@@ -25,7 +25,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * then writing out the GIV 0:99999999/sample.txt
  * and then wait for the GET to come back.
  */
-public class HTTPUploader implements Uploader {
+public final class HTTPUploader implements Uploader {
 
 	private OutputStream _ostream;
 	private InputStream _fis;
@@ -37,8 +37,8 @@ public class HTTPUploader implements Uploader {
 	private int _uploadEnd;
 	private int _fileSize;
 	private final int _index;
-	private /* final */ String _userAgent;
-	private /* final */ boolean _headersParsed;
+	private String _userAgent;
+	private boolean _headersParsed;
 	private final String _fileName;
 	private final String _hostName;
 	private final String _guid;
@@ -46,13 +46,10 @@ public class HTTPUploader implements Uploader {
 	private int _stateNum = CONNECTING;
 
 	private HTTPMessage _state;
-	private final UploadManager _manager;
-    private final MessageRouter _router;
 	
 	private boolean _chatEnabled;
 	private String _chatHost;
 	private int _chatPort;
-    private final FileManager _fileManager;
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
@@ -92,21 +89,15 @@ public class HTTPUploader implements Uploader {
 	 * @param fileName the name of the file
 	 * @param socket the <tt>Socket</tt> instance to serve the upload over
 	 * @param index the index of the file in the set of shared files
-	 * @param um a reference to the <tt>UploadManager</tt> instance 
-	 * @param fm a reference to the <tt>FileManager</tt> instance
 	 */
 	public HTTPUploader(HTTPRequestMethod method, String fileName, Socket socket, 
-						int index, UploadManager um, FileManager fm, 
-						MessageRouter router) {
+						int index) {
 		_method = method;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
-		_manager = um;
 		_index = index;
 		_amountRead = 0;
-        _fileManager = fm;
-        _router = router;        
 		_guid = null;
 		_port = 0;
 		try {			
@@ -118,7 +109,7 @@ public class HTTPUploader implements Uploader {
                 return;
             } 
 
-			_fileDesc = _fileManager.get(_index);
+			_fileDesc = RouterService.getFileManager().get(_index);
 			_fileSize = (int)_fileDesc.getSize();
 
             // if the requested name does not match our name on disk,
@@ -152,22 +143,19 @@ public class HTTPUploader implements Uploader {
      * @param host The downloaders ip address
      * @param port The port at which the downloader is listneing 
      * @param index index of file to be uploaded
+	 * @param guid the GUID of the request
      */
 	public HTTPUploader(String fileName, String host, int port, 
-						int index, String guid, UploadManager um, FileManager fm,
-                        MessageRouter router) {
+						int index, String guid) {
 		_fileName = fileName;
-		_manager = um;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
 		_hostName = host;
 		_guid = guid;
 		_port = port;
-        _fileManager = fm;
-        _router = router;
 		try {
-			_fileDesc = _fileManager.get(_index);
+			_fileDesc = RouterService.getFileManager().get(_index);
 			_fileSize = (int)_fileDesc.getSize();
             // if the requested name does not match our name on disk,
 			// report File Not Found
@@ -338,7 +326,7 @@ public class HTTPUploader implements Uploader {
 			_state = new FreeloaderUploadState();
 			break;
         case BROWSE_HOST:
-            _state = new BrowseHostUploadState(this, _fileManager, _router);
+            _state = new BrowseHostUploadState(this);
             break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
@@ -356,13 +344,6 @@ public class HTTPUploader implements Uploader {
 	int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
     int getUploadEnd() {return _uploadEnd;}
-	
-	/**
-	 * Accessor for the <tt>UploadManager</tt>.
-	 *
-	 * @return the <tt>UploadManager</tt>
-	 */
-	UploadManager getManager() {return _manager;}
 
 	// implements the Uploader interface
 	public int getFileSize() {return _fileSize;}
