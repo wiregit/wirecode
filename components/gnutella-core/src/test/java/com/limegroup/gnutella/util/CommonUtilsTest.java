@@ -63,7 +63,7 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 		File newResourceFile = new File(getSaveDirectory(), "copyTest");
 		newResourceFile.deleteOnExit();
 		String fileName = "com/sun/java/util/collections/Comparable.class";
-		File collectionsFile = CommonUtils.getResourceFile("lib/collections.jar");
+		File collectionsFile = CommonUtils.getResourceFile("collections.jar");
 		if(!collectionsFile.isFile()) {
 			fail("collections.jar not located");
 		}

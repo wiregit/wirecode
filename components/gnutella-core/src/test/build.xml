@@ -31,6 +31,7 @@
     <pathelement location="${messagebundles}" />
     <pathelement location="${builddir}" />
     <pathelement location="${datadir}" />
+    <pathelement location="${jars}" />
   </path>
   
   <!-- CLOVER SETUP TASKS -->
