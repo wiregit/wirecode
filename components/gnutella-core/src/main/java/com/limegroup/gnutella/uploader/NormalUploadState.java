@@ -210,7 +210,7 @@ public final class NormalUploadState implements HTTPMessage {
     /**
      * @return the bandwidth for uploads in bytes per second
      */
-    public float getUploadSpeed() {
+    public static float getUploadSpeed() {
 	    // if the user chose not to limit his uploads
 	    // by setting the upload speed to unlimited
 	    // set the upload speed to 3.4E38 bytes per second.
