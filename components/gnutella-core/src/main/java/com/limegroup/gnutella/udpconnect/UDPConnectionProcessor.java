@@ -131,6 +131,9 @@ public class UDPConnectionProcessor {
     /** Flag that the writeEvent is shutdown waiting for data to write */
 	private boolean 		  _waitingForDataAvailable;
 
+    /** Flag that can cause the writeEvent to wakeup */
+    private boolean           _wakeupWriteEvent;
+
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
 
@@ -152,16 +155,19 @@ public class UDPConnectionProcessor {
      */
     public UDPConnectionProcessor(InetAddress ip, int port) throws IOException {
         // Record their address
-        _ip        		   = ip;
-        _port      		   = port;
+        _ip        		         = ip;
+        _port      		         = port;
 
         // Init default state
-        _theirConnectionID   = UDPMultiplexor.UNASSIGNED_SLOT; 
-		_connectionState     = PRECONNECT_STATE;
-		_lastSendTime        = 0l;
-    	_chunkLimit          = DATA_WINDOW_SIZE; // TODO: This varies based on
-											     // Window fullness
-    	_receiverWindowSpace = DATA_WINDOW_SIZE; 
+        _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
+		_connectionState         = PRECONNECT_STATE;
+		_lastSendTime            = 0l;
+    	_chunkLimit              = DATA_WINDOW_SIZE;// TODO:This varies based 
+											        // on Window fullness
+    	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
+        _waitingForDataSpace     = false;
+        _waitingForDataAvailable = false;
+        _wakeupWriteEvent        = false;
 
 		_udpService        = UDPService.instance();
 
@@ -308,7 +314,7 @@ public class UDPConnectionProcessor {
     /**
      *  Activate writing if we were waiting for data to write
      */
-    public void writeDataActivation() {
+    public synchronized void writeDataActivation() {
 		if ( _waitingForDataAvailable ) {
 			_waitingForDataAvailable = false;
 
@@ -316,6 +322,13 @@ public class UDPConnectionProcessor {
 			scheduleWriteDataEvent(0);
 		}
 	}
+
+    /**
+     *  Set a flag that will eventually restart the writeEvent
+     */
+    public void wakeupWriteEvent() {
+        _wakeupWriteEvent = true;
+    }
 
     /**
      *  Setup and schedule the callback event for ensuring data gets acked.
@@ -856,6 +869,14 @@ log("calling getPending");
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
+
+            // If write event went to sleep and it is needed then
+            // wakeup writing
+            if ( _wakeupWriteEvent ) {
+                writeDataActivation();
+                _wakeupWriteEvent = true;
+            }
+
 log("keepalive");
 		
 			// Make sure that some messages are received within timeframe

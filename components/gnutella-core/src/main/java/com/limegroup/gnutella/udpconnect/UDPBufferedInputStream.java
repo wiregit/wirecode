@@ -39,71 +39,74 @@ public class UDPBufferedInputStream extends InputStream {
      * Read the next byte of data from the input source.  As normal, return -1 
      * if there is no more data.
      */
-    public synchronized int read() throws IOException  {
-        while (true) {
-            // Try to fetch some data if necessary
-            checkForData();
+    public int read() throws IOException  {
+        synchronized(_processor) { // Lock on the ConnectionProcessor
+            while (true) {
+                // Try to fetch some data if necessary
+                checkForData();
 
-            if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                if ( _activeChunk != null && _activeChunk.length > 0 ) {
 
-                // return a byte of data
-                _activeChunk.length--;
-                return (_activeChunk.data[_activeChunk.start++] & 0xff);
+                    // return a byte of data
+                    _activeChunk.length--;
+                    return (_activeChunk.data[_activeChunk.start++] & 0xff);
 
-            } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _activeChunk == null && _processor.isConnected() ) {
 
-                // Wait for some data to become available
-                waitOnData();
+                    // Wait for some data to become available
+                    waitOnData();
 
-            } else {
+                } else {
 
-                // This connection is closed
-                return -1;
+                    // This connection is closed
+                    return -1;
+                }
             }
-
         }
     }
 
     /**
      * 
      */
-    public synchronized int read(byte b[], int off, int len)
+    public int read(byte b[], int off, int len)
       throws IOException  {
         int origLen = len;
         int wlength;
 
-        while (true) {
-            // Try to fetch some data if necessary
-            checkForData();
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            while (true) {
+                // Try to fetch some data if necessary
+                checkForData();
 
-            if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                if ( _activeChunk != null && _activeChunk.length > 0 ) {
 
-                // Load some data
-                wlength = Math.min(_activeChunk.length, len);
-                System.arraycopy(b, off, 
-                  _activeChunk.data, _activeChunk.start, wlength);
-                len                 -= wlength;
-                _activeChunk.start  += wlength;
-                _activeChunk.length -= wlength;
-                if ( len <= 0 ) 
-                    return origLen;
+                    // Load some data
+                    wlength = Math.min(_activeChunk.length, len);
+                    System.arraycopy(b, off, 
+                      _activeChunk.data, _activeChunk.start, wlength);
+                    len                 -= wlength;
+                    _activeChunk.start  += wlength;
+                    _activeChunk.length -= wlength;
+                    if ( len <= 0 ) 
+                        return origLen;
 
-            } else if ( _activeChunk == null && _processor.isConnected() ) {
+                } else if ( _activeChunk == null && _processor.isConnected() ) {
 
-                // Wait for some data to become available
-                waitOnData();
+                    // Wait for some data to become available
+                    waitOnData();
 
-            } else if ( origLen != len ){
+                } else if ( origLen != len ){
 
-                // Return whatever was available
-                return(origLen - len);
+                    // Return whatever was available
+                    return(origLen - len);
 
-            } else {
+                } else {
 
-                // This connection is closed
-                return 0;
+                    // This connection is closed
+                    return 0;
+                }
+
             }
-
         }
     }
 
@@ -111,7 +114,7 @@ public class UDPBufferedInputStream extends InputStream {
      *  Throw away n bytes of data.  I think I just wont do this for now.
      *  TODO: Needed?
      */
-    public synchronized long skip(long n) {
+    public long skip(long n) {
         return 0;
     }
 
@@ -119,10 +122,12 @@ public class UDPBufferedInputStream extends InputStream {
      *  Returns how many bytes I know are immediately available.
      *  This can be optimized later but these things never seem to be accurate.
      */
-    public synchronized int available() {
-        if ( _activeChunk == null )
-            return 0;
-        return _activeChunk.length;
+    public int available() {
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            if ( _activeChunk == null )
+                return 0;
+            return _activeChunk.length;
+        }
     }
 
     /**
@@ -141,7 +146,7 @@ public class UDPBufferedInputStream extends InputStream {
     /**
      *  I hope that I don't need to support this.
      */
-    public synchronized void reset() {
+    public void reset() {
     }
 
     /**
@@ -153,32 +158,38 @@ public class UDPBufferedInputStream extends InputStream {
     /**
      *  If no pending data then try to get some.
      */
-    private synchronized void checkForData() {
-        if ( _activeChunk == null || _activeChunk.length <= 0 ) {
-            _activeChunk = _processor.getIncomingChunk();
+    private void checkForData() {
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            if ( _activeChunk == null || _activeChunk.length <= 0 ) {
+                _activeChunk = _processor.getIncomingChunk();
+            }
         }
     }
 
     /**
      *  Wait for a new chunk to become available.
      */
-    private synchronized void waitOnData() throws SocketTimeoutException {
-        try { 
+    private void waitOnData() throws SocketTimeoutException {
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            try { 
 System.out.println("waiting ...");
-            wait(_processor.getReadTimeout()); 
+                _processor.wait(_processor.getReadTimeout()); 
 System.out.println("done waiting ...");
-        } catch(InterruptedException e) {
-            throw new SocketTimeoutException(); 
-        } 
+            } catch(InterruptedException e) {
+                throw new SocketTimeoutException(); 
+            } 
 System.out.println("exit waiting ...");
+        }
     }
 
     /**
      *  Package accessor for notifying readers that data is available.
      */
-    synchronized void wakeup() {
-        // Wakeup any read operation waiting for data
-System.out.println("wakeup ...");
-        notify();  
+    void wakeup() {
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            // Wakeup any read operation waiting for data
+    System.out.println("wakeup ...");
+            _processor.notify();  
+        }
     }
 }

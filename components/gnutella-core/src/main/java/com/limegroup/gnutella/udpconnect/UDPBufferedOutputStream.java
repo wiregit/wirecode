@@ -52,7 +52,7 @@ public class UDPBufferedOutputStream extends OutputStream {
     public synchronized void write(int b) {
 		// If there was no data before this, then ensure a writer is awake
     	if ( getPendingChunks() == 0 )
-			_processor.writeDataActivation();
+            _processor.wakeupWriteEvent();
 
         while (true) {
 			// If there is room within current chunk
@@ -86,7 +86,7 @@ System.out.println("adding: "+b);
 
 		// If there was no data before this, then ensure a writer is awake
     	if ( getPendingChunks() == 0 )
-			_processor.writeDataActivation();
+			_processor.wakeupWriteEvent();
 
         while (true) {
 			// If there is room within current chunk
