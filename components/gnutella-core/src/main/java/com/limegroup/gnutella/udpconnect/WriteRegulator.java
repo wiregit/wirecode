@@ -113,6 +113,7 @@ public class WriteRegulator {
         //
         int sleepTime  = ((usedSpots+1) * baseWait);
         int minTime    = 0;
+        int gettingSlow= 0;
 
         if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
             sleepTime += 1;
@@ -183,6 +184,8 @@ public class WriteRegulator {
                   " wDelay:"+windowDelay+
                   " sT:"+sleepTime);
 
+			gettingSlow = 50;
+
             // If we are starting to affect the RTT, 
             // then ratchet down the accelorator
             /*
@@ -201,7 +204,7 @@ public class WriteRegulator {
 
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
-				minTime = lowRTT;
+				minTime = lowRTT / 4;
                 //sleepTime = (16*rtt) / 7;
                 if(LOG.isDebugEnabled())  
                     LOG.debug(
@@ -223,6 +226,7 @@ public class WriteRegulator {
             // Bump up the skipLimit occasionally to see if we can handle it
             if (_skipLimit < MAX_SKIP_LIMIT    &&
                 windowStart%windowSize == 0    &&
+                gettingSlow == 0               &&
                 windowStart > MIN_START_WINDOW &&
                 _tracker.failureRate() < LOW_FAILURE_RATE ) {
                 if(LOG.isDebugEnabled())  
@@ -253,6 +257,10 @@ public class WriteRegulator {
 
         // Ensure that any minimum sleep time is enforced
         sleepTime = Math.max(sleepTime, minTime);
+		
+		// Reduce the gettingSlow indicator over time
+		if ( gettingSlow > 0 )
+			gettingSlow--;
 
         return (long) sleepTime;
         //------------- Sleep ------------------------
