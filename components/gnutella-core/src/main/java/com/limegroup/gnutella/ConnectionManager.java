@@ -13,6 +13,7 @@ import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.filters.IPFilter;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -1544,7 +1545,9 @@ public class ConnectionManager {
                     // death of the fetcher, so just return.
                     return;
                 } 
-            } while (isConnected(endpoint));
+            } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
+                      isConnected(endpoint) );
+                      
 
             Assert.that(endpoint != null);
 

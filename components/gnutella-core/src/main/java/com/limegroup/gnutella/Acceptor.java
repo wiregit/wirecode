@@ -61,12 +61,6 @@ public class Acceptor implements Runnable {
      * LOCKING: obtain Acceptor.class' lock 
      */
     private static byte[] _address = new byte[4];
-
-	/**
-	 * <tt>IPFilter</tt> that allow LimeWire to only accept connections from
-	 * certain hosts.
-	 */
-    private IPFilter _filter = new IPFilter();;
     
 	/**
 	 * Variable for whether or not we have accepted an incoming connection --
@@ -493,23 +487,13 @@ public class Acceptor implements Runnable {
         }
     }
 
-
-    /** 
-     * Updates this IP filter.  Added to fix bug where banned IP added is not
-     * effective until restart (Bug 62001).  Allows a new host to be dynamically
-     * added to the Banned IPs list (via a reload from SettingsManager).  
-     */
-    public void refreshBannedIPs() {
-        _filter=new IPFilter();
-    }
-
     /**
      * Returns whether <tt>ip</tt> is a banned address.
      * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(String ip) {        
-        return !_filter.allow(ip);
+        return !IPFilter.instance().allow(ip);
     }
 
     

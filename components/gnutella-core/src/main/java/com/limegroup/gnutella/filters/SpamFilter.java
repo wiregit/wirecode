@@ -31,7 +31,7 @@ public abstract class SpamFilter {
         //1. IP-based techniques.
         String[] badIPs=settings.getBannedIps();
         if (badIPs.length!=0) {   //no need to check getAllowIPs
-            IPFilter bf=new IPFilter();
+            IPFilter bf=IPFilter.instance();
             buf.add(bf);
         }
 

@@ -567,7 +567,7 @@ public final class RouterService {
      * extra work must be done.
      */
     public static void adjustSpamFilters() {
-        acceptor.refreshBannedIPs();
+        IPFilter.refreshIPFilter();
 
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.

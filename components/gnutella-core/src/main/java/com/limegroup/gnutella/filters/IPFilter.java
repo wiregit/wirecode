@@ -9,12 +9,15 @@ import com.limegroup.gnutella.messages.*;
  * BlackListFilter.  Immutable.  
  */
 public final class IPFilter extends SpamFilter {
+    
+    private static IPFilter _instance = new IPFilter();
+    
     private final IPList badHosts = new IPList();
     private final IPList goodHosts = new IPList();
 
     /** Constructs a new BlackListFilter containing the addresses listed
      *  in the SettingsManager. */
-    public IPFilter(){        
+    private IPFilter(){        
         String[] allHosts = SettingsManager.instance().getBannedIps();
         for (int i=0; i<allHosts.length; i++)
             badHosts.add(allHosts[i]);
@@ -22,6 +25,20 @@ public final class IPFilter extends SpamFilter {
         allHosts = SettingsManager.instance().getAllowedIps();
         for (int i=0; i<allHosts.length; i++)
             goodHosts.add(allHosts[i]);        
+    }
+    
+    /**
+     * Returns the current active instance of IPFilter.
+     */
+    public static IPFilter instance() {
+        return _instance;
+    }
+    
+    /**
+     * Refresh the IPFilter's instance.
+     */
+    public static void refreshIPFilter() {
+        _instance = new IPFilter();
     }
 
     /** 
