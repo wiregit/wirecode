@@ -571,6 +571,9 @@ public class Connection implements Runnable {
             }//while
         }//try
         catch (IOException e){
+            //anu debug
+            e.printStackTrace("IOException in Connection.run()" + e);
+            System.exit(1)'
             manager.remove(this);
 
         }
