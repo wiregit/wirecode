@@ -249,6 +249,12 @@ public class UDPHostCache {
     public synchronized void hostCachesAdded() {
         if(udpHostsSet.isEmpty())
             loadDefaults();
+        // shuffle then sort, ensuring that we're still going to use
+        // hosts in order of failure, but within each of those buckets
+        // the order will be random.
+        Collections.shuffle(udpHosts);
+        Collections.sort(udpHosts, FAILURE_COMPARATOR);
+        dirty = false;
     }
     
     protected void loadDefaults() {
