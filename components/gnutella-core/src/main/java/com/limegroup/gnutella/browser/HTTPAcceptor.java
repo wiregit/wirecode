@@ -157,15 +157,8 @@ public class HTTPAcceptor implements Runnable {
                 }
             }
 
-			if(error) {
-                if(socketError instanceof BindException)
-                    MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
-                // If we still don't have a socket, there's an error
-                // but ignore buggy tcp/ip startup on Mac Classic
-                if ( !(socketError instanceof UnknownHostException &&
-                      CommonUtils.isMacClassic()) ) 
-				    ErrorService.error(e);
-			}
+			if(error) // no luck setting up?
+                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
         }
 
         while (true) {
