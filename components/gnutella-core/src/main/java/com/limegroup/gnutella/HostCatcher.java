@@ -1141,13 +1141,13 @@ public class HostCatcher {
          * The next time we're allowed to fetch via GWebCache.
          * Incremented after each succesful fetch.
          */
-        private long nextAllowedGWebCacheFetchTime = 0;
+        private long nextAllowedFetchTime = 0;
         
         /**
          * The delay to wait before the next time we contact a GWebCache.
          * Upped after each attempt at fetching.
          */
-        private int delayGWebCache = 20 * 1000;
+        private int delay = 20 * 1000;
         
         /**
          * How long we must wait after contacting UDP before we can contact
@@ -1166,7 +1166,7 @@ public class HostCatcher {
             
             long now = System.currentTimeMillis();
             // if no possible udp hosts & not allowed gwebcache, wait.
-            if(udpHostCache.getSize() == 0 && now < nextAllowedGWebCacheFetchTime)
+            if(udpHostCache.getSize() == 0 && now < nextAllowedFetchTime)
                 return;
                 
             //if we don't need hosts, exit.
@@ -1182,7 +1182,7 @@ public class HostCatcher {
          * if needed.
          */
         void resetFetchTime() {
-            nextAllowedGWebCacheFetchTime = 0;
+            nextAllowedFetchTime = 0;
         }
         
         /**
@@ -1201,22 +1201,22 @@ public class HostCatcher {
         synchronized void getHosts(long now) {
             // if we had udp host caches to fetch from, use them.
             if(udpHostCache.fetchHosts()) {
-                nextAllowedGWebCacheFetchTime = now + POST_UDP_DELAY;
+                nextAllowedFetchTime = now + POST_UDP_DELAY;
                 return;
             } // else didn't attempt to contact any UDP hosts.
             
             // if we aren't allowed to contact gwebcache's yet, exit.
-            if(now < nextAllowedGWebCacheFetchTime)
+            if(now < nextAllowedFetchTime)
                 return;
             
             int ret = gWebCache.fetchEndpointsAsync();
             switch(ret) {
             case BootstrapServerManager.FETCH_SCHEDULED:
-                delayGWebCache *= 5;
-                nextAllowedGWebCacheFetchTime = now + delayGWebCache;
+                delay *= 5;
+                nextAllowedFetchTime = now + delay;
                 if(LOG.isDebugEnabled())
                     LOG.debug("Fetching hosts.  Next allowed time: " +
-                              nextAllowedGWebCacheFetchTime);
+                              nextAllowedFetchTime);
                 break;
             case BootstrapServerManager.FETCH_IN_PROGRESS:
                 LOG.debug("Tried to fetch, but was already fetching.");
