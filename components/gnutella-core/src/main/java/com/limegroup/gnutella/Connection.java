@@ -221,6 +221,12 @@ public class Connection {
      * The "soft max" ttl to use for this connection.
      */
     private byte _softMax;
+
+    /**
+     * Variable for the next time to allow a ping.  Volatile to avoid
+     * multiple threads caching old data for the ping time.
+     */
+    private volatile long _nextPingTime = Long.MIN_VALUE;
     
     /**
      * Cache the 'connection closed' exception, so we have to allocate
@@ -1301,6 +1307,24 @@ public class Connection {
     // inherit doc comment
     public boolean isGoodLeaf() {
         return _headers.isGoodLeaf();
+    }
+
+    /**
+     * Returns whether or not we should allow new pings on this connection.  If
+     * we have recently received a ping, we will likely not allow the second
+     * ping to go through to avoid flooding the network with ping traffic.
+     *
+     * @return <tt>true</tt> if new pings are allowed along this connection,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean allowNewPings() {
+        long curTime = System.currentTimeMillis();
+        if(curTime < _nextPingTime) {
+            return false;
+        } else {
+            _nextPingTime = curTime + 800;
+            return true;
+        }         
     }
 
 	/**
