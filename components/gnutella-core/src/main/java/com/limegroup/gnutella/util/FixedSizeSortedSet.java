@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 
@@ -200,7 +201,7 @@ public class FixedSizeSortedSet {
     }
     
     public Iterator iterator() { 
-        return _sortedSet.iterator(); 
+        return new FSSSIterator();
     }
     
     public int size() { 
@@ -260,5 +261,31 @@ public class FixedSizeSortedSet {
                 iter.remove();
         }
     }
+     
+     private class FSSSIterator implements Iterator {
+     	
+     	private final Iterator _setIterator;
+     	private Object  _current;
+     	
+     	public FSSSIterator() {
+     		_setIterator=_sortedSet.iterator();
+
+     	}
+     	
+     	public boolean hasNext() {
+     		return _setIterator.hasNext();
+     	}
+     	
+     	public Object next() {
+     		_current = _setIterator.next();
+     		return _current;
+     	}
+     	
+     	public void remove() {
+     		_setIterator.remove();
+     		_map.remove(_current);
+     	}
+     	
+     }
 
 }
