@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.ChatSettings;
@@ -484,6 +485,15 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(alSha1 == null) {
                     continue;
                 }
+                
+                // in general, most alternate locations will already
+                // be in ip format -- but we do the lookup anyway
+                // just incase they aren't.
+                String ipString = NetworkUtils.ip2string(
+                    al.getHost().getHostBytes());
+                if(!IPFilter.instance().allow(ipString))
+                    continue;
+                
                 if(_altLocsReceived == null)
                     _altLocsReceived = 
                     AlternateLocationCollection.create(alSha1);
