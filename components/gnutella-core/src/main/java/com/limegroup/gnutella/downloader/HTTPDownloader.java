@@ -550,10 +550,15 @@ public class HTTPDownloader implements BandwidthTracker {
         			Iterator iter = _goodPushLocs.iterator();
         			while(iter.hasNext()) {
         				PushAltLoc next = (PushAltLoc)iter.next();
+        				
+        				// we should not have empty proxies unless this is ourselves
         				if (next.getPushAddress().getProxies().isEmpty()) {
-        				    iter.remove();
-        				    continue;
+        				    if (next.getPushAddress() instanceof PushEndpointForSelf)
+        				        continue;
+        				    else
+        				        Assert.that(false,"empty pushloc in downloader");
         				}
+        				
         				writeClone.add(next);
         				_writtenPushLocs.add(next);
         			}
@@ -572,10 +577,10 @@ public class HTTPDownloader implements BandwidthTracker {
                     Iterator iter = _badPushLocs.iterator();
                     while(iter.hasNext()) {
                         PushAltLoc next = (PushAltLoc)iter.next();
-        				if (next.getPushAddress().getProxies().isEmpty()) {
-        				    iter.remove();
-        				    continue;
-        				}
+                        
+                        // no empty proxies allowed here
+        				Assert.that(!next.getPushAddress().getProxies().isEmpty());
+        				
         				writeClone.add(next);
                         _writtenBadPushLocs.add(next);
                     }

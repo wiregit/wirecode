@@ -1519,9 +1519,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         // needs to contain a snapshot of the set of proxies it had when it failed or
         // succeeded.
         if (forFD instanceof PushAltLoc) {
+            
+            // it is possible that an HTTPUploader just received a NFAlt header
+            // which cleared the proxies of this pushloc.  If that happens we do
+            // not inform anybody. The PE will get removed from the FD by the uploader
+            // (we perform this check on a copy of the set)
+            
             PushAltLoc ploc = (PushAltLoc)loc;
+            if (ploc.getPushAddress().getProxies().isEmpty())
+                return;
+            
             PushAltLoc pFD = (PushAltLoc)forFD;
             pFD.updateProxies(good);
+            
+            Assert.that(!ploc.getPushAddress().getProxies().isEmpty());
         }
         
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {

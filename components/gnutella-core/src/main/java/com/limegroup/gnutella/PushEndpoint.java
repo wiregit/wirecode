@@ -429,6 +429,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * Updates either the PushEndpoint or the GUID_PROXY_MAP to ensure
 	 * that GUID_PROXY_MAP has a reference to all live PE GUIDs and
 	 * all live PE's reference the same GUID object as in GUID_PROXY_MAP.
+	 * 
+	 * If this method is not called, the PE will know only about the set
+	 * of proxies the remote host had when it was created.  Otherwise it
+	 * will point to the most recent known set.
 	 */
 	public synchronized void updateProxies(boolean good) {
 	    GuidSetWrapper existing;

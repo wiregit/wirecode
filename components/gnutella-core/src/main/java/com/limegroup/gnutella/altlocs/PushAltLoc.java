@@ -92,7 +92,15 @@ public class PushAltLoc extends AlternateLocation {
 	}
 	
 	/**
-	 * Updates the proxies in this PushEndpoint.
+	 * Updates the proxies in this PushEndpoint.  If this method is
+	 * called, the PE of this PushLoc will always point to the current
+	 * set of proxies we know the remote host has.  Otherwise, the PE
+	 * will point to the set of proxies we knew the host had when it was
+	 * created.
+	 * 
+	 * Note: it is a really good idea to call this method before adding
+	 * this pushloc to a AlternateLocationCollection which may already 
+	 * contain a pushloc for the same host.
 	 */
 	public void updateProxies(boolean isGood) {
 	    _pushAddress.updateProxies(isGood);
