@@ -205,9 +205,9 @@ public class ConnectionManager {
          Properties headers = connection.getHeaders();
          boolean isClientConnection = false;
          if(headers != null){
-            isClientConnection = Boolean.getBoolean(
-            connection.getHeaders().getProperty(
-            ConnectionHandshakeHeaders.SUPERNODE, "False"));
+            isClientConnection = (new Boolean(
+                connection.getHeaders().getProperty(
+                ConnectionHandshakeHeaders.SUPERNODE, "False"))).booleanValue();
          }
             
          //set the flag in the connection, so that we can know from the 
@@ -413,7 +413,11 @@ public class ConnectionManager {
                 List newConnections=new ArrayList(_initializedConnections);
                 newConnections.add(c);
                 _initializedConnections=newConnections;
+                System.out.println(
+                    "connection added to initialized connections");
             }else{
+                System.out.println(
+                    "connection added to initialized CLIENT connections");
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
                 List newConnections
@@ -745,10 +749,9 @@ public class ConnectionManager {
         String supernodeStr = headers.getProperty(
             ConnectionHandshakeHeaders.SUPERNODE);
         
-        
         if(supernodeStr != null)
         {
-            boolean isSupernode = Boolean.getBoolean(supernodeStr);
+            boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
             if(isSupernode)
                 connection.setSupernodeConnectionFlag(true);
             else
