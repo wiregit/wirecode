@@ -72,7 +72,12 @@ public class MediaType {
 		MediaType images=new MediaType("Images",
 									   new String[] {"gif", "jpg", "jpeg", "jpe",
 													 "png", "tif", "tiff"});	
-		return new MediaType[] {any, text, programs, audio, video, images};
+
+        //Added by Sumeet Thadani to allow a rich search window to be popped up.
+        //Changed on 6/6/01
+        MediaType meta = new MediaType("Rich...", null);
+
+		return new MediaType[] {any, text, programs, audio, video, images, meta};
     }		    
 
 	//      public static void main(String args[]) {
