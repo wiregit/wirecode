@@ -7,6 +7,9 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * This class is a factory for creating <tt>QueryRequest</tt> instances
  * for dynamic queries.  Dynamic queries adjust to the varying conditions of
@@ -17,6 +20,8 @@ import com.sun.java.util.collections.*;
  * settings, such as the TTL.
  */
 public final class QueryHandler {
+    
+    private static final Log LOG = LogFactory.getLog(QueryHandler.class);
 
 	/**
 	 * Constant for the number of results to look for.
@@ -452,31 +457,20 @@ public final class QueryHandler {
         List ultrapeers = /** method returns a copy */
             _connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
+            
+        QUERIED_CONNECTIONS.retainAll(ultrapeersAll);
+        QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeersAll);
         
         //if we did get a list of connections that matches the locale
         //of the query
         if(!ultrapeers.isEmpty()) {
-            QUERIED_CONNECTIONS.retainAll(ultrapeers);
-            QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
-        
             ultrapeers.removeAll(QUERIED_CONNECTIONS);
             ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
             //at this point ultrapeers could become empty
         }
                 
         if(ultrapeers.isEmpty()) { 
-            //either we used up all the returned ultrapeers or
-            //there were no locale matching ultrapeers connections to begin with
-            //so now use any ultrapeer connection
             ultrapeers = ultrapeersAll;
-
-            // weed out any stale data from the lists of queried connections --
-            // remove any elements that are not in our more up-to-date list
-            // of connections.
-            QUERIED_CONNECTIONS.retainAll(ultrapeers);
-            QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
-            
-            
             // now, remove any connections we've used from our current list
             // of connections to try
             ultrapeers.removeAll(QUERIED_CONNECTIONS);
@@ -502,6 +496,8 @@ public final class QueryHandler {
             mc = curConnection;
             break;
         }
+        
+        ManagedConnection _initial = mc;
 
         int remainingConnections = 
             Math.max(length+QUERIED_PROBE_CONNECTIONS.size(), 0);
@@ -518,7 +514,9 @@ public final class QueryHandler {
         // mc can still be null if the list of connections was empty.
         if(mc == null) {
             // if we have no connections to query, simply return for now
-            if(QUERIED_PROBE_CONNECTIONS.isEmpty()) return 0;
+            if(QUERIED_PROBE_CONNECTIONS.isEmpty()) {
+                return 0;
+            }
             
             // we actually remove this from the list to make sure that
             // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
@@ -527,8 +525,7 @@ public final class QueryHandler {
             mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
             probeConnection = true;
         }
-                           
-			
+        
         int results = (_numResultsReportedByLeaf > 0 ? 
                        _numResultsReportedByLeaf : 
                        RESULT_COUNTER.getNumResults());
@@ -562,7 +559,7 @@ public final class QueryHandler {
             ttl = 2;
         }
         QueryRequest query = createQuery(QUERY, ttl);
-        
+
         // send out the query on the network, returning the number of new
         // hosts theoretically reached
         return sendQueryToHost(query, mc, this);        
