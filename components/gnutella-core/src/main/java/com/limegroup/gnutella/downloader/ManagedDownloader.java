@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
@@ -800,6 +801,22 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized int getRetriesWaiting() {
         return files.size();
     }
+
+
+    /** 
+     * Returns an LimeXMLDocument array describing the downloaded
+     * file.
+     * TODO1 : currently, the docs from a random (first) RFD are returned.
+     * Can this be improved?  It seems to be sufficent for now.
+     */
+    public LimeXMLDocument[] getXMLDocs() {
+        LimeXMLDocument[] retArray = null;
+        if (this.allFiles[0] != null)
+            retArray = this.allFiles[0].getXMLDocs();
+        return retArray;
+    }
+
+
 }
 
 /** A RemoteFileDesc and the number of times we've tries to push it. */
