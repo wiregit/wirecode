@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
 import java.io.IOException;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -191,13 +191,13 @@ public abstract class FileManager {
     /**
      * The only ShareableFileFilter object that should be used.
      */
-    public static FilenameFilter SHAREABLE_FILE_FILTER =
+    public static FileFilter SHAREABLE_FILE_FILTER =
         new ShareableFileFilter();
         
     /**
      * The only DirectoryFilter object that should be used.
      */
-    public static FilenameFilter DIRECTORY_FILTER = new DirectoryFilter();
+    public static FileFilter DIRECTORY_FILTER = new DirectoryFilter();
         
     /**
      * The QueryRouteTable kept by this.  The QueryRouteTable will be 
@@ -730,9 +730,8 @@ public abstract class FileManager {
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
-        File[] dir_list = FileUtils.listFiles(directory, DIRECTORY_FILTER);
-        File[] file_list = 
-            FileUtils.listFiles(directory, SHAREABLE_FILE_FILTER);
+        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
+        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
@@ -1590,9 +1589,8 @@ public abstract class FileManager {
     /**
      * A filter for listing all shared files.
      */
-    private static class ShareableFileFilter implements FilenameFilter {
-        public boolean accept(File dir, String name) {
-            File f = new File(dir, name);
+    private static class ShareableFileFilter implements FileFilter {
+        public boolean accept(File f) {
             return isFileShareable(f, f.length());
         }
     }
@@ -1600,9 +1598,8 @@ public abstract class FileManager {
     /**
      * A filter for listing subdirectory only.
      */
-    private static class DirectoryFilter implements FilenameFilter {
-        public boolean accept(File dir, String name) {
-            File f = new File(dir, name);
+    private static class DirectoryFilter implements FileFilter {
+        public boolean accept(File f) {
             return f.isDirectory();
         }
     }
