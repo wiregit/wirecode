@@ -84,9 +84,7 @@ public class MiniAcceptor implements Runnable {
                ServerSocketChannel ssc = ServerSocketChannel.open();
                ssc.configureBlocking(true);
                ssc.socket().bind(new InetSocketAddress(port));
-               System.out.println("MiniAcceptor::about to assign socket::ss: "+ss);
                ss = ssc.socket();  
-               System.out.println("MiniAcceptor::about to assign socket::ss: "+ss); 
             } else {
                 ss = new ServerSocket(port);
                 ss.setReuseAddress(true);
