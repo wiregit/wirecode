@@ -355,8 +355,9 @@ public class DownloadManager implements BandwidthTracker {
         
         // Write list of active and waiting downloaders, then block list in
         //   IncompleteFileManager.
+        ObjectOutputStream out = null;
         try {
-            ObjectOutputStream out=new ObjectOutputStream(
+            out=new ObjectOutputStream(
                 new BufferedOutputStream(
                         new FileOutputStream(
                                 SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue())));
@@ -367,10 +368,12 @@ public class DownloadManager implements BandwidthTracker {
                 out.writeObject(incompleteFileManager);
             }
             out.flush();
-            out.close();
             return true;
         } catch (IOException e) {
             return false;
+        } finally {
+            if (out != null)
+                try {out.close();}catch(IOException ignored){}
         }
     }
 
