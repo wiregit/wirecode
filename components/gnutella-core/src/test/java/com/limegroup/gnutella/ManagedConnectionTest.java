@@ -24,6 +24,15 @@ public class ManagedConnectionTest extends TestCase {
         return ret;
     }
 
+    public void setUp() {
+        //Restore all the defaults.  Apparently testForwardsGGEP fails if this
+        //is in ultrapeer mode and the KEEP_ALIVE is 1.  It seems that WE (the
+        //client) send a "503 Service Unavailable" at line 77 of
+        //SupernodeHandshakeResponder.
+        SettingsManager.instance().loadDefaults();
+        SettingsManager.instance().setQuickConnectHosts(new String[0]);
+    }
+
     /** 
      * Tests buffering, dropping, and reordering of messages.  This is a
      * colossal test, delegating to lots of static helper methods.  At some
@@ -520,6 +529,7 @@ public class ManagedConnectionTest extends TestCase {
             in.close();
             out.close();
         } catch (IOException e) {
+            e.printStackTrace();
             fail("Mysterious IO problem: "+e);
         } catch (BadPacketException e) {
             fail("Bad packet: "+e);
