@@ -26,11 +26,19 @@ public final class AlternateLocationCollection
 	 */
 	private SortedMap _alternateLocations;
 
+    /**
+     * SHA1 <tt>URN</tt> for this collection.
+     */
 	private final URN SHA1;
 
-	public static AlternateLocationCollection createCollection() {
-		return new AlternateLocationCollection();
-	}
+    /**
+     * Factory constructor for creating a new 
+     * <tt>AlternateLocationCollection</tt> for this <tt>URN</tt>.
+     *
+     * @param sha1 the SHA1 <tt>URN</tt> for this collection
+     * @return a new <tt>AlternateLocationCollection</tt> instance for
+     *  this SHA1
+     */
 	public static AlternateLocationCollection createCollection(URN sha1) {
 		return new AlternateLocationCollection(sha1);
 	}
@@ -49,7 +57,8 @@ public final class AlternateLocationCollection
 	public static AlternateLocationCollection 
 		createCollectionFromHttpValue(final String value) {
 		if(value == null) {
-			throw new NullPointerException("cannot create an AlternateLocationCollection "+
+			throw new NullPointerException("cannot create an "+
+                                           "AlternateLocationCollection "+
 										   "from a null value");
 		}
 		StringTokenizer st = new StringTokenizer(value, ",");
@@ -57,7 +66,8 @@ public final class AlternateLocationCollection
 		while(st.hasMoreTokens()) {
 			String curTok = st.nextToken();
 			try {
-				AlternateLocation al = AlternateLocation.createAlternateLocation(curTok);
+				AlternateLocation al = 
+                    AlternateLocation.createAlternateLocation(curTok);
 				if(alc == null) {
 					alc = new AlternateLocationCollection(al.getSHA1Urn());
 				}
@@ -69,10 +79,6 @@ public final class AlternateLocationCollection
 		return alc;
 	}
 
-	private AlternateLocationCollection() {
-		SHA1 = null;
-	}
-
 	/**
 	 * Creates a new <tt>AlternateLocationCollection</tt> for the specified
 	 * <tt>URN</tt>.
@@ -80,9 +86,9 @@ public final class AlternateLocationCollection
 	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
 	 */
 	private AlternateLocationCollection(URN sha1) {
-//		if(sha1 == null) {
-//			throw new NullPointerException("null URN");
-//		}
+		if(sha1 == null) {
+			throw new NullPointerException("null URN");
+		}
 		if( sha1 != null && !sha1.isSHA1()) {
 			throw new IllegalArgumentException("URN must be a SHA1");
 		}
@@ -152,9 +158,25 @@ public final class AlternateLocationCollection
 		}
 	}
 
-	// implements the AlternateLocationCollector interface
+	/**
+     * Implements the <tt>AlternateLocationCollector</tt> interface.
+     * Adds the specified <tt>AlternateLocationCollection</tt> to this 
+     * collection.
+     *
+     * @param alc the <tt>AlternateLocationCollection</tt> to add
+     * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
+     *  <tt>null</tt>
+     * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
+     *  collection to add does not match the collection of <tt>this</tt>
+     */
 	public synchronized void 
-		addAlternateLocationCollection(AlternateLocationCollection alc) {
+        addAlternateLocationCollection(AlternateLocationCollection alc) {
+        if(alc == null) {
+            throw new NullPointerException("ALC is null");
+        }
+		if(!alc.getSHA1Urn().equals(SHA1)) {
+			throw new IllegalArgumentException("SHA1 does not match");
+		}
 		Map map = alc._alternateLocations;
 		if(map == null) return;
 		Collection values = map.values();
@@ -180,6 +202,9 @@ public final class AlternateLocationCollection
 	 */
 	public synchronized AlternateLocationCollection 
 		diffAlternateLocationCollection(AlternateLocationCollection alc) {
+        if(alc==null) {
+            throw new NullPointerException("alc is null");
+        }
 		AlternateLocationCollection nalc = new AlternateLocationCollection(SHA1);
 		Iterator iter = alc.values().iterator();
 		AlternateLocation value;
@@ -263,23 +288,16 @@ public final class AlternateLocationCollection
 		}
 		return writeBuffer.toString();
 	}
+	
 
-	/**
-	 * Returns the number of alternate locations stored.
-	 *
-	 * @return the number of alternate locations stored
-	 */
-	public synchronized int size() {
-		if(_alternateLocations == null) {
+    // Implements AlternateLocationCollector interface -- 
+    // inherit doc comment
+	public synchronized int numberOfAlternateLocations() { 
+        if(_alternateLocations == null) {
 			return 0;
 		}
 		return _alternateLocations.size();
-	}
-	
-	/**
-	 *  Implements AlternateLocationCollector interface
-	 */
-	public int numberOfAlternateLocations() { return size(); }
+    }
 
 	/**
 	 * Overrides Object.toString to print out all of the alternate locations
