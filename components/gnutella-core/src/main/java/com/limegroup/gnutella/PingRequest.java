@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
 /**
@@ -59,6 +60,27 @@ public class PingRequest extends Message {
         super((byte)0x0, ttl, (byte)length);
     }
 
+    /**
+     * Creates a QueryKey Request ping with a new GUID and TTL of 1
+     */
+    public PingRequest() {
+        this((byte)1);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            // write the GGEP block as the payload
+            GGEP ggepBlock = new GGEP(false);
+            ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+            ggepBlock.write(baos);
+            baos.write(0);
+        }
+        catch (IOException why) {
+            why.printStackTrace();
+        }
+        
+		payload=baos.toByteArray();
+		updateLength(payload.length); 
+    }
 
     /////////////////////////////methods///////////////////////////
 
@@ -80,6 +102,32 @@ public class PingRequest extends Message {
                                    this.getTTL(), 
                                    this.getHops());
     }
+
+    public boolean isQueryKeyRequest() {
+        if (!(getTTL() == 0) || !(getHops() == 1))
+            return false;
+        if (payload == null)
+            return false;
+        return parseGGEP(payload);
+    }
+
+
+    // handles parsing of all GGEP blocks.  may need to change return sig
+    // if new things are needed....
+    private final boolean parseGGEP(byte[] ggepBytes) {
+        int[] offsetIndex = new int[1];
+        offsetIndex[0] = 0;
+        while (offsetIndex[0] < ggepBytes.length) {
+            try {
+                GGEP ggepBlock = new GGEP(ggepBytes, 0, offsetIndex);
+                if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) 
+                    return true;
+            }
+            catch (BadGGEPBlockException ignored) {}
+        }
+        return false;
+    }
+
 
 	// inherit doc comment
 	public void recordDrop() {
