@@ -5,6 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
+import de.ueberdosis.mp3info.id3v2.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -180,6 +181,38 @@ public final class ID3Reader {
 
         return new LimeXMLDocument(nameValList, schemaURI);
     }
+
+    /**
+     * @return true if the mp3 file has license information in its ID3v2 TCOP
+     * tag.
+     */
+    public static boolean hasVerifiedLicense(String filename) 
+        throws IOException {
+        
+        de.ueberdosis.mp3info.ID3Reader reader = 
+            new de.ueberdosis.mp3info.ID3Reader(filename);
+        
+        ID3V2Tag v2Tag = reader.getV2Tag();
+
+        if (v2Tag == null)
+            return false;
+
+        java.util.Vector frames = v2Tag.getFrames();
+        java.util.Enumeration iter = frames.elements();
+
+        while (iter.hasMoreElements()) {
+            FrameT currFrameT = (FrameT) iter.nextElement();
+            if (currFrameT instanceof FrameTCOP) {
+                byte[] copyrightBytes = currFrameT.getData();
+                String copyrightString = new String(copyrightBytes);
+                if (copyrightString.indexOf("verify at") > 0)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
 
     /** @return a Object[] with the following order: title, artist, album, year,
        track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
