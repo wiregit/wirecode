@@ -40,7 +40,7 @@ public class ManagedConnection
     private volatile Buffer _oldOutputQueue=new Buffer(QUEUE_SIZE);
     /** True iff the output thread should write the queue immediately.
      *  Synchronized by _outputQueueLock. */
-    private boolean _flushImmediately=false;
+    private volatile boolean _flushImmediately=false;
     /** A condition variable used to implement the flush() method.
      *  Call notify when outputQueueLock and oldOutputQueueLock are
      *  empty. */

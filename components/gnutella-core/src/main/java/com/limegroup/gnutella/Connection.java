@@ -93,7 +93,7 @@ public class Connection {
      * to insure the _socket.close() happens if shutdown is called
      * asynchronously before initialize() completes.
      */
-    private boolean _closed;
+    private volatile boolean _closed=false;
 
     /**
      * Creates an outgoing connection with the specified listener.
