@@ -274,7 +274,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.6f";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.0";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
     public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
     public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
