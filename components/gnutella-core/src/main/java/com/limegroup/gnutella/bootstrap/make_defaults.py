@@ -103,7 +103,8 @@ def print_valid_candidates():
     for url in candidates:
         wrote=0
         try:
-            f=urlopen(url+"?hostfile=1")
+            #f=urlopen(url+"?hostfile=1")
+            f=urlopen(url+"?client=TEST&version=GWC0.8.5&hostfile=1")
             if valid_file(f):
                 wrote=print_candidate(url, 1, first_line)
             else:
