@@ -14,7 +14,7 @@ characters in emacs by search for the character and replacing it with nothing:
 from string import *
 from urllib import *
 import timeoutsocket
-
+import sys
 
 #The latest complete GWebCache scan.  This is a mirror of
 #http://zero-g.net/gwc/GWebCache.net, which is currently out.
