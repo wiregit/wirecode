@@ -237,7 +237,7 @@ public final class ID3Reader {
         for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String frameID = frame.getID();
-            String frameContent = new String(frame.getContent());
+            String frameContent = new String(frame.getContent()).trim();
             if(frameContent == null || frameContent.trim().equals(""))
                 continue;
             //check which tag we are looking at
@@ -262,7 +262,7 @@ public final class ID3Reader {
                     break;
                 }
                 frameContent = 
-                      new String(bytes, startIndex, bytes.length-startIndex);
+                  new String(bytes, startIndex, bytes.length-startIndex).trim();
                 data.setComment(frameContent);
             }
            else if(ID3Editor.TRACK_ID.equals(frameID)) {

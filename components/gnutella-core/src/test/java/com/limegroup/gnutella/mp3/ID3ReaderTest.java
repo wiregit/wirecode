@@ -42,8 +42,8 @@ public class ID3ReaderTest extends BaseTestCase {
                
         assertFalse(data.toString(), data.isComplete());
         assertEquals("Incorrect title", "Title 2", data.getTitle());
-        assertEquals("Incorrect artist", "", data.getArtist());
-        assertEquals("Incorrect album", "", data.getAlbum());
+        assertEquals("Incorrect artist", null, data.getArtist());
+        assertEquals("Incorrect album", null, data.getAlbum());
         assertEquals("Incorrect year", "2002", data.getYear());
         assertEquals("Incorrect track", 12, data.getTrack());
         assertEquals("Incorrect comments", "Comment 2", data.getComment());
