@@ -49,13 +49,29 @@ class HashTreeHandler {
 
     private static final String DIGEST =
         "http://open-content.net/spec/digest/tiger";    
-    private static final String SYSTEM_ID =
+
+    private static final String DTD_PUBLIC_ID =
+        "-//NET//OPEN-CONTENT//THEX 02//EN";
+    private static final String DTD_SYSTEM_ID =
         "http://open-content.net/spec/thex/thex.dtd";
+    private static final String DTD_ENTITY =
+        "<!ELEMENT hashtree (file,digest,serializedtree)>" +
+        "<!ELEMENT file EMPTY>" +
+        "<!ATTLIST file size CDATA #REQUIRED>" +
+        "<!ATTLIST file segmentsize CDATA #REQUIRED>" +
+        "<!ELEMENT digest EMPTY>" +
+        "<!ATTLIST digest algorithm CDATA #REQUIRED>" +
+        "<!ATTLIST digest outputsize CDATA #REQUIRED>" +
+        "<!ELEMENT serializedtree EMPTY>" +
+        "<!ATTLIST serializedtree depth CDATA #REQUIRED>"+
+        "<!ATTLIST serializedtree type CDATA #REQUIRED>" +
+        "<!ATTLIST serializedtree uri CDATA #REQUIRED>";
+
     private static final String SYSTEM_STRING = "SYSTEM";
     
     private static final String XML_TREE_DESC_START =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        + "<!DOCTYPE hashtree " + SYSTEM_STRING + " \"" + SYSTEM_ID + "\">"
+        + "<!DOCTYPE hashtree " + SYSTEM_STRING + " \"" + DTD_SYSTEM_ID + "\">"
         + "<hashtree>";
     private static final String XML_TREE_DESC_END = "</hashtree>";
 
@@ -337,7 +353,7 @@ class HashTreeHandler {
             // hack!
             // Shareaza sends invalid XML,
             int offset = data.indexOf("system");
-            if (offset > 0 && offset < data.indexOf(SYSTEM_ID)) {
+            if (offset > 0 && offset < data.indexOf(DTD_SYSTEM_ID)) {
                 data = data.substring(0, offset) + 
                        SYSTEM_STRING +
                        data.substring(offset + "system".length());
@@ -348,9 +364,8 @@ class HashTreeHandler {
 
             DOMParser parser = new DOMParser();
             InputSource is = new InputSource(new StringReader(data));
-            parser.setEntityResolver(new Resolver(is));
-            is.setSystemId(SYSTEM_ID);
-            is.setEncoding("UTF-8");
+            parser.setEntityResolver(new Resolver());
+
 
             try {
                 parser.parse(is);
@@ -435,12 +450,25 @@ class HashTreeHandler {
      * A custom EntityResolver so we don't hit a website for resolving.
      */
     private static final class Resolver implements EntityResolver {
-        private final InputSource schema;
-        public Resolver(InputSource s) {
-            schema = s;
-        }
-        public InputSource resolveEntity(String publicId, String systemId) {
-            return schema;
+        public Resolver() {}
+
+        public InputSource resolveEntity(String publicId, String systemId)
+                throws SAXException, IOException {
+            if (systemId.equals(DTD_SYSTEM_ID)) {
+                InputSource is = new InputSource(new StringReader(DTD_ENTITY));
+                is.setPublicId(DTD_PUBLIC_ID);//optional
+                is.setSystemId(DTD_SYSTEM_ID);//required
+                return is;
+            }
+            //the parser will open a regular URI connection to the systemId
+            //if we return null. Here we don't want this to occur...
+            if (publicId == null)
+                throw new SAXException("Can't resolve SYSTEM entity at '" +
+                                       systemId + "'");
+            else
+                throw new SAXException("Can't resolve PUBLIC entity '" +
+                                       publicId + "' at '" +
+                                       systemId + "'");
         }
     }
     
