@@ -30,7 +30,7 @@ class UpdateCollection {
     /**
      * The id of this UpdateCollection.
      */
-    private long collectionId = -1;
+    private int collectionId = -1;
     
     /**
      * The timestamp of this collection.
@@ -58,7 +58,7 @@ class UpdateCollection {
     /**
      * Gets the id of this UpdateCollection.
      */
-    long getId() {
+    int getId() {
         return collectionId;
     }
     
@@ -160,7 +160,7 @@ class UpdateCollection {
         }
         
         try {
-            collectionId = Long.parseLong(idText);
+            collectionId = Integer.parseInt(idText);
         } catch(NumberFormatException nfe) {
             LOG.error("Couldn't get collection id from: " + idText, nfe);
             return;

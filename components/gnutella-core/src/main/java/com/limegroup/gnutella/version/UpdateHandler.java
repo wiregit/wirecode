@@ -2,10 +2,13 @@ package com.limegroup.gnutella.version;
 
 
 import java.io.File;
+import java.io.RandomAccessFile;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -44,37 +47,58 @@ public class UpdateHandler {
     /**
      * The most recent id of the update info.
      */
-    private long _lastId;
+    private int _lastId;
+    
+    /**
+     * The bytes to send on the wire.
+     *
+     * TODO: Don't store in memory.
+     */
+    private byte[] _lastBytes;
     
     /**
      * Initializes data as read from disk.
      */
     private void initialize() {
-        String data = SignatureVerifier.getVerifiedData(getStoredFile(), getKeyFile(), "DSA");
-        UpdateCollection uc = UpdateCollection.create(data);
-        if(uc != null)
-            setData(uc);
+        handleNewData(readDataFromDisk());
     }
     
     /**
      * Notification that a new message has arrived.
      */
-    public void handleNewData(final long id, final byte[] data) {
-        QUEUE.add(new Runnable() {
-            public void run() {
-                handleDataInternal(id, data);
-            }
-        });
+    public void handleNewData(final byte[] data) {
+        if(data != null) {
+            QUEUE.add(new Runnable() {
+                public void run() {
+                    handleDataInternal(data);
+                }
+            });
+        }
+    }
+    
+    
+    /**
+     * Retrieves the latest version available.
+     */
+    public int getLatestVersion() {
+        return _lastId;
+    }
+    
+    /**
+     * Gets the bytes to send on the wire.
+     */
+    public byte[] getLatestBytes() {
+        return _lastBytes;
     }
     
     /**
      * Handles processing a newly arrived message.
      */
-    private void handleDataInternal(long id, byte[] data) {
+    private void handleDataInternal(byte[] data) {
         String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA");
         if(xml != null) {
             UpdateCollection uc = UpdateCollection.create(xml);
-            if(uc.getId() == id && id > _lastId)
+            if(uc.getId() > _lastId)
                 storeAndUpdate(data, uc);
         }
     }
@@ -82,16 +106,11 @@ public class UpdateHandler {
     /**
      * Stores the given data to disk & posts an update.
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection info) {
+    private void storeAndUpdate(byte[] data, UpdateCollection uc) {
         FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
-        setData(info);
-    }   
-    
-    /**
-     * Sets the most recent data for the given UpdateCollection.
-     */
-    private void setData(UpdateCollection uc) {
         _lastId = uc.getId();
+        _lastBytes = data;
+
         Version me;
         try {
             me = new Version(CommonUtils.getLimeWireVersion());
@@ -112,6 +131,28 @@ public class UpdateHandler {
             return;
             
         // TODO: pass this to the GUI in a certain amount of time, if necessary.
+    }
+    
+    /**
+     * Reads the data from disk.
+     */
+    private byte[] readDataFromDisk() {
+        RandomAccessFile raf = null;
+        File source = getStoredFile();
+        int length = (int)source.length();
+        if(length <= 0)
+            return null;
+        byte[] data = new byte[length];
+        try {
+            raf = new RandomAccessFile(source, "r");
+            raf.readFully(data);
+        } catch(IOException ioe) {
+            LOG.warn("Unable to read data file.", ioe);
+            return null;
+        } finally {
+            IOUtils.close(raf);
+        }
+        return data;
     }
     
     /**

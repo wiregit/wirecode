@@ -24,35 +24,8 @@ import java.util.Set;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.StaticMessages;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
-import com.limegroup.gnutella.messages.vendor.HeadPing;
-import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
-import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
-import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
-import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
-import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
-import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
@@ -81,6 +54,7 @@ import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -482,6 +456,12 @@ public abstract class MessageRouter {
         else if(msg instanceof SimppVM) {
             handleSimppVM((SimppVM)msg);
         } 
+        else if(msg instanceof UpdateRequest) {
+            handleUpdateRequest((UpdateRequest)msg, receivingConnection);
+        }
+        else if(msg instanceof UpdateResponse) {
+            handleUpdateResponse((UpdateResponse)msg, receivingConnection);
+        }
         else if (msg instanceof HeadPong) {  
             handleHeadPong((HeadPong)msg, receivingConnection); 
         } 
@@ -2090,6 +2070,25 @@ public abstract class MessageRouter {
         SimppManager.instance().checkAndUpdate(simppVM.getPayload());
     }
 
+    /**
+     *  Handles an update request by sending a response.
+     */
+    private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
+        if(req.getVersion() > UpdateRequest.VERSION)
+            return; //we are not going to deal with these types of requests. 
+
+        byte[] data = UpdateHandler.instance().getLatestBytes();
+        UpdateResponse msg = new UpdateResponse(data);
+        handler.reply(msg);
+    }
+    
+
+    /**
+     * Passes the request onto the update manager.
+     */
+    private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
+        UpdateHandler.instance().handleNewData(resp.getPayload());
+    }
 
     /**
      * The default handler for PushRequests received in
