@@ -348,6 +348,9 @@ public class RouterService
         //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
         File incompleteDir=SettingsManager.instance().getIncompleteDirectory();
+
+		if(incompleteDir == null) return;
+
         String[] files=incompleteDir.list();
         for (int i=0; i<files.length; i++) {
             if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
