@@ -1189,6 +1189,20 @@ public class Connection {
 		}
 		return _socket.getInetAddress();
     }
+    
+    /**
+     * Accessor for the <tt>Socket</tt> for this connection.
+     * 
+     * @return the <tt>Socket</tt> for this connection
+     * @throws IllegalStateException if this connection is not yet
+     *  initialized
+     */
+    public Socket getSocket() throws IllegalStateException {
+        if(_socket == null) {
+            throw new IllegalStateException("Not initialized");
+        }
+        return _socket;        
+    }
 
     /**
      * Returns true if the this connection is potentially on the 'same' network.
