@@ -460,7 +460,17 @@ public final class HTTPUploader implements Uploader {
 	//implements the Uploader interface
 	public boolean isHeaderParsed() { return _headersParsed; }
 
-    public boolean supportsQueueing() {return _supportsQueueing; }
+    public boolean supportsQueueing() {
+        return _supportsQueueing && isValidQueueingAgent();
+	}
+    
+    /**
+     * Blocks certain vendors from being queued, because of buggy
+     * downloading implementations on their side.
+     */
+    private boolean isValidQueueingAgent() {
+        return !_userAgent.startsWith("Morpheus 3.0.2");
+    }
     
     /**
      * The amount of bytes that this upload has transferred.
