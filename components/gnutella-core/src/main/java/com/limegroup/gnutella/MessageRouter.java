@@ -187,8 +187,7 @@ public abstract class MessageRouter
 	public void handleUDPMessage(Message msg, DatagramPacket datagram)
     {
         // Increment hops and decrement TTL.
-        if (!(msg instanceof QueryRequest))
-            msg.hop();
+        msg.hop();
 
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
@@ -198,10 +197,9 @@ public abstract class MessageRouter
 			ReceivedMessageStat.UDP_QUERY_REQUESTS.incrementStat();
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
-			if(msg.getTTL() > 1) return;
+			if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
-            msg.hop();
 		} else if (msg instanceof QueryReply) {			
 			ReceivedMessageStat.UDP_QUERY_REPLIES.incrementStat();
             handleQueryReply((QueryReply)msg, handler);
