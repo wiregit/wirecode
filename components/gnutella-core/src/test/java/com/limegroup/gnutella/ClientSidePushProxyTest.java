@@ -359,7 +359,7 @@ public class ClientSidePushProxyTest
             m = testUP.receive(TIMEOUT);
         } while (!(m instanceof QueryRequest)) ;
 
-        // send a reply with some PushProxy info
+        // send a reply with NO PushProxy info
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "golf is awesome");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
@@ -372,8 +372,8 @@ public class ClientSidePushProxyTest
         Thread.sleep(1000);
         assertTrue(callback.getRFD() != null);
 
-        // tell the leaf to download the file, should result in push proxy
-        // request
+        // tell the leaf to download the file, should result in normal TCP
+        // PushRequest
         rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
 
         // await a PushRequest
@@ -402,7 +402,7 @@ public class ClientSidePushProxyTest
         ServerSocket ss = new ServerSocket(7000);
         ss.setSoTimeout(TIMEOUT);
 
-        // send a reply with some PushProxy info
+        // send a reply with some BAD PushProxy info
         PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
         proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
         proxies[1] = new QueryReply.PushProxyContainer("127.0.0.1", 8000);
