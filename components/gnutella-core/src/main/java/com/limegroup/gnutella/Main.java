@@ -256,7 +256,10 @@ public class Main implements ActivityCallback {
     public void promptAboutCorruptDownload(Downloader dloader) {
         dloader.discardCorruptDownload(false);
     }
-
+    
+    public String getHostValue(String key){
+        return null;
+    }
     public void browseHostFailed(GUID guid) {};
 
 	public void setAnnotateEnabled(boolean enabled) {};

@@ -43,4 +43,5 @@ public class ActivityCallbackStub implements ActivityCallback {
     }    
     public void browseHostFailed(GUID guid) {};
     public void setAnnotateEnabled(boolean enabled) {};
+    public String getHostValue(String key) { return null;}
 }

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.User;
+import com.sun.java.util.collections.*;
 
 /**
  *  Callback to notify the GUI of asynchronous backend events.
@@ -173,6 +174,7 @@ public interface ActivityCallback
      */
     public void promptAboutCorruptDownload(Downloader dloader);
 
+    public String getHostValue(String key);
 
     /** Could not establish a listening port. */
 	public static final int PORT_ERROR = 10;
