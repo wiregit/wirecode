@@ -94,7 +94,7 @@ public class XMLParsingUtils {
         }
         return results;
     }
-    private static String plural(String type) {
+    static String plural(String type) {
         if(type.endsWith("y")) return type.substring(0,type.length()-1)+"ies";
         return type+"s";
     }
