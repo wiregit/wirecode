@@ -17,7 +17,7 @@ import java.lang.String;
  * "BrowserLauncher" code.
  */
  //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class Launcher {
+public final class Launcher {
 
 	/**
 	 * <tt>boolean</tt> specifying whether or not the necessary Mac
@@ -147,6 +147,8 @@ public class Launcher {
 		}
 	}
 
+    private static void openURLOSX(String url) throws IOException {
+    }
 	/**
 	 * Launches the file whose abstract path is specified in the 
 	 * <tt>File</tt> parameter.  This method will not launch any file
@@ -228,8 +230,7 @@ public class Launcher {
 	 *  call or in getting the canonical path of the file
 	 */
 	private static void launchFileMacOSX(final String file) throws IOException {
-		String command = "open "+"\""+file+"\"";
-		Runtime.getRuntime().exec(command);
+	    Runtime.getRuntime().exec(new String[]{"open", file});
 	}
 
 	/**
@@ -317,6 +318,17 @@ public class Launcher {
 								  + ie.getMessage());
 		}
 	}
+
+	/**
+	 * Methods required for Mac OS X.  The presence of native methods does not cause
+	 * any problems on other platforms.
+	 * 
+	 * NOTE: These are taken directly from Eric Albert's "BrowserLauncher" class
+	 */
+	private native static int ICStart(int[] instance, int signature);
+	private native static int ICStop(int[] instance);
+	private native static int ICLaunchURL(int instance, byte[] hint, byte[] data, int len,
+											int[] selectionStart, int[] selectionEnd);
 }
 
 
