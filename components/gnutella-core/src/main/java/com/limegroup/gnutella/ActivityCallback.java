@@ -51,9 +51,6 @@ public interface ActivityCallback
     /** Temp function until we rewrite HTTPManager for counting connections */
     public int getNumUploads();
 
-    /** sets the port in the configuration window */
-    public void setPort(int port);
-
 
     /**
      * Equivalent to error(errorCode, t).
