@@ -88,6 +88,25 @@ public class LimeXMLReplyCollection{
     }
     
     /**
+     * Gets a list of keywords from all the documents in this collection.
+     * <p>
+     * delegates to the individual documents and collates the list
+     */
+    protected List getKeyWords(){
+        List retList = new ArrayList();
+        Iterator docs;
+        synchronized(mainMapLock){
+            docs = mainMap.values().iterator();
+        }
+        while(docs.hasNext()){
+            LimeXMLDocument d = (LimeXMLDocument)docs.next();
+            retList.addAll(d.getKeyWords());
+        }
+        return retList;
+    }
+
+
+    /**
      * @param hashToFile contains all hashes for all the non-mp3 files found
      * by the MetaFileManager
      */

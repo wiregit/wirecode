@@ -605,7 +605,17 @@ public class FileManager {
 
         return ret;
     }
-
+    
+    /**
+     * called when a query route table has to be made. The current 
+     * implementaion just takes all the file names and they are split
+     * internally when added the QRT
+     */
+    public List getKeyWords(){
+        File[] files = getSharedFiles(null);
+        return Arrays.asList(files);
+    }
+    
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
         return new File(f.getCanonicalPath());

@@ -254,7 +254,26 @@ public class MetaFileManager extends FileManager {
         }
     }
 
-
+    /**
+     * Returns a list of all the words in the annotations - leaves out
+     * numbers. The list also includes the set of words that is contained
+     * in the names of the files.
+     */
+    public List getKeyWords(){
+         List words = super.getKeyWords();
+        //Now get a list of keywords from each of the ReplyCollections
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] schemas = rep.getAvailableSchemaURIs();
+        LimeXMLReplyCollection collection;
+        int len = schemas.length;
+        for(int i=0;i<len;i++){
+            collection = map.getReplyCollection(schemas[i]);
+            words.addAll(collection.getKeyWords());
+        }
+        return words;
+    }
+    
     /**
      * Used only for showing the current XML data in the system. This method
      * is used only for the purpose of testing. It is not used for anything 

@@ -80,11 +80,7 @@ public class LimeXMLDocument{
        
         //set the schema URI
         this.schemaUri = schemaURI;
-        
-        //anu commented out
-//        //initialize the field mapping map
-//        fieldToValue = new HashMap();
-        
+                
         //iterate over the passed list of fieldnames & values
         for(Iterator iterator = nameValueList.iterator();
             iterator.hasNext();){
@@ -92,8 +88,7 @@ public class LimeXMLDocument{
             NameValue nameValue = (NameValue)iterator.next();
             
             //update the field to value map
-            fieldToValue.put(nameValue.getName().trim(), 
-                             nameValue.getValue());
+            fieldToValue.put(nameValue.getName().trim(), nameValue.getValue());
         }
     }
     
@@ -137,10 +132,7 @@ public class LimeXMLDocument{
      */
     private void grabDocInfo(Node docElement,boolean root)
         throws SchemaNotFoundException{
-            
-            //anu commented out
-//        fieldToValue = new HashMap();
-            
+                        
         //Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
@@ -183,6 +175,26 @@ public class LimeXMLDocument{
         // the meta data is not associated with any file!
         //Similarly, if the action is null, it just means there is no
         //action associated with this Document. 
+    }
+
+    /**
+     * returns all the values - so long they are not numbers
+     */
+    protected List getKeyWords(){
+        List retList = new ArrayList();
+        Iterator iter = fieldToValue.values().iterator();
+        while(iter.hasNext()){
+            boolean number = true;//reset
+            String val = (String)iter.next();
+            try{
+                double d = (new Double(val)).doubleValue();
+            }catch(NumberFormatException e){
+                number = false;
+            }
+            if(!number)
+                retList.add(val);
+        }
+        return retList;
     }
 
     private void createMap(Node docElement) {

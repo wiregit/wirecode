@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.sun.java.util.collections.*;
 
 public class StandardMessageRouter
     extends MessageRouter
@@ -267,9 +268,14 @@ public class StandardMessageRouter
 
     /** @see MessageRouter.addQueryRoutingEntries */
     protected void addQueryRoutingEntries(QueryRouteTable qrt) {
-        File[] files = _fileManager.getSharedFiles(null);
-        for (int i=0; i<files.length; i++)
+        Iterator words = _fileManager.getKeyWords().iterator();
+        while(words.hasNext())
+            qrt.add((String)words.next());
+        /*
+          File[] files = _fileManager.getSharedFiles(null);
+          for (int i=0; i<files.length; i++)
             qrt.add(files[i].getAbsolutePath());
+        */
     }
 
     /**
