@@ -377,6 +377,15 @@ public class RouterService
         acceptor.setListeningPort(port);
     }
 
+    /** 
+     * Returns true if this has accepted an incoming connection, and hence
+     * probably isn't firewalled.  
+     */
+    public boolean acceptedIncomingConnection() {
+        return acceptor.acceptedIncoming();
+    }
+
+
     /**
      *  Return the total number of messages sent and received
      */
