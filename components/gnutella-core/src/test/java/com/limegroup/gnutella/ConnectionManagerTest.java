@@ -265,7 +265,11 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         
         public int getNumMessagesReceived() {
             return received;
-        }        
+        }
+        
+        protected void startOutputRunner() {
+            // do nothing
+        }
     }  
     
     private static class ClientSupernode extends TestManagedConnection {

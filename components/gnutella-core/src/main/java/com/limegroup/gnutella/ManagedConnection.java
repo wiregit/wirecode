@@ -623,8 +623,16 @@ public class ManagedConnection extends Connection
                 false);
         
         //Start the thread to empty the output queue
+        startOutputRunner();
+    }
+    
+    /**
+     * Creates and starts an OutputRunner.
+     * Exists as a hook for tests.
+     */
+    protected void startOutputRunner() {
         new OutputRunner();
-    }        
+    }    
 
     /** Repeatedly sends all the queued data. */
     private class OutputRunner extends Thread {
@@ -1427,11 +1435,6 @@ public class ManagedConnection extends Connection
         //Make it alive again (except for runner)
         _runnerDied=false;
         super._closed=false;
-    }
-
-    /** FOR TESTING PURPOSES ONLY! */
-    void startOutputRunner() {
-        new OutputRunner();
     }
 
     /** FOR TESTING PURPOSES ONLY! */
