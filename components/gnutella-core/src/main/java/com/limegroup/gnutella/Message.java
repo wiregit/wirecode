@@ -14,11 +14,11 @@ import java.io.*;
  */
 public abstract class Message implements Serializable{
     //Functional IDs defined by Gnutella protocol.
-    protected static final byte F_PING=(byte)0x0;
-    protected static final byte F_PING_REPLY=(byte)0x1;
-    protected static final byte F_PUSH=(byte)0x40;
-    protected static final byte F_QUERY=(byte)0x80;
-    protected static final byte F_QUERY_REPLY=(byte)0x81;
+    public static final byte F_PING=(byte)0x0;
+    public static final byte F_PING_REPLY=(byte)0x1;
+    public static final byte F_PUSH=(byte)0x40;
+    public static final byte F_QUERY=(byte)0x80;
+    public static final byte F_QUERY_REPLY=(byte)0x81;
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
