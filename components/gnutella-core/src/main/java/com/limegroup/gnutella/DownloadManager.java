@@ -712,18 +712,6 @@ public class DownloadManager implements BandwidthTracker {
         callback.error(ActivityCallback.ASSERT_ERROR, e);
     }
 
-    // take the extension off the filename...
-    private String ripExtension(String fileName) {
-        String retString = null;
-        int extStart = fileName.lastIndexOf('.');
-        if (extStart == -1)
-            retString = fileName;
-        else
-            retString = fileName.substring(0, extStart);
-        return retString;
-    }
-
-
     private final boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)
