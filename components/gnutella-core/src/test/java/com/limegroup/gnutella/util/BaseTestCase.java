@@ -8,6 +8,9 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.routing.*;
+
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     protected static File _baseDir;
@@ -355,7 +358,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});        
+            new String[] {"127.*.*.*"});
     }
 
     /**
@@ -422,6 +425,135 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     			fail(message);
     		}
     	};
+    }
+    
+    
+    ///////////////////////// Useful Testing Methods //////////////////////////
+    private static final int TIMEOUT = 300;
+
+    /** 
+	 * Tries to receive any outstanding messages on c 
+	 *
+     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
+	 */
+    public static boolean drain(Connection c) throws IOException {
+        return drain(c, TIMEOUT);
+    }
+    
+    public static boolean drain(Connection c, int timeout) throws IOException {
+        if(!c.isOpen())
+            return false;
+
+        boolean ret=false;
+        while (true) {
+            try {
+                Message m = c.receive(timeout);
+                ret = true;
+            } catch (InterruptedIOException e) {
+				// we read a null message or received another 
+				// InterruptedIOException, which means a messages was not 
+				// received
+                return ret;
+            } catch (BadPacketException e) {
+                // ignore...
+            }
+        }
+    }
+    
+    /**
+     * Tries to drain all messages from the array of connections.
+     */
+ 	public static void drainAll(Connection[] conns) throws Exception {
+ 	    drainAll(conns, TIMEOUT);
+ 	}
+ 	
+ 	public static void drainAll(Connection[] cs, int tout) throws IOException {
+        for (int i = 0; i < cs.length; i++) {
+            if (cs[i].isOpen())
+                drain(cs[i], tout);
+        }
+ 	}
+ 	
+ 	/**
+ 	 * Returns true if no messages beside expected ones (such as QRP, Pings)
+ 	 * were received.
+ 	 */
+ 	public static boolean noUnexpectedMessages(Connection c) {
+ 	    return noUnexpectedMessages(c, TIMEOUT);
+ 	}
+ 	
+ 	public static boolean noUnexpectedMessages(Connection c, int timeout) {
+        while (true) {
+            if(!c.isOpen())
+                return true;
+            try {
+                Message m = c.receive(timeout);
+                if (m instanceof RouteTableMessage)
+                    ;
+                else if (m instanceof PingRequest)
+                    ;
+                else // we should never get any other sort of message...
+                    return false;
+            } catch (InterruptedIOException ie) {
+                return true;
+            } catch (BadPacketException e) {
+                // ignore....
+            } catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+    
+    /**
+     * Returns the first message of the expected type, ignoring
+     * RouteTableMessages and PingRequests.
+     */
+    public static Message getFirstMessageOfType(Connection c, Class type) {
+        return getFirstMessageOfType(c, type, TIMEOUT);
+    }
+
+    public static Message getFirstMessageOfType(Connection c,
+                                                Class type,
+                                                int timeout) {
+        while (true) {
+            if(!c.isOpen())
+                return null;
+
+            try {
+                Message m = c.receive(timeout);
+                if (m instanceof RouteTableMessage)
+                    ;
+                else if (m instanceof PingRequest)
+                    ;
+                else if (type.isInstance(m))
+                    return m;
+                else
+                    return null;  // this is usually an error....
+            } catch (InterruptedIOException ie) {
+                return null;
+            } catch (BadPacketException e) {
+                // ignore...
+            } catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+    
+    public static QueryRequest getFirstQueryRequest(Connection c) {
+        return getFirstQueryRequest(c, TIMEOUT);
+    }
+    
+    public static QueryRequest getFirstQueryRequest(Connection c, int tout) {
+        return (QueryRequest)getFirstMessageOfType(c, 
+                                    QueryRequest.class, tout);
+    }
+    
+    public static QueryReply getFirstQueryReply(Connection c) {
+        return getFirstQueryReply(c, TIMEOUT);
+    }
+    
+    public static QueryReply getFirstQueryReply(Connection c, int tout) {
+        return (QueryReply)getFirstMessageOfType(c, QueryReply.class, tout);
     }
 }       
 
