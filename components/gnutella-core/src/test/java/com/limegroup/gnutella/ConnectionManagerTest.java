@@ -28,8 +28,9 @@ public class ConnectionManagerTest extends TestCase {
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);		
     }
 
     public ConnectionManagerTest(String name) {
@@ -55,7 +56,7 @@ public class ConnectionManagerTest extends TestCase {
                 failWithServerMessage();                
             }
         }
-        if(serversRunning == null || maxPortRunning < 6001) {      
+        if(serversRunning == null || maxPortRunning < Backend.DEFAULT_REJECT_PORT) {      
             failWithServerMessage();
         }
         if(ROUTER_SERVICE.isStarted()) return;
@@ -81,9 +82,9 @@ public class ConnectionManagerTest extends TestCase {
 
     private void failWithServerMessage() {
         fail("You must run this test with servers running --\n"+
-             "use the test6001 ant target to run LimeWire servers "+
-             "on ports 6000 and 6001.\n\n"+
-             "Type ant -D\"class=ConnectionManagerTest\" test6001\n\n");        
+             "use the test6301 ant target to run LimeWire servers "+
+             "on ports 6300 and 6301.\n\n"+
+             "Type ant -D\"class=ConnectionManagerTest\" test6301\n\n");        
     }
 
     public void tearDown() {
