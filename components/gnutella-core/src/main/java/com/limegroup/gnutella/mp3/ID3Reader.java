@@ -105,7 +105,7 @@ public final class ID3Reader {
         album = id3.getAlbum(), year = id3.getYear(),
         comment = id3.getComment();
         short track = (short) id3.getTrack(), gen = (short) id3.getGenre();
-        int bitrate = id3.getBitrate(), seconds = id3.getRuntime();
+        int bitrate = id3.getBitrateI(), seconds = id3.getRuntime();
 
         StringBuffer strB = new StringBuffer();
         if(solo){
@@ -153,7 +153,7 @@ public final class ID3Reader {
         album = id3.getAlbum(), year = id3.getYear(),
         comment = id3.getComment();
         short track = (short) id3.getTrack(), gen = (short) id3.getGenre();
-        int bitrate = id3.getBitrate(), seconds = id3.getRuntime();
+        int bitrate = id3.getBitrateI(), seconds = id3.getRuntime();
         String genre = getGenreString(gen);
 
         List nameValList = new ArrayList();
