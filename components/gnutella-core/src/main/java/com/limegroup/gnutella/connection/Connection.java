@@ -1422,9 +1422,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
 
     /**
-     *  Closes the Connection's socket and thus the connection itself.
+     * Closes the Connection's socket and thus the connection itself.
      */
-    public void close() {
+    void close() {
         
         // the writer can be null for testing
         if(_messageWriter != null) {
@@ -1435,11 +1435,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
         _closed = true;
-        if(_socket != null) {
-            try {               
-                _socket.close();
-            } catch(IOException e) {}
-        }
+        NetworkUtils.close(_socket);
         
         // tell the inflater & deflater that we're done with them.
         // These calls are dangerous, because we don't know that the
@@ -1453,24 +1449,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             _deflater.end();
         if( _inflater != null )
             _inflater.end();
-        
-       // closing _in (and possibly _out too) can cause NPE's
-       // in Message.read (and possibly other places),
-       // because BufferedInputStream can't handle
-       // the case where one thread is reading from the stream and
-       // another closes it.
-       // See BugParade ID: 4505257
-       
-       if (_in != null) {
-           try {
-               _in.close();
-           } catch (IOException e) {}
-       }
-       if (_out != null) {
-           try {
-               _out.close();
-           } catch (IOException e) {}
-       }
     }
 
     
