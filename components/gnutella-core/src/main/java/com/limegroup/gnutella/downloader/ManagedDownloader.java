@@ -535,7 +535,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
-        System.out.println("initializing: " + hash);
         if( hash != null ) {
             long size = incompleteFileManager.getCompletedSize(incompleteFile);
             // Create our AlternateLocationCollection if we haven't already.

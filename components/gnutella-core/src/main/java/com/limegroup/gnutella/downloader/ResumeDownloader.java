@@ -64,7 +64,6 @@ public class ResumeDownloader extends ManagedDownloader
                            boolean deserialized) {
         initializeIncompleteFile(_incompleteFile);
         super.initialize(manager, fileManager, callback, deserialized);
-        System.out.println("initializing alt locs from resume downloader");
         initializeAlternateLocations();
     }
 
