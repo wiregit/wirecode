@@ -77,6 +77,8 @@ public class SettingsManager implements SettingsInterface
     private static String   connectStringFirstWord_;
     private static String   connectStringRemainder_;
     private static String   connectOkString_;
+	private static int      basicQueryInfo_;
+	private static int      advancedQueryInfo_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -94,6 +96,7 @@ public class SettingsManager implements SettingsInterface
 
     /** a string for the file separator */
     private String fileSep_;
+
     private String home_;
     private String fileName_;
     private String ndFileName_;
@@ -482,6 +485,16 @@ public class SettingsManager implements SettingsInterface
                     try{setConnectOkString(p);}
                     catch(IllegalArgumentException e){}
                 }
+
+                else if(key.equals(SettingsInterface.BASIC_QUERY_INFO)){
+					i = Integer.parseInt(p);
+                    setBasicInfoForQuery(i);
+                }
+
+                else if(key.equals(SettingsInterface.ADVANCED_QUERY_INFO)){
+					i = Integer.parseInt(p);
+                    setAdvancedInfoForQuery(i);
+                }
             }
             catch(ClassCastException cce){}
         }
@@ -536,10 +549,16 @@ public class SettingsManager implements SettingsInterface
 		// RJS - setting the default values... 
 		setLastVersionChecked(SettingsInterface.DEFAULT_LAST_VERSION_CHECKED);
 		setCheckAgain(SettingsInterface.DEFAULT_CHECK_AGAIN);
-
+		setBasicInfoForQuery(SettingsInterface.DEFAULT_BASIC_INFO_FOR_QUERY);
+		setAdvancedInfoForQuery(SettingsInterface.DEFAULT_ADVANCED_INFO_FOR_QUERY);
         write_ = true;
         writeProperties();
     }
+
+
+    /******************************************************
+     *************  START OF ACCESSOR METHODS *************
+     ******************************************************/
 
     /** returns the time to live */
     public byte getTTL(){return ttl_;}
@@ -663,6 +682,17 @@ public class SettingsManager implements SettingsInterface
     /** returns the path of the properties and host list files */
     public String getPath() {return home_;}
 
+	public int getBasicInfoForQuery() {return basicQueryInfo_;}
+
+	public int getAdvancedInfoForQuery() {return advancedQueryInfo_;}
+
+    /******************************************************
+     **************  END OF ACCESSOR METHODS **************
+     ******************************************************/
+
+    /******************************************************
+     *************  START OF MUTATOR METHODS **************
+     ******************************************************/
 
     /** sets the maximum length of packets (spam protection)*/
     public synchronized void setMaxLength(int maxLength)
@@ -846,6 +876,10 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+	/** sets the default save directory for when the user 
+	 *  presses the "use default" button in the config 
+	 *  window.  this method should only get called at
+	 *  install time, and is therefore not synchronized */
     public void setSaveDefault(String dir) {
         if(!dir.endsWith(fileSep_))
             dir += fileSep_;
@@ -859,6 +893,16 @@ public class SettingsManager implements SettingsInterface
             //writeProperties();
         }
     }
+
+	public void setBasicInfoForQuery(int basicInfo) {
+		String s = Integer.toString(basicInfo);
+		props_.put(SettingsInterface.BASIC_QUERY_INFO, s);
+	}
+	
+	public void setAdvancedInfoForQuery(int advancedInfo) {
+		String s = Integer.toString(advancedInfo);
+		props_.put(SettingsInterface.ADVANCED_QUERY_INFO, s);
+	}
 
     /******************************************************
      *********  START OF CONFIGURATION SETTINGS ***********
@@ -1200,6 +1244,10 @@ public class SettingsManager implements SettingsInterface
             }
         }
     }
+
+    /******************************************************
+     ***************  END OF MUTATOR METHODS **************
+     ******************************************************/
 
 
     /** writes out the Network Discovery specialized

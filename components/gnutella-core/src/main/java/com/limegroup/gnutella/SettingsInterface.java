@@ -256,6 +256,8 @@ public interface SettingsInterface
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
+    public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
+    public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;	
 
     // The property key name constants
     public static final String TTL            = "TTL";
@@ -301,6 +303,8 @@ public interface SettingsInterface
 
     public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
+	public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
+	public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
 
     /** The current version of LimeWire.  This is read-only. */
 	public String getCurrentVersion();
