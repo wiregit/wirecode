@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.http.HTTPHeader;
@@ -82,8 +81,8 @@ public interface HeaderReader {
      * of the handshake.  This allows that message data to be retrieved and 
      * processed.
      * 
-     * @return a <tt>InputStream</tt> containing any left over data read from 
+     * @return a <tt>ByteBuffer</tt> containing any left over data read from 
      *  the remote host but not yet processed
      */
-    InputStream getRemainingData();
+    ByteBuffer getRemainingData();
 }
