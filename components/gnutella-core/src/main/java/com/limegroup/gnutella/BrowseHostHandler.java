@@ -85,35 +85,40 @@ public class BrowseHostHandler {
                 browseExchange(socket);
             }
             catch (IOException ioe) {
-                // try pushing for fun....
+                // try pushing for fun.... (if we have the guid of the servent)
                 shouldTryPush = true;
             }
             if (!shouldTryPush) 
                 break;
         case 1: // true
-            PushRequest pr = new PushRequest(GUID.makeGuid(),
+            // if we're trying to push & we don't have a servent guid, it fails
+            if ( _serventID == null ) {
+                _callback.browseHostFailed(_guid);
+            } else {
+                PushRequest pr = new PushRequest(GUID.makeGuid(),
                                              SettingsManager.instance().getTTL(),
                                              _serventID.bytes(), 
                                              SPECIAL_INDEX,
                                              _acceptor.getAddress(),
                                              _acceptor.getPort());
-            // register with the map so i get notified about a response to my
-            // Push.
-            synchronized (_pushedHosts) {
-                _pushedHosts.put(_serventID, new PushRequestDetails(this));
-            }
-            // send the Push after registering in case you get a response really
-            // quickly.
-            try {
-                _router.sendPushRequest(pr);
-            }
-            catch (IOException ioe) {
-                debug(ioe);
-                // didn't work, unregister yourself...
+                // register with the map so i get notified about a response to my
+                // Push.
                 synchronized (_pushedHosts) {
-                    _pushedHosts.remove(_serventID);
+                    _pushedHosts.put(_serventID, new PushRequestDetails(this));
                 }
-                _callback.browseHostFailed(_guid);
+                // send the Push after registering in case you get a response really
+                // quickly.
+                try {
+                    _router.sendPushRequest(pr);
+                }
+                catch (IOException ioe) {
+                    debug(ioe);
+                    // didn't work, unregister yourself...
+                    synchronized (_pushedHosts) {
+                        _pushedHosts.remove(_serventID);
+                    }
+                    _callback.browseHostFailed(_guid);
+                }
             }
             break;
         }
