@@ -2689,8 +2689,16 @@ public final class SettingsManager {
     public void setForcedIPAddressString(String address) 
             throws IllegalArgumentException {
         try {
-            InetAddress ia = InetAddress.getByName(address); 
-            _forcedIPAddress = ia.getAddress();
+			if(address.equals(DEFAULT_FORCED_IP_ADDRESS_STRING)) {
+				_forcedIPAddress = new byte[4];
+				_forcedIPAddress[0] = 0;
+				_forcedIPAddress[1] = 0;
+				_forcedIPAddress[2] = 0;
+				_forcedIPAddress[3] = 0;
+			} else {
+				InetAddress ia = InetAddress.getByName(address); 
+				_forcedIPAddress = ia.getAddress();
+			}
             PROPS.put(FORCED_IP_ADDRESS_STRING, address);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException();
