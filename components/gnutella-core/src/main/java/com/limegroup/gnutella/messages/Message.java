@@ -137,6 +137,23 @@ public abstract class Message
     }
 	
     /**
+     * Reads a Gnutella message from the specified input stream.  The returned
+     * message can be any one of the recognized Gnutella message, such as
+     * queries, query hits, pings, pongs, etc.
+     *
+     * @param in the <tt>InputStream</tt> instance containing message data
+     * @return a new Gnutella message instance
+     * @throws <tt>BadPacketException</tt> if the message is not considered
+     *  valid for any reason
+     * @throws <tt>IOException</tt> if there is any IO problem reading the
+     *  message
+     */
+    public static Message read(InputStream in)
+		throws BadPacketException, IOException {
+        return Message.read(in, new byte[23], N_UNKNOWN, SOFT_MAX);
+    }
+
+    /**
      * @modifies in
      * @effects reads a packet from the network and returns it as an
      *  instance of a subclass of Message, unless one of the following happens:
@@ -149,9 +166,9 @@ public abstract class Message
      *      is not expected to recover from this.
      *    </ul>
      */
-    public static Message read(InputStream in)
+    public static Message read(InputStream in, byte softMax)
 		throws BadPacketException, IOException {
-        return Message.read(in, new byte[23], N_UNKNOWN);
+        return Message.read(in, new byte[23], N_UNKNOWN, softMax);
     }
     
     /**
@@ -169,7 +186,7 @@ public abstract class Message
      */
     public static Message read(InputStream in, int network)
 		throws BadPacketException, IOException {
-        return Message.read(in, new byte[23], network);
+        return Message.read(in, new byte[23], network, SOFT_MAX);
     }    
     
     /**
@@ -179,9 +196,9 @@ public abstract class Message
      *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
      *  but the contents are not guaranteed to contain any useful data.  
      */
-    public static Message read(InputStream in, byte[] buf)
+    public static Message read(InputStream in, byte[] buf, byte softMax)
 		throws BadPacketException, IOException {
-        return Message.read(in, buf, N_UNKNOWN);
+        return Message.read(in, buf, N_UNKNOWN, softMax);
     }
 
     /**
@@ -192,7 +209,7 @@ public abstract class Message
      *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
      *  but the contents are not guaranteed to contain any useful data.  
      */
-    public static Message read(InputStream in, byte[] buf, int network)
+    public static Message read(InputStream in, byte[] buf, int network, byte softMax)
 		throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
@@ -246,12 +263,12 @@ public abstract class Message
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops >= SOFT_MAX) && (func != F_QUERY_REPLY))
+        else if ((hops >= softMax) && (func != F_QUERY_REPLY))
             throw new BadPacketException("Hops already exceeds soft maximum");
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
-        else if ((ttl+hops > SOFT_MAX) && (func != F_QUERY_REPLY)) {
-            ttl=(byte)(SOFT_MAX - hops);  //overzealous client;
+        else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
+            ttl=(byte)(softMax - hops);  //overzealous client;
                                          //readjust accordingly
             Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
                                      //new ttl>=0

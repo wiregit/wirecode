@@ -71,9 +71,7 @@ public class Connection {
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
-	private final HandshakeResponse HEADERS = 
-		new HandshakeResponse(HEADERS_READ);
-
+	private HandshakeResponse HEADERS;
 
     /** For outgoing Gnutella 0.6 connections, the properties written
      *  after "GNUTELLA CONNECT".  Null otherwise. */
@@ -119,7 +117,7 @@ public class Connection {
     public static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
 
     /**
-     * This time in milliseconds since 1970 that this connection was
+     * The time in milliseconds since 1970 that this connection was
      * established.
      */
     private long _connectionTime = Long.MAX_VALUE;
@@ -129,8 +127,11 @@ public class Connection {
     private Boolean _isLeaf=null;
     /** if I am a leaf connected to a supernode  */
     private Boolean _isUltrapeer=null;
-    /** is the GGEP header set?  (null if not yet known) */
-    private Boolean _supportsGGEP=null;
+
+    /**
+     * The "soft max" ttl to use for this connection.
+     */
+    private byte _softMax;
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -314,7 +315,19 @@ public class Connection {
             else
                 initializeIncoming();
 
+            HEADERS = HandshakeResponse.createServerResponse(HEADERS_READ);            
             _connectionTime = System.currentTimeMillis();
+
+            // Now set the soft max TTL that should be used on this connection.
+            // The +1 on the soft max for "good" connections is because the message
+            // may come from a leaf, and therefore can have an extra hop.
+            // "Good" connections are connections with features such as 
+            // intra-Ultrapeer QRP passing.
+            if(isGoodConnection()) {
+                _softMax = (byte)(HEADERS.getMaxTTL()+(byte)1);
+            } else {
+                _softMax = ConnectionSettings.SOFT_MAX.getValue();
+            }
 						
         } catch (NoGnutellaOkException e) {
             close();
@@ -709,7 +722,7 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
-            m = Message.read(_in, HEADER_BUF);
+            m = Message.read(_in, HEADER_BUF, _softMax);
         }
         return m;
     }
@@ -735,7 +748,7 @@ public class Connection {
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {
-            Message m=Message.read(_in);
+            Message m = Message.read(_in, _softMax);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
