@@ -422,19 +422,14 @@ public class QueryRouteTable {
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
-                //boolean wasSet = bitTable.get(nextPatch);
-                //boolean isSet = wasSet;
                 if (data[i] == KEYWORD_PRESENT) {
                     bitTable.set(nextPatch);
-                    //isSet = true;
+                    resizedQRT = null;
                 }
                 else if (data[i] == KEYWORD_ABSENT) {
                     bitTable.clear(nextPatch);
-                    //isSet = false;
-                }                
-                //if (wasSet != isSet) {
                     resizedQRT = null;
-                //}
+                }
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
@@ -469,9 +464,9 @@ public class QueryRouteTable {
 
     /**
      * Returns an iterator of RouteTableMessage that will convey the state of
-     * this.  If prev is null, this will include a reset.  Otherwise it will
-     * include only those messages needed to to convert prev to this.  More
-     * formally, for any non-null QueryRouteTable's m and prev, the following 
+     * this.  If that is null, this will include a reset.  Otherwise it will
+     * include only those messages needed to to convert that to this.  More
+     * formally, for any non-null QueryRouteTable's m and that, the following 
      * holds:
      *
      * <pre>
@@ -491,30 +486,50 @@ public class QueryRouteTable {
 
         //1. Calculate patch array
         byte[] data=new byte[bitTableLength];
-        //        byte[] data=new byte[bitTableLength];
+        // Fill up data with KEYWORD_NO_CHANGE, since the majority
+        // of elements will be that.
+        // Because it is already filled, we do not need to iterate and
+        // set it anywhere.
+        Utilities.fill(data, 0, bitTableLength, KEYWORD_NO_CHANGE);
         boolean needsPatch=false;
-        boolean needsFullByte=false;
-        for (int i=0; i<data.length; i++) {
-            boolean thisGet = this.bitTable.get(i);
-            if (prev!=null) {
-                if (thisGet == prev.bitTable.get(i))
-                    data[i] = KEYWORD_NO_CHANGE;
-                else if (thisGet)
-                    data[i] = KEYWORD_PRESENT;
-                else // prev.bitTable.get(i)
-                    data[i] = KEYWORD_ABSENT;
+        
+        //1a. If there was a previous table, determine if it was the same one.
+        //    If so, we can prevent BitTableLength calls to BitSet.get(int).
+        if( prev != null ) {
+            //1a-I. If they are not equal, xOr the tables and loop
+            //      through the different bits.  This avoids
+            //      bitTableLength*2 calls to BitSet.get
+            //      at the cost of the xOr'd table's cardinality
+            //      calls to both BitSet.nextSetBit and BitSet.get.
+            //      Generally it is worth it, as our BitTables don't
+            //      change very rapidly.
+            //      With the xOr'd table, we know that all 'clear'
+            //      values have not changed.  Thus, we can use
+            //      nextSetBit on the xOr'd table & this.bitTable.get
+            //      to determine whether or not we should set
+            //      data[x] to KEYWORD_PRESENT or KEYWORD_ABSENT.
+            //      Because this is an xOr, we know that if 
+            //      this.bitTable.get is true, prev.bitTable.get
+            //      is false, and vice versa.            
+            if(!this.bitTable.equals(prev.bitTable) ) {
+                BitSet xOr = (BitSet)this.bitTable.clone();
+                xOr.xor(prev.bitTable);
+                for (int i=xOr.nextSetBit(0); i >= 0; i=xOr.nextSetBit(i+1)) {
+                    data[i] = this.bitTable.get(i) ?
+                        KEYWORD_PRESENT : KEYWORD_ABSENT;
+                    needsPatch = true;
+                }
             }
-            else {
-                if (thisGet)
-                    data[i] = KEYWORD_PRESENT;
-                else
-                    data[i] = KEYWORD_NO_CHANGE;
+            // Else the two tables are equal, and we don't need to do anything
+            // because all elements already contain KEYWORD_NO_CHANGE.
+        }
+        //1b. If there was no previous table, scan through the table using
+        //    nextSetBit, avoiding bitTableLength calls to BitSet.get(int).
+        else {
+            for (int i=bitTable.nextSetBit(0);i>=0;i=bitTable.nextSetBit(i+1)){
+                data[i] = KEYWORD_PRESENT;
+                needsPatch = true;
             }
-
-            if (data[i]!=0)
-                needsPatch=true;
-            if (data[i]<-8 || data[i]>7) //can this fit in 4 signed bits?
-                needsFullByte=true;
         }
         //Optimization: there's nothing to report.  If prev=null, send a single
         //RESET.  Otherwise send nothing.
@@ -525,11 +540,8 @@ public class QueryRouteTable {
 
         //2. Try compression.
         //TODO: Should this not be done if compression isn't allowed?
-        byte bits=8;
-        if (! needsFullByte) {
-            data=halve(data);
-            bits=4;
-        }
+        byte bits=4;
+        data=halve(data);
 
         byte compression=PatchTableMessage.COMPRESSOR_NONE;
         //Optimization: If we are told it is safe to compress the message,

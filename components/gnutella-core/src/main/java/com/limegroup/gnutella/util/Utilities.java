@@ -48,6 +48,27 @@ public class Utilities
             span=span*2;
         }
     }
+    
+    /**
+     * An optimized replacement for Arrays.fill that takes advantage of System.arraycopy.
+     * On someone's Windows machine, this is over nearly twice as fast for arrays greater
+     * than 1000 elements.  The savings decrease somewhat over 32000 elements.
+     *
+     * @param array the array to fill
+     * @param start the starting offset, inclusive
+     * @param stop the stop offset+1.  <b>MUST be greater than start; this differs
+     *  from Arrays.fill.</b>
+     * @param value the value to write into the array
+     */
+    public static void fill(byte array[], int start, int stop, byte value) {
+        array[start] = value;
+        int span=1;
+        for (int i=start+1; i<stop; ) {
+            System.arraycopy(array, start, array, i, Math.min(span, stop-i));
+            i+=span;
+            span=span*2;
+        }
+    }    
 
 
     /**
