@@ -41,7 +41,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
     /**
      * Test read & write of map
      */
-    public void testPersistence() {
+    public void testPersistence() throws Exception {
         assertTrue("cache should not be present", !cacheExists() );
         
         UrnCache cache = UrnCache.instance();
@@ -62,7 +62,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
         }
     }
 
-	private static FileDesc[] createFileDescs() {
+	private static FileDesc[] createFileDescs() throws Exception {
         File path = CommonUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {

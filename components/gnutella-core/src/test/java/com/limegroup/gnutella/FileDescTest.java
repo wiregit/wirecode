@@ -56,7 +56,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {		
+	protected void setUp() throws Exception {		
 		_uncontainedUrnSet = new HashSet();
 		for(int i=0; i<10; i++) {
 			try {
