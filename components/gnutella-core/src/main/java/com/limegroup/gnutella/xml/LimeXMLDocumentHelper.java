@@ -123,8 +123,28 @@ public final class LimeXMLDocumentHelper{
      * empty string.
      */
     public static String getAggregateString(Response[] responses){
-        String agg = internalGetAggregateString2(responses);
-        return (agg);
+        //this hashmap remembers the current state of the string for each uri
+        HashMap uriToString /*LimeXMLSchemaURI -> String */ = new HashMap();
+        for(int i=0; i< responses.length; i++) {
+            LimeXMLDocument doc = responses[i].getDocument();
+            if(doc==null)
+                continue;
+            aggregateResponse(uriToString, doc,i);
+        }
+        StringBuffer retStringB = new StringBuffer();
+
+        //iterate over the map and close all the strings out.
+        Iterator iter = uriToString.values().iterator();
+        while(iter.hasNext()) {
+            String str = ((StringBuffer)iter.next()).toString();
+            int begin = str.indexOf("<",2);//index of opening outer(plural)
+            int end = str.indexOf(" ",begin);
+            String tail  = "</"+str.substring(begin+1,end)+">";
+            //            retString = retString+str+tail;
+            retStringB.append(str);
+            retStringB.append(tail);
+        }
+        return retStringB.toString();
     }
         
 
@@ -152,31 +172,6 @@ public final class LimeXMLDocumentHelper{
     }
 
 
-    private static String internalGetAggregateString2 (Response[] responses) { 
-        //this hashmap remembers the current state of the string for each uri
-        HashMap uriToString /*LimeXMLSchemaURI -> String */ = new HashMap();
-        for(int i=0; i< responses.length; i++) {
-            LimeXMLDocument doc = responses[i].getDocument();
-            if(doc==null)
-                continue;
-            aggregateResponse(uriToString, doc,i);
-        }
-        StringBuffer retStringB = new StringBuffer();
-
-        //iterate over the map and close all the strings out.
-        Iterator iter = uriToString.values().iterator();
-        while(iter.hasNext()) {
-            String str = ((StringBuffer)iter.next()).toString();
-            int begin = str.indexOf("<",2);//index of opening outer(plural)
-            int end = str.indexOf(" ",begin);
-            String tail  = "</"+str.substring(begin+1,end)+">";
-            //            retString = retString+str+tail;
-            retStringB.append(str);
-            retStringB.append(tail);
-        }
-        return retStringB.toString();
-    }
-    
     private static void aggregateResponse(HashMap uriToString, 
                                          LimeXMLDocument doc, int index) {
         if(doc == null)//response has no document
