@@ -203,7 +203,6 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-		 ConnectionStat.ALL_CONNECTION_ATTEMPTS.incrementStat();
          //1. Initialize connection.  It's always safe to recommend new headers.
          ManagedConnection connection=null;
          try {
@@ -1074,6 +1073,7 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
+		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
         RouterService.getCallback().connectionInitializing(c);
 
         try {
@@ -1287,6 +1287,7 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
+			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
             RouterService.getCallback().connectionInitializing(c);
         }
             
@@ -1321,6 +1322,7 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
+			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
             RouterService.getCallback().connectionInitializing(c);
         }
 
@@ -1379,7 +1381,7 @@ public class ConnectionManager {
         }
 
         public void run() {
-            try {               
+            try { 
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
