@@ -209,8 +209,6 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
 		drainAll();
-		drainAll();
-		sleep();
     }
 
     /** 
@@ -337,11 +335,24 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testBasicMechanism() {
+    public void testBasicMechanism() throws Exception {
+        drainAll();
+
         // we want to make sure that the leaf correctly guides the queries to
         // stop.
 
-        
+        // send a query from the leaf
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        LEAF.send(query);
+        LEAF.flush();
+
+        // one or more of the UPs should get it....
+        Thread.sleep(2000);
+        QueryRequest nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertTrue(nQuery != null);
     }
     
 

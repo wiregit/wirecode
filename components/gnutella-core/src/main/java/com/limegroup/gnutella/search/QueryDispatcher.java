@@ -137,7 +137,8 @@ public final class QueryDispatcher implements Runnable {
         synchronized(map) {
             Iterator iter = map.entrySet().iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
+                QueryHandler qh = 
+                    (QueryHandler)((Map.Entry)iter.next()).getValue();
                 if(qh.getReplyHandler() == handler)
                     toRemove.add(qh);
             }
@@ -190,7 +191,8 @@ public final class QueryDispatcher implements Runnable {
         synchronized(QUERIES) {
             Iterator iter = QUERIES.entrySet().iterator();
             while(iter.hasNext()) {
-                QueryHandler handler = (QueryHandler)iter.next();
+                QueryHandler handler = 
+                    (QueryHandler)((Map.Entry)iter.next()).getValue();
                 handler.sendQuery();
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
