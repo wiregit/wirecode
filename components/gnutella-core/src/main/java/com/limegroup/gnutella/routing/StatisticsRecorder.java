@@ -157,6 +157,11 @@ public class StatisticsRecorder
      */
     private static class StatisticsSenderThread extends Thread
     {
+        
+        StatisticsSenderThread() {
+            super("StatisticsSender");
+        }
+        
         public void run()
         {
             try 
