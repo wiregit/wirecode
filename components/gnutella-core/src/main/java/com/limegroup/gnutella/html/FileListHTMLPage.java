@@ -29,10 +29,19 @@ public class FileListHTMLPage {
     private FileListHTMLPage() {
     }
 
+
     /** 
      * Gets a HTML listing of all your shared files.
      */
     public String getSharedFilePage() {
+        FileManager fm = RouterService.getFileManager();
+        return getSharedFilePage(fm.getAllSharedFileDescriptors());
+    }
+
+    /** 
+     * Gets a HTML listing for the shared files you pass in.
+     */
+    public String getSharedFilePage(final FileDesc[] sharedFiles) {
         
         // pretty simple - start the page and add a link per shared file
         StringBuffer sb = new StringBuffer();
@@ -44,39 +53,35 @@ public class FileListHTMLPage {
         sb.append(host + ":" + port + htmlMiddle);
 
         {
-        // get all the Shared files from the FM
-        final String beginURL = "\r\n<a href=/get/";
-        FileManager fm = RouterService.getFileManager();
-        FileDesc[] sharedFiles = fm.getAllSharedFileDescriptors();
-        for (int i = 0; i < sharedFiles.length; i++) {
-            File currFile = sharedFiles[i].getFile();
-            sb.append(beginURL + sharedFiles[i].getIndex() + "/" +
-                      UploadManager.FV_PASS + "/" +
+            // get all the Shared files from the FM
+            final String beginURL = "\r\n<a href=/get/";
+            for (int i = 0; i < sharedFiles.length; i++) {
+                File currFile = sharedFiles[i].getFile();
+                sb.append(beginURL + sharedFiles[i].getIndex() + "/" +
+                          UploadManager.FV_PASS + "/" +
                       StringUtils.replace(URLEncoder.encode(currFile.getName()),
                                           "+", "%20") + ">" + 
-                      currFile.getName() + "</a><br>");
-        }
+                          currFile.getName() + "</a><br>");
+            }
         }
 
         {
-        // put the magnet links
-        sb.append(htmlMagnet);
-        final String beginURL = "\r\n<a href=\"magnet:?xt=urn:sha1:";
-        final String middle1URL = "&dn=";
-        final String middle2URL = 
-            "&xs=http://" + host + ":" + port + "/uri-res/N2R?urn:sha1:";
-        final String middle3URL = "\">";
-        final String endURL = "</a><br>";
-        FileManager fm = RouterService.getFileManager();
-        FileDesc[] sharedFiles = fm.getAllSharedFileDescriptors();
-        for (int i = 0; i < sharedFiles.length; i++) {
-            final String sha1 = sharedFiles[i].getSHA1Urn().toString();
-            final String fname = sharedFiles[i].getFile().getName();
-            sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
-                      sha1 + middle3URL + fname + endURL);
+            // put the magnet links
+            sb.append(htmlMagnet);
+            final String beginURL = "\r\n<a href=\"magnet:?xt=urn:sha1:";
+            final String middle1URL = "&dn=";
+            final String middle2URL = 
+                "&xs=http://" + host + ":" + port + "/uri-res/N2R?urn:sha1:";
+            final String middle3URL = "\">";
+            final String endURL = "</a><br>";
+            for (int i = 0; i < sharedFiles.length; i++) {
+                final String sha1 = sharedFiles[i].getSHA1Urn().toString();
+                final String fname = sharedFiles[i].getFile().getName();
+                sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
+                          sha1 + middle3URL + fname + endURL);
+            }
         }
-        }
-
+        
         // cap off the page
         sb.append(htmlEnd);
         return sb.toString();
