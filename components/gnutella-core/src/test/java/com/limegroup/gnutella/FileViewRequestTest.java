@@ -185,7 +185,6 @@ public class FileViewRequestTest extends ClientSideTestCase {
     }
 
     public void testGetResource() throws Exception {
-
         final String logo = "com/limegroup/gnutella/AcceptorTest.class";
         final File rFile = CommonUtils.getResourceFile(logo);
         final byte[] output = new byte[(int)rFile.length()];
@@ -202,6 +201,17 @@ public class FileViewRequestTest extends ClientSideTestCase {
         byte[] bytes = new byte[output.length];
         is.read(bytes);
         assertEquals(bytes, output);
+        assertTrue((conn.getResponseCode() >= 200) &&
+                   (conn.getResponseCode() < 300));
+    }
+
+    public void testBadGetResource() throws Exception {
+        final String logo = "com/limegroup/gnutella/AcceptorTest";
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.RESOURCE_GET + logo);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        assertTrue((conn.getResponseCode() >= 400) &&
+                   (conn.getResponseCode() < 500));
     }
 
 
