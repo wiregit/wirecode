@@ -49,11 +49,6 @@ public class Acceptor extends Thread {
 
     private IPFilter _filter=new IPFilter();;
     
-    private ConnectionManager _connectionManager;
-    private DownloadManager _downloadManager;
-    private UploadManager _uploadManager;
-    private ActivityCallback _callback;
-
 	private volatile boolean _acceptedIncoming = false;
 
 
@@ -189,9 +184,6 @@ public class Acceptor extends Thread {
         //0. Get local address.  This must be done here--not in the static
         //   initializer--because it can block under certain conditions.
         //   See the notes for _address.
-
-		// TODO: Why do we do this??  Local hosts are blocked in the
-		// setAddress method
         try {
             setAddress(InetAddress.getLocalHost().getAddress());
         } catch (UnknownHostException e) {
