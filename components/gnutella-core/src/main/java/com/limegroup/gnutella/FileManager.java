@@ -121,7 +121,7 @@ public class FileManager {
      * Design note: this method returns null instead of an empty array to avoid
      * allocations in the common case of no matches.)
      */
-    public Response[] query(QueryRequest request) {
+    public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
 
         //Special case: return everything for Clip2 indexing query (" ") and
@@ -130,24 +130,25 @@ public class FileManager {
         //network.  Note that some initial TTLs are filterd by GreedyQuery
         //before they ever reach this point.
         if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
-            synchronized (this) {   
-                //Extract responses for all non-null (i.e., not deleted) files.
-                Response[] ret=new Response[_numFiles];
-                int j=0;
-                for (int i=0; i<_files.size(); i++) {
-                    FileDesc desc = (FileDesc)_files.get(i);
-                    if (desc==null) 
-                        continue;                    
-                    Assert.that(j<ret.length,
-                                "_numFiles is too small");
-                    Response r=new Response(desc._index, desc._size, desc._name);
-                    ret[j]=r;
-                    j++;
-                }
-                Assert.that(j==ret.length,
-                            "_numFiles is too large");
-                return ret;
-            }            
+            //Special case: if no shared files, return null
+            if (_numFiles==0)
+                return null;
+            //Extract responses for all non-null (i.e., not deleted) files.
+            Response[] ret=new Response[_numFiles];
+            int j=0;
+            for (int i=0; i<_files.size(); i++) {
+                FileDesc desc = (FileDesc)_files.get(i);
+                if (desc==null) 
+                    continue;                    
+                Assert.that(j<ret.length,
+                            "_numFiles is too small");
+                Response r=new Response(desc._index, desc._size, desc._name);
+                ret[j]=r;
+                j++;
+            }
+            Assert.that(j==ret.length,
+                        "_numFiles is too large");
+            return ret;
         }
 
         //Normal case: query the index to find all matches.  TODO: this
@@ -434,12 +435,7 @@ public class FileManager {
      * matching.  The caller of this method must not mutate the returned
      * value.
      */
-    protected synchronized IntSet search(String query) {
-        //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
-        //Doing so would allow multiple queries to proceed in parallel.  But
-        //then you need to make _files volatile and work on a local reference,
-        //i.e., "_files=this._files"
-
+    protected IntSet search(String query) {
         //As an optimization, we lazily allocate all sets in case there are no
         //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
         //returns an iterator of one element and there is only one keyword.
