@@ -36,6 +36,9 @@ public class GiveStatsVendorMessage extends VendorMessage {
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
                        byte[] payload, int network) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,payload);
+        if(getPayload().length < 2)
+            throw new BadPacketException("INVALID PAYLOAD LENGTH: "+
+                                         payload.length);
         if(version == 1 && getPayload().length != 2)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
                                          payload.length);
