@@ -6,6 +6,8 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 
+import org.xml.sax.SAXException;
+import java.io.IOException;
 import java.net.*;
 
 import com.sun.java.util.collections.*;
@@ -173,65 +175,48 @@ public final class SearchResultHandler {
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
                 xmlCollectionString = new String(xmlUncompressed);
             }
-        }
-        catch (Exception e) {
-            // so what, i couldn't get xml, no biggie, don't kill everyone for
-            // no reason...
-            xmlCollectionString = "";
-        }
+        } catch (IOException ignored) {}
+
         debug("xmlCollectionString = " + xmlCollectionString);
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
-        int z = allDocsArray.size();
-        int k = -1;//for counting iterations...initialized to -1
-
-		byte[] replyGUID = data.getMessageGUID();
-
         Iterator iter = results.iterator();
-        while(iter.hasNext()) {
-            k++;
+        for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
             Response response = (Response)iter.next();
-            if (! RouterService.matchesType(replyGUID, response))
+            if (!RouterService.matchesType(data.getMessageGUID(), response))
                 continue;
             //Throw away results from Mandragore Worm
-            if (RouterService.isMandragoreWorm(replyGUID, response))
+            if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
                 continue;
             
-            ArrayList docs = null;
-            if(xmlCollectionString==null || xmlCollectionString.equals("")){
-                //Note:This means no XML in QHD. create docs from between nulls
-                LimeXMLDocument doc;//there is only going to be one Document
+            LimeXMLDocument doc = null;
+            if(xmlCollectionString==null || xmlCollectionString.equals("")) {
+                // No XML in QHD, use raw metadata.
                 try {
-                    String xmlStr = response.getMetadata();
-                    doc = new LimeXMLDocument(xmlStr);
-                }catch(Exception e){//could not create documnet
-                    doc = null;
+                    doc = new LimeXMLDocument(response.getMetadata());
                 }
-                if(doc==null)
-                    docs = null;
-                else{
-                    docs = new ArrayList();
-                    docs.add(doc);
-                }
-            }
-            else{//XML in QHD....make documents from there
-                //lets gather the documents
-                docs = new ArrayList(z);//size = number of schemas
+                catch(SAXException ignored) {}
+                catch(SchemaNotFoundException ignored) {}
+                catch(IOException ignored) {}
+            } else { //XML in QHD....make documents from there
+                // The RFD is only going to use one doc, so only
+                // take one.
                 LimeXMLDocument[] metaDocs;
-                for(int l=0; l<z;l++){//for each schema
-                    metaDocs = (LimeXMLDocument[])allDocsArray.get(l);
+                for(int schema = 0; schema < allDocsArray.size(); schema++) {
+                    metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
+                    // If there are no documents in this schema, try another.
                     if(metaDocs == null)
                         continue;
-                    if(metaDocs[k]!=null)
-                        //add doc corresponding to response from outer loop
-                        docs.add(metaDocs[k]);
+                    // If this schema had a document for this response, use it.
+                    if(metaDocs[currentResponse] != null) {
+                        doc = metaDocs[currentResponse];
+                        break; // we only need one, so break out.
+                    }
                 }    
             }
             
-            RemoteFileDesc rfd = null;
-            LimeXMLDocument doc = docs==null||docs.size()==0?null
-                                                 :(LimeXMLDocument)docs.get(0);
-            rfd = new RemoteFileDesc(data.getIP(),
+            RemoteFileDesc rfd = new RemoteFileDesc(
+                                     data.getIP(),
                                      data.getPort(),
                                      response.getIndex(),
                                      response.getName(),
@@ -249,7 +234,9 @@ public final class SearchResultHandler {
                                      System.currentTimeMillis(),
                                      data.getPushProxies()
                                     );
-			RouterService.getCallback().handleQueryResult(rfd,data);
+                                    
+            Set alts = response.getLocations();
+			RouterService.getCallback().handleQueryResult(rfd, data, alts);
 
         } //end of response loop
         return true;
