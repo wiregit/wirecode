@@ -43,7 +43,7 @@ public abstract class UploadState implements HTTPMessage {
 				
 				if (UPLOADER.wantsFAlts()) {
 					alts = UPLOADER.getNextSetOfPushAltsToSend();
-					if(alts.size() > 0) {
+					if(RouterService.acceptedIncomingConnection()) {
 						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
 	                                          new HTTPHeaderValueCollection(alts),
 	                                          os);
