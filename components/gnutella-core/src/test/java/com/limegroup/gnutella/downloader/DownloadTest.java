@@ -14,7 +14,10 @@ import com.limegroup.gnutella.gui.search.*;
 import javax.swing.JOptionPane;
 import junit.framework.*;
 
-
+/**
+ * Comprehensive test of downloads -- one of the most important tests in
+ * LimeWire.
+ */
 public class DownloadTest extends TestCase {
     static File directory=new File(".");
     static File file;
@@ -22,8 +25,8 @@ public class DownloadTest extends TestCase {
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
     static TestUploader uploader4=new TestUploader("6349", 6349);
-	static final DownloadManager dm = new DownloadManager();
-	static final ActivityCallbackStub callback = new ActivityCallbackStub();	
+	static DownloadManager dm;// = new DownloadManager();
+	static final ActivityCallbackStub callback = new ActivityCallbackStub();
 
     static URN testHash = null;
     static File testFile = null;
@@ -61,7 +64,7 @@ public class DownloadTest extends TestCase {
         }
     }
     
-    static void  deleteIncompleteDirectory(File dir) {
+    private static void  deleteIncompleteDirectory(File dir) {
         if(!dir.getName().equalsIgnoreCase("incomplete"))
             return;
         File[] files = dir.listFiles();
@@ -71,8 +74,11 @@ public class DownloadTest extends TestCase {
         dir.delete();
     }
 
+    public void setUp() {}
+
     public void testLegacy() {
-        String args[] = {};
+        String args[] = {"21"};
+        //String args[] = {};
         try {
             testFile = new File("test.txt");
             RandomAccessFile raf = new RandomAccessFile(testFile,"rw");
@@ -80,10 +86,13 @@ public class DownloadTest extends TestCase {
                 raf.writeByte(TestFile.getByte(i));
             raf.close();
             testHash = URN.createSHA1Urn(testFile);
-        } catch (IOException iox) {
-            debug("unable to get hash of test file...exiting \n");
-            System.exit(1);
-        } catch (InterruptedException ignored){}
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("unable to get hash of test file...exiting");
+        } catch (InterruptedException e){
+            e.printStackTrace();
+            fail("test setup interrupted");
+        }
 
         try {
             //Pick random name for file.  Delete if already exists from previous
@@ -93,10 +102,11 @@ public class DownloadTest extends TestCase {
             SettingsManager.instance().setSaveDirectory(directory);
             SettingsManager.instance().setConnectionSpeed(1000);
         } catch (IOException e) {
-            debug("Couldn't create temp file. \n");
-            System.exit(1);
+            e.printStackTrace();
+            fail("Couldn't create temp file.");
         }
-		RouterService rs = new RouterService(new ActivityCallbackStub());
+		RouterService rs = new RouterService(callback);
+        dm = rs.getDownloadManager();
         dm.initialize();
         
         //SimpleTimer timer = new SimpleTimer(true);
@@ -107,104 +117,105 @@ public class DownloadTest extends TestCase {
         };
         RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
         
-//          tOverlapCheckSpeed(5);
-//          cleanup();
-//          tOverlapCheckSpeed(25);
-//          cleanup();
-//          tOverlapCheckSpeed(125);
-//          cleanup();
-        if(args.length == 0 || args[0].equals("0")) {
-            tSimpleDownload();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("1")) {
-            tSimpleSwarm();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("2")) {
-            tUnbalancedSwarm();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("3")) {
-            tSwarmWithInterrupt();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("4")) {
-            tStealerInterrupted();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("5")) {
-            tAddDownload();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("6")) {
-            tStallingUploaderReplaced();
-            cleanup();
-        }
-        //test corruption and ignore it
-        //Note: callback.delCorrupt = false by default.
-        if(args.length == 0 || args[0].equals("7")) {
-            tOverlapCheckGrey(false);//wait for complete
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("8")) {
-            tOverlapCheckWhite(false);//wait for complete
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("9")) {
-            tMismatchedVerifyHash(false);
-            cleanup();
-        }
-        //now test corruption without ignoring it
-        callback.delCorrupt = true;
-        if(args.length == 0 || args[0].equals("10")) {
-            tOverlapCheckGrey(true);//wait for corrupt
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("11")) {
-            tOverlapCheckWhite(true);//wait for corrupt
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("12")) {
-            tMismatchedVerifyHash(true);
-            cleanup(); 
-        }
-        if(args.length == 0 || args[0].equals("13")) {
-            tSimpleAlternateLocations();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("14")) {
-            tTwoAlternateLocations();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("15")) {
-            tUploaderAlternateLocations();
-            cleanup();
-        }
-//          if(args.length == 0 || args[0].equals("16")) {
-//              tWeirdAlternateLocations();
-//              cleanup();
-//          }
-        if(args.length == 0 || args[0].equals("17")) {
-            tStealerInterruptedWithAlternate();
-            cleanup();
-        }
-        //if(args.length == 0 || args[0].equals("18")) {
-		//  tTwoAlternatesButOneWithNoSHA1();
-		//  cleanup();
-        //}
-        if(args.length == 0 || args[0].equals("19")) {
-            tUpdateWhiteWithFailingFirstUploader();
-            cleanup();
-        }
-        if(args.length == 0 || args[0].equals("20")) {
-            tQueuedDownloader();
-            cleanup();
-        }
-        if(args.length==0 || args[0].equals("21")) {
-            tAlternateLocationsExchangedWithBusy();
-            cleanup();
-        }
+        tOverlapCheckSpeed(5);
+        cleanup();
+        tOverlapCheckSpeed(25);
+        cleanup();
+        tOverlapCheckSpeed(125);
+        cleanup();
+
+          if(args.length == 0 || args[0].equals("0")) {
+              tSimpleDownload();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("1")) {
+              tSimpleSwarm();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("2")) {
+              tUnbalancedSwarm();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("3")) {
+              tSwarmWithInterrupt();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("4")) {
+              tStealerInterrupted();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("5")) {
+              tAddDownload();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("6")) {
+              tStallingUploaderReplaced();
+              cleanup();
+          }
+          //test corruption and ignore it
+          //Note: callback.delCorrupt = false by default.
+          if(args.length == 0 || args[0].equals("7")) {
+              tOverlapCheckGrey(false);//wait for complete
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("8")) {
+              tOverlapCheckWhite(false);//wait for complete
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("9")) {
+              tMismatchedVerifyHash(false);
+              cleanup();
+          }
+          //now test corruption without ignoring it
+          callback.delCorrupt = true;
+          if(args.length == 0 || args[0].equals("10")) {
+              tOverlapCheckGrey(true);//wait for corrupt
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("11")) {
+              tOverlapCheckWhite(true);//wait for corrupt
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("12")) {
+              tMismatchedVerifyHash(true);
+              cleanup(); 
+          }
+          if(args.length == 0 || args[0].equals("13")) {
+              tSimpleAlternateLocations();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("14")) {
+              tTwoAlternateLocations();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("15")) {
+              tUploaderAlternateLocations();
+              cleanup();
+          }
+  //          if(args.length == 0 || args[0].equals("16")) {
+  //              tWeirdAlternateLocations();
+  //              cleanup();
+  //          }
+          if(args.length == 0 || args[0].equals("17")) {
+              tStealerInterruptedWithAlternate();
+              cleanup();
+          }
+//          //if(args.length == 0 || args[0].equals("18")) {
+//  		//  tTwoAlternatesButOneWithNoSHA1();
+//  		//  cleanup();
+//          //}
+          if(args.length == 0 || args[0].equals("19")) {
+              tUpdateWhiteWithFailingFirstUploader();
+              cleanup();
+          }
+          if(args.length == 0 || args[0].equals("20")) {
+              tQueuedDownloader();
+              cleanup();
+          }
+//          //if(args.length==0 || args[0].equals("21")) {
+//          //  tAlternateLocationsExchangedWithBusy();
+//          //  cleanup();
+//          //}
     }
     
     
@@ -225,7 +236,8 @@ public class DownloadTest extends TestCase {
             downloader.connectHTTP(0,TestFile.length(),true);
             downloader.doDownload(vf,false);
         } catch (IOException e) {
-            assertTrue("Unexpected exception: "+e,false);
+            e.printStackTrace();
+            fail("Unexpected exception: "+e);
         } 
         long elapsed1=System.currentTimeMillis()-start1;
         
@@ -233,8 +245,9 @@ public class DownloadTest extends TestCase {
             RandomAccessFile raf = new RandomAccessFile(file,"rw");
             raf.seek(300);
             raf.write(65);
-        } catch (IOException io) {
-            assertTrue("Error programing a spook", false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Unexpected exception: "+e);
         }
         
         long start2=System.currentTimeMillis();
@@ -248,13 +261,16 @@ public class DownloadTest extends TestCase {
             downloader.connectHTTP(0, TestFile.length(),true);
             downloader.doDownload(vf, false);
         } catch (IOException e) {
-            assertTrue("Unexpected exception: "+e, false);
+            e.printStackTrace();
+            fail("Unexpected exception: "+e);
         } 
         long elapsed2=System.currentTimeMillis()-start2;
         debug("  No check="+elapsed2+", check="+elapsed1 +"\n");
     }
     
-    
+    /**
+     * Tests a basic download that does not swarm.
+     */
     private static void tSimpleDownload() {
         debug("-Testing non-swarmed download...");
         RemoteFileDesc rfd=newRFD(6346, 100);
@@ -344,9 +360,8 @@ public class DownloadTest extends TestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR, 
-              "u1 did all the work");
-        check(u2==STOP_AFTER, "u2 did all the work ("+u2+")");
+        assertTrue("u1 did all the work", u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR);
+        assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
 
 
@@ -396,20 +411,20 @@ public class DownloadTest extends TestCase {
             download=dm.download(new RemoteFileDesc[] {rfd1}, false);
             ((ManagedDownloader)download).addDownload(rfd2);
         } catch (FileExistsException e) {
-            check(false, "FAILED: already exists");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already exists");
         } catch (AlreadyDownloadingException e) {
-            check(false, "FAILED: already downloading");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already downloading");
         } catch (java.io.FileNotFoundException e) {
-            check(false, "FAILED: file not found (huh?)");
-            return;
+            e.printStackTrace();
+            fail("FAILED: file not found (huh?)");
         }
         waitForComplete(download);
         if (isComplete())
             debug("pass"+"\n");
         else
-            check(false, "FAILED: complete corrupt");
+            fail("FAILED: complete corrupt");
 
         //Make sure there weren't too many overlapping regions. Each upload
         //should do roughly half the work.
@@ -466,14 +481,14 @@ public class DownloadTest extends TestCase {
             //Start one location, wait a bit, then add another.
             download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         } catch (FileExistsException e) {
-            check(false, "FAILED: already exists");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already exists");
         } catch (AlreadyDownloadingException e) {
-            check(false, "FAILED: already downloading");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already downloading");
         } catch (java.io.FileNotFoundException e) {
-            check(false, "FAILED: file not found (huh?)");
-            return;
+            e.printStackTrace();
+            fail("FAILED: file not found (huh?)");
         }
         if(deleteCorrupt)
             waitForCorrupt(download);
@@ -499,14 +514,14 @@ public class DownloadTest extends TestCase {
             //Start one location, wait a bit, then add another.
             download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         } catch (FileExistsException e) {
-            check(false, "FAILED: already exists");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already exists");
         } catch (AlreadyDownloadingException e) {
-            check(false, "FAILED: already downloading");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already downloading");
         } catch (java.io.FileNotFoundException e) {
-            check(false, "FAILED: file not found (huh?)");
-            return;
+            e.printStackTrace();
+            fail("FAILED: file not found (huh?)");
         }
         if(deleteCorrupt)
             waitForCorrupt(download);
@@ -527,14 +542,14 @@ public class DownloadTest extends TestCase {
         try {
             download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
         } catch (FileExistsException e) {
-            check(false, "FAILED: already exists");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already exists");
         } catch (AlreadyDownloadingException e) {
-            check(false, "FAILED: already downloading");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already downloading");
         } catch (java.io.FileNotFoundException e) {
-            check(false, "FAILED: file not found (huh?)");
-            return;
+            e.printStackTrace();
+            fail("FAILED: file not found (huh?)");
         }
         if(deleteCorrupt)
             waitForCorrupt(download);
@@ -559,7 +574,8 @@ public class DownloadTest extends TestCase {
             ashould.addAlternateLocation(
                 AlternateLocation.createAlternateLocation(rfd1.getUrl()));
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         AlternateLocationCollection adiff = 
         ashould.diffAlternateLocationCollection(alt1); 
@@ -598,12 +614,13 @@ public class DownloadTest extends TestCase {
             ashould.addAlternateLocation(al1);
             ashould.addAlternateLocation(al2);
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         AlternateLocationCollection adiff = 
-        ashould.diffAlternateLocationCollection(alt1); 
+            ashould.diffAlternateLocationCollection(alt1); 
         AlternateLocationCollection adiff2 = 
-        alt1.diffAlternateLocationCollection(ashould); 
+            alt1.diffAlternateLocationCollection(ashould); 
         
         check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
         check(alt2.hasAlternateLocations(), "uploader didn't receive alt");
@@ -637,7 +654,8 @@ public class DownloadTest extends TestCase {
 				AlternateLocation.createAlternateLocation(url2);
             ualt.addAlternateLocation(al2);
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         uploader1.setAlternateLocations(ualt);
 
@@ -680,7 +698,8 @@ public class DownloadTest extends TestCase {
 			//  AlternateLocation.createAlternateLocation(
 			//      genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         uploader1.setAlternateLocations(ualt);
 
@@ -693,20 +712,21 @@ public class DownloadTest extends TestCase {
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
             ashould.addAlternateLocation(
-                AlternateLocation.createAlternateLocation(rfd1.getUrl()));
+                AlternateLocation.createAlternateLocation(rfd1));
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         //ashould.addAlternateLocationCollection(ualt);
         AlternateLocationCollection adiff = 
-        ashould.diffAlternateLocationCollection(alt1); 
+            ashould.diffAlternateLocationCollection(alt1); 
 
         AlternateLocationCollection adiff2 = 
-        alt1.diffAlternateLocationCollection(ashould); 
+            alt1.diffAlternateLocationCollection(ashould); 
         
-        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
-        check(!adiff.hasAlternateLocations(), "uploader got extra alts");
-        check(!adiff2.hasAlternateLocations(), "uploader didn't get all alts");
+        assertTrue("uploader didn't receive alt", alt1.hasAlternateLocations());
+        assertTrue("uploader got extra alts", !adiff.hasAlternateLocations());
+        assertTrue("uploader didn't get all alts", !adiff2.hasAlternateLocations());
     }
 
     private static void tStealerInterruptedWithAlternate() {
@@ -732,12 +752,12 @@ public class DownloadTest extends TestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(rfd4.getSHA1Urn());
         try {
-            URL url4 = rfd4.getUrl();//  rfdURL(rfd4);
             AlternateLocation al4 =
-				AlternateLocation.createAlternateLocation(url4);
+				AlternateLocation.createAlternateLocation(rfd4);
             ualt.addAlternateLocation(al4);
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         uploader1.setAlternateLocations(ualt);
 
@@ -755,11 +775,12 @@ public class DownloadTest extends TestCase {
         debug("\tTotal: "+(u1+u2+u3)+"\n");
 
         //Note: The amount downloaded from each uploader will not 
-        //be equal, because the uploaders are stated at different times.
-        check(u1==STOP_AFTER, "u1 did all the work");
-        check(u2>0, "u2 did no work");
-        check(u3>0, "u3 did no work");
-        check(u4==0, "u4 was used");
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertTrue("u2 did no work", u2>0);
+        assertTrue("u3 did no work", u3>0);
+        assertEquals("u4 was used", 0, u4);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
 
@@ -835,6 +856,11 @@ public class DownloadTest extends TestCase {
         tGeneric(rfds);
     }
 
+    /**
+     * Test to make sure that we read the alternate locations from the
+     * uploader response headers even if the response code is a 503,
+     * try again later.
+     */
     private static void tAlternateLocationsExchangedWithBusy() {
         //tests that a downloader reads alternate locations from the
         //uploader even if it receives a 503 from the uploader.
@@ -857,12 +883,12 @@ public class DownloadTest extends TestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
-            URL url2 = rfd2.getUrl();//  rfdURL(rfd2);
             AlternateLocation al2 =
-				AlternateLocation.createAlternateLocation(url2);
+				AlternateLocation.createAlternateLocation(rfd2);
             ualt.addAlternateLocation(al2);
         } catch (Exception e) {
-            check(false, "Couldn't setup test");
+            e.printStackTrace();
+            fail("Couldn't setup test");
         }
         uploader1.setAlternateLocations(ualt);
 
@@ -877,10 +903,11 @@ public class DownloadTest extends TestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1==0, "u1 did all the work");
-        check(u2<TestFile.length()+FUDGE_FACTOR, "u2 did all the work");
+        assertEquals("u1 did too much work", 0, u1);
+        assertTrue("u2 did all the work", u2<TestFile.length()+FUDGE_FACTOR);
     }
 
+    /*
     private static void tGUI() {
         final int RATE=500;
         uploader1.setCorruption(true);
@@ -895,7 +922,7 @@ public class DownloadTest extends TestCase {
         
         //Do dummy search
         byte[] guid=GUIMediator.instance().triggerSearch(file.getName());
-        assertTrue("Search didn't happen", guid!=null);
+        assertNotNull("Search didn't happen", guid);
 
         //Add normal dummy result
         ActivityCallback callback=router.getCallback();        
@@ -912,35 +939,40 @@ public class DownloadTest extends TestCase {
                           responses, new byte[16]);
         callback.handleQueryReply(qr);
     }
+    */
 
 
     ////////////////////////// Helping Code ///////////////////////////
     
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
     private static void tGeneric(RemoteFileDesc[] rfds) {
         Downloader download=null;
         try {
             download=dm.download(rfds, false);
         } catch (FileExistsException e) {
-            check(false, "FAILED: already exists");
-            return;
+            e.printStackTrace();
+            fail("FAILED: already exists");
         } catch (AlreadyDownloadingException e) {
-            check(false, "FAILED: already downloading");
+            e.printStackTrace();
+            fail("FAILED: already downloading");
             return;
         } catch (java.io.FileNotFoundException e) {
-            check(false, "FAILED: file not found (huh?)");
-            return;
+            e.printStackTrace();
+            fail("FAILED: file not found (huh?)");
         }
         waitForComplete(download);
         if (isComplete())
             debug("pass"+"\n");
         else
-            check(false, "FAILED: complete corrupt");
+            fail("FAILED: complete corrupt");
 
         IncompleteFileManager ifm=dm.getIncompleteFileManager();
         for (int i=0; i<rfds.length; i++) {
             File incomplete=ifm.getFile(rfds[i]);
             VerifyingFile vf=ifm.getEntry(incomplete);
-            assertEquals(null, vf);
+            assertNull("verifying file should be null", vf);
         }
     }
 
@@ -965,7 +997,8 @@ public class DownloadTest extends TestCase {
         try {
             theURL = new URL(url);
         } catch( Exception e ) {
-            check(false, "Generic URL creation failed");
+            e.printStackTrace();
+            fail("Generic URL creation failed");
         }  
         return theURL;
     }
@@ -992,7 +1025,8 @@ public class DownloadTest extends TestCase {
             else
                 set.add(URN.createSHA1Urn(urn));
         } catch(Exception e) {
-            debug("SHA1 not created for :"+file);
+            e.printStackTrace();
+            fail("SHA1 not created for: "+file);
         }
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, file.getName(),
@@ -1056,7 +1090,7 @@ public class DownloadTest extends TestCase {
         assertTrue(message,ok);
     }
 
-    private static final boolean DEBUG=false;
+    private static final boolean DEBUG = false;
     
     static void debug(String message) {
         if(DEBUG) 
@@ -1075,3 +1109,9 @@ public class DownloadTest extends TestCase {
         uploader4.reset();
     }
 }
+
+
+
+
+
+
