@@ -39,6 +39,8 @@ public class RequeryDownloadTest
     private RouteTable _queryRouteTable;
     /** The TestMessageRouter's FOR_ME_REPLY_HANDLER. */
     private final ReplyHandler _ourReplyHandler = ForMeReplyHandler.instance();
+    
+    private static final int PORT = 6939;
 
     class TestMessageRouter extends MessageRouterStub {
         List /* of QueryMessage */ broadcasts=new LinkedList();
@@ -59,11 +61,12 @@ public class RequeryDownloadTest
     }
 
     public void setUp() throws Exception {
+        try {
         ManagedDownloader.NO_DELAY = true;
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		ConnectionSettings.PORT.setValue(6346);
+		ConnectionSettings.PORT.setValue(PORT);
         
         _router=new TestMessageRouter();
         new RouterService(new ActivityCallbackStub(), _router);        
@@ -84,6 +87,10 @@ public class RequeryDownloadTest
         _uploader.setRate(Integer.MAX_VALUE);
         
         new File( getSaveDirectory(), _filename).delete();
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }    
 
     /** Creates a downloads.dat file named SNAPSHOT with a faked up
@@ -113,7 +120,7 @@ public class RequeryDownloadTest
        IncompleteFileManager ifm=new IncompleteFileManager();
        Set urns=new HashSet(1);
        urns.add(_hash);
-       RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", 6346, 13l,
+       RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", PORT, 13l,
                                                _filename, TestFile.length(),
                                                new byte[16], 56, false, 4, 
                                                true, null, urns,  false, 
@@ -239,7 +246,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response....
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(1000);
@@ -302,7 +309,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
         Thread.sleep(400);
         assertEquals("downloader should still waiting for results",
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -315,7 +322,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(400);
@@ -380,7 +387,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
         Thread.sleep(400);
         assertEquals("downloader should still have given up,yet wanting results",
             Downloader.GAVE_UP, downloader.getState());
@@ -393,7 +400,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(400);
@@ -452,7 +459,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
         Thread.sleep(400);
         assertEquals("downloader should still be given up",
             Downloader.GAVE_UP, downloader.getState());
@@ -467,7 +474,7 @@ public class RequeryDownloadTest
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-       _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+       _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(1000);
