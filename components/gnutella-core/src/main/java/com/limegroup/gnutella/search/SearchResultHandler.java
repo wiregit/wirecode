@@ -209,6 +209,15 @@ public final class SearchResultHandler {
                 continue;
             if(name==null || name.trim().equals(""))
                 continue;
+            if((data.getPort() & 0xFFFF0000) != 0) 
+                continue;
+            if((data.getSpeed() & 0xFFFFFFFF00000000L) != 0)
+                continue;
+            if((size & 0xFFFFFFFF00000000L) != 0)
+                continue;
+            if((index & 0xFFFFFFFF00000000L) != 0) 
+                continue;
+            
             int score = RouterService.score(replyGUID,response);
             if(isSpecificXMLSearch && (score == 0)) continue;
             
@@ -242,8 +251,35 @@ public final class SearchResultHandler {
                         docs.add(metaDocs[k]);
                 }    
             }
-						
-			RouterService.getCallback().handleQueryResult(data, response, docs);
+            
+            //Sumeet:TODO1: figure out how the xml is being parsed
+            //and choose the xml-document we want - see if we can optimize
+            //the above block.
+            RemoteFileDesc rfd = null;
+            LimeXMLDocument doc = docs==null||docs.size()==0?null
+                                                 :(LimeXMLDocument)docs.get(0);
+            int intSize =  (int)size;//can't change type in rfd, it's serialized
+            try {
+            rfd = new RemoteFileDesc(data.getIP(),data.getPort(),
+                                                 response.getIndex(),
+                                                 response.getName(),
+                                                 intSize,
+                                                 data.getClientGUID(),
+                                                 data.getSpeed(),
+                                                 data.isChatEnabled(),
+                                                 data.getQuality(),
+                                                 data.isBrowseHostEnabled(),
+                                                 doc,
+                                                 response.getUrns(),
+                                                 data.isReplyToMulticastQuery(),
+                                                 data.isFirewalled(), 
+                                                 data.getVendorCode(),
+                                                 System.currentTimeMillis(),
+                                                 data.getPushProxies());
+            } catch(IllegalArgumentException e) {
+                continue; //discard this response.
+            }
+			RouterService.getCallback().handleQueryResult(rfd,data);
 
         } //end of response loop
         return true;

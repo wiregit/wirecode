@@ -146,7 +146,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 				new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
 								   HugeTestUtils.URNS[i].httpStringValue(), 10, 
 								   GUID.makeGuid(), 10, true, 2, true, null, 
-								   HugeTestUtils.URN_SETS[i]);
+								   HugeTestUtils.URN_SETS[i],
+                                   false,false,"",0,null);
 
             // just make sure this doesn't throw an exception
 			AlternateLocation.createAlternateLocation(rfd);
@@ -157,7 +158,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                 new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0]);
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,false,"",0,null);
 
             // this should throw an exception, since it's a private address.
             AlternateLocation.createAlternateLocation(rfd);        

@@ -46,7 +46,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 					new RemoteFileDesc("www.limewire.org", invalidPorts[i], 
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
-									   false, null, null);
+									   false, null, null, false, false,"",
+                                       0, null);
 				fail("rfd1 should have received an exception for invalid port: "+
 					 rfd.getPort());
 			} catch(IllegalArgumentException e) {
@@ -68,7 +69,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 					new RemoteFileDesc("www.limewire.org", validPorts[i], 
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
-									   false, null, null);
+									   false, null, null, false, false,"",
+                                       0, null);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
 					 validPorts[i], e);
@@ -84,7 +86,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		urns.add(HugeTestUtils.URNS[0]);
 		RemoteFileDesc rfd =
 			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
-							   10, true, 3, true, null, urns);
+							   10, true, 3, true, null, urns, 
+                               false, false,"",0, null);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getHost();

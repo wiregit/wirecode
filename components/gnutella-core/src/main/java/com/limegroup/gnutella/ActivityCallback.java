@@ -47,7 +47,6 @@ public interface ActivityCallback
     /**
      * Add a query reply to the search result screen. 
      *
-     * @param qr a query reply with the same GUID as a query you initiated.
      *  The reply is not guaranteed to match the query; use 
      *  RouterService.matchesType for that.  Also, it's possible that the
      *  user has cancelled the search.
@@ -56,8 +55,7 @@ public interface ActivityCallback
      */
     //public void handleQueryReply( QueryReply qr );
 
-	public void handleQueryResult(HostData data, Response response, 
-								  List docs);
+	public void handleQueryResult(RemoteFileDesc rfd, HostData data);
 
     /**
      * Add a query string to the monitor screen

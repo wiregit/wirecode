@@ -1044,7 +1044,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, null);
+                                  speed, false, 4, false, null, null,
+                                  false,false,"",0,null);
     }
 
 	private static RemoteFileDesc newRFDWithURN(int port, int speed) {
@@ -1068,7 +1069,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, set);
+                                  speed, false, 4, false, null, set,
+                                  false, false,"",0,null);
     }
 
     /** Returns true if the complete file exists and is complete */

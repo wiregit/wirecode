@@ -697,7 +697,11 @@ public final class AlternateLocation
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  EMPTY_GUID, 1000,
-								  true, 3, false, null, urnSet, false, null);
+								  true, 3, false, null, urnSet, false,
+                                  false, //assume altLoc is not firewalled
+                                  "ALT",//Never displayed, and we don't know
+                                  getTime(),//not accurate, best we can do
+                                  null);
 	}
 
 	/**
