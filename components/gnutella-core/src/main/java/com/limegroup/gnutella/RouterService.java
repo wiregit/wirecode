@@ -124,6 +124,7 @@ public class RouterService
 
         //1. Prevent any new threads from starting.
         setKeepAlive(0);
+        SettingsManager.instance().setMaxIncomingConnections(0);
         //2. Remove all connections.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {

@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
-import com.limegroup.gnutella.util.IllegalArgumentException2;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -43,7 +42,7 @@ public class SettingsManager implements SettingsInterface
     private static int      uploadSpeed_;
     private static byte     searchLimit_;
     private static String   clientID_;
-    private static int      maxConn_;
+    private static int      maxIncomingConn_;
     private static int      localIP_;  // not yet implemented
     private static String   saveDirectory_;
     private static String   directories_;
@@ -342,10 +341,10 @@ public class SettingsManager implements SettingsInterface
                     catch (IllegalArgumentException ie){}
                 }
 
-                else if(key.equals(SettingsInterface.MAX_CONN)) {
+                else if(key.equals(SettingsInterface.MAX_INCOMING_CONNECTIONS)) {
                     try {
                         i = Integer.parseInt(p);
-                        try {setMaxConn(i);}
+                        try {setMaxIncomingConnections(i);}
                         catch (IllegalArgumentException ie){}
                     }
                     catch(NumberFormatException nfe){}
@@ -520,7 +519,8 @@ public class SettingsManager implements SettingsInterface
         setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
         //setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
-        setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
+        setMaxIncomingConnections(
+           SettingsInterface.DEFAULT_MAX_INCOMING_CONNECTION);
         setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
         setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
         setFilterAdult(SettingsInterface.DEFAULT_FILTER_ADULT);
@@ -597,7 +597,7 @@ public class SettingsManager implements SettingsInterface
     public String getClientID(){return clientID_;}
 
     /** returns the maximum number of connections to hold */
-    public int getMaxConn(){return maxConn_;}
+    public int getMaxIncomingConnections(){return maxIncomingConn_;}
 
     /** returns the directory to save to */
     public String getSaveDirectory() {
@@ -723,48 +723,51 @@ public class SettingsManager implements SettingsInterface
 
     /**
      * Sets the keepAlive without checking the maximum value.
-     * Exactly the same as setKeepAlive(keepAlive, false).
+     * Throws IllegalArgumentException if keepAlive is negative.
      */
-    public synchronized void setKeepAlive(int keepAlive) {
-        setKeepAlive(keepAlive, false);
+    public synchronized void setKeepAlive(int keepAlive)
+        throws IllegalArgumentException {
+        try {
+            setKeepAlive(keepAlive, false);
+        } catch (BadConnectionSettingException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
      * Sets the keep alive. If keepAlive is negative, throws
-     * IllegalArgumentException2 with a suggested value of 0.
+     * BadConnectionSettingException with a suggested value of 0.
      *
-     * If checkUpperLimit is true, then if keepAlive is too large for
-     * the current connection speed, IllegalArgumentException2 is
-     * thrown with a suggested value appropriate for the connection.
-     * It is guaranteed that calling setKeepAlive with this value will
-     * not throw an exception if the connection speed is not changed.
+     * If checkLimit is true, then if keepAlive is too large for the current
+     * connection speed or too large for the current number of incoming
+     * connections, BadConnectionSettingException is thrown with suggested new
+     * values.
      */
     public synchronized void setKeepAlive(int keepAlive,
-                                          boolean checkUpperLimit)
-        throws IllegalArgumentException2 {
-
-        //I'm copying these numbers out of GUIStyles.  I don't want
-        //this to depend on GUI code, though.
-        if (checkUpperLimit) {
-            int speed=getConnectionSpeed();
-            if (speed<=56) {
-                if (keepAlive>4)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(4)});
-            } else if (speed<=350) {
-                if (keepAlive>8)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(8)});
-            } else if (speed<=1000) {
-                if (keepAlive>14)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(14)});
+                                          boolean checkLimit)
+        throws BadConnectionSettingException {
+        int incoming=getMaxIncomingConnections();
+        if (checkLimit) {
+            int max=maxConnections(false);
+            //Too high for this connection speed?  Decrease it.
+            if (keepAlive > max) {
+                throw new BadConnectionSettingException(
+                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                    max, maxConnections(true));
+            }
+            //Too high for the number of incoming connections?
+            //Increase those.
+            if (keepAlive > incoming) {
+                throw new BadConnectionSettingException(
+                    BadConnectionSettingException.OUT_GREATER_THAN_IN,
+                    keepAlive, Math.min(keepAlive, maxConnections(true)));
             }
         }
 
         if (keepAlive<0) {
-            Object[] suggestions={new Integer(0)};
-            throw new IllegalArgumentException2(suggestions);
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.NEGATIVE_VALUE,
+                0, incoming);
         } else {
             keepAlive_ = keepAlive;
             String s = Integer.toString(keepAlive_);
@@ -772,6 +775,26 @@ public class SettingsManager implements SettingsInterface
             writeProperties();
         }
     }
+
+    /** Returns the maximum number of incoming/outgoing connections for the
+     *  given connection speed. 
+     */
+    private int maxConnections(boolean incoming) {
+        int speed=getConnectionSpeed();
+        //I'm copying these numbers out of GUIStyles.  I don't want this to
+        //depend on GUI code, though.  Ideally we'd restrict modem users to only
+        //ONE incoming connection.  But that breaks the rule that incoming
+        //connects>=outgoing.
+        if (speed<=56)        //ISDN
+            return 2;
+        else if (speed<=350)  //cable
+            return 4;
+        else if (speed<=1000) //T1
+            return 6;
+        else                  //T3: no limit
+            return Integer.MAX_VALUE;
+    }
+
 
     /** sets the limit for the number of searches
      *  throws an exception on negative limits
@@ -799,54 +822,58 @@ public class SettingsManager implements SettingsInterface
     }
 
     /**
-     * Sets the max number of connections without checking
-     * the maximum value.  Exactly the same as
-     *  setMaxConn(keepAlive, false).
+     * Sets the max number of incoming connections without checking
+     * the maximum value. Throws IllegalArgumentException if maxConn
+     * is negative.
      */
-    public synchronized void setMaxConn(int maxConn)
-        throws IllegalArgumentException2 {
-        setMaxConn(maxConn, false);
+    public synchronized void setMaxIncomingConnections(int maxConn)
+        throws IllegalArgumentException {
+        try {
+            setMaxIncomingConnections(maxConn, false);
+        } catch (BadConnectionSettingException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
-     * Sets the maximum number of connections (incoming and
+     * Sets the maximum number of incoming connections (incoming and
      * outgoing). If maxConn is negative, throws
-     * IllegalArgumentException2 with a suggested value of 0.
+     * BadConnectionSettingException with a suggested value of 0.
      *
-     * If checkUpperLimit is true, then if maxConn is too large for
-     * the current connection speed, IllegalArgumentException2 is
-     * thrown with a suggested value appropriate for the connection.
-     * It is guaranteed that calling setMaxConn with this value will
-     * not throw an exception if the connection speed is not changed.  */
-    public synchronized void setMaxConn(int maxConn,
-                                        boolean checkUpperLimit)
-        throws IllegalArgumentException2 {
-
-        //I'm copying these numbers out of GUIStyles.  I don't want
-        //this to depend on GUI code, though.
-        if (checkUpperLimit) {
-            int speed=getConnectionSpeed();
-            if (speed<=56) {
-                if (maxConn>6)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(6)});
-            } else if (speed<=350) {
-                if (maxConn>12)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(12)});
-            } else if (speed<=1000) {
-                if (maxConn>20)
-                    throw new IllegalArgumentException2(
-                                new Object[] {new Integer(20)});
+     * If checkLimit is true, then if keepAlive is too large for the current
+     * connection speed or too small for the current number of outgoing
+     * connections, throws BadConnectionSettingException with suggested new
+     * values.
+     */
+    public synchronized void setMaxIncomingConnections(int maxConn,
+                                                       boolean checkLimit)
+        throws BadConnectionSettingException {
+        int outgoing=getKeepAlive();
+        if (checkLimit) {
+            int max=maxConnections(true);
+            //Too high for this connection speed?  Decrease it.
+            if (maxConn > max) {
+                throw new BadConnectionSettingException(
+                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                    outgoing, max);
+            }
+            //Too low for the number of outgoing connections?
+            //Decrease those.
+            if (maxConn < outgoing) {
+                throw new BadConnectionSettingException(
+                    BadConnectionSettingException.OUT_GREATER_THAN_IN,
+                    maxConn, maxConn);
             }
         }
 
-        if(maxConn < 0)
-            throw new IllegalArgumentException();
-        else {
-            maxConn_ = maxConn;
-            String s = Integer.toString(maxConn_);
-            props_.put(SettingsInterface.MAX_CONN, s);
+        if(maxConn < 0) {
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.NEGATIVE_VALUE,
+                0, 0);
+        } else {
+            maxIncomingConn_ = maxConn;
+            String s = Integer.toString(maxConn);
+            props_.put(SettingsInterface.MAX_INCOMING_CONNECTIONS, s);
             writeProperties();
         }
     }

@@ -20,7 +20,7 @@ public class ConnectionManager {
      * exactly those endpoints that could be made from the elements of
      * "connections".
      *
-     * INVARIANT: numFetchers = max(0, keepAlive - connections.size())
+     * INVARIANT: numFetchers = max(0, keepAlive - getNumOutConnections())
      *            Number of fetchers equals number of connections needed, unless
      *            that number is less than zero.
      *
@@ -125,7 +125,8 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-        if (getNumConnections() < SettingsManager.instance().getMaxConn()) {
+        if (getNumInConnections() 
+                < SettingsManager.instance().getMaxIncomingConnections()) {
             ManagedConnection connection = new ManagedConnection(socket,
                                                                  _router,
                                                                  this);
@@ -190,6 +191,36 @@ public class ConnectionManager {
      */
     public int getNumConnections() {
         return _connections.size();
+    }
+
+    /**
+     * @return the number of incoming connections
+     */
+    private int getNumInConnections() {
+        //This could be optimized if desired by augmenting the state of
+        //ConnectionManager.
+        int ret=0;
+        //Note that we DON'T use getInitializedConnections.
+        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
+            if (! ((Connection)iter.next()).isOutgoing())
+                ret++;
+        }
+        return ret;
+    }
+
+    /**
+     * @return the number of outgoing connections
+     */
+    private int getNumOutConnections() {
+        //This could be optimized if desired by augmenting the state of
+        //ConnectionManager.
+        int ret=0;
+        //Note that we DON'T use getInitializedConnections.
+        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
+            if (((Connection)iter.next()).isOutgoing())
+                ret++;
+        }
+        return ret;
     }
 
     /**
@@ -317,7 +348,7 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        int need = _keepAlive - getNumConnections() - _fetchers.size();
+        int need = _keepAlive - getNumOutConnections() - _fetchers.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {

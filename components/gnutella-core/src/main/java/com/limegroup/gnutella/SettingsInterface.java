@@ -32,7 +32,7 @@ public interface SettingsInterface
     public int        getUploadSpeed();
     public byte       getSearchLimit();
     public String     getClientID();
-    public int        getMaxConn();
+    public int        getMaxIncomingConnections();
     public String     getSaveDirectory();
     public String     getSaveDefault();
     public String     getDirectories();
@@ -118,12 +118,12 @@ public interface SettingsInterface
         throws IllegalArgumentException;
 
     /** set the maximum number of connections */
-    public void setMaxConn(int maxConn)
+    public void setMaxIncomingConnections(int maxConn)
         throws IllegalArgumentException;
 
-    /** set the maximum number of connections,
+    /** set the maximum number of incoming connections,
      *  ensuring the value is not too large. */
-    public void setMaxConn(int maxConn, boolean checkUpperLimit)
+    public void setMaxIncomingConnections(int maxConn, boolean checkUpperLimit)
         throws IllegalArgumentException2;
 
     /** sets the directory for saving files*/
@@ -203,7 +203,7 @@ public interface SettingsInterface
     /** Default name for the network discovery properties */
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */
-    public static final int     DEFAULT_KEEP_ALIVE     = 4;
+    public static final int     DEFAULT_KEEP_ALIVE     = 2;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
@@ -215,7 +215,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_CONN       = 6;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
@@ -271,7 +271,8 @@ public interface SettingsInterface
     public static final String UPLOAD_SPEED   = "UPLOAD_SPEED";
     public static final String SEARCH_LIMIT   = "SEARCH_LIMIT";
     public static final String CLIENT_ID      = "CLIENT_ID";
-    public static final String MAX_CONN       = "MAXIMUM_NUMBER_OF_CONNECTIONS";
+    public static final String MAX_INCOMING_CONNECTIONS
+        = "MAX_INCOMING_CONNECTIONS";
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
     public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
