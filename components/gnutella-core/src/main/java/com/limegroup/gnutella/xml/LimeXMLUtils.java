@@ -296,7 +296,7 @@ public class LimeXMLUtils
             String currFieldName = (String)fieldNames.get(j);
             String queryValue = queryDoc.getValue(currFieldName);
             String replyDocValue = replyDoc.getValue(currFieldName);
-            if(replyDocValue == null)
+            if((replyDocValue == null) || replyDocValue.equals(""))
             {
                 nullCount++;
             }
