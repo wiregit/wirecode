@@ -74,6 +74,14 @@ public final class UDPService implements Runnable {
      */
     private boolean _acceptedUnsolicitedIncoming = false;
     
+    /** The last time the _acceptedUnsolicitedIncoming was set.
+     */
+    private long _lastUnsolicitedIncomingTime = 0;
+
+    /** The last time we sent a UDP Connect Back.
+     */
+    private long _lastConnectBackTime = System.currentTimeMillis();
+
 	/**
 	 * The thread for listening of incoming messages.
 	 */
@@ -117,6 +125,9 @@ public final class UDPService implements Runnable {
         UDP_RECEIVE_THREAD.setDaemon(true);
         UDP_SEND_THREAD = new ManagedThread(new Sender(), "UDPService-Sender");
         UDP_SEND_THREAD.setDaemon(true);
+        RouterService.schedule(new IncomingValidator(), 
+                               Acceptor.TIME_BETWEEN_VALIDATES,
+                               Acceptor.TIME_BETWEEN_VALIDATES);
     }
 	
 	/**
@@ -245,6 +256,8 @@ public final class UDPService implements Runnable {
                             if(isValidForIncoming(CONNECT_BACK_GUID, guid,
                                                   datagram))
                                 _acceptedUnsolicitedIncoming = true;
+                            _lastUnsolicitedIncomingTime =
+                                System.currentTimeMillis();
                         }
                         else if (message instanceof PingReply) {
                             GUID guid = new GUID(message.getGUID());
@@ -569,4 +582,58 @@ public final class UDPService implements Runnable {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 
+    private class MLImpl implements MessageListener {
+        public boolean _gotIncoming = false;
+        private final GUID _guid;
+        public MLImpl(GUID guid) {
+            _guid = guid;
+        }
+
+        public void processMessage(Message m) {
+            if ((m instanceof PingRequest) &&
+                (_guid.equals(new GUID(m.getGUID()))))
+                _gotIncoming = true;
+        }
+    }
+
+    private class IncomingValidator implements Runnable {
+        public IncomingValidator() {}
+        public void run() {
+            // clear and revalidate if 1) we haven't had in incoming in an hour
+            // or 2) we've never had incoming and we haven't checked in an hour
+            final long currTime = System.currentTimeMillis();
+            final MessageRouter mr = RouterService.getMessageRouter();
+            final ConnectionManager cm = RouterService.getConnectionManager();
+            if (
+                (_acceptedUnsolicitedIncoming && //1)
+                 ((currTime - _lastUnsolicitedIncomingTime) > 
+                  Acceptor.INCOMING_EXPIRE_TIME)) 
+                || 
+                (!_acceptedUnsolicitedIncoming && //2)
+                 ((currTime - _lastConnectBackTime) > 
+                  Acceptor.INCOMING_EXPIRE_TIME))
+                ) {
+                
+                final GUID cbGuid = new GUID(GUID.makeGuid());
+                final MLImpl ml = new MLImpl(cbGuid);
+                mr.registerMessageListener(cbGuid, ml);
+                // send a connectback request to a few peers and clear
+                if(cm.sendUDPConnectBackRequests(cbGuid))  {
+                    _lastConnectBackTime = System.currentTimeMillis();
+                    Runnable checkThread = new Runnable() {
+                            public void run() {
+                                // we set according to the message listener
+                                _acceptedUnsolicitedIncoming = ml._gotIncoming;
+                                mr.unregisterMessageListener(cbGuid);
+                            }
+                        };
+                    RouterService.schedule(checkThread, 
+                                           Acceptor.WAIT_TIME_AFTER_REQUESTS,
+                                           0);
+                }
+                else
+                    mr.unregisterMessageListener(cbGuid);
+            }
+        }
+    }
 }

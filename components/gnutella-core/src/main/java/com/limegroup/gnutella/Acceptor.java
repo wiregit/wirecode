@@ -26,9 +26,9 @@ import org.apache.commons.logging.Log;
 public class Acceptor implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
-    private static long INCOMING_EXPIRE_TIME = 60 * 60 * 1000; // 1 hour
-    private static long WAIT_TIME_AFTER_REQUESTS = 20 * 1000; // 20 seconds
-    private static long TIME_BETWEEN_VALIDATES = 15 * 60 * 1000; // 15 mins
+    static long INCOMING_EXPIRE_TIME = 60 * 60 * 1000; // 1 hour
+    static long WAIT_TIME_AFTER_REQUESTS = 20 * 1000; // 20 seconds
+    static long TIME_BETWEEN_VALIDATES = 15 * 60 * 1000; // 15 mins
 
     /**
      * The socket that listens for incoming connections. Can be changed to
