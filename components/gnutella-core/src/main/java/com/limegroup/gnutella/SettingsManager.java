@@ -53,6 +53,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
     private static int      searchAnimationTime_;
+    private static String   saveDefault_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -359,6 +360,12 @@ public class SettingsManager implements SettingsInterface
 			    catch (IllegalArgumentException ie){}
 			} catch(NumberFormatException nfe){}   	
 		    }
+
+		else if(key.equals(SettingsManager.SAVE_DEFAULT))
+		    {
+			try{setSaveDefault(p);}
+			catch(IllegalArgumentException e){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -392,6 +399,7 @@ public class SettingsManager implements SettingsInterface
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	setDirectories(home_);
 	setSaveDirectory(home_);
+	setSaveDefault(home_);
 	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 	setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
 	setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
@@ -446,6 +454,9 @@ public class SettingsManager implements SettingsInterface
     public String getSaveDirectory() {
 	return saveDirectory_;
     }
+
+    /** returns the default save directory */
+    public String getSaveDefault(){return saveDefault_;}
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
@@ -687,6 +698,20 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    public synchronized void setSaveDefault(String dir)
+    {
+	File f = new File(dir);
+	boolean b = f.isDirectory();
+	if(!b)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		saveDefault_ = dir;
+		props_.put(SettingsInterface.SAVE_DEFAULT, dir);
+		writeProperties();
+	    }	
+    }
+
     /** set the directories to search */
     public synchronized void setDirectories(String dir)
     {	
@@ -885,6 +910,7 @@ public class SettingsManager implements SettingsInterface
 		writeProperties();	
 	    }
     }
+
 
     /**
      *  Sets the pathname String for the file that 
