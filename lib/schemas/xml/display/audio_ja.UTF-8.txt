@@ -1,0 +1,16 @@
+audios__audio             = オーディオ
+audios__audio__title__    = 題名^100
+audios__audio__artist__   = アーティスト^60
+audios__audio__album__    = アルバム^60
+audios__audio__genre__    = ジャンル
+audios__audio__track__    = トラック
+audios__audio__type__     = タイプ
+audios__audio__seconds__  = 長さ^20
+audios__audio__year__     = 年^20
+audios__audio__language__ = 言語
+audios__audio__SHA1__     = ハッシュ^10
+audios__audio__bitrate__  = ビットレート^20
+audios__audio__price__    = 価格
+audios__audio__link__     = リンク
+audios__audio__comments__ = コメント
+audios__audio__action__ = アクション^10
