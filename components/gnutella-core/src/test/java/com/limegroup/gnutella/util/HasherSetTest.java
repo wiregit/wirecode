@@ -149,6 +149,14 @@ public class HasherSetTest extends BaseTestCase {
         assertTrue(set2.contains(set));
         assertFalse(set2.contains(one));
         assertFalse(set2.contains(two));
+
+	// test adding HasherSet to a normal collection
+	l = new LinkedList();
+	l.addAll(set2);
+	assertEquals(3,l.size());
+	assertTrue(l.contains(set));
+	assertTrue(l.contains(three));
+	assertTrue(l.contains(four));
     }
     
     public void testIteratorUnwraps() throws Exception {

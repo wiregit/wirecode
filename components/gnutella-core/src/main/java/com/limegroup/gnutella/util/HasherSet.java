@@ -81,38 +81,6 @@ public class HasherSet extends HashSet {
         return super.retainAll(wrap(arg0));
     }
     
-    /* (non-Javadoc)
-     * @see java.util.Collection#size()
-     */
-    public int size() {
-        return super.size();
-    }
-    
-    /* (non-Javadoc)
-     * @see java.util.Collection#toArray()
-     */
-    public Object[] toArray() {
-        Object [] obj = super.toArray();
-        Object [] ret = new Object[obj.length];
-        
-        for (int i = 0;i<obj.length;i++)
-            ret[i] = ((Wrapper)obj[i]).getObj();
-        
-        return ret;
-    }
-    /* (non-Javadoc)
-     * @see java.util.Collection#toArray(java.lang.Object[])
-     */
-    public Object[] toArray(Object[] arg0) {
-        Object [] tmp = new Object[arg0.length];
-        super.toArray(tmp);
-        
-        for (int i = 0;i<tmp.length;i++) 
-            arg0[i] = ((Wrapper)tmp[i]).getObj();
-        
-        return arg0;
-    }
-    
     /**
      * @param c a collection that will interact with this
      * @return a collection of Wrapper objects, wrapping each element in the
