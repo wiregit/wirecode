@@ -219,10 +219,12 @@ public class UDPBufferedInputStream extends InputStream {
     private void waitOnData() throws SocketTimeoutException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
+System.out.println("** WAITING**");
                 _processor.wait(_processor.getReadTimeout()); 
             } catch(InterruptedException e) {
                 throw new SocketTimeoutException(); 
             } 
+System.out.println("** NOT WAITING**");
         }
     }
 
