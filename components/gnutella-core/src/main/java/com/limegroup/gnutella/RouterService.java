@@ -572,29 +572,6 @@ public class RouterService
         return SettingsManager.instance();
     }
 
-
-    /**
-     * Create a queued download request
-     */
-    public void queueDownload(String ip, int port, int index, String fname,
-            byte[] bguid, int size) {
-
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
-
-        down.setQueued();
-        callback.addDownload( down );
-    }
-
-    /**
-     * Try to resume a download request
-     */
-    public void resumeDownload( HTTPDownloader mgr ) {
-        mgr.resume();
-
-        kickoffDownload(mgr);
-    }
-
-
     /**
      * Return how many files are being shared
      */

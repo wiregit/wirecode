@@ -994,7 +994,6 @@ public class SettingsManager implements SettingsInterface
         props_.put(UPLOADS_PER_PERSON , s);
     }
 
-
     public void setAdvancedInfoForQuery(int advancedInfo) {
         advancedQueryInfo_ = advancedInfo;
         String s = Integer.toString(advancedInfo);

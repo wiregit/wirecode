@@ -35,7 +35,6 @@ public class QueryReply extends Message implements Serializable{
     /** If parsed and vendor!=null, true iff the push flag is set. */
     private volatile boolean pushFlagSet;
 
-
     /** Creates a new query reply.  The number of responses is responses.length
      *
      *  @requires  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
@@ -236,36 +235,39 @@ public class QueryReply extends Message implements Serializable{
                 //terminator.  But Gnotella inserts meta-information between
                 //these null characters.  So we have to handle this.
                 //
-                //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
-                //RVOGL: But now, we insert metadata too, so we'll actually save
-                //the string
+                //See http://gnutelladev.wego.com/go/
+                //         wego.discussion.message?groupId=139406&
+                //         view=message&curMsgId=319258&discId=140845&
+                //         index=-1&action=view
 
                 //Search for first single null terminator.
                 int j=i;
-                for ( ; payload[j] != (byte)0; j++);
+                for ( ; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
 
-                //payload[i..j-1] is the name.
-                //This excludes the null terminator.
+                //payload[i..j-1] is name.  This excludes the null terminator.
                 String name=new String(payload,i,j-i);
-                i=j+1;
 
                 //Search for remaining null terminator.
-                for ( j=i; payload[j] != (byte)0; j++);
-
-                //payload[i..j-1] is the metadata.
-                //This excludes the null terminator.
-                String metadata=new String(payload,i,j-i);
-                responses[responses.length-left]=new Response(index,size,name,
-                                                              metadata);
                 i=j+1;
+                for ( j=i; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
+                String metadata = new String(payload,i, j-i);
+
+                i=j+1;
+
+                if (i>payload.length-16)
+                    throw new BadPacketException("Missing null terminator "
+                                                 +"filename");
+
+                responses[responses.length-left]=
+                    new Response(index,size,name,metadata);
             }
 
-            if (i<payload.length-16)
-                throw new BadPacketException("Extra data after " +
-                                             "double null terminators");
-            else if (i>payload.length-16)
-                throw new BadPacketException("Missing null terminator " +
-                                             "filename");
             //All set.  Accept parsed results.
             this.responses=responses;
         } catch (ArrayIndexOutOfBoundsException e) {
