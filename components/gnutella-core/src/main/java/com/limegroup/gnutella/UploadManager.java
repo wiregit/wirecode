@@ -43,19 +43,15 @@ public class UploadManager {
 	 * of uploads by a single user exceeds the SettingsManager's
 	 * uploadsPerPerson_ variable, then the upload is denied, 
 	 * and the used gets a Try Again Later message.
-     *
-     * INVARIANT: for all keys k in _uploadsInProgress with value v, 
-     * there are exactly v uploads in _fullUploads with the same 
-     * same address.  Conversely, all hosts in _uploadsInProgress
-     * occur as a key in _uploadsInProgress.
-     */
+	 */
 	private static Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
-	/**
-	 * The list of all uploads in progress.  This is used to shutdown 
-     * "Gnutella" uploads as needed.  
+
+    /**
+     * INVARIENT: ActiveUploads is always less than or equal to the
+     * summation of the values of _uploadsInProgress
      */
-	private static List _fullUploads = new LinkedList();
+    private int _activeUploads= 0;
 
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
@@ -150,7 +146,7 @@ public class UploadManager {
 	}
 
 	public int uploadsInProgress() {
-		return _uploadsInProgress.size();
+		return _activeUploads;
 	}
 
 	//////////////////////// Private Interface /////////////////////////
@@ -290,7 +286,7 @@ public class UploadManager {
 	public int calculateBandwidth() {
 		// public int calculateBurstSize() {
 		float totalBandwith = getTotalBandwith();
-		float burstSize = totalBandwith/uploadsInProgress();
+		float burstSize = totalBandwith/_activeUploads;
 		return (int)burstSize;
 	}
 
@@ -394,6 +390,10 @@ public class UploadManager {
 				// be because the connection failed.
 				_up.connect();
 				// start doesn't throw an exception.  rather, it
+				synchronized(UploadManager.this) {
+				    _activeUploads++;
+				}
+				
 				// handles it internally.  is this the correct
 				// way to handle it?
 				_up.start();
@@ -404,7 +404,10 @@ public class UploadManager {
 				// remove it from the uploads in progress
 				return;
 			} finally {
+			    
+
 				synchronized(UploadManager.this) {
+				    _activeUploads--;
 					removeFromMap(_host);
 					removeAttemptedPush(_host);
 				}
