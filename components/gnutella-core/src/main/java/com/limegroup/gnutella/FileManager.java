@@ -8,13 +8,12 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.FileComparator;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.KeyValue;
-import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.I18NConvert;
@@ -27,7 +26,6 @@ import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.TreeMap;
 import com.sun.java.util.collections.TreeSet;
 
@@ -251,8 +249,8 @@ public abstract class FileManager {
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
         _urnIndex = new HashMap();
-        _extensions = new TreeSet(new StringComparator());
-        _sharedDirectories = new TreeMap(new FileComparator());
+        _extensions = new TreeSet(Comparators.stringComparator());
+        _sharedDirectories = new TreeMap(Comparators.fileComparator());
         _incompletesShared = new IntSet();
         _fileToFileDesc = new HashMap();
     }

@@ -4,9 +4,9 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.FileUtils;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.FileComparator;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -60,7 +60,7 @@ public class IncompleteFileManager implements Serializable {
      * blocks so performance isn't an issue.  
      */
     private Map /* File -> VerifyingFile */ blocks=
-        new TreeMap(new FileComparator());
+        new TreeMap(Comparators.fileComparator());
     /**
      * Bijection between SHA1 hashes (URN) and incomplete files (File).  This is
      * used to ensure that any two RemoteFileDesc with the same hash get the
@@ -334,7 +334,7 @@ public class IncompleteFileManager implements Serializable {
      *  of File->VerifyingFile*/
     private Map transform(Object object) {
         Map map = (Map)object;
-        Map retMap = new TreeMap(new FileComparator());
+        Map retMap = new TreeMap(Comparators.fileComparator());
         for(Iterator i = map.keySet().iterator(); i.hasNext();) {
             Object incompleteFile = i.next();
             Object o = map.get(incompleteFile);

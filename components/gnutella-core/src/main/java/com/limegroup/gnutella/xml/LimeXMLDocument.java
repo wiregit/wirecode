@@ -37,7 +37,8 @@ public class LimeXMLDocument implements Serializable {
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    private final Map fieldToValue = new TreeMap(new StringComparator());
+    private final Map fieldToValue = 
+        new TreeMap(Comparators.stringComparator());
     private String schemaUri;
     private String xmlString;//this is what is sent back on the wire.
     /** 

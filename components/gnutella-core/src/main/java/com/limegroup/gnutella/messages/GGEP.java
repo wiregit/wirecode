@@ -3,8 +3,8 @@ package com.limegroup.gnutella.messages;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.COBSUtil;
+import com.limegroup.gnutella.util.Comparators;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -53,7 +53,8 @@ public class GGEP extends Object {
      * strings.  But strings are conventient for keys since they define hashCode
      * and equals.
      */
-    private Map /*String->byte[]*/ _props = new TreeMap(new StringComparator());
+    private final Map /*String->byte[]*/ _props = 
+        new TreeMap(Comparators.stringComparator());
 
     /**
      * False iff this should COBS encode values to prevent null bytes.
