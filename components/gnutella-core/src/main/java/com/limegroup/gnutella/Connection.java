@@ -927,6 +927,9 @@ public class Connection {
             //streams independently.
             try { _socket.shutdownInput(); } catch(IOException e) {}
             try { _socket.shutdownOutput(); } catch(IOException e) {}
+            //However, we still need to call _socket.close to ensure it's
+            //cancelled from selector.
+            try { _socket.close(); } catch(IOException e) { }
         }
     }
 
