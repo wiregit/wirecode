@@ -54,7 +54,7 @@ public class UDPCrawlerPong extends VendorMessage {
 			.getInitializedConnections().iterator();
 		
 		//add only good ultrapeers or just those who support UDP pinging
-		//(they also support BEST_CANDIDATE message)
+		//(they support UDP ponging, obviously)
 		boolean newOnly = request.hasNewOnly();
 		
 		while(iter.hasNext()) {
