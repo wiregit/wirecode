@@ -81,6 +81,10 @@ public class ReplyHandlerStub implements ReplyHandler {
             return null;
         }
     }
+
+    public boolean isStable() {
+        return true;
+    }
 }
 
 

@@ -227,6 +227,17 @@ public final class UDPReplyHandler implements ReplyHandler {
         return IP;
     }
 
+    /**
+     * Returns <tt>false</tt> to indicate that <tt>UDPReplyHandler</tt>s 
+     * should never be considered stable, due to data loss over UDP and lack
+     * of knowledge as to whether the host is still alive.
+     *
+     * @return <tt>false</tt> since UDP handler are never stable
+     */
+    public boolean isStable() {
+        return false;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
