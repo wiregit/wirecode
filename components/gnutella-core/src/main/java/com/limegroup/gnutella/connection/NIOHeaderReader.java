@@ -66,13 +66,13 @@ public final class NIOHeaderReader implements HeaderReader {
            _headerByteBuffer.hasRemaining())  {
             String header = read(_headerByteBuffer);
         
-            // If we read the final \r\n to end the headers, return null.
-            if(header.length() == 0) {
-                return null;
-            }
             // If we get a complete header, return it.  Otherwise, we'll 
             // read more
             if(header != null)  {
+                // If we read the final \r\n to end the headers, return null.
+                if(header.length() == 0) {
+                    return null;
+                }
                 return HTTPHeader.createHeader(header);
             }
         } 
