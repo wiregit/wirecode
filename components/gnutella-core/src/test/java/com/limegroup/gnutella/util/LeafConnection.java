@@ -6,14 +6,50 @@ package com.limegroup.gnutella.util;
  */
 public final class LeafConnection extends NewConnection {
 
-    public LeafConnection() {
-        super(15);
+    private final String DESCRIPTOR;
+
+    /**
+      * Constant keywork that is in ever standard leaf's QRP table.
+      */
+    public static final String LEAF_KEYWORD = "LEAFKEYWORD";
+
+    /**
+     * Constant alternate keyword for use in testing.
+     */
+    public static final String ALT_LEAF_KEYWORD = "ALTLEAFKEYWORD";
+    
+    public static LeafConnection createAltLeafConnection()  {
+        return new LeafConnection(new String[] {ALT_LEAF_KEYWORD},
+            15, "ALT LEAF CONNECTION", false);
     }
 
-    public LeafConnection(String[] keywords) {
-        super(15);
+    public static LeafConnection createWithKeywords(String[] keywords) {
+        return new LeafConnection(keywords, 20, "LEAF CONNECTION", true);
+    }
+
+    public static LeafConnection createLeafConnection() {
+        // TODO Auto-generated method stub
+        return new LeafConnection(new String[0], 15, "LEAF_CONNECTION", false);
+    }
+
+    /**
+     * Creates a new LeafConnection with the specified list of keywords, etc.
+     */
+    private LeafConnection(String[] keywords, int connections, 
+        String descriptor, boolean addStandardKeyword) {
+        super(connections, true);
         for(int i=0; i<keywords.length; i++) {
             QRT.add(keywords[i]);
         }
+        if(addStandardKeyword) {
+            QRT.add(LEAF_KEYWORD);
+        }
+        DESCRIPTOR = descriptor;
     }
+    
+    public String toString()  {
+        return DESCRIPTOR+": "+QRT;
+    }
+
+
 }
