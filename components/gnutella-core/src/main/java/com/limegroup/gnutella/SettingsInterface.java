@@ -13,6 +13,11 @@ package com.limegroup.gnutella;
  */
 
 public interface SettingsInterface {
+	/**
+	 * the default name of the shared directory.
+	 */
+	public static final String  SAVE_DIRECTORY_NAME = "Shared";
+
 	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
