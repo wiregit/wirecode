@@ -110,13 +110,8 @@ public final class UDPService implements Runnable {
      * @param datagramSocket the new listening socket, which must be be the
      *  return value of newListeningSocket(int).  A value of null disables 
      *  UDP sending and receiving.
-     * @throws <tt>NullPointerException</tt> if the <tt>datagramSocket</tt>
-     *  argument is null
 	 */
 	void setListeningSocket(DatagramSocket datagramSocket) {
-        if(datagramSocket == null) 
-            throw new NullPointerException("cannot accept null socket");
-
         // we used to check if we were GUESS capable according to the
         // SettingsManager.  but in general we want to have the SERVER side of
         // GUESS active always.  the client side should be shut off from 
