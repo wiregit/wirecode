@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
  *        |                                                  \|/
  *        |                                                   |
  *       /|\                                                  |--->INTERRUPTED
- *        |--------<---COMPLETE<------<-------<-------<------/      (done)
+ *        |--------<---COMPLETE-<------<-------<-------<------/      (done)
  *                        |
  *                        |
  *                      (done)
