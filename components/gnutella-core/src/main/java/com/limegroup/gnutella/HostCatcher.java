@@ -452,8 +452,10 @@ public class HostCatcher {
         if(!pr.getClientLocale().equals(""))
             endpoint.setClientLocale(pr.getClientLocale());
             
-        if(pr.isUDPHostCache())
+        if(pr.isUDPHostCache()) {
+            endpoint.setHostname(pr.getUDPCacheAddress());            
             endpoint.setUDPHostCache(true);
+        }
         
         if(!isValidHost(endpoint))
             return false;
@@ -485,7 +487,6 @@ public class HostCatcher {
         // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache())
             return addUDPHostCache(endpoint);
-
 
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.

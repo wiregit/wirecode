@@ -48,10 +48,10 @@ public class PingReply extends Message implements Serializable, IpPort {
     private final List PACKED_UDP_HOST_CACHES;
 
     /**
-     * Constant for whether or not this PingReply contains the GGEP field
-     * for being a udp host cache.
+     * The IP address to connect to if this is a UDP host cache.
+     * Null if this is not a UDP host cache.
      */
-    private final boolean UDP_HOST_CACHE;
+    private final String UDP_CACHE_ADDRESS;
 
     /**
      * Constant for the number of ultrapeer slots for this host.
@@ -709,9 +709,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         int slots = -1; //-1 didn't get it.
         InetAddress myIP=null;
         int myPort=0;
-        boolean udphostcache = false;
         List packedIPs = Collections.EMPTY_LIST;
         List packedCaches = Collections.EMPTY_LIST;
+        String cacheAddress = null;
         
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
@@ -827,7 +827,10 @@ public class PingReply extends Message implements Serializable, IpPort {
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
-                udphostcache = true;
+                cacheAddress = "";
+                try {
+                    cacheAddress = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+                } catch(BadGGEPPropertyException bad) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
@@ -865,7 +868,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         FREE_ULTRAPEER_SLOTS = freeUltrapeerSlots;
         CLIENT_LOCALE = locale;
         FREE_LOCALE_SLOTS = slots;
-        UDP_HOST_CACHE = udphostcache;
+        if(cacheAddress != null && "".equals(cacheAddress))
+            UDP_CACHE_ADDRESS = getAddress();
+        else
+            UDP_CACHE_ADDRESS = cacheAddress;
         PACKED_IP_PORTS = packedIPs;
         PACKED_UDP_HOST_CACHES = packedCaches;
     }
@@ -1416,7 +1422,14 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Accessor for host cacheness.
      */
     public boolean isUDPHostCache() {
-        return UDP_HOST_CACHE;
+        return UDP_CACHE_ADDRESS != null;
+    }
+    
+    /**
+     * Gets the UDP host cache address.
+     */
+    public String getUDPCacheAddress() {
+        return UDP_CACHE_ADDRESS;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

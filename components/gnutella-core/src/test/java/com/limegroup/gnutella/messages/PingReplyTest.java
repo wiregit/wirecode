@@ -626,6 +626,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                     new byte[] { 1, 1, 1, 1 },
                     (long)0, (long)0, false, ggep);
         assertTrue(pr.isUDPHostCache());
+        assertEquals("1.1.1.1", pr.getUDPCacheAddress());
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pr.write(out);
@@ -633,6 +634,23 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         PingReply read = (PingReply)Message.read(new ByteArrayInputStream(b));
         assertTrue(read.isUDPHostCache());
+        assertEquals("1.1.1.1", read.getUDPCacheAddress());
+        
+        ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.nowhere.org");
+        pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+                    new byte[] { 1, 1, 1, 1 },
+                    (long)0, (long)0, false, ggep);
+        assertTrue(pr.isUDPHostCache());
+        assertEquals("www.nowhere.org", pr.getUDPCacheAddress());
+
+        out = new ByteArrayOutputStream();
+        pr.write(out);
+        b = out.toByteArray();
+        
+        read = (PingReply)Message.read(new ByteArrayInputStream(b));
+        assertTrue(read.isUDPHostCache());
+        assertEquals("www.nowhere.org", read.getUDPCacheAddress());
     }
     
     public void testPackedIPsInPong() throws Exception {
