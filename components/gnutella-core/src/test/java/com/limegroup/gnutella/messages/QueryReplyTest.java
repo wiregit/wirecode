@@ -257,9 +257,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 						  payload);
 						  
         vendor=qr.getVendor();
-        assertEquals(vendor, vendor, "LIME");
-        vendor=qr.getVendor();
-        assertEquals(vendor, vendor, "LIME");
+        assertEquals("Vendor should have been LIME", vendor, "LIME");
         
         try {
             qr.getNeedsPush();
