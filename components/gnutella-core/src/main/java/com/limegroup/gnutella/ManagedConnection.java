@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.updates.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages

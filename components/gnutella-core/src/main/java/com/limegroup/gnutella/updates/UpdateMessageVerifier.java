@@ -1,7 +1,8 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.updates;
 
 import java.security.*;
 import java.io.*;
+import com.limegroup.gnutella.*;
 import com.bitzi.util.*;
 
 /**
@@ -55,6 +56,12 @@ public class UpdateMessageVerifier {
         signature = Base32.decode(base32);
         xmlMessage = new byte[data.length-1-j];
         System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);       
+    }
+
+    public byte[] getDataBytes() throws IllegalStateException {
+        if(data==null)
+            throw new IllegalStateException();
+        return data;
     }
 
     public static void main(String[] args) {

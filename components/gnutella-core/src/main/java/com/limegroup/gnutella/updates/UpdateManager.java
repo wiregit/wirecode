@@ -1,6 +1,7 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.updates;
 
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
 import java.net.*;
@@ -84,13 +85,14 @@ public class UpdateManager {
                     System.out.println("Sumeet: verification failed");
                     return;
                 }
-                System.out.println("Sumeet:checked content "+new String(data));
-
+                System.out.println("Sumeet: verified file contents");
+                String xml = new String(verifier.getDataBytes(),"UTF-8");
+                UpdateFileParser parser = new UpdateFileParser(xml);
+                //TODO1:parseFile using UpdateFileParser
                 } catch(Exception e ) {
                     //any errors? We can't continue...forget it.
                     return;
                 }
-                //TODO1:parseFile using UpdateFileParser
                 synchronized(UpdateManager.this) {
                     //write the file to disk
                     //update the version number

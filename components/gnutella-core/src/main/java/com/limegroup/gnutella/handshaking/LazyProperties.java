@@ -2,6 +2,7 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
 public class LazyProperties extends Properties
