@@ -195,11 +195,11 @@ public abstract class MessageRouter {
     		ConnectionManager.ULTRAPEER_CONNECTIONS, 14*60*1000);
     
     /**
-     * some constants related to the propagation of the best candidates.
-     * not final so that PrivilegedAccessor can change them.
+     * some constants related to the propagation of the best candidates.  
+     * should eventually be determined by experiments.
      */
-    private Integer CANDIDATE_PROPAGATION_DELAY= new Integer(2*60*60*1000); //2 hours
-    private Integer CANDIDATE_PROPAGATION_INTERVAL=new Integer(15*60*1000); // 15 minutes
+    private final int CANDIDATE_PROPAGATION_DELAY= 2*60*60*1000; //2 hours
+    private final int CANDIDATE_PROPAGATION_INTERVAL=15*60*1000; // 15 minutes
     
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -234,10 +234,9 @@ public abstract class MessageRouter {
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
         
-        //TODO: find the proper values experimentally
         RouterService.schedule(new CandidateAdvertiser(), 
-        			CANDIDATE_PROPAGATION_DELAY.intValue(),	
-					CANDIDATE_PROPAGATION_INTERVAL.intValue());
+        			CANDIDATE_PROPAGATION_DELAY,	
+					CANDIDATE_PROPAGATION_INTERVAL);
     }
 
     /** Call this to inform us that a query has been killed by a user or
