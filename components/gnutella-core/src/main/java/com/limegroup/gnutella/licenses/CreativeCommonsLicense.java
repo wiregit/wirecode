@@ -12,7 +12,7 @@ import java.io.*;
 public abstract class CreativeCommonsLicense {
 
     private final boolean _requiresAttribution;
-    private final boolean _allowsNoncommercialUseOnly;
+    private final boolean _prohibitsCommercialUse;
     private final boolean _disallowsDerivateWorks;
     private final boolean _isShareAlike;
 
@@ -20,7 +20,7 @@ public abstract class CreativeCommonsLicense {
      * Does some sanity checking for the license.
      */
     protected CreativeCommonsLicense(boolean requiresAttribution,
-                                     boolean allowsNoncommercialUseOnly,
+                                     boolean prohibitsCommercialUse,
                                      boolean disallowsDerivativeWorks,
                                      boolean isShareAlike) 
         throws IllegalArgumentException {
@@ -29,7 +29,7 @@ public abstract class CreativeCommonsLicense {
             throw new IllegalArgumentException("Can't disallow derivative works if you Share Alike!!");
         
         _requiresAttribution = requiresAttribution;
-        _allowsNoncommercialUseOnly = allowsNoncommercialUseOnly;
+        _prohibitsCommercialUse = prohibitsCommercialUse;
         _disallowsDerivateWorks = disallowsDerivativeWorks;
         _isShareAlike = isShareAlike;
     }
@@ -52,7 +52,7 @@ public abstract class CreativeCommonsLicense {
      *  your work and derivative works based upon it but for noncommercial 
      *  purposes only. 
      */
-    public boolean allowsNoncommercialUseOnly() { return _allowsNoncommercialUseOnly; }
+    public boolean prohibitsCommercialUse() { return _prohibitsCommercialUse; }
 
     /** @return true if You let others copy, distribute, display, and perform 
      *  only verbatim copies of your work, not derivative works based upon it. 
