@@ -108,7 +108,6 @@
   
   <target name="clover.clean">
     <delete dir="${cloverdir}/html"/>
-    <delete dir="${cloverdir}/history/html"/>
   </target>
   
   <target name="clover.all" depends="clean, with.clover">
