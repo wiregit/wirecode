@@ -4,7 +4,6 @@ import com.limegroup.gnutella.Assert;
 
 import com.sun.java.util.collections.*;
 import java.util.Locale;
-import java.util.Stack;
 
 /**
  * An information reTRIEval tree, a.k.a., a prefix tree.  A Trie is similar to
@@ -416,7 +415,7 @@ public class Trie {
          * INVARIANT: Top of stack contains the next node with not null
          * value to pop. All other elements in stack are iterators.
          */
-        private Stack /* of Iterator of TrieNode */ stack = new Stack();
+        private ArrayList /* of Iterator of TrieNode */ stack = new ArrayList();
         private boolean withNulls;
 
         /**
@@ -427,7 +426,7 @@ public class Trie {
             this.withNulls = withNulls;
             if (withNulls || start.getValue() != null)
                 // node has a value, push it for next
-                stack.push(start);
+                stack.add(start);
             else
                 // scan node children to find the next node
                 advance(start);
@@ -435,14 +434,15 @@ public class Trie {
 
         // inherits javadoc comment
         public boolean hasNext() {
-            return !stack.empty();
+            return !stack.isEmpty();
         }
 
         // inherits javadoc comment
         public Object next() {
-            if (stack.empty())
+            int size;
+            if ((size = stack.size()) == 0)
                 throw new NoSuchElementException();
-            TrieNode node = (TrieNode)stack.pop();
+            TrieNode node = (TrieNode)stack.remove(size - 1);
             advance(node);
             return node;
         }
@@ -457,21 +457,22 @@ public class Trie {
         private void advance(TrieNode node) {
             Iterator children = node.childrenForward();
             while (true) { // scan siblings and their children
+                int size;
                 if (children.hasNext()) {
                     node = (TrieNode)children.next();
                     if (children.hasNext()) // save siblings
-                        stack.push(children);
+                        stack.add(children);
                     // check current node and scan its sibling if necessary
                     if (withNulls || node.getValue() == null)
                         children = node.childrenForward(); // loop from there
                     else { // node qualifies for next()
-                        stack.push(node);
+                        stack.add(node);
                         return; // next node exists
                     }
-                } else if (stack.empty())
+                } else if ((size = stack.size()) == 0)
                     return; // no next node
                 else // no more siblings, return to parent
-                    children = (Iterator)stack.pop();
+                    children = (Iterator)stack.remove(size - 1);
             }
         }
     }
@@ -541,7 +542,7 @@ final class TrieNode {
      * i.e., for all i &lt; j,<br>
      *       children[i].edge.charAt(0) &lt; children[j].edge.charAt(0)
      */
-    private Vector /* of TrieEdge */ children = new Vector(0);
+    private ArrayList /* of TrieEdge */ children = new ArrayList(0);
 
     /**
      * Creates a trie with no children and no value.
@@ -657,13 +658,14 @@ final class TrieNode {
      * @modifies this
      */
     public void put(String label, TrieNode child) {
-        char labelStart = label.charAt(0);
-        int i = search(labelStart, false); // find closest match
+        char labelStart;
+        int i;
         // If there's a match it is the closest lower or equal one, and
         // precondition requires it to be lower, so we add the edge *after*
         // it. If there's no match, there are two cases: the Trie is empty,
         // or the closest match returned is the last edge in the list.
-        if (i >= 0) {
+        if ((i = search(labelStart = label.charAt(0), // find closest match
+                        false)) >= 0) {
             Assert.that(get(i).getLabelStart() != labelStart,
                         "Precondition of TrieNode.put violated.");
         }
@@ -675,8 +677,8 @@ final class TrieNode {
      * character.  Returns true if any edges where actually removed.
      */
     public boolean remove(char labelStart) {
-        int i = search(labelStart, true);
-        if (i == -1)
+        int i;
+        if ((i = search(labelStart, true)) < 0)
             return false;
         Assert.that(get(i).getLabelStart() == labelStart);
         children.remove(i);
@@ -712,11 +714,9 @@ final class TrieNode {
         }
 
         public Object next() {
-            if (!hasNext())
-                throw new NoSuchElementException();
-            TrieEdge edge = get(i);
-            i++;
-            return edge.getChild();
+            if (i < children.size())
+                return get(i++).getChild();
+            throw new NoSuchElementException();
         }
     }
 
@@ -739,11 +739,9 @@ final class TrieNode {
         }
 
         public Object next() {
-            if (!hasNext())
-                throw new NoSuchElementException();
-            TrieEdge edge = get(i);
-            i--;
-            return edge.getChild();
+            if (i >= 0)
+               return get(i--).getChild();
+            throw new NoSuchElementException();
         }
     } */
 
@@ -766,11 +764,9 @@ final class TrieNode {
         }
 
         public Object next() {
-            if (! hasNext())
-                throw new NoSuchElementException();
-            TrieEdge edge = get(i);
-            i++;
-            return edge.getLabel();
+            if (i < children.size())
+               return get(i++).getLabel();
+            throw new NoSuchElementException();
         }
     }
 
@@ -793,20 +789,18 @@ final class TrieNode {
         }
 
         public Object next() {
-            if (! hasNext())
-                throw new NoSuchElementException();
-            TrieEdge edge = get(i);
-            i--;
-            return edge.getLabel();
+            if (i >= 0)
+               return get(i--).getLabel();
+            throw new NoSuchElementException();
         }
     } */
 
     // inherits javadoc comment.
     public String toString() {
         Object val = getValue();
-        if (val == null)
-            return "NULL";
-        return val.toString();
+        if (val != null)
+           return val.toString();
+        return "NULL";
     }
 
     /**
