@@ -110,7 +110,8 @@ public class RouterService
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
   		this.downloader = new DownloadManager();
-  		this.uploadManager = new UploadManager();
+  		this.uploadManager = new UploadManager(this.callback, this.router, 
+											   this.acceptor, this.fileManager);
 
         this.chatManager = ChatManager.instance();
 
@@ -119,7 +120,7 @@ public class RouterService
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
 		this.manager.initialize(router, catcher);		
-		this.uploadManager.initialize(callback, router, acceptor,fileManager);
+		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
         this.chatManager.setActivityCallback(callback);
 
