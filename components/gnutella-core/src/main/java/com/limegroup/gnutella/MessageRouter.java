@@ -704,15 +704,13 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection() && counter != null) {
-            if (request.desiresOutOfBandReplies() &&
-                (handler instanceof Connection)) {
+            if (request.desiresOutOfBandReplies()) {
                 // this query came from a leaf - so check if it desires out-of-band
                 // responses and make sure that the IP it advertises is legit -
                 // if it isn't drop away....
                 // no need to check the port - if you are attacking yourself you
                 // got problems
-                Connection conn = (Connection) handler;
-                String remoteAddr = conn.getInetAddress().getHostAddress();
+                String remoteAddr = handler.getInetAddress().getHostAddress();
                 if (!request.getReplyAddress().equals(remoteAddr))
                     return;
                 // continue below, everything looks good
