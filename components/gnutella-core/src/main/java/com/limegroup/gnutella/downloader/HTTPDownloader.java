@@ -1387,7 +1387,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 _browseEnabled = true;
             else if (protocol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
-            else if (protocol.equals(HTTPConstants.FWT_PUSH_LOCS)){
+            else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
             	_wantsFalts=true;
             	_wantsFWTFalts=true;
             }

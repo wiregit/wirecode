@@ -19,7 +19,8 @@ import java.net.UnknownHostException;
  * the network format this is serialized to is:
  * byte 0 : 
  *    - bits 0-2 how many push proxies we have (so max is 7)
- *    - bits 3-7 possible future features/flags
+ *    - bits 3-5 the version of the f2f transfer protocol this altloc supports
+ *    - bits 6-7 other possible features.
  * bytes 1-16 : the guid
  * followed by 6 bytes per PushProxy
  */
@@ -29,13 +30,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public static final int PROXY_SIZE=6; //ip:port
 	
 	public static final int PLAIN=0x0; //no features for this PE
-	public static final int F2F_TRANSFER=0x8; //whether the PE supports F2F transfers.
 	
-	private static final int SIZE_MASK=0x7;
+	private static final int SIZE_MASK=0x7; //0000 0111
+	
+	private static final int FWT_VERSION_MASK=0x38; //0011 1000
 	
 	//the features mask does not clear the bits we do not understand
 	//because we may pass on the altloc to someone who does.
-	private static final int FEATURES_MASK=0xF8;
+	private static final int FEATURES_MASK=0xC0;   //1100 0000
 	
 	/**
 	 * the client guid of the endpoint
@@ -72,15 +74,21 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	private final int _features;
 	
+	/**
+	 * the version of firewall to firewall transfer protocol
+	 * this endpoint supports.  
+	 */
+	private final int _fwtVersion;
 
 	/**
 	 * 
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
-	public PushEndpoint(byte [] guid, Set proxies,int features) {
+	public PushEndpoint(byte [] guid, Set proxies,int features,int version) {
 		
-		_features = features & FEATURES_MASK;
+		_features = ((features & FEATURES_MASK) | (version << 3));
+		_fwtVersion=version;
 		
 		_clientGUID=guid;
 		_guid = new GUID(guid);
@@ -121,7 +129,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public PushEndpoint(byte [] guid, Set proxies) {
-		this(guid,proxies,PLAIN);
+		//TODO: make this constructor check which version of fwt we support
+		this(guid,proxies,PLAIN,0);
 	}
 	
 	/**
@@ -141,6 +150,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 		//TODO: once the format for marking F2F-enabled falts gets finalized,
 		//mark the _features header.
 		_features = PLAIN;
+		
+		//TODO: find the version of firewall to firewall transfer supported
+		_fwtVersion=0;
 		
 		_httpString=httpString;
 		StringTokenizer tok = new StringTokenizer(httpString,";");
@@ -266,6 +278,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		//get the number of push proxies
 		int number = data[offset] & SIZE_MASK;
 		int features = data[offset] & FEATURES_MASK;
+		int version = (data[offset] & FWT_VERSION_MASK) >> 3;
 		
 		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
 			throw new BadPacketException("not a valid PushEndpoint");
@@ -279,7 +292,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			proxies.add(new QueryReply.PushProxyContainer(tmp));
 		}
 		
-		return new PushEndpoint(guid,proxies,features);
+		return new PushEndpoint(guid,proxies,features,version);
 	}
 	
 	public byte [] getClientGUID() {
@@ -299,10 +312,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
-	 * @return whether this PE supports F2F transfers.
+	 * @return which version of F2F transfers this PE supports.
 	 */
-	public boolean supportsFWTransfers() {
-		return (_features & F2F_TRANSFER) == F2F_TRANSFER;
+	public int supportsFWTransfers() {
+		return _fwtVersion;
 	}
 	
 	public int hashCode() {
@@ -310,6 +323,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public boolean equals(Object other) {
+		
+		//this method ignores the version of firewall-to-firewall 
+		//transfers supported.
+		
 		if (other == null)
 			return false;
 		if (!(other instanceof PushEndpoint))
@@ -333,7 +350,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public String toString() {
-		String ret = "PE [FEATURES:"+_features+", GUID:"+_guid+", proxies:{ "; 
+		String ret = "PE [FEATURES:"+_features+", FWT Version:"+_fwtVersion+
+			", GUID:"+_guid+", proxies:{ "; 
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
 			PushProxyInterface ppi = (PushProxyInterface)iter.next();
 			ret = ret+ppi.getPushProxyAddress()+":"+ppi.getPushProxyPort()+" ";

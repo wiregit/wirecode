@@ -36,15 +36,15 @@ public class HeadPing extends VendorMessage {
 	public static final int PLAIN = 0x0;
 	public static final int INTERVALS = 0x1;
 	public static final int ALT_LOCS = 0x2;
-	public static final int PUSH_ALTLOCS=0x8;
-	public static final int FWT_PUSH_ALTLOCS=0x10;
+	public static final int PUSH_ALTLOCS=0x4;
+	public static final int FWT_PUSH_ALTLOCS=0x8;
 	
 	
 	
 	/**
 	 * the feature mask.
 	 */
-	public static final int FEATURE_MASK=0x1B;
+	public static final int FEATURE_MASK=0xF;
 	
 	private final URN _urn;
 	

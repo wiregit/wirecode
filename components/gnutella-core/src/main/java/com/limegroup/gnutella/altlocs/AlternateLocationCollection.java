@@ -377,6 +377,9 @@ public final class AlternateLocationCollection
      */
     public byte [] toBytesPush(int number) {
     	
+    	if (number <=0)
+    		return null;
+    	
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	FixedSizeSortedSet clone;
     	

@@ -555,7 +555,7 @@ public final class HTTPUploader implements Uploader {
         			if(_writtenPushLocs.contains(al))
         				continue;
         			
-        			if (_wantsFWTFalts && !al.supportsF2FTransfers())
+        			if (_wantsFWTFalts && al.supportsF2FTransfers() <1)
         				continue;
         			
         			_writtenPushLocs.add(al);
@@ -1043,7 +1043,7 @@ public final class HTTPUploader implements Uploader {
 				_supportsQueueing = true;
 			else if (protocol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
-            else if (protocol.equals(HTTPConstants.FWT_PUSH_LOCS)){
+            else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
             	_wantsFalts=true;
             	_wantsFWTFalts=true;
             }

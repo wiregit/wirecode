@@ -81,14 +81,23 @@ public class ConstantHTTPHeaderValue implements HTTPHeaderValue {
             HTTPConstants.G2_PROTOCOL + "/" + HTTPConstants.G2_VERSION
         );
     
+    /**
+     * exact meaning of this header: the host sending this header would like
+     * to receive alternate locations behind firewalls.
+     */
     public static final HTTPHeaderValue PUSH_LOCS_FEATURE =
     	new ConstantHTTPHeaderValue(
     			HTTPConstants.PUSH_LOCS + "/" + HTTPConstants.PUSH_LOCS_VERSION
         );
     
+    /**
+     * exact meaning of this header: the host sending this header supports
+     * the designated version of Firewall to Firewall transfer, and is 
+     * most likely firewalled.
+     */
     public static final HTTPHeaderValue FWT_PUSH_LOCS_FEATURE =
     	new ConstantHTTPHeaderValue(
-    			HTTPConstants.FWT_PUSH_LOCS + "/" + HTTPConstants.FWT_PUSH_LOCS_VERSION
+    			HTTPConstants.FW_TRANSFER + "/" + HTTPConstants.FWT_TRANSFER_VERSION
         );
     			
 }

@@ -2,9 +2,13 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
@@ -46,6 +50,7 @@ import com.sun.java.util.collections.*;
  */
 public class HeadPong extends VendorMessage {
 	
+	private static final Log LOG = LogFactory.getLog(HeadPong.class);
 	/**
 	 * cache references to the upload manager and file manager for
 	 * easier stubbing and testing.
@@ -72,6 +77,7 @@ public class HeadPong extends VendorMessage {
 	private static final byte FIREWALLED = (byte)0x4;
 	private static final byte DOWNLOADING = (byte)0x8;
 	
+	private static final byte CODES_MASK=(byte)0xF;
 	/**
 	 * all our slots are full..
 	 */
@@ -140,7 +146,7 @@ public class HeadPong extends VendorMessage {
 		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE, 
 		//COMPLETE_FILE, FIREWALLED or DOWNLOADING
 		if (version == VERSION && 
-				payload[1]>0xF) 
+				payload[1]>CODES_MASK) 
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
@@ -207,7 +213,7 @@ public class HeadPong extends VendorMessage {
 			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
 		}
 		
-		}catch(IOException oops) {
+		}catch(IOException oops) {oops.printStackTrace();
 			throw new BadPacketException(oops.getMessage());
 		}
 	}
@@ -249,9 +255,12 @@ public class HeadPong extends VendorMessage {
 		byte features = ping.getFeatures();
 		
 		caos.write(features);
+		if (LOG.isDebugEnabled())
+			LOG.debug("writing features "+features);
 		
 		//if we don't have the file..
 		if (desc == null) {
+			LOG.debug("we do not have the file");
 			caos.write(FILE_NOT_FOUND);
 			return baos.toByteArray();
 		}
@@ -272,7 +281,11 @@ public class HeadPong extends VendorMessage {
 		}
 		else 
 			retCode = (byte) (retCode | COMPLETE_FILE);
+		
 		caos.write(retCode);
+		
+		if(LOG.isDebugEnabled())
+			LOG.debug("our return code is "+retCode);
 		
 		//write the vendor id
 		caos.write(F_LIME_VENDOR_ID);
@@ -294,19 +307,25 @@ public class HeadPong extends VendorMessage {
 		//write out the return code and the queue status
 		daos.writeByte(queueStatus);
 		
+		if (LOG.isDebugEnabled())
+			LOG.debug("our queue status is "+queueStatus);
+		
 		
 		
 		//if we sent partial file and the remote asked for ranges, send them 
 		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
+			LOG.debug("adding ranges to pong");
 			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
 			byte [] ranges =ifd.getRangesAsByte();
 			
 			//write the ranges only if they will fit in the packet
 			if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
+				LOG.debug("added ranges");
 				daos.writeShort((short)ranges.length);
 				caos.write(ranges);
 			} 
 			else { //the ranges will not fit - say we didn't send them.
+				LOG.debug("ranges will not fit :(");
 				didNotSendRanges=true;
 			}
 			
@@ -327,32 +346,43 @@ public class HeadPong extends VendorMessage {
 		boolean FWTonly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
 			HeadPing.FWT_PUSH_ALTLOCS;
 		
-		if (FWTonly) 
+		if (FWTonly) {
+			LOG.debug("adding only fwt-enabled pushlocs in pong");
 			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
 				PushAltLoc current = (PushAltLoc)iter.next();
-				if (!current.supportsF2FTransfers())
+				if (current.supportsF2FTransfers() <1)
 					iter.remove();
 			}
-		
+		}	
 		if (altlocs !=null && altlocs.hasAlternateLocations() &&
 			ping.requestsPushLocs()) {
+			
 				
 				//push altlocs are bigger than normal altlocs, however we 
 				//don't know by how much.  The size can be between
 				//23 and 41 bytes.  We assume its 41.
 				int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
 				
+				if (LOG.isDebugEnabled())
+					LOG.debug("trying to add up to "+available+ " push locs to pong");
+				
 				byte [] altbytes = altlocs.toBytesPush(available);
 				
-				if (altbytes ==null){
+				if (altbytes == null){
 					//altlocs will not fit or none available - say we didn't send them
+					LOG.debug("push locs will not fit :(");
 					didNotSendPushAltLocs=true;
 				} else { 
+					LOG.debug("adding push altlocs");
 					daos.writeShort((short)altbytes.length);
 					caos.write(altbytes);
 				}
 				
-			}
+		}else
+			didNotSendPushAltLocs=true;
+		
+		
+		//now add any non-firewalled altlocs in case they were requested. 
 		
 		altlocs = desc.getAlternateLocationCollection();
 		
@@ -361,17 +391,23 @@ public class HeadPong extends VendorMessage {
 			
 			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
 			
+			if (LOG.isDebugEnabled())
+				LOG.debug("trying to add up to "+toPack+" push locs to pong");
+			
 			byte [] altbytes = altlocs.toBytes(toPack);
 			
 			if (altbytes ==null){
 				//altlocs will not fit or none available - say we didn't send them
+				LOG.debug("altlocs will not fit :(");
 				didNotSendAltLocs=true;
 			} else { 
+				LOG.debug("adding altlocs");
 				daos.writeShort((short)altbytes.length);
 				caos.write(altbytes);
 			}
 				
-		}
+		} else
+			didNotSendAltLocs=true;
 			
 		}catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -383,13 +419,18 @@ public class HeadPong extends VendorMessage {
 		//if we did not add ranges or altlocs due to constraints, 
 		//update the flags now.
 		
-		if (didNotSendRanges)
+		if (didNotSendRanges){
+			LOG.debug("not sending ranges");
 			ret[0] = (byte) (ret[0] & ~HeadPing.INTERVALS);
-		if (didNotSendAltLocs)
+		}
+		if (didNotSendAltLocs){
+			LOG.debug("not sending altlocs");
 			ret[0] = (byte) (ret[0] & ~HeadPing.ALT_LOCS);
-		if (didNotSendPushAltLocs)
+		}
+		if (didNotSendPushAltLocs){
+			LOG.debug("not sending push altlocs");
 			ret[0] = (byte) (ret[0] & ~HeadPing.PUSH_ALTLOCS);
-		
+		}
 		return ret;
 	}
 	
