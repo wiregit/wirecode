@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.mp3.ID3Reader;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
@@ -113,15 +114,31 @@ public class MetaFileManager extends FileManager {
 	public FileDesc addFileIfShared(File file, List metadata) {
         FileDesc fd = super.addFileIfShared(file);
         
-        // if not added or no metadata, nothing else to do.
-        if( fd == null || metadata == null || metadata.size() == 0 )
-            return fd;
+        // if not added, exit.
+        if( fd == null )
+            return null;
+            
+        // if added, but no metadata, try and create some.
+        if( metadata == null || metadata.size() == 0) {
+            // not mp3, can't create any ... 
+            if(!LimeXMLUtils.isMP3File(file))
+                return fd;
+
+            LimeXMLDocument doc;
+            try {
+                doc = ID3Reader.readDocument(file);
+            } catch(IOException ioe) {
+                // unable to read? oh well, no metadata.
+                return fd;
+            }
+            // create a list of metadata and add the doc to it.
+            metadata = new LinkedList();
+            metadata.add(doc);
+            // fall through and add it.
+        }
 
         SchemaReplyCollectionMapper mapper =
             SchemaReplyCollectionMapper.instance();
-
-        Assert.that( fd != null, "null fd just added.");
-        
         
         // add xml docs as appropriate, one per schema.
         List schemasAddedTo = new LinkedList();
