@@ -1693,78 +1693,76 @@ public class ManagedDownloader implements Downloader, Serializable {
         //this make throw an exception if we were not able to establish a 
         //direct connection and push was unsuccessful too
         HTTPDownloader dloader = null;
-        boolean http11 = false;
         
         //Step 1. establish a TCP Connection, either by opening a socket,
         //OR by sending a push request.
-        do {
-            dloader = establishConnection(rfd);
+        dloader = establishConnection(rfd);
+        
+        if(dloader == null)//any exceptions in the method internally?
+            return true;//no work was done, try to get another thread
     
-            if(dloader == null)//any exceptions in the method internally?
-                return true;//no work was done, try to get another thread
-    
-            http11 = true;//must enter the loop
-    
-            while(http11) {
-                //Step 2. OK. Wr have established TCP Connection. This 
-                //downloader should choose a part of the file to download
-                //and send the appropriate HTTP hearders
-                //Note: 0=disconnected,1=tcp-connected,2=http-connected
-                boolean wasQueued = false;
-                int connected;
-                http11 = rfd.isHTTP11();
-                while(true) { //while queued, connect and sleep if we queued
-                    int[] a = {-1};//reset the sleep value
-                    connected = assignAndRequest(dloader,a);
-                    
-                    //an uploader we want to stay connected with
-                    if(connected == 4)
-                        continue; // and has partial ranges
-                    if(connected!=1)
-                        break;
-                    if(!wasQueued) {
-                        synchronized(this) {queuedCount++;}
-                        wasQueued = true;
-                    }
-                    try {
-                        if(a[0] > 0)
-                            Thread.sleep(a[0]);//value from QueuedException
-                    } catch (InterruptedException ix) {
-                        debug("worker: interrupted while asleep in queue" +
-                              dloader);
-                        synchronized(this) {
-                            queuedCount--;
-                        }
-                        dloader.stop();//close connection
-                        // notifying will make no diff, coz the next iteration
-                        // will throw interrupted exception.
-                        return true;
-                    }
+        //Note: http11 is true or false depending on what we think thevalue
+        //should be for rfd is at the start, before connecting. We may later
+        //find that the we are wrong, in which case we update the rfd's http11
+        //value. But while we are in connectAndDownload we continue to use this
+        //local variable because the code is incapable of handling a change in
+        //http11 status while inside connectAndDownload.
+        boolean http11 = true;//must enter the loop
+        
+        while(http11) {
+            //Step 2. OK. Wr have established TCP Connection. This 
+            //downloader should choose a part of the file to download
+            //and send the appropriate HTTP hearders
+            //Note: 0=disconnected,1=tcp-connected,2=http-connected
+            boolean wasQueued = false;
+            int connected;
+            http11 = rfd.isHTTP11();
+            while(true) { //while queued, connect and sleep if we queued
+                int[] a = {-1};//reset the sleep value
+                connected = assignAndRequest(dloader,a,http11);
+                
+                //an uploader we want to stay connected with
+                if(connected == 4)
+                    continue; // and has partial ranges
+                if(connected!=1)
+                    break;
+                if(!wasQueued) {
+                    synchronized(this) {queuedCount++;}
+                    wasQueued = true;
                 }
-                if(wasQueued) {//we have been given a slot, after being queued
-                    synchronized(this) {
-                        queuedCount--;
-                    }
-                }
-                //Now, connected is either 0 or 2
-                Assert.that(connected==0 || connected==2 || connected==3,
-                            "invalid return from assignAndRequest "+connected);
-                if(connected==0) { // File Not Found, Try Again Later, etc...
-                    dloader.stop(); // close the connection for now.
+                try {
+                    if(a[0] > 0)
+                        Thread.sleep(a[0]);//value from QueuedException
+                } catch (InterruptedException ix) {
+                    debug("worker: interrupted while asleep in queue" +
+                          dloader);
+                    synchronized(this) { queuedCount--; }
+                    dloader.stop();//close connection
+                    // notifying will make no diff, coz the next iteration
+                    // will throw interrupted exception.
                     return true;
                 }
-                else if(connected==3) { // Nothing more to download
-                    // close the connection since we're finished.                    
-                    dloader.stop();
-                    return false;
-                }
-                
-                //Step 3. OK, we have successfully connected, start saving the
-                // file to disk
-                doDownload(dloader);
-            } // end of while(http11)
-        // re-establish if we thought it was 1.0 but was actually 1.1            
-        } while(!http11 && dloader.isHTTP11()); // end do loop
+            }
+            if(wasQueued) //we have been given a slot, after being queued
+                synchronized(this) { queuedCount--; }
+
+            //Now, connected is either 0 or 2
+            Assert.that(connected==0 || connected==2 || connected==3,
+                        "invalid return from assignAndRequest "+connected);
+            if(connected==0) { // File Not Found, Try Again Later, etc...
+                dloader.stop(); // close the connection for now.
+                return true;
+            }
+            else if(connected==3) { // Nothing more to download
+                // close the connection since we're finished.
+                dloader.stop();
+                return false;
+            }            
+            //Step 3. OK, we have successfully connected, start saving the
+            // file to disk
+            doDownload(dloader,http11);
+        } // end of while(http11)
+        
         //came out of the while loop, http1.0 spawn a thread
         return true;
     }
@@ -1973,15 +1971,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * otherwise if NoSuchElement( we have no areas to steal) return 3
      * otherwise if rfd was partial uploader and gave us ranges to try return 4
      */
-    private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime) {
+    private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime, 
+                                                              boolean http11) {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
                 if (!needed.isEmpty()) {
-                    assignWhite(dloader);
+                    assignWhite(dloader,http11);
                 } else {
                     updateNeeded = false;      //1. See comment in finally
-                    assignGrey(dloader); 
+                    assignGrey(dloader,http11); 
                 }
                 updateNeeded = false;          //2. See comment in finally
             } catch(NoSuchElementException nsex) {
@@ -2208,7 +2207,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
-    private void assignWhite(HTTPDownloader dloader) throws 
+    private void assignWhite(HTTPDownloader dloader, boolean http11) throws 
     IOException, TryAgainLaterException, FileNotFoundException, 
     NotSharingException , QueuedException, NoSuchRangeException {
         //Assign "white" (unclaimed) interval to new downloader.
@@ -2226,7 +2225,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( !dloader.getRemoteFileDesc().isPartialSource() ) {
             synchronized(this) {
                 interval = needed.removeFirst();
-                if( dloader.isHTTP11() )
+                if(http11)
                     interval = fixIntervalForChunk(interval);
             }
         }
@@ -2236,7 +2235,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized(this) {
                 // May throw NoSuchElementException
                 interval = getNeededPartialRange(dloader);
-                if( dloader.isHTTP11() )
+                if(http11)
                     interval = fixIntervalForChunk(interval);
             }
         }
@@ -2260,7 +2259,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * area to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey(HTTPDownloader dloader) throws
+    private void assignGrey(HTTPDownloader dloader, boolean http11) throws
     NoSuchElementException,  IOException, TryAgainLaterException, 
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
@@ -2268,8 +2267,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //to confusing, too many problems, etc...
         if( dloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
-                
-        boolean http11 = dloader.isHTTP11();
 
         //Split largest "gray" interval, i.e., steal part of another
         //downloader's region for a new downloader.  
@@ -2477,20 +2474,20 @@ public class ManagedDownloader implements Downloader, Serializable {
      * which MUST be initialized (i.e., downloader.connectTCP() and
      * connectHTTP() have been called)
      */
-    private void doDownload(HTTPDownloader downloader) {
+    private void doDownload(HTTPDownloader downloader, boolean http11) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
             downloader.doDownload(commonOutFile);
             if(RECORD_STATS) {
-                if(downloader.isHTTP11())
+                if(http11)
                     DownloadStat.SUCCESFULL_HTTP11.incrementStat();
                 else
                     DownloadStat.SUCCESFULL_HTTP10.incrementStat();
             }
         } catch (IOException e) {
             if(RECORD_STATS) {
-                if(downloader.isHTTP11())
+                if(http11)
                     DownloadStat.FAILED_HTTP11.incrementStat();
                 else
                     DownloadStat.FAILED_HTTP10.incrementStat();
@@ -2516,7 +2513,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
                 dloaders.remove(downloader);
                 //no need to add http11 dloader to files                
-                if(!problem && !downloader.isHTTP11())
+                if(!problem && !http11)
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
             }

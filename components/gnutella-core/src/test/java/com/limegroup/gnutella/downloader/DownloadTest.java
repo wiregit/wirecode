@@ -391,7 +391,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Throttle rate at 500KB/s to give opportunities for swarming.
         final int RATE=500;
-        uploader1.setRate(0);//stalling uploader
+        uploader1.setRate(0.1f);//stalling uploader
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFD(PORT_1, 100);
         RemoteFileDesc rfd2=newRFD(PORT_2, 100);
