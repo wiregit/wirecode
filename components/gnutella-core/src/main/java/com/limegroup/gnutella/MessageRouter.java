@@ -322,10 +322,6 @@ public abstract class MessageRouter
                                         ManagedConnection receivingConnection,
                                         ConnectionManager manager)
     {
-        //get the domains to which the receiving connection is
-        //authenticated to
-        Set authenticatedDomains = receivingConnection.getDomains();
-        
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         List list=manager.getInitializedConnections2();
@@ -333,16 +329,20 @@ public abstract class MessageRouter
         {
             //get the next connection
             ManagedConnection c = (ManagedConnection)list.get(i);
-            //send the query over this connection only if:
-            //1. It is an unauthenticated connection (normal 
-            //gnutella connection)
-            //2. It is an authenticated connection, and the connection on 
+            //send the query over this connection only if any of the following
+            //is true:
+            //1. The query originated from our node (receiving connection 
+            //is null)
+            //2. The connection under  consideration is an unauthenticated 
+            //connection (normal gnutella connection)
+            //3. It is an authenticated connection, and the connection on 
             //which we received query and this connection, are both 
             //authenticated to a common domain
             if(c != receivingConnection){
-                if(containsDefaultUnauthenticatedDomainOnly(c.getDomains())
-                 || Utilities.hasIntersection(
-                    authenticatedDomains,c.getDomains()))
+                if((receivingConnection == null)
+                    || containsDefaultUnauthenticatedDomainOnly(c.getDomains())
+                    || Utilities.hasIntersection(
+                    receivingConnection.getDomains(), c.getDomains()))
                     c.send(queryRequest);
             }
         }
