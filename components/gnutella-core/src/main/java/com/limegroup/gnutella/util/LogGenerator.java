@@ -7,6 +7,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
+import java.util.Date;
 
 /**
  * Generates a buffered log. It buffers the input and dumps it out after 
@@ -78,6 +79,13 @@ public class LogGenerator
             _count = 0;
         }
     }//end of fn append
+    
+    public void printlnWithDateStamp(Object o)
+    {
+        _buffer.append(new Date());
+        _buffer.append(" ");
+        this.println(o);
+    }
     
     /**
      * Writes the buffer to the 'out' stream
