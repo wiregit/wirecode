@@ -32,7 +32,7 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_XML_MASK       = 0x0020;
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
 
-    public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNew";
+    public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNew11223344";
 
     /**
      * The payload for the query -- includes the query string, the
