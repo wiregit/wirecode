@@ -51,7 +51,7 @@ public class SupernodeHandshakeResponder
             addHostAddresses(ret, _manager);
 
             //Decide whether to allow or reject.  Somewhat complicated because
-            //of ultarpeer guidance.
+            //of ultrapeer guidance.
             if (reject(outgoing, response.getHeaders())) {
                 return new HandshakeResponse(
                     HandshakeResponse.SLOTS_FULL,
@@ -67,11 +67,18 @@ public class SupernodeHandshakeResponder
             //already given ultrapeer guidance at this point, so there's no
             //"second chance" like in the reject(..) method.
             Properties ret=new Properties();
+
+			Properties headers = response.getHeaders();			
+			String ultrapeerHeader =
+				headers.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+
+			boolean isUltrapeer=ConnectionHandshakeHeaders.isTrue(ultrapeerHeader);
+			int connections = getNumIntraUltrapeerConnections(headers, isUltrapeer);
             if (!_manager.allowConnection(outgoing,
-                                          response.getHeaders().getProperty(
-                                              ConnectionHandshakeHeaders.X_SUPERNODE),
-                                          response.getHeaders().getProperty(
-                                              ConnectionHandshakeHeaders.USER_AGENT))) {
+										  ultrapeerHeader,
+                                          headers.getProperty(
+                                              ConnectionHandshakeHeaders.USER_AGENT),
+										  connections)) {
                 return new HandshakeResponse(
                     HandshakeResponse.SLOTS_FULL,
                     HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -107,19 +114,44 @@ public class SupernodeHandshakeResponder
         //old-fashioned reject connection mechanism in ConnectionManager for the
         //other cases.
         
-        String useragentHeader=headers.getProperty(
-                                   ConnectionHandshakeHeaders.USER_AGENT);
-        String ultrapeerHeader=headers.getProperty(
-                                   ConnectionHandshakeHeaders.X_SUPERNODE);
+        String useragentHeader =
+			headers.getProperty(ConnectionHandshakeHeaders.USER_AGENT);
+        String ultrapeerHeader =
+			headers.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
         boolean isUltrapeer=ConnectionHandshakeHeaders.isTrue(ultrapeerHeader);
 
+		int degree = getNumIntraUltrapeerConnections(headers, isUltrapeer);
+
         boolean allowedNow=_manager.allowConnection(
-            outgoing, ultrapeerHeader, useragentHeader);
+            outgoing, ultrapeerHeader, useragentHeader, degree);
         boolean allowedAsLeaf=_manager.allowConnection(
-            outgoing, ConnectionHandshakeHeaders.FALSE, useragentHeader);
+            outgoing, ConnectionHandshakeHeaders.FALSE, useragentHeader, degree);
 
         //Reject if not allowed now and guidance not possible.
         return ! (allowedNow || (isUltrapeer && allowedAsLeaf));
     }    
+
+
+	/**
+	 * Accessor for the reported number of intra-Ultrapeer connections
+	 * this connection attempts to maintain.  If the node is not an
+	 * Ultrapeer, this returns 0.  If it is an Ultrapeer but does not
+	 * support this header, we assume that it tries to maintain 6 intra-
+	 * Ultrapeer connections.
+	 *
+	 * @return the number of intra-Ultrapeer connections the connected node
+	 *  attempts to maintain, as reported in the X-Degree handshake header
+	 *  or guessed at otherwise
+	 */
+	private int getNumIntraUltrapeerConnections(Properties headers, 
+												boolean isUltrapeer) {
+		String connections = 
+			headers.getProperty(ConnectionHandshakeHeaders.X_DEGREE);
+		if(connections == null) {
+			if(isUltrapeer) return 6;
+			return 0;
+		}
+		return Integer.valueOf(connections).intValue();
+	}
 }
 
