@@ -2873,7 +2873,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //locations without hashes if throughput is good enough.
         //and load, but that's hard to do.
         int downloads=threads.size();
-        return Math.max(getSwarmCapacity() - downloads, 0);
+        return getSwarmCapacity() - downloads;
     }
 
     private int getSwarmCapacity() {
