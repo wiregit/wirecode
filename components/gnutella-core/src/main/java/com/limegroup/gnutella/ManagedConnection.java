@@ -1233,7 +1233,7 @@ public class ManagedConnection
 		String value = super.getProperty(ConnectionHandshakeHeaders.X_GUESS);
 		if(value == null) return -1;
 		else {
-			float version = Float.parseFloat(value);
+			float version = Float.valueOf(value).floatValue();
 			version *= 10;
 			return (int)version;
 		}
