@@ -201,6 +201,7 @@ public class PingReplyTest extends TestCase {
         int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
         int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
         int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
+        int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
@@ -210,6 +211,10 @@ public class PingReplyTest extends TestCase {
                       +udpLength // ID
                       +1   //data length
                       +1   //data bytes
+                      +1   //"UP" extension flags
+                      +upLength // ID
+                      +1   // data length
+                      +3  // data bytes
                       +1   //"VC" extension flags
                       +vcLength // ID
                       +1   // data length
@@ -224,16 +229,18 @@ public class PingReplyTest extends TestCase {
         assertTrue(bytes[offset+2+idLength+4]==(byte)'G');
         assertTrue(bytes[offset+2+idLength+5]==(byte)'U');
         assertTrue(bytes[offset+2+idLength+6]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3]==(byte)'V');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+4]==(byte)'C');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+6]==(byte)'L');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+7]==(byte)'I');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+8]==(byte)'M');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+9]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+10]==39);
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+4]==(byte)'P');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+5]==(byte)'V');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+6]==(byte)'C');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+8]==(byte)'L');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+9]==(byte)'I');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+10]==(byte)'M');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+11]==(byte)'E');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+12]==39);
         //...etc.
-        assertTrue(bytes[bytes.length-2-(3+udpLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(3+udpLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
+        assertTrue(bytes[bytes.length-2-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
 
 
         //Decode and check contents.
