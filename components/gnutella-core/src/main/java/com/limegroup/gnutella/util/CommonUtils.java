@@ -1050,6 +1050,7 @@ public final class CommonUtils {
      */
     public static String convertFileName(String name) {
 		
+		// ensure that block-characters aren't in the filename.
         name = I18NConvert.instance().compose(name);
 
 		// if the name is too long, reduce it.  We don't go all the way
