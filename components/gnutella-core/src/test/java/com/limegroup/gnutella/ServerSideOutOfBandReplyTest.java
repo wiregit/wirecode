@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
@@ -25,6 +26,9 @@ import java.net.*;
  *                              |
  *                              |
  *                             LEAF
+ *
+ *  This test should cover the case for leaves too, since there is no difference
+ *  between Leaf and UP when it comes to this behavior.
  */
 public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
@@ -433,7 +437,98 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
     public void testOutOfBandRequestWithSolicitedSupport() throws Exception {
+        // set up solicited UDP support
+        DatagramPacket pack = null;
+        {
+            drainAll();
+            PingReply pong = 
+                PingReply.create(GUID.makeGuid(), (byte) 4,
+                                 UDP_ACCESS.getLocalPort(), 
+                                 InetAddress.getLocalHost().getAddress(), 
+                                 10, 10, true, 900, true);
+            ULTRAPEER_1.send(pong);
+            ULTRAPEER_1.flush();
+
+            // wait for the ping request from the test UP
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get ping", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            PingRequest ping = (PingRequest) Message.read(in);
+            
+            // send the pong in response to the ping
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pong = PingReply.create(ping.getGUID(), (byte) 4,
+                                    UDP_ACCESS.getLocalPort(), 
+                                    InetAddress.getLocalHost().getAddress(), 
+                                    10, 10, true, 900, true);
+            pong.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      pack.getAddress(), pack.getPort());
+            UDP_ACCESS.send(pack);
+        }
+
         drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("susheel",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get VM", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = Message.read(in);
+        }
+
+        // ok - we should ACK the ReplyNumberVM
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()));
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        // now we should get the reply!
+        while (!(message instanceof QueryReply)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get reply", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = Message.read(in);
+        }
+
     }
 
     // tests that MessageRouter expires GUIDBundles/Replies in a timely fashion
