@@ -52,7 +52,8 @@ public class LimeXMLReplyCollection{
             done= false;
             return;
         }
-        int startIndex = content.indexOf("<?xml");
+        int startIndex = content.indexOf(
+                                    XMLStringUtils.XML_DOC_START_IDENTIFIER);
         int endIndex = startIndex;
         String xmlDoc = "";
         boolean finished= false;
@@ -62,7 +63,8 @@ public class LimeXMLReplyCollection{
                 finished = true;
                 continue;
             }
-            endIndex=content.indexOf("<?xml",startIndex+1);
+            endIndex=content.indexOf(XMLStringUtils.XML_DOC_START_IDENTIFIER,
+                                     startIndex+1);
             if (endIndex > 0)
                 xmlDoc = content.substring(startIndex, endIndex);
             else
