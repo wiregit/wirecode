@@ -28,6 +28,7 @@ public class RouterService
   						 MessageRouter router) {
   		this.callback = activityCallback;
   		this.router = router;
+		Assert.setCallback(this.callback);
   	}
 
 	/**
