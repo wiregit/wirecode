@@ -398,7 +398,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    private File incompleteFile;
+    protected File incompleteFile;
     /** The fully-qualified name of the downloaded file when this completes, or
      *  null if we haven't started downloading. Used for previewing purposes. */
     private File completeFile;
@@ -606,10 +606,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         triedLocatingSources = false;
         // get the SHA1 if we can.
         if(allFiles != null && downloadSHA1 == null) {
-            for(int i = 0; i < allFiles.length && downloadSHA1 == null; i++)
+            for(int i = 0; i < allFiles.length && downloadSHA1 == null; i++) 
                 downloadSHA1 = allFiles[i].getSHA1Urn();
         }
-        
         allFiles = verifyAllFiles(allFiles);
         // stores up to 1000 locations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
@@ -625,8 +624,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         try {
             initializeFilesAndFolders();
+            initializeIncompleteFile();
             initializeVerifyingFile();
-        }catch(IOException bad) {
+        }catch(IOException bad) {LOG.debug("",bad);
             setState(DISK_PROBLEM);
             return;
         }
@@ -928,26 +928,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                 rfds.add(allFiles[i]);
     }
 
+    /**
+     * assumes incompleteFile is initialized
+     */
     private void initializeVerifyingFile() throws IOException {
-        
-        if (incompleteFile != null)
-            return;
-        
-        incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
-        
-        if (incompleteFile == null) {
-            if (allFiles == null || allFiles.length == 0)
-                return;
-            incompleteFile = incompleteFileManager.getFile(allFiles[0]);
-        }
-        
-        int completedSize = 
-           (int)IncompleteFileManager.getCompletedSize(incompleteFile);
 
         //get VerifyingFile
         commonOutFile= incompleteFileManager.getEntry(incompleteFile);
 
         if(commonOutFile==null) {//no entry in incompleteFM
+            
+            int completedSize = 
+                (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+            
             commonOutFile = new VerifyingFile(completedSize);
             try {
                 //we must add an entry in IncompleteFileManager
@@ -958,6 +951,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw ioe;
             }
         }        
+    }
+    
+    protected void initializeIncompleteFile() throws IOException {
+        if (incompleteFile != null)
+            return;
+        
+        incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
+        
+        if (incompleteFile == null) {
+            if (allFiles == null || allFiles.length == 0)
+                return;
+            incompleteFile = incompleteFileManager.getFile(allFiles[0]);
+        }
     }
     
     /**
@@ -1872,6 +1878,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         try {
+            initializeIncompleteFile();
             initializeVerifyingFile();
             openVerifyingFile();
         } catch (IOException iox) {
