@@ -21,6 +21,7 @@ import com.sun.java.util.collections.*;
 public class ManagedConnectionBufferTest extends BaseTestCase {
 	
     public static final int PORT=6666;
+    private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
     private ManagedConnection out = null;
     private Connection in = null;
     MiniAcceptor acceptor = null;
@@ -214,58 +215,58 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(m);
 
         // send QueryReply with priority 1
-        m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6340, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(30000);
         out.send(m);
         
         // send 3 push requests
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6340));
+                                 0, IP, 6340));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6341));
+                                 0, IP, 6341));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6342));
+                                 0, IP, 6342));
                                  
         // send QueryReply with priority 1
-        m=new QueryReply(new byte[16], (byte)5, 6343, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6343, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(30000);
         out.send(m);
                                  
         // send 4 push requests                                 
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6343));
+                                 0, IP, 6343));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6344));
+                                 0, IP, 6344));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6345));
+                                 0, IP, 6345));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6346));                                                                                                                                    
+                                 0, IP, 6346));                                                                                                                                    
                                  
         // send QueryReply with priority 7                                 
-        m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
                          new Response[0], new byte[16], false);
         out.send(m);
         
         // send PingReply with 3 hops
-        m=PingReply.create(new byte[16], (byte)5, 6343, new byte[4]);
+        m=PingReply.create(new byte[16], (byte)5, 6343, IP);
         m.hop();  m.hop();  m.hop();        
         out.send(m);
         
         // send PingReply with 3 hops
-        m=PingReply.create(new byte[16], (byte)5, 6344, new byte[4]);
+        m=PingReply.create(new byte[16], (byte)5, 6344, IP);
         m.hop();  m.hop();  m.hop();
         out.send(m);        
         
         // send QueryReply with priority 2
-        m=new QueryReply(new byte[16], (byte)5, 6344, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6344, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(20000);
         out.send(m);
         
         // send QueryReply with priority 0
-        m=new QueryReply(new byte[16], (byte)5, 6345, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6345, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(50000);
         out.send(m);              
@@ -274,22 +275,22 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(new ResetTableMessage(1024, (byte)2));
         
         // send a watchdog pong
-        out.send(PingReply.create(new byte[16], (byte)1, 6342, new byte[4]));
+        out.send(PingReply.create(new byte[16], (byte)1, 6342, IP));
         
         // send PingReply with 2 hops
-        m = PingReply.create(new byte[16], (byte)3, 6340, new byte[4]);
+        m = PingReply.create(new byte[16], (byte)3, 6340, IP);
         m.hop();
         m.hop();
         out.send(m);
         
         // send QueryReply with priority 4
-        m=new QueryReply(new byte[16], (byte)5, 6346, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6346, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(5000);
         out.send(m);            
         
         // send QueryReply with priority 5
-        m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6342, IP, 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(1000);
         out.send(m);
@@ -588,7 +589,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  OTHER: reset
         out.stopOutputRunner(); 
         out.send(new PingRequest((byte)1));
-        out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+        out.send(new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
                                 new Response[0], new byte[16], false));
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(QueryRequest.createQuery("a", (byte)3));
