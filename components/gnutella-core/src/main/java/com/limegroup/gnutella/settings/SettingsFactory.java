@@ -57,8 +57,11 @@ public final class SettingsFactory {
 	 * @param settingsStream the <tt>InputStream</tt> to load
 	 */
 	public void reload(File file) {
-		// if the props file doesn't exist, the init sequence will prompt
-		// the user for the required values, so return
+		// If the props file doesn't exist, the init sequence will prompt
+		// the user for the required values, so return.  If this is not 
+		// loading limewire.props, but rather something like themes.txt,
+		// we also return, as attempting to load an invalid file will
+		// not do any good.
 		if(!file.isFile()) return;
         try {
             PROPS.load(new FileInputStream(file));
