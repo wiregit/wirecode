@@ -220,7 +220,10 @@ public class BrowseHostHandler {
     	}
     }
     private void browseExchangeInternal(Socket socket) throws IOException {
-    	socket.setSoTimeout(10000);
+    	
+    	//when/if we start reusing connections, remove this timeout
+    	socket.setSoTimeout(500);
+
         LOG.trace("BHH.browseExchange(): entered.");
         setState(EXCHANGING);
         
@@ -288,16 +291,17 @@ public class BrowseHostHandler {
         }
         LOG.debug("BHH.browseExchange(): read HTTP seemingly OK.");
         
-        in = new BufferedInputStream(in);
 
         // ok, everything checks out, proceed and read QRs...
         Message m = null;
         while(true) {
         	try {
         		m = null;
+        		LOG.debug("reading message");
         		m = Message.read(in);
+        		LOG.debug("read message "+m);
         	}
-        	catch (BadPacketException bpe) {}
+        	catch (BadPacketException bpe) {LOG.debug(bpe);}
         	if(m == null) 
         		return;
         	 else {

@@ -53,6 +53,10 @@ public class UDPConnection extends Socket {
         return _processor.getLocalAddress();
     }
     
+    public int getSoTimeout() {
+    	return _processor.getReadTimeout();
+    }
+    
     //-------  Mostly Unimplemented  ----------------
 
     public UDPConnection() throws IOException {

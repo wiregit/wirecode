@@ -3,6 +3,9 @@ package com.limegroup.gnutella.udpconnect;
 import java.io.*;
 import java.net.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  *  Handle reading from a UDP Connection in the form of a stream.
  *  This class tries to minimize byte array allocations by using the
@@ -10,6 +13,10 @@ import java.net.*;
  */
 public class UDPBufferedInputStream extends InputStream {
 
+	
+    private static final Log LOG =
+        LogFactory.getLog(UDPBufferedInputStream.class);
+    
     /**
      *  The maximum blocking time of a read.
      */
@@ -223,8 +230,11 @@ public class UDPBufferedInputStream extends InputStream {
             	long now = System.currentTimeMillis();
                 _processor.wait(timeout);
                 if (timeout > 0 &&
-                		System.currentTimeMillis() - now > timeout) 
-                	throw new SocketTimeoutException();
+                		System.currentTimeMillis() - now > timeout) {
+                	SocketTimeoutException e = new SocketTimeoutException();
+                	LOG.debug("",e);
+                	throw e;
+                }
             } catch(InterruptedException e) {
                 throw new InterruptedIOException(e.getMessage()); 
             } 
