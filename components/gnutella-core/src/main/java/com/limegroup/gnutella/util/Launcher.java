@@ -303,11 +303,15 @@ public class Launcher {
 		case MRJ_2_1:
 			Runtime.getRuntime().exec(new String[] {(String)browser,path});
 			break;
-		case WINDOWS_NT:
+		case WINDOWS_NT: // this also gets called for Windows 2000
+			File f = new File(path);
+			//if(f.isFile())
+			//System.out.println("Launcher::found the file: "+path);
 			command = "cmd /c "+"\""+ checkChars(path)+"\"";
 			Runtime.getRuntime().exec(command);
 			break;
 		case WINDOWS_9x:
+			
 			command = "start "+"\""+ path+"\"";
 			Runtime.getRuntime().exec(command);
 			break;
@@ -415,7 +419,7 @@ public class Launcher {
 	/** This sets up the file name for nt to escape
 	 *  special characters. */
     private static String checkChars(String str) {
-        String escapeChars = "&()|<>^ ,";
+        String escapeChars = "&()|<>^ ,;=";
         char[] chars = str.toCharArray();
         int length = chars.length;
         char[] new_chars = new char[length*3];
