@@ -6,7 +6,7 @@ import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.Iterator;
 
 /**
- * Sends Gnutella pings via UPD to a set of hosts and calls back to a listener
+ * Sends Gnutella pings via UDP to a set of hosts and calls back to a listener
  * whenever responses are returned.
  */
 public class UDPHostRanker {
