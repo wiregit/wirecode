@@ -159,6 +159,12 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final StringSetting CLASSPATH = 
         FACTORY.createStringSetting("CLASSPATH", JAR_NAME.getValue());
+        
+    /**
+     * Whether or not we are acting as a server.
+     */
+    public static final BooleanSetting SERVER =
+        FACTORY.createBooleanSetting("SERVER", false);
     
         
     /**
