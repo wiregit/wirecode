@@ -1,10 +1,10 @@
-# BEGIN CASE
-hello;HELLO
-hello;ＨＥＬＬＯ
+﻿# BEGIN CASE
+heあllo;ＨＥあＬＬＯ
 limewire;ＬＩＭＥＷＩＲＥ
 hello;ＨＥllo
 カ;ｶ
 アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンヲ;ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝｦ
+ss;ß
 # END CASE
 # BEGIN ACCENTS
 ジャ;ｼﾞｬ
@@ -22,13 +22,80 @@ e;É
 e;Ê
 e;Ë
 i;Ì
+s;Š
+s;š
+y;Ÿ
+a;ª
+o;º
+a;À
+a;Á
+やaや;やÂや
+sag;sÃg
+daaad;daÄad
+ecace;ecÅce
+c;Ç
+e;È
+e;É
+e;Ê
+e;Ë
+i;Ì
+i;Í
+i;Î
+i;Ï
+n;Ñ
+o;Ò
+o;Ó
+o;Ô
+o;Õ
 o;Ö
+u;Ù
+u;Ú
+u;Û
+u;Ü
+y;Ý
+a;à
+a;á
+a;â
+a;ã
+a;ä
+a;å
+c;ç
+e;è
+e;é
+e;ê
+e;ë
+i;ì
+i;í
+i;î
+i;ï
+n;ñ
+o;ò
+o;ó
+o;ô
+o;õ
+o;ö
+u;ù
+u;ú
+u;û
+u;ü
+y;ý
+y;ÿ
 ecec;ÈÇÈÇ
-# END ŸACCENTS
+aa;a¢a
+aa;a∆a
+# END ACCENTS
 # BEGIN OTHER
 tm;™
 カ;㋕
 エスクード;㌇
 # END OTHER
 # BEGIN KEYWORD_SPLIT
+や a や;やÂや
+sag;sÃg
+daaad;daÄad
+ecace;ecÅce
+hello ヤッホー;ＨＥＬＬＯヤッホー
+山田 たろう;山田たろう
+ライムワイヤー pro 購入;ライムワイヤーＰＲＯ購入
+this is ライムワイヤー;ｔHiS ＩＳ　ライムワイヤー
 # END KEYWORD_SPLIT
