@@ -184,6 +184,7 @@ public final class UploadManager implements BandwidthTracker {
                 // always give a slot if we're forcing UploadManager to allow
                 // this request.
                 giveSlot |= forceAllow;
+                System.out.println(uploader + ":giveSlot: " + giveSlot);
                 
                 queued = doSingleUpload(uploader, socket,
 										socket.getInetAddress().getHostAddress(), 
