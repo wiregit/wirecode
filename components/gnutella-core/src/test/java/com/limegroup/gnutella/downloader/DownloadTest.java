@@ -250,7 +250,7 @@ public class DownloadTest extends TestCase {
     
     private static void tSimpleDownload() {
         debug("-Testing non-swarmed download...");
-        RemoteFileDesc rfd=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd=newRFD(6346, 100);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -266,8 +266,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -292,8 +292,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -322,8 +322,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -352,8 +352,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE/10);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -380,8 +380,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
 
         Downloader download=null;
         try {
@@ -425,8 +425,8 @@ public class DownloadTest extends TestCase {
         final int RATE=500;
         uploader1.setRate(0);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -451,8 +451,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/100);
         uploader2.setCorruption(true);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         
         Downloader download=null;
         try {
@@ -484,8 +484,8 @@ public class DownloadTest extends TestCase {
         uploader1.setCorruption(true);
         uploader1.stopAfter(TestFile.length()/8);//blinding fast
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         
         Downloader download=null;
         try {
@@ -514,7 +514,8 @@ public class DownloadTest extends TestCase {
                          "stop when corrupt "+ deleteCorrupt+" ");
         final int RATE=100;
         uploader1.setRate(RATE);
-        RemoteFileDesc rfd1 = newRFDWithURN(6346,100,null);
+        RemoteFileDesc rfd1 = newRFDWithURN(6346,100,
+        "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         Downloader download = null;
         try {
             download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
@@ -803,8 +804,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader1.setBusy(true);
         uploader2.setRate(RATE/4);//slower downloader - guarantee second spot
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         tGeneric(rfds);        
 
@@ -819,7 +820,7 @@ public class DownloadTest extends TestCase {
     private static void tQueuedDownloader() {
         debug("-Testing queued downloader. \n");
         uploader1.setQueue(true);
-        RemoteFileDesc rfd1 = newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd1 = newRFD(6346, 100);
         RemoteFileDesc[] rfds = {rfd1};
         //the queued downloader will resend the query after sleeping,
         //and then it shold complete the download, because TestUploader
@@ -841,8 +842,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setBusy(true);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, testHash.toString());
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, testHash.toString());
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -980,7 +981,7 @@ public class DownloadTest extends TestCase {
 			new com.sun.java.util.collections.HashSet();
         try {
             if (urn == null)
-                set.add(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+                set.add(URN.createSHA1Urn("urn:sha1:MTSUIEFABDVUDXZMJEBQWNI6RVYHTNIJ"));
             else
                 set.add(URN.createSHA1Urn(urn));
         } catch(Exception e) {
