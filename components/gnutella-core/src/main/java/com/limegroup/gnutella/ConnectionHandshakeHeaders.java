@@ -19,4 +19,5 @@ public class ConnectionHandshakeHeaders
     public static final String X_QUERY_ROUTING      = "X-Query-Routing";
     public static final String X_PONG_CACHING       = "X-Pong-Caching";
     public static final String X_SUPERNODE_NEEDED   = "X-Supernode-Needed";
+    public static final String USER_AGENT           = "User-Agent";
 }
