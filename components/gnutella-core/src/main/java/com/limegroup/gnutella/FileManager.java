@@ -157,31 +157,6 @@ public class FileManager {
     }
 
 	/**
-	 * Returns the file index for the specified URN.  This only returns 
-	 * one index, even though multiple indeces are possible with 
-	 * HUGE v. 0.93.
-	 *
-	 * @param urn the urn for the file
-	 * @return the index corresponding to the requested urn, or
-	 *  -1 if not matching index could be found
-	 */
-	public synchronized int getFileIndexForUrn(final URN urn) {
-		Iterator iter = _files.iterator();
-		int count = 0;
-		while(iter.hasNext()) {
-			FileDesc candidate = (FileDesc)iter.next();
-			if (candidate==null) continue;
-			if (candidate.containsUrn(urn)) {
-				return count;
-			}
-			count++;
-		}
-
-		// none found
-		return -1;
-	}
-
-	/**
 	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
 	 * one <tt>FileDesc</tt>, even though multiple indeces are possible with 
 	 * HUGE v. 0.93.
