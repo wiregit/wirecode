@@ -73,7 +73,11 @@ public class RemoteFileDesc implements Serializable {
 		_clientGUID = clientGUID;
 		_chatEnabled = chat;
         _quality = quality;
-        _xmlDocs = xmlDocs;
+
+		// make a defensive copy of the xml docs array so no one can 
+		// mutate this class
+		_xmlDocs = new LimeXMLDocument[xmlDocs.length];
+		System.arraycopy(xmlDocs, 0, _xmlDocs, 0, xmlDocs.length);
 	}
 
 	/* Accessor Methods */
