@@ -119,7 +119,7 @@ public final class MessageRouterTest extends BaseTestCase {
      * <tt>Response</tt> arrays.
      */
     public void testResponsesToQueryReplies() throws Exception {
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true); 
+        ConnectionSettings.LAST_FWT_STATE.setValue(true); 
 
         Class[] paramTypes = new Class[] {
             Response[].class, 

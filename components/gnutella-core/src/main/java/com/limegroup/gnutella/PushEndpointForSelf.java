@@ -89,6 +89,9 @@ public class PushEndpointForSelf extends PushEndpoint {
      * Our port is our external port
      */
     public int getPort() {
+        if (UDPService.instance().canDoFWT() 
+                && !RouterService.acceptedIncomingConnection())
+            return UDPService.instance().getStableUDPPort();
         return RouterService.getPort();
     }
     

@@ -115,9 +115,9 @@ public class FWTDetectionTest extends BaseTestCase {
      */
     public void testDisconnected() throws Exception {
         cmStub.setConnected(false);
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        ConnectionSettings.LAST_FWT_STATE.setValue(false);
         assertTrue(UDPService.instance().canDoFWT());
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        ConnectionSettings.LAST_FWT_STATE.setValue(true);
         assertFalse(UDPService.instance().canDoFWT());
         
     }
@@ -127,9 +127,9 @@ public class FWTDetectionTest extends BaseTestCase {
      */
     public void testNotReceivedPong() throws Exception {
         cmStub.setConnected(true);
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        ConnectionSettings.LAST_FWT_STATE.setValue(false);
         assertTrue(UDPService.instance().canDoFWT());
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        ConnectionSettings.LAST_FWT_STATE.setValue(true);
         assertFalse(UDPService.instance().canDoFWT());
         
         cmStub.setConnected(false);
@@ -146,9 +146,9 @@ public class FWTDetectionTest extends BaseTestCase {
         //reply with a pong that does not carry info
         ponger1.reply(null);
         cmStub.setConnected(true);
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        ConnectionSettings.LAST_FWT_STATE.setValue(false);
         assertTrue(UDPService.instance().canDoFWT());
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        ConnectionSettings.LAST_FWT_STATE.setValue(true);
         assertFalse(UDPService.instance().canDoFWT());
         
         //reply with a pong that does carry info
@@ -159,9 +159,9 @@ public class FWTDetectionTest extends BaseTestCase {
         Thread.sleep(1000);
         
         cmStub.setConnected(true);
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        ConnectionSettings.LAST_FWT_STATE.setValue(false);
         assertTrue(UDPService.instance().canDoFWT());
-        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        ConnectionSettings.LAST_FWT_STATE.setValue(true);
         assertTrue(UDPService.instance().canDoFWT());
     }
     
@@ -252,7 +252,7 @@ public class FWTDetectionTest extends BaseTestCase {
         Thread.sleep(500);
         cmStub.setConnected(true);
         assertTrue(UDPService.instance().canDoFWT());
-        assertFalse(ConnectionSettings.EVER_DISABLED_FWT.getValue());
+        assertFalse(ConnectionSettings.LAST_FWT_STATE.getValue());
         cmStub.setConnected(false);
     }
     
@@ -276,7 +276,7 @@ public class FWTDetectionTest extends BaseTestCase {
         Thread.sleep(500);
         cmStub.setConnected(true);
         assertFalse(UDPService.instance().canDoFWT());
-        assertTrue(ConnectionSettings.EVER_DISABLED_FWT.getValue());
+        assertTrue(ConnectionSettings.LAST_FWT_STATE.getValue());
         cmStub.setConnected(false);
     }
     

@@ -332,7 +332,7 @@ public class StandardMessageRouter extends MessageRouter {
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
-                                    boolean canFWTransfer) {
+                                    boolean isFWTransfer) {
         
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
@@ -352,22 +352,22 @@ public class StandardMessageRouter extends MessageRouter {
         }
         
         if(!isFromMcast) {
-            // there'll only be one port from here on, so if it's invalid, exit
-            port = RouterService.getPort();
-            if(!NetworkUtils.isValidPort(port))
-                return Collections.EMPTY_LIST;
             
             // see if we have a valid FWTrans address.  if not, fall back.
-            if(canFWTransfer) {
+            if(isFWTransfer) {
+                port = UDPService.instance().getStableUDPPort();
                 ip = RouterService.getExternalAddress();
-                if(!NetworkUtils.isValidAddress(ip))
-                    canFWTransfer = false;
+                if(!NetworkUtils.isValidAddress(ip) 
+                        || !NetworkUtils.isValidPort(port))
+                    isFWTransfer = false;
             }
             
             // if we still don't have a valid address here, exit early.
-            if(!canFWTransfer) {
+            if(!isFWTransfer) {
                 ip = RouterService.getAddress();
-                if(!NetworkUtils.isValidAddress(ip))
+                port = RouterService.getPort();
+                if(!NetworkUtils.isValidAddress(ip) ||
+                        !NetworkUtils.isValidPort(port))
                     return Collections.EMPTY_LIST;
             }
         }
@@ -444,7 +444,7 @@ public class StandardMessageRouter extends MessageRouter {
                                                 busy, uploaded, 
                                                 measuredSpeed, 
                                                 ChatSettings.CHAT_ENABLED.getValue(),
-                                                isFromMcast, canFWTransfer,
+                                                isFromMcast, isFWTransfer,
                                                 proxies);
                     queryReplies.add(queryReply);
                 }
@@ -466,7 +466,7 @@ public class StandardMessageRouter extends MessageRouter {
                                         notIncoming, busy, uploaded, 
                                         measuredSpeed, 
                                         ChatSettings.CHAT_ENABLED.getValue(),
-                                        isFromMcast, canFWTransfer,
+                                        isFromMcast, isFWTransfer,
                                         proxies);
             queryReplies.add(queryReply);
         }

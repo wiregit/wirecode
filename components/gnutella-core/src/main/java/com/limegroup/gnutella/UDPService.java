@@ -116,13 +116,13 @@ public class UDPService implements Runnable {
     /** The last reported port as seen from the outside
      *  LOCKING: this
      */
-    private int _lastReportedPort = -1;
+    private int _lastReportedPort;
 
     /**
-     * Whether we have received a Pong carrying our address.
+     * The number of pongs carrying IP:Port info we have received.
      * LOCKING: this
      */
-    private boolean _receivedIPPong;
+    private int _numReceivedIPPongs;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -353,11 +353,11 @@ public class UDPService implements Runnable {
                 PingReply r = (PingReply)message;
                 if (r.getMyPort() != 0) {
                     synchronized(this){
-                        Assert.that(_lastReportedPort != -1 , "got a pong without socket!");
+                        _numReceivedIPPongs++;
                         
-                        _receivedIPPong=true;
-                        
-                        if (_lastReportedPort!=r.getMyPort()) {
+                        if (_numReceivedIPPongs==1) 
+                            _lastReportedPort=r.getMyPort();
+                        else if (_lastReportedPort!=r.getMyPort()) {
                             _portStable = false;
                             _lastReportedPort = r.getMyPort();
                         }
@@ -666,8 +666,10 @@ public class UDPService implements Runnable {
 	 *  If we have received an udp packet but are not connected, or haven't 
 	 * received a pong carrying ip info yet, see if we ever disabled fwt in the 
 	 * past.
-	 *  If we are connected and have gotten ip pongs, our port must not change 
-	 * and is the same as our tcp port.
+	 *  If we are connected and have gotten a single ip pong, our port must be 
+	 * the same as our tcp port or our forced tcp port.
+	 *  If we have received more than one ip pong, they must all report the same
+	 * port.
 	 */
 	public boolean canDoFWT(){
 	    // this does not affect EVER_DISABLED_FWT.
@@ -675,29 +677,33 @@ public class UDPService implements Runnable {
 	        return false;
 
 	    if (!RouterService.isConnected())
-	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
 	    
 	    boolean ret = true;
 	    synchronized(this) {     	
-	        if (!_receivedIPPong) 
-	            return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	        if (_numReceivedIPPongs < 1) 
+	            return !ConnectionSettings.LAST_FWT_STATE.getValue();
 	        
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
-	                    " vs. external port "+RouterService.getPort()+
+	                    " number of received IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
 	                            RouterService.getExternalAddress()));
 	        }
 	        
 	        ret= 
 	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
-	    		_portStable &&
-	    		_lastReportedPort==RouterService.getPort();
+	    		_portStable;
+	        
+	        if (_numReceivedIPPongs == 1){
+	            ret = ret &&
+	            	(_lastReportedPort == RouterService.getAcceptor().getPort(false) ||
+	                    _lastReportedPort == RouterService.getPort());
+	        }
 	    }
 	    
-	    if (!ret)
-	        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+	    ConnectionSettings.LAST_FWT_STATE.setValue(!ret);
 	    
 	    return ret;
 	}
@@ -707,12 +713,26 @@ public class UDPService implements Runnable {
 	    return _portStable;
 	}
 	
-	public boolean receivedIpPong() {
-	    return _receivedIPPong;
+	public int receivedIpPong() {
+	    return _numReceivedIPPongs;
 	}
 	
 	public int lastReportedPort() {
 	    return _lastReportedPort;
+	}
+	
+	/**
+	 * @return the stable UDP port as seen from the outside.
+	 * If we haven't received at least 2 IPpongs, we use the router service port.
+	 */
+	public int getStableUDPPort() {
+	    
+	    synchronized(this) {
+	        if (_portStable && _numReceivedIPPongs > 1)
+	            return _lastReportedPort;
+	    }
+	    
+	    return RouterService.getPort();
 	}
 
 	/**
@@ -820,11 +840,7 @@ public class UDPService implements Runnable {
             PingRequest pr = new PingRequest(getSolicitedGUID().bytes(),
                                              (byte)1, (byte)0);
             
-            // unless we know for sure we cannot do FWT, request a test
-            if (!RouterService.acceptedIncomingConnection() &&
-                    canDoFWT())
-                pr.addIPRequest();
-            
+            pr.addIPRequest();
             send(pr, ep.getAddress(), ep.getPort());
         }
     }
