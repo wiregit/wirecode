@@ -69,7 +69,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		
 		////////////////////  Contruct from Raw Bytes /////////////
 		
-		//Normal case: double null-terminated result
+ 		//Normal case: double null-terminated result
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[11+8]=(byte)65;  //The character 'A'
@@ -530,6 +530,28 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
+    }
+
+    /**
+     * Test to make sure that results that have no name are rejected 
+     */
+    public void testThatEmptyResultsAreRejected() throws Exception {
+
+ 		// create a payload that says it has one result, but whose
+        // result is empty.  This should be rejected!
+		byte[] payload=new byte[11+11+16];
+		payload[0] = 1;            //Number of results
+		//payload[11+8]=(byte)65;  //The character 'A'
+
+		QueryReply qr = 
+            new QueryReply(new byte[16], (byte)5, (byte)0, payload);
+
+        
+        try {
+            List results = qr.getResultsAsList();
+            fail("should have thrown an exception for empty result");
+        } catch(BadPacketException e) {
+        }
     }
     
 }
