@@ -625,7 +625,6 @@ public class ConnectionManager {
 					 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
 			}
 
-			System.out.println("ConnectionManager::allowConnection 4"); 
 			// otherwise, it is a high degree connection, so allow it if we 
 			// need more connections
 			return (trustedVendor(userAgentHeader) &&
