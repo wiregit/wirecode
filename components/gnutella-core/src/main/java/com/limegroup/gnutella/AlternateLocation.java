@@ -56,34 +56,32 @@ public final class AlternateLocation
 	 *  throw NullPointerException here, but since we're already forcing the
 	 *  caller to catch IOException, we might as well throw in in both cases
 	 */
-	public AlternateLocation(final String location) throws IOException {
+	public static AlternateLocation createAlternateLocation(final String location) 
+		throws IOException {
 		if(location == null || location.equals("")) {
 			throw new IOException("NULL OR EMPTY STRING IN ALTERNATE LOCATION");
 		}
-		try {
-			URL = AlternateLocation.createUrl(location);
-		} catch(MalformedURLException e) {
-			throw new IOException("MALFORMED URL");
-		}
-		
-		if(!AlternateLocation.isTimestamped(location)) {
-			OUTPUT_DATE_TIME = null;		
-			
+
+		URL url = AlternateLocation.createUrl(location);
+		Date date;
+		if(!AlternateLocation.isTimestamped(location)) {			
 			// just set the time to be as old as possible since there's
 			// no date information -- this makes comparisons easier
-			TIME = new Date(0).getTime();
+			date = new Date(0);
 		}
 		else {
 			// this can be null
-			OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(location);			
-			if(OUTPUT_DATE_TIME != null) {
-				Date date = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
-				TIME = date.getTime();
+			String outputDateTime = 
+			    AlternateLocation.extractDateTimeString(location);			
+			if(outputDateTime != null) {
+				date = AlternateLocation.createDateInstance(outputDateTime);
 			} else {
-				TIME = new Date(0).getTime();
+				date = new Date(0);
 			}
-		}		
+		}
+		return new AlternateLocation(url, date);
 	}
+
 
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> instance for the givel 
@@ -97,18 +95,30 @@ public final class AlternateLocation
 	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
 	 *  <tt>null</tt>
 	 */
-	public AlternateLocation(final URL url) 
+	public static AlternateLocation createAlternateLocation(final URL url) 
 		throws MalformedURLException {
 		if(url == null) {
-			throw new NullPointerException("AlternateLocation cannot accept null URL");
+			throw new NullPointerException("cannot accept null URL");
 		}
 		// create a new URL instance from the data for the given url
 		// and the urn
-		this.URL = new URL(url.getProtocol(), url.getHost(), url.getPort(),
-						   url.getFile());
+		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
+							  url.getFile());
 		// make the date the current time
 		Date date = new Date();
-		TIME = date.getTime();
+		return new AlternateLocation(tempUrl, date);
+	}
+
+	/**
+	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
+	 * and <tt>Date</tt> timestamp.
+	 *
+	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
+	 * @param date the <tt>Date</tt> timestamp for the <tt>AlternateLocation</tt>
+	 */
+	private AlternateLocation(final URL url, final Date date) {
+		this.URL = url;
+		this.TIME = date.getTime();
 		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
 	}
 
