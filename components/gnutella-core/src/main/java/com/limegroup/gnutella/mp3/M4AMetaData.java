@@ -46,10 +46,10 @@ public class M4AMetaData extends AudioMetaData {
 	/**
 	 * some atoms we don't care about
 	 */
-	private static final int FTYP_ATOM = 0x66767970;
+	private static final int FTYP_ATOM = 0x66747970;
 	private static final int MOOV_ATOM = 0x6d6f6f76;
 	private static final int MVHD_ATOM = 0x6d766864;
-	private static final int TRAK_ATOM = 0x7672616b;
+	private static final int TRAK_ATOM = 0x7472616b;
 	private static final int UDTA_ATOM = 0x75647461;
 	private static final int META_ATOM = 0x6d657461;
 	private static final int HDLR_ATOM = 0x68646c72;
@@ -82,16 +82,16 @@ public class M4AMetaData extends AudioMetaData {
 	
 	public M4AMetaData(File f) throws IOException{
 		super(f);
-		_f = f;
-		_in = new DataInputStream(new FileInputStream(_f));
-		_metaData = new HashMap();
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.mp3.MetaData#parseFile(java.io.File)
 	 */
 	protected void parseFile(File f) throws IOException {
+		_f = f;
+		_in = new DataInputStream(new FileInputStream(_f));
 		_in = getMetaDataStream();
+		_metaData = new HashMap();
 		
 		populateMetaDataMap();
 		
@@ -176,6 +176,7 @@ public class M4AMetaData extends AudioMetaData {
 			skipAtom(TRAK_ATOM,_in);
 			enterAtom(UDTA_ATOM,_in);
 			enterAtom(META_ATOM,_in);
+			_in.skip(4); //no comment...
 			skipAtom(HDLR_ATOM,_in);
 			
 			//at this point we are about to enter the ILST atom
@@ -187,7 +188,8 @@ public class M4AMetaData extends AudioMetaData {
 			
 		}finally {
 			//close the file before proceeding futher
-			try {_in.close();}catch(IOException ignored){}
+			if (_in!=null)
+				try {_in.close();}catch(IOException ignored){}
 		}
 		
 		//create a ByteArrayInputStream and read from it.
