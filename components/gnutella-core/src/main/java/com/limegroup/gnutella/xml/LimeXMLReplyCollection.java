@@ -23,18 +23,20 @@ public class LimeXMLReplyCollection{
     private String schemaURI;
     
     /**
-     * A map of URN -> LimeXMLDocument for each shared file
-     * that contains XML.
-     * Note: Each ReplyCollection is written out to 1 physical file on 
-     * shutdown.
-     * 
-     * LOCKING: Never obtain fileToHash's lock after obtaining
-     *          mainMap's lock.
+     * A map of URN -> LimeXMLDocument for each shared file that contains XML.
+     * Each ReplyCollection is written out to one physical file on shutdown.
      */
     private HashMap /* URN -> LimeXMLDocument */ mainMap;
-    public boolean audio = false;//package access
-    private File dataFile = null;//flat file where all data is stored.
-    private MetaFileManager metaFileManager = null;
+    
+    /**
+     * Whether or not this LimeXMLReplyCollection is for audio files.
+     */
+    private final boolean audio;
+    
+    /**
+     * The location on disk that information is serialized to.
+     */
+    private File dataFile = null;
     
     /**
      * Obtain WRITE_LOCK before writing to disk.
@@ -55,15 +57,12 @@ public class LimeXMLReplyCollection{
     public static final int HASH_FAILED  = 11;
 
     /**
-     * @param fileToHash The map of files to hashes for all shared files.
+     * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
-     * @param fm A pointer to the system wide (Meta)FileManager .
      * @param audio Whether this is a collection of audio files.
      */
-    public LimeXMLReplyCollection(FileDesc[] fds, String URI, 
-                                  FileManager fm, boolean audio) {
+    public LimeXMLReplyCollection(FileDesc[] fds, String URI, boolean audio) {
         this.schemaURI = URI;
-        this.metaFileManager = (MetaFileManager)fm;
         this.audio = audio;
         debug("LimeXMLReplyCollection(): entered with audio = " +
               audio);
@@ -81,7 +80,7 @@ public class LimeXMLReplyCollection{
         // The serialization of mainMap went through three stages in LimeWire.
         // Prior to LimeWire 2.5, the map was stored as
         //      String (xml mini hash) -> String (XML).
-        // After that (before LimeWire 3.3) it was stored as
+        // After that (before LimeWire 3.4) it was stored as
         //      String (xml mini hash) -> LimeXMLDocument
         // From LimeWire 3.3 on, it is stored as
         //      URN (SHA1 Hash) -> LimeXMLDocument        
@@ -90,13 +89,13 @@ public class LimeXMLReplyCollection{
         // ensure that we can handle all cases and update them to the
         // current format.
         
-        // This iterates over each entry in fileToHash (File -> URN)
-        // to find the associated entry in the map read off disk.
-        // If no entry is found, it could be for a few reasons:
+        // This iterates over each shared FileDesc to find the associated entry
+        // in the map read off disk. If no entry is found, it could be for a 
+        // few reasons:
         // 1) The file has no XML associated with it.
         // 2) The entry is stored as String -> String or String -> LimeXMLDoc
         // Because reason one is common, and reason two will only occur during
-        // the first time LimeWire 3.3 is started (and a previous version
+        // the first time LimeWire 3.4 is started (and a previous version
         // of LimeWire had already run once), and we don't want to do the mini
         // hash to perform a lookup for every file that doesn't have XML,
         // we glance at the first entry in the deserialized map and see if
@@ -194,18 +193,18 @@ public class LimeXMLReplyCollection{
                 else // only id3 data with mp3 files
                     return ID3Reader.readDocument(file);
             }
-            catch (SAXException ignored1) { }
-            catch (IOException ignored2) { }
-            catch (SchemaNotFoundException ignored3) { }
+            catch (SAXException ignored) { }
+            catch (IOException ignored) { }
+            catch (SchemaNotFoundException ignored) { }
         }
-        else { // !audio || (audio && !mp3)
+        else { // !audio || !mp3
             try {
                 if ((xmlStr != null) && (!xmlStr.equals(""))) 
                     return new LimeXMLDocument(xmlStr);
             }
-            catch (SAXException ignored1) { }
-            catch (IOException ignored2) { }
-            catch (SchemaNotFoundException ignored3) { }
+            catch (SAXException ignored) { }
+            catch (IOException ignored) { }
+            catch (SchemaNotFoundException ignored) { }
         }
         
         return null;
@@ -272,8 +271,8 @@ public class LimeXMLReplyCollection{
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
-        fd.addLimeXMLDocument(replyDoc);        
         replyDoc.setXMLUrn(hash);
+        fd.addLimeXMLDocument(replyDoc);
         try {
             String identifier = fd.getFile().getCanonicalPath();
             replyDoc.setIdentifier(identifier);
@@ -282,13 +281,12 @@ public class LimeXMLReplyCollection{
 
 
     void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc) {
-        URN hash = fd.getSHA1Urn();
         addReply(fd, replyDoc);
         
         // commit to disk...
         if (audio) {
             try {
-                mp3ToDisk(f.getCanonicalPath(), hash, replyDoc);
+                mp3ToDisk(f.getCanonicalPath(), replyDoc);
             } catch(IOException ignored) {}
         } else
             write();
@@ -350,6 +348,11 @@ public class LimeXMLReplyCollection{
         return oldDoc;
     }
 
+    /**
+     * Removes the document associated with this FileDesc
+     * from this collection, as well as removing it from
+     * the FileDesc.
+     */
     public boolean removeDoc(FileDesc fd) {
         URN hash = fd.getSHA1Urn();
         boolean found;
@@ -358,16 +361,19 @@ public class LimeXMLReplyCollection{
             val = mainMap.remove(hash);
             found = (val != null);
         }
+        
         boolean written = false;
+        
         if(found){
             written = write();
-            if( written )            
+            if( written ) {
                 fd.removeLimeXMLDocument((LimeXMLDocument)val);
+            } else { // put it back to maintain consistency
+                synchronized(mainMap) {
+                    mainMap.put(hash,val);
+                }
+            }
         }
-        if(!written && found){//put it back to maintin consistency
-            synchronized(mainMap){
-                mainMap.put(hash,val);
-            }        }
         
         debug("found: " + found + ", written: " + written);
         
@@ -403,7 +409,7 @@ public class LimeXMLReplyCollection{
     /**
      * Writes this mp3 file to disk, using the XML in the doc.
      */
-    public int mp3ToDisk(String mp3FileName, URN hash, LimeXMLDocument doc) {
+    public int mp3ToDisk(String mp3FileName, LimeXMLDocument doc) {
         boolean wrote=false;
         int mp3WriteState = -1;
         
@@ -413,7 +419,7 @@ public class LimeXMLReplyCollection{
         // if so, we need to commit the ID3 data to disk....
         ID3Editor commitWith = ripMP3XML(mp3FileName, doc);
         if (commitWith != null)  // commit to disk.
-            mp3WriteState = commitID3Data(mp3FileName, hash, commitWith);
+            mp3WriteState = commitID3Data(mp3FileName, commitWith);
         
         // write out the mainmap in serial form...
         wrote = write();
@@ -470,7 +476,6 @@ public class LimeXMLReplyCollection{
 
 
     private int commitID3Data(String mp3FileName,
-                              URN oldHash,
                               ID3Editor editor) {
         //write to mp3 file...
         int retVal = editor.writeID3DataToDisk(mp3FileName);
@@ -488,7 +493,7 @@ public class LimeXMLReplyCollection{
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        metaFileManager.fileChanged(new File(mp3FileName));
+        RouterService.getFileManager().fileChanged(new File(mp3FileName));
         return retVal;
     }
 

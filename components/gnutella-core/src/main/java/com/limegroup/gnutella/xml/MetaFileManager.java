@@ -10,8 +10,11 @@ import com.sun.java.util.collections.*;
  * in replies.
  */
 public class MetaFileManager extends FileManager {
+    
+    /**
+     * Lock used when loading meta-settings.
+     */
     private final Object META_LOCK = new Object();
-    private boolean initialized = false;
     
     /**
      * Overrides FileManager.query.
@@ -142,44 +145,34 @@ public class MetaFileManager extends FileManager {
         if (loadThreadInterrupted())
             return;
         synchronized(META_LOCK){
-            if (!initialized){//do this only on startup
-                SchemaReplyCollectionMapper mapper = 
-                      SchemaReplyCollectionMapper.instance();
-                //created maper schemaURI --> ReplyCollection
-                LimeXMLSchemaRepository schemaRepository = 
-                      LimeXMLSchemaRepository.instance();                
+            SchemaReplyCollectionMapper mapper = 
+                  SchemaReplyCollectionMapper.instance();
+            //created maper schemaURI --> ReplyCollection
+            LimeXMLSchemaRepository schemaRepository = 
+                  LimeXMLSchemaRepository.instance();
 
-                if (loadThreadInterrupted())
-                    return;
+            if (loadThreadInterrupted())
+                return;
 
-                //now the schemaRepository contains all the schemas.
-                String[] schemas = schemaRepository.getAvailableSchemaURIs();
-                //we have a list of schemas
-                int len = schemas.length;
-                LimeXMLReplyCollection collection;
-                FileDesc fds[] = super.getSharedFileDescriptors(null);
-                for(int i=0;
-                    (i<len) && !loadThreadInterrupted();
-                    i++){
-                    //One ReplyCollection per schema
-                    String s = LimeXMLSchema.getDisplayString(schemas[i]);
-                    collection = 
-                    new LimeXMLReplyCollection(fds, schemas[i], this, 
-                                               s.equalsIgnoreCase("audio"));
-                    //Note: the collection may have size==0!
-                    mapper.add(schemas[i],collection);
-                }                
-            }//end of if, we may be initialized, may have been interrupted 
-            // fell through...
-            /* We never set it to true.
-              if (!loadThreadInterrupted())
-              initialized = true;
-            */
+            //now the schemaRepository contains all the schemas.
+            String[] schemas = schemaRepository.getAvailableSchemaURIs();
+            //we have a list of schemas
+            int len = schemas.length;
+            LimeXMLReplyCollection collection;
+            FileDesc fds[] = super.getSharedFileDescriptors(null);
+            for(int i=0; i < len && !loadThreadInterrupted(); i++) {
+                //One ReplyCollection per schema
+                String s = LimeXMLSchema.getDisplayString(schemas[i]);
+                collection = 
+                    new LimeXMLReplyCollection(fds, schemas[i], 
+                                           s.equalsIgnoreCase("audio"));
+                //Note: the collection may have size==0!
+                mapper.add(schemas[i],collection);
+            }
             //showXMLData();
         }//end of synchronized block
 		_callback.setAnnotateEnabled(true);
-    }//end of loadSettings.
-
+    }
 
     private Response[] union(Response[] normals, Response[] metas){       
         if(normals == null)
