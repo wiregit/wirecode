@@ -264,17 +264,23 @@ public class DownloadManager implements BandwidthTracker {
         }        
 
         // for each downloader, see if any RFD conflicts
+        //
         // philosophical question - usually we don't allow ManagedDownloaders to
         // be downloading the same file.  so once i find a match, should i be
         // stopping my progress through the list of downloaders?  well, this
         // code works, and doesn't seem to be practically inefficient, mainly
         // cuz conflictsLAX is coded as speedily as possible.....
-        for (int j = 0; j < downloaders.size(); j++) {
-            ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
-            for (int i = 0; i < rfds.length; i++) 
-                if (currD.conflictsLAX(rfds[i]))
+        //
+        // non-philosphical answer - once you find conflictsLAX to be true,
+        // break out of the loop.  only one downloader needs be notified
+        for (int i = 0; i < rfds.length; i++) 
+            for (int j = 0; j < downloaders.size(); j++) {
+                ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
+                if (currD.conflictsLAX(rfds[i])) {
                     currD.addDownload(rfds[i]);
-        }        
+                    break;
+                }
+            }        
     }
 
 
