@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.routing;
 
-import java.util.BitSet;
+
 import java.io.*;
 import java.util.zip.*;
 import com.sun.java.util.collections.*;
