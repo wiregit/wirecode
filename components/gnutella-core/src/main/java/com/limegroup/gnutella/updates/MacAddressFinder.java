@@ -51,8 +51,12 @@ public class MacAddressFinder {
     }   
 
     private String getLinuxMac() throws IOException {
-        String result = runCommand("ifconfig");
-        return parseResult(result,"HWAddr");
+        String result = runCommand("LANG=C /sbin/ifconfig");
+        if(result.length()<17)//unknown result, but it's gotta be bigger than 17
+            result = runCommand("LANG=C /bin/ifconfig");
+        if(result.length() < 17) //need to try another?
+            result = runCommand("LANG=C ifconfig");//getting desperate here.
+        return parseResult(result,"hwaddr");
     }   
 
     private String getSolarisMac() throws IOException {
@@ -61,6 +65,7 @@ public class MacAddressFinder {
     }   
 
     private String parseResult(String result, String delimiter) {
+        result = result.toLowerCase();//lets ignore all case
         StringTokenizer tok = new StringTokenizer(result,"\n");
         while(tok.hasMoreTokens()) {//for each line of result
             String line = tok.nextToken();
