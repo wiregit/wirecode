@@ -56,7 +56,7 @@ OPTIONS_BUTTONS_CANCEL_LABEL=取消
 OPTIONS_BUTTONS_CANCEL_TIP=変更を取消.
 OPTIONS_BUTTONS_APPLY_LABEL=適用
 OPTIONS_BUTTONS_APPLY_TIP=変更を適用.
-#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
+OPTIONS_RESTART_REQUIRED=選択されたオプションは,ライムワイヤーを再起動されたときに有効になります.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -288,7 +288,7 @@ TABLES_DISPLAY_TOOLTIPS=ツールチップを表示
 ################################################################################
 # Keys/value pairs for SearchView stuff....
 ################################################################################
-#??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
+SEARCH_NOT_CONNECTED=ネットワークに接続されていません. 接続するには「ファイル」メニューより「接続」を選択してください.
 SEARCH_DOWNLOAD_BUTTON_LABEL=ダウンロード
 SEARCH_DOWNLOAD_BUTTON_TIP=選択されたファイル全てをダウンロード.
 SEARCH_WISHLIST_BUTTON_LABEL=探し物リストに追加
@@ -580,11 +580,11 @@ PLAYLIST_OPTIONS_SHUFFLE=シャッフル
 PLAYLIST_DIALOG_OPEN_TITLE=再生リストを選択 (. m3u)
 PLAYLIST_DIALOG_SAVE_TITLE=再生リストを別名で保存....
 PLAYLIST_DIALOG_SAVE_SAVE=保存
-#??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
-#??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
-#??? PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
-#??? PLAYLIST_FILE_MISSING=. The file cannot be found.
-#??? PLAYLIST_FILE_CORRUPT=. The file is corrupt.
+PLAYLIST_CANNOT_PLAY_FILE=ファイルを再生できません：
+PLAYLIST_FILE_UNSUPPORTED=. 形式を認識できません.
+PLAYLIST_LINE_UNAVAILABLE=. アウトプットが見つかりません.
+PLAYLIST_FILE_MISSING=. ファイルが見つかりません.
+PLAYLIST_FILE_CORRUPT=. ファイルが壊れています.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
@@ -789,7 +789,7 @@ MESSAGE_INCOMPLETE_DIRECTORY_END=未完ファイルの保存先にする事は�
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire は指定したフォルダをファイル保存先にする事は出来ません. 別のフォルダを指定して下さい.
 MESSAGE_FILE_CORRUPT=LimeWire はファイル内に破損を発見しました.
 MESSAGE_CONTINUE_DOWNLOAD=ダウンロードを続けますか.
-#??? MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
+MESSAGE_LANG_CHANGE=選択された言語はライムワイヤーを再起動した際に表示されます. また選択された言語の表示に必要なフォントがあることを確認してください
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
