@@ -9,7 +9,7 @@ import com.limegroup.gnutella.messages.*;
  * architecture.
  */
 public class NewConnection extends TestConnection {    
-    
+
     /**
      * Constant route table data for testing.
      */

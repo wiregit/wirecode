@@ -5,7 +5,11 @@ package com.limegroup.gnutella.util;
  * tables.
  */
 public final class LeafConnection extends NewConnection {
-        
+
+    public LeafConnection() {
+        super(15);
+    }
+
     public LeafConnection(String[] keywords) {
         super(15);
         for(int i=0; i<keywords.length; i++) {

@@ -101,6 +101,57 @@ public final class QueryHandlerTest extends BaseTestCase {
 
 
     /**
+     * Tests the method for sending an individual query to a 
+     * single connections.
+     */
+    public void testSendQueryToHost() throws Exception {
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        ReplyHandler rh = new UltrapeerConnection();        
+        QueryRequest query = QueryRequest.createQuery("test", (byte)1);
+        QueryHandler qh = 
+            QueryHandler.createHandler(query, rh, new TestResultCounter());
+        Class[] paramTypes = new Class[] {
+            QueryRequest.class, 
+            ManagedConnection.class,
+            QueryHandler.class,
+        };
+
+		Method m = 
+            PrivilegedAccessor.getMethod(QueryHandler.class, 
+                                         "sendQueryToHost",
+                                         paramTypes);
+
+        ManagedConnection mc = new UltrapeerConnection();
+        Object[] params = new Object[] {
+            query, mc, qh,
+        };
+
+        m.invoke(null, params);
+        Set hostsQueried = 
+            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+        assertEquals("should not have added host", 0, hostsQueried.size());
+
+        // make sure we add the connection to the queries handlers
+        // if it doesn't support probe queries and the TTL is 1
+        params[1] = new LeafConnection();
+        m.invoke(null, params);
+        hostsQueried = 
+            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+        assertEquals("should have added host", 1, hostsQueried.size());
+
+        // make sure it adds the connection when the ttl is higher
+        // than one and the connection supports probe queries
+        params[0] = QueryRequest.createQuery("test");
+        params[1] = new UltrapeerConnection();
+
+        m.invoke(null, params);
+        hostsQueried = 
+            (Set)PrivilegedAccessor.getValue(qh, "QUERIED_HANDLERS");
+        assertEquals("should have added host", 2, hostsQueried.size());
+        
+    }
+
+    /**
      * Tests the method for calculating the next TTL.
      */
     public void testCalculateNewTTL() throws Exception {
@@ -416,6 +467,15 @@ public final class QueryHandlerTest extends BaseTestCase {
      */
     private static final class TestResultCounter implements ResultCounter {
         private final int RESULTS;
+
+        /**
+         * Creates the default counter that always returns that it has
+         * received 10 results.
+         */
+        TestResultCounter() {
+            this(10);
+        }
+
         TestResultCounter(int results) {
             RESULTS = results;
         }
