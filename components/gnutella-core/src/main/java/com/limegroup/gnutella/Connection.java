@@ -801,7 +801,7 @@ public class Connection {
      * Determines if the address should be changed and changes it if
      * necessary.
      */
-    public void changeAddress(final String v) {
+    private void changeAddress(final String v) {
         // invalid or private, exit
         if(!NetworkUtils.isValidAddress(v) || NetworkUtils.isPrivateAddress(v))
             return;
