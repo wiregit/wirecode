@@ -150,7 +150,6 @@ public class XMLStringUtils
             startIndex = endIndex;
         }
         
-        System.out.println("finished tokenizing");
         //return the list of chopped/tokenized elements    
         return choppedElements;
     }
