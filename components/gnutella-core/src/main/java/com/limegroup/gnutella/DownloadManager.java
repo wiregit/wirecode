@@ -252,8 +252,8 @@ public class DownloadManager implements BandwidthTracker {
         try { 
             rfds = qr.toRemoteFileDescArray();
         }
-        catch (Exception e) {
-            debug(e);
+        catch (BadPacketException bpe) {
+            debug(bpe);
             rfds = new RemoteFileDesc[0];
         }
         
