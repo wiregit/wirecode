@@ -6,8 +6,8 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
-public class StandardMessageRouter extends MessageRouter
-{
+public class StandardMessageRouter extends MessageRouter {
+
     private ActivityCallback _callback;
     private FileManager _fileManager;
 
@@ -99,22 +99,29 @@ public class StandardMessageRouter extends MessageRouter
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
 	 */
-	protected void respondToUDPPingRequest(PingRequest request) {
+	protected void respondToUDPPingRequest(PingRequest request, 
+										   DatagramPacket datagram) {
 		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
-		while(iter.hasNext()) {
-			GUESSEndpoint host = (GUESSEndpoint)iter.next();
-			PingReply reply = new PingReply(request.getGUID(), (byte)1, 
-											host.getPort(),
-											host.getAddress().getAddress(), 
-											(long)0, (long)0, 
-											true);
-			try {
-				sendPingReply(reply);
-			} catch(IOException e) {					
-				// we can't do anything other than try to send it
-				continue;
+		if(iter.hasNext()) {
+			while(iter.hasNext()) {
+				GUESSEndpoint host = (GUESSEndpoint)iter.next();				
+				PingReply reply = 
+					new PingReply(request.getGUID(), (byte)1, 
+								  host.getPort(),
+								  host.getAddress().getAddress(), 
+								  (long)0, (long)0, 
+								  true);
+				try {
+					sendPingReply(reply);
+				} catch(IOException e) {					
+					// we can't do anything other than try to send it
+					continue;
+				}
 			}
+		} else {
+			// always respond with something
+			sendAcknowledgement(datagram, request.getGUID());
 		}
 	}
 
