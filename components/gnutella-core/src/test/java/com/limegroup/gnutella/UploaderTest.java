@@ -89,23 +89,23 @@ public class UploaderTest extends TestCase {
             connectDloader(d1,true,rfd1,true);
             HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
             connectDloader(d2,true,rfd2,true);
-            try { //queued at 0th position
+            try { //queued at 1st position
                 d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
                 connectDloader(d3,true,rfd3,true);
                 fail("uploader should have been queued, but was given slot");
             } catch(QueuedException qx) {
-                assertEquals(0, qx.getQueuePosition());
+                assertEquals(1, qx.getQueuePosition());
             } catch (Exception ioe) {
                 ioe.printStackTrace();
                 fail("not queued");
             }
             HTTPDownloader d4 = null;
-            try { //queued at 1st position
+            try { //queued at 2nd position
                 d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
                 connectDloader(d4,true,rfd4,true);
                 fail("uploader should have been queued, but was given slot");
             } catch(QueuedException qx) {
-                assertEquals(1,qx.getQueuePosition());
+                assertEquals(2,qx.getQueuePosition());
             } catch (Exception ioe) {
                 fail("not queued");
             }
@@ -158,7 +158,7 @@ public class UploaderTest extends TestCase {
             try {
                 connectDloader(d4,false,rfd4,true);
             } catch(QueuedException qx) {
-                assertEquals(0,qx.getQueuePosition());
+                assertEquals(1,qx.getQueuePosition());
             } catch (Exception other) {
                 other.printStackTrace();
                 fail("other exception thrown");
@@ -192,7 +192,7 @@ public class UploaderTest extends TestCase {
                 connectDloader(d3,true,rfd3,true);
                 fail("uploader should have been queued, but was given slot");
             } catch(QueuedException qx) {
-                assertEquals(0, qx.getQueuePosition());
+                assertEquals(1, qx.getQueuePosition());
             } catch (Exception ioe) {
                 ioe.printStackTrace();
                 fail("not queued");
@@ -203,7 +203,7 @@ public class UploaderTest extends TestCase {
                 connectDloader(d4,true,rfd4,true);
                 fail("uploader should have been queued, but was given slot");
             } catch(QueuedException qx) {
-                assertEquals(1,qx.getQueuePosition());
+                assertEquals(2,qx.getQueuePosition());
             } catch (Exception ioe) {
                 fail("not queued");
             }
@@ -275,7 +275,7 @@ public class UploaderTest extends TestCase {
             } catch(TryAgainLaterException tx) {
                 fail("d3 should have been queued TALX thrown");
             } catch (QueuedException expectedException) { 
-                assertEquals(0,expectedException.getQueuePosition());
+                assertEquals(1,expectedException.getQueuePosition());
             }
         } catch(Exception anyOther) {
             System.out.println("failed");
