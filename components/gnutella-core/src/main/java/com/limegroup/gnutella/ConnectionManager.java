@@ -196,7 +196,7 @@ public class ConnectionManager {
          //requires some refactoring of that damn initialization code.
          
          //1. Initialize connection.  It's always safe to recommend new headers.
-         boolean wasShielded=hasShieldedClientSupernodeConnection();
+         boolean wasShielded=hasClientSupernodeConnection();
          int oldKeepAlive=_keepAlive;
          ManagedConnection connection=null;
          try {
@@ -305,7 +305,7 @@ public class ConnectionManager {
      */
     public boolean isSupernode() {
         boolean isCapable=SettingsManager.instance().getEverSupernodeCapable();
-        return isCapable && !hasShieldedClientSupernodeConnection();
+        return isCapable && !hasClientSupernodeConnection();
     }
     
     /**
@@ -315,7 +315,7 @@ public class ConnectionManager {
      * @return True, if the clientnode has connection to supernode,
      * false otherwise
      */
-    public synchronized boolean hasShieldedClientSupernodeConnection() {
+    public synchronized boolean hasClientSupernodeConnection() {
         //TODO2: this can be optimized to avoid allocations
         List connections=getInitializedConnections();
         if (connections.size()!=1)

@@ -649,7 +649,7 @@ public abstract class MessageRouter
     public void forwardQueryRouteTables() {
         //As a tiny optimization, we skip the propogate if we have not in
         //shielded mode.
-        if (! _manager.hasShieldedClientSupernodeConnection())
+        if (! _manager.hasClientSupernodeConnection())
             return;
 
         synchronized (queryUpdateLock) {
@@ -661,7 +661,8 @@ public abstract class MessageRouter
                 
                 //There should only be one leaf/supernode connection.  But we
                 //can recover gracefully if that for some reason isn't the case.
-                if (! c.isClientSupernodeConnection()) 
+                if (! (c.isClientSupernodeConnection() 
+                          && c.isQueryRoutingEnabled())) 
                     continue;
                 
                 //Check the time to decide if it needs an update.

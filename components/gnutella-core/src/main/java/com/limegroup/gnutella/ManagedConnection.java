@@ -814,9 +814,11 @@ public class ManagedConnection
             return Boolean.valueOf(value).booleanValue();
     }
 
-    /** Returns true iff the connection is a supernode shielding me, i.e., if I
-     *  wrote "Supernode: false" and this connection wrote "Supernode: true"
-     *  (not necessarily in that order). */
+    /** Returns true iff the connection is a supernode and I am a leaf, i.e., if
+     *  I wrote "Supernode: false", this connection wrote "Supernode: true" (not
+     *  necessarily in that order).  <b>Does NOT require that QRP is enabled</b>
+     *  between the two; the supernode could be using reflector indexing, for
+     *  example. */
     public boolean isClientSupernodeConnection() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
@@ -827,13 +829,13 @@ public class ManagedConnection
             ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
             return false;
-        else
+        else 
             return !Boolean.valueOf(value).booleanValue();
     }
 
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
      *  if I wrote "Supernode: true" and this connection wrote "Supernode:
-     *  false". */
+     *  false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
         //Is remote host a supernode...
         if (! isClientConnection())
@@ -844,8 +846,27 @@ public class ManagedConnection
             ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
             return false;
-        else
-            return Boolean.valueOf(value).booleanValue();
+        else if (!Boolean.valueOf(value).booleanValue())
+            return false;
+
+        //...and do both support QRP?
+        return isQueryRoutingEnabled();
+    }
+
+    /** True if the remote host supports query routing (QRP).  This is only 
+     *  meaningful in the context of leaf-supernode relationships. */
+    boolean isQueryRoutingEnabled() {
+        //We are ALWAYS QRP-enabled, so we only need to look at what the remote
+        //host wrote.
+        String value=getProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING);
+        if (value==null)
+            return false;
+        try {            
+            Float f=new Float(value);
+            return f.floatValue() >= 0.1f;   //TODO: factor into constant!
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     /** Returns the system time that we should next forward a query route table
@@ -1087,7 +1108,7 @@ public class ManagedConnection
                 addCommonProperties(props);                
                 addHostAddresses(props, _manager);
 
-                if (_manager.hasShieldedClientSupernodeConnection()) {
+                if (_manager.hasClientSupernodeConnection()) {
                     //b) Incoming, with supernode connection: reject (redirect)
                     return new HandshakeResponse(
                                    HandshakeResponse.SHIELDED,
