@@ -75,6 +75,10 @@ public final class AlternateLocation
 			    AlternateLocation.extractDateTimeString(location);			
 			if(outputDateTime != null) {
 				date = AlternateLocation.createDateInstance(outputDateTime);
+				if(date.after(new Date())) {
+					// the date reported is in the future, so throw exception
+					throw new IOException("reported date is in the future");
+				}
 			} else {
 				date = new Date(0);
 			}
