@@ -102,7 +102,13 @@ public class StandardMessageRouter extends MessageRouter {
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   DatagramPacket datagram,
                                            ReplyHandler handler) {
-        sendPingReply(PingReply.create(request.getGUID(), (byte)1), handler);
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if(NetworkUtils.isValidAddress(addr) &&
+           NetworkUtils.isValidPort(port)) {        
+            sendPingReply(PingReply.create(request.getGUID(), 
+                                           (byte)1), handler);
+        }
 	}
 
     /**

@@ -413,7 +413,7 @@ public final class UDPService implements Runnable {
                 } catch(NoRouteToHostException nrthe) {
                     // oh well, if we can't find that host, ignore it ...
                 } catch(IOException ioe) {
-                    if(isIgnoreable(ioe.getMessage()))
+                    if(isIgnoreable(ioe, ioe.getMessage()))
                         return;
                         
                     String errString = "ip/port: " + 
@@ -437,7 +437,13 @@ public final class UDPService implements Runnable {
          * either be "Datagram send failed (code=<code>)"
          * or simply the text of the error.
          */
-        private boolean isIgnoreable(final String message) {
+        private boolean isIgnoreable(Throwable ex, final String message) {
+            // PortUnreachableException was added in Java 1.4 --
+            // check for it with a class name comparison.
+            if("java.net.PortUnreachableException".equals(
+                                            ex.getClass().getName()))
+                return true;
+            
             if(message == null)
                 return false;
 
@@ -496,8 +502,14 @@ public final class UDPService implements Runnable {
                 return true;
             if(scan(msg, 10091, "network subsystem is unavailable"))
                 return true;
-            if(scan(msg, 10107, "option unsupported by protocol"))
+            if(scan(msg, 10107, null))
                 return true;
+            if(scan(msg, -1,  "option unsupported by protocol"))
+                return true;
+            if(scan(msg, -1, "descriptor not a socket"))
+                return true;
+            if(scan(msg, -1, "icmp port unreachable"))
+                return true;                
                 
             // General invalid error on Linux
             if(msg.indexOf("operation not permitted") > -1)
@@ -511,11 +523,11 @@ public final class UDPService implements Runnable {
          * of the message, returning true if either was found.
          */
         private boolean scan(final String msg, int code, final String name) {
-            if(msg.indexOf("code="+code) > -1)
+            if(code != -1 && msg.indexOf("code="+code) > -1)
                 return true;
-            if(msg.indexOf("error: "+code) > -1)
+            if(code != -1 && msg.indexOf("error: "+code) > -1)
                 return true;
-            if(msg.indexOf(name) > -1)
+            if(name != null && msg.indexOf(name) > -1)
                 return true;
             return false;
         }

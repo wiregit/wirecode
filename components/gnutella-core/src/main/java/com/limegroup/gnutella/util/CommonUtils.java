@@ -707,6 +707,7 @@ public final class CommonUtils {
 		} 
 
         if(!settingsDir.isDirectory()) {
+            settingsDir.delete(); // delete whatever it may have been
             if(!settingsDir.mkdirs()) {
                 String msg = "could not create preferences directory: "+
                     settingsDir;

@@ -118,6 +118,8 @@ public final class ID3Reader {
         List nameValList = data.toNameValueList();
         if(nameValList.isEmpty())
             throw new IOException("invalid/no data.");
+        if(LimeXMLSchemaRepository.instance().getSchema(schemaURI) == null)
+            throw new IOException("no audio schema");
 
         return new LimeXMLDocument(nameValList, schemaURI);
     }
