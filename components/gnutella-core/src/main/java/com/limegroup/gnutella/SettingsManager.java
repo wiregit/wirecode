@@ -9,12 +9,11 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * This class manages the property settings.  It maintains
- * default settings for values not set in the saved
- * settings files and updates those settings based on user
- * input, checking for errors where appropriate.  It also
- * saves the settings file to disk when the session
- * terminates.
+ * This class manages the property settings.  It maintains default 
+ * settings for values not set in the saved settings files and 
+ * updates those settings based on user input, checking for errors 
+ * where appropriate.  It also saves the settings file to disk when 
+ * the session terminates.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public class SettingsManager {
@@ -95,16 +94,20 @@ public class SettingsManager {
     /** Use quick connect hosts instead of gnutella.net? */
     private final boolean DEFAULT_USE_QUICK_CONNECT = true;
 	/** This is limewire's public pong cache */
-    public static final String  DEFAULT_LIMEWIRE_ROUTER    = 
+    public static final String  DEFAULT_LIMEWIRE_ROUTER = 
 	  "router.limewire.com";
 	/** This is limewire's dedicated pong cache */
-    public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
+    public static final String  DEDICATED_LIMEWIRE_ROUTER = 
 	  "router4.limewire.com";
     /** List of hosts to try on quick connect */
-    private final String[] DEFAULT_QUICK_CONNECT_HOSTS
-    = {DEFAULT_LIMEWIRE_ROUTER+":6346",
-       "gnutellahosts.com:6346",
+    private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
+		DEFAULT_LIMEWIRE_ROUTER+":6346",
+		"connect1.gnutellanet.com:6346",
+		"connect2.gnutellanet.com:6346",
+		"connect3.gnutellanet.com:6346",
+		"connect4.gnutellanet.com:6346",
     };
+
     private final int     DEFAULT_PARALLEL_SEARCH  = 5;
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     /** Default for whether user should be prompted before downloading exe's. */
@@ -157,6 +160,8 @@ public class SettingsManager {
 	 */
 	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
 		SpeedConstants.MODEM_SPEED_INT;
+
+	private final boolean DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN = false;
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -244,6 +249,8 @@ public class SettingsManager {
 	 */
 	private final String MINIMUM_SEARCH_SPEED =
 		"MINIMUM_SEARCH_SPEED";
+
+	private final String SEARCH_FILTER_MESSAGE_SHOWN = "SEARCH_FILTER_MESSAGE_SHOWN";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -713,6 +720,10 @@ public class SettingsManager {
 				}
 				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
 					setMinimumSearchSpeed(Integer.parseInt(p));
+				} 
+				else if(key.equals(SEARCH_FILTER_MESSAGE_SHOWN)) {
+					Boolean messageShown = new Boolean(p);
+					set17SearchMessageShown(messageShown.booleanValue());
 				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
@@ -806,6 +817,7 @@ public class SettingsManager {
 		setCountry(DEFAULT_COUNTRY);
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
+		set17SearchMessageShown(DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN);
     }
 
 
@@ -1240,6 +1252,11 @@ public class SettingsManager {
 	public int getMinimumSearchSpeed() {
 		String str = _props.getProperty(MINIMUM_SEARCH_SPEED);
 		return Integer.parseInt(str);
+	}
+
+	public boolean get17SearchMessageShown() {
+		Boolean b = Boolean.valueOf(_props.getProperty(SEARCH_FILTER_MESSAGE_SHOWN));
+		return b.booleanValue();
 	}
 
     /******************************************************
@@ -2154,6 +2171,11 @@ public class SettingsManager {
 		_props.put(MINIMUM_SEARCH_SPEED, Integer.toString(speed));
 	}
 	
+
+	public void set17SearchMessageShown(boolean shown) {
+		Boolean b = new Boolean(shown);
+		_props.put(SEARCH_FILTER_MESSAGE_SHOWN, b.toString());
+	}
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
