@@ -215,8 +215,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  DownloadManager.  Package-access and non-final for testing.
      *  @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
     static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
-    /** The number of times to requery the network. */
-    private static final int REQUERY_ATTEMPTS = 60;
+    /** The number of times to requery the network. 
+     *  We are getting rid of ALL requeries, so the new value is one such that
+     *  a Requery can never happen.
+     */
+    private static final int REQUERY_ATTEMPTS = -1;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
 
@@ -454,10 +457,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * queued state, at least for the moment.
      *     @requires this is uninitialized or stopped, 
      *      and allFiles, and incompleteFileManager are set
-     *     @modifies everything but the above fields */
-    public void initialize(DownloadManager manager, 
-                           FileManager fileManager, 
-                           ActivityCallback callback) {
+     *     @modifies everything but the above fields 
+     * @param deserialized True if this downloader is being initialized after 
+     * being read from disk, false otherwise.
+     */
+    public void initialize(DownloadManager manager, FileManager fileManager, 
+                           ActivityCallback callback, 
+                           final boolean deserialized) {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
@@ -477,7 +483,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.dloaderManagerThread=new Thread() {
             public void run() {
                 try { 
-                    tryAllDownloads();
+                    tryAllDownloads(deserialized);
                 } catch (Throwable e) {
                     //This is a "firewall" for reporting unhandled errors.  We
                     //don't really try to recover at this point, but we do
@@ -776,7 +782,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //this) or waiting for retry (by sleeping).
         }
         if ((state==Downloader.WAITING_FOR_RETRY) ||
-            (state==Downloader.WAITING_FOR_RESULTS))
+            (state==Downloader.WAITING_FOR_RESULTS) || 
+            (state==Downloader.GAVE_UP))
             reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
@@ -811,6 +818,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized void stop() {
+        // make redundant calls to stop() fast
+        // this change is pretty safe because stopped is only set in two
+        // places - initialized and here.  so long as this is true, we know
+        // this is safe.
+        if (stopped)
+            return;
+
         //This method is tricky.  Look carefully at run.  The most important
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
@@ -860,7 +874,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //This stopped because all hosts were tried.  (Note that this
                 //couldn't have been user aborted.)  Therefore no threads are
                 //running in this and it may be safely resumed.
-                initialize(this.manager, this.fileManager, this.callback);
+                initialize(this.manager, this.fileManager, this.callback, false);
             } else if (state==WAITING_FOR_RETRY) {
                 //Interrupt any waits.
                 if (dloaderManagerThread!=null)
@@ -930,15 +944,44 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     //////////////////////////// Core Downloading Logic /////////////////////
 
+    /**
+     * This method is called when
+     * 1) all downloads sources failed
+     * 2) there are no busy hosts
+     * 3) there is no room for a requery
+     * Subclasses should override this method if they want to enforce special
+     * behavior before going to the GAVE_UP state.
+     * NOTE: Only the following states are can be preemptively woken up due to
+     * new results - WAITING_FOR_RETRY, WAITING_FOR_RESULTS, and GAVE_UP.
+     * @return two longs - long[0] is the state the downloader should go in.
+     * long[1] is the time the downloader should spend in state long[0].  if
+     * long[1] < 1, this return value is ignored.
+     * @param deserialized true if this downloader was initialized from disk, 
+     * false if it is brand new.
+     * @param timeSpentWaiting the millisecond time that the downloader has 
+     * spent in the failed state.
+     */
+    protected long[] getFailedState(boolean deserialized, 
+                                   long timeSpentWaiting) {
+        // no special states
+        return new long[2];
+    }
+
+
     /** 
      * Actually does the download, finding duplicate files, trying all
      * locations, resuming, waiting, and retrying as necessary. Also takes care
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
+     * @param deserialized True if this downloader was deserialized from disk,
+     * false if it was newly constructed.
      */
-    protected void tryAllDownloads() {     
+    protected void tryAllDownloads(boolean deserialized) {     
         // the number of requeries i've done...
         int numRequeries = 0;
+        // the amount of time i've spent waiting for results or any other
+        // special state as dictated by subclasses (getFailedState)
+        long timeSpentWaiting = 0;
         // the time to next requery.  We don't want to send the first requery
         // until a few minutes after the initial download attempt--after all,
         // the user just started a query.  Hence initialize nextRequeryTime to
@@ -1060,9 +1103,23 @@ public class ManagedDownloader implements Downloader, Serializable {
                         }
                     }
                     else {
-                        setState(GAVE_UP);
-                        manager.remove(this, false);
-                        return;
+                        // first delegate to subclass - see if we should set
+                        // the state and or wait for a certain amount of time
+                        long[] instructions = getFailedState(deserialized, 
+                                                            timeSpentWaiting);
+                        // if the subclass has told me to do some special waiting
+                        if (instructions[1] > 0) {
+                            setState((int) instructions[0], instructions[1]);
+                            reqLock.lock(instructions[1]);
+                            timeSpentWaiting += 
+                                System.currentTimeMillis() - currTime;
+                        }
+                        else {
+                            // now just give up and hope for matching results
+                            setState(GAVE_UP);
+                            // wait indefn. for matching results
+                            reqLock.lock(0);
+                        }
                     }
                 }
             } catch (InterruptedException e) {

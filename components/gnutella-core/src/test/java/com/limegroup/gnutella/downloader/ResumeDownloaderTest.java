@@ -44,7 +44,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
         ret.initialize(new DownloadManagerStub(), 
                        new FileManagerStub(), 
-                       new ActivityCallbackStub());
+                       new ActivityCallbackStub(), false);
         return ret;
     }
 
@@ -63,13 +63,13 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader=newResumeDownloader();
-        while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
+        while (downloader.getState()!=Downloader.GAVE_UP) {         
 			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.WAITING_FOR_RESULTS, 
+                assertEquals(Downloader.GAVE_UP, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(Downloader.GAVE_UP, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
         //Serialize it!
@@ -86,11 +86,11 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         in.close();
         downloader.initialize(new DownloadManagerStub(),
                               new FileManagerStub(),
-                              new ActivityCallbackStub());
+                              new ActivityCallbackStub(), true);
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(Downloader.GAVE_UP, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }
