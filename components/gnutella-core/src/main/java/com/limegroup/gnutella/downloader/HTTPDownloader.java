@@ -46,6 +46,8 @@ public class HTTPDownloader implements Runnable {
     private int _state;
 
     private boolean _resume;
+    private boolean        _wasShutdown = false;
+    private HTTPDownloader _replacement = null;
 
 
     /** 
@@ -88,8 +90,11 @@ public class HTTPDownloader implements Runnable {
 	
 	byte[] ip=s.getInetAddress().getAddress();
 	PushRequestedFile prf=new PushRequestedFile(clientGUID, file,
-						    ip, index);
-	boolean found=requested.remove(prf);
+						    ip, index, this);
+
+	// Find the original Push request and mutate it into this object
+	boolean found = findAndMutate(prf);
+	//boolean found=requested.remove(prf);
 	if (! found)
 	    throw new IllegalAccessException();
 	
@@ -288,8 +293,9 @@ public class HTTPDownloader implements Runnable {
     public void run() {
 	
 	if (_mode == 1){
-	    if ( _state != QUEUED )
-	        _callback.addDownload(this);
+	    // Need to mutate the original connection into this connection
+	    //if ( _state != QUEUED )
+	        //_callback.addDownload(this);
 	    initOne();
 	}
 	else if (_mode == 2) {
@@ -330,6 +336,11 @@ public class HTTPDownloader implements Runnable {
     public void sendPushRequest() {
 	final byte[] clientGUID=_guid;
 
+    	if ( _wasShutdown )
+	    return;
+
+	_state = REQUESTING;
+
 	//Record this push so incoming push connections can be verified.
 	Assert.that(clientGUID!=null);
 	Assert.that(_filename!=null);
@@ -346,7 +357,7 @@ public class HTTPDownloader implements Runnable {
 	    return;
 	}
 	PushRequestedFile prf=new PushRequestedFile(clientGUID, _filename,
-						    remoteIP, _index);
+						    remoteIP, _index, this);
 	requested.add(prf);
 	
 	//TODO1: Should this be a new mGUID or the mGUID of the corresponding
@@ -565,6 +576,7 @@ public class HTTPDownloader implements Runnable {
     
     public void shutdown()
     {
+	_wasShutdown = true;
 	try {
 	    _istream.close();
 	    _fos.close();
@@ -575,8 +587,47 @@ public class HTTPDownloader implements Runnable {
 
     }
 
+    /**
+     *  Tell this downloader who (push) is replacing it
+     */
+    public void setReplacement( HTTPDownloader down )
+    {
+	_replacement = down;
+    }
+
+    /**
+     *  Get this downloaders (push) replacement
+     */
+    public HTTPDownloader getReplacement( )
+    {
+	return( _replacement );
+    }
 
 
+    /**
+     *  Find a push request and flag it for replacement by incoming
+     */
+    public boolean findAndMutate(PushRequestedFile prf) 
+    {
+        PushRequestedFile curPRF = null;
+
+	Iterator iter=requested.iterator();
+	while (iter.hasNext()) {
+	    curPRF=(PushRequestedFile)iter.next();
+
+	    if (prf.equals(curPRF))
+		break;
+	}
+
+	// If found then tell the original request, what its replacement is
+	if ( curPRF != null ) {
+	    curPRF.down.setReplacement(prf.down);
+            setDownloadInfo(curPRF.down);
+	    requested.remove(curPRF);
+	    return true;
+	}
+	return false;
+    }
 }
 
 /** A file that we requested via a push message. */
@@ -586,14 +637,16 @@ class PushRequestedFile {
     byte[] ip;
     int index;
     Date time;
+    HTTPDownloader down;
 
     public PushRequestedFile(byte[] clientGUID, String filename, 
-			     byte[] ip, int index) {
+			     byte[] ip, int index, HTTPDownloader down) {
 	this.clientGUID=clientGUID;
 	this.filename=filename;
 	this.ip=ip;
 	this.index=index;
 	this.time=new Date();
+	this.down=down;
     }
 
     /** Returns true if this request was made before the given time. */
