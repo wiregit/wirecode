@@ -2,6 +2,7 @@
 
 <!-- set global properties for this basedir -->
 <property name="basedir" value="."/>
+<property name="releasedir" value="../release"/>
 <property name="downloader" value="com/limegroup/gnutella/downloader"/>
 <property name="filters" value="com/limegroup/gnutella/filters"/>
 <property name="tests" value="com/limegroup/gnutella/tests"/>
@@ -17,8 +18,8 @@
 
 
 <!-- constants -->
-<property name="DEBUG" value="yes"/>  
-<property name="OPTIMIZE" value="no"/>  
+<property name="DEBUG" value="no"/>  
+<property name="OPTIMIZE" value="yes"/>  
 
 <!-- default classpath for javac.  it is set as the user's CLASSPATH
      environment with the jar files necessary for compilation appended. -->
@@ -57,24 +58,31 @@
     </javac>
 </target>
 
-<!-- Creates a core.jar file in a platform independent manner -->
-<target name="corejar" depends="clean, core">
-   <jar jarfile="core.jar" basedir="${basedir}" includes="**/*.class" />
-</target>
-
-<!-- Creates a core.jar file in a platform independent manner and copies -->
-<!-- it to the gui/lib directory, assuming that core and gui are on the  -->
-<!-- package level -->
-<target name="copycorejar" depends="corejar">
-   <copy file="core.jar" todir="../gui/lib"/>
-</target>
+	
 
 <!-- CLEAN -->
 <target name="clean">
 	<delete>
 		<fileset dir="${basedir}/com" includes="**/*.class"/>
 	</delete>
-</target>		
+</target>
+
+<!-- CLEAN RELEASE -->
+<target name="cleanrelease">
+	<delete>
+		<fileset dir="${releasedir}/com" includes="**/*.class"/>
+	</delete>
+</target>
+
+<!-- RELEASE -->
+<target name="release" depends="init">
+	<javac debug="no" optimize="yes"
+		srcdir="${basedir}" destdir="${releasedir}"
+		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${routing}/**,${chat}/**,${mp3}/**,${security}/**,${handshaking}/**"
+	>
+      <classpath refid="default.classpath" />
+    </javac>
+</target>
 
 </project>
 
