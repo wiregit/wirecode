@@ -541,8 +541,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         int numRequeries = 0;
         // the next time to requery....
         long nextRequeryTime = 0;
-        // the current time...
-        long currTime = 0;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
@@ -595,7 +593,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 manager.yieldSlot(this);
 
                 // should i send a requery?
-                currTime = System.currentTimeMillis();
+                final long currTime = System.currentTimeMillis();
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries++ < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
@@ -607,20 +605,25 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
                 // FLOW:
+                // 0.  If I was stopped, well, stop :) .
                 // 1.  If there is a retry to try (at least 1), then sleep for
                 // the time you should sleep to wait for busy hosts.  Also do
                 // some counting to let the GUI know how many guys you are
                 // waiting on.  Be sure to use the RequestLock, so then you can
                 // be waken up early to service a new QR
                 // 2. If there is no retry, then we have the following options:
-                //    A.  If you were stopped, stop.
-                //    B.  If you are waiting for results, set up the GUI
+                //    A.  If you are waiting for results, set up the GUI
                 //        correctly.  Note that the condition to enter this
                 //        branch will be violated when the last requery wait
                 //        time is reached but we've incremented past the number
                 //        of requeries allowed.
-                //    C.  Else, give up.
-                if (waitForRetry && !stopped) {
+                //    B.  Else, give up.
+                if (stopped) {
+                    setState(ABORTED);
+                    manager.remove(this, false);
+                    return;
+                }
+                if (waitForRetry) {
                     synchronized (this) {
                         retriesWaiting=0;
                         for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
@@ -634,14 +637,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // feel free to wake up early and try it....
                     reqLock.lock(time); 
                 } else {
-                    if (stopped) {
-                        setState(ABORTED);
-                        manager.remove(this, false);
-                        return;
-                    }
-                    else if (numRequeries <= REQUERY_ATTEMPTS) {
-                        currTime = System.currentTimeMillis();
-                        final long waitTime = nextRequeryTime - currTime;
+                    if (numRequeries <= REQUERY_ATTEMPTS) {
+                        final long waitTime = 
+                        nextRequeryTime - System.currentTimeMillis();
                         setState(WAITING_FOR_RESULTS, waitTime);
                         reqLock.lock(waitTime);
                     }
