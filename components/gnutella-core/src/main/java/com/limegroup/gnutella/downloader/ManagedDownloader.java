@@ -1379,7 +1379,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     public synchronized void pause() {
         // do not pause if already stopped.
-        if(!stopped) {
+        if(!stopped && !isCompleted()) {
             stop();
             stopped = false;
             paused = true;
