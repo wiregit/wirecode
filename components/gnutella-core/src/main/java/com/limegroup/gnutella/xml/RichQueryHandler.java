@@ -4,6 +4,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import com.sun.java.util.collections.List;
@@ -69,51 +70,46 @@ public class RichQueryHandler{
         //FileManager fManager = FileManager.instance();
         //We need the MetaFileManager to get the FileDesc from full FileName
         //Note:FileManager has been changed to return a MetaFileManager now
-        Response res;
         long index=-1;
         long size=-1;
         String name="";
         int z =0;
         boolean valid = true;
         debug("RQH.query(): # of resps = " + s);
-        for(int i=0; i<s;i++){
+        boolean busy = 
+            RouterService.getUploadManager().isBusy() &&
+            RouterService.getUploadManager().isQueueFull();        
+        for(int i = 0; i < s; i++) {
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none
             FileDesc fd = null;
-            if(subjectFile==null){//pure data (data about NO file)
+            Response res = null;
+            if(subjectFile==null) { //pure data (data about NO file)
                 index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
-                size = 0;//there is no file, so no size
-                name =" ";//leave blank
-            }
-            else { //meta-data about a specific file
+                size = 0; //there is no file, so no size
+                name = " "; //leave blank
+                res = new Response(index, size, name);
+            } else { //meta-data about a specific file
                 fd = fManager.file2index(subjectFile);
-                if (fd != null){//we found a file with the right name
-					index = fd.getIndex();
-					name =  fd.getName();//need not send whole path; just name + index
-					size =  fd.getSize();
-                }
-                else{//meaning fd == null 
-                    //this is a bad case: 
-                    //the metadata says that its about a file but the 
-                    //fileManager cannot find this file.
-                    //we should remove this meta-data from the repository
-                    //The above is a TODO2
+                if( fd == null || 
+                   (busy && fd.getNumberOfAlternateLocations() < 10) ) {
+                    // if fd is null, MetaFileManager is out of synch with
+                    // FileManager -- this is bad.
                     valid = false;
+                } else { //we found a file with the right name
+					index = fd.getIndex();
+                    //need not send whole path; just name + index					
+					name =  fd.getName();
+					size =  fd.getSize();
+					res = new Response(fd);
                 }
             }
             if (valid) {
                 //if this code is NOT run s times 
                 //there will be nulls at the end of the array
-                res = new Response(fd);
                 res.setDocument(currDoc);
                 retResponses[z] = res;
                 z++;
-                try {
-                    debug("RQH: xml = " + currDoc.getXMLString());
-                }
-                catch (Exception e) {
-                    ErrorService.error(e);
-                }
             }
             valid = true;
         }
