@@ -413,9 +413,10 @@ public class SettingsManager implements SettingsInterface
         if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
             setMaxIncomingConnections(0);
-        }
-  
+        }  
+		
         write_ = true;
+		resetFileManager();
         writeProperties();
     }
 
@@ -1433,15 +1434,17 @@ public class SettingsManager implements SettingsInterface
 
 	// resets the file manager values in a new thread,
 	// as it could take a long time. 
-	private void resetFileManager() {
-		Thread fileManagerThread = new Thread() {
-			public void run() {
-				FileManager.getFileManager().reset();
-				FileManager.getFileManager().addDirectories(directories_);        
-			}
-		};
-		fileManagerThread.setDaemon(true);
-		fileManagerThread.start();
+	private synchronized void resetFileManager() {
+		if(write_) {
+			Thread fileManagerThread = new Thread() {
+				public void run() {
+					FileManager.getFileManager().reset();
+					FileManager.getFileManager().addDirectories(directories_);  
+				}
+			};
+			fileManagerThread.setDaemon(true);
+			fileManagerThread.start();
+		}
 	}
 
     /** writes out the properties file to with the specified
