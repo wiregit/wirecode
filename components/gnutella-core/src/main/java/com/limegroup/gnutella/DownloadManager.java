@@ -4,6 +4,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -961,11 +962,13 @@ public class DownloadManager implements BandwidthTracker {
         	//We can't send the push to a host we don't know
         	//but we can still send it to the proxies.
         } finally {
+            IPFilter filter = IPFilter.instance();
         	//make sure we send it to the proxies, if any
         	Set proxies = file.getPushProxies();
         	for (Iterator iter = proxies.iterator();iter.hasNext();) {
         		PushProxyInterface ppi = (PushProxyInterface)iter.next();
-        		udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
+        		if (filter.allow(ppi.getPushProxyAddress().getAddress()))
+        		    udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
         	}
         }
         return true;
@@ -1052,9 +1055,12 @@ public class DownloadManager implements BandwidthTracker {
             NetworkUtils.ip2string(shouldDoFWTransfer ? externalAddr : addr) +
             ":" + port;
 
+        IPFilter filter = IPFilter.instance();
         // try to contact each proxy
         for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
             PushProxyInterface ppi = (PushProxyInterface)iter.next();
+            if (!filter.allow(ppi.getPushProxyAddress().getAddress()))
+                continue;
             final String ppIp = ppi.getPushProxyAddress().getHostAddress();
             final int ppPort = ppi.getPushProxyPort();
             String connectTo =  "http://" + ppIp + ":" + ppPort + request;
@@ -1151,6 +1157,8 @@ public class DownloadManager implements BandwidthTracker {
     	
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
+    	// TODO: UDPService.canDoFWT() should be added as condition
+    	// when its merged
         if(!RouterService.acceptedIncomingConnection()) {
             if(!sendPushTCP(file, guid))
                 notify(toNotify);
