@@ -105,32 +105,40 @@ public final class Expand {
      */
     public static void expandFile(File source, File dest, boolean overwrite) 
         throws IOException {
-        ZipInputStream zis = new ZipInputStream(
-                new BufferedInputStream(new FileInputStream(source)));
-        ZipEntry ze = null;
+        ZipInputStream zis = null;
         
-        while ((ze = zis.getNextEntry()) != null) {
-            File f = new File(dest, ze.getName());
-            // create intermediary directories - sometimes zip don't add them
-            File dirF=new File(f.getParent());
-            dirF.mkdirs();
+        try {
+            zis = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(source)));
+            ZipEntry ze = null;
             
-            if (ze.isDirectory()) {
-                f.mkdirs(); 
-            } else if ( ze.getTime() > f.lastModified() ||
-                        overwrite ) {
-                FileUtils.setWriteable(f);
-                byte[] buffer = new byte[1024];
-                int length = 0;
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(f));
+            while ((ze = zis.getNextEntry()) != null) {
+                File f = new File(dest, ze.getName());
+                // create intermediary directories - sometimes zip don't add them
+                File dirF=new File(f.getParent());
+                dirF.mkdirs();
                 
-                while ((length = zis.read(buffer)) >= 0) {
-                    fos.write(buffer, 0, length);
+                if (ze.isDirectory()) {
+                    f.mkdirs(); 
+                } else if ( ze.getTime() > f.lastModified() ||
+                            overwrite ) {
+                    FileUtils.setWriteable(f);
+                    byte[] buffer = new byte[1024];
+                    int length = 0;
+                    OutputStream fos = null;
+                    try {
+                        fos = new BufferedOutputStream(new FileOutputStream(f));
+                    
+                        while ((length = zis.read(buffer)) >= 0) {
+                            fos.write(buffer, 0, length);
+                        }
+                    } finally {
+                        IOUtils.close(fos);
+                    }
                 }
-                
-                fos.close();
             }
+        } finally {
+            IOUtils.close(zis);
         }
-        zis.close();
     }
 }
