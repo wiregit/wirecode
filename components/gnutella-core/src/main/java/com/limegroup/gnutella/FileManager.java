@@ -363,7 +363,7 @@ public abstract class FileManager {
 	/**
 	 * Returns a list of all shared incomplete file descriptors.
 	 */
-	public FileDesc[] getIncompleteFileDescriptors() {
+	public synchronized FileDesc[] getIncompleteFileDescriptors() {
         if (_incompletesShared == null) {
             return null;
         }
