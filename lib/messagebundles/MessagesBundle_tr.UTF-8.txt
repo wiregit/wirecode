@@ -116,7 +116,6 @@ SEARCH_TITLE=Ara
 MONITOR_TITLE=İzle
 CONNECTIONS_TITLE=Bağlantılar
 LIBRARY_TITLE=Kütüphane
-SHOPPING_TITLE=LimeDükkanı
 OPTIONS_TITLE=Seçenekler
 STATS_TITLE=İstatistikler
 DOWNLOAD_TITLE=İndirilenler
@@ -129,7 +128,6 @@ SEARCH_TIP=Dosya arama ve ındirme.
 MONITOR_TIP=Arama sonuçlarını ve gönderilenleri görüntüleme.
 CONNECTIONS_TIP=Diğer ıstemcilere bağlanma.
 LIBRARY_TIP=Kaydedilmiş dosya klasörünü görüntüleme.
-SHOPPING_TIP=LimeWire alışveriş merkezine gider.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -186,9 +184,6 @@ MENU_NAV_CONN_ACCESSIBLE=Bağlantılar ekranını görüntüler.
 MENU_NAV_LIB=Kütüphane
 MENU_NAV_LIB_MNEMONIC=K
 MENU_NAV_LIB_ACCESSIBLE=Kütüphane ekranını görüntüler.
-MENU_NAV_SHOPPING=LimeDükkanı
-MENU_NAV_SHOPPING_MNEMONIC=D
-MENU_NAV_SHOPPING_ACCESSIBLE=LimeShop websitesini görüntüler.
 
 MENU_VIEW_TITLE=Görüntüle
 MENU_VIEW_TITLE_MNEMONIC=G
@@ -201,18 +196,12 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=Bağlantılar penceresini gösterir.
 MENU_VIEW_LIBRARY=Kütüphane
 MENU_VIEW_LIBRARY_MNEMONIC=K
 MENU_VIEW_LIBRARY_ACCESSIBLE=Kütüphane penceresini gösterir.
-MENU_VIEW_SHOPPING=LimeDükkanı
-MENU_VIEW_SHOPPING_MNEMONIC=D
-MENU_VIEW_SHOPPING_ACCESSIBLE=Alışveriş penceresini gösterir.
 
 MENU_RESOURCES_TITLE=Kaynaklar
 MENU_RESOURCES_TITLE_MNEMONIC=K
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_ACCESSIBLE=LimeWire PRO websitesini görüntüler.
-MENU_RESOURCES_LIMESHOP=LimeDükkanı
-MENU_RESOURCES_LIMESHOP_MNEMONIC=D
-MENU_RESOURCES_LIMESHOP_ACCESSIBLE=LimeShop websitesini görüntüler.
 
 MENU_TOOLS_TITLE=Araçlar
 MENU_TOOLS_TITLE_MNEMONIC=A

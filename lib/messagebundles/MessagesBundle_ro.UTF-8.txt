@@ -114,7 +114,6 @@ SEARCH_TITLE=Cauta
 MONITOR_TITLE=Monitor
 CONNECTIONS_TITLE=Conexiuni
 LIBRARY_TITLE=Librarie
-SHOPPING_TITLE=LimeShop
 OPTIONS_TITLE=Optiuni
 STATS_TITLE=Statistici
 DOWNLOAD_TITLE=Descarca
@@ -127,7 +126,6 @@ SEARCH_TIP=Cauta si descarca fisierele dorite
 MONITOR_TIP=Afiseaza rezultatul cautarilor si upload-urile
 CONNECTIONS_TIP=Conexiuni la alti clienti
 LIBRARY_TIP=Afiseaza rezumatul fisierelor salvate
-SHOPPING_TIP=Faceti cumparaturi la LimeWire
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -181,9 +179,6 @@ MENU_NAV_CONN_ACCESSIBLE=Afiseaza fereastra de conexiuni
 MENU_NAV_LIB=Librarie
 MENU_NAV_LIB_MNEMONIC=L
 MENU_NAV_LIB_ACCESSIBLE=Afiseaza fereastra librarie
-MENU_NAV_SHOPPING=LimeShop
-MENU_NAV_SHOPPING_MNEMONIC=S
-MENU_NAV_SHOPPING_ACCESSIBLE=Afiseaza LimeShop Website
 
 MENU_VIEW_TITLE=Afiseaza
 MENU_VIEW_TITLE_MNEMONIC=Z
@@ -196,18 +191,12 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=Afiseaza fereastra de conexiuni
 MENU_VIEW_LIBRARY=Librarie
 MENU_VIEW_LIBRARY_MNEMONIC=L
 MENU_VIEW_LIBRARY_ACCESSIBLE=Afiseaza libraria
-MENU_VIEW_SHOPPING=LimeShop
-MENU_VIEW_SHOPPING_MNEMONIC=S
-MENU_VIEW_SHOPPING_ACCESSIBLE=Afiseaza fereastra de cumparare
 
 MENU_RESOURCES_TITLE=Resurse
 MENU_RESOURCES_TITLE_MNEMONIC=R
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_ACCESSIBLE=Afiseaza LimeWire PRO web site
-MENU_RESOURCES_LIMESHOP=LimeShop
-MENU_RESOURCES_LIMESHOP_MNEMONIC=S
-MENU_RESOURCES_LIMESHOP_ACCESSIBLE=Afiseaza LimeWire web site
 
 MENU_TOOLS_TITLE=Utilitare
 MENU_TOOLS_TITLE_MNEMONIC=U
