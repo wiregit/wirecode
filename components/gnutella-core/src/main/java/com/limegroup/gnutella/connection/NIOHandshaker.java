@@ -29,12 +29,29 @@ public class NIOHandshaker extends AbstractHandshaker {
     private boolean _handshakeComplete;
 
     
-
+    /**
+     * Creates a new <tt>NIOHandshaker</tt> for the specified connection.
+     * 
+     * @param conn the <tt>Connection</tt> to handshake for
+     * @param requestHeaders the request headers to send
+     * @param responseHeaders the responder for determining our response to 
+     *  the remote host
+     * @return a new <tt>NIOHandshaker</tt>
+     */
     public static Handshaker createHandshaker(Connection conn,
         Properties requestHeaders, HandshakeResponder responseHeaders)  {
         return new NIOHandshaker(conn, requestHeaders, responseHeaders);
     }
     
+    /**
+     * Creates a new <tt>NIOHandshaker</tt> instance for the specified 
+     * connection.
+     * 
+     * @param conn the <tt>Connection</tt> to handshake for
+     * @param requestHeaders the request headers to send
+     * @param responseHeaders the responder for determining our response to 
+     *  the remote host
+     */
     private NIOHandshaker(Connection conn, 
         Properties requestHeaders, HandshakeResponder responseHeaders)  {
         super(conn, requestHeaders, responseHeaders);
@@ -43,18 +60,26 @@ public class NIOHandshaker extends AbstractHandshaker {
         }
     }
     
-    
+    /**
+     * Creates a new byte buffer for the outgoing connection request.
+     * 
+     * @param headers the headers to include in the request
+     * @return a new byte buffer with the connect string and headers for the
+     *  outgoing connection request
+     */
     private static ByteBuffer createRequestBuffer(Properties headers)  {
         StringBuffer sb = new StringBuffer();
-        Enumeration headerNames = headers.keys();
-        Enumeration headerValues = headers.elements();
+        Enumeration headerNames = headers.propertyNames();
         while(headerNames.hasMoreElements())  {
-            sb.append(headerNames.nextElement());
+            String key = (String)headerNames.nextElement();
+            sb.append(key);
             sb.append(": ");
-            sb.append(headerValues.nextElement());
+            sb.append(headers.getProperty(key));
+            //sb.append(headerValues.nextElement());
             sb.append(CRLF);
         }
         sb.append(CRLF);
+        // TODO: deal with Remote-IP header -- see old Connection sendHeaders
         
         byte[] connectBytes = (GNUTELLA_CONNECT_06+CRLF).getBytes();
         byte[] headerBytes = sb.toString().getBytes();
