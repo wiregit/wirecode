@@ -524,9 +524,12 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // fully connected, and we can go ahead with the handshake
         if(!ConnectionSettings.USE_NIO.getValue())  {
             blockingHandshake();              
-        } //else if(isOutgoing())  {
-            //HANDSHAKER.write();
-        //}
+        } else if(isOutgoing() && _socket.isConnected())  {
+            // if our socket is already connected and it's an outgoing 
+            // connection, we need to notify the handshaker to start the
+            // handshake
+            HANDSHAKER.handshake();
+        }
     }
     
     /**
