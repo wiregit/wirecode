@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.io.*;
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 
 /**

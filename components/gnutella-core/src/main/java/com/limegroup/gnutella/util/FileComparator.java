@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
-import com.sun.java.util.collections.Comparator;
+import java.util.Comparator;
 
 /**
  * Compares two File's lexically by file name).  Useful for storing Java 1.1.8

@@ -6,7 +6,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.FileUtils;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary

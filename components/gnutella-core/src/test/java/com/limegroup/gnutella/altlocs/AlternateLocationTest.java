@@ -12,9 +12,9 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.TreeMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.

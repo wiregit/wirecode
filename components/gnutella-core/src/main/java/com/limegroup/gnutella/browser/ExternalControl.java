@@ -5,7 +5,7 @@ import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.StringTokenizer;
 import java.net.*;
 import java.io.*;

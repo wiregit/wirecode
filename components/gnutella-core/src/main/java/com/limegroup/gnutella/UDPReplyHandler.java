@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.io.IOException;
 import java.net.*;

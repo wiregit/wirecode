@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.security;
 
 import java.security.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.security.Authenticator;

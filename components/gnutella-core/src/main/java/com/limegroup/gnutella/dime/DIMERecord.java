@@ -7,8 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import com.limegroup.gnutella.Assert;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Map;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.ByteOrder;

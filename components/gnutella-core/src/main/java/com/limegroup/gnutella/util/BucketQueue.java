@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.NoSuchElementException;
-import com.sun.java.util.collections.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 /** 
  * A discrete-case priority queue.  Designed to be a replacement for BinaryHeap

@@ -20,9 +20,9 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Sends the THEX tree as an HTTP message.

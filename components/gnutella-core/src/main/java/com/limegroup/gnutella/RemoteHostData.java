@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 /**
  * Simple representation of a remote host.

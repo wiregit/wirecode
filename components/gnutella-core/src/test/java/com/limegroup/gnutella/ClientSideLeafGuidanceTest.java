@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

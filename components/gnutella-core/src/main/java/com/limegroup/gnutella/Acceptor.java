@@ -9,7 +9,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

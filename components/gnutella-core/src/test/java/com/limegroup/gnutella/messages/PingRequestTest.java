@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PingRequestTest(String name) {

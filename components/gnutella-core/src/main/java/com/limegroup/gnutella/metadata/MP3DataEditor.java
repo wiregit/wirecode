@@ -10,11 +10,11 @@ import java.io.UnsupportedEncodingException;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Vector;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2DecompressionException;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.security;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * A dummy authenticator. Does nothing

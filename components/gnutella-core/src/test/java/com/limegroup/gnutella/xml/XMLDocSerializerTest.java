@@ -5,8 +5,8 @@ import java.io.File;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
+import java.util.Iterator;
+import java.util.Map;
 
 /** This class tests that present and future versions are compatible with older
  * versions of LimeXMLDocument.  Basically, for every version the current

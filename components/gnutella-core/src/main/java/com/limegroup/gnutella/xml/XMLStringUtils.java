@@ -6,7 +6,7 @@
 
 package com.limegroup.gnutella.xml;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Provides utility methods to process the canonicalized strings we use to

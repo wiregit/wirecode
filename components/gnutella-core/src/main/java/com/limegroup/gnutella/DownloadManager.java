@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -332,7 +332,9 @@ public class DownloadManager implements BandwidthTracker {
         //Read downloaders from disk.
         List buf=null;
         try {
-            ObjectInputStream in=new ObjectInputStream(new FileInputStream(file));
+            ObjectInputStream in = new ConverterObjectInputStream(
+                                    new BufferedInputStream(
+                                        new FileInputStream(file)));
             //This does not try to maintain backwards compatibility with older
             //versions of LimeWire, which only wrote the list of downloaders.
             //Note that there is a minor race condition here; if the user has

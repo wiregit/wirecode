@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.tigertree;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,13 +16,14 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Gregorio Roper
@@ -134,7 +136,9 @@ public final class TigerTreeCache implements Serializable {
     private static Map createMap() {
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(new FileInputStream(CACHE_FILE));
+            ois = new ConverterObjectInputStream(
+                    new BufferedInputStream(
+                        new FileInputStream(CACHE_FILE)));
             return (Map) ois.readObject();
         } catch (IOException e) {
             return new HashMap();

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,11 +12,12 @@ import java.io.Serializable;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -138,7 +140,9 @@ public final class UrnCache {
         Map result;
         ObjectInputStream ois = null;
 		try {
-            ois = new ObjectInputStream(new FileInputStream(file));
+            ois = new ConverterObjectInputStream(
+                    new BufferedInputStream(
+                        new FileInputStream(file)));
 			result = (Map)ois.readObject();
         } catch (IOException e) {
             result = null;

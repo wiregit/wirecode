@@ -10,7 +10,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 
 /**

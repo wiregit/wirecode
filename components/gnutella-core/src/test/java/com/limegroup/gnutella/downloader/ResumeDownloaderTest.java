@@ -23,8 +23,9 @@ import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /** 
  * Unit tests small parts of ResumeDownloader.  See RequeryDownloadTest for
@@ -147,7 +148,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  @param expectHash true iff there should be a hash in the downloader */
     private void tSerialization(String file, boolean expectHash) 
             throws Exception {
-        ObjectInputStream in=new ObjectInputStream(
+        ObjectInputStream in=new ConverterObjectInputStream(
             new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
         );
         ResumeDownloader rd=(ResumeDownloader)in.readObject();

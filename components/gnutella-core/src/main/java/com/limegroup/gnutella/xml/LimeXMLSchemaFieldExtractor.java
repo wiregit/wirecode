@@ -5,7 +5,7 @@
  */
 
 package com.limegroup.gnutella.xml;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

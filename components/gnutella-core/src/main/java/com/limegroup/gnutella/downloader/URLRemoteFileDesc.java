@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import java.net.URL;
 import java.io.Serializable;
-import com.sun.java.util.collections.Set;
+import java.util.Set;
 
 /**
  * A RemoteFileDesc augmented with a URL, which might be different from the

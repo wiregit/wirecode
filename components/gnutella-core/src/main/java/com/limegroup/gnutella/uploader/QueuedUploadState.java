@@ -4,9 +4,9 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class QueuedUploadState implements HTTPMessage {
 

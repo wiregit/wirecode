@@ -5,9 +5,9 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.Date;
 import java.io.IOException;
 import java.io.OutputStream;

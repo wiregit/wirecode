@@ -20,9 +20,9 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.MetaFileManager;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MulticastTest extends BaseTestCase {
 

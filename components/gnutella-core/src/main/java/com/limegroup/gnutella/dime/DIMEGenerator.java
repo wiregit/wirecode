@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.dime;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
 import java.io.OutputStream;
 import java.io.IOException;
 

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.udpconnect;
 
 import java.io.*;
 import java.net.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.search.*;

@@ -6,7 +6,7 @@ import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.xml.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.net.*;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;

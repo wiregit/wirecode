@@ -21,9 +21,9 @@ import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class I18NSendReceiveTest 
     extends com.limegroup.gnutella.util.BaseTestCase {

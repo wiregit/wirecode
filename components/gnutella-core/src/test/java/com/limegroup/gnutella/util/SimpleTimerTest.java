@@ -5,7 +5,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.stubs.ErrorCallbackStub;
-import com.sun.java.util.collections.ArrayList;
+import java.util.ArrayList;
 
 /**
  * Unit tests for SimpleTimer

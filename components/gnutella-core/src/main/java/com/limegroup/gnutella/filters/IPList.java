@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.Assert;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A mutable list of IP addresses.  More specifically, a list of sets of

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.security;
 import java.io.Serializable;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Contains authentication information for a user

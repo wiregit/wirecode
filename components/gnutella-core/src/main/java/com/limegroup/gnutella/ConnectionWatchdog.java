@@ -3,11 +3,11 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.xml;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.util.Locale;
 import org.apache.xerces.parsers.DOMParser;

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Comparator;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /** 
  * Coomon Array manipulation routines

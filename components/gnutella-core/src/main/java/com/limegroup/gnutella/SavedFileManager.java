@@ -7,10 +7,10 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import java.io.File;
 import java.io.IOException;
 
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.TreeSet;
-import com.sun.java.util.collections.Iterator;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.Iterator;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

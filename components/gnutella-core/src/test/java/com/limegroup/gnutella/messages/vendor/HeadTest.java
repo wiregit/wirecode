@@ -9,7 +9,7 @@ import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.util.Random;
 

@@ -8,10 +8,10 @@ import java.io.InputStream;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.NoSuchElementException;
-import com.sun.java.util.collections.UnsupportedOperationException;
+import java.util.List;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 
 /**
  * Tests for DIMEParser.

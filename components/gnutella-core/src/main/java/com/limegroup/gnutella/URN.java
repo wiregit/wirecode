@@ -7,8 +7,8 @@ import com.limegroup.gnutella.security.SHA1;
 import com.bitzi.util.*;
 import java.io.*;
 import java.security.*;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.HashMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.net.*;
 import java.util.Locale;
 

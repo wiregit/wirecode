@@ -7,9 +7,9 @@ import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import java.net.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 /**
  * This class handles common utility functions for networking tasks.

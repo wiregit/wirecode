@@ -43,13 +43,13 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.Map;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file

@@ -15,9 +15,9 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UUID;
 import com.limegroup.gnutella.dime.*;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.HashMap;
 
 /**
  * Unit tests for HashTree

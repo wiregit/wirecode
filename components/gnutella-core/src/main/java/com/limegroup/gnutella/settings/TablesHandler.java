@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.settings;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Handles preferences for tables.  Stored settings include

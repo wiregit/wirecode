@@ -10,8 +10,7 @@ import java.lang.ref.WeakReference;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, IpPort,
-                                 com.sun.java.util.collections.Comparable
+public class Endpoint implements Cloneable, IpPort, Comparable
 {
     
     private String hostname = null;

@@ -13,7 +13,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.simpp.*;
 import com.limegroup.gnutella.upelection.*;
 import com.limegroup.gnutella.udpconnect.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.StringTokenizer;
 import java.io.*;
 import java.net.*;

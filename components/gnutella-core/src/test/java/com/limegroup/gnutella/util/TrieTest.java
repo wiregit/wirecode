@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.NoSuchElementException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Tests Trie.

@@ -18,7 +18,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 /**
  *  Tests that a Ultrapeer correctly sends XML Replies.  

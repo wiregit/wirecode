@@ -6,7 +6,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.metadata.*;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class handles querying shared files with XML data and returning XML data

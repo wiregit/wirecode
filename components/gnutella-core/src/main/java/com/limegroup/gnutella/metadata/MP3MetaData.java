@@ -5,7 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import de.vdheide.mp3.*;
 
 /**

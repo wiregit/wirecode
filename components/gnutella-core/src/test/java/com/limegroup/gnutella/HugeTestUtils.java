@@ -6,8 +6,8 @@ import java.net.URL;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class provides convenient data and utility functions to

@@ -21,10 +21,10 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.security.TigerTree;
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.List;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class stores HashTrees and is capable of verifying a file it is also

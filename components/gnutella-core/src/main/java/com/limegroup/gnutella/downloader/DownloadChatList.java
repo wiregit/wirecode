@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class keeps track of chattable <tt>HTTPDownloader</tt> instances for

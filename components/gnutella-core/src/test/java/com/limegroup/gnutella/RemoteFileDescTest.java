@@ -4,8 +4,8 @@ import java.net.URL;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.

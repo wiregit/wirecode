@@ -3,9 +3,9 @@ package com.limegroup.gnutella.util;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.Interval;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.NoSuchElementException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**

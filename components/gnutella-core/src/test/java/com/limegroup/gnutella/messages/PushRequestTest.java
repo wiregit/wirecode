@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PushRequestTest(String name) {

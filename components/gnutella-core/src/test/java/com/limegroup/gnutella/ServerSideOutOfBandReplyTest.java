@@ -34,9 +34,9 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Random;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
 
 /**
  *  Tests that an Ultrapeer correctly handles out-of-band queries.  Essentially 

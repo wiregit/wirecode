@@ -8,7 +8,7 @@ package com.limegroup.gnutella.metadata;
 
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.io.*;
 
