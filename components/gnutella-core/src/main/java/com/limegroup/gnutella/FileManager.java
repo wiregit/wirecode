@@ -33,6 +33,7 @@ public class FileManager {
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in a shared directory with a shareable extension. */
     private ArrayList /* of FileDesc */ _files;
+
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
@@ -42,6 +43,7 @@ public class FileManager {
     private Trie /* String -> IntSet  */ _index;
     /** an index mapping appropriately case-normalized URN strings to
      * the indices in _files.  */
+
     private Hashtable /* String -> IntSet  */ _urnIndex;
     
     /** The set of extensions to share, sorted by StringComparator. 
@@ -148,12 +150,58 @@ public class FileManager {
         return ret;
     }
 
+	/**
+	 * Returns the file index for the specified URN.  This only returns 
+	 * one index, even though multiple indeces are possible with 
+	 * HUGE v. 0.93.
+	 *
+	 * @param urn the urn for the file
+	 * @return the index corresponding to the requested urn, or
+	 *  -1 if not matching index could be found
+	 */
+	public int getFileIndexForURN(String urn) {
+        Iterator iter = _files.iterator();
+		int count = 0;
+        while(iter.hasNext()) {
+            FileDesc candidate = (FileDesc)iter.next();
+            if (candidate==null) continue;
+            if (candidate.satisfiesUrn(urn)) {
+                return count;
+            }
+			count++;
+        }
+        // none found
+        return -1;
+	}
+
+	/**
+	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
+	 * one <tt>FileDesc</tt>, even though multiple indeces are possible with 
+	 * HUGE v. 0.93.
+	 *
+	 * @param urn the urn for the file
+	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
+	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
+	 */
+	public FileDesc getFileDescForURN(String urn) {
+        Iterator iter = _files.iterator();
+        while(iter.hasNext()) {
+            FileDesc candidate = (FileDesc)iter.next();
+            if (candidate==null) continue;
+            if (candidate.satisfiesUrn(urn)) {
+                return candidate;
+            }
+        }
+        // none found
+        return null;
+	}
+
    /**
      * Returns the FileDesc matching the passed-in path and size, if any,
      * null otherwise. Kind of silly, definitely inefficient, but only
      * needed rarely, from library view, because there's no sharing of
      * data structures for local files
-     */
+     */	
     public FileDesc getFileDescMatching(String path, int size) {
         // linear probe. thankfully it's rare
         Iterator iter = _files.iterator();
@@ -169,7 +217,8 @@ public class FileManager {
         }
         // none found
         return null;
-    }
+	}
+	
 
 
     /**
@@ -571,11 +620,10 @@ public class FileManager {
                 return false;
             _size += n;
             int fileIndex = _files.size();
-
-            long modTime = (new File(path)).lastModified();
+			long modTime = (new File(path)).lastModified();
 			HashSet urns = UrnCache.instance().getUrns(path, modTime);
-            FileDesc fileDesc = new FileDesc(fileIndex, name, path, (int)n,
-			  modTime, urns);
+			FileDesc fileDesc = new FileDesc(fileIndex, name, path, (int)n,
+											 modTime, urns);
             _files.add(fileDesc);
             _numFiles++;
 
@@ -655,8 +703,8 @@ public class FileManager {
                             FileDesc fd = (FileDesc)pendingFileDescs.elementAt(0);
                             pendingFileDescs.removeElementAt(0);
                             fd.calculateUrns();
-						    UrnCache.instance().
-							  persistUrns(fd._path,fd._modTime,fd._urns);	
+							UrnCache.instance().
+							    persistUrns(fd._path,fd._modTime,fd._urns);
                             updateUrnIndex(fd);
                         }
                     }
