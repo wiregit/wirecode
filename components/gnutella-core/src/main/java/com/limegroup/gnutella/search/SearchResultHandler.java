@@ -63,7 +63,10 @@ public final class SearchResultHandler {
      *  I need synchronization for every call I make, so a Vector is fine.
      */
     private final List GUID_COUNTS = new Vector();
-    
+
+    /*---------------------------------------------------    
+      PUBLIC INTERFACE METHODS
+     ----------------------------------------------------*/
 
 	/**
 	 * Starts the thread that processes search results.
@@ -123,21 +126,31 @@ public final class SearchResultHandler {
         }
     }
 
-    private GuidCount removeQueryInternal(GUID guid) {
-        synchronized (GUID_COUNTS) {
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
-                GuidCount currGC = (GuidCount) iter.next();
-                if (currGC.getGUID().equals(guid)) {
-                    iter.remove();  // get rid of this dude
-                    return currGC;  // and return it...
-                }
-            }
-        }
-        return null;
-    }
 
+    /**
+     * Use this to see how many results have been displayed to the user for the
+     * specified query.
+     *
+     * @param guid the guid of the query.
+     *
+     * @return the number of non-filtered results for query with guid guid. -1
+     * is returned if the guid was not found....
+     */    
+    public int getNumResultsForQuery(GUID guid) {
+        GuidCount gc = retrieveGuidCount(guid);
+        if (gc != null)
+            return gc.getNumResults();
+        else
+            return -1;
+    }
     
+    /*---------------------------------------------------    
+      END OF PUBLIC INTERFACE METHODS
+     ----------------------------------------------------*/
+
+    /*---------------------------------------------------    
+      PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
 
 	/**
 	 * Private class for processing replies as they come in -- does some
@@ -293,17 +306,16 @@ public final class SearchResultHandler {
         // around for further use
         if (numSentToBackEnd > 0) {
             // get the correct GuidCount
-            GuidCount gc = removeQueryInternal(new GUID(qr.getGUID()));
+            GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
             if (gc == null)
                 // 0. probably just hit lag, or....
                 // 1. we could be under attack - hits not meant for us
                 // 2. programmer error - ejected a query we should not have
                 return;
             
-            // update the object and remember it
-            debug("SRH.accountAndUpdateDynamicQueriers(): in(crement/sert)ing.");
+            // update the object
+            debug("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
             gc.increment(numSentToBackEnd);
-            GUID_COUNTS.add(gc);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
@@ -326,6 +338,37 @@ public final class SearchResultHandler {
         debug("SRH.accountAndUpdateDynamicQueriers(): returning.");
     }
 
+
+    private GuidCount removeQueryInternal(GUID guid) {
+        synchronized (GUID_COUNTS) {
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(guid)) {
+                    iter.remove();  // get rid of this dude
+                    return currGC;  // and return it...
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private GuidCount retrieveGuidCount(GUID guid) {
+        synchronized (GUID_COUNTS) {
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(guid))
+                    return currGC;
+            }
+        }
+        return null;
+    }
+
+    /*---------------------------------------------------    
+      END OF PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
 
     private final boolean debugOn = false;
     private void debug(String out) {
