@@ -28,10 +28,6 @@ public class LimeXMLReplyCollection {
     private static final Log LOG =
         LogFactory.getLog(LimeXMLReplyCollection.class);
     
-    /**
-     * map used to ensure that no two threads try to annotate the same file
-     */
-    private static Map _nameToDesc = Collections.synchronizedMap(new HashMap());
 
     /**
      * The schemaURI of this collection.
@@ -595,34 +591,21 @@ public class LimeXMLReplyCollection {
         if(LOG.isDebugEnabled())
             LOG.debug("writing: " + fileName + " to disk.");
         
-        Object toLock;
-        
-        synchronized (_nameToDesc) {
-        	if (!_nameToDesc.containsKey(fileName)) {
-        		_nameToDesc.put(fileName,fd);
-        		toLock = fd;
-        	} else 
-        		toLock = _nameToDesc.get(fileName);
-        }
-        
-        synchronized(toLock) {
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        	MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
-        	if (commitWith != null)  {// commit to disk.
-        		if(commitWith.getCorrectDocument() == null) 
-        			mp3WriteState = commitMetaData(fileName, commitWith);
-        		else { 
-        			//The id3 data on disk is better than the data we got in the
-        			//query reply. So we should update the Document we added
-        			removeDoc(fd);
-        			addReply(fd, commitWith.getCorrectDocument());
-        			mp3WriteState = NORMAL;//no need to write anything
-        		}
+        MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
+        if (commitWith != null)  {// commit to disk.
+        	if(commitWith.getCorrectDocument() == null) 
+        		mp3WriteState = commitMetaData(fileName, commitWith);
+        	else { 
+        		//The id3 data on disk is better than the data we got in the
+        		//query reply. So we should update the Document we added
+        		removeDoc(fd);
+        		addReply(fd, commitWith.getCorrectDocument());
+        		mp3WriteState = NORMAL;//no need to write anything
         	}
         }
         
-        _nameToDesc.remove(fileName);
         
         Assert.that(mp3WriteState != INCORRECT_FILETYPE, 
                     "trying to write id3 to non mp3 file");
