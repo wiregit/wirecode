@@ -868,16 +868,19 @@ public abstract class MessageRouter {
         catch (IllegalStateException ise) {
             return;
         }
+        
+        Socket sock = null;
         try {
-            Socket sock = new Socket(addrToContact, portToContact);
+            sock = new Socket(addrToContact, portToContact);
             sock.getOutputStream().write("\n\n".getBytes());
-            NetworkUtils.close(sock);
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             // whatever
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             // whatever
+        } finally {
+            if(sock != null) {
+                NetworkUtils.close(sock);
+            }
         }
     }
 
