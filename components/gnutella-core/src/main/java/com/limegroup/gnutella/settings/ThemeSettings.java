@@ -265,6 +265,10 @@ public final class ThemeSettings extends LimeProps {
             next = st.nextToken();
             if(next.equals("osx"))
                 next = "(OSX)";
+            else if(next.equals("limewire"))
+                next = "LimeWire";
+            else if(next.equals("limeWirePro"))
+                next = "LimeWire PRO";
             formatted.append(" " + next.substring(0,1).toUpperCase(Locale.US));
             if(next.length() > 1) formatted.append(next.substring(1));
             
