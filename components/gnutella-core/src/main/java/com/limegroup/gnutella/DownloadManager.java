@@ -7,6 +7,8 @@ import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.NetworkUtils;
+
 
 
 /** 
@@ -688,18 +690,50 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies router 
      */
     public boolean sendPush(RemoteFileDesc file) {
-        PushRequest pr=new PushRequest(GUID.makeGuid(),
-                                       SettingsManager.instance().getTTL(),
-                                       file.getClientGUID(),
-                                       file.getIndex(),
-                                       RouterService.getAddress(),
-                                       RouterService.getPort());
-        try {
-            router.sendPushRequest(pr);
-        } catch (IOException e) {
-            return false;
+        PushProxyInterface[] proxies = file.getPushProxies();
+        if (proxies == null) {
+            PushRequest pr=new PushRequest(GUID.makeGuid(),
+                                           SettingsManager.instance().getTTL(),
+                                           file.getClientGUID(),
+                                           file.getIndex(),
+                                           RouterService.getAddress(),
+                                           RouterService.getPort());
+            try {
+                router.sendPushRequest(pr);
+            } catch (IOException e) {
+                return false;
+            }
+            return true;
         }
-        return true;
+        
+        // we have proxy info
+        boolean requestSuccessful = false;
+        final GUID clientGUID = new GUID(file.getClientGUID());
+        final String requestString = 
+            "/gnutella/pushproxy?ServerID=" + clientGUID.toHexString();
+        final String nodeString = "X-Node:";
+        final String nodeValue = 
+            NetworkUtils.ip2string(RouterService.getAddress()) +
+            ":" + RouterService.getPort();
+        for (int i = 0; (i < proxies.length) && !requestSuccessful; i++) {
+            try {
+                String ip = proxies[i].getPushProxyAddress().getHostName();
+                int port = proxies[i].getPushProxyPort();
+                URL url = new URL("http", ip, port, requestString);
+                HttpURLConnection connection = 
+                (HttpURLConnection) url.openConnection();
+                connection.setUseCaches(false);
+                connection.setRequestProperty(nodeString, nodeValue);
+                requestSuccessful = (connection.getResponseCode() == 202);
+                connection.disconnect();
+            }
+            catch (MalformedURLException url) {
+                url.printStackTrace();
+            }
+            catch (IOException ioe) {
+            }
+        }
+        return requestSuccessful;
     }
 
 
