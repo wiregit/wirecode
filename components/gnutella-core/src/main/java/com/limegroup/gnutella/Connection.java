@@ -522,10 +522,17 @@ public class Connection {
     }
 
     /**
-     * @return true if this has been initialized but not closed
+     * Returns true if this has been closed.
      */
-    public boolean isOpen() {
-        return _socket!=null && !_closed;
+    public boolean isClosed() {
+        return _closed;
+    }
+
+    /**
+     * Returns true if this has been initialized.
+     */
+    public boolean isInitialized() {
+        return _socket!=null;
     }
 
     /**

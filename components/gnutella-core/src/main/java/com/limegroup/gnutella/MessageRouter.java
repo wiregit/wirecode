@@ -1043,10 +1043,10 @@ public abstract class MessageRouter
             handlePushRequestForMe(pushRequest, receivingConnection);
         }
 
-        public boolean isOpen()
+        public boolean isClosed()
         {
             //I'm always ready to handle replies.
-            return true;
+            return false;
         }
     }
 }

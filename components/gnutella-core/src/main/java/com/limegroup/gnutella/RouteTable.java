@@ -59,7 +59,7 @@ class RouteTable {
     public synchronized void routeReply(byte[] guid,
                                         ReplyHandler replyHandler) {
         Assert.that(replyHandler != null);
-        if (! replyHandler.isOpen())
+        if (replyHandler.isClosed())
             return;
 
         GUID g=new GUID(guid);
@@ -80,7 +80,7 @@ class RouteTable {
         Assert.that(replyHandler != null);
         Assert.that(guid!=null, "Null GUID in tryToRouteReply");
 
-        if (! replyHandler.isOpen())
+        if (replyHandler.isClosed())
             return false;
 
         GUID g=new GUID(guid);

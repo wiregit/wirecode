@@ -353,7 +353,7 @@ public class ManagedConnection
         }
 
         public void run() {
-            while (isOpen()) {
+            while (! isClosed()) {
                 //1. Wait until (1) the queue is full or (2) the
                 //maximum allowable send latency has passed (and the
                 //queue is not empty)...
@@ -743,7 +743,7 @@ public class ManagedConnection
      * wrong.  (This bizarre behavior makes connection fetching simpler.)
      */
     public boolean isOldClient() {
-        if (! super.isOpen()) 
+        if (! super.isInitialized()) 
             //Still initializing?
             return _protocol==PROTOCOL_OLD;
         else 

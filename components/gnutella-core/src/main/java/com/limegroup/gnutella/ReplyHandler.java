@@ -27,8 +27,8 @@ interface ReplyHandler
                            ManagedConnection receivingConnection);
 
     /**
-     * Returns true if the reply handler is still able to handle
-     * a reply.
+     * Returns true if the reply handler is unable to handle
+     * a reply because it's closed.
      */
-    boolean isOpen();
+    boolean isClosed();
 }
