@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -25,6 +26,31 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    /**
+     * Tests the methods for getting the leaf and ultrapeer slots from the 
+     * pong.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testHasFreeSlots() throws Exception {
+        byte[] guid = GUID.makeGuid();
+        byte[] ip = {1,1,1,1};
+        PingReply pr = PingReply.create(guid, (byte)3, 6346, ip, 
+            (long)10, (long)10, true, 100, true);    
+            
+        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
+        
+        // Leaves are determined based partly on our connected status.  We're
+        // not connected for this test, so leaf slots should be 0.
+        assertEquals("unexpected number leaf slots", 0, pr.getNumLeafSlots());
+        
+        // Connection status doesn't matter for ultrapeer slots -- we just 
+        // subtract the number of connections we have from the desired number
+        assertEquals("unexpected number ultrapeer slots", 
+            ConnectionSettings.NUM_CONNECTIONS.getValue(), 
+            pr.getNumUltrapeerSlots());
+    }
+    
     /**
      * Tests the method for creating a new pong with a changed GUID out
      * of an existing pong
@@ -67,8 +93,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // make sure we reject invalid payload sizes
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted payload size");
         } catch(BadPacketException e) {
@@ -79,8 +104,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
         addIP(payload);
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(null, (byte)4, (byte)3,
+            PingReply.createFromNetwork(null, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted null guid");
         } catch(NullPointerException e) {
@@ -89,8 +113,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // make sure we reject null payloads
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             null);
             fail("should have not accepted null payload");
         } catch(NullPointerException e) {
@@ -118,8 +141,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                          payload, PingReply.STANDARD_PAYLOAD_SIZE, 
                          extensions.length);
         try {
-            PingReply pong = 
-                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                             payload);
             fail("should have not accepted bad GGEP in payload");
         } catch(BadPacketException e) {
@@ -132,8 +154,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         addIP(payload);        
 
         // this one should go through
-        PingReply pong = 
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+        PingReply.createFromNetwork(guid, (byte)4, (byte)3,
                                         payload);
     }
 
