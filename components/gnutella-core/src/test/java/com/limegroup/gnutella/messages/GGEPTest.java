@@ -129,8 +129,8 @@ public class GGEPTest extends TestCase {
         }
     }
 
-    /** Null bytes disallowed, e.g., in query replies.  
-     *  TODO: ultimately this will enable COBS encoding. */
+    /** Null bytes are always allowed now.
+     */
     public void testValueContainsIllegalNull() {
         byte[] bytes = new byte[2];
         bytes[0] = (byte)'S';
@@ -140,8 +140,9 @@ public class GGEPTest extends TestCase {
         try {
             GGEP temp = new GGEP(false);
             temp.put("WHATEVER", hasANull);
-            fail("No IllegalArgumentException.");
-        } catch (IllegalArgumentException pass) { }
+        } catch (IllegalArgumentException fail) { 
+            fail("IllegalArgumentException.");
+        }
     }
 
     public void testEquals() {
