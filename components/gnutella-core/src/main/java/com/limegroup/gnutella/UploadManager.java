@@ -91,6 +91,10 @@ public class UploadManager implements BandwidthTracker {
      *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
      */
     private volatile int highestSpeed=-1;
+
+    /** The desired minimum quality of service to provide for uploads, in
+     *  KB/s.  See testTotalUploadLimit. */
+    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
     private FileManager _fileManager;
 
@@ -283,17 +287,35 @@ public class UploadManager implements BandwidthTracker {
 		
 
 	/**
-	 * Returns 'false' if the total number of uploads has been
-	 * reached, and true otherwise.  Note that because this test 
-	 * relies on the uploadsInProgress() method, it may sometimes
-	 * be incorrect if a push request takes a long time to respond. 
-	 */
+	 * Returns true iff another upload is allowed.  Note that because this test
+	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
+	 * if a push request takes a long time to respond.  
+     */
 	private boolean testTotalUploadLimit() {
-		int max = SettingsManager.instance().getMaxUploads();
+        //Allow another upload if (a) we currently have fewer than
+        //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
+        //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
+        //
+        //In other words, we continue to allow uploads until everyone's
+        //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
+        //uploads, the probability that all just happen to have low capacity
+        //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
+        //expensive of quality, making swarmed downloads work better.        
+
 		int current = uploadsInProgress();
-		if (current >= max)
-			return false;
-		return true;
+        SettingsManager settings=SettingsManager.instance();
+		if (current >= settings.getMaxUploads()) {
+            return false;
+        } else if (current < settings.getSoftMaxUploads()) {
+            return true;
+        } else {
+            float fastest=0.0f;
+            for (Iterator iter=_activeUploadList.iterator(); iter.hasNext(); ) {
+                BandwidthTracker upload=(BandwidthTracker)iter.next();
+                fastest=Math.max(fastest, upload.getMeasuredBandwidth());
+            }
+            return fastest>MINIMUM_UPLOAD_SPEED;
+        }
 	}
 
     /** @requires caller has this' monitor */
@@ -585,21 +607,22 @@ public class UploadManager implements BandwidthTracker {
 		
 	}
 
-
-	/**
-	 * Implements the <tt>BandwidthTracker</tt> interface.
-	 * 
-	 * Returns that bandwidth transferred in kilobytes per second since
-	 * the last time this call was made.
-	 */
-	public synchronized int getNewBytesTransferred() {
-		int newBytes = 0;
-		Iterator iter = _activeUploadList.iterator();
-		while(iter.hasNext()) {
+    /** Calls measureBandwidth on each uploader. */
+    public synchronized void measureBandwidth() {
+        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			newBytes += bt.getNewBytesTransferred();
+			bt.measureBandwidth();
 		}
-		return newBytes;
+    }
+
+    /** Returns the total upload throughput, i.e., the sum over all uploads. */
+	public synchronized float getMeasuredBandwidth() {
+        float sum=0;
+        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+			BandwidthTracker bt = (BandwidthTracker)iter.next();
+			sum+=bt.getMeasuredBandwidth();
+		}
+        return sum;
 	}
 
     /** Partial unit test. */

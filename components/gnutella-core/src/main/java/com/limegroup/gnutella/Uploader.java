@@ -79,16 +79,5 @@ public interface Uploader extends BandwidthTracker {
 	 * return the port of the host to chat with
 	 */
 	public int getChatPort();
-
-	/**
-	 * Inherited from the <tt>BandwidthTracker</tt> interface.
-	 * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 * component since the last time this method was called.
-	 *
-	 * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 *         component since the last time this method was called
-	 */
-	public int getNewBytesTransferred();
-	
 }
 

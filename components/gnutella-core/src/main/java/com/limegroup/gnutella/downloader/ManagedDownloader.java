@@ -80,7 +80,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private Socket pushSocket;
 
     /** For implementing the BandwidthTracker interface. */
-    private int _oldAmountRead = 0;
+    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -1061,19 +1061,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retriesWaiting;
     }
 
-    /**
-     * Implements the <tt>BandwidthTracker</tt> interface.
-     * Returns the number of bytes read since the last time this method
-     * was called.
-     *
-     * @return the number of new bytes read since the last time this method
-     *         was called
-     */
-    public synchronized int getNewBytesTransferred() {
-        int newAmountRead = getAmountRead();
-        int newBytesTransferred = newAmountRead - _oldAmountRead;
-        _oldAmountRead = newAmountRead;
-        return newBytesTransferred;
+    public void measureBandwidth() {
+        bandwidthTracker.measureBandwidth(getAmountRead());
+    }
+    
+    public float getMeasuredBandwidth() {
+        return bandwidthTracker.getMeasuredBandwidth();
     }
     
     /*

@@ -65,13 +65,13 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-    private final int TIMER_DELAY = 10 * 60 * 1000; //10 minutes
+	private final int TIMER_DELAY = 2000;
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-	private final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
+	private final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/2000;
 
 	/** 
 	 * Constant handle to the <tt>Timer</tt> instance that handles
@@ -185,12 +185,12 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	private void collectBandwidthData() {
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
-        int newUpstreamBytes   = _uploadTracker.getNewBytesTransferred();
-        int newDownstreamBytes = _downloadTracker.getNewBytesTransferred();
+        _uploadTracker.measureBandwidth();
+        _downloadTracker.measureBandwidth();
 		int newUpstreamBytesPerSec = 
-            newUpstreamBytes/TIMER_DELAY_IN_SECONDS;
+            (int)_uploadTracker.getMeasuredBandwidth();
 		int newDownstreamBytesPerSec = 
-            newDownstreamBytes/TIMER_DELAY_IN_SECONDS;
+            (int)_downloadTracker.getMeasuredBandwidth();
 		if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
 			_maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
 			SETTINGS.setMaxUpstreamBytesPerSec(_maxUpstreamBytesPerSec);

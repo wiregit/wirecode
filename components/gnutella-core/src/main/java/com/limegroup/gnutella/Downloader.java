@@ -101,15 +101,4 @@ public interface Downloader extends BandwidthTracker {
      * Result meaningful only in the DOWNLOADING state.
      */
     public Iterator /* of Endpoint */ getChattableHosts();
-
-    /**
-     * Inherited from the <tt>BandwidthTracker</tt> interface.
-     * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
-     * component since the last time this method was called.
-     *
-     * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
-     *
-     *         component since the last time this method was called
-     */
-    public int getNewBytesTransferred();
 }
