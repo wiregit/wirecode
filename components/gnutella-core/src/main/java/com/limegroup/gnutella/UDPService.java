@@ -214,6 +214,11 @@ public final class UDPService implements Runnable {
                 // ----------------------------*                
                 // process packet....
                 // *----------------------------
+                if(!NetworkUtils.isValidAddress(datagram.getAddress()))
+                    continue;
+                if(!NetworkUtils.isValidPort(datagram.getPort()))
+                    continue;
+                
                 byte[] data = datagram.getData();
                 try {
                     // we do things the old way temporarily
