@@ -1,8 +1,5 @@
 /**
- * auth: rsoule
- * file: HTTPDownloader.java
- * desc: Read data from the net and write to disk.
- *
+ * Read data from the net and write to disk.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
@@ -298,7 +295,6 @@ public class HTTPDownloader {
 		String download_dir = settings.getSaveDirectory();
 
 		File complete_file = new File(download_dir, _filename);
-		String path_to_complete = complete_file.getAbsolutePath();
 		
 		File shared = new File(download_dir);
 		String shared_path = shared.getCanonicalPath();
@@ -313,7 +309,7 @@ public class HTTPDownloader {
 
 	  
         //2. Do actual download, appending to incomplete file if necessary.
-		String path_to_incomplete = _incompleteFile.getAbsolutePath();
+		String path_to_incomplete = _incompleteFile.getCanonicalPath();
 		boolean append = false;
 
 		if (_initialReadingPoint > 0)
@@ -363,7 +359,7 @@ public class HTTPDownloader {
 			//renameTo is not guaranteed to work, esp. when the
 			//file is being moved across file systems.  
 
-			FileManager.instance().addFileIfShared(path_to_complete);
+			FileManager.instance().addFileIfShared(complete_file);
 
 		} else 
 			throw new FileIncompleteException();
