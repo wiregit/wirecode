@@ -17,7 +17,7 @@ public final class MalformedRequestState implements HTTPMessage {
 	/**
 	 * Constant for the error message to send.
 	 */
-	private final byte[] ERROR_MESSAGE = 
+	private static final byte[] ERROR_MESSAGE = 
 		"Malformed Request".getBytes();
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {

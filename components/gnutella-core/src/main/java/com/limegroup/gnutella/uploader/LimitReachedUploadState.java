@@ -21,7 +21,7 @@ public class LimitReachedUploadState implements HTTPMessage {
 	/**
 	 * The error message to send in the message body.
 	 */
-	private final byte[] ERROR_MESSAGE = 
+	private static final byte[] ERROR_MESSAGE = 
 		"Server busy.  Too many active uploads.".getBytes();
 
 	/**
