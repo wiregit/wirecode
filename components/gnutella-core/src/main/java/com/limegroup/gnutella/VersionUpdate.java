@@ -307,6 +307,7 @@ public class VersionUpdate
 				"completed.  Please restart LimeWire to use your new version.";
 				Utilities.showMessage(message);
 				_settings.setLastVersionChecked(_newVersion);
+				_settings.writeProperties();
 				System.exit(0);
 			}
 			
