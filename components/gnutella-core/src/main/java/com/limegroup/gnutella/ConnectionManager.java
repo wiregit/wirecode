@@ -72,7 +72,7 @@ public class ConnectionManager {
 		MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
     /** The desired number of slots to reserve for good connections (e.g.,
      *  LimeWire) unrouted connections. */
     public static final int RESERVED_GOOD_CONNECTIONS = 2;   
