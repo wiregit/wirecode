@@ -384,8 +384,34 @@ public class RouterService
      * property.
      *
      * @param newKeep the desired total number of messaging connections
+     * @exception if the suggested keep alive value is not suitable
      */
-    public void setKeepAlive(int newKeep) {
+    public void setKeepAlive(int newKeep) throws BadConnectionSettingException {
+        
+        //validate the keep alive value
+
+        //a)Negative keep alive is invalid
+        if(newKeep < 0)
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.NEGATIVE_VALUE,
+                SettingsManager.instance().getKeepAlive(),
+                SettingsManager.instance().getMaxIncomingConnections());
+        
+        //b)The request for increasing keep alive if we are leaf node is invalid
+        if ((newKeep > 1) && hasClientSupernodeConnection())
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1, 0);
+        
+        //c)Also the request to decrease the keep alive below a minimum
+        //level is invalid, if we are an Ultrapeer with leaves
+        if(manager.hasSupernodeClientConnection()
+            && newKeep < manager.MIN_CONNECTIONS_FOR_SUPERNODE)
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
+                manager.MIN_CONNECTIONS_FOR_SUPERNODE,
+                manager.MIN_CONNECTIONS_FOR_SUPERNODE);
+
+        //set the new keep alive
         manager.setKeepAlive(newKeep);
     }
 
