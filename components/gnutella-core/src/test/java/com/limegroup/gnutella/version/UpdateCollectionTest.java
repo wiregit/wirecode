@@ -104,4 +104,101 @@ public final class UpdateCollectionTest extends BaseTestCase {
 	    assertNull(data.getButton1Text());
 	    assertNull(data.getButton2Text());
     }
+    
+    public void testRanges() throws Exception {
+	    UpdateCollection uc = UpdateCollection.create(
+	        "<update id='42'>" +
+	            "<msg from='0.0.0' to='3.0.0' for='4.6.0' url='http://www.limewire.com/update/force' style='4'>" +
+	                "<lang id='en'>FORCED Text</lang>" +
+	            "</msg>" +
+	            "<msg from='3.0.0' to='4.0.0' for='4.6.0' url='http://www.limewire.com/update/old' style='2'>" +
+	                "<lang id='en'>Major Text (really old version)</lang>" +
+	            "</msg>" +
+	            "<msg from='4.0.0' for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
+	                "<lang id='en'>Major Text</lang>" +
+	            "</msg>" +
+	            "<msg from='4.6.0' for='4.6.5' url='http://www.limewire.com/update' style='1'>" +
+	                "<lang id='en'>Text</lang>" +
+	            "</msg>" +
+	            "<msg from='4.6.5' to='4.7.2' for='4.7.3' url='http://www.limewire.com/beta' style='0'>" +
+	                "<lang id='en'>Text</lang>" +
+	            "</msg>" +
+	            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='3'>" +
+	                "<lang id='en'>Text</lang>" +
+	            "</msg>" +	            
+	        "</update>");
+	        
+        // First make sure it ignored the invalid msgs.
+        assertEquals(uc.getUpdateData().toString(), 6, uc.getUpdateData().size());
+        assertEquals(42, uc.getId());
+	    
+	    // Idea:
+	    // People who have [0.0.0, 3.0.0) are told about a FORCED update to 4.6.0 (with one set of text)
+	    // People who have [3.0.0, 4.0.0) are told about a MAJOR update to 4.6.0  (with another set of text)
+	    // People who have [4.0.0, 4.6.0) are told about a MAJOR update to 4.6.0  (with yet another set of text)
+	    // People who have [4.6.0, 4.6.5) are told about a SERVICE update to 4.6.5
+	    // People who have [4.6.5, 4.7.2) are told about a BETA update to 4.7.3
+	    // People who have [4.8.0, 4.8.3) are told about a CRITICAL update to 4.8.3
+	    // Note that the upper boundary is always exlusive, whereas the lower boundary is inclusive.
+	    UpdateData data;
+	    
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("FORCED Text", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("FORCED Text", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("FORCED Text", data.getUpdateText());
+	    
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text (really old version)", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text (really old version)", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text (really old version)", data.getUpdateText());
+
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text", data.getUpdateText());
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals("Major Text", data.getUpdateText());
+
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.6.5", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("4.6.5", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertNull(data);
+	    
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.7.3", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertNull(data);
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertNull(data);
+	    
+	    data = uc.getUpdateDataFor(new Version("4.7.1"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.7.3", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.7.2"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertNull(data);
+	    
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("4.8.3", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("4.8.3", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertEquals("4.8.3", data.getUpdateVersion());
+	    data = uc.getUpdateDataFor(new Version("4.8.3"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertNull(data);
+    }
+            
 }
