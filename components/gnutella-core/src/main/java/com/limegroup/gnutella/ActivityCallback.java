@@ -56,6 +56,8 @@ public interface ActivityCallback
 
 	public void recieveMessage(Chatter chr);
 
+	/** lets the user know that a host is no longer available */
+	public void chatUnavailable(Chatter chatter);
 
     /**
      * Notifies the GUI that the given directory has been shared.  This method

@@ -70,6 +70,12 @@ public class InstantMessenger extends Chat {
 	public void stop() {
 		_manager.removeChat(this);
 		_activityCallback.removeChat(this);
+		try {
+			_out.close();
+			_socket.close();
+		} catch (IOException e) {
+			
+		}
 	}
 
 	/** send a message accross the socket to the other host */
@@ -144,14 +150,16 @@ public class InstantMessenger extends Chat {
 					if ( str != null ) {
 						_message += str;
 						_activityCallback.recieveMessage(_chatter);
-					}
+					} 
 				} catch (IOException e) {
 					// if an exception was thrown, then 
 					// the socket was closed, and the chat
 					// was terminated.
 					// return;
+					_activityCallback.chatUnavailable(_chatter);
+					
 					break;
-				}
+				} 
 
 			}
 		}
