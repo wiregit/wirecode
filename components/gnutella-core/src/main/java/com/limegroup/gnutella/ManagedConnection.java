@@ -93,7 +93,7 @@ public class ManagedConnection extends Connection
      * The time to wait between last-hop QRT table updates between Ultrapeers,
      * when a leaf becomes busy and signals this to us
      */
-    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*2; //5 minutes
+    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*2; //2 minutes
 
     /** 
      * The time to wait between route table updates for Ultrapeers, 
@@ -256,7 +256,7 @@ public class ManagedConnection extends Connection
     /**
      * The next time to send a QRT update to this peer because of BusyLeaf updates
      */
-    private long _nextBusyLeafQRPForwardTime;
+    private long _nextBusyLeafQRPForwardTime=0;
 
 
     /** 
@@ -289,6 +289,15 @@ public class ManagedConnection extends Connection
      */
     private volatile int softMaxHops = -1;
 
+    /**
+     * Getter for the most recent HopsFlowMessage softMaxHops received.
+     * 
+     * @return the current hops which we are limited to from HopsFlow message 
+     */
+    public byte getSoftMaxFromHopsFlow(){
+        return (byte)softMaxHops;    
+    }
+    
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
      */
@@ -1318,7 +1327,7 @@ public class ManagedConnection extends Connection
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             softMaxHops = hops.getHopValue();
             
-            if( m_bSupportsBusyLeaf && isSupernodeClientConnection() ){
+            if( isSupernodeClientConnection() ){
                 //	If the connection is to a leaf, and the leaf supports
                 //	the busy leaf QRT scheme, then set the global busy 
                 //	leaf flag appropriately

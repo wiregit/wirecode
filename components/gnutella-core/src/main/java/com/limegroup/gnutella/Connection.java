@@ -282,19 +282,6 @@ public class Connection implements IpPort {
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
 
-
-    /**
-     * True if this host has shown support (via vendormessage) of Busy Leaf
-     * QRT suppression 
-     */
-    protected boolean m_bSupportsBusyLeaf=false;
-    
-    /**
-     * True if this host IS a busy leaf, and its QRT shouldn't be included in
-     * our last-hop QRT
-     */
-    protected boolean m_bBusyLeaf=false;
-    
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
@@ -1360,6 +1347,10 @@ public class Connection implements IpPort {
     public byte getSoftMax() {
         return _softMax;
     }
+    
+    public byte getSoftMaxFromHopsFlow(){
+        return getSoftMax();   //  Overridden by ManagedConnection 
+    }
 
     /**
      * Checks whether this connection is considered a stable connection,
@@ -1852,7 +1843,7 @@ public class Connection implements IpPort {
      * @return true iff this connection is a busy leaf (don't include his QRT table)
      */
     public boolean isBusyLeaf(){
-        return isSupernodeClientConnection() && m_bSupportsBusyLeaf && m_bBusyLeaf;
+        return isSupernodeClientConnection() && getSoftMaxFromHopsFlow()==0;
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,

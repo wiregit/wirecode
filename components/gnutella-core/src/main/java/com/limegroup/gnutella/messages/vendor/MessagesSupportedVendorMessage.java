@@ -98,9 +98,6 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         // Hops Flow
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,
                                         HopsFlowVendorMessage.VERSION);
-        // Busy Leaf
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_BUSY_LEAF,
-                						BusyLeafVendorMessage.VERSION);
         hashSet.add(smp);
         // Give Stats Request
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_GIVE_STATS, 

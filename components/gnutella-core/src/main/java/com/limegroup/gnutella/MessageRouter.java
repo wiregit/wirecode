@@ -2538,13 +2538,13 @@ public abstract class MessageRouter {
 				continue;
             }
 
-            //  If we get here, then we are here because the peer didn't get updated
-            //      the last time a leaf went busy.  Since we are about to update this
-            //      node, we should clear his flag out...
+            //  If we get here, then the peer is going to get an updated QRT, so we no
+            //      longer need to keep his "delayed BusyLeafQRT flag", since this update
+            //      will exclude the busy leaf's QRT
             c.setDelayedLeafBusyFlag(false);
             
 			c.incrementNextQRPForwardTime(time);
-            c.incrementNextBusyLeafQRPForwardTime(time);
+            c.incrementNextBusyLeafQRPForwardTime(time);    
 				
 			// Create a new query route table if we need to
 			if (table == null) {
@@ -2586,6 +2586,10 @@ public abstract class MessageRouter {
             c.setQueryRouteTableSent(table);
 		}
         
+        //  At this point, if there WAS a busy leaf for whom we were updating QRTs, 
+        //      we have either updated all peers with our last-hop QRT, or we have 
+        //      flagged all peers we have skipped (because of timing reasons) so that
+        //      we know to update them in the future, as soon as time limits permit.  -DN
         _manager.setBusyLeafFlag(false);
     }
 
