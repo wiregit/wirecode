@@ -52,15 +52,16 @@ public final class Pinger implements Runnable {
      * pings along all connections.
      */
     public void run() {
-        while(true) {
-            if(RouterService.isSupernode()) {
-                RouterService.getMessageRouter().broadcastPingRequest(PING);
-            }
-            try {
+        try {
+            while(true) {
+                if(RouterService.isSupernode()) {
+                    RouterService.getMessageRouter().broadcastPingRequest(PING);
+                }
+                
                 Thread.sleep(3000);
-            } catch(InterruptedException e) {
-                // this should not happen
             }
+        } catch(Throwable t) {
+            ErrorService.error(t);
         }
     }
 }
