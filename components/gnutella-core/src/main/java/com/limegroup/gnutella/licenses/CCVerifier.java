@@ -148,11 +148,36 @@ import org.xml.sax.SAXException;
     public void verify(VerificationCallback listener) {
         VQUEUE.add(new VImpl(listener));
     }
+
+    /**
+     * Retrieves the body of a page that has RDF embedded in it.
+     *
+     * Returns null if the page could not be found.
+     */
+    protected String getBody() {
+        HttpClient client = HttpClientManager.getNewClient();
+        GetMethod get = new GetMethod(uri.toString());
+        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        try {
+            HttpClientManager.executeMethodRedirecting(client, get);
+            return get.getResponseBodyAsString();
+        } catch(IOException ioe) {
+            return null;
+        } finally {
+            get.releaseConnection();
+        }
+    }
     
     /**
      * Verifies the body of the verification page.
      */
     protected boolean doVerification(String body) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Attempting to verify: " + body);
+        
+        if(body == null || body.trim().equals(""))
+            return false;
+        
         // look for two rdf:RDF's.
         int startRDF = body.indexOf("rdf:RDF");
         if(startRDF >= body.length() - 1)
@@ -196,25 +221,31 @@ import org.xml.sax.SAXException;
      * Ensures the 'work' item exists and retrieves the URN, if it exists.
      */
     protected boolean parseWorkItem(Node work) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Parsing work item: " + work);
+        
         // work MUST exist.
-        if(work == null)
+        if(work == null) {
+            LOG.error("No work item, bailing");
             return false;
+        }
             
         NamedNodeMap attributes = work.getAttributes();
-        try {
-            Node about = attributes.getNamedItemNS("rdf", "about");
-            if(about != null) {
-                String value = about.getNodeValue();
-                // attempt to create a SHA1 urn out of it.
-                try {
-                    expectedURN = URN.createSHA1Urn(value);
-                } catch(IOException ioe) {
-                    LOG.warn("Unable to create URN out of 'about' value", ioe);
-                }
+        Node about = attributes.getNamedItem("rdf:about");
+        if(about != null) {
+            String value = about.getNodeValue();
+            // attempt to create a SHA1 urn out of it.
+            try {
+                expectedURN = URN.createSHA1Urn(value);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Found URN: " + expectedURN);
+            } catch(IOException ioe) {
+                LOG.warn("Unable to create URN out of 'about' value", ioe);
             }
-        } catch(DOMException err) {
-            LOG.error("Unable to retrieve about with rdf namespace", err);
+        } else if(LOG.isWarnEnabled()) {
+            LOG.warn("No about item!");
         }
+        
         // other than it existing, nothing else needs to happen.
         return true;
     }
@@ -223,24 +254,26 @@ import org.xml.sax.SAXException;
      * Parses the 'license' item.
      */
     protected boolean parseLicenseItem(Node license) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Parsing license item: " + license);
+        
         if(license == null)
             return false;
            
         // Get the license URL. 
         NamedNodeMap attributes = license.getAttributes();
-        try {
-            Node about = attributes.getNamedItemNS("rdf", "about");
-            if(about != null) {
-                String value = about.getNodeValue();
-                try {
-                    licenseURL = new URL(value);
-                } catch(MalformedURLException murl) {
-                    LOG.warn("Unable to get license URL", murl);
-                }
+        Node about = attributes.getNamedItem("rdf:about");
+        if(about != null) {
+            String value = about.getNodeValue();
+            try {
+                licenseURL = new URL(value);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Found licenseURL: " + licenseURL);
+            } catch(MalformedURLException murl) {
+                LOG.warn("Unable to get license URL", murl);
             }
-        } catch(DOMException err) {
-            LOG.error("Unable to retrieve about with rdf namespace", err);
-        }
+        } else if(LOG.isWarnEnabled())
+            LOG.warn("No about item!");
         
         // Get the 'permit', 'requires', and 'prohibits' values.
         NodeList children = license.getChildNodes();
@@ -268,22 +301,27 @@ import org.xml.sax.SAXException;
      * Adds a single permission to the list.
      */
     private void addPermission(List permissions, Node node) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Adding permission from: " + node);
+        
         NamedNodeMap attributes = node.getAttributes();
-        try {
-            Node resource = attributes.getNamedItemNS("rdf", "resource");
-            if(resource != null) {
-                String value = resource.getNodeValue();
-                int slash = value.lastIndexOf('/');
-                if(slash != -1 && slash != value.length()-1) {
-                    String permission = value.substring(slash+1);
-                    permissions.add(permission);
-                }
+        Node resource = attributes.getNamedItem("rdf:resource");
+        if(resource != null) {
+            String value = resource.getNodeValue();
+            int slash = value.lastIndexOf('/');
+            if(slash != -1 && slash != value.length()-1) {
+                String permission = value.substring(slash+1);
+                permissions.add(permission);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Added permission: " + permission);
+            } else if (LOG.isWarnEnabled()) {
+                LOG.trace("Unable to find permission name: " + value);
             }
-        } catch(DOMException err) {
-            LOG.error("Unable to retrieve resource with rdf namespace", err);
+        } else if(LOG.isWarnEnabled()) {
+            LOG.warn("No resource item in rdf namespace");
         } 
     }
-
+    
     /**
      * Runnable that actually does the verification.
      */
@@ -295,25 +333,13 @@ import org.xml.sax.SAXException;
         }
         
         public void run() {
-            HttpClient client = HttpClientManager.getNewClient();
-            GetMethod get = new GetMethod(uri.toString());
-            get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
-            try {
-                HttpClientManager.executeMethodRedirecting(client, get);
-                String body = get.getResponseBodyAsString();
-                if(body == null || body.trim().equals(""))
-                    state = VERIFY_FAILED;
-                else if(!doVerification(body))
-                    state = VERIFY_FAILED;
-                else
-                    state = VERIFIED;
-            } catch(IOException ioe) {
+            String body = getBody();
+            if(!doVerification(body))
                 state = VERIFY_FAILED;
-            } finally {
-                get.releaseConnection();
-            }
+            else
+                state = VERIFIED;
             
             vc.verificationCompleted(CCVerifier.this);
         }
-    }   
+    }
 }
