@@ -175,9 +175,18 @@ public class LimeXMLReplyCollection {
             
             if( doc == null ) // no document, ignore.
                 continue;
-                            
-            // We have a document, add it.
-            addReply(fd, doc);
+                
+            // check to see if it's corrupted and if so, fix it.
+            if( ID3Reader.isCorrupted(doc) ) {
+                doc = ID3Reader.fixCorruption(doc);
+                try {
+                    mp3ToDisk(file.getCanonicalPath(), doc);
+                } catch(IOException ioe) {
+                    addReply(fd, doc);
+                }
+            } else {
+                addReply(fd, doc);
+            }
         }
     
         debug("LimeXMLReplyCollection(): returning.");
