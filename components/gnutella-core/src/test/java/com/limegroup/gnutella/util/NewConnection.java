@@ -20,10 +20,22 @@ public class NewConnection extends TestConnection {
      */
     protected final QueryRouteTable QRT = new QueryRouteTable();
     
-    public NewConnection(int connections) {
+    public static NewConnection createConnection(int connections) {
+        return new NewConnection(connections);
+    }
+
+    protected NewConnection(int connections) {
         super(connections);
         QUERY_INFO.lastReceived = QRT;
     }
+
+    public static NewConnection createConnection() {
+        return new NewConnection(10);
+    }
+
+    //public NewConnection createHitConnection() {
+        
+    //}
 
     public boolean isGoodUltrapeer() {
         return true;
