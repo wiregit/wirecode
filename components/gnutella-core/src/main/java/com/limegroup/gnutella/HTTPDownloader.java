@@ -46,6 +46,11 @@ public class HTTPDownloader implements Runnable {
 
     private int _state;
 
+    private boolean _resume;
+    private int _finalAmount;
+    private int _initialAmount;
+
+
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
 	
@@ -235,79 +240,7 @@ public class HTTPDownloader implements Runnable {
 
     
 
-    public void doDownload() {
-
-	SettingsManager set = SettingsManager.instance();
-	_downloadDir = set.getSaveDirectory();
-	
-	String pathname = _downloadDir + _filename;
-	//TODO1: if  _filename has ".." or "/" in it, this
-	//is a grave security flaw!
-
-	//TODO1: if pathname exists, we probably don't want to overwrite.
-	//Alternatives: ask user, write to temporary file.  Exception:
-	//if resuming a partial download.
-
-	try {
-	    _fos = new FileOutputStream(pathname);
-	}
-	catch (FileNotFoundException e) {
-	    _state = ERROR;
-	    return;
-  	}
-	catch (Exception e) {
-	    _state = ERROR;
-	    return;
-	}
-	
-	readHeader();
-	
-	int c = -1;
-	
-	byte[] buf = new byte[1024]; 
-
-	//TODO3: Note we ignore the file length.  In the rare case that the
-	//remote host doesn't close the connection, this will loop forever.
-	//However, this may be the sensible thing to do since many clients may
-	//get Content-length wrong.
-	while (true) {
-	    
-	    try {
-		c = _br.read(buf);
-	    }
-	    catch (Exception e) {
-		_state = ERROR;
-		 return;
-	    }
-
-	    if (c == -1)
-		break;
-
-	    try {
-		_fos.write(buf, 0, c);
-	    }
-	    catch (Exception e) {
-		_state = ERROR;
-		break;
-	    }
-
-	    _amountRead+=c;
-
-	}
-
-	try {
-	    _br.close();
-	    _fos.close();
-	}
-	catch (IOException e) {
-	    _state = ERROR;
-	    return;
-	}
-
-	_state = COMPLETE;
-    }
-
-
+   
     public void exit() {
 	try {
 	    _br.close();
@@ -318,26 +251,124 @@ public class HTTPDownloader implements Runnable {
     }
     
 
-     public void readHeader() {
-	String str = null;
+    public void setResume() {
+	_resume = true;
+    }
 
-	int flag = 0;
+    public void doDownload() {
 
+	readHeader();
+
+	SettingsManager set = SettingsManager.instance();
+	
+	_downloadDir = set.getSaveDirectory();
+
+	String pathname = _downloadDir + _filename;
+
+	File myFile = new File(pathname);
+
+	if ((myFile.exists()) && (!_resume)) {
+	    // ask the user if the file should be overwritten
+	    _state = ERROR;
+	    return;
+	}
+		
+	try {
+	    _fos = new FileOutputStream(pathname, _resume);
+	}
+	    
+	catch (FileNotFoundException e) {
+	    _state = ERROR;
+	    return;
+	}
+	
+	catch (Exception e) {
+	    _state = ERROR;
+	    return;
+	}
+	
+	int c = -1;
+	
+	byte[] buf = new byte[1024]; 
+	
+	int amountToRead = _finalAmount - _initialAmount;
+
+	
+	//  System.out.println("amountToRead: " + amountToRead);
+//  	System.out.println("_initialAmount: " + _initialAmount);
+//  	System.out.println("_finalAmount: " + _finalAmount);
+
+	//TODO3: Note we ignore the file length.  In the rare case that the
+	//remote host doesn't close the connection, this will loop forever.
+	//However, this may be the sensible thing to do since many clients may
+	//get Content-length wrong.
+	while (true) {
+	    
+	    if (_amountRead == amountToRead) {
+		_state = COMPLETE;		
+		break;
+	    }
+
+	    try {
+		c = _br.read(buf);
+	    }
+	    catch (Exception e) {
+		_state = ERROR;
+		return;
+	    }
+	    
+	    if (c == -1)
+		break;
+	    
+	    try {
+		_fos.write(buf, 0, c);
+	    }
+	    catch (Exception e) {
+		_state = ERROR;
+		break;
+	    }
+
+	    _amountRead+=c;
+	    
+	}
+	
+	try {
+	    _br.close();
+	    _fos.close();
+	}
+	
+	catch (IOException e) {
+	    _state = ERROR;
+	    return;
+	}
+	
+	
+    }
+
+    
+    public void readHeader() {
+	String str = " ";
+	
+	boolean foundLength = false;
+	boolean foundRangeInitial = false;
+	boolean foundRangeFinal = false;
+	
 	//TODO1: what if Content-length is not the last header?
 	//Better to look for the blank line after headers.
-	while (true) {		
-		str = _br.readLine();
-		//System.out.println(str);
-
+	while (!str.equals("")) {
+	    
+	    str = _br.readLine();
+	    //System.out.println(str);
+	    
 	    if (str.indexOf("Content-length:") != -1) {
-		String sub;
-		try {
-		    sub=str.substring(15);
-		} catch (ArrayIndexOutOfBoundsException e) {
+		    String sub;
+		    try {
+			sub=str.substring(15);
+		    } catch (ArrayIndexOutOfBoundsException e) {
 		    _state = ERROR;
 		    return;
-		}
-
+		    }
+		    
 		sub = sub.trim();
 		
 		try {
@@ -347,21 +378,58 @@ public class HTTPDownloader implements Runnable {
 		    _state = ERROR;
 		    return;
 		}
-		
-		flag = 1;
-		
-		str = _br.readLine();
-	
-		break;
-	    }
-	}
 
-	if (flag == 0) {
+		foundLength = true;;
+	    }
+
+	    if (str.indexOf("Range: bytes=") != -1) {
+		String sub = str.substring(13);
+		sub = sub.trim();   // remove the white space
+		char c;
+		c = sub.charAt(0);  // get the first character
+		if (c == '-') {  // - n
+		    String second = sub.substring(1);
+		    second = second.trim();
+		    _finalAmount = java.lang.Integer.parseInt(second);
+		    foundRangeFinal = true;
+		}
+		else {                // m - n or 0 - 
+		    int dash = sub.indexOf("-");
+
+		    String first = sub.substring(0, dash);
+		    first = first.trim();
+
+		    _initialAmount = java.lang.Integer.parseInt(first);
+		    foundRangeInitial = true;
+
+		    String second = sub.substring(dash+1);
+		    second = second.trim();
+
+		    if (!second.equals("")) {
+			_finalAmount = java.lang.Integer.parseInt(second);
+			foundRangeFinal = true;
+		    }
+		}
+		
+	    }
+	
+	    
+	}
+	
+	if (!foundLength) {
 	    _state = ERROR;
 	}
 
+	if (!foundRangeInitial) {
+	    _initialAmount = 0;
+	}
+	
+	if (!foundRangeFinal) {
+	    _finalAmount = _sizeOfFile;
+	}
+	
     }
-
+    
     public void shutdown()
     {
 	try {
