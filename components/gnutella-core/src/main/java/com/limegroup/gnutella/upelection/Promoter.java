@@ -20,11 +20,12 @@ public class Promoter implements Runnable {
 		//first thing we do is promote ourselves to an ultrapeer.
 		try {
 			RouterService.getConnectionManager().becomeAnUPWithBackupConn(_host,_port);
+			
 		}catch(IOException failed) {
 			//we couldn't connect to the guy who asked us to become an UP.  Abort
-			failed.printStackTrace();
 			return;
 		}
+		
 		
 		//throw new RuntimeException("keep implementing");
 		System.out.println("keep implementing");

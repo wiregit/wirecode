@@ -1484,55 +1484,49 @@ public class ConnectionManager {
      */
     public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
    
-    	//first, lose one of our current UPs in order to free a slot.
-    	ManagedConnection sacrificed = (ManagedConnection)_initializedConnections.get(0);
-    	remove(sacrificed);
+    	//first, see if we are already connected to that host
+    	//and if so, close the connection since morphing is not yet implemented
+    	if (isConnectedTo(host))
+    		for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
+    			ManagedConnection c = (ManagedConnection) iter.next();
+    			if (c.getAddress().equals(host))
+    				remove(c);
+    		}
+    	
+    	//also close some connections until we have a free slot
+    	while (PREFERRED_CONNECTIONS_FOR_LEAF - getNumInitializedConnections() < 1)
+    		remove ((ManagedConnection) _initializedConnections.get(0));
     	
     	
-    	//this connection must not fail.  
+    	//this connection must not fail.  If it does, the process will be aborted. 
 		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
-		
-		//let the exception propagate
-		//if we fail to connect for any reason, abort the promotion process.
-		initializeExternallyGeneratedConnection(UPconn);
-    	
-		//now remove all our connections
-		//Question: do we want to remove the fetched but not initialized connections as well?
-		//I think yes, since we'll be doing a crawl for new connections --zab
-		List oldConnections = _connections;
-		
-		//now remove all our open connections 
-		synchronized(this) {
-			_connections = new ArrayList();
-			_connections.add(UPconn);
-			_initializedConnections = new ArrayList();
-			_initializedClientConnections = new ArrayList();
-		}
-		//and add the new one.
+		UPconn.initialize();
 		processConnectionHeaders(UPconn);
-		completeConnectionInitialization(UPconn, false);
 		
+		//if we got here, the connection is initialized
+		//shut down the other connections, try to become an ultrapeer.
+		disconnect(); 
 		
-		//start it off-thread
-		Thread connThread = new ManagedThread() {
-			public void ManagedRun() {
-				try {
-					startConnection(UPconn);
-				}catch(IOException iox) {} //the OutgoingConnector ignores it as well
-			}
-		};
-		connThread.start();
-		
-		
-		//and close the old connections we had.
-		for (Iterator iter = oldConnections.iterator();iter.hasNext();) {
-			ManagedConnection conn = (ManagedConnection)iter.next();
-			if (conn!=UPconn) //make sure we don't close our special connection
-				conn.close();
+		//now add our backup connection to the lists.
+		//this duplicates some code from initializeExternallyGeneratedConnection
+		RouterService.getCallback().connectionInitializing(UPconn);
+		synchronized(this) {
+			connectionInitializing(UPconn);
+			completeConnectionInitialization(UPconn,false);
 		}
+		//start the connection
+		Thread connectionRunner = new ManagedThread(
+				new OutgoingConnector(UPconn,false));
+		connectionRunner.start();
 		
-		//that's it.  Now we have only one supernode2supernode connection, we should
-		//promote ourselves.
+		//sleep some time to get the connection initialized, etc.
+		try {
+			Thread.sleep(1000);
+		}catch(InterruptedException iex){}
+
+		//become an UP! :)
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		isSupernode();
 		
     }
 

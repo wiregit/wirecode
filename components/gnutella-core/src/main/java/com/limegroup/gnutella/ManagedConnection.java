@@ -321,7 +321,7 @@ public class ManagedConnection extends Connection
      */
     public static ManagedConnection forceUP2UPConnection (String host, int port) {
     	return new ManagedConnection(host, port, 
-    		new UltrapeerHeaders(host), new UltrapeerHandshakeResponder(host));
+    		new UltrapeerHeaders(host), new ForcedUltrapeerHandshakeResponder(host));
     	
     }
 

@@ -395,7 +395,7 @@ public class Connection implements IpPort {
      */
     public void initialize(int timeout) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-
+    	
         if(isOutgoing())
             _socket=Sockets.connect(_host, _port, timeout);
 

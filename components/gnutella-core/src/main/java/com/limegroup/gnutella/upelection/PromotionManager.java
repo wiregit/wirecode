@@ -116,6 +116,7 @@ public class PromotionManager {
 	}
 	
 	public void handleACK(PromotionACKVendorMessage message, Endpoint sender) {
+		
 		//first see if anyone is indeed a promotion partner
     	Endpoint partner = null;
     	
@@ -124,20 +125,24 @@ public class PromotionManager {
     			return;
     	
     		//check if we received the ACK from the right person
-    		if (!sender.equals(_promotionPartner)) 
-					return;
+    		//also allow for loopback addresses for testing 
+    		if (!sender.equals(_promotionPartner) && 
+    				!sender.getInetAddress().isLoopbackAddress())
+    			return;
     		
     		//set the promotion partner to null if that's the case
     		partner = _promotionPartner;
     		_promotionPartner = null;
+    		
+    		//stop the expiration thread
+    		_expirer.interrupt();
+    		_expirer = null;
     	}
     	
     	//*************************
     	//we know we have received a proper ACK.
     	
     	
-    	//first, stop the expiration thread
-    	_expirer.interrupt();
     	
     	//then, proceed as appropriate:
     	
@@ -170,18 +175,19 @@ public class PromotionManager {
 			
 			//set the promotion partner 
 			_promotionPartner = candidate;
+			
+			//start a resetting thread
+			_expirer = new ManagedThread(new Expirer());
+			_expirer.setDaemon(true);
+			_expirer.start();
 		}
 		
 		//*******
 		//send a PromotionRequestVM to the appropriate route
 		PromotionRequestVendorMessage msg = new PromotionRequestVendorMessage(BestCandidates.getBest());
 		
-		RouterService.getMessageRouter().forwardPromotionRequest(msg);
+		RouterService.getMessageRouter().forwardPromotionRequest(msg);	
 		
-		//start a cleaner thread
-		_expirer = new ManagedThread(new Expirer());
-		_expirer.setDaemon(true);
-		_expirer.start();
 	}
 	
 	/**
