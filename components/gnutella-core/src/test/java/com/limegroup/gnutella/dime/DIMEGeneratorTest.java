@@ -88,4 +88,12 @@ public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.BaseTes
         assertTrue(readOne.isFirstRecord());
         assertTrue(readOne.isLastRecord());
     }
+    
+    public void testWriteWithNone() throws Exception {
+        DIMEGenerator gen = new DIMEGenerator();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        gen.write(out);
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        assertEquals(-1, in.read());
+    }
 }

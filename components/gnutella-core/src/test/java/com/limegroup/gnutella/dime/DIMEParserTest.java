@@ -11,6 +11,7 @@ import junit.framework.Test;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.NoSuchElementException;
+import com.sun.java.util.collections.UnsupportedOperationException;
 
 /**
  * Tests for DIMEParser.
@@ -367,5 +368,13 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(IOException ioe) {
             assertEquals("already read last message.", ioe.getMessage());
         }
+    }
+    
+    public void testRemove() throws Exception {
+        Iterator p = new DIMEParser(new ByteArrayInputStream(new byte[0]));
+        try {
+            p.remove();
+            fail("expected exception");
+        } catch(UnsupportedOperationException expected) {}
     }
 }

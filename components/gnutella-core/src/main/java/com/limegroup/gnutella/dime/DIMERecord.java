@@ -238,7 +238,7 @@ public class DIMERecord {
         //The DIME specification allows this to be a 32-bit unsigned field,
         //which in Java would be a long -- but in order to hold the array
         //of the data, we can only read up to 16 unsigned bits (an int), in order
-        //to size the array correctly.        
+        //to size the array correctly.
         if(dataLength < 0)
             throw new IOException("data too big.");
 

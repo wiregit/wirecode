@@ -87,7 +87,9 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	    assertEquals(0, record.getId().length);
 	    assertEquals(0, record.getOptions().length);
 	    assertEquals("", record.getIdentifier());
+        assertEquals("", record.getIdentifier()); // test again for coverage.
 	    assertEquals(new HashMap(), record.getOptionsMap());
+        assertEquals(new HashMap(), record.getOptionsMap()); // test again.
 	}
 	
 	public void testCreate() throws Exception {
@@ -671,4 +673,47 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         }
     }
+    
+    public void testDataTooLarge() throws Exception {
+        ByteArrayOutputStream out;
+        ByteArrayInputStream in;
+        DIMERecord record;
+        
+	    out = new ByteArrayOutputStream();
+	    out.write( 0x08 ); // mb, me & cf clear.
+	    out.write( 0x00 ); // // no type + reserved
+	    out.write( new byte[] { 0, 0 } ); // option length: 0
+	    out.write( new byte[] { 0, 0 } ); // id length: 0
+	    out.write( new byte[] { 0, 0 } ); // type length: 0
+	    out.write( new byte[] { (byte)0xFF, (byte)0xFF, 
+	                            (byte)0xFF, (byte)0xFF } ); // data length: LARGE
+        in = new ByteArrayInputStream(out.toByteArray());   
+        try {
+            record = DIMERecord.createFromStream(in);
+            fail("expected exception");
+        } catch(IOException expected) {
+            assertEquals("data too big.", expected.getMessage());
+        }
+        
+        // Test boundary cases.
+	    out = new ByteArrayOutputStream();
+	    out.write( 0x08 ); // mb, me & cf clear.
+	    out.write( 0x00 ); // // no type + reserved
+	    out.write( new byte[] { 0, 0 } ); // option length: 0
+	    out.write( new byte[] { 0, 0 } ); // id length: 0
+	    out.write( new byte[] { 0, 0 } ); // type length: 0
+	    // one over Integer.MAX_VALUE (in big endian format)
+	    out.write( new byte[] { (byte)0xFF, (byte)0xFF, 
+	                            (byte)0x01, (byte)0x00 } );
+        in = new ByteArrayInputStream(out.toByteArray());   
+        try {
+            record = DIMERecord.createFromStream(in);
+            fail("expected exception");
+        } catch(IOException expected) {
+            assertEquals("data too big.", expected.getMessage());
+        }
+        
+        // can't really test Integer.MAX_VALUE 'cause it's too big to
+        // store.
+    }     
 }
