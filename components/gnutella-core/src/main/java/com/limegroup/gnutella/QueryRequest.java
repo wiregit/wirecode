@@ -13,8 +13,6 @@ public class QueryRequest extends Message implements Serializable{
      *  LOCKING: obtain this' lock. */
     private String query=null;
     private String richQuery = null;
-    /** Flag indicating if byte[] payload and inst vars are synced */
-    private boolean payloadHarmonized = false; 
 
     // HUGE v0.93 fields
     /** Any URN types requested on responses */
@@ -54,6 +52,19 @@ public class QueryRequest extends Message implements Serializable{
 			this.queryUrns = new HashSet(queryUrns);
 		}
         buildPayload(); // now the length has been set
+		if(this.queryUrns == null) {
+			this.queryUrns = Collections.EMPTY_SET; 
+		}
+		else {
+			this.queryUrns = Collections.unmodifiableSet(queryUrns);
+		}
+		if(this.requestedUrnTypes == null) {
+			this.requestedUrnTypes = Collections.EMPTY_SET;
+		}
+		else {
+			this.requestedUrnTypes =
+			    Collections.unmodifiableSet(requestedUrnTypes);
+		}
     }
 
     /**
@@ -61,7 +72,7 @@ public class QueryRequest extends Message implements Serializable{
      * with a empty rich query
      */
     public QueryRequest(byte ttl, int minSpeed, String query) {
-        this(ttl, minSpeed, query, "");
+        this(ttl, minSpeed, query, "", false, null, null);
     }
 
 
@@ -81,9 +92,39 @@ public class QueryRequest extends Message implements Serializable{
      * @requires payload.length>=3
      */
     public QueryRequest(byte[] guid, byte ttl, byte hops,
-            byte[] payload) {
+						byte[] payload) {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
         this.payload=payload;
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            short sp = ByteOrder.leb2short(bais);
+            minSpeed = ByteOrder.ubytes2int(sp);
+            query = readNullTerminatedString(bais);
+            // handle extensions, which include rich query and URN stuff
+            queryUrns=null;
+            requestedUrnTypes=null;
+            String exts = readNullTerminatedString(bais);
+            StringTokenizer stok = new StringTokenizer(exts,"\u001c");
+            while (stok.hasMoreElements()) {
+                handleGemExtensionString(stok.nextToken());
+            }
+            if (richQuery == null) richQuery=""; 
+        } catch (IOException ioe) {
+            System.out.println("QueryRequest.scanPayload() IOException");
+        }
+		if(this.queryUrns == null) {
+			this.queryUrns = Collections.EMPTY_SET; 
+		}
+		else {
+			this.queryUrns = Collections.unmodifiableSet(queryUrns);
+		}
+		if(this.requestedUrnTypes == null) {
+			this.requestedUrnTypes = Collections.EMPTY_SET;
+		}
+		else {
+			this.requestedUrnTypes =
+			    Collections.unmodifiableSet(requestedUrnTypes);
+		}		
     }
     
     private void buildPayload() {
@@ -113,10 +154,9 @@ public class QueryRequest extends Message implements Serializable{
             baos.write(0);                             // final null
             payload=baos.toByteArray();
             updateLength(payload.length); 
-            payloadHarmonized=true;
-        } catch (IOException ioe) {
+		} catch (IOException ioe) {
             System.out.println("QueryRequest.buildPayload() IOException");
-        }
+		}
     }
 
     protected void writePayload(OutputStream out) throws IOException {
@@ -130,10 +170,7 @@ public class QueryRequest extends Message implements Serializable{
      * as this seems to cause problems on the Japanese Macintosh.  If you need
      * the raw bytes of the query string, call getQueryByteAt(int).
      */
-    public synchronized String getQuery() {
-        if(!payloadHarmonized) {
-            scanPayload();
-        }
+    public String getQuery() {
         return query;
     }
     
@@ -142,10 +179,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *
 	 * @return the rich query string
 	 */
-    public synchronized String getRichQuery() {
-        if(!payloadHarmonized) {
-            scanPayload();
-        }
+    public String getRichQuery() {
         return richQuery;
     }
  
@@ -156,14 +190,8 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return the <tt>Set</tt> of URN types requested for this query, or
 	 * <tt>null</tt> if there are no specified URN types
 	 */
-    public synchronized Set getRequestedUrnTypes() {
-        if(!payloadHarmonized) {
-            scanPayload();
-        }
-		if(requestedUrnTypes != null) {
-			return new HashSet(requestedUrnTypes);
-		}
-		return null;
+    public Set getRequestedUrnTypes() {
+		return requestedUrnTypes;
     }
     
 	/**
@@ -173,41 +201,10 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, or 
 	 * <tt>null</tt> if there are no URNs specified for the query
 	 */
-    public synchronized Set getQueryUrns() {
-        if(!payloadHarmonized) {
-            scanPayload();
-        }
-		if( queryUrns != null) {
-			return new HashSet(queryUrns);
-		}
-		return null;
+    public Set getQueryUrns() {
+		return queryUrns;
     }
-    
-	/**
-	 * Scans the payload for the query request, initializing variables
-	 * for the query request in the process.
-	 */
-    private void scanPayload() {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-            short sp = ByteOrder.leb2short(bais);
-            minSpeed = ByteOrder.ubytes2int(sp);
-            query = readNullTerminatedString(bais);
-            // handle extensions, which include rich query and URN stuff
-            queryUrns=null;
-            requestedUrnTypes=null;
-            String exts = readNullTerminatedString(bais);
-            StringTokenizer stok = new StringTokenizer(exts,"\u001c");
-            while (stok.hasMoreElements()) {
-                handleGemExtensionString(stok.nextToken());
-            }
-            if (richQuery == null) richQuery=""; 
-            payloadHarmonized=true;
-        } catch (IOException ioe) {
-            System.out.println("QueryRequest.scanPayload() IOException");
-        }
-    }
-    
+        
 	/**
 	 * Handles an individual HUGE "General Extension Mechanism" (GEM)
 	 * string, adding the appropriate URN, URN type, or xml query data 
@@ -278,9 +275,6 @@ public class QueryRequest extends Message implements Serializable{
 	 * value returned is always smaller than 2^16.
 	 */
     public int getMinSpeed() {
-        if(!payloadHarmonized) {
-            scanPayload();
-        }
         return minSpeed;
     }
 
