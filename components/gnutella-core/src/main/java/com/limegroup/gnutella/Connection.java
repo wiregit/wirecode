@@ -61,6 +61,12 @@ public class Connection {
     private HandshakeResponder _propertiesWrittenR;
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */
+    
+    /**
+     * Indicates whether the connection is to a shielded client
+     */
+    private boolean _isClientConnection = false;
+    
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
@@ -168,6 +174,23 @@ public class Connection {
                 throw e;
             }
         }
+    }
+    
+    /**
+     * Sets the flag indicating whether the connection is to a shielded client
+     * @param flag The flag value to be set
+     */
+    public void setClientConnectionFlag(boolean flag){
+        _isClientConnection = flag;
+    }
+    
+    /**
+     * Indicates whether the connection is to a shielded client
+     * @return true, if the connection is to a shielded client, false
+     * otherwise
+     */
+    public boolean isClientConnection(){
+        return _isClientConnection;
     }
 
     private static class BadHandshakeException extends IOException { }
