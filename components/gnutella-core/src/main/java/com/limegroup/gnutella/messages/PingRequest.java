@@ -53,6 +53,7 @@ public class PingRequest extends Message {
      */
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
+        _ggeps=new GGEP[1];
         addLocale();
     }
     
@@ -164,6 +165,7 @@ public class PingRequest extends Message {
             GGEP ggep = new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
                      ApplicationSettings.LANGUAGE.getValue());
+            _ggeps[0]=ggep;
             ggep.write(baos);
             baos.write(0);
             
@@ -178,8 +180,6 @@ public class PingRequest extends Message {
     /**
      * marks this ping request as requesting a pong carrying ip:port
      * info.
-     * 
-     * 
      */
     public void addIPRequest() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -187,20 +187,13 @@ public class PingRequest extends Message {
 
             // Since existing clients are hard-coded to expect the locale GGEP
             // at offset 0, we add the request to that block
+            if (_ggeps==null)
+                _ggeps=new GGEP[1];
+            if (_ggeps[0]==null)
+                _ggeps[0]=new GGEP(false);
             
-            GGEP ggep= null;
-            if (payload!=null)
-                try{
-                    ggep = new GGEP(payload,0,null);
-                }catch(BadGGEPBlockException bad) {
-                    //we created this message ourselves - and now it has a bad block!
-                    ErrorService.error(bad);
-                }
-            else
-                ggep = new GGEP(false);
-            
-            ggep.put(GGEP.GGEP_HEADER_IPPORT);
-            ggep.write(baos);
+            _ggeps[0].put(GGEP.GGEP_HEADER_IPPORT);
+            _ggeps[0].write(baos);
             baos.write(0);
             
             payload = baos.toByteArray();

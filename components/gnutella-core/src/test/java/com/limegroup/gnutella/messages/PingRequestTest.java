@@ -126,7 +126,8 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         pr = (PingRequest)m;
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         pr.write(outBuffer);
-        String out = outBuffer.toString().substring(23);
+        byte [] outb = outBuffer.toByteArray();
+        String out = new String(outb,23,outb.length-23);
         assertEquals("Wrong payload", "ABCDEFGHIJKLMNOP", out);
       
         //Test the new constructor for big pings read from the network

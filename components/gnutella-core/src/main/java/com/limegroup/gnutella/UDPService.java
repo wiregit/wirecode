@@ -245,7 +245,7 @@ public class UDPService implements Runnable {
             _socket.close();
         
         
-        //c) Replace with new sock.  Notify the udpThread.
+        //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
             synchronized (_sendLock) {
                 // if we are being turned on
@@ -258,11 +258,12 @@ public class UDPService implements Runnable {
                 _socket = (DatagramSocket) datagramSocket;
                 
                 // set the port in the FWT records
-                synchronized(this) {
-                    _lastReportedIP=_socket.getLocalAddress().getAddress();
-                    _lastReportedPort=_socket.getLocalPort();
-                    _portStable=true;
-                }
+                if (_socket!=null)
+                    synchronized(this) {
+                        _lastReportedIP=_socket.getLocalAddress().getAddress();
+                        _lastReportedPort=_socket.getLocalPort();
+                        _portStable=true;
+                    }
                 _receiveLock.notify();
                 _sendLock.notify();
             }
