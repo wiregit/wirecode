@@ -220,7 +220,7 @@ public class Connection implements Runnable {
 	//Can't use same lock as receive()!
 	synchronized (out) {
 	    m.write(out);
-//  	    out.flush();
+  	    out.flush();
 	    sent++;	    
 	    if (manager!=null)
 		manager.total++;
@@ -490,7 +490,6 @@ public class Connection implements Runnable {
 		    String client_str = new String(client_id);
 
 		    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
-			System.out.println("Sending a message to a host");
 			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
 			nextHost.send(m); //send the message to appropriate host
 		    }
