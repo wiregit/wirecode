@@ -94,10 +94,12 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         ResumeDownloader downloader=newResumeDownloader();
         while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
 			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.WAITING_FOR_RESULTS, 
+                assertEquals(Downloader.GAVE_UP, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
+        // give the downloader time to change its state
+        Thread.sleep(1000);
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
