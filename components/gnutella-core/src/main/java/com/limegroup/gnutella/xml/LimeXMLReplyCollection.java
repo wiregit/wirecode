@@ -210,6 +210,13 @@ public class LimeXMLReplyCollection{
     public void addReplyWithCommit(File f, 
                                    String hash, 
                                    LimeXMLDocument replyDoc) {
+        String identifier ="";
+        try{
+            identifier = f.getCanonicalPath();
+        }catch(IOException e){
+            //do nothing
+        }
+        replyDoc.setIdentifier(identifier);
         addReply(hash, replyDoc);
         // commit to disk...
         try {
