@@ -243,7 +243,6 @@ public class HostCatcher {
         else
             e.setWeight(NORMAL_PRIORITY);
 
-        boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
                 //Adding e may eject an older point from queue, so we have to
@@ -252,15 +251,6 @@ public class HostCatcher {
                 Object ejected=queue.insert(e);
                 if (ejected!=null)
                     set.remove(ejected);
-
-                //If this is not full, notify the callback.  If this is full,
-                //the GUI's display of the host catcher will differ from this.
-                //This is acceptable; the user really doesn't need to see so
-                //many hosts, and implementing the alternatives would require
-                //many changes to ActivityCallback and probably a more efficient
-                //representation on the GUI side.
-                if (ejected==null)
-                    notifyGUI=true;
 
                 this.notify();
             }
@@ -275,8 +265,7 @@ public class HostCatcher {
                 gotGoodPongLock.notify();
             }
         }
-        if (notifyGUI)
-            callback.knownHost(e);
+        callback.knownHost(e);
     }
 
     /**
