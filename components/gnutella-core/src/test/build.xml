@@ -2,11 +2,9 @@
 
   <!-- set global properties for this basedir -->
   <property name="builddir"    value="build" />
-  <property name="messages"    value="com/limegroup/gnutella/messages" /> 
-  <property name="util"        value="com/limegroup/gnutella/util" /> 
   <property name="lib"         value="../gui/lib/"/>
   <property name="collections" value="${lib}collections.jar"/>
-  <property name="xerces"      value="${lib}xerces.jar"/>
+  <property name="xerces"      value="lib/xerces.jar"/>
   <property name="junit"       value="${lib}junit.jar"/>
   <property name="jl011"       value="${lib}jl011.jar"/>
   <property name="ui"          value="${lib}ui.jar"/>
@@ -16,7 +14,7 @@
   <property name="skins"       value="${lib}skinlf.jar"/>
   <property name="coredir"     value="../core/"/>
   <property name="guidir"      value="../gui/"/>
-  <property name="settings"    value="${coredir}com/limegroup/gnutella/settings/"/>
+  <property name="settings"    value="com/limegroup/gnutella/settings/"/>
   <property name="tests"       value="com/limegroup/gnutella/tests/"/>
 
   <!-- constants -->
@@ -27,6 +25,7 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
+    <pathelement location="${builddir}" />
     <pathelement location="${basedir}" />
     <pathelement location="${coredir}" />
     <pathelement location="${collections}" />
