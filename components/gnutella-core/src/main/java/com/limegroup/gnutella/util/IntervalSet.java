@@ -149,6 +149,8 @@ public class IntervalSet {
      * all the intervals.
      */
     public Iterator getNeededIntervals(int maxSize) {
+        if(maxSize < 1) 
+            return (new ArrayList()).iterator();//return an empty iterator
         if (intervals==null || intervals.size()==0) {//Nothing recorded?
             Interval block=new Interval(0, maxSize-1);
             List buf=new ArrayList(); 
