@@ -7,6 +7,9 @@ import org.xml.sax.*;
 import java.net.*;
 import java.util.*;
 import java.io.*;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.HttpClient;
 
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
@@ -119,42 +122,22 @@ public class UpdateManager {
                 //establish a connection and just return, its fail safe. 
                 String ip = c.getIPString();
                 int port = c.getListeningPort();
-                byte[] data = null;
+                String connectTo = "http://" + ip + ":" + port + UPDATE;
+                HttpMethod get = new GetMethod(connectTo);
+                get.addRequestHeader("Cache-Control", "no-cache");
+                get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+                get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+                HttpClient client = HttpClientManager.getNewClient();
                 try {
-                    URL url = new URL("http",ip,port,UPDATE);
-                    HttpURLConnection connection=(HttpURLConnection)
-                                                      url.openConnection();
-                    connection.setUseCaches(false);
-                    connection.setRequestProperty("User-Agent",
-                                                  CommonUtils.getHttpServer());
-                    connection.setRequestProperty(  /*no persistence*/
-                    HTTPHeaderName.CONNECTION.httpStringValue(), "close");
-                    connection.setRequestProperty("accept","text/html");//??
-                    
-                    InputStream in = connection.getInputStream();
-                    int len = connection.getContentLength();
-                    debug("Content len "+len);
-                    data = new byte[len];
-                    int BUF_LEN = 1024;//buffer size
-                    byte[] buf = new byte[BUF_LEN];
-                    int iters = len%BUF_LEN==0 ? len/BUF_LEN : (len/BUF_LEN)+1;
-                    ByteReader byteReader = new ByteReader(in);
-                    int totalRead = 0;
-                    for(int i=0; i<iters; i++) {
-                        int left = len - totalRead;
-                        int a = byteReader.read(buf,0,Math.min(BUF_LEN,left));
-                        if(a==-1)
-                            break;
-                        System.arraycopy(buf,0,data,totalRead,a);
-                        totalRead += a;
-                    }
-                    UpdateMessageVerifier verifier=new 
-                                                   UpdateMessageVerifier(data);
-                    boolean verified = verifier.verifySource();
-                    if(!verified) {
-                        debug("Verification failed");
+                    client.executeMethod(get);
+                    byte[] data = get.getResponseBody();
+                    if( data == null )
                         return;
-                    }
+                    UpdateMessageVerifier verifier =
+                        new UpdateMessageVerifier(data);
+                    if(!verifier.verifySource())
+                        return;
                     debug("Verified file contents");
                     String xml = new String(verifier.getMessageBytes(),"UTF-8");
                     UpdateFileParser parser = new UpdateFileParser(xml);
@@ -195,15 +178,15 @@ public class UpdateManager {
                             return; //runningVersion <= newVersion -- no message
                         RouterService.getCallback().indicateNewVersion();
                     }
-                } catch(MalformedURLException mfux) {
-                    //MalformedURLException - while creating URL
-                    ErrorService.error(mfux);
                 } catch(IOException iox) {
                     //IOException - reading from socket, writing to disk etc.
                     return;
                 } catch(SAXException sx) {
                     //SAXException - parsing the xml
                     return; //We can't continue...forget it.
+                } finally {
+                    if( get != null )
+                        get.releaseConnection();
                 }
             }//end of run
         };

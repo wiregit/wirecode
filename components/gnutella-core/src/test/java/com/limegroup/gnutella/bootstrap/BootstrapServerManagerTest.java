@@ -153,7 +153,8 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
         Iterator iter=bman.getBootstrapServers();
         assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        assertTrue(! iter.hasNext());
+        if(iter.hasNext())
+            fail("had another: " + iter.next());
     }
 
     public void testRemoveErrorHosts() {

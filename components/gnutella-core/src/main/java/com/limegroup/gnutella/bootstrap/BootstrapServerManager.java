@@ -8,6 +8,15 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -18,6 +27,9 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
  * http://zero-g.net/gwebcache/specs.html
  */
 public class BootstrapServerManager {
+    
+    private static final Log LOG =
+        LogFactory.getLog(BootstrapServerManager.class);
 
     /** The minimum number of endpoints/urls to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
@@ -52,7 +64,6 @@ public class BootstrapServerManager {
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
-
 
     /////////////////////////// Public Interface //////////////////////
 
@@ -323,40 +334,27 @@ public class BootstrapServerManager {
 			throw new NullPointerException("null server in request to one host");
 		}
         BufferedReader in = null;
-        HttpURLConnection connection = null;
+        String connectTo = server.getURL().toString()
+                 +"?client="+CommonUtils.QHD_VENDOR_NAME
+                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
+                 +"&"+request.parameters();
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader("Cache-Control", "no-cache");
+        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                             "close");
+        get.setFollowRedirects(true);
+        HttpClient client = HttpClientManager.getNewClient();
         try {
-            //Prepare the request.  TODO: it would be great to add connection
-            //timeouts, but URLConnection doesn't give us control over that.
-            //One option on Java 1.4 is to set some system properties, e.g.,
-            //http.defaultSocketTimeout.  See for example
-            //   developer.java.sun.com/developer/bugParade/bugs/4143518.html
-            URL url = new URL(server.getURL().toString()
-                +"?client="+CommonUtils.QHD_VENDOR_NAME
-                +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
-                +"&"+request.parameters());
-            connection = (HttpURLConnection)url.openConnection();
-            connection.setUseCaches(false);
-            connection.setRequestProperty(
-                "User-Agent",
-                CommonUtils.getHttpServer());
-            connection.setRequestProperty(                    //no persistence
-                HTTPHeaderName.CONNECTION.httpStringValue(),
-                "close");
-            //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
-            //weird characters on international systems.
-            try {
-                in = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), 
-                                        "ISO-8859-1"));
-            } catch(NullPointerException e) {
-                // This can happen because of JDK bug 4218806
-                // See http://developer.java.sun.com/developer/bugParade/bugs/4218806.html
-                throw new IOException("null .getInputStream()");
-            } catch(ArrayIndexOutOfBoundsException e) {
-                // There is a bug in java's implementation that can cause this
-                // error to happen.  It has been reported mostly on macs,
-                // on OS9 (with 1.1.8) and OSX (with 1.3.1).
-                throw new IOException("aiioe");
+            HttpClientManager.executeMethodRedirecting(client, get);
+            in = new BufferedReader(
+                    new InputStreamReader(
+                        get.getResponseBodyAsStream()));
+                        
+            if(get.getStatusCode() < 200 || get.getStatusCode() >= 300) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Invalid status code: " + get.getStatusCode());
+                throw new IOException("no 200 ok.");
             }
 
             //For each line of data (excludes HTTP headers)...
@@ -366,6 +364,9 @@ public class BootstrapServerManager {
                 String line = in.readLine();
                 if (line == null)
                     break;
+                    
+                if(LOG.isTraceEnabled())
+                    LOG.trace("<< " + line);
 
                 if (firstLine && StringUtils.startsWithIgnoreCase(line,"ERROR")){
                     request.handleError(server);
@@ -382,14 +383,14 @@ public class BootstrapServerManager {
             if (!errors)
                 _lastConnectable = server;
         } catch (IOException ioe) {
+            LOG.warn("Exception while handling server", ioe);
             request.handleError(server);
         } finally {
-            //Close the connection.  TODO: is this really the preferred way?
+            //Close the connection.
             if (in!=null)
                 try { in.close(); } catch (IOException e) { }
-            if(connection != null) {
-                connection.disconnect(); 
-            }
+            if (get != null)
+                get.releaseConnection();
         }
     }
 

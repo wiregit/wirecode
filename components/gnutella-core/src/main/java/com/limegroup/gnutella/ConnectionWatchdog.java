@@ -8,12 +8,17 @@ import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Map;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /*
  * A "watchdog" thread that periodically examines connections and
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.
  */
 public final class ConnectionWatchdog implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
 
     /**
      * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
@@ -174,6 +179,8 @@ public final class ConnectionWatchdog implements Runnable {
             ConnectionState currentState=new ConnectionState(c);
             ConnectionState oldState=(ConnectionState)state;
             if (currentState.notProgressedSince(oldState)) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Killing connection: " + c);
                 //Got a dud; replace it.  Here we rely on the
                 //ConnectionManager to do the replacement.  A better
                 //policy might be to restart a new connection to c.

@@ -63,6 +63,8 @@ public class ClientSideBrowseHostTest
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -89,6 +91,7 @@ public class ClientSideBrowseHostTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         connect(rs);
+        testUP = connect(rs, 6355, true);        
     }        
     
     public void setUp() throws Exception  {
@@ -191,8 +194,6 @@ public class ClientSideBrowseHostTest
     // 3. if all else fails the client sends a PushRequest
 
     public void testHTTPRequest() throws Exception {
-        testUP = connect(rs, 6355, true);
-
         drain(testUP);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
@@ -345,6 +346,13 @@ public class ClientSideBrowseHostTest
         // wait for the incoming PushProxy request
         Socket httpSock = ss.accept();
         assertNotNull(httpSock);
+        
+        BufferedWriter sockWriter  = 
+            new BufferedWriter(new
+                               OutputStreamWriter(httpSock.getOutputStream()));
+        sockWriter.write("HTTP/1.1 202 OK\r\n");
+        sockWriter.flush();
+        
 
         // start reading and confirming the HTTP request
         String currLine = null;
@@ -416,7 +424,7 @@ public class ClientSideBrowseHostTest
         try {
             do {
                 m = testUP.receive(TIMEOUT);
-                assertTrue(!(m instanceof PushRequest));
+                assertNotInstanceof(m.toString(), PushRequest.class, m);
             } while (true) ;
         }
         catch (InterruptedIOException expected) {}
@@ -473,8 +481,8 @@ public class ClientSideBrowseHostTest
 
         // nothing works for the guy, we should get a PushRequest
         do {
-            m = testUP.receive(TIMEOUT*4);
-        } while (!(m instanceof PushRequest)) ;
+            m = testUP.receive(TIMEOUT*5);
+        } while (!(m instanceof PushRequest));
 
         // awesome - everything checks out!
     }

@@ -12,6 +12,9 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
  * routines for reading and writing of Gnutella messages.  A connection is
@@ -59,6 +62,8 @@ import com.limegroup.gnutella.statistics.*;
  * TTL traffic generally.
  */
 public class Connection {
+    
+    private static final Log LOG = LogFactory.getLog(Connection.class);
 	
 	/**
 	 * Lock for maintaining accurate data for when to allow ping forwarding.
@@ -1002,6 +1007,9 @@ public class Connection {
             
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+            if(LOG.isTraceEnabled())
+                LOG.trace("Connection (" + toString() +
+                          ") read message: " + msg);
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -1021,6 +1029,7 @@ public class Connection {
                 _bytesReceived += msg.getTotalLength();
             }
         } catch(NullPointerException npe) {
+            LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
             throw CONNECTION_CLOSED;
         }
         return msg;
@@ -1038,6 +1047,10 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Connection (" + toString() + 
+                      ") is sending message: " + m);
+        
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
