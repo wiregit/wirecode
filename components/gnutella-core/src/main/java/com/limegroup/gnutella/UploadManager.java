@@ -185,7 +185,24 @@ public final class UploadManager implements BandwidthTracker {
                         return;
                     }
                 } catch(IOException ioe) {//including InterruptedIOException
-                        return;
+                    debug("IOE thrown, closing socket");
+                    synchronized(this) {
+                        int i=0;
+                        boolean found = false;
+                        for(Iterator iter=_queuedUploads.iterator();
+                                                        iter.hasNext();i++) {
+                            KeyValue kv = (KeyValue)iter.next();
+                            if(kv.getKey()==socket) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(found)
+                            _queuedUploads.remove(i);
+                        uploader.setState(Uploader.INTERRUPTED);
+                    }
+                    close(socket);
+                    return;
                 }
             }//end of while
         } finally {
