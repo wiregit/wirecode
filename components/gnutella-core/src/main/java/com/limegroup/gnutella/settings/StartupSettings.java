@@ -12,4 +12,10 @@ public final class StartupSettings extends LimeProps {
      */ 
     public static final BooleanSetting ALLOW_MULTIPLE_INSTANCES = 
         FACTORY.createBooleanSetting("ALLOW_MULTIPLE_INSTANCES", false); 
+        
+    /**
+     * A boolean flag for whether or not to start LimeWire on system startup.
+     */
+    public static final BooleanSetting RUN_ON_STARTUP = 
+        FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
 }
