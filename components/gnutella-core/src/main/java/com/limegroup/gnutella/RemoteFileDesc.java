@@ -50,10 +50,6 @@ public class RemoteFileDesc implements Serializable {
     private boolean _firewalled;
     private String _vendor;
     private long _timestamp;
-    //TODO: Try to see if we can solve serialization issues without
-    //having to create all these different variables.
-    //instead, just hold a response and a host data object
-    private static boolean _isMeasured = false;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -292,13 +288,6 @@ public class RemoteFileDesc implements Serializable {
 		Endpoint e = new Endpoint(_host, _port);
 		return e.isPrivateAddress();
 	}
-
-    
-    //Sumeet:TODO1: This method needs to be corrected.
-    public boolean getIsMeasured() {
-        return _isMeasured;
-    }
-
     
     public PushProxyInterface[] getPushProxies() {
         return _proxies;

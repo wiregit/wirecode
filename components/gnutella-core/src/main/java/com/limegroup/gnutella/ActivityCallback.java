@@ -55,7 +55,8 @@ public interface ActivityCallback
      */
     //public void handleQueryReply( QueryReply qr );
 
-	public void handleQueryResult(RemoteFileDesc rfd, byte[] clientGUID);
+	public void handleQueryResult(RemoteFileDesc rfd, byte[] clientGUID, 
+                                  HostData data);
 
     /**
      * Add a query string to the monitor screen
