@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
+import java.util.StringTokenizer;
 
 /** Encapsulates important details about a auto download....
  */
