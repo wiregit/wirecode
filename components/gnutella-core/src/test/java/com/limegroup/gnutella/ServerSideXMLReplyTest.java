@@ -351,11 +351,29 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testXMLReturned() throws Exception {
+    public void testXMLReturned1() throws Exception {
         drainAll();
 
         // send a query
         QueryRequest query = QueryRequest.createQuery("metadata");
+        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.flush();
+
+        // confirm that result has heXML.
+        QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+        assertTrue(reply != null);
+        assertTrue(reply.getXMLBytes() != null);
+        assertTrue("xml length = " + reply.getXMLBytes().length,
+                   reply.getXMLBytes().length > 10);
+    }
+
+    public void testXMLReturned2() throws Exception {
+        drainAll();
+
+        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Alternative\"></audio></audios>";
+
+        // send a query
+        QueryRequest query = QueryRequest.createQuery("Alternative", richQuery);
         ULTRAPEER_1.send(query);
         ULTRAPEER_1.flush();
 
