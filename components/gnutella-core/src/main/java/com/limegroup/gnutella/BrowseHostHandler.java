@@ -175,7 +175,7 @@ public class BrowseHostHandler {
                 // start processing queries...
                 readingHTTP = false;
             }
-            else if (indexOfIgnoreCase(currLine, "User-Agent") > -1)
+            else if (indexOfIgnoreCase(currLine, "Server") > -1)
                 ; // just skip, who cares?
             else if (indexOfIgnoreCase(currLine, "Content-Type") > -1) {
                 // make sure it is QRs....
