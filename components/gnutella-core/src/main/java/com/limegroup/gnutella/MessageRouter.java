@@ -924,10 +924,12 @@ public abstract class MessageRouter {
 		//because of some very obscure optimization rules, it's actually
 		//possible that qi could be non-null but not initialized.  Need
 		//to be more careful about locking here.
-		ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-		if (qi.lastReceived==null) 
-			return false;
-		else if (qi.lastReceived.contains(query)) {
+
+        //if(!mc.hasRouteTableData()) return false;
+		//ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+		//if (qi.lastReceived==null) 
+        //return false;
+		if (mc.hitsQueryRouteTable(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -1579,6 +1581,9 @@ public abstract class MessageRouter {
         //Mutate query route table associated with receivingConnection.  
         //(This is legal.)  Create a new one if none exists.
         synchronized (receivingConnection.getQRPLock()) {
+            receivingConnection.updateQueryRouteTable(m);
+
+            /*
             ManagedConnectionQueryInfo qi =
                 receivingConnection.getQueryRouteState();
             if (qi.lastReceived==null) {
@@ -1592,6 +1597,7 @@ public abstract class MessageRouter {
             } catch (BadPacketException e) {
                 //TODO: ?
             }
+            */
         }
     }
 
