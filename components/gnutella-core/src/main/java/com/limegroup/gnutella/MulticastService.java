@@ -65,8 +65,7 @@ public final class MulticastService implements Runnable {
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private final Thread MULTICAST_THREAD
-	    = new Thread(this, "MulticastService");
+	private final Thread MULTICAST_THREAD;
 
 	/**
 	 * Instance accessor.
@@ -78,7 +77,14 @@ public final class MulticastService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private MulticastService() { }
+	private MulticastService() {
+	    MULTICAST_THREAD =
+	        new Thread(this, "MulticastService");
+		MULTICAST_THREAD.setDaemon(true);
+        MULTICAST_THREAD.start();
+    }
+	    
+
 
     /** 
      * Returns a new MulticastSocket that is bound to the given port.  This
@@ -118,12 +124,6 @@ public final class MulticastService implements Runnable {
 	 */
 	void setListeningSocket(MulticastSocket multicastSocket)
 	  throws IOException {
-        if (!MULTICAST_THREAD.isAlive()) {
-			MULTICAST_THREAD.setDaemon(true);
-            MULTICAST_THREAD.start();
-            Thread.yield(); // give it a bit of time to start up.
-		}
-
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
             _socket.close();

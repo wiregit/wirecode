@@ -65,7 +65,7 @@ public final class UDPService implements Runnable {
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private final Thread UDP_THREAD = new Thread(this, "UDPService");
+	private final Thread UDP_THREAD;
 
     /**
      * The GUID that we advertise out for UDPConnectBack requests.
@@ -82,7 +82,11 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() { }
+	private UDPService() {
+        UDP_THREAD = new Thread(this, "UDPService");
+		UDP_THREAD.setDaemon(true);
+        UDP_THREAD.start();
+    }
 
     /** @return The GUID to send for UDPConnectBack attempts....
      */
@@ -124,11 +128,6 @@ public final class UDPService implements Runnable {
         // SettingsManager.  but in general we want to have the SERVER side of
         // GUESS active always.  the client side should be shut off from 
 		// MessageRouter.
-        if (!UDP_THREAD.isAlive()) {
-			UDP_THREAD.setDaemon(true);
-            UDP_THREAD.start();
-            Thread.yield(); // give it a bit of time to start up.
-		}
 
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
