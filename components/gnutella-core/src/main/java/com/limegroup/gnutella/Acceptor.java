@@ -291,7 +291,8 @@ public class Acceptor extends Thread {
 				InetAddress address = client.getInetAddress();
 				byte[] addressBytes = address.getAddress();
                 if (isBannedIP(address.getHostAddress()) ||
-					addressBytes[0] == 127) {
+					(addressBytes[0] == 127 && 
+                     SettingsManager.instance().getLocalIsPrivate())) {
                     client.close();
                     continue;
                 }
