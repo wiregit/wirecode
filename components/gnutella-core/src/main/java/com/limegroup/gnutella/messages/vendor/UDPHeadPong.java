@@ -113,7 +113,7 @@ public class UDPHeadPong extends VendorMessage {
 			short rangeLength=dais.readShort();
 			byte [] ranges = new byte [rangeLength];
 			dais.readFully(ranges);
-			_ranges = IntervalSet.parseFromHttpHeader(new String(ranges),null);
+			_ranges = IntervalSet.parseBytes(ranges);
 		}
 		
 		//if there is more data in the packet, it must be alternate locations.
@@ -189,7 +189,7 @@ public class UDPHeadPong extends VendorMessage {
 		//if we sent partial file, we need to send the available ranges
 		if (retCode == PARTIAL_FILE) {
 			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
-			byte [] ranges =ifd.getAvailableRanges().getBytes(); 
+			byte [] ranges =ifd.getRangesAsByte(); 
 			caos.write((short)ranges.length);
 			caos.write(ranges);
 		}

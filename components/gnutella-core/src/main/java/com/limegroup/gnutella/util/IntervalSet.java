@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -290,6 +291,35 @@ public class IntervalSet {
         return intervals.toString();
     }
     
+    /**
+     *
+     * @return packed representation of the intervals.
+     */
+    public byte [] toBytes() {
+    	byte [] ret = new byte[intervals.size()*8];
+    	int pos = 0;
+    	for (Iterator iter = intervals.iterator();iter.hasNext();) {
+    		Interval current = (Interval) iter.next();
+    		System.arraycopy(current.toBytes(),0,ret,pos,4);
+    		pos+=4;
+    	}
+    	return ret;
+    }
+    
+    /**
+     * parses an IntervalSet from a byte array.  Each interval is 8 bytes; so if
+     * the size of the array is not divisible by 8 the last remaining bytes are discarded.
+     * @return
+     */
+    public static IntervalSet parseBytes(byte [] data) {
+    	IntervalSet ret = new IntervalSet();
+    	for (int i =0; i< data.length/8;i++) {
+    		int low = ByteOrder.beb2int(data,i*8);
+    		int high = ByteOrder.beb2int(data,i*8+4);
+    		ret.add(new Interval(low,high));
+    	}
+    	return ret;
+    }
     /**
      * Parses X-Available-Ranges header and returns an IntervalSet.
      * 
