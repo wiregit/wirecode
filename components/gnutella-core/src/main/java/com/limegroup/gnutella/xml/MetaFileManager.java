@@ -260,7 +260,7 @@ public class MetaFileManager extends FileManager {
      * in the names of the files.
      */
     public List getKeyWords(){
-         List words = super.getKeyWords();
+         ArrayList words = (ArrayList)super.getKeyWords();
         //Now get a list of keywords from each of the ReplyCollections
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
