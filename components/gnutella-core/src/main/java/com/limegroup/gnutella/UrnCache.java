@@ -14,7 +14,7 @@ import java.io.*;
 import java.security.*;
 import java.util.Enumeration;
 
-public class UrnCache {
+public final class UrnCache {
     
     /**
      * File where urns (currently SHA1 urns) get persisted to
@@ -29,7 +29,7 @@ public class UrnCache {
     /**
      * UrnCache container
      */
-    private Hashtable /* String -> HashSet */ theUrnCache;
+    private Map /* String -> HashSet */ theUrnCache;
 
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
@@ -51,12 +51,19 @@ public class UrnCache {
 	}
     
     /**
-     * Find any URNs remembered from a previous session for a file
+     * Find any URNs remembered from a previous session for the specified
+	 * <tt>File</tt> instance.  The returned <tt>HashSet</tt> is
+	 * guaranteed to be non-null, but it may be empty.
+	 *
+	 * @param file the <tt>File</tt> instance to look up URNs for
+	 * @return a new <tt>HashSet</tt> containing any cached URNs for the
+	 *  speficied <tt>File</tt> instance, guaranteed to be non-null, but
+	 *  possibly empty
      */
-    public HashSet getUrns(File file) {
+    public Collection getUrns(File file) {
 		long modTime = file.lastModified();
 		String path = file.getAbsolutePath();
-		HashSet urns = new HashSet();
+		Collection urns = new HashSet();
 
         /** one or more "urn:" names for this file */
 
@@ -64,11 +71,11 @@ public class UrnCache {
         if (modTime==0L) 
 		    return urns; 
         
-        HashSet cachedUrns = (HashSet)theUrnCache.get(modTime+" "+path);
+        Collection cachedUrns = (Collection)theUrnCache.get(modTime+" "+path);
         if(cachedUrns!=null) {
             Iterator iter = cachedUrns.iterator();
             while(iter.hasNext()){
-                String urn = (String)iter.next();
+                URN urn = (URN)iter.next();
                 urns.add(urn);
             }
         } // else just leave urns empty for now
@@ -78,9 +85,13 @@ public class UrnCache {
 
 
     /**
-     * Add URNs to theUrnCache
+     * Add URNs for the specified <tt>FileDesc</tt> instance to theUrnCache.
+	 *
+	 * @param fileDesc the <tt>FileDesc</tt> instance containing URNs to store
      */
-    public void persistUrns(File file, HashSet urns) {
+    public void persistUrns(FileDesc fileDesc) {
+		File file = fileDesc.getFile();
+		Collection urns = fileDesc.getUrns();
 		long modTime = file.lastModified();
 		String path = file.getAbsolutePath();
         theUrnCache.put(modTime+" "+path, urns);
@@ -95,7 +106,8 @@ public class UrnCache {
      */
     private void initCache() {
         try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
+            ObjectInputStream ois = 
+			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
             theUrnCache = (Hashtable)ois.readObject();
             ois.close();
         } catch (Exception e) {
@@ -124,7 +136,8 @@ public class UrnCache {
      */
     public void persistCache() {
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
+            ObjectOutputStream oos = 
+			    new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
             oos.writeObject(theUrnCache);
             oos.close();
         } catch (Exception e) {
@@ -132,5 +145,8 @@ public class UrnCache {
         }
     }
 }
+
+
+
 
 
