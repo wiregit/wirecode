@@ -29,6 +29,7 @@ public class Response {
     /** Per HUGE v0.93 proposal, urns includes returned urn-values
      */
     private Set urns;
+
     // HUGE v.093 GeneralExtensionMechanism between-the-null extensions
     private byte[] extBytes;
     
@@ -83,14 +84,26 @@ public class Response {
             this.handleLegacyOrGemExtensionString(stok.nextToken());
         }
     }
+
+	/**
+	 * Constructs a new <tt>Response</tt> instance from the data in the
+	 * specified <tt>FileDesc</tt> instance.
+	 *
+	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
+	 *  this <tt>Response</tt>
+	 */
+	public Response(FileDesc fd) {
+		this(fd.getIndex(), fd.getFile().length(), fd.getFile().getName());
+		urns = fd.getUrns();
+	}
     
     private void handleLegacyOrGemExtensionString(String ext) {      
-		if(URN.isURN(ext)) {
+		if(URN.isUrn(ext)) {
 			// it's a HUGE v0.93 URN name for the same files
 			try {
-				URN urn = URNFactory.createURN(ext);
+				URN urn = URNFactory.createUrn(ext);
 				if (urns == null) urns = new HashSet();
-				this.addUrn(urn);
+				urns.add(urn);
 			} catch(IOException e) {
 				// there was an error creating the URN, so return
 				return;
@@ -192,7 +205,7 @@ public class Response {
                 Iterator iter = urns.iterator();
                 while (iter.hasNext()) {
                     URN urn = (URN)iter.next();
-                    baos.write(urn.getURNString().getBytes());
+                    baos.write(urn.getUrnString().getBytes());
                     if (iter.hasNext()) {
                         baos.write(0x1c);
                     }
@@ -209,18 +222,18 @@ public class Response {
      */
     public int getLength() {
         // must match same number of bytes writeToArray() will write
-        updateExtBytes();
-        return 8 +                   // index and size
-               nameBytes.length +
-               1 +                   // null
-               extBytes.length +
-               1;                    // final null
+		updateExtBytes();
+		return 8 +                   // index and size
+		nameBytes.length +
+		1 +                   // null
+		extBytes.length +
+		1;                    // final null
     }
     
     /**
      * utility function for instantiating individual responses from inputstream
      */
-    public static Response readFromStream(InputStream is) throws IOException {
+    public static Response createFromStream(InputStream is) throws IOException {
         // extract file index & size
         long index=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
         long size=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
@@ -240,14 +253,14 @@ public class Response {
         while((c=is.read())!=0) {
             baos.write(c);
         }
-        String name=new String(baos.toByteArray());
+        String name = new String(baos.toByteArray());
 
         // Extract extra info, if any
         baos.reset();
         while((c=is.read())!=0) {
             baos.write(c);
         }
-        String betweenNulls=new String(baos.toByteArray());
+        String betweenNulls = new String(baos.toByteArray());
         if(betweenNulls==null || betweenNulls.equals("")) {
             return new Response(index,size,name);
         } else {
@@ -255,28 +268,14 @@ public class Response {
         }
     }
     
-
-	/**
-	 * Adds a URN to the set of URNs for this <tt>Response</tt> instance.
-	 * Note that this method does no validity checking a requires that
-	 * the caller supply a valid URN.
-	 *
-	 * @param urn the <tt>URN</tt> instance to add to the set of URNs for
-	 *  this response
-	 */
-    public void addUrn(URN urn){
-        if (urns == null) urns = new HashSet();
-        urns.add(urn);
-    }
-
     /**
      * To add metaData to a response after it has been created.
      * Added to faciliatate setting audio metadata for responses
      * generated from ordinary searches. 
      */
     public void setMetadata(String meta){
-        this.metadata = meta;
-        this.metaBytes = meta.getBytes();
+		this.metadata = meta;
+		this.metaBytes = meta.getBytes();
     }
 
     public long getIndex() {
@@ -303,11 +302,15 @@ public class Response {
     }
 
     public byte[] getNameBytes() {
-        return nameBytes;
+		byte[] copy = new byte[nameBytes.length];
+		System.arraycopy(nameBytes, 0, copy, 0, nameBytes.length);
+        return copy;
     }
 
     public byte[] getMetaBytes() {
-        return metaBytes;
+		byte[] copy = new byte[metaBytes.length];
+		System.arraycopy(metaBytes, 0, copy, 0, metaBytes.length);
+        return copy;
     }
 
     public String getName() {
@@ -319,18 +322,8 @@ public class Response {
 	}
 
     public Set getUrns() {
-		return urns;
+		return new HashSet(urns);
     }
-  
-    /**
-     * returns true if metadata is not XML, but ToadNode's response
-
-     public boolean hasToadNodeData(){
-     if(metadata.indexOf("<")>-1 && metadata.indexOf(">") > -1)
-     return false;
-     return true;//no angular brackets. This is a TOADNODE response
-     }
-    */
 
     public boolean equals(Object o) {
         if (! (o instanceof Response))
