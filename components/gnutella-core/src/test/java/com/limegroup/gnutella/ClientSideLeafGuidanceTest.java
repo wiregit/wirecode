@@ -3,18 +3,12 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
-import com.bitzi.util.*;
-
 import junit.framework.*;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -24,9 +18,8 @@ import java.net.*;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-public class ClientSideLeafGuidanceTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
-    private static final int PORT=6669;
+public class ClientSideLeafGuidanceTest extends BaseTestCase {
+    private static final int TEST_PORT = 6669;
     private static final int TIMEOUT=2000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
@@ -58,7 +51,7 @@ public class ClientSideLeafGuidanceTest
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(TEST_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
@@ -84,14 +77,14 @@ public class ClientSideLeafGuidanceTest
         callback=new MyActivityCallback();
         rs=new RouterService(callback);
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
+            TEST_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
+            TEST_PORT, ConnectionSettings.PORT.getValue());
+        connect();
     }        
     
     public void setUp() throws Exception  {
@@ -104,7 +97,7 @@ public class ClientSideLeafGuidanceTest
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
+     private static void connect() 
      throws IOException, BadPacketException {
          debug("-Establish connections");
          //Ugh, there is a race condition here from the old days when this was
@@ -114,11 +107,11 @@ public class ClientSideLeafGuidanceTest
          //System.out.println("Please establish a connection to localhost:6350\n");
      }
      
-     private static Connection connect(RouterService rs, int port, 
+     private static Connection connect(int port, 
                                        boolean ultrapeer) 
          throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -203,7 +196,7 @@ public class ClientSideLeafGuidanceTest
     public void testBasicGuidance() throws Exception {
         
         for (int i = 0; i < testUPs.length; i++) {
-            testUPs[i] = connect(rs, 6355+i, true);
+            testUPs[i] = connect(6355+i, true);
 
             // send a MessagesSupportedMessage
             testUPs[i].send(MessagesSupportedVendorMessage.instance());
@@ -212,8 +205,8 @@ public class ClientSideLeafGuidanceTest
         }
 
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        rs.query(queryGuid.bytes(), "susheel");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        RouterService.query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         for (int i = 0; i < testUPs.length; i++) {
@@ -249,7 +242,7 @@ public class ClientSideLeafGuidanceTest
         }
 
         // shut off the query....
-        rs.stopQuery(queryGuid);
+        RouterService.stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUPs.length; i++) {
@@ -267,8 +260,8 @@ public class ClientSideLeafGuidanceTest
             drain(testUPs[i]);
         
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        rs.query(queryGuid.bytes(), "susheel daswanu");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        RouterService.query(queryGuid.bytes(), "susheel daswanu");
 
         for (int i = 0; i < testUPs.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUPs[i]);
@@ -354,8 +347,8 @@ public class ClientSideLeafGuidanceTest
             drain(testUPs[i]);
         
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(rs.newQueryGUID());
-        rs.query(queryGuid.bytes(), "anita kesavan");
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        RouterService.query(queryGuid.bytes(), "anita kesavan");
 
         for (int i = 0; i < testUPs.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUPs[i]);
@@ -426,7 +419,7 @@ public class ClientSideLeafGuidanceTest
         }
 
         // shut off the query....
-        rs.stopQuery(queryGuid);
+        RouterService.stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUPs.length; i++) {
@@ -510,10 +503,10 @@ public class ClientSideLeafGuidanceTest
             return rfd;
         }
 
-        public void handleQueryResult(RemoteFileDesc rfd,
+        public void handleQueryResult(RemoteFileDesc rfdParam,
                                       HostData data,
                                       Set locs) {
-            this.rfd = rfd;
+            this.rfd = rfdParam;
         }
     }
 

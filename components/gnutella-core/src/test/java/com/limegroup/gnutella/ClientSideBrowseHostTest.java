@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
@@ -26,7 +22,7 @@ import java.net.*;
  */
 public class ClientSideBrowseHostTest 
     extends com.limegroup.gnutella.util.BaseTestCase {
-    private static final int PORT=6669;
+    private static final int SERVER_PORT = 6669;
     private static final int TIMEOUT=500;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
@@ -55,7 +51,7 @@ public class ClientSideBrowseHostTest
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(SERVER_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
@@ -83,15 +79,15 @@ public class ClientSideBrowseHostTest
         callback=new MyActivityCallback();
         rs=new RouterService(callback);
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
+            SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
-        testUP = connect(rs, 6355, true);        
+            SERVER_PORT, ConnectionSettings.PORT.getValue());
+        connect();
+        testUP = connect(6355, true);        
     }        
     
     public void setUp() throws Exception  {
@@ -104,17 +100,17 @@ public class ClientSideBrowseHostTest
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
+     private static void connect() 
          throws IOException, BadPacketException {
          debug("-Establish connections");
 
      }
      
-     private static Connection connect(RouterService rs, int port, 
+     private static Connection connect(int port, 
                                        boolean ultrapeer) 
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -200,7 +196,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "boalt.org");
+        RouterService.query(guid, "boalt.org");
 
         // the testUP should get it
         Message m = null;
@@ -231,7 +227,7 @@ public class ClientSideBrowseHostTest
 
         // tell the leaf to browse host the file, should result in direct HTTP
         // request
-        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 null);
@@ -256,8 +252,8 @@ public class ClientSideBrowseHostTest
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "Host");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
-        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
 
         // let the other side do its thing
         Thread.sleep(500);
@@ -295,7 +291,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "nyu.edu");
+        RouterService.query(guid, "nyu.edu");
 
         // the testUP should get it
         Message m = null;
@@ -328,7 +324,7 @@ public class ClientSideBrowseHostTest
 
         // tell the leaf to browse host the file, should result in PushProxy
         // request
-        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
@@ -368,11 +364,11 @@ public class ClientSideBrowseHostTest
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
-        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
 
         // now we need to GIV
-        Socket push = new Socket(InetAddress.getLocalHost(), PORT);
+        Socket push = new Socket(InetAddress.getLocalHost(), SERVER_PORT);
         BufferedWriter writer = 
             new BufferedWriter(new
                                OutputStreamWriter(push.getOutputStream()));
@@ -393,8 +389,8 @@ public class ClientSideBrowseHostTest
         st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "Host");
         addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
-        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
 
         // let the other side do its thing
         Thread.sleep(500);
@@ -431,7 +427,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "anita");
+        RouterService.query(guid, "anita");
 
         // the testUP should get it
         Message m = null;
@@ -458,7 +454,7 @@ public class ClientSideBrowseHostTest
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file,
-        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
+        RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
