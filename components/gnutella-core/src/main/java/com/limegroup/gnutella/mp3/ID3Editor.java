@@ -35,6 +35,15 @@ public class ID3Editor {
     private static final String BITRATE_STRING = "bitrate=\"";
     private static final String SECONDS_STRING = "seconds=\"";
 
+    private static final String TITLE_ID = "TIT2";
+    private static final String ARTIST_ID = "TPE1";
+    private static final String ALBUM_ID = "TALB";
+    private static final String YEAR_ID = "TYER";
+    private static final String TRACK_ID = "TRCK";
+    private static final String COMMENT_ID = "COMM";
+    private static final String GENRE_ID = "TCON";
+
+
     private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
@@ -282,19 +291,17 @@ public class ID3Editor {
                                                    IOException, ID3v2Exception {
         ID3v2 id3Handler = new ID3v2(file);        
         Vector frames = null;
-        boolean framesPresent = false;
         try {
             frames = (Vector)id3Handler.getFrames().clone();
-            framesPresent = true;
         } catch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
-            framesPresent = false;
+            //fall thro' we'll deal with it later -- frames will be null
         }
         
         List framesToUpdate = new ArrayList();
         addAllNeededFrames(framesToUpdate);
         if(framesToUpdate.size() == 0) //we have nothing to update
             return LimeXMLReplyCollection.NORMAL;
-        if(framesPresent) { //old frames present, update the differnt ones 
+        if(frames != null) { //old frames present, update the differnt ones 
             for(Iterator iter=frames.iterator(); iter.hasNext(); ) {
                 ID3v2Frame oldFrame = (ID3v2Frame)iter.next();
                 //note: equality of ID3v2Frame based on value of id
@@ -331,37 +338,37 @@ public class ID3Editor {
         ID3v2Frame frame = null; 
 
         if(title_ != null && !title_.equals("")) {
-            frame = makeFrame("TIT2",title_);
+            frame = makeFrame(TITLE_ID,title_);
             if(frame!=null)
                 updateList.add(frame);
         }
         if (artist_!=null && !artist_.equals("")) {
             frame = null;
-            frame = makeFrame("TPE1",artist_);
+            frame = makeFrame(ARTIST_ID,artist_);
             if(frame != null) 
                 updateList.add(frame);
         }
         if(album_ != null && !album_.equals("")) {
             frame = null;
-            frame = makeFrame("TALB", album_);
+            frame = makeFrame(ALBUM_ID, album_);
             if(frame != null) 
                 updateList.add(frame);
         }
         if (year_!=null && !year_.equals("")) { 
             frame = null;
-            frame = makeFrame("TYER", year_);
+            frame = makeFrame(YEAR_ID, year_);
             if(frame != null) 
                 updateList.add(frame);
         }
         if(track_ != null && !track_.equals("")) {
             frame = null;
-            frame = makeFrame("TRCK", track_);
+            frame = makeFrame(TRACK_ID, track_);
             if(frame !=  null)
                 updateList.add(frame);
         }
         if (comment_!=null && !comment_.equals("")) {
             frame = null;
-            frame = makeFrame("COMM", comment_);
+            frame = makeFrame(COMMENT_ID, comment_);
             if(frame != null) 
                 updateList.add(frame);
         }
@@ -371,9 +378,9 @@ public class ID3Editor {
             //id3v1, so we need to add that in
             if(getGenreByte() > -1) {
                 String v2Genre = "("+getGenreByte()+")"+genre_;
-                frame = makeFrame("TCON", v2Genre);
+                frame = makeFrame(GENRE_ID, v2Genre);
             } else {
-                frame = makeFrame("TCON", genre_);
+                frame = makeFrame(GENRE_ID, genre_);
             }
             if(frame != null) 
                 updateList.add(frame);
