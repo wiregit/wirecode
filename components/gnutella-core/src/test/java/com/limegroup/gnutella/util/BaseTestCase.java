@@ -181,7 +181,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
             _testResult.addError(this, ex);
             _testThread.interrupt();
         } else {
-            throw new RuntimeException(ex);
+            fail("ErrorService callback error", ex);
         }
     }
 }
