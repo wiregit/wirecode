@@ -14,6 +14,11 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 
 public class FileManager {
+    /** The string used by Clip2 reflectors to index hosts. */
+    public static final String INDEXING_QUERY="    ";
+    /** The string used by LimeWire to browse hosts. */
+    public static final String BROWSE_QUERY="*.*";
+
     /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
     private int _size;
@@ -116,9 +121,37 @@ public class FileManager {
      * allocations in the common case of no matches.)
      */
     public Response[] query(QueryRequest request) {
-        //TODO1: handle clip2 indexing query
-        //TODO1: handle wildcards
         String str = request.getQuery();
+
+        //Special case: return everything for Clip2 indexing query (" ") and
+        //browse queries ("*.*").  If these messages had initial TTLs too high,
+        //StandardMessageRouter will clip the number of results sent on the
+        //network.  Note that some initial TTLs are filterd by GreedyQuery
+        //before they ever reach this point.
+        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
+            synchronized (this) {   
+                //Extract responses for all non-null (i.e., not deleted) files.
+                Response[] ret=new Response[_numFiles];
+                int j=0;
+                for (int i=0; i<_files.size(); i++) {
+                    FileDesc desc = (FileDesc)_files.get(i);
+                    if (desc==null) 
+                        continue;                    
+                    Assert.that(j<ret.length,
+                                "_numFiles is too small");
+                    Response r=new Response(desc._index, desc._size, desc._name);
+                    ret[j]=r;
+                    j++;
+                }
+                Assert.that(j==ret.length,
+                            "_numFiles is too large");
+                return ret;
+            }            
+        }
+
+        //Normal case: query the index to find all matches.  TODO: this
+        //sometimes returns more results (>255) than we actually send out.
+        //That's wasted work.
         IntSet matches = search(str);
         if (matches==null)
             return null;

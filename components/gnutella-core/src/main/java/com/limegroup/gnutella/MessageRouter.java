@@ -221,7 +221,8 @@ public abstract class MessageRouter
         //any more.
         if ((receivingConnection.getNumMessagesReceived()<=2)
                 && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals("    "))) {
+                && (queryRequest.getQuery().equals(
+                    FileManager.INDEXING_QUERY))) {
             receivingConnection.setKillable(false);
         }
 
