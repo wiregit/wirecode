@@ -9,6 +9,7 @@ public class StandardMessageRouter
 {
     private ActivityCallback _callback;
     private FileManager _fileManager;
+    private DownloadManager _downloader;
 
     public StandardMessageRouter(ActivityCallback callback, FileManager fm)
     {
@@ -217,7 +218,7 @@ public class StandardMessageRouter
         sendResponses(responses, queryRequest, acceptor, clientGUID);
         
     }
-    
+
     public void sendResponses(Response[] responses, 
                                         QueryRequest queryRequest,
                                          Acceptor acceptor,
@@ -343,8 +344,14 @@ public class StandardMessageRouter
         QueryReply queryReply,
         ManagedConnection receivingConnection)
     {
-        if (!receivingConnection.isPersonalSpam(queryReply))
+        if (_downloader == null) 
+            if (RouterService.instance() != null)
+                _downloader = RouterService.instance().getDownloadManager();
+
+        if (!receivingConnection.isPersonalSpam(queryReply)) {
             _callback.handleQueryReply(queryReply);
+            _downloader.handleQueryReply(queryReply);
+        }
     }
 
     /**

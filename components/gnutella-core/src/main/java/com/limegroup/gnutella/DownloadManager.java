@@ -4,6 +4,7 @@ import com.limegroup.gnutella.downloader.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
+import java.util.StringTokenizer;
 
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number of
@@ -240,6 +241,54 @@ public class DownloadManager implements BandwidthTracker {
         return null;
     }
 
+
+    /* Adds the file named in qr to an existing downloader if appropriate.
+     */
+    public void handleQueryReply(QueryReply qr) {
+        // first check if the qr is of 'sufficient quality', if not just
+        // short-circuit.
+        if (qr.calculateQualityOfService(!acceptor.acceptedIncoming()) < 1)
+            return;
+
+        // get them as RFDs....
+        RemoteFileDesc[] rfds = null;
+        try { 
+            rfds = qr.toRemoteFileDescArray();
+        }
+        catch (BadPacketException bpe) {
+            debug(bpe);
+            rfds = new RemoteFileDesc[0];
+        }
+        
+        // need to synch because active and waiting are not thread safe
+        List downloaders = new ArrayList();
+        synchronized (this) { 
+            // add to all downloaders, even if they are waiting....
+            downloaders.addAll(active);
+            downloaders.addAll(waiting);
+        }        
+
+        // for each downloader, see if any RFD conflicts
+        //
+        // philosophical question - usually we don't allow ManagedDownloaders to
+        // be downloading the same file.  so once i find a match, should i be
+        // stopping my progress through the list of downloaders?  well, this
+        // code works, and doesn't seem to be practically inefficient, mainly
+        // cuz conflictsLAX is coded as speedily as possible.....
+        //
+        // non-philosphical answer - once you find conflictsLAX to be true,
+        // break out of the loop.  only one downloader needs be notified
+        for (int i = 0; i < rfds.length; i++) 
+            for (int j = 0; j < downloaders.size(); j++) {
+                ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
+                if (currD.conflictsLAX(rfds[i])) {
+                    currD.addDownload(rfds[i]);
+                    break;
+                }
+            }        
+    }
+
+
     /**
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already
@@ -336,6 +385,104 @@ public class DownloadManager implements BandwidthTracker {
         if(active.isEmpty() && waiting.isEmpty())
             callback.downloadsComplete();
     }
+
+    
+    private final String[] invalidWords = {"the", "an", "a"};
+    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
+    /** Canonicalizes a file name - gets rid of articles, etc...
+     *  @param map Adds the canonicalized elements to this map.
+     */    
+    private final void canonicalize(String fileName,
+                                    Map map) {
+        // separate by whitespace and _ 
+        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
+        while (st.hasMoreTokens()) {
+            final String currToken = st.nextToken().toLowerCase();
+            if (wordSet.contains(currToken))
+                continue;
+            try {
+                Double.parseDouble(currToken);
+                continue;
+            }
+            catch (NumberFormatException ignored) {}
+            { // success
+                Integer occurrences = (Integer) map.get(currToken);
+                if (occurrences == null)
+                    occurrences = new Integer(1);
+                else
+                    occurrences = new Integer(occurrences.intValue()+1);
+                map.put(currToken, occurrences);
+            }
+        }
+    }
+
+    /** @return A String Array of size 1 that is a intersection of all the
+     *  canonicalized rfd filename values.
+     */
+    private final String[] extractQueryStrings(String[] names) {
+        String[] retStrings = new String[1];
+        // used for intersection
+        Map words = new HashMap();
+        
+        for (int i = 0; i < names.length; i++) 
+            canonicalize(ripExtension(names[i]), words);
+        
+        // create the query string....
+        StringBuffer sb = new StringBuffer();
+        Iterator keys = words.keySet().iterator();
+        while (keys.hasNext()) {
+            String currKey = (String) keys.next();
+            Integer count = (Integer) words.get(currKey);
+            // if the string 'intersected', add it....
+            if (count.intValue() == names.length)
+                sb.append(currKey + " ");
+        }
+        
+        retStrings[0] = sb.toString();
+        return retStrings;
+    }
+
+
+    void extractQueryStringUNITTEST() {
+        String[] queries = {"Susheel_Daswani_Neil_Daswani",
+                            "Susheel Ruchika Mahesh Kyle Daswani",
+                            "Susheel" + FileManager.DELIMETERS + "Daswani",
+                            "Sumeet (Susheel) Anurag (Daswani)Chris"};
+        String[] retStrings = extractQueryStrings(queries);
+        System.out.println(retStrings[0]);      
+    }
+
+
+
+    private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
+        final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
+        QueryRequest[] retQRs= new QueryRequest[queryStrings.length];
+        for (int i = 0; i < queryStrings.length; i++)
+            // mark the query as a requery...
+            retQRs[i] = new QueryRequest(SettingsManager.instance().getTTL(),
+                                         minSpeed, queryStrings[i], true);
+        return retQRs;
+    }
+
+
+    /** Initiates a search for files similar to rfd.
+     * PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc objects.
+     */
+    public void sendQuery(RemoteFileDesc[] rfds) {
+        // convert....
+        String[] names = new String[rfds.length];
+        for (int i = 0; i < rfds.length; i++)
+            names[i] = rfds[i].getFileName();
+
+        // construct QRs
+        String[] qStrings= extractQueryStrings(names);
+        QueryRequest[] qReqs = constructQueryRequests(qStrings);
+
+        // send away....
+        for (int i = 0; i < qReqs.length; i++)
+            router.broadcastQueryRequest(qReqs[i]);            
+    }
+
 
     /**
      * Sends a push request for the given file.  Returns false iff no push could
@@ -456,4 +603,34 @@ public class DownloadManager implements BandwidthTracker {
     public void internalError(Throwable e) { 
         callback.error(ActivityCallback.ASSERT_ERROR, e);
     }
+
+    // take the extension off the filename...
+    private String ripExtension(String fileName) {
+        String retString = null;
+        int extStart = fileName.lastIndexOf('.');
+        if (extStart == -1)
+            retString = fileName;
+        else
+            retString = fileName.substring(0, extStart);
+        return retString;
+    }
+
+
+    private final boolean debugOn = false;
+    private final void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private final void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
+    }
+
+    /*
+    public static void main(String argv[]) {
+        DownloadManager dm = new DownloadManager();
+        dm.extractQueryStringUNITTEST();
+    }
+    */
+
 }

@@ -64,6 +64,13 @@ public class RouterService
      */
     private Authenticator authenticator;
 
+    private static RouterService me = null;
+    /* @return May return null, be careful....
+     */
+    public static RouterService instance() {
+        return me;
+    }
+
 	/**
 	 * Creates a unitialized RouterService.  No work is done until
      * initialize() is called.
@@ -81,6 +88,8 @@ public class RouterService
         this.fileManager = fManager;
         this.authenticator = authenticator;
 		Assert.setCallback(this.callback);
+        
+        me = this;
   	}
 
 	/**
@@ -157,6 +166,15 @@ public class RouterService
 	 */
     public FileManager getFileManager(){
         return fileManager;
+    }
+
+    /** 
+     * Accessor for the <tt>DownloadManager</tt> instance in use.
+     *
+     * @return the <tt>DownloadManager</tt> in use
+     */
+    public DownloadManager getDownloadManager() {
+        return downloader;
     }
 
 
@@ -518,7 +536,7 @@ public class RouterService
      * results in the GUI.)
      */
     public boolean acceptedIncomingConnection() {
-        return acceptor.acceptedIncoming();
+            return acceptor.acceptedIncoming();
     }
 
 
@@ -897,7 +915,7 @@ public class RouterService
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
+	public Downloader download(RemoteFileDesc[] files, boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
 		return downloader.getFiles(files, overwrite);
