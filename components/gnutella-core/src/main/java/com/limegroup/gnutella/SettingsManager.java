@@ -750,7 +750,7 @@ public class SettingsManager implements SettingsInterface
 	 ******************************************************/
 
     /** set the directory for saving files */
-    public synchronized void setSaveDirectory(String dir) {
+    public void setSaveDirectory(String dir) {
 		if(!dir.endsWith(fileSep_))
 			dir += fileSep_;
 		File f = new File(dir);
@@ -798,7 +798,7 @@ public class SettingsManager implements SettingsInterface
      *  exception if you try to set the speed
      *  far faster than a T3 line or less than
      *  0.*/
-    public synchronized void setConnectionSpeed(int speed) {
+    public void setConnectionSpeed(int speed) {
 		if(speed < 0 || speed > 20000)
 			throw new IllegalArgumentException();
 		else {
@@ -809,7 +809,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the time to live */
-    public synchronized void setTTL(byte ttl) 
+    public void setTTL(byte ttl) 
 		throws IllegalArgumentException {
 		if (ttl < 1 || ttl > 14)
 			throw new IllegalArgumentException();
@@ -821,7 +821,7 @@ public class SettingsManager implements SettingsInterface
     }
 	
     /** sets the soft maximum time to live */
-    public synchronized void setSoftMaxTTL(byte softmaxttl)
+    public void setSoftMaxTTL(byte softmaxttl)
 		throws IllegalArgumentException {
 		if (softmaxttl < 0 || softmaxttl > 14)
 			throw new IllegalArgumentException();
