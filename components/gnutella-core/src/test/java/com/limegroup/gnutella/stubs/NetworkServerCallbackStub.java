@@ -1,6 +1,7 @@
 /*
  * Listens for events relayed from a NetworkClientCallbackStub.
  * 
+ * ===========================================================================
  * HOW TO USE:
  * 
  * public class MyNetworkServerCallbackStub extends NetworkServerCallbackStub {
@@ -22,12 +23,33 @@
  * 			...
  * 		}
  * 
- * This class should actually take the ActivityCallback as an argument
- * but I'm not about to write the parsing of all those arguments, plus
- * you may not need anything other than notification anyways.
+ * ==============================================================================
+ * If you are just interested in waiting for notifications, you don't need to 
+ * override anything:
+ * 
+ * 
+ * public class MyTestCase extends ... {
+ *
+ * 		//have an instance 
+ * 		MyNetworkServerCallbackStub callback = new MyNetworkServerCallbackStub(...)
+ * 
+ * 		/**
+ *       * some test case which needs to wait for removeUpload to get called
+ *       *
+ * 		public void testSomething() throws Exception {
+ * 			...
+ * 			synchronized(callback._removeUpload) {
+ * 				callback._removeUpload.wait();  //or wait(timeout);
+ * 			}
+ * 			...
+ * 			//this code won't get executed until the callback receives the notification 
+ *			//for removeUpload.
+ *		} 
+ *
  * 
  * 
  */
+
 package com.limegroup.gnutella.stubs;
 
 
@@ -41,6 +63,14 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 	private final Thread _listener;
 	
 	
+	//locks for various events.
+	public final Object _acceptChat, _addDownload, _addSharedDirectory, _addSharedFile,_addUpload,
+		_browseHostFailed, _chatErrorMessage, _chatUnavailable, _clearSharedFiles,
+		_connectionClosed, _connectionInitialized, _connectionInitializing, _downloadsComplete,
+		_fileManagerLoaded, _handleQueryResult, _handleQueryString, _handleSharedFileUpdate,
+		_indicateNewVersion, _notifyUserAboutUpdate, _promptAboutCorruptDownload, _receiveMessage,
+		_removeUpload, _removeDownload, _restoreApplication, _setAnnotateEnabled, _showDownloads,
+		_uploadsComplete;
 	
 	/**
 	 * starts listening for the client callback on the local machine
@@ -58,6 +88,35 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 		
 		_listener.setDaemon(true);
 		_listener.start();
+		
+		//create the various locks
+		_acceptChat = new Object();
+		_addDownload = new Object();
+		_addSharedDirectory = new Object();
+		_addSharedFile = new Object();
+		_addUpload = new Object();
+		_browseHostFailed = new Object();
+		_chatErrorMessage = new Object();
+		_chatUnavailable = new Object();
+		_clearSharedFiles = new Object();
+		_connectionClosed= new Object();
+		_connectionInitialized = new Object();
+		_connectionInitializing = new Object();
+		_downloadsComplete = new Object();
+		_fileManagerLoaded = new Object();
+		_handleQueryResult = new Object();
+		_handleQueryString = new Object();
+		_handleSharedFileUpdate = new Object();
+		_indicateNewVersion = new Object();
+		_notifyUserAboutUpdate = new Object();
+		_promptAboutCorruptDownload = new Object();
+		_receiveMessage = new Object();
+		_removeDownload = new Object();
+		_removeUpload = new Object();
+		_restoreApplication = new Object();
+		_setAnnotateEnabled = new Object();
+		_showDownloads = new Object();
+		_uploadsComplete = new Object();
 	}
 	
 	/**
@@ -99,35 +158,90 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 		
 		public void dispatch(int code){
 			switch(code) {
-				case NetworkClientCallbackStub.acceptChat : parseAcceptChat();break;
-				case NetworkClientCallbackStub.addDownload : parseAddDownload();break;
-				case NetworkClientCallbackStub.addSharedDirectory : parseAddSharedDirectory();break;
-				case NetworkClientCallbackStub.addSharedFile : parseAddSharedFile();break;
-				case NetworkClientCallbackStub.addUpload : parseAddUpload();break;
-				case NetworkClientCallbackStub.browseHostFailed : parseBrowseHostFailed();break;
-				case NetworkClientCallbackStub.chatErrorMessage : parseChatErrorMessage();break;
-				case NetworkClientCallbackStub.chatUnavailable : parseChatUnavailable() ;break;
-				case NetworkClientCallbackStub.clearSharedFiles : parseClearSharedFiles(); break;
-				case NetworkClientCallbackStub.connectionClosed : parseConnectionClosed(); break;
-				case NetworkClientCallbackStub.connectionInitialized : parseConnectionInitialized(); break;
-				case NetworkClientCallbackStub.connectionInitializing : parseConnectionInitializing(); break;
-				case NetworkClientCallbackStub.downloadsComplete : parseDownloadsComplete(); break;
-				case NetworkClientCallbackStub.fileManagerLoaded : parseFileManagerLoaded(); break;
-				case NetworkClientCallbackStub.handleQueryResult : parseHandleQueryResult(); break;
-				case NetworkClientCallbackStub.handleQueryString : parseHandleQueryString(); break;
-				case NetworkClientCallbackStub.handleSharedFileUpdate : parseHandleSharedFileUpdate(); break;
-				case NetworkClientCallbackStub.indicateNewVersion : parseIndicateNewVersion(); break;
-				case NetworkClientCallbackStub.notifyUserAboutUpdate : parseNotifyUserAboutUpdate(); break;
-				case NetworkClientCallbackStub.promptAboutCorruptDownload : parsePromptAboutCorruptDownload(); break;
-				case NetworkClientCallbackStub.receiveMessage : parseReceiveMessage(); break;
-				case NetworkClientCallbackStub.removeDownload : parseRemoveDownload(); break;
-				case NetworkClientCallbackStub.removeUpload : parseRemoveUpload(); break;
-				case NetworkClientCallbackStub.restoreApplication : parseRestoreApplication(); break;
-				case NetworkClientCallbackStub.setAnnotateEnabled : parseSetAnnotateEnabled(); break;
-				case NetworkClientCallbackStub.showDownloads : parseShowDownloads(); break;
-				case NetworkClientCallbackStub.uploadsComplete : parseUploadsComplete(); break;
+				case NetworkClientCallbackStub.acceptChat : 
+					notiffy(_acceptChat);
+					parseAcceptChat();break;
+				case NetworkClientCallbackStub.addDownload :
+					notiffy(_addDownload);
+					parseAddDownload();break;
+				case NetworkClientCallbackStub.addSharedDirectory : 
+					notiffy(_addSharedDirectory);
+					parseAddSharedDirectory();break;
+				case NetworkClientCallbackStub.addSharedFile : 
+					notiffy(_addSharedFile);
+					parseAddSharedFile();break;
+				case NetworkClientCallbackStub.addUpload : 
+					notiffy(_addUpload);
+					parseAddUpload();break;
+				case NetworkClientCallbackStub.browseHostFailed : 
+					notiffy(_browseHostFailed);
+					parseBrowseHostFailed();break;
+				case NetworkClientCallbackStub.chatErrorMessage : 
+					notiffy(_chatErrorMessage);
+					parseChatErrorMessage();break;
+				case NetworkClientCallbackStub.chatUnavailable : 
+					notiffy(_chatUnavailable);
+					parseChatUnavailable() ;break;
+				case NetworkClientCallbackStub.clearSharedFiles : 
+					notiffy(_clearSharedFiles);
+					parseClearSharedFiles(); break;
+				case NetworkClientCallbackStub.connectionClosed : 
+					notiffy(_connectionClosed);
+					parseConnectionClosed(); break;
+				case NetworkClientCallbackStub.connectionInitialized : 
+					notiffy(_connectionInitialized);
+					parseConnectionInitialized(); break;
+				case NetworkClientCallbackStub.connectionInitializing : 
+					notiffy(_connectionInitializing);
+					parseConnectionInitializing(); break;
+				case NetworkClientCallbackStub.downloadsComplete : 
+					notiffy(_downloadsComplete);
+					parseDownloadsComplete(); break;
+				case NetworkClientCallbackStub.fileManagerLoaded : 
+					notiffy(_fileManagerLoaded);
+					parseFileManagerLoaded(); break;
+				case NetworkClientCallbackStub.handleQueryResult : 
+					notiffy(_handleQueryResult);
+					parseHandleQueryResult(); break;
+				case NetworkClientCallbackStub.handleQueryString : 
+					notiffy(_handleQueryString);
+					parseHandleQueryString(); break;
+				case NetworkClientCallbackStub.handleSharedFileUpdate : 
+					notiffy(_handleSharedFileUpdate);
+					parseHandleSharedFileUpdate(); break;
+				case NetworkClientCallbackStub.indicateNewVersion : 
+					notiffy(_indicateNewVersion);
+					parseIndicateNewVersion(); break;
+				case NetworkClientCallbackStub.notifyUserAboutUpdate : 
+					notiffy(_notifyUserAboutUpdate);
+					parseNotifyUserAboutUpdate(); break;
+				case NetworkClientCallbackStub.promptAboutCorruptDownload : 
+					notiffy(_promptAboutCorruptDownload);
+					parsePromptAboutCorruptDownload(); break;
+				case NetworkClientCallbackStub.receiveMessage : 
+					notiffy(_receiveMessage);
+					parseReceiveMessage(); break;
+				case NetworkClientCallbackStub.removeDownload : 
+					notiffy(_removeDownload);
+					parseRemoveDownload(); break;
+				case NetworkClientCallbackStub.removeUpload : 
+					notiffy(_removeUpload);
+					parseRemoveUpload(); break;
+				case NetworkClientCallbackStub.restoreApplication : 
+					notiffy(_restoreApplication);
+					parseRestoreApplication(); break;
+				case NetworkClientCallbackStub.setAnnotateEnabled : 
+					notiffy(_setAnnotateEnabled);
+					parseSetAnnotateEnabled(); break;
+				case NetworkClientCallbackStub.showDownloads : 
+					notiffy(_showDownloads);
+					parseShowDownloads(); break;
+				case NetworkClientCallbackStub.uploadsComplete : 
+					notiffy(_uploadsComplete);
+					parseUploadsComplete(); break;
 			}
 		}
+		
 		
 		protected void parseAcceptChat() {}
 		protected void parseAddDownload() {}
@@ -178,6 +292,17 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 		}
 		private void parseUploadsComplete(){
 			uploadsComplete();
+		}
+	}
+	
+	/**
+	 * notifies all listeners on a specific object.
+	 * misspelled on purpose. 
+	 * @param o the object to be notified.
+	 */
+	private final void notiffy(Object o) {
+		synchronized(o) {
+			o.notifyAll();
 		}
 	}
 }
