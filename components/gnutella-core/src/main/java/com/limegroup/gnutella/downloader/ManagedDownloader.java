@@ -94,7 +94,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                     |
                               connectAndDownload
                           /           |             \
-        establishConnection     assignDownload       doDownload
+        establishConnection     assignAndRequest       doDownload
              |                        |                        \
        HTTPDownloader.connectTCP  assignWhite/assignGrey        \
                                       |           HTTPDownlaoder.doDownload
@@ -146,7 +146,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * datastructures, also atomicity is guaranteed since we are still 
      * synchronized. 
      *
-     * Never acquire this' monitor if you have stealLock's monitor.
+     * Never acquire stealLock's monitor if you have this' monitor.
      *
      * Also, always hold stealLock's monitor before REMOVING elements from 
      * needed. As always, we must obtain this' monitor before modifying needed.
