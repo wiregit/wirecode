@@ -352,7 +352,7 @@ public class CountPercent {
         List langsMidway = new LinkedList();
         List langsStarted = new LinkedList();
         List langsEmbryonic = new LinkedList();
-        Map charsets = new HashMap();
+        Map charsets = new TreeMap();
         
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
@@ -859,20 +859,32 @@ class LanguageInfo implements Comparable {
     }
 
     /**
-     * Returns a description of this language.
+     * Returns a native description of this language.
      * If the variantName is not 'international' or '', then 
      * the display is:
      *    languageName, variantName (countryName)
      * Otherwise, the display is:
      *    languageName (countryName)
+     * If the language is Right-To-Left, the whole string is returned
+     * surrounded by BiDi embedding controls.
      */
     public String toString() {
+        final String bidi1, bidi2;
+        if (isRightToLeft) {
+            bidi1 = "\u202b"; /* RLE control: Right-To-Left Embedding */
+            bidi2 = "\u202c"; /* PDF control: Pop Directional Format */
+        } else {
+            bidi1 = "";
+            bidi2 = "";
+        }
         if (variantName != null &&
             !variantName.toLowerCase().equals("international") &&
             !variantName.equals(""))
-            return languageName + ", " + variantName + " (" + countryName + ")";
+            return bidi1 + languageName + ", " + variantName +
+                   " (" + countryName + ")" + bidi2;
         else
-            return languageName + " (" + countryName + ")";
+            return bidi1 + languageName +
+                   " (" + countryName + ")" + bidi2;
     }
     
     public String getScript() { return scriptName; }
@@ -882,16 +894,9 @@ class LanguageInfo implements Comparable {
     public String getName() { return displayName; }
     
     public String getLink() {
-        final String tip;
-        if (isRightToLeft)
-            tip = "\u202b" /* RLE control: Right-To-Left Embedding */
-                + toString()
-                + "\u202c"; /* PDF control: Pop Directional Format */
-        else
-            tip = toString();
         return
            "<a href=\"" + CountPercent.PRE_LINK + fileName +
-           "\" title=\"" + tip + "\">" +
+           "\" title=\"" + toString() + "\">" +
            displayName + "</a>";
     }
     
