@@ -603,8 +603,20 @@ public final class SettingsFactory {
                                                            String simppKey) {
         settings.add(setting);
         setting.reload();
-        if(simppKey != null) 
+        //Simpp related checks...
+        if(simppKey != null) {
+            //Check if simpp value was specified before this setting was loaded
+            SimppSettingsManager simppSetMan = SimppSettingsManager.instance();
+            String simppValue = simppSetMan.getRemanentSimppValue(simppKey);
+            if(simppValue != null) {//yes there was a note left for us
+                //1. register the default value with SimppSettingsManager
+                simppSetMan.cacheUserPref(setting, setting.getValueAsString());
+                //2. Set the value to simppvalue
+                setting.setValue(simppValue);
+            }
+            //update the mapping of the simpp key to the setting.
             simppKeyToSetting.put(simppKey, setting);
+        }
 	}
     
     /**
