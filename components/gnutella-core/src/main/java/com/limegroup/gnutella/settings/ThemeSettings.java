@@ -37,7 +37,6 @@ public final class ThemeSettings {
 					 dirName);
 
 		final File THEME_PROPS = new File(themeDir, "theme.txt");
-		System.out.println("theme file: "+THEME_PROPS); 
 
 		// unpack the zip if we haven't already
 		if(!themeDir.isDirectory() ||
