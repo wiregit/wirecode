@@ -41,10 +41,12 @@ public class FileManager {
      * Likewise for all i, for all k in _files[i]._path, _index.get(k)
      * contains i. */
     private Trie /* String -> IntSet  */ _index;
-    /** an index mapping appropriately case-normalized URN strings to
-     * the indices in _files.  */
-
-    private Map /* String -> IntSet  */ _urnIndex;
+    /** an index mapping appropriately case-normalized URN strings to the
+     * indices in _files.  Used to make query-by-hash faster.  INVARIANT: for
+     * all keys k in _urnIndex, for all i in _urnIndex.get(k),
+     * _files[i].containsUrn(k).  Likewise for all i, for all k in
+     * _files[i].getUrns(),  _urnIndex.get(k) contains i.  */
+    private Map /* URN -> IntSet  */ _urnIndex;
     
     /** The set of extensions to share, sorted by StringComparator. 
      *  INVARIANT: all extensions are lower case. */
@@ -111,7 +113,7 @@ public class FileManager {
         _numFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
-        _urnIndex = new Hashtable();
+        _urnIndex = new HashMap();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
     }
@@ -435,7 +437,8 @@ public class FileManager {
             _size = 0;
             _numFiles = 0;
             _files=new ArrayList();
-            _index=new Trie(true); //maintain invariant
+            _index=new Trie(true);   //maintain invariant
+            _urnIndex=new HashMap(); //maintain invariant
             _extensions = new TreeSet(new StringComparator());
             _sharedDirectories = new TreeMap(new FileComparator());
 
@@ -696,10 +699,12 @@ public class FileManager {
      *  disk.
      */
     public synchronized boolean removeFileIfShared(File f) {
+        repOk();
         //Take care of case, etc.
         try {
             f=getCanonicalFile(f);
         } catch (IOException e) {
+            repOk();
             return false;
         }
 
@@ -736,12 +741,34 @@ public class FileManager {
                         //_index.remove(keyword) if indices.size()==0.
                     }
                 }
+
+                //Remove hash information.
+                this.removeUrnIndex(fd);
+
+                repOk();
                 return true;  //No more files in list will match this.
             }
         }
+        repOk();
         return false;
     }
 
+    /** Removes any URN index information for desc */
+    private synchronized void removeUrnIndex(FileDesc fileDesc) {
+		Iterator iter = fileDesc.getUrns().iterator();
+		while (iter.hasNext()) {
+            //Lookup each of desc's URN's ind _urnIndex.  
+            //(It better be there!)
+			URN urn = (URN)iter.next();
+            IntSet indices=(IntSet)_urnIndex.get(urn);
+            Assert.that(indices!=null, "Invariant broken");
+
+            //Delete index from set.  Remove set if empty.
+            indices.remove(fileDesc._index);
+            if (indices.size()==0)
+                _urnIndex.remove(urn);
+		}
+    }
 
     /** 
      * If oldName isn't shared, returns false.  Otherwise removes "oldName",
@@ -1008,11 +1035,11 @@ public class FileManager {
             // lowercase "urn:<type>:", uppercase Base32 SHA1
             IntSet hits = (IntSet)_urnIndex.get(urn);
             if(hits!=null) {
-                // double-check hits to ensure they're still valid
+                // double-check hits to be defensive (not strictly needed)
                 IntSet.IntSetIterator iter = hits.iterator();
                 while(iter.hasNext()) {
                     FileDesc fd = (FileDesc)_files.get(iter.next());
-                    if(fd.containsUrn(urn)) {
+                    if(fd!=null && fd.containsUrn(urn)) {
                         // still valid
                         if(ret==null) ret = new IntSet();
                         ret.add(fd.getIndex());
@@ -1047,6 +1074,19 @@ public class FileManager {
             FileDesc desc=(FileDesc)_files.get(i);
             Assert.that(desc!=null,
                         "Null entry for index value "+i);
+        }
+
+        //Make sure all FileDesc named in _urnIndex exist.
+        for (Iterator iter=_urnIndex.keySet().iterator(); iter.hasNext(); ) {
+            URN urn=(URN)iter.next();
+            IntSet indices2=(IntSet)_urnIndex.get(urn);
+            for (IntSet.IntSetIterator iter2=indices2.iterator(); 
+                     iter2.hasNext(); ) {
+                int i=iter2.next();
+                FileDesc fd=(FileDesc)_files.get(i);
+                Assert.that(fd!=null, "Missing file for urn");
+                Assert.that(fd.containsUrn(urn), "URN mismatch");
+            }
         }
 
         //Verify directory listing.  Make sure directory only contains 
@@ -1094,6 +1134,13 @@ public class FileManager {
             } catch (IOException e) {
                 Assert.that(false);
             }
+            //d) Ensure URNs listed.
+            for (iter=desc.getUrns().iterator(); iter.hasNext(); ) {
+                URN urn=(URN)iter.next();
+                IntSet indices2=(IntSet)_urnIndex.get(urn);
+                Assert.that(indices2!=null, "Urn not found");
+                Assert.that(indices2.contains(desc._index));
+            }
         }   
         Assert.that(_numFiles==numFilesCount,
                     _numFiles+" should be "+numFilesCount);
@@ -1102,4 +1149,5 @@ public class FileManager {
     }
 
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java
+    //            core/com/limegroup/gnutella/tests/UrnRequestTest.java
 }
