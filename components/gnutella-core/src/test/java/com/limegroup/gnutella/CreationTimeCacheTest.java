@@ -205,7 +205,7 @@ public class CreationTimeCacheTest
 
     ///////////////////////// Actual Tests ////////////////////////////
 
-    /** Tests that the URN_MAP is derived correctly from the TIME_MAP
+    /** Tests that the URN_MAP is derived correctly from the URN_TO_TIME_MAP
      */
     public void testMapCreation() throws Exception {
         // mock up our own createtimes.txt
@@ -226,7 +226,8 @@ public class CreationTimeCacheTest
         
         // now have the CreationTimeCache read it in
         CreationTimeCache ctCache = new CreationTimeCache();
-        Map TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        Map TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, 
+                                                        "URN_TO_TIME_MAP");
         assertEquals(toSerialize, TIME_MAP);
     }
 
@@ -330,7 +331,7 @@ public class CreationTimeCacheTest
         ctCache = new CreationTimeCache();
         assertFalse(ctCache.getFiles().hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(0, TIME_MAP.size());
 
         ctCache.addTime(hash1, middle.longValue());
@@ -348,7 +349,7 @@ public class CreationTimeCacheTest
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(1, TIME_MAP.size());
 
         ctCache.addTime(hash2, old.longValue());
@@ -358,8 +359,8 @@ public class CreationTimeCacheTest
         ctCache.persistCache();
         iter = ctCache.getFiles();
         assertEquals(hash3, iter.next());
-        // just clear out two middles
-        iter.next(); iter.next();
+        // just clear middle
+        iter.next();
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
         ctCache = null;
@@ -374,7 +375,7 @@ public class CreationTimeCacheTest
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(3, TIME_MAP.size());
         ctCache.removeTime(hash3);
         ctCache.persistCache();
@@ -388,7 +389,7 @@ public class CreationTimeCacheTest
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
 
-        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
+        TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
         assertEquals(1, TIME_MAP.size());
         ctCache = null;
         fm.clearExcludeURN();
