@@ -924,13 +924,77 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** set the directories to search */
-    public void setDirectories(String dir) {
+    /** set the directories to search.  this is synchronized
+	 *  because some gui elements may want to make this call
+	 *  in a separate thread (they probably should, since this
+	 *  method could take awhile. this method will also filter
+	 *  out any duplicate or invalid directories in the string. */
+    public synchronized void setDirectories(String dir) {
+		boolean dirsModified = false;
+		directories_ = dir;
+		String[] dirs = getDirectoriesAsArray();
+		int i = 0;
+		while(i < dirs.length) {
+			if(dirs[i] != null) {
+				File f = new File(dirs[i]);
+				if(f.isDirectory()) {
+					int count = 0;
+					int z = 0;
+					String str = "";
+					try {str = f.getCanonicalPath();}
+					catch(IOException ioe) {break;}
+					while(z < dirs.length) {
+						if(dirs[z] != null) { 
+							File file = new File(dirs[z]);
+							String name = "";
+							try {name = file.getCanonicalPath();}
+							catch(IOException ioe) {break;}
+							if(str.equals(name)) { 
+								count++;			
+								if(count > 1) {
+									dirs[z] = null;
+									dirsModified = true;
+								}
+							}
+						}
+						z++;
+					}					
+				}
+				else {
+					dirs[i] = null;
+					dirsModified = true;
+				}
+			}
+			i++;
+		}
+		if(dirsModified) {
+			i = 0;
+			StringBuffer sb = new StringBuffer();
+			while(i < dirs.length) {
+				if(dirs[i] != null) {
+					sb.append(dirs[i]);
+					sb.append(';');
+				}
+				i++;
+			}
+			directories_ = sb.toString();
+		}
         FileManager.getFileManager().reset();
-        FileManager.getFileManager().addDirectories(dir);
-        directories_ = dir;
-        props_.put(SettingsInterface.DIRECTORIES, dir);
+        FileManager.getFileManager().addDirectories(directories_);        
+        props_.put(SettingsInterface.DIRECTORIES, directories_);
     }
+
+//  	public static void main(String args[]) {
+//  		System.out.println("directories_: "+ directories_);
+//  		SettingsManager settings = SettingsManager.instance();
+//  		System.out.println("directories_: "+ directories_);
+//  		settings.setDirectories("c:\\p;c:\\p;c:\\pC:\\My Music;C:\\Program Files;"+
+//  								"C:\\Program Files\\LimeWire;"+
+//  								"C:\\Program Files\\LimeWire;C:\\Program Files;C:\\My Music;"+
+//  								"c:\\My Music;c:\\Program Files\\Direct;"+
+//  								"C:\\Program Files\\direct\\;C:\\ProgramFiles");
+//  		System.out.println("directories_: "+ directories_);
+//  	}
 
     /** set the extensions to search for */
     public void setExtensions(String ext) {
