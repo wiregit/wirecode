@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ import java.util.Arrays;
 public class NIOBIOTestClientManager {
 
     public static void main(String[] args) {
-        if(args.length < 2) {
+        if(args.length < 3) {
             System.out.println("Incorrect syntax.  Please specify the number " +                "of connections to maintain in the first argument and the " +                "delay between sends to the server as the second argument " +                "(in milliseconds).");
             System.exit(0);
         }
@@ -34,13 +35,29 @@ public class NIOBIOTestClientManager {
                 "valid setting for the number of connections to maintain");
             System.exit(0);
         }
+
+        InetAddress tempAddress = null;
+        try {
+            tempAddress = InetAddress.getByName(args[2]);
+        } catch (UnknownHostException e1) {
+            System.out.println("Please specify the host to connect to " +
+                "as the third argument -- "+args[2]+" is not a " +
+                "valid host to connect to.");
+            System.exit(0);
+        }
+        
+        SERVER_ADDRESS = tempAddress;
+        
         new NIOBIOTestClientManager(num, delay);                    
     }
+    
+    private static InetAddress SERVER_ADDRESS;
     
     /**
      * Runs the desired number of clients.
      */
     private NIOBIOTestClientManager(int num, int delay) {
+        
         for(int i=0; i<num; i++) {
             new TestClient(delay);
             try {
@@ -70,7 +87,7 @@ public class NIOBIOTestClientManager {
         
         public void run() {
             try {
-                Socket sock = new Socket("10.254.0.54", 7777);
+                Socket sock = new Socket(SERVER_ADDRESS, 7777);
                 OutputStream os = sock.getOutputStream();
                 InputStream is = sock.getInputStream();
                 while(true) {
