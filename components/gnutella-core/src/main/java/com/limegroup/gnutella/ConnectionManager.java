@@ -824,29 +824,6 @@ public class ConnectionManager {
         return _authenticator;
     }
     
-    /**
-     * @return a clone of this' initialized connections.
-     * The iterator yields items in any order.  It <i>is</i> permissible
-     * to modify this while iterating through the elements of this, but
-     * the modifications will not be visible during the iteration.
-     */
-    public List getInitializedConnections() {
-        List clone=new ArrayList();
-        clone.addAll(_initializedConnections);
-        return clone;
-    }
-    
-    /**
-     * @return a clone of this' initialized connections to shielded-clients.
-     * The iterator yields items in any order.  It <i>is</i> permissible
-     * to modify this while iterating through the elements of this, but
-     * the modifications will not be visible during the iteration.
-     */
-    public List getInitializedClientConnections() {
-        List clone=new ArrayList();
-        clone.addAll(_initializedClientConnections);
-        return clone;
-    }
 
     /**
      * @requires returned value not modified
