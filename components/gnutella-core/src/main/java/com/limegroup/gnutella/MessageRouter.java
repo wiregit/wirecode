@@ -666,28 +666,26 @@ public abstract class MessageRouter {
      */
     protected void sendQueryKeyPong(PingRequest pr, DatagramPacket datagram) {
 
-        boolean isSupernode = RouterService.isSupernode();
-        if (isSupernode) { // only UPs should be doling out QKs....
-            // generate a QueryKey (quite quick - current impl. (DES) is super
-            // fast!
-            InetAddress address = datagram.getAddress();
-            int port = datagram.getPort();
-            QueryKey key = QueryKey.getQueryKey(address, port);
+        // after find more sources and OOB queries, everyone can dole out query
+        // keys....
 
-            // respond with Pong with QK, as GUESS requires....
-            PingReply reply = 
-                PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-            try {
-                UDPService.instance().send(reply, datagram.getAddress(),
-                                           datagram.getPort());
-            } catch(IOException ioe) {
-                ErrorService.error(ioe,
-                    "ip/port: " + datagram.getAddress() + ":" + datagram.getPort());
-            }
-
-            if (RECORD_STATS)
-                SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
+        // generate a QueryKey (quite quick - current impl. (DES) is super
+        // fast!
+        InetAddress address = datagram.getAddress();
+        int port = datagram.getPort();
+        QueryKey key = QueryKey.getQueryKey(address, port);
+        
+        // respond with Pong with QK, as GUESS requires....
+        PingReply reply = 
+            PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
+        try {
+            UDPService.instance().send(reply, datagram.getAddress(),
+                                       datagram.getPort());
+        } catch(IOException ioe) {
+            ErrorService.error(ioe, "ip/port: " + datagram.getAddress() + 
+                               ":" + datagram.getPort());
         }
+
     }
 
 
