@@ -14,7 +14,30 @@ public class PingRequestTest extends TestCase {
         return new TestSuite(PingRequestTest.class);
     }
 
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+
     //TODO: test other parts of ping!
+
+    public void testQueryKeyPing() {
+        try {
+            PingRequest pr = new PingRequest();
+            assertFalse(pr.isQueryKeyRequest()); // hasn't been hopped yet
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pr.write(baos);
+            ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+            PingRequest prRead = (PingRequest) Message.read(bais);
+            prRead.hop();
+            assertTrue(prRead.isQueryKeyRequest());
+        }
+        catch (Exception crap) {
+            assertTrue(false);
+        }
+    }
 
     public void testBigPing() {
         byte[] buffer = new byte[23+16];//Headers plus payload(16 bytes)
