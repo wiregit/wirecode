@@ -11,6 +11,7 @@
 <property name="chat" value="com/limegroup/gnutella/chat"/>
 <property name="gnutella" value="com/limegroup/gnutella"/>
 <property name="mp3" value="com/limegroup/gnutella/mp3"/>
+<property name="security" value="com/limegroup/gnutella/security"/>
 
 
 <!-- constants -->
@@ -37,7 +38,7 @@
 <target name="core" depends="init">
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
 		srcdir="${basedir}" destdir="${basedir}"
-		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${chat}/**,$(mp3)/**"
+		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${chat}/**,${mp3}/**,${security}/**"
 	/>
 </target>
 
