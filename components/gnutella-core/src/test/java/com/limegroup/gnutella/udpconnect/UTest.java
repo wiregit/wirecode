@@ -42,6 +42,12 @@ public class UTest implements ActivityCallback, ErrorCallback {
                 } else if (args[2].equals("-es")) {
                     tlogstart("Starting EchoServer:");
                     echoServer(usock);
+                } else if (args[2].equals("-ecb")) {
+                    tlogstart("Starting EchoClientBlock:");
+                    echoClientBlock(usock);
+                } else if (args[2].equals("-esb")) {
+                    tlogstart("Starting EchoServerBlock:");
+                    echoServerBlock(usock);
 				} else if (args[2].equals("-uc")) {
                     tlogstart("Starting UnidirectionalClient:");
 					unidirectionalClient(usock);
@@ -154,6 +160,96 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		log("Done echo");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done echoServer test");
+	}
+
+	private static void echoClientBlock(UDPConnection usock) 
+	  throws IOException {
+		OutputStream ostream = usock.getOutputStream();
+		InputStream  istream = usock.getInputStream();
+
+		ClientReader reader = new ClientReader(istream);
+		reader.start();
+	
+		// setup transfer data
+		byte bdata[] = new byte[512];
+		for (int i = 0; i < 512; i++)
+			bdata[i] = (byte) (i % 256);
+
+		for (int i = 0; i < 4096; i++) {
+			ostream.write(bdata, 0, 512);
+			if ( (i % 8) == 0 ) 
+				log2("Write status: "+i*8);
+		}
+		log("Done write");
+		
+		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
+        tlogend("Done echoClientBlock test");
+	}
+
+	static class ClientBlockReader extends Thread {
+		InputStream istream;
+
+		public ClientBlockReader(InputStream istream) {
+			this.istream = istream;
+		}
+
+		public void run() {
+			int rval;
+			log2("Begin read");
+
+			byte bdata[] = new byte[512];
+
+			int len;
+			try {
+				for (int i = 0; i < 512 * 4096; i += len) {
+					len = istream.read(bdata);
+
+					for (int j = 0; j < len; j++) {
+						if ( bdata[i+j] != ((i+j) % 256) ) {
+							log2("Error on read expected: "+(i+j)
+							  +" received: "+bdata[i+j]);
+							break;
+						} 
+						if ( ((i+j) % 1024) == 0 ) 
+							log2("Read status: "+i);
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			log2("Done read");
+		}
+	}
+
+	private static void echoServerBlock(UDPConnection usock) 
+	  throws IOException {
+		OutputStream ostream = usock.getOutputStream();
+		InputStream  istream = usock.getInputStream();
+
+		byte bdata[] = new byte[512];
+
+		int len = 0;
+		try {
+			for (int i = 0; i < 512 * 4096; i += len) {
+				len = istream.read(bdata);
+
+				for (int j = 0; j < len; j++) {
+					if ( bdata[i+j] != ((i+j) % 256) ) {
+						log2("Error on echo expected: "+(i+j)
+						  +" received: "+bdata[i+j]);
+						break;
+					} 
+					if ( ((i+j) % 1024) == 0 ) 
+						log2("Echo status: "+i);
+				}
+			}
+			ostream.write(bdata, 0, len);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		log("Done echoBlock");
+		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
+        tlogend("Done echoServerBlock test");
 	}
 
     private static void unidirectionalClient(UDPConnection usock) 
