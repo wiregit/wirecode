@@ -30,17 +30,17 @@ public class SettingsManager {
 	/**
 	 * the name of the host list file.
 	 */
-	private final String  HOST_LIST_NAME = "gnutella.net";	
+	private final String HOST_LIST_NAME = "gnutella.net";	
 
     /** 
 	 * Default name for the properties file 
 	 */
-    private final String  PROPS_NAME = "limewire.props";
+    private final String PROPS_NAME = "limewire.props";
 
     /** 
 	 * Default name for the network discovery properties 
 	 */
-    private final String  ND_PROPS_NAME  = "nd.props";
+    private final String ND_PROPS_NAME  = "nd.props";
 
 	private final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
@@ -119,7 +119,6 @@ public class SettingsManager {
     private final int     DEFAULT_MAX_UPLOADS      = 8;
     private final boolean DEFAULT_CLEAR_UPLOAD     = true;
     private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
-    private final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    
 		= "GNUTELLA CONNECT/0.4";
     private final String  DEFAULT_CONNECT_OK_STRING 
@@ -135,7 +134,6 @@ public class SettingsManager {
     private final int     DEFAULT_FREELOADER_ALLOWED  = 100;
 	private final long    DEFAULT_AVERAGE_UPTIME      = 200;
 	private final long    DEFAULT_TOTAL_UPTIME        = 0;
-	private final int     DEFAULT_SESSIONS            = 1;
 	private final boolean DEFAULT_INSTALLED           = false;
 	private final int     DEFAULT_APP_WIDTH           = 640;
 	private final int     DEFAULT_APP_HEIGHT          = 620;
@@ -153,6 +151,19 @@ public class SettingsManager {
 	private final String DEFAULT_COUNTRY              = "US";
 
 	/**
+	 * Constant default value for whether or not an incoming connection
+	 * has ever been established.
+	 */
+	private final boolean DEFAULT_EVER_ACCEPTED_INCOMING = false;
+    
+    //settings for Supernode implementation
+    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
+    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
+    private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
+    private volatile boolean DEFAULT_SUPERNODE_MODE = true;
+    
+
+	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
 	 */
@@ -164,7 +175,24 @@ public class SettingsManager {
 	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
 		SpeedConstants.MODEM_SPEED_INT;
 
-	private final boolean DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN = false;
+	/**
+	 * Constant default value for the maximum number of bytes ever passed
+	 * per second upstream.
+	 */
+	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
+
+	/**
+	 * Constant default value for the maximum number of bytes ever passed
+	 * per second downstream.
+	 */
+	private final int DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC = 0;
+    
+    /**
+     * Constant default value for whether or not this node has ever been
+     * considered "supernode capable," meaning that it has met all of the
+     * requirements of a supernode, but not necessarily been a supernode.
+     */
+    private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -205,7 +233,6 @@ public class SettingsManager {
     private final String MAX_UPLOADS           = "MAX_UPLOADS";
     private final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
     private final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
-    private final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
 
     private final String CONNECT_STRING        = "CONNECT_STRING";
     private final String CONNECT_OK_STRING     = "CONNECT_OK_STRING";
@@ -235,24 +262,69 @@ public class SettingsManager {
 	private final String CLASSPATH             = "CLASSPATH";
 	private final String MAIN_CLASS            = "MAIN_CLASS";
 
-	private final String CHAT_ENABLED          = "CHAT_ENABLED";
-
-	private final String LANGUAGE              = "LANGUAGE";
-	private final String COUNTRY               = "COUNTRY";
+	/**
+	 * Constant key for whether or not chat is enabled.
+	 */
+	private final String CHAT_ENABLED = "CHAT_ENABLED";
 
 	/**
-	 * Key for the minimum quality to allow in search results.
+	 * Constant key for the language we're currently using.
+	 */
+	private final String LANGUAGE = "LANGUAGE";
+
+
+	/**
+	 * Constant key for the country.
+	 */
+	private final String COUNTRY = "COUNTRY";
+    
+    //settings for Supernode implementation
+    private final String MAX_SHIELDED_CLIENT_CONNECTIONS 
+       = "MAX_SHIELDED_CLIENT_CONNECTIONS";
+    private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
+       = "MIN_SHIELDED_CLIENT_CONNECTIONS";
+    private final String SUPERNODE_PROBATION_TIME 
+       = "SUPERNODE_PROBATION_TIME"; 
+    private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
+
+	/**
+	 * Constant key for the minimum quality to allow in search results.
 	 */
 	private final String MINIMUM_SEARCH_QUALITY =
 		"MINIMUM_SEARCH_QAULITY";
 
 	/**
-	 * Key for the minimum speed to allow in search results.
+	 * Constant key for the minimum speed to allow in search results.
 	 */
 	private final String MINIMUM_SEARCH_SPEED =
 		"MINIMUM_SEARCH_SPEED";
 
-	private final String SEARCH_FILTER_MESSAGE_SHOWN = "SEARCH_FILTER_MESSAGE_SHOWN";
+	/**
+	 * Constant key for the whether or not an incoming connection has
+	 * ever been accepted accross all sessions.
+	 */
+	private final String EVER_ACCEPTED_INCOMING = 
+		"EVER_ACCEPTED_INCOMING";
+	
+	/**
+	 * Constant key for the maximum number of bytes per second ever passed
+	 * upstream.
+	 */
+	private final String MAX_UPSTREAM_BYTES_PER_SEC = 
+		"MAX_UPLOAD_BYTES_PER_SEC";
+
+	/**
+	 * Constant key for the maximum number of bytes per second ever passed
+	 * downstream.
+	 */
+	private final String MAX_DOWNSTREAM_BYTES_PER_SEC = 
+		"MAX_DOWNLOAD_BYTES_PER_SEC";
+    
+    /**
+     * Constant key for whether or not this node has ever been considered
+     * "supernode capable" across all sessions.
+     */
+    private final String EVER_SUPERNODE_CAPABLE = "EVER_SUPERNODE_CAPABLE";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -292,14 +364,14 @@ public class SettingsManager {
     private volatile int      _maxSimDownload;
     private volatile boolean  _promptExeDownload;
     private volatile int      _maxUploads;
-    private volatile int      _searchAnimationTime;
     private volatile int      _uploadsPerPerson;
 
 	private volatile boolean  _chatEnabled;          
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
-     *  INVARIANT: connectString_=connectStringFirstWord_+" "+connectStringRemainder_
+     *  INVARIANT: connectString_=connectStringFirstWord_+" 
+     *             "+connectStringRemainder_
      *             connectString!=""
      *             connectStringFirstWord does not contain spaces
      */
@@ -311,33 +383,39 @@ public class SettingsManager {
     private volatile int      _advancedQueryInfo;
     private volatile int      _freeLoaderFiles;
     private volatile int      _freeLoaderAllowed;
-	private volatile int      _sessions;
 	private volatile long     _averageUptime;
 	private volatile long     _totalUptime;
+	private volatile int      _sessions;
+	
 	private volatile boolean  _installed;
 	private volatile boolean  _acceptedIncoming = false;
-
-
-    /** 
-	 * Set up a local variable for the properties
-	 */
-    private volatile Properties _props;
-
-    /** 
-	 * Specialized properties file for the network discoverer
-     */
-    private volatile Properties _ndProps;    
 
     /**
      * Type of the servant: client, xml-client, server etc
      */
-    private String    _servantType;
+    private String _servantType;
+
+    //settings for Supernode implementation
+    private volatile int _maxShieldedClientConnections;
+    private volatile int _minShieldedClientConnections;
+    private volatile long _supernodeProbationTime;
+    private volatile boolean _supernodeMode;
+    private volatile boolean _shieldedClientSupernodeConnection;
+
+    /** 
+	 * Constant member variable for the main <tt>Properties</tt> instance.
+	 */
+    private final Properties PROPS = new Properties();
+
+    /** 
+	 * Specialized constant properties file for the network discoverer.
+     */
+    private final Properties ND_PROPS = new Properties();;    
 
     /**
      * Set up the manager instance to follow the singleton pattern.
      */
-    private static SettingsManager _instance = new SettingsManager();
-
+    private static final SettingsManager INSTANCE = new SettingsManager();
 
     /**
 	 * Returns the <tt>SettingsManager</tt> instance.
@@ -345,31 +423,24 @@ public class SettingsManager {
 	 * @return the <tt>SettingsManager</tt> instance
      */
     public static SettingsManager instance() {
-        return _instance;
+        return INSTANCE;
     }
 
     /** 
-	 * The constructor is private to ensure that only one copy 
-	 * will be created
+	 * Private constructor to ensure that this can only be constructed 
+	 * from inside this class.
      */
-    private SettingsManager() {
-        _props      = new Properties();
-        _ndProps    = new Properties();
-		
-        FileInputStream fis;
+    private SettingsManager() {		
+        FileInputStream ndfis;
         try {
-            fis = new FileInputStream(new File(ND_PROPS_NAME));
-            try {_ndProps.load(fis);}
+            ndfis = new FileInputStream(new File(ND_PROPS_NAME));
+            try {ND_PROPS.load(ndfis);}
             catch(IOException ioe) {}
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
-		initialize();
-    }
 
 
-    /** Check the properties file and set the props */
-    private void initialize() {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
@@ -395,6 +466,10 @@ public class SettingsManager {
     /** 
 	 * Sets all of the properties manually to ensure that each
 	 * property is valid.
+	 *
+	 * @param tempProps the temporary <tt>Properties</tt> file containing
+	 *                  values that will be validated before being added
+	 *                  to the "master" <tt>Properties</tt> file
      */
     private void validateFile(Properties tempProps) {
         String p;
@@ -622,9 +697,6 @@ public class SettingsManager {
                         break;
                     setUseQuickConnect(bs);
                 }
-                else if(key.equals(SEARCH_ANIMATION_TIME)) {
-                    setSearchAnimationTime(Integer.parseInt(p));
-                }
                 else if(key.equals(CONNECT_STRING)) {
                     setConnectString(p);
                 }
@@ -661,14 +733,14 @@ public class SettingsManager {
                 else if(key.equals(FREELOADER_ALLOWED)) {
                     setFreeloaderAllowed(Integer.parseInt(p));
                 }
+				else if(key.equals(SESSIONS)) {
+					setSessions(Integer.parseInt(p) + 1);
+				}
 				else if(key.equals(AVERAGE_UPTIME)) {
 					setAverageUptime(Long.parseLong(p));
 				}
 				else if(key.equals(TOTAL_UPTIME)) {
 					setTotalUptime(Long.parseLong(p));
-				}
-				else if(key.equals(SESSIONS)) {
-					setSessions(Integer.parseInt(p)+1);
 				}
                 else if(key.equals(SERVANT_TYPE)) {
 					setServantType(p);
@@ -726,24 +798,52 @@ public class SettingsManager {
 				}
 				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
 					setMinimumSearchSpeed(Integer.parseInt(p));
-				} 
-				else if(key.equals(SEARCH_FILTER_MESSAGE_SHOWN)) {
-					Boolean messageShown = new Boolean(p);
-					set17SearchMessageShown(messageShown.booleanValue());
 				}
-            }
-            catch(NumberFormatException nfe){ /* continue */ }
-            catch(IllegalArgumentException iae){ /* continue */ }
-            catch(ClassCastException cce){ /* continue */ }
-        }
+				else if(key.equals(EVER_ACCEPTED_INCOMING)) {
+					Boolean b = new Boolean(p);
+					setEverAcceptedIncoming(b.booleanValue());
+				}
+				else if(key.equals(MAX_UPSTREAM_BYTES_PER_SEC)) {
+					setMaxUpstreamBytesPerSec(Integer.parseInt(p));
+				}
+				else if(key.equals(MAX_DOWNSTREAM_BYTES_PER_SEC)) {
+					setMaxDownstreamBytesPerSec(Integer.parseInt(p));
+				}
+                else if(key.equals(EVER_SUPERNODE_CAPABLE)) {
+                    Boolean b = new Boolean(p);
+                    setEverSupernodeCapable(b.booleanValue());
+                }
+				
+                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS))
+                {
+                    setMaxShieldedClientConnections((new Integer(p)).intValue());
+                }
+                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS))
+                {
+                    setMinShieldedClientConnections((new Integer(p)).intValue());
+                }
+                else if(key.equals(SUPERNODE_PROBATION_TIME))
+                {
+                    setSupernodeProbationTime((new Long(p)).longValue());
+                }
+                else if(key.equals(SUPERNODE_MODE))
+                {
+                    setSupernodeMode((new Boolean(p)).booleanValue());
+                }
+			}
+			catch(NumberFormatException nfe){ /* continue */ }
+			catch(IllegalArgumentException iae){ /* continue */ }
+			catch(ClassCastException cce){ /* continue */ }
+		}
+	
+		//Special case: if this is a modem, ensure that KEEP_ALIVE and
+		//MAX_INCOMING_CONNECTIONS are sufficiently low.
+		if ( getConnectionSpeed()<=56 ) { //modem
+			setKeepAlive(Math.min(2, getKeepAlive()));
+			setMaxIncomingConnections(2);
+		}
+	}
 
-        //Special case: if this is a modem, ensure that KEEP_ALIVE and
-        //MAX_INCOMING_CONNECTIONS are sufficiently low.
-        if ( getConnectionSpeed()<=56 ) { //modem
-            setKeepAlive(Math.min(2, getKeepAlive()));
-            setMaxIncomingConnections(2);
-        }
-    }
 
     /** 
 	 * Load in the default values.  Any properties
@@ -788,7 +888,6 @@ public class SettingsManager {
         setMaxSimDownload(DEFAULT_MAX_SIM_DOWNLOAD);
         setPromptExeDownload(DEFAULT_PROMPT_EXE_DOWNLOAD);
         setMaxUploads(DEFAULT_MAX_UPLOADS);
-        setSearchAnimationTime(DEFAULT_SEARCH_ANIMATION_TIME);
         setConnectString(DEFAULT_CONNECT_STRING);
         setConnectOkString(DEFAULT_CONNECT_OK_STRING);
 
@@ -804,7 +903,6 @@ public class SettingsManager {
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
-		setSessions(DEFAULT_SESSIONS);
         //anu added
         setServantType(DEFAULT_SERVANT_TYPE);
 		setInstalled(DEFAULT_INSTALLED);
@@ -824,14 +922,26 @@ public class SettingsManager {
 		setCountry(DEFAULT_COUNTRY);
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
-		set17SearchMessageShown(DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN);
+		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
+		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
+		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
+        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
+        
+        //settings for Supernode implementation
+        setMaxShieldedClientConnections(
+            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
+        setMinShieldedClientConnections(
+            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
+        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
+        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
     }
 
-
-    /******************************************************
-     *************  START OF ACCESSOR METHODS *************
-     ******************************************************/
-
+    /**
+	 * Returns whether or not uploads to browsers should be allowed.
+	 *
+	 * @return <tt>true</tt> is uploads to browsers should be allowed, 
+	 *         <tt>false</tt> otherwise
+	 */
 	public boolean getAllowBrowser() {return _allowBroswer;}
 
     /** Returns the time to live */
@@ -888,7 +998,7 @@ public class SettingsManager {
 	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the save directory.
 	 *
-	 * @throws  FileNotFoundException
+	 * @throws  <tt>FileNotFoundException</tt>
 	 *          If the incomplete directory is <tt>null</tt>.      
 	 */
     public File getSaveDirectory() throws FileNotFoundException {
@@ -906,7 +1016,7 @@ public class SettingsManager {
 	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the directory for saving incomplete files.
 	 *
-	 * @throws  FileNotFoundException
+	 * @throws  <tt>FileNotFoundException</tt>
 	 *          If the incomplete directory is <tt>null</tt>.      
 	 */
     public File getIncompleteDirectory() throws FileNotFoundException {
@@ -929,7 +1039,7 @@ public class SettingsManager {
     /** Returns the directories to search */
     public String getDirectories(){return _directories;}
 
-	/** returns the shared directories as an array of pathname strings. */
+	/** Returns the shared directories as an array of pathname strings. */
     public String[] getDirectoriesAsArray() {
 		if(_directories == null) return new String[0];		
         _directories.trim();
@@ -986,38 +1096,174 @@ public class SettingsManager {
 		return DEFAULT_EXTENSIONS;
 	}
 
+    /**
+     * Returns an array of strings denoting the ip addresses that the
+     * user has banned.
+     *  
+     * @return an array of strings denoting banned ip addresses
+     */
     public String[] getBannedIps(){return _bannedIps;}
+    
+    /**
+     * Returns an array of strings denoting words that the user has banned.
+     *  
+     * @return an array of strings that the user has banned
+     */
     public String[] getBannedWords(){return _bannedWords;}
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not "adult
+     * content" should be filtered from search results.
+     *
+     * @return <tt>true</tt> if adult content should be filtered out, 
+     *         <tt>false</tt> otherwise
+     */
     public boolean getFilterAdult(){return _filterAdult;}
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not duplicate
+     * search results should be filtered out.
+     *
+     * @return <tt>true</tt> if duplicates should be filtered, <tt>false</tt>
+     *         otherwise
+     */
     public boolean getFilterDuplicates(){return _filterDuplicates;}
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not html search
+     * results should be filtered out.
+     *
+     * @return <tt>true</tt> if html should be filtered, <tt>false</tt>
+     *         otherwise
+     */
     public boolean getFilterHtml(){return _filterHtml;}
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not vbs search
+     * results should be filtered out.
+     *
+     * @return <tt>true</tt> if vbs files should be filtered, <tt>false</tt>
+     *         otherwise
+     */
     public boolean getFilterVbs(){return _filterVbs;}
-    public boolean getFilterGreedyQueries() { return _filterGreedyQueries; }
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not "greedy"
+     * queries, such as "mp3," should be filtered out.
+     *
+     * @return <tt>true</tt> if greedy queries should be filtered, 
+     *         <tt>false</tt> otherwise
+     */
+    public boolean getFilterGreedyQueries() {return _filterGreedyQueries;}
+    
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not "bearshare"
+     * queries should be filtered out.
+     *
+     * @return <tt>true</tt> if bearshare queries should be filtered, 
+     *         <tt>false</tt> otherwise
+     */
     public boolean getFilterBearShareQueries() { return _filterBearShare; }
 
+    /**
+     * Returns a <tt>boolean</tt> value indicating whether or not automatic
+     * connection to the network via "quick connect" servers should be 
+     * enables at startup.
+     *
+     * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
+     *         otherwise
+     */
     public boolean getUseQuickConnect(){return _useQuickConnect;}
+    
+    /**
+     * Returns an array of servers to automatically connect to via "quick
+     * connect" on startup.
+     * 
+     * @return an array of servers to use for quickly connecting
+     */
     public String[] getQuickConnectHosts(){return _quickConnectHosts;}
+    
+    /**
+     * Returns the number of simultaneous searches to allow before the oldest
+     * search panes start getting dropped.
+     * 
+     * @return the number of simultaneous searches to allow before the oldest
+     *         search panes start getting dropped
+     */
     public int getParallelSearchMax(){return _parallelSearchMax;}
+    
+    /**
+     * Returns the maximum number of simultaneous downloads to allow.
+     *
+     * @return the maximum number of simultaneous downloads to allow
+     */
     public int getMaxSimDownload(){return _maxSimDownload;}
+    
+    /**
+     * Returns a <tt>boolean</tt> specifying whether or not the user should
+     * be prompted prior to downloading an exe file.
+     *
+     * @return <tt>true</tt> if the user should be prompted, <tt>false</tt>
+     *         otherwise
+     */
     public boolean getPromptExeDownload(){return _promptExeDownload;}
+    
+    /**
+     * Returns the maximum number of simultaneous uploads to allow.
+     *
+     * @return the maximum number of simultaneous uploads to allow
+     */
     public int getMaxUploads(){return _maxUploads;}
+    
+    /**
+     * Returns a <tt>boolean</tt> specifying whether or not completed uploads
+     * should automatically be cleared from the upload window.
+     *
+     * @return <tt>true</tt> if completed uploads should automatically be 
+     *         cleared, <tt>false</tt> otherwise
+     */
     public boolean getClearCompletedUpload(){return _clearCompletedUpload;}
+    
+    /**
+     * Returns a <tt>boolean</tt> specifying whether or not completed downloads
+     * should automatically be cleared from the download window.
+     *
+     * @return <tt>true</tt> if completed downloads should automatically be 
+     *         cleared, <tt>false</tt> otherwise
+     */
     public boolean getClearCompletedDownload(){return _clearCompletedDownload;}
-    public int getSearchAnimationTime(){ return _searchAnimationTime; }
 
-    public String getConnectString(){ return _connectString; }
+    /**
+     * Returns the connect <tt>String</tt> to use when making Gnutella 
+     * connections.
+     *
+     * @return the connect <tt>String</tt> to use when making Gnutella 
+     * connections
+     */
+    public String getConnectString() { 
+        return _connectString; 
+    }
+    
     /** Returns the first word of the connect string.
      *  This is solely a convenience routine. */
-    public String getConnectStringFirstWord(){ return _connectStringFirstWord; }
-    /** Returns the remaing words of the connect string, without the leading space.
-     *  This is solely a convenience routine. */
-    public String getConnectStringRemainder(){ return _connectStringRemainder; }
+    public String getConnectStringFirstWord() { 
+        return _connectStringFirstWord; 
+    }
+    
+    /** 
+     * Returns the remaing words of the connect string, without the leading
+     * space.  This is solely a convenience routine. 
+     */
+    public String getConnectStringRemainder() { 
+        return _connectStringRemainder; 
+    }
+    
     public String getConnectOkString(){ return _connectOkString; }
 
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** Returns the Network Discovery specialized properties file */
-    public Properties getNDProps(){return _ndProps;}
+    public Properties getNDProps(){return ND_PROPS;}
 
     /** Returns the path of the properties and host list files */
     public String getPath() {return CURRENT_DIRECTORY + File.separator;}
@@ -1041,25 +1287,43 @@ public class SettingsManager {
         return Message.ip2string(_forcedIPAddress);
     }
 
+    /**
+     * Returns the port to use when forcing the ip.
+     *
+     * @return the port to use when forcing the ip
+     */
     public int getForcedPort() {
         return _forcedPort;
     }
 
 	/**
-	 * Returns a boolean indicating whether or not to check again
+	 * Returns a <tt>boolean<tt> indicating whether or not to check again
 	 * for application updates.
 	 *
 	 * @return <tt>true</tt> if we should check again for updates,
 	 *         <tt>false</tt> otherwise
 	 */
     public boolean getCheckAgain() {
-		Boolean b = new Boolean(_props.getProperty(CHECK_AGAIN));
+		Boolean b = new Boolean(PROPS.getProperty(CHECK_AGAIN));
         return b.booleanValue();
     }
 
+	/**
+	 * Returns the number of files required to not be considered a freeloader.
+	 *
+	 * @return the number of files required to not be considered a freeloader
+	 */
     public int getFreeloaderFiles() {
         return _freeLoaderFiles;
     }
+
+	/**
+     * Returns the probability (expressed as a percentage) that an incoming
+     * freeloader will be accepted.  
+	 *
+	 * @return the probability (expressed as a percentage) that an incoming
+     * freeloader will be accepted
+	 */
     public int getFreeloaderAllowed() {
         return _freeLoaderAllowed;
     }
@@ -1112,7 +1376,7 @@ public class SettingsManager {
 	 * @return the width of the application main window in pixels
 	 */
 	public int getAppWidth() {
-		return Integer.parseInt(_props.getProperty(APP_WIDTH));
+		return Integer.parseInt(PROPS.getProperty(APP_WIDTH));
 	}
 
 	/**
@@ -1121,14 +1385,13 @@ public class SettingsManager {
 	 * @return the height of the application main window in pixels
 	 */
 	public int getAppHeight() {
-		return Integer.parseInt(_props.getProperty(APP_HEIGHT));
+		return Integer.parseInt(PROPS.getProperty(APP_HEIGHT));
 	}
     
     /**
      * Returns the type of the servant: client, xml-client, server etc
      */
-    public String getServantType()
-    {
+    public String getServantType() {
         return _servantType;
     }
 
@@ -1140,7 +1403,7 @@ public class SettingsManager {
 	 *         this session, <tt>false</tt> otherwise
 	 */
 	public boolean getRunOnce() {
-		Boolean b = Boolean.valueOf(_props.getProperty(RUN_ONCE));
+		Boolean b = Boolean.valueOf(PROPS.getProperty(RUN_ONCE));
 		return b.booleanValue();
 	}
 
@@ -1152,7 +1415,7 @@ public class SettingsManager {
 	 *         in the previous session
 	 */
 	public int getWindowX() {
-		return Integer.parseInt(_props.getProperty(WINDOW_X));
+		return Integer.parseInt(PROPS.getProperty(WINDOW_X));
 	}
 
 	/**
@@ -1163,7 +1426,7 @@ public class SettingsManager {
 	 *         in the previous session
 	 */
 	public int getWindowY() {
-		return Integer.parseInt(_props.getProperty(WINDOW_Y));
+		return Integer.parseInt(PROPS.getProperty(WINDOW_Y));
 	}
 
 	/**
@@ -1176,24 +1439,42 @@ public class SettingsManager {
 	 *         otherwise
 	 */
 	public boolean getShowTrayDialog() {
-		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_TRAY_DIALOG));
+		Boolean b = Boolean.valueOf(PROPS.getProperty(SHOW_TRAY_DIALOG));
 		return b.booleanValue();	
 	}
 
 	/**
 	 * Returns a boolean specifying whether or not to minimize 
 	 * the application to the system tray.
+	 *
+	 * @return <tt>true</tt> if the application should be minimized to the
+	 *         system tray, <tt>false</tt> otherwise
 	 */
 	public boolean getMinimizeToTray() {
-		Boolean b = new Boolean(_props.getProperty(MINIMIZE_TO_TRAY));
+		Boolean b = new Boolean(PROPS.getProperty(MINIMIZE_TO_TRAY));
 		return b.booleanValue();	
 	}
 
 	/**
 	 * Returns true is an incoming connection has ever been established
-	 * during a single session
+	 * during this session.
+	 *
+	 * @return <tt>true</tt> if an incoming connection has been 
+	 *         established during this session, <tt>false</tt> otherwise
 	 */
 	public boolean getAcceptedIncoming() {return _acceptedIncoming;}
+
+	/**
+	 * Returns whether or not an incoming connection has ever been accepted
+	 * over all sessions.
+	 *
+	 * @return <tt>true</tt> if an incoming connection has ever been 
+	 *         established, <tt>false</tt> otherwise
+	 */
+	public boolean getEverAcceptedIncoming() {
+		Boolean b = Boolean.valueOf(PROPS.getProperty(EVER_ACCEPTED_INCOMING));
+		return b.booleanValue();
+	}
 
 	/**
 	 * Returns a boolean specifying whether or not the close
@@ -1204,7 +1485,7 @@ public class SettingsManager {
 	 *         application should be shown, <tt>false</tt> otherwise
 	 */
 	public boolean getShowCloseDialog() {
-		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_CLOSE_DIALOG));
+		Boolean b = Boolean.valueOf(PROPS.getProperty(SHOW_CLOSE_DIALOG));
 		return b.booleanValue();	
 	}
   
@@ -1215,7 +1496,7 @@ public class SettingsManager {
 	 *         startup.
      */
     public String getClassPath() {
-        return _props.getProperty(CLASSPATH);
+        return PROPS.getProperty(CLASSPATH);
     }
 
     /**
@@ -1225,7 +1506,7 @@ public class SettingsManager {
 	 *         startup
      */
     public String getMainClass() {
-        return _props.getProperty(MAIN_CLASS);
+        return PROPS.getProperty(MAIN_CLASS);
     }
 
 	/**
@@ -1236,7 +1517,7 @@ public class SettingsManager {
 	 *         application
 	 */
 	public String getLanguage() {
-		return _props.getProperty(LANGUAGE);
+		return PROPS.getProperty(LANGUAGE);
 	}
 
 	/**
@@ -1247,7 +1528,7 @@ public class SettingsManager {
 	 *         application
 	 */
 	public String getCountry() {
-		return _props.getProperty(COUNTRY);
+		return PROPS.getProperty(COUNTRY);
 	}
 
 	/**
@@ -1257,7 +1538,7 @@ public class SettingsManager {
 	 * @return the minimum search quality, on a scale of 0 to 3 inclusive
 	 */
 	public int getMinimumSearchQuality() {
-		String str = _props.getProperty(MINIMUM_SEARCH_QUALITY);
+		String str = PROPS.getProperty(MINIMUM_SEARCH_QUALITY);
 		return Integer.parseInt(str);
 	}
 
@@ -1268,15 +1549,96 @@ public class SettingsManager {
 	 * @return the minimum search speed to display
 	 */
 	public int getMinimumSearchSpeed() {
-		String str = _props.getProperty(MINIMUM_SEARCH_SPEED);
+		String str = PROPS.getProperty(MINIMUM_SEARCH_SPEED);
+		return Integer.parseInt(str);
+	}
+	
+	/**
+	 * Returns the maximum number of upstream bytes per second ever
+	 * passed by this node.
+	 *
+	 * @return the maximum number of upstream bytes per second ever
+	 * passed by this node
+	 */
+	public int getMaxUpstreamBytesPerSec() {
+		String str = PROPS.getProperty(MAX_UPSTREAM_BYTES_PER_SEC);
 		return Integer.parseInt(str);
 	}
 
-	public boolean get17SearchMessageShown() {
-		Boolean b = Boolean.valueOf(_props.getProperty(SEARCH_FILTER_MESSAGE_SHOWN));
-		return b.booleanValue();
+	/**
+	 * Returns the maximum number of downstream bytes per second ever
+	 * passed by this node.
+	 *
+	 * @return the maximum number of downstream bytes per second ever
+	 * passed by this node
+	 */
+	public int getMaxDownstreamBytesPerSec() {
+		String str = PROPS.getProperty(MAX_DOWNSTREAM_BYTES_PER_SEC);
+		return Integer.parseInt(str);
 	}
+    
+    //settings for Supernode implementation
+    /**
+     * Returns the maximum number of shielded connections to be supported by
+     * the supernode
+     */
+    public int getMaxShieldedClientConnections()
+    {
+        return _maxShieldedClientConnections;
+    }
+    
+    /**
+     * Returns the minimum number of shielded connections to be supported by
+     * the supernode
+     */
+    public int getMinShieldedClientConnections()
+    {
+        return _minShieldedClientConnections;
+    }
 
+    /**
+     * Returns whether or not this node has ever met the requirements of 
+     * a supernode, regardless of whether or not it actually acted as one.
+     *
+     * @return <tt>true</tt> if this node has ever met supernode requirements,
+     *         <tt>false</tt> otherwise
+     */
+    public boolean getEverSupernodCapable() {
+        Boolean b = 
+            Boolean.valueOf(PROPS.getProperty(EVER_SUPERNODE_CAPABLE));
+        return b.booleanValue();
+    }
+    
+    /**
+     * Returns the probation time for s supernode, during which supernode
+     * decides whether to swith to client mode or stay as supernode
+     */
+    public long getSupernodeProbationTime()
+    {
+        return _supernodeProbationTime;
+    }
+    
+    /**
+     * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
+     */
+    public boolean isSupernode()
+    {
+        return _supernodeMode;
+    }
+
+    /**
+     * Tells whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @return True, if the clientnode has connection to supernode,
+     * false otherwise
+     */
+    public boolean hasShieldedClientSupernodeConnection()
+    {
+        return _shieldedClientSupernodeConnection;
+    }
+    
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -1286,15 +1648,18 @@ public class SettingsManager {
      *************  START OF MUTATOR METHODS **************
      ******************************************************/
 
+
 	/** 
-	 * Updates all of the uptime settings based on the
-	 * passed in time value for the most recent session. 
+	 * Updates the average, total, and current update settings based on
+	 * previous settings and the <tt>newTime</tt> argument for the number
+	 * of seconds that have passed since the last update.
 	 *
-	 * @param currentTime the time the applicaiton has been run in
-	 *                    the current session
+	 * @param newTime the number of seconds that have passed since
+	 *                the last time the uptime was updated (since the
+	 *                last time this method was called).
 	 */
-	public void updateUptime(int currentTime) {
-		_totalUptime += currentTime;
+	public void updateUptime(final int newTime) {
+		_totalUptime += newTime;
 		_averageUptime = _totalUptime/_sessions;
 		setTotalUptime(_totalUptime);
 		setAverageUptime(_averageUptime);
@@ -1308,12 +1673,9 @@ public class SettingsManager {
 	 * @param sessions the total number of sessions that the application
 	 *                 has been run
 	 */
-	private void setSessions(int sessions) {
-		if(_sessions < 1)
-			_sessions = 10;
+	private void setSessions(final int sessions) {
 		_sessions = sessions;
-		String s = Integer.toString(_sessions);
-		_props.put(SESSIONS, s);
+		PROPS.put(SESSIONS, Integer.toString(_sessions));
 	}
 
 	/** 
@@ -1323,9 +1685,7 @@ public class SettingsManager {
 	 *                      application running
 	 */
 	private void setAverageUptime(long averageUptime) {
-		_averageUptime = averageUptime;
-		String s = Long.toString(_averageUptime);
-		_props.put(AVERAGE_UPTIME, s);
+		PROPS.put(AVERAGE_UPTIME, Long.toString(averageUptime));
 	}
 
 	/** 
@@ -1336,7 +1696,7 @@ public class SettingsManager {
 	private void setTotalUptime(long totalUptime) {
 		_totalUptime = totalUptime;
 		String s = Long.toString(_totalUptime);
-		_props.put(TOTAL_UPTIME, s);
+		PROPS.put(TOTAL_UPTIME, s);
 	}
 
     /** 
@@ -1345,7 +1705,7 @@ public class SettingsManager {
     public void setMaxLength(int maxLength) {
 		_maxLength = maxLength;
 		String s = Integer.toString(_maxLength);
-		_props.put(MAX_LENGTH, s);        
+		PROPS.put(MAX_LENGTH, s);        
     }
 
     /** 
@@ -1354,7 +1714,7 @@ public class SettingsManager {
     public void setTimeout(int timeout) {
 		_timeout = timeout;
 		String s = Integer.toString(_timeout);
-		_props.put(TIMEOUT, s);        
+		PROPS.put(TIMEOUT, s);        
     }
 
     /**
@@ -1398,7 +1758,7 @@ public class SettingsManager {
         } else {
             _keepAlive = keepAlive;
             String s = Integer.toString(_keepAlive);
-            _props.put(KEEP_ALIVE, s);
+            PROPS.put(KEEP_ALIVE, s);
         }
     }
 
@@ -1424,7 +1784,7 @@ public class SettingsManager {
     /** 
 	 * Sets the limit for the number of searches
      * throws an exception on negative limits
-     * and limits of 10,000 or more 
+     * and limits of 10,000 or more. 
 	 */
     public void setSearchLimit(byte limit) {
         if(limit < 0 || limit > 10000)
@@ -1432,14 +1792,14 @@ public class SettingsManager {
         else {
             _searchLimit = limit;
             String s = Byte.toString(_searchLimit);
-            _props.put(SEARCH_LIMIT, s);
+            PROPS.put(SEARCH_LIMIT, s);
         }
     }
 
     /** Sets the client (gu) ID number */
     public void setClientID(String clientID) {
 		_clientID = clientID;
-		_props.put(CLIENT_ID, _clientID);
+		PROPS.put(CLIENT_ID, _clientID);
     }
 
     /**
@@ -1464,11 +1824,10 @@ public class SettingsManager {
      * connection speed or too small for the current number of outgoing
      * connections, throws BadConnectionSettingException with suggested new
      * values.  The suggestions attempt to set MAX_INCOMING_CONNECTIONS to
-     * maxConn, even if that means adjusting the KEEP_ALIVE.  The suggestions are
-     * not necessarily guaranteed to be valid however.
+     * maxConn, even if that means adjusting the KEEP_ALIVE.  The suggestions 
+     * are not necessarily guaranteed to be valid however.
      */
-    public void setMaxIncomingConnections(int maxConn,
-										  boolean checkLimit)
+    public void setMaxIncomingConnections(int maxConn, boolean checkLimit)
         throws BadConnectionSettingException {
         if (checkLimit) {
             int max=maxConnections();
@@ -1487,12 +1846,12 @@ public class SettingsManager {
         } else {
             _maxIncomingConn = maxConn;
             String s = Integer.toString(maxConn);
-            _props.put(MAX_INCOMING_CONNECTIONS, s);
+            PROPS.put(MAX_INCOMING_CONNECTIONS, s);
         }
     }
 
     /** 
-	 * Sets the hard maximum time to live 
+	 * Sets the hard maximum time to live. 
 	 */
     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -1500,33 +1859,28 @@ public class SettingsManager {
         else {
             _maxttl = maxttl;
             String s = Byte.toString(_maxttl);
-            _props.put(MAX_TTL, s);
+            PROPS.put(MAX_TTL, s);
         }
     }
 
     public void setBasicInfoForQuery(int basicInfo) {
         _basicQueryInfo = basicInfo;
         String s = Integer.toString(basicInfo);
-        _props.put(BASIC_QUERY_INFO, s);
+        PROPS.put(BASIC_QUERY_INFO, s);
     }
 
 	public void setUploadsPerPerson(int uploads) {
 		_uploadsPerPerson = uploads;
 		String s = Integer.toString(uploads);
-        _props.put(UPLOADS_PER_PERSON , s);
+        PROPS.put(UPLOADS_PER_PERSON , s);
 	}
 
 
     public void setAdvancedInfoForQuery(int advancedInfo) {
         _advancedQueryInfo = advancedInfo;
         String s = Integer.toString(advancedInfo);
-        _props.put(ADVANCED_QUERY_INFO, s);
+        PROPS.put(ADVANCED_QUERY_INFO, s);
     }
-
-
-    /******************************************************
-     *********  START OF CONFIGURATION SETTINGS ***********
-     ******************************************************/
 
     /** 
 	 * Sets the directory for saving files. 
@@ -1535,13 +1889,13 @@ public class SettingsManager {
 	 *                   abstract pathname of the directory for
 	 *                   saving files.  
 	 *
-	 * @throws  IOException 
+	 * @throws  <tt>IOException</tt> 
 	 *          If the directory denoted by the directory pathname
 	 *          String parameter did not exist prior to this method
 	 *          call and could not be created, or if the canonical
 	 *          path could not be retrieved from the file system.
 	 * 
-	 * @throws  NullPointerException 
+	 * @throws  <tt>NullPointerException</tt> 
 	 *          If the "dir" parameter is null.
 	 */
     public void setSaveDirectory(File saveDir) throws IOException {
@@ -1559,7 +1913,7 @@ public class SettingsManager {
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
 		
-		_props.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
+		PROPS.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
     /** 
@@ -1625,7 +1979,7 @@ public class SettingsManager {
             }
             _directories = sb.toString();
         }
-        _props.put(DIRECTORIES, _directories);
+        PROPS.put(DIRECTORIES, _directories);
     }
 
     /** 
@@ -1663,15 +2017,17 @@ public class SettingsManager {
 			_directories += ";";
 		_directories += newPath;
 		_directories += ";";
-		_props.put(DIRECTORIES, _directories);
+		PROPS.put(DIRECTORIES, _directories);
     }
 
     /** 
-	 * set the extensions to search for 
+	 * Sets the file extensions that are shared.
+	 *
+	 * @param ext the semi-colon delimited string of shared file extensions
 	 */
     public void setExtensions(String ext) {
         _extensions = ext;
-        _props.put(EXTENSIONS, ext);
+        PROPS.put(EXTENSIONS, ext);
     }
 
     /** 
@@ -1683,7 +2039,7 @@ public class SettingsManager {
         else {
             _ttl = ttl;
             String s = Byte.toString(_ttl);
-            _props.put(TTL, s);
+            PROPS.put(TTL, s);
         }
     }
 
@@ -1696,7 +2052,7 @@ public class SettingsManager {
         else {
             _softmaxttl = softmaxttl;
             String s = Byte.toString(softmaxttl);
-            _props.put(SOFT_MAX_TTL, s);
+            PROPS.put(SOFT_MAX_TTL, s);
         }
     }
 
@@ -1711,7 +2067,7 @@ public class SettingsManager {
         else {
             _port = port;
             String s = Integer.toString(_port);
-            _props.put(PORT, s);
+            PROPS.put(PORT, s);
         }
     }
 
@@ -1727,7 +2083,7 @@ public class SettingsManager {
         else {
             _connectionSpeed = speed;
             String s = Integer.toString(_connectionSpeed);
-            _props.put(SPEED, s);
+            PROPS.put(SPEED, s);
         }
     }
 
@@ -1743,7 +2099,7 @@ public class SettingsManager {
         else {
             _uploadSpeed = speed;
             String s = Integer.toString(_uploadSpeed);
-            _props.put(UPLOAD_SPEED, s);
+            PROPS.put(UPLOAD_SPEED, s);
         }
     }
 
@@ -1782,7 +2138,7 @@ public class SettingsManager {
         _connectStringFirstWord = firstWord;
         _connectStringRemainder = remainder;
 
-        _props.put(CONNECT_STRING, connect);
+        PROPS.put(CONNECT_STRING, connect);
     }
 
     public void setConnectOkString(String ok)
@@ -1791,7 +2147,7 @@ public class SettingsManager {
             throw new IllegalArgumentException();
 
         _connectOkString = ok;
-        _props.put(CONNECT_OK_STRING, ok);
+        PROPS.put(CONNECT_OK_STRING, ok);
     }
 
     public void setParallelSearchMax(int max) {
@@ -1800,46 +2156,57 @@ public class SettingsManager {
         else {
             _parallelSearchMax = max;
             String s = String.valueOf(max);
-            _props.put(PARALLEL_SEARCH, s);
+            PROPS.put(PARALLEL_SEARCH, s);
         }
     }
+
+
+	/**
+	 * Sets whether or not the application should prompt the user before
+	 * downloading exe files.
+	 *
+	 * @param prompt specifies whether or not the application should prompt
+	 *               the user before downloading exe files
+	 */
+    public void setPromptExeDownload(boolean prompt) {        
+        _promptExeDownload = prompt;
+        String s = String.valueOf(prompt);
+        PROPS.put(PROMPT_EXE_DOWNLOAD, s);
+    }
+
+	/**
+	 * Sets whether or not chat should be enabled.
+	 *
+	 * @param chatEnabled specified whether or not chat is enabled
+	 */
+	public void setChatEnabled(boolean chatEnabled) {
+		_chatEnabled = chatEnabled;
+		String s = String.valueOf(chatEnabled);
+		PROPS.put(CHAT_ENABLED, s);
+	}
 
     public void setMaxSimDownload(int max) {
 		_maxSimDownload = max;
 		String s = String.valueOf(max);
-		_props.put(MAX_SIM_DOWNLOAD, s);        
+		PROPS.put(MAX_SIM_DOWNLOAD, s);        
     }
-
-
-    public void setPromptExeDownload(boolean prompt) {        
-        _promptExeDownload = prompt;
-        String s = String.valueOf(prompt);
-        _props.put(PROMPT_EXE_DOWNLOAD, s);
-    }
-
-	public void setChatEnabled(boolean chatEnabled) {
-		_chatEnabled = chatEnabled;
-		String s = String.valueOf(chatEnabled);
-		_props.put(CHAT_ENABLED, s);
-	}
-
 
     public void setMaxUploads(int max) {
 		_maxUploads = max;
 		String s = String.valueOf(max);
-		_props.put(MAX_UPLOADS, s);
+		PROPS.put(MAX_UPLOADS, s);
     }
 
     public void setClearCompletedUpload(boolean b) {
 		_clearCompletedUpload = b;
 		String s = String.valueOf(b);
-		_props.put(CLEAR_UPLOAD, s);
+		PROPS.put(CLEAR_UPLOAD, s);
     }
 
     public void setClearCompletedDownload(boolean b) {
 		_clearCompletedDownload = b;
 		String s = String.valueOf(b);
-		_props.put(CLEAR_DOWNLOAD, s);
+		PROPS.put(CLEAR_DOWNLOAD, s);
     }
 
     public void setForceIPAddress(boolean force) {
@@ -1849,10 +2216,15 @@ public class SettingsManager {
         else
             c = "false";
         _forceIPAddress = force;
-        _props.put(FORCE_IP_ADDRESS, c);
+        PROPS.put(FORCE_IP_ADDRESS, c);
     }
 
-
+	/**
+	 * Sets whether or not browsers should be allowed to perform uploads.
+	 *
+	 * @param <tt>boolean</tt> specifying whether or not browsers should
+	 *        ever be allowed to perform uploads
+	 */
     public void setAllowBrowser(boolean allow) {
         String c;
         if (allow == true)
@@ -1860,7 +2232,7 @@ public class SettingsManager {
         else
             c = "false";
         _allowBroswer = allow;
-        _props.put(ALLOW_BROWSER, c);
+        PROPS.put(ALLOW_BROWSER, c);
     }
 
     /** 
@@ -1878,12 +2250,17 @@ public class SettingsManager {
         try {
             InetAddress ia = InetAddress.getByName(address); 
             _forcedIPAddress = ia.getAddress();
-            _props.put(FORCED_IP_ADDRESS_STRING, address);
+            PROPS.put(FORCED_IP_ADDRESS_STRING, address);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException();
         }
     }
 
+    /**
+     * Sets the port to use when forcing the ip address.
+     * 
+     * @param port the port to use for forcing the ip address
+     */
     public void setForcedPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
@@ -1892,7 +2269,7 @@ public class SettingsManager {
         else {
             _forcedPort = port;
             String s = Integer.toString(_forcedPort);
-            _props.put(FORCED_PORT, s);
+            PROPS.put(FORCED_PORT, s);
         }
     }
 	
@@ -1906,66 +2283,82 @@ public class SettingsManager {
 	public void setInstalled(boolean installed) {        
         _installed = installed;
         String s = String.valueOf(installed);
-        _props.put(INSTALLED, s);
+        PROPS.put(INSTALLED, s);
     }
 
-    /******************************************************
-     *********  END OF CONFIGURATION SETTINGS *************
-     ******************************************************/
-
+	/**
+	 * Sets the array of ip addresses that the user has banned.
+	 *
+	 * @param bannedIps the array of ip addresses that the user has banned
+	 *                  from their machine
+	 */
     public void setBannedIps(String[] bannedIps) {
         if(bannedIps == null)
             throw new IllegalArgumentException();
         else {
             _bannedIps = bannedIps;
-            _props.put(BANNED_IPS,
-                       encode(bannedIps));
+            PROPS.put(BANNED_IPS,encode(bannedIps));
         }
     }
 
+	/**
+	 * Sets the array of words that the user has banned from appearing in
+	 * search results.
+	 *
+	 * @param bannedIps the array of words that the user has banned from
+	 *                  appearing in search results
+	 */	
     public void setBannedWords(String[] bannedWords) {
         if(bannedWords == null)
             throw new IllegalArgumentException();
         else {
             _bannedWords = bannedWords;
-            _props.put(BANNED_WORDS,
+            PROPS.put(BANNED_WORDS,
                        encode(bannedWords));
         }
     }
 
+	/**
+	 * Sets whether or not search results including "adult content" are
+	 * banned.
+	 *
+	 * @param filterAdult specifies whether or not search results with
+	 *                    words designated as "adult content" should be
+	 *                    banned
+	 */
     public void setFilterAdult(boolean filterAdult) {
 		_filterAdult = filterAdult;
 		Boolean b = new Boolean(filterAdult);
 		String s = b.toString();
-		_props.put(FILTER_ADULT, s);
+		PROPS.put(FILTER_ADULT, s);
     }
 
     public void setFilterDuplicates(boolean filterDuplicates) {
 		_filterDuplicates = filterDuplicates;
 		Boolean b = new Boolean(filterDuplicates);
 		String s = b.toString();
-		_props.put(FILTER_DUPLICATES, s);
+		PROPS.put(FILTER_DUPLICATES, s);
     }
 
     public void setFilterHtml(boolean filterHtml) {
 		_filterHtml = filterHtml;
 		Boolean b = new Boolean(filterHtml);
 		String s = b.toString();
-		_props.put(FILTER_HTML, s);
+		PROPS.put(FILTER_HTML, s);
     }
 
     public void setFilterVbs(boolean filterVbs) {
 		_filterVbs = filterVbs;
 		Boolean b = new Boolean(filterVbs);
 		String s = b.toString();
-		_props.put(FILTER_VBS, s);
+		PROPS.put(FILTER_VBS, s);
     }
 
     public void setFilterGreedyQueries(boolean yes) {
         _filterGreedyQueries = yes;
         Boolean b = new Boolean(yes);
         String s = b.toString();
-        _props.put(FILTER_GREEDY_QUERIES, s);
+        PROPS.put(FILTER_GREEDY_QUERIES, s);
     }
 
 
@@ -1973,34 +2366,35 @@ public class SettingsManager {
         _filterBearShare = yes;
         Boolean b = new Boolean(yes);
         String s = b.toString();
-        _props.put(FILTER_BEARSHARE_QUERIES, s);
+        PROPS.put(FILTER_BEARSHARE_QUERIES, s);
     }
-
+	
+	/**
+	 * Specifies whether or not quick connect hosts should be used for 
+	 * connecting to the network on startup.
+	 *
+	 * @param useQuickConnect specifies whether or not quick connect hosts
+	 *                        should be used on startup
+	 */
     public void setUseQuickConnect(boolean useQuickConnect) {
 		_useQuickConnect = useQuickConnect;
 		Boolean b = new Boolean(useQuickConnect);
 		String s = b.toString();
-		_props.put(USE_QUICK_CONNECT, s);
+		PROPS.put(USE_QUICK_CONNECT, s);
     }
 
+	/**
+	 * Sets the array of hosts to use as quick connect hosts on startup.
+	 *
+	 * @param hosts the array of hosts to use for quick connect hosts
+	 */
     public void setQuickConnectHosts(String[] hosts) {
         if(hosts == null)
             throw new IllegalArgumentException();
         else {
             _quickConnectHosts = hosts;
-            _props.put(QUICK_CONNECT_HOSTS,
+            PROPS.put(QUICK_CONNECT_HOSTS,
                        encode(hosts));
-        }
-    }
-
-
-    public void setSearchAnimationTime(int seconds) {
-        if(seconds < 0)
-            throw new IllegalArgumentException();
-        else {
-            _searchAnimationTime = seconds;
-            String s = Integer.toString(seconds);
-            _props.put(SEARCH_ANIMATION_TIME, s);
         }
     }
 
@@ -2011,19 +2405,18 @@ public class SettingsManager {
      * incoming connections are accepted.  Throws IllegalArgumentException if
      * allowed<0 or allowed>100.
      */
-    public void setFreeloaderAllowed(int allowed)
-        throws IllegalArgumentException
-    {
+    public void setFreeloaderAllowed(int allowed) 
+		throws IllegalArgumentException {
         if (allowed>100 || allowed<0)
             throw new IllegalArgumentException();
         _freeLoaderAllowed = allowed;
         String s = Integer.toString(allowed);
-        _props.put(FREELOADER_ALLOWED, s);
+        PROPS.put(FREELOADER_ALLOWED, s);
     }
 
     /**
-     * Sets minimum the number of files a host must share to not be considered a
-     * freeloader.  For example, if files==0, no host is considered a
+     * Sets minimum the number of files a host must share to not be considered 
+     * a freeloader.  For example, if files==0, no host is considered a
      * freeloader.  Throws IllegalArgumentException if files<0.
      */
     public void setFreeloaderFiles(final int files) 
@@ -2032,7 +2425,7 @@ public class SettingsManager {
             throw new IllegalArgumentException();
         _freeLoaderFiles = files;
         String s = Integer.toString(files);
-        _props.put(FREELOADER_FILES, s);
+        PROPS.put(FREELOADER_FILES, s);
     }
 
 	
@@ -2044,7 +2437,7 @@ public class SettingsManager {
 	 */
     public void setCheckAgain(final boolean check) {
 		Boolean b = new Boolean(check);
-        _props.put(CHECK_AGAIN, b.toString());
+        PROPS.put(CHECK_AGAIN, b.toString());
     }
 
 	/**
@@ -2054,7 +2447,7 @@ public class SettingsManager {
 	 */
 	public void setAppWidth(final int width) {
         String s = Integer.toString(width);
-		_props.put(APP_WIDTH, s);
+		PROPS.put(APP_WIDTH, s);
 	}
 
 	/**
@@ -2063,7 +2456,7 @@ public class SettingsManager {
 	 * @param height the height in pixels of the main application window
 	 */
 	public void setAppHeight(final int height) {
-		_props.put(APP_HEIGHT, Integer.toString(height));
+		PROPS.put(APP_HEIGHT, Integer.toString(height));
 	}
 
 	/**
@@ -2075,7 +2468,7 @@ public class SettingsManager {
 	 */
 	public void setRunOnce(final boolean runOnce) {
 		Boolean b = new Boolean(runOnce);
-		_props.put(RUN_ONCE, b.toString());
+		PROPS.put(RUN_ONCE, b.toString());
 	}
 
 	/**
@@ -2085,7 +2478,7 @@ public class SettingsManager {
 	 * @param x the x position of the main application window
 	 */
 	public void setWindowX(final int x) {
-		_props.put(WINDOW_X, Integer.toString(x));
+		PROPS.put(WINDOW_X, Integer.toString(x));
 	}
 
 	/**
@@ -2095,7 +2488,7 @@ public class SettingsManager {
 	 * @param y the y position of the main application window
 	 */
 	public void setWindowY(final int y) {
-		_props.put(WINDOW_Y, Integer.toString(y));
+		PROPS.put(WINDOW_Y, Integer.toString(y));
 	}
 
 	/**
@@ -2106,7 +2499,7 @@ public class SettingsManager {
 	 */
 	public void setShowTrayDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
-		_props.put(SHOW_TRAY_DIALOG, b.toString());
+		PROPS.put(SHOW_TRAY_DIALOG, b.toString());
 	}
 
 	/**
@@ -2118,7 +2511,7 @@ public class SettingsManager {
 	 */
 	public void setMinimizeToTray(final boolean minimize) {
 		Boolean b = new Boolean(minimize);
-		_props.put(MINIMIZE_TO_TRAY, b.toString());
+		PROPS.put(MINIMIZE_TO_TRAY, b.toString());
 	}	
 
 	/**
@@ -2130,7 +2523,20 @@ public class SettingsManager {
 	 */
 	public void setAcceptedIncoming(final boolean incoming) {
 		_acceptedIncoming = incoming;
+		setEverAcceptedIncoming(incoming);
     }
+
+	/**
+	 * Sets whether or not this client has ever accepted an incoming 
+	 * connection during any session.
+	 *
+	 * @param acceptedIncoming <tt>boolean</tt> specifying whether or not this
+	 *                         client has ever accepted an incoming connection
+	 */
+	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
+		Boolean b = new Boolean(acceptedIncoming);
+		PROPS.put(EVER_ACCEPTED_INCOMING, b.toString());
+	}
 
 	/**
 	 * Sets the flag for whether or not the close dialog window should be 
@@ -2141,7 +2547,7 @@ public class SettingsManager {
 	 */
 	public void setShowCloseDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
-		_props.put(SHOW_CLOSE_DIALOG, b.toString());
+		PROPS.put(SHOW_CLOSE_DIALOG, b.toString());
 	}
     
     /**
@@ -2150,23 +2556,20 @@ public class SettingsManager {
 	 * @param classpath the classpath to use at startup
      */
     public void setClassPath(final String classpath) {
-        _props.put(CLASSPATH, classpath);
+        PROPS.put(CLASSPATH, classpath);
     }
     
     /**
      * Sets the type of the servant: client, xml-client, server etc
      */
-    private void setServantType(String servantType)
-    {
-        if(Constants.isValidServantType(servantType))
-        {
+    private void setServantType(String servantType) {
+        if(Constants.isValidServantType(servantType)) {
             _servantType = servantType;
         }
-        else
-        {
+        else {
             _servantType = DEFAULT_SERVANT_TYPE;
         }
-        _props.put(SERVANT_TYPE, _servantType);
+        PROPS.put(SERVANT_TYPE, _servantType);
     }
 
     /**
@@ -2175,7 +2578,7 @@ public class SettingsManager {
 	 * @param mainClass the main class to load at startup
      */
     public void setMainClass(final String mainClass) {
-        _props.put(MAIN_CLASS, mainClass);
+        PROPS.put(MAIN_CLASS, mainClass);
     }
 
 	/**
@@ -2184,7 +2587,7 @@ public class SettingsManager {
 	 * @param language the language to use
 	 */
 	public void setLanguage(final String language) {
-		_props.put(LANGUAGE, language);
+		PROPS.put(LANGUAGE, language);
 	}
 
 	/**
@@ -2193,7 +2596,7 @@ public class SettingsManager {
 	 * @param country the country to use
 	 */
 	public void setCountry(final String country) {
-		_props.put(COUNTRY, country);
+		PROPS.put(COUNTRY, country);
 	}
 
 	/**
@@ -2203,8 +2606,8 @@ public class SettingsManager {
 	 * @param quality the minimum quality for search results, from 0 to 3,
 	 *                inclusive
 	 */
-	public void setMinimumSearchQuality(int quality) {
-		_props.put(MINIMUM_SEARCH_QUALITY, Integer.toString(quality));
+	public void setMinimumSearchQuality(final int quality) {
+		PROPS.put(MINIMUM_SEARCH_QUALITY, Integer.toString(quality));
 	}
 
 	/**
@@ -2212,15 +2615,107 @@ public class SettingsManager {
 	 *
 	 * @param speed the minimum speed to display
 	 */
-	public void setMinimumSearchSpeed(int speed) {
-		_props.put(MINIMUM_SEARCH_SPEED, Integer.toString(speed));
+	public void setMinimumSearchSpeed(final int speed) {
+		PROPS.put(MINIMUM_SEARCH_SPEED, Integer.toString(speed));
 	}
-	
 
-	public void set17SearchMessageShown(boolean shown) {
-		Boolean b = new Boolean(shown);
-		_props.put(SEARCH_FILTER_MESSAGE_SHOWN, b.toString());
+	/**
+	 * Sets the maximum number of upstream bytes per second ever passed by
+	 * this node.
+	 *
+	 * @param bytes the maximum number of upstream bytes per second ever 
+	 *              passed by this node
+	 */
+	public void setMaxUpstreamBytesPerSec(final int bytes) {
+		PROPS.put(MAX_UPSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
 	}
+
+
+	/**
+	 * Sets the maximum number of downstream bytes per second ever passed by
+	 * this node.
+	 *
+	 * @param bytes the maximum number of downstream bytes per second ever 
+	 *              passed by this node
+	 */
+	public void setMaxDownstreamBytesPerSec(final int bytes) {
+		PROPS.put(MAX_DOWNSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
+	}
+    
+    /**
+     * Sets whether or not this node has ever met all of the requirements 
+     * necessary to become a supernode, reqardless of whether or not it
+     * actually acted as one.
+     *
+     * @param supernodeCapable <tt>boolean</tt> indicating whether or not 
+     *  this node has ever met all of the necessary requirements to be 
+     *  considered a supernode
+     */
+    public void setEverSupernodeCapable(final boolean supernodeCapable) {
+        Boolean b = new Boolean(supernodeCapable);
+        PROPS.put(EVER_SUPERNODE_CAPABLE, b.toString());
+    }
+
+    //settings for Supernode implementation
+    
+    /**
+     * Sets the maximum number of shielded connections to be supported by
+     * the supernode
+     */
+    public void setMaxShieldedClientConnections(
+        int maxShieldedClientConnections)
+    {
+        this._maxShieldedClientConnections = maxShieldedClientConnections;
+        PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
+            Integer.toString(maxShieldedClientConnections));
+    }
+    
+    /**
+     * Sets the minimum number of shielded connections to be supported by
+     * the supernode. If the minimum number of connections are not received
+     * over a period of time, then the node may change its status from 
+     * supernode to client-node.
+     */
+    public void setMinShieldedClientConnections(
+        int minShieldedClientConnections)
+    {
+        this._minShieldedClientConnections = minShieldedClientConnections;
+        PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
+            Integer.toString(minShieldedClientConnections));
+    }
+
+    /**
+     * Sets the probation time for s supernode, during which supernode
+     * decides whether to swith to client mode or stay as supernode
+     */
+    public void setSupernodeProbationTime(long supernodeProbationTime)
+    {
+        this._supernodeProbationTime = supernodeProbationTime;
+        PROPS.put(SUPERNODE_PROBATION_TIME, 
+            Long.toString(supernodeProbationTime));
+    }
+    
+    /**
+     * Sets whether the node is gonna be a supernode or not
+     */
+    public void setSupernodeMode(boolean supernodeMode)
+    {
+        this._supernodeMode = supernodeMode;
+        PROPS.put(SUPERNODE_MODE, 
+            (new Boolean(supernodeMode)).toString());
+    }
+    
+    /**
+     * Sets the flag indicating whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @param flag the flag value to be set
+     */
+    public void setShieldedClientSupernodeConnection(boolean flag)
+    {
+        _shieldedClientSupernodeConnection = flag;
+    }
+    
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
@@ -2235,7 +2730,7 @@ public class SettingsManager {
 		FileOutputStream ostream = null;
 		try {
 			ostream = new FileOutputStream(new File(PROPS_NAME));
-			_props.save(ostream, "");
+			PROPS.save(ostream, "");
 			ostream.close();
 		}
 		catch (Exception e){}
@@ -2324,7 +2819,7 @@ public class SettingsManager {
 		
 //  		Boolean b = new Boolean(s);
 //  		System.out.println("boolean: "+b.booleanValue());
-//          //_props.put(INSTALLED, s);
+//          //PROPS.put(INSTALLED, s);
 //  	}
 
     //      /** Unit test */
