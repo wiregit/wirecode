@@ -121,7 +121,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public static Test suite() { 
-        return buildTestSuite(DownloadTest.class, "testHighSmallerStealingFromHttp10");
+        return buildTestSuite(DownloadTest.class);
     }
 
     public static void main(String[] args) {
