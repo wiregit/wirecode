@@ -18,12 +18,12 @@ public class MediaType {
     
     // These values should match standard MIME content-type
     // categories and/or XSD schema names.
-    private static final String SCHEMA_ANY_TYPE = "*";
-    private static final String SCHEMA_DOCUMENTS = "text";
-    private static final String SCHEMA_PROGRAMS = "application";
-    private static final String SCHEMA_AUDIO = "audio";
-    private static final String SCHEMA_VIDEO = "video";
-    private static final String SCHEMA_IMAGES = "image";
+    public static final String SCHEMA_ANY_TYPE = "*";
+    public static final String SCHEMA_DOCUMENTS = "text";
+    public static final String SCHEMA_PROGRAMS = "application";
+    public static final String SCHEMA_AUDIO = "audio";
+    public static final String SCHEMA_VIDEO = "video";
+    public static final String SCHEMA_IMAGES = "image";
     
     // These are used as resource keys to retreive descriptions in the GUI
     private static final String ANY_TYPE = "MEDIA_ANY_TYPE";
@@ -292,6 +292,13 @@ public class MediaType {
             if (schema.equals(ALL_MEDIA_TYPES[i].schema))
                 return true;
         return false;
+    }
+    
+    /**
+     * Retrieves the any media type.
+     */
+    public static MediaType getAnyTypeMediaType() {
+        return TYPE_ANY;
     }
     
     /**
