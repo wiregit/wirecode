@@ -1,4 +1,4 @@
-﻿(C) 2001-2004 The Lime Group. All Rights Reserved.
+﻿(C) 2001-2005 The Lime Group. All Rights Reserved.
 
 This is a small list of supported locales for LimeWire, with their
 contributors, and their area of work.  Mainly, supporting a locale is a matter
@@ -34,6 +34,9 @@ en_ZA   /South Africa
 en_AU   /Australia                            
 en_NZ   /New Zealand                          
 en_IN   /India                                
+------- ----------------------- ------------- -------------------------------
+af      Afrikaans/South Africa Messages       "Jacques Coetsee"
+af_ZA   Afrikaans/Suid-Afrika                 mail: jacques.coetsee AT riversidelofts.co.za
 ------- ----------------------- ------------- -------------------------------
 ca      Catalan/Spain           Messages      "Joan Ensesa"
 ca_ES   Català/Espanya                        mail: jensesa AT pobox.com
