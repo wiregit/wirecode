@@ -31,7 +31,7 @@ public class BrowseHostHandler {
 
     private static final int DIRECT_CONNECT_TIME = 10000; // 10 seconds.
 
-    private static final long EXPIRE_TIME = 9000; // 9 seconds
+    private static final long EXPIRE_TIME = 15000; // 15 seconds
 
     private static final int SPECIAL_INDEX = 0;
 
