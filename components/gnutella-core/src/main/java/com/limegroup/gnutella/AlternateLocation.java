@@ -66,14 +66,18 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * This constructor creates a new <tt>AlternateLocation</tt> instance for 
-	 * the specified URL.  This automatically gives this alternate location
-	 * the current date and time for its timestamp.
+	 * Creates a new <tt>AlternateLocation</tt> instance for the given host
+	 * and the specified <tt>URN</tt>.
 	 *
-	 * @param URL the <tt>URL</tt> instance for the alternate location
+	 * @param HOST_NAME the address of the alternate location host
+	 * @param URN the <tt>URN</tt> for the resource
+	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
+	 *  could not be succussfully constructed from the supplied arguments
 	 */
-	public AlternateLocation(final URL URL) {
-		this.URL = URL;
+	public AlternateLocation(final String HOST_NAME, URN URN) 
+		throws MalformedURLException {
+		String fullUrl = HOST_NAME+HTTPConstants.URI_RES_N2R+URN.toString();
+		this.URL = new URL(fullUrl);
 
 		// make the date the current time
 		this.DATE = new Date();
@@ -559,7 +563,7 @@ public final class AlternateLocation
 		
 		Date date = new Date();
 		String dateStr = AlternateLocation.convertDateToString(date);
-		if(!isValidDate(dateStr)) {
+		if(!AlternateLocation.isValidDate(dateStr)) {
 			failureEncountered = true;
 			System.out.println("TEST FAILED: VALID DATE NOT CONSIDERED VALID");
 			System.out.println("DATE: "+date);
