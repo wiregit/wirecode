@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.http;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import junit.framework.Test;
 
@@ -31,6 +33,152 @@ public final class HttpUtilsTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
+    /**
+     * Test to make sure the method for writing headers to a stream with 
+     * string values is working properly.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithStringToStream() throws Exception {
+        try {
+            HTTPUtils.writeHeader(null, 
+                "test",
+                new ByteArrayOutputStream());
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }        
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                (String)null, new ByteArrayOutputStream());
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }        
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                "test", (OutputStream)null);
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }  
+        
+        OutputStream os = new ByteArrayOutputStream();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 
+            "10", os);
+        
+        assertEquals("unexpected header", 
+            "Content-Length: 10\r\n", os.toString());
+    }
+    
+    /**
+     * Test to make sure the method for writing headers to a Writer with 
+     * string values is working properly.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithStringToWriter() throws Exception {
+        try {
+            HTTPUtils.writeHeader(null, 
+                "test",
+                new FileWriter("test"));
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }    
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                (String)null,
+                new FileWriter("test"));
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        } 
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                "test",
+                (Writer)null);
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }   
+        
+        Writer fw = new StringWriter();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION, 
+            "close", fw);
+        
+        assertEquals("unexpected header", 
+            "Connection: close\r\n", fw.toString());
+    }
+    
+    /**
+     * Test to make sure the method for writing headers to a stream with 
+     * HTTP values values is working properly.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithSHttpValueToStream() throws Exception {
+        try {
+            HTTPUtils.writeHeader(null, 
+                ConstantHTTPHeaderValue.CLOSE_VALUE,
+                new ByteArrayOutputStream());
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }    
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                (HTTPHeaderValue)null,
+                new ByteArrayOutputStream());
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        } 
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                ConstantHTTPHeaderValue.CLOSE_VALUE,
+                (OutputStream)null);
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }    
+        
+        OutputStream os = new ByteArrayOutputStream();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION, 
+            ConstantHTTPHeaderValue.CLOSE_VALUE, os);
+        
+        assertEquals("unexpected header", 
+            "Connection: close\r\n", os.toString());
+    }
+    
+    /**
+     * Test to make sure the method for writing headers to a Writer with 
+     * HTTP values values is working properly.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithSHttpValueToWriter() throws Exception {
+        try {
+            HTTPUtils.writeHeader(null, 
+                ConstantHTTPHeaderValue.CLOSE_VALUE,
+                new FileWriter("test"));
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }    
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                (HTTPHeaderValue)null,
+                new FileWriter("test"));
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        } 
+        try {
+            HTTPUtils.writeHeader(HTTPHeaderName.ACCEPT_ENCODING, 
+                ConstantHTTPHeaderValue.CLOSE_VALUE,
+                (Writer)null);
+            fail("should have throws null pointer");
+        } catch(NullPointerException e) {
+        }    
+        
+        Writer fw = new StringWriter();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION, 
+            ConstantHTTPHeaderValue.CLOSE_VALUE, fw);
+        
+        assertEquals("unexpected header", 
+            "Connection: close\r\n", fw.toString());
+    }
+  
     /**
      * Tests the method for writing the date header to a <tt>Writer</tt> 
      * instance. 
