@@ -4,6 +4,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.messages.*;
 
@@ -23,6 +24,32 @@ import java.net.UnknownHostException;
  *    - bits 6-7 other possible features.
  * bytes 1-16 : the guid
  * followed by 6 bytes per PushProxy
+ * 
+ * the http format this is serialized to is an ascii string consisting of
+ * ';'-delimited tokens.  The first token is the client GUID represented in hex
+ * and is the only required token.  The other tokens can be addresses of push proxies
+ * or various feature headers.  Currently the only feature header we parse is the
+ * fwawt header that contains the version number of the firewall to firewall transfer
+ * protocol supported by the altloc.
+ * 
+ * Examples:
+ * 
+ *  //altloc with 2 proxies that supports firewall transfer 1.0 :
+ * 
+ * <ThisIsTheGUIDASDF>;fwawt/1.0;20.30.40.50:60;1.2.3.4:5567
+ * 
+ *   //altloc with 1 proxy that doesn't support firewall transfer :
+ * 
+ * <ThisIsTHeGUIDasfdaa527>;1.2.3.4:5564
+ * 
+ * //altloc with 1 proxy that supports two features we don't know/care about :
+ * 
+ * <ThisIsTHeGUIDasfdaa527>;someFeature/3.2;10.20.30.40:5564;otherFeature/0.4
+ * 
+ *  //altloc without any proxies that doesn't support any features
+ *  // not very useful, but still valid  
+ * 
+ * <ThisIsTheGUIDasdf23457>
  */
 public class PushEndpoint implements HTTPHeaderValue{
 
@@ -102,11 +129,15 @@ public class PushEndpoint implements HTTPHeaderValue{
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 		
 		//create the http string representation
-		//TODO: once the http format for f2f PEs gets finalized, 
-		//mark the http string.
+
 		String httpString = _guid.toHexString()+";";
 		
-		//also calculate the hashcode in the constructor
+		//if version is not 0, append it to the http string
+		if (version!=0)
+			httpString+=HTTPConstants.FW_TRANSFER+"/"+version+";";
+		
+		//also calculate the hashcode in the constructor, also append
+		//proxies to httpString in the same loop
 		
 		int hashcode = _guid.hashCode();
 		
@@ -147,16 +178,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public PushEndpoint(String httpString) throws IOException{
 		
-		//TODO: once the format for marking F2F-enabled falts gets finalized,
-		//mark the _features header.
-		_features = PLAIN;
-		
-		//TODO: find the version of firewall to firewall transfer supported
-		_fwtVersion=0;
-		
+
+		//copy the constructing string directly.
 		_httpString=httpString;
+		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
+		//the first token is the guid
 		String guidS=null;
 		try{
 			guidS = tok.nextToken();
@@ -173,13 +201,23 @@ public class PushEndpoint implements HTTPHeaderValue{
 		HashSet proxies = new HashSet();
 		
 		int parsedProxies = 0;
+		int fwtVersion =0;
 		
 		while(tok.hasMoreTokens() && parsedProxies < 4) {
 			String current = tok.nextToken();
 			
+			//see if this token is the fwawt header
+			if (current.startsWith(HTTPConstants.FW_TRANSFER)) {
+				int slash = current.indexOf("/");
+				String version = current.substring(slash+1);
+				fwtVersion = (int)Float.parseFloat(version);
+				continue;
+				
+			}
+			
 			int separator = current.indexOf(":");
 			
-			//see if this is a valid; skip gracefully invalid altlocs
+			//see if this is a valid ip:port address; skip gracefully invalid altlocs
 			if (separator == -1 || separator!= current.lastIndexOf(":") ||
 					separator == current.length())
 				continue;
@@ -213,6 +251,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		_hashcode=hashcode;
 		
+		_fwtVersion=fwtVersion;
+		
+		_features = _proxies.size() | (_fwtVersion << 3);
 		_size = HEADER_SIZE+
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 	}
