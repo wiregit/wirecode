@@ -38,8 +38,8 @@ public class LimeXMLUtils
             line = br.readLine();
             if(line != null)
             {
-                //append the line after removing extraneous white spaces
-                sb.append(line.trim());
+                //append the line (along with the newline that got removed)
+                sb.append(line + "\n");
             }
         }
       
