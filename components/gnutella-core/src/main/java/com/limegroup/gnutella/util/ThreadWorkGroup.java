@@ -108,12 +108,14 @@ public class ThreadWorkGroup {
     public synchronized void stop() throws InterruptedException {
         _stopped = true;
         synchronized (_workers) {
+            // interrupt everybody
             Iterator workers = _workers.iterator();
-            while (workers.hasNext()) {
-                Thread currThread = (Thread) workers.next();
-                currThread.interrupt();
-                currThread.join();
-            }
+            while (workers.hasNext()) 
+                ((Thread) workers.next()).interrupt();
+            // wait for the stragglers....
+            workers = _workers.iterator();
+            while (workers.hasNext()) 
+                ((Thread) workers.next()).join();
             _workers.clear();
         }
     }
