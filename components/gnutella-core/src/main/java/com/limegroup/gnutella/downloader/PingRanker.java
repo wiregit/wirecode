@@ -86,7 +86,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
     public PingRanker() {
-        pinger = new HeadPinger();
+        pinger = new UDPPinger();
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
@@ -120,7 +120,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             everybody.add(host);
         
         if(LOG.isDebugEnabled())
-            LOG.debug("adding new host "+host);
+            LOG.debug("adding new host "+host+" "+host.getPushAddr());
         
         newHosts.add(host);
         pingIfNeeded();
@@ -128,7 +128,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     private void addIfNew(RemoteFileDesc host) {
         if (LOG.isDebugEnabled())
-            LOG.debug("potentially adding new host "+host);
+            LOG.debug("potentially adding new host "+host+" "+host.getPushAddr());
         
         if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
                 return;
@@ -180,8 +180,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (sha1 == null)
             return;
         
-        LOG.debug("will ping some hosts");
-        
         // create a ping for the non-firewalled hosts
         HeadPing ping = new HeadPing(myGUID,sha1,getPingFlags());
         
@@ -207,7 +205,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (LOG.isDebugEnabled())
             LOG.debug("pinging hosts: "+toSend);
         
-        pinger.rank(toSend,this,this,ping);
+        pinger.rank(toSend,null,this,ping);
     }
     
     /**
@@ -238,7 +236,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             if (LOG.isDebugEnabled())
                 LOG.debug("pinging push locatioin "+rfd.getPushAddr());
             
-            pinger.rank(rfd.getPushProxies(),this,this,pushPing);
+            pinger.rank(rfd.getPushProxies(),null,this,pushPing);
         }
         
     }
@@ -256,13 +254,13 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
         HeadPong pong = (HeadPong)m;
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("received a pong "+ pong+ " from "+handler);// +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
-        
         if (!pingedHosts.containsKey(handler))
             return;
         
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("received a pong "+ pong+ " from "+handler +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
         
         // if the pong is firewalled, remove the other proxies from the 
         // pinged set
