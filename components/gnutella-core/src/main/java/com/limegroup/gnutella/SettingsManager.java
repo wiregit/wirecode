@@ -608,10 +608,12 @@ public class SettingsManager implements SettingsInterface {
 	 *
 	 * @return  A <code>File</code> instance denoting the abstract
 	 *          pathname of the save directory.
-	 *          Returns <code>null</code> if the save directory has
-	 *          not been set successfully.
+	 *
+	 * @throws  FileNotFoundException
+	 *          If the incomplete directory is <code>null</code>.      
 	 */
-    public File getSaveDirectory() {
+    public File getSaveDirectory() throws FileNotFoundException {
+		if(_saveDirectory == null) throw new FileNotFoundException();
 		return _saveDirectory;
     }
 
@@ -621,10 +623,12 @@ public class SettingsManager implements SettingsInterface {
 	 *
 	 * @return  A <code>File</code> instance denoting the abstract
 	 *          pathname of the directory for saving incomplete files.
-	 *          Returns <code>null</code> if the incomplete directory has
-	 *          not been set successfully.
+	 *
+	 * @throws  FileNotFoundException
+	 *          If the incomplete directory is <code>null</code>.      
 	 */
-    public File getIncompleteDirectory() {
+    public File getIncompleteDirectory() throws FileNotFoundException {
+		if(_incompleteDirectory == null) throw new FileNotFoundException();
 		return _incompleteDirectory;
     }
 
@@ -660,16 +664,35 @@ public class SettingsManager implements SettingsInterface {
         temp.trim();
 		if(!temp.endsWith(";")) 
 			temp += ";";
-		temp += getIncompleteDirectory().getAbsolutePath();
+		String incompleteDir = "";
+		try {
+			incompleteDir = getIncompleteDirectory().getAbsolutePath();
+		} catch(FileNotFoundException fnfe) {			
+		}
+		temp += incompleteDir;
         return StringUtils.split(temp, ';');		
 	}
     
-    /** Returns the name of the file used to store the downloader state.  This
-     *  file is stored in the incomplete directory and is a read-only
-     *  property. */
-    public String getDownloadSnapshotFile() {
-        return 
-            (new File(getIncompleteDirectory(), "downloads.dat")).getAbsolutePath();
+    /** 
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the file with a snapshot of current downloading files.
+	 *
+	 * <p>This file is stored in the incomplete directory and is a read-only
+     * property.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the file with a snapshot of current downloading
+	 *          files.
+	 */
+    public File getDownloadSnapshotFile() {
+		File incompleteDir = null;
+		try {
+			incompleteDir = getIncompleteDirectory();
+		} catch(FileNotFoundException fnfe) {
+			// this is ok, as incompleteDir will remain null, and this will
+			// return the snapshot file from the current directory.
+		}
+        return (new File(incompleteDir, "downloads.dat"));
     }
 
 
