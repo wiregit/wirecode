@@ -1734,30 +1734,30 @@ public class ConnectionManager {
 
         // Try a single connection
         public void run() {
-            // If the user has no Internet connection, simply return.
-            if(_noInternetConnection) {
-                return;
-            }
-            // Wait for an endpoint.
-            Endpoint endpoint = null;
-            do {
-                try {
-                    endpoint = _catcher.getAnEndpoint();
-                } catch (InterruptedException exc2) {
-                    // Externally generated interrupt.
-                    // The interrupting thread has recorded the
-                    // death of the fetcher, so just return.
+            try {
+                // If the user has no Internet connection, simply return.
+                if(_noInternetConnection) {
                     return;
                 }
-            } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
-                      isConnectedTo(endpoint) );                      
+                // Wait for an endpoint.
+                Endpoint endpoint = null;
+                do {
+                    try {
+                        endpoint = _catcher.getAnEndpoint();
+                    } catch (InterruptedException exc2) {
+                        // Externally generated interrupt.
+                        // The interrupting thread has recorded the
+                        // death of the fetcher, so just return.
+                        return;
+                    }
+                } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
+                          isConnectedTo(endpoint) );                      
+    
+                Assert.that(endpoint != null);
+    
+                ManagedConnection connection = new ManagedConnection(
+                    endpoint.getHostname(), endpoint.getPort());
 
-            Assert.that(endpoint != null);
-
-            ManagedConnection connection = new ManagedConnection(
-                endpoint.getHostname(), endpoint.getPort());
-
-            try {
                 // If we've been trying to connect for awhile and have not 
                 // already checked our connection, check to make sure the
                 // user's internet connection is live.
@@ -1789,10 +1789,6 @@ public class ConnectionManager {
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
-            }
-            finally{
-                if (connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
             }
         }
 	}
