@@ -60,6 +60,11 @@ public class HTTPUploader implements Uploader {
 		FileDesc desc = FileManager.instance().get(_index);
 		_fileSize = desc._size;
 		setState(CONNECTED);
+		try {
+		    _ostream = _socket.getOutputStream();
+		} catch (IOException e) {
+		    setState(NOT_CONNECTED);
+		}
 	}
 		
 	// Push requested Upload
@@ -91,6 +96,9 @@ public class HTTPUploader implements Uploader {
 			// ask chris about Assert
 			Assert.that(_filename != null);  
 			// write out the giv
+
+			Assert.that(_filename != "");  
+
 			String giv; 
 			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
 			_ostream.write(giv.getBytes());

@@ -75,7 +75,9 @@ public class UploadManager {
                 
 
 	public void acceptUpload(Socket socket) {
-		System.out.println("acceptUpload called!");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
+		System.out.println(">> acceptUpload called!");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
 		HTTPUploader uploader;
 		GETLine line;
 		try {
@@ -111,6 +113,10 @@ public class UploadManager {
 
 	public void acceptPushUpload(String file, String host, int port, 
 								 int index, String guid) { 
+
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		System.out.println(">> acceptPushUpload called!");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		Uploader uploader;
 		uploader = new HTTPUploader(file, host, port, index, guid);
 		// check to see if the file is in the attempted pushes
@@ -140,10 +146,23 @@ public class UploadManager {
 		try {
 			// attempt to connect via push
 			uploader.connect();
+		} catch (AssertFailure a) {
+			System.out.println("Assert Failure");
+			// if it fails, insert it into the push failed list
+			uploader.setState(Uploader.PUSH_FAILED);
+			insertFailedPush(host);
+			// remove it from the uploads in progress
+			removeFromMap(host);
+			removeAttemptedPush(host);
+			return;
 		} catch (IOException e) {
 			// if it fails, insert it into the push failed list
 			uploader.setState(Uploader.PUSH_FAILED);
 			insertFailedPush(host);
+			// remove it from the uploads in progress
+			removeFromMap(host);
+			removeAttemptedPush(host);
+			return;
 		}
 
 		_callback.addUpload(uploader);		
