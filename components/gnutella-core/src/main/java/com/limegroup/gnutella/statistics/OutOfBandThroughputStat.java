@@ -21,30 +21,32 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
     public static final int TERRIBLE_SUCCESS_RATE = 40;
+    
+    private static final int thirtyMins = 30 * 60 * 1000;
+    
 
-    private static Runnable adjuster = null;
+    private static final Runnable adjuster = new Runnable() {
+        public void run() {
+        	if (LOG.isDebugEnabled())
+        		LOG.debug("current success rate "+ getSuccessRate()+
+        				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
+						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
+            if (!isSuccessRateGreat() &&
+                !isSuccessRateTerrible()) {
+            	LOG.debug("boosting sample size by 500");
+                MIN_SAMPLE_SIZE += 500;
+            }
+        }
+    };
+    
+    static {
+    	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+    }
+    
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
-	private OutOfBandThroughputStat() {
-        final int thirtyMins = 30 * 60 * 1000;
-        if (adjuster==null) {
-        	adjuster = new Runnable() {
-                public void run() {
-                	if (LOG.isDebugEnabled())
-                		LOG.debug("current success rate "+ getSuccessRate()+
-                				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
-								" measurements with a min sample size "+MIN_SAMPLE_SIZE);
-                    if (!isSuccessRateGreat() &&
-                        !isSuccessRateTerrible()) {
-                    	LOG.debug("boosting sample size by 500");
-                        MIN_SAMPLE_SIZE += 500;
-                    }
-                }
-            };
-            RouterService.schedule(adjuster, thirtyMins, thirtyMins);
-        }
-    }
+	private OutOfBandThroughputStat() {}
 
 
 	/**
