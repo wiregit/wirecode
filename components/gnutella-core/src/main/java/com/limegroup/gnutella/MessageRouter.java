@@ -777,7 +777,7 @@ public abstract class MessageRouter {
     /**
      * Broadcasts the query request to all initialized connections that
      * are not the receivingConnection, setting up the routing
-     * to the designated QueryReplyHandler.  This is called from the default
+     * to the designated QueryReplyHandler.  This is called from teh default
      * handleQueryRequest and the default broadcastQueryRequest(QueryRequest)
      *
      * If different (smarter) broadcasting functionality is desired, override
