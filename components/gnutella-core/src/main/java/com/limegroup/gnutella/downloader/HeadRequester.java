@@ -49,11 +49,11 @@ final class HeadRequester implements Runnable {
 	 *  store any newly discovered locations
 	 * @param totalAlts the total known alternate locations to report
 	 */
-	public HeadRequester(List hosts, 
+	public HeadRequester(Set hosts, 
 						 URN resourceName,
 						 AlternateLocationCollector collector,
 						 AlternateLocationCollection totalAlts) {
-		HOSTS = new HashSet(hosts);
+		HOSTS = hosts;
 		RESOURCE_NAME = resourceName;
 		COLLECTOR = collector;
 		TOTAL_ALTS = totalAlts;

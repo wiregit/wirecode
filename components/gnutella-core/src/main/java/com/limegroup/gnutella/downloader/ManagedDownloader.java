@@ -1397,8 +1397,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 fileDesc.addAlternateLocationCollection(totalAlternateLocations);
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
+                HashSet set = null;
+                synchronized(this) {
+                    set = new HashSet(files);
+                }
 				HeadRequester requester = 
-			        new HeadRequester(files, fileHash, fileDesc, 
+			        new HeadRequester(set, fileHash, fileDesc, 
                                       fileDesc.getAlternateLocationCollection());
 				Thread headThread = new Thread(requester, "HEAD Request Thread");
 				headThread.setDaemon(true);
