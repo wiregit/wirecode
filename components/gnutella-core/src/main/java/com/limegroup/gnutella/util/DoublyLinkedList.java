@@ -10,6 +10,9 @@ import com.sun.java.util.collections.*;
 
 /**
 * Its a doubly linked list 
+* <br>
+* Note: All the access to the list should be synchronized externally(if
+* required)
 * @author  Anurag Singla
 * @version
 */
@@ -112,12 +115,32 @@ public boolean remove(ListElement element)
     return true;
 }
 
+/**
+* Removes all entries from this list
+*/
+public void clear() 
+{
+    //since no elements, make start & last point to each other
+    start.next = last;
+    last.prev = start;
+}
 
+
+/**
+* Returns a new instance for the inner class
+* @param key The key to be stored in the new instance
+* @return the new instance of ListElement (inner class)
+*/
+public static DoublyLinkedList.ListElement getANewListElement(Object key)
+{
+    //create and return a new instance
+    return new ListElement(key);
+}
 
 /**
 * An element of the linked list
 */
-public class ListElement
+public static class ListElement
 {
     /**
     * The key/object it stores
