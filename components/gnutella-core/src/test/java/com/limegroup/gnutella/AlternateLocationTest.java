@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import junit.framework.*;
@@ -65,6 +66,10 @@ public final class AlternateLocationTest extends TestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+    public void setUp() {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+    }
 
 	/**
 	 * Tests the constructor that takes a URL as an argument to make sure it
@@ -170,12 +175,12 @@ public final class AlternateLocationTest extends TestCase {
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				if(!al.isTimestamped()) {
-					assertTrue("test failed -- alternate location string not "+
+					fail("test failed -- alternate location string not "+
 							   "considered stamped: "+
-                               HugeTestUtils.VALID_TIMESTAMPED_LOCS[i], false);
+                         HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				}
 			} catch(IOException e) {
-                assertTrue("test failed with exception "+e, false);
+                fail("test failed with exception "+e);
             }		 
 		}
 	}
@@ -446,8 +451,9 @@ public final class AlternateLocationTest extends TestCase {
             String loc = HugeTestUtils.FIREWALLED_LOCS[i];
             try {
                 AlternateLocation al = AlternateLocation.createAlternateLocation(loc);
-                fail("alt loc should have thrown an exception for loc: "+loc);
+                fail("alt loc should not have accepted firewalled loc: "+loc);
             } catch(Exception e) {
+                // this is expected 
             }
         }
 
