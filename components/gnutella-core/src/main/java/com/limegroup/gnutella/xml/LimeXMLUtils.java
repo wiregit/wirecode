@@ -70,16 +70,22 @@ public class LimeXMLUtils
         String line = "";
      
         //open the file
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        while(line != null)
-        {
-            //read a line from file
-            line = br.readLine();
-            if(line != null)
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+            while(line != null)
             {
-                //append the line (along with the newline that got removed)
-                sb.append(line + "\n");
+                //read a line from file
+                line = br.readLine();
+                if(line != null)
+                {
+                    //append the line (along with the newline that got removed)
+                    sb.append(line + "\n");
+                }
             }
+        } finally {
+            if( br != null)
+                br.close();
         }
       
         //get & return the input source
@@ -736,10 +742,11 @@ public class LimeXMLUtils
      */
     public static byte[] hashFile(File toHash) throws Exception {
         byte[] retBytes = null;
+        FileInputStream fis = null;
         try {        
 
             // setup
-            FileInputStream fis = new FileInputStream(toHash);           
+            fis = new FileInputStream(toHash);           
             MessageDigest md = MessageDigest.getInstance("SHA");
 
             long fileLength = toHash.length();            
@@ -795,6 +802,10 @@ public class LimeXMLUtils
         }
         catch (Exception e) {
             throw new Exception(e.toString());
+        }
+        finally {
+            if (fis != null)
+                fis.close();
         }
         return retBytes;
     }

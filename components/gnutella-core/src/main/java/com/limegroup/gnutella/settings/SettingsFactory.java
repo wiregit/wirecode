@@ -83,12 +83,20 @@ public final class SettingsFactory {
 		// we also return, as attempting to load an invalid file will
 		// not do any good.
 		if(!SETTINGS_FILE.isFile()) return;
+		FileInputStream fis = null;
         try {
-            PROPS.load(new FileInputStream(SETTINGS_FILE));
+            fis = new FileInputStream(SETTINGS_FILE);
+            PROPS.load(fis);
         } catch(IOException e) {
 			ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
-        }		
+        } finally {
+            if( fis != null ) {
+                try {
+                    fis.close();
+                } catch(IOException e) {}
+            }
+        }
         
         // Reload all setting values
         Iterator ii = settings.iterator(); 

@@ -514,18 +514,26 @@ public final class SettingsManager {
      */
     private SettingsManager() {
         // load the specialized property file for network discovery
+        FileInputStream ndfis = null;
         try {
-            FileInputStream ndfis = new FileInputStream(new File(ND_PROPS_NAME));
-            try {ND_PROPS.load(ndfis);}
-            catch(IOException ioe) {}
-        }
-        catch(FileNotFoundException fne){}
-        catch(SecurityException se) {}
+            ndfis = new FileInputStream(new File(ND_PROPS_NAME));
+            try {
+                ND_PROPS.load(ndfis);
+            } catch(IOException ioe) {}
+        } catch(FileNotFoundException fne){
+        } catch(SecurityException se) {
+        } finally {
+            try {
+                if( ndfis != null)
+                    ndfis.close();
+            } catch (IOException ioe) {}
+        }            
 
         // load the main application properties file
         Properties tempProps = new Properties();
+        FileInputStream fis = null;
         try {
-            FileInputStream fis = new FileInputStream(PROPS_FILE);
+            fis = new FileInputStream(PROPS_FILE);
             try {
                 tempProps.load(fis);
                 loadDefaults();
@@ -536,10 +544,20 @@ public final class SettingsManager {
 			        // error closing the file, so continue using the
 			        // defaults.
 				}
-            } catch(IOException e){loadDefaults();}
+            } catch(IOException e){
+                loadDefaults();
+            }
+        } catch(FileNotFoundException fnfe) {
+            loadDefaults();
+        } catch(SecurityException se){
+            loadDefaults();
+        } finally {
+            try {
+                if( fis != null )
+                    fis.close();
+            } catch(IOException e) {}
         }
-        catch(FileNotFoundException fnfe){loadDefaults();}
-        catch(SecurityException se){loadDefaults();}        
+        
         try {
             String language = getLanguage();
             String country = getCountry();

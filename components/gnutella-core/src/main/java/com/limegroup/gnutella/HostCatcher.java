@@ -184,27 +184,35 @@ public class HostCatcher {
      */
     synchronized void read(File hostFile) throws FileNotFoundException, 
 												 IOException {
-        BufferedReader in = new BufferedReader(new FileReader(hostFile));
-        while (true) {
-            String line=in.readLine();
-            if (line==null)
-                break;
-                
-            //If endpoint a special GWebCache endpoint?  If so, add it to
-            //gWebCache but not this.
-            try {
-                BootstrapServer e=new BootstrapServer(line);
-                gWebCache.addBootstrapServer(e);
-                continue;
-            } catch (ParseException ignore) { }
-
-            //Is it a normal endpoint?
-            try {
-                ExtendedEndpoint e=ExtendedEndpoint.read(line);
-                add(e, NORMAL_PRIORITY);
-            } catch (ParseException pe) {
-                continue;
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(hostFile));
+            while (true) {
+                String line=in.readLine();
+                if (line==null)
+                    break;
+                    
+                //If endpoint a special GWebCache endpoint?  If so, add it to
+                //gWebCache but not this.
+                try {
+                    BootstrapServer e=new BootstrapServer(line);
+                    gWebCache.addBootstrapServer(e);
+                    continue;
+                } catch (ParseException ignore) { }
+    
+                //Is it a normal endpoint?
+                try {
+                    ExtendedEndpoint e=ExtendedEndpoint.read(line);
+                    add(e, NORMAL_PRIORITY);
+                } catch (ParseException pe) {
+                    continue;
+                }
             }
+        } finally {
+            try {
+                if( in != null )
+                    in.close();
+            } catch(IOException e) {}
         }
     }
 
