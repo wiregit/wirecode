@@ -2,9 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.chat.*;
-import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.search.*;
 
@@ -53,23 +51,23 @@ public class Main implements ActivityCallback, ErrorCallback {
 					break;
 				//          //Print routing tables
 				//          else if (command.equals("route"))
-				//              service.dumpRouteTable();
+				//              RouterService.dumpRouteTable();
 				//          //Print connections
 				//          else if (command.equals("push"))
-				//              service.dumpPushRouteTable();
+				//              RouterService.dumpPushRouteTable();
 				//Print push route
 				else if (command.equals("stat")) {
-					//              service.dumpConnections();
-					System.out.println("Number of hosts: "+service.getNumHosts());
-					System.out.println("Number of files: "+service.getNumFiles());
-					System.out.println("Size of files: "+service.getTotalFileSize());
+					//              RouterService.dumpConnections();
+					System.out.println("Number of hosts: "+RouterService.getNumHosts());
+					System.out.println("Number of files: "+RouterService.getNumFiles());
+					System.out.println("Size of files: "+RouterService.getTotalFileSize());
 				}
 				//Send pings to everyone
 				else if (command.equals("update"))
-					service.updateHorizon();
+					RouterService.updateHorizon();
 				//Print hostcatcher
 				else if (command.equals("catcher")) {
-					for (Iterator iter=service.getHosts(); iter.hasNext(); )
+					for (Iterator iter=RouterService.getHosts(); iter.hasNext(); )
 						System.out.println(iter.next().toString());
 				}
 				String[] commands=split(command);
@@ -79,7 +77,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 						int port=6346;
 						if (commands.length>=3)
 							port=Integer.parseInt(commands[2]);
-						service.connectToHostBlocking(commands[1], port);
+						RouterService.connectToHostBlocking(commands[1], port);
 					} catch (IOException e) {
 						System.out.println("Couldn't establish connection.");
 					} catch (NumberFormatException e) {
@@ -90,11 +88,11 @@ public class Main implements ActivityCallback, ErrorCallback {
 					int i=command.indexOf(' ');
 					Assert.that(i!=-1 && i<command.length());
 					String query=command.substring(i+1);
-					service.query(service.newQueryGUID(), query);
+					RouterService.query(RouterService.newQueryGUID(), query);
 				} else if (commands.length==2 && commands[0].equals("listen")) {
 					try {
 						int port=Integer.parseInt(commands[1]);
-						service.setListeningPort(port);
+						RouterService.setListeningPort(port);
 					} catch (NumberFormatException e) {
 						System.out.println("Please specify a valid port.");
 					} catch (IOException e) {
@@ -106,7 +104,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 			}
 		}
 		System.out.println("Good bye.");
-		service.shutdown(); //write gnutella.net
+		RouterService.shutdown(); //write gnutella.net
     }
 
     /////////////////////////// ActivityCallback methods //////////////////////
