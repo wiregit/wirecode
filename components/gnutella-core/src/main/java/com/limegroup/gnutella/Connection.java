@@ -7,6 +7,9 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.connection.BIOMessageWriter;
+import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.NIOMessageWriter;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
@@ -252,7 +255,7 @@ public class Connection {
      */
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
-
+    
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
