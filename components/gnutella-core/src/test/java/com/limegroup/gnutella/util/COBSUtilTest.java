@@ -20,6 +20,22 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
     }  
 
 
+    public void testBoundCase() throws IOException {
+        byte[] bytes = new byte[254];
+        for (int i = 0; i < bytes.length; i++) bytes[i] = (byte) 7;
+        byte[] after = COBSUtil.cobsEncode(bytes);
+        assertTrue("after[0] is " + after[0], after[0] == ((byte)0xFF));
+        assertEquals(256, after.length); // 2 bytes of overhead for 254 bytes
+        byte[] afterOptimized = new byte[255];
+        // some people leave off that last 0, we should react OK
+        System.arraycopy(after, 0, afterOptimized, 0, afterOptimized.length);
+        byte[] decoded = COBSUtil.cobsDecode(afterOptimized);
+        assertEquals(255, decoded.length);
+        for (int i = 0; i < bytes.length; i++)
+            assertTrue(bytes[i] == decoded[i]);
+        assertEquals(0, decoded[254]);
+    }
+
     public void testEncodeAndDecode() throws IOException {
         for (int num = 1; num < 260; num++) 
             encodeAndDecode(num);

@@ -71,6 +71,10 @@ public class COBSUtil {
             }
             if (code < 0xFF) sink.write(0);
         }
+        // if the last block is 254 bytes, optimized encoding schemes may not
+        // cause that last extra 0 to be written.  this makes sure everything
+        // cool.
+        if (code == 0xFF) sink.write(0);
 
         return sink.toByteArray();
     }
