@@ -180,4 +180,21 @@ public class ApplicationSettings extends LimeProps {
      */
     public static final StringSetting DEFAULT_LOCALE = 
         FACTORY.createStringSetting("DEFAULT_LOCALE", "en");
+        
+
+    
+    /**
+     * Gets the current language setting.
+     */
+    public static String getLanguage() {
+        String lc = LANGUAGE.getValue();
+        String cc = COUNTRY.getValue();
+        String lv = LOCALE_VARIANT.getValue();
+        String lang = lc;
+        if(cc != null && !cc.equals(""))
+            lang += "_" + cc;
+        if(lv != null && !lv.equals(""))
+            lang += "_" + lv;
+        return lang;
+    }
 }

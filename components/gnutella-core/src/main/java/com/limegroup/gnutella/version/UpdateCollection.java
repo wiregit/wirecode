@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.io.StringReader;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -23,6 +24,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 
 class UpdateCollection {
@@ -248,6 +251,17 @@ class UpdateCollection {
             data.setFree(free != null);
         }
         
+        // Update the URL to contain the correct pro & language.
+        if(url.indexOf('?') == -1)
+            url += "?";
+        else
+            url += "&";
+        url += "pro="   + CommonUtils.isPro() + 
+               "&lang=" + encode(ApplicationSettings.getLanguage()) +
+               "&lv="   + encode(CommonUtils.getLimeWireVersion()) +
+               "&jv="   + encode(CommonUtils.getJavaVersion()) +
+               "&os="   + encode(CommonUtils.getOS()) +
+               "&osv="  + encode(CommonUtils.getOSVersion());
         data.setUpdateURL(url);
         
         try {
@@ -310,5 +324,12 @@ class UpdateCollection {
             return node.getNodeValue();
         else
             return null;
+    }
+    
+    /**
+     * Converts a string into url encoding.
+     */
+    private String encode(String unencoded) {
+        return URLEncoder.encode(unencoded);
     }
 }

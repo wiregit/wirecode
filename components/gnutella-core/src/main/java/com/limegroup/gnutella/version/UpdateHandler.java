@@ -154,7 +154,7 @@ public class UpdateHandler {
                              UpdateSettings.UPDATE_STYLE.getValue());
         
         UpdateInformation info = uc.getUpdateDataFor(limeV, 
-                                                     getLanguage(),
+                                                     ApplicationSettings.getLanguage(),
                                                      CommonUtils.isPro(),
                                                      style,
                                                      javaV);
@@ -202,21 +202,6 @@ public class UpdateHandler {
             else
                 RouterService.getCallback().updateAvailable(update);
         }
-    }
-    
-    /**
-     * Gets the current language setting.
-     */
-    private String getLanguage() {
-        String lc = ApplicationSettings.LANGUAGE.getValue();
-        String cc = ApplicationSettings.COUNTRY.getValue();
-        String lv = ApplicationSettings.LOCALE_VARIANT.getValue();
-        String lang = lc;
-        if(cc != null && !cc.equals(""))
-            lang += "_" + cc;
-        if(lv != null && !lv.equals(""))
-            lang += "_" + lv;
-        return lang;
     }
     
     /**
