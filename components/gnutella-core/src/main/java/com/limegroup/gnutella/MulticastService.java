@@ -131,6 +131,12 @@ public final class MulticastService implements Runnable {
         synchronized (_receiveLock) {
             //synchronized (_sendLock) {
                 // if the input is null, then the service will shut off ;) .
+                // leave the group if we're shutting off the service.
+                if (multicastSocket == null 
+                 && _socket != null
+                 && _group != null) {
+                    _socket.leaveGroup(_group);
+                }
                 _socket = (MulticastSocket) multicastSocket;
                 _receiveLock.notify();
                // _sendLock.notify();
