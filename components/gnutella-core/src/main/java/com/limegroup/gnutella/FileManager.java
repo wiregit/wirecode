@@ -48,7 +48,7 @@ public abstract class FileManager {
     public static final File SUBDIR_SHARE;
     
     static {
-        File forceShare = new File(".", "NetworkShare").getAbsoluteFile();
+        File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
