@@ -39,4 +39,10 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting TEXT_WITH_ICONS =
         FACTORY.createBooleanSetting("UI_TEXT_WITH_ICONS", true);
+        
+    /**
+     * Setting for not grouping search results in GUI
+     */
+    public static final BooleanSetting UI_GROUP_RESULTS =
+        FACTORY.createBooleanSetting("UI_GROUP_RESULTS", true);
 }
