@@ -166,7 +166,15 @@ public final class ConnectionSettings extends LimeProps {
         
     public static final StringSetting CONNECT_OK_STRING =
         FACTORY.createStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
-        
+    
+    /**
+     * Setting for whether or not to use NIO for network IO.  This is useful,
+     * for example, for testing the old blocking IO code without switching 
+     * JVMs.
+     */
+    public static final BooleanSetting USE_NIO =
+        FACTORY.createBooleanSetting("USE_NIO", true);
+          
     /**
      * Helper method left from Settings Manager
      *
