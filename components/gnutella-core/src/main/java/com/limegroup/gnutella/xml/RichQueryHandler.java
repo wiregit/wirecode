@@ -63,9 +63,6 @@ public class RichQueryHandler{
         long size=-1;
         String name="";
         int z = 0;
-        boolean busy = 
-            RouterService.getUploadManager().isBusy() &&
-            RouterService.getUploadManager().isQueueFull();
         for(Iterator i = matchingReplies.iterator(); i.hasNext(); ) {
             LimeXMLDocument currDoc = (LimeXMLDocument)i.next();
             String subjectFile = currDoc.getIdentifier();//returns null if none
@@ -79,8 +76,7 @@ public class RichQueryHandler{
             } else { //meta-data about a specific file
                 fd = RouterService.getFileManager().getFileDescForFile(
                     new File(subjectFile));
-                if( fd == null || 
-                   (busy && fd.getAltLocsSize() >= 10) ) {
+                if( fd == null) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.
                     continue;
@@ -125,9 +121,4 @@ public class RichQueryHandler{
         if (debugOn)
             System.out.println(out);
     }
-    private void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
-    }
-
 }
