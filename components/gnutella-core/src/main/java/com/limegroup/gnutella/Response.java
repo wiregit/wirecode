@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
 import org.xml.sax.SAXException;
@@ -125,19 +126,6 @@ public class Response {
 	 */
 	private static final String KHZ = "kHz";
 
-	/**
-	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
-	 * because Collections.EMPTY_SET is not serializable in the collections
-	 * 1.1 implementation.
-	 */
-	private static final Set EMPTY_SET = 
-		Collections.unmodifiableSet(new HashSet());
-
-	/**
-	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
-	 */
-	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -213,7 +201,7 @@ public class Response {
 		if(urns == null) {
 			// this is necessary because Collections.EMPTY_SET is not
 			// serializable in collections 1.1
-			this.urns = EMPTY_SET;
+			this.urns = DataUtils.EMPTY_SET;
 		}
 		else {
 			this.urns = Collections.unmodifiableSet(urns);
@@ -406,7 +394,7 @@ public class Response {
 	private static byte[] createExtBytes(Set urns) {
         try {
 			if(urns == null) {
-				return EMPTY_BYTE_ARRAY;
+				return DataUtils.EMPTY_BYTE_ARRAY;
 			}
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			Iterator iter = urns.iterator();
@@ -422,7 +410,7 @@ public class Response {
         } catch (IOException ioe) {
 			// simply do not store any bytes for extensions if there
 			// was a problem
-			return EMPTY_BYTE_ARRAY;
+			return DataUtils.EMPTY_BYTE_ARRAY;
         }
     }
 
