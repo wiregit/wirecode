@@ -28,13 +28,13 @@ import com.limegroup.gnutella.statistics.MessageReadErrorStat;
  */
 public final class MessageReader {
  
- 	private static final byte F_PING                                              = (byte)0x0;
-	private static final byte F_PING_REPLY                              = (byte)0x1;
-	private static final byte F_PUSH                                            = (byte)0x40;
-	private static final byte F_QUERY                                          = (byte)0x80;
-	private static final byte F_QUERY_REPLY                           = (byte)0x81;
-	private static final byte F_ROUTE_TABLE_UPDATE         = (byte)0x30;
-	private static final byte F_VENDOR_MESSAGE                  = (byte)0x31;
+ 	private static final byte F_PING                  = (byte)0x0;
+	private static final byte F_PING_REPLY            = (byte)0x1;
+	private static final byte F_PUSH                  = (byte)0x40;
+	private static final byte F_QUERY                 = (byte)0x80;
+	private static final byte F_QUERY_REPLY           = (byte)0x81;
+	private static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
+	private static final byte F_VENDOR_MESSAGE        = (byte)0x31;
 	private static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
 	
 	/**
@@ -71,8 +71,14 @@ public final class MessageReader {
 	/**
 	 * Constant for the <tt>ByteBuffer</tt> for reading headers.
 	 */
-     //private static final ByteBuffer HEADER = 
-    	//ByteBuffer.allocate(HEADER_SIZE);
+     private static final ByteBuffer HEADER = 
+    	ByteBuffer.allocate(HEADER_SIZE);
+        
+    /**
+     * Constant for the <tt>ByteBuffer</tt> for reading payloads.
+     */
+     private static final ByteBuffer PAYLOAD = 
+        ByteBuffer.allocate(MessageSettings.MAX_LENGTH.getValue());
 
 		
 	/**
@@ -81,6 +87,16 @@ public final class MessageReader {
 	 */
 	private static final byte HARD_MAX = (byte)14;
 	
+    /**
+     * Factory method for creating new <tt>MessageReader</tt>
+     * instances for each connection.
+     * 
+     * @return a new <tt>MessageReader</tt> instance
+     */
+    public static MessageReader createReader() {
+        return new MessageReader();
+    }
+    
 	/**
 	 * Ensure that this class cannot be constructed.
 	 */
@@ -97,7 +113,7 @@ public final class MessageReader {
 	 *    connection being broken
 	 * @throws BadPacketException if the message has an unexpected form
 	 */
-	public static Message createMessageFromTCP(SelectionKey key) 
+	public Message createMessageFromTCP(SelectionKey key) 
 		throws IOException, BadPacketException {
 		return createMessage(key, Message.N_TCP);
 	}
@@ -115,7 +131,7 @@ public final class MessageReader {
 	 * @throws BadPacketException if the data received from the network is invalid for 
 	 *    any reason
 	 */
-	private static Message createMessage(SelectionKey key, int network) 
+	private Message createMessage(SelectionKey key, int network) 
 		throws IOException, BadPacketException {
 
 		ByteBuffer HEADER = 
@@ -166,11 +182,22 @@ public final class MessageReader {
 			// message is read
 			HEADER.clear();
 		}
-   }
-   
-	private static Message 
-   		createMessage(ByteBuffer header, ByteBuffer payloadBuffer, Connection conn, 
-   									 int network) 
+    }
+    
+    /**
+     * Creates a new <tt>Message</tt> instance from the specified header,
+     * payload, connection, and network.
+     * 
+     * @param header
+     * @param payloadBuffer
+     * @param conn
+     * @param network
+     * @return
+     * @throws BadPacketException
+     */  
+    private Message 
+   		createMessage(ByteBuffer header, ByteBuffer payloadBuffer, 
+            Connection conn, int network) 
         throws BadPacketException {
     	//System.out.println("MessageReader::createMessage");
 		header.flip();
@@ -220,19 +247,19 @@ public final class MessageReader {
 		//return createMessage(guid, func, ttl, hops, length, payload, network);
 	}
         
-    private static Message createMessage(byte[] guid, byte func, byte ttl, 
-    																		 byte hops, int length, byte[] payload,
-    																		 int network) throws BadPacketException  {
+    private Message createMessage(byte[] guid, byte func, byte ttl, 
+        byte hops, int length, byte[] payload, int network) 
+        throws BadPacketException  {
 		switch (func) {
-			//TODO: all the length checks should be encapsulated in the various
-			//constructors; Message shouldn't know anything about the various
-		   //messages except for their function codes.  I've started this
+		    //TODO: all the length checks should be encapsulated in the various
+		    //constructors; Message shouldn't know anything about the various
+		    //messages except for their function codes.  I've started this
 		   //refactoring with PushRequest and PingReply.
-		   case F_PING:
-			   if (length>0) { //Big ping
-				   return new PingRequest(guid,ttl,hops,payload);
-			   }
-			   return new PingRequest(guid,ttl,hops);
+	       case F_PING:
+		      if (length>0) { //Big ping
+			     return new PingRequest(guid,ttl,hops,payload);
+			  }
+			  return new PingRequest(guid,ttl,hops);
 
 		   case F_PING_REPLY:
 			   return PingReply.createFromNetwork(guid, ttl, hops, payload);
