@@ -212,12 +212,6 @@ public class PromotionManager {
 			try {
 				//sleep some time
 				Thread.sleep(REQUEST_TIMEOUT);
-			
-				//if we didn't get interrupted by now the candidate
-				//has failed to reply or has successfully promoted
-				//itself to an UP.  Either way,
-			//	if (RouterService.isSupernode())
-				//	BestCandidates.fail(_promotionPartner);
 				
 				//and clear the state
 				synchronized(_promotionLock) {
