@@ -144,7 +144,8 @@ public class MediaType implements Serializable {
                 "cab", "rpm", "deb", "msi", "msp",
                 "gz", "gzip", "z", "bz2", "zoo",
                 "tar", "tgz", "taz", "shar",
-                "hqx", "sit", "dmg", "7z"
+                "hqx", "sit", "dmg", "7z",
+                "iso", "nrg", "cue", "bin"
             });
         MediaType audio = new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
@@ -153,7 +154,7 @@ public class MediaType implements Serializable {
                 "wma", "wav",
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
-                "au", "snd", "iso",
+                "au", "snd", "s3m",
                 "mid", "midi", "rmi", "mod"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
@@ -162,7 +163,7 @@ public class MediaType implements Serializable {
                 "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v",
                 "vcd", "mp4", "dv", "dvd", "div", "divx", "dvx",
                 "smi", "smil", "rm", "ram", "rv",
-                "avi", "asf", "wmv", "qt", "mov",
+                "avi", "asf", "asx", "wmv", "qt", "mov",
                 "fli", "flc", "flx",
                 "wml", "vrml", "swf", "dcr", "jve", "nsv"
             });
@@ -170,11 +171,11 @@ public class MediaType implements Serializable {
             new String[] {
                 "gif", "png",
                 "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
-                "tif", "tiff", "iff", "lbm", "ilbm",
+                "tif", "tiff", "iff", "lbm", "ilbm", "eps",
                 "mac", "drw", "pct", "img",
                 "bmp", "dib", "rle", "ico", "ani", "icl", "cur",
                 "emf", "wmf", "pcx",
-                "pcd", "tga", "pic",
+                "pcd", "tga", "pic", "fig",
                 "psd", "wpg", "dcx", "cpt", "mic",
                 "pbm", "pnm", "ppm", "xbm", "xpm", "xwd",
                 "sgi", "fax", "rgb", "ras"
