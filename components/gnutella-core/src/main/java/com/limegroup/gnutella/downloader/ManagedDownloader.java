@@ -999,8 +999,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		
 		if(totalAlternateLocations != null) {
 			FileDesc fileDesc = 
-              fileManager.getFileDescMatching(completeFile.toString(),
-				(int)completeFile.length());  
+              fileManager.getFileDescMatching(completeFile);  
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
