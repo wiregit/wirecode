@@ -178,7 +178,7 @@ public class RouterService
 
         // Ensure the keep alive is at least 1.
         if (settings.getKeepAlive()<1)
-            settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
+            settings.setKeepAlive(settings.DEFAULT_KEEP_ALIVE);
         int oldKeepAlive = settings.getKeepAlive();
 
         // Build an endpoint of the group server
@@ -642,9 +642,9 @@ public class RouterService
     }
 
     /**
-     * Returns an instance of a SettingsInterface
+     * Returns an instance of a SettingsManager.
      */
-    public SettingsInterface getSettings() {
+    public SettingsManager getSettings() {
         return SettingsManager.instance();
     }
 
