@@ -30,29 +30,25 @@ public class ConnectionManager {
     private ActivityCallback _callback;
 	private SettingsManager _settings;
 
-    /* List of all connections.  This is implemented with two data structures:
-     * a list for fast iteration, and a set for quickly telling what we're
-     * connected to.
+    /* List of all connections.
      *
-     * INVARIANT: "connections" contains no duplicates, and "endpoints" contains
-     * exactly those endpoints that could be made from the elements of
-     * "connections".
+     * INVARIANT: "connections" contains no duplicates
      *
      * INVARIANT: numFetchers = max(0, keepAlive - getNumConnections())
      *            Number of fetchers equals number of connections needed, unless
      *            that number is less than zero.
      *
-     * LOCKING: connections and endpoints must NOT BE MUTATED.  Instead they
-     *          should be replaced as necessary with new copies.  Before
-     *          replacing the structures, obtain this' monitor.
+     * LOCKING: connections must NOT BE MUTATED.  Instead they should be
+     *          replaced as necessary with new copies.  Before replacing,
+     *          obtain this' monitor.
+     *
      *          *** All six of the following members should only be modified
-     *              from threads that have this' monitor ***
+     *              from threads that have this' monitor *** 
      */
     private volatile List /* of ManagedConnection */ _initializedConnections =
         new ArrayList();
     private volatile List /* of ManagedConnection */ _connections =
         new ArrayList();
-    private volatile Set /* of Endpoint */ _endpoints = new HashSet();
 	private ConnectionWatchdog _watchdog;
 
 
@@ -289,19 +285,27 @@ public class ConnectionManager {
     }
 
     /**
-     * Sets the maximum number of incoming connections.  This does not
-     * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
-     * able to vary this without permanently setting the property.
+     * Returns true iff there is a connection (initializing or initialized)
+     * to the given host.  Note that this doesn't account for ports, since
+     * ephemeral ports can confuse matters.
+     * @param host a hostname in dotted-quad format, e.g., "18.239.0.144"
      */
-    //public void setMaxIncomingConnections(int max) {
-	//_maxIncomingConnections = max;
-    //}
-
-    /**
-     * @return true if there is a connection to the given host.
-     */
-    public boolean isConnected(Endpoint host) {
-        return _endpoints.contains(host);
+    public boolean isConnected(String host) {
+        //Note that we use getConnections() (which clones the list and is
+        //thread-safe) to avoid the need for locks. 
+        List conns=getConnections();
+        for (int i=0; i<conns.size(); i++) {
+            ManagedConnection mc=(ManagedConnection)conns.get(i);
+            //Unfortunately mc.getInetAddres() will return null if mc is not
+            //initialized, so we call getOrigHost(), which is guaranteed to be
+            //well defined.  TODO3: Note that getOrigHost may not be in
+            //dotted-quad format if an outgoing connection was made from a
+            //symbolic name, e.g. "router.limewire.com".
+            String remoteHost=mc.getOrigHost();
+            if (host.equals(remoteHost))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -406,12 +410,6 @@ public class ConnectionManager {
             List newConnections=new ArrayList(_initializedConnections);
             newConnections.add(c);
             _initializedConnections=newConnections;
-
-            //REPLACE _endpoints with the set _endpoints+{c}
-            Set newEndpoints=new HashSet(_endpoints);
-            newEndpoints.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                                          c.getPort()));
-            _endpoints=newEndpoints;
         }
 
 		// Check for satisfied ultra-fast connection threshold
@@ -532,14 +530,7 @@ public class ConnectionManager {
             List newConnections=new ArrayList();
             newConnections.addAll(_initializedConnections);
             newConnections.remove(c);
-            _initializedConnections=newConnections;
-
-            //REPLACE _endpoints with the set _endpoints+{c}
-            Set newEndpoints=new HashSet();
-            newEndpoints.addAll(_endpoints);
-            newEndpoints.remove(new Endpoint(
-                c.getInetAddress().getHostAddress(), c.getPort()));
-            _endpoints=newEndpoints;           
+            _initializedConnections=newConnections;           
         }
         // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections
@@ -875,9 +866,9 @@ public class ConnectionManager {
                     // death of the fetcher, so just return.
                     return;
                 }               
-            } while ( (isConnected(endpoint)) || 
-                      (Acceptor.isMe(endpoint.getHostname(), 
-                       endpoint.getPort())) );
+            } while ( isConnected(endpoint.getHostname()) || 
+                      Acceptor.isMe(endpoint.getHostname(), 
+                                    endpoint.getPort()) );
 
             Assert.that(endpoint != null);
 
