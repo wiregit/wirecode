@@ -463,6 +463,24 @@ public class Response {
     
 
     /**
+     * Like writeToArray(), but writes to an OutputStream.
+     */
+    public void writeToStream(OutputStream os) throws IOException {
+        ByteOrder.int2leb((int)index, os);
+        ByteOrder.int2leb((int)size, os);
+        for (int i = 0; i < nameBytes.length; i++)
+            os.write(nameBytes[i]);
+        //Write first null terminator.
+        os.write(0);
+        // write HUGE v0.93 General Extension Mechanism extensions
+        // (currently just URNs)
+        for (int i = 0; i < extBytes.length; i++)
+            os.write(extBytes[i]);
+        //add the second null terminator
+        os.write(0);
+    }
+
+    /**
      * Sets this' metadata.  Added to faciliatate setting audio metadata for
      * responses generated from ordinary searches.  Typically this should only
      * be called if no metadata was passed to this' constructor.
