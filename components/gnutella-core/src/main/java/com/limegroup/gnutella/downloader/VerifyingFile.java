@@ -19,8 +19,6 @@ import com.limegroup.gnutella.util.*;
  */
 public class VerifyingFile {
     
-    private final static org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VerifyingFile.class);
-    
     private RandomAccessFile fos;
 
     private boolean checkOverlap;
