@@ -18,6 +18,7 @@ public interface SettingsInterface
 {    
     // Accessor methods 
     public byte       getTTL();
+    public byte       getSoftMaxTTL();
     public byte       getMaxTTL();
     public int        getMaxLength();
     public int        getTimeout();
@@ -44,7 +45,11 @@ public interface SettingsInterface
     public void setTTL(byte ttl) 
 	throws IllegalArgumentException;
 
-    /** set the maximum time to live */
+    /** set the soft maximum time to live (TTLs above this are readjusted) */
+    public void setSoftMaxTTL(byte smaxttl)
+    	throws IllegalArgumentException;
+
+    /** set the hard maximum time to live (TTLs above this are dropped) */
     public void setMaxTTL(byte maxttl) 
 	throws IllegalArgumentException;
    
@@ -106,8 +111,10 @@ public interface SettingsInterface
 
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)4;
-    /** Default setting for the maximum time to live */
-    public static final byte    DEFAULT_MAX_TTL        = (byte)10;
+    /** Default setting for the soft maximum time to live */
+    public static final byte    DEFAULT_SOFT_MAX_TTL   = (byte)7;
+    /** Default setting for the hard maximum time to live */
+    public static final byte    DEFAULT_MAX_TTL        = (byte)50;
     /** Default maximum packet length */
     public static final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
@@ -141,6 +148,7 @@ public interface SettingsInterface
 
     // The property key name constants 
     public static final String TTL            = "TTL";
+    public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
     public static final String MAX_TTL        = "MAX_TTL";
     public static final String MAX_LENGTH     = "MAX_LENGTH";
     public static final String TIMEOUT        = "TIMEOUT";
