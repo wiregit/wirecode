@@ -101,19 +101,6 @@ public class ConnectionManager {
      * _keepAlive incoming connections.  
      */
     private volatile int _keepAlive=0;
-    /** The number of incoming connections.  Used to avoid the cost of scanning
-     * through _initializedConnections when deciding whether to accept incoming..
-     *
-     *  INVARIANT: _incomingConnections>=the number of incoming connections in
-     *  _connections.  In the "steady state", i.e., when no incoming connections
-     *  are being initialized, this value is exactly equal to the number of
-     *  incoming connections.
-     *
-     *  LOCKING: obtain _incomingConnectionLock */
-    private volatile int _incomingConnections=0;
-    private volatile int _incomingClientConnections = 0;
-    /** The lock for the number of incoming connnections. */
-    private Object _incomingConnectionsLock=new Object();
 
     private MessageRouter _router;
     private HostCatcher _catcher;
@@ -260,9 +247,6 @@ public class ConnectionManager {
          
          //update the connection count
          try {   
-             //increment the appropriate connection count to reflect the
-             //addition of this new connection
-             incrementConnectionCount(connection, false);    
              //keep handling the messages on the connection
 
              //if a leaf connected to us, ensure that we have enough non-leaf
@@ -277,9 +261,6 @@ public class ConnectionManager {
              //Internal error!
              _callback.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
-            //increment the appropriate connection count to reflect the
-            //addition of this new connection
-            decrementConnectionCount(connection, false);  
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
                 lostShieldedClientSupernodeConnection();
@@ -307,48 +288,6 @@ public class ConnectionManager {
             }
         }
     }
-
-     /**
-      * Increments the appropriate connection count, based upon the 
-      * type of the new connection opened
-      * (e.g. incoming supernode, outgoing supernode, outgoing leaf etc.)
-      * @param connection The new connection we received that led to
-      * incrementing the count
-      * @param outgoing Flag indicating if the connection is outgoing 
-      * or incoming. True means outgoing, False means incoming
-      */
-     protected void incrementConnectionCount(ManagedConnection connection,
-        boolean outgoing) {
-        if(!outgoing) {
-            synchronized (_incomingConnectionsLock) {
-                 if(connection.isSupernodeClientConnection())
-                     _incomingClientConnections++;
-                 else
-                     _incomingConnections++;
-             }                 
-        }
-     }
-
-     /**
-      * Decrements the appropriate connection count, based upon the 
-      * type of the connection closed
-      * (e.g. incoming supernode, outgoing supernode, outgoing leaf etc.)
-      * @param connection The connection closed that led to
-      * decrementing the count
-      * @param outgoing Flag indicating if the connection was outgoing 
-      * or incoming. True means outgoing, False means incoming
-      */
-     protected void decrementConnectionCount(ManagedConnection connection,
-        boolean outgoing) {
-        if(!outgoing) {
-            synchronized (_incomingConnectionsLock) {
-                 if(connection.isSupernodeClientConnection())
-                     _incomingClientConnections--;
-                 else
-                     _incomingConnections--;
-            }
-        }
-     }
      
     /**
      * @modifies this, route table
@@ -395,7 +334,7 @@ public class ConnectionManager {
     public synchronized void ensureConnectionsForSupernode(){
         //Note: not holding the _incomingConnectionsLock as just reading the 
         //volatile value
-        if(_incomingClientConnections > 0 
+        if(getNumInitializedClientConnections() > 0 
             && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
             setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
         }
@@ -431,12 +370,7 @@ public class ConnectionManager {
      * Returns true if this is a super node with a connection to a leaf. 
      */
     public boolean hasSupernodeClientConnection() {
-        //TODO: this is wrong.  What about outgoing supernode->client
-        //connections.  They're rare but possible.
-        if(_incomingClientConnections > 0)
-            return true;
-        else
-            return false;
+        return getNumInitializedClientConnections() > 0;
     }
     
     /**
@@ -460,6 +394,14 @@ public class ConnectionManager {
      */
     private int getNumInitializedConnections() {
 		return _initializedConnections.size();
+    }
+    
+    /**
+     * @return the number of initializedclient connections, which is less than
+     * or equals to the number of connections.  
+     */
+    private int getNumInitializedClientConnections() {
+		return _initializedClientConnections.size();
     }
 
 	/**
@@ -588,7 +530,7 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             int shieldedMax=
                 SettingsManager.instance().getMaxShieldedClientConnections();
-            return _incomingClientConnections < shieldedMax;
+            return getNumInitializedClientConnections() < shieldedMax;
         } else if (isUltrapeerAware) {
             //2. Ultrapeer.  In the old days, we used to kill off old
             //connections for ultrapeers.  Now we simply don't allow extra old
@@ -650,7 +592,7 @@ public class ConnectionManager {
     public boolean supernodeNeeded(){
         //if more than 70% slots are full, return true 
         if(isSupernode() &&
-            _incomingClientConnections > 
+            getNumInitializedClientConnections() > 
             (SettingsManager.instance()
             .getMaxShieldedClientConnections() * 0.7)){
             return true;
@@ -1241,7 +1183,7 @@ public class ConnectionManager {
         //if is a supernode, and have other connections (client or ultrapeer),
         //or the supernode status is forced, dont change mode
         int connections=getNumInitializedConnections()
-                       +_initializedClientConnections.size();
+                       +getNumInitializedClientConnections();
         if (_settings.getForceSupernodeMode() 
             || (isSupernode() && connections > 0))
             return false;
