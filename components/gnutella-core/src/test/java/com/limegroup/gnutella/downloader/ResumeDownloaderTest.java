@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -62,9 +63,12 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         // this ResumeDownloader is started from the library, not from restart,
         // that is why the last param to init is false
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
-        ret.initialize(new DownloadManagerStub(), 
+        DownloadManager dm = new DownloadManagerStub();
+        dm.scheduleWaitingPump();
+        ret.initialize(dm, 
                        new FileManagerStub(), 
-                       new ActivityCallbackStub(), false);
+                       new ActivityCallbackStub());
+        ret.startDownload();
         return ret;
     }
 
@@ -105,13 +109,16 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             new ByteArrayInputStream(baos.toByteArray()));
         downloader=(ResumeDownloader)in.readObject();
         in.close();
-        downloader.initialize(new DownloadManagerStub(),
+        DownloadManager dm = new DownloadManagerStub();
+        dm.scheduleWaitingPump();
+        downloader.initialize(dm,
                               new FileManagerStub(),
-                              new ActivityCallbackStub(), true);
+                              new ActivityCallbackStub());
+        downloader.startDownload();
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_USER, downloader.getState());
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }

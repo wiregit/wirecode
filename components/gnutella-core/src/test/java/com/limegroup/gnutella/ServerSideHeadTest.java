@@ -46,8 +46,8 @@ public class ServerSideHeadTest extends BaseTestCase {
     	
 
     	ping1 = new HeadPing(FileManagerStub._notHave);
-    	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.urn));
-    	ping3 = new HeadPing(URN.createSHA1Urn(FileDescStub.urn),
+    	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
+    	ping3 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN),
     			new Endpoint("127.0.0.1",port2));
     	ping4 = new HeadPing(FileManagerStub._notHave,
     			new Endpoint("127.0.0.1",port1));

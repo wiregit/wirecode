@@ -194,7 +194,7 @@ class SimpleTimerTask implements Comparable {
     public boolean runAndReschedule() {
         try {
             _task.run();
-        } catch (Exception e) {
+        } catch (Throwable e) {
 			ErrorService.error(e);
         }
         if(_period == 0) return false;

@@ -18,12 +18,15 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 
 public class DownloadManagerStub extends DownloadManager {
-    public void initialize(
-        ActivityCallback callback, MessageRouter router,
-        Acceptor acceptor, FileManager fileManager) { }
-    public void postGuiInit(RouterService backend) { }
+    public void initialize(ActivityCallback callback, MessageRouter router,
+                           FileManager fileManager) {
+        super.initialize(callback, router, fileManager);
+        postGuiInit();
+    }
+
     public synchronized int downloadsInProgress() { return 0; }
     public synchronized boolean readSnapshot(File file) { return false; }
+    public synchronized boolean writeSnapshot() { return true; }
 
     /*
     public synchronized Downloader download(RemoteFileDesc[] files,
@@ -42,9 +45,7 @@ public class DownloadManagerStub extends DownloadManager {
     }
     public void handleQueryReply(QueryReply qr) { }
     public void acceptDownload(Socket socket) { }
-    public void waitForSlot(ManagedDownloader downloader) { }
-    public void yieldSlot(ManagedDownloader downloader) { }
-    public void remove(ManagedDownloader downloader, boolean success) { }
+    //public void remove(ManagedDownloader downloader, boolean success) { }
     public boolean sendQuery(ManagedDownloader requerier, QueryRequest query) { 
 
 		return !GUID.isLimeRequeryGUID(query.getGUID());

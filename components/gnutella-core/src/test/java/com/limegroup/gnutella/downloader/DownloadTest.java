@@ -99,7 +99,7 @@ public class DownloadTest extends BaseTestCase {
 	private static boolean REMOVED = false;
     
     // default to waiting for 2 defaults.
-    private static long DOWNLOAD_WAIT_TIME = 1000 * 6 * 2;	
+    private final static long DOWNLOAD_WAIT_TIME = 1000 * 60 * 4;	
     
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
@@ -107,6 +107,7 @@ public class DownloadTest extends BaseTestCase {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
+        dm.scheduleWaitingPump();
         RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         
         //SimpleTimer timer = new SimpleTimer(true);
@@ -131,8 +132,9 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void setUp() {
-        DOWNLOAD_WAIT_TIME = 1000 * 60 * 2;
         DOWNLOADER = null;
+        
+        dm.clearAllDownloads();
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         // Don't wait for network connections for testing
@@ -789,7 +791,7 @@ public class DownloadTest extends BaseTestCase {
     public void testThexOnlyWorksFiveTimes() throws Exception {
         LOG.debug("-Testing that thex can identify a corrupt download range" +
                   " but will only try and fix it up to 5 times.");
-        final int RATE = 500;
+        final float RATE = -1;
         uploader1.setCorruption(true);
         uploader1.setCorruptBoundary(50);
         uploader1.setMaxConnects(6);
@@ -1427,7 +1429,7 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
-        RemoteFileDesc rfd1 = newRFD(PORT_1, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd1};
         //the queued downloader will resend the query after sleeping,
         //and then it shold complete the download, because TestUploader
@@ -1533,15 +1535,12 @@ public class DownloadTest extends BaseTestCase {
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
-        //The first uploader got a range of 0-100%.  After the download receives
-        //50%, it will close the socket.  But the uploader will send some data
-        //between the time it sent byte 50% and the time it receives the FIN
-        //segment from the downloader.  Half a second latency is tolerable.  
+
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds1 = {rfd1};
         List rfds2 = new LinkedList();
         rfds2.add(rfd2);
@@ -1579,11 +1578,11 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
-        RemoteFileDesc rfd3 = newRFD(PORT_3, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
         ManagedDownloader downloader = null;        
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
@@ -1636,11 +1635,11 @@ public class DownloadTest extends BaseTestCase {
         uploader2.setRate(RATE);
         uploader2.setQueue(true);
         uploader2.unqueue = false; //never unqueue this uploader.
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
-        RemoteFileDesc rfd3 = newRFD(PORT_3, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
         ManagedDownloader downloader = null;
         
@@ -1784,9 +1783,9 @@ public class DownloadTest extends BaseTestCase {
         uploader2.unqueue = false; //never unqueue this uploader.
         uploader2.queuePos = 3;//the better one
         
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        RemoteFileDesc rfd3=newRFD(PORT_3, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100);
         
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
@@ -2094,7 +2093,7 @@ public class DownloadTest extends BaseTestCase {
             try {
                 Thread.sleep(1000);// try again after a second
             } catch(InterruptedException e) {
-                assertTrue("downloader unexpecteted interrupted",false);
+                fail("downloader unexpecteted interrupted", e);
                 return;
             }
         }

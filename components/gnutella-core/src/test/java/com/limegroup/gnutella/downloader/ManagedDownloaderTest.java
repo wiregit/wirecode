@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -23,6 +24,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.LinkedList;
@@ -31,6 +33,10 @@ import com.sun.java.util.collections.Set;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
+    private DownloadManagerStub manager;
+    private FileManager fileman;
+    private ActivityCallback callback;
+    private MessageRouter router;
 
     public ManagedDownloaderTest(String name) {
         super(name);
@@ -46,6 +52,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     
     public void setUp() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        manager = new DownloadManagerStub();
+        fileman = new FileManagerStub();
+        callback = new ActivityCallbackStub();
+        router = new MessageRouterStub();
+        manager.initialize(callback, router, fileman);
     }
 
     public void testLegacy() throws Exception {
@@ -211,10 +222,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     
     /** Tests that the progress is retained for deserialized downloaders. */
     public void testSerializedProgress() throws Exception {        
-        DownloadManager manager=new DownloadManagerStub();
-        FileManager fileman=new FileManagerStub();
-        ActivityCallback callback=new ActivityCallbackStub();
-
         IncompleteFileManager ifm=new IncompleteFileManager();
         RemoteFileDesc rfd=newRFD("some file.txt");
         File incompleteFile=ifm.getFile(rfd);
@@ -226,7 +233,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
             new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm, null);
-        downloader.initialize(manager, fileman, callback, false);
+        downloader.initialize(manager, fileman, callback);
+        manager.requestStart(downloader);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
@@ -244,7 +252,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                 new ByteArrayInputStream(baos.toByteArray()));
             downloader=(ManagedDownloader)in.readObject();
             in.close();
-            downloader.initialize(manager, fileman, callback, true);
+            downloader.initialize(manager, fileman, callback);
+            manager.requestStart(downloader);
         } catch (IOException e) {
             fail("Couldn't serialize", e);
         }
@@ -273,9 +282,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 				new ManagedDownloader(
 						new RemoteFileDesc[] {newRFD("another testfile.txt")},
                         new IncompleteFileManager(), null);
-            downloader.initialize(new DownloadManagerStub(), 
-                                  new FileManagerStub(),
-                                  new ActivityCallbackStub(), false);
+            downloader.initialize(manager, 
+                                  fileman,
+                                  callback);
+            manager.requestStart(downloader);
             //Wait for it to download until error, need to wait 
             Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
@@ -286,12 +296,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                          Downloader.WAITING_FOR_USER, 
                          downloader.getState());
             //Hit resume, make sure progress not erased.
-            try { 
-                downloader.resume(); 
-            } catch (AlreadyDownloadingException e) {
-                fail("No other downloads!", e);
-            }
-            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            downloader.resume(); 
+            try { Thread.sleep(2000); } catch (InterruptedException e) { }
             // you would think we'd expect wating for results here, but instead
             // we will wait for connections (since we have no one to query)
             assertEquals(Downloader.WAITING_FOR_CONNECTIONS, 

@@ -60,7 +60,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-    }      
+    }
     
     private static void doSettings() {
         TIMEOUT = 3000;
@@ -815,8 +815,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                         gotPing = ((PingRequest) m).isQueryKeyRequest();
                 }
                 catch (InterruptedIOException iioe) {
-                    assertTrue("was successful for " + i,
-                               false);
+                    fail("was successful for " + i, iioe);
                 }
             }
         }
@@ -824,8 +823,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         //Thread.sleep((UDP_ACCESS.length * 1000) - 
                      //(System.currentTimeMillis() - currTime));
 
-        Thread.sleep(1000);
-
+        Thread.sleep(5000);
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
@@ -933,20 +931,15 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             boolean gotPing = false;
             while (!gotPing) {
-                try {
-                    byte[] datagramBytes = new byte[1000];
-                    pack = new DatagramPacket(datagramBytes, 1000);
-                    UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
-                    UDP_ACCESS[0].receive(pack);
-                    InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = Message.read(in);
-                    m.hop();
-                    if (m instanceof PingRequest)
-                        gotPing = ((PingRequest) m).isQueryKeyRequest();
-                }
-                catch (InterruptedIOException iioe) {
-                    assertTrue(false);
-                }
+                byte[] datagramBytes = new byte[1000];
+                pack = new DatagramPacket(datagramBytes, 1000);
+                UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
+                UDP_ACCESS[0].receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                m = Message.read(in);
+                m.hop();
+                if (m instanceof PingRequest)
+                    gotPing = ((PingRequest) m).isQueryKeyRequest();
             }
         }
 
@@ -983,28 +976,23 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         { // confirm a URN query
             boolean gotQuery = false;
             while (!gotQuery) {
-                try {
-                    byte[] datagramBytes = new byte[1000];
-                    pack = new DatagramPacket(datagramBytes, 1000);
-                    UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
-                    UDP_ACCESS[0].receive(pack);
-                    InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = Message.read(in);
-                    if (m instanceof QueryRequest) {
-                        QueryRequest qReq = (QueryRequest) m;
-                        Set queryURNs = qReq.getQueryUrns();
-                        gotQuery = queryURNs.contains(urn);
-                        if (gotQuery)
-                            gotQuery = qk.equals(qReq.getQueryKey());
-                    }
-                }
-                catch (InterruptedIOException iioe) {
-                    assertTrue(false);
+                byte[] datagramBytes = new byte[1000];
+                pack = new DatagramPacket(datagramBytes, 1000);
+                UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
+                UDP_ACCESS[0].receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                m = Message.read(in);
+                if (m instanceof QueryRequest) {
+                    QueryRequest qReq = (QueryRequest) m;
+                    Set queryURNs = qReq.getQueryUrns();
+                    gotQuery = queryURNs.contains(urn);
+                    if (gotQuery)
+                        gotQuery = qk.equals(qReq.getQueryKey());
                 }
             }
         }
 
-        long timeoutVal = 1000 - (System.currentTimeMillis() - currTime);
+        long timeoutVal = 5000 - (System.currentTimeMillis() - currTime);
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
         // purge front end of query

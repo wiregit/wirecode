@@ -28,6 +28,10 @@ import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
+import java.util.StringTokenizer;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.LinkedList;
+
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     protected static File _baseDir;
@@ -79,8 +83,14 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         String method = System.getProperty("junit.test.method");
         if(method != null) {
             method = method.trim();
-            if(!"".equals(method) && !"${method}".equals(method))
-                return buildTestSuite(cls, method);
+            if(!"".equals(method) && !"${method}".equals(method)) {
+                StringTokenizer st = new StringTokenizer(method, ",");
+                List l = new LinkedList();
+                while(st.hasMoreTokens())
+                    l.add(st.nextToken());
+                String[] tests = (String[])l.toArray(new String[l.size()]);
+                return buildTestSuite(cls, tests);
+            }
         }
 
         return new LimeTestSuite(cls);

@@ -33,7 +33,7 @@ import org.apache.commons.logging.Log;
  * swarmed downloads, the ability to download copies of the same file from
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
- * Subclasses may refine the requery behavior by overriding the nextRequeryTime,
+ * Subclasses may refine the requery behavior by overriding the 
  * newRequery(n), allowAddition(..), and addDownload(..)  methods.
  * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
  * default locations, and the getFileName() method to specify the completed
@@ -60,8 +60,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       capacity of the fastest uploader.
 
       The ideal way of identifying duplicate copies of a file is to use hashes
-      via the HUGE proposal.  Until that is more widely adopted, LimeWire
-      considers two files with the same name and file size to be duplicates.
+      via the HUGE proposal.
 
       When discussing swarmed downloads, it's useful to divide parts of a file
       into three categories: black, grey, and white. Black regions have already
@@ -121,10 +120,64 @@ public class ManagedDownloader implements Downloader, Serializable {
                                       |
                            HTTPDownloader.connectHTTP
 
-      tryAllDownloads waits for retries.
+      DownloadManager notifies a ManagedDownloader when it should start
+      tryAllDownloads.  An inactive download (waiting for a busy host,
+      waiting for a user to requery, waiting for GUESS responses, etc..)
+      is essentially a state-machine, pumped forward by DownloadManager.
+      The 'master thread' of a ManagedDownloader is recreated every time
+      DownloadManager moves the download from inactive to active.
+      
       The core downloading loop is done by tryAllDownloads3.
       connectAndDownload (which is started asynchronously in tryAllDownloads3),
       does the three step ennumerated above.
+            
+      All downloads start QUEUED.
+      From there, it will stay queued until a slot is available.
+      
+      If atleast one host is available to download from, then the
+      first state is always CONNECTING.
+          After connecting, a downloader can become:
+          a) DOWNLOADING (actively downloading)
+          b) WAITING_FOR_RETRY (busy hosts)
+          c) ABORTED (user manually stopped the download)
+          d) REMOTE_QUEUED (the remote host queued us)
+      
+      If no hosts existed for connecting, or we exhausted our attempts
+      at connecting to all possible hosts, the state will become one of:
+          e) GAVE_UP (maxxed out on requeries)
+          f) WAITING_FOR_USER (waiting for the user to initiate a requery)
+          g) ITERATIVE_GUESSING (targetted location of more sources)
+      If the user resumes the download and we were WAITING_FOR_USER, a requery
+      is sent out and we go into WAITING_FOR_RESULTS stage.  After we have
+      finished waiting for results (if none arrived), we will either go back to
+      WAITING_FOR_USER (if we are allowed more requeries), or GAVE_UP (if we 
+      maxxed out the requeries).
+      After ITERATIVE_GUESSING completes, if no results arrived then we go to 
+      WAITING_FOR_USER.  Prior to WAITING_FOR_RESULTS, if no connections are
+      active then we wait at WAITING_FOR_CONNECTIONS until connections exist.
+      
+      If more results come in while waiting in these states, the download will
+      either immediately become active (CONNECTING ...) again, or change its
+      state to QUEUED and wait for DownloadManager to activate it.
+      
+      The download can finish in one of the following states:
+          h) COMPLETE (download completed just fine)
+          i) ABORTED  (user pressed stopped at some point)
+          j) COULDNT_MOVE_TO_LIBRARY (limewire couldn't the file)
+          k) CORRUPT_FILE (the file was corrupt)
+
+     There are a few intermediary states:
+          l) HASHING
+          m) SAVING
+          n) IDENTIFY_CORRUPTION
+          o) RECOVERY_FAILED
+     HASHING & SAVING are seen by the GUI, and are used just prior to COMPLETE,
+     to let the user know what is currently happening in the closing states of
+     the download.  IDENTIFY_CORRUPTION is used if SHA1 hash checks failed
+     and a TigerTree exists, to identify precisely which parts of the file are
+     corrupt.  RECOVERY_FAILED is used as an indicator that we no longer want
+     to retry the download, because we've tried and recovered from corruption
+     too many times.
 
       Currently the desired parallelism is fixed at 2 for modem users, 6
       for cable/T1/DSL, and 8 for T3 and above.
@@ -216,15 +269,32 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
 
-    /** The time to wait between requeries, in milliseconds.  This time can
-     *  safely be quite small because it is overridden by the global limit in
-     *  DownloadManager.  Package-access and non-final for testing.
-     *  @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
+    /**
+     * The time to wait between requeries, in milliseconds.  This time can
+     * safely be quite small because it is overridden by the global limit in
+     * DownloadManager.  Package-access and non-final for testing.
+     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
     static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
-    /** The number of times to requery the network. All requeries are
-     *  user-driven.
+    
+    /**
+     * How long we'll wait after sending a GUESS query before we try something
+     * else.
+     */
+    private static final int GUESS_WAIT_TIME = 5000;
+    
+    /**
+     * How long we'll wait before attempting to download again after checking
+     * for stable connections (and not seeing any)
+     */
+    private static final int CONNECTING_WAIT_TIME = 750;
+    
+    /**
+     * The number of times to requery the network. All requeries are
+     * user-driven.
      */
     private static final int REQUERY_ATTEMPTS = 1;
+    
+
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
     
@@ -292,7 +362,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Otherwise null. */
     private Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
-    private boolean stopped;
+    private volatile boolean stopped;
 
     
     /** The connections we're using for the current attempts. */    
@@ -368,9 +438,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Integer.MAX_VALUE if we don't know. Should be modified only through
      *  setState. */
     private long stateTime;
-    /** If in the wait state, the number of retries we're waiting for.
-     *  Otherwise undefined. */
-    private int retriesWaiting;
+    
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
@@ -394,13 +462,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
      *  no corrupt file. */
     private volatile File corruptFile;
-    /** Lock used to communicate between addDownload and tryAllDownloads, and
-     *  pauseForRequery and resume.
-     *  The RequeryLock is only meant for one producer and consumer.  The code
-     *  may it look like there are multiple producers and consumers, but if you
-     *  follow the code flow you'll see that there is only one of each.
-     */
-    private RequeryLock reqLock = new RequeryLock();
 
 	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
@@ -466,6 +527,34 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The GUID of the original query.  may be null.
      */
     private final GUID originalQueryGUID;
+    
+    /**
+     * Whether or not this was deserialized from disk.
+     */
+    protected boolean deserializedFromDisk;
+    
+    /**
+     * The number of queries already done for this downloader.
+     * Influenced by the type of downloader & whether or not it was started
+     * from disk or from scratch.
+     */
+    private int numQueries;
+    
+    /**
+     * Whether or not we've sent a GUESS query.
+     */
+    private boolean triedLocatingSources;
+    
+    /**
+     * Whether or not we've gotten new files since the last time this download
+     * started.
+     */
+    private volatile boolean receivedNewSources;
+    
+    /**
+     * The time the last query was sent out.
+     */
+    private long lastQuerySent;
 
 
     /**
@@ -489,6 +578,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.allFiles = files;
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
+        this.deserializedFromDisk = false;
     }
 
     /** 
@@ -517,18 +607,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * BandwidthTrackerImpl after reading from the stream
      */
     private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {        
+            throws IOException, ClassNotFoundException {
+        deserializedFromDisk = true;
+
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
 		//Old versions used to read BandwidthTrackerImpl here.  Now we just use
 		//one as a place holder.
         stream.readObject();
-
-        //The following is needed to prevent NullPointerException when reading
-        //serialized object from disk. This can't be done in the constructor or
-        //initializer statements, as they're not executed.  Nor should it be
-        //done in initialize, as that could cause problems in resume().
-        reqLock=new RequeryLock();
     }
 
     /** 
@@ -543,8 +629,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * being read from disk, false otherwise.
      */
     public void initialize(DownloadManager manager, FileManager fileManager, 
-                           ActivityCallback callback, 
-                           final boolean deserialized) {
+                           ActivityCallback callback) {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
@@ -564,6 +649,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         altLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
+        queuePosition = "";
+        queuedVendor = "";
+        triedLocatingSources = false;
         // get the SHA1 if we can.
         if(allFiles != null) {
             for(int i = 0; i < allFiles.length && sha1 == null; i++)
@@ -574,26 +662,236 @@ public class ManagedDownloader implements Downloader, Serializable {
         // stores up to 10 locations for up to 10 minutes
         recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
         synchronized (this) {
-            if(shouldInitAltLocs(deserialized)) {
+            if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
             }
         }
-        this.dloaderManagerThread=new ManagedThread("ManagedDownload") {
+        setState(QUEUED);
+    }
+    
+    /**
+     * Starts the download.
+     */
+    public void startDownload() {
+        dloaderManagerThread = new ManagedThread("ManagedDownload") {
             public void managedRun() {
-                try { 
-                    tryAllDownloads(deserialized);
-                } catch (Throwable e) {
-                    //This is a "firewall" for reporting unhandled errors.  We
-                    //don't really try to recover at this point, but we do
-                    //attempt to display the error in the GUI for debugging
-                    //purposes.
-                    ErrorService.error(e);
+                try {
+                    receivedNewSources = false;
+                    tryAllDownloads();
+                    completeDownload();
+                } catch(Throwable t) {
+                    // if any unhandled errors occurred, remove this
+                    // download completely and message the error.
+                    manager.remove(ManagedDownloader.this, true);
+                    ErrorService.error(t);
+                } finally {
+                    dloaderManagerThread = null;
                 }
             }
         };
         dloaderManagerThread.setDaemon(true);
         dloaderManagerThread.start();       
     }
+    
+    /**
+     * Completes the download process, possibly sending off requeries
+     * that may later restart it.
+     *
+     * This essentially pumps the state of the download to different
+     * areas, depending on what is required or what has already occurred.
+     */
+    private void completeDownload() {
+        boolean complete = isCompleted();
+        long now = System.currentTimeMillis();
+
+        // Notify the manager that this download is done.
+        manager.remove(this, complete);
+
+        if(LOG.isTraceEnabled())
+            LOG.trace("MD completing <" + getFileName() + 
+                      "> completed download, state: " +
+                      getState() + ", numQueries: " + numQueries +
+                      ", lastQuerySent: " + lastQuerySent);
+
+        // if this is all completed, nothing else to do.
+        if(complete)
+            ; // all done.
+
+        // Try iterative GUESSing...
+        // If that sent some queries, don't do anything else.
+        else if(tryGUESSing())
+            ; // all done for now.
+
+       // If busy, try waiting for that busy host.
+        else if (getState() == WAITING_FOR_RETRY)
+            setState(WAITING_FOR_RETRY, calculateWaitTime());
+        
+        // If we sent a query recently, then we don't want to send another,
+        // nor do we want to give up.  Just continue waiting for results
+        // from that query.
+        else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES)
+            setState(WAITING_FOR_RESULTS,
+                     TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
+            
+        // If we're at our requery limit, give up.
+        else if( numQueries >= REQUERY_ATTEMPTS )
+            setState(GAVE_UP);
+            
+        // If we want to send the requery immediately, do so.
+        else if(shouldSendRequeryImmediately(numQueries))
+            sendRequery();
+            
+        // Otherwise, wait for the user to initiate the query.            
+        else
+            setState(WAITING_FOR_USER);
+        
+        if(LOG.isTraceEnabled())
+            LOG.trace("MD completed <" + getFileName() +
+                      "> completed download, state: " + 
+                      getState() + ", numQueries: " + numQueries);
+    }
+    
+    /**
+     * Attempts to send a requery.
+     */
+    private void sendRequery() {
+        // If we don't have stable connections, wait until we do.
+        if(!hasStableConnections()) {
+            lastQuerySent = -1; // mark as wanting to requery.
+            setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
+        } else {
+            try {
+                if(manager.sendQuery(this, newRequery(numQueries))) {
+                    lastQuerySent = System.currentTimeMillis();
+                    numQueries++;
+                    setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                } else {
+                    lastQuerySent = -1; // mark as wanting to requery.
+                }
+            } catch(CantResumeException cre) {
+                // oh well.
+            }
+        }
+    }
+    
+    /**
+     * Handles state changes when inactive.
+     */
+    public void handleInactivity() {
+        if(LOG.isTraceEnabled())
+            LOG.trace("handling inactivity. state: " + 
+                      getState() + ", hasnew: " + hasNewSources() + 
+                      ", left: " + getRemainingStateTime());
+        
+        switch(getState()) {
+        case WAITING_FOR_RETRY:
+        case WAITING_FOR_CONNECTIONS:
+        case ITERATIVE_GUESSING:
+            // If we're finished waiting on busy hosts,
+            // stable connections, or GUESSing,
+            // but we're still inactive, then we queue ourselves
+            // and wait till we get restarted.
+            if(getRemainingStateTime() <= 0)
+                setState(QUEUED);
+            break;
+        case WAITING_FOR_RESULTS:
+            // If we have new sources but are still inactive,
+            // then queue ourselves and wait to restart.
+            if(hasNewSources())
+                setState(QUEUED);
+            // Otherwise, we've ran out of time waiting for results,
+            // so give up.
+            else if(getRemainingStateTime() <= 0)
+                setState(GAVE_UP);
+            break;
+        case WAITING_FOR_USER:
+        case GAVE_UP:
+        case QUEUED:
+            // If we're waiting for the user to do something,
+            // have given up, or are queued, there's nothing to do.
+            break;
+        default:
+            Assert.that(false, "invalid state: " + getState());
+        }
+    }   
+    
+    /**
+     * Tries iterative GUESSing of sources.
+     */
+    private boolean tryGUESSing() {
+        if(originalQueryGUID == null || triedLocatingSources || sha1 == null)
+            return false;
+            
+        MessageRouter mr = RouterService.getMessageRouter();
+        Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
+        if(guessLocs == null || guessLocs.isEmpty())
+            return false;
+
+        setState(ITERATIVE_GUESSING, GUESS_WAIT_TIME);
+        triedLocatingSources = true;
+
+        //TODO: should we increment a stat to get a sense of
+        //how much this is happening?
+        for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
+            // send a guess query
+            GUESSEndpoint ep = (GUESSEndpoint) i.next();
+            OnDemandUnicaster.query(ep, sha1);
+            // TODO: see if/how we can wait 750 seconds PER send again.
+            // if we got a result, no need to continue GUESSing.
+            if(receivedNewSources)
+                break;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Determines if this is in a 'completed' state.
+     */
+    private boolean isCompleted() {
+        switch(getState()) {
+        case COMPLETE:
+        case ABORTED:
+        case COULDNT_MOVE_TO_LIBRARY:
+        case CORRUPT_FILE:
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Determines if this is in an 'active' downloading state.
+     */
+    private boolean isActive() {
+        switch(getState()) {
+        case CONNECTING:
+        case DOWNLOADING:
+        case REMOTE_QUEUED:
+        case HASHING:
+        case SAVING:
+        case IDENTIFY_CORRUPTION:
+        case RECOVERY_FAILED:
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Determines if this is in an 'inactive' state.
+     */
+    private boolean isInactive() {
+        switch(getState()) {
+        case QUEUED:
+        case GAVE_UP:
+        case WAITING_FOR_RESULTS:
+        case WAITING_FOR_USER:
+        case WAITING_FOR_CONNECTIONS:
+        case ITERATIVE_GUESSING:
+        case WAITING_FOR_RETRY:
+            return true;
+        }
+        return false;
+    }   
     
     /**
      * Initialize files wrt allFiles.
@@ -702,12 +1000,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * override this to be more or less specific.  Note that the requery will
      * not be sent if global limits are exceeded.<p>
      *
-     * The default implementation includes all non-trivial keywords found in all
-     * RemoteFileDesc's in this, i.e., the INTERSECTION of all file names.  A
-     * keyword is "non-trivial" if it is not a number of a common English
-     * article (e.g., "the"), a number (e.g., "2"), or the file extension.  The
-     * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
-     * of all hashes.
+     * The default implementation uses extractQueryString, which
+     * includes all non-trivial keywords found in the first RFD in allFiles.
+     * A keyword is "non-trivial" if it is not a number of a common English
+     * article (e.g., "the"), a number (e.g., "2"), or the file extension.
      *
      * Since there are no more AUTOMATIC requeries, subclasses are advised to
      * stop using createRequery(...).  All attempts to 'requery' the network is
@@ -720,63 +1016,28 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @exception CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
      */
-    protected synchronized QueryRequest newRequery(int numRequeries) 
+    protected synchronized QueryRequest newRequery(int numRequeries)
 		throws CantResumeException {
-        if (allFiles.length<0)                  //TODO: what filename?
-            throw new CantResumeException("");  //      maybe another exception?
-
-		if(allFiles[0].getSHA1Urn() == null) {
+		    
+		if(allFiles[0].getSHA1Urn() == null)
 			return QueryRequest.createQuery(extractQueryString());
-		}
-        return QueryRequest.createQuery(extractQueryString());
-    }
-
-    /** We need to offer this to subclasses to override because they might
-     *  have specific behavior when deserialized from disk.  for example,
-     *  RequeryDowloader should return a count of 0 upon deserialization, but 1
-     *  if started from scratch.
-     */
-    protected int getQueryCount(boolean deserializedFromDisk) {
-        // MDs, whether started from scratch or from disk, always
-        // start with 0 query attempts.  subclasses should override as
-        // necessary
-        return 0; 
+        else // this is where a SHA1 query would be sent, if desired
+            return QueryRequest.createQuery(extractQueryString());
     }
 
 
     /**
-     * This dictates whether this downloader should wait for user input before
-     * spawning a Requery.  Subclasses should override with desired behavior as
-     * necessary.
-     * @return true if we the pause was broken because of new results.  false
-     * if the user woke us up.
-     * @param numRequeries The number of requeries sent so far.
-     * @param deserializedFromDisk If the downloader was deserialized from a 
-     * snapshot.  May be useful for subclasses.
+     * Determines if we should send a requery immediately, or wait for user
+     * input.
+     *
+     * 'lastQuerySent' being equal to -1 indicates that the user has already
+     * clicked resume, so we do want to send immediately.
      */
-    protected boolean pauseForRequery(int numRequeries, 
-                                      boolean deserializedFromDisk) 
-        throws InterruptedException {
-        // if you've sent too many requeries jump out immediately....
-        if (numRequeries >= REQUERY_ATTEMPTS)
+    protected boolean shouldSendRequeryImmediately(int numRequeries) {
+        if(lastQuerySent == -1)
+            return true;
+        else
             return false;
-        // MD's never want to requery without user input.
-        boolean retVal = false;
-        synchronized (reqLock) {
-            setState(WAITING_FOR_USER);
-            try {
-                retVal = reqLock.lock(0);  // wait indefinitely
-            }
-            catch (InterruptedException stopException) {
-                // must have been killed!!
-                if (!stopped)
-                    ErrorService.error(stopException);
-                else
-                    throw stopException;
-            }
-            // state will be set by tryAllDownloads()
-        }
-        return retVal;
     }
 
     /** Subclasses should override this method when necessary.
@@ -1006,14 +1267,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * NOT added to allFiles, but IS added the list of RFDs to connect to
      * if and only if a matching RFD is not currently in that list.
      *
-     * If the file is ultimately added to the list, either reqLock is released
-     * or this is notified.
-     *
      * This ALWAYS returns true, because the download is either allowed
      * or silently ignored (because we're already downloading or going to
      * attempt to download from the host described in the RFD).
      */
-    protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
+    protected synchronized final boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
         rfd.setDownloading(true);
         if(sha1 == null)
@@ -1022,7 +1280,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
             return true;
-        
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, we must still add it to files if it didn't already exist
         // there.
@@ -1060,13 +1317,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( added ) {
             if(LOG.isTraceEnabled())
                 LOG.trace("added rfd: " + rfd);
-            if ((state==Downloader.WAITING_FOR_RETRY) ||
-                (state==Downloader.WAITING_FOR_RESULTS) || 
-                (state==Downloader.GAVE_UP) || 
-                (state==Downloader.WAITING_FOR_USER))
-                reqLock.releaseDueToNewResults();
-            else
+            if(isInactive() || dloaderManagerThread == null) {
+                LOG.trace("inactive, marking as new source");
+                receivedNewSources = true;
+            } else {
                 this.notify();                      //see tryAllDownloads3
+            }
+            // we could manager.requestStart, but that is synchronized on
+            // manager and we can't grab that lock if we're synchronized on
+            // this.  since we can't guarantee we won't be holding this' lock,
+            // we leave it up to manager to start us off if we have new sources
         }
         
         return true;
@@ -1078,6 +1338,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( files != null && files.contains(rfd))
             return false;
         return true;
+    }
+    
+    /**
+     * Returns true if we have received more possible source since the last
+     * time we went inactive.
+     */
+    public boolean hasNewSources() {
+        return receivedNewSources;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1106,7 +1374,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
 
-    public synchronized void stop() {
+    public void stop() {
         // make redundant calls to stop() fast
         // this change is pretty safe because stopped is only set in two
         // places - initialized and here.  so long as this is true, we know
@@ -1118,27 +1386,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;
-        //This guarantees any downloads in progress will be killed.  New
-        //downloads will not start because of the flag above. Note that this
-        //does not kill downloaders that are queued...
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
-            ((HTTPDownloader)iter.next()).stop();			
+        
+        // Tell the manager to remove us if we're inactive.
+        // The "if waiting" part may be an optimization, since I don't think
+        // anything bad will occur if a download is removed multiple times,
+        // but it is safest to only remove if we know it's not going to
+        // remove shortly.
+        // This call MUST be outside this' lock, else deadlock could occur.
+        manager.removeIfWaiting(this);
+        
+        synchronized(this) {
+            //This guarantees any downloads in progress will be killed.  New
+            //downloads will not start because of the flag above. Note that this
+            //does not kill downloaders that are queued...
+            for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
+                ((HTTPDownloader)iter.next()).stop();			
+    
+            //...so we interrupt all threads - see connectAndDownload.
+            //This is safe because worker threads can be waiting for a push 
+            //or to requeury, or sleeping while queued. In every case its OK to 
+            //interrupt the thread
+            for(Iterator iter=threads.iterator(); iter.hasNext(); )
+                ((Thread)iter.next()).interrupt();
 
-        //...so we interrupt all threads - see connectAndDownload.
-        //This is safe because worker threads can be waiting for a push 
-        //or to requeury, or sleeping while queued. In every case its OK to 
-        //interrupt the thread
-        for(Iterator iter=threads.iterator(); iter.hasNext(); )
-            ((Thread)iter.next()).interrupt();
-            
-
-        //Interrupt thread if waiting to retry.  This is actually just an
-        //optimization since the thread will terminate upon exiting wait.  In
-        //fact, this may not do anything at all if the thread is just about to
-        //enter the wait!  Still this is nice in case the thread is waiting for
-        //a long time.
-        if (dloaderManagerThread!=null)
-            dloaderManagerThread.interrupt();
+            if(dloaderManagerThread != null)
+                dloaderManagerThread.interrupt();
+        }
     }
 
     /**
@@ -1233,48 +1506,28 @@ public class ManagedDownloader implements Downloader, Serializable {
         } 
     }
 
-    public boolean resume() throws AlreadyDownloadingException {
-        //Ignore request if already in the download cycle.
-        synchronized (this) {
-            if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-                   state==ABORTED || state==WAITING_FOR_USER))
+    /**
+     * Requests this download to resume.
+     *
+     * If the download is not inactive, this does nothing.
+     * If the downloader was waiting for the user, a requery is sent.
+     */
+    public boolean resume() {
+        synchronized(this) {
+            //Ignore request if already in the download cycle.
+            if (!isInactive())
                 return false;
+    
+            // if we were waiting for the user to start us, then try to send the
+            // requery.
+            if(getState() == WAITING_FOR_USER)
+                sendRequery();
         }
-
-        //Sometimes a resume can cause a conflict.  So we check.  Do not hold
-        //this' lock during this step, as that can cause deadlock.  There is a
-        //small chance that a conflicting file could be added to this after the
-        //check.
-        String conflict=this.manager.conflicts(allFiles, this);
-        if (conflict!=null)
-            throw new AlreadyDownloadingException(conflict);        
-
-        //Do actual download.
-        synchronized (this) {
-            if (state==GAVE_UP || state==ABORTED) {
-                if ((state==GAVE_UP) &&
-                    (dloaderManagerThread!=null) && 
-                    (dloaderManagerThread.isAlive())) {
-                    // if the dloaderManagerThread is simply waiting on reqLock,
-                    // then just release him.  calling initialize will 'do the 
-                    // right thing' but will cause a memory leak due to threads
-                    // not being cleaned up.  Alternatively, we could have
-                    // called stop() and then initialize.
-                    reqLock.releaseDueToNewResults();
-                } else
-                    //This stopped because all hosts were tried.  (Note that
-                    //this couldn't have been user aborted.)  Therefore no
-                    //threads are running in this and it may be safely resumed.
-                    initialize(this.manager, this.fileManager, this.callback, 
-                               false);
-            } else if (state==WAITING_FOR_RETRY) {
-                //Interrupt any waits.
-                if (dloaderManagerThread!=null)
-                    dloaderManagerThread.interrupt();
-            } else if (state==WAITING_FOR_USER) 
-                reqLock.releaseDueToRequery();
-            return true;
-        }
+        
+        // Notify the manager that we want to resume.
+        // It will start us if we're allowed to start.
+        manager.requestStart(this);
+        return true;
     }
     
     /**
@@ -1355,29 +1608,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     //////////////////////////// Core Downloading Logic /////////////////////
 
     /**
-     * This method is called when
-     * 1) all downloads sources failed
-     * 2) there are no busy hosts
-     * 3) there is no room for a requery
-     * Subclasses should override this method if they want to enforce special
-     * behavior before going to the GAVE_UP state.
-     * NOTE: Only the following states are can be preemptively woken up due to
-     * new results - WAITING_FOR_RETRY, WAITING_FOR_RESULTS, and GAVE_UP.
-     * @return two longs - long[0] is the state the downloader should go in.
-     * long[1] is the time the downloader should spend in state long[0].  if
-     * long[1] < 1, this return value is ignored.
-     * @param deserialized true if this downloader was initialized from disk, 
-     * false if it is brand new.
-     * @param timeSpentWaiting the millisecond time that the downloader has 
-     * spent in the failed state.
-     */
-    protected long[] getFailedState(boolean deserialized, 
-                                   long timeSpentWaiting) {
-        // no special states
-        return new long[2];
-    }
-    
-    /**
      * Cleans up information before this downloader is removed from memory.
      */
     public synchronized void finish() {
@@ -1397,238 +1627,63 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param deserialized True if this downloader was deserialized from disk,
      * false if it was newly constructed.
      */
-    protected void tryAllDownloads(final boolean deserializedFromDisk) {     
-        // the number of queries i've done for this downloader - this is
-        // influenced by the type of downloader i am and if i was started from
-        // disk or from scratch
-        int numQueries = getQueryCount(deserializedFromDisk);
-        // set this up in case you need to wait for results.  we'll always wait
-        // TIME_BETWEEN_REQUERIES long after a query
-        long timeQuerySent = System.currentTimeMillis();
-        // the amount of time i've spent waiting for results or any other
-        // special state as dictated by subclasses (getFailedState)
-        long timeSpentWaiting = 0;
-        // only query GUESS sources once
-        boolean triedLocatingSources = false;
-
-        //While not success and still busy...
-        while (true) {
-            try {
-                setState(QUEUED);  
-                queuePosition="";//initialize
-                queuedVendor="";//initialize
-                LOG.trace("Waiting for slot");
-                manager.waitForSlot(this);
-                LOG.trace("Got slot");
-                boolean waitForRetry=false;
-                initializeFiles();
-                if(files.size() > 0) {
-                    try {
-                        if(checkHosts()) {//files is global
-                            setState(GAVE_UP);
-                            return;
-                        }
-                        int status=tryAllDownloads2();
-                        if (status==COMPLETE) {
-                            //Success!
-                            setState(COMPLETE);
-                            manager.remove(this, true);
-                            return;
-                        } else if (status==COULDNT_MOVE_TO_LIBRARY) {
-                            setState(COULDNT_MOVE_TO_LIBRARY);
-                            manager.remove(this, false);
-                            return;
-                        } else if (status==CORRUPT_FILE) {
-                            setState(CORRUPT_FILE);
-                            manager.remove(this, false);
-                            return;
-                        } else if (status==WAITING_FOR_RETRY) {
-                            waitForRetry=true;
-                        } else {
-                            Assert.that(status==GAVE_UP,
-                                        "Bad status from tad2: "+status);
-                        }
-                    } catch (InterruptedException e) {
-                        //check that each waitForSlot is paired with yieldSlot,
-                        //unless we're aborting
-                        if (!stopped)
-                            ErrorService.error(e);
-                    }
-                }
-                manager.yieldSlot(this);
-                if (stopped) {
-                    setState(ABORTED);
-                    manager.remove(this, false);
-                    return;
-                }
-
-                // sanity checks
-                Assert.that(getState() != GAVE_UP);
-                Assert.that(getState() != COMPLETE);
-                Assert.that(getState() != COULDNT_MOVE_TO_LIBRARY);
-                Assert.that(getState() != CORRUPT_FILE);
-                
-                // try to do iterative guessing here
-                if ((this.originalQueryGUID != null) && !triedLocatingSources) { 
-                    MessageRouter mr = RouterService.getMessageRouter();
-                    Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
-                    
-                    if ((guessLocs != null) && !guessLocs.isEmpty()) {
-                        setState(ITERATIVE_GUESSING);
-                        triedLocatingSources = true;
-                        boolean areThereNewResults = false;
-                        //TODO: should we increment a stat to get a sense of
-                        //how much this is happening?
-                        for (Iterator i = guessLocs.iterator(); 
-                             (sha1 != null) && i.hasNext() ; ) {
-                            // send a guess query
-                            GUESSEndpoint ep = (GUESSEndpoint) i.next();
-                            OnDemandUnicaster.query(ep, sha1);
-                            // wait a while for a result
-                            if (!areThereNewResults)
-                                areThereNewResults = reqLock.lock(750);
-                            // else don't wait at all, we want to process that
-                            // new result(s) ASAP
-                        }
-                        if (areThereNewResults)
-                            continue;
-                    }
-                }
-
-                if (stopped) {
-                    setState(ABORTED);
-                    manager.remove(this, false);
-                    return;
-                }
-
-                final long currTime = System.currentTimeMillis();
-
-                // FLOW:
-                // 1.  If there is a retry to try (at least 1), then sleep for
-                // the time you should sleep to wait for busy hosts.  Also do
-                // some counting to let the GUI know how many guys you are
-                // waiting on.  Be sure to use the RequestLock, so then you can
-                // be waken up early to service a new QR
-                // 2. If there is no retry, then we have the following options:
-                //    A.  If you are waiting for results, set up the GUI
-                //        correctly.  You know if you are waiting if
-                //        numQueries is positive and we still have to wait.
-                //    B.  Else, stall the download and see if the user ever
-                //        wants to relaunch the query.  Note that the stalled
-                //        download could be resumed because relevant results
-                //        came in (they were later than TIME_BETWEEN_REQUERIES)
-                //    C.  Else, see if the subclass has any special 'give up'
-                //        instructions, else just give up and wait passively
-                //        for results
-
-                // 1.
-                if (waitForRetry) {
-                    synchronized (this) {
-                        retriesWaiting = files.size();
-                    }
-                    long time=calculateWaitTime();
-                    setState(WAITING_FOR_RETRY, time);
-                    // wait for a retry, but if you get a new result in earlier
-                    // feel free to wake up early and try it....
-                    reqLock.lock(time); 
-                } 
-                // 2.
-                else {
-                    
-                    boolean areThereNewResults = false;
-                    final long timeToWait = TIME_BETWEEN_REQUERIES - 
-                        (System.currentTimeMillis() - timeQuerySent);
-                    // 2A) we've sent a requery and never received results, 
-                    // so wait for results...
-                    if ((numQueries > 0) && (timeToWait > 0)) {
-                        setState(WAITING_FOR_RESULTS, timeToWait);
-                        areThereNewResults = reqLock.lock(timeToWait);
-                    }
-
-                    if (!areThereNewResults) {
-                        // 2B) should we wait for the user to respawn a query?
-                        // pauseForRequery delegates to subclasses when
-                        // necessary, it returns if it was woken up due to new
-                        // results.  so if new results, go up top and try and
-                        // get them, else the user woke us up so send another
-                        // query
-                        if (pauseForRequery(numQueries, deserializedFromDisk)) 
-                            continue;
-                        if (numQueries < REQUERY_ATTEMPTS) {
-                            waitForStableConnections();
-                            // yeah, it is about time & i've not sent too many...
-                            try {
-                                if (manager.sendQuery(this, 
-                                                      newRequery(numQueries)))
-                                    numQueries++;
-                                // reset wait time for results
-                                timeQuerySent = System.currentTimeMillis();
-                            } catch (CantResumeException ignore) { }
-                        }
-                        else {
-                            // 2C) delegate to subclasses and follow
-                            // instructions, or just 'give up' and wait for
-                            // results.
-                            // first delegate to subclass - see if we should set
-                            // the state and or wait for a certain amount of time
-                            long[] instructions = 
-                                getFailedState(deserializedFromDisk, 
-                                               timeSpentWaiting);
-                            // if the subclass has told me to do some special
-                            // waiting
-                            if (instructions[1] > 0) {
-                                setState((int) instructions[0], instructions[1]);
-                                reqLock.lock(instructions[1]);
-                                timeSpentWaiting += 
-                                    System.currentTimeMillis() - currTime;
-                            }
-                            else {
-                                // now just give up and hope for matching results
-                                setState(GAVE_UP);
-                                // wait indefn. for matching results
-                                reqLock.lock(0);
-                            }
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                if (stopped) { 
-                    setState(ABORTED);
-                    manager.remove(this, false);
-                    return;
-                }
-            }
+    protected void tryAllDownloads() {
+        initializeFiles();
+        if(checkHosts()) {//files is global
+            setState(GAVE_UP);
+            return;
+        }
+        
+        int status = GAVE_UP;
+        try {
+            status = tryAllDownloads2();
+        } catch (InterruptedException e) {
+            // nothing should interrupt except for a stop
+            if (!stopped)
+                ErrorService.error(e);
+        }
+                   
+        // If TAD2 gave a completed state, set the state correctly & exit.
+        // Otherwise...
+        // If we manually stopped then set to ABORTED, else set to the 
+        // appropriate state (either a busy host or no hosts to try).
+        switch(status) {
+        case COMPLETE:
+        case COULDNT_MOVE_TO_LIBRARY:
+        case CORRUPT_FILE:
+            setState(status);
+            return;
+        case WAITING_FOR_RETRY:
+        case GAVE_UP:
+            if(stopped)
+                setState(ABORTED);
+            else
+                setState(status);
+            return;
+        default:
+            Assert.that(false, "Bad status from tad2: "+status);
         }
     }
-
 
 	private static final int MIN_NUM_CONNECTIONS      = 2;
 	private static final int MIN_CONNECTION_MESSAGES  = 6;
 	private static final int MIN_TOTAL_MESSAGES       = 45;
-	private static final int CONNECTION_DELAY         = 500;
 	        static boolean   NO_DELAY				  = false; // For testing
     /**
-     *  Try to wait for good, stable, connections with some amount of reach
-	 *  or message flow.
+     *  Determines if we have any stable connections to send a requery down.
      */
-    private void waitForStableConnections() 
-      throws InterruptedException {
-
-		if ( NO_DELAY )  return;  // For Testing without network connection
+    private boolean hasStableConnections() {
+		if ( NO_DELAY )
+		    return true;  // For Testing without network connection
 
 		// TODO: Note that on a private network, these conditions might
 		//       be too strict.
-
+		
 		// Wait till your connections are stable enough to get the minimum 
 		// number of messages
-		while 
-		( (RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
-			  < MIN_NUM_CONNECTIONS) &&
-		  (RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES) 
-        ) {
-            setState(WAITING_FOR_CONNECTIONS);
-			Thread.sleep(CONNECTION_DELAY); 
-		}
+		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+			        >= MIN_NUM_CONNECTIONS &&
+               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
 
@@ -3334,7 +3389,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             //If we are corrupt, we want to stop sharing the incomplete file,
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
-            
             if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
@@ -3437,11 +3491,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         switch (state) {
         case CONNECTING:
         case WAITING_FOR_RETRY:
-            remaining=stateTime-System.currentTimeMillis();
-            return (int)Math.max(remaining, 0)/1000;
         case WAITING_FOR_RESULTS:
+        case ITERATIVE_GUESSING:
+        case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
             return (int)Math.max(remaining, 0)/1000;
+        case QUEUED:
+            return 0;
         default:
             return Integer.MAX_VALUE;
         }
@@ -3570,10 +3626,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
-    public synchronized int getRetriesWaiting() {
-        return retriesWaiting;
-    }
-
     public synchronized void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
@@ -3629,62 +3681,5 @@ public class ManagedDownloader implements Downloader, Serializable {
            Math.random() > 0.5f)
             return true;
         return false;
-    }
-
-    /** Synchronization Primitive for auto-requerying....
-     *  Can be understood as follows:
-     *  -- The tryAllDownloads thread does a lock(), which will cause it to
-     *  wait() for up to waitTime.  it may be woken up earlier if it gets
-     *  a requery result. moreover, it won't wait if it has a result already...
-     *  -- The addDownload method, upon getting a result that matches, will
-     *  wake up the tryAllDownloads thread with a release...().  
-     *  -- The tryAllDownloads method may release the lock due to a user-driven
-     *  query.
-     *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
-     *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
-     */
-    private class RequeryLock extends Object {
-        private volatile boolean shouldWait = true;
-        // returned from lock to signify the reason for exit
-        private volatile boolean newResults = false;
-
-        public synchronized void releaseDueToNewResults() {
-            shouldWait = false;
-            newResults = true;
-            this.notifyAll();
-        }
-
-        public synchronized void releaseDueToRequery() {
-            // we want shouldWait to stay what it is - we don't want to 'queue'
-            // (queue size = 1) user requests 
-            this.notifyAll();
-        }
-
-        private synchronized boolean getAndClearNewResult() {
-            boolean retVal = newResults;
-            newResults = false;
-            return retVal;
-        }
-
-        /** @exception InterruptedException if you are interrupted, you were
-         *  probably stopped.
-         */
-        public synchronized boolean lock(long waitTime) 
-            throws InterruptedException {
-            try {
-                // max waitTime i'll wait, best case i'll get
-                // interrupted 
-                if (shouldWait) 
-                    this.wait(waitTime);
-            }
-            catch (InterruptedException ie) {
-                // if interrupted, make sure to reset shouldWait...
-                shouldWait = true;
-                throw ie;
-            }
-            shouldWait = true;
-            return getAndClearNewResult();
-        }
-
     }
 }
