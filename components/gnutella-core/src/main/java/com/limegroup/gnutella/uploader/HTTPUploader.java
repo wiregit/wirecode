@@ -1,9 +1,21 @@
 package com.limegroup.gnutella.uploader;
 
-/**
- * Read data from disk and write to the net.
+/*
+ * There are two constructors that are necessary.  The 
+ * first is to handle the case where there is a regular
+ * upload.  in that case, the manager class has already
+ * processed a message that looks like: 
+ * GET /get/0/sample.txt HTTP/1.0
+ * and already given a socket connection.  all that we
+ * need to do is actually upload the file to the socket.
  *
+ * In the second case, we have recieved a push request,
+ * so we are going to need to establish the connection
+ * on this end.  We do this by creating the socket, and
+ * then writing out the GIV 0:99999999/sample.txt
+ * and then wait for the GET to come back.
  */
+
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 import java.io.*;
@@ -41,24 +53,15 @@ public class HTTPUploader implements Uploader {
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
-	/****************** Constructors ***********************/
-	/**
-	 * There are two constructors that are necessary.  The 
-	 * first is to handle the case where there is a regular
-	 * upload.  in that case, the manager class has already
-	 * processed a message that looks like: 
-	 * GET /get/0/sample.txt HTTP/1.0
-	 * and already given a socket connection.  all that we
-	 * need to do is actually upload the file to the socket.
-	 *
-	 * In the second case, we have recieved a push request,
-	 * so we are going to need to establish the connection
-	 * on this end.  We do this by creating the socket, and
-	 * then writing out the GIV 0:99999999/sample.txt
-	 * and then wait for the GET to come back.
-	 */
+    //constructors
 
-	// Regular upload
+	/**
+     * The constructor used for normal uploads, takes the incoming socket as 
+     * a parameter
+     * @param file the file to be uploaded
+     * @param s the socket on which to upload the file.
+     * @param index index of file to upload
+     */
 	public HTTPUploader(String file, Socket s, int index, UploadManager m,
                         FileManager fm) {
 		_socket = s;
@@ -96,6 +99,16 @@ public class HTTPUploader implements Uploader {
 	}
 		
 	// Push requested Upload
+    /**
+     * The other constructor that is used for push uploads. This constructor
+     * does not take a socket. An uploader created with this constructor 
+     * must eventually connect to the downloader using the connect method of 
+     * this class
+     * @param file The name of the file to be uploaded
+     * @param host The downloaders ip address
+     * @param port The port at which the downloader is listneing 
+     * @param index index of file to be uploaded
+     */
 	public HTTPUploader(String file, String host, int port, int index,
 						String guid, UploadManager m, FileManager fm) {
 		_filename = file;
@@ -121,8 +134,8 @@ public class HTTPUploader implements Uploader {
      * This method is called in the case of a push only.
      * <p>
      * The method creates the socket, and send the GIV message.
-     * At this point the socket, is in the same state as a socket that was
-     * created by a normal downloader - ready to receive the GET
+     * When this method returns the socket, is in the same state as a 
+     * socket created as a result of a normal upload - ready to receive GET
      * <p>
      * @return The returned socket is used for a normal upload.
      */

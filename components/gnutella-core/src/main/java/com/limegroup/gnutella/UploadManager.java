@@ -10,8 +10,8 @@ import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * The list of all the uploads in progress.
- *
- *
+ * 
+ * 
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
@@ -181,6 +181,10 @@ public class UploadManager implements BandwidthTracker {
         }
 	}
     
+    /**
+     * Does some book-keeping and makes the downloader, start the download
+     * @param uploader This method assumes that uploader is connected.
+     */
     private void doSingleUpload(HTTPUploader uploader, String host,
         int index) {
         long startTime=-1;
@@ -205,13 +209,8 @@ public class UploadManager implements BandwidthTracker {
         if (uploader.getState() == Uploader.COMPLETE)
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
-        /*
-          } catch (IOException e) {
-          // if it fails, insert it into the push failed list
-          synchronized(UploadManager.this) { insertFailedPush(host, index); }
-          }
-        */
-        //finally {			    
+
+        //clean up
         long finishTime=System.currentTimeMillis();
         synchronized(UploadManager.this) {
             //Report how quickly we uploaded the data, regardless of
@@ -248,7 +247,13 @@ public class UploadManager implements BandwidthTracker {
 	/**
 	 * Accepts a new push upload, creating a new <tt>HTTPUploader</tt>.
      * NON-BLOCKING: creates a new thread to transfer the file.
-	 *
+	 * <p>
+     * The thread makes the uploader connect (which does the connecting 
+     * and also writes out the GIV, so the state of the returned socket 
+     * is the same as a socket which the accpetUpload methos would 
+     * expect)and delegates to the acceptUpload method with the socket 
+     * it gets from connecting.
+     * <p>
 	 * @param file the fully qualified pathname of the file to upload
 	 * @param host the ip address of the host to upload to
 	 * @param port the port over which the transfer will occur
