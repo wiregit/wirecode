@@ -255,7 +255,7 @@ public class HTTPDownloader implements Runnable {
 	
   	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
-	long start = myFile.length() + 1;
+	long start = myFile.length();
 	
 	String startRange = java.lang.String.valueOf(start);
 

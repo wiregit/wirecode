@@ -356,11 +356,11 @@ public class HTTPUploader implements Runnable {
 
 	byte[] buf = new byte[1024];
 
-	int skip = 0;
-	if (_uploadBegin != 0)
-	    skip = _uploadBegin -1;
+	//  int skip = 0;
+//  	if (_uploadBegin != 0)
+//  	    skip = _uploadBegin -1;
 
-	_fis.skip(skip);
+	_fis.skip(_uploadBegin);
 
 	while (true) {
 	    try {
