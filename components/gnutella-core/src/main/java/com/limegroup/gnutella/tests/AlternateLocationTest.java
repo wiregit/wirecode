@@ -99,13 +99,13 @@ public final class AlternateLocationTest extends TestCase {
 			for(int i=0; i<validURNS.length; i++) {
 				URN urn = new URN(validURNS[i]);
 				URL url1 = new URL("http", validURLS[i], 6346, 
-								   URNFactory.createHttpUrnFileString(urn));
+								   URNFactory.createHttpUrnServiceRequest(urn));
 				URL url2 = new URL("http", validURLS[i], "/test.htm");
 				AlternateLocation al1 = new AlternateLocation(url1);
 				AlternateLocation al2 = new AlternateLocation(url2);
 				AlternateLocation al3 = 
 				    new AlternateLocation("http://"+validURLS[i] + ":6346"+
-										  URNFactory.createHttpUrnFileString(urn)+
+										  URNFactory.createHttpUrnServiceRequest(urn)+
 										  " "+AlternateLocation.convertDateToString(new Date()));
 				AlternateLocation al4 = 
 				    new AlternateLocation("http://"+validURLS[i] + "/test.htm"+
