@@ -1,4 +1,4 @@
-Section 2.x: Query Keys
+Section 2.x: Query Keysf
 
 In order to facilitate secure, non-spoofable GUESS query exchanges, a
 Query Key system MUST be supported by both client and server GUESS
