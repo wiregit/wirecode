@@ -482,9 +482,9 @@ public class Acceptor implements Runnable {
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
     
-        /*String host = addr.getHostAddress();*/
+        String host = addr.getHostAddress();
         byte[] bytes = addr.getAddress();
-        return /*!RouterService.getConnectionManager().isConnectedTo(host) &&*/
+        return !RouterService.getConnectionManager().isConnectedTo(host) &&
                !NetworkUtils.isCloseIP(bytes, getAddress(false)) &&
                !NetworkUtils.isLocalAddress(addr);
 	}

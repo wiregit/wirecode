@@ -284,8 +284,6 @@ public final class UDPService implements Runnable {
 	 */
 	private boolean isValidForIncoming(GUID match, GUID guidReceived,
 	                                   DatagramPacket d) {
-        return match.equals(guidReceived);
-        /* CODE FOR isConnectedTo check.
         if(!match.equals(guidReceived))
             return false;
             
@@ -293,7 +291,6 @@ public final class UDPService implements Runnable {
 
         return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()  ||
                !RouterService.getConnectionManager().isConnectedTo(host);
-        */
     }
     
     /**
