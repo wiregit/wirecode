@@ -187,4 +187,10 @@ public class DownloadStat extends AdvancedStatistic {
      */ 
     public static final Statistic FAILED_HTTP10 =
         new DownloadStat();
+        
+    /**
+     * Statistic for the number of once failed sources that are now working.
+     */
+    public static final Statistic RETRIED_SUCCESS =
+        new DownloadStat();
 }
