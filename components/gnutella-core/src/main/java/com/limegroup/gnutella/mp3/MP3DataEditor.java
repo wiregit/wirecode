@@ -25,7 +25,7 @@ import de.vdheide.mp3.NoID3v2TagException;
 /**
  * an editor specifically for mp3 files with id3 tags
  */
-public class MP3DataEditor extends MetaDataEditor {
+public class MP3DataEditor extends AudioMetaDataEditor {
 	
     private static final String TITLE_STRING   = "title=\"";
     private static final String ARTIST_STRING  = "artist=\"";
@@ -494,6 +494,132 @@ public class MP3DataEditor extends MetaDataEditor {
             }
         }
     }
+	/** 
+	 * The caller of this method has the xml string that represents a
+	 * LimeXMLDocument, and wants to write the document out to disk. For this
+	 * method to work effectively, the caller must instantiate this class and
+	 * call this method first, and then call to actually write the ID3
+	 * tags out.
+	 * <p>
+	 * This method reads the complete xml string and removes the id3 *
+	 * components of the xml string, and stores the values of the id3 tags in a
+	 * class variable which will later be used to write the id3 tags in the
+	 * mp3file.
+	 * <p>
+	 * @return a parseable xml string which has the same attributes as the
+	 * xmlStr paramter minus the id3 tags.
+	 */
+	public String removeID3Tags(String xmlStr) {
+	    //will be used to reconstruct xmlStr after ripping stuff from it
+	    int i, j;
+	    Object[] rippedStuff = null;
+	
+	    //title        
+	    try {
+	        rippedStuff = ripTag(xmlStr, TITLE_STRING);
+	
+	        title_ = (String)rippedStuff[2];
+	        debug("title = "+title_);
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //artist
+	    try {
+	        rippedStuff = ripTag(xmlStr, ARTIST_STRING);
+	
+	        artist_ = (String)rippedStuff[2];
+	        debug("artist = "+artist_);
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //album
+	    try {
+	        rippedStuff = ripTag(xmlStr, ALBUM_STRING);
+	
+	        album_ = (String)rippedStuff[2];
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //year
+	    try {
+	        rippedStuff = ripTag(xmlStr, YEAR_STRING);
+	
+	        year_ = (String)rippedStuff[2];
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //track
+	    try {
+	        rippedStuff = ripTag(xmlStr, TRACK_STRING);
+	
+	        track_ = (String)rippedStuff[2];
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //comment
+	    try {
+	        rippedStuff = ripTag(xmlStr, COMMENT_STRING);
+	
+	        comment_ = (String)rippedStuff[2];
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //genre
+	    try {
+	        rippedStuff = ripTag(xmlStr, GENRE_STRING);
+	
+	        genre_ = (String)rippedStuff[2];
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //bitrate
+	    try {
+	        rippedStuff = ripTag(xmlStr, BITRATE_STRING);
+	
+	        // we get bitrate info from the mp3 file....
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	    //seconds
+	    try {
+	        rippedStuff = ripTag(xmlStr, SECONDS_STRING);
+	
+	        // we get seconds info from the mp3 file....
+	
+	        i = ((Integer)rippedStuff[0]).intValue();
+	        j = ((Integer)rippedStuff[1]).intValue();        
+	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
+	    } 
+	    catch (IOException e) {};
+	
+	
+	
+	    return xmlStr;//this has been suitable modified
+	}
 
 	
 }

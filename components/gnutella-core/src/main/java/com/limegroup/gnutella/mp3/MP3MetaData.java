@@ -162,15 +162,15 @@ public class MP3MetaData extends AudioMetaData {
             if(frameContent == null || frameContent.trim().equals(""))
                 continue;
             //check which tag we are looking at
-            if(MetaDataEditor.TITLE_ID.equals(frameID)) 
+            if(MP3DataEditor.TITLE_ID.equals(frameID)) 
                 data.setTitle(frameContent);
-            else if(MetaDataEditor.ARTIST_ID.equals(frameID)) 
+            else if(MP3DataEditor.ARTIST_ID.equals(frameID)) 
                 data.setArtist(frameContent);
-            else if(MetaDataEditor.ALBUM_ID.equals(frameID)) 
+            else if(MP3DataEditor.ALBUM_ID.equals(frameID)) 
                 data.setAlbum(frameContent);
-            else if(MetaDataEditor.YEAR_ID.equals(frameID)) 
+            else if(MP3DataEditor.YEAR_ID.equals(frameID)) 
                 data.setYear(frameContent);
-            else if(MetaDataEditor.COMMENT_ID.equals(frameID)) {
+            else if(MP3DataEditor.COMMENT_ID.equals(frameID)) {
                 //ID3v2 comments field has null separators embedded to encode
                 //language etc, the real content begins after the last null
                 byte[] bytes = frame.getContent();
@@ -186,12 +186,12 @@ public class MP3MetaData extends AudioMetaData {
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 data.setComment(frameContent);
             }
-           else if(MetaDataEditor.TRACK_ID.equals(frameID)) {
+           else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
                     data.setTrack(Short.parseShort(frameContent));
                 } catch (NumberFormatException ignored) {} 
             }
-            else if(MetaDataEditor.GENRE_ID.equals(frameID)) {
+            else if(MP3DataEditor.GENRE_ID.equals(frameID)) {
                 //ID3v2 frame for genre has the byte used in ID3v1 encoded
                 //within it -- we need to parse that out
                 int startIndex = frameContent.indexOf("(");
