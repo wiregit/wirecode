@@ -3288,9 +3288,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Adds an Interval into the needed list.
      */
     private synchronized void addToNeeded(Interval val) {
+        List added = null;
+        if(LOG.isWarnEnabled())
+            added = new LinkedList();
         Iterator required = commonOutFile.getNecessaryBlocks(val);
-        for(; required.hasNext(); )
-            needed.add((Interval)required.next());
+        for(; required.hasNext(); ) {
+            Interval next = (Interval)required.next();
+            if(LOG.isWarnEnabled())
+                added.add(next);
+            needed.add(next);
+        }
+        if(LOG.isWarnEnabled())
+            LOG.warn("Wanted to add [" + val + "], added: " + added);
     }
 
     /** 

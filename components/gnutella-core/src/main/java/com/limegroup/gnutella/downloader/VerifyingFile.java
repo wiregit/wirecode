@@ -4,6 +4,9 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
  * the parts of the file they are downloading through a single object of this 
@@ -18,6 +21,8 @@ import com.limegroup.gnutella.util.*;
  * @author Sumeet Thadani, Chris Rohrs
  */
 public class VerifyingFile {
+    
+    private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
     
     private RandomAccessFile fos;
 
@@ -130,9 +135,11 @@ public class VerifyingFile {
             req.add(in);
             return req.iterator();
         } else {
+            if(LOG.isWarnEnabled())
+                LOG.warn("Overlap!  Ranges: " + overlap);
             IntervalSet lap = new IntervalSet();
             if(in.low != 0)
-                lap.add(new Interval(0, in.low));
+                lap.add(new Interval(0, in.low-1));
             for(Iterator i = overlap.iterator(); i.hasNext(); )
                 lap.add((Interval)i.next());
             return lap.getNeededIntervals(in.high+1);
