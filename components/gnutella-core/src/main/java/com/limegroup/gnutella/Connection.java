@@ -137,12 +137,25 @@ public class Connection {
             throw new IOException();
         }
 
-		// Set the Acceptors IP address
-		Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
-
-        _in = new BufferedInputStream(_socket.getInputStream());
-        _out = new BufferedOutputStream(_socket.getOutputStream());
-
+        try {
+            // Set the Acceptors IP address
+            Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
+            
+            _in = new BufferedInputStream(_socket.getInputStream());
+            _out = new BufferedOutputStream(_socket.getOutputStream());
+            if (_in==null || _out==null) throw new IOException();
+        } catch (Exception e) {
+            //Apparently Socket.getInput/OutputStream throws
+            //NullPointerException if the socket is closed.  (See Sun bug
+            //4091706.)  Unfortunately the socket may have been closed after the
+            //the check above, e.g., if the user pressed disconnect.  So we
+            //catch NullPointerException here--any any other weird possible
+            //exceptions.  An alternative is to obtain a lock before doing these
+            //calls, but we are afraid that getInput/OutputStream may be a
+            //blocking operation.  Just to be safe, we also check that in/out
+            //are not null.
+            throw new IOException();
+        }
 
         try {
             if(isOutgoing()) {
