@@ -1056,7 +1056,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
+            if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
                 Assert.silent(false, "wrong IFD.\n" +
                            "we are resuming :"+(this instanceof ResumeDownloader)+
