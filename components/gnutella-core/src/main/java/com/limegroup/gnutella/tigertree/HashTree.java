@@ -128,8 +128,14 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize >= fileSize / maxNodes);
-        Assert.that(nodeSize < (fileSize / maxNodes) * 2);
+        Assert.that(nodeSize >= fileSize / maxNodes,
+                    "nodeSize: " + nodeSize + 
+                    ", fileSize: " + fileSize + 
+                    ", maxNode: " + maxNodes);
+        Assert.that(nodeSize <= (fileSize / maxNodes) * 2,
+                    "nodeSize: " + nodeSize + 
+                    ", fileSize: " + fileSize + 
+                    ", maxNode: " + maxNodes);
 
         // do the actual hashing
         List nodes = createTTNodes(nodeSize, fileSize, is);

@@ -134,8 +134,10 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/0//uri-res/N2R?"+
                 fd.getSHA1Urn().httpStringValue()+" HTTP/1.1\r\n\r\n";
-			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
-			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);
+			sendRequestThatShouldFail(HTTPRequestMethod.GET, 
+			                          request, STATUS_404);
+			sendRequestThatShouldFail(HTTPRequestMethod.HEAD,
+			                          request, STATUS_404);
 		}
 	}	
 
