@@ -25,6 +25,10 @@ public class DownloadTest extends TestCase {
 
     static URN testHash = null;
     static File testFile = null;
+    static { 
+        SettingsManager.instance().setLocalIsPrivate(false);
+    }
+    
     
     public DownloadTest(String name) {
         super(name);
