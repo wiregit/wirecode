@@ -114,7 +114,15 @@ public final class SettingsFactory {
             // a-OK.
             try {
                 PROPS.load(fis);
-            } catch(IllegalArgumentException ignored) {}
+            } catch(IllegalArgumentException ignored) {
+            } catch(IOException iox) {
+                String msg = iox.getMessage();
+                if(StringUtils.indexOfIgnoreCase(msg,"corrupted") < 0)
+                    throw iox; 
+                //it was the "file or directory corrupted" exception
+                SETTINGS_FILE.delete();//revert to defaults
+                MessageService.showError("ERROR_PROPS_CORRUPTED");
+            }
         } catch(IOException e) {
 			ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
