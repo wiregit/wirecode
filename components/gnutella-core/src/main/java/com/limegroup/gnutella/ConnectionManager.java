@@ -372,7 +372,9 @@ public class ConnectionManager {
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
             try {
-                if (mc.getInetAddress().getHostAddress().equals(hostName))
+                InetAddress addr=mc.getInetAddress();
+                Assert.that(addr!=null, "No address for "+mc);
+                if (addr.getHostAddress().equals(hostName))
                     return true;
             } catch (IllegalStateException e) {
                 //Connection still initializing...ignore.

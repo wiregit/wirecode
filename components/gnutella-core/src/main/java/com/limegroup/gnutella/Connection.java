@@ -9,7 +9,7 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.*;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -282,8 +282,8 @@ public class Connection {
             // Set the Acceptors IP address
             Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
             
-            _in = _socket.getInputStream();
-            _out = _socket.getOutputStream();           
+            _in = new ChannelInputStream(_socket.getChannel());
+            _out = new ChannelOutputStream(_socket.getChannel());
             if (_in==null || _out==null) throw new IOException();
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
