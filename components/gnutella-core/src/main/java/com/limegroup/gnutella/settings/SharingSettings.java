@@ -91,6 +91,9 @@ public class SharingSettings extends LimeProps {
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
+		
+        FileUtils.setWriteable(saveDir);
+        FileUtils.setWriteable(incDir);
 
 		if(!saveDir.canRead() || !saveDir.canWrite() ||
 		   !incDir.canRead()  || !incDir.canWrite()) {
