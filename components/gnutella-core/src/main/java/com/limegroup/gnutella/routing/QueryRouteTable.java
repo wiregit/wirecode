@@ -20,9 +20,9 @@ import com.sun.java.util.collections.ArrayList;
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=256;
+    public static final int DEFAULT_TABLE_SIZE=8192;
     /** The suggested default max table TTL. */
-    public static final int DEFAULT_TABLE_TTL=10;
+    public static final int DEFAULT_TABLE_TTL=2;
 
     //TODO: formalize specifications.  Write rep invariant.  Specify add*
     //methods to allow adding of random keywords because of collisions.
@@ -37,7 +37,8 @@ public class QueryRouteTable {
     /**
      * tableLengths[i] is the size of tables[i].  This is needed because 
      * BitSet.length() doesn't exist in Java 1.1.8.  
-     * INVARIANT: tablesLength.size==tables.size.
+     * INVARIANT: tablesLength.size==tables.size
+     *            for all i in tableLengths, tableLengths(i)%2==0
      */
     private int[] tableLengths;
 
@@ -48,7 +49,7 @@ public class QueryRouteTable {
 
     /** 
      * Creates a new QueryRouteTable that has space for initialSize keywords
-     * with TTL up to ttl.
+     * with TTL up to ttl.   
      */
     public QueryRouteTable(int ttl, int initialSize) {
         this.tableLengths=new int[ttl];
@@ -56,7 +57,7 @@ public class QueryRouteTable {
         initialize(initialSize);
     }
 
-    /** Resets all TTL tables to be initialSize long and empty. */
+    /** Resets all TTL tables to be initialSize long and empty.  */
     private void initialize(int initialSize) {
         for (int i=0; i<tables.length; i++) {
             this.tableLengths[i]=initialSize;
@@ -74,9 +75,13 @@ public class QueryRouteTable {
         //TODO: overload with contains(String query, int ttl)?
         //Check that all hashed keywords are in table[TTL].
         String[] keywords=HashFunction.keywords(qr.getQuery());
-        BitSet table=tables[Math.min(qr.getTTL(), tables.length-1)];
+        int ttl=Math.min(qr.getTTL(), tables.length-1);        
+        BitSet table=tables[ttl];
+        int length=length(ttl);
         for (int i=0; i<keywords.length; i++) {
-            if (! table.get(HashFunction.hash(keywords[i], length(i))))
+            String keyword=keywords[i];
+            int hash=HashFunction.hash(keyword, length);
+            if (! table.get(hash))
                 return false;
         }
         return true;
@@ -91,7 +96,9 @@ public class QueryRouteTable {
         for (int i=0; i<keywords.length; i++) {
             //See contains(..) for a discussion on TTLs and decrementing.
             for (int ttl=0; ttl<tables.length; ttl++) {
-                int hash=HashFunction.hash(keywords[i], length(ttl));
+                int length=length(ttl);
+                String keyword=keywords[i];
+                int hash=HashFunction.hash(keyword, length);
                 tables[ttl].set(hash);
             }
         }
@@ -167,6 +174,7 @@ public class QueryRouteTable {
      */
     public Iterator /* of RouteTableMessage */ encode(RouteTableMessage prev) {
         //TODO1: this is a hopelessly inefficient encoding.  Optimize.
+        //TODO: should this be responsible for sending RESET?
         List buf=new ArrayList(tables.length);
         for (int i=0; i<tables.length; i++) {
             buf.add(new SetDenseTableMessage((byte)1, (byte)i, 

@@ -785,7 +785,8 @@ public abstract class MessageRouter
                 _queryInfoTable.put(receivingConnection, qrt);            
             }
             qrt.update(m);    
-            
+            System.out.println("Receiving "+m+" from "+receivingConnection);
+
             //Propogate tables to those connection that need it.
             forwardQueryRouteTables();
         }
@@ -805,19 +806,26 @@ public abstract class MessageRouter
             for(int i=0; i<list.size(); i++) {
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 QueryRouteTable qrt=(QueryRouteTable)_queryInfoTable.get(c);
-                if (qrt==null || !qrt.needsUpdate())
+                //TODO2: don't send to older connections
+                if (qrt!=null && !qrt.needsUpdate())
                     continue;
+                //This is a really important part.  It prevents infinite loops
+                //of messages.  TODO: but it isn't quite right because you end
+                //up sending TWO messsages to a host.
+                if (qrt!=null)
+                    qrt.resetUpdateTime(10000);
                 
                 //Create table to send on this connection...
                 QueryRouteTable table=createRouteTable(c);
                 
                 //..and send each piece.
                 //TODO1: use incremental and interleaved update
+                //TODO1: send RESET message first time?  See QueryRouteTable.
                 for (Iterator iter=table.encode(null); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
                     c.send(m);
+                    System.out.println("Sending "+m+" to "+c);
                 }
-                table.resetUpdateTime(0);  //TODO: for testing only.
             }
         }
     }
