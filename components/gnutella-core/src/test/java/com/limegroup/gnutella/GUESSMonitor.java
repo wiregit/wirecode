@@ -14,6 +14,9 @@ import java.util.*;
  */
 public class GUESSMonitor {
 
+    public final static String INSTRUCTIONS = 
+        "? - Help; verbose - switch verbose on/off";
+
     private Backend _backend;
     private MyMessageRouter _messageRouter;
 
@@ -33,15 +36,24 @@ public class GUESSMonitor {
 
 
     public static void main(String argv[]) throws Exception {
-        System.out.println("Type Anything to Exit....");
+        System.out.println("Type 'quit' to Exit....");
         GUESSMonitor guessMon = new GUESSMonitor();
         //  open up standard input
+        String input = "";
         BufferedReader br = 
         new BufferedReader(new InputStreamReader(System.in));
-        try {
-            br.readLine(); // just wait for input...
-        } 
-        catch (IOException ioe) {
+        System.out.println("Ready - Type '?' for Help.");
+        while (!input.equals("quit")) {
+            System.out.print("% ");
+            try {
+                input = br.readLine(); // just wait for input...
+                if (input.equals("?")) 
+                    System.out.println(INSTRUCTIONS);
+                else if (input.equals("verbose"))
+                    guessMon.switchDebug();
+            } 
+            catch (IOException ioe) {
+            }
         }
         guessMon.shutdown();
     }
@@ -90,7 +102,7 @@ public class GUESSMonitor {
         }
                 
         private void guessPongLoop() {
-            System.out.println("guessPongLoop(): starting.");
+            debug("guessPongLoop(): starting.");
             while (_shouldRun) {
                 synchronized (_guessPongs) {
                     while (_shouldRun && _guessPongs.size() == 0) {
@@ -102,13 +114,21 @@ public class GUESSMonitor {
                 }
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
-                    System.out.println("guessPongLoop(): consuming Pong = " + 
-                                       currPong);
+                    debug("guessPongLoop(): consuming Pong = " + currPong);
                 }
             }
-            System.out.println("guessPongLoop(): returning.");
+            debug("guessPongLoop(): returning.");
         }
 
     }
 
+    private boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn) {
+            System.out.println(out);
+        }
+    }
+    public void switchDebug() {
+        debugOn = !debugOn;
+    }
 }
