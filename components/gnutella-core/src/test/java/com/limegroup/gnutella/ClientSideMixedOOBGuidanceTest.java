@@ -339,6 +339,48 @@ public class ClientSideMixedOOBGuidanceTest
         }
 
         // now confirm that we leaf guide the 'even' guys but not the others.
+        Message m = null;
+        assertGreaterThan(SearchResultHandler.REPORT_INTERVAL, 4*testUPs.length);
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[4];
+            res[0] = new Response(10, 10, "susheel"+i);
+            res[1] = new Response(10, 10, "susheel smells good"+i);
+            res[2] = new Response(10, 10, "anita is sweet"+i);
+            res[3] = new Response(10, 10, "anita is prety"+i);
+            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+        
+        // all UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            if ((i==0) || (i==2)) {
+                assertNotNull(stat);
+                assertEquals(new GUID(stat.getGUID()), queryGuid);
+                assertEquals(4, stat.getNumResults());
+            }
+            else
+                assertNull(stat);
+        }
+
+        // shut off the query....
+        rs.stopQuery(queryGuid);
+
+        // all UPs should get a QueryStatusResponse with 65535
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            if ((i==0) || (i==2)) {
+                assertNotNull(stat);
+                assertEquals(new GUID(stat.getGUID()), queryGuid);
+                assertEquals(65535, stat.getNumResults());
+            }
+            else
+                assertNull(stat);
+        }
 
     }
 
