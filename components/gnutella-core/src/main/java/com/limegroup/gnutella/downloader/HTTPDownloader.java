@@ -18,7 +18,8 @@ public class HTTPDownloader implements Runnable {
     private int MIN_BUFF = 1024;
     private int MAX_BUFF = 64 * 1024;
 
-    private BufferedReader _in;
+    // private BufferedReader _in;
+    private DataInputStream _in;;
 
     private InputStream _istream;
     private String _filename;
@@ -45,24 +46,17 @@ public class HTTPDownloader implements Runnable {
 
 	try {
 	    _istream = s.getInputStream();
-	    _bis = new BufferedInputStream(_istream);
-	    InputStreamReader isr = new InputStreamReader(_istream);
-	    _in = new BufferedReader(isr, 1);
+	//      _bis = new BufferedInputStream(_istream);
+//  	    InputStreamReader isr = new InputStreamReader(_istream);
+	    //  	    _in = new BufferedReader(isr, 1);
+  	    _in = new DataInputStream(_istream);
 	}
 
 	catch (Exception e) {
 	    _callback.error(ActivityCallback.ERROR_4);
 	}
 
-	SettingsManager set = SettingsManager.instance();
-	_downloadDir = set.getSaveDirectory();
-	String pathname = _downloadDir  + "/ " + _filename;
-	try {
-	    _fos = new FileOutputStream(pathname);
-	}
-	catch (FileNotFoundException e) {
-	    
-	}
+	
     }
       
     /* The client side get */
@@ -97,28 +91,28 @@ public class HTTPDownloader implements Runnable {
 
 	    return;
 	}
-	try {
+  	try {
 	    _istream = conn.getInputStream();
-	    _bis = new BufferedInputStream(_istream);
-	    InputStreamReader isr = new InputStreamReader(_istream);
-	    _in = new BufferedReader(isr, 1);
-	}
-	catch (IOException e) {
-	    e.printStackTrace();
-	    sendPushRequest(host, index, port, guid);
-	    return;
+//  //  	    _bis = new BufferedInputStream(_istream);
+//  //  	    InputStreamReader isr = new InputStreamReader(_istream);
+  	    _in = new DataInputStream(_istream);
+  	}
+  	catch (IOException e) {
+  	    e.printStackTrace();
+  	    sendPushRequest(host, index, port, guid);
+  	    return;
 
-	}
+  	}
 
-	SettingsManager set = SettingsManager.instance();
-	_downloadDir = set.getSaveDirectory();
-	String pathname = _downloadDir  + "/ " + _filename;
-	try {
-	    _fos = new FileOutputStream(pathname);
-	}
-	catch (FileNotFoundException e) {
+	//  SettingsManager set = SettingsManager.instance();
+//  	_downloadDir = set.getSaveDirectory();
+//  	String pathname = _downloadDir  + "/ " + _filename;
+//  	try {
+//  	    _fos = new FileOutputStream(pathname);
+//  	}
+//  	catch (FileNotFoundException e) {
 	    
-	}
+//  	}
 
     }
     
@@ -188,47 +182,219 @@ public class HTTPDownloader implements Runnable {
     }
 
     
+
     public void doDownload() {
+
+	SettingsManager set = SettingsManager.instance();
+	_downloadDir = set.getSaveDirectory();
+	String pathname = _downloadDir  + _filename;
+	
+	System.out.println(pathname);
+	try {
+	    _fos = new FileOutputStream(pathname);
+	}
+	catch (FileNotFoundException e) {
+  	    System.out.println("THere is an error with the fos");
+  	}
+	catch (Exception e) {
+	    System.out.println("THere was an exception with the fos");
+	    e.printStackTrace();
+	}
 	
 	readHeader();
 	
-	if (_sizeOfFile != -1) {
+	
+	int c = -1;
+	
+	byte[] buf = new byte[1024]; 
+
+	while (true) {
 	    
-	    int c = -1;		
-	    byte[] buf = new byte[1024];
+	    try {
+		c = _in.read(buf);
+		// c = _in.read();
+		// System.out.print(c);
+	    }
+	    catch (Exception e) {
+		System.out.print("THere is a problem with read");
+	    }
+
+	    if (c == -1)
+		break;
+
+	    try {
+		_fos.write(buf, 0, c);
+		// _fos.write(c);
+	    }
+	    catch (Exception e) {
+		System.out.print("THere is a problem with write");
+	    }
+
+	    _amountRead+=c;
+	    // _amountRead++;
+	}
+
+	try {
+	_in.close();
+       
+	_fos.close();
+	}
+	catch (IOException e) {
+	}
+    }
+
+
+    public void doDownloadThree() {
+	
+	SettingsManager set = SettingsManager.instance();
+	_downloadDir = set.getSaveDirectory();
+	String pathname = _downloadDir  + _filename;
+	
+	System.out.println(pathname);
+	try {
+	    _fos = new FileOutputStream(pathname);
+	}
+	catch (FileNotFoundException e) {
+  	    System.out.println("THere is an error with the fos");
+  	}
+	catch (Exception e) {
+	    System.out.println("THere was an exception with the fos");
+	    e.printStackTrace();
+	}
+	
+	// readHeader();
+	
+	int c = -1;
+	
+	while (true) {
 	    
-	    while (true) {
-		try {
-		    c = _istream.read(buf);
-		}
-		catch (IOException e) {
-		    _callback.error(ActivityCallback.ERROR_8);
-		}
-		if (c == -1) 
-		    break;
-		try {
-		    _fos.write(buf, 0, c);
-		}
+	    try {
+		c = _istream.read();
+		System.out.print(c);
+	    }
+	    catch (Exception e) {
+		System.out.print("THere is a problem with read");
+	    }
+
+	    if (c == -1)
+		break;
+
+	    try {
+		_fos.write(c);
+	    }
+	    catch (Exception e) {
+		System.out.print("THere is a problem with write");
+	    }
+
+	}
+	
+
+    }
+
+
+    public void doDownloadTwo() {
+
+	SettingsManager set = SettingsManager.instance();
+	_downloadDir = set.getSaveDirectory();
+	String pathname = _downloadDir  + _filename;
+	
+	System.out.println(pathname);
+	try {
+	    _fos = new FileOutputStream(pathname);
+	}
+	catch (FileNotFoundException e) {
+  	    System.out.println("THere is an error with the fos");
+  	}
+	catch (Exception e) {
+	    System.out.println("THere was an exception with the fos");
+	    e.printStackTrace();
+	}
+
+	readHeader();
+	
+//  	if (_sizeOfFile == -1) 
+//  	    return;
+
+	int c = -1;
+	while (true) {
+	    try {
+		c = _istream.read();
+	    }
+	    catch (IOException e) {
+		// System.out.println("There is an error with the write"));
+		System.out.print(c);
+		_callback.error(ActivityCallback.ERROR_8);
+	    }
+	    if (c == -1) 
+		break;
+	    try {
+		_fos.write(c);
+	    }
+	    catch (IOException e) {
+		System.out.println("There is an error with the write");
+		_callback.error(ActivityCallback.ERROR_8);
+	    }
+	    _amountRead++;
+	    System.out.println("The value of _amountRead is " + _amountRead);
+	}
+	System.out.println("The value of _sizeOfFile is " + _sizeOfFile);
+	System.out.println("The value of _amountRead is " + _amountRead);
+	
+
+    }
+
+
+    public void doSchmownload() {
+	
+	readHeader();
+	
+	//  if (_sizeOfFile == -1) 
+//  	    return;
+	    
+	int c = -1;		
+	byte[] buf = new byte[1024];
+	
+	while (true) {
+	    try {
+		c = _istream.read(buf);
+	    }
+	    catch (IOException e) {
+		_callback.error(ActivityCallback.ERROR_8);
+	    }
+	    if (c == -1) 
+		break;
+	    try {
+		_fos.write(buf, 0, c);
+	    }
 		catch (IOException e) {
 		    _callback.error(ActivityCallback.ERROR_8);		    
 		}
 		_amountRead+=c;
-	    }
-	    try {
-		_fos.close();
-	    }
-	    catch (IOException e) {
-		_callback.error(ActivityCallback.ERROR_8);		    
-	    }
-	    
+		
+		System.out.println("The value of c is " + c);
+		System.out.println("The value of _amountRead is " + _amountRead);
+		
 	}
+	
+	System.out.println("The value of _amountRead is " + _amountRead);
+	System.out.println("The value of _sizeOfFile is " + _sizeOfFile);
+	
+	try {
+	    _fos.close();
+	}
+	catch (IOException e) {
+	    _callback.error(ActivityCallback.ERROR_8);		    
+	}
+	
     }
 
-    public void readHeader() {
+
+     public void readHeader() {
 	String str = null;
 	while (true) {		
 	    try {
 		str = _in.readLine();
+		System.out.println(str);
 	    }
 	    catch (IOException e) {
 		_callback.error(ActivityCallback.ERROR_9);
@@ -240,6 +406,7 @@ public class HTTPDownloader implements Runnable {
 		_sizeOfFile = java.lang.Integer.parseInt(sub);
 		try {
 		    str = _in.readLine();
+		    System.out.println(str);
 		}
 		catch (IOException e) {
 		    _callback.error(ActivityCallback.ERROR_9);
@@ -248,8 +415,45 @@ public class HTTPDownloader implements Runnable {
 		break;
 	    }
 	}
+	//  try {
+//  	    //_in.close();
+//  	} catch (IOException e) {
+//  	}
 	
     }
+
+
+
+    //  public void readHeader() {
+//  	String str = null;
+//  	while (true) {		
+//  	    try {
+//  		str = _in.readLine();
+//  	    }
+//  	    catch (IOException e) {
+//  		_callback.error(ActivityCallback.ERROR_9);
+//  		return;
+//  	    }
+//  	    if (str.indexOf("Content-length:") != -1) {
+//  		String sub = str.substring(15);
+//  		sub.trim();
+//  		_sizeOfFile = java.lang.Integer.parseInt(sub);
+//  		try {
+//  		    str = _in.readLine();
+//  		}
+//  		catch (IOException e) {
+//  		    _callback.error(ActivityCallback.ERROR_9);
+//  		    return;
+//  		}
+//  		break;
+//  	    }
+//  	}
+	//  try {
+//  	    //_in.close();
+//  	} catch (IOException e) {
+//  	}
+	
+    //   }
 
     public void shutdown()
     {
