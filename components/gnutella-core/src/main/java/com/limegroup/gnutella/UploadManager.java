@@ -272,6 +272,10 @@ public class UploadManager implements BandwidthTracker {
   			}
   		}
 		_activeUploadList.remove(uploader);
+
+		// Enable auto shutdown
+		if(_activeUploads == 0)
+			_callback.uploadsComplete();
   	}
 	
 	private boolean testPerHostLimit(String host) {

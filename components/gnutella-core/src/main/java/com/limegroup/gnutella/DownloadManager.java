@@ -62,6 +62,10 @@ public class DownloadManager implements BandwidthTracker {
         this.fileManager=fileManager;
     }
 
+    public int downloadsInProgress() {
+        return active.size() + waiting.size();
+    }
+
     /** Writes a snapshot of all downloaders in this to the file named
      *  DOWNLOAD_SNAPSHOT_FILE.  Returns true iff the file was successfully
      *  written. */
@@ -323,6 +327,10 @@ public class DownloadManager implements BandwidthTracker {
         //in the GAVE_UP state is not serialized here even if still displayed in
         //the GUI.  Maybe this callback model needs a little tweaking.
         writeSnapshot();
+
+        // Enable auto shutdown
+        if(active.isEmpty() && waiting.isEmpty())
+            callback.downloadsComplete();
     }
 
     /**
