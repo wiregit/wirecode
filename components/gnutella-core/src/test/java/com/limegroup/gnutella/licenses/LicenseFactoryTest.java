@@ -138,6 +138,25 @@ public final class LicenseFactoryTest extends BaseTestCase {
         // check to make sure that verifying one urn against another page doesn't work
         assertFalse(LicenseFactory.isVerifiedAndValid(urn2, vf1));
         assertFalse(LicenseFactory.isVerifiedAndValid(urn1, vf2));
+        
+        // Now that 1, 2, 3, & 4 are verified & cached, retrieving the Licenses should
+        // return already-verified & valid licenses.
+        License d1 = LicenseFactory.create(vf1);
+        License d2 = LicenseFactory.create(vf2);
+        License d3 = LicenseFactory.create(vf3);
+        License d4 = LicenseFactory.create(vf4);
+        assertTrue(d1.isVerified());
+        assertTrue(d2.isVerified());
+        assertTrue(d3.isVerified());
+        assertTrue(d4.isVerified());
+        
+        assertTrue(d1.isValid(urn1));
+        assertTrue(d2.isValid(urn2));
+        
+        assertFalse(d3.isValid(urn3));
+        assertFalse(d4.isValid(urn4));
+        assertTrue(d3.isValid(null));
+        assertTrue(d4.isValid(null));
     }
     
     
