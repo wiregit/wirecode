@@ -13,7 +13,12 @@ import java.io.*;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 public class ExternalControl {
+    
+    private static final Log LOG = LogFactory.getLog(ExternalControl.class);
 
 
 	private static final String LOCALHOST       = "127.0.0.1"; 
@@ -22,6 +27,7 @@ public class ExternalControl {
 	private static String       enqueuedRequest = null;
 
 	public static String preprocessArgs(String args[]) {
+	    LOG.trace("enter proprocessArgs");
 
 		String arg = new String();
 		for(int i = 0; i < args.length; i++) {
@@ -54,6 +60,7 @@ public class ExternalControl {
 		return initialized;
 	}
 	public static void enqueueMagnetRequest(String arg) {
+	    LOG.trace("enter enqueueMagnetRequest");
 		enqueuedRequest = arg;
 	}
 
@@ -67,6 +74,7 @@ public class ExternalControl {
 	}
 	
 	public static void handleMagnetRequest(String arg) {
+	    LOG.trace("enter handleMagnetRequest");
 
 		ActivityCallback callback = RouterService.getCallback();
 
@@ -79,8 +87,18 @@ public class ExternalControl {
 
 	    MagnetOptions options[] = parseMagnet(arg);
 
-		if ( options == null )
+		if ( options == null ) {
+		    if(LOG.isWarnEnabled())
+		        LOG.warn("Invalid magnet, ignoring: " + arg);
 			return;
+        }
+        
+        if(LOG.isDebugEnabled()) {
+            for(int i = 0; i < options.length; i++) {
+                LOG.debug("Kicking off downloader for option " + i +
+                          " " + options[i]);
+            }
+        }                 
 
 		// Kick off appropriate downloaders
         // 
@@ -136,26 +154,29 @@ public class ExternalControl {
                     try {
                         new URI((String)it.next()); // is it a valid URI?
                     } catch(URIException e) {
+                        LOG.warn("Invalid URI in magnet", e);
                         errorMsg = e.getMessage();
                         it.remove(); // if not, remove it from the list.
                     }
                 }
-				defaultURLs = new String[urls.size()];
-		        defaultURLs = (String[]) urls.toArray(defaultURLs);
+		        defaultURLs = (String[])urls.toArray(new String[urls.size()]);
 			}
-            //System.out.println("download parms:");
-            //System.out.println("urn:"+urn);
-            //System.out.println("kt:"+curOpt.kt);
-            //System.out.println("dn:"+curOpt.dn);
-            //System.out.println("xt:"+curOpt.xt);
-            //System.out.println("xs:"+curOpt.xs);
-            //System.out.println("as:"+curOpt.as);
+			
+		    if(LOG.isDebugEnabled()) {
+		        LOG.debug("Processing magnet with params:\n" +
+		                  "urn [" + urn + "]\n" +
+		                  "options [" + curOpt + "]");
+            }
 
             // Validate that we have something to go with from magnet
             // If not, report an error.
             if ( !( urls.size() > 0  || 
                     urn != null || 
                     (curOpt.kt != null && !"".equals(curOpt.kt)) ) ) {
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("Invalid magnet. urls.size == " + urls.size() +
+                             "curOpt.kt == " + curOpt.kt);
+                }
                 if ( errorMsg != null )
                     errorMsg = curOpt.toString() + " (" + errorMsg + ")";
                 else
@@ -189,12 +210,19 @@ public class ExternalControl {
 	 *  and return true as a sign that LimeWire is running.
 	 */
 	public static void fireMagnet(Socket socket) {
+	    LOG.trace("enter fireMagnet");
+	    
         Thread.currentThread().setName("IncomingMagnetThread");
 		try {
 			// Only allow control from localhost
 			if ( !LOCALHOST.equals(
-				  socket.getInetAddress().getHostAddress()) )
+				  socket.getInetAddress().getHostAddress()) ) {
+                if(LOG.isWarnEnabled()) {
+				    LOG.warn("Invalid magnet request from: " + 
+				              socket.getInetAddress().getHostAddress());
+                }
 				return;
+            }
 
 			// First read extra parameter
 			socket.setSoTimeout(Constants.TIMEOUT);
@@ -211,6 +239,7 @@ public class ExternalControl {
 			out.flush();
             handleMagnetRequest(line);
 		} catch (IOException e) {
+		    LOG.warn("Exception while responding to magnet request", e);
 		}
 			
 		try { socket.close(); } catch (IOException e) { }
@@ -265,6 +294,7 @@ public class ExternalControl {
 
 
 	private static MagnetOptions[] parseMagnet(String arg) {
+	    LOG.trace("enter parseMagnet");
 		MagnetOptions[] ret = null;
 		HashMap         options = new HashMap();
 
