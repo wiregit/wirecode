@@ -43,11 +43,10 @@ public final class URN {
 	 */
 	public static final int SHA1_URN = 100;
 
-
 	/**
 	 * The string representation of the URN.
 	 */
-	private String _urnString;
+	private final String _urnString;
   
 
 	/**
@@ -65,6 +64,7 @@ public final class URN {
 		switch(URN_TYPE) {
 		case SHA1_URN:
 			_urnString = createSHA1String(FILE);
+			break;
 		default:
 			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
 		}
@@ -187,16 +187,23 @@ public final class URN {
 			return false;
 		}
 
+		int urnIndex1 = colon1Index-3;
+		int urnIndex2 = colon1Index+1;
+
+		if((urnIndex1 < 0) || (urnIndex2 < 0)) {
+			return false;
+		}
+
 		// get the "urn:" substring so we can make sure it's there,
 		// ignoring case
-		String urnStr = URN_STRING.substring(colon1Index-3, colon1Index+1);
+		String urnStr = URN_STRING.substring(0, colon1Index+1);
 
 		// get the last colon -- this should separate the <NID>
 		// from the <NIS>
 		int colon2Index = URN_STRING.indexOf(":", colon1Index+1);
 		
 		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(URN_STRING) ||
+		   !urnStr.equalsIgnoreCase(URN.URN_STRING) ||
 		   !isValidNID(URN_STRING.substring(colon1Index+1, colon2Index)) ||
 		   !isValidNSS(URN_STRING.substring(colon2Index+1))) {
 			return false;
@@ -286,4 +293,123 @@ public final class URN {
 	public String toString() {
 		return _urnString;
 	}
+
+	/*
+	public static void main(String[] args) {
+		String [] validURNS = {
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		};
+
+		String [] invalidURNS = {
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC",
+		    "urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "ur:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "rn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urnsha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    " urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn::sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn: sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1 :PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1 :PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB",
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB ",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB.."+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
+		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB. "+
+			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		};
+		//UploadManager um = new UploadManager();
+		boolean encounteredFailure = false;
+		System.out.println("TESTING VALID URNS TO MAKE SURE THEY PASS TESTS..."); 
+		for(int i=0; i<validURNS.length; i++) {
+			try {
+				URN urn = new URN(validURNS[i]);
+			} catch(IOException e) {
+				if(!encounteredFailure) {
+					System.out.println(  ); 
+					System.out.println("VALID URN TEST FAILED");
+				}
+				encounteredFailure = true;
+				System.out.println(); 
+				System.out.println("FAILED ON URN: ");
+				System.out.print(validURNS[i]); 
+			}
+		}
+		if(!encounteredFailure) {
+			System.out.println("VALID URN TEST PASSED"); 
+		}
+		System.out.println(); 
+		System.out.println("TESTING INVALID URNS TO MAKE SURE THEY FAIL TESTS..."); 
+		for(int i=0; i<invalidURNS.length; i++) {
+			try {
+				URN urn = new URN(invalidURNS[i]);
+				if(!encounteredFailure) {
+					System.out.println("INVALID URN TEST FAILED");
+				}
+				encounteredFailure = true;
+				System.out.println(); 
+				System.out.println("FAILED ON URN "+i+": ");
+				System.out.print(invalidURNS[i]); 
+			} catch(IOException e) {
+			}
+		}
+		if(!encounteredFailure) {
+			System.out.println("INVALID URN TEST PASSED"); 
+		}
+		
+		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
+		encounteredFailure = false;
+		System.out.println(); 
+		System.out.println("TESTING SHA1 URN CONSTRUCTION"); 
+		
+
+		File[] testFiles = new File("C:\\My Music").listFiles();
+		File curFile = null;
+		try {
+			for(int i=0; i<testFiles.length; i++) {
+				curFile = testFiles[i];
+				if(!curFile.isFile()) {
+					System.out.println("FILE NOT A FILE: "+curFile); 
+				}
+				URN urn = URNFactory.createSHA1URN(curFile);
+				if(!urn.isSHA1()) {
+					System.out.println("SHA1 TEST FAILED ON FILE: "+curFile); 
+				}
+				if(!urn.isValidURN(urn.getURNString())) {
+					System.out.println("VALID URN TEST FAILED ON FILE: "+curFile); 
+				}
+				System.out.println("urn: "+urn); 
+			}
+		} catch(IOException e) {
+			encounteredFailure = true;
+			System.out.println("TEST FAILED ON FILE: "+curFile); 
+		}
+
+		if(!encounteredFailure) {
+			System.out.println("SHA1 URN CONSTRUCTION TEST PASSED"); 
+		}
+
+
+		// ALL TESTS HAVE PASSED
+		System.out.println(); 
+		if(!encounteredFailure) {
+			System.out.println("ALL TESTS PASSED"); 
+		}
+		
+	}
+	*/
 }
