@@ -112,40 +112,65 @@ public class WriteRegulator {
         }
         int windowDelay = 
           (((baseWait * _sendWindow.getWindowSize()) / _skipLimit) * 2) / 4;
+
+        // If our RTT time is going up, figure out what to do
         if ( rtt != 0 && baseWait != 0 && 
              (windowDelay < rtt || rtt > maxRTT) ) {
             if(LOG.isDebugEnabled())  
                 LOG.debug(
-                  "RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
-                  " rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
+                  " -- MAX EXCEED "+
+                  " RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
+                  " Rrtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
                   " lRTT:"+_sendWindow.lowRoundTripTime()+
                   " sWait:"+sentWait+
                   " mRTT:"+maxRTT+
                   " wDelay:"+windowDelay+
                   " sT:"+sleepTime);
 
+            // If we are starting to affect the RTT, 
+            // then ratchet down the accelorator
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
                 _skipLimit /= 2;
+                if(LOG.isDebugEnabled())  
+                    LOG.debug(
+                      " -- LOWER SL "+
+                      " rRTT:"+realRTT+
+                      " lRTT:"+lowRTT+
+                      " rtt:"+rtt+ 
+                      " sL:"+_skipLimit);
             }
-            if ( rtt > maxRTT || realRTT > maxRTT ) 
+
+            // If we are majorly affecting the RTT, then slow down right now
+            if ( rtt > maxRTT || realRTT > maxRTT ) {
                 sleepTime = (16*rtt) / 7;
+                if(LOG.isDebugEnabled())  
+                    LOG.debug(
+                      " -- UP SLEEP "+ 
+                      " rtt:"+rtt+ 
+                      " mRTT:"+maxRTT+
+                      " rRTT:"+realRTT+
+                      " sT:"+sleepTime);
+            }
         }
 
+        // Cycle through the accelerator states and enforced backoff
         if ( _skipLimit < 1 )
             _skipLimit = 1;
         _skipCount = (_skipCount + 1) % _skipLimit;
         if ( !_limitHit ) {
-            if (_sendWindow.getWindowStart()%_sendWindow.getWindowSize() == 0) {
+            // Bump up the skipLimit occasionally to see if we can handle it
+            if (_skipLimit < 50 &&
+                _sendWindow.getWindowStart()%_sendWindow.getWindowSize() == 0) {
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
-                LOG.debug("UPP sL:"+_skipLimit);
+                LOG.debug(" -- UPP sL:"+_skipLimit);
             }
         } else {
             _limitCount++;
             if (_limitCount >= _limitReset) {
                 if(LOG.isDebugEnabled())  
-                    LOG.debug("UPP reset:"+_skipLimit);
+                    LOG.debug(" -- UPP reset:"+_skipLimit);
                 _limitCount = 0;
                 _limitHit = false;
             }
