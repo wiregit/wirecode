@@ -17,6 +17,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
@@ -63,7 +64,8 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         // this ResumeDownloader is started from the library, not from restart,
         // that is why the last param to init is false
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
-        DownloadManager dm = new DownloadManagerStub();
+        DownloadManagerStub dm = new DownloadManagerStub();
+        dm.initialize();
         dm.scheduleWaitingPump();
         ret.initialize(dm, 
                        new FileManagerStub(), 
@@ -110,6 +112,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         downloader=(ResumeDownloader)in.readObject();
         in.close();
         DownloadManager dm = new DownloadManagerStub();
+        dm.initialize();
         dm.scheduleWaitingPump();
         downloader.initialize(dm,
                               new FileManagerStub(),
