@@ -71,7 +71,8 @@ public class LimeXMLDocument{
             NameValue nameValue = (NameValue)iterator.next();
             
             //update the field to value map
-            fieldToValue.put(nameValue.getName(), nameValue.getValue());
+            fieldToValue.put(nameValue.getName().trim(), 
+                             nameValue.getValue());
         }
     }
     
@@ -147,7 +148,8 @@ public class LimeXMLDocument{
                     String canonicalizedAttName= docElement.getNodeName()+
                     XMLStringUtils.DELIMITER+att.getNodeName()+
                     XMLStringUtils.DELIMITER;                
-                    fieldToValue.put(canonicalizedAttName,att.getNodeValue());
+                    fieldToValue.put(canonicalizedAttName.trim(),
+                                     att.getNodeValue().trim());
                 }
             }
         }
@@ -188,15 +190,14 @@ public class LimeXMLDocument{
             currTag=parentName+XMLStringUtils.DELIMITER+currNode.getNodeName();
         else
             currTag = currNode.getNodeName();
-            
+
         //if (currNode.getNodeType() == Node.CDATA_SECTION_NODE)
         //  System.out.println("this node has type  "+ currNode.getNodeType());
 
         Element currElement = (Element)currNode;
         String nodeValue = LimeXMLUtils.getText(currElement.getChildNodes());
-        nodeValue = nodeValue.trim();
         if (nodeValue != null && !nodeValue.equals(""))
-            fieldToValue.put(currTag, nodeValue);
+            fieldToValue.put(currTag.trim(), nodeValue.trim());
         //add the attributes only if its not the first level
         if(!parentName.equals("")){
             List attribs=LimeXMLUtils.getAttributes(currNode.getAttributes());
@@ -207,7 +208,8 @@ public class LimeXMLDocument{
                 String attString=currTag+XMLStringUtils.DELIMITER
                          +attName+XMLStringUtils.DELIMITER;
                 String attValue = att.getNodeValue();
-                fieldToValue.put(attString,attValue);
+                fieldToValue.put(attString.trim(),
+                                 attValue.trim());
             }
         }
         return currTag;
@@ -283,7 +285,7 @@ public class LimeXMLDocument{
     }
 
     public String getValue(String fieldName){
-        String value = (String)fieldToValue.get(fieldName);
+        String value = (String)fieldToValue.get(fieldName.trim());
         return value;
     }
     
