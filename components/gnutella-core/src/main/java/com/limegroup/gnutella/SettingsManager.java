@@ -3188,6 +3188,7 @@ public final class SettingsManager {
 	 */
 	public void setJarName(final String jarName) {
 		setStringValue(JAR_NAME, jarName);
+		setStringValue("CLASSPATH", jarName);
 	}
 
 	/**
