@@ -112,7 +112,7 @@ public class UpdateManager {
      * Returns whether or not we have a valid file on disk.
      */
     public boolean isValid() {
-        return isValid();
+        return isValid;
     }
     
     /**
