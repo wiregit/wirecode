@@ -13,7 +13,7 @@ import com.sun.java.util.collections.*;
  * for a GUID and mapping that GUID to null (in the case of a removed
  * ReplyHandler).
  */
-public class RouteTable {
+class RouteTable {
     /**
      * The obvious implementation of this class is a mapping from GUID to
      * ReplyHandler's.  The problem with this representation is it's hard to
