@@ -40,22 +40,69 @@ public final class PongCacherTest extends BaseTestCase {
     }
 
     /**
+     * Tests the method that determines whether or not we need pongs
+     * for the cacher.
+     */
+    public void testNeedsPongs() throws Exception {
+        ConnectionManager cm = 
+            new LeafConnectionManager(new ServerAuthenticator());
+        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
+        
+        // we should not need pongs when we're not an Ultrapeer.
+        assertTrue("should not have needed a pong", 
+                   !PongCacher.instance().needsPongs());
+        cm = new UltrapeerConnectionManager(new ServerAuthenticator());
+        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
+
+        // we should not need pongs when we're not an Ultrapeer.
+        assertTrue("should need a pong when none have been added yet", 
+                   PongCacher.instance().needsPongs());
+
+        PongCacher.instance().
+            addPong(PingReply.create(new GUID().bytes(), (byte)5));
+        
+        // we should still need a pong when there aren't enough yet
+        assertTrue("should need a pong when there still aren't very many", 
+                   PongCacher.instance().needsPongs());
+
+        // make sure we completely saturate the cacher with pongs
+        for(int j=0; j<10; j++) {
+            for(int i=0; i<PongCacher.NUM_HOPS; i++) {
+                PingReply curPong = 
+                    PingReply.create(new GUID().bytes(), (byte)i);
+                for(int z=0; z<i; z++) {
+                    curPong.hop();
+                }
+                PongCacher.instance().addPong(curPong);
+            }
+        }
+
+        // we should not need pongs when the cacher's full
+        assertTrue("should not need any pongs", 
+                   !PongCacher.instance().needsPongs());
+
+        Thread.sleep(3000);
+
+        // we should need pongs whenever we haven't gotten a new one for
+        // awhile
+        assertTrue("should need pongs since they're stale", 
+                   PongCacher.instance().needsPongs());
+
+    }
+
+    /**
      * Tests the method for getting the best set of pongs.
      */
     public void testGetBestPongs() throws Exception {
         ConnectionManager cm = 
             new UltrapeerConnectionManager(new ServerAuthenticator());
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
-        //Thread.sleep(2000);
         
         List pongs = PC.getBestPongs();
-        //int startSize = pongs.size();
 
         PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
-
-        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      1, pongs.size());        
@@ -63,11 +110,10 @@ public final class PongCacherTest extends BaseTestCase {
         pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
-        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
 
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
-                     2, pongs.size());  
+                     1, pongs.size());  
 
         // fill up the pongs at the default hop
         for(int i=0; i<30; i++) {
@@ -76,11 +122,10 @@ public final class PongCacherTest extends BaseTestCase {
             PC.addPong(curPong);
         }
 
-        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
 
         assertEquals("unexpected number of cached pongs", 
-                     PongCacher.NUM_CACHED_PONGS, pongs.size());
+                     PongCacher.NUM_PONGS_PER_HOP, pongs.size());
 
         PingReply highHopPong = 
             PingReply.create(new GUID().bytes(), (byte)5);
@@ -92,7 +137,7 @@ public final class PongCacherTest extends BaseTestCase {
         //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
-                     PongCacher.NUM_CACHED_PONGS, pongs.size());
+                     PongCacher.NUM_PONGS_PER_HOP+1, pongs.size());
 
         BucketQueue queue = 
             (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
@@ -113,7 +158,7 @@ public final class PongCacherTest extends BaseTestCase {
         //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
-                     PongCacher.NUM_CACHED_PONGS, pongs.size());   
+                     PongCacher.NUM_PONGS_PER_HOP+2, pongs.size());   
 
         iter = pongs.iterator();
         pr = (PingReply)iter.next();
@@ -139,15 +184,15 @@ public final class PongCacherTest extends BaseTestCase {
 
         pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);
-        assertEquals("unexpected bucket queue size", 2, bq.size());
-        assertEquals("unexpected bucket queue size", 2, bq.size(0));
+        assertEquals("unexpected bucket queue size", 1, bq.size());
+        assertEquals("unexpected bucket queue size", 1, bq.size(0));
 
-        for(int i=bq.size(0); i<PongCacher.NUM_CACHED_PONGS+2; i++) {
+        for(int i=bq.size(0); i<PongCacher.NUM_PONGS_PER_HOP+2; i++) {
             PC.addPong(pong);
         }
         
         assertEquals("unexpected bucket queue size", 
-                     PongCacher.NUM_CACHED_PONGS, bq.size(0));
+                     PongCacher.NUM_PONGS_PER_HOP, bq.size(0));
     }
 }
 
