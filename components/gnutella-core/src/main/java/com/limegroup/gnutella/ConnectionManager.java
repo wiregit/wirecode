@@ -1843,6 +1843,12 @@ public class ConnectionManager {
          * firewalled.
          */
         private volatile boolean _notifiedAboutFirewall = false;
+        
+        /**
+         * Flag for whether or not we've notified the user about them not
+         * having an internet connection.
+         */
+        private volatile boolean _notifiedAboutNoInternet = false;
     
         /**
          * Flag for whether or not the auto-connection process is in effect.
@@ -1880,6 +1886,7 @@ public class ConnectionManager {
             _hasInternetConnection = UNKNOWN;
             _gwebCachesFinished = false;
             _notifiedAboutFirewall = false;
+            _notifiedAboutNoInternet = false;
             _automaticallyConnecting = false;
             _lastSuccessfulConnect = 0;
             _lastConnectionCheck = 0;
@@ -2042,6 +2049,13 @@ public class ConnectionManager {
                 connect();  
                 return;  
             }
+            
+            // If we've already popped up a message this connect-time,
+            // don't pop up another one.
+            if(_notifiedAboutNoInternet)
+                return;
+            
+            _notifiedAboutNoInternet = true;
             
             // If the user has used the computer in the last 30 seconds, notify 
             // them to reconnect.  Otherwise, there may have been a temporary 
