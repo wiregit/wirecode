@@ -138,28 +138,39 @@ public class I18NSendReceiveTest
 
         List expectedReply = new ArrayList();
         //should find FILE_0
-        expectedReply.add(FILE_0);
+        addExpectedReply(expectedReply, FILE_0);
         sendCheckQuery(expectedReply, "hello");
 
         //should find FILE_2, FILE_3, FILE_4
-        expectedReply.add(FILE_2);
-        expectedReply.add(FILE_3);
-        expectedReply.add(FILE_4);
+        addExpectedReply(expectedReply, FILE_2);
+        addExpectedReply(expectedReply, FILE_3);
+        addExpectedReply(expectedReply, FILE_4);
         sendCheckQuery(expectedReply, "testthis");
         
         //should find FILE_3
-        expectedReply.add(FILE_3);
+        addExpectedReply(expectedReply, FILE_3);
         sendCheckQuery(expectedReply, "\u7206\u98a8");
 
         //should find FILE_1
-        expectedReply.add(FILE_1);
+        addExpectedReply(expectedReply, FILE_1);
         sendCheckQuery(expectedReply, "\u5143\u6c17");
         
         //should find FILE_4
-        expectedReply.add(FILE_4);
+        addExpectedReply(expectedReply, FILE_4);
         sendCheckQuery(expectedReply, "malcom testthis \u30e1\u30fc\u30c8\u30eb");
 
 
+    }
+    
+    /**
+     * Adds an expected reply to the expected reply list.
+     */
+    private void addExpectedReply(List list, String name) throws Exception {
+        // Get the name as it is on disk.
+        File f = new File("com/limegroup/gnutella/" + name);
+        assertTrue("file: " + name + " doesn't exist", f.exists());
+        f = f.getCanonicalFile(); // necessary.
+        list.add(f.getName());
     }
 
     /**
@@ -214,16 +225,16 @@ public class I18NSendReceiveTest
 
         List expectedReply = new ArrayList();
 
-        expectedReply.add(META_FILE_0);
+        addExpectedReply(expectedReply, META_FILE_0);
         sendCheckQueryXML(expectedReply, director1,
                           buildXMLString("director=\"" + director1 + "\""));
         
-        expectedReply.add(META_FILE_1);
-        expectedReply.add(META_FILE_2);
+        addExpectedReply(expectedReply, META_FILE_1);
+        addExpectedReply(expectedReply, META_FILE_2);
         sendCheckQueryXML(expectedReply, director2,
                           buildXMLString("director=\"" + director2 + "\""));
         
-        expectedReply.add(META_FILE_2);
+        addExpectedReply(expectedReply, META_FILE_2);
         sendCheckQueryXML(expectedReply, director2,
                           buildXMLString("director=\"" 
                                          + director2 
