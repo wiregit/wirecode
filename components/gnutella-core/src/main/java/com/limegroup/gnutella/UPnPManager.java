@@ -87,8 +87,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		"urn:schemas-upnp-org:service:WANIPConnection:1";
 	
 	/** prefixes and a suffix for the descriptions of our TCP and UDP mappings */
-	private static final String TCP_PREFIX = "Lime/TCP:";
-	private static final String UDP_PREFIX = "Lime/UDP:";
+	private static final String TCP_PREFIX = "LimeTCP";
+	private static final String UDP_PREFIX = "LimeUDP";
 	private static final String GUID_SUFFIX = 
 		ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
 	
@@ -365,7 +365,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		remove.setArgumentValue("NewExternalPort",m._externalPort);
 		remove.setArgumentValue("NewProtocol",m._protocol);
 		
-		return remove.postControlAction();
+		boolean success = remove.postControlAction();
+		if(LOG.isDebugEnabled())
+		    LOG.debug("Remove succeeded: " + success);
+		return success;
 	}
 
 	/**
@@ -515,6 +518,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				for (int i=0;;i++) {
     				getGeneric.setArgumentValue("NewPortMappingIndex",i);
 				    LOG.debug("Stale Iteration: " + i + ", generic.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
+				    getGeneric.print();
 					
 					if (!getGeneric.postControlAction())
 						break;
@@ -543,6 +547,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				Mapping current = (Mapping)iter.next();
 				if(LOG.isDebugEnabled())
 				    LOG.debug("Analyzing: " + current);
+				    
+				if(current._description == null)
+				    continue;
 				
 				// does it have our description?
 				if (current._description.equals(TCP_PREFIX+GUID_SUFFIX) ||

@@ -468,7 +468,7 @@ public class Acceptor implements Runnable {
         	if(natted && validPort && !forcedIP) {
         		int mappedPort = UPNP_MANAGER.mapPort(_port);
         		if(LOG.isDebugEnabled())
-        		    LOG.debug("UPNP port mapped: " + _port);
+        		    LOG.debug("UPNP port mapped: " + mappedPort);
         		
 			    //if we created a mapping successfully, update the forced port
 			    if (mappedPort != 0 ) {
