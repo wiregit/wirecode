@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_NativeLauncher_nativeLaunchFileWindows
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus
 }
