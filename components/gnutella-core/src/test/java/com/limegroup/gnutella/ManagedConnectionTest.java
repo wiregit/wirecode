@@ -148,10 +148,11 @@ public class ManagedConnectionTest extends BaseTestCase {
 	}
 
     public void testHorizonStatistics() {
+        HorizonCounter hc = HorizonCounter.instance();
         ManagedConnection mc= new ManagedConnection("", 0);
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
-        mc.HORIZON_UPDATE_TIME=1*200;   
+        hc.HORIZON_UPDATE_TIME=1*200;   
 
         PingReply pr1 = PingReply.create(
             GUID.makeGuid(), (byte)3, 6346,
@@ -167,46 +168,46 @@ public class ManagedConnectionTest extends BaseTestCase {
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
             3, 30, false, 0, false);
 
-        assertEquals("unexpected number of files", 0, mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 0, mc.getNumHosts());
-        assertEquals("unexted total file size", 0, mc.getTotalFileSize());
+        assertEquals("unexpected number of files", 0, hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
+        assertEquals("unexted total file size", 0, hc.getTotalFileSize());
 
         mc.updateHorizonStats(pr1);
         mc.updateHorizonStats(pr1);  //check duplicates
-        assertEquals("unexpected number of files", 1, mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
+        assertEquals("unexpected number of files", 1, hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
 
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+        try { Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }
             
-        mc.refreshHorizonStats();    
+        hc.refresh();
         mc.updateHorizonStats(pr1);  //should be ignored for now
         mc.updateHorizonStats(pr2);
         mc.updateHorizonStats(pr3);
-        assertEquals("unexpected number of files", 1, mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
-        mc.refreshHorizonStats();    //should be ignored
-        assertEquals("unexpected number of files", 1, mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
+        assertEquals("unexpected number of files", 1, hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
+        hc.refresh();    //should be ignored
+        assertEquals("unexpected number of files", 1, hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
 
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+        try { Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }            
 
-        mc.refreshHorizonStats();    //update stats
-        assertEquals("unexedted number of files", 1+2+3, mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 3, mc.getNumHosts());
-        assertEquals("unexpedted total filesize", 10+20+30, mc.getTotalFileSize());
+        hc.refresh();    //update stats
+        assertEquals("unexedted number of files", 1+2+3, hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 3, hc.getNumHosts());
+        assertEquals("unexpedted total filesize", 10+20+30, hc.getTotalFileSize());
 
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+        try { Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }       
 
-        mc.refreshHorizonStats();
-        assertEquals("unexpected number of files", 0,mc.getNumFiles());
-        assertEquals("unexpected number of hosts", 0,mc.getNumHosts());
-        assertEquals("unexpected total file size", 0,mc.getTotalFileSize());
+        hc.refresh();
+        assertEquals("unexpected number of files", 0,hc.getNumFiles());
+        assertEquals("unexpected number of hosts", 0,hc.getNumHosts());
+        assertEquals("unexpected total file size", 0,hc.getTotalFileSize());
         
         mc.close();
     }
