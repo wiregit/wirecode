@@ -806,7 +806,7 @@ public class ConnectionManager {
      * the modifications will not be visible during the iteration.
      */
     public List getConnections() {
-        List clone=new ArrayList(_connections);
+        List clone = new ArrayList(_connections);
         return clone;
     }
 
@@ -914,9 +914,9 @@ public class ConnectionManager {
      */
     private void connectionInitializing(Connection c) {
         //REPLACE _connections with the list _connections+[c]
-        List newConnections=new ArrayList(_connections);
+        List newConnections = new ArrayList(_connections);
         newConnections.add(c);
-        _connections=newConnections;
+        _connections = newConnections;
     }
 
     /**
@@ -943,19 +943,19 @@ public class ConnectionManager {
             if(!conn.isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections+[c]
-                List newConnections=new ArrayList(_initializedConnections);
+                List newConnections = new ArrayList(_initializedConnections);
                 newConnections.add(conn);
-                _initializedConnections=newConnections;
+                _initializedConnections = newConnections;
                 //maintain invariant
                 if(conn.isClientSupernodeConnection())
                     _shieldedConnections++;                
-            } else{
+            } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
-                List newConnections
-                    =new ArrayList(_initializedClientConnections);
+                List newConnections =
+                    new ArrayList(_initializedClientConnections);
                 newConnections.add(conn);
-                _initializedClientConnections=newConnections;
+                _initializedClientConnections = newConnections;
             }
 	        // do any post-connection initialization that may involve sending.
 	        conn.postInit();
@@ -1253,6 +1253,9 @@ public class ConnectionManager {
         finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
+            // TODO:: what happens if the call to handle the connection 
+            // initialization happens while we're processing the headers outside
+            // of the lock??
             processConnectionHeaders(conn);
         }
         
@@ -1446,7 +1449,6 @@ public class ConnectionManager {
             
         try {
             conn.initialize();
-
         } catch(IOException e) {
             remove(conn);
             throw e;
@@ -1488,14 +1490,14 @@ public class ConnectionManager {
     }
     
     // TODO: threading issues????
-    public synchronized void handleConnectionInitialization(Connection conn) 
+    public void handleConnectionInitialization(Connection conn) 
         throws IOException  {
 
         // if the connection received headers, process the headers to
         // take steps based on the headers
         // processConnectionHeaders(conn);     
         
-        // If there's not space for the connection, reject it.  This mechanism
+        // If there's no space for the connection, reject it.  This mechanism
         // works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         // connections.  Sometimes Connections are handled by headers
         // directly.
@@ -1530,7 +1532,7 @@ public class ConnectionManager {
      *
      * @param conn the <tt>Connection</tt> to finish initializing
      */
-    private synchronized void completeConnectionInitialization(Connection conn) {
+    private void completeConnectionInitialization(Connection conn) {
         synchronized(this) {
             if(conn.isOutgoing()) {
                 _initializingFetchedConnections.remove(conn);
@@ -1671,7 +1673,6 @@ public class ConnectionManager {
 
             Assert.that(endpoint != null);
 
-
             Connection connection = new Connection(
                 endpoint.getHostname(), endpoint.getPort());
 
@@ -1684,23 +1685,15 @@ public class ConnectionManager {
                     initializeFetchedConnection(connection, this);
                     _catcher.doneWithConnect(endpoint, true);
                 } catch (NoGnutellaOkException e) {
-                    _catcher.doneWithConnect(endpoint, true);
-                    throw e;                    
+                    _catcher.doneWithConnect(endpoint, true);                   
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
-                    throw e;
                 }
-
-				//startConnection(connection);
-            } catch(IOException e) {
+                // TODO: review again the removal of startConnection call here
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
             }
-            //finally{
-              //  if (connection.isClientSupernodeConnection())
-                //    lostShieldedClientSupernodeConnection();
-            //}
         }
 	}
 }
