@@ -119,13 +119,13 @@ public abstract class AbstractStatHandler {
 	 *
 	 * @param msg the received <tt>Message</tt> to add to the data
 	 */
-	public void addMessage(Message msg) {
-		
+	public void addMessage(Message msg) {		
+		BANDWIDTH_BYTE_STAT.addData(msg.getTotalLength());
+
 		// if we're not recording advanced stats, ignore the call
 		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
 		NUMBER_STAT.incrementStat();
 		BYTE_STAT.addData(msg.getTotalLength());
-		BANDWIDTH_BYTE_STAT.addData(msg.getTotalLength());
 		if(new GUID(msg.getGUID()).isLimeGUID()) {
 			LIME_NUMBER_STAT.incrementStat();
 			LIME_BYTE_STAT.addData(msg.getTotalLength());
