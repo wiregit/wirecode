@@ -63,7 +63,7 @@ public class CreativeCommonsResultTest
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File cc1 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/ccverifytest0.mp3");
@@ -174,8 +174,40 @@ public class CreativeCommonsResultTest
 
     ///////////////////////// Actual Tests ////////////////////////////
 
-    public void testCCResultsNormalSearch() {
-        
+    // MUST RUN THIS TEST FIRST
+    public void testCCResultsXMLSearch() throws Exception {
+
+        Thread.sleep(2000); // give time to verify files
+        assertEquals(2, rs.getNumSharedFiles());
+
+        for (int i = 0; i < testUPs.length; i++) {
+            testUPs[i] = connect(rs, 6355+i, true);
+            assertTrue("should be open", testUPs[i].isOpen());
+            assertTrue("should be up -> leaf",
+                testUPs[i].isSupernodeClientConnection());
+            drain(testUPs[i], 500);
+        }
+
+        // just make an incoming to the leaf so it knows it will respond to
+        // queries
+        Socket s = new Socket(InetAddress.getLocalHost(), PORT);
+        s.close();
+
+        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio license=\"Creative Commons\"></audio></audios>";
+
+        // we should send a query to the leaf and get results.
+        QueryRequest query = QueryRequest.createQuery("Creative Commons",
+                                                      richQuery);
+        testUPs[1].send(query);
+        testUPs[1].flush();
+
+        QueryReply reply = getFirstQueryReply(testUPs[1]);
+        assertNotNull(reply);
+        assertEquals(new GUID(query.getGUID()), new GUID(reply.getGUID()));
+        assertEquals(2, reply.getResultCount());
+        String hexML = new String(reply.getXMLBytes());
+        assertTrue(hexML, hexML.indexOf("license=\"Creative Commons\"") > 0);
+
     }
 
 
