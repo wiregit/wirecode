@@ -263,6 +263,20 @@ public class RouterService
     }
 
     /**
+     *  Return the total number of dropped messages 
+     */
+    public int getTotalDroppedMessages() {
+	return( manager.totDropped );
+    }
+
+    /**
+     *  Return the total number of misrouted messages
+     */
+    public int getTotalRouteErrors() {
+	return( manager.totRouteError );
+    }
+
+    /**
      *  Return the number of good hosts in my horizon.
      */
     public long getNumHosts() {

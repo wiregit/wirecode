@@ -79,6 +79,8 @@ public class ConnectionManager implements Runnable {
     public int QReqCount; //Query Request count
     public int QRepCount; //Query Reply count
     public int pushCount; //Push request count
+    public int totDropped; //Total dropped messages
+    public int totRouteError; //Total misrouted messages
     
     private Vector badHosts = new Vector();
 

@@ -311,6 +311,7 @@ public class Connection implements Runnable {
 
     private final boolean isRouteSpam(Message m) {
 	if (! routeFilter.allow(m)) {
+	    manager.totDropped++;
 	    dropped++;
 	    return true;
 	} else
@@ -410,6 +411,7 @@ public class Connection implements Runnable {
 		    }
 		    else { //Route Table does not know what to do with message
 			//do nothing...drop the message
+	                manager.totDropped++;
 			dropped++;
 		    }
 		}
@@ -496,6 +498,7 @@ public class Connection implements Runnable {
 		    }
 		    else{//route table does not know what to do this message
 			//do nothing...drop the message
+	                manager.totDropped++;
 			dropped++;
 		    }
 		}
@@ -558,6 +561,8 @@ public class Connection implements Runnable {
 		    }
 		    else{// the message has arrived in error or is spam
 			//do nothing.....drop the message
+	                manager.totRouteError++;
+	                manager.totDropped++;
 			dropped++;
 		    }
 		}// else if		
