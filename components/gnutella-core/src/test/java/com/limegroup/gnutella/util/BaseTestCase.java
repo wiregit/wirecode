@@ -253,8 +253,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public static void setupSettings() {
         SettingsManager.instance(); // initialize SettingsManager
-        AbstractSettings.setShouldSave(false);
-        AbstractSettings.revertToDefault();
+        SettingsHandler.setShouldSave(false);
+        SettingsHandler.revertToDefault();
     }
     
     /**
@@ -320,7 +320,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public static void setStandardSettings() {
         SettingsManager settings = SettingsManager.instance();
-        AbstractSettings.revertToDefault();
+        SettingsHandler.revertToDefault();
 		settings.setExtensions("tmp");
 		ConnectionSettings.KEEP_ALIVE.setValue(4);
 		SearchSettings.GUESS_ENABLED.setValue(true);

@@ -110,7 +110,6 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     }
 
     public static void setSettings() {
-		AbstractSettings.revertToDefault();
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
