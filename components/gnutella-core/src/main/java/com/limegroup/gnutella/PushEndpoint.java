@@ -65,7 +65,8 @@ public class PushEndpoint {
 		else 
 			_proxies = DataUtils.EMPTY_SET;
 		
-		_size = HEADER_SIZE+_proxies.size()*PROXY_SIZE;
+		_size = HEADER_SIZE+
+			Math.min(_proxies.size(),4) * PROXY_SIZE;
 		
 		//also calculate the hashcode in the constructor
 		
@@ -107,14 +108,14 @@ public class PushEndpoint {
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
-		where[offset] = (byte)_proxies.size();
+		where[offset] = (byte)(Math.min(4,_proxies.size()));
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,offset+1,16);
 		
 		//store the push proxies
 		int i=0;
-		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+		for (Iterator iter = _proxies.iterator();iter.hasNext() && i < 4;) {
 			PushProxyInterface ppi = (PushProxyInterface) iter.next();
 			
 			byte [] addr = ppi.getPushProxyAddress().getAddress();

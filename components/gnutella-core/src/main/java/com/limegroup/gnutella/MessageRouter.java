@@ -79,9 +79,6 @@ public abstract class MessageRouter {
      */
     private RouteTable _pushRouteTable = 
         new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
-    
-    private RouteTable _headPongRouteTable = 
-        new RouteTable(2, MAX_ROUTE_TABLE_SIZE);
 
     /** How long to buffer up out-of-band replies.
      */
@@ -2589,45 +2586,13 @@ public abstract class MessageRouter {
     	UDPService uservice = UDPService.instance();
     	
     	if (_udpHeadRequests.add(host)) {
-    		
-    		//this ping needs to be routed.
-    	//	if (ping.getClientGuid()!=null) 
-    	//		routeHeadPing(ping,datagram);
-    	//	else {
-    		
-    			HeadPong pong = new HeadPong(ping);
-    		
-    			uservice.send(pong, host, port);
-    	//	}
+    		HeadPong pong = new HeadPong(ping);
+    		uservice.send(pong, host, port);
+    
     	}
     }
     
-    private void routeHeadPing(HeadPing ping, DatagramPacket datagram) {
-    	
-    	InetAddress host = datagram.getAddress();
-    	int port = datagram.getPort();
-    	
-    	ReplyHandler handler = 
-			_pushRouteTable.getReplyHandler(ping.getClientGuid().bytes());
-		
-		//drop the ping if no entry
-		if (handler == null)
-			return;
-		
-		//don't bother routing if this is intended for me.
-		if (handler instanceof ForMeReplyHandler) 
-			handleHeadPing(HeadPing.createForwardPing(ping),datagram);
-		
-		//remember where to send the pong to.
-		//the pong will have the same GUID as the ping.
-		UDPReplyHandler pinger = new UDPReplyHandler(host,port);
-		_headPongRouteTable.routeReply(ping.getGUID(),pinger);
-		
-		//and send off the routed ping
-		handler.send(ping);
-
-    }
-    
+        
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
@@ -2644,12 +2609,7 @@ public abstract class MessageRouter {
     	
     	boolean send=false;
     	
-    	if (RouterService.isSupernode())
-    		send = _udpHeadRequests.add(conn.getInetAddress()); 
-    	else
-    		send = true;
-    	
-    	if (send){
+    	if (_udpHeadRequests.add(conn.getInetAddress())){
     		HeadPong pong = new HeadPong(ping);
     		conn.send(pong);
     	}

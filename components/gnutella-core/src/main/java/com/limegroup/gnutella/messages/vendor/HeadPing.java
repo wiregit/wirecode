@@ -40,11 +40,6 @@ public class HeadPing extends VendorMessage {
 	
 	
 	/**
-	 * whether this ping should be routed like a push request
-	 */
-	public static final int PUSH_PING=0x8;
-	
-	/**
 	 * the feature mask.
 	 */
 	public static final int FEATURE_MASK=0xF;
@@ -53,7 +48,7 @@ public class HeadPing extends VendorMessage {
 	
 	private final byte _features;
 	
-	private final GUID _guid;
+	
 	
 	/**
 	 * creates a message object with data from the network.
@@ -91,12 +86,7 @@ public class HeadPing extends VendorMessage {
 		}
 		
 		//parse the client guid if this is a push request
-		if ((_features & PUSH_PING) == PUSH_PING) {
-			byte [] guidBytes = new byte[16];
-			System.arraycopy(payload,42,guidBytes,0,16);
-			_guid = new GUID(guidBytes);
-		}
-		else _guid=null;
+		
 		
 	}
 	
@@ -105,33 +95,17 @@ public class HeadPing extends VendorMessage {
 	 * @param sha1 the urn to get information about.
 	 * @param features which features to include in the response
 	 */
-	public HeadPing(URN urn, int features) {
-		 this (urn, null, features);
-	}
-	
-	/**
-	 * creates a HeadPing that will be routed like a push request once it
-	 * reaches the push proxy.  
-	 * 
-	 * @param sha1 the sha1 urn of the file we want info about
-	 * @param clientGuid the clientGuid of the firewalled host
-	 * @param features the format of the pong.  
-	 */
-	public HeadPing(URN sha1,GUID clientGuid,int features) {
+	public HeadPing(URN sha1, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(sha1, features,clientGuid));
-		
-		//make sure the push flag is set if pushing
-		if (clientGuid!=null)
-			features = features | PUSH_PING;
-		
+		 		derivePayload(sha1, features));
 		features = features & FEATURE_MASK;
 		
 		_features = (byte)features;
-		_guid =clientGuid;
-		_urn = sha1;
 		
+		_urn = sha1;
 	}
+	
+
 	
 	
 	/**
@@ -141,48 +115,22 @@ public class HeadPing extends VendorMessage {
 		this(urn, PLAIN);
 	}
 	
-	/**
-	 * creates a ping that should be forwarded to a shielded leaf.
-	 * both messages have the same guid.
-	 * 
-	 * @param original the original ping received from the pinger
-	 * @return the new ping, with stripped clientGuid and updated features.
-	 */
-	public static HeadPing createForwardPing(HeadPing original) {
-		
-		HeadPing ret = 
-			new HeadPing(original.getUrn(),
-					original.getFeatures() & ~PUSH_PING);
-		
-		ret.setGUID(new GUID(original.getGUID()));
-		
-		return ret;
-	}
 	
-	private static byte [] derivePayload(URN urn, int features, GUID clientGuid) {
+	private static byte [] derivePayload(URN urn, int features) {
 		 
-		//make sure the push flag is set if pushing
-		if (clientGuid!=null)
-			features = features | PUSH_PING;
 		
 		features = features & FEATURE_MASK;
 		
 		
 		String urnStr = urn.httpStringValue();
 		int urnlen = urnStr.getBytes().length;
-		int totalLen = urnlen;
-		totalLen= totalLen+ (clientGuid!=null ? 
-					clientGuid.bytes().length+1 : 1);
+		int totalLen = urnlen+1;
 		
 		byte []ret = new byte[totalLen];
 		
 		ret[0]=(byte)features;
 		
 		System.arraycopy(urnStr.getBytes(),0,ret,1,urnlen);
-		
-		if (clientGuid!=null)
-			System.arraycopy(clientGuid.bytes(),0,ret,urnlen+1,16);
-		
 		
 		return ret;
 	}
@@ -211,12 +159,5 @@ public class HeadPing extends VendorMessage {
 		return _features;
 	}
 	
-	/**
-	 * 
-	 * @return the client guid that this ping should be 
-	 * forwarded to.  if null, this is not a push ping.
-	 */
-	public GUID getClientGuid() {
-		return _guid;
-	}
+
 }
