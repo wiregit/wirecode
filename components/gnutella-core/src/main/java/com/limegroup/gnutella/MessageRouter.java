@@ -2101,6 +2101,10 @@ public abstract class MessageRouter {
 
         if(replyHandler != null)
             replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
+        
+        //this is a little weird case but we may use it somewhere (??)
+        else if (Arrays.equals(_clientGUID,push.getClientGUID()))
+    	    FOR_ME_REPLY_HANDLER.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else
             throw new IOException("no route for push");
     }
