@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
-import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
@@ -689,46 +689,23 @@ public abstract class FileManager {
         //runner thread only obtain this's monitor when adding individual
         //files.
         {
-            Map added = new HashMap();
+            Set added = new HashSet();
 
             // Add contents of each directory as long as we're not interrupted.
             for(int i = 0; i < directories.length && !loadThreadInterrupted(); i++) {
-                added.putAll(updateDirectories(directories[i], null));
+                added.addAll(updateDirectories(directories[i], null));
             }
 
-            // Add specially shared files while checking for duplicates and
-            // directories with existing entries as long as we're not interrupted.
+            // Add specially shared files as long as we're not interrupted, 
+            // and update the number of pending files.
             File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-            for(int j = 0; j < specialFiles.length && !loadThreadInterrupted(); j++) {
-                File directory = specialFiles[j].getParentFile();
-                KeyValue kv = (KeyValue)added.get(directory);
-                if(kv == null) {
-                    added.put(directory, new KeyValue(directory, new File[] { specialFiles[j] }));
-                    _numPendingFiles++;
-                } else {
-                    // check for duplicate existing entry
-                    boolean found = false;
-                    File[] existingFiles = (File[])kv.getValue();
-                    for(int k = 0; k < existingFiles.length; k++) {
-                        if(specialFiles[j].getName().equals(existingFiles[k].getName())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    // no duplicate found, so need to add specially shared file to list
-                    if(!found) {
-                        File[] newExistingFiles = new File[existingFiles.length + 1];
-                        System.arraycopy(existingFiles, 0, newExistingFiles, 0, existingFiles.length);
-                        newExistingFiles[existingFiles.length] = specialFiles[j];
-                        kv.setValue(newExistingFiles);
-                        _numPendingFiles++;
-                    }
-                }
-            }
+            int preSpecialSize = added.size();
+            added.addAll(Arrays.asList(specialFiles));
+            _numPendingFiles += (added.size() - preSpecialSize);
             
             // Add the files that were just marked as being shareable.
             if (!loadThreadInterrupted())
-                updateSharedFiles(added.values().iterator());
+                updateSharedFiles(added.iterator());
             
             // Compact the index once.  As an optimization, we skip this
             // if loadSettings has subsequently been called.
@@ -750,34 +727,31 @@ public abstract class FileManager {
     }
     
     /**
-     * Recursively adds this directory and all subdirectories
-     * to the shared directories and updated the number of pending
-     * shared files. If directory doesn't exist, isn't a 
-     * directory, or has already been added, does nothing.
-     * This method is thread-safe.  It acquires locks on a per-directory basis.
-     * If the _loadThread is interrupted while scanning the contents of
-     * directory, it returns immediately.
-     * @requires directory is part of DIRECTORIES_TO_SHARE or one of
-     *  its children, and parent is directory's shared parent or null if
-     *  directory's parent is not shared.
+     * Recursively adds this directory and all subdirectories to the shared
+     * directories and updates the number of pending shared files.  Does nothing
+     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
+     * been added.  This method is thread-safe.  It acquires locks on a
+     * per-directory basis.  If the _loadThread is interrupted while scanning
+     * the contents of <tt>directory</tt>, it returns immediately.
+     * 
+     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
+     *           children, and parent is directory's shared parent or null if
+     *           directory's parent is not shared.
      * @modifies this
-     * @return A Map of directories that were added.  The Map's keys
-     *         are directories and the values are in the form of a KeyValue pair
-     *         (the key being the directory, and the value being an array of
-     *         shareable files in that directory).
+     * @return A Set of Files that were added.
      */
-    private Map updateDirectories(File directory, File parent) {
+    private Set updateDirectories(File directory, File parent) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
-            directory=FileUtils.getCanonicalFile(directory);
+            directory = FileUtils.getCanonicalFile(directory);
         } catch (IOException e) {
-            return Collections.EMPTY_MAP;  //doesn't exist?
+            return Collections.EMPTY_SET;  //doesn't exist?
         }
         
         // don't share the incomplete directory ... 
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
-            return Collections.EMPTY_MAP;
+            return Collections.EMPTY_SET;
 
         boolean isForcedShare = directory.equals(FORCED_SHARE);
         
@@ -788,7 +762,7 @@ public abstract class FileManager {
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
-            return Collections.EMPTY_MAP;
+            return Collections.EMPTY_SET;
 
         int numShareable = file_list.length;
         int numSubDirs = dir_list.length;
@@ -799,7 +773,7 @@ public abstract class FileManager {
         synchronized (this) {
             // if it was already added, ignore.
             if ( _sharedDirectories.get(directory) != null)
-                return Collections.EMPTY_MAP;
+                return Collections.EMPTY_SET;
                 
             _sharedDirectories.put(directory, new IntSet());
             
@@ -808,8 +782,8 @@ public abstract class FileManager {
                 
             _numPendingFiles += numShareable;
         }
-        Map added = new HashMap();
-        added.put(directory, new KeyValue(directory, file_list));
+        Set added = new HashSet();
+        added.addAll(Arrays.asList(file_list));
         
         //STEP 3:
         // Recursively add subdirectories.
@@ -830,7 +804,7 @@ public abstract class FileManager {
         // Do not share subdirectories of the forcibly shared dir.
         if(!isForcedShare) { 
             for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
-                added.putAll(updateDirectories(dir_list[i], directory));
+                added.addAll(updateDirectories(dir_list[i], directory));
             }
         }
         
@@ -838,26 +812,18 @@ public abstract class FileManager {
     }
     
     /**
-     * Updates the shared files with the list of shareable files.
+     * Updates the shared files with an iterator of additional Files to share.
      * This method is thread-safe.  It acquires locks on a per-file basis.
      * If the _loadThread is interrupted while adding the contents of the
      * directory, it returns immediately.     
      *
-     * @param toShare an iterator over KeyValue objects, the key being the directory
-     *  the files are in, and the value being an array of the shareable
-     *  files.
+     * @param toShare an iterator over File instances.
      */
      private void updateSharedFiles(Iterator toShare) {
-        while(toShare.hasNext() && !loadThreadInterrupted()) {
-            KeyValue info = (KeyValue)toShare.next();
-            File[] shareables = (File[])info.getValue();
-            for(int j = 0; j < shareables.length && !loadThreadInterrupted(); j++) {
-                addFile(shareables[j]);
-                synchronized(this) { _numPendingFiles--; }
-            }
-            // let the gc clean up the array of shareables.
-            info.setValue(null);            
-        }
+         while (toShare.hasNext() && !loadThreadInterrupted()) {
+             addFile((File)toShare.next());
+             synchronized(this) { _numPendingFiles--; }
+         }
     }
     
      /**
