@@ -8,6 +8,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
 
@@ -168,11 +169,10 @@ public final class UploadManager implements BandwidthTracker {
                     int oldTimeout = socket.getSoTimeout();
                     socket.setSoTimeout(SettingsManager.instance(
                         ).getPersistentHTTPConnectionTimeout());
-                    //dont read a word of size more than 3 
+                    //dont read a word of size more than 4 
                     //as we will handle only the next "GET" request
-                    String word=IOUtils.readWord(socket.getInputStream(), 3);
+                    String word = IOUtils.readWord(socket.getInputStream(), 4);
                     socket.setSoTimeout(oldTimeout);
-                    //TODO: how could this possibly equal 'HEAD' if we only read 3 characters?
                     if(!word.equalsIgnoreCase("GET") &&				   
 					   !word.equalsIgnoreCase("HEAD")) { 
                         return;
