@@ -1,19 +1,18 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
-import com.sun.java.util.collections.Arrays;
+import junit.framework.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Unit tests for Utilities
  */
-public class UtilitiesTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class UtilitiesTest extends TestCase {
     public UtilitiesTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(UtilitiesTest.class);
+        return new TestSuite(UtilitiesTest.class);
     }
 
     public void testFill() {
@@ -42,7 +41,7 @@ public class UtilitiesTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testLog2() {
         for (int i=0; i<31; i++) {
-            assertEquals(i, Utilities.log2(1<<i));
+            assertTrue(Utilities.log2(1<<i)==i);
         }
     }     
 }

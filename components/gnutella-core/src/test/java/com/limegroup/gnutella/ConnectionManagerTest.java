@@ -1,412 +1,126 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
+import junit.framework.*;
 import java.util.Properties;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.security.DummyAuthenticator;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.MiniAcceptor;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
  * of right events.  VERY slow--involves lots of timeouts--so not part of the
  * standard test suite.  
  */
-public class ConnectionManagerTest extends BaseTestCase {
-
-    private static final TestHostCatcher CATCHER = new TestHostCatcher();
-
-    private static final RouterService ROUTER_SERVICE =
-        new RouterService(new ActivityCallbackStub());
+public class ConnectionManagerTest extends TestCase {
+    private ConnectionManager cm;
+    private TestHostCatcher hc;
 
     public ConnectionManagerTest(String name) {
-        super(name);        
+        super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(ConnectionManagerTest.class);
+        return new TestSuite(ConnectionManagerTest.class);
     }
 
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
-    }
-    
-    public static void globalSetUp() throws Exception {
-        setSettings();
-        launchAllBackends();
-                
-        PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
-
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
-                                    "_catcher",CATCHER);
-                                    
-        ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
-    }
-
-    public void setUp() throws Exception {
-        setSettings();
-    }
-    
-    private static void setSettings() throws Exception {
-        ConnectionSettings.PORT.setValue(6346);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
+    public void setUp() {
+		ConnectionSettings.KEEP_ALIVE.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);	
+        //SettingsManager.instance().setKeepAlive(0);
+        //SettingsManager.instance().setConnectOnStartup(false);
+        cm=new ConnectionManager(new DummyAuthenticator());
+        hc=new TestHostCatcher();
+        cm.initialize();        
     }
 
     public void tearDown() {
         //Ensure no more threads.
-        RouterService.disconnect();
-        RouterService.clearHostCatcher();
-        CATCHER.connectSuccess = 0;
-        CATCHER.connectFailures = 0;
-        CATCHER.endpoint = null;
-        sleep();
+        cm.disconnect();
     }
     
-    /**
-     * Tests the method for checking whether or not connections should be 
-     * allowed.
-     * 
-     * @throws Exception if an error occurs
-     */
-    public void testAllowConnection() throws Exception {
-        
-    }
-    
-    /**
-     * Tests the method for allowing ultrapeer 2 ultrapeer connections.
-     * 
-     * @throws Exception if an error occurs
-     */
-    public void testAllowUltrapeer2UltrapeerConnection() throws Exception {
-        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
-            "allowUltrapeer2UltrapeerConnection", 
-            new Class[] {HandshakeResponse.class});
-        
-        
-        HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        Object[] params = new Object[] {hr};
-        boolean allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertFalse("connection should not have been allowed", allow);
-        
-        hr = createTestResponse("Bearshare 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-        
-        hr = createTestResponse("LimeWire 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-        
-        hr = createTestResponse("Shareaza 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-    }
-    
-    /**
-     * Tests the method for allowing ultrapeer 2 leaf connections.
-     * 
-     * @throws Exception if an error occurs
-     */
-    public void testAllowUltrapeer2LeafConnection() throws Exception {
-        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
-            "allowUltrapeer2LeafConnection", 
-            new Class[] {HandshakeResponse.class});
-        
-        
-        HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        Object[] params = new Object[] {hr};
-        boolean allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertFalse("connection should not have been allowed", allow);
-        
-        hr = createTestResponse("Bearshare 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-        
-        hr = createTestResponse("LimeWire 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-        
-        hr = createTestResponse("Shareaza 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
-        assertTrue("connection should have been allowed", allow);
-    }    
-
-    /**
-     * Utility method for creating a set of headers with the specified user
-     * agent value.
-     * 
-     * @param userAgent the User-Agent to include in the headers
-     * @return a new <tt>HandshakeResponse</tt> with the specified user agent
-     * @throws IOException if an error occurs
-     */
-    private static HandshakeResponse createTestResponse(String userAgent) 
-        throws IOException {
-        Properties headers = new Properties();
-        headers.put("User-Agent", userAgent);
-        return HandshakeResponse.createResponse(headers);
-    }
-    
-    public void testSupernodeStatus() throws Exception {
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);        
-        ConnectionManager mgr = RouterService.getConnectionManager();
-        
-        // test preconditions
-        assertTrue("should start as supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-        
-        // construct peers
-        // u ==> i should be ultrapeer
-        // l ==> i should be leaf
-        ManagedConnection u1, l1, l2;
-        u1 = new SupernodeClient();
-        l1 = new ClientSupernode();
-        l2 = new ClientSupernode();
-        
-        // add a supernode => client connection
-        initializeStart(u1);
-        assertTrue("should still be supernode", mgr.isSupernode());
-        assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
-        initializeDone(u1);
-        assertTrue("should still be supernode", mgr.isSupernode());
-        assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
-        mgr.remove(u1);
-        assertTrue("should still be supernode", mgr.isSupernode());
-        assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
-        
-        
-        // add a leaf -> supernode connection
-        initializeStart(l1);
-        assertTrue("should still be supernode", mgr.isSupernode());
-        assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
-        initializeDone(l1);
-        assertTrue("should not be supernode", !mgr.isSupernode());
-        assertTrue("should be leaf", mgr.isShieldedLeaf());
-        mgr.remove(l1);
-        assertTrue("should be supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-        
-        // test a strange condition
-        // (two leaves start, second finishes then removes,
-        //  third removes then finishes)
-        initializeStart(l1);
-        initializeStart(l2);
-        initializeDone(l2);
-        assertTrue("should not be supernode", !mgr.isSupernode());
-        assertTrue("should be leaf", mgr.isShieldedLeaf());
-        mgr.remove(l2);
-        assertTrue("should be supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-        mgr.remove(l1);
-        assertTrue("should be supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-        initializeDone(l1);
-        assertTrue("should be supernode", mgr.isSupernode());
-        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-    }   
-        
-    
-    /**
-     * Tests to make sure that a connection does not succeed with an
-     * unreachable host.
-     */
     public void testUnreachableHost() {
-        CATCHER.endpoint = new Endpoint("1.2.3.4", 5000);
-        RouterService.connect();
-        sleep(10000);
-        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
+        hc.endpoint=new Endpoint("1.2.3.4", 6346);
+        cm.setKeepAlive(1);
+        sleep();
+        assertEquals(0, hc.connectSuccess);
+        assertEquals(1, hc.connectFailures);
+        cm.disconnect();
     }
 
-    /**
-     * Test to make sure tests does not succeed with a host reporting
-     * the wrong protocol.
-     */
     public void testWrongProtocolHost() {
-        CATCHER.endpoint = new Endpoint("www.yahoo.com", 80);
-        RouterService.connect();
+        hc.endpoint=new Endpoint("www.yahoo.com", 80);
+        cm.setKeepAlive(1);
         sleep();
-        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
-        //assertEquals("should have received failure", 1, CATCHER.connectFailures);
+        assertEquals(0, hc.connectSuccess);
+        assertEquals(1, hc.connectFailures);
     }
 
-    /**
-     * Test to make sure that a good host is successfully connected to.
-     */
     public void testGoodHost() {
-        CATCHER.endpoint = new Endpoint("localhost", Backend.BACKEND_PORT);
-        
-        RouterService.connect();
+        MiniAcceptor acceptor=new MiniAcceptor(null);
+        hc.endpoint=new Endpoint("localhost", 6346);
+        cm.setKeepAlive(1);
+        Connection in=acceptor.accept();
+        assertEquals(1, hc.connectSuccess);
+        assertEquals(0, hc.connectFailures);
+        in.close();
         sleep();
-        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
-        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
+        assertEquals(1, hc.connectSuccess);
+        assertEquals(0, hc.connectFailures);
     }
 
-
-    /**
-     * Tests to make sure that a host is still added to the host
-     * catcher as a connection that was made (at least temporarily) even
-     * if the server sent a 503.
-     */
     public void testRejectHost() {
-        CATCHER.endpoint = 
-            new Endpoint("localhost", Backend.REJECT_PORT);
-        RouterService.connect();
+        MiniAcceptor acceptor=new MiniAcceptor(new RejectResponder());
+        hc.endpoint=new Endpoint("localhost", 6346);
+        cm.setKeepAlive(1);
+        Connection in=acceptor.accept();
         sleep();
-        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
-        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
+        assertEquals(1, hc.connectSuccess);   //success even though rejected
+        assertEquals(0, hc.connectFailures);
+    }
+    
+    class RejectResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response, 
+                                         boolean outgoing) {
+            return new HandshakeResponse(HandshakeResponse.SHIELDED,
+                                         HandshakeResponse.SHIELDED_MESSAGE,
+                                         new Properties());
+        }
     }
 
     private void sleep() {
-        sleep(5000);
-    }
-
-    private void sleep(int milliseconds) {
         try {
-            Thread.sleep(milliseconds);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
         }
-    }
-    
-    
-    private void initializeStart(ManagedConnection c) throws Exception {
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
-            "connectionInitializingIncoming",
-            new Object[] { c },
-            new Class[] { ManagedConnection.class} );
-    }
-    
-    private void initializeDone(ManagedConnection c) throws Exception {
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
-            "connectionInitialized",
-            new Object[] { c },
-            new Class[] { ManagedConnection.class} );            
+    }        
+}
+
+class TestHostCatcher extends HostCatcher {
+    volatile Endpoint endpoint;
+    volatile int connectSuccess=0;
+    volatile int connectFailures=0;
+
+    TestHostCatcher() {
+        super();
     }
 
-    /**
-     * Test host catcher that allows us to return endpoints that we 
-     * specify when our test framework requests endpoints to connect
-     * to.
-     */
-    private static class TestHostCatcher extends HostCatcher {
-        private volatile Endpoint endpoint;
-        private volatile int connectSuccess=0;
-        private volatile int connectFailures=0;
-        
-        TestHostCatcher() {
-            super();
-        }
-        
-        public synchronized Endpoint getAnEndpoint() throws InterruptedException {
-            if (endpoint==null)
-                throw new InterruptedException("no endpoint");
-            else {
-                Endpoint ret=endpoint;
-                endpoint=null;
-                return ret;
-            }
-        }
-        
-        public synchronized void doneWithConnect(Endpoint e, boolean success) {
-            if (success)
-                connectSuccess++;
-            else
-                connectFailures++;
-        }
-        
-        // overridden so we ignore gnutella.net for this test
-        public void initialize() {        
+    public synchronized Endpoint getAnEndpoint() throws InterruptedException {
+        if (endpoint==null)
+            throw new InterruptedException();
+        else {
+            Endpoint ret=endpoint;
+            endpoint=null;
+            return ret;
         }
     }
 
-    private static class TestManagedConnection extends ManagedConnection {
-        private boolean isOutgoing;
-        private int sent;
-        private int received;
-        private static int lastHost = 0;
-
-        public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346);
-            this.isOutgoing=isOutgoing;
-            this.sent=sent;
-            this.received=received;
-        }
-
-        public boolean isOutgoing() {
-            return isOutgoing;
-        }
-
-        public int getNumMessagesSent() {
-            return sent;
-        }
-        
-        public int getNumMessagesReceived() {
-            return received;
-        }
-        
-        protected void startOutputRunner() {
-            // do nothing
-        }
-    }  
-    
-    private static class ClientSupernode extends TestManagedConnection {
-        
-        ClientSupernode() {
-            super(false, 0, 0);
-        }
-        
-        public boolean isClientSupernodeConnection() {
-            return true;
-        }
-        public boolean isSupernodeClientConnection() {
-            return false;
-        }
+    public synchronized void doneWithConnect(Endpoint e, boolean success) {
+        if (success)
+            connectSuccess++;
+        else
+            connectFailures++;
     }
-    
-    private static class SupernodeClient extends TestManagedConnection {
-        SupernodeClient() {
-            super(false, 0, 0);
-        }
-        public boolean isClientSupernodeConnection() {
-            return false;
-        }
-        public boolean isSupernodeClientConnection() {
-            return true;
-        }
-    }
-          
 }

@@ -1,262 +1,78 @@
 package com.limegroup.gnutella.messages;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import junit.framework.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.guess.*;
+import com.sun.java.util.collections.*;
+import java.io.*;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Random;
-
-public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
-    
-    /**
-     * A non blank IP
-     */
-    private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
-    
+public class PingReplyTest extends TestCase {
     public PingReplyTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(PingReplyTest.class);
+        return new TestSuite(PingReplyTest.class);
     }
-
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
-    }
-
-   
-    /**
-     * Tests the methods for getting the leaf and ultrapeer slots from the 
-     * pong.
-     * 
-     * @throws Exception if an error occurs
-     */
-    public void testHasFreeSlots() throws Exception {
-        byte[] guid = GUID.makeGuid();
-        byte[] ip = {1,1,1,1};
-        PingReply pr = PingReply.create(guid, (byte)3, 6346, ip, 
-            (long)10, (long)10, true, 100, true);    
-            
-        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
-        
-        // Leaves are determined based partly on our connected status.  We're
-        // not connected for this test, so leaf slots should be 0.
-        assertEquals("unexpected number leaf slots", 0, pr.getNumLeafSlots());
-        
-        assertTrue("slots unexpectedly not full", !pr.hasFreeLeafSlots());
-        
-        assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
-        
-        // Connection status doesn't matter for ultrapeer slots -- we just 
-        // subtract the number of connections we have from the desired number
-        assertEquals("unexpected number ultrapeer slots", 
-            ConnectionSettings.NUM_CONNECTIONS.getValue(), 
-            pr.getNumUltrapeerSlots());
-        
-        // Switch ConnectionManager to report different values for free leaf
-        // and ultrapeer slots.
-        PrivilegedAccessor.setValue(RouterService.class, "manager",
-            new TestConnectionManager(0,10));
-        
-        pr = PingReply.create(guid, (byte)3, 6346, ip, 
-            (long)10, (long)10, true, 100, true);    
-            
-        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
-
-        assertTrue("slots unexpectedly full", pr.hasFreeLeafSlots());
-        
-        assertTrue("slots unexpectedly not full", !pr.hasFreeUltrapeerSlots());
-        
-        // Should now have leaf slots
-        assertEquals("unexpected number leaf slots", 10, pr.getNumLeafSlots());
-        
-        // Connection status doesn't matter for ultrapeer slots -- we just 
-        // subtract the number of connections we have from the desired number
-        assertEquals("unexpected number ultrapeer slots",0, 
-            pr.getNumUltrapeerSlots());
-    }
-   
-    
-    /**
-     * Tests the method for creating a new pong with a changed GUID out
-     * of an existing pong
-     */
-    public void testMutateGUID() throws Exception {
-        byte[] guid = new GUID().bytes();
-        byte ttl = 4;
-        int port = 6444;
-        byte[] ip = {1, 1, 1, 1};
-        long files = 500L;
-        long kbytes = 75580L;
-        boolean isUltrapeer = false;
-        int dailyUptime = 10;
-        boolean isGUESSCapable = false;
-        
-        PingReply pr = 
-            PingReply.create(guid, ttl, port, ip, files, kbytes, 
-                             isUltrapeer, dailyUptime, isGUESSCapable);
-        
-        PingReply testPR = pr.mutateGUID(new GUID().bytes());
-        
-        assertNotEquals(pr.getGUID(), testPR.getGUID());
-        assertEquals(pr.getTTL(), testPR.getTTL());
-        assertEquals(pr.getPort(), testPR.getPort());
-        assertEquals(pr.getInetAddress(), testPR.getInetAddress());
-        assertEquals(pr.getFiles(), testPR.getFiles());
-        assertEquals(pr.getKbytes(), testPR.getKbytes());
-        assertEquals(pr.isUltrapeer(), testPR.isUltrapeer());
-        assertEquals(pr.getDailyUptime(), testPR.getDailyUptime());
-        assertEquals(pr.supportsUnicast(), testPR.supportsUnicast());
-    }
-
-
-    /**
-     * Tests the method for creating a pong from the network.
-     */
-    public void testCreatePongFromNetwork() throws Exception {
-        byte[] guid = new GUID().bytes();
-        byte[] payload = new byte[2];
-
-        // make sure we reject invalid payload sizes
-        try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            payload);
-            fail("should have not accepted payload size");
-        } catch(BadPacketException e) {
-            // expected because the payload size is invalid
-        }
-
-        // make sure we reject null guids
-        payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
-        addIP(payload);
-        try {
-            PingReply.createFromNetwork(null, (byte)4, (byte)3,
-                                            payload);
-            fail("should have not accepted null guid");
-        } catch(NullPointerException e) {
-            // expected because the payload size is invalid
-        }        
-
-        // make sure we reject null payloads
-        try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            null);
-            fail("should have not accepted null payload");
-        } catch(NullPointerException e) {
-            // expected because the payload size is invalid
-        }        
-
-        // make sure we reject bad ggep
-        GGEP ggep = new GGEP(true);
-        payload = new byte[3];
-        // set 'LIM'  -- incorrect value to make sure it fails
-        System.arraycopy("LIM".getBytes(),
-                         0, payload, 0,
-                         2);
-         // add it
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);  
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ggep.write(baos);
-
-        byte[] extensions = baos.toByteArray();
-        payload = 
-            new byte[PingReply.STANDARD_PAYLOAD_SIZE+extensions.length];
-        addIP(payload);            
-
-        System.arraycopy(extensions, 0, 
-                         payload, PingReply.STANDARD_PAYLOAD_SIZE, 
-                         extensions.length);
-        try {
-            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            payload);
-            fail("should have not accepted bad GGEP in payload");
-        } catch(BadPacketException e) {
-            // expected because the payload size is invalid
-        }                
-
-        // test one that should go through fine
-        payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
-        payload[0] = 1;
-        addIP(payload);        
-
-        // this one should go through
-        PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                        payload);
-    }
-
 
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
-        byte[] ip={(byte)0xFE, (byte)0x00, (byte)0x00, (byte)0x1};
-        PingReply pr = PingReply.create(new byte[16], (byte)0,
-                                        u2, ip, u4, u4);
-
-        assertEquals(u2, pr.getPort());
-        assertEquals(u4, pr.getFiles());
+        byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x1};
+        PingReply pr=new PingReply(new byte[16], (byte)0,
+                                   u2, ip, u4, u4);
+        assertTrue(pr.getPort()==u2);
+        assertTrue(pr.getFiles()==u4);
         long kbytes=pr.getKbytes();
-        assertEquals(Long.toHexString(kbytes), u4, kbytes);
-        String ip2=pr.getAddress();
-        assertEquals("254.0.0.1", ip2);
-        assertTrue(! pr.isUltrapeer());
+        assertTrue(Long.toHexString(kbytes), kbytes==u4);
+        String ip2=pr.getIP();
+        assertTrue(ip2, ip2.equals("255.0.0.1"));
+        //assertTrue(pr.ip!=null);  //Looking at private data
+        ip2=pr.getIP();
+        assertTrue(ip2, ip2.equals("255.0.0.1"));
+        assertTrue(! pr.isMarked());
     }      
       
     //TODO: check construction from raw bytes
 
     public void testPongMarking() {
-        PingReply pr = 
-            PingReply.createExternal(new byte[16], (byte)2, 6346, IP,
-                                     false);
-
-        
-        assertTrue(! pr.isUltrapeer());        
+        PingReply pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         0, 0, false);
+        assertTrue(! pr.isMarked());        
         // all pongs should have a GGEP extension now....
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        pr = PingReply.createExternal(new byte[16], (byte)2, 6346, IP,
-                                      true);
-        assertTrue(pr.isUltrapeer());
+        assertTrue(pr.hasGGEPExtension());
+        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         0, 0, true);
+        assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
-                              5, 2348, false, 0, false);        
-        assertTrue(! pr.isUltrapeer());
-        assertEquals(2348, pr.getKbytes());
+        assertTrue(pr.hasGGEPExtension());
+        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         5, 2348, false);        
+        assertTrue(! pr.isMarked());
+        assertTrue(pr.getKbytes()==2348);
         // all pongs should have a GGEP extension now....
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
-                              5, 2348, true, 0, true);
-        assertTrue(pr.isUltrapeer());
+        assertTrue(pr.hasGGEPExtension());
+        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         5, 2348, true);
+        assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
-                              5, 345882, false, 0, false);
-        assertTrue(! pr.isUltrapeer());
+        assertTrue(pr.hasGGEPExtension());
+        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         5, 345882, false);
+        assertTrue(! pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        pr = PingReply.create(new byte[16], (byte)2, 6346, IP,
-                              5, 345882, true, -1, true);
-        assertTrue(pr.isUltrapeer());
-        // after added unicast support, all Ultrapeer Pongs have GGEP extension
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-
-        
-        assertEquals("pong should not have a daily uptime", -1,
-                     pr.getDailyUptime());        
+        assertTrue(pr.hasGGEPExtension());
+        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
+                         5, 345882, true);
+        assertTrue(pr.isMarked());
+        // after added unicast support, all Ultrapeer Pongs have GGEP extensions
+        assertTrue(pr.hasGGEPExtension());
+        try {
+            pr.getDailyUptime();
+            assertTrue(false);
+        } 
+        catch (BadPacketException e) { 
+        }
     }
       
     public void testPowerOf2() {
@@ -272,7 +88,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! PingReply.isPowerOf2(71));
     }
 
-    public void testNonGGEPBigPong() throws Exception  {
+    public void testNonGGEPBigPong() {
         //Will this pass big pongs--even if the contents are not GGEP?
         byte[] payload = new byte[14+2];
         //add the port
@@ -297,63 +113,81 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload[14] = (byte) 65;
         payload[15] = (byte) 66;
         PingReply pr=null;
-        pr = PingReply.createFromNetwork(new byte[16], (byte)2, (byte)4, payload);
+        try {
+            pr = new PingReply(new byte[16], (byte)2, (byte)4, payload);
+        } catch (BadPacketException e) {
+            fail("Packet bad: "+e);
+        }
         assertTrue(! pr.hasGGEPExtension());
+        try {
+            pr.getDailyUptime();
+            assertTrue(false);
+        } catch (BadPacketException e) { }
 
-        assertEquals("pong should not have a daily uptime", -1,
-                     pr.getDailyUptime());  
         
         //Start testing
-        assertEquals("wrong port", 15, pr.getPort());
-        String ip = pr.getAddress();
-        assertEquals("wrong IP", "16.16.16.16", ip);
-        assertEquals("wrong files", 15, pr.getFiles());
-        assertEquals("Wrong share size", 15, pr.getKbytes());
+        assertTrue("wrong port", pr.getPort() == 15);
+        String ip = pr.getIP();
+        assertTrue("wrong IP", ip.equals("16.16.16.16"));
+        assertTrue("wrong files", pr.getFiles() == 15);
+        assertTrue("Wrong share size", pr.getKbytes() == 15);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        pr.write(stream);
+        try{
+            pr.write(stream);
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+            assertTrue("problem with writing out big pong", false);
+        }
         byte[] op = stream.toByteArray();
         byte[] big = new byte[2];
         big[0] = op[op.length-2];
         big[1] = op[op.length-1];
         String out = new String(big);
-        assertEquals("Big part of pong lost", "AB", out);
+        assertTrue("Big part of pong lost", out.equals("AB"));
         //come this far means its OK
     }
 
 
-    public void testBasicGGEP() throws Exception {
+    public void testBasicGGEP() {
         // create a pong
-        PingReply pr = 
-            PingReply.createExternal(new byte[16], (byte)3, 6349, IP, false);
+        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
+                                   0l, 0l);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        pr.write(baos);
-
+        try {
+            pr.write(baos);
+        } catch (IOException e) {
+            assertTrue("Couldn't write stream.", false);
+        }
         byte[] bytes=baos.toByteArray(); 
 
         //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
-        PingReply pong=(PingReply)m;
-        assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.supportsUnicast()==false);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
+        try {
+            Message m=Message.read(new ByteArrayInputStream(bytes));
+            PingReply pong=(PingReply)m;
+            assertTrue(m instanceof PingReply);
+            assertTrue(pong.getPort()==6349);
+            assertTrue(pong.hasGGEPExtension());
+            assertTrue(pong.supportsUnicast()==false);
+            assertTrue(pong.getVendor().equals("LIME"));
+            assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
+                       pong.getVendorMajorVersion()==2);
+            assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
+                       pong.getVendorMinorVersion()==7);
+        } catch (BadPacketException e) {
+            fail("Couldn't extract uptime");
+        } catch (IOException e) {
+            fail("IO problem");
+        }
     }
 
 
     /** Test the raw bytes of an encoded GGEP'ed pong.  Then checks that
      *  these can be decoded.  Note that this will need to be changed if
      *  more extensions are added. */
-    public void testGGEPEncodeDecode() throws Exception {
+    public void testGGEPEncodeDecode() {
         //Create pong
-
-        PingReply pr = PingReply.create(new byte[16], (byte)3, 6349, IP,
-                                   0l, 0l, true, 523, true);        
-
+        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
+                                   0l, 0l, true, 523);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
@@ -411,97 +245,31 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
         //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
-        PingReply pong=(PingReply)m;
-        assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.getDailyUptime()==523);
-        assertTrue(pong.supportsUnicast()==true);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
-
-    }
-
-    /** Test the raw bytes of an encoded GGEP'ed pong.  Then checks that
-     *  these can be decoded.  Note that this will need to be changed if
-     *  more extensions are added. */
-    public void testGGEPEncodeDecodeNoGUESS() throws Exception {
-        //Create pong
-
-        PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, IP,
-                                      0l, 0l, true, 523, false);        
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
-            pr.write(baos);
+            Message m=Message.read(new ByteArrayInputStream(bytes));
+            PingReply pong=(PingReply)m;
+            assertTrue(m instanceof PingReply);
+            assertTrue(pong.getPort()==6349);
+            assertTrue(pong.hasGGEPExtension());
+            assertTrue(pong.getDailyUptime()==523);
+            assertTrue(pong.supportsUnicast()==true);
+            assertTrue(pong.getVendor().equals("LIME"));
+            assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
+                       pong.getVendorMajorVersion()==2);
+            assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
+                       pong.getVendorMinorVersion()==7);
+        } catch (BadPacketException e) {
+            fail("Couldn't extract uptime");
         } catch (IOException e) {
-            assertTrue("Couldn't write stream.", false);
+            fail("IO problem");
         }
-
-        //Encode and check raw bytes.
-        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
-        //this into account....
-        byte[] bytes=baos.toByteArray(); 
-        int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
-        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
-        int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
-        int ggepLength=1   //magic number
-                      +1   //"DUPTIME" extension flags
-                      +idLength //ID
-                      +1   //data length
-                      +2   //data bytes
-                      +1   //"UP" extension flags
-                      +upLength // ID
-                      +1   // data length
-                      +3  // data bytes
-                      +1   //"VC" extension flags
-                      +vcLength // ID
-                      +1   // data length
-                      +5;  // data bytes
-        assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
-        int offset=23+14;                              //GGEP offset
-        assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
-        assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
-        assertTrue(bytes[offset+2]==(byte)'D');
-        assertTrue(bytes[offset+3]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+4]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+5]==(byte)'P');
-        assertTrue(bytes[offset+2+idLength+4+upLength+5]==(byte)'V');
-        assertTrue(bytes[offset+2+idLength+4+upLength+6]==(byte)'C');
-        assertTrue(bytes[offset+2+idLength+4+upLength+8]==(byte)'L');
-        assertTrue(bytes[offset+2+idLength+4+upLength+9]==(byte)'I');
-        assertTrue(bytes[offset+2+idLength+4+upLength+10]==(byte)'M');
-        assertTrue(bytes[offset+2+idLength+4+upLength+11]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+upLength+12]==39);
-        //...etc.
-        assertTrue(bytes[bytes.length-2-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
-
-
-        //Decode and check contents.
-        Message m=Message.read(new ByteArrayInputStream(bytes));
-        PingReply pong=(PingReply)m;
-        assertTrue(m instanceof PingReply);
-        assertTrue(pong.getPort()==6349);
-        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        assertTrue(pong.getDailyUptime()==523);
-        assertTrue(pong.supportsUnicast()==false);
-        assertTrue(pong.getVendor().equals("LIME"));
-        assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
-                   pong.getVendorMajorVersion()==2);
-        assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
-                   pong.getVendorMinorVersion()==7);
     }
 
-    public void testStripGGEP2() throws Exception {
+    public void testStripGGEP2() {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        PingReply pr1 = PingReply.create(guid, (byte)3, 6349, ip,
-                                    13l, 14l, false, 4321, false); 
+        PingReply pr1=new PingReply(guid, (byte)3, 6349, ip,
+                                    13l, 14l, false, 4321);           
         PingReply pr2=(PingReply)pr1.stripExtendedPayload();
         assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
         assertEquals(pr1.getHops(), pr2.getHops());
@@ -509,14 +277,19 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(pr1.getFiles(), pr2.getFiles());
         assertEquals(pr1.getKbytes(), pr2.getKbytes());
         assertEquals(pr1.getPort(), pr2.getPort());
-        assertEquals(pr1.getInetAddress(), pr2.getInetAddress());
+        assertEquals(pr1.getIP(), pr2.getIP());
 
         assertTrue(! pr2.hasGGEPExtension());
-        assertEquals("pong should not have a daily uptime", -1,
-                     pr2.getDailyUptime());
-
+        try {
+            pr2.getDailyUptime();
+            fail("No exception");
+        } catch (BadPacketException e) { }
         ByteArrayOutputStream out=new ByteArrayOutputStream();
-        pr2.write(out);
+        try {
+            pr2.write(out);
+        } catch (IOException e) {
+            fail("Mysterious IO problem");
+        }
         assertTrue(out.toByteArray().length==(23+14));
 
         //Check no aliasing
@@ -525,7 +298,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(pr1.getTTL()!=pr2.getTTL());
     }
 
-    public void testPongTooSmall() throws Exception {
+    public void testPongTooSmall() {
         byte[] bytes=new byte[23+25];  //one byte too small
         bytes[16]=Message.F_PING_REPLY;
         bytes[17]=(byte)3;     //hops
@@ -535,65 +308,50 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         try {
             Message.read(in);
             fail("No exception thrown");
+        } catch (IOException fail) {
+            fail("Unexpected IO problem");
         } catch (BadPacketException pass) { 
             //Pass!
         }
     }
 
 
-    public void testQueryKeyPong() throws Exception {
+    public void testQueryKeyPong() {
         byte[] randBytes = new byte[8];
         (new Random()).nextBytes(randBytes);
         QueryKey qk = null;
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        qk = QueryKey.getQueryKey(randBytes, true);
-        PingReply pr = 
-            PingReply.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
-                                          2, 2, true, qk);
-        assertTrue(pr.getQueryKey().equals(qk));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        pr.write(baos);
-        ByteArrayInputStream bais = 
-             new ByteArrayInputStream(baos.toByteArray());
-        PingReply prStreamed = (PingReply) Message.read(bais);
-        assertTrue(prStreamed.getQueryKey().equals(qk));
-            
-    }
+        try {
+            qk = QueryKey.getQueryKey(randBytes, true);
+        }
+        catch (Exception crap) {
+            assertTrue(false);
+        }
+        PingReply pr = new PingReply(guid.bytes(), (byte) 1, 6346, ip,
+                                     2, 2, true, qk);
+        try {
+            assertTrue(pr.getQueryKey().equals(qk));
+        }
+        catch (Exception crap) {
+            assertTrue(false);
+        }
+
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pr.write(baos);
+            ByteArrayInputStream bais = 
+                 new ByteArrayInputStream(baos.toByteArray());
+            PingReply prStreamed = (PingReply) Message.read(bais);
+            assertTrue(prStreamed.getQueryKey().equals(qk));
+        }
+        catch (Exception damn) {
+            assertTrue(false);
+        }
     
-    private final void addIP(byte[] payload) {
-        // fill up the ip so its not blank.
-        payload[2] = 1;
-        payload[3] = 1;
-        payload[4] = 1;
-        payload[5] = 1;
     }
 
-    /**
-     * Utility class that overrides ConnectionManager methods for getting the
-     * number of free leaf and ultrapeer slots.
-     */
-    private static class TestConnectionManager extends ConnectionManager {
-        private final int NUM_FREE_NON_LEAF_SLOTS;
-        private final int NUM_FREE_LEAF_SLOTS;
-
-        TestConnectionManager(int numFreeNonLeafSlots, int numFreeLeafSlots) {
-            super(null);
-            NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
-            NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
-        }
-        
-        public int getNumFreeNonLeafSlots() {
-            return NUM_FREE_NON_LEAF_SLOTS;
-        }
-        
-        public int getNumFreeLeafSlots() {
-            return NUM_FREE_LEAF_SLOTS;
-        }
-    }
     // TODO: build a test to test multiple GGEP blocks in the payload!!  the
     // implementation does not cover this it seems, so it should fail ;)
 
 }
-
-

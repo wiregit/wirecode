@@ -1,27 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.util.Random;
-
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.messages.*; 
+import com.limegroup.gnutella.guess.*; 
+import com.limegroup.gnutella.util.*;
+import java.net.*;
+import java.io.*;
+import java.util.*;
 
 /** Simulates a 'network' of unicast enabled clients.  The clients don't search,
  *  but they always respond to queries.
@@ -67,11 +51,10 @@ public class UnicastSimulator {
     private void createPongs() throws Exception {
         _pongs = new PingReply[NUM_LISTENERS];
         for (int i = 0; i < NUM_LISTENERS; i++) {
-            _pongs[i] = 
-                PingReply.createExternal(GUID.makeGuid(), (byte)5,
-                                         PORT_RANGE_BEGIN+i, _localAddress, 
-                                         true);                                         
-            Assert.that(_pongs[i].isUltrapeer());
+            _pongs[i] = new PingReply(GUID.makeGuid(), (byte) 5, 
+                                      PORT_RANGE_BEGIN+i, _localAddress, 
+                                      10, 100, true);
+            Assert.that(_pongs[i].isMarked());
         }
     }
 
@@ -127,13 +110,14 @@ public class UnicastSimulator {
                 // established
                 Socket sock = servSock.accept();
                 debug("UnicastSimulator.tcpLoop(): got a incoming connection.");
-                sock.setSoTimeout(Constants.TIMEOUT);
+                sock.setSoTimeout(SettingsManager.instance().getTimeout());
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(sock.getInputStream(),8);
                 sock.setSoTimeout(0);
 
-                if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
+                if (word.equals(SettingsManager.instance().
+                        getConnectStringFirstWord())) {
                     Connection conn = new Connection(sock, null);
                     conn.initialize();
                     debug("UnicastSimulator.tcpLoop(): sending pings.");
@@ -213,7 +197,7 @@ public class UnicastSimulator {
                         QueryReply qr = new QueryReply(inGUID, (byte) 5,
                                                        port, _localAddress,
                                                        0, resps, 
-                                                       GUID.makeGuid(), false);
+                                                       GUID.makeGuid());
                         // send the QR...
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());
@@ -231,12 +215,11 @@ public class UnicastSimulator {
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
                                                      key, pad);
-                            PingReply pRep =
-                                PingReply.createQueryKeyReply(pr.getGUID(),
-                                                              (byte)1,
-                                                              port,
-                                                              _localAddress,
-                                                              2, 2, true, qk);
+                            PingReply pRep = new PingReply(pr.getGUID(),
+                                                           (byte)1,
+                                                           port,
+                                                           _localAddress,
+                                                           2, 2, true, qk);
                             send(socket, pRep, datagram.getAddress(),
                                  datagram.getPort());
                         }

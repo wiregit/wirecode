@@ -1,13 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.*; 
+import com.limegroup.gnutella.http.*; 
+import com.sun.java.util.collections.*;
+import java.io.*;
+import java.net.*;
 
 /**
  * This class provides convenient data and utility functions to
@@ -67,16 +64,17 @@ public final class HugeTestUtils {
 	 * Array of query strings.
 	 */
 	public static final String[] QUERY_STRINGS = {
-		"try this",
+		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"file",
 		"different file",
 		"file.mp3",
-		"urn",
-		"urnsha1",
+		"urn:",
+		"urn:sha1",
 		"good file",
-		"maybe this",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"this one too",
-		"how about this one",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFBCCC",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYR",
 		"file.file",
 		"the best file ever",
 		"big file",
@@ -100,14 +98,14 @@ public final class HugeTestUtils {
 		"www.natprior.org",
 		"www.census.gov",
 		"www.cmpbs.org",
-		"www.lc.org",
+		"www.lc.gov",
 		"www.news.com",
 		"www.oreilly.com",
 		"www.apple.com",
 		"www.gnutella.com",
 		"www.gnutellanews.com",
 		"java.sun.com",
-		"jakarta.apache.org",
+		"www.jakarta.org",
 	};
 
 	/**
@@ -284,8 +282,6 @@ public final class HugeTestUtils {
 	 */
 	public static URN UNIQUE_SHA1;
 
-	public static URN SHA1;
-	
 	private static final HugeTestUtils INSTANCE = new HugeTestUtils();
 
 	static {
@@ -300,13 +296,7 @@ public final class HugeTestUtils {
 			BAD_PORT_URLS[0] = new URL("http", "www.limewire.org", -1, "test");
 			BAD_PORT_URLS[1] = new URL("http", "www.limewire.org", 66000, "test");				
 		} catch(MalformedURLException e) {
-			ErrorService.error(e);
-		}
-
-		try {
-			SHA1 = URN.createSHA1Urn(VALID_URN_STRINGS[3]);
-		} catch(IOException e) {
-			ErrorService.error(e);
+			e.printStackTrace();
 		}
 
 		for(int i=0; i<VALID_URN_STRINGS.length; i++) {
@@ -318,7 +308,7 @@ public final class HugeTestUtils {
 				urnSet.add(urn);
 				URN_SETS[i] = urnSet;
 			} catch(IOException e) {
-				ErrorService.error(e);
+				e.printStackTrace();
 			}
 		}
 
@@ -329,7 +319,7 @@ public final class HugeTestUtils {
 							"/uri-res/N2R?"+URNS[i].httpStringValue());
 			} catch(MalformedURLException e) {
 				// this should not happen
-				ErrorService.error(e);
+				e.printStackTrace();
 			}
 		}
 
@@ -340,27 +330,27 @@ public final class HugeTestUtils {
 							"/uri-res/N2R?"+URNS[0].httpStringValue());
 			} catch(MalformedURLException e) {
 				// this should not happen
-				ErrorService.error(e);
+				e.printStackTrace();
 			}
 		}
 
 		for(int i=0; i<UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
 				UNEQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.create(UNEQUAL_URLS[i]);
+					AlternateLocation.createAlternateLocation(UNEQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
-				ErrorService.error(e);
+				e.printStackTrace();
 			}
 		}
 
 		for(int i=0; i<EQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
 				EQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.create(EQUAL_URLS[i]);
+					AlternateLocation.createAlternateLocation(EQUAL_URLS[0]);
 			} catch(IOException e) {
 				// this should not happen
-				ErrorService.error(e);
+				e.printStackTrace();
 			}
 		}
 

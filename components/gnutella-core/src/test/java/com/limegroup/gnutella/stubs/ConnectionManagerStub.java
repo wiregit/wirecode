@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.*;
 
 /** A (incomplete!) stub for ConnectionManager. */
 public class ConnectionManagerStub extends ConnectionManager {
@@ -30,11 +28,11 @@ public class ConnectionManagerStub extends ConnectionManager {
         return true;
     }        
 
-	public boolean allowConnection(HandshakeResponse hr) {
-		return true;
-	}
-    
-    public String toString() {
-        return "ConnectionManagerStub";
+    public boolean allowConnection(boolean outgoing,
+                                   String ultrapeerHeader,
+                                   String useragentHeader) {
+        //Needed to make ConnectionManagerTest pass. 
+        //See ConnectionManagerTest.setUp.
+        return true;
     }
 }

@@ -1,28 +1,20 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.limegroup.gnutella.*;
+import java.io.*;
+import junit.framework.*;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.RemoteFileDesc;
-
-public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class AutoDownloaderDetailsTest extends TestCase {
 
     public AutoDownloaderDetailsTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(AutoDownloaderDetailsTest.class);
+        return new TestSuite(AutoDownloaderDetailsTest.class);
     }
 
-	public void testLegacy() throws Exception {
+	public void testLegacy() {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("moxxiffey", null,
                                 GUID.makeGuid(), MediaType.getAudioMediaType());
@@ -32,21 +24,28 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
         for (int i = 0; i < rfds.length; i++)
             rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
                                          i, GUID.makeGuid(),
-                                         3, false, 3, false,null, null,
-                                         false, false,"",0,null);
+                                         3, false, 3, false,null, null);
 
         //Test serialization by writing to disk and rereading.  All the methods
         //should still work afterwards.
-        File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
-        ObjectOutputStream out=
-                    new ObjectOutputStream(new FileOutputStream(tmp));
-        out.writeObject(add);
-        out.close();
-        ObjectInputStream in=
-                      new ObjectInputStream(new FileInputStream(tmp));
-        add=(AutoDownloadDetails)in.readObject();
-        in.close();
-        tmp.delete();
+        try {
+            File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
+            ObjectOutputStream out=
+                        new ObjectOutputStream(new FileOutputStream(tmp));
+            out.writeObject(add);
+            out.close();
+            ObjectInputStream in=
+                          new ObjectInputStream(new FileInputStream(tmp));
+            add=(AutoDownloadDetails)in.readObject();
+            in.close();
+            tmp.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertTrue("Unexpected IO problem.",false);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            assertTrue("Unexpected class cast problem.",false);
+        }
         
         assertTrue(add.addDownload(rfds[0]));
         add.commitDownload(rfds[0]);

@@ -1,84 +1,69 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
-import com.sun.java.util.collections.Arrays;
+import junit.framework.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Tests StringUtils.
  */
-public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class StringUtilsTest extends TestCase {
     public StringUtilsTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(StringUtilsTest.class);
+        return new TestSuite(StringUtilsTest.class);
     }  
 
-    /**
-     * Tests the method for getting the index of a substring from within 
-     * another string, ignoring case.
-     */
-    public void testIndexOfIgnoreCase() throws Exception {
-        int index = StringUtils.indexOfIgnoreCase("test", "t");
-        assertEquals("unexpected index", 0, index);
-        index = StringUtils.indexOfIgnoreCase("test", "p");
-        assertEquals("unexpected index", -1, index);
-        
-        index = StringUtils.indexOfIgnoreCase("test", "st");
-        assertEquals("unexpected index", 2, index);
-    }
-    
     public void testCase() {
         //Case methods.  Test all boundary conditions.
         //See ASCII table for further justification.
-        assertEquals('\0', StringUtils.toOtherCase('\0'));
-        assertEquals('0',StringUtils.toOtherCase('0'));
-        assertEquals('@',StringUtils.toOtherCase('@'));
-        assertEquals('a',StringUtils.toOtherCase('A'));
-        assertEquals('h',StringUtils.toOtherCase('H'));
-        assertEquals('z',StringUtils.toOtherCase('Z'));
-        assertEquals('[',StringUtils.toOtherCase('['));
-        assertEquals('`',StringUtils.toOtherCase('`'));
-        assertEquals('A',StringUtils.toOtherCase('a'));
-        assertEquals('H',StringUtils.toOtherCase('h'));
-        assertEquals('Z',StringUtils.toOtherCase('z'));
-        assertEquals('{',StringUtils.toOtherCase('{'));
+        assertTrue(StringUtils.toOtherCase('\0')=='\0');
+        assertTrue(StringUtils.toOtherCase('0')=='0');
+        assertTrue(StringUtils.toOtherCase('@')=='@');
+        assertTrue(StringUtils.toOtherCase('A')=='a');
+        assertTrue(StringUtils.toOtherCase('H')=='h');
+        assertTrue(StringUtils.toOtherCase('Z')=='z');
+        assertTrue(StringUtils.toOtherCase('[')=='[');
+        assertTrue(StringUtils.toOtherCase('`')=='`');
+        assertTrue(StringUtils.toOtherCase('a')=='A');
+        assertTrue(StringUtils.toOtherCase('h')=='H');
+        assertTrue(StringUtils.toOtherCase('z')=='Z');
+        assertTrue(StringUtils.toOtherCase('{')=='{');        
     }
 
     public void testContains1() {
         //Wildcards
-        assertTrue(StringUtils.contains("", "") );
-        assertTrue(StringUtils.contains("abc", "") );
-        assertTrue(StringUtils.contains("abc", "b") );
-        assertFalse(StringUtils.contains("abc", "d") );
-        assertTrue(StringUtils.contains("abcd", "a*d"));
-        assertTrue(StringUtils.contains("abcd", "*a**d*") );
-        assertFalse(StringUtils.contains("abcd", "d*a") );
-        assertFalse(StringUtils.contains("abcd", "*.*") );
-        assertTrue(StringUtils.contains("abc.d", "*.*") );
-        assertTrue(StringUtils.contains("abc.", "*.*") );
+        assertTrue(StringUtils.contains("", "") == true);
+        assertTrue(StringUtils.contains("abc", "") == true);
+        assertTrue(StringUtils.contains("abc", "b") == true);
+        assertTrue(StringUtils.contains("abc", "d") == false);
+        assertTrue(StringUtils.contains("abcd", "a*d") == true);
+        assertTrue(StringUtils.contains("abcd", "*a**d*") == true);
+        assertTrue(StringUtils.contains("abcd", "d*a") == false);
+        assertTrue(StringUtils.contains("abcd", "*.*") == false);
+        assertTrue(StringUtils.contains("abc.d", "*.*") == true);
+        assertTrue(StringUtils.contains("abc.", "*.*") == true);
     }
 
     public void testContains2() {
         //Spaces and wildcards
-        assertFalse(StringUtils.contains("abcd", "x") );
-        assertTrue(StringUtils.contains("abcd", "a b"));
-        assertFalse(StringUtils.contains("abcd", "a x") );
-        assertTrue(StringUtils.contains("abcd", "a c") );
-        assertTrue(StringUtils.contains("abcd", "a+c") );
-        assertTrue(StringUtils.contains("abcd", "d a"));
-        assertTrue(StringUtils.contains("abcd", "a d+c") );
-        assertFalse(StringUtils.contains("abcd", "a dc") );
-        assertTrue(StringUtils.contains("abcd", "a b*c") );
-        assertFalse(StringUtils.contains("abcd", "a c*b") );
-        assertTrue(StringUtils.contains("abcd", " ab+") );
-        assertFalse(StringUtils.contains("abcd", "+x+") );
-        assertTrue(StringUtils.contains("abcde", "ab bcd") );
-        assertFalse(StringUtils.contains("abcde", "ab bd") );
+        assertTrue(StringUtils.contains("abcd", "x") == false);
+        assertTrue(StringUtils.contains("abcd", "a b") == true);
+        assertTrue(StringUtils.contains("abcd", "a x") == false);
+        assertTrue(StringUtils.contains("abcd", "a c") == true);
+        assertTrue(StringUtils.contains("abcd", "a+c") == true);
+        assertTrue(StringUtils.contains("abcd", "d a") == true);
+        assertTrue(StringUtils.contains("abcd", "a d+c") == true);
+        assertTrue(StringUtils.contains("abcd", "a dc") == false);
+        assertTrue(StringUtils.contains("abcd", "a b*c") == true);
+        assertTrue(StringUtils.contains("abcd", "a c*b") == false);
+        assertTrue(StringUtils.contains("abcd", " ab+") == true);
+        assertTrue(StringUtils.contains("abcd", "+x+") == false);
+        assertTrue(StringUtils.contains("abcde", "ab bcd") == true);
+        assertTrue(StringUtils.contains("abcde", "ab bd") == false);
         assertTrue(StringUtils.contains("abcdefghj",
-                                         "+*+*ab*d+def*g c ") );  
+                                         "+*+*ab*d+def*g c ") == true);  
     }
 
     public void testContainsCase() {
@@ -189,87 +174,4 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! StringUtils.startsWithIgnoreCase("a", "ab"));
         assertTrue(! StringUtils.startsWithIgnoreCase("", "a"));
     }
-
-	/**
-	 * Tests the method that replaces sections of a string with a new
-	 * string.
-	 */
-	public void testStringUtilsReplace() {
-		String _testString = "test_";
-		String[] old_strs = {
-			"old0",
-			"old1",
-			"old2",
-			"old3",
-			"old4",
-		};
-
-		String[] new_strs = {
-			"new0",
-			"new1",
-			"new2",
-			"new3",
-			"new4",
-		};
-
-		for(int i=0; i<old_strs.length; i++) {
-			String str = 
-				StringUtils.replace(_testString+old_strs[i], 
-									old_strs[i], new_strs[i]);
-			
-			assertEquals("unexpected string", _testString+new_strs[i], str);
-		}
-	}
-    
-    //tests method contains with non-ascii chars... (japanese to be exact)
-    public void testContainsNonAscii() throws Exception {
-        String miyamoto = "\u5bae\u672c\u6b66\u8535\u69d8";
-        
-        assertTrue(StringUtils.contains(miyamoto, "\u5bae\u672c"));
-        assertFalse(StringUtils.contains(miyamoto, "\uff2e"));
-        assertTrue(StringUtils.contains(miyamoto, "\u672c+\u8535"));
-        assertTrue(StringUtils.contains(miyamoto, "\u5bae*\u69d8"));
-        assertTrue(StringUtils.contains(miyamoto, "\u672c \u8535"));
-        assertFalse(StringUtils.contains(miyamoto, "\uff2d \u8535"));
-        assertTrue(StringUtils.contains(miyamoto, "\u5bae \u6b66+\u69d8"));
-
-    }
-
-    //tests the collator comparisions...
-    public void testCompareFullPrimary() throws Exception {
-        String s1 = "cafe";
-        String s2 = "caf\u00e9";
-        
-        assertEquals("these should be considered the same",
-                     0,
-                     StringUtils.compareFullPrimary(s1, s2));
-        
-        String s3 = "limewire";
-        String s4 = "\uff2c\uff29\uff2d\uff25\uff37\uff29\uff32\uff25";
-        
-        assertEquals("these should be considered the same",
-                     0,
-                     StringUtils.compareFullPrimary(s3, s4));
-        
-        String a1 = "test";
-        String a2 = "tist";
-        String a3 = "\uff34\uff29\uff33\uff34"; //tist in FULLWIDTH
-        
-        //comparing ascii so should be same as compareIgnoreCase
-        //the important thing is that they are both negative, or positive
-        assertEquals("expected to be the same as compareIignoreCase",
-                     StringUtils.compareIgnoreCase(a1, a2) < 0,
-                     StringUtils.compareFullPrimary(a1, a2) < 0);
-        
-        assertEquals("expected to be the same (FULLWIDTH)",
-                      StringUtils.compareFullPrimary(a1, a2),
-                      StringUtils.compareFullPrimary(a1, a3));
-        
-        assertEquals("should of returned zero",
-                     0,
-                     StringUtils.compareFullPrimary(a2, a3));
-        
-    }
-
 }
-

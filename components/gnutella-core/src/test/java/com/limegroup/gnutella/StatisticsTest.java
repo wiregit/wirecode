@@ -1,10 +1,8 @@
 package com.limegroup.gnutella;
 
-import junit.framework.Test;
+import junit.framework.*;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
-
-public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase { 
+public class StatisticsTest extends TestCase { 
     //Most of this code assumes a window factor W of 7 days.
 
     /** Fudge factor */
@@ -18,12 +16,12 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(StatisticsTest.class);
+        return new TestSuite(StatisticsTest.class);
     }
 
     public void setUp() {
-        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(0);
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.0f);
+        SettingsManager.instance().setLastShutdownTime(0);
+        SettingsManager.instance().setFractionalUptime(0.0f);
         TestStatistics.now=0;
     }
     
@@ -54,7 +52,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testHalfTimeEquilibrium() {
         //                 ------up------
         // days 0          1             2
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
+        SettingsManager.instance().setFractionalUptime(0.5f);
         TestStatistics.now=MSECS_PER_DAY;
         TestStatistics stats=new TestStatistics();
         TestStatistics.now+=MSECS_PER_DAY;
@@ -67,23 +65,21 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
      * New uptime: 3/7*1/3+4/7*0.5=3/7
      */
     public void testFractionalUpdate() {
+        SettingsManager settings=SettingsManager.instance();
+
         //Test calculate without property update
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
+        settings.setFractionalUptime(0.5f);
         TestStatistics.now=2*MSECS_PER_DAY;
         TestStatistics stats=new TestStatistics();
         TestStatistics.now+=MSECS_PER_DAY;
         assertEquals(3.0f/7.0f, stats.calculateFractionalUptime(), DELTA);
-        assertEquals(0,
-            ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
-        assertEquals(0.5f,
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), DELTA);
+        assertEquals(0, settings.getLastShutdownTime());
+        assertEquals(0.5f, settings.getFractionalUptime(), DELTA);
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now, 
-            ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
-        assertEquals(3.0f/7.0f, 
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), DELTA);
+        assertEquals(TestStatistics.now, settings.getLastShutdownTime());
+        assertEquals(3.0f/7.0f, settings.getFractionalUptime(), DELTA);
     }
 
     /** Test one hour down, two hours up.  It takes a long time to
@@ -97,7 +93,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
 
         assertEquals(2.0f/3.0f, 
-                     ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 
+                     SettingsManager.instance().getFractionalUptime(), 
                      0.05);
     }
 
@@ -117,21 +113,19 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
      * (Session should be ignored)
      */
     public void testUptimeBackwards() {
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
+        SettingsManager settings=SettingsManager.instance();
+        settings.setFractionalUptime(0.5f);
 
         //Test calculate without property update
         TestStatistics.now=MSECS_PER_DAY;
         TestStatistics stats=new TestStatistics();
         TestStatistics.now-=MSECS_PER_HOUR;   //backwards!
-        assertEquals(0.5f,
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
+        assertEquals(0.5f, settings.getFractionalUptime(), 0.0f);
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now,
-            ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
-        assertEquals(0.5f,
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);        
+        assertEquals(TestStatistics.now, settings.getLastShutdownTime());
+        assertEquals(0.5f, settings.getFractionalUptime(), 0.0f);        
     }
     
    /**
@@ -139,23 +133,20 @@ public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase {
      * (Session should be ignored)
      */
     public void testShutdownBackwards() {
-        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(MSECS_PER_DAY);
-        ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
+        SettingsManager settings=SettingsManager.instance();
+        settings.setLastShutdownTime(MSECS_PER_DAY);
+        settings.setFractionalUptime(0.5f);
 
         //Test calculate without property update
-        TestStatistics.now=
-             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue()-MSECS_PER_HOUR;
+        TestStatistics.now=settings.getLastShutdownTime()-MSECS_PER_HOUR;  //!
         TestStatistics stats=new TestStatistics();
         TestStatistics.now+=MSECS_PER_DAY;
-        assertEquals(0.5f,
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
+        assertEquals(0.5f, settings.getFractionalUptime(), 0.0f);
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now,
-            ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
-        assertEquals(0.5f,
-            ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
+        assertEquals(TestStatistics.now, settings.getLastShutdownTime());
+        assertEquals(0.5f, settings.getFractionalUptime(), 0.0f);        
     }
 }
 

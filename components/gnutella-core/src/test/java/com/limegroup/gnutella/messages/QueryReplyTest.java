@@ -1,48 +1,17 @@
 package com.limegroup.gnutella.messages;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushProxyInterface;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Random;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.*; 
+import com.limegroup.gnutella.util.*;
+import com.sun.java.util.collections.*;
+import java.io.*;
+import junit.framework.*;
+import junit.extensions.*;
 
 /**
  * This class tests the QueryReply class.
  */
-public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
-
-    private static final byte[] IP = new byte[] {1, 1, 1, 1};
-    private static final String EXTENSION = "XYZ";
-    private static final int MAX_LOCATIONS = 10;
-
-    private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
-    private FileManager fman = null;
-    private Object loaded = new Object();
-    
+public final class QueryReplyTest extends TestCase {
+	
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -51,7 +20,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	}
 
 	public static Test suite() {
-		return buildTestSuite(QueryReplyTest.class);
+		return new TestSuite(QueryReplyTest.class);
 	}
 
 	/**
@@ -60,88 +29,75 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-	
-    
-    public static void globalSetUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        try {
-            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-        } catch (SecurityException e) {
-        }        
-    }
-    
-	public void setUp() throws Exception {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        	    
-	    cleanFiles(_sharedDir, false);
-	    fman = new SimpleFileManager();
-	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
-	    
-	}
-		
 
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
-	public void testLegacy() throws Exception {		
-		byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)0x1};
+	public void testLegacyUnitTest() {		
+		byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
 		long u4=0x00000000FFFFFFFFl;
 		byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
 		Response[] responses=new Response[0];
 		QueryReply qr=new QueryReply(guid, (byte)5,
 									 0xF3F1, ip, 1, responses,
-									 guid, false);
-		assertEquals(1, qr.getSpeed());
-		assertEquals(Integer.toHexString(qr.getPort()), 0xF3F1, qr.getPort());
-
-        assertEquals(qr.getResults().hasNext(), false);
-
+									 guid);
+		assertEquals(qr.getSpeed(), 1);
+		assertEquals(Integer.toHexString(qr.getPort()), qr.getPort(), 0xF3F1);
+		try {
+			assertEquals(qr.getResults().hasNext(), false);
+		} catch (BadPacketException e) {
+			assertTrue(false);
+		}
 		responses=new Response[2];
 		responses[0]=new Response(11,22,"Sample.txt");
 		responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
 		qr=new QueryReply(guid, (byte)5,
 						  0xFFFF, ip, u4, responses,
-						  guid, false);
-		assertEquals("254.0.0.1",qr.getIP());
-		assertEquals(0xFFFF, qr.getPort());
-		assertEquals(u4, qr.getSpeed());
-		assertTrue(Arrays.equals(qr.getClientGUID(),guid));
-
-		Iterator iter=qr.getResults();
-		Response r1=(Response)iter.next();
-		assertEquals(r1, responses[0]);
-		Response r2=(Response)iter.next();
-		assertEquals(r2, responses[1]);
-		assertFalse(iter.hasNext());
-
+						  guid);
+		assertEquals(qr.getIP(), "255.0.0.1");
+		assertEquals(qr.getPort(), 0xFFFF);
+		assertEquals(qr.getSpeed(), u4);
+		assertEquals(Arrays.equals(qr.getClientGUID(),guid), true);
+		try {
+			Iterator iter=qr.getResults();
+			Response r1=(Response)iter.next();
+			assertEquals(r1, responses[0]);
+			Response r2=(Response)iter.next();
+			assertEquals(r2, responses[1]);
+			assertEquals(iter.hasNext(), false);
+		} catch (BadPacketException e) {
+			assertTrue(false);
+		} catch (NoSuchElementException e) {
+			assertTrue(false);
+		}
 		
 		////////////////////  Contruct from Raw Bytes /////////////
 		
- 		//Normal case: double null-terminated result
+		//Normal case: double null-terminated result
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
-		payload[1]=1;            //non-zero port
-		payload[3]=1;            //non-blank ip
 		payload[11+8]=(byte)65;  //The character 'A'
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-						  payload);
-
-
-		iter=qr.getResults();
-		Response response=(Response)iter.next();
-		assertEquals("A", response.getName());
-		assertFalse(iter.hasNext());
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
+		try {
+			Iterator iter=qr.getResults();
+			Response response=(Response)iter.next();
+			assertEquals("'"+response.getName()+"'", response.getName(), "A");
+			assertEquals(iter.hasNext(), false);
+		} catch (BadPacketException e) {
+			assertTrue(false);
+		}
 		try {
 			qr.getVendor();    //undefined => exception
-			fail("qr should have been invalid");
+			assertTrue(false);
 		} catch (BadPacketException e) { }
 		try {
 			qr.getNeedsPush(); //undefined => exception
-			fail("qr should have been invalid");
+			assertTrue(false);
 		} catch (BadPacketException e) { }
 		
 		
@@ -149,28 +105,26 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //the client GUID, but not the results.
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
-		payload[1]=1;                    //non-zero port
-		payload[3]=1;                    //non-blank ip
         payload[11+8]=(byte)65;          //The character 'A'
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-						  payload);
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
-            iter=qr.getResults();
-            fail("qr should have been invalid");
+            Iterator iter=qr.getResults();
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getVendor();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
 
         //Test case added by Sumeet Thadani to check the metadata part
         //Test case modified by Susheel Daswani to check the metadata part
         payload=new byte[11+11+(4+1+4+5)+16];
         payload[0]=1;                    //Number of results
-		payload[1]=1;                    //non-zero port
-		payload[3]=1;                    //non-blank ip		
         payload[11+8]=(byte)65;          //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -185,52 +139,58 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1+4+3]=(byte)'H';   //The character 'E'
         payload[11+11+4+1+4+4]=(byte)0;   //null terminator
 		
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
-            iter=qr.getResults();
+            Iterator iter=qr.getResults();
             Response r = (Response)iter.next();
-            assertEquals("sumeet test a", 1, r.getNameBytesSize());
-            assertEquals("sumeet test b", 0, r.getMetaBytesSize());
+            assertEquals("sumeet test a", r.getNameBytesSize(), 1);
+            assertEquals("sumeet test b", r.getMetaBytesSize(), 0);
             byte[] name = r.getNameBytes();
-            assertEquals("sumeet test c", 'A', name[0]);
-            assertEquals("Sumeet test1", "A",  r.getName());
-            assertEquals("unexpected xml bytes",
-						 "SUSH", (new String(qr.getXMLBytes())));
+            assertEquals("sumeet test c", name[0], 'A');
+            assertEquals("Sumeet test1", r.getName(), "A");
+            assertEquals("SUSH is not " + (new String(qr.getXMLBytes())), 
+						 (new String(qr.getXMLBytes())), "SUSH");
         }catch(BadPacketException e){
-            fail("metaResponse not created well!", e);
+            System.out.println("MetaResponse not created well!");
         }
 
         //Normal case: basic metainfo with no vendor data
         payload=new byte[11+11+(4+1+4+4)+16];
         payload[0]=1;            //Number of results
-		payload[1]=1;            //non-zero port
-		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;  //The size of public area
-        payload[11+11+4+1]=(byte)0xB1; // set push yes/no flag (and other stuff)
-        payload[11+11+4+1+1]=(byte)0x01; // set the push understood flag
+        payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
         payload[11+11+4+1+2]=(byte)4;  // set xml length
         payload[11+11+4+1+3]=(byte)0;
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        String vendor=qr.getVendor();
-        assertEquals(vendor, "LIME", vendor);
-        vendor=qr.getVendor();
-        assertEquals(vendor, "LIME", vendor);
-        assertTrue(qr.getNeedsPush());
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
+        try {
+            String vendor=qr.getVendor();
+            assertEquals(vendor, "LIME", vendor);
+            vendor=qr.getVendor();
+            assertEquals(vendor, "LIME", vendor);
+            assertEquals(qr.getNeedsPush(), true);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            assertTrue(false);
+        }
         
         //Normal case: basic metainfo with extra vendor data
         payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
-		payload[1]=1;            //non-zero port
-		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -238,64 +198,75 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
         payload[11+11+4+1]=(byte)0xF0; //no push flag (and other crap)
-        payload[11+11+4+1+1]=(byte)0x01; // push understood flag
         payload[11+11+4+1+2]=(byte)32; //size of xml lsb
         payload[11+11+4+1+3]=(byte)78; // size of xml msb
         for (int i = 0; i < 20000; i++)
             payload[11+11+4+1+4+i] = 'a';
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        vendor=qr.getVendor();
-        assertEquals(vendor, "LLME", vendor);
-        vendor=qr.getVendor();
-        assertEquals(vendor, "LLME", vendor);
-        assertFalse(qr.getNeedsPush());
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}		
+        try {
+            String vendor=qr.getVendor();
+            assertEquals(vendor, "LLME", vendor);
+            vendor=qr.getVendor();
+            assertEquals(vendor, "LLME", vendor);
+            assertEquals(qr.getNeedsPush(), false);
+        } catch (BadPacketException e) {
+            assertTrue(false);
+            e.printStackTrace();
+        }
         try {
             qr.getSupportsChat();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) {
         }
 
         //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
-		payload[1]=1;            //non-zero port
-        payload[3]=1;           //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}		
         try {
             qr.getNeedsPush();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try { 
             qr.getVendor();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
 
         //Bad case.  Common payload length lies.
         payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
-		payload[1]=1;            //non-zero port
-        payload[3]=1;            //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        qr.getResults();
-        
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);            
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
+        try {
+            qr.getResults();
+        } catch (BadPacketException e) {
+            assertTrue(false);
+        }
         try {
             qr.getVendor();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }  
 
 
@@ -306,8 +277,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //(We don't bother testing undefined and set.  Who cares?)
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
-		payload[1]=1;                //non-zero port
-        payload[3]=1;                //non-blank ip		
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -317,27 +286,35 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1]=(byte)0x0; //no data known
         payload[11+11+4+1+1]=(byte)0x0; 
         payload[11+11+4+1+2]=(byte)1;         
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-						  
-        vendor=qr.getVendor();
-        assertEquals("unexpected vendor", "LIME", vendor);
-        
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
-            qr.getNeedsPush();
-            fail("qr should have been invalid");
-        } catch(BadPacketException e) {}
+            String vendor=qr.getVendor();
+            assertEquals(vendor, vendor, "LIME");
+            vendor=qr.getVendor();
+            assertEquals(vendor, vendor, "LIME");
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            assertTrue(false);
+        }                                        
+        try {
+            assertEquals(qr.getNeedsPush(), false);
+        } catch (BadPacketException e) { }
         try {
             qr.getIsBusy();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getHadSuccessfulUpload();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getIsMeasuredSpeed();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
        
 
@@ -345,56 +322,72 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         payload=new byte[11+11+(4+1+4+1+1)+16];
         payload[0]=1;                //Number of results
-		payload[1]=1;                //non-zero port
-        payload[3]=1;                //non-blank ip				
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)73;   //The character 'I'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;    //common payload size
-        payload[11+11+4+1]=(byte)0x1d;    // 0001 1101
-        payload[11+11+4+1+1]=(byte)0x1d;  // 0001 1101
+        payload[11+11+4+1]=(byte)0x1d;  //111X1 
+        payload[11+11+4+1+1]=(byte)0x1c;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         payload[11+11+4+1+4]=(byte)0x1; //supports chat
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
+        try {
+            String vendor=qr.getVendor();
+            assertEquals(vendor, "LIME", vendor);
+            assertEquals(qr.getNeedsPush(), true);
+            assertEquals(qr.getNeedsPush(), true);
+            assertEquals(qr.getIsBusy(), true);
+            assertEquals(qr.getIsBusy(), true);
+            assertEquals(qr.getIsMeasuredSpeed(), true);
+            assertEquals(qr.getIsMeasuredSpeed(), true);
+            assertEquals(qr.getHadSuccessfulUpload(), true);
+            assertEquals(qr.getHadSuccessfulUpload(), true);
+            assertEquals(qr.getSupportsChat(), true);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            assertTrue(false);
+        }                                        
 
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-							  
-        vendor=qr.getVendor();
-        assertEquals(vendor, "LIME", vendor);
-        assertTrue(qr.getNeedsPush());
-        assertTrue(qr.getIsBusy());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertTrue(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getSupportsChat());
           
         //Normal case: busy and push bits defined and unset
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
-		payload[1]=1;                //non-zero port
-        payload[3]=1;                //non-blank ip
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
-        payload[11+11+4+1]=(byte)0x1c;    // 0001 1100
-        payload[11+11+4+1+1]=(byte)0x01;  // 0000 0001  //push understood
+        payload[11+11+4+1]=(byte)0x1c;  //111X1 
+        payload[11+11+4+1+1]=(byte)0x0;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
-
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        vendor=qr.getVendor();
-        assertEquals(vendor, "LIME", vendor);
-        assertFalse(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getHadSuccessfulUpload());
-
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
+        try {
+            String vendor=qr.getVendor();
+            assertEquals(vendor, "LIME", vendor);
+            assertEquals(qr.getNeedsPush(), false);
+            assertEquals(qr.getIsBusy(), false);
+            assertEquals(qr.getIsMeasuredSpeed(), false);
+            assertEquals(qr.getHadSuccessfulUpload(), false);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            assertTrue(false);
+        }  
         try {
             qr.getSupportsChat();
-            fail("LiME!=LIME when looking at private area");
+            assertTrue(false); //LiME!=LIME when looking at private area
         } catch (BadPacketException e) { }
 
         //Create extended QHD from scratch
@@ -404,26 +397,29 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          false, true, true, false, true, false);
-        assertEquals("254.0.0.1", qr.getIP());
-        assertEquals(0xFFFF, qr.getPort());
-        assertEquals(u4, qr.getSpeed());
+                          false, true, true, false, true);
+        assertEquals(qr.getIP(), "255.0.0.1");
+        assertEquals(qr.getPort(), 0xFFFF);
+        assertEquals(qr.getSpeed(), u4);
         assertTrue(Arrays.equals(qr.getClientGUID(),guid));
-
-        iter=qr.getResults();
-        r1=(Response)iter.next();
-        assertEquals(r1, responses[0]);
-        r2=(Response)iter.next();
-        assertEquals(r2, responses[1]);
-        assertFalse(iter.hasNext());
-        assertEquals("LIME", qr.getVendor());
-        assertFalse(qr.getNeedsPush());
-        assertTrue(qr.getIsBusy());
-        assertTrue(qr.getHadSuccessfulUpload());
-        assertFalse(qr.getIsMeasuredSpeed());
-        assertTrue(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(!qr.isReplyToMulticastQuery());
+        try {
+            Iterator iter=qr.getResults();
+            Response r1=(Response)iter.next();
+            assertEquals(r1, responses[0]);
+            Response r2=(Response)iter.next();
+            assertEquals(r2, responses[1]);
+            assertEquals(iter.hasNext(), false);
+            assertEquals(qr.getVendor(), "LIME");
+            assertEquals(qr.getNeedsPush(), false);
+            assertEquals(qr.getIsBusy(), true);
+            assertEquals(qr.getHadSuccessfulUpload(), true);
+            assertEquals(qr.getIsMeasuredSpeed(), false);
+            assertEquals(qr.getSupportsChat(), true);
+        } catch (BadPacketException e) {
+            assertTrue(false);
+        } catch (NoSuchElementException e) {
+            assertTrue(false);
+        }
 
         //Create extended QHD from scratch with different bits set
         responses=new Response[2];
@@ -432,87 +428,33 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          true, false, false, true, false, false);
-
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(!qr.isReplyToMulticastQuery());
-
+                          true, false, false, true, false);
+        try {
+            assertEquals(qr.getVendor(), "LIME");
+            assertEquals(qr.getNeedsPush(), true);
+            assertEquals(qr.getIsBusy(), false);
+            assertEquals(qr.getHadSuccessfulUpload(), false);
+            assertEquals(qr.getIsMeasuredSpeed(), true);
+            assertEquals(qr.getSupportsChat(), false);
+        } catch (BadPacketException e) {
+            assertTrue(false);
+        } catch (NoSuchElementException e) {
+            assertTrue(false);
+        }
         //And check raw bytes....
         ByteArrayOutputStream out=new ByteArrayOutputStream();
-        qr.write(out);
-
+        try {
+            qr.write(out);
+        } catch (IOException e) {
+            assertTrue(false);
+        }
         byte[] bytes=out.toByteArray();
-        int ggepLen = _ggepUtil.getQRGGEP(true, false, 
-                                          new HashSet()).length;
+        final int ggepLen = GGEPUtil.getQRGGEP(true).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
-        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
-        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
-        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
-
-        // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(!qr.isReplyToMulticastQuery());
-
-        //Create extended QHD from scratch with different bits set
-        // Do not set multicast, as that will unset pushing, busy, etc..
-        // and generally confuse the test.
-        responses=new Response[2];
-        responses[0]=new Response(11,22,"Sample.txt");
-        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
-        qr=new QueryReply(guid, (byte)5,
-                          0xFFFF, ip, u4, responses,
-                          guid,
-                          true, false, false, true, false, false);
-
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertFalse(qr.isReplyToMulticastQuery());
-
-        //And check raw bytes....
-        out=new ByteArrayOutputStream();
-        qr.write(out);
-
-        bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, 
-                                      new HashSet()).length;
-        //Length includes header, query hit header and footer, responses, and
-        //QHD (public and private)
-        assertEquals(
-            (23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen,
-            bytes.length
-        );
-        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
-        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
-
-        // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
-        assertEquals("LIME", qr.getVendor());
-        assertTrue(qr.getNeedsPush());
-        assertFalse(qr.getIsBusy());
-        assertFalse(qr.getHadSuccessfulUpload());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertFalse(qr.getSupportsChat());
-        assertTrue(qr.getSupportsBrowseHost());
-        assertFalse(qr.isReplyToMulticastQuery());
+        assertEquals(bytes.length,(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen);
+        assertEquals(bytes[bytes.length-16-6-ggepLen],0x3d); //11101
+        assertEquals(bytes[bytes.length-16-5-ggepLen],0x31); //10001
 
         //Create from scratch with no bits set
         responses=new Response[2];
@@ -520,26 +462,26 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
-                          guid, false);
+                          guid);
         try {
             qr.getVendor();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getNeedsPush();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getIsBusy();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getHadSuccessfulUpload();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
         try {
             qr.getIsMeasuredSpeed();
-            fail("qr should have been invalid");
+            assertTrue(false);
         } catch (BadPacketException e) { }
 	}
 
@@ -548,22 +490,21 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         QueryReply reachableNonBusy=new QueryReply(
             new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
             false, false,    //!needsPush, !isBusy
-            true, false, false, false);
+            true, false, false);
         QueryReply reachableBusy=new QueryReply(
             new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
             false, true,     //!needsPush, isBusy
-            true, false, false, false);
+            true, false, false);
         QueryReply unreachableNonBusy=new QueryReply(
             new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
             true, false,     //needsPush, !isBusy
-            true, false, false, false);
+            true, false, false);
         QueryReply unreachableBusy=new QueryReply(
             new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
             true, true,      //needsPush, isBusy
-            true, false, false, false);
+            true, false, false);
         QueryReply oldStyle=new QueryReply(
-            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], 
-            new byte[16], false);
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16]);
         
         //Remember that a return value of N corresponds to N+1 stars
         assertEquals(3,  reachableNonBusy.calculateQualityOfService(false));
@@ -577,425 +518,4 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0,  oldStyle.calculateQualityOfService(false));
         assertEquals(0,  oldStyle.calculateQualityOfService(true));
     }
-
-
-    public void testGGEPUtil() throws Exception {
-        GGEP testGGEP = null;
-
-        // test standard null GGEP....
-        try {
-            // this shouldn't even work....
-            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false,
-                                                    new HashSet()), 
-                                0, null);
-            assertTrue(false);
-        }
-        catch (BadGGEPBlockException expected) {}
-
-        // test just BH GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, 
-                                                new HashSet()), 
-                            0, null);
-        assertEquals(1, testGGEP.getHeaders().size());
-        assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-        assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
-
-        // test just multicast GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, 
-                                                new HashSet()), 
-                            0, null);
-        assertEquals(1, testGGEP.getHeaders().size());
-        assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-        assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
-
-        // test combo GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true,
-                                                new HashSet()),
-                            0, null);
-        assertEquals(2, testGGEP.getHeaders().size());
-        assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-        assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
-
-    }
-
-    public void testBasicPushProxyGGEP() throws Exception {
-        basicTest(false, false);
-        basicTest(false, true);
-        basicTest(true, false);
-        basicTest(true, true);
-    }
-
-    public void basicTest(final boolean browseHost, 
-                          final boolean multicast) throws Exception {
-        int numHeaders = 1;
-
-        // first take input of proxies
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.stanford.edu"};
-        Set proxies = new HashSet();
-        for (int i = 0; i < hosts.length; i++)
-            proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
-        GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     proxies), 
-                                 0, null);
-        if (browseHost) {
-            numHeaders++;
-            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-        }
-        if (multicast) {
-            numHeaders++;
-            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
-        }
-        assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
-        assertEquals(numHeaders, testGGEP.getHeaders().size());
-        Set retProxies = 
-            _ggepUtil.getPushProxies(new GGEP[] { testGGEP });
-        assertEquals(4, retProxies.size());
-
-        PushProxyInterface[] array1 = 
-            (PushProxyInterface[])retProxies.toArray(new QueryReply.PushProxyContainer[0]);
-        PushProxyInterface[] array2 = 
-            (PushProxyInterface[])proxies.toArray(new QueryReply.PushProxyContainer[0]);
-
-        assertEquals(retProxies, proxies);
-        //for(int i=0; i<array1.length; i++) {
-        //  assertEquals(array1[i], array2[i]);
-        //}
-        //Iterator iter1 = retProxies.iterator();
-        //Iterator iter2 = proxies.iterator();
-        //while(iter1.hasNext() && iter2.hasNext()) {
-        //  assertEquals((PushProxyInterface)iter1.next(), 
-        //               (PushProxyInterface)iter2.next());
-        //}
-        
-    }
-
-
-    public void testBadPushProxyInput() throws Exception {
-        byte[] badBytes = new byte[6];
-        GGEP ggep[] = new GGEP[1];
-        // test a bad ip
-        // 0.0.0.0 is a bad address
-
-        // trying to input
-        try {
-            PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 6346);
-        }
-        catch (IllegalArgumentException expected) {}
-
-        // from the network
-        ggep[0] = new GGEP();
-        badBytes[0] = (byte) 0;
-        badBytes[1] = (byte) 0;
-        badBytes[2] = (byte) 0;
-        badBytes[3] = (byte) 0;
-        badBytes[4] = (byte) 3;
-        badBytes[5] = (byte) 4;
-        ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-        assertTrue(_ggepUtil.getPushProxies(ggep).isEmpty());
-
-        // test a bad port
-
-        // trying to input is the only case
-        try {
-            PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 634600);
-        }
-        catch (IllegalArgumentException expected) {}
-
-        // this should work fine...
-        ggep[0] = new GGEP();
-        badBytes[0] = (byte) 1;
-        badBytes[1] = (byte) 1;
-        badBytes[2] = (byte) 2;
-        badBytes[3] = (byte) 2;
-        badBytes[4] = (byte) 0;
-        badBytes[5] = (byte) 0;
-        ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-        assertNotNull(_ggepUtil.getPushProxies(ggep));
-
-
-        // try to get proxies when the lengths are wrong
-        for (int i = 0; i < 100; i++) {
-            badBytes = new byte[i];
-            // just put some filler in here....
-            for (int j = 0; j < badBytes.length; j++) {
-                // make sure each one is unique, as the returned
-                // Set from getPushProxies will filter duplicates
-                if(j%6 == 0) {
-                    badBytes[j] = (byte)j;
-                }
-                else{
-                    badBytes[j] = (byte)i;
-                }
-            }
-            ggep[0] = new GGEP();
-            ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-            if (i == 0)
-                assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
-            else if (i < 6) 
-                assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
-            else  {// length is fine
-                   // -1 because the first entry is invalid since it
-                   // begins with 0.               
-                assertEquals((i / 6) - 1,
-                             _ggepUtil.getPushProxies(ggep).size());
-                
-            }
-        }
-
-    }
-
-
-    public void testManualPushProxyInput() throws Exception {
-        Random rand = new Random();
-        GGEP ggep[] = new GGEP[1];
-        for (int i = 0; i < 10; i++) {
-            byte[] bytes = new byte[6*(i+1)];
-            rand.nextBytes(bytes);
-            // don't trust zeroes or 255 in IP...
-            for (int j = 0; j < bytes.length; j++) {
-                if (bytes[j] == (byte) 0) bytes[j] = (byte) 1;
-                if (bytes[j] == (byte)255)bytes[j] = (byte)254;
-            }
-
-            // from the network
-            ggep[0] = new GGEP();
-            ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, bytes);
-
-            Set proxies = _ggepUtil.getPushProxies(ggep);
-            assertNotNull(proxies);
-
-            Iterator iter = proxies.iterator();
-            int j = 0;
-            while(iter.hasNext()) {
-                final int inIndex = 6*j;
-                PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                InetAddress addr = ppi.getPushProxyAddress();
-                byte[] tempAddr = new byte[4];
-                System.arraycopy(bytes, inIndex, tempAddr, 0, 4);
-
-                InetAddress addr2 = InetAddress.getByAddress(tempAddr);
-                String address = addr2.getHostAddress();
-                
-                int curPort = ByteOrder.leb2int(bytes, inIndex+4, 2);
-                PushProxyInterface ppi2 = 
-                    new QueryReply.PushProxyContainer(address, curPort);
-
-                assertTrue(proxies.contains(ppi2));
-                //assertEquals(addr, addr2);
-                //int port = ppi.getPushProxyPort();
-                /*
-                final int inIndex = 6*j;
-                
-                byte[] addrBytes = addr.getAddress();
-                byte[] portBytes = new byte[2];
-                ByteOrder.short2leb((short)port, portBytes, 0);
-                
-                assertEquals(addrBytes[0], bytes[inIndex]);
-                assertEquals(addrBytes[1], bytes[inIndex+1]);
-                assertEquals(addrBytes[2], bytes[inIndex+2]);
-                assertEquals(addrBytes[3], bytes[inIndex+3]);
-                assertEquals(portBytes[0], bytes[inIndex+4]);
-                assertEquals(portBytes[1], bytes[inIndex+5]);
-                */
-                j++;
-            }
-        }
-
-    }
-    
-    public void testPushProxyQueryReply() throws Exception {
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.berkeley.edu"};
-
-        for (int outer = 0; outer < hosts.length; outer++) {
-            //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
-            Set proxies = new HashSet();
-            for (int i = 0; i < hosts.length; i++)
-                proxies.add(
-                    new QueryReply.PushProxyContainer(hosts[i], 6346));
-            
-            QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           proxies);
-            
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            qr.write(baos);
-            ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
-
-            // test read from network            
-            Set retProxies = readQR.getPushProxies();
-            assertTrue(retProxies != null);
-            assertTrue(retProxies != proxies);
-            Iterator iter1 = retProxies.iterator();
-            Iterator iter2 = proxies.iterator();
-            while(iter1.hasNext() && iter2.hasNext()) {
-                assertEquals((PushProxyInterface)iter1.next(), 
-                             (PushProxyInterface)iter2.next());
-            }
-            //for (int i = 0; i < retProxies.length; i++)
-            //  assertTrue(retProxies[i].equals(proxies[i]));
-
-            // test simple accessor
-            retProxies = qr.getPushProxies();
-            assertTrue(retProxies != null);
-            assertTrue(retProxies != proxies);
-            iter1 = retProxies.iterator();
-            iter2 = proxies.iterator();
-            while(iter1.hasNext() && iter2.hasNext()) {
-                assertEquals((PushProxyInterface)iter1.next(), 
-                             (PushProxyInterface)iter2.next());
-            }
-            //for (int i = 0; i < retProxies.length; i++)
-            //  assertTrue(retProxies[i].equals(proxies[i]));
-
-        }
-    }
-    
-    public void testQueryReplyHasAlternates() throws Exception {
-        addFilesToLibrary();
-        addAlternateLocationsToFiles();
-        
-        boolean checked = false;
-		for(int i = 0; i < fman.getNumFiles(); i++) {
-			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
-			Response[] hits = fman.query(qr);
-			assertNotNull("didn't get a response for query " + qr, hits);
-			// we can only do this test on 'unique' names, so if we get more than
-			// one response, don't test.
-			if ( hits.length != 1 ) continue;
-			checked = true;
-			
-			// first check basic stuff on the response.
-			assertEquals("responses should be equal", testResponse, hits[0]);
-			assertEquals("should have 10 other alts",
-			    10, testResponse.getLocations().size());
-			assertEquals("should have equal alts",
-			    testResponse.getLocations(), hits[0].getLocations());
-			    
-			// then actually create a QueryReply and read it, to make
-			// sure we can write & read stuff correctly.
-            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, hits,
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);			    
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            qReply.write(baos);
-            ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
-            
-            List readHits = readQR.getResultsAsList();
-            assertEquals("wrong # of results", hits.length, readHits.size());
-            Response hit = (Response)readHits.get(0);
-            assertEquals("wrong # of alts",
-                hits[0].getLocations(), hit.getLocations());
-		}        
-    }
-
-
-    /**
-     * Test to make sure that results that have no name are rejected 
-     */
-    public void testThatEmptyResultsAreRejected() throws Exception {
-
- 		// create a payload that says it has one result, but whose
-        // result is empty.  This should be rejected!
-		byte[] payload=new byte[11+11+16];
-		payload[0] = 1;            //Number of results
-		payload[1]=1;              //non-zero port
-        payload[3]=1;                //non-blank ip
-		//payload[11+8]=(byte)65;  //The character 'A'
-
-		QueryReply qr = 
-            new QueryReply(new byte[16], (byte)5, (byte)0, payload);
-
-        
-        try {
-            List results = qr.getResultsAsList();
-            fail("should have thrown an exception for empty result");
-        } catch(BadPacketException e) {
-        }
-    }
-
-	private void addFilesToLibrary() throws Exception {
-		String dirString = "com/limegroup/gnutella";
-		File testDir = CommonUtils.getResourceFile(dirString);
-		testDir = testDir.getCanonicalFile();
-		assertTrue("could not find the gnutella directory",
-		    testDir.isDirectory());
-		
-        File[] testFiles = testDir.listFiles(new FileFilter() { 
-            public boolean accept(File file) {
-                // use files with a $ because they'll generally
-                // trigger a single-response return, which is
-                // easier to check
-                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
-            }
-        });
-		assertNotNull("no files to test against", testFiles);
-		assertNotEquals("no files to test against", 0, testFiles.length);
-
-        waitForLoad();
-
-   		for(int i=0; i<testFiles.length; i++) {
-			if(!testFiles[i].isFile()) continue;
-			File shared = new File(
-			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
-			assertTrue("unable to get file",
-			    CommonUtils.copy( testFiles[i], shared));
-            assertNotEquals(null, fman.addFileIfShared(shared));
-		}
-        
-        // the below test depends on the filemanager loading shared files in 
-        // alphabetical order, and listFiles returning them in alphabetical
-        // order since neither of these must be true, a length check can
-        // suffice instead.
-        //for(int i=0; i<files.length; i++)
-        //    assertEquals(files[i].getName()+".tmp", 
-        //                 fman.get(i).getFile().getName());
-            
-        assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getNumFiles() );
-    }
-    
-    private void addAlternateLocationsToFiles() throws Exception {
-        FileDesc[] fds = fman.getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) {
-            String urn = fds[i].getSHA1Urn().httpStringValue();
-            for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
-                fds[i].add(AlternateLocation.create(loc));
-            }
-        }
-    }
-    
-    private class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized(loaded) {
-                loaded.notify();
-            }
-        }
-    }
-    
-    private void waitForLoad() {
-        synchronized(loaded) {
-            try {
-                fman.loadSettings(false); // true won't matter either                
-                loaded.wait();
-            } catch (InterruptedException e) {
-                //good.
-            }
-        }
-    }   
-
 }

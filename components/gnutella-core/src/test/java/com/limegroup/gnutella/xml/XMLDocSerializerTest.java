@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.xml;
 
-import java.io.File;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
+import java.io.*;
+import com.sun.java.util.collections.*;
+import junit.framework.*;
 
 /** This class tests that present and future versions are compatible with older
  * versions of LimeXMLDocument.  Basically, for every version the current
@@ -14,7 +10,7 @@ import com.sun.java.util.collections.Map;
  *
  * NOTE: Must be run from the directory where the relevant .sxml files reside.
  */
-public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class XMLDocSerializerTest extends TestCase {
 
     final String fileLocation = "com/limegroup/gnutella/xml/";
 
@@ -22,16 +18,11 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
         super(name);
     }
 
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
-    }
-    
-    public static Test suite() {
-        return buildTestSuite(XMLDocSerializerTest.class);
+    protected void setUp() {
     }
 
-    private void basicTest(File file) throws Exception  {
-        assertTrue("File " + file + " cannot be found!",
+    private void basicTest(File file) {
+        Assert.assertTrue("File " + file + " cannot be found!",
                           file.exists());
         try {
             LimeXMLReplyCollection.MapSerializer ms =
@@ -46,21 +37,34 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         }
         catch (Exception e) {
-            fail("couldn't deserialize XML docs", e);
+            e.printStackTrace();
+            Assert.assertTrue("Couldn't deserialize XML Docs!",
+                              false);
         }
     }
     
     /* Test the first version of LimeXMLDocument, versions 2.4.4 and preceding.
      */
-    public void test244Pre() throws Exception {
-        basicTest(CommonUtils.getResourceFile(fileLocation + "audio244Pre.sxml"));
+    public void test244Pre() {
+        basicTest(new File(fileLocation + "audio244Pre.sxml"));
     }
 
     /* This method should be changed as new versions are added.  And the current
      * version should be added as a new test.
      */
-    public void testCurrent() throws Exception {
-        basicTest(CommonUtils.getResourceFile(fileLocation + "audio.sxml"));
+    public void testCurrent() {
+        basicTest(new File(fileLocation + "audio.sxml"));
+    }
+
+
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+    public static Test suite() {
+        TestSuite suite =  new TestSuite("XML Serialization Unit Test");
+        suite.addTest(new TestSuite(XMLDocSerializerTest.class));
+        return suite;
     }
 
 }

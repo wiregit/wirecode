@@ -1,61 +1,27 @@
 package com.limegroup.gnutella;
 
+import junit.framework.*;
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
+import java.net.*;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-
-public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
-    
-    private static Acceptor acceptThread;
+public class AcceptorTest extends TestCase {
 
     public AcceptorTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(AcceptorTest.class);
+        return new TestSuite(AcceptorTest.class);
     }
 
-	public static void main(String[] args) {
-		junit.textui.TestRunner.run(suite());
-	}
+    public void testPortsOccupied() {
+        // strategy: open sockets on various ports and try to set the listening
+        // port via Acceptor.
 
-    public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        RouterService.getConnectionManager().initialize();
-        
         // start it up!
-        acceptThread = new Acceptor();
+        Acceptor acceptThread = new Acceptor();
         acceptThread.start();
-        
-        // Give thread time to find and open it's sockets.   This race condition
-        // is tolerated in order to speed up LimeWire startup
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex) {}                
-    }
-    
-    public void setUp() throws Exception {
-        //shut off the various services,
-        //if an exception is thrown, something bad happened.
-        acceptThread.setListeningPort(0);
-    }
-    
-    public void tearDown() throws Exception {
-        //shut off the various services,
-        //if an exception is thrown, something bad happened.
-        acceptThread.setListeningPort(0);
-    }        
-        
-    /**
-     * This test checks to ensure that Acceptor.setListeningPort
-     * cannot use a port if the UDP part is already bound.
-     */
-    public void testCannotUseBoundUDPPort() {        
+
         int portToTry = 2000;
         DatagramSocket udp = null;
         while (true) {
@@ -77,14 +43,8 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
         catch (IOException expected) {
             udp.close();
         }
-    }
-        
-    /**
-     * This test checks to ensure that Acceptor.setListeningPort
-     * cannot use port if the TCP part is already bound.
-     */
-    public void testCannotUseBoundTCPPort() {
-        int portToTry = 2000;
+
+
         ServerSocket tcp = null;
         while (true) {
             // get a free port for UDP traffic.
@@ -108,13 +68,22 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
             }
             catch (Exception ignored) {}
         }
-    }
 
-    /**
-     * This test checks to make sure that Acceptor.setListeningPort
-     * correctly binds the UDP & TCP port.
-     */
-     public void testAcceptorBindsUDPandTCP() {
+
+        // hopefully this'll stop the thread...
+        try {
+            acceptThread.setListeningPort(0);
+        }
+        catch (IOException whatever) {}
+        acceptThread = null;    }
+
+
+    public void testPortsAreOccupied() {
+
+        // start it up!
+        Acceptor acceptThread = new Acceptor();
+        acceptThread.start();
+
         int portToTry = 2000;
         while (true) {
             try {
@@ -142,6 +111,14 @@ public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
                        false);
         }
         catch (Exception good) {}
+
+
+        // hopefully this'll stop the thread...
+        try {
+            acceptThread.setListeningPort(0);
+        }
+        catch (IOException whatever) {}
+        acceptThread = null;
     }
 
 }

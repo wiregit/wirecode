@@ -1,24 +1,30 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
+import com.sun.java.util.collections.*;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
+import java.net.*;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class FileDescTest extends TestCase {
 
+	private final String [] containedURNStrings = {
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
+	};
 
 	private final String[] uncontainedURNStrings = {
 		"urn:sha1:CLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
@@ -43,14 +49,14 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 
 	public static Test suite() {
-		return buildTestSuite(FileDescTest.class);
+		return new TestSuite(FileDescTest.class);
 	}
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() throws Exception {		
+	protected void setUp() {		
 		_uncontainedUrnSet = new HashSet();
 		for(int i=0; i<10; i++) {
 			try {
@@ -81,12 +87,12 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	/**
 	 * Tests the FileDesc construcotor.
 	 */
-	public void testConstructor() throws Exception {
-		File file = CommonUtils.getResourceFile("build.xml");
+	public void testConstructor() {
+		File file = new File("build.xml");
 
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
-			new FileDesc(null, urns, 0);
+			FileDesc fd = new FileDesc(null, urns, 0);
 			fail("null values should not be permitted for FileDesc "+
 				 "constructor");
 		} catch(NullPointerException e) {
@@ -96,17 +102,17 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	/**
 	 * Tests the calculateAndCacheURN method
 	 */
-	public void testCalculateAndCacheURN() throws Exception {
-		File file = new File(getSaveDirectory(), "nonexistentfile");
+	public void testCalculateAndCacheURN() {
+		File file = new File("nonexistentfile");
 		if(file.exists()) file.delete();
 		try {
-			FileDesc.calculateAndCacheURN(file);
+			Set urns = FileDesc.calculateAndCacheURN(file);
 			fail("nonexistent files should not be permitted");
 		} catch(IllegalArgumentException e) {
 		}		
 
 		try {
-			FileDesc.calculateAndCacheURN(null);
+			Set urns = FileDesc.calculateAndCacheURN(null);
 			fail("null files should not be permitted");
 		} catch(NullPointerException e) {
 		}		
@@ -117,24 +123,35 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * Tests that alternate locations with the same SHA1 values can be
 	 * added to a <tt>FileDesc</tt>.
 	 */
-	public void testAddingAlternateLocations() throws Exception{
-		File file = CommonUtils.getResourceFile("build.xml");
-		Set urns = FileDesc.calculateAndCacheURN(file);
-		FileDesc fd = new FileDesc(file, urns, 0);
-		URN sha1 = fd.getSHA1Urn();
-		URL sha1Url = new URL("http", "60.23.35.10", 6346, 
-							  "/uri-res/N2R?"+sha1.httpStringValue());
-		AlternateLocation loc =  
-			AlternateLocation.create(sha1Url);
-		fd.add(loc);
+	public void testAddingAlternateLocations() {
+		File file = new File("build.xml");
+		try {
+			Set urns = FileDesc.calculateAndCacheURN(file);
+			FileDesc fd = new FileDesc(file, urns, 0);
+			URN sha1 = fd.getSHA1Urn();
+  			URL sha1Url = new URL("http", "60.23.35.10", 6346, 
+								  "/uri-res/N2R?"+sha1.httpStringValue());
+			AlternateLocation loc =  
+				AlternateLocation.createAlternateLocation(sha1Url);
+			fd.addAlternateLocation(loc);
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
+		} catch(IOException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
+		}
 	}
 
 	/**
 	 * Tests that alternate locations with the different SHA1 values cannot be
 	 * added to a <tt>FileDesc</tt>.
 	 */
-	public void testAddingDifferentAlternateLocations() throws Exception {
-		File file = CommonUtils.getResourceFile("build.xml");
+	public void testAddingDifferentAlternateLocations() {
+		File file = new File("build.xml");
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
 			FileDesc fd = new FileDesc(file, urns, 0);
@@ -143,9 +160,9 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 								  HTTPConstants.URI_RES_N2R+
 								  HugeTestUtils.URNS[0]);
 			AlternateLocation loc =  
-				AlternateLocation.create(sha1Url);
+				AlternateLocation.createAlternateLocation(sha1Url);
 			assertNotNull("should not be null", loc.getSHA1Urn());
-			fd.add(loc);
+			fd.addAlternateLocation(loc);
 			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);
 		} catch(IllegalArgumentException e) {
 		} catch(IOException e) {

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 /** Forks output to console as well as delegate stream. */
 public class DebugOutputStream extends OutputStream {

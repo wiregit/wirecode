@@ -1,37 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.io.*;
 import java.util.StringTokenizer;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.IntPair;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
-import com.sun.java.util.collections.Iterator;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.uploader.HTTPUploader;
+import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.*;
 
 public class TestUploader {    
-    
-    private static final Log LOG = LogFactory.getLog(TestUploader.class);
-    
     /** My name, for debugging */
     private final String name;
 
@@ -55,10 +33,8 @@ public class TestUploader {
 	private AlternateLocationCollection incomingAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
-    private ServerSocket server;
+    ServerSocket server = null;
     private boolean busy = false;
-    private int retryAfter = -1;
-    private int timesBusy = Integer.MAX_VALUE;
     //Note about queue testing: This is how the queuing simulation works: If
     //queue is set, the uploader sends the X-Queue header etc in handleRequest
     //method, and sets values for minPollTime and maxPollTime. In the loop
@@ -70,48 +46,10 @@ public class TestUploader {
     private boolean queue = false;
     private long minPollTime = -1;
     private long maxPollTime = -1;
-    final int MIN_POLL = 45000;
+    //Note if either of these is changed we must change the X-Queue header in
+    //this test
+    private final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
-    private int partial = 0;
-    private Long creationTime = null;
-    
-    boolean unqueue = true;
-    int queuePos = 1;
-
-    boolean killedByDownloader = false;
-    
-    /**
-     * The offset for the low chunk.
-     */
-    private int lowChunkOffset = 0;
-    
-    /**
-     * The offset for the high chunk.
-     */
-    private int highChunkOffset = 0;
-        
-    /**
-     * The number of requests this uploader has received.
-     */
-    private int requestsReceived = 0;
-    
-    /**
-     * Whether or not this uploader should respond with HTTP/1.1
-     */
-    private boolean respondWithHTTP11 = true;
-    
-    /**
-     * The sum of the number of bytes we need to upload across all requests.  If
-     * this value is less than totalUploaded and the uploader encountered an
-     * IOException in handle request it means the downloader killed the
-     * connection.
-     */
-    int totalAmountToUpload;
-
-    /**
-     * <tt>IPFilter</tt> for only allowing local connections.
-     */
-    private final IPFilter IP_FILTER = IPFilter.instance();
 
 
     /** 
@@ -120,37 +58,12 @@ public class TestUploader {
      * another thread to do the listening. 
      */
     public TestUploader(String name, final int port) {
-
-        // ensure that only local machines can connect!!
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
         this.name=name;
         reset();
-        
-        try {
-            server = new ServerSocket();
-            //Use Java 1.4's option to reuse a socket address.  This is
-            //important because some client thread may be using the given port
-            //even though no threads are listening on the given socket.
-            server.setReuseAddress(true);
-            server.bind(new InetSocketAddress(port));
-        } catch (IOException e) {
-            LOG.debug("Couldn't bind socket to port "+port+"\n");
-            //System.out.println("Couldn't listen on port "+port);
-            ErrorService.error(e);
-            return;
-        }
-        
         //spawn loop();
         Thread t = new Thread() {
             public void run() {
-                try {
-                    loop(port);
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                loop(port);
             }
         };
         t.setDaemon(true);
@@ -159,7 +72,7 @@ public class TestUploader {
 
     public void stopThread() {
         try {
-            if ( server != null )
+            if (server!=null)
                 server.close();
         } catch (IOException e) {}
     }
@@ -176,21 +89,9 @@ public class TestUploader {
         stopped = false;
         sendCorrupt = false;
         busy = false;
-        retryAfter = -1;
-        timesBusy = Integer.MAX_VALUE;
         queue = false;
-        partial = 0;
         minPollTime = -1;
         maxPollTime = -1;
-        unqueue = true;
-        queuePos=1;
-        killedByDownloader = false;
-        totalAmountToUpload = 0;
-        requestsReceived = 0;
-        connects = 0;
-        lowChunkOffset = 0;
-        highChunkOffset = 0;
-        respondWithHTTP11 = true;
     }
 
     public int amountUploaded() {
@@ -206,44 +107,12 @@ public class TestUploader {
         this.rate=rate;
     }
     
-    /**
-     * Determine how many times this test uploader should respond
-     * with a busy status.
-     */
-    public void setTimesBusy(int nTimes) {
-        this.timesBusy = nTimes;
-    }
-    
-    /**
-     * Determines what should be sent in the Retry-After header
-     */
-    public void setRetryAfter(int seconds) {
-        this.retryAfter = seconds;
-    }
-    
-    /**
-     * Sets this test uploader to be busy.
-     * Use setTimesBusy to set the number of times this
-     * uploader should respond as busy.
-     * By default it will respond Integer.MAX_VALUE times.
-     */
     public void setBusy(boolean busy) {
         this.busy = busy;
     }
 
     public void setQueue(boolean q) { 
         this.queue = q;
-    }
-
-    public void setCreationTime(Long l) {
-        this.creationTime = l;
-    }
-
-    public void setPartial(boolean part) {
-        if(part)
-            this.partial = 1;
-        else
-            this.partial = 0;//reset
     }
 
     /** Sets whether this should send bad data. */
@@ -268,27 +137,6 @@ public class TestUploader {
         storedAltLocs = alts;
     }
     
-    /**
-     * Sets the offset for the low chunk.
-     */
-    public void setLowChunkOffset(int offset) {
-        lowChunkOffset = offset;
-    }
-    
-    /**
-     * Sets the offset for the high chunk.
-     */
-    public void setHighChunkOffset(int offset) {
-        highChunkOffset = offset;
-    }
-    
-    /**
-     * Sets whether or not this uploader will respond with HTTP/1.1
-     */
-    public void setHTTP11(boolean yes) {
-        respondWithHTTP11 = yes;
-    }
-    
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
@@ -307,13 +155,6 @@ public class TestUploader {
     public int getConnections() {
         return connects;
     }
-    
-    /**
-     * Returns the number of requests this received.
-     */
-    public int getRequestsReceived() {
-        return requestsReceived;
-    }
         
     /** Returns the last request sent or null if none. 
      *  @return a request like "GET /get/0/file.txt HTTP/1.1" */
@@ -325,22 +166,27 @@ public class TestUploader {
      * Repeatedly accepts connections and handles them.
      */
     private void loop(int port) {
-        Socket socket = null;
-        while(true) {
-            try {
-                socket = server.accept();
-                connects++;
+        try {
+            //Use Java 1.4's option to reuse a socket address.  This is
+            //important because some client thread may be using the given port
+            //even though no threads are listening on the given socket.
+            server = new ServerSocket();
+            server.setReuseAddress(true);
+            server.bind(new InetSocketAddress(port));
+        } catch (IOException ioe) {
+            DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
+            System.out.println("Couldn't listen on port "+port);
+            ioe.printStackTrace();
+            return;
+        }
 
-                // make sure it's from us
-				InetAddress address = socket.getInetAddress();
-                if (isBannedIP(address.getHostAddress())) {
-                    LOG.debug("Banned address -- closing");
-                    server.close();
-                    continue;
-                }
-                LOG.debug("Uploader accepted connection");
+        while(true) {
+            Socket s=null;
+            try {
+                s = server.accept();
+                connects++;
                 //spawn thread to handle request
-                final Socket mySocket = socket;
+                final Socket mySocket=s;
                 Thread runner=new Thread() {
                     public void run() {          
                         try {
@@ -348,18 +194,13 @@ public class TestUploader {
                                 handleRequest(mySocket);
                                 if (queue) { 
                                     mySocket.setSoTimeout(MAX_POLL);
-                                    if(unqueue) // second time give slot
-                                        queue = false;
+                                    queue = false;//second time give slot
                                     handleRequest(mySocket);
                                 }
                                 mySocket.setSoTimeout(8000);
                             }
                         } catch (IOException e) {
-                            if(totalUploaded < totalAmountToUpload)
-                                killedByDownloader = true;
-                            LOG.debug("Exception in uploader (" + name + ")", e);
-                        } catch(Throwable t) {
-                            ErrorService.error(t);
+                            //e.printStackTrace();
                         } finally {
                             try {
                                 mySocket.close();
@@ -371,7 +212,7 @@ public class TestUploader {
                 };
                 runner.start();
             } catch (IOException e) {
-                LOG.debug("exception in accept", e);
+                //e.printStackTrace();
                 try { server.close(); } catch (IOException ignore) { }
                 return;  //server socket closed.
             }
@@ -379,14 +220,6 @@ public class TestUploader {
         }
     }
 
-    /**
-     * Returns whether <tt>ip</tt> is a banned address.
-     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
-     * @return true iff ip is a banned address.
-     */
-    public boolean isBannedIP(String ip) {        
-        return !IP_FILTER.allow(ip);
-    }
     
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
@@ -401,14 +234,9 @@ public class TestUploader {
         int start = 0;
         int stop = TestFile.length();
         boolean firstLine=true;
-        AlternateLocationCollection badLocs = null;
-        AlternateLocationCollection goodLocs = null;
         while (true) {
             String line=input.readLine();
             if (firstLine) {
-                if(line != null && !line.equals("")) {
-                    requestsReceived++;
-                }
                 request=line;
                 firstLine=false;
             }
@@ -420,12 +248,16 @@ public class TestUploader {
 			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
 				_sha1 = readContentUrn(line);
 			}
-            
-            if(HTTPHeaderName.NALTS.matchesStartOfString(line))
-                badLocs = readAlternateLocations(line);
-			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
-				goodLocs = readAlternateLocations(line);
 
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
+				if(incomingAltLocs == null) {
+					incomingAltLocs =
+						AlternateLocationCollection.createCollection(_sha1);
+				}
+				readAlternateLocations(line, incomingAltLocs);
+            }        
+            
+            
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
             if (i==0) {
@@ -435,43 +267,22 @@ public class TestUploader {
                 } catch (Exception e) { 
                     Assert.that(false, "Bad Range request: \""+line+"\"");
                 }
-                start=p.a + lowChunkOffset;
-                if(start < 0) start = 0;
-                stop=p.b + highChunkOffset;
-                if(stop > TestFile.length()) stop = TestFile.length();
+                start=p.a;
+                stop=p.b;;
             }
             
             i = line.indexOf("GET");
             if(i==0)
                 http11 = line.indexOf("1.1") > 0;
 		}
-        if(_sha1!=null) {
-            if(incomingAltLocs == null)
-                incomingAltLocs = AlternateLocationCollection.create(_sha1);
-            if(badLocs!=null) {
-                synchronized(badLocs) {
-                    Iterator iter = badLocs.iterator();
-                    while(iter.hasNext()) 
-                        incomingAltLocs.remove((AlternateLocation)iter.next());
-                }
-            }
-            if(goodLocs!=null) {
-                synchronized(goodLocs) {
-                    Iterator iter = goodLocs.iterator();
-                    while(iter.hasNext()) 
-                        incomingAltLocs.add((AlternateLocation)iter.next());
-                }        
-            }
-        }
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
-    //Send the data.
+        //Send the data.
         send(output, start, stop);
     }
 
     private void send(OutputStream out, int start, int stop) 
-        throws IOException {
-        totalAmountToUpload += stop - start;
+            throws IOException {
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
         if(minPollTime > 0) 
@@ -482,28 +293,16 @@ public class TestUploader {
             Assert.that(t0 < maxPollTime,
                         "queued downloader responded too late, by "+
                         (t0-maxPollTime) +" mS");        
-
-        String httpValue = respondWithHTTP11 ? "HTTP/1.1" : "HTTP/1.0";
-		String str = httpValue + " " +
-            (busy || queue || partial==1 ?
-            "503 Service Unavailable\r\n" :
-            "200 OK \r\n");
+        
+		String str=
+        busy|queue?"HTTP/1.1 503 Service Unavailable\r\n":"HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
-		
-		if(busy && retryAfter != -1) {
-		    str = "Retry-After: " + retryAfter + "\r\n";
-		    out.write(str.getBytes());
-		}
 
         if(queue) {
-            LOG.debug("Upload Queued");
-            str = "X-Queue: position="+queuePos+
-                ", pollMin=" + MIN_POLL/1000 + 
-                ", pollMax=" + MAX_POLL/1000 +
-                "\r\n";
-            out.write(str.getBytes());
-            str = "\r\n";
-            out.write(str.getBytes());
+            String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
+            out.write(s.getBytes());
+            s = "\r\n";
+            out.write(s.getBytes());
             out.flush();//don't close socket
             long t = System.currentTimeMillis();
             minPollTime = t+MIN_POLL;
@@ -511,64 +310,31 @@ public class TestUploader {
             return;
         }
 
-        if(partial > 0) {
-            switch(partial) {
-            case 1:
-                str="X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
-                break;
-            case 2:
-                str="X-Available-Ranges: bytes 50000-900000\r\n";
-                break;
-            default:
-                str="X-Available-Ranges: bytes 50000-150000\r\n";
-            }
-            out.write(str.getBytes());
-            out.flush();
-            partial++;
-            if(partial==2) {//was 1 until last statement
-                str="\r\n";
-                out.write(str.getBytes());
-                out.flush();
-                return;
-            }
-        }
-		str = "Content-Length:"+ (stop - start) + "\r\n";
+		str = "Content-length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
-		if (start != 0 || (stop - start != TestFile.length())) {
+		if (start != 0) {
             //Note that HTTP stop values are INCLUSIVE.  Our internal values
             //are EXCLUSIVE.  Hence the -1.
 			str = "Content-range: bytes " + start  +
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
 			out.write(str.getBytes());
 		}
-		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) {
-
-            LOG.debug("Writing alternate location header:\n"+storedAltLocs+"\n");      
+		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) 
             HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                  storedAltLocs, out);
-        } else {
-            LOG.debug("Did not write alt locs:\n"+storedAltLocs+"\n");
-        }
-        if(creationTime != null) {
-            LOG.debug("Writing out Creation Time.");
-            HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
-                                  out);
-        }
+		      storedAltLocs, out);
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
         if (busy) {
-            //turn busy off for the next time if necessary
-            if( connects >= timesBusy )
-                busy = false;
             out.close();
             return;
         }
         
-        //Write data.
+        //Write data at throttled rate.  See NormalUploadState.  TODO: use
+        //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            if (stopAfter > -1 && totalUploaded == stopAfter) {
+            if (stopAfter>-1 && totalUploaded>=stopAfter) {
                 stopped=true;
                 out.flush();
                 throw new IOException();
@@ -666,18 +432,6 @@ public class TestUploader {
                     throw new IOException();
                 }
         }
-        //check that the downloader made a correct range request if we are
-        //partial and this is the second iteration. 
-        if(partial==3) {//check this before checking partial2 -- we set it there
-            Assert.that(start==150000,
-                        "downloader picked incorrect start range in iteration");
-            Assert.that(stop==250010,
-                        "downloader pick incorrect stop range in iteration");
-        }
-        if(partial==2) {
-            Assert.that(start==50000,"invalid start range");
-            Assert.that(stop==150010,"invalid stop range was:"+stop);
-        }                
         return new IntPair(start, stop);
     }
 	/**
@@ -691,34 +445,27 @@ public class TestUploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private AlternateLocationCollection readAlternateLocations
-                                                     (final String altHeader) {
-        AlternateLocationCollection alc=null;
-		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+	private static void readAlternateLocations(final String altHeader,
+											   final AlternateLocationCollector alc) {
+		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return null;
+		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        if(_sha1!=null)
-            alc = AlternateLocationCollection.create(_sha1);
-        if (alc==null)
-            return null;
+
 		while(st.hasMoreTokens()) {
 			try {
 				// note that the trim method removes any CRLF character
 				// sequences that may be used if the sender is using
 				// continuations.
 				AlternateLocation al = 
-				    AlternateLocation.create(
-				        st.nextToken().trim(), _sha1);
-				alc.add(al);
+				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
+				alc.addAlternateLocation(al);
 			} catch(IOException e) {
-                e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
 		}
-        return alc;
 	}
 
 	/**

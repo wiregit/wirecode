@@ -1,11 +1,9 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.handshaking.*;
+import java.net.*;
+import java.io.*;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -39,17 +37,11 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(HandshakeResponder properties, int port) {
-		//ConnectionSettings.NUM_CONNECTIONS.setValue(3);
         this.properties=properties;
         this.port=port;
         Thread runner=new Thread(this);
         runner.start();
         Thread.yield();  //hack to make sure runner creates socket
-    }
-
-    /** Starts the listen socket without blocking. */
-    public MiniAcceptor(int port) {
-		this(new UltrapeerHandshakeResponder("localhost"), port);
     }
 
     /** Blocks until a connection is available, and returns it. 
@@ -78,7 +70,6 @@ public class MiniAcceptor implements Runnable {
         ServerSocket ss=null;
         try {
             ss=new ServerSocket(port);
-            ss.setReuseAddress(true);
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
@@ -92,7 +83,8 @@ public class MiniAcceptor implements Runnable {
             } 
         } catch (IOException e) {
             if (ss==null) {
-                ErrorService.error(e);
+                System.err.println("Couldn't listen to port "+port);
+                e.printStackTrace();  //Couldn't listen?  Serious.
             }
             error=e;                  //Record for later.
             synchronized (lock) {
@@ -102,4 +94,3 @@ public class MiniAcceptor implements Runnable {
         }
     }
 }
-

@@ -1,32 +1,29 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
-
-import junit.framework.Test;
-
+import junit.framework.*;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.ByteOrder;
-import com.sun.java.util.collections.Arrays;
 
 /**
  * Tests COBSUtil
  */
-public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class COBSUtilTest extends TestCase {
     public COBSUtilTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(COBSUtilTest.class);
+        return new TestSuite(COBSUtilTest.class);
     }  
 
 
-    public void testEncodeAndDecode() throws IOException {
+    public void testEncodeAndDecode() throws java.io.IOException {
         for (int num = 1; num < 260; num++) 
             encodeAndDecode(num);
     }
     
 
-    private void encodeAndDecode(int num) throws IOException {
+    private void encodeAndDecode(int num) throws java.io.IOException {
         // test all 0s...
         debug("COBSUtilTest.encode(): num = " +
               num);
@@ -34,13 +31,13 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = 0;
         byte[] after = COBSUtil.cobsEncode(bytes);
-        assertEquals(bytes.length , (after.length-1));
+        assertTrue(bytes.length == (after.length-1));
         for (int i = 0; i < after.length; i++)
-            assertEquals(0x01, after[i]);
+            assertTrue(after[i] == 0x01);
         byte[] decoded = COBSUtil.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
-            assertEquals(bytes[i], decoded[i]);
-        assertEquals(0,decoded[bytes.length]);
+            assertTrue(bytes[i] == decoded[i]);
+        assertTrue(decoded[bytes.length] == 0);
 
 
         // test all 1s....
@@ -59,9 +56,9 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                    );
         decoded = COBSUtil.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
-            assertEquals("num = " + num + ", i = " + i, 
-                       bytes[i], decoded[i]);
-        assertEquals(0,decoded[bytes.length]);
+            assertTrue("num = " + num + ", i = " + i, 
+                       bytes[i] == decoded[i]);
+        assertTrue(decoded[bytes.length] == 0);
         
         // ----------------------------------
         // build up 'induction' case for 0(1..).  we can trust 'induction' due
@@ -77,22 +74,22 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                 else
                     bytes[i] = 1;
             after = COBSUtil.cobsEncode(bytes);
-            assertEquals(bytes.length,(after.length-1));
+            assertTrue(bytes.length == (after.length-1));
             for (int i = 0; i < after.length; i++) {
                 debug("COBSUtilTest.encode(): i = " + i);
                 if (i == 0)
-                    assertEquals(1,after[0]);
+                    assertTrue(after[0] == 1);
                 else if ((i == 1) ||
                          ((((i-1) % j) == 0) && (num > i))
                          )
-                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                    assertTrue(ByteOrder.ubyte2int(after[i]) > 1);
                 else
-                    assertEquals(1, after[i]);
+                    assertTrue(after[i] == 1);
             }
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
-                assertEquals(bytes[i], decoded[i]);
-            assertEquals(0,decoded[bytes.length]);
+                assertTrue(bytes[i] == decoded[i]);
+            assertTrue(decoded[bytes.length] == 0);            
         }
         // ----------------------------------
 
@@ -108,18 +105,18 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                 else
                     bytes[i] = 0;
             after = COBSUtil.cobsEncode(bytes);
-            assertEquals(bytes.length ,(after.length - 1));
+            assertTrue(bytes.length == (after.length - 1));
             for (int i = 0; i < bytes.length; i++)
                 if ((i == 0) ||
                     (i % j == 0)
                     )
-                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                    assertTrue(ByteOrder.ubyte2int(after[i]) > 1);
                 else
-                    assertEquals(1, after[i]);
+                    assertTrue(after[i] == 1);
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
-                assertEquals(bytes[i] , decoded[i]);
-            assertEquals(decoded[bytes.length] , 0);
+                assertTrue(bytes[i] == decoded[i]);
+            assertTrue(decoded[bytes.length] == 0);
         }
         // ----------------------------------
     }
@@ -132,55 +129,16 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testSymmetry() throws IOException {
+    public void testSymmetry() throws java.io.IOException {
         // a quick test for symmetry - but symmetry was actually tested above,
         // so no need for much testing...
         byte[] bytes = (new String("Sush Is Cool!")).getBytes();
         byte[] after = COBSUtil.cobsDecode(COBSUtil.cobsEncode(bytes));
-        assertEquals(bytes.length , (after.length - 1));
+        assertTrue(bytes.length == (after.length - 1));
         byte[] afterTrimmed = (new String(after)).trim().getBytes();
         assertTrue(Arrays.equals(bytes, afterTrimmed));
     }
 
-
-    public void testBadCOBSBlock() throws Exception {
-        byte[] badBlock = new byte[10];
-        badBlock[0] = (byte) 11;
-        for (int i = 1; i < badBlock.length; i++)
-            badBlock[i] = (byte)1;
-        try {
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
-            assertTrue(false);
-        }
-        catch (IOException expected) {}
-
-        badBlock = new byte[10];
-        badBlock[0] = (byte) 10;
-        for (int i = 1; i < badBlock.length; i++)
-            badBlock[i] = (byte)1;
-        try {
-            // should pass this time
-            // badBlock is actually good ;)
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
-        }
-        catch (IOException unexpected) {
-            assertTrue(false);
-        }
-
-        badBlock = new byte[4];
-        badBlock[0] = (byte) 2;
-        badBlock[1] = (byte) 1;
-        badBlock[2] = (byte) 1;
-        badBlock[3] = (byte) 2;
-        try {
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
-            assertTrue(false);
-        }
-        catch (IOException expected) {
-        }
-
-    }
-    
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());

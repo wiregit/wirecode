@@ -1,151 +1,137 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.stubs.*;
+
+import junit.framework.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.*;
+import java.io.*;
+import java.net.*;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.  The test includes a leaf attached to 3 
- * Ultrapeers.
+ * redirects properly, etc.
  */
-public class LeafRoutingTest extends BaseTestCase {
-    private static final int SERVER_PORT = 6669;
-    private static final int TIMEOUT=500;
-    private static final byte[] ultrapeerIP=
+public class LeafRoutingTest extends TestCase {
+    static final int PORT=6669;
+    static final int TIMEOUT=500;
+    static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-    private static final byte[] oldIP=
+    static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private static Connection ultrapeer1;
-    private static Connection ultrapeer2;
-    private static Connection old1;
-    private static Connection old2;
-    private static RouterService rs;
+    static Connection ultrapeer1;
+    static Connection ultrapeer2;
+    static Connection old1;
+    static Connection old2;
 
     public LeafRoutingTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(LeafRoutingTest.class);
+        return new TestSuite(LeafRoutingTest.class);
     }    
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    private static void doSettings() {
+
+
+    public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        ConnectionSettings.PORT.setValue(SERVER_PORT);
+        SettingsManager settings=SettingsManager.instance();
+        settings.setPort(PORT);
+        settings.setDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
+		ConnectionSettings.KEEP_ALIVE.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-    }        
-    
-    public static void globalSetUp() throws Exception {
-        doSettings();
 
         ActivityCallback callback=new ActivityCallbackStub();
-        rs=new RouterService(callback);
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
+        //FileManager files=new FileManagerStub();
+        //MessageRouter router=new MessageRouterStub();
+        RouterService rs=new RouterService(callback);
+        assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
-        RouterService.clearHostCatcher();
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
-        connect();
-    }        
-    
-    public void setUp() throws Exception  {
-        doSettings();
-    }
-    
-    public static void globalTearDown() throws Exception {
-        shutdown();
-    }
+        rs.clearHostCatcher();
+        assertEquals("unexpected port", PORT, settings.getPort());
+
+        //Run tests
+        try {
+            connect(rs);
+            doRedirect();
+            doLeafBroadcast(rs);
+            doBroadcastFromUltrapeer();
+            doNoBroadcastFromOld();
+            shutdown();
+        } catch (IOException e) { 
+            e.printStackTrace();
+            fail("Mysterious IOException: "+e);
+        } catch (BadPacketException e) { 
+            e.printStackTrace();
+            fail("Mysterious bad packet: "+e);
+        } catch (Exception e) {
+            e.printStackTrace();
+			fail("unexpected exception: "+e);
+        }
+     }
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect() throws Exception {
-         debug("-Establish connections");
+     private static void connect(RouterService rs) 
+             throws IOException, BadPacketException {
+         //Ugh, there is a race condition here from the old days when this was
+         //an interactive test.  If rs connects before the listening socket is
+         //created, the test will fail.
 
-         ultrapeer1 = connect(6350, true);
-         ultrapeer2 = connect(6351, true);
-         old1 = connect(6352, true);
-         old2 = connect(6353, true);
+         //System.out.println("Please establish a connection to localhost:6350\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6350);
+         ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
+         ultrapeer1.initialize();
+         replyToPing(ultrapeer1, true);
+
+         //System.out.println("Please establish a connection to localhost:6351\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6351);
+         ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
+         ultrapeer2.initialize();
+         replyToPing(ultrapeer2, true);
+
+         //System.out.println("Please establish a connection to localhost:6352\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6352);
+         old1=new Connection(accept(6352), new OldResponder());
+         old1.initialize();
+         replyToPing(old1, false);
+
+         //System.out.println("Please establish a connection to localhost:6353\n");
+         rs.connectToHostAsynchronously("127.0.0.1", 6353);
+         old2=new Connection(accept(6353), new OldResponder());
+         old2.initialize();
+         replyToPing(old2, false);
      }
-     
-    private static Connection connect(int port, boolean ultrapeer) 
-        throws Exception {
+
+     private static Socket accept(int port) throws IOException { 
          ServerSocket ss=new ServerSocket(port);
-         RouterService.connectToHostAsynchronously("127.0.0.1", port);
-         Socket socket = ss.accept();
-         ss.close();
-         
-         socket.setSoTimeout(3000);
-         InputStream in=socket.getInputStream();
+         Socket s=ss.accept();
+         InputStream in=s.getInputStream();
          String word=readWord(in);
          if (! word.equals("GNUTELLA"))
              throw new IOException("Bad word: "+word);
-         
-         HandshakeResponder responder;
-         if (ultrapeer) {
-            responder = new UltrapeerResponder();
-         } else {
-             responder = new EmptyResponder();
-         }
-         
-         Connection con = new Connection(socket, responder);
-         con.initialize();
-         replyToPing(con, ultrapeer);
-         return con;
+         return s;
      }
-     
+
      /**
       * Acceptor.readWord
       *
@@ -169,27 +155,16 @@ public class LeafRoutingTest extends BaseTestCase {
          throw new IOException();
      }
 
-	private static void replyToPing(Connection c, boolean ultrapeer) 
-        throws Exception {
-        // respond to a ping iff one is given.
-        Message m = null;
-        byte[] guid;
-        try {
-            while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
-            }
-            guid = ((PingRequest)m).getGUID();            
-        } catch(InterruptedIOException iioe) {
-            //nothing's coming, send a fake pong anyway.
-            guid = new GUID().bytes();
-        }
-        
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
-        PingReply reply = 
-            PingReply.createExternal(guid, (byte)7,
-                                     socket.getLocalPort(), 
-                                     ultrapeer ? ultrapeerIP : oldIP,
-                                     ultrapeer);
+     private static void replyToPing(Connection c, boolean ultrapeer) 
+             throws IOException, BadPacketException {
+         Message m=c.receive(1000);
+         assertTrue(m instanceof PingRequest);
+         PingRequest pr=(PingRequest)m;
+         byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+         PingReply reply=new PingReply(pr.getGUID(), (byte)7,
+                                       c.getLocalPort(), 
+                                       ultrapeer ? ultrapeerIP : oldIP,
+                                       0, 0, ultrapeer);
          reply.hop();
          c.send(reply);
          c.flush();
@@ -197,115 +172,96 @@ public class LeafRoutingTest extends BaseTestCase {
 
      ///////////////////////// Actual Tests ////////////////////////////
 
-    public void testLeafBroadcast() 
+    private static void doLeafBroadcast(RouterService rs) 
             throws IOException, BadPacketException {
-        debug("-Leaf Broadcast test");        
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "crap");
+        //System.out.println("Please send a query for \"crap\" from your leaf\n");
+        //try {
+        //    Thread.sleep(6000);
+        //} catch (InterruptedException e) { }
+        byte[] guid=rs.newQueryGUID();
+        rs.query(guid, "crap", 0);
+        //System.out.println("-Testing broadcast from leaf");
 
         while (true) {
-            assertNotNull("ultrapeer1 is null", ultrapeer1);
             Message m=ultrapeer1.receive(2000);
             if (m instanceof QueryRequest) {
-                assertEquals("unexpected query name", "crap", 
-                             ((QueryRequest)m).getQuery());
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }       
         while (true) {
             Message m=ultrapeer2.receive(2000);
             if (m instanceof QueryRequest) {
-                assertEquals("unexpected query name", "crap", 
-                             ((QueryRequest)m).getQuery());
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }
         while (true) {
             Message m=old1.receive(2000);
             if (m instanceof QueryRequest) {
-                assertEquals("unexpected query name", "crap", 
-                             ((QueryRequest)m).getQuery());
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
                 break;
             }
         }
-//          while (true) {
-//              Message m=old2.receive(2000);
-//              if (m instanceof QueryRequest) {
-//                  assertEquals("unexpected query name", "crap", 
-//                               ((QueryRequest)m).getQuery());
-//                  break;
-//              }
-//          }
-    }
-
-    /**
-     * Tests that the X-Try and X-Try-Ultrapeer headers are correctly
-     * being transferred in connection headers.
-     */
-    public void testRedirect() {
-        debug("-Test X-Try/X-Try-Ultrapeer headers");
-        Connection c=new Connection("127.0.0.1", SERVER_PORT,
-                                    new Properties(),
-                                    new EmptyResponder()
-                                    );
-
-        try {
-            c.initialize();
-            fail("handshake should not have succeeded");
-        } catch (IOException e) {
-            // THESE VALUES WERE POPULATED DURING THE PING/PONG EXCHANGE
-            // WHEN THE CONNECTIONS WERE CREATED.
-            
-            String hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
-            //System.out.println("X-Try-Ultrapeers: "+hosts);
-            assertNotNull("unexpected null value", hosts);
-            Set s=list2set(hosts);
-            assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+hosts, 
-                         4, s.size());
-            //byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-            assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6350));
-            assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6351));
-            assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6352));
-            assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(ultrapeerIP, 6353));
-
-            //assertTrue("expected Ultrapeer not present in list",
-            //           s.contains(new Endpoint(localhost, 6350))); 
-            //assertTrue("expected Ultrapeer not present in list",
-            //           s.contains(new Endpoint(localhost, 6351)));
-            //assertTrue("expected Ultrapeer not present in list",
-            //           s.contains(new Endpoint(localhost, 6352))); 
-            //assertTrue("expected Ultrapeer not present in list",
-            //           s.contains(new Endpoint(localhost, 6353)));
-
+        while (true) {
+            Message m=old2.receive(2000);
+            if (m instanceof QueryRequest) {
+                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+                break;
+            }
         }
     }
 
+    private static void doRedirect() {
+        //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
+        Connection c=new Connection("127.0.0.1", PORT,
+                                    new Properties(),
+                                    new OldResponder(),
+                                    false);
+        try {
+            c.initialize();
+            assertTrue("Handshake succeeded!", false);
+        } catch (IOException e) {
+            String hosts=c.getProperty(ConnectionHandshakeHeaders.X_TRY);
+            //System.out.println("X-Try: "+hosts);
+            assertTrue("No hosts", hosts!=null);
+            Set s=list2set(hosts);
+            assertEquals("unexpected set size", 2, s.size());
+            assertTrue(s.contains(new Endpoint(oldIP, 6352)));
+            assertTrue(s.contains(new Endpoint(oldIP, 6353)));
 
-		/*
-    private void doBroadcastFromUltrapeer() throws IOException {
-        debug("-Test query from ultrapeer not broadcasted");
+            hosts=c.getProperty(
+                                ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
+            //System.out.println("X-Try-Ultrapeers: "+hosts);
+            assertTrue(hosts!=null);
+            s=list2set(hosts);
+            assertEquals("unexpected set size", 4, s.size());
+            byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6350)));
+            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6351)));
+            assertTrue(s.contains(new Endpoint(localhost, 6350))); 
+            assertTrue(s.contains(new Endpoint(localhost, 6351)));
+        }
+    }
+
+    private static void doBroadcastFromUltrapeer() throws IOException {
+        //System.out.println("-Test query from ultrapeer not broadcasted");
         drain(ultrapeer2);
         drain(old1);
         drain(old2);
 
-		//QueryRequest qr = QueryRequest.createQuery("crap", (byte)7);
-		QueryRequest qr = QueryRequest.createNonFirewalledQuery("crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         ultrapeer1.send(qr);
         ultrapeer1.flush();
 
-        assertTrue("drain should have returned false", !drain(ultrapeer2));
+        assertTrue(! drain(ultrapeer2));
         //We don't care whether this is forwarded to the old connections
     }
-		*/
 
-    /*
+
     private static void doNoBroadcastFromOld() 
         throws IOException, BadPacketException {
-        debug("-Test query from old not broadcasted");
+        //System.out.println("-Test query from old not broadcasted");
         drain(ultrapeer1);
         drain(ultrapeer2);
         drain(old2);
@@ -318,109 +274,14 @@ public class LeafRoutingTest extends BaseTestCase {
         assertTrue(! drain(ultrapeer2));
         Message m=old2.receive(500);
         assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertTrue(m.getHops()==(byte)1);
         // we adjust all TTLs down to 6....
-		assertEquals("unexpected TTL", (byte)5, m.getTTL());        
+        assertTrue(m.getTTL()==(byte)5);         
     }
-    */
-
-    /**
-     * Tests to make sure that connections to old hosts are not allowed
-     */
-    public void testConnectionToOldDisallowed() {
-        Connection c=new Connection("127.0.0.1", SERVER_PORT,
-                                    new Properties(),
-                                    new EmptyResponder()
-                                    );
-        try {
-            c.initialize();
-            fail("handshake should not have succeeded");
-        } catch (IOException e) {
-        }        
-    }
-
-
-    public void testLeafAnswersQueries() throws Exception {
-        drain(ultrapeer2);
-
-        // make sure the set up succeeded
-        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
-
-        // send a query that should hit
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
-                                              "berkeley", null, null, null,
-                                              null, false, 0, false, 0);
-        ultrapeer2.send(query);
-        ultrapeer2.flush();
-        
-        // hope for the result
-        Message m = null;
-        do {
-            m = ultrapeer2.receive(TIMEOUT);
-        } while (!(m instanceof QueryReply)) ;
-        
-    }
-
-
-    public void testLeafAnswersURNQueries() throws Exception {
-        drain(ultrapeer2);
-
-        // make sure the set up succeeded
-        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
-
-        // get the URNS for the files
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
-        URN berkeleyURN = (URN) iter.next();
-        iter = FileDesc.calculateAndCacheURN(susheel).iterator();
-        URN susheelURN = (URN) iter.next();
-
-        // send a query that should hit
-        QueryRequest query = QueryRequest.createQuery(berkeleyURN);
-
-        ultrapeer2.send(query);
-        ultrapeer2.flush();
-        
-        // hope for the result
-        Message m = null;
-        do {
-            m = ultrapeer2.receive(TIMEOUT);
-            if (m instanceof QueryReply) {
-                QueryReply qr = (QueryReply) m;
-                iter = qr.getResults();
-                Response first = (Response) iter.next();
-                assertEquals(first.getUrns(),
-                             FileDesc.calculateAndCacheURN(berkeley));
-            }
-        } while (!(m instanceof QueryReply)) ;
-        
-        // send another query that should hit
-        query = QueryRequest.createQuery(susheelURN);
-
-        ultrapeer2.send(query);
-        ultrapeer2.flush();
-        
-        // hope for the result
-        m = null;
-        do {
-            m = ultrapeer2.receive(TIMEOUT);
-            if (m instanceof QueryReply) {
-                QueryReply qr = (QueryReply) m;
-                iter = qr.getResults();
-                Response first = (Response) iter.next();
-                assertEquals(first.getUrns(),
-                             FileDesc.calculateAndCacheURN(susheel));
-            }
-        } while (!(m instanceof QueryReply)) ;
-    }
-
 
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
-    private Set /* of Endpoint */ list2set(String addresses) {
+    private static Set /* of Endpoint */ list2set(String addresses) {
         Set ret=new HashSet();
         StringTokenizer st = new StringTokenizer(addresses,
             Constants.ENTRY_SEPARATOR);
@@ -438,9 +299,26 @@ public class LeafRoutingTest extends BaseTestCase {
         return ret;
     }
 
+    //////////////////////////////////////////////////////////////////
+
+    /** Tries to receive any outstanding messages on c 
+     *  @return true if this got a message */
+    private static boolean drain(Connection c) throws IOException {
+        boolean ret=false;
+        while (true) {
+            try {
+                Message m=c.receive(500);
+                ret=true;
+                //System.out.println("Draining "+m+" from "+c);
+            } catch (InterruptedIOException e) {
+                return ret;
+            } catch (BadPacketException e) {
+            }
+        }
+    }
+
     private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
-        debug("-Shutting down");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
@@ -449,19 +327,23 @@ public class LeafRoutingTest extends BaseTestCase {
         old1.close();
         old2.close();
     }
+}
 
-    private static final boolean DEBUG = false;
-    
-    static void debug(String message) {
-        if(DEBUG) 
-            System.out.println(message);
+class UltrapeerResponder implements HandshakeResponder {
+    public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException {
+        Properties props=new Properties();
+        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+        props.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+        return new HandshakeResponse(props);
     }
+}
 
-    private static class UltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
-            props.put(HeaderNames.X_DEGREE, "42");           
-            return HandshakeResponse.createResponse(props);
-        }
-    }}
+
+class OldResponder implements HandshakeResponder {
+    public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException {
+        Properties props=new Properties();
+        return new HandshakeResponse(props);
+    }
+}

@@ -1,23 +1,13 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
-import com.limegroup.gnutella.guess.GUESSStatistics;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.util.*;
+import java.io.*;
+import java.util.*;
+import java.net.*;
 
 /** Starts a BackEnd (which should have a .props file configured to be an
  *  Ultrapeer) and any time it gets a pong from a GUESS Ultrapeer, it sends
@@ -26,44 +16,38 @@ import com.limegroup.gnutella.util.NetworkUtils;
  *  underneath it.
  *  If you run main, this will stop when you enter anything and press RETURN.
  */
-public class GUESSMonitor extends BaseTestCase {
+public class GUESSMonitor {
 
     public final static String INSTRUCTIONS = 
         "? - Help; verbose - switch verbose on/off; connect - start the " +
         "backend; disconnect - stop the backend; stats - show stats";
 
-    private RouterService _backend;
+    private Backend _backend;
     private MyMessageRouter _messageRouter;
 
     public GUESSMonitor() {
-        super("GUESS MONITOR");
-        setStandardSettings();
         // make my own MessageRouter....            
         ActivityCallback stub = new ActivityCallbackStub();
-        _messageRouter = new MyMessageRouter();
-        _backend = new RouterService(stub, _messageRouter);
-        //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
+        FileManager staticFM = RouterService.getFileManager();
+        _messageRouter = new MyMessageRouter(stub, staticFM);
+        _backend = Backend.createLongLivedBackend(stub, _messageRouter);
         _backend.start();
-        RouterService.forceKeepAlive(8);
-        //_backend.getRouterService().forceKeepAlive(5);
+        _backend.getRouterService().forceKeepAlive(5);
     }
 
     public void shutdown() {
         _messageRouter.shutdown();
         _messageRouter.join();
-        RouterService.shutdown();
+        _backend.shutdown("GUESSMonitor exiting!");
     }
 
     public void connect() {
-        //_backend.getRouterService().connect();
-        //_backend.getRouterService().forceKeepAlive(5);
-        RouterService.connect();
-        RouterService.forceKeepAlive(5);
+        _backend.getRouterService().connect();
+        _backend.getRouterService().forceKeepAlive(5);
     }
 
     public void disconnect() {
-    //_backend.getRouterService().disconnect();
-        RouterService.disconnect();
+        _backend.getRouterService().disconnect();
     }
 
     public static void main(String argv[]) throws Exception {
@@ -100,7 +84,7 @@ public class GUESSMonitor extends BaseTestCase {
     }
 
     
-    private class MyMessageRouter extends StandardMessageRouter {
+    private class MyMessageRouter extends MetaEnabledMessageRouter {
 
         private List _guessPongs = new Vector();
         private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
@@ -121,8 +105,8 @@ public class GUESSMonitor extends BaseTestCase {
             catch (Exception ignored) {}
         }
 
-        public MyMessageRouter() {
-            super();
+        public MyMessageRouter(ActivityCallback ac, FileManager fm) {
+            super(ac, fm);
             _pongLoop = new Thread() {
                     public void run() {
                         guessPongLoop();
@@ -134,14 +118,19 @@ public class GUESSMonitor extends BaseTestCase {
         protected void handlePingReply(PingReply reply,
                                        ReplyHandler handler) {
             super.handlePingReply(reply, handler);
-            if (!NetworkUtils.isPrivateAddress(reply.getIPBytes()) &&
-                notMe(reply.getInetAddress(), reply.getPort()) &&
-                reply.supportsUnicast()) {
-                synchronized (_guessPongs) {
-                    _guessPongs.add(reply);
-                    _guessPongs.notify();
+            try {
+                if (!Endpoint.isPrivateAddress(reply.getIPBytes()) &&
+                    notMe(InetAddress.getByName(reply.getIP()), 
+                          reply.getPort()) &&
+                    reply.supportsUnicast()) {
+                    synchronized (_guessPongs) {
+                        _guessPongs.add(reply);
+                        _guessPongs.notify();
+                    }
                 }
             }
+            catch (BadPacketException ignored) {}
+            catch (UnknownHostException ignored) {}
         }
                 
         private void guessPongLoop() {
@@ -157,34 +146,34 @@ public class GUESSMonitor extends BaseTestCase {
                 }
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
-                    if (_badHosts.contains(currPong.getInetAddress()))
+                    if (_badHosts.contains(currPong.getIP()))
                         continue;
                     {
                         // don't hit the same guys too often.....
-                        if (_lastFiveHosts.contains(currPong.getInetAddress()))
+                        if (_lastFiveHosts.contains(currPong.getIP()))
                             continue;
-                        _lastFiveHosts.addFirst(currPong.getInetAddress());
+                        _lastFiveHosts.addFirst(currPong.getIP());
                     }
                     debug("guessPongLoop(): consuming Pong = " + currPong);
                     Object[] retObjs = 
-                        GUESSStatistics.getAckStatistics(currPong.getAddress(),
+                        GUESSStatistics.getAckStatistics(currPong.getIP(),
                                                          currPong.getPort());
                     float numSent = ((Float)retObjs[1]).floatValue();
                     float numGot = ((Float)retObjs[0]).floatValue();
                     float averageTime = ((Float)retObjs[2]).floatValue();
                     float successRate = (numGot/numSent)*100;
 
-                    tallyStats(numGot, averageTime, successRate);
+                    tallyStats(numGot, numSent, averageTime, successRate);
                     // also keep track of unique tests done....
-                    if (!_uniqueHosts.contains(currPong.getInetAddress())) {
-                        _uniqueHosts.add(currPong.getInetAddress());
+                    if (!_uniqueHosts.contains(currPong.getIP())) {
+                        _uniqueHosts.add(currPong.getIP());
                         if (numGot == 0)
-                            _badHosts.add(currPong.getInetAddress());
+                            _badHosts.add(currPong.getIP());
                         else
                             goodGUESSers++;
                     }
 
-                    debug("Sent Queries to " + currPong.getInetAddress() + ":" +
+                    debug("Sent Queries to " + currPong.getIP() + ":" +
                           currPong.getPort() + " . " + "Success Rate = " +
                           successRate + " at an average of " +
                           averageTime + " ms per Query.");
@@ -207,7 +196,7 @@ public class GUESSMonitor extends BaseTestCase {
     private float overallLatency = 0;
     private float goodGUESSers = 0;
 
-    private synchronized void tallyStats(float numGot,
+    private synchronized void tallyStats(float numGot, float numSent, 
                                     float averageTime, float successRate) {
         if (numGot > 0) {
             numSuccessTests++;

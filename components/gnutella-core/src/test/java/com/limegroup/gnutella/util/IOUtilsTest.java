@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
 
-import junit.framework.Test;
-
-public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class IOUtilsTest extends TestCase {
 
 	/**
 	 * Constructs a new <tt>IOUtilsTest</tt> with the specified name.
@@ -25,22 +24,30 @@ public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase 
 	 * Runs this suite of tests.
 	 */
 	public static Test suite() {
-		return buildTestSuite(IOUtilsTest.class);
+		return new TestSuite(IOUtilsTest.class);
 	}
 
 	/**
 	 * Tests the readWord method.
 	 */
-	public void testIOUtilsReadWord() throws Exception {
+	public void testIOUtilsReadWord() {
 		String firstWord = "GET";
 		String test0 = firstWord+" /get/0/file.txt";
 		InputStream stream0 = new ByteArrayInputStream(test0.getBytes());
-		String result = IOUtils.readWord(stream0, 3);
-		assertEquals("result should equal first word", result, firstWord);
+		try {
+			String result = IOUtils.readWord(stream0, 3);
+			assertEquals("result should equal first word", result, firstWord);
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
+		}
 
 
 		InputStream stream1 = new ByteArrayInputStream(test0.getBytes());
-		result = IOUtils.readWord(stream1, 4);
-		assertEquals("result should equal first word", result, firstWord);
+		try {
+			String result = IOUtils.readWord(stream1, 4);
+			assertEquals("result should equal first word", result, firstWord);
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
+		}
 	}
 }

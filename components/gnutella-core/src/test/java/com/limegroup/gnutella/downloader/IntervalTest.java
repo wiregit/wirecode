@@ -1,15 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
-import junit.framework.Test;
+import junit.framework.*;
 
-public class IntervalTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class IntervalTest extends TestCase {
 
     public IntervalTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(IntervalTest.class);
+        return new TestSuite(IntervalTest.class);
     }
 
 	public void testLegacy() {

@@ -1,35 +1,29 @@
 package com.limegroup.gnutella.bootstrap;
 
+import junit.framework.*;
+import com.sun.java.util.collections.*;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.ParseException;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
 
 /**
  * Unit tests for BootstrapServerManager.
  */
-public class BootstrapServerManagerTest extends BaseTestCase {
+public class BootstrapServerManagerTest extends TestCase {
     public BootstrapServerManagerTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(BootstrapServerManagerTest.class);
+        return new TestSuite(BootstrapServerManagerTest.class);
     }
 
     ////////////////////////////////////////////////////////////////////////////
     final int RESPONSES_PER_SERVER=12;
-    final static int SERVER_PORT=6700;
+    final static int PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
     final static String COMMON_PARAMS="client=LIME&version="
         +URLEncoder.encode(CommonUtils.getLimeWireVersion());
@@ -42,23 +36,22 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     BootstrapServer url1, url2, url3;
     TestBootstrapServer s1, s2, s3;
 
-    public void setUp() throws Exception {
-        url1=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT)+DIRECTORY);
-        url2=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT+1)+DIRECTORY);
-        url3=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT+2)+DIRECTORY);
+    public void setUp() throws IOException, ParseException {
+        url1=new BootstrapServer("http://127.0.0.1:"+(PORT)+DIRECTORY);
+        url2=new BootstrapServer("http://127.0.0.1:"+(PORT+1)+DIRECTORY);
+        url3=new BootstrapServer("http://127.0.0.1:"+(PORT+2)+DIRECTORY);
 
         //Prepare backend
-        catcher = new TestHostCatcher();
-        PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
-        bman = new TestBootstrapServerManager();
+        catcher=new TestHostCatcher();
+        bman=new TestBootstrapServerManager(catcher);
         bman.addBootstrapServer(url1);
         bman.addBootstrapServer(url2);
         bman.addBootstrapServer(url3);
 
         //Prepare servers
-        s1=new TestBootstrapServer(SERVER_PORT);
-        s2=new TestBootstrapServer(SERVER_PORT+1);
-        s3=new TestBootstrapServer(SERVER_PORT+2);
+        s1=new TestBootstrapServer(PORT);
+        s2=new TestBootstrapServer(PORT+1);
+        s3=new TestBootstrapServer(PORT+2);
 
         StringBuffer response=new StringBuffer();
         for (int i=0; i<RESPONSES_PER_SERVER; i++)
@@ -75,9 +68,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         try { Thread.sleep(200); } catch (InterruptedException e) { }
     }
 
-    
     ///////////////////////////////////////////////////////////////////////
-    
+
     /** Checks hostfile=1 request.  Also checks that unreachable hosts are
      *  visited as needed.  */
     public void testFetchEndpointsAsync() {
@@ -90,10 +82,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
 
         //Check that backend sent right requests.  Only the second host should
         //have been contacted.
-        assertNull(s3.getRequest());   //wasn't reachable
+        assertEquals(null, s3.getRequest());   //wasn't reachable
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&hostfile=1 HTTP/1.1", 
                      s2.getRequest());
-        assertNull( s1.getRequest());   //wasn't contacted
+        assertEquals(null, s1.getRequest());   //wasn't contacted
         //...and got right results.
         for (int i=0; i<RESPONSES_PER_SERVER; i++) 
             assertEquals(new Endpoint("1.2.3."+i+":6346"),
@@ -161,8 +153,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         Iterator iter=bman.getBootstrapServers();
         assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        if(iter.hasNext())
-            fail("had another: " + iter.next());
+        assertTrue(! iter.hasNext());
     }
 
     public void testRemoveErrorHosts() {
@@ -236,8 +227,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
                            +"&ip=18.239.0.144:6347 HTTP/1.1", 
                      s3.getRequest());
-        assertNull(s2.getRequest());
-        assertNull(s1.getRequest());
+        assertEquals(null, s2.getRequest());
+        assertEquals(null, s1.getRequest());
     }
 
     public void testSendUpdatesAsyncURL() {
@@ -253,7 +244,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());
-        assertNull(s1.getRequest());
+        assertEquals(null, s1.getRequest());
     }
 
     public void testSendUpdatesAsyncNoOK() {
@@ -271,13 +262,13 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());
-        assertNull(s1.getRequest());
+        assertEquals(null, s1.getRequest());
     }
 
     public void testGiveUp() {    
-        int old = BootstrapServerManager.MAX_HOSTS_PER_REQUEST;
+        int old=bman.MAX_HOSTS_PER_REQUEST;
         try {
-            BootstrapServerManager.MAX_HOSTS_PER_REQUEST = 2;
+            bman.MAX_HOSTS_PER_REQUEST=2;
             s3.shutdown();
             s2.shutdown();
             bman.fetchEndpointsAsync();
@@ -288,7 +279,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
             assertEquals(url1, iter.next());
             assertTrue(! iter.hasNext());
         } finally {
-            BootstrapServerManager.MAX_HOSTS_PER_REQUEST = old;
+            bman.MAX_HOSTS_PER_REQUEST=old;
         }
     }
 
@@ -332,7 +323,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                  iter.next()) { 
             count++; 
         }        
-        assertGreaterThan(100, count);
+        assertTrue(count>100);
 
         //Make sure this actually got some endpoints.  Note: this requires a
         //network connection, as it actually uses GWebCache.
@@ -345,11 +336,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         s3.setResponseData("You have been redirected.");
         bman.fetchEndpointsAsync();
         sleep();
-        assertNotNull(s3.getRequest());  //original location
-        assertNotNull(s1.getRequest());  //was redirected here
-        assertNull(s2.getRequest());  //didn't go here
-        assertEquals("invalid responses, got: " + catcher.list,
-                RESPONSES_PER_SERVER, catcher.list.size());
+        assertTrue(s3.getRequest()!=null);  //original location
+        assertTrue(s1.getRequest()!=null);  //was redirected here
+        assertTrue(s2.getRequest()==null);  //didn't go here
+        assertTrue(catcher.list.size()==RESPONSES_PER_SERVER);
     }
 
     private void sleep() {
@@ -371,18 +361,12 @@ class TestHostCatcher extends HostCatcher {
         list.add(e);
         return true;
     }
-
-    public boolean add(Endpoint e, int priority) {
-        list.add(e);
-        return true;
-    }
 }
 
 /** A BootstrapServerManager that tries host in a round-robin fashion. */
 class TestBootstrapServerManager extends BootstrapServerManager {
-
-    public TestBootstrapServerManager() {
-        super();
+    public TestBootstrapServerManager(HostCatcher hc) {
+        super(hc);
     }
 
     /** The LAST value given out, or -1 if none.  Starts with s3 and works down

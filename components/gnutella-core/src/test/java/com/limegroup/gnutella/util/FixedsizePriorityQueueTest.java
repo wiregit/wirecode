@@ -1,11 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
+import junit.framework.*;
+import com.sun.java.util.collections.*;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.NoSuchElementException;
-
-public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class FixedsizePriorityQueueTest extends TestCase {
     private final Integer one=new Integer(1);
     private final Integer two=new Integer(2);
     private final Integer three=new Integer(3);
@@ -25,7 +23,7 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
     }
 
     public static Test suite() {
-        return buildTestSuite(FixedsizePriorityQueueTest.class);
+        return new TestSuite(FixedsizePriorityQueueTest.class);
     }    
     
     public void setUp() {

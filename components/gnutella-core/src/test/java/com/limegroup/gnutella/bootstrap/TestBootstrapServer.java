@@ -1,42 +1,19 @@
 package com.limegroup.gnutella.bootstrap;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.limegroup.gnutella.ErrorService;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
+import java.io.*;
+import java.net.*;
 
 /**
  * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
 public class TestBootstrapServer {
-    
-    
-    private static final Log LOG =
-        LogFactory.getLog(TestBootstrapServer.class);
-    
     ServerSocket _ss;
-    List _sockets = new LinkedList();
+    Socket _socket;
 
     String _request;
     String _response;
     String _responseData="";
-    
-    boolean _allowConnectionReuse = false;
-    
-    int _numConnections = 0;
-    int _numRequests = 0;
 
     /** Starts a single bootstrap server listening on the given port
      *  Call setResponse() to set abnormal HTTP responses.
@@ -44,33 +21,9 @@ public class TestBootstrapServer {
      *  @exception IOException this couldn't list on the port */    
     public TestBootstrapServer(int port) throws IOException { 
         setResponse("HTTP/1.0 200 OK");
-        _ss=new ServerSocket();
-        _ss.setReuseAddress(true);
-        _ss.bind(new InetSocketAddress(port));
+        _ss=new ServerSocket(port);
         Thread runner=new RunnerThread();
         runner.start();
-    }
-    
-    /**
-     * Returns the number of connection attempts this simple server received.
-     */
-    public int getConnectionAttempts() {
-        return _numConnections;
-    }
-    
-    /**
-     * Returns the number of requests this simple server recieved.
-     */
-    public int getRequestAttempts() {
-        return _numRequests;
-    }
-    
-    /**
-     * Sets whether or not this simple server should allow the connection
-     * to be reused for multiple requests.
-     */
-    public void setAllowConnectionReuse(boolean reuse) {
-        _allowConnectionReuse = reuse;
     }
     
     /** Sets what this should send for any HTTP response, without any newline
@@ -97,12 +50,10 @@ public class TestBootstrapServer {
         } catch (IOException e) {
         }
 
-        for(Iterator i = _sockets.iterator(); i.hasNext(); ) {
-            try {
-                Socket s = (Socket)i.next();
-                if(s != null )
-                    s.close();
-            } catch (IOException e) {}
+        try {
+            if (_socket!=null)
+                _socket.close();
+        } catch (IOException e) {
         }
     }
 
@@ -110,50 +61,20 @@ public class TestBootstrapServer {
         public void run() {
             try {
                 run2();
-            } catch (IOException e) {
-            } catch(Throwable e) {
-                ErrorService.error(e);
-            }
+            } catch (IOException e) { }
         }
         
         public void run2() throws IOException {
-            while(true) {
-                LOG.debug("waiting to accept new connection");
-                Socket s = _ss.accept();
-                LOG.debug("accepted new connection");
-                _numConnections++;
-                _sockets.add(s);
-                BufferedReader in=
-                    new BufferedReader(
-                        new InputStreamReader(s.getInputStream()));
-                OutputStream out = s.getOutputStream();
-                while(true) {
-                    LOG.debug("reading new request");
-                    _request=in.readLine();
-                    LOG.debug("read: " + _request);
-                    if(_request == null)
-                        break;
-                    
-                    // gobble up headers.
-                    String restOfLine = _request;
-                    while(!restOfLine.equals("")) {
-                        restOfLine = in.readLine();
-                        if(restOfLine == null)
-                            break;
-                        LOG.debug("continued read: " + restOfLine);
-                    }
-                    LOG.debug("finished reading request.");
-                    _numRequests++;
-                    out.write(_response.getBytes());
-                    out.write(_responseData.getBytes());
-                    out.flush();
-                    if(!_allowConnectionReuse)
-                        break;
-                }
-                out.close();
-                if(!_allowConnectionReuse)
-                    break;
-            }
+            _socket=_ss.accept();
+            BufferedReader in=
+                new BufferedReader(
+                    new InputStreamReader(_socket.getInputStream()));
+            _request=in.readLine();
+            OutputStream out=_socket.getOutputStream();
+            out.write(_response.getBytes());
+            out.write(_responseData.getBytes());
+            out.flush();
+            out.close();
         }
     }
 }

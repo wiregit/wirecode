@@ -1,16 +1,19 @@
 package com.limegroup.gnutella;
 
-import java.net.URL;
-
-import junit.framework.Test;
-
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.CommonUtils;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
+import java.util.Date;
+import java.net.*;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
  */
-public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTestCase {	  
+public final class RemoteFileDescTest extends TestCase {	  
 
 	private byte[] TEST_GUID;
 
@@ -19,7 +22,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 	}
 
 	public static Test suite() {
-		return buildTestSuite(RemoteFileDescTest.class);
+		return new TestSuite(RemoteFileDescTest.class);
 	}
 
 	public static void main(String[] args) {
@@ -43,8 +46,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 					new RemoteFileDesc("www.limewire.org", invalidPorts[i], 
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
-									   false, null, null, false, false,"",
-                                       0, null);
+									   false, null, null);
 				fail("rfd1 should have received an exception for invalid port: "+
 					 rfd.getPort());
 			} catch(IllegalArgumentException e) {
@@ -66,11 +68,11 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 					new RemoteFileDesc("www.limewire.org", validPorts[i], 
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
-									   false, null, null, false, false,"",
-                                       0, null);
+									   false, null, null);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
-					 validPorts[i], e);
+					 validPorts[i]);
+				// this is expected
 			}
 		}
 	}
@@ -83,17 +85,14 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		urns.add(HugeTestUtils.URNS[0]);
 		RemoteFileDesc rfd =
 			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
-							   10, true, 3, true, null, urns, 
-                               false, false,"",0, null);
+							   10, true, 3, true, null, urns);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getHost();
 		String colonPort = ":"+rfd.getPort();
 		assertTrue("unexpected beginning of url", 
 				   urlString.startsWith("http://"+host+colonPort));
-		assertEquals("unexpected double slash",
-		    urlString.indexOf(colonPort+"//"), -1);
-		assertNotEquals("unexpected double slash",
-		    -1, urlString.indexOf(":3000/"));
+		assertEquals("unexpected double slash", urlString.indexOf(colonPort+"//"), -1);
+		assertTrue("unexpected double slash", urlString.indexOf(":3000/") != -1);		
 	}
 }

@@ -1,47 +1,27 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import junit.framework.*;
+import java.io.*;
+import java.net.URL;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.stubs.*;
+import com.sun.java.util.collections.*;
 
 /** 
  * Unit tests small parts of ResumeDownloader.  See RequeryDownloadTest for
  * larger integration tests.
  * @see RequeryDownloadTest 
  */
-public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
-    static final String filePath="com/limegroup/gnutella/downloader/";
+public class ResumeDownloaderTest extends TestCase {
     static final String name="filename.txt";
     static final URN hash=TestFile.hash();
     static final int size=1111;
     static final int amountDownloaded=500;
     static final RemoteFileDesc rfd=newRFD(name, size, hash);
     static final IncompleteFileManager ifm=new IncompleteFileManager();
-    static File incompleteFile;
-    
-    public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        incompleteFile=ifm.getFile(rfd);
+    static final File incompleteFile=ifm.getFile(rfd);
+    static {
         VerifyingFile vf=new VerifyingFile(false);
         vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
@@ -54,17 +34,15 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public static Test suite() {
-        return buildTestSuite(ResumeDownloaderTest.class);
+        return new TestSuite(ResumeDownloaderTest.class);
     }
 
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */
     private static ResumeDownloader newResumeDownloader() {
-        // this ResumeDownloader is started from the library, not from restart,
-        // that is why the last param to init is false
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
         ret.initialize(new DownloadManagerStub(), 
                        new FileManagerStub(), 
-                       new ActivityCallbackStub(), false);
+                       new ActivityCallbackStub());
         return ret;
     }
 
@@ -74,44 +52,51 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             urns.add(hash);
         return new RemoteFileDesc("1.2.3.4", 6346, 13l,
                                   name, size,
-                                  new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",0,null);
+                                  new byte[16], 56, false, 4, true, null, urns);
     }
 
     ////////////////////////////////////////////////////////////////////////////
 
     /** Tests that the progress is not 0% while requerying.
      *  This issue was reported by Sam Berlin. */
-    public void testRequeryProgress() throws Exception {
+    public void testRequeryProgress() {
         ResumeDownloader downloader=newResumeDownloader();
         while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
 			if ( downloader.getState() != Downloader.QUEUED )
                 assertEquals(Downloader.WAITING_FOR_RESULTS, 
 				  downloader.getState());
-            Thread.sleep(200);
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
 		}
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
-        //Serialize it!
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        ObjectOutputStream out=new ObjectOutputStream(baos);
-        out.writeObject(downloader);
-        out.flush(); out.close();
-        downloader.stop();
+        try {
+            //Serialize it!
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ObjectOutputStream out=new ObjectOutputStream(baos);
+            out.writeObject(downloader);
+            out.flush(); out.close();
+            downloader.stop();
 
-        //Deserialize it as a different instance.  Initialize.
-        ObjectInputStream in=new ObjectInputStream(
-            new ByteArrayInputStream(baos.toByteArray()));
-        downloader=(ResumeDownloader)in.readObject();
-        in.close();
-        downloader.initialize(new DownloadManagerStub(),
-                              new FileManagerStub(),
-                              new ActivityCallbackStub(), true);
+            //Deserialize it as a different instance.  Initialize.
+            ObjectInputStream in=new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray()));
+            downloader=(ResumeDownloader)in.readObject();
+            in.close();
+            downloader.initialize(new DownloadManagerStub(),
+                                  new FileManagerStub(),
+                                  new ActivityCallbackStub());
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Couldn't serialize");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            fail("No class");
+        }
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_USER, downloader.getState());
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }
@@ -120,40 +105,34 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
      *  (LimeWire 2.7.0/2.7.1 beta.)
      */
     public void testSerialization12()
-            throws Exception {
-        tSerialization("ResumeDownloader.1_2.dat", false);
+            throws IOException, ClassNotFoundException {
+        tSerialization(
+            "com/limegroup/gnutella/downloader/ResumeDownloader.1_2.dat", false);
     }
 
     /** Tests serialization of version 1.3 of ResumeDownloader.
      *  (LimeWire 2.7.3) */
     public void testSerialization13()
-            throws Exception {
-        tSerialization("ResumeDownloader.1_3.dat", true);
+            throws IOException, ClassNotFoundException {
+        tSerialization(
+            "com/limegroup/gnutella/downloader/ResumeDownloader.1_3.dat", true);
     }
     
     /** Generic serialization testing routing. 
      *  @param file the serialized ResumeDownloader to read
      *  @param expectHash true iff there should be a hash in the downloader */
     private void tSerialization(String file, boolean expectHash) 
-            throws Exception {
-        ObjectInputStream in=new ObjectInputStream(
-            new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
-        );
+            throws IOException, ClassNotFoundException {
+        ObjectInputStream in=new ObjectInputStream(new FileInputStream(file));
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
-        QueryRequest qr = rd.newRequery(0);
-        URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");
+        QueryRequest qr=rd.newRequery(0);
+        assertEquals("filename.txt", qr.getQuery());
         if (expectHash) {
-            assertEquals("unexpected hash", hash, _hash);
-            // filenames were put in hash queries since everyone drops //
-            assertEquals("hash query should have filename",
-                name, qr.getQuery());
+            assertEquals(1, qr.getQueryUrns().size());
+            assertEquals(hash, qr.getQueryUrns().iterator().next());       
+        } else {
+            assertEquals(0, qr.getQueryUrns().size());
         }
-
-        // we never send URNs
-        assertEquals("unexpected amount of urns",
-                     0, qr.getQueryUrns().size());
-        assertEquals("unexpected filename",
-                     "filename.txt", qr.getQuery());            
     }
 
 
@@ -165,11 +144,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             ResumeDownloader rd=newResumeDownloader();
             ObjectOutputStream out=new ObjectOutputStream(
                                     new FileOutputStream(
-                                      CommonUtils.getResourceFile(
-                                        filePath + "ResumeDownloader.dat"
-                                      )
-                                    )
-                                  );
+                                      "ResumeDownloader.dat"));
             out.writeObject(rd);
             out.flush();
             out.close();    

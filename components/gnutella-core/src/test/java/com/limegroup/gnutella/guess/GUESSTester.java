@@ -1,29 +1,16 @@
 package com.limegroup.gnutella.guess;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
+import java.io.*;
+import java.net.*;
+import junit.framework.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*; 
 
 /** Provides primitives for contacting GUESS nodes on the network.
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
  *  tuned and will now work in general.
  */
-public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
+public class GUESSTester extends TestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -112,14 +99,15 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Run this suite of tests.
 	 */
 	public static Test suite() {
-		return buildTestSuite(GUESSTester.class);
+		return new TestSuite(GUESSTester.class);
 	}
 
     public void testSmall() {
         try {
             assertTrue(testAck("10.254.0.19", 6346) > 0);
-            assertNotNull(testQuery("10.254.0.19", 6346,
-									QueryRequest.createQuery("morrissey", (byte)1)));
+            assertTrue(testQuery("10.254.0.19", 6346,
+                                 new QueryRequest((byte) 1, 0, 
+                                                  "morrissey", false)) != null);
         }
         catch (Exception whatever) {
             assertTrue(false);
@@ -134,7 +122,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-		QueryRequest qr = QueryRequest.createQuery("susheel", (byte)1);
+        QueryRequest qr = new QueryRequest((byte)1, 0, "susheel", false);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);

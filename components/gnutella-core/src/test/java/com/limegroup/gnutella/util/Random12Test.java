@@ -1,17 +1,18 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
+import junit.framework.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Unit tests for Random12
  */
-public class Random12Test extends com.limegroup.gnutella.util.BaseTestCase {
+public class Random12Test extends TestCase {
     public Random12Test(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(Random12Test.class);
+        return new TestSuite(Random12Test.class);
     }
 
     Random12 rand;
@@ -51,13 +52,13 @@ public class Random12Test extends com.limegroup.gnutella.util.BaseTestCase {
 
         for (int trials=0; trials<n*10; trials++) {
             int i=rand.nextInt(n);
-            assertGreaterThanOrEquals(0,i);
-            assertLessThan(n, i);
+            assertTrue(i>=0);
+            assertTrue(i<n);
             values[i]++;
         }
 
         for (int i=0; i<n; i++) {
-            assertGreaterThan(0, values[i]);
+            assertTrue(values[i]>0);
         }
     }
 }

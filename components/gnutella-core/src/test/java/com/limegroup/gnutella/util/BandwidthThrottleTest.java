@@ -1,17 +1,14 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import com.limegroup.gnutella.util.*;
+import junit.framework.*;
 import java.util.Random;
-
-import junit.framework.Test;
+import java.io.*;
 
 /**
  * Tests BandwidthThrottle and ThrottledOutputStream.
  */
-public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class BandwidthThrottleTest extends TestCase {
     public BandwidthThrottleTest(String name) {
         super(name);
     }
@@ -33,7 +30,7 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
     OutputStream out;
     
     public static Test suite() {
-        return buildTestSuite(BandwidthThrottleTest.class);
+        return new TestSuite(BandwidthThrottleTest.class);
     }  
 
     protected void setUp() {
@@ -47,7 +44,7 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
             pin=new PipedInputStream(pout);
             out=new ThrottledOutputStream(pout, throttle);
         } catch (IOException e) {
-            fail("Couldn't set up stream", e);
+            fail("Couldn't set up stream: "+e);
         }
         
         stopTime=startTime+TIME;    //Do this last, since time matters
@@ -64,58 +61,70 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
             int bytesToSend=random.nextInt(15);     //more or less than N
             bytesSent+=throttle.request(bytesToSend);
         }
-        assertLessThan("Wrong number of bytes: "+bytesSent,
-                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
+        assertTrue("Wrong number of bytes: "+bytesSent,
+                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
     }
 
-    public void testThrottledOutputStreamByte() throws Exception {
+    public void testThrottledOutputStreamByte() {
         final int RATE=20000;            //Fast! 10KB/second
         throttle.setRate(RATE);
         final int BYTES=TIME/1000*RATE;  //200 bytes
 
-        while (System.currentTimeMillis()<stopTime) {
-            byte b=(byte)random.nextInt();
-            out.write(b);
-            assertTrue("Bad byte", (byte)pin.read()==b);
-            bytesSent++;
+        try {
+            while (System.currentTimeMillis()<stopTime) {
+                byte b=(byte)random.nextInt();
+                out.write(b);
+                assertTrue("Bad byte", (byte)pin.read()==b);
+                bytesSent++;
+            }
+        } catch (IOException e) {
+            fail("Mysterious IO problem "+e);
         }
-        assertLessThan("Wrong number of bytes: "+bytesSent,
-                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
+        assertTrue("Wrong number of bytes: "+bytesSent,
+                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
     }
     
-    public void testThrottledOutputStreamBytes() throws Exception  {
+    public void testThrottledOutputStreamBytes() {
         final int RATE=1000;            //Medium fast
         throttle.setRate(RATE);
         final int BYTES=TIME/1000*RATE;  
 
-        byte[] buf=new byte[150];
-        while (System.currentTimeMillis()<stopTime) {
-            random.nextBytes(buf);
-            int n=random.nextInt(buf.length);
-            out.write(buf, 0, n);
-            for (int i=0; i<n; i++)   
-                assertTrue("Bad byte", (byte)pin.read()==buf[i]);
-            bytesSent+=n;
+        try {
+            byte[] buf=new byte[150];
+            while (System.currentTimeMillis()<stopTime) {
+                random.nextBytes(buf);
+                int n=random.nextInt(buf.length);
+                out.write(buf, 0, n);
+                for (int i=0; i<n; i++)   
+                    assertTrue("Bad byte", (byte)pin.read()==buf[i]);
+                bytesSent+=n;
+            }
+        } catch (IOException e) {
+            fail("Mysterious IO problem "+e);
         }
-        assertLessThan("Wrong number of bytes: "+bytesSent,
-                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
+        assertTrue("Wrong number of bytes: "+bytesSent,
+                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
     }
     
-    public void testThrottledOutputStreamBytes2() throws Exception {
+    public void testThrottledOutputStreamBytes2() {
         final int RATE=1000;            //Medium fast
         throttle.setRate(RATE);
         final int BYTES=TIME/1000*RATE;  
 
-        byte[] buf=new byte[150];
-        while (System.currentTimeMillis()<stopTime) {
-            random.nextBytes(buf);
-            out.write(buf);
-            for (int i=0; i<buf.length;i++)   
-                assertTrue("Bad byte", (byte)pin.read()==buf[i]);
-            bytesSent+=buf.length;
+        try {
+            byte[] buf=new byte[150];
+            while (System.currentTimeMillis()<stopTime) {
+                random.nextBytes(buf);
+                out.write(buf);
+                for (int i=0; i<buf.length;i++)   
+                    assertTrue("Bad byte", (byte)pin.read()==buf[i]);
+                bytesSent+=buf.length;
+            }
+        } catch (IOException e) {
+            fail("Mysterious IO problem "+e);
         }
-        assertLessThan("Wrong number of bytes: "+bytesSent,
-                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES)); 
+        assertTrue("Wrong number of bytes: "+bytesSent,
+                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES); 
     }
 
     //TODO: test fairness when sharing one throttle among multiple streams
