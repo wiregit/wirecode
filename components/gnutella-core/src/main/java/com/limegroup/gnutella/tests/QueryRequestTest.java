@@ -83,10 +83,11 @@ public final class QueryRequestTest extends TestCase {
 				baos[i].write(0);
 				Set curUrnSet = new HashSet();
 				Set curUrnTypeSet = new HashSet();
+				//curUrnTypeSet.add(UrnType.SHA1);
+				curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
 				for(int j=i; j<HugeTestUtils.URNS.length; j++) {
 					baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
 					curUrnSet.add(HugeTestUtils.URNS[j]);
-					curUrnTypeSet.add(HugeTestUtils.URNS[j].getUrnType());
 					if((j+1) != HugeTestUtils.URNS.length) {
 						baos[i].write(0x1c);
 					}
@@ -101,11 +102,17 @@ public final class QueryRequestTest extends TestCase {
 				Set queryUrns = qr.getQueryUrns();
 				assertEquals("query urn sets should be equal", curUrnSet, queryUrns);
 				Set queryUrnTypes = qr.getRequestedUrnTypes();
-				assertEquals("query urn type sets should be equal", curUrnTypeSet, 
+
+				assertEquals("urn type set sizes should be equal", curUrnTypeSet.size(),
+							 queryUrnTypes.size());
+				assertEquals("urn types should be equal\r\n"+
+							 "set 1: "+print(curUrnTypeSet)+"r\n"+
+							 "set 2: "+print(queryUrnTypes), 
+							 curUrnTypeSet,
 							 queryUrnTypes);
 			}		   
 		} catch(IOException e) {
-			assertTrue("unexpected exception: "+e, false);
+			fail("unexpected exception: "+e);
 		}
 	}	
 
@@ -157,8 +164,8 @@ public final class QueryRequestTest extends TestCase {
 		Set queryUrns = new HashSet();
 		queryUrns.add(HugeTestUtils.URNS[4]);
 
-		QueryRequest qr = new QueryRequest(QueryRequest.newQueryGUID(isRequery), 
-										   ttl, minSpeed, query, richQuery, 
+		byte[] guid = QueryRequest.newQueryGUID(isRequery);
+		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, richQuery, 
 										   isRequery, requestedUrnTypes, queryUrns);
 		
 		assertEquals("ttls should be equal", ttl, qr.getTTL());
@@ -168,5 +175,53 @@ public final class QueryRequestTest extends TestCase {
 		assertEquals("query urn types should be equal", requestedUrnTypes, 
 					 qr.getRequestedUrnTypes());
 		assertEquals("query urns should be equal", queryUrns, qr.getQueryUrns());
+				
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			qr.write(baos);
+			baos.flush();
+		} catch (IOException e) {
+			fail("unexpected exception: "+e);
+		}
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+		QueryRequest qrTest = null;
+		try {
+			qrTest = (QueryRequest)qr.read(bais);
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}
+		assertEquals("queries should be equal", qr.getQuery(), qrTest.getQuery());
+		assertEquals("rich queries should be equals", qr.getRichQuery(), 
+					 qrTest.getRichQuery());
+
+		Set urnTypes0 = qr.getRequestedUrnTypes();
+		Set urnTypes1 = qrTest.getRequestedUrnTypes();
+		Iterator iter0 = urnTypes0.iterator();
+		Iterator iter1 = urnTypes1.iterator();
+		UrnType urnType0 = (UrnType)iter0.next();
+		UrnType urnType1 = (UrnType)iter1.next();
+		assertEquals("urn types should both be sha1", urnType0, urnType1);
+		assertEquals("urn type set sizes should be equal", urnTypes0.size(), 
+					 urnTypes1.size());
+		assertEquals("urn types should be equal\r\n"+
+					 "set0: "+print(urnTypes0)+"\r\n"+
+					 "set1: "+ print(urnTypes1), 
+					 urnTypes0,
+					 urnTypes1);
+		assertEquals("query urns should be equal", qr.getQueryUrns(), qrTest.getQueryUrns());
+		assertEquals("min speeds should be equal", qr.getMinSpeed(), qrTest.getMinSpeed());
+		
+	}
+
+	private static String print(Collection col) {
+		Iterator iter = col.iterator();
+		StringBuffer sb = new StringBuffer();
+		while(iter.hasNext()) {
+			sb.append(iter.next()); 
+			sb.append("\r\n");
+		}
+		return sb.toString();
 	}
 }
