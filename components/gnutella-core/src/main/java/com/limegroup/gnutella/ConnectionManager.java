@@ -6,6 +6,7 @@ import java.io.*;
 import java.rmi.RemoteException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.networkdiscoverer.NDAccess;
+import java.util.Date;
 
 /**
  * The list of all connections.  Accepts new connections and creates
@@ -787,6 +788,10 @@ public class ConnectionManager implements Runnable {
                 //return if we socket is not valid
                 return;
             }
+            
+            //echo client info to be recorded into file
+            System.out.println(new Date() + " " +  client.getInetAddress());
+            
             //Check if IP address of the incoming socket is in badHosts 
             //(initialized in propertyManager()
             if (badHosts.contains(client.getInetAddress().getHostAddress() ) )
