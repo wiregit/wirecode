@@ -41,6 +41,7 @@ public class SettingsManager implements SettingsInterface
     private static String   saveDirectory_;
     private static String   directories_;
     private static String   extensions_;
+	private static String   incompleteDirectory_;
     private static String[] bannedIps_;
     private static String[] bannedWords_;
     private static boolean  filterDuplicates_;
@@ -267,6 +268,10 @@ public class SettingsManager implements SettingsInterface
 					try {setExtensions(p);}
 					catch (IllegalArgumentException ie){}
 				}
+
+				else if(key.equals(SettingsInterface.INCOMPLETE_DIR)) {
+					setIncompleteDirectory(p);
+				}
 	       
 				else if(key.equals(SettingsInterface.BANNED_IPS)) {
 					try {setBannedIps(decode(p));}
@@ -393,6 +398,7 @@ public class SettingsManager implements SettingsInterface
 		setDirectories("");
 		setSaveDirectory(home_);
 		setSaveDefault(home_);
+		setIncompleteDirectory(home_);
 		//setInstallDir("");
 		setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 		setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
@@ -452,6 +458,11 @@ public class SettingsManager implements SettingsInterface
     public String getSaveDirectory() {
 		return saveDirectory_;
     }
+
+	/** returns the incomplete directory */ 
+	public String getIncompleteDirectory() {
+		return incompleteDirectory_;
+	}
 
     /** returns the default save directory */
     public String getSaveDefault(){return saveDefault_;}
@@ -675,6 +686,20 @@ public class SettingsManager implements SettingsInterface
 			//writeProperties();
 		}
     }
+
+	public synchronized void setIncompleteDirectory(String dir) {
+		boolean fb = dir.endsWith(fileSep_);
+		if(fb == false)
+			dir = dir.concat(fileSep_);
+		File f = new File(dir);
+		boolean b = f.isDirectory();
+		if(b == false)
+			throw new IllegalArgumentException();
+		else {
+			incompleteDirectory_ = dir;
+			props_.put(SettingsInterface.INCOMPLETE_DIR, dir);
+		}
+	}
 
     public synchronized void setSaveDefault(String dir) {
 		File f = new File(dir);

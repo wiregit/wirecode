@@ -36,6 +36,7 @@ public interface SettingsInterface
     public String     getSaveDefault();
     public String     getDirectories();
     public String     getExtensions();
+	public String     getIncompleteDirectory();
     public String[]   getBannedIps();
     public String[]   getBannedWords();
     public boolean    getFilterDuplicates();
@@ -127,6 +128,10 @@ public interface SettingsInterface
     
     /** sets the string of extensions*/
     public void setExtensions(String extensions)
+		throws IllegalArgumentException;
+
+	/** sets the directory for saving incomplete files */
+	public void setIncompleteDirectory(String dir) 
 		throws IllegalArgumentException;
    
     public void setBannedIps(String[] ips) 
@@ -249,6 +254,7 @@ public interface SettingsInterface
     public static final String STATS          = "STATS";
     public static final String MAX_CONN       = "MAXIMUM_NUMBER_OF_CONNECTIONS";
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
+    public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
     public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";
