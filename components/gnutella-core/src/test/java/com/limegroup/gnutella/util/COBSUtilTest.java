@@ -17,13 +17,13 @@ public class COBSUtilTest extends TestCase {
     }  
 
 
-    public void testEncode() throws java.io.IOException {
-        for (int num = 1; num < 520; num++) 
-            encode(num);
+    public void testEncodeAndDecode() throws java.io.IOException {
+        for (int num = 1; num < 260; num++) 
+            encodeAndDecode(num);
     }
     
 
-    private void encode(int num) throws java.io.IOException {
+    private void encodeAndDecode(int num) throws java.io.IOException {
         // test all 0s...
         debug("COBSUtilTest.encode(): num = " +
               num);
@@ -34,6 +34,10 @@ public class COBSUtilTest extends TestCase {
         assertTrue(bytes.length == (after.length-1));
         for (int i = 0; i < after.length; i++)
             assertTrue(after[i] == 0x01);
+        byte[] decoded = COBSUtil.cobsDecode(after);
+        for (int i = 0; i < bytes.length; i++)
+            assertTrue(bytes[i] == decoded[i]);
+        assertTrue(decoded[bytes.length] == 0);
 
 
         // test all 1s....
@@ -50,6 +54,11 @@ public class COBSUtilTest extends TestCase {
                    (ByteOrder.ubyte2int(after[0]) == (num+1)) || 
                    (ByteOrder.ubyte2int(after[0]) == 255)
                    );
+        decoded = COBSUtil.cobsDecode(after);
+        for (int i = 0; i < bytes.length; i++)
+            assertTrue("num = " + num + ", i = " + i, 
+                       bytes[i] == decoded[i]);
+        assertTrue(decoded[bytes.length] == 0);
         
         // ----------------------------------
         // build up 'induction' case for 0(1..).  we can trust 'induction' due
@@ -77,7 +86,10 @@ public class COBSUtilTest extends TestCase {
                 else
                     assertTrue(after[i] == 1);
             }
-            
+            decoded = COBSUtil.cobsDecode(after);
+            for (int i = 0; i < bytes.length; i++)
+                assertTrue(bytes[i] == decoded[i]);
+            assertTrue(decoded[bytes.length] == 0);            
         }
         // ----------------------------------
 
@@ -101,6 +113,10 @@ public class COBSUtilTest extends TestCase {
                     assertTrue(ByteOrder.ubyte2int(after[i]) > 1);
                 else
                     assertTrue(after[i] == 1);
+            decoded = COBSUtil.cobsDecode(after);
+            for (int i = 0; i < bytes.length; i++)
+                assertTrue(bytes[i] == decoded[i]);
+            assertTrue(decoded[bytes.length] == 0);
         }
         // ----------------------------------
     }
@@ -112,10 +128,10 @@ public class COBSUtilTest extends TestCase {
             System.out.println(out);
     }
 
-    public void testDecode() {
-    }
 
     public void testSymmetry() throws java.io.IOException {
+        // a quick test for symmetry - but symmetry was actually tested above,
+        // so no need for much testing...
         byte[] bytes = (new String("Sush Is Cool!")).getBytes();
         byte[] after = COBSUtil.cobsDecode(COBSUtil.cobsEncode(bytes));
         assertTrue(bytes.length == (after.length - 1));
