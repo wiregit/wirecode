@@ -6,6 +6,8 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.statistics.CompressionStat;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Blocking message writer.  Blocks writing messages to the network.  This 
@@ -62,6 +64,54 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         // TODO Auto-generated method stub
         return false;
     }
+    
+    public void simpleWrite(Message msg) throws IOException {
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+        
+        // The try/catch block is necessary for two reasons...
+        // See the notes in Connection.close above the calls
+        // to end() on the Inflater/Deflater and close()
+        // on the Input/OutputStreams for the details.        
+        try {
+            if ( CONNECTION.isWriteDeflated() ) {
+                priorUncompressed = _deflater.getTotalIn();
+                priorCompressed = _deflater.getTotalOut();
+            }
+            
+            try {
+                msg.write(_out);
+            } catch(IOException ioe) {
+                close(); // make sure we close.
+                throw ioe;
+            }
+
+            updateWriteStatistics(msg, priorUncompressed, priorCompressed);
+        } catch(NullPointerException e) {
+            throw CONNECTION_CLOSED;
+        }
+    }
+    
+    /**
+     * Updates the write statistics.
+     * @param m the possibly null message to add to the bytes sent
+     * @param pUn the prior uncompressed traffic, used for adding to stats
+     * @param pComp the prior compressed traffic, used for adding to stats
+     */
+    private void updateWriteStatistics(Message m, long pUn, long pComp) {
+        if( m != null )
+            CONNECTION.stats().addBytesSent(m.getTotalLength());
+        if(CONNECTION.isWriteDeflated()) {
+            CONNECTION.stats().addCompressedBytesSent(_deflater.getTotalOut());
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalIn() - pUn));
+                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalOut() - pComp));
+            }
+        }
+    }     
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#write(com.limegroup.gnutella.messages.Message)

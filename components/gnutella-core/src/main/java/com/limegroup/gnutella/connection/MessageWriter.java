@@ -33,6 +33,13 @@ public interface MessageWriter {
     boolean write(Message m) throws IOException;
     
     /**
+     * Writes this message directly to the network without any buffering.
+     * 
+     * @param msg the <tt>Message</tt> to write
+     */
+    void simpleWrite(Message msg) throws IOException;
+    
+    /**
      * Returns whether or not there are pending, unsent messages for this 
      * writer.
      * 

@@ -63,4 +63,11 @@ public final class MessageWriterProxy implements MessageWriter {
         DELEGATE.close();
     }
 
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#simpleWrite(com.limegroup.gnutella.messages.Message)
+     */
+    public void simpleWrite(Message msg) throws IOException {
+        DELEGATE.simpleWrite(msg);
+    }
+
 }

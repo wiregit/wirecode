@@ -31,7 +31,12 @@ public final class NIOMessageWriter implements MessageWriter {
     /**
 	 * Variable for the current message being written.
 	 */
-	private ByteBuffer _message;
+	//private Message _message;
+    
+    /**
+     * <tt>ByteBuffer</tt> for the current message being sent.
+     */
+    private ByteBuffer _message;
 	
     
     /**
@@ -112,6 +117,7 @@ public final class NIOMessageWriter implements MessageWriter {
     	if(!hasPendingMessage()) {
     		throw new IllegalStateException("no pending message");
     	}
+        
     	CHANNEL.write(_message);
     	if(!_message.hasRemaining()) {
     		_message = null;
@@ -130,6 +136,13 @@ public final class NIOMessageWriter implements MessageWriter {
     public void close() {
         // TODO implement this method if necessary
         
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#simpleWrite(com.limegroup.gnutella.messages.Message)
+     */
+    public void simpleWrite(Message msg) throws IOException {
+        write(msg);   
     }
     
 }
