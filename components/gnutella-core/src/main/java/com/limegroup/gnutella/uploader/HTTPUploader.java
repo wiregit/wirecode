@@ -45,7 +45,6 @@ public final class HTTPUploader implements Uploader {
 	private final String _guid;
 	private final int _port;
 	private int _stateNum = CONNECTING;
-    private StalledUploadWatchdog _stalledChecker;
 
 	private HTTPMessage _state;
 	
@@ -54,7 +53,10 @@ public final class HTTPUploader implements Uploader {
 	private int _gnutellaPort;
     private boolean _supportsQueueing = false;
 
-
+    /**
+     * The Watchdog that will kill this uploader if it takes too long.
+     */
+    private final StalledUploadWatchdog STALLED_WATCHDOG;
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
@@ -101,26 +103,56 @@ public final class HTTPUploader implements Uploader {
      * @param old the old HTTPDownloader which we use for bandwidth 
      * to initialize this' bandwidth tracker so we have history
 	 */
-	public HTTPUploader(HTTPRequestMethod method, String fileName, 
-                        Socket socket, int index, HTTPUploader old, 
-                        StalledUploadWatchdog stallChecker) {
-		_method = method;
+	public HTTPUploader(HTTPRequestMethod method,
+	                    String fileName, 
+                        Socket socket,
+                        int index,
+                        StalledUploadWatchdog dog) {
+        STALLED_WATCHDOG = dog;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
-		_index = index;
-		_amountRead = 0;
+		_index = index;;
 		_guid = null;
 		_port = 0;
-        _stalledChecker = stallChecker;
-        if(old!=null) {
-            _totalAmountRead += old.getTotalAmountUploaded();
-            bandwidthTracker=old.bandwidthTracker;
+		reinitialize(method);
         }
-        else {
-            _totalAmountRead = 0;
+    
+    /**
+     * Reinitializes this uploader for a new request method.
+     */
+    public void reinitialize(HTTPRequestMethod method) {
+        _method = method;
+        _amountRequested = 0;
+        _uploadBegin = 0;
+        _uploadEnd = 0;
+        _fileSize = 0;
+        _userAgent = null;
+        _headersParsed = false;
+        _stateNum = CONNECTING;
+        _state = null;
+        _chatEnabled = false;
+        _browseEnabled = false;
+        _gnutellaPort = 0;
+        _supportsQueueing = false;
+        _requestedURN = null;
+        _fileDesc = null;
+        _clientAcceptsXGnutellaQueryreplies = false;
+        _alternateLocationCollection = null;
+        
+        // If this is the first time we are initializing it,
+        // create a new bandwidth tracker and set a few more variables.
+        if( bandwidthTracker == null ) {
             bandwidthTracker = new BandwidthTrackerImpl();
+            _totalAmountRead = 0;
+            _amountRead = 0;
         }            
+        // Otherwise, update the amount read.
+        else {
+            _totalAmountRead += _amountRead;
+            _amountRead = 0;
+        }
+        
 		try {			
 			_ostream = _socket.getOutputStream();
         } catch(IOException e) {
@@ -130,7 +162,7 @@ public final class HTTPUploader implements Uploader {
         }
 
         //special case for certain states
-        switch(index) {
+        switch(_index) {
         case UploadManager.BROWSE_HOST_FILE_INDEX:
             setState(BROWSE_HOST);
             return;
@@ -188,10 +220,12 @@ public final class HTTPUploader implements Uploader {
 	 * @param guid the GUID of the request */
 	public HTTPUploader(String fileName, String host, int port, 
                                             int index, String guid) {
+        STALLED_WATCHDOG = null; // not used to transfer.
 		_fileName = fileName;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
+		_totalAmountRead = 0;
 		_hostName = host;
 		_guid = guid;
 		_port = port;
@@ -348,7 +382,7 @@ public final class HTTPUploader implements Uploader {
 		_stateNum = state;
 		switch (state) {
 		case CONNECTING:
-			_state = new NormalUploadState(this,_stalledChecker);
+			_state = new NormalUploadState(this, STALLED_WATCHDOG);
 			break;
         case QUEUED:
             int pos=RouterService.getUploadManager().positionInQueue(_socket);
@@ -916,7 +950,7 @@ public final class HTTPUploader implements Uploader {
 
 	// overrides Object.toString
 	public String toString() {
-        return "<"+_hostName+":"+_port+", "+_fileName+">";
+        return "<"+_hostName+":"+_port+", "+ _index +">";
 //  		return "HTTPUploader:\r\n"+
 //  		       "File Name: "+_fileName+"\r\n"+
 //  		       "Host Name: "+_hostName+"\r\n"+

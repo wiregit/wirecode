@@ -22,6 +22,7 @@ import com.limegroup.gnutella.downloader.*; //for testing
 public final class UploadManager implements BandwidthTracker {
 
     /** An enumeration of return values for queue checking. */
+    private final int BYPASS_QUEUE = -1;
     private final int REJECTED = 0;    
     private final int QUEUED = 1;
     private final int ACCEPTED = 2;
@@ -142,71 +143,86 @@ public final class UploadManager implements BandwidthTracker {
                              Socket socket, boolean forceAllow) {
         debug(" accepting upload");
         HTTPUploader uploader = null;
+        long startTime = -1;
 		try {
             int queued = -1;
             String oldFileName = "";
             HTTPRequestMethod currentMethod=method;
             StalledUploadWatchdog watchdog = new StalledUploadWatchdog();
             InputStream iStream = null;
+            boolean startedNewFile = false;
             //do uploads
             while(true) {
                 //parse the get line
                 if(iStream == null) {
-                    iStream = //socket.getInputStream();
-                      new BufferedInputStream(socket.getInputStream());
+                    iStream = new BufferedInputStream(socket.getInputStream());
                 }
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
 
-                debug(" successfully parsed request");
+                debug(uploader + " successfully parsed request");
                 
                 String fileName = line._fileName;
                 
-                //if this is atleast the second time through --
-                //if this should show in the GUI
-                //if we're now processing a new file --
-                // then remove the old uploader from the gui.
-                //NOTE: This MUST be done before the new uploader
-                //      is created.  Otherwise the GUI won't
-                //      be able to remove it.
-                if ( uploader != null && shouldShowInGUI(uploader)
-                  && !oldFileName.equalsIgnoreCase(fileName) ) {
-                    RouterService.getCallback().removeUpload(uploader);
+                // Determine if this is a new file ...
+                if( uploader == null                // no previous uploader
+                 || currentMethod != uploader.getMethod()  // method change
+                 || !oldFileName.equalsIgnoreCase(fileName) ) { // new file
+                    startedNewFile = true;
+                } else {
+                    startedNewFile = false;
                 }
-                //We wait until the last moment before remvoving the uploader
-                //from the _activeUploadsList, because if we removed it any
-                //earlier, some other uploader could be given a slot, while we
-                //are not finished with this upload. Note that this does not
-                //completely solve the problem, but reduces it considerably.
-                removeFromList(uploader);
                 
+                // If we're starting a new uploader, clean the old one up
+                // and then create a new one.
+                if(startedNewFile) {
+                    debug(uploader + " starting new file");
+                    if (uploader != null) {
+                        cleanupFinishedUploader(uploader, startTime);
+                    }
                 uploader = new HTTPUploader(currentMethod,
                                             fileName, 
 									        socket,
 									        line._index,
-									        uploader,
 									        watchdog);
+                }
+                // Otherwise (we're continuing an uploader),
+                // reinitialize the existing HTTPUploader.
+                else {
+                    debug(uploader + " continuing old file");
+                    uploader.reinitialize(currentMethod);
+                }
                 
                 uploader.readHeader(iStream);
                 
                 debug(uploader+" HTTPUploader created and read all headers");
-                boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
-                                    queued==ACCEPTED);
+
+                // If we have not accepted this file already, then
+                // find out whether or not we should.
+                if( queued != ACCEPTED ) {
+                    queued = processNewRequest(uploader, socket, forceAllow);
+                    // If we just accepted this request,
+                    // set the start time appropriately.
+                    if( queued == ACCEPTED )
+                        startTime = System.currentTimeMillis();                    
+                }
                 
-                // always give a slot if we're forcing UploadManager to allow
-                // this request.
-                giveSlot |= forceAllow;
-                
-                queued = doSingleUpload(uploader, socket,
-										socket.getInetAddress().getHostAddress(), 
-										line._index, giveSlot);
+                // If we started a new file with this request, attempt
+                // to display it in the GUI.
+                if( startedNewFile ) {
+                    addToGUI(uploader);
+                }
+
+                // Do the actual upload.
+                doSingleUpload(uploader);
                 
                 oldFileName = fileName;
                 
                 //if not to keep the connection open (either due to protocol
                 //not being HTTP 1.1, or due to error state, then return
                 if ((!line.isHTTP11()||uploader.getCloseConnection())
-                                                             && queued!=QUEUED)
+                  && queued!=QUEUED) {
                     return;
+                }
                 //read the first word of the next request and proceed only if
                 //"GET" or "HEAD" request.  Versions of LimeWire before 2.7
                 //forgot to switch the request method.
@@ -216,7 +232,7 @@ public final class UploadManager implements BandwidthTracker {
                     socket.setSoTimeout(SettingsManager.instance().
                                         getPersistentHTTPConnectionTimeout());
                 //dont read a word of size more than 4 
-                //as we will handle only the next "GET" request
+                //as we will handle only the next "HEAD" or "GET" request
                 String word = IOUtils.readWord(
                     iStream, 4);
                 debug(uploader+" next request arrived ");
@@ -230,10 +246,10 @@ public final class UploadManager implements BandwidthTracker {
                     return;
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
-            debug("IOE thrown, closing socket");
+            debug(uploader + " IOE thrown, closing socket");
 
         } catch(ArrayIndexOutOfBoundsException ae) {
-            debug("AIOOBE thrown, closing socket");
+            debug(uploader + " AIOOBE thrown, closing socket");
         } finally {
             // If the socket timed out while waiting for the next request,
             // then this is considered interupted.
@@ -241,27 +257,26 @@ public final class UploadManager implements BandwidthTracker {
                 uploader.setState(Uploader.INTERRUPTED);
                 
             synchronized(this) {
-                //This call to remove is when we are finally done with all the
-                //requests. This call to to removeFromList is needed because we
-                //have shifted the (per itertion) call to the top of the loop
-                //rather than the bottom, so the last iteration does not remove
-                //the uploader from _activeUploadList.
-                removeFromList(uploader);
+                // Always clean up the finished uploader
+                // from the active list & report the upload speed
+                if( uploader != null )
+                    cleanupFinishedUploader(uploader, startTime);
+                    
+                // If this uploader is still in the queue,
+                // remove it.
                 boolean found = false;
                 for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
                     KeyValue kv = (KeyValue)iter.next();
                     if(kv.getKey()==socket) {
-                        found = true;
                         iter.remove();
+                        found = true;
                     }
                 }
+                if(found)
+                    uploader.setState(Uploader.INTERRUPTED);
             }
-
-            //ensure the uploader is removed from the GUI
-            if (uploader != null && shouldShowInGUI(uploader) )
-                RouterService.getCallback().removeUpload(uploader);            
             
-            debug("closing socket");
+            debug(uploader + " closing socket");
             //close the socket
             close(socket);
         }
@@ -272,118 +287,153 @@ public final class UploadManager implements BandwidthTracker {
      * in the GUI.
      */
     private boolean shouldShowInGUI(Uploader uploader) {
-        return !shouldBypassQueue(uploader);
+        return uploader.getState() != Uploader.BROWSE_HOST &&
+               uploader.getState() != Uploader.UPDATE_FILE &&
+               uploader.getState() != Uploader.MALFORMED_REQUEST &&
+               uploader.getIndex() != BAD_URN_QUERY_INDEX &&
+               uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
     /**
      * Determines whether or not this Uploader should bypass queueing,
      * (meaning that it will always work immediately, and will not use
      *  up slots for other uploaders).
+     *
+     * All requests that are not the 'connecting' state should bypass
+     * the queue, because they have already been queued once.
      */
     private boolean shouldBypassQueue(Uploader uploader) {
-        return  uploader.getState() == Uploader.BROWSE_HOST ||
-            uploader.getState() == Uploader.UPDATE_FILE ||
-            uploader.getState() == Uploader.MALFORMED_REQUEST ||
-            uploader.getIndex() == BAD_URN_QUERY_INDEX ||
-            uploader.getMethod() == HTTPRequestMethod.HEAD;
+        return uploader.getState() != Uploader.CONNECTING;
     }
     
     /**
-     * Attempts to upload the given file for the given uploader.  May instead 
-     * reject or queue the upload.
-     *
-     * @param uploader the uploader for this file, which MUST be connected
-     * @param giveSlot whether the upload already has the slot for this file
-     *  If false, the usual queueing rules apply.
-     * @exception IOException if checkAndQueue throws an IOException, which
-     *  means that the GET request came too early for the queued uploader
+     * Cleans up a finished uploader.
+     * This does the following:
+     * 1) Reports the speed at which this upload occured.
+     * 2) Removes the uploader from the active upload list
+     * 3) Increments the completed uploads in the FileDesc
+     * 4) Removes the uploader from the GUI.
+     * (3 & 4 are only done if 'shouldShowInGUI' is true)
      */
-    private int doSingleUpload(Uploader uploader, Socket socket, String host, 
-                               int index, boolean giveSlot) throws IOException {
-        long startTime=-1;
-        debug(uploader+ " starting single upload");
-                
-        // check if it complies with the restrictions.
-        // and set the uploader state accordingly
-        int queued = -1;
-        if (!shouldBypassQueue(uploader)) {
-            // State at this point can be:
-            // FILE_NOT_FOUND, PUSH_FAILED, CONNECTING
-            if(uploader.getState()==Uploader.CONNECTING) {
-                //can throw IOEx
-                queued = checkAndQueue(uploader, host, socket,giveSlot);
-                debug(uploader+ " insert and test returned "+queued);
-                Assert.that(queued!=-1);
+    private void cleanupFinishedUploader(Uploader uploader, long startTime) {
+        debug(uploader + " cleaning up finished.");
+        long finishTime = System.currentTimeMillis();
+        synchronized(this) {
+            //Report how quickly we uploaded the data.
+            if(startTime > 0) {
+                reportUploadSpeed( finishTime-startTime,
+                                   uploader.getTotalAmountUploaded());
             }
-            //We are going to notify the gui about the new upload, and let
-            //it decide what to do with it - will act depending on it's
-            //state
+            removeFromList(uploader);
+        }
+        
             if ( shouldShowInGUI(uploader) ) {
-                RouterService.getCallback().addUpload(uploader);
                 FileDesc fd = uploader.getFileDesc();
-    			if(fd != null) {
-    				fd.incrementAttemptedUploads();
-    				RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
+            if( fd != null && uploader.getState() == Uploader.COMPLETE ) {
+                fd.incrementCompletedUploads();
+                RouterService.getCallback().handleSharedFileUpdate(
+                    fd.getFile());
     			}
+            RouterService.getCallback().removeUpload(uploader);
             }
         }
         
-        // Note that this will ONLY happen if checkAndQueue returned QUEUED
-        if(queued == QUEUED) { //we were queued
-            socket.setSoTimeout(MAX_POLL_TIME);
-            uploader.setState(Uploader.QUEUED);
+    /**
+     * Maintains the internal state within UploadManager for this Upload.
+     * This does the following:
+     * 1) If 'shouldBypassQueue' & forceAllow are false, calls checkAndQueue
+     *    in order to determine whether or not this uploader should
+     *    be given a slot.
+     *    If forceAllow is true, queued is set to ACCEPTED.
+     * 2) If it is determined that the uploader is queued, the
+     *    soTimeout on the socket is set to be MAX_POLL_TIME and the
+     *    state is changed to QUEUED.
+     *    If it is determined that the uploader is accepted, the uploader
+     *    is added to the _activeUploadList.
+     */
+    private int processNewRequest(Uploader uploader, 
+                                  Socket socket,
+                                  boolean forceAllow) throws IOException {
+        debug(uploader + " processing new request.");
+        
+        int queued = -1;
+        
+        // If this uploader should not bypass the queue, determine it's
+        // slot.
+        if( !shouldBypassQueue(uploader) ) {
+            // If we are forcing this upload, intercept the queue check.
+            if( forceAllow )
+                queued = ACCEPTED;
+            // Otherwise, determine whether or not to queue, accept
+            // or reject the uploader.
+            else {
+                // note that checkAndQueue can throw an IOException
+                queued = checkAndQueue(uploader, socket);
+                Assert.that(queued != -1);
+            
+            }
+        } else {
+            queued = BYPASS_QUEUE;
         }
-        // This is NOT done for Browse-Host, Update-File, Malformed-Requests,
-        // urn queries with a bad index, or HEAD requests
-        // because checkAndQueue is never called to set queued's state
-        else if(queued == ACCEPTED) { // we have been given a slot
+        
+        // Act upon the queued state.
+        switch(queued) {
+            case REJECTED:
+                uploader.setState(Uploader.LIMIT_REACHED);
+                break;
+            case QUEUED:
+                uploader.setState(Uploader.QUEUED);
+                socket.setSoTimeout(MAX_POLL_TIME);
+                break;
+            case ACCEPTED:
+                Assert.that(uploader.getState() == Uploader.CONNECTING,
+                            "invalid state for accepted uploader");
             synchronized (this) {
-                uploader.setState(Uploader.CONNECTING);
                 _activeUploadList.add(uploader);
             }
+                break;
+            case BYPASS_QUEUE:
+                // ignore.
+                break;
+            default:
+                Assert.that(false, "Invalid queued state: " + queued);
         }
-        //Note: We do not call connect() anymore. That's because connect would
-        //never do anything in the case of a normal upload  - becasue the
-        //HTTPUploader already have a socket. connect() would only be executed
-        // if a push was calling this method. 
-        //Now the acceptPushDownload method connects directly.
         
-        // start doesn't throw an exception.  rather, it
-        // handles it internally.  is this the correct
-        // way to handle it?
-        startTime=System.currentTimeMillis();
-        uploader.writeResponse();
-        debug(uploader+" Uploader wrote response");
-        if ( uploader.getState() == Uploader.UPLOADING
-            || uploader.getState() == Uploader.CONNECTING ) {
-            uploader.setState(Uploader.INTERRUPTED);
+        return queued;
         }
 
-        // check the state of the upload once the
-        // writeResponse method has finished.  if it is complete...
-        if (uploader.getState() == Uploader.COMPLETE) {
-            // then set a flag in the upload manager...
-            _hadSuccesfulUpload = true;
-            // is this necessary? -- i'm pretty sure it is.
+    /**
+     * Adds this upload to the GUI and increments the attempted uploads.
+     * Does nothing if 'shouldShowInGUI' is false.
+     */
+    private void addToGUI(Uploader uploader) {
+        //We are going to notify the gui about the new upload, and let
+        //it decide what to do with it - will act depending on it's
+        //state
             if (shouldShowInGUI(uploader)) {
+            RouterService.getCallback().addUpload(uploader);
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
-					fd.incrementCompletedUploads();
-					RouterService.getCallback().handleSharedFileUpdate(fd.getFile());            
+    			fd.incrementAttemptedUploads();
+    			RouterService.getCallback().handleSharedFileUpdate(
+    			    fd.getFile());
 				}
             }
         }
 
-        //clean up
-        long finishTime=System.currentTimeMillis();
-        synchronized(UploadManager.this) {
-            //Report how quickly we uploaded the data, regardless of
-            //whether the transfer was interrupted, unless we couldn't
-            //connect.  The client will ignore small amounts of data.
-            if (startTime>0)
-                reportUploadSpeed(finishTime-startTime,
-                                  uploader.amountUploaded());
-            return queued;
+    /**
+     * Does the actual upload.
+     */
+    private void doSingleUpload(Uploader uploader) throws IOException {
+        uploader.writeResponse();
+        
+        switch( uploader.getState() ) {
+            case Uploader.UPLOADING:
+            case Uploader.CONNECTING:
+                debug(uploader + " uploader in wrong state: "
+                         + uploader.getState());
+                throw new IOException("invalid state after writeResponse: " +
+                                      uploader.getState());
         }
     }
 
@@ -551,9 +601,9 @@ public final class UploadManager implements BandwidthTracker {
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
-	private synchronized int checkAndQueue(Uploader uploader, String host,
-                          Socket socket, boolean giveSlot) throws IOException {
-        boolean limitReached = hostLimitReached(host);//greedy downloader?
+	private synchronized int checkAndQueue(Uploader uploader,
+	                                       Socket socket) throws IOException {
+        boolean limitReached = hostLimitReached(uploader.getHost());
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
@@ -567,15 +617,12 @@ public final class UploadManager implements BandwidthTracker {
 
         Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
-        if(giveSlot)
-            return ACCEPTED;
 
         if(posInQueue == -1) {//this uploader is not in the queue already
             debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
             if(limitReached || wontAccept) { 
                 debug(uploader+" limited? "+limitReached+" wontAccept? "
                       +wontAccept);
-                uploader.setState(Uploader.LIMIT_REACHED);
                 return REJECTED; //we rejected this uploader
             }
             addToQueue(socket);
@@ -609,7 +656,6 @@ public final class UploadManager implements BandwidthTracker {
             //it should be removed from the queue.
             if(!queue) {//downloader does not support queueing
                 _queuedUploads.remove(posInQueue);//remove it
-                uploader.setState(Uploader.LIMIT_REACHED);
                 ret = REJECTED;
             }
         }
