@@ -40,8 +40,15 @@ public class Main implements ActivityCallback {
 		    System.out.println("Number of hosts: "+service.getNumHosts());
 		    System.out.println("Number of files: "+service.getNumFiles());
 		    System.out.println("Size of files: "+service.getTotalFileSize());
-		} else if (command.equals("update"))
+		} 
+		//Send pings to everyone
+		else if (command.equals("update"))
 		    service.updateHorizon();	    
+		//Print hostcatcher
+		else if (command.equals("catcher")) {
+		    for (Iterator iter=service.getHosts(); iter.hasNext(); )
+			System.out.println(iter.next().toString());
+		}
 		String[] commands=split(command);	       
 		//Connect to remote host (establish outgoing connection)
 		if (commands.length>=2 && commands[0].equals("connect")) {
