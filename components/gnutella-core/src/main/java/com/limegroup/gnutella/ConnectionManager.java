@@ -60,30 +60,55 @@ public class ConnectionManager {
     /** Minimum number of outdegree=30 connections that an ultrapeer 
 	 * with leaf connections must have, meaning the number of ultrapeer
 	 * connections to other ultrapeers that also have 30 connections.*/
-    private static final int MIN_OUT_DEGREE_30_CONNECTIONS = 27;
+    //private static final int MIN_OUT_DEGREE_30_CONNECTIONS = 20;
+    //private static final int RESERVED_GOOD_UTLRAPEERS = 20;
 
 	/** The maximum number of connections to maintain to older Ultrapeers
 	 * that have low-degrees of intra-Ultrapeer connections --
 	 * connections to the "low-density" network.*/
-	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 15;
+	//private static final int MAX_LOW_DEGREE_ULTRAPEERS = 15;
 
     /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
-    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 
-		MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
+    //public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 
+	//MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
+
+	/**
+	 * The number of Ultrapeer connections to ideally maintain.
+	 */
+	public static final int ULTRAPEER_CONNECTIONS = 25;
 
     /** Ideal number of connections for a leaf.  */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
 
-	public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
+	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
-    /** The desired number of slots to reserve for good connections (e.g.,
-     *  LimeWire) unrouted connections. */
-    public static final int RESERVED_GOOD_CONNECTIONS = 2;   
+    /** 
+	 * The desired number of slots to reserve for "good" connections.  
+	 * Search architecture design is an ongoing area of research both in the
+	 * Gnutella world and in the academic world.  As a result, the meaning 
+	 * of "good" connection will vary over time with development in open
+	 * search architectures.  As of LimeWire 2.9, "good" connections
+	 * meant connections that used querty routing tables between Ultrapeers
+	 * and that used high numbers of intra-Ultrapeer connections.  At 
+	 * release time, that was only LimeWire, but it will likely soon include
+	 * BearShare.
+	 */
+    public static final int RESERVED_GOOD_CONNECTIONS = 15;  
+
+
+	/**
+	 * The number of leaf connections reserved for "good" clients.  As
+	 * described above, the definition of good constantly changes with 
+	 * advances in search architecture.
+	 */
+    public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 10;  
+ 
     /** Similar to RESERVED_GOOD_CONNECTIONS, but measures the number of slots
      *  allowed for bad leaf connections.  A value of zero means that only
      *  LimeWire's leaves are allowed.  */
-    public static final int ALLOWED_BAD_LEAF_CONNECTIONS = 4;
+    public static final int ALLOWED_BAD_LEAF_CONNECTIONS = 2;
+
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_ULTRAPEER headers. */
     private static final int MAX_SUPERNODE_ENDPOINTS=10;
@@ -293,9 +318,6 @@ public class ConnectionManager {
      *  this one.
      */
     public synchronized void remove(ManagedConnection c) {
-		
-		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
         removeInternal(c);
         adjustConnectionFetchers();
     }
@@ -327,8 +349,8 @@ public class ConnectionManager {
         //Note: not holding the _incomingConnectionsLock as just reading the 
         //volatile value
         if(getNumInitializedClientConnections() > 0 
-            && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
-            setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
+            && _keepAlive < ULTRAPEER_CONNECTIONS){
+            setKeepAlive(ULTRAPEER_CONNECTIONS);
         }
     }
     
@@ -607,7 +629,7 @@ public class ConnectionManager {
 
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
-        if (_keepAlive <= 0) {
+        if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive <= 0) {
             return false;
 		} else if (RouterService.isLeaf()) {
 			// we're a leaf -- don't allow any incoming connections
@@ -616,9 +638,17 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-            return getNumInitializedClientConnections() 
-                < (trustedVendor(hr.getUserAgent())
-				   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
+			if(goodConnection(hr)) {
+				return getNumInitializedClientConnections() < MAX_LEAVES;
+			} else {
+				return getNumInitializedClientConnections() <
+					(trustedVendor(hr.getUserAgent()) ?
+					 (MAX_LEAVES - RESERVED_GOOD_LEAF_CONNECTIONS) :
+					 ALLOWED_BAD_LEAF_CONNECTIONS);
+			}
+            //return getNumInitializedClientConnections() 
+			//  < (trustedVendor(hr.getUserAgent())
+			//   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
 
         } else if (hr.isSupernodeConnection()) {
             //2. Ultrapeer.  Preference trusted vendors using BearShare's
@@ -626,25 +656,37 @@ public class ConnectionManager {
 
 			int connections = getNumInitializedConnections();
 
-			if(hr.isHighDegreeConnection() && 
-			   hr.isUltrapeerQueryRoutingConnection()) {
+			if(goodConnection(hr)) {
 				// otherwise, it is a high degree connection, so allow it if we 
 				// need more connections
-				return (trustedVendor(hr.getUserAgent()) &&
-						connections < MIN_CONNECTIONS_FOR_SUPERNODE);
+				return connections < ULTRAPEER_CONNECTIONS;
 			}
 
 			// if it's not a new high-density connection, only allow it if
 			// our number of connections is below the maximum number of old
 			// connections to allow
 			return connections < 
-				(trustedVendor(hr.getUserAgent()) ? 
-				 MAX_LOW_DEGREE_ULTRAPEERS : 
-				 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
-        } 
-		
+				//(trustedVendor(hr.getUserAgent()) ? 
+				ULTRAPEER_CONNECTIONS - RESERVED_GOOD_CONNECTIONS;
+			//MAX_LOW_DEGREE_ULTRAPEERS : 
+			// MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
+        }
 		return false;
     }
+
+	/**
+	 * This method determines whether the given node is what is currently
+	 * considered a "good" connection.  Search architectures are developing
+	 * very quickly, meaning that this method will change over time.
+	 * Categorizing connections as "good" or "bad" simplifies preferencing.
+	 *
+	 * @param hr the <tt>HandshakeResponse</tt> instance containing the
+	 *  headers for the new connection
+	 */
+	private static boolean goodConnection(HandshakeResponse hr) {
+		return (hr.isHighDegreeConnection() && 
+				hr.isUltrapeerQueryRoutingConnection());
+	}
 
 	/**
 	 * Helper method for determining whether or not the connecting node is
@@ -1332,6 +1374,7 @@ public class ConnectionManager {
     }
 
     
+
     /**
      * Initializes an outgoing connection created by createConnection or any
      * incomingConnection.  If this is an incoming connection and there are no
@@ -1341,7 +1384,6 @@ public class ConnectionManager {
      */
     private void initializeExternallyGeneratedConnection(ManagedConnection c)
 		throws IOException {
-
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
         //slots.  This keeps reject connections from appearing in the GUI, as
@@ -1357,11 +1399,12 @@ public class ConnectionManager {
             
         try {
             c.initialize();
+
         } catch(IOException e) {
             remove(c);
             throw e;
         }
-        finally{
+        finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
             processConnectionHeaders(c);
