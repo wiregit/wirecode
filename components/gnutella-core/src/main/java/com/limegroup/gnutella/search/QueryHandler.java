@@ -54,7 +54,7 @@ public final class QueryHandler {
      * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
      * milliseconds.
      */
-    static final long TIME_TO_WAIT_PER_HOP = 2300;
+    static final long TIME_TO_WAIT_PER_HOP = 2200;
 
 
 	/**
@@ -564,7 +564,7 @@ public final class QueryHandler {
 		// return true if we've been querying for longer than the specified 
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
-		if(queryLength > 180*1000) {
+		if(queryLength > 200*1000) {
             if(QUERY.getHops() == 0) {
                 System.out.println(QUERY.getQuery()+
                                    " length timed out: "+
