@@ -65,6 +65,7 @@ public class MiniAcceptor implements Runnable {
                     return null;
                 }
             }
+            c.buildAndStartQueues();
             return c;
         }
     }
