@@ -26,69 +26,14 @@ import com.sun.java.util.collections.Iterator;
  *  the following methods of MessageRouter: handleQueryRequestPossibleDuplicate
  *  and handleQueryRequest
  *
- *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
+ *  ULTRAPEER[0]  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
  *                              |
  *                              |
  *                              |
- *                             LEAF
+ *                             LEAF[0]
  */
-public final class ServerSideDynamicQueryTest extends BaseTestCase {
+public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     
-    /**
-     * Simple IP so a blank one isn't used.
-     */
-    private static final byte[] IP = new byte[] { 1, 1, 1, 1};
-
-	/**
-	 * The port that the central Ultrapeer listens on, and that the other nodes
-	 * connect to it on.
-	 */
-    private static final int PORT = 6667;
-
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.
-	 */
-    private static final int TIMEOUT = 2000;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 4;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
-    /**
-     * Leaf connection to the Ultrapeer.
-     */
-    private static Connection LEAF;
-
-    /**
-     * Ultrapeer connection.
-     */
-    private static Connection ULTRAPEER_1;
-
-    /**
-	 * Second Ultrapeer connection
-     */
-    private static Connection ULTRAPEER_2;
-
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
-
     public ServerSideDynamicQueryTest(String name) {
         super(name);
     }
@@ -100,131 +45,28 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+    public static Integer numUPs() {
+        return new Integer(2);
+    }
+
+    public static Integer numLeaves() {
+        return new Integer(1);
+    }
 	
-	private static void buildConnections() {
-	    LEAF =
-			new Connection("localhost", PORT, 
-						   new LeafHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-        
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+    public static ActivityCallback getActivityCallback() {
+        return new ActivityCallbackStub();
     }
 
-    public static void setSettings() throws Exception {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client to listen on port 6667, with
-        //incoming slots and no connections.
-        //To keep LimeWire from connecting to the outside network, we filter out
-        //all addresses but localhost and 18.239.0.*.  The latter is used in
-        //pongs for testing.  TODO: it would be nice to have a way to prevent
-        //BootstrapServerManager from adding defaults and connecting.
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*", "18.239.0.*"});
-        ConnectionSettings.PORT.setValue(PORT);
-        SharingSettings.setDirectories(new File[0]);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(4);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-    }
-
-	public static void globalSetUp() throws Exception {
-        setSettings();
-
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
-		connect();
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-	}
-
-    
-    public void setUp() throws Exception {
-        setSettings();
-        
-        assertTrue("should be open", ULTRAPEER_1.isOpen());
-        assertTrue("should be open", ULTRAPEER_2.isOpen());
-        assertTrue("should be open", LEAF.isOpen());
-
-        assertTrue("should be up -> up",
-            ULTRAPEER_1.isSupernodeSupernodeConnection());
-        assertTrue("should be up -> up",
-            ULTRAPEER_2.isSupernodeSupernodeConnection());
-        assertTrue("should be client -> up",
-            LEAF.isClientSupernodeConnection());
-    }
-
-
-	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
-		sleep();
-		LEAF.close();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
-		sleep();
-	}
-
-	private static void sleep() {
-		try {Thread.sleep(300);}catch(InterruptedException e) {}
-	}
-
-	/**
-	 * Drains all messages 
-	 */
- 	private static void drainAll() throws Exception {
- 		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
- 		}
- 		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 		if(LEAF.isOpen()) {
- 			drain(LEAF);
- 		}
- 	}
-
-	/**
-	 * Connects all of the nodes to the central test Ultrapeer.
-	 */
-    private static void connect() throws Exception {
-		buildConnections();
-        //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
-        //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
-        
+    public static void setUpQRPTables() throws Exception {
         //3. routed leaf, with route table for "test"
-        LEAF.initialize();
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
-			LEAF.flush();
+            LEAF[0].send((RouteTableMessage)iter.next());
+			LEAF[0].flush();
         }
 
         // for Ultrapeer 1
@@ -232,20 +74,9 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+            ULTRAPEER[0].send((RouteTableMessage)iter.next());
+			ULTRAPEER[0].flush();
         }
-
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-		assertTrue("LEAF should be connected", LEAF.isOpen());
-
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
     }
 
     // BEGIN TESTS
@@ -257,15 +88,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
 		Response response1=new Response(0L, 0L, "berkeley rocks");
@@ -277,10 +108,10 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 										 56,
 										 new Response[] {response1},
 										 guid1, false);
-        drain(ULTRAPEER_2);
-		LEAF.send(reply1);
-		LEAF.flush();
-		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
+        drain(ULTRAPEER[1]);
+		LEAF[0].send(reply1);
+		LEAF[0].flush();
+		QueryReply qRep = getFirstQueryReply(ULTRAPEER[1]);
         assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
@@ -288,18 +119,18 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend the probe....
         request.setTTL((byte)2);
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF[0].receive(TIMEOUT);
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -315,15 +146,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         request.setTTL((byte)1);
         assertEquals(1, request.getHops());
 
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
 		Response response1=new Response(0L, 0L, "berkeley rocks");
@@ -335,10 +166,10 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 										 56,
 										 new Response[] {response1},
 										 guid1, false);
-        drain(ULTRAPEER_2);
-		LEAF.send(reply1);
-		LEAF.flush();
-		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
+        drain(ULTRAPEER[1]);
+		LEAF[0].send(reply1);
+		LEAF[0].flush();
+		QueryReply qRep = getFirstQueryReply(ULTRAPEER[1]);
         assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
@@ -346,18 +177,18 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend the probe....
         request.setTTL((byte)2);
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF[0].receive(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -371,32 +202,32 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         Thread.sleep(2*1000);
 
         // test that the duplicate probe doesn't go anywhere it isn't supposed
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
         }
         catch (InterruptedIOException expected) {}
 
         // should NOT be forwarded to other Ultrapeer....
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
     }
     
     // makes sure a probe can't be extended twice....
@@ -406,32 +237,32 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         Thread.sleep(2*1000);
 
         // extend the probe....
         request.setTTL((byte)3);
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF[0].receive(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -441,20 +272,20 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend it again but make sure it doesn't get through...
         request.setTTL((byte)4);
-        ULTRAPEER_2.send(request);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(request);
+        ULTRAPEER[1].flush();
 
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
         // should NOT be forwarded to other Ultrapeer....
-        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
     }
 
     // tries to extend queries with original TTL > 1, should fail...
@@ -465,15 +296,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             QueryRequest request = QueryRequest.createQuery("berkeley");
             request.setTTL((byte)i);
 
-            ULTRAPEER_2.send(request);
-            ULTRAPEER_2.flush();
+            ULTRAPEER[1].send(request);
+            ULTRAPEER[1].flush();
 
-            QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
             assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
             // should be forwarded to other Ultrapeer
-            reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+            reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
             assertNotNull(reqRecvd);
             assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -483,19 +314,19 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             
             // extend the probe....
             request.setTTL((byte)(i+1));
-            ULTRAPEER_2.send(request);
-            ULTRAPEER_2.flush();
+            ULTRAPEER[1].send(request);
+            ULTRAPEER[1].flush();
 
             // should be counted as a duplicate and not forwarded anywhere...
             // leaves don't get any unexpected messages, no use using
             // noUnenexpectedMessages
             try {
-                LEAF.receive(TIMEOUT);
+                LEAF[0].receive(TIMEOUT);
                 fail("expected InterruptedIOException");
             }
             catch (InterruptedIOException expected) {}
 
-            assertTrue(noUnexpectedMessages(ULTRAPEER_1));
+            assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
         }
     }
 

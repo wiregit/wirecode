@@ -40,6 +40,11 @@ import com.sun.java.util.collections.Iterator;
  */
 public abstract class ServerSideTestCase extends BaseTestCase {
     
+    /**
+     * Simple IP so a blank one isn't used.
+     */
+    protected static final byte[] IP = new byte[] { 1, 1, 1, 1};
+
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
