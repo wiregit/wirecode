@@ -164,7 +164,8 @@ public class DuplicateFilter extends SpamFilter {
         }
 
         //Look up query in both sets.  Add it to new set if not already there.
-        QueryPair qp=new QueryPair(qr.getQuery(), qr.getHops());
+        QueryPair qp=new QueryPair(
+            qr.getQuery(), qr.getHops(), qr.getRichQuery(), qr.getQueryUrns() );
         if (oldQueries.contains(qp)) {
             return false;
         } else {
@@ -172,61 +173,6 @@ public class DuplicateFilter extends SpamFilter {
             return added;     //allow if wasn't already in young set
         }
     }
-
-
-    ///** Unit test */
-    /*
-    public static void main(String args[]) {        
-        SpamFilter filter=new DuplicateFilter();
-        PingRequest pr=null;
-        QueryRequest qr=null;
-        
-        pr=new PingRequest((byte)2);
-        byte[] guid=pr.getGUID();
-        guid[9]++;
-        qr=new QueryRequest(guid, pr.getTTL(), pr.getHops(), new byte[3]);
-        Assert.that(filter.allow(pr));
-        Assert.that(!filter.allow(qr));
-        pr=new PingRequest((byte)2);
-        Assert.that(filter.allow(pr)); //since GUIDs are currently random
-        Assert.that(!filter.allow(pr));
-        
-        //Now, if I wait a few seconds, it should be allowed.
-        synchronized (filter) {
-            try {
-                filter.wait(GUID_LAG*2);
-            } catch (InterruptedException e) { }
-        }
-        
-        Assert.that(filter.allow(pr));  
-        Assert.that(!filter.allow(pr));
-        pr=new PingRequest((byte)2);
-        Assert.that(filter.allow(pr));
-        pr.hop(); //hack to get different hops count
-        Assert.that(filter.allow(pr));
-        
-        
-        qr=new QueryRequest((byte)2, 0, "search1");
-        Assert.that(filter.allow(qr));
-        Assert.that(!filter.allow(qr));
-        qr=new QueryRequest((byte)2, 0, "search2");
-        Assert.that(filter.allow(qr));
-
-        //Now, if I wait a few seconds, it should be allowed.
-        synchronized (filter) {
-            try {
-                filter.wait(QUERY_LAG*4);
-            } catch (InterruptedException e) { }
-        }
-
-        Assert.that(filter.allow(qr));
-        Assert.that(!filter.allow(qr));
-        qr=new QueryRequest((byte)2, 0, "search3");
-        Assert.that(filter.allow(qr));
-        qr.hop(); //hack to get different hops count
-        Assert.that(filter.allow(qr));
-    }
-    */
 }
 
 class GUIDPair {
@@ -245,15 +191,20 @@ class GUIDPair {
     }
 }
 
-class QueryPair implements com.sun.java.util.collections.Comparable {
+class QueryPair {
     String query;
     int hops;
+    String xml;
+    Set URNs;
     
-    QueryPair(String query, int hops) {
+    QueryPair(String query, int hops, String xml, Set URNs) {
         this.query=query;
         this.hops=hops;
+        this.xml = xml;
+        this.URNs = URNs;
     }
 
+    /*
     public int compareTo(Object o) {
         QueryPair other=(QueryPair)o;
         //Primary key: hops
@@ -266,17 +217,25 @@ class QueryPair implements com.sun.java.util.collections.Comparable {
             return this.query.compareTo(other.query);
         else
             return ret;
-    }
+    } */
 
     public boolean equals(Object o) {
         if (! (o instanceof QueryPair))
             return false;
         QueryPair other=(QueryPair)o;
-        return (this.hops==other.hops) && this.query.equals(other.query);
+        return (this.hops==other.hops) && 
+               this.URNs.equals(other.URNs) &&
+               this.query.equals(other.query) &&
+               this.xml.equals(other.xml);
     }                
 
     public int hashCode() {
-        return query.hashCode()+hops;
+        int result = 17;
+		result = (37*result) + query.hashCode();
+		result = (37*result) + xml.hashCode();
+		result = (37*result) + URNs.hashCode();
+		result = (37*result) + hops;
+		return result;
     }
     
     public String toString() {
