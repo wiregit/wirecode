@@ -485,18 +485,22 @@ public class ManagedConnection
 
         /** While the connection is not closed, sends all data delay. */
         public void run() {
-            while (true) {
-                repOk();
-                try {
-                    waitForQueued();
-                    sendQueued();
-                } catch (IOException e) {
-                    if (_manager!=null) //may be null for testing
-                        _manager.remove(ManagedConnection.this);
-                    _runnerDied=true;
-                    return;
+            try {
+                while (true) {
+                    repOk();
+                    try {
+                        waitForQueued();
+                        sendQueued();
+                    } catch (IOException e) {
+                        if (_manager!=null) //may be null for testing
+                            _manager.remove(ManagedConnection.this);
+                        _runnerDied=true;
+                        return;
+                    }
+                    repOk();
                 }
-                repOk();
+            } catch(Throwable t) {
+                RouterService.error(t);
             }
         }
 

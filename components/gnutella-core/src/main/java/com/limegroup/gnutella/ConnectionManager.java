@@ -1376,7 +1376,7 @@ public class ConnectionManager {
 
 				startConnection(_connection);
             } catch(IOException e) {
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 //Internal error!
                 RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
@@ -1467,7 +1467,7 @@ public class ConnectionManager {
                 _router.sendPingRequest(_specialPing, _connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 //Internal error!
                 RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
@@ -1550,7 +1550,7 @@ public class ConnectionManager {
 
 				startConnection(connection);
             } catch(IOException e) {
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 //Internal error!
                 RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }

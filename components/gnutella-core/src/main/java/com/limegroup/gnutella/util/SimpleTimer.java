@@ -103,23 +103,27 @@ public class SimpleTimer {
 
         /** Repeatedly runs tasks from queue as appropriate. */
         public void run() {
-            while (! _isCancelled) {
-                //1. Wait for runnable task.
-                SimpleTimerTask ttask=null;
-                try {
-                    ttask=waitForTask();
-                    if (ttask==null)
-                        continue;
-                } catch (InterruptedException e) {
-                    Assert.that(_isCancelled, "Interrupted without cancel");
-                    return;
+            try {
+                while (! _isCancelled) {
+                    //1. Wait for runnable task.
+                    SimpleTimerTask ttask=null;
+                    try {
+                        ttask=waitForTask();
+                        if (ttask==null)
+                            continue;
+                    } catch (InterruptedException e) {
+                        Assert.that(_isCancelled, "Interrupted without cancel");
+                        return;
+                    }
+                    
+                    //2. Run task WITHOUT HOLDING LOCK, then reschedule.
+                    ttask.runAndReschedule();
+                    synchronized(_queue) {
+                        _queue.insert(ttask);
+                    }
                 }
-
-                //2. Run task WITHOUT HOLDING LOCK, then reschedule.
-                ttask.runAndReschedule();
-                synchronized(_queue) {
-                    _queue.insert(ttask);
-                }
+            } catch(Throwable t) {
+                RouterService.error(t);
             }
         }
 

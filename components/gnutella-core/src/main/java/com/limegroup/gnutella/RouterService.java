@@ -382,45 +382,49 @@ public final class RouterService {
      * Shuts down the backend and writes the gnutella.net file.
      */
     public static void shutdown() {
-        //Update fractional uptime statistics (before writing limewire.props)
-        Statistics.instance().shutdown();
-
-        //Write gnutella.net
         try {
-            catcher.write(SETTINGS.getHostList());
-        } catch (IOException e) {}
-		finally {
-			SETTINGS.writeProperties();
-		}
-        //Cleanup any preview files.  Note that these will not be deleted if
-        //your previewer is still open.
-        File incompleteDir=null;
-		try {
-			incompleteDir=SETTINGS.getIncompleteDirectory();
-		} catch(java.io.FileNotFoundException fnfe) {
-			// if we could not get the incomplete directory, simply return.
-			return;
-		}
-
-        String[] files=incompleteDir.list();
-
-		if(files == null) return;
-
-        for (int i=0; i<files.length; i++) {
-            if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
-                File file=new File(incompleteDir, files[i]);
-                file.delete();  //May or may not work; ignore return code.
+            //Update fractional uptime statistics (before writing limewire.props)
+            Statistics.instance().shutdown();
+            
+            //Write gnutella.net
+            try {
+                catcher.write(SETTINGS.getHostList());
+            } catch (IOException e) {}
+            finally {
+                SETTINGS.writeProperties();
             }
+            //Cleanup any preview files.  Note that these will not be deleted if
+            //your previewer is still open.
+            File incompleteDir=null;
+            try {
+                incompleteDir=SETTINGS.getIncompleteDirectory();
+            } catch(java.io.FileNotFoundException fnfe) {
+                // if we could not get the incomplete directory, simply return.
+                return;
+            }
+            
+            String[] files=incompleteDir.list();
+            
+            if(files == null) return;
+            
+            for (int i=0; i<files.length; i++) {
+                if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
+                    File file=new File(incompleteDir, files[i]);
+                    file.delete();  //May or may not work; ignore return code.
+                }
+            }
+            
+            //Write download state
+            downloader.writeSnapshot();
+            
+            //save cookies
+            Cookies.instance().save();
+            
+            //persist urn cache
+            UrnCache.instance().persistCache();
+        } catch(Throwable t) {
+            RouterService.error(t);
         }
-        
-        //Write download state
-        downloader.writeSnapshot();
-
-        //save cookies
-        Cookies.instance().save();
-        
-        //persist urn cache
-        UrnCache.instance().persistCache();
     }
 
     /**
@@ -681,15 +685,19 @@ public final class RouterService {
 
 		Thread searcherThread = new Thread() {
 			public void run() {
-				// per HUGE v0.94, ask for URNs on responses
-				Set reqUrns = new HashSet();
-				reqUrns.add(UrnType.ANY_TYPE);
-				
-				QueryRequest qr = new QueryRequest(guid, SETTINGS.getTTL(),
-												   minSpeed, query, richQuery, 
-												   false, reqUrns, null);
-				verifier.record(qr, type);
-				router.broadcastQueryRequest(qr);
+                try {
+                    // per HUGE v0.94, ask for URNs on responses
+                    Set reqUrns = new HashSet();
+                    reqUrns.add(UrnType.ANY_TYPE);
+                    
+                    QueryRequest qr = new QueryRequest(guid, SETTINGS.getTTL(),
+                                                       minSpeed, query, richQuery, 
+                                                       false, reqUrns, null);
+                    verifier.record(qr, type);
+                    router.broadcastQueryRequest(qr);
+                } catch(Throwable t) {
+                    RouterService.error(t);
+                }
 			}
 		};
 		searcherThread.setDaemon(true);

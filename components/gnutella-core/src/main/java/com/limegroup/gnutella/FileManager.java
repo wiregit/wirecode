@@ -415,8 +415,8 @@ public class FileManager {
                 public void run() {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
-					} catch(Exception e) {
-						_callback.error(e);
+					} catch(Throwable t) {
+						_callback.error(t);
 					}
                 }
             };

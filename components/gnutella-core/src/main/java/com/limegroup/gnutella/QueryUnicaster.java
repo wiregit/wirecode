@@ -146,7 +146,11 @@ public final class QueryUnicaster {
         // start service...
         _querier = new Thread() {
 			public void run() {
-				queryLoop();
+                try {
+                    queryLoop();
+                } catch(Throwable t) {
+                    RouterService.error(t);
+                }
 			}
 		};
         // only if settings says i can....

@@ -139,58 +139,61 @@ public final class UDPService implements Runnable {
 	 * dispatches them to their appropriate handlers.
 	 */
 	public void run() {
-		MessageRouter router = RouterService.getMessageRouter();
-		byte[] datagramBytes = new byte[BUFFER_SIZE];
-
-        while (true) {
-            // prepare to receive
-            DatagramPacket datagram = new DatagramPacket(datagramBytes, 
-                                                         BUFFER_SIZE);
-
-            // when you first can, try to recieve a packet....
-            // *----------------------------
-            synchronized (_receiveLock) {
-                if (_socket == null) {
+        try {
+            MessageRouter router = RouterService.getMessageRouter();
+            byte[] datagramBytes = new byte[BUFFER_SIZE];
+            
+            while (true) {
+                // prepare to receive
+                DatagramPacket datagram = new DatagramPacket(datagramBytes, 
+                                                             BUFFER_SIZE);
+                
+                // when you first can, try to recieve a packet....
+                // *----------------------------
+                synchronized (_receiveLock) {
+                    if (_socket == null) {
+                        try {
+                            _receiveLock.wait();
+                        }
+                        catch (InterruptedException ignored) {
+                            continue;
+                        }
+                    }
                     try {
-                        _receiveLock.wait();
-                    }
-                    catch (InterruptedException ignored) {
+                        _socket.receive(datagram);
+                    } 
+                    catch(InterruptedIOException e) {
                         continue;
-                    }
+                    } 
+                    catch(IOException e) {
+                        continue;
+                    } 
                 }
+                // ----------------------------*                
+                // process packet....
+                // *----------------------------
+                _isGUESSCapable = true;
+                byte[] data = datagram.getData();
+                int length = datagram.getLength();
                 try {
-                    _socket.receive(datagram);
-                } 
-                catch(InterruptedIOException e) {
+                    // we do things the old way temporarily
+                    InputStream in = new ByteArrayInputStream(data);
+                    Message message = Message.read(in);		
+                    if(message == null) continue;
+                    if (message instanceof QueryRequest)
+                        sendAcknowledgement(datagram, message.getGUID());
+                    router.handleUDPMessage(message, datagram);				
+                }
+                catch (IOException e) {
                     continue;
-                } 
-                catch(IOException e) {
+                }
+                catch (BadPacketException e) {
                     continue;
-                } 
+                }
+                // ----------------------------*
             }
-            // ----------------------------*
-
-            // process packet....
-            // *----------------------------
-            _isGUESSCapable = true;
-            byte[] data = datagram.getData();
-            int length = datagram.getLength();
-            try {
-                // we do things the old way temporarily
-                InputStream in = new ByteArrayInputStream(data);
-                Message message = Message.read(in);		
-                if(message == null) continue;
-                if (message instanceof QueryRequest)
-                    sendAcknowledgement(datagram, message.getGUID());
-                router.handleUDPMessage(message, datagram);				
-            }
-            catch (IOException e) {
-                continue;
-            }
-            catch (BadPacketException e) {
-                continue;
-            }
-            // ----------------------------*
+        } catch(Throwable t) {
+            RouterService.error(t);
         }
 	}
 

@@ -364,7 +364,7 @@ public final class UploadManager implements BandwidthTracker {
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
                     }
-                } catch(Exception e) {
+                } catch(Throwable e) {
 					RouterService.error(e);
 				}
                 finally {

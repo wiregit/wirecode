@@ -3573,7 +3573,7 @@ public final class SettingsManager {
 			PROPS.save(ostream, "");
 			ostream.close();
 		}
-		catch (Exception e){
+		catch (Throwable e){
             showInternalError(e);
         }
 		finally {

@@ -300,24 +300,28 @@ public class BrowseHostHandler {
      */
     private static class Expirer implements Runnable {
         public void run() {
-            Iterator keys = null;
-            Set toRemove = new HashSet();
-            synchronized (_pushedHosts) {
-                keys = _pushedHosts.keySet().iterator();
-                while (keys.hasNext()) {
-                    Object currKey = keys.next();
-                    PushRequestDetails currPRD = null;
-                    currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
-                    if ((currPRD != null) && (currPRD.isExpired())) {
-                        debug("Expirer.run(): expiring a badboy.");
-                        toRemove.add(currKey);
-                        currPRD.bhh._callback.browseHostFailed(currPRD.bhh._guid);
+            try {
+                Iterator keys = null;
+                Set toRemove = new HashSet();
+                synchronized (_pushedHosts) {
+                    keys = _pushedHosts.keySet().iterator();
+                    while (keys.hasNext()) {
+                        Object currKey = keys.next();
+                        PushRequestDetails currPRD = null;
+                        currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
+                        if ((currPRD != null) && (currPRD.isExpired())) {
+                            debug("Expirer.run(): expiring a badboy.");
+                            toRemove.add(currKey);
+                            currPRD.bhh._callback.browseHostFailed(currPRD.bhh._guid);
+                        }
                     }
+                    // done iterating through _pushedHosts, remove the keys now...
+                    keys = toRemove.iterator();
+                    while (keys.hasNext())
+                        _pushedHosts.remove(keys.next());
                 }
-                // done iterating through _pushedHosts, remove the keys now...
-                keys = toRemove.iterator();
-                while (keys.hasNext())
-                    _pushedHosts.remove(keys.next());
+            } catch(Throwable t) {
+                RouterService.error(t);
             }
         }
     }

@@ -172,8 +172,9 @@ public class StatisticsRecorder
                 out.close();
                 InputStream input = connection.getInputStream();
             }
-            catch(IOException ie)
+            catch(Throwable t)
             {
+                RouterService.error(t);
             }
 
         }

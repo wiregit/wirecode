@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 import java.net.*;
 import java.io.*;
 import java.lang.reflect.*;
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.*;
 
 
 /**
@@ -186,18 +186,22 @@ class SocketOpener {
 
     private class SocketOpenerThread extends Thread {
         public void run() {
-            Socket sock=null;
             try {
-                sock=new Socket(host, port);
-            } catch (IOException e) { }                
-
-            synchronized (SocketOpener.this) {
-                if (timedOut && sock!=null)
-                    try { sock.close(); } catch (IOException e) { }
-                else {
-                    socket=sock;   //may be null
-                    SocketOpener.this.notify();
+                Socket sock=null;
+                try {
+                    sock=new Socket(host, port);
+                } catch (IOException e) { }                
+                
+                synchronized (SocketOpener.this) {
+                    if (timedOut && sock!=null)
+                        try { sock.close(); } catch (IOException e) { }
+                    else {
+                        socket=sock;   //may be null
+                        SocketOpener.this.notify();
+                    }
                 }
+            } catch(Throwable t) {
+                RouterService.error(t);
             }
         }
     }

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.net.*;
 import java.io.*;
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.*;
 
 /** 
  * Opens a Java URLConnection with a bounded timeout.  Typical use:
@@ -80,18 +80,22 @@ public class URLOpener {
 
     private class URLOpenerThread implements Runnable {
         public void run() {
-            URLConnection conn=null;
             try {
-                conn = url.openConnection();
-            } catch (IOException e) { }                
-
-            synchronized (URLOpener.this) {
-                if (timedOut && conn!=null)
-                    close(conn);
-                else {
-                    connection=conn;   //may be null
-                    URLOpener.this.notify();
-				}
+                URLConnection conn=null;
+                try {
+                    conn = url.openConnection();
+                } catch (IOException e) { }                
+                
+                synchronized (URLOpener.this) {
+                    if (timedOut && conn!=null)
+                        close(conn);
+                    else {
+                        connection=conn;   //may be null
+                        URLOpener.this.notify();
+                    }
+                }
+            } catch(Throwable t) {
+                RouterService.error(t);
             }
         }
     }

@@ -162,14 +162,18 @@ public class ConnectionWatchdog implements Runnable {
      * Loop forever, replacing old dud connections with new good ones. 
      */
     public void run() {
-        while (true) {
-            //We make fresh data structures every time through the loop to
-            //assure that no garbage connnections are retained.  (I'm not sure
-            //you can guarantee that calling clear() actually clears reference.)
-            List duds=findDuds();
-            if (duds.size() > 0) {
-                killIfStillDud(duds);
+        try {
+            while (true) {
+                //We make fresh data structures every time through the loop to
+                //assure that no garbage connnections are retained.  (I'm not sure
+                //you can guarantee that calling clear() actually clears reference.)
+                List duds=findDuds();
+                if (duds.size() > 0) {
+                    killIfStillDud(duds);
+                }
             }
+        } catch (Throwable t) {
+            RouterService.error(t);
         }
     }
 

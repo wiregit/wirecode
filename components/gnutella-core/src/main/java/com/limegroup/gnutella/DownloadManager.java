@@ -92,8 +92,12 @@ public class DownloadManager implements BandwidthTracker {
         readSnapshot(SettingsManager.instance().getDownloadSnapshotFile());
         Runnable checkpointer=new Runnable() {
             public void run() {
-                if (downloadsInProgress()>0) //optimization
-                    writeSnapshot();
+                try {
+                    if (downloadsInProgress()>0) //optimization
+                        writeSnapshot();
+                } catch(Throwable t) {
+                    RouterService.error(t);
+                }
             }
         };
         RouterService.schedule(checkpointer, 

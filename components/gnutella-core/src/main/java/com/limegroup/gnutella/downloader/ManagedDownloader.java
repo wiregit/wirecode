@@ -448,7 +448,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             public void run() {
                 try { 
                     tryAllDownloads();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     //This is a "firewall" for reporting unhandled errors.  We
                     //don't really try to recover at this point, but we do
                     //attempt to display the error in the GUI for debugging
@@ -1356,7 +1356,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         boolean iterate = false;
                         try {
                             iterate = connectAndDownload(rfd);
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             //This is a "firewall" for reporting unhandled
                             //errors.  We don't really try to recover at this
                             //point, but we do attempt to display the error in

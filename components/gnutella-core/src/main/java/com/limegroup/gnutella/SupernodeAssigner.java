@@ -134,7 +134,11 @@ public final class SupernodeAssigner {
     public void start() {
         Runnable task=new Runnable() {
             public void run() {
-                collectBandwidthData();
+                try {
+                    collectBandwidthData();
+                } catch(Throwable t) {
+                    RouterService.error(t);
+                }
             }
         };            
         RouterService.schedule(task, 0, TIMER_DELAY);

@@ -147,12 +147,16 @@ public class HostCatcher {
         //Gnucleus says otherwise.
         Runnable updater=new Runnable() {
             public void run() {
-                if (RouterService.acceptedIncomingConnection() && 
-					RouterService.isSupernode()) {
-                    Endpoint e=new Endpoint(RouterService.getAddress(),
-                                            RouterService.getPort());
-                    //This spawn another thread, so blocking is not an issue.
-                    gWebCache.sendUpdatesAsync(e);
+                try {
+                    if (RouterService.acceptedIncomingConnection() && 
+                        RouterService.isSupernode()) {
+                            Endpoint e=new Endpoint(RouterService.getAddress(),
+                                                    RouterService.getPort());
+                            //This spawn another thread, so blocking is not an issue.
+                            gWebCache.sendUpdatesAsync(e);
+                        }
+                } catch(Throwable t) {
+                    RouterService.error(t);
                 }
             }
         };
