@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 
 /*
@@ -30,9 +31,9 @@ public class ConnectionWatchdog implements Runnable {
 
     /** A snapshot of a connection.  Used by run() */
     private static class ConnectionState {
-        long sentDropped;
-        long sent;
-        long received;
+        final long sentDropped;
+        final long sent;
+        final long received;
 
         /** Takes a snapshot of the given connection. */
         ConnectionState(ManagedConnection c) {
@@ -73,11 +74,11 @@ public class ConnectionWatchdog implements Runnable {
     private List findDuds() {
         //Take a snapshot of all connections, including leaves.  Different data
         //structures could be used here.
-        HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
+        Map /* ManagedConnection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-                continue; //e.g., Clip2 reflector
+            //if (! c.isKillable())
+			//continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
         }
 
@@ -88,11 +89,11 @@ public class ConnectionWatchdog implements Runnable {
 
         //Loop through all connections, trying to find ones that
         //have not made sufficient progress. 
-        List ret=new ArrayList();
+        List ret = new ArrayList();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-                continue; //e.g., Clip2 reflector
+            //if (! c.isKillable())
+			//  continue; //e.g., Clip2 reflector
             Object state=snapshot.get(c);
             if (state==null)
                 continue;  //this is a new connection
@@ -122,8 +123,8 @@ public class ConnectionWatchdog implements Runnable {
         HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=connections.iterator(); iter.hasNext();) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-                continue; //e.g., Clip2 reflector
+            //if (! c.isKillable())
+			//  continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
             RouterService.getMessageRouter().sendPingRequest(
@@ -139,8 +140,8 @@ public class ConnectionWatchdog implements Runnable {
         //haven't made progress are killed.
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-                continue; //e.g., Clip2 reflector
+            //if (! c.isKillable())
+			//  continue; //e.g., Clip2 reflector
             c.setHorizonEnabled(true);
             Object state=snapshot.get(c);
             if (state==null)
@@ -164,6 +165,7 @@ public class ConnectionWatchdog implements Runnable {
      * Loop forever, replacing old dud connections with new good ones. 
      */
     public void run() {
+		if(!ConnectionSettings.WATCHDOG_ACTIVE.getValue()) return;
         try {
             while (true) {
                 //We make fresh data structures every time through the loop to
