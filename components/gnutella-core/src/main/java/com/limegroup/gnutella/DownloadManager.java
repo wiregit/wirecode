@@ -620,8 +620,7 @@ public class DownloadManager implements BandwidthTracker {
                 RequeryDownloader dlder = (RequeryDownloader) requerier;
                 QueryRequest qr = 
                 new QueryRequest(SettingsManager.instance().getTTL(),
-                                 0, dlder.getQuery(),
-                                 dlder.getRichQuery(), true);
+                                 0, dlder.getQuery(), true);
                 router.broadcastQueryRequest(qr);
             }
             else
