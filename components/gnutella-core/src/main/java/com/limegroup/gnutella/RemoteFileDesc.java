@@ -8,7 +8,16 @@ import org.xml.sax.*;
 /**
  * A reference to a single file on a remote machine.  In this respect
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
- * specific data as well, such as the server's 16-byte GUID.
+ * specific data as well, such as the server's 16-byte GUID.<p>
+ *
+ * This class is serialized to disk as part of the downloads.dat file.  Hence
+ * you must be very careful before making any changes.  Deleting or changing the
+ * types of fields is DISALLOWED.  Adding field a F is acceptable as long as the
+ * readObject() method of this initializes F to a reasonable value when
+ * reading from older files where the fields are not present.  This is exactly
+ * what we do with _urns and _browseHostEnabled.  On the other hand, older
+ * version of LimeWire will simply discard any extra fields F if reading from a
+ * newer serialized file.  
  */
 public class RemoteFileDesc implements Serializable {
     private static final long serialVersionUID = 6619479308616716538L;
@@ -22,7 +31,12 @@ public class RemoteFileDesc implements Serializable {
 	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
-    private final LimeXMLDocument _xmlDoc;
+    /** RemoteFileDesc can only be constructed with a single piece of metadata.
+     *  However, historically RemoteFileDesc stored an array of metadata.  Hence
+     *  we must be prepared to read this data from a serialized downloads.dat
+     *  file.  In other words, _xmlDocs is typically null or a single non-null
+     *  element, unless this was deserialized from an older version.  */
+    private final LimeXMLDocument[] _xmlDocs;
 	private final Set _urns;
 	private final boolean _browseHostEnabled;
 
@@ -33,6 +47,7 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -63,7 +78,8 @@ public class RemoteFileDesc implements Serializable {
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
-		_xmlDoc = xmlDoc;
+        if(xmlDoc!=null) //not strictly needed
+            _xmlDocs = new LimeXMLDocument[] {xmlDoc};
 		if(urns == null) {
 			_urns = EMPTY_SET;
 		}
@@ -72,6 +88,17 @@ public class RemoteFileDesc implements Serializable {
 		}
 	}
 
+    private void readObject(ObjectInputStream stream) {
+        defaultReadObject();
+        //Older downloads.dat files do not have _urns, so _urns will be null
+        //(the default Java value).  Hence we also initialize
+        //_browseHostEnabled.  See class overview for more details.
+        if(_urns == null) {
+            _urns = EMPTY_SET;
+            _browseHostEnabled= false;
+        }
+    }
+    
 
 	/* Accessor Methods */
 	public final String getHost() {return _host;}
@@ -93,7 +120,10 @@ public class RemoteFileDesc implements Serializable {
 	 * which can be <tt>null</tt>.
 	 */
     public final LimeXMLDocument getXMLDoc() {
-		return _xmlDoc;
+        if (_xmlDocs==null)
+            return null;
+        else
+            return _xmlDocs[0];  //can be null
 	}
 
 	/**
@@ -155,8 +185,8 @@ public class RemoteFileDesc implements Serializable {
 				 Arrays.equals(_clientGUID, other._clientGUID)) &&
 				(_speed == other._speed) &&
 				(_size == other._size) &&
-				(_xmlDoc == null ? other._xmlDoc == null :
-				 _xmlDoc.equals(other._xmlDoc)) &&
+				(getXMLDoc() == null ? other.getXMLDoc() == null :
+				  getXMLDoc().equals(other.getXMLDoc())) &&
 				(_urns == null ? other._urns == null :
 				 _urns.equals(other._urns)));		
     }
