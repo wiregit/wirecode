@@ -540,7 +540,7 @@ public class ConnectionManager {
     public void measureBandwidth() {
         float upstream=0.f;
         float downstream=0.f;
-        List connections=getInitializedConnections();
+        List connections = getInitializedConnections2();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
             mc.measureBandwidth();
@@ -897,7 +897,7 @@ public class ConnectionManager {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
+            Iterator ultrapeers = getInitializedConnections2().iterator();
             Set proxies = new HashSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
@@ -918,7 +918,7 @@ public class ConnectionManager {
      * 
      */
     public Connection getTCPRedirectUltrapeer() {
-        Iterator ultrapeers = getInitializedConnections().iterator();
+        Iterator ultrapeers = getInitializedConnections2().iterator();
         while (ultrapeers.hasNext()) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsTCPRedirect() >= 0)
@@ -935,7 +935,7 @@ public class ConnectionManager {
      * 
      */
     public Connection getUDPRedirectUltrapeer() {
-        Iterator ultrapeers = getInitializedConnections().iterator();
+        Iterator ultrapeers = getInitializedConnections2().iterator();
         while (ultrapeers.hasNext()) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsUDPRedirect() >= 0)
@@ -954,7 +954,7 @@ public class ConnectionManager {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for query status response is a cached
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
+            Iterator ultrapeers = getInitializedConnections2().iterator();
             while (ultrapeers.hasNext()) {
                 ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
                 if (currMC.remoteHostSupportsLeafGuidance() >= 0)

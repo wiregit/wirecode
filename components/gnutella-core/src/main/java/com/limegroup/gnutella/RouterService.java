@@ -678,7 +678,7 @@ public class RouterService {
 		int count = 0;
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections().iterator();
+        for (Iterator iter=manager.getInitializedConnections2().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             count += c.getNumMessagesSent();
@@ -695,7 +695,7 @@ public class RouterService {
 		int msgs; 
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections().iterator();
+        for (Iterator iter=manager.getInitializedConnections2().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             msgs = c.getNumMessagesSent();

@@ -338,7 +338,7 @@ public final class QueryHandler {
         // 2) If we haven't sent the probe query, send it
         if(!_probeQuerySent) {
             ProbeQuery pq = 
-                new ProbeQuery(_connectionManager.getInitializedConnections(),
+                new ProbeQuery(_connectionManager.getInitializedConnections2(),
                                this);
             long timeToWait = pq.getTimeToWait();            
             _theoreticalHostsQueried += pq.sendProbe();
@@ -352,7 +352,7 @@ public final class QueryHandler {
         else {
             // otherwise, just send a normal query
             int newHosts = 
-                sendQuery(_connectionManager.getInitializedConnections());
+                sendQuery(_connectionManager.getInitializedConnections2());
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
                 // connections to potentially appear
@@ -368,7 +368,8 @@ public final class QueryHandler {
                 _timeToWaitPerHop -= _timeToDecreasePerHop;
 
                 int resultFactor =
-                    Math.max(1, (int)(RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
+                    Math.max(1, 
+                        (int)(RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
 
                 int decrementFactor = Math.max(1, (int)(_numDecrements/6));
 
