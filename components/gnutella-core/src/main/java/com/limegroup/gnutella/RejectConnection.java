@@ -30,18 +30,20 @@ class RejectConnection extends Connection{
     public void run(){
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for run");
 	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null,"Illegal manager state for run");
-	try {
-	    while (true) { // continue till we get a PingRequest
-		Message m=null;
-		try {
-		    m=receive(SettingsManager.instance().getTimeout()); //gets the timeout from SettingsManager
-		    if (m==null)
-			continue;
-		}// end of try for BadPacketEception from socket 
-		catch (BadPacketException e) {
-		    //System.out.println("Discarding bad packet ("+e.getMessage()+")");
-		    continue;
-		}
+	Message m=null;
+    try {
+        m=receive(SettingsManager.instance().getTimeout()); //gets the timeout from SettingsManager
+        if (m==null)
+            return; //Timeout has occured and we havent received the ping, 
+                    //so just return
+    }// end of try for BadPacketEception from socket 
+    catch (BadPacketException e) {
+        return; //Its a bad packet, just return
+    }
+    catch(IOException ioe){
+        shutdown();// if we have an IO Exception drop the connection
+    }
+    try{
 		if( (m instanceof PingRequest)&& (m.getHops()==0) ){
 		    //this is the only kind of message we will deal with in Reject Connection
 		    //If any other kind of message comes in we drop 
@@ -66,7 +68,7 @@ class RejectConnection extends Connection{
 		    // we have sent 10 hosts. Now close the connection
 		    shutdown();
 		}// end of (if m is PingRequest)
-	    } // End of while(true)
+	
 	}// end of try
 	catch (IOException e){
 	    shutdown();// if we have an IO Exception drop the connection
