@@ -142,6 +142,17 @@ public class BitSet implements Cloneable, java.io.Serializable {
 	    bits = newBits;
 	}
     }
+    
+    /**
+     * Compacts this BitTable.
+     */
+    public void compact() {
+        if(bits.length > unitsInUse) {
+            long newBits[] = new long[unitsInUse];
+            System.arraycopy(bits, 0, newBits, 0, unitsInUse);
+            bits = newBits;
+        }
+    }
 
     /**
      * Sets the bit at the specified index to to the complement of its
@@ -747,6 +758,24 @@ public class BitSet implements Cloneable, java.io.Serializable {
         for (int i=0; i<unitsInUse; i++)
             sum += bitCount(bits[i]);
         return sum;
+    }
+    
+    /**
+     * Returns the number of units that are completely 0.
+     */
+    public int unusedUnits() {
+        int sum = 0;
+        for(int i = 0; i < unitsInUse; i++)
+            if(bitCount(bits[i]) == 0)
+                sum++;
+        return sum;
+    }
+    
+    /**
+     * Returns the number of units in use.
+     */
+    public int getUnitsInUse() {
+        return unitsInUse;
     }
 
     /**

@@ -168,6 +168,20 @@ public class QueryRouteTable {
         double set = bitTable.cardinality();
         return ( set / bitTableLength ) * 100.0;
 	}
+	
+	/**
+	 * Returns the number of empty elements in the table.
+	 */
+	public int getEmptyUnits() {
+	    return bitTable.unusedUnits();
+	}
+	
+	/**
+	 * Returns the total number of units allocated for storage.
+	 */
+	public int getUnitsInUse() {
+	    return bitTable.getUnitsInUse();
+	}
 
     /**
      * Returns true if a response could be generated for qr.  Note that a return
@@ -469,6 +483,7 @@ public class QueryRouteTable {
             }
             nextPatch++;
         }
+        bitTable.compact();
 
         //4. Update sequence numbers.
         this.sequenceSize=m.getSequenceSize();
