@@ -65,8 +65,8 @@ public class DirectAltLoc extends AlternateLocation {
 	
 	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
 		super(sha1);
-		if (NetworkUtils.isValidExternalIpPort(address))
-		    throw new IOException("not a valid external address:port in direct altloc");
+		if (!NetworkUtils.isValidExternalIpPort(address))
+		    throw new IOException("not a valid external address:port in direct altloc "+address);
 		
 		_node=address;
 	}
