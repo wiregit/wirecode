@@ -224,8 +224,8 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.sendMessage((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flushMessage();
+            ULTRAPEER_1.writer().simpleWrite((RouteTableMessage)iter.next());
+			ULTRAPEER_1.writer().flush();
         }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
@@ -375,8 +375,8 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.sendMessage((RouteTableMessage)iter.next());
-			LEAF.flushMessage();
+            LEAF.writer().simpleWrite((RouteTableMessage)iter.next());
+			LEAF.writer().flush();
         }
 
         // make sure UP is advertised proxy support
@@ -387,8 +387,8 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
 
         // send proxy request
         PushProxyRequest req = new PushProxyRequest(new GUID(clientGUID));
-        LEAF.sendMessage(req);
-        LEAF.flushMessage();
+        LEAF.writer().simpleWrite(req);
+        LEAF.writer().flush();
 
         // wait for ack
         do {

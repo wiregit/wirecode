@@ -219,8 +219,8 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.sendMessage((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flushMessage();
+            ULTRAPEER_1.writer().simpleWrite((RouteTableMessage)iter.next());
+			ULTRAPEER_1.writer().flush();
         }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
@@ -363,8 +363,8 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
                                               null, false, 0, false);
-        ULTRAPEER_1.sendMessage(query);
-        ULTRAPEER_1.flushMessage();
+        ULTRAPEER_1.writer().simpleWrite(query);
+        ULTRAPEER_1.writer().flush();
 
         // await a response
         Message m = null;

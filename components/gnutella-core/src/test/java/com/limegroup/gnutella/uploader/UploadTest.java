@@ -524,8 +524,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
 		c.initialize();
 		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-            c.sendMessage(query);
-            c.flushMessage();
+            c.writer().simpleWrite(query);
+            c.writer().flush();
             QueryReply reply=null;
             while (true) {
                 Message m=c.receive(2000);
@@ -544,8 +544,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
             //Create listening socket, then send push.
             ServerSocket ss=new ServerSocket(callbackPort);
-            c.sendMessage(push);
-            c.flushMessage();
+            c.writer().simpleWrite(push);
+            c.writer().flush();
             Socket s=ss.accept();
             BufferedReader in = new BufferedReader(new InputStreamReader(
                 s.getInputStream()));
@@ -584,8 +584,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
         c.initialize();
         QueryRequest query = QueryRequest.createQuery("txt", (byte)3);
-        c.sendMessage(query);
-        c.flushMessage();
+        c.writer().simpleWrite(query);
+        c.writer().flush();
         QueryReply reply=null;
         while (true) {
             Message m=c.receive(2000);
@@ -604,8 +604,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Create listening socket, then send push.
         ServerSocket ss=new ServerSocket(callbackPort);
-        c.sendMessage(push);
-        c.flushMessage();
+        c.writer().simpleWrite(push);
+        c.writer().flush();
         Socket s=ss.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
@@ -831,8 +831,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
         c.initialize();
         QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-        c.sendMessage(query);
-        c.flushMessage();
+        c.writer().simpleWrite(query);
+        c.writer().flush();
         QueryReply reply=null;
         while (true) {
             Message m=c.receive(2000);
@@ -850,8 +850,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Create listening socket, then send push.
         ServerSocket ss=new ServerSocket(callbackPort);
-        c.sendMessage(push);
-        c.flushMessage();
+        c.writer().simpleWrite(push);
+        c.writer().flush();
         Socket s=ss.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));

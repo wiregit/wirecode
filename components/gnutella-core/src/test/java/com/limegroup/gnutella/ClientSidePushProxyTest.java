@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
@@ -182,8 +181,8 @@ public class ClientSidePushProxyTest
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
         reply.hop();
-        c.sendMessage(reply);
-        c.flushMessage();
+        c.writer().simpleWrite(reply);
+        c.writer().flush();
      }
 
     ///////////////////////// Actual Tests ////////////////////////////
@@ -194,8 +193,8 @@ public class ClientSidePushProxyTest
         testUP = connect(rs, 6355, true);
 
         // send a MessagesSupportedMessage
-        testUP.sendMessage(MessagesSupportedVendorMessage.instance());
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(MessagesSupportedVendorMessage.instance());
+        testUP.writer().flush();
 
         // we expect to get a PushProxy request
         Message m = null;
@@ -207,8 +206,8 @@ public class ClientSidePushProxyTest
         PushProxyAcknowledgement ack = 
         new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
                                      6355, new GUID(m.getGUID()));
-        testUP.sendMessage(ack);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(ack);
+        testUP.writer().flush();
 
         // client side seems to follow the setup process A-OK
     }
@@ -224,8 +223,8 @@ public class ClientSidePushProxyTest
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
                                               null, false, 0, false);
-        testUP.sendMessage(query);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(query);
+        testUP.writer().flush();
 
         // await a response
         Message m = null;
@@ -257,8 +256,8 @@ public class ClientSidePushProxyTest
                                          9000);
         
         // send the PR off
-        testUP.sendMessage(pr);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(pr);
+        testUP.writer().flush();
 
         // we should get a incoming GIV
         Socket givSock = ss.accept();
@@ -310,8 +309,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -413,8 +412,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, null);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -422,7 +421,8 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        RouterService.download((new RemoteFileDesc[] { callback.getRFD() }), 
+            true);
 
         // await a PushRequest
         do {
@@ -460,8 +460,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -469,7 +469,8 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        RouterService.download((new RemoteFileDesc[] { callback.getRFD() }), 
+            true);
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();

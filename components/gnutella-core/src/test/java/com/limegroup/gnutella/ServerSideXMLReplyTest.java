@@ -208,8 +208,8 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.sendMessage((RouteTableMessage)iter.next());
-			LEAF.flushMessage();
+            LEAF.writer().simpleWrite((RouteTableMessage)iter.next());
+			LEAF.writer().flush();
         }
 
         // for Ultrapeer 1
@@ -217,8 +217,8 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.sendMessage((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flushMessage();
+            ULTRAPEER_1.writer().simpleWrite((RouteTableMessage)iter.next());
+			ULTRAPEER_1.writer().flush();
         }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
@@ -363,8 +363,8 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 
         // send a query
         QueryRequest query = QueryRequest.createQuery("metadata");
-        ULTRAPEER_1.sendMessage(query);
-        ULTRAPEER_1.flushMessage();
+        ULTRAPEER_1.writer().simpleWrite(query);
+        ULTRAPEER_1.writer().flush();
 
         // confirm that result has heXML.
         QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
@@ -381,8 +381,8 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 
         // send a query
         QueryRequest query = QueryRequest.createQuery("Alternative", richQuery);
-        ULTRAPEER_1.sendMessage(query);
-        ULTRAPEER_1.flushMessage();
+        ULTRAPEER_1.writer().simpleWrite(query);
+        ULTRAPEER_1.writer().flush();
 
         // confirm that result has heXML.
         QueryReply reply = getFirstQueryReply(ULTRAPEER_1);

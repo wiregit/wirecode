@@ -178,8 +178,8 @@ public class ClientSideBrowseHostTest
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
         reply.hop();
-        c.sendMessage(reply);
-        c.flushMessage();
+        c.writer().simpleWrite(reply);
+        c.writer().flush();
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -220,8 +220,8 @@ public class ClientSideBrowseHostTest
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, null);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -321,8 +321,8 @@ public class ClientSideBrowseHostTest
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -450,8 +450,8 @@ public class ClientSideBrowseHostTest
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.sendMessage(m);
-        testUP.flushMessage();
+        testUP.writer().simpleWrite(m);
+        testUP.writer().flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
