@@ -1,6 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.io.Serializable;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.Iterator;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * A generic type of media, i.e., "video" or "audio".
@@ -104,6 +108,44 @@ public class MediaType implements Serializable {
     }
     
     // do we really need this static method ?
+    public static MediaType getDocumentMediaType() {
+        // index should match the above constructor
+        return (getDefaultMediaTypes())[1]; /* DOCS */
+    }
+
+    // do we really need this static method ?
+    public static MediaType getProgramMediaType() {
+        // index should match the above constructor
+        return (getDefaultMediaTypes())[2]; /* PROGS */
+    }
+
+    private static MediaType linProgMediaType = null; 
+    // necessary for the meta-flag in queries
+    private static MediaType getLinuxProgramMediaType() {
+        if (linProgMediaType == null)
+        linProgMediaType = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+            new String[] {
+                "bin", "mdb", "sh", "csh", "awk", "pl",
+                "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
+                "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
+                "cue"
+            });
+        return linProgMediaType;
+    }
+
+    private static MediaType winProgMediaType = null;
+    // necessary for the meta-flag in queries
+    private static MediaType getWindowsProgramMediaType() {
+        if (winProgMediaType == null)
+        winProgMediaType = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+            new String[] {
+                "exe", "zip", "jar", "cab", "msi", "msp",
+                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue"
+            });
+        return winProgMediaType;
+    }
+
+    // do we really need this static method ?
     public static MediaType getAudioMediaType() {
         // index should match the above constructor
         return (getDefaultMediaTypes())[3]; /* AUDIO */
@@ -134,7 +176,7 @@ public class MediaType implements Serializable {
                 "rtf", "wri", "doc", "mcw", "wps",
                 "xls", "wk1", "dif", "csv", "ppt",
                 "hlp", "chm",
-                "tex", "texi", "latex", "info", "man"
+                "tex", "texi", "latex", "info", "man", "pps"
             });
         MediaType programs = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
@@ -155,7 +197,8 @@ public class MediaType implements Serializable {
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
                 "au", "snd", "s3m",
-                "mid", "midi", "rmi", "mod"
+                "mid", "midi", "rmi", "mod",
+                "iso"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
@@ -184,4 +227,51 @@ public class MediaType implements Serializable {
         // Added by Sumeet Thadani to allow a rich search window to be popped up.
         return new MediaType[] {any, text, programs, audio, video, images};
     }
+
+    /** @return a MediaType.Aggregator to use for your query.  Null is a
+     *  possible return value.
+     */
+    public static Aggregator getAggregator(QueryRequest query) {
+        if (query.desiresAll()) return null;
+        Aggregator retAggr = new Aggregator();
+        if (query.desiresLinuxOSXPrograms())
+            retAggr.addFilter(getLinuxProgramMediaType());
+        if (query.desiresWindowsPrograms())
+            retAggr.addFilter(getWindowsProgramMediaType());
+        if (query.desiresDocuments()) retAggr.addFilter(getDocumentMediaType());
+        if (query.desiresAudio()) retAggr.addFilter(getAudioMediaType());
+        if (query.desiresVideo()) retAggr.addFilter(getVideoMediaType());
+        if (query.desiresImages()) retAggr.addFilter(getImageMediaType());
+        return retAggr;
+    }
+
+    /** Utility class for aggregating MediaTypes.
+     *  This class is not synchronized - it should never be used in a fashion
+     *  where synchronization is necessary.  If that changes, add synch.
+     */
+    public static class Aggregator {
+        /** A list of MediaType objects.
+         */
+        private List _filters = new LinkedList();
+
+        private Aggregator() {}
+        /** I don't check for duplicates. */
+        private void addFilter(MediaType filter) {
+            _filters.add(filter);
+        }
+
+        /** @return true if the Response falls within one of the MediaTypes
+         *  this aggregates.
+         */
+        public boolean allow(final String fName) {
+            Iterator iter = _filters.iterator();
+            while (iter.hasNext()) {
+                MediaType currType = (MediaType)iter.next();
+                if (currType.matches(fName))
+                    return true;
+            }
+            return false;
+        }
+    }
+
 }

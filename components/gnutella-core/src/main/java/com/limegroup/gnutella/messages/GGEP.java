@@ -39,6 +39,9 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_WHAT_IS = "WH";
     /** The extension header disabling OOB proxying. */
     public static final String GGEP_HEADER_NO_PROXY = "NP";
+    /** The extension header (key) for MetaType query support */
+    public static final String GGEP_HEADER_META = "M";
+
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 

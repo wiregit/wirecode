@@ -1318,7 +1318,7 @@ public abstract class FileManager {
 
         //Special case: return up to 3 of your 'youngest' files.
         if (request.isWhatIsNewRequest()) 
-            return respondToWhatIsNewRequest(includeXML);
+            return respondToWhatIsNewRequest(request, includeXML);
 
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,
@@ -1346,7 +1346,8 @@ public abstract class FileManager {
 		}
 
         List responses = new LinkedList();
-        
+        final MediaType.Aggregator filter = MediaType.getAggregator(request);
+
         // Iterate through our hit indexes to create a list of results.
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
@@ -1356,7 +1357,8 @@ public abstract class FileManager {
                             "unexpected null in FileManager for query:\n"+
                             request);
             } 
-            
+            if ((filter != null) && !filter.allow(desc.getName())) continue;
+
             desc.incrementHitCount();
             
             RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
@@ -1365,17 +1367,20 @@ public abstract class FileManager {
                 addXMLToResponse(resp, desc);
             responses.add(resp);
         }
-        return (Response[])responses.toArray(new Response[responses.size()]);
+        if (responses.size() == 0) return EMPTY_RESPONSES;
+        else 
+            return (Response[])responses.toArray(new Response[responses.size()]);
     }
 
     /**
      * Responds to a what is new request.
      */
-    private Response[] respondToWhatIsNewRequest(boolean includeXML) {
+    private Response[] respondToWhatIsNewRequest(QueryRequest request, 
+                                                 boolean includeXML) {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List urnList = CreationTimeCache.instance().getFiles(3);
+        List urnList = CreationTimeCache.instance().getFiles(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         

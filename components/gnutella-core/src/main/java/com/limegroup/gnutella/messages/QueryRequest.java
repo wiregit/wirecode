@@ -32,6 +32,31 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_XML_MASK       = 0x0020;
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
 
+    /** Mask for audio queries - input 0 | AUDIO_MASK | .... to specify
+     *  audio responses.
+     */
+    public static final int AUDIO_MASK  = 0x0004;
+    /** Mask for video queries - input 0 | VIDEO_MASK | .... to specify
+     *  video responses.
+     */
+    public static final int VIDEO_MASK  = 0x0008; 
+    /** Mask for document queries - input 0 | DOC_MASK | .... to specify
+     *  document responses.
+     */
+    public static final int DOC_MASK  = 0x0010;
+    /** Mask for image queries - input 0 | IMAGE_MASK | .... to specify
+     *  image responses.
+     */
+    public static final int IMAGE_MASK  = 0x0020;
+    /** Mask for windows programs/packages queries - input 0 | WIN_PROG_MASK
+     *  | .... to specify windows programs/packages responses.
+     */
+    public static final int WIN_PROG_MASK  = 0x0040;
+    /** Mask for linux/osx programs/packages queries - input 0 | LIN_PROG_MASK
+     *  | .... to specify linux/osx programs/packages responses.
+     */
+    public static final int LIN_PROG_MASK  = 0x0080;
+
     public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNewXOXO";
     // kept public, non-final for testing sake
     public static int WHAT_IS_NEW_GGEP_VALUE = 1;
@@ -86,6 +111,12 @@ public class QueryRequest extends Message implements Serializable{
      * The Query Key associated with this query -- can be null.
      */
     private final QueryKey QUERY_KEY;
+
+    /**
+     * The flag in the 'M' GGEP extension - if non-null, the query is requesting
+     * only certain types.
+     */
+    private Integer _metaMask = null;
 
 	/**
 	 * Cached hash code for this instance.
@@ -144,10 +175,11 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
+        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
+                                DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -165,10 +197,11 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
+                                DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
+                                sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 	/**
@@ -195,7 +228,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -223,7 +256,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -251,7 +284,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
@@ -271,7 +304,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN, false, 0, false);
+	                            Message.N_UNKNOWN, false, 0, false, 0);
     }
 	    
 	
@@ -379,7 +412,7 @@ public class QueryRequest extends Message implements Serializable{
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Message.N_UNKNOWN, false, 
-                                WHAT_IS_NEW_GGEP_VALUE, false);
+                                WHAT_IS_NEW_GGEP_VALUE, false, 0);
     }
    
 
@@ -394,7 +427,7 @@ public class QueryRequest extends Message implements Serializable{
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Message.N_UNKNOWN, true, WHAT_IS_NEW_GGEP_VALUE,
-                                false);
+                                false, 0);
     }
    
 
@@ -507,7 +540,8 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
 								qr.getNetwork(), qr.desiresOutOfBandReplies(),
-                                qr.getCapabilitySelector(), qr.doNotProxy());
+                                qr.getCapabilitySelector(), qr.doNotProxy(),
+                                qr.getMetaMask());
 	}
 
 	/**
@@ -525,7 +559,8 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
 								qr.getNetwork(), true,
-                                qr.getCapabilitySelector(), qr.doNotProxy());
+                                qr.getCapabilitySelector(), qr.doNotProxy(),
+                                qr.getMetaMask());
 	}
 
 	/**
@@ -542,7 +577,7 @@ public class QueryRequest extends Message implements Serializable{
 								qr.isFirewalledSource(),
 								qr.getNetwork(), false, 
                                 qr.getCapabilitySelector(),
-                                qr.doNotProxy());
+                                qr.doNotProxy(), qr.getMetaMask());
 	}
 
     /**
@@ -572,7 +607,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -602,7 +637,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false);
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -631,7 +666,7 @@ public class QueryRequest extends Message implements Serializable{
                              qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
                              qr.getQueryUrns(), qr.getQueryKey(), false, 
                              Message.N_MULTICAST, false, 
-                             qr.getCapabilitySelector(), false);
+                             qr.getCapabilitySelector(), false, 0);
         mQr.setHops(qr.getHops());
         return mQr;
 	}
@@ -652,7 +687,8 @@ public class QueryRequest extends Message implements Serializable{
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Message.N_UNKNOWN,
                                 qr.desiresOutOfBandReplies(),
-                                qr.getCapabilitySelector(), false);
+                                qr.getCapabilitySelector(), false,
+                                qr.getMetaMask());
 	}
 
 	/**
@@ -665,7 +701,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, 
 								FileManager.INDEXING_QUERY, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false, 0, false);
+                                false, Message.N_UNKNOWN, false, 0, false, 0);
 	}
 
 	/**
@@ -681,7 +717,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false, 0, false);
+                                false, Message.N_UNKNOWN, false, 0, false, 0);
 	}
 
 
@@ -740,7 +776,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
-             false, 0, false);
+             false, 0, false, 0);
     }
 
     /**
@@ -755,7 +791,7 @@ public class QueryRequest extends Message implements Serializable{
                          boolean canReceiveOutOfBandReplies) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
-             canReceiveOutOfBandReplies, 0, false);
+             canReceiveOutOfBandReplies, 0, false, 0);
     }
 
     /**
@@ -783,7 +819,7 @@ public class QueryRequest extends Message implements Serializable{
         // calls me with the doNotProxy flag set to false
         this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
              queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
-             capabilitySelector, false);
+             capabilitySelector, false, 0);
     }
 
     /**
@@ -807,9 +843,11 @@ public class QueryRequest extends Message implements Serializable{
                         Set requestedUrnTypes, Set queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
-                        int capabilitySelector, boolean doNotProxy) {
+                        int capabilitySelector, boolean doNotProxy,
+                        int metaFlagMask) {
         // don't worry about getting the length right at first
-        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
+        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
+              network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
 		   (queryUrns == null || queryUrns.size() == 0)) {
@@ -820,6 +858,11 @@ public class QueryRequest extends Message implements Serializable{
             throw new IllegalArgumentException("Bad capability = " +
                                                capabilitySelector);
         _capabilitySelector = capabilitySelector;
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 248))
+            throw new IllegalArgumentException("Bad Meta Flag = " +
+                                               metaFlagMask);
+        if (metaFlagMask > 0)
+            _metaMask = new Integer(metaFlagMask);
 
 		// the new Min Speed format - looks reversed but
 		// it isn't because of ByteOrder.short2leb
@@ -831,7 +874,9 @@ public class QueryRequest extends Message implements Serializable{
         // if we can NOT receive out of band replies, we want in-band XML - so
 		// set the correct bit.
         // if we can receive out of band replies, we do not want in-band XML -
-		// we'll hope the out-of-band reply guys will provide us all necessary XML.
+		// we'll hope the out-of-band reply guys will provide us all necessary
+		// XML.
+
         if (!canReceiveOutOfBandReplies) 
             minSpeed |= SPECIAL_XML_MASK;
         else // bit 10 flags out-of-band support
@@ -929,10 +974,14 @@ public class QueryRequest extends Message implements Serializable{
             // add a GGEP-block if we shouldn't proxy
             if (doNotProxy)
                 ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
-            
+
+            // add a meta flag
+            if (_metaMask != null)
+                ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
+
             // if there are GGEP headers, write them out...
             if ((this.QUERY_KEY != null) || (_capabilitySelector > 0) ||
-                _doNotProxy) {
+                _doNotProxy || (_metaMask != null)) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
@@ -1019,6 +1068,15 @@ public class QueryRequest extends Message implements Serializable{
                                 ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
                         if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
                             _doNotProxy = true;
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                            _metaMask = 
+                                new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                            // if the value is something we can't handle, don't
+                            // even set it
+                            if ((_metaMask.intValue() < 4) ||
+                                (_metaMask.intValue() > 248))
+                                _metaMask = null;
+                        }
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
@@ -1223,7 +1281,7 @@ public class QueryRequest extends Message implements Serializable{
 	/**
 	 * Returns whether or not this query contains URNs.
 	 *
-	 * @return <tt>true</tt> if this query contains URNs, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if this query contains URNs,<tt>false</tt> otherwise
 	 */
 	public boolean hasQueryUrns() {
 		return !QUERY_URNS.isEmpty();
@@ -1344,10 +1402,73 @@ public class QueryRequest extends Message implements Serializable{
         return QUERY_KEY;
     }
 
+    /** @return true if the query has no constraints on the type of results
+     *  it wants back.
+     */
+    public boolean desiresAll() {
+        return (_metaMask == null);
+    }
+
+    /** @return true if the query desires 'Audio' results back.
+     */
+    public boolean desiresAudio() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & AUDIO_MASK) > 0);
+        return true;
+    }
+    
+    /** @return true if the query desires 'Video' results back.
+     */
+    public boolean desiresVideo() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & VIDEO_MASK) > 0);
+        return true;
+    }
+    
+    /** @return true if the query desires 'Document' results back.
+     */
+    public boolean desiresDocuments() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & DOC_MASK) > 0);
+        return true;
+    }
+    
+    /** @return true if the query desires 'Image' results back.
+     */
+    public boolean desiresImages() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & IMAGE_MASK) > 0);
+        return true;
+    }
+    
+    /** @return true if the query desires 'Programs/Packages' for Windows
+     *  results back.
+     */
+    public boolean desiresWindowsPrograms() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & WIN_PROG_MASK) > 0);
+        return true;
+    }
+    
+    /** @return true if the query desires 'Programs/Packages' for Linux/OSX
+     *  results back.
+     */
+    public boolean desiresLinuxOSXPrograms() {
+        if (_metaMask != null) 
+            return ((_metaMask.intValue() & LIN_PROG_MASK) > 0);
+        return true;
+    }
+
+    private int getMetaMask() {
+        if (_metaMask != null)
+            return _metaMask.intValue();
+        return 0;
+    }
+
 	// inherit doc comment
 	public void recordDrop() {
 		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);	   
+			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 		}
 	}
 
@@ -1398,11 +1519,3 @@ public class QueryRequest extends Message implements Serializable{
             "urns: "+getQueryUrns().size()+">";
     }
 }
-
-
-
-
-
-
-
-

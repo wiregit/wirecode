@@ -809,6 +809,104 @@ public final class QueryRequestTest extends BaseTestCase {
 
     }
 
+
+    public void testMetaFlagConstructor() throws Exception {
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, false, 
+                             1);
+            assertTrue(false);
+        }
+        catch (IllegalArgumentException yes) {}
+
+        // when no flag is set
+        testMetaFlag(0);
+
+        int[] flags = new int[6];
+        flags[0] = QueryRequest.AUDIO_MASK;
+        flags[1] = QueryRequest.VIDEO_MASK;
+        flags[2] = QueryRequest.DOC_MASK;
+        flags[3] = QueryRequest.IMAGE_MASK;
+        flags[4] = QueryRequest.WIN_PROG_MASK;
+        flags[5] = QueryRequest.LIN_PROG_MASK;
+        for (int i = 0; i < flags.length; i++) {
+            testMetaFlag(0 | flags[i]);
+            for (int j = 0; j < flags.length; j++) {
+                if (j == i) continue;
+                testMetaFlag(0 | flags[i] | flags[j]);
+                for (int k = 0; k < flags.length; k++) {
+                    if (k == j) continue;
+                    testMetaFlag(0 | flags[i] | flags[j] | flags[k]);
+                    for (int l = 0; l < flags.length; l++) {
+                        if (l == k) continue;
+                        testMetaFlag(0 | flags[i] | flags[j] | flags[k] |
+                                     flags[l]);
+                        for (int m = 0; m < flags.length; m++) {
+                            if (m == l) continue;
+                            testMetaFlag(0 | flags[i] | flags[j] | flags[k] |
+                                         flags[l] | flags[m]);
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, false,
+                             0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
+                             flags[4] | flags[5]);
+            assertTrue(false);
+        }
+        catch (IllegalArgumentException yes) {}
+
+    }
+
+    private void testMetaFlag(int flag) throws Exception {
+        try {
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
+                             null, null, true, Message.N_TCP, false, 0, false,
+                             flag);
+        if (flag == 0) assertTrue(query.desiresAll());
+        if ((flag & QueryRequest.AUDIO_MASK) > 0)
+            assertTrue(query.desiresAudio());
+        if ((flag & QueryRequest.VIDEO_MASK) > 0)
+            assertTrue(query.desiresVideo());
+        if ((flag & QueryRequest.DOC_MASK) > 0)
+            assertTrue(query.desiresDocuments());
+        if ((flag & QueryRequest.IMAGE_MASK) > 0)
+            assertTrue(query.desiresImages());
+        if ((flag & QueryRequest.WIN_PROG_MASK) > 0)
+            assertTrue(query.desiresWindowsPrograms());
+        if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
+            assertTrue(query.desiresLinuxOSXPrograms());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        query.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        QueryRequest qr = (QueryRequest) Message.read(bais);
+        if (flag == 0) assertTrue(query.desiresAll());
+        if ((flag & QueryRequest.AUDIO_MASK) > 0)
+            assertTrue(qr.desiresAudio());
+        if ((flag & QueryRequest.VIDEO_MASK) > 0)
+            assertTrue(qr.desiresVideo());
+        if ((flag & QueryRequest.DOC_MASK) > 0)
+            assertTrue(qr.desiresDocuments());
+        if ((flag & QueryRequest.IMAGE_MASK) > 0)
+            assertTrue(qr.desiresImages());
+        if ((flag & QueryRequest.WIN_PROG_MASK) > 0)
+            assertTrue(qr.desiresWindowsPrograms());
+        if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
+            assertTrue(qr.desiresLinuxOSXPrograms());
+        }
+        catch (IllegalArgumentException no) {
+            assertTrue(false);
+        }
+    }
+
+
     
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();

@@ -335,7 +335,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                               "whatever", null, null, null, 
                                               null, false, 
                                               Message.N_UNKNOWN, false, 0,
-                                              true);
+                                              true, 0);
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
