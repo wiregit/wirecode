@@ -73,5 +73,13 @@ public final class ConnectionSettings extends AbstractSettings {
 	public static final BooleanSetting REMOVE_ENABLED =
 		CFG_FACTORY.createBooleanSetting("REMOVE_ENABLED", true);
 
+
+	/**
+	 * Setting for whether or not the keep alive setting should be ignored
+	 * -- used for testing.
+	 */
+	public static final BooleanSetting IGNORE_KEEP_ALIVE =
+		CFG_FACTORY.createBooleanSetting("IGNORE_KEEP_ALIVE", false);
+
 }
 
