@@ -217,6 +217,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
         new PingReplyErrorStat();
         
     /**
+     * Statistic for failure due to an invalid ping reply address.
+     */
+    public static final Statistic PING_REPLY_INVALID_ADDRESS =
+        new PingReplyErrorStat();
+        
+    /**
      * Statistic for failure due to an invalid ping reply ggep block.
      */
     public static final Statistic PING_REPLY_INVALID_GGEP =

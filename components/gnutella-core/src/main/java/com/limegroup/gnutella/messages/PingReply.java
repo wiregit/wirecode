@@ -166,8 +166,6 @@ public class PingReply extends Message implements Serializable {
      */
     public static PingReply 
         create(byte[] guid, byte ttl, int port, byte[] address) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, false, -1, false); 
     }
 
@@ -187,8 +185,6 @@ public class PingReply extends Message implements Serializable {
     public static PingReply 
         createExternal(byte[] guid, byte ttl, int port, byte[] address,
                        boolean ultrapeer) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
     }
 
@@ -209,8 +205,6 @@ public class PingReply extends Message implements Serializable {
         createExternal(byte[] guid, byte ttl, int port, byte[] address,
                        int uptime,
                        boolean ultrapeer) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
     }
 
@@ -228,11 +222,8 @@ public class PingReply extends Message implements Serializable {
     public static PingReply 
         createGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
         throws UnknownHostException {
-        int port = ep.getPort();
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl,
-                      port,
+                      ep.getPort(),
                       ep.getHostBytes(),
                       0, 0, true, -1, true);        
     }
@@ -252,8 +243,6 @@ public class PingReply extends Message implements Serializable {
      */
     public static PingReply 
         createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, true, -1, true); 
     }
 
@@ -275,8 +264,6 @@ public class PingReply extends Message implements Serializable {
     public static PingReply 
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, ip, files, kbytes, 
                       false, -1, false); 
     }
@@ -306,8 +293,6 @@ public class PingReply extends Message implements Serializable {
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
- 		if(!NetworkUtils.isValidPort(port))
-			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
@@ -341,6 +326,8 @@ public class PingReply extends Message implements Serializable {
 
  		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);
+        if(!NetworkUtils.isValidAddress(ip))
+            throw new IllegalArgumentException("invalid address");			
         
         byte[] extensions = null;
         if(ggep != null) {
@@ -408,7 +395,13 @@ public class PingReply extends Message implements Serializable {
  		    if( RECORD_STATS )
                 ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port: "+port); 
-        }			
+        }
+        String ip = NetworkUtils.ip2string(payload, 2);
+        if(!NetworkUtils.isValidAddress(ip)) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
+            throw new BadPacketException("invalid address: " + ip);
+        }
         GGEP ggep = parseGGEP(payload);
         
         if(ggep != null && ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
