@@ -1605,7 +1605,7 @@ public class ManagedConnection extends Connection
         }
 
         public void run() {
-            synchronized (this) {
+            synchronized (GuidMapExpirer.class) {
                 // iterator through all the maps....
                 Iterator iter = toExpire.iterator();
                 while (iter.hasNext()) {
