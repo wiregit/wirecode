@@ -57,6 +57,9 @@ public final class SettingsFactory {
 	 * @param settingsStream the <tt>InputStream</tt> to load
 	 */
 	public void reload(File file) {
+		// if the props file doesn't exist, the init sequence will prompt
+		// the user for the required values, so return
+		if(!file.isFile()) return;
         try {
             PROPS.load(new FileInputStream(file));
         } catch(IOException e) {
