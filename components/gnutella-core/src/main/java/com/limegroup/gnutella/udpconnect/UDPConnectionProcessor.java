@@ -85,6 +85,12 @@ public class UDPConnectionProcessor {
 		a message being received */
     private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
 
+    /** Define the size of a small send window for increasing wait time */
+    private static final long SMALL_SEND_WINDOW       = 3;
+
+    /** Define the size of a small send window for increasing wait time */
+    private static final long SMALL_WINDOW_MULTIPLE   = 4;
+
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -862,6 +868,11 @@ log("calling getPending");
 		// For now just leave it very simple  
 		// TODO: Simplify experimental algorithm and plug it in
 		long waitTime = (long)_sendWindow.getRTO() / 3l;
+        if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
+            // If send window getting small
+            // then wait longer
+            waitTime *= SMALL_WINDOW_MULTIPLE;                
+        }
 		if (waitTime == 0) 
 			waitTime = DEFAULT_RTO_WAIT_TIME;
 
