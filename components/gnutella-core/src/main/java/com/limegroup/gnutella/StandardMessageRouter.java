@@ -15,7 +15,6 @@ import com.sun.java.util.collections.*;
  */
 public class StandardMessageRouter extends MessageRouter {
 
-    private ActivityCallback _callback;
     private FileManager _fileManager;
     
     private final boolean RECORD_STATS = !CommonUtils.isJava118();
@@ -28,8 +27,7 @@ public class StandardMessageRouter extends MessageRouter {
      * @param fm the <tt>FileManager</tt> for querying the set of 
      *  shared files
      */
-    public StandardMessageRouter(ActivityCallback callback, FileManager fm) {
-        _callback = callback;
+    public StandardMessageRouter(FileManager fm) {
         _fileManager = fm;
     }
 
