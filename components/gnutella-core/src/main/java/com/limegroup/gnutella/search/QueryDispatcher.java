@@ -13,9 +13,9 @@ import com.limegroup.gnutella.*;
 public final class QueryDispatcher implements Runnable {
 
 	/**
-	 * <tt>List</tt> of outstanding queries.  
+	 * <tt>Map</tt> of outstanding queries.  
 	 */
-	private final List QUERIES = new LinkedList();
+	private final Map QUERIES = new HashMap(); // GUID -> QueryHandler
 
 	/**
 	 * <tt>List</tt> of new queries to add.
@@ -84,8 +84,19 @@ public final class QueryDispatcher implements Runnable {
         // if it's not a leaf connection, we don't care that it's closed
         if(!handler.isSupernodeClientConnection()) return;
         removeFromCollection(NEW_QUERIES, handler);
-        removeFromCollection(QUERIES, handler);
+        removeFromMap(QUERIES, handler);
     }
+
+    /** Updates the relevant QueryHandler with result stats from the leaf.
+     */
+    public void updateLeafResultsForQuery(GUID queryGUID, int numResults) {
+        synchronized (QUERIES) {
+            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
+            if (qh != null)
+                qh.updateLeafResults(numResults);
+        }
+    }
+
 
     /**
      * Removes the specified <tt>ReplyHandler</tt> from the specified
@@ -108,6 +119,37 @@ public final class QueryDispatcher implements Runnable {
             }
             coll.removeAll(toRemove);
         }        
+    }
+
+    /**
+     * Removes the specified <tt>ReplyHandler</tt> from the specified
+     * <tt>Map</tt>.
+     *
+     * TODO: this method can be sped up if the handler object had access
+     * to its guid.
+     *
+     * @param map the <tt>Map</tt> to remove the <tt>ReplyHandler</tt>
+     *  from
+     * @param handler the <tt>ReplyHandler</tt> to remove
+     */
+    private static void removeFromMap(Map map, ReplyHandler handler) {
+        List toRemove = new LinkedList();
+        synchronized(map) {
+            Iterator iter = map.entrySet().iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = 
+                    (QueryHandler)((Map.Entry)iter.next()).getValue();
+                if(qh.getReplyHandler() == handler)
+                    toRemove.add(qh);
+            }
+            //TODO: ask adam if toRemove will ever have more than 1 element.  i
+            //don't know the code that well....
+            iter = toRemove.iterator();
+            while (iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                map.remove(new GUID(qh.getGUID()));
+            }
+        }     
     }
 
 	/**
@@ -135,7 +177,11 @@ public final class QueryDispatcher implements Runnable {
 		// NEW_QUERIES
 		synchronized(NEW_QUERIES) {
             synchronized(QUERIES) {
-                QUERIES.addAll(NEW_QUERIES);
+                Iterator iter = NEW_QUERIES.iterator();
+                while (iter.hasNext()) {
+                    QueryHandler qh = (QueryHandler) iter.next();
+                    QUERIES.put(new GUID(qh.getGUID()), qh);
+                }
             }
 			NEW_QUERIES.clear();
 		}
@@ -143,9 +189,10 @@ public final class QueryDispatcher implements Runnable {
         List expiredQueries = new LinkedList();
 
         synchronized(QUERIES) {
-            Iterator iter = QUERIES.iterator();
+            Iterator iter = QUERIES.entrySet().iterator();
             while(iter.hasNext()) {
-                QueryHandler handler = (QueryHandler)iter.next();
+                QueryHandler handler = 
+                    (QueryHandler)((Map.Entry)iter.next()).getValue();
                 handler.sendQuery();
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
@@ -153,7 +200,11 @@ public final class QueryDispatcher implements Runnable {
             }
 
             // remove any expired queries
-            QUERIES.removeAll(expiredQueries);
+            iter = expiredQueries.iterator();
+            while (iter.hasNext()) {
+                QueryHandler qh = (QueryHandler) iter.next();
+                QUERIES.remove(new GUID(qh.getGUID()));
+            }
         }
         _done = true;
 	}

@@ -35,7 +35,7 @@ public class QueryDispatcherTest extends BaseTestCase {
         QueryDispatcher qd = QueryDispatcher.instance();
         qd.start();
         
-        List queries = (List)PrivilegedAccessor.getValue(qd, "QUERIES");
+        Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
         assertEquals("should not be any queries", 0, queries.size());
 
@@ -50,10 +50,41 @@ public class QueryDispatcherTest extends BaseTestCase {
         qd.addQuery(handler);
         Thread.sleep(3000);
         
-        assertEquals("unexpected queries size", 2, queries.size());
+        assertEquals("unexpected queries size", 1, queries.size());
         qd.removeReplyHandler(rh);
         assertEquals("should not be any queries", 0, queries.size());
         
+        // now add two different queries and make sure everything is koser
+        QueryRequest qrAlt = QueryRequest.createQuery("test 2");
+        QueryHandler handlerAlt = 
+        QueryHandler.createHandlerForNewLeaf(qrAlt, rh, 
+                                             new TestResultCounter(0));
+        
+        qd.addQuery(handler);
+        qd.addQuery(handlerAlt);
+        Thread.sleep(3000);
+        
+        assertEquals("unexpected queries size", 2, queries.size());
+        qd.removeReplyHandler(rh);
+        assertEquals("should not be any queries", 0, queries.size());
+
+        // one more test - make sure different RHs don't effect each other
+        QueryRequest qrOther = QueryRequest.createQuery("test other");
+        ReplyHandler rhOther = new TestReplyHandler();
+        QueryHandler handlerOther = 
+        QueryHandler.createHandlerForNewLeaf(qrOther, rhOther, 
+                                             new TestResultCounter(0));
+        
+        qd.addQuery(handler);
+        qd.addQuery(handlerAlt);
+        qd.addQuery(handlerOther);
+        Thread.sleep(3000);
+        
+        assertEquals("unexpected queries size", 3, queries.size());
+        qd.removeReplyHandler(rh);
+        assertEquals("should only be Other queries", 1, queries.size());
+        qd.removeReplyHandler(rhOther);
+        assertEquals("should not be any queries", 0, queries.size());
     }
 
 

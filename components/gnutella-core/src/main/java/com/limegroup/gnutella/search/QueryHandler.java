@@ -49,6 +49,11 @@ public final class QueryHandler {
 	private static final int HASH_QUERY_RESULTS = 10;
 
     /**
+     * If Leaf Guidance is in effect, the maximum number of hits to route.
+     */
+    private static final int MAXIMUM_ROUTED_FOR_LEAVES = 75;
+
+    /**
      * The number of milliseconds to wait per query hop.  So, if we send
      * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
      * milliseconds.  As the query continues and we gather more data
@@ -90,6 +95,11 @@ public final class QueryHandler {
 	 */
 	private static ConnectionManager _connectionManager =
 		RouterService.getConnectionManager();
+
+    /**
+     * Variable for the number of results the leaf reports it has.
+     */
+    private volatile int _numResultsReportedByLeaf = 0;
 
 	/**
 	 * Variable for the next time after which a query should be sent.
@@ -449,11 +459,13 @@ public final class QueryHandler {
         }
                            
 			
-        int results = RESULT_COUNTER.getNumResults();
+        int results = (_numResultsReportedByLeaf > 0 ? 
+                       _numResultsReportedByLeaf : 
+                       RESULT_COUNTER.getNumResults());
         double resultsPerHost = 
             (double)results/(double)_theoreticalHostsQueried;
 			
-        int resultsNeeded = RESULTS - results;        
+        int resultsNeeded = RESULTS - results;
         int hostsToQuery = 40000;
         if(resultsPerHost != 0) {
             hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
@@ -592,10 +604,26 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-		if(RESULT_COUNTER.getNumResults() >= RESULTS) {
-            return true;
+        // ----------------
+        // NOTE: as agreed, _numResultsReportedByLeaf is the number of results
+        // the leaf has received/consumed by a filter DIVIDED by 4 (4 being the
+        // number of UPs connection it maintains).  That is why we don't divide
+        // it here or anything.  We aren't sure if this mixes well with
+        // BearShare's use but oh well....
+        // ----------------
+        // if leaf guidance is in effect, we have different criteria.
+        if (_numResultsReportedByLeaf > 0) {
+            // we shouldn't route too much regardless of what the leaf says
+            if (RESULT_COUNTER.getNumResults() >= MAXIMUM_ROUTED_FOR_LEAVES)
+                return true;
+            // if the leaf is happy, so are we....
+            if (_numResultsReportedByLeaf > RESULTS)
+                return true;
         }
-	 
+        // leaf guidance is not in effect or we are doing our own query
+        else if (RESULT_COUNTER.getNumResults() >= RESULTS)
+            return true;
+
         // if our theoretical horizon has gotten too high, consider
         // it enough results
         // precisely what this number should be is somewhat hard to determine
@@ -614,6 +642,15 @@ public final class QueryHandler {
 
 		return false;
 	}
+
+    /**
+     * Use this to modify the number of results as reported by the leaf you are
+     * querying for.
+     */
+    public void updateLeafResults(int numResults) {
+        if (numResults > _numResultsReportedByLeaf)
+            _numResultsReportedByLeaf = numResults;
+    }
 
     /**
      * Accessor for the <tt>ReplyHandler</tt> instance for the connection
@@ -641,6 +678,13 @@ public final class QueryHandler {
 	public String toString() {
 		return "QueryHandler: QUERY: "+QUERY;
 	}
+
+    /** @return simply returns the guid of the query this is handling.
+     */
+    public byte[] getGUID() {
+        return QUERY.getGUID();
+    }
+
 }
 
 
