@@ -905,7 +905,10 @@ public class DownloadTest extends TestCase {
         qr=new QueryReply(guid, (byte)5, 6347,
                           localhost, Integer.MAX_VALUE,
                           responses, new byte[16]);
-        callback.handleQueryReply(qr);
+
+		
+        //callback.handleQueryReply(qr);
+		RouterService.getSearchResultHandler().handleQueryReply(qr);
     }
 
 
