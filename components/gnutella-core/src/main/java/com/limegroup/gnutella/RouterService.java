@@ -1021,7 +1021,7 @@ public final class RouterService {
 	 *
 	 * @param errorCode the code for the error
 	 */
-	public static void error(int errorCode) {
+	public static void error(int errorCode) { 
 		callback.error(errorCode);
 	}
 
@@ -1033,6 +1033,7 @@ public final class RouterService {
 	 *  trace of the error
 	 */
 	public static void error(Throwable trace) {
+		trace.printStackTrace();
 		callback.error(trace);
 	}
 
@@ -1045,6 +1046,7 @@ public final class RouterService {
 	 *  trace of the error
 	 */
 	public static void error(int errorCode, Throwable trace) {
+		trace.printStackTrace();
 		callback.error(errorCode, trace);
 	}
 
