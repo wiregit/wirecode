@@ -72,7 +72,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * and removed when hashing finishes.
 	 * IntWrapper stores the amount of bytes read.
 	 */
-	private static Map /* File -> IntWrapper */ progressMap = new HashMap();
+	private static final Map /* File -> IntWrapper */ progressMap =
+	    new HashMap();
 	
 	/**
 	 * Gets the amount of bytes hashed for a file that is being hashed.
