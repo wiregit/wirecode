@@ -347,6 +347,15 @@ public class QueryRequest extends Message implements Serializable{
                                 !RouterService.acceptedIncomingConnection());
     }
 
+	/**
+	 */
+	public static QueryRequest 
+		createMulticastQuery(byte[] guid, String query, String xmlQuery, Set sha1s) {
+		return new QueryRequest(guid, (byte)1, 0, query, xmlQuery,
+								false, UrnType.ANY_TYPE_SET, sha1s,
+								false);
+	}
+
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
      * needed.
