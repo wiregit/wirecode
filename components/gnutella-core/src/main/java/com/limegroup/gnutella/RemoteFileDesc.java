@@ -33,15 +33,15 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 */
 
 	/* speed priorities */
-	public static final int PRIVATE_MODEM_PRIORITY       = 10;
-	public static final int PRIVATE_CABLE_PRIORITY       = 8;
-	public static final int PRIVATE_T1_PRIORITY          = 7;
-	public static final int PRIVATE_T3_PRIORITY          = 6;
+	private final int PRIVATE_MODEM_PRIORITY       = 10;
+	private final int PRIVATE_CABLE_PRIORITY       = 8;
+	private final int PRIVATE_T1_PRIORITY          = 7;
+	private final int PRIVATE_T3_PRIORITY          = 6;
 
-	public static final int PUBLIC_MODEM_PRIORITY        = 5;
-	public static final int PUBLIC_CABLE_PRIORITY        = 3;
-	public static final int PUBLIC_T1_PRIORITY           = 2;
-	public static final int PUBLIC_T3_PRIORITY           = 1;
+	private final int PUBLIC_MODEM_PRIORITY        = 5;
+	private final int PUBLIC_CABLE_PRIORITY        = 3;
+	private final int PUBLIC_T1_PRIORITY           = 2;
+	private final int PUBLIC_T3_PRIORITY           = 1;
 
 	/* how many times a download will be attempted */
 
