@@ -273,11 +273,11 @@ public final class MP3Info {
 				pos += c - 3;
 				
 				c = fis.read(buf, 3, buf.length-3); //read next chunk			
-			} while (c != -1 && pos < 20000); //c is # of bytes read; until EOF
-			//stop checking after first 20k, could be corrupted/infected file
+			} while (c != -1 && pos < 100000); //c is # of bytes read; until EOF
+			//stop checking after first 100k, could be corrupted/infected file
 
 			
-		if (c == -1 || pos >= 20000) { // what the $#*!
+		if (c == -1 || pos >= 100000) { // what the $#*!
 			_header = 0;
 			throw new IOException("MP3 header not found.");
 		}
