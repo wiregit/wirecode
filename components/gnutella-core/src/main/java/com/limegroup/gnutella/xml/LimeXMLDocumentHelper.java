@@ -16,6 +16,10 @@ import com.limegroup.gnutella.Response;
 
 public final class LimeXMLDocumentHelper{
 
+    public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
+    public static final String XML_NAMESPACE =
+        "xsi:noNamespaceSchemaLocation=\"";
+
 	/**
 	 * Private constructor to ensure that this class can never be
 	 * instantiated.
@@ -26,20 +30,14 @@ public final class LimeXMLDocumentHelper{
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
      */
-    public static List getDocuments(String aggregatedXML, 
-                                    int totalResponseCount) {
-        
-        if(aggregatedXML==null || 
-                aggregatedXML.equals("") ||
-                totalResponseCount <= 0)
+    public static List getDocuments(String aggregatedXML, int totalResponseCount) {
+        if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
             return Collections.EMPTY_LIST;
         
         List results = new ArrayList();
         
-        Iterator xmlDocumentsIterator = XMLParsingUtils.split(aggregatedXML).iterator();
-        while(xmlDocumentsIterator.hasNext()) {
-            
-            String xmlDocument = (String)xmlDocumentsIterator.next();
+        for(Iterator i = XMLParsingUtils.split(aggregatedXML).iterator(); i.hasNext(); ) {
+            String xmlDocument = (String)i.next();
             XMLParsingUtils.ParseResult parsingResult;
             try {
                 parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
@@ -49,13 +47,11 @@ public final class LimeXMLDocumentHelper{
                 return Collections.EMPTY_LIST; // abort
             }
             
-            final String indexKey =
-                parsingResult.canonicalKeyPrefix + LimeXMLDocument.XML_INDEX_ATTRIBUTE;
+            final String indexKey = parsingResult.canonicalKeyPrefix +
+                                    LimeXMLDocument.XML_INDEX_ATTRIBUTE;
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
-            
-            Iterator mapsIterator = parsingResult.iterator();
-            while(mapsIterator.hasNext()) {
-                Map attributes = (Map)mapsIterator.next();
+            for(Iterator j = parsingResult.iterator(); j.hasNext(); ) {
+                Map attributes = (Map)j.next();
                 String sindex = (String)attributes.remove(indexKey);
                 if (sindex == null)
                     return Collections.EMPTY_LIST;
@@ -80,125 +76,53 @@ public final class LimeXMLDocumentHelper{
         }
         return results;
     }
+    
     /**
-     * @param responses array is a set of responses. Some have meta-data
-     * some do not. 
-     * The aggregrate string should reflect the indexes of the 
-     * responses
-     *<p>
-     * If none of the responses have any metadata, this method returns an
-     * empty string.
+     * Builds an XML string out of all the responses.
+     * If no responses have XML, an empty string is returned.
      */
-    public static String getAggregateString(Response[] responses){
-        //this hashmap remembers the current state of the string for each uri
-        HashMap uriToString /*LimeXMLSchemaURI -> String */ = new HashMap();
-        for(int i=0; i< responses.length; i++) {
+    public static String getAggregateString(Response[] responses) {
+        HashMap /* LimeXMLSchema -> StringBuffer */ allXML = new HashMap();
+        for(int i = 0; i < responses.length; i++) {
             LimeXMLDocument doc = responses[i].getDocument();
-            if(doc==null)
-                continue;
-            aggregateResponse(uriToString, doc,i);
-        }
-        StringBuffer retStringB = new StringBuffer();
-
-        //iterate over the map and close all the strings out.
-        Iterator iter = uriToString.values().iterator();
-        while(iter.hasNext()) {
-            String str = ((StringBuffer)iter.next()).toString();
-            int begin = str.indexOf("<",2);//index of opening outer(plural)
-            int end = str.indexOf(" ",begin);
-            retStringB.append(str);
-            retStringB.append("</");
-            retStringB.append(str.substring(begin+1,end));
-            retStringB.append(">");
-        }
-        return retStringB.toString();
-    }
-
-    private static void aggregateResponse(HashMap uriToString, 
-                                         LimeXMLDocument doc, int index) {
-        if(doc == null)//response has no document
-            return;
-        String uri = doc.getSchemaURI();
-        StringBuffer currStringB = (StringBuffer)uriToString.get(uri);
-
-        if(currStringB == null) {//no entry so far
-            //1. add the outer (plural form) - w/o the end
-            String str = null;
-            try {
-                str = doc.getXMLString();
-            } catch(SchemaNotFoundException e) {  
-                return;//dont do anything to the map, just return
+            if(doc != null) {
+                LimeXMLSchema schema = doc.getSchema();
+                StringBuffer built = (StringBuffer)allXML.get(schema);
+                if(built == null) {
+                    built = new StringBuffer();
+                    allXML.put(schema, built);
+                }
+                built.append(doc.getAttributeStringWithIndex(i));
             }
-            if(str==null || str.equals("")) 
-                return;
-            str = str.substring(0,str.lastIndexOf("<"));
-            //2.append the index in the right place.
-            int p = str.indexOf("<");//index of opening header
-            Assert.that(p>=0, "LimeXMLDocument is broken");
-            p = str.indexOf("<",p+1);//index of opening outer(plural) 
-            Assert.that(p>=0, "LimeXMLDocument is broken");
-            p = str.indexOf("<",p+1);//index of opening inner
-            Assert.that(p>=0, "LimeXMLDocument is broken");
-            int q = str.indexOf(">",p+1);//index of first closing tag
-            int k = str.lastIndexOf("/",q-1);//is it tag closing inclusive?
-            if(k!=-1 && p < k && k < q )//   "/" b/w open and close
-                if(str.substring(k+1,q).trim().equals(""))
-                    p=k;//white space only b/w / and >
-                else
-                    p=q;
-            else
-                p=q;
-            String first = str.substring(0,p);
-            String last = str.substring(p);
-            StringBuffer strB = new StringBuffer(first.length() +
-                                                 15 + last.length());
-            // str = first+" index=\""+index+"\" "+last;
-            strB.append(first);
-            strB.append(" index=\"");
-            strB.append(index);
-            strB.append("\" ");
-            strB.append(last);
-            //3. add the entry in the map
-            uriToString.put(uri, strB);
         }
-        else {            
-            //1.strip the plural form out of the xml string
-            String str = null;
-            try{
-                str = doc.getXMLString();
-            } catch(SchemaNotFoundException e) {
-                return;//dont modify the string in the hashmap. just return
-            }
-            int begin = str.indexOf("<");//index of header
-            Assert.that( begin != -1, str);
-            begin = str.indexOf("<",begin+1);//index of outer(plural) tag-close
-            Assert.that( begin != -1, str);
-            begin = str.indexOf("<",begin+1);//index of begining of current tag
-            Assert.that( begin != -1, str);            
-            int end = str.lastIndexOf("<");
-            Assert.that( end != -1, str);
-            str = str.substring(begin,end);
-            //2.insert the index 
-            int p = str.indexOf(">");
-            int q = str.lastIndexOf("/",p-1);
-            if (q!=-1 && q < p) // 
-                if(str.substring(q+1,p).trim().equals(""))
-                   p = q;
-            String first = str.substring(0,p);
-            String last = str.substring(p);
-            //  str = first+" index=\""+index+"\" "+last;
-            //  currString = currString+str;
-            currStringB.append(first);
-            currStringB.append(" index=\"");
-            currStringB.append(index);
-            currStringB.append("\" ");
-            currStringB.append(last);
-            //3.concatinate the remaining xml to currString
-            //4.put it back into the map
-            uriToString.put(uri,currStringB);
+     
+        // Iterate through each schema and build a string containing
+        // a bunch of XML docs, each beginning with XML_HEADER.   
+        StringBuffer fullXML = new StringBuffer();
+        for(Iterator i = allXML.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            LimeXMLSchema schema = (LimeXMLSchema)entry.getKey();
+            StringBuffer buffer = (StringBuffer)entry.getValue();
+            buildXML(fullXML, schema, buffer.toString());
         }
+        return fullXML.toString();
     }
-
-
-
+    
+    /**
+     * Wraps the inner element around the root tags, with the correct
+     * XML headers.
+     */
+    public static void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
+        buffer.append(XML_HEADER);
+        buffer.append("<");
+        buffer.append(schema.getRootXMLName());
+        buffer.append(" ");
+        buffer.append(XML_NAMESPACE);
+        buffer.append(schema.getSchemaURI());
+        buffer.append("\">");
+        buffer.append(inner);
+        buffer.append("</");
+        buffer.append(schema.getRootXMLName());
+        buffer.append(">");
+    }
 }

@@ -193,13 +193,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             iter=qr.getResults();
             Response r = (Response)iter.next();
-            assertEquals("sumeet test a", 1, r.getNameBytesSize());
-            assertEquals("sumeet test b", 0, r.getMetaBytesSize());
-            byte[] name = r.getNameBytes();
-            assertEquals("sumeet test c", 'A', name[0]);
             assertEquals("Sumeet test1", "A",  r.getName());
-            assertEquals("unexpected xml bytes",
-						 "SUSH", (new String(qr.getXMLBytes())));
+            assertNull("bad xml", r.getDocument());
         }catch(BadPacketException e){
             fail("metaResponse not created well!", e);
         }

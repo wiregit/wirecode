@@ -161,18 +161,6 @@ public class LimeXMLUtils
     }
     
     /**
-     * Creates a Response instance from the passed xml string
-     */
-    public static Response createResponse(String xml)
-    {
-        //create a new response using default values and return it
-        return new Response(
-            LimeXMLProperties.DEFAULT_NONFILE_INDEX,
-                xml.length(), "xml result", xml);
-    }
-
-    
-    /**
      * Reads all the bytes from the passed input stream till end of stream
      * reached.
      * @param in The input stream to read from
@@ -394,47 +382,6 @@ public class LimeXMLUtils
     
     public static boolean isSupportedFormatForSchema(File file, String schemaURI) {
     	return getSchemaURI(file).equals(schemaURI);
-    }
-    
-    /**
-      * Converts the given list of xml documents to an array of responses
-      * @param xmlDocuments List (of LimeXMLDocument) of xml documentst that
-      * need to be converted to instances of Response class
-      * @return Array of responses after converting passed xml documents  
-      */
-    public static Response[] getResponseArray(List xmlDocuments)
-    {
-        //create new Response array of required size
-        Response[] responseArray = new Response[xmlDocuments.size()]; 
-        
-        //iterate over the xml documents to generate Responses
-        int i=0;
-        Iterator iterator = xmlDocuments.iterator();
-        while(iterator.hasNext() && i < responseArray.length)
-        {
-            String responseString = "";
-            
-            try {
-                responseString = 
-                ((LimeXMLDocument)iterator.next()).getXMLString();            
-//                System.out.println("response = " + responseString);
-            }
-            catch (SchemaNotFoundException snfe) {
-                ErrorService.error(snfe);
-            }
-
-            //make response out of the string
-            //use the length of the string as size
-            //and whole string as the file name
-            //using dummy index of 0. The choice is arbitray at this point, might
-            //get standardized later
-            responseArray[i] = LimeXMLUtils.createResponse(responseString);
-            //increment the index
-            i++;
-        }
-        
-        //return the response array
-        return responseArray;
     }
     
     /**

@@ -53,12 +53,9 @@ public final class SearchSettings extends LimeProps {
 
     /**
      * Setting for the maximum number of bytes to allow in XML queries.
-     * An informal, Q&D study found that the XML length of an average, not
-     * too specific query is between 140-170.  So 200 gives us some breathing
-     * room, though it will kill some very specific XML searches.
      */
     public static final IntSetting MAX_XML_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 200);
+        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
     
     /**
 	 * The minimum quality (number of stars) for search results to

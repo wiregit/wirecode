@@ -643,20 +643,11 @@ public class LimeXMLReplyCollection {
                                                         boolean checkBetter) {
         
         MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
-        
         //if this call returned null, we should store the data in our
         //xml repository only.
         if (newValues == null)
         	return null;
-        
-        String newXML = null;
-
-        try {
-            newXML = doc.getXMLString();
-        } catch(SchemaNotFoundException snfe) {
-            return null;
-        }
-        newValues.populateFromString(newXML);
+        newValues.populate(doc);
         
         // Now see if the file already has the same info ...
         MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
@@ -666,14 +657,7 @@ public class LimeXMLReplyCollection {
         } catch(IOException e) {
             return null;
         }
-        String existingXML = null;
-        try {
-            existingXML = existingDoc.getXMLString();
-        } catch(SchemaNotFoundException snfe) {
-            return null;
-        }
-        existing.populateFromString(existingXML);
-        
+        existing.populate(existingDoc);
         
         if(!checkBetter) { //if we are not required to choose better tags
             if(newValues.equals(existing)) // The ID3 tags are same do nothing.

@@ -199,14 +199,8 @@ public class MetaFileManager extends FileManager {
         retList.remove(audioDoc);
         
         //now add the non-id3 tags from audioDoc to id3doc
-        List audioList = null;
-        List id3List = null;
-        try {
-            audioList = audioDoc.getOrderedNameValueList();
-            id3List = id3Doc.getOrderedNameValueList();
-        } catch (SchemaNotFoundException snfx) {
-            ErrorService.error(snfx);
-        }
+        List audioList = audioDoc.getOrderedNameValueList();
+        List id3List = id3Doc.getOrderedNameValueList();
         for(int i = 0; i < audioList.size(); i++) {
             NameValue nameVal = (NameValue)audioList.get(i);
             if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
