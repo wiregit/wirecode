@@ -28,21 +28,21 @@ public class HTTPDownloader implements Runnable {
 
 
     protected InputStream _istream;
-    private String _filename;
+    protected String _filename;
     protected int _sizeOfFile;
     protected int _amountRead;
-    private MessageRouter _router;
-    private Acceptor _acceptor;
+    protected MessageRouter _router;
+    protected Acceptor _acceptor;
     protected ActivityCallback _callback;
     private Socket _socket;
-    private String _downloadDir;
+    protected String _downloadDir;
     private FileOutputStream _fos;
 
-    String _protocol;
-    String _host;
-    int _port;
+	String _protocol;
+	String _host;
+	int _port;
     int _index;
-    byte[] _guid;
+	byte[] _guid;
     protected ByteReader _br;
     private int _mode;
 
@@ -783,7 +783,6 @@ public class HTTPDownloader implements Runnable {
     public boolean findAndMutate(PushRequestedFile prf)
     {
         PushRequestedFile curPRF = null;
-
         Iterator iter=requested.iterator();
         while (iter.hasNext()) {
             curPRF=(PushRequestedFile)iter.next();
