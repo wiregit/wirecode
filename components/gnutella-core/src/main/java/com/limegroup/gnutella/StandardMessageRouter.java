@@ -333,16 +333,40 @@ public class StandardMessageRouter extends MessageRouter {
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
 
-        // if it is a multicasted response, use the non-forced address
-        // and port
-        int port = isFromMcast ?
-            RouterService.getNonForcedPort() :
-            RouterService.getPort();
-        byte[] ip = isFromMcast ? RouterService.getNonForcedAddress() :
-                    (canFWTransfer ? RouterService.getExternalAddress() : 
-                     RouterService.getAddress());
-
-
+        // pick the right address & port depending on multicast & fwtrans
+        // if we cannot find a valid address & port, exit early.
+        int port = -1;
+        byte[] ip = null;
+        // first try using multicast addresses & ports, but if they're
+        // invalid, fallback to non multicast.
+        if(isFromMcast) {
+            ip = RouterService.getNonForcedAddress();
+            port = RouterService.getNonForcedPort();
+            if(!NetworkUtils.isValidPort(port) ||
+               !NetworkUtils.isValidAddress(ip))
+                isFromMcast = false;
+        }
+        
+        if(!isFromMcast) {
+            // there'll only be one port from here on, so if it's invalid, exit
+            port = RouterService.getPort();
+            if(!NetworkUtils.isValidPort(port))
+                return Collections.EMPTY_LIST;
+            
+            // see if we have a valid FWTrans address.  if not, fall back.
+            if(canFWTransfer) {
+                ip = RouterService.getExternalAddress();
+                if(!NetworkUtils.isValidAddress(ip))
+                    canFWTransfer = false;
+            }
+            
+            // if we still don't have a valid address here, exit early.
+            if(!canFWTransfer) {
+                ip = RouterService.getAddress();
+                if(!NetworkUtils.isValidAddress(ip))
+                    return Collections.EMPTY_LIST;
+            }
+        }
         
         // get the xml collection string...
         String xmlCollectionString = 

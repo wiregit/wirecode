@@ -14,6 +14,7 @@ import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
@@ -360,15 +361,18 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	    int port = location.indexOf(':');
 	    final String loc =
 	        (port == -1 ? location : location.substring(0, port));
-        //Use the IP class as a quick test to make sure it was a valid location
+        //Use the IP class as a quick test to make sure it numeric
         try {
             new IP(loc);
         } catch(IllegalArgumentException iae) {
             throw new IOException("invalid location: " + location);
         }
-        
         //But, IP still could have passed if it thought there was a submask
         if( loc.indexOf('/') != -1 )
+            throw new IOException("invalid location: " + location);
+
+        //Then make sure it's a valid IP addr.
+        if(!NetworkUtils.isValidAddress(loc))
             throw new IOException("invalid location: " + location);
         
         if( port == -1 )
@@ -383,6 +387,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
                 throw new IOException("invalid location: " + location);
             }
         }
+        
+        if(!NetworkUtils.isValidPort(port))
+            throw new IOException("invalid port: " + port);
 	    
 	    return new Endpoint(loc,port);
     }
