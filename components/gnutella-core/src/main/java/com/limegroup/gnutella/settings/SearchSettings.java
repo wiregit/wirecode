@@ -23,6 +23,14 @@ public final class SearchSettings extends LimeProps {
 	public static final BooleanSetting GUESS_ENABLED =
 		FACTORY.createBooleanSetting("GUESS_ENABLED", true);
 
+
+	/**
+	 * Setting for whether or not OOB searching is enabled.
+	 */
+	public static final BooleanSetting OOB_ENABLED =
+		FACTORY.createBooleanSetting("OOB_ENABLED", true);
+
+
     /**
      * The TTL for probe queries.
      */

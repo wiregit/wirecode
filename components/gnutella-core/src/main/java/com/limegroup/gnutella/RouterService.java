@@ -754,7 +754,8 @@ public class RouterService {
     public static byte[] newQueryGUID() {
         if (isGUESSCapable() && !uploadManager.isBusy() && 
             OutOfBandThroughputStat.isSuccessRateGood() &&
-            acceptedIncomingConnection())
+            acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
+            SearchSettings.OOB_ENABLED.getValue())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
