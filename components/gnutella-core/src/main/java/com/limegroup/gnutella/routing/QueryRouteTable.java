@@ -225,13 +225,13 @@ public class QueryRouteTable {
     /**
      * For all keywords k in filename, adds <k> to this.
      */
-    public void add(String filename) {
-        addBTInternal(filename);
+    public void add(String filePath) {
+        addBTInternal(filePath);
     }
 
 
-    private void addBTInternal(String filename) {
-        String[] words=HashFunction.keywords(filename);
+    private void addBTInternal(String filePath) {
+        String[] words = HashFunction.keywords(filePath);
         String[] keywords=HashFunction.getPrefixes(words);
 		byte log2 = Utilities.log2(bitTableLength);
         for (int i=0; i<keywords.length; i++) {

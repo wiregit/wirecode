@@ -125,7 +125,7 @@ public class HashFunction {
      * @param fileName The name of the file to break up into keywords.  These
      *  keywords will subsequently be hashed for inclusion in the bit vector.
      */
-    public static String[] keywords(String fileName) {
+    public static String[] keywords(String filePath) {
         //TODO1: this isn't a proper implementation.  It should really be
         //to tokenized by ALL non-alphanumeric characters.
 
@@ -137,7 +137,7 @@ public class HashFunction {
             // TODO: a better canonicalForm(query) function here that
             // also removes accents by converting first to NFKD and keeping
             // only PRIMARY differences
-            I18NConvert.instance().getNorm(fileName),
+            I18NConvert.instance().getNorm(filePath),
             FileManager.DELIMETERS);
     }
 
