@@ -40,39 +40,37 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                          0, 0, false);
         assertTrue(! pr.isMarked());        
         // all pongs should have a GGEP extension now....
-        assertTrue(pr.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          0, 0, true);
         assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue(pr.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 2348, false);        
         assertTrue(! pr.isMarked());
         assertTrue(pr.getKbytes()==2348);
         // all pongs should have a GGEP extension now....
-        assertTrue(pr.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 2348, true);
         assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue(pr.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, false);
         assertTrue(! pr.isMarked());
         // all pongs should have a GGEP extension now....
-        assertTrue(pr.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, true);
         assertTrue(pr.isMarked());
-        // after added unicast support, all Ultrapeer Pongs have GGEP extensions
-        assertTrue(pr.hasGGEPExtension());
-        try {
-            pr.getDailyUptime();
-            assertTrue(false);
-        } 
-        catch (BadPacketException e) { 
-        }
+        // after added unicast support, all Ultrapeer Pongs have GGEP extension
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
+
+        
+        assertEquals("pong should not have a daily uptime", -1,
+                     pr.getDailyUptime());        
     }
       
     public void testPowerOf2() {
@@ -115,14 +113,12 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingReply pr=null;
         pr = new PingReply(new byte[16], (byte)2, (byte)4, payload);
         assertTrue(! pr.hasGGEPExtension());
-        try {
-            pr.getDailyUptime();
-            fail("pr should have been a bad packet.");
-        } catch (BadPacketException e) { }
 
+        assertEquals("pong should not have a daily uptime", -1,
+                     pr.getDailyUptime());  
         
         //Start testing
-        assertTrue("wrong port", pr.getPort() == 15);
+        assertEquals("wrong port", 15, pr.getPort());
         String ip = pr.getIP();
         assertTrue("wrong IP", ip.equals("16.16.16.16"));
         assertTrue("wrong files", pr.getFiles() == 15);
@@ -153,7 +149,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
-        assertTrue(pong.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertTrue(pong.supportsUnicast()==false);
         assertTrue(pong.getVendor().equals("LIME"));
         assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
@@ -231,7 +227,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
-        assertTrue(pong.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertTrue(pong.getDailyUptime()==523);
         assertTrue(pong.supportsUnicast()==true);
         assertTrue(pong.getVendor().equals("LIME"));
@@ -302,7 +298,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertTrue(pong.getPort()==6349);
-        assertTrue(pong.hasGGEPExtension());
+        assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertTrue(pong.getDailyUptime()==523);
         assertTrue(pong.supportsUnicast()==false);
         assertTrue(pong.getVendor().equals("LIME"));
@@ -327,10 +323,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(pr1.getIP(), pr2.getIP());
 
         assertTrue(! pr2.hasGGEPExtension());
-        try {
-            pr2.getDailyUptime();
-            fail("No exception");
-        } catch (BadPacketException e) { }
+        assertEquals("pong should not have a daily uptime", -1,
+                     pr2.getDailyUptime());
+
         ByteArrayOutputStream out=new ByteArrayOutputStream();
         pr2.write(out);
         assertTrue(out.toByteArray().length==(23+14));
