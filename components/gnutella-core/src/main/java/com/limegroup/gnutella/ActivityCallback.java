@@ -182,6 +182,17 @@ public interface ActivityCallback
      */
     public void promptAboutCorruptDownload(Downloader dloader);
 
+	/**
+	 *  Tell the GUI to deiconify.
+	 */
+	public void restoreApplication();
+
+	/**
+	 *  Show active downloads
+	 */
+	public void showDownloads();
+
+
     public String getHostValue(String key);
 
     /** Could not establish a listening port. */

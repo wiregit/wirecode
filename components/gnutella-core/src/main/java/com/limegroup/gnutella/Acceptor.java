@@ -8,6 +8,8 @@ import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.browser.ExternalControl;
+
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -357,8 +359,10 @@ public class Acceptor extends Thread {
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
-
 				}
+			    else if (word.equals("MAGNET")) {
+                    ExternalControl.fireMagnet(_socket);
+                }	
                 //4. Unknown protocol
                 else {
                     throw new IOException();
@@ -371,6 +375,7 @@ public class Acceptor extends Thread {
 			}
         }
     }
+
 
     /** 
      * Updates this IP filter.  Added to fix bug where banned IP added is not
