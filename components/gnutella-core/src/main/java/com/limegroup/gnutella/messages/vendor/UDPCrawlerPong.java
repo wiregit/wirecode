@@ -207,7 +207,7 @@ public class UDPCrawlerPong extends VendorMessage {
 			}
 			
 			// append myself at the end
-			agents.append("LimeWire/").append(CommonUtils.getLimeWireVersion());
+			agents.append(CommonUtils.getHttpServer());
 			
 			//zip the string
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
