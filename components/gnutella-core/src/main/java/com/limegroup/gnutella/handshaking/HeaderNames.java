@@ -56,6 +56,11 @@ public final class HeaderNames {
     public static final String X_VENDOR_MESSAGE = "Vendor-Message";
 
     /**
+     * Constant for the header advertising support of extendible probe queries.
+     */
+    public static final String X_PROBE_QUERIES = "X-Ext-Probes";
+
+    /**
      * Send by new hosts using dynamic-query style searching to denote the
      * maximum TTL that should be sent to them.  This is only for queries
      * coming directly from this host, and is affected by degree.
