@@ -340,6 +340,108 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         
         assertEquals("download should be complete",
             Downloader.COMPLETE, downloader.getState() );
+
+        mgr.remove((ManagedDownloader) downloader, true);
+    }
+    
+    /**
+     * Tests RequeryDownloader, aka the "wishlist" downloader.  It must
+     * initially send the right query and only accept the right results.
+     * This takes the test a little further - it makes sure that the downloader
+     * can wake up from the WAITING_FOR_USER state when a new result comes in.
+     */
+    public void testRequeryDownload2() throws Exception {
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=5*1000; //5 seconds
+        DownloadManager.TIME_BETWEEN_REQUERIES=5*1000;
+
+        //Start a download for the given incomplete file.  Give the thread time
+        //to start up, then make sure nothing has been sent initially.
+        Downloader downloader=null;
+        downloader=mgr.download("file name", 
+                                null, 
+                                GUID.makeGuid(),
+                                null);
+        Thread.sleep(200);
+        assertEquals("nothing should have been sent to start", 
+            0, router.broadcasts.size());
+
+        //Now wait a few seconds and make sure a requery of right type was sent.
+        Thread.sleep(6*1000);
+        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
+        downloader.resume();
+        Thread.sleep(500); // give the downloader a chance to send the query
+        assertEquals("downloader should be waiting for results", 
+            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals("unexpected router.broadcasts size", 1, 
+                     router.broadcasts.size());
+        Object m=router.broadcasts.get(0);
+        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
+        QueryRequest qr=(QueryRequest)m;
+		// First query is not counted as requery
+        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        assertEquals("unexpected query", "file name", qr.getQuery());
+        assertNotNull("expected any type of urn", qr.getRequestedUrnTypes());
+        assertEquals("only one (any) urn type expected",
+            1, qr.getRequestedUrnTypes().size());
+        assertNotNull("should have sent atleast an empty length urn set",
+            qr.getQueryUrns() );
+        assertEquals("wishlist has no URN",
+            0, qr.getQueryUrns().size() );
+
+        // make sure that the downloader waited for results but didn't get any
+        Thread.sleep(6*1000);
+        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
+
+        //Send a mismatching response to the query, making sure it is ignored.
+        //Give the downloader time to start up first.
+        Response response=new Response(
+            0l, TestFile.length(), "totally different.txt",
+            null, null, null);
+        byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
+        QueryReply reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false, false);//supports chat, is multicast response
+        router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        Thread.sleep(400);
+        assertEquals("downloader should still be waiting for results",
+            Downloader.WAITING_FOR_USER, downloader.getState());
+
+        //Send a good response to the query.
+        response=new Response(0l,   //index
+                              TestFile.length(),
+                              "some file name.txt",
+                              null,  //metadata
+                              null,  //URNs
+                              null); //metadata
+        reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false, false);//supports chat, is multicast response
+        router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+
+        //Make sure the downloader does the right thing with the response.
+        Thread.sleep(400);
+        while (downloader.getState()!=Downloader.COMPLETE &&
+               downloader.getState()!=Downloader.CORRUPT_FILE ) {
+			if ( downloader.getState() != Downloader.CONNECTING &&
+			     downloader.getState() != Downloader.WAITING_FOR_RESULTS &&
+			     downloader.getState() != Downloader.HASHING &&
+			     downloader.getState() != Downloader.SAVING &&
+			     downloader.getState() != Downloader.DOWNLOADING )
+                assertEquals("downloader should only be downloading",
+                    Downloader.DOWNLOADING, downloader.getState());
+            Thread.sleep(200);
+        }
+        
+        assertEquals("download should be complete",
+            Downloader.COMPLETE, downloader.getState() );
+
+        mgr.remove((ManagedDownloader) downloader, true);
     }
     
     /** Tests that requeries are sent fairly and at appropriate rate. */
