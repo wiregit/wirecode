@@ -86,7 +86,7 @@ public abstract class MessageStat implements Statistic {
 	 * Stores the accumulated statistics for the current time period
 	 * into the accumulated historical data.
 	 */
-	private void storeCurrentStat() {
+	public void storeCurrentStat() {
 		STAT_HISTORY.remove(0);
 		STAT_HISTORY.add(new Integer(_current));
 		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
