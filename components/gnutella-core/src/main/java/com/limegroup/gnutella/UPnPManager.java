@@ -474,30 +474,4 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			}
 		}
 	}
-	
-	public void test() {
-		Mapping m = new Mapping("",
-				6346+"",
-				"192.168.1.100",
-				6346+"",
-				"UDP",
-				"test");
-		removeMapping(m);
-		/*m = new Mapping("",
-				6346+"",
-				"192.168.1.101",
-				6346+"",
-				"TCP",
-				"test");
-		addMapping(m);*/
-	}
-	public static void main(String[] args) throws Exception {
-		final UPnPManager cp = UPnPManager.instance();
-		Thread.sleep(4000);
-		cp.test();
-		synchronized(cp)  {
-			cp.wait();
-		}
-	}
-	
 }

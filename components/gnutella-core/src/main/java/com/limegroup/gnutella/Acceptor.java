@@ -413,11 +413,9 @@ public class Acceptor implements Runnable {
 			_port = tempPort;
         } catch (IOException e) {
             socketError = e;
-            // 2. Try 40 different ports. The first 10 tries increment
+            // 2. Try 20 different ports. The first 10 tries increment
             // sequentially from 6346. The next 10 tries are random ports between
             // 2000 and 52000
-            // for each port first check if its available on the NAT (if a NAT exists)
-            // and then check if its available locally.
             int numToTry = 20;
             Random gen = null;
             for (int i=0; i<numToTry; i++) {
