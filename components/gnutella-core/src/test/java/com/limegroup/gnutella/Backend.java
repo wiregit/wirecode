@@ -86,7 +86,8 @@ public final class Backend {
 	 */
 	public void shutdown() {
 		System.out.println("BACKEND SHUTDOWN"); 
-		ROUTER_SERVICE.shutdown();		
+		ROUTER_SERVICE.shutdown();	
+		System.exit(0);
 	}
 
 	/**
