@@ -159,19 +159,19 @@ public final class ID3Reader {
         int seconds = ((Integer) info[8]).intValue();
 
         List nameValList = new ArrayList();
-        if(!((String)info[0]).equals(""))
+        if(info[0]!=null && !((String)info[0]).equals(""))
             nameValList.add(new NameValue(TITLE_KEY, info[0]));
-        if(!((String)info[1]).equals(""))
+        if(info[1]!=null && !((String)info[1]).equals(""))
             nameValList.add(new NameValue(ARTIST_KEY, info[1]));
-        if(!((String)info[2]).equals(""))
+        if(info[2]!=null && !((String)info[2]).equals(""))
             nameValList.add(new NameValue(ALBUM_KEY, info[2]));
-        if(!((String)info[3]).equals(""))
+        if(info[3]!=null && !((String)info[3]).equals(""))
             nameValList.add(new NameValue(YEAR_KEY, info[3]));
-        if(!((String)info[5]).equals(""))
+        if(info[5]!=null && !((String)info[5]).equals(""))
             nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
         if(track > 0)
             nameValList.add(new NameValue(TRACK_KEY, ""+track));
-        if(!info[6].equals("") )
+        if(info[6]!=null && !info[6].equals("") )
             nameValList.add(new NameValue(GENRE_KEY, info[6]));
         if(bitrate > 0)
             nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
@@ -319,7 +319,7 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[0] = str;
         }
@@ -329,7 +329,7 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[1] = str;
         }
@@ -339,7 +339,7 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[2] = str;
         }
@@ -349,7 +349,7 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[3] = str;
         }
@@ -366,10 +366,11 @@ public final class ID3Reader {
         //6. track
         try {
             str = mp3File.getTrack().getTextContent();
+            System.out.println("Sumeet:|"+str+"|");
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[4] = new Short(str);
         }
@@ -379,7 +380,7 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {
             str = "";
         }
-        if(! "".equals(str)) {
+        if(str!=null && !"".equals(str)) {
             fieldCount++;
             audioTags[6] = str;
         }
