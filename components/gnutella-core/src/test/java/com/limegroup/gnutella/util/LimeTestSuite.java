@@ -33,6 +33,14 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         super(a);
         _testClass = a;
     }
+    
+    /**
+     * Allows the test class to be changed.
+     * Required when forcing a single test to be run from a TestCase.
+     */
+    public static void setTestClass(Class cls) {
+        _testClass = cls;
+    }
          
     /**
      * Modified run.

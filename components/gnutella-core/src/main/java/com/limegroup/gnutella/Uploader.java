@@ -10,18 +10,19 @@ import java.net.*;
  */
 public interface Uploader extends BandwidthTracker {
 
-	public static final int CONNECTING       = 0;
-	public static final int FREELOADER       = 1;
-	public static final int LIMIT_REACHED    = 2;
-	public static final int UPLOADING        = 3;
-	public static final int COMPLETE         = 4;
-	public static final int INTERRUPTED      = 5;
-	public static final int FILE_NOT_FOUND   = 7;
-    public static final int BROWSE_HOST      = 8;
-    public static final int QUEUED           = 9;
-    public static final int UPDATE_FILE      = 10;
+	public static final int CONNECTING        = 0;
+	public static final int FREELOADER        = 1;
+	public static final int LIMIT_REACHED     = 2;
+	public static final int UPLOADING         = 3;
+	public static final int COMPLETE          = 4;
+	public static final int INTERRUPTED       = 5;
+	public static final int FILE_NOT_FOUND    = 7;
+    public static final int BROWSE_HOST       = 8;
+    public static final int QUEUED            = 9;
+    public static final int UPDATE_FILE       = 10;
     public static final int MALFORMED_REQUEST = 11;
-    public static final int PUSH_PROXY       = 12;
+    public static final int PUSH_PROXY        = 12;
+    public static final int UNAVAILABLE_RANGE = 13;
 
     /**
 	 * Stops this upload.  If the download is already 

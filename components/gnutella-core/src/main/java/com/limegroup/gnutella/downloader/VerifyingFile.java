@@ -22,6 +22,8 @@ public class VerifyingFile {
     private RandomAccessFile fos;
 
     private boolean checkOverlap;
+    
+    private volatile boolean isCorrupted;
 
     private ManagedDownloader managedDownloader; 
     /**
@@ -75,9 +77,11 @@ public class VerifyingFile {
                 fos.readFully(fileBuf,0,amountToCheck);
                 int j = findInitialPoint(overlapInterval,currPos, numBytes);
                 for(int i=0;i<amountToCheck;i++,j++) {
-                    if (buf[j]!=fileBuf[i]) //corrupt bytes
+                    if (buf[j]!=fileBuf[i]) { //corrupt bytes
+                        isCorrupted = true; // flag as corrupted.
                         if(managedDownloader!=null)//md may be null for testing
                             managedDownloader.promptAboutCorruptDownload();
+                    }
                 }
             }
         }
@@ -110,16 +114,41 @@ public class VerifyingFile {
         return writtenBlocks.getSize();
     }
   
+    /**
+     * Closes the file output stream.
+     */
     public void close() {
-        // this MUST release the reference to the ManagedDownloader,
-        // otherwise, all downloaders will always stay in memory
-        // (which includes everything the download references)
-        managedDownloader = null;
+        // This does not clear the ManagedDownloader because
+        // it could still be in a waiting state, and we need
+        // it to allow IncompleteFileDescs to funnel alt-locs
+        // as sources to the downloader.
         if(fos==null)
             return;
         try { 
             fos.close();
         } catch (IOException ioe) {}
+    }
+    
+    /**
+     * Clears the ManagedDownloader variable, allowing it to be GC'ed.
+     */
+    public void clearManagedDownloader() {
+        managedDownloader = null;
+    }   
+    
+    /**
+     * Returns whether or not we have determined if the written is corrupted.
+     */
+    public boolean isCorrupted() {
+        return isCorrupted;
+    }
+    
+    /**
+     * Returns the ManagedDownloader this VerifyingFile is associated with.
+     * If this VerifyingFile is closed, the return value will be null.
+     */
+    public ManagedDownloader getManagedDownloader() {
+        return managedDownloader;
     }
     
     /////////////////////////private helpers//////////////////////////////

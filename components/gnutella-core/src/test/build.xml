@@ -133,7 +133,23 @@
     </antcall>
     <antcall target="html"/>
     <antcall target="clean testData"/>
- </target> 
+ </target>
+ 
+  <!-- Runs a specific class, passing the output to the shell & XML file-->
+ <!-- class name specified by class passed by 'class' -->
+ <!-- For example, to run UltrapeerRoutingTest, you would type: -->
+ <!-- ant -D"class=UltrapeerRoutingTest" test -->
+ <!-- To test, say, DownloadTest, you would type: -->
+ <!-- ant -D"class=downloader/DownloadTest" test -->
+ <target name="testnofail" if="class">
+    <antcall target="batchunit">
+        <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
+        <param name="haltonfailure" value="no"/>
+        <param name="haltonerror" value="no"/>
+    </antcall>
+    <antcall target="html"/>
+    <antcall target="clean testData"/>
+ </target>  
 
  
  <!-- To be used internally by 'test all', 'test package' & 'test' -->

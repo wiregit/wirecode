@@ -46,6 +46,11 @@ public class QueuedUploadState implements HTTPMessage {
                                   FILE_DESC.getAlternateLocationCollection(),
                                           ostream);
                 }
+                if (FILE_DESC instanceof IncompleteFileDesc) {
+                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
+                                          ((IncompleteFileDesc)FILE_DESC),
+                                          ostream);
+                }
             }
         }
         str = "\r\n";
@@ -55,4 +60,8 @@ public class QueuedUploadState implements HTTPMessage {
     public void writeMessageBody(OutputStream ostream) throws IOException {
         //this method should MUST NOT do anything.
     }
+    
+	public boolean getCloseConnection() {
+	    return false;
+	}    
 }

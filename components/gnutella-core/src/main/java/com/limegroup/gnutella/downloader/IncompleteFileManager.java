@@ -100,6 +100,7 @@ public class IncompleteFileManager implements Serializable {
             File file=(File)iter.next();
             if (!file.exists() || isOld(file)) {
                 ret=true;
+                RouterService.getFileManager().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }                
@@ -220,7 +221,20 @@ public class IncompleteFileManager implements Serializable {
             //No hash.
             return new File(incDir, tempName(convertedName, rfd.getSize(), 0));
         }
-    }    
+    }
+    
+    /**
+     * Returns the file associated with the specified URN.  If no file matches,
+     * returns null.
+     *
+     * @return the file associated with the URN, or null if none.
+     */
+    public synchronized File getFileForUrn(URN urn) {
+        if( urn == null )
+            throw new NullPointerException("null urn");
+        
+        return (File)hashes.get(urn);
+    }
 
     /** 
      * Returns the unqualified file name for a file with the given name
@@ -256,6 +270,8 @@ public class IncompleteFileManager implements Serializable {
         //Convert blocks from interval lists to VerifyingFile.
         //See serialization note above.
         blocks=transform(blocks);
+        //Notify FileManager about the new incomplete files.
+        registerAllIncompleteFiles();
     }
 
     private synchronized void writeObject(ObjectOutputStream stream) 
@@ -342,10 +358,19 @@ public class IncompleteFileManager implements Serializable {
                 //Could also break here as a small optimization.
                 iter.remove();
         }
+        
+        //Remove the entry from FileManager
+        RouterService.getFileManager().removeFileIfShared(incompleteFile);
     }
 
+    /**
+     * Associates the incompleteFile with the VerifyingFile vf.
+     * Notifies FileManager about a new Incomplete File.
+     */
     public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
         blocks.put(incompleteFile,vf);
+        
+        registerIncompleteFile(incompleteFile);
     }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {
@@ -362,7 +387,35 @@ public class IncompleteFileManager implements Serializable {
             return vf.getBlockSize();
         }
     }
-   
+    
+    /**
+     * Notifies file manager about all incomplete files.
+     */
+    public synchronized void registerAllIncompleteFiles() {
+        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+            File file=(File)iter.next();
+            if (file.exists() && !isOld(file)) {
+                registerIncompleteFile(file);
+            }
+        }
+    }
+    
+    /**
+     * Notifies file manager about a single incomplete file.
+     */
+    private synchronized void registerIncompleteFile(File incompleteFile) {
+        // Only register if it has a SHA1 -- otherwise we can't share.
+        Set hashes = getAllCompletedHashes(incompleteFile);
+        if( hashes.size() == 0 ) return;
+        
+        RouterService.getFileManager().addIncompleteFile(
+            incompleteFile,
+            hashes,
+            getCompletedName(incompleteFile),
+            (int)getCompletedSize(incompleteFile),
+            getEntry(incompleteFile)
+        );
+    }
 
     /**
      * Returns the name of the complete file associated with the given
@@ -427,13 +480,31 @@ public class IncompleteFileManager implements Serializable {
      */
     public synchronized URN getCompletedHash(File incompleteFile) {
         //Return a key k s.t., hashes.get(k)==incompleteFile...
-        for (Iterator iter=hashes.keySet().iterator(); iter.hasNext(); ) {
-            URN key=(URN)iter.next();
-            if (hashes.get(key).equals(incompleteFile))
-                return key;
+        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry entry=(Map.Entry)iter.next();
+            if (incompleteFile.equals(entry.getValue()))
+                return (URN)entry.getKey();
         }
         return null; //...or null if no such k.
     }
+    
+    /**
+     * Returns any known hashes of the complete file associated with the given
+     * incomplete file, i.e., the hashes of incompleteFile when the 
+     * download is complete.
+     * @param incompleteFile a file returned by getFile
+     * @return a set of known hashes
+     */
+    public synchronized Set getAllCompletedHashes(File incompleteFile) {
+        Set urns = new HashSet(1);
+        //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
+        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry entry=(Map.Entry)iter.next();
+            if (incompleteFile.equals(entry.getValue()))
+                urns.add(entry.getKey());
+        }
+        return urns;
+    }    
 
     public synchronized String toString() {
         StringBuffer buf=new StringBuffer();

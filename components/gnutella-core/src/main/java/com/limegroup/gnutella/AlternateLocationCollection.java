@@ -153,6 +153,13 @@ public final class AlternateLocationCollection
 	public URN getSHA1Urn() {
 		return SHA1;
 	}
+	
+	/**
+	 * Returns the SHA1 for this AlternateLocationCollection.
+	 */
+	public URN getSHA1() {
+	    return SHA1;
+	}
 
 	/**
 	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
@@ -167,8 +174,9 @@ public final class AlternateLocationCollection
 	 * @throws <tt>IllegalArgumentException</tt> if the <tt>AlternateLocation</tt>
 	 *  being added does not have a SHA1 urn or if the SHA1 urn does not match
 	 *  the urn for this collection
+	 * @return true if added, false otherwise.
 	 */
-	public void addAlternateLocation(AlternateLocation al) {
+	public boolean addAlternateLocation(AlternateLocation al) {
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
@@ -180,12 +188,12 @@ public final class AlternateLocationCollection
 		    
     		// if it's not a valid time, don't attempt to add.
             if ( !isValidTime(al.getTime()) ) {
-                return;
+                return false;
             }
     		
     		// do not add this if it was previously removed.
     		if ( wasRemoved(al) ) {
-    		    return;
+    		    return false;
             }
             
             // See if this location already exists in the map somewhere.
@@ -195,9 +203,11 @@ public final class AlternateLocationCollection
             if( toUpdate == null ||
               ( toUpdate != null && toUpdate.compareTo(al) > 0 ) ) {
                 LOCATIONS.put(al, al);
-                return;
+                return true;
             }
         }
+        
+        return false;
 	}
 	
 	/**
@@ -292,7 +302,7 @@ public final class AlternateLocationCollection
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
      *  collection to add does not match the collection of <tt>this</tt>
      */
-	public void 
+	public int 
         addAlternateLocationCollection(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("ALC is null");
@@ -301,13 +311,17 @@ public final class AlternateLocationCollection
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
 		
+		int added = 0;
 		synchronized(alc.LOCATIONS) {
 			Iterator iter = alc.LOCATIONS.keySet().iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				addAlternateLocation(curLoc);
+				if( addAlternateLocation(curLoc) )
+				    added++;
 			}
 		}
+		
+		return added;
 	}
 
 	// implements the AlternateLocationCollector interface

@@ -1,5 +1,3 @@
-
-
 package com.limegroup.gnutella;
 
 import java.io.*;
@@ -7,6 +5,8 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -26,69 +26,132 @@ public class FileManager {
      * is _loadThread, which is controlled by _loadThreadLock.
      **********************************************************************/
 
-    /** the total size of all files, in bytes.
-     *  INVARIANT: _size=sum of all size of the elements of _files */
+    /**
+     * The total size of all files, in bytes.
+     * INVARIANT: _size=sum of all size of the elements of _files,
+     *   except IncompleteFileDescs, which may change size at any time.
+     */
     private long _size;
-    /** the total number of files.  INVARIANT: _numFiles==number of
-     *  elements of _files that are not null. */
+    
+    /**
+     * The total number of files.  INVARIANT: _numFiles==number of
+     * elements of _files that are not null and not IncompleteFileDescs.
+     */
     private int _numFiles;
-    /** the total number of files that are pending sharing.
+    
+    /** 
+     * The total number of files that are pending sharing.
      *  (ie: awaiting caching or being added)
      */
     private int _numPendingFiles;
-    /** the list of shareable files.  An entry is null if it is no longer
-     *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in a shared directory with a shareable extension. */
+    
+    /**
+     * The total number of incomplete shared files.
+     * INVARIANT: _numFiles + _numIncompleteFiles == the number of
+     *  elements of _files that are not null.
+     */
+    private int _numIncompleteFiles;
+    
+    /** 
+     * The list of shareable files.  An entry is null if it is no longer
+     *  shared.
+     * INVARIANT: for all i, f[i]==null, or f[i].index==i and
+     *  f[i]._path is in a shared directory with a shareable extension or
+     *  f[i]._path is the incomplete directory if f is an IncompleteFileDesc.
+     */
     private List /* of FileDesc */ _files;
 
-    /** an index mapping keywords in file names to the indices in _files.  A
+    /**
+     * An index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
-     * without a character from DELIMETERS.  INVARIANT: For all keys k in
-     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
-     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
-     * contains i. */
+     * without a character from DELIMETERS.  IncompleteFile keywords
+     * are NOT stored in this index.  Retrieval is of IncompleteFiles are only
+     * allowed by hash.
+     *
+     * INVARIANT: For all keys k in _index, for all i in _index.get(k), 
+     * _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path where _files[i]
+     * is not an IncompleteFileDesc, _index.get(k) contains i.
+     */
     private Trie /* String -> IntSet  */ _index;
-    /** an index mapping appropriately case-normalized URN strings to the
-     * indices in _files.  Used to make query-by-hash faster.  INVARIANT: for
-     * all keys k in _urnIndex, for all i in _urnIndex.get(k),
+    
+    /**
+     * An index mapping appropriately case-normalized URN strings to the
+     * indices in _files.  Used to make query-by-hash faster.
+     * INVARIANT: for all keys k in _urnIndex, for all i in _urnIndex.get(k),
      * _files[i].containsUrn(k).  Likewise for all i, for all k in
-     * _files[i].getUrns(),  _urnIndex.get(k) contains i.  */
+     * _files[i].getUrns(),  _urnIndex.get(k) contains i.
+     */
     private Map /* URN -> IntSet  */ _urnIndex;
     
-    /** The set of extensions to share, sorted by StringComparator. 
-     *  INVARIANT: all extensions are lower case. */
+    /**
+     * The set of extensions to share, sorted by StringComparator. 
+     * INVARIANT: all extensions are lower case.
+     */
     private static Set /* of String */ _extensions;
-    /** The list of shared directories and their contents.  More formally, a
-     *  mapping whose keys are shared directories and any subdirectories
-     *  reachable through those directories.  The value for any key is the set
-     *  of indices of all shared files in that directory.  INVARIANT: for any
-     *  key k with value v in _sharedDirectories, for all i in v,
+    
+    /**
+     * The list of shared directories and their contents.  More formally, a
+     * mapping whose keys are shared directories and any subdirectories
+     * reachable through those directories.  The value for any key is the set
+     * of indices of all shared files in that directory.
+     * INVARIANT: for any key k with value v in _sharedDirectories, 
+     * for all i in v,
      *       _files[i]._path==k+_files[i]._name.
-     *  Likewise, for all i s.t. _files[i]!=null,
+     *  Likewise, for all i s.t.
+     *  _files[i]!=null and !(_files[i] instanceof IncompleteFileDesc),
      *       _sharedDirectories.get(
      *            _files[i]._path-_files[i]._name).contains(i).
      * Here "==" is shorthand for file path comparison and "a-b" is short for
      * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
-     * canonicalized files, sorted by a FileComparator. */
+     * canonicalized files, sorted by a FileComparator.
+     *
+     * Incomplete shared files are NOT stored in this data structure, but are
+     * instead in the _incompletesShared IntSet.
+     */
     private Map /* of File -> IntSet */ _sharedDirectories;
+    
+    /**
+     * The IntSet for incomplete shared files.
+     * 
+     * INVARIANT: for all i in _incompletesShared,
+     *       _files[i]._path == the incomplete directory.
+     *       _files[i] instanceof IncompleteFileDesc
+     *  Likewise, for all i s.t.
+     *    _files[i] != null and _files[i] instanceof IncompleteFileDesc,
+     *       _incompletesShared.contains(i)
+     * 
+     * This structure is not strictly needed for correctness, but it allows
+     * others to retrieve all the incomplete-shared files, which is
+     * a relatively useful feature.
+     */
+    private IntSet _incompletesShared;
 
-    /** The thread responsisble for adding contents of _sharedDirectories to
+    /**
+     *  The thread responsisble for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
      *  because indexing files can be slow.  Interrupt this thread to stop the
      *  loading; it will periodically check its interrupted status. 
      *  LOCKING: obtain _loadThreadLock before modifying and before obtaining
-     *  this (to prevent deadlock). */
+     *  this (to prevent deadlock).
+     */
     private Thread _loadThread;
-    /** True if _loadThread.interrupt() was called.  This is needed because
+    /**
+     *  True if _loadThread.interrupt() was called.  This is needed because
      *  _loadThread.isInterrupted() does not behave as expected.  See
-     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html */
-    private boolean _loadThreadInterrupted=false;   
-    /** The lock for _loadThread.  Necessary to prevent deadlocks in
-     *  loadSettings. */
+     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html
+     */
+    private boolean _loadThreadInterrupted=false;
+    
+    /**
+     * The lock for _loadThread.  Necessary to prevent deadlocks in
+     * loadSettings.
+     */
     private Object _loadThreadLock=new Object();
     
     /** The callback for adding shared directories and files, or null
-     *  if this has no callback.  */
+     *  if this has no callback.
+     */
     protected static ActivityCallback _callback;
     
     /**
@@ -104,8 +167,10 @@ public class FileManager {
         
     
 
-    /** Characters used to tokenize queries and file names. */
-    public static final String DELIMETERS=" -._+/*()\\";
+    /**
+     * Characters used to tokenize queries and file names.
+     */
+    public static final String DELIMETERS=" -._+/*()\\";    
     private static final boolean isDelimeter(char c) {
         switch (c) {
         case ' ':
@@ -134,12 +199,14 @@ public class FileManager {
         // overwrite all these variables
         _size = 0;
         _numFiles = 0;
+        _numIncompleteFiles = 0;
         _numPendingFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
         _urnIndex = new HashMap();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
+        _incompletesShared = new IntSet();
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -154,16 +221,31 @@ public class FileManager {
     ////////////////////////////// Accessors ///////////////////////////////
 
     
-    /** Returns the size of all files, in <b>bytes</b>.  Note that the largest
+    /**
+     * Returns the size of all files, in <b>bytes</b>.  Note that the largest
      *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
-     *  bytes are being shared, returns this value. */
+     *  bytes are being shared, returns this value.
+     */
     public int getSize() {return ByteOrder.long2int(_size);}
 
-    /** Returns the number of files. */
+    /**
+     * Returns the number of files.
+     */
     public int getNumFiles() {return _numFiles;}
     
-    /** Returns the number of pending files. */
-    public int getNumPendingFiles() { return _numPendingFiles; }
+    /**
+     * Returns the number of shared incomplete files.
+     */
+    public int getNumIncompleteFiles() {
+        return _numIncompleteFiles;
+    }
+    
+    /**
+     * Returns the number of pending files.
+     */
+    public int getNumPendingFiles() {
+        return _numPendingFiles;
+    }
 
 
     /**
@@ -213,14 +295,14 @@ public class FileManager {
 
 		IntSet.IntSetIterator iter = indeces.iterator();
 		
-		// we only care about one of the indeces -- it doesn't matter which
-		// one, since they all are the "same" file, with the same URN
-		if(iter.hasNext()) {
+        //Pick the first non-null non-Incomplete FileDesc.
+        FileDesc ret = null;
+		while ( iter.hasNext() 
+               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
 			int index = iter.next();
-			return (FileDesc)_files.get(index);
-		} else {
-			return null;
+            ret = (FileDesc)_files.get(index);
 		}
+        return ret;
 	}
 
 	/**
@@ -243,7 +325,24 @@ public class FileManager {
         return null;
 	}
 	
-
+	/**
+	 * Returns a list of all shared incomplete file descriptors.
+	 */
+	public FileDesc[] getIncompleteFileDescriptors() {
+        if (_incompletesShared == null) {
+            return null;
+        }
+        
+        FileDesc[] ret = new FileDesc[_incompletesShared.size()];
+        IntSet.IntSetIterator iter = _incompletesShared.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
+            FileDesc fd = (FileDesc)_files.get(iter.next());
+            Assert.that(fd != null, "Directory has null entry");
+            ret[i]=fd;
+        }
+        
+        return ret;
+    }
 
     /**
      * Returns a list of all shared files in the given directory, in any order.
@@ -499,12 +598,14 @@ public class FileManager {
             // Reset the file list info
             _size = 0;
             _numFiles = 0;
+            _numIncompleteFiles = 0;
             _numPendingFiles = 0;
             _files=new ArrayList();
             _index=new Trie(true);   //maintain invariant
             _urnIndex=new HashMap(); //maintain invariant
             _extensions = new TreeSet(new StringComparator());
             _sharedDirectories = new TreeMap(new FileComparator());
+            _incompletesShared = new IntSet();
 
             // Load the extensions.
             String[] extensions = 
@@ -557,7 +658,12 @@ public class FileManager {
             if (! loadThreadInterrupted())
                 trim();                    
         }
-
+        
+        // Tell the download manager to notify us of incomplete files.
+		if (! loadThreadInterrupted())
+		    RouterService.getDownloadManager().getIncompleteFileManager().
+		        registerAllIncompleteFiles();
+		    
 		// write out the cache of URNs
 		UrnCache.instance().persistCache();
     }
@@ -780,6 +886,65 @@ public class FileManager {
     }
 
     /**
+     * Adds an incomplete file to be used for partial file sharing.
+     *
+     * @modifies this
+     * @param incompleteFile the incomplete file.
+     * @param urns the set of all known URNs for this incomplete file
+     * @param name the completed name of this incomplete file
+     * @param size the completed size of this incomplete file
+     * @param vf the VerifyingFile containing the ranges for this inc. file
+     */
+    public synchronized void addIncompleteFile(File incompleteFile,
+                                               Set urns,
+                                               String name,
+                                               int size,
+                                               VerifyingFile vf) {
+        // We want to ensure that incomplete files are never added twice.
+        // This may happen if IncompleteFileManager is deserialized before
+        // FileManager finishes loading ...
+        // So, every time an incomplete file is added, we check to see if
+        // it already was... and if so, ignore it.
+        // This is somewhat expensive, but it is called very rarely, so it's ok
+		Iterator iter = urns.iterator();
+		while (iter.hasNext()) {
+            // if there were indices for this URN, exit.
+            IntSet shared = (IntSet)_urnIndex.get(iter.next());
+            // nothing was shared for this URN, look at another
+            if( shared == null )
+                continue;
+                
+            IntSet.IntSetIterator isIter = shared.iterator();
+            for ( ; isIter.hasNext(); ) {
+                int i = isIter.next();
+                FileDesc desc = (FileDesc)_files.get(i);
+                // unshared, keep looking.
+                if(desc == null)
+                    continue;
+                String incPath = incompleteFile.getAbsolutePath();
+                String path  = desc.getFile().getAbsolutePath();
+                // the files are the same, exit.
+                if( incPath.equals(path) )
+                    return;
+            }
+        }
+        
+        // no indices were found for any URN associated with this
+        // IncompleteFileDesc... add it.
+        int fileIndex = _files.size();
+        _incompletesShared.add(fileIndex);
+        IncompleteFileDesc ifd = new IncompleteFileDesc(
+            incompleteFile, urns, fileIndex, name, size, vf);            
+        _files.add(ifd);
+        this.updateUrnIndex(ifd);
+        _numIncompleteFiles++;
+        if (_callback != null) {
+            File parent = getParentFile(incompleteFile);
+            _callback.addSharedFile(ifd, parent);
+        }
+    }
+
+    /**
      * @modifies this
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
@@ -793,7 +958,6 @@ public class FileManager {
 				indices=new IntSet();
 				_urnIndex.put(urn, indices);
 			}
-
 			indices.add(fileDesc.getIndex());
 		}
     }
@@ -827,6 +991,21 @@ public class FileManager {
             //Aha, it's shared. Unshare it by nulling it out.
             if (f.equals(candidate)) {
                 _files.set(i,null);
+                
+                // If it's an incomplete file, the only reference we 
+                // have is the URN, so remove that and be done.
+                // We also return false, because the file was never really
+                // "shared" to begin with.
+                if (fd instanceof IncompleteFileDesc) {
+                    this.removeUrnIndex(fd);
+                    _numIncompleteFiles--;
+                    boolean removed = _incompletesShared.remove(i);
+                    Assert.that(removed,
+                        "File "+i+" not found in " + _incompletesShared);
+                    repOk();
+                    return false;
+                }
+                
                 _numFiles--;
                 _size-=fd.getSize();
 
@@ -1041,6 +1220,8 @@ public class FileManager {
      * Returns an array of all responses matching the given request.  If there
      * are no matches, the array will be empty (zero size).
      *
+     * Incomplete Files are NOT returned in responses to queries.
+     *
      * Design note: returning an empty array requires no extra allocations,
      * as empty arrays are immutable.
      */
@@ -1054,14 +1235,20 @@ public class FileManager {
         //before they ever reach this point.
         if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
             //Special case: if no shared files, return null
+            // This works even if incomplete files are shared, because
+            // they are added to _numIncompleteFiles and not _numFiles.
             if (_numFiles==0)
                 return EMPTY_RESPONSES;
             //Extract responses for all non-null (i.e., not deleted) files.
+            //Because we ignore all incomplete files, _numFiles continues
+            //to work as the expected size of ret.
             Response[] ret=new Response[_numFiles];
             int j=0;
             for (int i=0; i<_files.size(); i++) {
                 FileDesc desc = (FileDesc)_files.get(i);
-                if (desc==null) 
+        		// If the file was unshared or is an incomplete file,
+        		// DO NOT SEND IT.
+                if (desc==null || desc instanceof IncompleteFileDesc) 
                     continue;    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
@@ -1210,7 +1397,11 @@ public class FileManager {
                 IntSet.IntSetIterator iter = hits.iterator();
                 while(iter.hasNext()) {
                     FileDesc fd = (FileDesc)_files.get(iter.next());
-                    if(fd!=null && fd.containsUrn(urn)) {
+        		    // If the file is unshared or an incomplete file
+        		    // DO NOT SEND IT.
+        		    if(fd == null || fd instanceof IncompleteFileDesc)
+        			    continue;
+                    if(fd.containsUrn(urn)) {
                         // still valid
                         if(ret==null) ret = new IntSet();
                         ret.add(fd.getIndex());

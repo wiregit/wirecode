@@ -272,7 +272,8 @@ public class FileDesc implements AlternateLocationCollector {
 
 	/**
 	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
-	 * <tt>FileDesc</tt>.  The collection could be empty or <tt>null</tt>.
+	 * <tt>FileDesc</tt>.  The collection will always have this location
+	 * added to it.
 	 *
 	 * @return the <tt>AlternateLocationCollection</tt> for this 
 	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
@@ -288,6 +289,19 @@ public class FileDesc implements AlternateLocationCollector {
 		}
 		return ALT_LOCS;
 	}
+	
+	/**
+	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
+	 * <tt>FileDesc</tt>.  The collection could be empty.
+	 *
+	 * @return the <tt>AlternateLocationCollection</tt> for this 
+	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
+	 *  if it is not initialized
+	 */
+	public AlternateLocationCollection
+	  getAlternateLocationCollectionWithoutSelf() {
+		return ALT_LOCS;
+	}	
 
 	/** 
 	 * Implements <tt>AlternateLocationCollector</tt> interface.
@@ -296,7 +310,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
 	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
 	 */
-	public void addAlternateLocation(AlternateLocation al) {
+	public boolean addAlternateLocation(AlternateLocation al) {
         if(al == null) {
             throw new NullPointerException("cannot accept null alt locs");
         }
@@ -309,7 +323,7 @@ public class FileDesc implements AlternateLocationCollector {
 											   SHA1_URN+"\n"+sha1);
 		}
 		URL url = al.getUrl();
-		ALT_LOCS.addAlternateLocation(al);
+		return ALT_LOCS.addAlternateLocation(al);
 	}
 
 	/**
@@ -323,7 +337,7 @@ public class FileDesc implements AlternateLocationCollector {
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
      *  collection to add does not match the collection of <tt>this</tt>
      */
-	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
+	public int addAlternateLocationCollection(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("cannot accept null alt loc coll");
         }
@@ -331,7 +345,7 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("SHA1 does not match:\n"+
 											   SHA1_URN+"\n"+alc.getSHA1Urn());
 		}
-		ALT_LOCS.addAlternateLocationCollection(alc);
+		return ALT_LOCS.addAlternateLocationCollection(alc);
 	}
 
 	// implements AlternateLocationCollector interface

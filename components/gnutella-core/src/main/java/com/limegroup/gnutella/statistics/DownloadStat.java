@@ -80,6 +80,12 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
 
     /**
+     * Statistic for the number of range not available download responses.
+     */
+    public static final Statistic RNA_EXCEPTION =
+        new DownloadStat();
+
+    /**
      * Statistic for the number of file not found download responses.
      */ 
     public static final Statistic FNF_EXCEPTION =
@@ -98,10 +104,29 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
         
     /**
+     * Statistic for the number of ProblemReadingHeader exceptions
+     * while downloading.
+     */
+    public static final Statistic PRH_EXCEPTION =
+        new DownloadStat();
+        
+    /**
+     * Statistic for the number of Unknown Codes from download responses.
+     */
+    public static final Statistic UNKNOWN_CODE_EXCEPTION =
+        new DownloadStat();
+        
+    /**
      * Statistic for the number of IOExceptions while downloading.
      */
     public static final Statistic IO_EXCEPTION =
         new DownloadStat();
+
+
+    /**
+     * Statistic for the number of NoSuchRangeExceptions while downloading.
+     */
+    public static final Statistic NSR_EXCEPTION = new DownloadStat();
 
     /**
      * Statistic for the number of 'ok' responses while downloading.

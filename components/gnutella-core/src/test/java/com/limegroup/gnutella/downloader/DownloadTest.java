@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
@@ -66,32 +66,9 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static final ActivityCallbackStub callback = new MyCallback();
 	private static ManagedDownloader DOWNLOADER = null;
 	private static Object COMPLETE_LOCK = new Object();
+	private static boolean REMOVED = false;
+	private static final long TWO_MINUTES = 1000 * 60 * 2;
 	
-	/**
-	 * The list of tests to run.
-	 * If it is empty, or if a test's number is in here, it will run.
-	 * Otherwise it will generate a failure (just to let us know it isn't running).
-	 */
-	private static final int[] testsToRun = { };
-	private static final int SIMPLE_DOWNLOAD = 1;
-	private static final int SIMPLE_SWARM = 2;
-	private static final int UNBALANCED_SWARM = 3;
-	private static final int SWARM_WITH_INTERRUPT = 4;
-	private static final int STEALER_INTERRUPTED = 5;
-	private static final int ADD_DOWNLOAD = 6;
-	private static final int STALLING_UPLOADER_REPLACED = 7;
-	private static final int TWO_ALTERNATE_LOCATIONS = 8;
-	private static final int UPLOADER_ALTERNATE_LOCATIONS = 9;
-	private static final int WIERD_ALTERNATE_LOCATIONS = 10;
-	private static final int STEALER_INTERRUPTED_WITH_ALTERNATE = 11;
-	private static final int UPDATE_WHITE_WITH_FAILING_FIRST_UPLOADER = 12;
-	private static final int QUEUED_DOWNLOADER = 13;
-	private static final int ALTERNATE_LOCATIONS_EXCHANGED_WITH_BUSY = 14;
-	private static final int MISMATCHED_VERIFY_HASH = 17;
-	private static final int OVERLAP_CHECK_WHITE = 18;
-	private static final int OVERLAP_CHECK_GREY = 19;
-	private static final int SIMPLE_ALTERNATE_LOCATIONS = 20;
-    private static final int ALTERNATE_LOCATIONS_ARE_REMOVED = 21;
     
     public static void globalSetUp() {
 		RouterService rs = new RouterService(callback);
@@ -201,20 +178,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
             */
     
-    /**
-     * Tests to see if this 'i' is one of the testsToRun
-     */
-    private static void shouldRun(int myTest) {
-        if ( testsToRun.length == 0 ) return;
-       
-        for(int i = 0; i < testsToRun.length; i++) {
-            if ( testsToRun[i] == myTest )
-                return;
-        }
-        
-        fail("ignoring test.");
-    }
-    
     
     ////////////////////////// Test Cases //////////////////////////
     
@@ -231,7 +194,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0,TestFile.length(),true);
-        downloader.doDownload(vf,false);
+        downloader.doDownload(vf);
 
         long elapsed1=System.currentTimeMillis()-start1;
         
@@ -248,7 +211,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         vf.open(savedFile,null);
         downloader.connectTCP(0);
         downloader.connectHTTP(0, TestFile.length(),true);
-        downloader.doDownload(vf, false);
+        downloader.doDownload(vf);
 
         long elapsed2=System.currentTimeMillis()-start2;
         debug("  No check="+elapsed2+", check="+elapsed1 +"\n");
@@ -258,7 +221,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests a basic download that does not swarm.
      */
     public void testSimpleDownload() throws Exception {
-        shouldRun(SIMPLE_DOWNLOAD);
         debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
@@ -267,7 +229,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public void testSimpleSwarm() throws Exception {
-        shouldRun(SIMPLE_SWARM);
         debug("-Testing swarming from two sources...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -300,7 +261,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testUnbalancedSwarm() throws Exception  {
-        shouldRun(UNBALANCED_SWARM);
         debug("-Testing swarming from two unbalanced sources...");
         
         final int RATE=500;
@@ -330,7 +290,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testSwarmWithInterrupt() throws Exception {
-        shouldRun(SWARM_WITH_INTERRUPT);
         debug("-Testing swarming from two sources (one broken)...");
         
         final int RATE=500;
@@ -360,7 +319,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testStealerInterrupted() throws Exception {
-        shouldRun(STEALER_INTERRUPTED);
         debug("-Testing unequal swarming with stealer dying...");
         
         final int RATE=500;
@@ -393,7 +351,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testAddDownload() throws Exception {
-        shouldRun(ADD_DOWNLOAD);
         debug("-Testing addDownload (increases swarming)...");
         
         final int RATE=500;
@@ -430,7 +387,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testStallingUploaderReplaced() throws Exception  {
-        shouldRun(STALLING_UPLOADER_REPLACED);
         debug("-Testing download completion with stalling downloader...");
         
         //Throttle rate at 500KB/s to give opportunities for swarming.
@@ -466,7 +422,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tOverlapCheckGrey(boolean deleteCorrupt) throws Exception {
-        shouldRun(OVERLAP_CHECK_GREY);
         debug("-Testing overlap checking from Grey area..." +
                          "stop when corrupt "+deleteCorrupt+" ");
                          
@@ -495,7 +450,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tOverlapCheckWhite(boolean deleteCorrupt) throws Exception {
-        shouldRun(OVERLAP_CHECK_WHITE);
         debug("-Testing overlap checking from White area..."+
                          "stop when corrupt "+deleteCorrupt+" ");
                          
@@ -524,7 +478,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tMismatchedVerifyHash(boolean deleteCorrupt) throws Exception {
-        shouldRun(MISMATCHED_VERIFY_HASH);
         debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
@@ -541,7 +494,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testSimpleAlternateLocations() throws Exception {  
-        shouldRun(SIMPLE_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -572,7 +524,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testTwoAlternateLocations() throws Exception {  
-        shouldRun(TWO_ALTERNATE_LOCATIONS);
         debug("-Testing Two AlternateLocations...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -611,7 +562,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testUploaderAlternateLocations() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        shouldRun(UPLOADER_ALTERNATE_LOCATIONS);
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -656,7 +606,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testAlternateLocationsAreRemoved() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        shouldRun(ALTERNATE_LOCATIONS_ARE_REMOVED);
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -722,7 +671,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  
-        shouldRun(WIERD_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -773,7 +721,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testStealerInterruptedWithAlternate() throws Exception {
-        shouldRun(STEALER_INTERRUPTED_WITH_ALTERNATE);
         debug("-Testing swarming of rfds ignoring alt ...");
         
         int capacity=SettingsManager.instance().getConnectionSpeed();
@@ -825,6 +772,259 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u4 was used", 0, u4);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
+    
+    public void testPartialSourceIsAddedAfterPortion() throws Exception {
+        
+        // change the minimum required bytes so it'll be added.
+        PrivilegedAccessor.setValue(HTTPDownloader.class,
+            "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            "_acceptedIncoming", Boolean.TRUE );
+            
+        debug("-Testing that downloader adds itself to the mesh");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+        
+        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
+        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+                    
+        // neither uploader knows any alt locs.
+        assertNull(u1Alt);
+        assertNull(u2Alt);
+
+        // the rate must be absurdly slow for the incomplete file.length()
+        // check in HTTPDownloader to be updated.
+        final int RATE=50;
+        final int STOP_AFTER = TestFile.length()/3;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //both uploaders should know that this downloader is an alt loc.
+        u1Alt = uploader1.getAlternateLocations();
+        u2Alt = uploader2.getAlternateLocations();
+        assertNotNull(u1Alt);
+        assertNotNull(u2Alt);
+        Collection u1Locs = u1Alt.values();
+        Collection u2Locs = u2Alt.values();
+        AlternateLocation al =
+            AlternateLocation.createAlternateLocation(TestFile.hash());
+        assertTrue( u1Locs.contains(al) );
+        assertTrue( u2Locs.contains(al) );        
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertGreaterThan("u2 did no work", 0, u2);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+    
+    public void testPartialSourceNotAddedWithCorruption() throws Exception {
+        
+        // change the minimum required bytes so it'll be added.
+        PrivilegedAccessor.setValue(HTTPDownloader.class,
+            "MIN_PARTIAL_FILE_BYTES", new Integer(TestFile.length()/2) );
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            "_acceptedIncoming", Boolean.TRUE );
+            
+        debug("-Testing that downloader does not add to mesh if corrupt");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+        
+        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
+        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+                    
+        // neither uploader knows any alt locs.
+        assertNull(u1Alt);
+        assertNull(u2Alt);
+
+        // the rate must be absurdly slow for the incomplete file.length()
+        // check in HTTPDownloader to be updated.
+        final int RATE=50;
+        final int STOP_AFTER = TestFile.length()/3;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader1.setCorruption(true);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGenericCorrupt(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //both uploaders should know that this downloader is an alt loc.
+        u1Alt = uploader1.getAlternateLocations();
+        u2Alt = uploader2.getAlternateLocations();
+        assertNotNull(u1Alt);
+        assertNotNull(u2Alt);
+        Collection u1Locs = u1Alt.values();
+        Collection u2Locs = u2Alt.values();
+        AlternateLocation al =
+            AlternateLocation.createAlternateLocation(TestFile.hash());
+        assertTrue( !u1Locs.contains(al) );
+        assertTrue( !u2Locs.contains(al) );        
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertGreaterThan("u2 did no work", 0, u2);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+    
+    public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
+        debug("-Testing a shared partial funnels alt locs to downloader");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+            
+        final int RATE=200;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = TestFile.length()/10;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        uploader3.setRate(RATE);
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        
+        //Start with only RFD1.
+        RemoteFileDesc[] rfds = {rfd1};
+        
+        // Add RFD2 and 3 to the IncompleteFileDesc, make sure we use them.
+        Thread locAdder = new Thread( new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    FileDesc fd = RouterService.getFileManager().
+                        getFileDescForUrn(TestFile.hash());
+                    assertInstanceof( IncompleteFileDesc.class, fd );
+                    fd.addAlternateLocation(
+                        AlternateLocation.createAlternateLocation(rfd2));
+                    AlternateLocationCollection alcs =
+                        AlternateLocationCollection.createCollection(
+                            TestFile.hash());
+                    alcs.addAlternateLocation(
+                        AlternateLocation.createAlternateLocation(rfd3));
+                    fd.addAlternateLocationCollection(alcs);
+                } catch(Throwable e) {
+                    ErrorService.error(e);
+                }
+            }
+       });
+       locAdder.start();
+        
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tu3: "+u3+"\n");
+        debug("\tTotal: "+(u1+u2+u3)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertEquals("u2 did too much work", STOP_AFTER, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+    
+    public void testResumeFromPartialWithAlternateLocations() throws Exception {
+        debug("-Testing alt locs from partial bootstrap resumed download");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+            
+        final int RATE=200;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = TestFile.length()/10;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        uploader3.setRate(RATE);
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        AlternateLocation al1 = AlternateLocation.createAlternateLocation(rfd1);
+        AlternateLocation al2 = AlternateLocation.createAlternateLocation(rfd2);
+        AlternateLocation al3 = AlternateLocation.createAlternateLocation(rfd3);
+        AlternateLocationCollection alcs =
+            AlternateLocationCollection.createCollection(TestFile.hash());
+        alcs.addAlternateLocation(al2);
+        alcs.addAlternateLocation(al3);
+        
+        IncompleteFileManager ifm = dm.getIncompleteFileManager();
+        // put the hash for this into IFM.
+        File incFile = ifm.getFile(rfd1);
+        incFile.createNewFile();
+        // add the entry, so it's added to FileManager.
+        ifm.addEntry(incFile, new VerifyingFile(true));
+        
+        // Get the IncompleteFileDesc and add these alt locs to it.
+        FileDesc fd =
+            RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
+        assertNotNull(fd);
+        assertInstanceof(IncompleteFileDesc.class, fd);
+        fd.addAlternateLocation(al1);
+        fd.addAlternateLocationCollection(alcs);
+        
+        tResume(incFile);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tu3: "+u3+"\n");
+        debug("\tTotal: "+(u1+u2+u3)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did wrong work", STOP_AFTER, u1);
+        assertEquals("u2 did wrong work", STOP_AFTER, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }    
 
 	// no longer in use, as alternate locations should always have SHA1s
 	/*
@@ -863,7 +1063,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	*/
 
     public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
-        shouldRun(UPDATE_WHITE_WITH_FAILING_FIRST_UPLOADER);
         debug("-Testing corruption of needed. \n");
         
         final int RATE=500;
@@ -890,7 +1089,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testQueuedDownloader() throws Exception {
-        shouldRun(QUEUED_DOWNLOADER);
         debug("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
@@ -910,7 +1108,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testAlternateLocationsExchangedWithBusy() throws Exception {
         //tests that a downloader reads alternate locations from the
         //uploader even if it receives a 503 from the uploader.
-        shouldRun(ALTERNATE_LOCATIONS_EXCHANGED_WITH_BUSY);
         debug("-Testing dloader gets alt from 503 uploader...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -950,6 +1147,23 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u1 did too much work", 0, u1);
         assertLessThan("u2 did all the work", TestFile.length()+FUDGE_FACTOR, u2);
     }
+    
+    public void testPartialDownloads() throws IOException {
+        debug("-Testing partial downloads...");
+        uploader1.setPartial(true);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        Downloader downloader = null;
+        try {
+            downloader = dm.download(rfds,false);
+        } catch (AlreadyDownloadingException adx) {
+            assertTrue("downloader already downloading??",false);
+        }
+        waitForBusy(downloader);
+        assertEquals("Downloader did not go to busy after getting ranges",
+                     Downloader.WAITING_FOR_RETRY, downloader.getState());
+    }
+
 
     /*
     private static void tGUI() {
@@ -1011,6 +1225,47 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             VerifyingFile vf=ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);
         }
+    }
+    
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
+    private static void tGenericCorrupt(RemoteFileDesc[] rfds) throws Exception {
+        Downloader download=null;
+
+        download=dm.download(rfds, false);
+
+        waitForComplete(false);
+        if (isComplete())
+            fail("should be corrupt");
+        else
+            debug("pass");
+        
+        IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        for (int i=0; i<rfds.length; i++) {
+            File incomplete=ifm.getFile(rfds[i]);
+            VerifyingFile vf=ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
+    }
+    
+    /**
+     * Performs a generic resume download test.
+     */
+    private static void tResume(File incFile) throws Exception {
+        Downloader download = null;
+        
+        download = dm.download(incFile);
+        
+        waitForComplete(false);
+        if (isComplete())
+            debug("pass"+"\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        VerifyingFile vf = ifm.getEntry(incFile);
+        assertNull("verifying file should be null", vf);
     }
 
 	/*
@@ -1118,16 +1373,38 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static void waitForComplete(boolean isCorrupt) {
         synchronized(COMPLETE_LOCK) {
             try {
-                COMPLETE_LOCK.wait();
+                REMOVED = false;
+                COMPLETE_LOCK.wait(TWO_MINUTES);
             } catch (InterruptedException e) {
                 //good.
             }
         }
+        
+        if( !REMOVED ) {
+            dm.remove(DOWNLOADER, false);
+            fail("download did not finish, last state was: " +
+                 DOWNLOADER.getState());
+        }
+        
         if ( isCorrupt )
             assertEquals("unexpected state", Downloader.CORRUPT_FILE, DOWNLOADER.getState());
         else
             assertEquals("unexpected state", Downloader.COMPLETE, DOWNLOADER.getState());
     }        
+    
+    private static void waitForBusy(Downloader downloader) {
+        for(int i=0; i< 12; i++) { //wait 12 seconds
+            if(downloader.getState() == Downloader.WAITING_FOR_RETRY)
+                return;
+            try {
+                Thread.sleep(1000);// try again after a second
+            } catch(InterruptedException e) {
+                assertTrue("downloader unexpecteted interrupted",false);
+                return;
+            }
+        }
+        return;
+    }
     
     private static final class MyCallback extends ActivityCallbackStub {
         public void addDownload(Downloader d) {
@@ -1135,6 +1412,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         public void removeDownload(Downloader d) {
             synchronized(COMPLETE_LOCK) {
+                REMOVED = true;
                 COMPLETE_LOCK.notify();
             }
         }

@@ -10,7 +10,7 @@ public interface AlternateLocationCollector {
 	 * Adds an <tt>AlternateLocation</tt> instance to the collection of 
 	 * <tt>AlternateLocation</tt>s.
 	 */
-	public void addAlternateLocation(AlternateLocation al);
+	public boolean addAlternateLocation(AlternateLocation al);
 
 	/**
 	 * Adds the specified collection of <tt>AlternateLocation</tt>s to
@@ -19,7 +19,7 @@ public interface AlternateLocationCollector {
 	 * @param alc the <tt>AlternateLocationCollection</tt> instance to
 	 *  add this alternate location to the collection 
 	 */
-	public void addAlternateLocationCollection(AlternateLocationCollection alc);
+	public int addAlternateLocationCollection(AlternateLocationCollection alc);
 
 	/**
 	 * Returns whether or not this <tt>AlternateLocationCollector</tt> has

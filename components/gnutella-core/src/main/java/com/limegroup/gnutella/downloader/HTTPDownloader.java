@@ -7,6 +7,7 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.Sockets;
 import java.io.*;
 import java.net.*;
@@ -33,9 +34,27 @@ import com.sun.java.util.collections.*;
  */
 
 public class HTTPDownloader implements BandwidthTracker {
-    /** The length of the buffer used in downloading. */
+    /**
+     * The length of the buffer used in downloading.
+     */
     public static final int BUF_LENGTH=1024;
-
+    
+    
+    /**
+     * The smallest possible file to be shared with partial file sharing.
+     * Non final for testing purposes.
+     */
+    private static int MIN_PARTIAL_FILE_BYTES = 5*1024*1024; // 5MB
+    
+    /**
+     * The current minimum size allowed for partial file sharing.
+     * Initialized to either MIN_PARTIAL_FILE_BYTES or 1/4 of the
+     * incomplete file's expected total size.
+     * Used to enforce the policy that partial files are only shared
+     * if atleast 25% of the file has been downloaded.
+     */
+    private int _minPartialFileSize = MIN_PARTIAL_FILE_BYTES;
+    
     private RemoteFileDesc _rfd;
     private boolean _isPush;
 	private long _index;
@@ -60,6 +79,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
+    
+    /**
+     * The last state of commonOutFile.isCorrupted.
+     * Used to know whether or not to add ourselves to the mesh.
+     */
+    private boolean _outIsCorrupted;
 
 	/**
 	 * The new alternate locations we've received for this file.
@@ -134,13 +159,16 @@ public class HTTPDownloader implements BandwidthTracker {
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
-
 		_alternateLocationsToSend   = alts; 
         _alternateLocationsReceived = (alts == null ? null :
             AlternateLocationCollection.createCollection(alts.getSHA1Urn()));
 
 		_amountRead = 0;
 		_totalAmountRead = 0;
+		// if we have not downloaded at least 25% of the file, 
+		// don't share it.
+		_minPartialFileSize = Math.max(MIN_PARTIAL_FILE_BYTES,
+		    (int)(rfd.getSize() * .25 )); 
     }
 
     /**
@@ -205,10 +233,16 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception FileNotFoundException the host doesn't recognize the file
      * @exception NotSharingException the host isn't sharing files (BearShare)
      * @exception IOException miscellaneous  error 
+     * @exception QueuedException uploader has queued us
+     * @exception RangeNotAvailableException uploader has ranges 
+     * other than requested
+     * @exception ProblemReadingHeaderException could not parse headers
+     * @exception UnknownCodeException unknown response code
      */
     public void connectHTTP(int start, int stop, boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
-               NotSharingException, QueuedException {
+             NotSharingException, QueuedException, RangeNotAvailableException,
+             ProblemReadingHeaderException, UnknownCodeException {
 
         _amountToRead = stop-start;
         _totalAmountRead += _amountRead;
@@ -239,6 +273,25 @@ public class HTTPDownloader implements BandwidthTracker {
                 alts.addAlternateLocationCollection(_alternateLocationsToSend);
             }
         }
+        
+        // Add ourselves to the mesh if:
+        //  This rfd has a SHA1,
+        //  We are allowing partial sharing,
+        //  The VerifyingFile is not corrupted,
+        //  We have downloaded a large enough portion of the file,
+        //  and We have accepted incoming during this session.
+        if (_rfd.getSHA1Urn() != null && 
+          UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+          !_outIsCorrupted &&
+          RouterService.acceptedIncomingConnection() &&
+          _incompleteFile.length() > _minPartialFileSize) {
+            if( alts == null ) // will be null if altsToSend is null.
+                alts = AlternateLocationCollection.createCollection(
+                    _rfd.getSHA1Urn() );
+            AlternateLocation al =
+                AlternateLocation.createAlternateLocation(alts.getSHA1Urn());
+            alts.addAlternateLocation(al);
+        }
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
@@ -246,10 +299,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		if(alts != null && alts.getNumberOfAlternateLocations() > 0) {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}
-        //TODO1: is this range correct??
-        //System.out.println("Sumeet: "+startRange+", "+stop);
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
-
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
             //Get our own address and port.  This duplicates the getAddress an
@@ -288,8 +338,7 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new IOException();
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
-        int code=parseHTTPCode(str);	
-
+        int code=parseHTTPCode(str, _rfd);	
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
         int[] refQueueInfo = {-1,-1,-1};
@@ -313,7 +362,7 @@ public class HTTPDownloader implements BandwidthTracker {
             if (str.toUpperCase().startsWith("CONTENT-RANGE:")) {
 				int startOffset=parseContentRangeStart(str);
                 if (startOffset!=_initialReadingPoint)
-                    throw new IOException(
+                    throw new ProblemReadingHeaderException(
                         "Unexpected start offset; too dumb to recover");
             }
 
@@ -329,31 +378,44 @@ public class HTTPDownloader implements BandwidthTracker {
             else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) {
                 _server = readServer(str);
             }
+            else if (HTTPHeaderName.AVAILABLE_RANGES.matchesStartOfString(str))
+            {
+                parseAvailableRangesHeader(str, _rfd);
+            }
         }
 
 
 		//Accept any 2xx's, but reject other codes.
 		if ( (code < 200) || (code >= 300) ) {
-			if (code == 404)
+			if (code == 404) // file not found
 				throw new 
 				    com.limegroup.gnutella.downloader.FileNotFoundException();
-			else if (code == 410)
-				throw new 
-                    com.limegroup.gnutella.downloader.NotSharingException();
-			else if (code == 503) {
+			else if (code == 410) // not shared.
+				throw new NotSharingException();
+            else if (code == 416) //Shareaza's requested range not available
+                throw new RangeNotAvailableException();
+			else if (code == 503) { // busy or queued, or range not available.
                 int min = refQueueInfo[0];
                 int max = refQueueInfo[1];
                 int pos = refQueueInfo[2];
                 if(min != -1 && max != -1 && pos != -1)
                     throw new QueuedException(min,max,pos);
-                //no QueuedException? not queued.
+                    
+                // per the PFSP spec, a 503 should be returned.
+                // but, to let us distinguish between a busy &
+                // a range not available, check if the partial
+                // sources are filled up ...
+                if( _rfd.isPartialSource() )
+                    throw new RangeNotAvailableException();
+                    
+                //no QueuedException or RangeNotAvailableException? not queued.
 				throw new TryAgainLaterException();
                 // a general catch for 4xx and 5xx's
                 // should maybe be a different exception?
                 // else if ( (code >= 400) && (code < 600) ) 
             }
-			else 
-				throw new IOException();			
+			else // unknown or unimportant
+				throw new UnknownCodeException(code);			
 		}        
     }
 
@@ -418,7 +480,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException some other problem
      *  extracting result code
      */
-    private static int parseHTTPCode(String str) throws IOException {		
+    private static int parseHTTPCode(String str, RemoteFileDesc rfd) throws IOException {		
 		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
 		String token;
 
@@ -431,6 +493,9 @@ public class HTTPDownloader implements BandwidthTracker {
 		// the first token should contain HTTP
 		if (token.toUpperCase().indexOf("HTTP") < 0 )
 			throw new NoHTTPOKException();
+        // does the server support http 1.1?
+        else 
+            rfd.setHTTP11( token.indexOf("1.1") > 0 );
 		
 		// the next token should be a number
 		// just a safety
@@ -556,29 +621,100 @@ public class HTTPDownloader implements BandwidthTracker {
         return numBeforeDash;
     }
 
+    /**
+     * Parses X-Available-Ranges header and stores the available ranges as a
+     * list.
+     * 
+     * @param str the X-Available-Ranges header line which should look like:
+     *         "X-Available-Ranges: bytes A-B, C-D, E-F"
+     *         "X-Available-Ranges:bytes A-B"
+     * @param rfd the RemoteFileDesc2 for the location we are trying to download
+     *         from. We need this to store the available Ranges. 
+     * @exception ProblemReadingHeaderException when we could not parse the 
+     *         header line.
+     */
+    private static void parseAvailableRangesHeader(String line, 
+                                                   RemoteFileDesc rfd) 
+        throws IOException {
+        List availableRanges = new ArrayList();
+        
+        line = line.toLowerCase();
+        // start parsing after the word "bytes"
+        int start = line.indexOf("bytes") + 6;
+        // if start == -1 the word bytes has not been found
+        // if start >= line.length we are at the end of the 
+        // header line
+        while (start != -1 && start < line.length()) {
+            // try to parse the number before the dash
+            int stop = line.indexOf('-', start);
+            // test if this is a valid interval
+            if ( stop == -1 )
+                break; 
+
+            // this is the interval to store the available 
+            // range we are parsing in.
+            Interval interval = null;
+    
+            try {
+                // read number before dash
+                // bytes A-B, C-D
+                //       ^
+                int low = Integer.parseInt(line.substring(start, stop).trim());
+                
+                // now moving the start index to the 
+                // character after the dash:
+                // bytes A-B, C-D
+                //         ^
+                start = stop + 1;
+                // we are parsing the number before the comma
+                stop = line.indexOf(',', start);
+                
+                // If we are at the end of the header line, there is no comma 
+                // following.
+                if ( stop == -1 )
+                    stop = line.length();
+                
+                // read number after dash
+                // bytes A-B, C-D
+                //         ^
+                int high = Integer.parseInt(line.substring(start, stop).trim());
+                
+                // this interval should be inclusive at both ends
+                interval = new Interval( low, high );
+                
+                // start parsing after the next comma. If we are at the
+                // end of the header line start will be set to 
+                // line.length() +1
+                start = stop + 1;
+                
+            } catch (NumberFormatException e) {
+                throw new ProblemReadingHeaderException();
+            }
+            availableRanges.add(interval);
+        }
+        rfd.setAvailableRanges(availableRanges);
+    }
     
     /////////////////////////////// Download ////////////////////////////////
 
     /*
      * Downloads the content from the server and writes it to a temporary
      * file.  Blocking.  This MUST be initialized via connect() beforehand, and
-     * doDownload MUST NOT have already been called.  If checkOverlap, the
-     * incomplete file is compared with the data being downloaded; if there is
-     * a mismatch, OverlapMismatchException is thrown immediately.
+     * doDownload MUST NOT have already been called. If there is
+     * a mismatch in overlaps, the VerifyingFile triggers a callback to
+     * the ManagedDownloader, which triggers a callback to the GUI to let us
+     * know whether to continue or interrupt.
      *  
-     * @param checkOverlap check the existing contents of the incomplete file 
-     *  before writing to it.
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(VerifyingFile commonOutFile, boolean http11) 
+	public void doDownload(VerifyingFile commonOutFile) 
         throws IOException {
         _socket.setSoTimeout(0);//once downloading we can stall for a bit
         long currPos = _initialReadingPoint;
         try {
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
-            byte[] fileBuf = new byte[BUF_LENGTH];
             
             while (true) {
                 //1. Read from network.  It's possible that we've read more than
@@ -606,6 +742,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
                 commonOutFile.writeBlock(currPos,c, buf);
+                _outIsCorrupted = commonOutFile.isCorrupted();
 
                 currPos += c;//update the currPos for next iteration
                 _amountRead += c;
@@ -616,7 +753,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 throw new FileIncompleteException();  
             }
         } finally {
-            if(!http11)
+            if(!isHTTP11())
                 _byteReader.close();
         }
 	}
@@ -673,11 +810,24 @@ public class HTTPDownloader implements BandwidthTracker {
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 	public int getPort() {return _port;}
-    /** Returns the RemoteFileDesc passed to this' constructor. */
+	
+    /**
+     * Returns the RemoteFileDesc passed to this' constructor.
+     */
     public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
-    /** Returns true iff this is a push download. */
+    
+    /**
+     * Returns true iff this is a push download.
+     */
     public boolean isPush() {return _isPush;}
-
+    
+    /**
+     *  returns true if we have think that the server 
+     *  supports HTTP1.1 
+     */
+    public boolean isHTTP11() {
+        return _rfd.isHTTP11();
+    }
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
@@ -702,14 +852,17 @@ public class HTTPDownloader implements BandwidthTracker {
     public String toString() {
         return "<"+_host+":"+_port+", "+getFileName()+">";
     }
-
-
+    
 	private HTTPDownloader(String str) {
 		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 		_byteReader = new ByteReader(stream);
 		_alternateLocationsReceived = null;
 		_alternateLocationsToSend = null;
-	}
+		_rfd =  new RemoteFileDesc("127.0.0.1", 0,
+                                  0, "a", 0, new byte[16],
+                                  0, false, 0, false, null, null,
+                                  false, false, "", 0, null);
+	}    
 }
 
 

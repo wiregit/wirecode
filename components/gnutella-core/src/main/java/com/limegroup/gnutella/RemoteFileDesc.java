@@ -35,7 +35,8 @@ public class RemoteFileDesc implements Serializable {
     private final int _quality;
     private final boolean _replyToMulticast;
 
-    /** RemoteFileDesc can only be constructed with a single piece of metadata.
+    /**
+     *  RemoteFileDesc can only be constructed with a single piece of metadata.
      *  However, historically RemoteFileDesc stored an array of metadata.  Hence
      *  we must be prepared to read this data from a serialized downloads.dat
      *  file.  In other words, _xmlDocs is typically null or a single non-null
@@ -55,12 +56,40 @@ public class RemoteFileDesc implements Serializable {
     private boolean _firewalled;
     private String _vendor;
     private long _timestamp;
-
+    
+    /**
+     * Whether or not the remote host supports HTTP/1.1
+     * This is purposely NOT IMMUTABLE.  Before we connect,
+     * we can only assume the remote host supports HTTP/1.1 by
+     * looking at the set of URNs.  If any exist, we assume
+     * HTTP/1.1 is supported (because URNs were added to Gnutella
+     * after HTTP/1.1).  Once we connect, this value is set to
+     * be whatever the host reports in the response line.
+     *
+     * When deserializing, this value may be wrong for older download.dat
+     * files.  (Older versions will always set this to false, because
+     * the field did not exist.)  To counter that, when deserializing,
+     * if this is false, we set it to true if any URNs are present.
+     */
+    private boolean _http11;
+    
     /**
      * The <tt>Set</tt> of proxies for this host -- can be empty.
      */
     private Set _proxies;
 		
+    /**
+     * The List of available ranges.  Should not be serialized.
+     * This is not an IntervalSet for a reason:
+     * We do not want to compact overlapping ranges into a single range,
+     * because the remote host may not understand them as such.
+     * We must act off the ranges as they're listed to us.
+     * For LimeWires, the ranges will always be as compact as possible,
+     * but for other vendors this is unknown.
+     *
+     * This is NOT SERIALIZED.
+     */
+    private transient List _availableRanges = null;
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -144,6 +173,7 @@ public class RemoteFileDesc implements Serializable {
 		else {
 			_urns = Collections.unmodifiableSet(urns);
 		}
+        _http11 = ( !_urns.isEmpty() );
 	}
 
     private void readObject(ObjectInputStream stream) 
@@ -164,7 +194,47 @@ public class RemoteFileDesc implements Serializable {
 		if(_xmlDocs != null && _xmlDocs.length == 0) {
 			_xmlDocs = null;
 		}
+        // http11 must be set manually, because older clients did not have this
+        // field but did have urns.
+        _http11 = ( _http11 || !_urns.isEmpty() );
     }
+    
+    /** 
+     * Accessor for HTTP11.
+     *
+     * @return Whether or not we think this host supports HTTP11.
+     */
+    public boolean isHTTP11() {
+        return _http11;
+    }
+    
+    /**
+     * Mutator for HTTP11.  Should be set after connecting.
+     */
+    public void setHTTP11(boolean http11) {
+        _http11 = http11;
+    }
+    
+    /**
+     * Returns true if this is a partial source
+     */
+    public boolean isPartialSource() {
+        return (_availableRanges != null);
+    }
+    
+    /**
+     * Accessor for the available ranges.
+     */
+    public List getAvailableRanges() {
+        return _availableRanges;
+    }
+
+    /**
+     * Mutator for the available ranges.
+     */
+    public void setAvailableRanges(List availableRanges) {
+        this._availableRanges = availableRanges;
+    }    
     
 	/**
 	 * Accessor for the host ip with this file.

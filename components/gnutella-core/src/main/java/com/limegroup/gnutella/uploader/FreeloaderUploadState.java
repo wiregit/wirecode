@@ -3,6 +3,9 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -38,6 +41,9 @@ public class FreeloaderUploadState implements HTTPMessage {
 		os.write(str.getBytes());
 		str = "Content-Length: " + RESPONSE_PAGE.length() + "\r\n";
 		os.write(str.getBytes());
+		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
+		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
+		                      os);		
 		str = "\r\n";
 		os.write(str.getBytes());
 	}
@@ -45,4 +51,8 @@ public class FreeloaderUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream os) throws IOException {
 		os.write(RESPONSE_PAGE.getBytes());
 	}
+	
+	public boolean getCloseConnection() {
+	    return true;
+	}	
 }

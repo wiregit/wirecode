@@ -7,6 +7,7 @@ import junit.framework.*;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -248,6 +249,160 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", responses[2].getName(), f6.getName());
     }
     
+    /**
+     * Tests adding incomplete files to the FileManager.
+     */
+    public void testAddIncompleteFile() throws Exception {    
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());    
+        
+        // add one incomplete file and make sure the numbers go up.
+        Set urns = new HashSet();
+        urns.add( HugeTestUtils.URNS[0] );
+        fman.addIncompleteFile(
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
+
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+            
+        // add another incomplete file with the same hash and same
+        // name and make sure it's not added.
+        fman.addIncompleteFile(
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
+
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+            
+        // add another incomplete file with another hash, it should be added.
+        urns = new HashSet();
+        urns.add( HugeTestUtils.URNS[1] );
+        fman.addIncompleteFile(
+            new File("c"), urns, "c", 0, new VerifyingFile(false));
+
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            2, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+    }
+    
+    /**
+     * Tests the removeFileIfShared for incomplete files.
+     */
+    public void testRemovingIncompleteFiles() {
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+            
+        Set urns = new HashSet();
+        urns.add( HugeTestUtils.URNS[0] );
+        fman.addIncompleteFile(
+            new File("a"), urns, "a", 0, new VerifyingFile(false));
+        urns = new HashSet();
+        urns.add( HugeTestUtils.URNS[1] );
+        fman.addIncompleteFile(
+            new File("b"), urns, "b", 0, new VerifyingFile(false));        
+        assertEquals("unexpected shared incomplete",
+            2, fman.getNumIncompleteFiles());
+            
+        fman.removeFileIfShared( new File("a") );
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());
+        
+        fman.removeFileIfShared( new File("c") );
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());
+        
+        fman.removeFileIfShared( new File("b") );
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+    }
+    
+    /**
+     * Tests that responses are not returned for IncompleteFiles.
+     */
+    public void testQueryRequestsDoNotReturnIncompleteFiles() {
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+            
+        Set urns = new HashSet();
+        URN urn = HugeTestUtils.URNS[0];
+        urns.add( urn );
+        fman.addIncompleteFile(
+            new File("sambe"), urns, "a", 0, new VerifyingFile(false));
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());            
+            
+        QueryRequest qr = QueryRequest.createQuery(urn, "sambe");
+        Response[] responses = fman.query(qr);
+        assertNotNull(responses);
+        assertEquals("unexpected number of resp.", 0, responses.length);
+    }
+    
+    /**
+     * Tests that IncompleteFileDescs are returned for FileDescForUrn only
+     * if there are no complete files.
+     */
+    public void testGetFileDescForUrn() throws Exception {
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());
+            
+        Set urns = new HashSet();
+        URN urn = HugeTestUtils.URNS[0];
+        urns.add( urn );
+        fman.addIncompleteFile(
+            new File("sambe"), urns, "a", 0, new VerifyingFile(false));
+        assertEquals("unexpected shared incomplete",
+            1, fman.getNumIncompleteFiles());
+            
+        // First test that we DO get this IFD.
+        FileDesc fd = fman.getFileDescForUrn(urn);
+        assertEquals( urns, fd.getUrns() );
+        
+        // add a file to the library and load it up.
+        f3 = createNewTestFile(11);   
+        waitForLoad();
+        assertEquals("unexected shared files", 1, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete",
+            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending",
+            0, fman.getNumPendingFiles());        
+        
+        // ensure it got shared.
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals( f3, files[0] );
+        fd = fman.get(0);
+        urn = fd.getSHA1Urn();
+        urns = fd.getUrns();
+        
+        // now add an ifd with those urns.
+        fman.addIncompleteFile(
+            new File("sam"), urns, "b", 0, new VerifyingFile(false));
+        
+        FileDesc retFD = fman.getFileDescForUrn(urn);    
+        assertNotNull(retFD);
+        assertNotInstanceof(IncompleteFileDesc.class, retFD);
+        assertEquals(retFD, fd);
+    }
+        
+        
 	/**
 	 * Tests URN requests on the FileManager.
 	 */
@@ -311,7 +466,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			assertEquals("urns should be equal", urn, responseUrns[0]);		
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
-	}	
+	}
 	
 	private void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";

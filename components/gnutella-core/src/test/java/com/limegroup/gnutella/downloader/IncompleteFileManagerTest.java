@@ -10,6 +10,7 @@ import java.io.*;
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
+    private FileManager fm;
     
     static {
         SettingsManager.instance();
@@ -26,6 +27,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     
     public void setUp() {
         ifm=new IncompleteFileManager();
+        fm = RouterService.getFileManager();
     }
 
     /** @param urn a SHA1 urn, or null */
@@ -48,7 +50,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     /////////////////////////////////////////////////////////////
 
 	public void testLegacy() throws Throwable {
-        File file=new File(getSaveDirectory(), "test.txt");
+        File file=new File(getSaveDirectory(), "T-748-test.txt");
         IncompleteFileManager ifm=new IncompleteFileManager();
         Iterator iter=null;
         VerifyingFile vf = new VerifyingFile(true);
@@ -155,6 +157,34 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         assertEquals(tmp1, tmp2);
         assertEquals(tmp2, ifm.getFile(newRFD("some file name", 1839, null)));
     }
+    
+    /**
+     * Checks that addEntry & removeEntry notify the FileManager of the
+     * added / removed incomplete file.
+     */
+    public void testFileManagerIsNotified() throws Exception {
+        assertEquals(0, fm.getNumIncompleteFiles()); // begin with 0 shared.
+        
+        //Populate IFM with a hash.
+        rfd1=newRFD("some file name", 1839, 
+                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        File tmp1=ifm.getFile(rfd1);
+        VerifyingFile vf=new VerifyingFile(true);
+        ifm.addEntry(tmp1, vf);
+        
+        assertEquals(1, fm.getNumIncompleteFiles()); // 1 added.
+        
+        // make sure it's associated with a URN.
+        URN urn = URN.createSHA1Urn(    
+            "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        FileDesc fd = fm.getFileDescForUrn(urn);
+        assertNotNull(urn);
+        assertInstanceof(IncompleteFileDesc.class, fd);
+        
+        ifm.removeEntry(tmp1);
+        
+        assertEquals(0, fm.getNumIncompleteFiles()); // back to 0 shared.
+    }   
 
     public void testCompletedHash_NotFound() {
         File tmp2=new File("T-1839-some file name");

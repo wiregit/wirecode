@@ -26,6 +26,13 @@ public class UploadStat extends AdvancedStatistic {
 	    new UploadStat();
 	    
     /**
+     * Statstics for completed file transfers.  This is incremented once per
+     * connection, not once per chunk.
+     */
+    public static final Statistic COMPLETED_FILE =
+        new UploadStat();
+	    
+    /**
      * Statistic for interrupted uploads.  This is incremented once per
      * connection, not once per chunk.
      */
@@ -63,6 +70,12 @@ public class UploadStat extends AdvancedStatistic {
      * Statistic for uploads whose status is LIMIT_REACHED.
      */ 
     public static final Statistic LIMIT_REACHED =
+        new UploadStat();
+        
+    /**
+     * Statistic for uploads whose status is UNAVAILABLE_RANGE.
+     */
+    public static final Statistic UNAVAILABLE_RANGE =
         new UploadStat();
 
     /**

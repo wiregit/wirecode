@@ -116,6 +116,14 @@ public class DownloadManager implements BandwidthTracker {
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
     }
+    
+    /**
+     * Returns the IncompleteFileManager used by this DownloadManager
+     * and all ManagedDownloaders.
+     */
+    public IncompleteFileManager getIncompleteFileManager() {
+        return incompleteFileManager;
+    }    
 
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
@@ -220,7 +228,6 @@ public class DownloadManager implements BandwidthTracker {
             return false;
         }
     }
-
      
     ////////////////////////// Main Public Interface ///////////////////////
            
@@ -278,11 +285,8 @@ public class DownloadManager implements BandwidthTracker {
         //active if it can.
         ManagedDownloader downloader =
 			new ManagedDownloader(files, incompleteFileManager);
-        downloader.initialize(this, fileManager, callback, false);
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        //Save this' state to disk for crash recovery.
-        writeSnapshot();
+
+        startDownload(downloader, false);
         return downloader;
     }   
     
@@ -323,13 +327,7 @@ public class DownloadManager implements BandwidthTracker {
                                               textQuery,
                                               filename,
                                               defaultURL);
-        downloader.initialize(this, fileManager, callback, false);
-
-        //Add download to appropriate lists and write snapshot.  
-        //TODO: factor to make less like getFiles().
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        writeSnapshot();
+        startDownload(downloader, false);
         return downloader;
     }
 
@@ -387,16 +385,11 @@ public class DownloadManager implements BandwidthTracker {
                                               incompleteFile,
                                               name,
                                               size);
-            downloader.initialize(this, fileManager, callback, false);
         } catch (IllegalArgumentException e) {
             throw new CantResumeException(incompleteFile.getName());
         }
-
-        //Add download to appropriate lists and write snapshot.  
-        //TODO: factor to make less like getFiles().
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        writeSnapshot();
+        
+        startDownload(downloader, true);
         return downloader;
     }
 
@@ -434,12 +427,23 @@ public class DownloadManager implements BandwidthTracker {
 
         RequeryDownloader downloader=
             new RequeryDownloader(incompleteFileManager,add);
-        downloader.initialize(this, fileManager, callback, false);
-        waiting.add(downloader);
-        callback.addDownload(downloader);
-        //Save this' state to disk for crash recovery.
-        writeSnapshot();
+
+        startDownload(downloader, false);
         return downloader;        
+    }
+    
+    /**
+     * Performs common tasks for starting the download.
+     * 1) Initializes the downloader.
+     * 2) Adds the download to the waiting list.
+     * 3) Notifies the callback about the new downloader.
+     * 4) Writes the new snapshot out to disk.
+     */
+    private void startDownload(ManagedDownloader md, boolean deserialized) {
+        md.initialize(this, fileManager, callback, deserialized);
+        waiting.add(md);
+        callback.addDownload(md);
+        writeSnapshot(); // Save state for crash recovery.
     }
 
 
@@ -520,7 +524,6 @@ public class DownloadManager implements BandwidthTracker {
         handleManagedDownloaderAdditions(rfds);
     }
 
-
     private void handleManagedDownloaderAdditions(RemoteFileDesc[] rfds) {
 
         if (rfds.length == 0)
@@ -545,8 +548,6 @@ public class DownloadManager implements BandwidthTracker {
             }
         }
     }
-
-
 
     /**
      * Accepts the given socket for a push download to this host.
@@ -639,7 +640,8 @@ public class DownloadManager implements BandwidthTracker {
         active.remove(downloader);
         waiting.remove(downloader);
         querySentMDs.remove(downloader);
-        notify();  
+        downloader.finish();
+        notify();
         callback.removeDownload(downloader);
         //Save this' state to disk for crash recovery.  Note that a downloader
         //in the GAVE_UP state is not serialized here even if still displayed in
@@ -916,11 +918,6 @@ public class DownloadManager implements BandwidthTracker {
     private final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
-    }
-
-    /** FOR TESTING ONLY: returns this' list of partially downloaded blocks. */
-    public IncompleteFileManager getIncompleteFileManager() {
-        return incompleteFileManager;
     }
 
 

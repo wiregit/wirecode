@@ -281,6 +281,9 @@ public final class HTTPUploader implements Uploader {
         case MALFORMED_REQUEST:
             _state = new MalformedRequestState();
             break;
+        case UNAVAILABLE_RANGE:
+            _state = new UnavailableRangeUploadState(_fileDesc);
+            break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -301,9 +304,28 @@ public final class HTTPUploader implements Uploader {
         }
 	}
 	
-	OutputStream getOutputStream() {return _ostream;}
-	InputStream getInputStream() {return _fis;}
+	/**
+	 * Returns the output stream this uploader is writing to.
+	 */
+	OutputStream getOutputStream() {
+        return _ostream;
+    }
     
+    /**
+     * Returns the FileInputStream this uploader is reading from.
+     */
+	InputStream getInputStream() {
+	    return _fis;
+    }
+    
+    /**
+     * Returns whether or not the current state wants
+     * to close the connection.
+     */
+    public boolean getCloseConnection() {
+        Assert.that(_state != null);
+        return _state.getCloseConnection();
+    }    
     
 	/**
      * Returns the current HTTP Request Method.
@@ -355,9 +377,9 @@ public final class HTTPUploader implements Uploader {
 	}	 
 	 
     /** The byte offset where we should start the upload. */
-	int getUploadBegin() {return _uploadBegin;}
+	public int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
-    int getUploadEnd() {return _uploadEnd;}
+    public int getUploadEnd() {return _uploadEnd;}
 
 	// implements the Uploader interface
 	public int getFileSize() {return _fileSize;}
@@ -456,8 +478,8 @@ public final class HTTPUploader implements Uploader {
 	 * 'GET' portion of the request header has already been read.
 	 *
 	 * @param iStream the input stream to read the headers from.
-	 * @throws <tt>IOException</tt> if there are any io issues while reading
-	 *  the header
+	 * @throws <tt>IOException</tt> if the connection closes while reading
+	 * @throws <tt>ProblemReadingHeaderException</tt> if any header is invalid
 	 */
 	public void readHeader(InputStream iStream) throws IOException {
         _uploadBegin = 0;
@@ -490,6 +512,16 @@ public final class HTTPUploader implements Uploader {
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
         	}
+        } catch(ProblemReadingHeaderException prhe) {
+            // there was a problem reading the header.. gobble up
+            // the rest of the input and rethrow the exception
+            while(true) {
+                String str = br.readLine();
+                if( str == null || str.equals("") )
+                 break;
+            }
+            
+            throw prhe;
         } finally {
             // we want to ensure these are always set, regardless
             // of if an exception was thrown.
@@ -521,7 +553,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			sub = str.substring(5);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
         }
 		sub = sub.trim();
 		int colon = sub.indexOf(":");
@@ -534,7 +566,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			port = java.lang.Integer.parseInt(sport);
 		} catch (NumberFormatException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
         }
 		_chatEnabled = true;
 		_browseEnabled = true;
@@ -564,11 +596,12 @@ public final class HTTPUploader implements Uploader {
 		try {
             int i=str.indexOf("bytes");    //TODO: use constant
             if (i<0)
-                throw new IOException("bytes not present in range");
+                throw new ProblemReadingHeaderException(
+                     "bytes not present in range");
             i+=6;                          //TODO: use constant
 			sub = str.substring(i);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
 		}
 		// remove the white space
         sub = sub.trim();   
@@ -577,7 +610,7 @@ public final class HTTPUploader implements Uploader {
 		try {
 			c = sub.charAt(0);
 		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
+			throw new ProblemReadingHeaderException();
 		}
 		// - n  
         if (c == '-') {  
@@ -585,7 +618,7 @@ public final class HTTPUploader implements Uploader {
 			try {
 				second = sub.substring(1);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             second = second.trim();
 			try {
@@ -596,7 +629,7 @@ public final class HTTPUploader implements Uploader {
                                     _fileSize-Integer.parseInt(second));
 				_uploadEnd = _fileSize;
 			} catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
         }
         else {                
@@ -606,18 +639,18 @@ public final class HTTPUploader implements Uploader {
 			try {
 				first = sub.substring(0, dash);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             first = first.trim();
 			try {
 				_uploadBegin = java.lang.Integer.parseInt(first);
 			} catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
 			try {
 				second = sub.substring(dash+1);
 			} catch (IndexOutOfBoundsException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
             second = second.trim();
             if (!second.equals("")) 
@@ -627,7 +660,7 @@ public final class HTTPUploader implements Uploader {
                     //index, so increment by 1.
 					_uploadEnd = java.lang.Integer.parseInt(second)+1;
             } catch (NumberFormatException e) {
-				throw new IOException();
+				throw new ProblemReadingHeaderException();
 			}
         }
         
@@ -705,7 +738,8 @@ public final class HTTPUploader implements Uploader {
    			_alternateLocationCollection = 
 				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
         if(_alternateLocationCollection != null)
-            HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
+            HTTPUploader.parseAlternateLocations(
+                str, _alternateLocationCollection, _fileDesc);
 
         return true;
     }
@@ -792,16 +826,16 @@ public final class HTTPUploader implements Uploader {
 	/**
 	 * Parses the alternate location header.  The header can contain only one
 	 * alternate location, or it can contain many in the same header.
-	 * This method adds them all to the <tt>FileDesc</tt> for this
-	 * uploader.  This will not allow more than 20 alternate locations
-	 * for a single file.
+	 * This method will notify DownloadManager of new alternate locations
+	 * if the FileDesc is an IncompleteFileDesc.
 	 *
 	 * @param altHeader the full alternate locations header
 	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
 	 *  locations should be added to
 	 */
 	private static void parseAlternateLocations(final String altHeader,
-												final AlternateLocationCollector alc) {
+												final AlternateLocationCollector alc,
+												final FileDesc fd) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted

@@ -37,4 +37,8 @@ public final class FileNotFoundUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
 	}
+	
+	public boolean getCloseConnection() {
+	    return false;
+	}
 }

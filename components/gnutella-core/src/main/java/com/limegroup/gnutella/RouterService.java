@@ -969,6 +969,13 @@ public class RouterService {
 	public static int getSharedFileSize() {
 		return fileManager.getSize();
 	}
+	
+	/** 
+	 * Returns a list of all incomplete shared file descriptors.
+	 */
+	public static FileDesc[] getIncompleteFileDescriptors() {
+	    return fileManager.getIncompleteFileDescriptors();
+	}
 
     /**
      * Returns a list of all shared file descriptors in the given directory.

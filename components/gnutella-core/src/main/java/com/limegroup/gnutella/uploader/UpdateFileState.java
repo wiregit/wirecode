@@ -37,6 +37,9 @@ public class UpdateFileState implements HTTPMessage {
         ostream.write(str.getBytes());
 	    str = "Content-Length: " + updateContents.length + "\r\n";
 		ostream.write(str.getBytes());
+		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
+		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
+		                      ostream);		
 		str = "\r\n";
         ostream.write(str.getBytes());
     }
@@ -45,4 +48,8 @@ public class UpdateFileState implements HTTPMessage {
         ostream.write(updateContents); 
         _uploader.setAmountUploaded(updateContents.length);
     }
+    
+	public boolean getCloseConnection() {
+	    return true;
+	}    
 }

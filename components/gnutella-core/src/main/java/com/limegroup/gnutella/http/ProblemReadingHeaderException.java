@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 
