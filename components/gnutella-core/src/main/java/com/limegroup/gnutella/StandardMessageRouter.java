@@ -95,14 +95,23 @@ public class StandardMessageRouter
 	 * Responds to a ping request received over a UDP port.  This is
 	 * handled differently from all other ping requests.  Instead of
 	 * responding with a pong from this node, we respond with a pong
-	 * from other UltraPeers supporting UDP from our cache.
+	 * from other UltraPeers supporting UDP from our cache.  This method
+	 * should only be called if this host is an UltraPeer, as only UltaPeers
+	 * should accept messages over UDP.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
 	 */
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   Acceptor acceptor) {
-		
-		
+		List unicastEndpoints = QueryUnicaster.instance().getUnicastEndpoints();
+		Iterator iter = unicastEndpoints.iterator();
+		while(iter.hasNext()) {
+			PingReply reply = (PingReply)iter.next();
+			try {
+				sendPingReply(reply);
+			} catch(IOException e) {
+			}											
+		}		
 	}
 
     /**
