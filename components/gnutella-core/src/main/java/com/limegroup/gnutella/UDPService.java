@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
@@ -98,6 +99,17 @@ public final class UDPService implements Runnable {
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
 
+    /**
+     * <tt>Map</tt> of GUIDs to <tt>HostListeners</tt>.
+     */
+    private final Map HOST_LISTENERS = new HashMap();
+    
+    /**
+     * <tt>List</tt> of <tt>HostListeners</tt> to maintain the order that 
+     * listeners were added.
+     */
+    private final List HOST_LISTENERS_LIST = new LinkedList();
+    
 	/**
 	 * Instance accessor.
 	 */
@@ -246,6 +258,11 @@ public final class UDPService implements Runnable {
                             GUID guidReceived = new GUID(message.getGUID());
                             if (SOLICITED_PING_GUID.equals(guidReceived))
                                 _acceptedSolicitedIncoming = true;
+                            HostListener hl = 
+                                (HostListener)HOST_LISTENERS.get(guidReceived);
+                            if(hl != null) {
+                                hl.addHost((PingReply)message);
+                            }
                         }
                     }
                     router.handleUDPMessage(message, datagram);
@@ -262,6 +279,25 @@ public final class UDPService implements Runnable {
             ErrorService.error(t);
         }
 	}
+    
+    /**
+     * Sends the specified <tt>Message</tt> to the specified host and associates
+     * the message <tt>GUID</tt> with the specified <tt>HostListener</tt> for
+     * any replies that are returned.
+     * 
+     * @param msg the <tt>Message</tt> to send
+     * @param host the host to send the message to
+     * @param listener the <tt>HostListener</tt> to notify about any pongs
+     *  received
+     */
+    public void send(Message msg, IpPort host, HostListener listener) {
+        HOST_LISTENERS.put(new GUID(msg.getGUID()), listener);
+        HOST_LISTENERS_LIST.add(listener);
+        if(HOST_LISTENERS.size() > 2000) {
+            HOST_LISTENERS.remove(HOST_LISTENERS_LIST.remove(0));
+        }
+        send(msg, host.getInetAddress(), host.getPort());
+    }
 
 	/**
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
