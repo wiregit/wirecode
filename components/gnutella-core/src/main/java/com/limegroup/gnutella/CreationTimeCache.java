@@ -224,14 +224,9 @@ public final class CreationTimeCache {
         try {
             oos = new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
             oos.writeObject(URN_TO_TIME_MAP);
-        }
-        catch (FileNotFoundException fnfe) {
-            Assert.that(false, "Couldn't Write find cache file!!");
-        }
-        catch (IOException e) {
-            Assert.that(false, "Couldn't Write to Disk!!");
-        }
-        finally {
+        } catch (IOException e) {
+            ErrorService.error(e);
+        } finally {
             try {
                 if (oos != null)
                     oos.close();
