@@ -155,9 +155,11 @@ public class BootstrapServerManager {
         }
         public void handleResponseData(BootstrapServer server, String line) {
             try {
-                //Endpoint's constructor won't choke on "ERROR", so we check.
-                Endpoint host=new Endpoint(line);                    
-                _catcher.add(host, true);
+                //TODO: what priority to use when adding?  We don't know whether
+                //the host ia an ultrapeer or not, but we expect it to have a
+                //higher than usual average daily uptime.
+                Endpoint host=new Endpoint(line);
+                _catcher.add(host, true);       
                 responses++;
             } catch (IllegalArgumentException bad) { 
                 //One strike and you're out; skip servers that send bad data.

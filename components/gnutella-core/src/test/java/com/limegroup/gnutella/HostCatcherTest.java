@@ -98,133 +98,6 @@ public class HostCatcherTest extends TestCase {
         assertTrue(hc.getNumPrivateHosts()==0);
     }
 
-    public void testBootstraps() {
-        try {
-            SettingsManager.instance().setQuickConnectHosts(
-                new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347", "crap:crap"});
-            hc.expire();
-
-            hc.add(new Endpoint("128.103.60.3", 6346), false);
-            hc.add(new Endpoint("128.103.60.2", 6346), false);
-            hc.add(new Endpoint("128.103.60.1", 6346), false);
-
-            Endpoint router1=hc.getAnEndpoint();
-            assertTrue(router1.equals(new Endpoint("r1.b.c.d", 6346)));         
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.1", 6346)));
-            hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.doneWithConnect(router1, false);    //got pong
-            hc.doneWithMessageLoop(router1);
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.144", 6346)));        
-
-            Endpoint router2=hc.getAnEndpoint();
-            assertTrue(router2.equals(new Endpoint("r2.b.c.d", 6347)));        
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.2", 6346)));        
-            hc.doneWithConnect(router2, false);
-            hc.doneWithMessageLoop(router2);
-
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("128.103.60.3", 6346))); //no more bootstraps
-        } catch (InterruptedException e) {
-            assertTrue("Mysterious InterruptedException", false);
-        }
-    }
-
-    public void testExpireBig() {
-        try {
-            HostCatcher.DEBUG=false;
-            final int SIZE=100;
-            assertTrue(SIZE>HostCatcher.HOSTS_BEFORE_BOOTSTRAP);
-            //Tests that some messages are copied from GOOD priority to NORMAL,
-            //but some aren't.
-            SettingsManager.instance().setQuickConnectHosts(
-                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
-            for (int i=SIZE; i>=1; i--) 
-                hc.add(new Endpoint("18.239.0.144", i), true);
-            assertEquals(SIZE, 
-                         hc.getNumUltrapeerHosts());
-
-            hc.expire();
-
-            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP, 
-                         hc.getNumUltrapeerHosts());
-            int i=1;
-            for (; i<=HostCatcher.HOSTS_BEFORE_BOOTSTRAP; i++)
-                assertEquals(new Endpoint("18.239.0.144", i),
-                             hc.getAnEndpoint());
-            assertTrue(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
-            for (; i<=SIZE; i++)
-                assertEquals(new Endpoint("18.239.0.144", i),
-                             hc.getAnEndpoint());
-            assertEquals(0, hc.getNumHosts());
-        } catch (InterruptedException e) { 
-            assertTrue("Mysterious InterruptedException", false);
-        }
-    }
-
-    public void testExpireSmall() {
-        try {
-            HostCatcher.DEBUG=false;
-            final int SIZE=5;
-            assertTrue(SIZE<HostCatcher.HOSTS_BEFORE_BOOTSTRAP);
-            //Tests that some messages are copied from GOOD priority to NORMAL,
-            //but some aren't.
-            SettingsManager.instance().setQuickConnectHosts(
-                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
-            for (int i=SIZE; i>=1; i--) 
-                hc.add(new Endpoint("18.239.0.144", i), true);
-            assertEquals(SIZE, 
-                         hc.getNumUltrapeerHosts());
-
-            hc.expire();
-
-            assertEquals(SIZE, hc.getNumUltrapeerHosts());            
-            for (int i=1; i<=SIZE; i++)
-                assertEquals(new Endpoint("18.239.0.144", i),
-                             hc.getAnEndpoint());
-            assertTrue(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
-            assertEquals(0, hc.getNumHosts());
-        } catch (InterruptedException e) { 
-            assertTrue("Mysterious InterruptedException", false);
-        }
-    }
-
-    /** Ensures threads woken up when waiting for a bootstrap host. */
-    public void testExpireEmpty() {
-        //Start fetcher and give it time to block in getAnEndpoint().
-        SettingsManager.instance().setQuickConnectHosts(new String[0]);
-        TestFetcher fetcher=new TestFetcher();
-        fetcher.start();
-        try { Thread.sleep(100); } catch (InterruptedException e) { }
-
-        //Make sure fetcher hasn't mad progress.
-        assertNull(fetcher.result);
-
-        //Add quick-connect hosts and notify.
-        SettingsManager.instance().setQuickConnectHosts(
-            new String[] {"r1.b.c.d:6346"});
-        hc.expire();
-
-        //Make sure fetcher has made progress.  Timeout just prevents test from
-        //blocking.
-        try {
-            fetcher.join(1000);
-        } catch (InterruptedException e) { }
-        assertEquals(new Endpoint("r1.b.c.d", 6346), fetcher.result);
-    }
-
-    class TestFetcher extends Thread {
-        volatile Endpoint result;
-        public void run() {
-            try {
-                result=hc.getAnEndpoint();
-            } catch (InterruptedException e) { }
-        }
-    }
-
-
     public void testIterators() {
         //System.out.println("-Testing iterators");
 
@@ -295,7 +168,6 @@ public class HostCatcherTest extends TestCase {
             hc.write(tmp.getAbsolutePath());
 
             //2. read HC from file.
-            SettingsManager.instance().setQuickConnectHosts(new String[0]);
             setUp();
             hc.read(tmp.getAbsolutePath());
             assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
@@ -345,12 +217,10 @@ public class HostCatcherTest extends TestCase {
             hc.write(tmp.getAbsolutePath());            
 
             //2. Read
-            SettingsManager.instance().setQuickConnectHosts(new String[0]);
             setUp();
             HostCatcher.DEBUG=false;  //Too darn slow
             hc.read(tmp.getAbsolutePath());
-            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP,
-                         hc.getNumUltrapeerHosts());
+            assertEquals(0, hc.getNumUltrapeerHosts());
             assertEquals(new Endpoint("18.239.0.142", 0),
                          hc.getAnEndpoint());
             for (int i=N; i>1; i--) {
@@ -426,7 +296,6 @@ public class HostCatcherTest extends TestCase {
             out.close();
 
             //2. Read and verify
-            SettingsManager.instance().setQuickConnectHosts(new String[0]);
             setUp();
             hc.read(tmp.getAbsolutePath());
             assertTrue(hc.getAnEndpoint().equals( 
@@ -458,14 +327,12 @@ public class HostCatcherTest extends TestCase {
             out.close();
 
             //2. Read
-            SettingsManager.instance().setQuickConnectHosts(new String[0]);
             setUp();
             HostCatcher.DEBUG=false;  //Too darn slow
             hc.read(tmp.getAbsolutePath());
 
             assertEquals(HostCatcher.NORMAL_SIZE, hc.getNumHosts());
-            assertEquals(HostCatcher.HOSTS_BEFORE_BOOTSTRAP, 
-                         hc.getNumUltrapeerHosts());
+            assertEquals(0, hc.getNumUltrapeerHosts());
 
             //3. Verify it's random.  This is hard to check.  We just verify
             //that that the first three entries aren't the last three entries

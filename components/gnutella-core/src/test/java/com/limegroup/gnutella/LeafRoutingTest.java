@@ -46,8 +46,6 @@ public class LeafRoutingTest extends TestCase {
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(PORT);
         settings.setDirectories(new File[0]);
-        settings.setUseQuickConnect(false);
-        settings.setQuickConnectHosts(new String[0]);
         settings.setConnectOnStartup(false);
         settings.setEverSupernodeCapable(false);
         settings.setDisableSupernodeMode(true);

@@ -28,7 +28,6 @@ public class ConnectionManagerTest extends TestCase {
     public void setUp() {
         SettingsManager.instance().setKeepAlive(0);
         SettingsManager.instance().setConnectOnStartup(false);
-        SettingsManager.instance().setQuickConnectHosts(new String[0]);        
         cm=new ConnectionManager(new ActivityCallbackStub(),
                                  new DummyAuthenticator());
         hc=new TestHostCatcher();
@@ -46,7 +45,6 @@ public class ConnectionManagerTest extends TestCase {
         sleep();
         assertEquals(0, hc.connectSuccess);
         assertEquals(1, hc.connectFailures);
-        assertEquals(1, hc.loopsDone);
         cm.disconnect();
     }
 
@@ -56,7 +54,6 @@ public class ConnectionManagerTest extends TestCase {
         sleep();
         assertEquals(0, hc.connectSuccess);
         assertEquals(1, hc.connectFailures);
-        assertEquals(1, hc.loopsDone);
     }
 
     public void testGoodHost() {
@@ -66,12 +63,10 @@ public class ConnectionManagerTest extends TestCase {
         Connection in=acceptor.accept();
         assertEquals(1, hc.connectSuccess);
         assertEquals(0, hc.connectFailures);
-        assertEquals(0, hc.loopsDone);
         in.close();
         sleep();
         assertEquals(1, hc.connectSuccess);
         assertEquals(0, hc.connectFailures);
-        assertEquals(1, hc.loopsDone);        
     }
 
     public void testRejectHost() {
@@ -82,7 +77,6 @@ public class ConnectionManagerTest extends TestCase {
         sleep();
         assertEquals(1, hc.connectSuccess);   //success even though rejected
         assertEquals(0, hc.connectFailures);
-        assertEquals(1, hc.loopsDone);
     }
     
     class RejectResponder implements HandshakeResponder {
@@ -106,7 +100,6 @@ class TestHostCatcher extends HostCatcher {
     volatile Endpoint endpoint;
     volatile int connectSuccess=0;
     volatile int connectFailures=0;
-    volatile int loopsDone=0;
 
     TestHostCatcher() {
         super(new ActivityCallbackStub());
@@ -127,9 +120,5 @@ class TestHostCatcher extends HostCatcher {
             connectSuccess++;
         else
             connectFailures++;
-    }
-
-    public synchronized void doneWithMessageLoop(Endpoint e) {
-        loopsDone++;
     }
 }

@@ -41,7 +41,6 @@ public class ManagedConnectionTest extends TestCase {
         //client) send a "503 Service Unavailable" at line 77 of
         //SupernodeHandshakeResponder.
         SettingsManager.instance().loadDefaults();
-        SettingsManager.instance().setQuickConnectHosts(new String[0]);
     }
 
     /** 

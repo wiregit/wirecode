@@ -29,15 +29,14 @@ import java.text.ParseException;
  *      addresses.        
  * </ol> 
  *
- * HostCatcher also manages the list of permanent bootstrap servers like
- * <tt>router.limewire.com</tt>.  The expire() method can force this to
- * reconnect to the bootstrap server by demoting ultrapeer pongs.  YOU MUST CALL
- * EXPIRE() TO GET BOOTSTRAP PONGS.  This should be done when calling
- * RouterService.connect().  The doneWithMessageLoop method helps this connect
- * to only one bootstrap server at a time.<p>
+ * HostCatcher also manages the list of GWebCache servers.  YOU MUST CALL
+ * EXPIRE() TO START THE GBWEBCACHE BOOTSTRAPING PROCESS.  This should be done
+ * when calling RouterService.connect().<p>
  *
  * Finally, HostCatcher maintains a list of "permanent" locations, based on
- * average daily uptime.  These are stored in the gnutella.net file.  
+ * average daily uptime.  These are stored in the gnutella.net file.  They
+ * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
+ * use those anymore.
  */
 public class HostCatcher {    
     //These constants are package-access for testing.  
@@ -51,10 +50,6 @@ public class HostCatcher {
     /** The number of private IP pongs to store. */
     static final int BAD_SIZE=15;
     static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
-    /** The number of hosts to try before relying on router.limewire.com.  This
-     *  is used when loading the gnutella.net file and when expiring the
-     *  cache. */
-    static final int HOSTS_BEFORE_BOOTSTRAP=20;
 
     /** The number of permanent locations to store in gnutella.net */
     static final int PERMANENT_SIZE=NORMAL_SIZE;
@@ -99,16 +94,6 @@ public class HostCatcher {
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache=new BootstrapServerManager(this);
     
-
-    /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
-     * router.limewire.com.  We try these hosts serially (starting with the
-     * head) until we get some good endpoints, e.g. size(GOOD_SIZE)>0.  */
-    private LinkedList /* of Endpoint */ bootstrapHosts=new LinkedList();
-    /** The bootstrap host we're trying to connect from, or null if none.
-     * Prevents us from connecting to more than one bootstrap host at a time.
-     * This value is set when removing entries from bootstrapHosts.  It's
-     * cleared in doneWithEndpoint(). */
-    private Endpoint bootstrapHostInProgress=null;
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -197,9 +182,8 @@ public class HostCatcher {
      */
     synchronized void read(String filename)
             throws FileNotFoundException, IOException {
-        //Read gnutella.net file into temporary buffer.
-        List /* of ExtendedEndpoint */ buffer=new ArrayList(NORMAL_SIZE);
-        BufferedReader in=new BufferedReader(new FileReader(filename));
+        BufferedReader in=null;
+        in=new BufferedReader(new FileReader(filename));
         while (true) {
             String line=in.readLine();
             if (line==null)
@@ -216,38 +200,10 @@ public class HostCatcher {
             //Is it a normal endpoint?
             try {
                 ExtendedEndpoint e=ExtendedEndpoint.read(line);
-                buffer.add(e);
+                add(e, priority(e));
             } catch (ParseException pe) {
                 continue;
             }
-        }
-
-        //If the gnutella.net file is very large, we can assume we're
-        //running LimeWire for the first time.  In this case, we want to
-        //pick a random subset of the gnutella.net file to add.  You might
-        //also want to check that LimeWire is running for the first time--
-        //but I worry that we might be using an old limewire.props with a
-        //new gnutella.net.
-        //
-        //It's possible to specialize the shuffling algorithm to run in
-        //O(PERMANENT_SIZE) time instead of O(buffer.size()) time, while still
-        //preventing duplicates.
-        if (buffer.size()>PERMANENT_SIZE) {
-            Collections.shuffle(buffer);
-            buffer=buffer.subList(0, PERMANENT_SIZE); //efficient
-        }
-
-        //Add entries to the buffer.  Note that first elements end up at the
-        //lowest priority, assuming they're otherwise equal.
-        for (int i=0; i<buffer.size(); i++) {
-            ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
-            //First pongs are normal priority.  Last HOSTS_BEFORE_BOOTSTRAP are
-            //given ultrapeer priority.  This delays the use of
-            //router.limewire.com until connection attempts fail.
-            int priority=i>=(buffer.size()-HOSTS_BEFORE_BOOTSTRAP) 
-                         ? GOOD_PRIORITY
-                         : priority(e);
-            add(e, priority);
         }
     }
 
@@ -255,6 +211,7 @@ public class HostCatcher {
      * @modifies the file named filename
      * @effects writes this to the given file.  The file
      *  is prioritized by rough probability of being good.
+     *  GWebCache entries are also included in this file.
      */
     synchronized void write(String filename) throws IOException {
         repOk();
@@ -461,25 +418,39 @@ public class HostCatcher {
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
             try { 
-                //a) If we have a good endpoint, use that.
-                if (queue.size(GOOD_PRIORITY)>0) 
-                    return getAnEndpointInternal(); 
-                //b) If we're not currently connecting to a bootstrap server and
-                //there are servers left to try, do so.
-                else if (bootstrapHostInProgress==null
-                         && !bootstrapHosts.isEmpty()) {                    
-                    Endpoint ret=(Endpoint)bootstrapHosts.removeFirst();
-                    bootstrapHostInProgress=ret;
-                    return ret;
-                }
-                //c) Try one of the crap pongs.
-                else
-                    return getAnEndpointInternal();
+                return getAnEndpointInternal();
             } catch (NoSuchElementException e) { }
             
             //No luck?  Wait and try again.
-            wait();  //throws InterruptedException 			
+            wait();  //throws InterruptedException          
         } 
+    }
+  
+    /**
+     * Notifies this that the fetcher has finished attempting a connection to
+     * the given host.  This exists primarily to update the permanent host list
+     * with connection history.
+     *
+     * @param e the address/port, which should have been returned by 
+     *  getAnEndpoint
+     * @param success true if we successfully established a messaging connection 
+     *  to e, at least temporarily; false otherwise 
+     */
+    public synchronized void doneWithConnect(Endpoint e, boolean success) {
+        //Normal host: update key.  TODO3: adjustKey() operation may be more
+        //efficient.
+        if (! (e instanceof ExtendedEndpoint))
+            //Should never happen, but I don't want to update public
+            //interface of this to operate on ExtendedEndpoint.
+            return;
+        ExtendedEndpoint ee=(ExtendedEndpoint)e;
+
+        removePermanent(ee);
+        if (success)
+            ee.recordConnectionSuccess();
+        else
+            ee.recordConnectionFailure();
+        addPermanent(ee);
     }
 
     /**
@@ -584,53 +555,6 @@ public class HostCatcher {
     }
 
     /**
-     * Notifies this that the fetcher has finished attempting a connection to
-     * the given host.  This exists primarily to update the permanent host list
-     * with connection history.
-     *
-     * @param e the address/port, which should have been returned by 
-     *  getAnEndpoint
-     * @param success true if we successfully established a messaging connection 
-     *  to e, at least temporarily; false otherwise 
-     */
-    public synchronized void doneWithConnect(Endpoint e, boolean success) {
-        if (e!=bootstrapHostInProgress) {
-            //Normal host: update key.  TODO3: adjustKey() operation may be more
-            //efficient.
-            if (! (e instanceof ExtendedEndpoint))
-                //Should never happen, but I don't want to update public
-                //interface of this to operate on ExtendedEndpoint.
-                return;
-            ExtendedEndpoint ee=(ExtendedEndpoint)e;
-
-            removePermanent(ee);
-            if (success)
-                ee.recordConnectionSuccess();
-            else
-                ee.recordConnectionFailure();
-            addPermanent(ee);
-        }         
-    }
-    
-    /**
-     * Notifies this that the fetcher is done with the fetched connection to
-     * host.  This exists primarily to tell if we're done with
-     * router.limewire.com (and go on to other host caches if necessary).  This
-     * method may only be called after doneWithConnect().  It's ok to call this
-     * even if the connect failed.
-     *
-     * @param e the address/port, which should have been returned by 
-     *  getAnEndpoint 
-     */
-    public synchronized void doneWithMessageLoop(Endpoint e) {
-        if (e==bootstrapHostInProgress) {  //not .equals
-            //Was a special bootstrap host?  Keep track.
-            bootstrapHostInProgress=null;
-            notifyAll();  //may be able to try other bootstrap servers
-        }
-    }
-
-    /**
      *  Remove unwanted or used entries
      */
     public synchronized void removeHost(String host, int port) {
@@ -646,47 +570,6 @@ public class HostCatcher {
      * out bootstrap pongs if necessary.
      */
     public synchronized void expire() {
-        //Add bootstrap hosts IN ORDER.
-        bootstrapHostInProgress=null;
-        bootstrapHosts.clear();
-        String[] hosts=settings.getQuickConnectHosts();
-        for (int i=0; i<hosts.length; i++) {
-            try {
-                Endpoint e=new Endpoint(hosts[i]);
-                bootstrapHosts.addLast(e);
-                //This may allow some fetchers to progress.
-                notify();
-            } catch (IllegalArgumentException ignore) {
-                //poorly formatted quick-connect host
-            }
-        }
-        
-        //Move the worst N-HOSTS_BEFORE_BOOTSTRAP ultrapeer hosts from GOOD to
-        //NORMAL.  This is a little weird because these hosts really still are
-        //ultrapeer pongs--just lesser priority.  Leave the best
-        //HOSTS_BEFORE_BOOTSTRAP pongs in the same priority level.  Our
-        //implementation uses a temporary buffer to avoid needing knowledge of
-        //queue structure.
-        int n=getNumUltrapeerHosts();
-        ExtendedEndpoint[] buffer=new ExtendedEndpoint[n];
-        for (int i=0; i<n; i++) {
-            //1. Remove pongs from queue, adding to buffer.
-            try {
-                buffer[i]=getAnEndpointInternal();
-            } catch (NoSuchElementException e) {
-                Assert.that(false, 
-                    i+"'th getAnEndpointInternal not consistent with "+n);
-            }
-        }
-        Assert.that(getNumUltrapeerHosts()==0, "Ultrapeers not emptied");
-        int i=n-1;
-        for (; i>=HOSTS_BEFORE_BOOTSTRAP; i--)
-            //2. Copy worst pongs to normal priority
-            add(buffer[i], NORMAL_PRIORITY);
-        for (; i>=0; i--)
-            //3. Put best pongs back into good priority
-            add(buffer[i], GOOD_PRIORITY);        
-
         //Connect to a GWebCache
         gWebCache.fetchEndpointsAsync();
         gWebCache.fetchBootstrapServersAsync();

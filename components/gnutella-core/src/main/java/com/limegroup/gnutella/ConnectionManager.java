@@ -826,7 +826,6 @@ public class ConnectionManager {
             (!settings.getUseQuickConnect())
                 && _catcher.getNumHosts()==0;
         if (useHack) {
-            settings.setUseQuickConnect(true);
             disconnect();
         }
 
@@ -850,7 +849,6 @@ public class ConnectionManager {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) { }
-            SettingsManager.instance().setUseQuickConnect(false);
         }
     }
     
@@ -1512,9 +1510,6 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                //Record that we're done with the connection, which may allow
-                //HostCatcher to go on to other endpoints.
-                _catcher.doneWithMessageLoop(endpoint);
                 if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
             }
