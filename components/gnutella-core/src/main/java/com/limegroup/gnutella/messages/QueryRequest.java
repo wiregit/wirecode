@@ -812,11 +812,13 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> for browse host queries
 	 */
 	public static QueryRequest createBrowseHostQuery() {
-        return new QueryRequest(newQueryGUID(false), (byte)1, 
-								FileManager.INDEXING_QUERY, "", 
-                                UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false, 0, false, 0);
+		return new QueryRequest(newQueryGUID(false), (byte)1, 
+				FileManager.INDEXING_QUERY, "", 
+                UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+                !RouterService.acceptedIncomingConnection(), 
+				Message.N_UNKNOWN, false, 0, false, 0);
 	}
+	
 
 	/**
 	 * Specialized constructor used to create a query without the firewalled
