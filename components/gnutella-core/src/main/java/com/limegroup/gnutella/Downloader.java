@@ -182,7 +182,7 @@ public interface Downloader extends BandwidthTracker {
      * Returns the position of the download on the uploader, relavent only if
      * the downloader is queueud.
      */
-    public String getQueuePosition();
+    public int getQueuePosition();
     
     /**
      * Return the number of validated alternate locations for this download

@@ -2116,8 +2116,8 @@ public class DownloadTest extends BaseTestCase {
         Thread.sleep(1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
-        int qPos = Integer.parseInt
-        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        int qPos = 
+        ((Integer)PrivilegedAccessor.getValue(downloader,"queuePosition")).intValue();
         
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",1,queued);

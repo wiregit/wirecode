@@ -500,7 +500,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private File completeFile;
     /**
      * The position of the downloader in the uploadQueue */
-    private String queuePosition;
+    private int queuePosition;
     /**
      * The vendor the of downloader we're queued from.
      */
@@ -705,7 +705,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         altLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        queuePosition = "";
         queuedVendor = "";
         triedLocatingSources = false;
         // get the SHA1 if we can.
@@ -2990,11 +2989,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return ConnectionStatus.getNoData(); // we were signalled to stop.
                     setState(REMOTE_QUEUED);
                 }
-                int oldPos = queuePosition.equals("")?
-                Integer.MAX_VALUE:Integer.parseInt(queuePosition);
+                
                 int newPos = qx.getQueuePosition();
-                if ( newPos < oldPos ) {
-                    queuePosition = "" + newPos;
+                if ( newPos < queuePosition ) {
+                    queuePosition = newPos;
                     queuedVendor = dloader.getVendor();
                 }                    
             }
@@ -3778,9 +3776,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return browseList.hasBrowseHostEnabledHost();
 	}
 
-    public synchronized String getQueuePosition() {
+    public synchronized int getQueuePosition() {
         if(getState() != REMOTE_QUEUED)
-            return "";
+            return 0;
         return queuePosition;
     }
     
