@@ -301,6 +301,12 @@ public abstract class MessageRouter {
 
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
+		// Verify that the address and port are valid.
+		// If they are not, we cannot send any replies to them.
+		if(!NetworkUtils.isValidAddress(address) ||
+		   !NetworkUtils.isValidPort(port))
+		    return;
+
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {

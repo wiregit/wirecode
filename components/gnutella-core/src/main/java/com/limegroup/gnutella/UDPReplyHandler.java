@@ -47,6 +47,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param port the port to reply to
 	 */
 	public UDPReplyHandler(InetAddress ip, int port) {
+	    if(!NetworkUtils.isValidPort(port))
+	        throw new IllegalArgumentException("invalid port: " + port);
+	    if(!NetworkUtils.isValidAddress(ip))
+	        throw new IllegalArgumentException("invalid ip: " + ip);
+	       
 		IP   = ip;
 		PORT = port;
 	}
