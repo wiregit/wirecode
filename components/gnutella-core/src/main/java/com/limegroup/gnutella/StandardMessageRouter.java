@@ -76,16 +76,10 @@ public class StandardMessageRouter extends MessageRouter {
 
         List pongs = PongCacher.instance().getBestPongs();
         Iterator iter = pongs.iterator();
+        byte[] guid = pingRequest.getGUID();
         try {
             while(iter.hasNext()) {
-                PingReply p = (PingReply)iter.next();
-                PingReply correctGUIDPong = 
-                    PingReply.create(pingRequest.getGUID(), 
-                                     p.getTTL(), p.getPort(),
-                                     p.getIPBytes(), p.getFiles(), p.getKbytes(),
-                                     p.isUltrapeer(), p.getDailyUptime(),
-                                     p.supportsUnicast());
-                sendPingReply(correctGUIDPong);
+                sendPingReply(((PingReply)iter.next()).mutateGUID(guid));
             }
         } catch(IOException e) {  
             // this indicates that the reply route has been broken,
