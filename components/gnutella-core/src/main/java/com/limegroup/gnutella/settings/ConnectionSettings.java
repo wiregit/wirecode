@@ -14,7 +14,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * accepted.
 	 */
 	public static final BooleanSetting EVER_ACCEPTED_INCOMING =
-		FACTORY.createExpirableBooleanSetting("EVER_ACCEPTED_INCOMING", false);
+		FACTORY.createBooleanSetting("EVER_ACCEPTED_INCOMING", false);
 
 	/**
 	 * Settings for whether or not to automatically connect to the network

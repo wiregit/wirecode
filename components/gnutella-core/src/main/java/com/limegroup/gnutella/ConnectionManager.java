@@ -292,13 +292,6 @@ public class ConnectionManager {
      */
     public boolean isShieldedLeaf() {
         return _shieldedConnections != 0;
-//        List connections=getInitializedConnections();
-//        for (int i=0; i<connections.size(); i++) {
-//            ManagedConnection first=(ManagedConnection)connections.get(i);
-//            if (first.isClientSupernodeConnection())
-//                return true;
-//        }
-//        return false;
     }
     
     /**

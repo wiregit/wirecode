@@ -498,6 +498,10 @@ public class RouterService {
         try {
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
+            
+            //Update firewalled status
+            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
+                acceptedIncomingConnection());
 
             //Write gnutella.net
             try {
