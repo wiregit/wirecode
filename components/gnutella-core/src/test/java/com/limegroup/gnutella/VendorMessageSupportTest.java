@@ -204,6 +204,12 @@ public class VendorMessageSupportTest extends BaseTestCase {
         _leaf1.send(hops);
         _leaf1.flush();
 
+        try {
+            // wait for hops flow to be turned off....
+            Thread.sleep(2*1000);
+        }
+        catch (InterruptedException ignored) {}
+
         qr = new QueryRequest((byte) 3, 0, "foosball", false);
         _leaf2.send(qr);
         _leaf2.flush();
