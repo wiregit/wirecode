@@ -293,6 +293,10 @@ public class RouterService {
         ConnectionWatchdog.instance().start();
         LOG.trace("STOP ConnectionWatchdog");
         
+        LOG.trace("START SavedFileManager");
+        SavedFileManager.instance();
+        LOG.trace("STOP SavedFileManager");
+        
         LOG.trace("STOP RouterService.");
 	}
 

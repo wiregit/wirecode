@@ -1407,9 +1407,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Cleans up information before this downloader is removed from memory.
      */
-    public void finish() {
+    public synchronized void finish() {
         if( commonOutFile != null )
             commonOutFile.clearManagedDownloader();
+        if(allFiles != null) {
+            for(int i = 0; i < allFiles.length; i++)
+                allFiles[i].setDownloading(false);
+        }       
     }
 
     /** @return either the URN of the file that was downloaded the most so far
@@ -1997,9 +2001,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {
                 file = FileUtils.getCanonicalFile(completeFile);
             } catch(IOException ignored) {}
-            // Only cache if we're going to share it.
-            if(fileManager.isFileInSharedDirectories(file))
-                UrnCache.instance().addUrns(file, urns);
+            // Always cache the URN, so results can lookup to see
+            // if the file exists.
+            UrnCache.instance().addUrns(file, urns);
+            // Notify the SavedFileManager that there is a new saved
+            // file.
+            SavedFileManager.instance().addSavedFile(file, urns);
         }
 
         FileDesc fileDesc = 
