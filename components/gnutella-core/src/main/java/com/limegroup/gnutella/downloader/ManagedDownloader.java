@@ -20,6 +20,9 @@ import java.net.*;
  * swarmed downloads, the ability to download copies of the same file from
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
+ * Subclasses may refine the requery behavior by overriding the
+ * allowAddition(..) or addDownload(..) methods.<p>
+ * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
  * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
@@ -196,6 +199,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  verify that different sources are serving the same content. */
     private static final int OVERLAP_BYTES=500;
 
+    /** The time to wait between requeries, in milliseconds.  This time can
+     *  safely be quite small because it is overridden by the global limit in
+     *  DownloadManager.  Package-access and non-final for testing.
+     *  @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
+    static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
     /** The number of times to requery the network. */
     private static final int REQUERY_ATTEMPTS = 60;
     /** The size of the approx matcher 2d buffer... */
@@ -530,11 +538,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     private boolean initDone = false; // used to init
     /**
-     * Returns true if 'other' could conflict with one of the files in this. 
-     * This is a much less strict version compared to conflicts().
+     * Returns true if 'other' should be accepted as a new download location.
      */
-    public boolean conflictsLAX(RemoteFileDesc other) {
-
+    protected boolean allowAddition(RemoteFileDesc other) {
         if (!initDone) {
             synchronized (matcher) {
                 matcher.setIgnoreCase(true);
@@ -578,19 +584,27 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
     /** 
-     * Adds the given location to this.  This will terminate after
-     * downloading rfd or any of the other locations in this.  This
-     * may swarm some file from rfd and other locations.
+     * Attempts to add the given location to this.  If rfd is accepted, this
+     * will terminate after downloading rfd or any of the other locations in
+     * this.  This may swarm some file from rfd and other locations.<p>
+     * 
+     * This method only adds rfd if allowAddition(rfd).  Subclasses may
+     * wish to override this protected method to control the behavior.
      * 
      * @param rfd a new download candidate.  Typically rfd will be similar or
      *  same to some entry in this, but that is not required.  
+     * @return true if rfd has been added.  In this case, the caller should
+     *  not offer rfd to another ManagedDownloaders.
      */
-    public synchronized void addDownload(RemoteFileDesc rfd) {
+    public synchronized boolean addDownload(RemoteFileDesc rfd) {
+        if (! allowAddition(rfd))
+            return false;
+
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
             if (rfd.equals(allFiles[i]))
-                return;          
+                return true;          
         }  
 
         //System.out.println("Adding "+rfd);
@@ -615,6 +629,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
+        return true;
     }
 
     /**
@@ -766,7 +781,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // the user just started a query.  Hence initialize nextRequeryTime to
         // System.currentTimeMillis() plus a few minutes.
         long nextRequeryTime = System.currentTimeMillis()
-            + getMinutesToWaitForRequery(numRequeries)*60*1000;
+                             + TIME_BETWEEN_REQUERIES;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -842,8 +857,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if (manager.sendQuery(this, allFiles))
                         numRequeries++;
                     // set time for next requery...
-                    nextRequeryTime = currTime + 
-                    (getMinutesToWaitForRequery(numRequeries)*60*1000);
+                    nextRequeryTime = currTime + TIME_BETWEEN_REQUERIES;
                 }
 
 
@@ -1965,21 +1979,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
-    /**
-     * Returns the time to wait between the n'th and n+1'th automatic requery,
-     * where n=requeries.  Hence getMinutesToWaitForRequery(0) is the time to
-     * wait before the first requery. getMinutesToWaitForRequery(1) is the time
-     * to wait after that before requerying again.
-     *
-     * @param requeriesthe number of requeries sent, which must be non-negative
-     * @return minutes to wait
-     */
-    protected int getMinutesToWaitForRequery(int requeries) {
-        return 5;
-    }
-
     /** Synchronization Primitive for auto-requerying....
-     *  Can be underst00d as follows:
+     *  Can be understood as follows:
      *  -- The tryAllDownloads thread does a lock(), which will cause it to
      *  wait() for up to waitTime.  it may be woken up earlier if it gets
      *  a requery result. moreover, it won't wait if it has a result already...
@@ -2113,4 +2114,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private ManagedDownloader() {
     }
 
+    //More tests:
+    //-test/com/limegroup/gnutella/downloader/ManagedDownloaderTest.java
+    // (simply calls above unit test)
+    //-test/com/limegroup/gnutella/downloader/DownloadTest.java
+    // (tests swarming)
+    //-test/com/limegroup/gnutella/downloader/RequeryDownloadTest.java
+    // (tests allowAddition/addDownload)
 }

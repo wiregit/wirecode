@@ -52,10 +52,9 @@ public class DownloadManager implements BandwidthTracker {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
-    /** The amount of time between requeries: 
-     *  45 minutes
-     */
-    public final static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
+    /** The global minimum time between any two requeries, in milliseconds.
+     *  @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/
+    public static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
 
     /** The last time that a requery was sent.
      */
@@ -434,24 +433,16 @@ public class DownloadManager implements BandwidthTracker {
             downloaders.addAll(waiting);
         }        
 
-        // for each downloader, see if any RFD conflicts
-        //
-        // philosophical question - usually we don't allow ManagedDownloaders to
-        // be downloading the same file.  so once i find a match, should i be
-        // stopping my progress through the list of downloaders?  well, this
-        // code works, and doesn't seem to be practically inefficient, mainly
-        // cuz conflictsLAX is coded as speedily as possible.....
-        //
-        // non-philosphical answer - once you find conflictsLAX to be true,
-        // break out of the loop.  only one downloader needs be notified
-        for (int i = 0; i < rfds.length; i++) 
+        //For each rfd i, offer it to downloader j.  Give rfd i to at most one
+        //RFD.  TODO: it's possible that downloader x could accept rfds[i] but
+        //that would cause a conflict with downloader y.  Check for this.
+        for (int i = 0; i < rfds.length; i++) {
             for (int j = 0; j < downloaders.size(); j++) {
                 ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
-                if (currD.conflictsLAX(rfds[i])) {
-                    currD.addDownload(rfds[i]);
+                if (currD.addDownload(rfds[i]))
                     break;
-                }
             }
+        }
     }
 
 

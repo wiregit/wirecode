@@ -8,10 +8,15 @@ import com.sun.java.util.collections.*;
  * A ManagedDownloader that tries to resume to a specific incomplete file.  The
  * ResumeDownloader initially has no locations to download from.  Instead it
  * immediately requeries--by hash if possible--and only accepts results that
- * would result in resumes from the specified incomplete file.
+ * would result in resumes from the specified incomplete file.  Do not be
+ * confused by the name; ManagedDownloader CAN resume from incomplete files,
+ * but it is less strict about its choice of download.
  */
 public class ResumeDownloader extends ManagedDownloader 
         implements Serializable {
+    /** Ensures backwards compatibility of the downloads.dat file. */
+    static final long serialVersionUID = -4535935715006098724L;
+
     private final IncompleteFileManager _incompleteFileManager;
     private final File _incompleteFile;
     private final String _name;
@@ -28,7 +33,8 @@ public class ResumeDownloader extends ManagedDownloader
      * @param name the name of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
-     *  IncompleteFileManager.getCompletedSize(incompleteFile) */
+     *  IncompleteFileManager.getCompletedSize(incompleteFile) 
+     */
     public ResumeDownloader(DownloadManager manager,
                             FileManager fileManager,
                             IncompleteFileManager incompleteFileManager,
@@ -44,18 +50,35 @@ public class ResumeDownloader extends ManagedDownloader
         this._size=size;
     }
 
+    /**
+     * Overrides ManagedDownloader to reserve _incompleteFile for this download.
+     * That is, any download that would use the same incomplete file is 
+     * rejected, even if this is not currently downloading.
+     */
     public boolean conflicts(File incompleteFile) {
         return incompleteFile.equals(_incompleteFile);
     }
 
-    public boolean conflictsLAX(RemoteFileDesc other) {        
+    /**
+     * Overrides ManagedDownloader to allow any RemoteFileDesc that would
+     * resume from _incompleteFile.
+     */
+    protected boolean allowAddition(RemoteFileDesc other) {        
         return _incompleteFile.equals(_incompleteFileManager.getFile(other));
     }
 
+    /**
+     * Overrides ManagedDownloader to display a reasonable file name even
+     * when no locations have been found.
+     */
     public synchronized String getFileName() {        
         return _name;
     }
 
+    /**
+     * Overrides ManagedDownloader to display a reasonable file size even
+     * when no locations have been found.
+     */
     public synchronized int getContentLength() {
         return _size;
     }

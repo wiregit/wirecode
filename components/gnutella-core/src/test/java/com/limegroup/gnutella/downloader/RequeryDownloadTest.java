@@ -14,7 +14,7 @@ import junit.framework.*;
  * downloaders, a stubbed-out MessageRouter (no real messaging connections), and
  * test uploaders.
  */
-public class ResumeByHashTest extends TestCase {
+public class RequeryDownloadTest extends TestCase {
     /** The main test fixture.  Contains the incomplete file and hash below. */
     DownloadManager mgr; 
     /** Where to send and receive messages */
@@ -49,12 +49,13 @@ public class ResumeByHashTest extends TestCase {
 
     //////////////////////////// Fixtures /////////////////////////
 
-    public ResumeByHashTest(String name) {
+    public RequeryDownloadTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return new TestSuite(ResumeByHashTest.class);
+        return new TestSuite(RequeryDownloadTest.class);
+        //return new RequeryDownloadTest("testRequeryDownload");
     }
 
     public void setUp() {
@@ -232,7 +233,82 @@ public class ResumeByHashTest extends TestCase {
             assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
             downloader.stop();
         }
-    }
+    }    
 
     
+    /**
+     * Tests RequeryDownloader, aka the "wishlist" downloader.  It must
+     * initially send the right query and only accept the right results.  
+     */
+    public void testRequeryDownload() {
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=5*1000; //5 seconds
+        DownloadManager.TIME_BETWEEN_REQUERIES=5*1000;
+
+        //Start a download for the given incomplete file.  Give the thread time
+        //to start up, then make sure nothing has been sent initially.
+        Downloader downloader=null;
+        try {
+            downloader=mgr.startRequeryDownload("file name", 
+                                                null, 
+                                                GUID.makeGuid(),
+                                                null);
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        }
+        try { Thread.sleep(200); } catch (InterruptedException e) { }  
+        assertEquals(0, router.broadcasts.size());
+
+        //Now wait a few seconds and make sure a requery of right type was sent.
+        try { Thread.sleep(6*1000); } catch (InterruptedException e) { }
+        assertEquals(1, router.broadcasts.size());
+        Object m=router.broadcasts.get(0);
+        assertTrue(m instanceof QueryRequest);
+        QueryRequest qr=(QueryRequest)m;
+        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        assertEquals("file name", qr.getQuery());
+        assertTrue(qr.getRequestedUrnTypes()==null
+                   || qr.getRequestedUrnTypes().size()==0);
+        assertTrue(qr.getQueryUrns()==null
+                   || qr.getQueryUrns().size()==0);
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+
+        //Send a mismatching response to the query, making sure it is ignored.
+        //Give the downloader time to start up first.
+        Response response=new Response(
+            0l, TestFile.length(), "totally different.txt",
+            null, null, null);
+        byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
+        QueryReply reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false);       //supports chat
+        ManagedConnection stubConnection=new ManagedConnectionStub();
+        router.handleQueryReply(reply, stubConnection);
+        try { Thread.sleep(400); } catch (InterruptedException e) { }
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+
+        //Send a good response to the query.
+        response=new Response(0l,   //index
+                              TestFile.length(),
+                              "some file name.txt",
+                              null,  //metadata
+                              null,  //URNs
+                              null); //metadata
+        reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false);       //supports chat
+        router.handleQueryReply(reply, stubConnection);
+
+        //Make sure the downloader does the right thing with the response.
+        try { Thread.sleep(500); } catch (InterruptedException e) { }
+        while (downloader.getState()!=Downloader.COMPLETE) {            
+            assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
+        }
+    }    
 }

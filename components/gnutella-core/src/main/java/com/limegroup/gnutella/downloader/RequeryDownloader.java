@@ -3,14 +3,18 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import java.io.*;
 
-/** This is essentially a ManagedDownloader with a few hitches.  First of all,
- *  the conflictsLAX method does different things depending on the state.
- *  Secondly, this downloader will requery the network until it has a file to
- *  download.  Since ManagedDownloader is serializable, this too is 
- *  serializable; be careful when modifying!
+/** 
+ * A wishlist ManagedDownloader.  This is initially with only a list of search
+ * keywords (e.g., from the user)--with no RemoteFileDesc's.  It will requery
+ * the network with the given keywords.  When it gets a result that matches the
+ * query, it will start downloading from that location.  Subsequently this will
+ * behave like a standard ManagedDownloader, only accepting RemoteFileDesc's
+ * matching the current set of RemoteFileDesc's.
  */
 public class RequeryDownloader extends ManagedDownloader 
         implements Serializable {
+    /** Ensure backwards downloads.dat compatibility. */
+    static final long serialVersionUID = 8241301635419840924L;
 
     /** Contains the specifics of the search that spawned me.  Important for
      *  requerying....
@@ -74,27 +78,30 @@ public class RequeryDownloader extends ManagedDownloader
     }
 
     /**
-     * Returns true if 'other' could conflict with one of the files in this. 
-     * This is a much less strict version compared to conflicts().
-     * WARNING - THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
-     * STATE!!!  Ideally used when WAITING_FOR_RESULTS....
+     * Overrides ManagedDownloader to allow any RemoteFileDesc that matches
+     * this' keywords.  If a match has already been found and a download has
+     * been started, only allows those RemoteFileDesc's that actually match 
+     * the download.
      */
-    public boolean conflictsLAX(RemoteFileDesc other) {        
-        boolean retVal = false;
+    protected boolean allowAddition(RemoteFileDesc other) {        
         if (_hasFile)
-            retVal = super.conflictsLAX(other);
+            return super.allowAddition(other);
         else {
-            // see if this RFD is kosher.  if so, then add the download to the
-            // superclass and from now on you'll execute the above branch....
+            // See if this RFD matches.  If so, then record the information.
+            // Yes, we should really be modifying this in addDownloader, not
+            // here, but that's ok since a return value of true implies that the
+            // download will actually be added.  Note that from now on you'll
+            // execute the above branch.
             synchronized (_add) {
                 if (_add.addDownload(other)) {
-                    super.addDownload(other);
                     _add.commitDownload(other);
                     _hasFile = true;
+                    return true;
+                } else {
+                    return false;
                 }
             }
         }    
-        return retVal;
     }
 
 
