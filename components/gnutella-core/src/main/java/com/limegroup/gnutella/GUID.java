@@ -32,10 +32,18 @@ public class GUID /* implements Comparable */ {
         return ret;
     }
 
+    /** Same as isWindowsGUID(this.bytes). */
+    public final boolean isWindowsGUID() {    
+        return isWindowsGUID(bytes);
+    }
+
+
     /** Returns true if this is a GUID created by the Windows CoCreateGUID()
      *  routine.  Note that the converse does not hold; this method may
-     *  also return true for other randomly generated GUID's. */      
-    public boolean isWindowsGUID() {    
+     *  also return true for other randomly generated GUID's. 
+     *     @requires bytes.length==16
+     */      
+    public static boolean isWindowsGUID(byte[] bytes) {    
         //Windows GUID's are of the form 10------, where "1" is the most
         //significant bit and "-" means "don't care".  See the internet
         //draft by Salz and Leach:
@@ -44,9 +52,14 @@ public class GUID /* implements Comparable */ {
         return (bytes[8]&0xc0)==0x80;
     }
 
+    /** Same as isNewGUID(this.bytes). */
+    public final boolean isNewGUID() {
+        return isNewGUID(this.bytes);
+    }
+    
     /** Returns true if this is a GUID from newer Gnutella clients, e.g.,
      *  LimeWire and BearShare. */
-    public boolean isNewGUID() {
+    public static boolean isNewGUID(byte[] bytes) {
         //Is byte 8 all 1's?  Note that we downcast 0xFF first so both sides of
         //the equality are automatically widened, with the same sign extension.
         return bytes[8]==(byte)0xFF;
