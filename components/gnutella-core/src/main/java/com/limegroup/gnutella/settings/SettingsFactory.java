@@ -271,7 +271,7 @@ public final class SettingsFactory {
 	public synchronized StringSetting createStringSetting(String key, 
                                                           String defaultValue) {
         StringSetting result = 
-            new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+            new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
@@ -280,9 +280,9 @@ public final class SettingsFactory {
      * @param useSimpp if true, makes the setting SimppEnabled
      */
     public synchronized StringSetting createSettableStringSetting(String key,
-                                    String defaultValue, String simppKey) {
-		StringSetting result = 
-           new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+                String defaultValue, String simppKey, String max, String min) {
+		StringSetting result =  new StringSetting(
+                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -297,15 +297,18 @@ public final class SettingsFactory {
 	public synchronized BooleanSetting createBooleanSetting(String key, 
                                                         boolean defaultValue) {
         BooleanSetting result =
-          new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+          new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
 
+    /**
+     * if max != min, the setting becomes unsettable
+     */
     public synchronized BooleanSetting createSettableBooleanSetting(String key, 
-                                      boolean defaultValue, String simppKey) {
-		BooleanSetting result = 
-          new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+              boolean defaultValue, String simppKey, boolean max, boolean min) {
+		BooleanSetting result = new BooleanSetting(
+                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -320,15 +323,15 @@ public final class SettingsFactory {
 	public synchronized IntSetting createIntSetting(String key, 
                                                          int defaultValue) {
         IntSetting result = 
-            new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+            new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
     
     public synchronized IntSetting createSettableIntSetting(String key, 
-                                           int defaultValue, String simppKey) {
-		IntSetting result = 
-            new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+                        int defaultValue, String simppKey, int max, int min) {
+		IntSetting result = new IntSetting(
+                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -344,15 +347,15 @@ public final class SettingsFactory {
 	public synchronized ByteSetting createByteSetting(String key, 
                                                       byte defaultValue) {
 		ByteSetting result = 
-             new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+             new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
     
     public synchronized ByteSetting createSettableByteSetting(String key, 
-                                         byte defaultValue, String simppKey) {
-		ByteSetting result = 
-             new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+                      byte defaultValue, String simppKey, byte max, byte min) {
+		ByteSetting result = new ByteSetting(
+             DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -368,15 +371,16 @@ public final class SettingsFactory {
 	public synchronized LongSetting createLongSetting(String key, 
                                                       long defaultValue) {
 		 LongSetting result = 
-             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
          handleSettingInternal(result, null);
          return result;
     }
     
     public synchronized LongSetting createSettableLongSetting(String key,
-                                         long defaultValue, String simppKey) {
+                       long defaultValue, String simppKey, long max, long min) {
 		 LongSetting result = 
-             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                                                            simppKey, max, min);
          handleSettingInternal(result, simppKey);
          return result;
 	}
@@ -398,13 +402,13 @@ public final class SettingsFactory {
         }
 
 		FileSetting result = 
-            new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+            new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
 
     public synchronized FileSetting createSettableFileSetting(String key, 
-                                          File defaultValue, String simppKey) {
+                      File defaultValue, String simppKey, File max, File min) {
 	    String parentString = defaultValue.getParent();
 	    if( parentString != null ) {
 		    File parent = new File(parentString);
@@ -412,8 +416,8 @@ public final class SettingsFactory {
 		        parent.mkdirs();
         }
 
-		FileSetting result = 
-            new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+		FileSetting result = new FileSetting(
+                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -428,17 +432,16 @@ public final class SettingsFactory {
 	public synchronized ColorSetting createColorSetting(String key, 
                                                         Color defaultValue) {
 		ColorSetting result = 
-        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
-                                                        defaultValue, null);
+        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key,defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
 
     public synchronized ColorSetting createSettableColorSetting(String key, 
-                                        Color defaultValue, String simppKey) {
+                   Color defaultValue, String simppKey, Color max, Color min) {
 		ColorSetting result = 
         ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
-                                                        defaultValue, simppKey);
+                                        defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -455,16 +458,16 @@ public final class SettingsFactory {
 
         CharArraySetting result =
             CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
-                                                  key, defaultValue, null);
+                                                  key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
         
     public synchronized CharArraySetting createSettableCharArraySetting(
-                        String key, char[] defaultValue, String simppKey) {
-        CharArraySetting result =
-            CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
-                                                  key, defaultValue, simppKey);
+                            String key, char[] defaultValue, String simppKey,
+                            char[] max, char[] min) {
+        CharArraySetting result =new CharArraySetting(DEFAULT_PROPS, PROPS, 
+                                        key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -479,15 +482,15 @@ public final class SettingsFactory {
 	public synchronized FloatSetting createFloatSetting(String key, 
                                                         float defaultValue) {
 		FloatSetting result = 
-            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
 
     public synchronized FloatSetting createSettableFloatSetting(String key, 
-                                        float defaultValue, String simppKey) {
-		FloatSetting result = 
-            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+                   float defaultValue, String simppKey, float max, float min) {
+		FloatSetting result = new FloatSetting(
+                  DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
 	}
@@ -503,17 +506,18 @@ public final class SettingsFactory {
         createStringArraySetting(String key, String[] defaultValue) {
         StringArraySetting result = 
                        new StringArraySetting(DEFAULT_PROPS, PROPS, key, 
-                                                        defaultValue, null);
+                                                                 defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
         
 
     public synchronized StringArraySetting createSettableStringArraySetting(
-                         String key, String[] defaultValue, String simppKey) {
+              String key, String[] defaultValue, String simppKey, 
+              String [] max, String[] min) {
         StringArraySetting result = 
-                       new StringArraySetting(DEFAULT_PROPS, PROPS, key, 
-                                                        defaultValue, simppKey);
+        new StringArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                                                         simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -528,15 +532,17 @@ public final class SettingsFactory {
     public synchronized FileArraySetting 
         createFileArraySetting(String key, File[] defaultValue) {
         FileArraySetting result = 
-        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
     
     public synchronized FileArraySetting createSettableFileArraySetting(
-                           String key, File[] defaultValue, String simppKey) {
+                      String key, File[] defaultValue, String simppKey, 
+                      File[] max, File[] min) {
         FileArraySetting result = 
-        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                             simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -554,7 +560,6 @@ public final class SettingsFactory {
         
         if (expired)
             result.revertToDefault();
-        
         return result;
 	}
     
@@ -585,15 +590,17 @@ public final class SettingsFactory {
     public synchronized FontNameSetting createFontNameSetting(String key, 
                                                            String defaultValue){
         FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
+        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
     }
 
     public synchronized FontNameSetting createSettableFontNameSetting(
-                           String key, String defaultValue, String simppKey) {
+            String key, String defaultValue, String simppKey, 
+            String max, String min ) {
         FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                            simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
  	}

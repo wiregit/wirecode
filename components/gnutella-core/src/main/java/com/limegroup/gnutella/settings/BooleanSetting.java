@@ -18,10 +18,17 @@ public final class BooleanSetting extends Setting {
 	 * @param defaultBool the default value to use for the setting
 	 */
 	BooleanSetting(Properties defaultProps, Properties props, String key, 
-				                      boolean defaultBool, String simppKey) {
-		super(defaultProps, props, key, String.valueOf(defaultBool), simppKey);
+                                                          boolean defaultBool) {
+		super(defaultProps, props, key, String.valueOf(defaultBool), null, 
+                                                                  null, null);
 	}
-        
+       
+    BooleanSetting(Properties defaultProps, Properties props, String key, 
+              boolean defaultBool, String simppKey, boolean max, boolean min) {
+		super(defaultProps, props, key, String.valueOf(defaultBool), 
+              simppKey, new Boolean(max), new Boolean(min) );
+	}
+ 
 	/**
 	 * Accessor for the value of this setting.
 	 * 
@@ -46,5 +53,14 @@ public final class BooleanSetting extends Setting {
      */
     protected void loadValue(String sValue) {
         value = Boolean.valueOf(sValue.trim()).booleanValue();
+    }
+
+    protected boolean isInRange(String value) {
+        boolean max = ((Boolean)MAX_VALUE).booleanValue();
+        boolean min = ((Boolean)MIN_VALUE).booleanValue();
+        boolean val = Boolean.getBoolean(value);
+        if( max == min && max != val)
+            return false;
+        return true;
     }
 }

@@ -13,6 +13,8 @@ public class FileArraySetting extends Setting {
     
     private File[] value;
 
+    public static final File[] DUMMY_FILE_ARRAY = new File[0];
+
 	/**
 	 * Creates a new <tt>FileArraySetting</tt> instance with the specified
 	 * key and defualt value.
@@ -21,10 +23,20 @@ public class FileArraySetting extends Setting {
 	 * @param defaultInt the default value to use for the setting
 	 */
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
-                                       File[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, decode(defaultValue), simppKey);
+                                                         File[] defaultValue) {
+		super(defaultProps, props, key, decode(defaultValue), null, null, null);
 	}
         
+	FileArraySetting(Properties defaultProps, Properties props, String key, 
+                     File[] defaultValue, String simppKey, 
+                     File[] max, File[] min) {
+		super(defaultProps, props, key, decode(defaultValue), 
+                                                            simppKey, max, min);
+        if(max != DUMMY_FILE_ARRAY || min != DUMMY_FILE_ARRAY)
+            throw new IllegalArgumentException("illegal max or min in setting");
+    }
+
+
 	/**
 	 * Accessor for the value of this setting.
 	 * 
@@ -86,5 +98,10 @@ public class FileArraySetting extends Setting {
         }
             
         return buffer.toString();
+    }
+
+    protected boolean isInRange(String value) {
+        //No illegal ranges for file arrays. Just return true
+        return true;
     }
 }

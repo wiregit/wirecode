@@ -17,8 +17,16 @@ public final class ByteSetting extends Setting {
 	 * @param defaultByte the default value to use for the setting
 	 */
 	ByteSetting(Properties defaultProps, Properties props, String key, 
-                byte defaultByte, String simppKey) {
-		super(defaultProps, props, key, String.valueOf(defaultByte), simppKey);
+                                                             byte defaultByte) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
+                                                             null, null, null);
+	}
+
+
+	ByteSetting(Properties defaultProps, Properties props, String key, 
+                byte defaultByte, String simppKey, byte max, byte min) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
+              simppKey, new Byte(max), new Byte(min) );
 	}
         
 	/**
@@ -49,5 +57,12 @@ public final class ByteSetting extends Setting {
         } catch(NumberFormatException nfe) {
             revertToDefault();
         }
+    }
+
+    protected boolean isInRange(String value) {
+        byte max = ((Byte)MAX_VALUE).byteValue();
+        byte min = ((Byte)MIN_VALUE).byteValue();
+        byte val = Byte.parseByte(value);
+        return (val <= max && val >= min);
     }
 }

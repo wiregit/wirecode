@@ -17,9 +17,20 @@ public final class IntSetting extends Setting {
 	 * @param defaultInt the default value to use for the setting
 	 */
 	IntSetting(Properties defaultProps, Properties props, String key, 
-                                           int defaultInt, String simppKey) {
-		super(defaultProps, props, key, String.valueOf(defaultInt), simppKey);
+                                                              int defaultInt) {
+        super(defaultProps, props, key, String.valueOf(defaultInt), 
+                                                            null, null, null);
 	}
+
+    /**
+     * Constructor for Settable setting which specifies a simpp-key and max and
+     * min permissible values.
+     */
+	IntSetting(Properties defaultProps, Properties props, String key, 
+          int defaultInt, String simppKey, int maxSimppVal, int minSimppVal) {
+		super(defaultProps, props, key, String.valueOf(defaultInt), simppKey,
+                            new Integer(maxSimppVal), new Integer(minSimppVal));
+    }
         
 	/**
 	 * Accessor for the value of this setting.
@@ -51,4 +62,10 @@ public final class IntSetting extends Setting {
         }
     }
     
+    protected boolean isInRange(String value) {
+        int max = ((Integer)MAX_VALUE).intValue();
+        int min = ((Integer)MIN_VALUE).intValue();
+        int val = Integer.parseInt(value);
+        return (val <= max && val >= min);
+    }
 }

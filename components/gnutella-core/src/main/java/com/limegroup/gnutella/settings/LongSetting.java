@@ -17,9 +17,16 @@ public final class LongSetting extends Setting {
 	 * @param defaultLong the default value to use for the setting
 	 */
 	LongSetting(Properties defaultProps, Properties props, String key, 
-                                         long defaultLong, String simppSetting) {
+                                         long defaultLong) {
 		super(defaultProps, props, key, String.valueOf(defaultLong), 
-                                                                  simppSetting);
+                                                              null, null, null);
+	}
+
+
+	LongSetting(Properties defaultProps, Properties props, String key, 
+                long defaultLong, String simppSetting, long max, long min) {
+		super(defaultProps, props, key, String.valueOf(defaultLong), 
+                                 simppSetting, new Long(max), new Long(min) );
 	}
         
 	/**
@@ -50,5 +57,12 @@ public final class LongSetting extends Setting {
         } catch(NumberFormatException nfe) {
             revertToDefault();
         }
+    }
+
+    protected boolean isInRange(String value) {
+        long max = ((Long)MAX_VALUE).longValue();
+        long min = ((Long)MIN_VALUE).longValue();
+        long val = Long.parseLong(value);
+        return (val <= max && val >= min);
     }
 }

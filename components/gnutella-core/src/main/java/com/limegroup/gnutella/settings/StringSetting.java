@@ -17,8 +17,13 @@ public final class StringSetting extends Setting {
 	 * @param defaultStr the default value to use for the setting
 	 */
 	StringSetting(Properties defaultProps, Properties props, String key, 
-                                       String defaultStr, String simppKey) {
-		super(defaultProps, props, key, defaultStr, simppKey);
+                                       String defaultStr) {
+		super(defaultProps, props, key, defaultStr, null, null, null);
+	}
+
+	StringSetting(Properties defaultProps, Properties props, String key, 
+                   String defaultStr, String simppKey, String max, String min) {
+		super(defaultProps, props, key, defaultStr, simppKey, max, min);
 	}
         
 	/**
@@ -47,4 +52,9 @@ public final class StringSetting extends Setting {
         value = sValue;
     }
     
+    protected boolean isInRange(String value) {
+        //This has no meaning for strings, just return true -- all strings are
+        //"in range"
+        return true;
+    }
 }

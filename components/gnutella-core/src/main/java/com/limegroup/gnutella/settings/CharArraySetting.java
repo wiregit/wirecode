@@ -12,6 +12,8 @@ public final class CharArraySetting extends Setting {
      */
     private char[] value;
 
+    public static final char[] DUMMY_CHAR_ARRAY = new char[0];
+
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -24,17 +26,25 @@ public final class CharArraySetting extends Setting {
 	 */
     static CharArraySetting 
         createCharArraySetting(Properties defaultProps, Properties props, 
-                               String key, char[] defaultValue, 
-                                                             String simppKey) {
+                               String key, char[] defaultValue) {
         return new CharArraySetting(defaultProps, props, key, 
-                                           new String(defaultValue), simppKey);
+                                           new String(defaultValue));
     }
 
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                                       String defaultValue, String simppKey) {
-		super(defaultProps, props, key, defaultValue, simppKey);
+                                                          String defaultValue) {
+		super(defaultProps, props, key, defaultValue, null, null, null);
 	}
-        
+     
+	CharArraySetting(Properties defaultProps, Properties props, String key, 
+                 char[] defaultValue, String simppKey, char[] max, char[] min) {
+		super(defaultProps, props, key, new String(defaultValue), 
+                                                           simppKey, max, min);
+        if(max != DUMMY_CHAR_ARRAY || min != DUMMY_CHAR_ARRAY)
+            throw new IllegalArgumentException("illegal max or min in setting");
+	}
+
+   
 	/**
 	 * Accessor for the value of this setting.
 	 * 
@@ -59,5 +69,10 @@ public final class CharArraySetting extends Setting {
      */
     protected void loadValue(String sValue) {
         value = sValue.trim().toCharArray();
+    }
+
+    protected boolean isInRange(String value) {
+        //cannot handle ranges for char arrays. Just return true
+        return true;
     }
 }
