@@ -589,6 +589,22 @@ public class RouterService
         return( FileManager.instance().getNumFiles() );
     }
 
+    /**
+     * Returns a list of all shared files in the given directory.
+     * All the files returned have already been passed to the gui
+     * via ActivityCallback.addSharedFile.  Note that if a file
+     * is added to the given directory after this method completes, 
+     * addSharedFile will be called for that file.
+     *
+     * @requires directory is a shared directory that has already
+     *  been passed to the GUI via ActivityCallback.addDirectory.
+     */
+    public File[] getSharedFiles(File directory) {
+        //TODO: this is stubbed out!
+        return new File[0];
+    }
+    
+
     /** 
      * Tries to "smart download" any of the given files.<p>  
      *
