@@ -23,14 +23,10 @@ public class ID3ReaderTest extends BaseTestCase {
 	}
 
     ////////////
-
-    public void setUp() {
+    public static void globalSetUp() {
         String dir = "com/limegroup/gnutella/mp3/";
         TEST_FILE = CommonUtils.getResourceFile(dir+"ID3TestFile.mp3");
-    }
-
-    public void tearDown() {
-        TEST_FILE = null;
+        assertTrue("file should exist", TEST_FILE.exists());
     }
     
     //////////
@@ -39,19 +35,19 @@ public class ID3ReaderTest extends BaseTestCase {
      * Tests that the ID3v2 tags are read correctly
      */
     public void testID3v2Tags() throws Exception {
-        Object[] tags = new Object[7];
-        Object[] params = {TEST_FILE, tags};
-        Object ret = PrivilegedAccessor.invokeMethod(ID3Reader.class, 
-                                                    "parseID3v2Data", params);
-        assertFalse("There are only 5 values not 7", 
-                                               ((Boolean)ret).booleanValue());
-        assertEquals("Incorrect title", "Title 2", tags[0]);
-        assertNull("Incorrect artist", tags[1]);
-        assertNull("Incorrect album", tags[2]);
-        assertEquals("Incorrect year", "2002", tags[3]);
-        assertEquals("Incorrect track", new Short("12"), tags[4]);
-        assertEquals("Incorrect comments", "Comment 2", tags[5]);
-        assertEquals("Incorrect genre", "Acid", tags[6]);
+        ID3Reader.ID3Data data = null;
+        
+        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+               
+        assertFalse(data.toString(), data.isComplete());
+        assertEquals("Incorrect title", "Title 2", data.getTitle());
+        assertEquals("Incorrect artist", "", data.getArtist());
+        assertEquals("Incorrect album", "", data.getAlbum());
+        assertEquals("Incorrect year", "2002", data.getYear());
+        assertEquals("Incorrect track", 12, data.getTrack());
+        assertEquals("Incorrect comments", "Comment 2", data.getComment());
+        assertEquals("Incorrect genre", "Acid", data.getGenre());
     }
 
     /**
@@ -60,19 +56,20 @@ public class ID3ReaderTest extends BaseTestCase {
      * value
      */
     public void testOverAllReading() throws Exception {
-        Object[] params = {TEST_FILE};
-        Object retArray = 
-        PrivilegedAccessor.invokeMethod(ID3Reader.class, "parseFile", params);
-        Object[] ret = (Object[]) retArray;
+        ID3Reader.ID3Data data = null;
+        
+        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+               ID3Reader.class, "parseFile", new Object[] { TEST_FILE });
+
         //Test if the values are as expected
-        assertEquals("Incorrent size of array", 9, ret.length);
-        assertEquals("Title not picked up correctly", "Title 2", ret[0]);
-        assertEquals("Artist not picked up correctly", "", ret[1]);
-        assertEquals("Album not picked up correctly", "Album 1", ret[2]);
-        assertEquals("Year not picked up correctly", "2002", ret[3]);
-        assertEquals("Track not picked up correctly", new Short("12"), ret[4]);
-        assertEquals("Comment not picked up correctly", "Comment 2", ret[5]);
-        assertEquals("Genre not picked up correctly", "Acid", ret[6]);
+        assertFalse("Incorrent size of array", data.isComplete());
+        assertEquals("bad title", "Title 2", data.getTitle());
+        assertEquals("bad artist", "", data.getArtist());
+        assertEquals("bad album", "Album 1", data.getAlbum());
+        assertEquals("bad year", "2002", data.getYear());
+        assertEquals("bad track", 12, data.getTrack());
+        assertEquals("bad comment", "Comment 2", data.getComment());
+        assertEquals("bad genre", "Acid", data.getGenre());
     }
     
 }

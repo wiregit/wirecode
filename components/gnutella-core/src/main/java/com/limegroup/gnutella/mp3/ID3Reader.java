@@ -231,11 +231,11 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {}
         
         try {
-            data.setTitle(mp3File.getArtist().getTextContent());
+            data.setArtist(mp3File.getArtist().getTextContent());
         } catch(FrameDamagedException ignored) {}
         
         try {
-            data.setTitle(mp3File.getAlbum().getTextContent());
+            data.setAlbum(mp3File.getAlbum().getTextContent());
         } catch(FrameDamagedException ignored) {}
 
         try {
@@ -437,7 +437,7 @@ public final class ID3Reader {
      * Simple class to encapsulate information about ID3 tags.
      * Can write the data to a NameValue list or an XML string.
      */
-    private static class ID3Data {
+    static class ID3Data {
         private String title;
         private String artist;
         private String album;
@@ -447,6 +447,23 @@ public final class ID3Reader {
         private String genre;
         private int bitrate = -1;
         private int length = -1;
+        
+        public String toString() {
+            return "ID3Data: title[" + title + "], artist[" + artist +
+                   "], album[" + album + "], year[" + year + "], comment["
+                   + comment + "], track[" + track + "], genre[" + genre +
+                   "], bitrate[" + bitrate + "], length[" + length +"]";
+        }          
+        
+        String getTitle() { return title; }
+        String getArtist() { return artist; }
+        String getAlbum() { return album; }
+        String getYear() { return year; }
+        String getComment()  { return comment; }
+        short getTrack() { return track; }
+        String getGenre() { return genre; }
+        int getBitrate() { return bitrate; }
+        int getLength() { return length; }
         
         void setTitle(String title) {
             this.title = title;
