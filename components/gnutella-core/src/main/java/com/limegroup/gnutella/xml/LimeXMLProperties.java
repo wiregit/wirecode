@@ -68,6 +68,19 @@ public class LimeXMLProperties
      */
     private static final String XML_DOCS_DIR_DEF = "etc" + File.separator + 
                                                 "xml" + File.separator;
+    
+    /**
+     * Name of the property that denotes the max number of xml results
+     * to be returned by direct querying of a database
+     */
+    private static final String MAX_JDBC_XML_RESULTS = "MAX_JDBC_XML_RESULTS";
+    
+    /**
+     * Default value for the max number of xml results
+     * to be returned by direct querying of a database
+     */
+    private static final int MAX_JDBC_XML_RESULTS_DEF = 255;
+    
     /**
      * The property that denotes the file that stores the 
      * Schema Transformation DataMap
@@ -302,6 +315,29 @@ public class LimeXMLProperties
             KEYWORD_LIST_FILE_DEF);
 
         return getPath() + keywordListFile;   
+    }
+    
+    /**
+     * Returns the max number of xml results
+     * to be returned by direct querying of a database
+     */
+    public int getMaxJDBCXMLResults()
+    {
+        //get the property value
+        String maxJDBCXMLResults = _properties.getProperty(
+            MAX_JDBC_XML_RESULTS, 
+            MAX_JDBC_XML_RESULTS_DEF + " ");
+
+        try
+        {
+            //return in integer form
+            return Integer.parseInt(maxJDBCXMLResults);
+        }
+        catch(Exception e)
+        {
+            //if property not set properly, return the default value
+            return MAX_JDBC_XML_RESULTS_DEF;
+        }
     }
     
     
