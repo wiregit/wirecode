@@ -326,7 +326,7 @@ public final class QueryUnicaster {
                     _objects.remove(0);
                 _objects.add(o);
             }
-            return hasObject;
+            return !hasObject;
         }
     }
 
