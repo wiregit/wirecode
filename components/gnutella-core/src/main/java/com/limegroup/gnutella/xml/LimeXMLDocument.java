@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -27,7 +28,9 @@ import com.limegroup.gnutella.util.NameValue;
  */
 public class LimeXMLDocument implements Serializable {
 
-    public static final String XML_ID_ATTRIBUTE_STRING = "identifier";
+    public static final String XML_ID_ATTRIBUTE = "identifier__";
+    public static final String XML_ACTION_ATTRIBUTE = "action__";
+    public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
 
 	/**
@@ -36,7 +39,7 @@ public class LimeXMLDocument implements Serializable {
 	private volatile transient int hashCode = 0;
 
     /** For backwards compatibility with downloads.dat. */
-    static final long serialVersionUID = 7396170507085078485L;
+    private static final long serialVersionUID = 7396170507085078485L;
 
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
@@ -44,12 +47,16 @@ public class LimeXMLDocument implements Serializable {
     private Map fieldToValue = new HashMap();
     private String schemaUri;
     private String xmlString;//this is what is sent back on the wire.
+
     /** 
-     * Field corresponds to the name of the file for which this
-     * meta-data corresponds to. It can be null if the data is pure meta-data
+     * The file this is related to.  Can be null if pure meta-data.
      */
-    private String identifier;
-    private String action="";
+    private transient File fileId;
+    
+    /**
+     * The action that this doc has.
+     */
+    private String action;
     
     /**
      * Indicator that the LimeXMLDocument was created after
@@ -67,25 +74,30 @@ public class LimeXMLDocument implements Serializable {
      */
     private transient List CACHED_KEYWORDS = null;
 
-    public void setIdentifier(String id) {
-        identifier = id;
-    }
-    
     /**
-     * This method is used by Lime Peer Server
+     * Constructs a LimeXMLDocument with the given string.
      */
-    public void setSchemaURI(String uri) {
-        schemaUri = uri;
-    }
-
-    //constructor
-    public LimeXMLDocument(String XMLStr) throws SAXException, 
-                                        SchemaNotFoundException, IOException{
-        if(XMLStr==null || XMLStr.equals(""))
+    public LimeXMLDocument(String xml)
+      throws SAXException, SchemaNotFoundException, IOException {
+        if(xml==null || xml.equals(""))
             throw new SAXException("null or empty string");
-        InputSource doc = new InputSource(new StringReader(XMLStr));
-        initialize(doc);
-        this.xmlString = ripIdentifier(XMLStr.trim());
+
+        InputSource doc = new InputSource(new StringReader(xml));
+        XMLParsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
+        if (result.isEmpty())
+            throw new IOException("No element present");
+        if (result.schemaURI == null)
+            throw new SchemaNotFoundException("no schema");
+
+        this.fieldToValue = (Map)result.get(0);
+        this.schemaUri = result.schemaURI;
+        this.action = (String)fieldToValue.get(result.canonicalKeyPrefix + XML_ACTION_ATTRIBUTE);
+        // if we were able to remove the identifier, regen the XML string.
+        if(fieldToValue.remove(result.canonicalKeyPrefix + XML_ID_ATTRIBUTE) != null)
+            getXMLString();
+        else
+            this.xmlString = xml.trim();
+
         if(xmlString.equals(""))
             throw new SAXException("empty after identifier ripped");
     }
@@ -98,22 +110,25 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map map, String schemaURI){
+    LimeXMLDocument(Map map, String schemaURI, String keyPrefix) {
+        if(map.isEmpty())
+            throw new IllegalArgumentException("empty map");
+
         this.schemaUri = schemaURI;
-        if(map.keySet().isEmpty()) throw new IllegalArgumentException("empty map");
-        fieldToValue = map;
+        this.fieldToValue = map;
+        this.action = (String)fieldToValue.get(keyPrefix + XML_ACTION_ATTRIBUTE);
+        fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
     }
 
     /**
      * Constructs a new LimeXMLDocument
-     * @param nameValueList List (of NameValue) of fieldnames (in canonicalized
+     * @param nameValueList List (of Map.Entry) of fieldnames (in canonicalized
      * form) and corresponding values that will be used to create the 
      * new instance
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */
-    public LimeXMLDocument(Collection nameValueList, String schemaURI){
-       
+    public LimeXMLDocument(Collection nameValueList, String schemaURI) {
         //set the schema URI
         this.schemaUri = schemaURI;
         if(nameValueList.isEmpty())
@@ -121,21 +136,14 @@ public class LimeXMLDocument implements Serializable {
                 
         //iterate over the passed list of fieldnames & values
         for(Iterator i = nameValueList.iterator(); i.hasNext(); ) {
-            String name;
-            Object value;
-            Object next = i.next();
-            if( next instanceof NameValue ) {
-                name = ((NameValue)next).getName();
-                value = ((NameValue)next).getValue();
-            } else if( next instanceof Map.Entry ) {
-                name = (String)((Map.Entry)next).getKey();
-                value = ((Map.Entry)next).getValue();
-            } else {
-                throw new IllegalArgumentException("Invalid Collection");
-            }
-            //update the field to value map
+            Map.Entry next = (Map.Entry)i.next();
+            String name = (String)next.getKey();
+            Object value = next.getValue();
             fieldToValue.put(name.trim(), value);
         }
+        
+        // scan for action/id/etc..
+        scanFields();        
         
         // Verify that the data read from the collection had valid info
         // for this schema.
@@ -162,59 +170,50 @@ public class LimeXMLDocument implements Serializable {
         throws IOException, ClassNotFoundException {
         // we may want to do special stuff in the future....
         in.defaultReadObject();
+        scanFields();
+        
         // make sure any spaces are removed.
         if(xmlString != null)
             xmlString = xmlString.trim();
-        
-        if (identifier!=null && fieldToValue!=null &&
-        		LimeXMLUtils.isMP3File(identifier)) {
-        	
-        	String genre = (String) fieldToValue.get("audios__audio__genre__");
-        	if (genre!=null)
-        		try {
-        			short index = Short.parseShort(genre);
-        			genre = MP3MetaData.getGenreString(index);
-        			fieldToValue.put("audios__audio__genre__", genre);
-        		}
-        		catch (NumberFormatException ignored) {
-        			// the string is fine, it is a valid genre...
-        		}
-        }
-    }
- 
-
-    /** expunges the 'identifier' tag from the xml string, if present....
-     */
-    private static String ripIdentifier(String xmlWithID) {
-        String retString = xmlWithID;
-
-        int indexOfID = xmlWithID.indexOf(XML_ID_ATTRIBUTE_STRING);
-        if (indexOfID > -1) {
-            final String quote = "\"";
-            int indexOfEndQuote = xmlWithID.indexOf(quote, indexOfID+1);
-            indexOfEndQuote = xmlWithID.indexOf(quote, indexOfEndQuote+1);
-            String begin = xmlWithID.substring(0, indexOfID);
-            String end = xmlWithID.substring(indexOfEndQuote+1);
-            retString = begin + end;
-        }
-        if (retString.indexOf(XML_HEADER) < 0)
-            retString = XML_HEADER + retString;
-        return retString;
     }
     
-
-    private void initialize(InputSource doc) throws SchemaNotFoundException,
-                            IOException, SAXException {
+    /**
+     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX.
+     * Action is stored, index & identifier are removed.
+     */
+    private void scanFields() {
+        // If no fields to scan, nothing to do.
+        if(fieldToValue.isEmpty())
+            return;
+            
+        Map.Entry firstEntry = (Map.Entry)getNameValueSet().iterator().next();
+        String firstKey = (String)firstEntry.getKey();
         
-        XMLParsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
+        // The canonicalKey is always going to be x__x__<other stuff here>
+        int idx = firstKey.indexOf(XMLStringUtils.DELIMITER);
+        idx = firstKey.indexOf(XMLStringUtils.DELIMITER, idx+1);
+        // not two delimiters? can't find the canonicalKey
+        if(idx == -1)
+            return;
+            
+        // 2 == XMLStringUtils.DELIMITER.length()
+        String canonicalKey = firstKey.substring(0, idx + 2); 
+        action = (String)fieldToValue.get(canonicalKey + XML_ACTION_ATTRIBUTE);
+        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
+        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
         
-        if (result.isEmpty())
-            throw new IOException("No element present");
-        
-        fieldToValue = (Map)result.get(0);
-        schemaUri = result.schemaURI;
+        // regenerate the XML string.
+        if(xmlString != null) {
+            xmlString = null;
+            try {
+                getXMLString();
+            } catch(SchemaNotFoundException ignored) {}
+        }   
     }
 
+    /**
+     * Returns the number of fields this document has.
+     */
     public int getNumFields() {
         return fieldToValue.size();
     }
@@ -277,17 +276,24 @@ public class LimeXMLDocument implements Serializable {
      * Returns the name of the file that the data in this XML document 
      * corresponds to. If the meta-data does not correspond to any file
      * in the file system, this method will rerurn a null.
-     * 
-     * TODO: this should return a File object.
      */
-    public String getIdentifier(){
-        return identifier;
+    public File getIdentifier() {
+        return fileId;
     }
     
-    public String getAction(){
-        return action;
+    /**
+     * Sets the identifier.
+     */
+    public void setIdentifier(File id) {
+        fileId = id;
     }
 
+    public String getAction() {
+        if(action == null)
+            return "";
+        else
+            return action;
+    }
 
     /**
      * Returns a Set of Map.Entry, where each key-value corresponds to a
@@ -371,8 +377,7 @@ public class LimeXMLDocument implements Serializable {
         return (String)fieldToValue.get(field);
     }
 
-
-    public String getValue(String fieldName){
+    public String getValue(String fieldName) {
         String retValue = null;
         fieldName = fieldName.trim();
         retValue = (String)fieldToValue.get(fieldName);
@@ -381,77 +386,16 @@ public class LimeXMLDocument implements Serializable {
     
 
     /**
-     * @return an XML string that will be re-created as this document 
-     * when it is re-assembled in another machine. 
-     * @exception SchemaNotFoundException DO NOT CALL THIS METHOD unless
-     * you know that getSchemaURI() returns a valid xml schema.  Set it 
-     * yourself with setSchemaURI().
+     * @return the XML to be sent on the wire.
+     * @exception SchemaNotFoundException if the schema is invalid.
      */
     public String getXMLString() throws SchemaNotFoundException {        
-        if (xmlString == null || xmlString.equals("")) {
-            // derive xml...
-            xmlString = constructXML(getOrderedNameValueList(),schemaUri);
-            xmlString = xmlString.trim();
-        }
+        // generate the XML
+        if (xmlString == null || xmlString.equals(""))
+            xmlString = constructXML(getOrderedNameValueList(),schemaUri).trim();
+
         return xmlString;
     }
-    
-
-
-    /**
-     * @return an XML string that will be re-created as this document 
-     * when it is re-assembled in another machine. this xml string contains
-     * the filename identifier too (as an attribute).
-     * @exception SchemaNotFoundException DO NOT CALL THIS METHOD unless
-     * you know that getSchemaURI() returns a valid xml schema.  Set it 
-     * yourself with setSchemaURI().
-     */
-    public String getXMLStringWithIdentifier() throws SchemaNotFoundException {
-        String ret = getXMLString();
-        //Insert the identifier name in the xmlString
-        int index = ret.indexOf(">");//end of the header string
-        if (index < 0)
-            return ret;  // do not insert anything if not valid xml
-        index = ret.indexOf(">",++index);//index of end of root element
-        index = ret.indexOf(">",++index);//end of only child (plural form)
-        String first = ret.substring(0,index);
-        String last = ret.substring(index);
-        String middle = " identifier=\""+identifier+"\"";
-        ret = first+middle+last;
-        return ret;
-    }
-
-
-    
-    //Unit Tester    
-//     public static void main(String args[]){
-//         ripIDTest();
-//         debugTest1();
-//     }
-    
-//     public static void debugTest1() {
-//         String s="<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio type=\"song\" album=\"hey\" genre=\"you\"/></audios>";
-//         try {
-//             LimeXMLDocument d = new LimeXMLDocument(s);
-//             System.out.println("Document d = "+d);
-//             String v = d.getValue("audios__audio__type__");
-//             Assert.that(v.equals("song"));
-//             v = d.getValue("audios__audio__album__");
-//             Assert.that(v.equals("hey"));
-//             v = d.getValue("audios__audio__genre__");
-//             Assert.that(v.equals("you"));
-
-//         } catch (Exception e ) {
-//             e.printStackTrace();
-//         }
-//     }
-    
-//     static void ripIDTest() {
-//     final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
-    
-//     Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
-//     }
-    
 
     /**
      * finds the structure of the document by looking at the names of 
@@ -588,8 +532,8 @@ public class LimeXMLDocument implements Serializable {
 		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
 		return ((schemaUri == null ? xmlDoc.schemaUri == null :
 				 schemaUri.equals(xmlDoc.schemaUri)) &&
-				(identifier == null ? xmlDoc.identifier == null :
-				 identifier.equals(xmlDoc.identifier)) &&
+				(fileId == null ? xmlDoc.fileId == null :
+				 fileId.equals(xmlDoc.fileId)) &&
 				(action == null ? xmlDoc.action == null :
 				 action.equals(xmlDoc.action)) &&
 				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
@@ -605,18 +549,14 @@ public class LimeXMLDocument implements Serializable {
 	public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
-			if(fieldToValue != null) {
+			if(fieldToValue != null)
 				result = 37*result + fieldToValue.hashCode();
-			}
-			if(schemaUri != null) {
+			if(schemaUri != null)
 				result = 37*result + schemaUri.hashCode();
-			}
-			if(identifier != null) {
-				result = 37*result + identifier.hashCode();
-			}
-			if(action != null) {
+			if(fileId != null)
+				result = 37*result + fileId.hashCode();
+			if(action != null)
 				result = 37*result + action.hashCode();
-			}
 			hashCode = result;
 		} 
 		return hashCode;

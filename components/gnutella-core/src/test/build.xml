@@ -26,8 +26,8 @@
   <path id="default.classpath" >
     <fileset dir="${jars}" includes="*.jar, *.zip"/>
     <fileset dir="${testslib}" includes="*.jar"/>
-    <pathelement location="${messagebundles}" />
     <pathelement location="${builddir}" />
+    <pathelement location="${messagebundles}" />
     <pathelement location="${datadir}" />
     <pathelement location="${jars}" />
   </path>

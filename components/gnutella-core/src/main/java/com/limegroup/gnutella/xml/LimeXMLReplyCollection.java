@@ -217,7 +217,8 @@ public class LimeXMLReplyCollection {
                 if(LOG.isDebugEnabled())
                     LOG.debug("reconstructing document for id3v2: " + file);
                 LimeXMLDocument tempDoc = constructDocument(file);
-                if (tempDoc != null) doc = tempDoc;
+                if (tempDoc != null)
+                    doc = tempDoc;
             }
                 
             // Verify the doc has information in it.
@@ -248,20 +249,13 @@ public class LimeXMLReplyCollection {
      *  <tt>LimeXMLDocument</tt> otherwise.
      */
     private LimeXMLDocument constructDocument(File file) {
-
-    	
         if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
-        	
-            try{    
+            try {
             	return MetaDataReader.readDocument(file);
-            }
-            
-            catch (IOException ignored) { 
+            } catch (IOException ignored) { 
             	return null; 
             }
-            
         }
-        
         return null;
     }
     
@@ -383,11 +377,9 @@ public class LimeXMLReplyCollection {
             mainMap.put(hash,replyDoc);
             addKeywords(replyDoc);
         }
+        
         fd.addLimeXMLDocument(replyDoc);
-        try {
-            String identifier = fd.getFile().getCanonicalPath();
-            replyDoc.setIdentifier(identifier);
-        } catch(IOException ignored) {}
+        replyDoc.setIdentifier(fd.getFile());
     }
 
 
@@ -660,7 +652,7 @@ public class LimeXMLReplyCollection {
         String newXML = null;
 
         try {
-            newXML = doc.getXMLStringWithIdentifier();
+            newXML = doc.getXMLString();
         } catch(SchemaNotFoundException snfe) {
             return null;
         }
@@ -676,7 +668,7 @@ public class LimeXMLReplyCollection {
         }
         String existingXML = null;
         try {
-            existingXML = existingDoc.getXMLStringWithIdentifier();
+            existingXML = existingDoc.getXMLString();
         } catch(SchemaNotFoundException snfe) {
             return null;
         }

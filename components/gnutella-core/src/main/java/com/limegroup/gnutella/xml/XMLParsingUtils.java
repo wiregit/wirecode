@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -40,26 +41,23 @@ public class XMLParsingUtils {
      * Parses our simplified XML
      */
     public static ParseResult parse(String xml, int responseCount) 
-    	throws IOException, SAXException {
+      throws IOException, SAXException {
         return parse(new InputSource(new StringReader(xml)),responseCount);
     }
     
     public static ParseResult parse(InputSource inputSource) 
-    	throws IOException,SAXException{
-        return parse(inputSource,8);
+      throws IOException,SAXException {
+        return parse(inputSource, 8);
     }
     
     /**
      * Parses our simplified XML
      */
     public static ParseResult parse(InputSource inputSource, int responseCount) 
-    	throws IOException, SAXException {
-        
+      throws IOException, SAXException {
         ParseResult result = new ParseResult(responseCount);
-        LimeParser parser = (LimeParser)_parserContainer.get();   
-        
+        LimeParser parser = (LimeParser)_parserContainer.get();
         parser.parse(result,inputSource);
-        
         return result;
     }
 
@@ -96,9 +94,9 @@ public class XMLParsingUtils {
             super(size*2/3);
         }
         
-        public String schemaURI;                              //like http://www.limewire.com/schemas/audio.xsd
-        public String type;                                   //e.g. audio, video, etc.
-        public String canonicalKeyPrefix;                     //like audios__audio__
+        public String schemaURI;            //like http://www.limewire.com/schemas/audio.xsd
+        public String type;                 //e.g. audio, video, etc.
+        public String canonicalKeyPrefix;   //like audios__audio__
     }
     
     /**
@@ -129,7 +127,7 @@ public class XMLParsingUtils {
          * discarded.
          */
         public void parse(ParseResult dest, InputSource input) 
-        	throws SAXException, IOException{
+        	throws SAXException, IOException {
             
             //if parser creation failed, do not try to parse.
             if (_reader==null)
@@ -156,13 +154,18 @@ public class XMLParsingUtils {
                 _result.canonicalKeyPrefix += "__"+localName+"__";
             } 
             
-            Map attributeMap = new HashMap();
-            for(int i=0; i<attributes.getLength(); i++) {
-                attributeMap.put(_result.canonicalKeyPrefix + 
-                                 attributes.getLocalName(i) + "__",
-                                 attributes.getValue(i));
+            int attributesLength = attributes.getLength();
+            if(attributesLength > 0) {
+                Map attributeMap = new HashMap(attributesLength);
+                for(int i = 0; i < attributesLength; i++) {
+                    attributeMap.put(_result.canonicalKeyPrefix + 
+                                     attributes.getLocalName(i) + "__",
+                                     attributes.getValue(i));
+                }
+                _result.add(attributeMap);
+            } else {
+                _result.add(Collections.EMPTY_MAP);
             }
-            _result.add(attributeMap);
         }
     }
 }

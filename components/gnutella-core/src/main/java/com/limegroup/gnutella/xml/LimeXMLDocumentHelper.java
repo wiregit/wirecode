@@ -49,30 +49,32 @@ public final class LimeXMLDocumentHelper{
                 return Collections.EMPTY_LIST; // abort
             }
             
-            String indexKey = parsingResult.canonicalKeyPrefix + "index__";
+            final String indexKey =
+                parsingResult.canonicalKeyPrefix + LimeXMLDocument.XML_INDEX_ATTRIBUTE;
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
             
             Iterator mapsIterator = parsingResult.iterator();
             while(mapsIterator.hasNext()) {
-                
-                Map map = (Map)mapsIterator.next();
-                
-                String sindex = (String)map.get(indexKey);
+                Map attributes = (Map)mapsIterator.next();
+                String sindex = (String)attributes.remove(indexKey);
                 if (sindex == null)
                     return Collections.EMPTY_LIST;
                 
                 int index = -1;
-                try{
+                try {
                     index = Integer.parseInt(sindex);
-                }catch(NumberFormatException bad) { //invalid document
+                } catch(NumberFormatException bad) { //invalid document
                     return Collections.EMPTY_LIST;
                 }
                 
                 if (index >= documents.length || index < 0)
                     return Collections.EMPTY_LIST; // malicious document, can't trust it.
                 
-                documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
-                
+                if(!attributes.isEmpty()) {
+                    documents[index] = new LimeXMLDocument(attributes,
+                                                           parsingResult.schemaURI,
+                                                           parsingResult.canonicalKeyPrefix);
+                }
             }
             results.add(documents);
         }
