@@ -38,7 +38,7 @@ public class GGEPTest extends TestCase {
             GGEP temp = new GGEP(hashMap);
             Assert.assertTrue("Test 2 Constructor Failed!", false);
         }
-        catch (BadGGEPPropertyException hopefullyNot) {
+        catch (BadGGEPPropertyException hopefullySo) {
         }        
     }
 
@@ -54,9 +54,23 @@ public class GGEPTest extends TestCase {
             GGEP temp = new GGEP(hashMap);
             Assert.assertTrue("Test 3 Constructor Failed!", false);
         }
-        catch (BadGGEPPropertyException hopefullyNot) {
+        catch (BadGGEPPropertyException hopefullySo) {
         }
     }
+
+
+    public void testByteArrayConstructor1() {
+        byte[] bytes = new byte[2];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x8A;
+        try {
+            GGEP temp = new GGEP(bytes,0);
+        }
+        catch (BadGGEPBlockException hopefullyNot) {
+            Assert.assertTrue("Test 4 Constructor Failed!", false);
+        }
+    }
+
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());

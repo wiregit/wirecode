@@ -24,6 +24,10 @@ public class GGEP extends Object {
     /** The maximum size of a extension data (value). */
     public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
 
+    /** The GGEP prefix.  A GGEP block will start with this byte value.
+     */
+    public static final byte GGEP_PREFIX_MAGIC_NUMBER = (byte) 0xC3;
+
     /** The collection of key/value pairs this GGEP instance represents.
      */
     private Map _props = null;
@@ -87,10 +91,76 @@ public class GGEP extends Object {
      *  @exception BadGGEPBlockException Thrown if the block could not be parsed
      *  correctly.
      */
-    public GGEP(byte[] messageBytes, int beginOffset) 
+    public GGEP(byte[] messageBytes, final int beginOffset) 
         throws BadGGEPBlockException {
+
+        // all GGEP blocks start with this prefix....
+        if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
+            throw new BadGGEPBlockException();
+
+        boolean onLastExtension = false;
+        int currIndex = beginOffset + 1;
+        while (!onLastExtension) {
+
+            // process extension header flags
+            // bit order is interpreted as 76543210            
+            sanityCheck(messageBytes[currIndex]);
+            onLastExtension = isLastExtension(messageBytes[currIndex]);
+            boolean encoded = isEncoded(messageBytes[currIndex]);
+            boolean compressed = isCompressed(messageBytes[currIndex]);
+            int headerLen = deriveHeaderLength(messageBytes[currIndex]);
+            debug("GGEP(): onLastExtension = " + onLastExtension);
+            debug("GGEP(): encoded = " + encoded);
+            debug("GGEP(): compressed = " + compressed);
+            debug("GGEP(): headerLen = " + headerLen);
+        }
     }
 
+    private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
+        // the 4th bit in the header's first byte must be 0.
+        if ((headerFlags & 0x10) != 0)
+            throw new BadGGEPBlockException();
+    }
+        
+    private boolean isLastExtension(byte headerFlags) {
+        boolean retBool = false;
+        // the 8th bit in the header's first byte, when set, indicates that
+        // this header is the last....
+        if ((headerFlags & 0x80) != 0)
+            retBool = true;
+        return retBool;        
+    }
+
+
+    private boolean isEncoded(byte headerFlags) {
+        boolean retBool = false;
+        // the 7th bit in the header's first byte, when set, indicates that
+        // this header is the encoded with COBS
+        if ((headerFlags & 0x40) != 0)
+            retBool = true;
+        return retBool;        
+    }
+
+
+    private boolean isCompressed(byte headerFlags) {
+        boolean retBool = false;
+        // the 6th bit in the header's first byte, when set, indicates that
+        // this header is the compressed with deflate
+        if ((headerFlags & 0x20) != 0)
+            retBool = true;
+        return retBool;        
+    }
+
+
+    private int deriveHeaderLength(byte headerFlags) 
+        throws BadGGEPBlockException {
+        int retInt = 0;
+        // bits 0-3 give the length of the extension header (1-15)
+        retInt = headerFlags & 0x0F;
+        if (retInt == 0)
+            throw new BadGGEPBlockException();
+        return retInt;
+    }
     /** Provides access to the extension headers represented by this GGEP
      *  instance.
      *  @return An Set (Strings) of all the keys/headers in this GGEP 
@@ -128,6 +198,11 @@ public class GGEP extends Object {
         return new GGEP[0];
     }
 
+    public static final boolean debugOn = false;
+    public void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
 }
 
 
