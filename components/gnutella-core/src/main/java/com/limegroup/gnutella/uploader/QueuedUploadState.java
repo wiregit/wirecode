@@ -9,6 +9,7 @@ import java.io.*;
 public class QueuedUploadState implements HTTPMessage {
 
     private FileDesc FILE_DESC;
+    private HTTPUploader _uploader;
     private int position;
 
 	/**
@@ -17,9 +18,10 @@ public class QueuedUploadState implements HTTPMessage {
 	private final byte[] ERROR_MESSAGE = 
 		"Server busy.  Too many active uploads.".getBytes();
 
-    public QueuedUploadState(int pos, FileDesc desc) {
+    public QueuedUploadState(int pos, HTTPUploader uploader) {
         this.position = pos;
-        this.FILE_DESC= desc;
+        this._uploader = uploader;
+        this.FILE_DESC= uploader.getFileDesc();
     }
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -43,8 +45,7 @@ public class QueuedUploadState implements HTTPMessage {
                                       ostream);
                 if(FILE_DESC.hasAlternateLocations()) {
                     HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                  FILE_DESC.getAlternateLocationCollection(),
-                                          ostream);
+                        _uploader.getAlternateLocationCollection(), ostream);
                 }
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

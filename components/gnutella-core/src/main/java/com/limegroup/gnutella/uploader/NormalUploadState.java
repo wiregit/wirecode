@@ -121,8 +121,7 @@ public final class NormalUploadState implements HTTPMessage {
 				}
 				if(FILE_DESC.hasAlternateLocations()) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-										  FILE_DESC.getAlternateLocationCollection(),
-										  ostream);
+						   _uploader.getAlternateLocationCollection(), ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

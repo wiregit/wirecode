@@ -18,6 +18,8 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 */
 	private final FileDesc FILE_DESC;
 
+    private final HTTPUploader _uploader;
+
 	/**
 	 * The error message to send in the message body.
 	 */
@@ -30,8 +32,9 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 *
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
-	public LimitReachedUploadState(FileDesc fd) {
-		FILE_DESC = fd;
+	public LimitReachedUploadState(HTTPUploader uploader) {
+        _uploader = uploader;
+		FILE_DESC = uploader.getFileDesc();
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -53,8 +56,7 @@ public class LimitReachedUploadState implements HTTPMessage {
 									  ostream);
 				if(FILE_DESC.hasAlternateLocations()) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-										  FILE_DESC.getAlternateLocationCollection(),
-										  ostream);
+						   _uploader.getAlternateLocationCollection(),ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

@@ -88,6 +88,13 @@ public final class HTTPUploader implements Uploader {
 	 * this upload.
 	 */
 	private AltLocCollectionsManager _altLocs;
+    
+    /**
+     * The number of AltLocs that this uploader has written out. It is necessary
+     * to rememeber this number beacuse uploader do not want to keep repeating
+     * the same set of alternate locations to potential downloaders
+     */
+    private int _numAltsWritten;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -284,10 +291,10 @@ public final class HTTPUploader implements Uploader {
 			break;
         case QUEUED:
             int pos=RouterService.getUploadManager().positionInQueue(_socket);
-            _state = new QueuedUploadState(pos,_fileDesc);
+            _state = new QueuedUploadState(pos,this);
             break;
 		case LIMIT_REACHED:
-			_state = new LimitReachedUploadState(_fileDesc);
+			_state = new LimitReachedUploadState(this);
 			break;
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
@@ -308,7 +315,7 @@ public final class HTTPUploader implements Uploader {
             _state = new MalformedRequestState();
             break;
         case UNAVAILABLE_RANGE:
-            _state = new UnavailableRangeUploadState(_fileDesc);
+            _state = new UnavailableRangeUploadState(this);
             break;
 		case COMPLETE:
 		case INTERRUPTED:
@@ -446,6 +453,25 @@ public final class HTTPUploader implements Uploader {
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();
 	}
+    
+    /**
+     * generates an AlternateLocationCollection based on the number of 
+     * AltLocs that this Uploader has already sent out.
+     */
+    public AlternateLocationCollection getAlternateLocationCollection() {
+        Iterator iter  = _fileDesc.getAlternateLocationCollection().iterator();
+        AlternateLocationCollection ret = 
+                    AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        //Sumeet:TODO1: Check synchronization. But I think getting an iterator
+        //on the AlternateLocation collection should return a shallow copy
+        for(int i=0; iter.hasNext() && i < _numAltsWritten ; i++) 
+            iter.next(); //skip the first _numAltsWritten
+        int i;
+        for(i = 0; i< 10 && iter.hasNext();i++)
+            ret.add((AlternateLocation)iter.next());//Deadlocks?
+        _numAltsWritten += i;//add as many as we added now.
+        return ret;
+    }
     
     /**
      * Blocks certain vendors from being queued, because of buggy
