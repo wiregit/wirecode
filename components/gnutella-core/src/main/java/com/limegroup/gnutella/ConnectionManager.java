@@ -752,6 +752,7 @@ public class ConnectionManager {
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
             
+        	//check if we are promoting somebody at the moment
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             
@@ -1734,6 +1735,24 @@ public class ConnectionManager {
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
+        //
+        //however, always accept the connection if it comes from the
+        //leaf that we are trying to promote.
+        
+        boolean fromCandidate = false;
+        if (c.isSupernodeSupernodeConnection() && !c.isOutgoing()) 
+        	//evaluate the big conditional only for incoming UP connections
+        	//because it involves locking stuff.
+        	fromCandidate =RouterService.getPromotionManager().
+					isPromoting(c.getAddress(),c.getPort());
+        
+        if (fromCandidate) {
+        	//free up an UP slot
+        	while (!hasFreeUltrapeerSlots())
+        		remove ( (ManagedConnection)
+        				_initializedConnections.get(0));
+        } 
+        else
         if (!c.isOutgoing() && !allowConnection(c)) {
             c.loopToReject();
             //No need to remove, since it hasn't been added to any lists.

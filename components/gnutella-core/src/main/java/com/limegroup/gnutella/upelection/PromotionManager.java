@@ -10,6 +10,7 @@ package com.limegroup.gnutella.upelection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
 
@@ -115,10 +116,22 @@ public class PromotionManager {
 		}
 	}
 	
+	public boolean isPromoting(String host, int port) {
+		synchronized(_promotionLock) {
+			if (_promotionPartner == null)
+				return false;
+			return (_promotionPartner.getAddress().equals(host) &&
+				_promotionPartner.getPort() == port ) ||
+				_promotionPartner.getInetAddress().isLoopbackAddress(); //for testing
+		}
+	}
+	
 	public void handleACK(PromotionACKVendorMessage message, Endpoint sender) {
+		//cache the current status
+		boolean isSupernode = RouterService.isSupernode();
 		
 		//first see if anyone is indeed a promotion partner
-    	Endpoint partner = null;
+    	
     	
     	synchronized(_promotionLock) {
     		if (_promotionPartner == null)  
@@ -129,25 +142,24 @@ public class PromotionManager {
     		if (!sender.equals(_promotionPartner) && 
     				!sender.getInetAddress().isLoopbackAddress())
     			return;
-    		
-    		//set the promotion partner to null if that's the case
-    		partner = _promotionPartner;
-    		_promotionPartner = null;
-    		
-    		//stop the expiration thread
-    		_expirer.interrupt();
-    		_expirer = null;
+    			
+    		//set the promotion partner to null
+    		//have an extra check here to avoid re-acquiring the lock
+			if (!isSupernode)
+				_promotionPartner=null;
     	}
     	
     	//*************************
     	//we know we have received a proper ACK.
-    	
+    	//stop the expiration thread
+    	_expirer.interrupt();
+    	_expirer = null;    	
     	
     	
     	//then, proceed as appropriate:
     	
     	//if we are a leaf, start the promotion process
-    	if (!RouterService.isSupernode()) {
+    	if (!isSupernode) {
     		Thread promoter = new ManagedThread(
     				new Promoter(sender));
     		promoter.setDaemon(true);
@@ -157,6 +169,11 @@ public class PromotionManager {
     		//we are the originally requesting UP, ACK back.
     		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
     		UDPService.instance().send(pong, sender);
+			
+			//postpone the timeout of the promotion for a while
+			_expirer = new ManagedThread(new Expirer());
+			_expirer.setDaemon(true);
+			_expirer.start();
     	}
 	}
 	
