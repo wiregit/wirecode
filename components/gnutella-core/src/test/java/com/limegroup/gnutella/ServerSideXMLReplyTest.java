@@ -120,10 +120,10 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
     public void testXMLReturned2() throws Exception {
         drainAll();
 
-        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Alternative\"></audio></audios>";
+        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Ambient\"></audio></audios>";
 
         // send a query
-        QueryRequest query = QueryRequest.createQuery("Alternative", richQuery);
+        QueryRequest query = QueryRequest.createQuery("Ambient", richQuery);
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 
