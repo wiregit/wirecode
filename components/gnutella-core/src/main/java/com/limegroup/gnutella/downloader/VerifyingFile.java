@@ -133,6 +133,14 @@ public class VerifyingFile {
         return isCorrupted;
     }
     
+    /**
+     * Returns the ManagedDownloader this VerifyingFile is associated with.
+     * If this VerifyingFile is closed, the return value will be null.
+     */
+    public ManagedDownloader getManagedDownloader() {
+        return managedDownloader;
+    }
+    
     /////////////////////////private helpers//////////////////////////////
     
     /*

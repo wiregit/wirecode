@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.Interval;
 import com.sun.java.util.collections.*;
@@ -81,6 +82,44 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         }
         return new FileInputStream(getFile());
     }
+    
+    /**
+     * Adds the alternate location to this FileDesc and also notifies
+     * the ManagedDownloader of a new location for this.
+     */
+    public boolean addAlternateLocation(AlternateLocation al) {
+        boolean ret = super.addAlternateLocation(al);
+        if (ret) {
+            ManagedDownloader md = _verifyingFile.getManagedDownloader();
+            if( md != null )
+                md.addAlternateLocation(al, (int)getSize());
+        }
+        return ret;
+    }
+    
+	/**
+     * Adds the alternate locations to this FileDesc and also notifies the
+     * ManagedDownloader of new locations for this.
+     */
+	public int addAlternateLocationCollection(AlternateLocationCollection alc) {
+	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+	    
+        // if no downloader, just add the collection.
+	    if( md == null )
+	        return super.addAlternateLocationCollection(alc);
+	    
+        // otherwise, iterate through and individually add them, to make
+        // sure they get added to the downloader.
+        int added = 0;
+        for(Iterator iter = alc.values().iterator(); iter.hasNext(); ) {
+            AlternateLocation al = (AlternateLocation)iter.next();
+            if( super.addAlternateLocation(al) ) {
+                md.addAlternateLocation(al, (int)getSize());
+                added++;
+            }
+        }
+        return added;
+	}    
     
     /**
      * Returns the available ranges as an HTTP string value.

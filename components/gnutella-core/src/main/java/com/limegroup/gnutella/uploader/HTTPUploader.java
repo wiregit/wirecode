@@ -833,11 +833,7 @@ public final class HTTPUploader implements Uploader {
 				
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {
-                    boolean added = alc.addAlternateLocation(al);
-                    if( added && fd instanceof IncompleteFileDesc ) {
-                       RouterService.getDownloadManager().handleAlternateLocation(
-                            al, (int)fd.getSize() );
-                    }
+                    alc.addAlternateLocation(al);
                 }
 			} catch(IOException e) {
 				// just return without adding it.

@@ -520,25 +520,6 @@ public class DownloadManager implements BandwidthTracker {
         
         handleManagedDownloaderAdditions(rfds);
     }
-    
-    /**
-     * Adds the location named in the AlternateLocation to an existing
-     * downloader if appropriate.
-     */
-    public void handleAlternateLocation(AlternateLocation al, int fileSize) {
-        List downloaders = new ArrayList();
-        synchronized(this) {
-            downloaders.addAll(active);
-            downloaders.addAll(waiting);
-        }
-        
-        //Give the alternate location to at most one downloader
-        for(int i = 0; i < downloaders.size(); i++) {
-            ManagedDownloader currD = (ManagedDownloader)downloaders.get(i);
-            if( currD.addAlternateLocation(al, fileSize) )
-                break;
-        }
-    }
 
     private void handleManagedDownloaderAdditions(RemoteFileDesc[] rfds) {
 
@@ -564,8 +545,6 @@ public class DownloadManager implements BandwidthTracker {
             }
         }
     }
-
-
 
     /**
      * Accepts the given socket for a push download to this host.
