@@ -477,13 +477,16 @@ public class LimeXMLUtils
     /**
      * takes a string and returns the same string with the first letter 
      * capitalized
+     * <p>
+     * 11/2/01 Also replaces any "_" with " "
      */
     public static String capitalizeFirst(String str)
     {
-        String first = str.substring(0,1);
-        String newFirst = first.toUpperCase();
+        String first = str.substring(0,1).toUpperCase();
         String last = str.substring(1); 
-        return  newFirst+last;
+        String retStr = first+last;
+        return retStr.replace('_',' ');
+        
     }
 
     /**
