@@ -359,7 +359,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void tryAllDownloads() {     
         List[] /* of File */ buckets=bucket(allFiles, incompleteFileManager);
-        System.out.println("Buckets: "+Arrays.asList(buckets).toString());
+        //System.out.println("Buckets: "+Arrays.asList(buckets).toString());
 
         //While not success and still busy...
         while (true) {
@@ -460,7 +460,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             return status;
                 
         //3. Move to library.  
-        System.out.println("MANAGER: completed");
+        //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
         completeFile.delete();
         //Try moving file.  If we couldn't move the file, i.e., because
@@ -597,7 +597,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw e;
             }
             dloader.stopAt(interval.high);
-            System.out.println("MANAGER: assigning white "+interval+" to "+dloader);
+            //System.out.println("MANAGER: assigning white "+interval+" to "+dloader);
         }
         else {
             //Split largest "gray" interval, i.e., steal part of another
@@ -629,7 +629,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloader=findConnectable(files, start, stop, busy);
             dloader.stopAt(stop);
             biggest.stopAt(start);
-            System.out.println("MANAGER: assigning grey "+start+"-"+stop+" to "+dloader);
+            //System.out.println("MANAGER: assigning grey "+start+"-"+stop+" to "+dloader);
         }
                 
         //2) Asynchronously do download
@@ -681,7 +681,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             File incompleteFile=incompleteFileManager.getFile(rfd);
             HTTPDownloader ret;
             if (needsPush(rfd)) {
-                System.out.println("MANAGER: trying push to "+rfd);
+                //System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
                 synchronized (pushLock) {
                     manager.sendPush(rfd);
@@ -707,7 +707,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             } else {             
                 //Establish normal downloader.
                 ret=new HTTPDownloader(rfd, incompleteFile, start, stop);
-                System.out.println("MANAGER: trying connect to "+rfd);
+                //System.out.println("MANAGER: trying connect to "+rfd);
             }
 
             try {
@@ -746,8 +746,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch (IOException e) {
         } finally {
             int stop=downloader.getInitialReadingPoint()+downloader.getAmountRead();
-            System.out.println("    WORKER: terminating from "+downloader
-                               +" at "+stop);
+            //System.out.println("    WORKER: terminating from "+downloader
+            //                   +" at "+stop);
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO: use measured speed.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
