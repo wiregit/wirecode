@@ -20,6 +20,11 @@ public class SimpleTimer {
     private final Timer TIMER;
     
     /**
+     * Whether or not we actively cancelled the timer.
+     */
+    private volatile boolean cancelled = true;
+    
+    /**
      * Creates a new active SimpleTimer with a callback for internal errors.
      * @param isDaemon true if this' thread should be a daemon.
      */
@@ -55,17 +60,24 @@ public class SimpleTimer {
                 }
             }
         };
-            
-        if(period == 0)
-            TIMER.schedule(tt, delay);
-        else
-            TIMER.schedule(tt, delay, period);
+
+        try {
+            if(period == 0)
+                TIMER.schedule(tt, delay);
+            else
+                TIMER.schedule(tt, delay, period);
+        } catch(IllegalStateException ise) {
+            // swallow ISE's if the Timer cancelled itself.
+            if(cancelled)
+                throw ise;
+        }
     }      
 
     /**
      * Cancels this.  No more tasks can be scheduled or executed.
      */ 
     public void cancel() {
+        cancelled = true;
         TIMER.cancel();
     }
 }

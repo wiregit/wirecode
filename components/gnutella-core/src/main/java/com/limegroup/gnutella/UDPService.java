@@ -601,6 +601,8 @@ public class UDPService implements Runnable {
                 return true;
             if(scan(msg, -1, "already connected"))
                 return true;
+            if(scan(msg, -1, "socket is closed"))
+                return true;
                 
             // General invalid error on Linux
             if(msg.indexOf("operation not permitted") > -1)

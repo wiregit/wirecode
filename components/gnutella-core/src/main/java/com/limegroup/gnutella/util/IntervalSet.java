@@ -242,14 +242,25 @@ public class IntervalSet {
         //LOOP INVARIANT: interval!=null ==> low==interval.high
         int low=-1;
         Interval interval=null;
+        boolean fixed = false;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
             interval=(Interval)iter.next();
             if (interval.low!=0 && low<interval.low) {//needed for first interval
-                if (low+1 > interval.low-1)
-                    throw new IllegalArgumentException("constructing invalid interval "+
-                            " while trying to invert \n"+toString()+
-                            " \n with size "+maxSize+
-                            " low:"+low+" interval.low:"+interval.low);
+                if (low+1 > interval.low-1) {
+                    if(!fixed) {
+                        fixed = true;
+                        fix();
+                        iter = intervals.iterator();
+                        low = -1;
+                        interval = null;
+                        continue;
+                    } else {
+                        throw new IllegalArgumentException("constructing invalid interval "+
+                                " while trying to invert \n"+toString()+
+                                " \n with size "+maxSize+
+                                " low:"+low+" interval.low:"+interval.low);
+                    }
+                }
                 ret.add(new Interval(low+1, interval.low-1));
             }
             low=interval.high;
@@ -330,5 +341,24 @@ public class IntervalSet {
     		ret.add(new Interval(low,high));
     	}
     	return ret;
+    }
+    
+    /**
+     * Recomposes intervals to ensure that invariants are met.
+     */
+    private void fix() {
+        String preIntervals = intervals.toString();
+        
+        List oldIntervals = new ArrayList(intervals);
+        intervals.clear();
+        for(Iterator i = oldIntervals.iterator(); i.hasNext(); )
+            add((Interval)i.next());
+        
+        String postIntervals = intervals.toString();
+        
+        Assert.silent(false, 
+            "IntervalSet invariants broken.\n" + 
+            "Pre  Fixing: " + preIntervals + "\n" +
+            "Post Fixing: " + postIntervals);
     }
 }

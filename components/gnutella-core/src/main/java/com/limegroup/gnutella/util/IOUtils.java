@@ -173,6 +173,8 @@ public class IOUtils {
                 out.write(buf, 0, read);
             }
             return out.toByteArray();
+        } catch(OutOfMemoryError oome) {
+            throw new IOException(oome.getMessage());
         } finally {
             IOUtils.close(in);
         }

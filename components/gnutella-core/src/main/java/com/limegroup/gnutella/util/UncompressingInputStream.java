@@ -29,6 +29,8 @@ public final class UncompressingInputStream extends InflaterInputStream {
             //when the underlying socket was closed/disconnected
             //while the read reached the native socketRead0
             throw new IOException(aioobe.getMessage());
+        } catch(OutOfMemoryError oome) {
+            throw new IOException(oome.getMessage());
         }
     }
 } // class
