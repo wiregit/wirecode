@@ -53,6 +53,46 @@ public final class LocaleTester {
 		"MENU_FILE_LIBRARY_DELETE_FOLDER_MNEMONIC"
 	};
 
+	private final String[] GERMAN_NON_ERROR_KEYS = {
+		"OPTIONS_CHAT_MAIN_TITLE",
+		"UPLOAD_TABLE_STRING_STATUS",
+		"GENERAL_CHAT_BUTTON_LABEL",
+		"MODEM_SPEED",
+		"UPLOAD_STRING_KBPSEC",
+		"RESULT_PANEL_CHAT",
+		"MENU_VIEW_MONITOR",
+		"RESULT_PANEL_COUNT",
+		"SEARCH_CHAT_BUTTON_LABEL",
+		"T1_SPEED",
+		"CV_TABLE_STRING_STANDARD",
+		"DOWNLOAD_STATUS_COLUMN",
+		"CV_STRING_ULTRAPEER",
+		"DOWNLOAD_NAME_COLUMN",
+		"MESSAGE_ERROR_CAPTION",
+		"CV_TABLE_STRING_LEAF",
+		"CV_TABLE_STRING_KBPSEC",
+		"MENU_NAV_MONITOR",
+		"MEDIA_VIDEO",
+		"MENU_HELP_FORUM",
+		"OPTIONS_FIREWALL_MAIN_TITLE",
+		"ABOUT_LABEL_ADDRESS",
+		"MENU_RESOURCES_LIMESHOP",
+		"MENU_NAV_TITLE",
+		"UPLOAD_TITLE",
+		"MENU_RESOURCES_PRO",
+		"UPDATE_DIALOG_CAPTION",
+		"RESULT_PANEL_NAME",
+		"PLAYLIST_TABLE_NAME",
+		"DOWNLOAD_CHAT_COLUMN",
+		"PRO_LABEL_QUESTION",
+		"MONITOR_TITLE",
+		"CV_COLUMN_STATUS",
+		"MEDIA_AUDIO",
+		"CV_TABLE_STRING_ULTRAPEER",
+		"UPLOAD_TABLE_STRING_NAME",
+		"SEARCH_STOP_BUTTON_LABEL"
+	};
+
 	public LocaleTester() {		
 		if(_testLanguageCode.equals("german")) {
 			_locale = Locale.GERMAN;
@@ -99,7 +139,7 @@ public final class LocaleTester {
 				try {
 					testValue = TEST_BUNDLE.getString(curKey);
 				} catch(MissingResourceException mre) {
-					if(!shouldAddToErrors(curKey)) continue;
+					if(!shouldAddToErrors(curKey, _testLanguageCode)) continue;
 					errorEncountered = true;
 					String str = "MISSING KEY: "+curKey+"\n";
 					fos.write(str.getBytes());
@@ -107,7 +147,7 @@ public final class LocaleTester {
 				try {
 					standardValue = STANDARD_BUNDLE.getString(curKey);
 					if(testValue.equals(standardValue)) {
-						if(!shouldAddToErrors(curKey)) continue;
+						if(!shouldAddToErrors(curKey, _testLanguageCode)) continue;
 						errorEncountered = true;
 						String str = "IDENTICAL VALUES IN ENGLISH "+
 						"AND "+_locale.getDisplayLanguage().toUpperCase()+
@@ -137,9 +177,14 @@ public final class LocaleTester {
 		}			
 	}
 
-	private boolean shouldAddToErrors(String key) {
+	private boolean shouldAddToErrors(String key, String locale) {
 		for(int i=0; i<NON_ERROR_KEYS.length; i++) {
 			if(key.equals(NON_ERROR_KEYS[i])) return false;
+		}
+		if(locale.equalsIgnoreCase("german")) {
+			for(int i=0; i<GERMAN_NON_ERROR_KEYS.length; i++) {
+				if(key.equals(GERMAN_NON_ERROR_KEYS[i])) return false;
+			}
 		}
 		return true;
 	}
