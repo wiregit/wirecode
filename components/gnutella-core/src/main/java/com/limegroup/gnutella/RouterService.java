@@ -766,8 +766,7 @@ public final class RouterService {
 		//Thread searcherThread = new Thread("SearcherThread") {
 		//public void run() {
 		try {
-			//if(!isSupernode()) {
-			if(false) {
+			if(!isSupernode()) {
 				// per HUGE v0.94, ask for URNs on responses
 				Set urnTypes = new HashSet();
 				urnTypes.add(UrnType.ANY_TYPE);
