@@ -36,20 +36,69 @@ public class HTTPStat extends AdvancedStatistic {
 	 * <tt>Statistic</tt> for all HTTP HEAD requests that have
 	 * been made in this session.
 	 */
-	public static final Statistic HTTP_HEAD_REQUESTS =
+	public static final Statistic HEAD_REQUESTS =
 		new HTTPRequestStat();
 
 	/**
 	 * <tt>Statistic</tt> for all HTTP GET requests that have
 	 * been made in this session.
 	 */
-	public static final Statistic HTTP_GET_REQUESTS =
+	public static final Statistic GET_REQUESTS =
 		new HTTPRequestStat();
 		
     /**
      * <tt>Statistic</tt> for all HTTP GIV requests that have been made
      * in this session.
      */
-    public static final Statistic HTTP_GIV_REQUESTS =
+    public static final Statistic GIV_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all Gnutella requests that have been made
+     * in this session.
+     */
+    public static final Statistic GNUTELLA_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all LimeWire requests that have been made
+     * in this session.
+     */
+    public static final Statistic GNUTELLA_LIMEWIRE_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all Chat requests that have been made
+     * in this session.
+     */
+    public static final Statistic CHAT_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all Magnet requests that have been made
+     * in this session.
+     */
+    public static final Statistic MAGNET_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all Unknown requests that have been made
+     * in this session.
+     */
+    public static final Statistic UNKNOWN_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all Banned requests that have been made
+     * in this session.
+     */
+    public static final Statistic BANNED_REQUESTS =
+        new HTTPRequestStat();
+        
+    /**
+     * <tt>Statistic</tt> for all closed requests that have been made
+     * in this session.
+     */
+    public static final Statistic CLOSED_REQUESTS =
         new HTTPRequestStat();
 }

@@ -65,6 +65,11 @@ public class Acceptor implements Runnable {
 	 * used to determine firewall status.
 	 */
 	private volatile boolean _acceptedIncoming = false;
+	
+	/**
+	 * Whether or not to record stats.
+	 */
+	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 
 	/**
@@ -365,6 +370,8 @@ public class Acceptor implements Runnable {
 				
 				InetAddress address = client.getInetAddress();
                 if (isBannedIP(address.getHostAddress())) {
+			        if( RECORD_STATS )
+			            HTTPStat.BANNED_REQUESTS.incrementStat();                    
                     client.close();
                     continue;
                 }
@@ -434,6 +441,8 @@ public class Acceptor implements Runnable {
                 try {
                     in=_socket.getInputStream(); 
                 } catch (Exception e) {
+                    if( RECORD_STATS )
+                        HTTPStat.CLOSED_REQUESTS.incrementStat();
                     throw new IOException("could not access socket stream");
                 }
                 _socket.setSoTimeout(Constants.TIMEOUT);
@@ -463,39 +472,46 @@ public class Acceptor implements Runnable {
 
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
+                    if( RECORD_STATS )
+                        HTTPStat.GNUTELLA_REQUESTS.incrementStat();
                     cm.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {
+                    if( RECORD_STATS )
+                        HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
                     cm.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
+					if( RECORD_STATS )
+						HTTPStat.GET_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
-					if(!CommonUtils.isJava118()) {
-						HTTPStat.HTTP_GET_REQUESTS.incrementStat();
-					}
                 }
 				else if (word.equals("HEAD")) {
+					if( RECORD_STATS )
+						HTTPStat.HEAD_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
-					if(!CommonUtils.isJava118()) {
-						HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
-					}
 				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
+                    if( RECORD_STATS )
+                        HTTPStat.GIV_REQUESTS.incrementStat();
                     dm.acceptDownload(_socket);
-                    if(!CommonUtils.isJava118()) {
-                        HTTPStat.HTTP_GIV_REQUESTS.incrementStat();
-                    }
                 }
 				else if (word.equals("CHAT")) {
-					ChatManager.instance().accept(_socket);
+				    if( RECORD_STATS )
+				        HTTPStat.CHAT_REQUESTS.incrementStat();
+                    ChatManager.instance().accept(_socket);
 				}
 			    else if (word.equals("MAGNET")) {
+			        if( RECORD_STATS )
+                        HTTPStat.MAGNET_REQUESTS.incrementStat();
                     ExternalControl.fireMagnet(_socket);
                 }	
                 //4. Unknown protocol
                 else {
+                    if( RECORD_STATS )
+                        HTTPStat.UNKNOWN_REQUESTS.incrementStat();
                     throw new IOException("UNKOWN PROTOCOL: "+word);
                 }
             } catch (IOException e) {
