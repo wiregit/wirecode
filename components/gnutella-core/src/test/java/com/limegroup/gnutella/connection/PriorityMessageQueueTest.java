@@ -13,6 +13,11 @@ import com.limegroup.gnutella.Response;
  */
 public class PriorityMessageQueueTest extends BaseTestCase {
     
+    /**
+     * A non-blank IP.
+     */
+    private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
+    
 	public PriorityMessageQueueTest(String name) {
 		super(name);
 	}
@@ -31,22 +36,22 @@ public class PriorityMessageQueueTest extends BaseTestCase {
         //By guid volume
         PriorityMessageQueue q=new PriorityMessageQueue(
             1000, Integer.MAX_VALUE, 100);
-        m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6341, IP, 0, 
                          new Response[0], new byte[16], 
                          false, false, false, false, false, false);
         m.setPriority(1000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6331, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6331, IP, 0, 
                          new Response[0], new byte[16],
                          false, false, false, false, false, false);
         m.setPriority(1000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6349, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6349, IP, 0, 
                          new Response[0], new byte[16],
                          false, false, false, false, false, false);
         m.setPriority(9000);
         q.add(m);
-        m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
+        m=new QueryReply(new byte[16], (byte)5, 6340, IP, 0, 
                          new Response[0], new byte[16],
                          false, false, false, false, false, false);
         m.setPriority(0);
@@ -91,15 +96,15 @@ public class PriorityMessageQueueTest extends BaseTestCase {
         //By negative hops
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
         PingReply pong=PingReply.create(
-            new byte[16], (byte)5, 6340, new byte[4], 0, 0);
+            new byte[16], (byte)5, 6340, IP, 0, 0);
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6330, new byte[4], 0, 0);
+        pong=PingReply.create(new byte[16], (byte)5, 6330, IP, 0, 0);
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6342, new byte[4], 0, 0);
+        pong=PingReply.create(new byte[16], (byte)5, 6342, IP, 0, 0);
         pong.hop();
         pong.hop();
         q.add(pong);
-        pong=PingReply.create(new byte[16], (byte)5, 6341, new byte[4], 0, 0);
+        pong=PingReply.create(new byte[16], (byte)5, 6341, IP, 0, 0);
         pong.hop();
         q.add(pong);
         pong=(PingReply)q.removeNextInternal();
