@@ -1065,8 +1065,6 @@ MULTICAST_SPEED=Ethernet
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
-#### CV_PANEL_TITLE=Connected Hosts
-CV_PANEL_TITLE=Bağlanılan konaklar
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=Konak
 #### CV_COLUMN_STATUS=Status
@@ -1095,7 +1093,7 @@ CV_COLUMN_QRP_FULL=QRP (%/boyut)
 CV_BUTTON_REMOVE=Sil
 #### CV_BUTTON_TOOLTIP_REMOVE=Remove the Selected Connections
 CV_BUTTON_TOOLTIP_REMOVE=Seçili bağlantıları siler.
-#### CV_BUTTON_ADD=Add
+#### CV_BUTTON_ADD=Add...
 CV_BUTTON_ADD=Ekle
 #### CV_BUTTON_TOOLTIP_ADD=Create a New Outgoing Connection
 CV_BUTTON_TOOLTIP_ADD=Dışagiden yeni bir bağlantı oluşturur.
@@ -1129,12 +1127,20 @@ CV_TABLE_STRING_INCOMING=İçegelen
 CV_TABLE_STRING_OUTGOING=Dışagiden
 #### CV_TABLE_STRING_CONNECTED_ON=Connected on
 CV_TABLE_STRING_CONNECTED_ON=Bağlanılan tarih
-#### CV_STRING_CLIENT=[Leaf]
+#### CV_STRING_CLIENT=Leaf
 CV_STRING_CLIENT=[Yaprak]
-#### CV_STRING_ULTRAPEER=[Ultrapeer]
+#### CV_STRING_ULTRAPEER=Ultrapeer
 CV_STRING_ULTRAPEER=[Ultrapeer]
+#### CV_STRING_STATUS=Connection Status:
+#? CV_STRING_STATUS=
 #### CV_TABLE_STRING_KBPSEC=KB/s
 CV_TABLE_STRING_KBPSEC=KB/s
+#### CV_ADD_HOST_LABEL=Host:
+#? CV_ADD_HOST_LABEL=
+#### CV_ADD_PORT_LABEL=Port:
+#? CV_ADD_PORT_LABEL=
+#### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
+#? CV_ADD_DIALOG_TITLE=
 
 ################################################################################
 # Key/value pairs for strings in the library window
@@ -2209,11 +2215,11 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Dahili yürütücüyü ya da sistem öntanımlı
 #? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
 #? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=
-#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my Music:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=
-#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability Mode
+#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility mode:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
