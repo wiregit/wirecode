@@ -26,7 +26,8 @@ import java.util.Arrays;
  * @author Prashant Dhokte (pdhokte@iss.net)
  * @author Christopher Rohrs (added setValue)
  * @author Sam Berlin (added support for static fields/methods,
- *                     native parameters in methods, and invokeConstructor)
+ *                     native parameters in methods, invokeConstructor,
+ *                     and getClass)
  */
 public class PrivilegedAccessor {
 
@@ -41,9 +42,9 @@ public class PrivilegedAccessor {
            throws IllegalAccessException, NoSuchFieldException {
         Field field;
         if ( instance instanceof Class )
-            field = getField((Class)instance, fieldName);
+            field = getFieldImpl((Class)instance, fieldName);
         else
-            field = getField(instance.getClass(), fieldName);
+            field = getFieldImpl(instance.getClass(), fieldName);
         field.setAccessible(true);
         return field.get(instance);
     }
@@ -61,9 +62,9 @@ public class PrivilegedAccessor {
             throws IllegalAccessException, NoSuchFieldException {
         Field field;
         if ( instance instanceof Class )
-            field = getField((Class)instance, fieldName);
+            field = getFieldImpl((Class)instance, fieldName);
         else
-            field = getField(instance.getClass(), fieldName);
+            field = getFieldImpl(instance.getClass(), fieldName);
         field.setAccessible(true);
         field.set(instance, value);
     }
@@ -153,6 +154,18 @@ public class PrivilegedAccessor {
     }
     
     /**
+     * Returns the class 'name' that was declared by class 'parent'.
+     *
+     * @param parent the class who you want to look in for this class
+     * @param name the class you're looking for.
+     */
+    public static Class getClass(Class parent, String name)
+      throws ClassNotFoundException {
+        Class clazz = getClassImpl(parent, name);
+        return clazz;
+    }
+    
+    /**
      * Constructs an object with the given parameters.
      */
     public static Object invokeConstructor(Class clazz,
@@ -169,7 +182,9 @@ public class PrivilegedAccessor {
                     classTypes[i] = args[i].getClass();
             }
         }
-        return getConstructor(clazz, classTypes).newInstance(args);
+        Constructor cs = getConstructorImpl(clazz, classTypes);
+        cs.setAccessible(true);
+        return cs.newInstance(args);
     }
     
     
@@ -177,7 +192,7 @@ public class PrivilegedAccessor {
     /**
      * Return the named field from the given class.
      */
-    private static Field getField(Class thisClass, 
+    private static Field getFieldImpl(Class thisClass, 
                                   String fieldName) 
                                   throws NoSuchFieldException {
         if (thisClass == null)
@@ -186,7 +201,7 @@ public class PrivilegedAccessor {
             return thisClass.getDeclaredField( fieldName );
         }
         catch(NoSuchFieldException e) {
-            return getField(thisClass.getSuperclass(), fieldName);
+            return getFieldImpl(thisClass.getSuperclass(), fieldName);
         }
     }
 
@@ -211,15 +226,30 @@ public class PrivilegedAccessor {
     /**
      * Return the constructor with the given parameters.
      */
-    private static Constructor getConstructor(Class clazz, Class[] classTypes)
+    private static Constructor getConstructorImpl(Class clazz, Class[] classTypes)
       throws NoSuchMethodException {
         Constructor[] cs = clazz.getDeclaredConstructors();
         for (int i = 0; i < cs.length; i++) {
-            if ( Arrays.equals(classTypes, cs[i].getParameterTypes()) ) {
-                cs[i].setAccessible(true);
+            // check for constructors which have arguments
+            if ( Arrays.equals(classTypes, cs[i].getParameterTypes()) )
                 return cs[i];
-            }
+            // check for no argument constructor                
+            if ( cs[i].getParameterTypes().length == 0 && classTypes == null )
+                return cs[i];
         }
         throw new NoSuchMethodException();
+    }
+    
+    /**
+     * Return the class with the given name.
+     */
+    private static Class getClassImpl(Class parent, String name)
+      throws ClassNotFoundException {
+        Class[] clazzes = parent.getDeclaredClasses();
+        for(int i = 0; i < clazzes.length; i++) {
+            if ( clazzes[i].getName().equals(parent.getName() + "$" + name) )
+                return clazzes[i];
+        }
+        throw new ClassNotFoundException("Invalid class : " + parent.getName() + "$" + name);
     }
 }

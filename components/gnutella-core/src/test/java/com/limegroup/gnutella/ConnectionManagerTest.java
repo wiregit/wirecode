@@ -9,6 +9,7 @@ import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.MiniAcceptor;
 import com.limegroup.gnutella.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -142,7 +143,28 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
         }
-    }        
+    }
+    
+   public void testComparator() throws Exception {
+        TestManagedConnection i13=new TestManagedConnection(false, 1, 3);
+        TestManagedConnection o13=new TestManagedConnection(true, 1, 3);
+        TestManagedConnection i10=new TestManagedConnection(false, 1, 0);
+        TestManagedConnection o10=new TestManagedConnection(true, 1, 0);
+        
+        List l=new ArrayList(); l.add(i13); l.add(o13); l.add(i10); l.add(o10);
+        Collections.sort(l, newManagedConnectionComparator());
+        Assert.that(l.get(0)==o10);
+        Assert.that(l.get(1)==o13);
+        Assert.that(l.get(2)==i10);
+        Assert.that(l.get(3)==i13);
+    }
+    
+    private static Comparator newManagedConnectionComparator() throws Exception {
+        Class mcc = PrivilegedAccessor.getClass(
+            ConnectionManager.class, "ManagedConnectionComparator" );
+        return (Comparator)PrivilegedAccessor.invokeConstructor(
+            mcc, null );
+    }
 
     /**
      * Test host catcher that allows us to return endpoints that we 
@@ -179,4 +201,29 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         public void initialize() {        
         }
     }
+
+    private static class TestManagedConnection extends ManagedConnection {
+        private boolean isOutgoing;
+        private int sent;
+        private int received;
+
+        public TestManagedConnection(boolean isOutgoing, int sent, int received) {
+            super("1.2.3.4", 6346);
+            this.isOutgoing=isOutgoing;
+            this.sent=sent;
+            this.received=received;
+        }
+
+        public boolean isOutgoing() {
+            return isOutgoing;
+        }
+
+        public int getNumMessagesSent() {
+            return sent;
+        }
+        
+        public int getNumMessagesReceived() {
+            return received;
+        }        
+    }    
 }
