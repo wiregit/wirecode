@@ -41,10 +41,19 @@ class LicenseCache {
     private final File CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "licenses.cache");        
     
-    private final Map /* URI -> License */ licenses = createMap();
+    /**
+     * A map of Licenses.  One License per URI.
+     */
+    private Map /* URI -> License */ licenses;
+    
+    /**
+     * An extra map of details that Licenses can use
+     * to cache info.  This information lasts forever.
+     */
+    private Map /* Object -> Object */ details;
 
     private static final LicenseCache INSTANCE = new LicenseCache();
-    private LicenseCache() {}
+    private LicenseCache() { deserialize(); }
     public static LicenseCache instance() { return INSTANCE; }
     
     /**
@@ -55,16 +64,30 @@ class LicenseCache {
     }
     
     /**
+     * Adds details.
+     */
+    synchronized void addDetails(Object key, Object value) {
+        details.put(key, value);
+    }
+    
+    /**
      * Retrieves the cached license for the specified URI, substituting
      * the license string for a new one.
      */
     synchronized License getLicense(String licenseString, URI licenseURI) {
         License license = (License)licenses.get(licenseURI);
         if(license != null)
-            return license.copy(licenseString);
+            return license.copy(licenseString, licenseURI);
         else
              return null;
     }
+    
+    /**
+     * Gets details.
+     */
+    synchronized Object getDetails(Object key) {
+        return details.get(key);
+    } 
     
     /**
      * Determines if the license is verified for the given URN and URI.
@@ -77,7 +100,7 @@ class LicenseCache {
    /**
      * Loads values from cache file, if available
      */
-    private Map createMap() {
+    private void deserialize() {
         ObjectInputStream ois = null;
         try {
             ois = new ObjectInputStream(
@@ -97,10 +120,11 @@ class LicenseCache {
                     }
                 }
             }
-            return map;
+            licenses = map;
+            
+            details = (Map)ois.readObject();            
         } catch(Throwable t) {
             LOG.error("Can't read licenses", t);
-            return new HashMap();
         } finally {
             if (ois != null) {
                 try {
@@ -109,6 +133,11 @@ class LicenseCache {
                     // all we can do is try to close it
                 }
             }
+            
+            if(licenses == null)
+                licenses = new HashMap();
+            if(details == null)
+                details = new HashMap();
         }
     }
     
@@ -138,6 +167,7 @@ class LicenseCache {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
             oos.writeObject(licenses);
+            oos.writeObject(details);
             oos.flush();
         } catch (IOException e) {
             ErrorService.error(e);

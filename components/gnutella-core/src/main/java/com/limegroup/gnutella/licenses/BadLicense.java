@@ -28,14 +28,14 @@ public class BadLicense implements License {
     public boolean isVerified() { return true; }
     public boolean isVerifying() { return false; }
     public boolean isValid(URN urn) { return false; }
-    public String getLicenseDescription() { return license;  }
+    public String getLicenseDescription(URN urn) { return "Permissions unknown."; }
     public URI getLicenseURI() { return null; }
-    public URL getLicenseDeed() { return guessLicenseDeed(); }
+    public URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
     public String getLicense() { return license; }
     public void verify(VerificationListener listener) {}
     public long getLastVerifiedTime() { return 0; }
     
-    public License copy(String license) {
+    public License copy(String license, URI licenseURI) {
         BadLicense newL = null;
         try {
             newL = (BadLicense)clone();

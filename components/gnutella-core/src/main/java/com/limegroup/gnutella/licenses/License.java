@@ -7,6 +7,13 @@ import com.limegroup.gnutella.URN;
 
 /**
  * Contains methods related to verification.
+ *
+ * It is possible that the License is a bulk license and contains
+ * information related to multiple works.  This license is encapsulated
+ * so that it contains information unique to a single verification location.
+ * Methods that retrieve information specific to a particular work should
+ * provide a URN to identify that work.  If the provided URN is null,
+ * information will be given on a best-guess basis.
  */
 public interface License {
     
@@ -29,13 +36,22 @@ public interface License {
     
     /**
      * True if this license was verified and is valid & matches the given URN.
+     *
+     * If the provided URN is null, this will return true as long as atleast
+     * one work in this license is valid.  If the license provided no URNs
+     * for a work, this will also return true.  If URNs were provided for
+     * all works and a URN is given here, this will only return true if the
+     * URNs match.
      */
     public boolean isValid(URN urn);
     
     /**
      * Returns a description of this license.
+     *
+     * Retrieves the description for the particular URN.  If no URN is given,
+     * a best-guess is used to extract the correct description.
      */
-    public String getLicenseDescription();
+    public String getLicenseDescription(URN urn);
     
     /**
      * Returns a URI that the user can visit to manually verify.
@@ -44,8 +60,11 @@ public interface License {
     
     /**
      * Returns the location of the deed for this license.
+     *
+     * Retrieves the deed for the work with the given URN.  If no URN is given,
+     * a best-guess is used to extract the correct license deed.
      */
-    public URL getLicenseDeed();
+    public URL getLicenseDeed(URN urn);
     
     /**
      * Returns the license, in human readable form.
@@ -65,7 +84,7 @@ public interface License {
     public long getLastVerifiedTime();
     
     /**
-     * Returns a copy of this license with a new 'license' string.
+     * Returns a copy of this license with a new 'license' string and URI.
      */
-    public License copy(String license);
+    public License copy(String license, URI licenseURI);
 }
