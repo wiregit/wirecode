@@ -213,9 +213,9 @@ public final class UDPConnectionTest extends BaseTestCase {
             boolean sSuccess = t.getSuccess();
 
             // Validate the results
-            assertTrue("echoClient should return true ", 
+            assertTrue("unidirectionalClient should return true ", 
                 cSuccess);
-            assertTrue("echoServer should return true ", 
+            assertTrue("unidirectionalServer should return true ", 
                 sSuccess);
 
         } finally {
