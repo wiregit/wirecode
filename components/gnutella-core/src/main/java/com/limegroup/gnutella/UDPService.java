@@ -228,11 +228,11 @@ public final class UDPService implements Runnable {
                             _acceptedSolicitedIncoming = true;
                     }
                     if(message instanceof PingReply) {
-                        PingReplyHandler prh = 
-                            (PingReplyHandler)PONG_HANDLERS.get(
+                        HostListener hl = 
+                            (HostListener)PONG_HANDLERS.get(
                                 new GUID(message.getGUID()));
-                        if(prh != null) {
-                            prh.handlePingReply((PingReply)message);
+                        if(hl != null) {
+                            hl.addHost((PingReply)message);
                         }
                     }
                     router.handleUDPMessage(message, datagram);
@@ -253,8 +253,8 @@ public final class UDPService implements Runnable {
     private final Map PONG_HANDLERS = new HashMap();
     
     public void send(Message msg, InetAddress ip, int port, 
-        PingReplyHandler handler) {
-        PONG_HANDLERS.put(new GUID(msg.getGUID()), handler);
+        HostListener listener) {
+        PONG_HANDLERS.put(new GUID(msg.getGUID()), listener);
         send(msg, ip, port);
     }
     
