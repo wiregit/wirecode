@@ -328,7 +328,9 @@ public class Acceptor extends Thread {
                     throw new IOException();
                 }
                 _socket.setSoTimeout(SettingsManager.instance().getTimeout());
-                String word=readWord(in);
+                //dont read a word of size more than 8 
+                //("GNUTELLA" is the longest word we know at this time)
+                String word=IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
 
                 //1. Gnutella connection.  If the user hasn't changed the
@@ -370,28 +372,6 @@ public class Acceptor extends Thread {
                 try { _socket.close(); } catch (IOException e2) { }
             }
         }
-    }
-
-
-    /**
-     * @modifies sock
-     * @effects Returns the first word (i.e., no whitespace) of less
-     *  than 8 characters read from sock, or throws IOException if none
-     *  found.
-     */
-    private static String readWord(InputStream sock) throws IOException {
-        final int N=9;  //number of characters to look at
-        char[] buf=new char[N];
-        for (int i=0 ; i<N ; i++) {
-            int got=sock.read();
-            if (got==-1)  //EOF
-                throw new IOException();
-            if ((char)got==' ') { //got word.  Exclude space.
-                return new String(buf,0,i);
-            }
-            buf[i]=(char)got;
-        }
-        throw new IOException();
     }
 
     /** Added to fix bug where banned IP added is not effective until restart
