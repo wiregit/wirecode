@@ -23,8 +23,16 @@ public boolean processed = false;
 /**
 * The number of other nodes that this node is connected to
 */
-public int connectivity = 0;	
+private int connectivity = 0;	
 
+/**
+* Sets the connectivity of the node
+* @param connectvity the connectivity to be set 
+*/
+public setConnectivity(int connectivity)
+{
+	this.connectivity = connectivity;
+}
 
 /**
 * The comparison function (It uses the connectivity as the measure for comparison
