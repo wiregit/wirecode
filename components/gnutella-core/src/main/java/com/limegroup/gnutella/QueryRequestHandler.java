@@ -20,5 +20,6 @@ public interface QueryRequestHandler
                             ManagedConnection receivingConnection,
                             MessageRouter router,
                             ActivityCallback callback,
-                            Acceptor acceptor);
+                            Acceptor acceptor,
+                            ConnectionManager connectionManager);
 }

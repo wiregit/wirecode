@@ -183,7 +183,8 @@ public class MessageRouter
                                                   receivingConnection,
                                                   this,
                                                   _callback,
-                                                  _acceptor);
+                                                  _acceptor,
+                                                  _manager);
         }
     }
 
@@ -202,7 +203,8 @@ public class MessageRouter
                                                     receivingConnection,
                                                     this,
                                                     _callback,
-                                                    _acceptor);
+                                                    _acceptor,
+                                                    _manager)
         }
     }
 

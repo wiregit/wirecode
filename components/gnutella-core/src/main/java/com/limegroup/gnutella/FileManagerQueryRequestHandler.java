@@ -27,7 +27,8 @@ public class FileManagerQueryRequestHandler
                                    ManagedConnection receivingConnection,
                                    MessageRouter router,
                                    ActivityCallback callback,
-                                   Acceptor acceptor)
+                                   Acceptor acceptor,
+                                   ConnectionManager connectionManager)
     {
         // Reduce TTL and increment hops, then broadcast the ping
         // If the old value of TTL was 0 or 1, don't broadcast the message
