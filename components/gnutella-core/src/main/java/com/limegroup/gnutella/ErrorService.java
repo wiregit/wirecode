@@ -41,6 +41,13 @@ public final class ErrorService {
 	public static void error(Throwable problem) {
 		_errorCallback.error(problem);
 	}
+	
+	/**
+	 * Displays the error to the user with a specific detail information.
+	 */
+	public static void error(Throwable problem, String detail) {
+	    _errorCallback.error(problem, detail);
+	}
 
 
 	/**
