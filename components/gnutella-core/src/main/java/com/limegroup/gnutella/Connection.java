@@ -115,6 +115,10 @@ public class Connection implements Runnable {
     /** True iff the output thread should write the queue immediately.
      *  Synchronized by outputQueueLock. */
     private boolean flushImmediately=false;
+    /** A condition variable used to implement the flush() method.
+     *  Call notify when outputQueueLock and oldOutputQueueLock are
+     *  empty. */
+    private Object flushLock=new Object();
 
     /** Trigger an opening connection to shutdown after it opens */
     private boolean doShutdown;
@@ -328,16 +332,26 @@ public class Connection implements Runnable {
         }
     }
 
-    /** Ensures that any data queued in this is written to output as
-     *  soon as possible.  Normally, there is no need to call this
-     *  method; the output buffers are automatically flushed every few
-     *  seconds (at most).  However, it may be necessary to call this
-     *  method in situations where latencies are not tolerable, e.g.,
-     *  in the network discoverer. */
+    /** 
+     * @requires no other threads are calling send() or flush()
+     * @effects block until all queued data is written.  Normally,
+     *  there is no need to call this method; the output buffers are
+     *  automatically flushed every few seconds (at most).  However, it
+     *  may be necessary to call this method in situations where high
+     *  latencies are not tolerable, e.g., in the network
+     *  discoverer. 
+     */
     public void flush() {
         synchronized (outputQueueLock) {
             flushImmediately=true;
             outputQueueLock.notify();
+        }
+        synchronized (flushLock) {
+            while (! (outputQueue.isEmpty() && oldOutputQueue.isEmpty())) {
+                try {
+                    flushLock.wait();
+                } catch (InterruptedException e) { }
+            }
         }
     }
 
@@ -386,6 +400,11 @@ public class Connection implements Runnable {
                     out.flush();
                 } catch (IOException e) {
                     connectionClosed=true;
+                }
+                synchronized(flushLock) {
+                    //note that oldOutputQueue.isEmpty()
+                    if (outputQueue.isEmpty())
+                        flushLock.notify();
                 }
             }
         }
