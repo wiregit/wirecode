@@ -573,6 +573,12 @@ public final class UploadManager implements BandwidthTracker {
             if(u.getHost().equals(host))
                 i++;
         }
+        iter = _queuedUploads.iterator();
+        while(iter.hasNext()) { //also count uploads in queue to this host
+            Socket s = (Socket)((KeyValue)iter.next()).getKey();
+            if(s.getInetAddress().getHostAddress().equals(host))
+                i++;
+        }
         return i>=max;
 	}
 

@@ -331,8 +331,7 @@ public class UploaderTest extends TestCase {
         }
         System.out.println("passed");
     }
-
-    
+ 
     public void testSoftMax() {
         UploadManager upManager = new UploadManager(ac,mr,fm);
         SettingsManager.instance().setMaxUploads(9999);
@@ -375,6 +374,47 @@ public class UploaderTest extends TestCase {
         }
     }
     
+    /**
+     * We should count the number of uploads in progress AND the number of
+     * uploads the upload queue before deciding the upload per host limit.
+     * Tests this. 
+     */
+    public void testUploadLimtIncludesQueue() {
+        UploadManager upManager = new UploadManager(ac,mr,fm);
+        SettingsManager.instance().setMaxUploads(1);
+        SettingsManager.instance().setSoftMaxUploads(1);
+        SettingsManager.instance().setUploadsPerPerson(1);
+        SettingsManager.instance().setUploadQueueSize(10);
+        try { //first two uploads to get slots
+            HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+            connectDloader(d1,true,rfd1,true);
+            try { //queued at 1st position
+                HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
+                connectDloader(d2,true,rfd2,true);
+                fail("uploader should have been queued");
+            } catch (QueuedException qx) {
+                assertEquals(1,qx.getQueuePosition());
+            } catch (Exception e) {
+                fail("unknown exception");
+            }
+            try {
+                HTTPDownloader d3 = addUploader(upManager,rfd2,"1.1.1.2",true);
+                connectDloader(d3,true,rfd2,true);
+                fail("uploader should have been rejected ");
+            } catch (QueuedException qx) {
+                fail("uploader should have been rejected not queued ");
+            } catch (TryAgainLaterException talx) {
+                //expected behaviour
+            } catch (Exception e) {
+                fail("unknown exception");
+            }
+            System.out.println("passed");
+        } catch(Exception anyother) {
+            System.out.println("FAILED");
+            anyother.printStackTrace();
+        }
+    }
+
     /**
      * Tests that two requests for the same file on the same connection, does
      * not cause the second request to be queued.
