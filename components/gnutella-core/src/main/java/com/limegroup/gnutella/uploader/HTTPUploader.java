@@ -101,6 +101,15 @@ public class HTTPUploader implements Runnable {
 	
 	_sizeOfFile = _fdesc._size;
 
+	try {
+	    File myFile = new File(_fdesc._path);  /* _path is the full name */
+	    _fin = new BufferedReader(new FileReader(myFile));
+	}
+	
+	catch (Exception e) {
+	    _callback.error("unable to open file");
+	}
+
 	URLConnection conn;
 
 	try {
