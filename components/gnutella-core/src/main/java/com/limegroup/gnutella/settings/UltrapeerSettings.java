@@ -9,14 +9,14 @@ public final class UltrapeerSettings extends AbstractSettings {
 	 * Setting for whether or not we've ever been Ultrapeer capable.
 	 */
 	public static final BooleanSetting EVER_ULTRAPEER_CAPABLE =
-		FACTORY.createBooleanSetting("EVER_ULTRAPEER_CAPABLE", false);
+		FACTORY.createBooleanSetting("EVER_SUPERNODE_CAPABLE", false);
 
 
 	/**
 	 * Setting for whether or not to force Ultrapeer mode.
 	 */
 	public static final BooleanSetting FORCE_ULTRAPEER_MODE =
-		FACTORY.createBooleanSetting("FORCE_ULTRAPEER_MODE", false);
+		FACTORY.createBooleanSetting("FORCE_SUPERNODE_MODE", false);
 
 	/**
 	 * Setting for whether or not to disable Ultrapeer mode.
