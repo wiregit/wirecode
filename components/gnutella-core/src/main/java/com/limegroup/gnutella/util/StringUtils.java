@@ -394,5 +394,24 @@ public class StringUtils {
         return string.substring(0, max);
     }
 
+    /**
+     * Helper method to obtain the starting index of a substring within another
+     * string, ignoring their case.  This method is expensive because it has  
+     * to set each character of each string to lower case before doing the 
+     * comparison.
+     * 
+     * @param str the string in which to search for the <tt>substring</tt>
+     *  argument
+     * @param substring the substring to search for in <tt>str</tt>
+     * @return if the <tt>substring</tt> argument occurs as a substring within  
+     *  <tt>str</tt>, then the index of the first character of the first such  
+     *  substring is returned; if it does not occur as a substring, -1 is 
+     *  returned
+     */
+    public static int indexOfIgnoreCase(String str, String substring) {
+    	// Look for the index after the expensive conversion to lower case.
+    	return str.toLowerCase().indexOf(substring.toLowerCase());
+    }
+
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
 }
