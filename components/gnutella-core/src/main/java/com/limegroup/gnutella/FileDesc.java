@@ -90,6 +90,6 @@ public final class FileDesc {
     public static final boolean isGMLDocumentUnderstandable(
         GMLDocument gmlDocument)
     {
-        return ID3Tag.isGMLDocumentUnderstandable(dmlDocument);
+        return ID3Tag.isGMLDocumentUnderstandable(gmlDocument);
     }
 }
