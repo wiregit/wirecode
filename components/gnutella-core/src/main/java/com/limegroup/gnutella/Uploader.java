@@ -34,6 +34,11 @@ public interface Uploader extends BandwidthTracker {
 	 * returns the length of the file being uploaded.
 	 */ 
 	public int getFileSize();
+	
+	/**
+	 * returns the length of the requested size for uploading
+	 */ 
+	public int getAmountRequested();	
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
@@ -81,6 +86,7 @@ public interface Uploader extends BandwidthTracker {
 	 */
 	public boolean chatEnabled();
 	
+	
 	/**
 	 * return the host address of the host to chat with
 	 */
@@ -90,5 +96,15 @@ public interface Uploader extends BandwidthTracker {
 	 * return the port of the host to chat with
 	 */
 	public int getChatPort();
+	
+	/** 
+	 * return the userAgent
+	 */
+	public String getUserAgent();
+	
+	/** 
+	 * return whether or not the headers have been parsed
+	 */
+	public boolean isHeaderParsed();
 }
 
