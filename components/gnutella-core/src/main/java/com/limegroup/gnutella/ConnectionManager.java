@@ -50,6 +50,17 @@ public class ConnectionManager {
         new ArrayList();
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
+    /**
+     * List of connections to the shielded clients.
+     * INVARIANTS: 
+     * 1. _initializedConnections {intersection} _initializedClientConnections
+     * = NULL
+     * <p>
+     * 2. _connections is a superset of _initializedClientConnections
+     * 3. {Connection}.isClientConection == true iff its a client connection
+     */
+    private volatile List /* of ManagedConnection */ 
+        _initializedClientConnections = new ArrayList();
 
     /** 
      * The number of connections to keep up.  Initially we will try _keepAlive
@@ -69,6 +80,7 @@ public class ConnectionManager {
      *
      *  LOCKING: obtain _incomingConnectionLock */
     private volatile int _incomingConnections=0;
+    private volatile int _incomingClientConnections = 0;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
 
@@ -173,60 +185,64 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         //Atomically decide whether to accept connection.  Release lock
-         //before actually managing the connection.
-         boolean allowConnection=false;
-         synchronized (_incomingConnectionsLock) {
-             if (_incomingConnections < _keepAlive) {
-                 //Yes, we'll allow it.  Increment the incoming count NOW even
-                 //before this connection is processed.  The value will be
-                 //decremented in the finally clause below.
-                 _incomingConnections++;
-                 allowConnection=true;
-             }
+         //TODO2: We need to re-enable the reject connection mechanism.  The
+         //catch is that you don't know whether to reject for sure until you've
+         //handshaked.  Basically RejectConnection is no longer sufficient, so I
+         //propose eliminating it; just use a normal ManagedConnection but don't
+         //add it to list of connections, and don't add it to gui.  This
+         //requires some refactoring of that damn initialization code.
+         
+         //1. Initialize connection.  It's always safe to recommend new headers.
+         ManagedConnection connection=null;
+         try {
+             connection = new ManagedConnection(socket, _router, this);
+             initializeExternallyGeneratedConnection(connection);
+         } catch (IOException e) {
+             return;
          }
          
-         if (allowConnection) {
-             //a) Handle normal connection (blocking).
-             ManagedConnection connection = new ManagedConnection(
-                 socket, _router, this);
-             try {                     
-                 initializeExternallyGeneratedConnection(connection);
+         //2. Check if it is a client connection, and decide whether to keep.
+         boolean isClientConnection = Boolean.getBoolean(
+            connection.getHeaders().getProperty(
+            ConnectionHandshakeHeaders.SUPERNODE, "False"));
+            
+         //set the flag in the connection, so that we can know from the 
+         //connection itself whether the connection is to a shielded client
+         connection.setClientConnectionFlag(isClientConnection);
+         
+         //update the connection count
+         try {   
+             synchronized (_incomingConnectionsLock) {
+                 if(isClientConnection)
+                     _incomingClientConnections++;
+                 else
+                     _incomingConnections++;
+             }                  
+
+             //a) Not needed: kill.  TODO: reject as described above.
+             if((isClientConnection &&
+                (_incomingClientConnections > 
+                SettingsManager.instance().getMaxShieldedClientConnections()))
+                || (!isClientConnection && 
+                (_incomingConnections > _keepAlive))) {
+                    synchronized(this){
+                        removeInternal(connection);
+             }
+             }else {                     
                  sendInitialPingRequest(connection);
                  connection.loopForMessages();
-             } catch(IOException e) {
-             } catch(Exception e) {
-                 //Internal error!
-                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-             } finally {
-                 synchronized (_incomingConnectionsLock) {
-                     _incomingConnections--;
-                 }
              }
-         } else {
-             //b) Handle reject connection if not on a Mac with OS 9.1 or below.  
-			 //The constructor does the whole deal -- intializing, looking for 
-			 //and responding to a PingRequest.  It's all synchronous, because 
-			 //we have a dedicated thread right here.
-			if(!CommonUtils.isMacClassic()) {
-				new RejectConnection(socket, _catcher);
-			}
-            
-			// Otherwise, we're not on windows.  We did this 
-			// because we know that RejectConnection was causing
-			// problems on the Mac (periodically freezing the
-			// system and leading to a 40% approval rating on
-			// download.com), and we have not been able to test
-			// it on other systems.  Since we know that not using
-			// a reject connection will not cause a problem, then
-			// we might as well just be safe and not use one on 
-			// non-windows systems.
-			else {
-				try {
-					socket.close();
-				}
-				catch(IOException ioe) {}
-			}
+         } catch(IOException e) {
+         } catch(Exception e) {
+             //Internal error!
+             _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+         } finally {
+             synchronized (_incomingConnectionsLock) {
+                 if(isClientConnection)
+                     _incomingClientConnections--;
+                 else
+                     _incomingConnections--;
+             }
          }
      }
 
@@ -319,6 +335,18 @@ public class ConnectionManager {
         clone.addAll(_initializedConnections);
         return clone;
     }
+    
+    /**
+     * @return a clone of this' initialized connections to shielded-clients.
+     * The iterator yields items in any order.  It <i>is</i> permissible
+     * to modify this while iterating through the elements of this, but
+     * the modifications will not be visible during the iteration.
+     */
+    public List getInitializedClientConnections() {
+        List clone=new ArrayList();
+        clone.addAll(_initializedClientConnections);
+        return clone;
+    }
 
     /**
      * @requires returned value not modified
@@ -363,11 +391,21 @@ public class ConnectionManager {
      */
     private void connectionInitialized(Connection c) {
         if(_connections.contains(c)) {
-            //REPLACE _initializedConnections with the list
-            //_initializedConnections+[c]
-            List newConnections=new ArrayList(_initializedConnections);
-            newConnections.add(c);
-            _initializedConnections=newConnections;
+            //update the appropriate list of connections
+            if(!c.isClientConnection()){
+                //REPLACE _initializedConnections with the list
+                //_initializedConnections+[c]
+                List newConnections=new ArrayList(_initializedConnections);
+                newConnections.add(c);
+                _initializedConnections=newConnections;
+            }else{
+                //REPLACE _initializedClientConnections with the list
+                //_initializedClientConnections+[c]
+                List newConnections
+                    =new ArrayList(_initializedClientConnections);
+                newConnections.add(c);
+                _initializedClientConnections=newConnections;
+            }
 
             //REPLACE _endpoints with the set _endpoints+{c}
             Set newEndpoints=new HashSet(_endpoints);
@@ -458,15 +496,36 @@ public class ConnectionManager {
         // stuff associated with initialized connections.  For efficiency 
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
-        int i=_initializedConnections.indexOf(c);
-        if (i != -1) {
-            //REPLACE _initializedConnections with the list
-            //_initializedConnections-[c]
-            List newConnections=new ArrayList();
-            newConnections.addAll(_initializedConnections);
-            newConnections.remove(c);
-            _initializedConnections=newConnections;
-
+        boolean removed = false;
+        if(!c.isClientConnection()){
+            int i=_initializedConnections.indexOf(c);
+            if (i != -1) {
+                removed = true;
+                //REPLACE _initializedConnections with the list
+                //_initializedConnections-[c]
+                List newConnections=new ArrayList();
+                newConnections.addAll(_initializedConnections);
+                newConnections.remove(c);
+                _initializedConnections=newConnections;
+            }
+        }else{
+            //check in _initializedClientConnections
+            int i=_initializedClientConnections.indexOf(c);
+            if (i != -1) {
+                removed = true;
+                //REPLACE _initializedClientConnections with the list
+                //_initializedClientConnections-[c]
+                List newConnections=new ArrayList();
+                newConnections.addAll(_initializedClientConnections);
+                newConnections.remove(c);
+                _initializedClientConnections=newConnections;
+            }
+        }
+        
+        //if connection was removed from any of the initialized lists of
+        //connections, remove from the set of connected endpoints too.
+        if(removed)
+        {
             //REPLACE _endpoints with the set _endpoints+{c}
             Set newEndpoints=new HashSet();
             newEndpoints.addAll(_endpoints);
@@ -474,9 +533,10 @@ public class ConnectionManager {
                 c.getInetAddress().getHostAddress(), c.getPort()));
             _endpoints=newEndpoints;           
         }
+        
         // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections
-        i=_connections.indexOf(c);
+        int i=_connections.indexOf(c);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
             List newConnections=new ArrayList(_connections);
