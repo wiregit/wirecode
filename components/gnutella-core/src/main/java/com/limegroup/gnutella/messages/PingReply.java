@@ -16,14 +16,62 @@ public class PingReply extends Message implements Serializable {
     
     /** All the data.  We extract the port, ip address, number of files,
      *  and number of kilobytes lazily. */
-    private byte[] payload;
+    private final byte[] PAYLOAD;
+
     /** The IP string as extracted from payload[2..5].  Cached to avoid
      *  allocations.  LOCKING: obtain this' monitor. */
-    private volatile String ip;
-    /** The GGEP block from payload[14...].  Cached to avoid allocations.  Null
-     *  if the GGEP data has not been parsed, this has no GGEP data, or the GGEP
-     *  data is corrupt.  LOCKING: obtain this' monitor. */
-    private volatile GGEP ggep;
+    private final String IP;
+
+    /**
+     * Constant for the port number of this pong.
+     */
+    private final int PORT;
+
+    /**
+     * Constant for the number of shared files reported in the pong.
+     */
+    private final long FILES;
+
+    /**
+     * Constant for the number of shared kilobytes reported in the pong.
+     */
+    private final long KILOBYTES;
+
+    /**
+     * Constant int for the daily average uptime.
+     */
+    private final int DAILY_UPTIME;
+
+    /**
+     * Constant for whether or not the remote node supports unicast.
+     */
+    private final boolean SUPPORTS_UNICAST;
+
+    /**
+     * Constant for the vendor of the remote host.
+     */
+    private final String VENDOR;
+
+    /**
+     * Constant for the major version number reported in the vendor block.
+     */
+    private final int VENDOR_MAJOR_VERSION;
+
+    /**
+     * Constant for the minor version number reported in the vendor block.
+     */
+    private final int VENDOR_MINOR_VERSION;
+
+    /**
+     * Constant for the query key reported for the pong.
+     */
+    private final QueryKey QUERY_KEY;
+
+    /**
+     * Constant boolean for whether or not this pong contains any GGEP
+     * extensions.
+     */
+    private final boolean HAS_GGEP_EXTENSION;
 
     /**
      * Creates a new ping from scratch.
@@ -39,8 +87,8 @@ public class PingReply extends Message implements Serializable {
      * @param kbytes the total size of all files I'm sharing, in kilobytes.
      *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
      */
-    public PingReply(byte[] guid, byte ttl,
-             int port, byte[] ip, long files, long kbytes) {
+    public PingReply(byte[] guid, byte ttl, int port, byte[] ip, long files, 
+                     long kbytes) {
         this(guid, ttl, port, ip, files, kbytes, false);
     }
 
@@ -61,8 +109,8 @@ public class PingReply extends Message implements Serializable {
      *  which sets kbytes to the nearest power of 2 not less than 8.
      */
     public PingReply(byte[] guid, byte ttl,
-             int port, byte[] ip, long files, long kbytes, 
-             boolean isUltrapeer) { 
+                     int port, byte[] ip, long files, long kbytes, 
+                     boolean isUltrapeer) { 
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1, false);
     }
 
@@ -118,6 +166,113 @@ public class PingReply extends Message implements Serializable {
              qkGGEP(queryKey));
     }
 
+    /** Internal constructor used to bind the encoded GGEP payload, avoiding the
+     *  need to construct it more than once.  
+     *  @param extension the encoded GGEP payload, or null if none */
+    private PingReply(byte[] guid, byte ttl, int port, byte[] ip, long files, 
+                      long kbytes, boolean isUltrapeer, byte[] extensions) {
+        super(guid, Message.F_PING_REPLY, ttl, (byte)0, 
+            STANDARD_PAYLOAD_SIZE + (extensions==null ? 0 : extensions.length));
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);
+        
+        PAYLOAD = new byte[getLength()];
+        //It's ok if casting port, files, or kbytes turns negative.
+        ByteOrder.short2leb((short)port, PAYLOAD, 0);
+        //Payload stores IP in BIG-ENDIAN
+        PAYLOAD[2]=ip[0];
+        PAYLOAD[3]=ip[1];
+        PAYLOAD[4]=ip[2];
+        PAYLOAD[5]=ip[3];
+        ByteOrder.int2leb((int)files, PAYLOAD, 6);
+        ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), 
+                          PAYLOAD, 
+                          10);
+        
+        //Encode GGEP block if included.
+        if (extensions!=null) {
+            System.arraycopy(extensions, 0, 
+                             PAYLOAD, STANDARD_PAYLOAD_SIZE, 
+                             extensions.length);
+        }            
+
+        PORT = port;//ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
+        FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
+        KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
+
+        // IP is big-endian
+        IP = ip2string(PAYLOAD, 2);
+
+        // GGEP parsing
+        GGEP ggep = parseGGEP();
+        int dailyUptime = -1;
+        boolean supportsUnicast = false;
+        String vendor = "";
+        int vendorMajor = -1;
+        int vendorMinor = -1;
+        QueryKey key = null;
+        if(ggep != null) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
+                try {
+                    dailyUptime = 
+                        ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
+                } catch(BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+            }
+
+            supportsUnicast = 
+                ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
+
+            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
+                try {
+                    vendor = 
+                        new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
+                                   0, 4);   
+                } catch(BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                    vendorMajor = (bytes[4] >> 4);
+                } catch (BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                    vendorMinor = (bytes[4] & 15);
+                }
+                catch (BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+             }
+
+            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                try {
+                    byte[] bytes = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                    key = QueryKey.getQueryKey(bytes, false);
+                }
+                catch (IllegalArgumentException malformedQueryKey) { 
+                    // simply don't assign it
+                }
+                catch (BadGGEPPropertyException corrupt) { 
+                    // simply don't assign it
+                }
+            }
+        }
+
+        HAS_GGEP_EXTENSION = ggep != null;
+        DAILY_UPTIME = dailyUptime;
+        SUPPORTS_UNICAST = supportsUnicast;
+        VENDOR = vendor;
+        VENDOR_MAJOR_VERSION = vendorMajor;
+        VENDOR_MINOR_VERSION = vendorMinor;
+        QUERY_KEY = key;
+
+    }
+
     /**
      * Wrap a PingReply around stuff snatched from the network.
      * <p>
@@ -126,44 +281,90 @@ public class PingReply extends Message implements Serializable {
      *
      * @exception BadPacketException payload is too small
      */
-    public PingReply(byte[] guid, byte ttl, byte hops,
-             byte[] payload) throws BadPacketException {
+    public PingReply(byte[] guid, byte ttl, byte hops, byte[] payload) 
+        throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         if (payload.length<STANDARD_PAYLOAD_SIZE)
-            throw new BadPacketException();
-        this.payload=payload;
+            throw new BadPacketException("invalid payload length");
+        this.PAYLOAD=payload;
+        PORT = ByteOrder.ubytes2int(ByteOrder.leb2short(PAYLOAD,0));
+        FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
+        KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
  		if(!CommonUtils.isValidPort(getPort()))
-			throw new BadPacketException("invalid port");
+			throw new BadPacketException("invalid port: "+PORT);
+
+        // IP is big-endian
+        IP = ip2string(PAYLOAD, 2);
+
+        // GGEP parsing
+        GGEP ggep = parseGGEP();
+        int dailyUptime = -1;
+        boolean supportsUnicast = false;
+        String vendor = "";
+        int vendorMajor = -1;
+        int vendorMinor = -1;
+        QueryKey key = null;
+        if(ggep != null) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
+                try {
+                    dailyUptime = 
+                        ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
+                } catch(BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+            }
+
+            supportsUnicast = 
+                ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
+
+            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
+                try {
+                    vendor = 
+                        new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
+                                   0, 4);   
+                } catch(BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                    vendorMajor = (bytes[4] >> 4);
+                } catch (BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                    vendorMinor = (bytes[4] & 15);
+                }
+                catch (BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+             }
+
+            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                try {
+                    byte[] bytes = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                    key = QueryKey.getQueryKey(bytes, false);
+                }
+                catch (IllegalArgumentException malformedQueryKey) { 
+                    // simply don't assign it
+                }
+                catch (BadGGEPPropertyException corrupt) { 
+                    // simply don't assign it
+                }
+            }
+        }
+
+        HAS_GGEP_EXTENSION = ggep != null;
+        DAILY_UPTIME = dailyUptime;
+        SUPPORTS_UNICAST = supportsUnicast;
+        VENDOR = vendor;
+        VENDOR_MAJOR_VERSION = vendorMajor;
+        VENDOR_MINOR_VERSION = vendorMinor;
+        QUERY_KEY = key;
     }
      
-    /** Internal constructor used to bind the encoded GGEP payload, avoiding the
-     *  need to construct it more than once.  
-     *  @param extension the encoded GGEP payload, or null if none */
-    private PingReply(byte[] guid, byte ttl, 
-             int port, byte[] ip, long files, long kbytes,
-             boolean isUltrapeer, byte[] extensions) {    
-        super(guid, Message.F_PING_REPLY, ttl, (byte)0, 
-            STANDARD_PAYLOAD_SIZE + (extensions==null ? 0 : extensions.length));
-        this.payload=new byte[getLength()];
-        //It's ok if casting port, files, or kbytes turns negative.
-        ByteOrder.short2leb((short)port, payload, 0);
-        //Payload stores IP in BIG-ENDIAN
-        payload[2]=ip[0];
-        payload[3]=ip[1];
-        payload[4]=ip[2];
-        payload[5]=ip[3];
-        ByteOrder.int2leb((int)files, payload, 6);
-        ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), 
-                          payload, 
-                          10);
-        
-        //Encode GGEP block if included.
-        if (extensions!=null) {
-            System.arraycopy(extensions, 0, 
-                             payload, STANDARD_PAYLOAD_SIZE, 
-                             extensions.length);
-        }            
-    }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
     private static byte[] newGGEP(int dailyUptime, boolean isUltrapeer,
@@ -270,180 +471,158 @@ public class PingReply extends Message implements Serializable {
 
 
     protected void writePayload(OutputStream out) throws IOException {
-        out.write(payload);
+        out.write(PAYLOAD);
 		if(RECORD_STATS) {
 			SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
 		}
     }
 
-    public String toString() {
-        return "PingReply("+getIP()+":"+getPort()
-            +", "+super.toString()+")";
-    }
-
+    /**
+     * Accessor for the port reported in this pong.
+     *
+     * @return the port number reported in the pong
+     */
     public int getPort() {
-        return  ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
+        return PORT;
     }
 
     /**
      * Returns the ip field in standard dotted decimal format, e.g.,
      * "127.0.0.1".  The most significant byte is written first.
      */
-    public synchronized String getIP() {        
-        //Despite some incorrect early documentation, payload really is
-        //big-endian.
-        if (ip==null)
-            ip=ip2string(payload, 2);
-        return ip;
+    public String getIP() { 
+        return IP;
     }
 
-     /**
+    /**
      * Returns the ip address bytes (MSB first)
      */
     public byte[] getIPBytes() {
         byte[] ip=new byte[4];
-        ip[0]=payload[2];
-        ip[1]=payload[3];
-        ip[2]=payload[4];
-        ip[3]=payload[5];
+        ip[0]=PAYLOAD[2];
+        ip[1]=PAYLOAD[3];
+        ip[2]=PAYLOAD[4];
+        ip[3]=PAYLOAD[5];
         
         return ip;
     }
     
+    /**
+     * Accessor for the number of files shared, as reported in the
+     * pong.
+     *
+     * @return the number of files reported shared
+     */
     public long getFiles() {
-        return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,6));
+        return FILES;
     }
 
+    /**
+     * Accessor for the number of kilobytes shared, as reported in the
+     * pong.
+     *
+     * @return the number of kilobytes reported shared
+     */
     public long getKbytes() {
-        return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,10));
+        return KILOBYTES;
     }
 
     /** Returns the average daily uptime in seconds from the GGEP payload.
-     *  @exception BadPacketException if the uptime is not known or corrupt. */
-    public synchronized int getDailyUptime() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        try {
-            return ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME);
-        } catch (BadGGEPPropertyException e) {
-            throw new BadPacketException("Couldn't find uptime extension.");
-        }
+     *  If the pong did not report a daily uptime, returns -1.
+     *
+     * @return the daily uptime reported in the pong, or -1 if the uptime
+     *  was not present or could not be read
+     */
+    public int getDailyUptime() {
+        return DAILY_UPTIME;
     }
 
 
-    /** Returns the average daily uptime in seconds from the GGEP payload.
-     *  @exception BadPacketException if the uptime is not known or corrupt. */
-    public synchronized boolean supportsUnicast() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        return ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+    /** Returns whether or not this host support unicast, GUESS-style
+     *  queries.
+     *
+     * @return <tt>true</tt> if this host does support GUESS-style queries,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean supportsUnicast() {
+        return SUPPORTS_UNICAST;
     }
 
 
     /** Returns the 4-character vendor string associated with this Pong.
-     *  @exception BadPacketException if the vendor is not known or corrupt.
+     *
+     * @return the 4-character vendor code reported in the pong, or the
+     *  empty string if no vendor code was successfully read
      */
-    public synchronized String getVendor() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        try {
-            return new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
-                              0, 4);
-        }
-        catch (BadGGEPPropertyException corrupt) {
-            throw new BadPacketException("Corrupt GGEP block");
-        }
+    public String getVendor() {
+        return VENDOR;
     }
 
 
-    /** Returns the Major Version number of this pong.
-     *  @exception BadPacketException if the version is not known or corrupt.
+    /** Returns the major version number of the vendor returning this pong.
+     * 
+     * @return the major version number of the vendor returning this pong,
+     *  or -1 if the version could not be read
      */
-    public synchronized int getVendorMajorVersion() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        try {
-            byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-            return (bytes[4] >> 4);
-        }
-        catch (BadGGEPPropertyException corrupt) {
-            throw new BadPacketException("Corrupt GGEP block");
-        }
+    public int getVendorMajorVersion() {
+        return VENDOR_MAJOR_VERSION;
     }
 
-    /** Returns the Minor Version number of this pong.
-     *  @exception BadPacketException if the version is not known or corrupt.
+    /** Returns the minor version number of the vendor returning this pong.
+     * 
+     * @return the minor version number of the vendor returning this pong,
+     *  or -1 if the version could not be read
      */
-    public synchronized int getVendorMinorVersion() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        try {
-            byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-            return (bytes[4] & 15);
-        }
-        catch (BadGGEPPropertyException corrupt) {
-            throw new BadPacketException("Corrupt GGEP block");
-        }
+    public int getVendorMinorVersion() {
+        return VENDOR_MINOR_VERSION;
     }
 
 
     /** Returns the QueryKey (if any) associated with this pong.  May be null!
-     *  @exception BadPacketException if the version is not known or corrupt.
+     *
+     * @return the <tt>QueryKey</tt> for this pong, or <tt>null</tt> if no
+     *  key was specified
      */
-    public synchronized QueryKey getQueryKey() throws BadPacketException {
-        parseGGEP();
-        if (ggep==null)
-            throw new BadPacketException("Missing GGEP block");
-        try {
-            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                byte[] bytes = 
-                    ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                return QueryKey.getQueryKey(bytes, false);
-            }
-        }
-        catch (IllegalArgumentException malformedQueryKey) {
-            throw new BadPacketException("Malformed Query Key");
-        }
-        catch (BadGGEPPropertyException corrupt) {
-            throw new BadPacketException("Corrupt GGEP block");
-        }
-        return null;
+    public QueryKey getQueryKey() {
+        return QUERY_KEY;
     }
 
 
-
-    public synchronized boolean hasGGEPExtension() {
-        parseGGEP();
-        return ggep!=null;
+    /**
+     * Returns whether or not this pong has a GGEP extension.
+     *
+     * @return <tt>true</tt> if the pong has a GGEP extension, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean hasGGEPExtension() {
+        return HAS_GGEP_EXTENSION;
     }
     
     // TODO : change this to look for multiple GGEP block in the payload....
     /** Ensure GGEP data parsed...if possible. */
-    private synchronized void parseGGEP() {
-        //Return if we've already parsed the data or this is a plain pong
-        //without space for GGEP.  If this has bad GGEP data, multiple calls to
+    private GGEP parseGGEP() {
+        //Return if this is a plain pong without space for GGEP.  If 
+        //this has bad GGEP data, multiple calls to
         //parseGGEP will result in multiple parse attempts.  While this is
         //inefficient, it is sufficiently rare to not justify a parsedGGEP
         //variable.
-        if (ggep!=null || getLength()<=STANDARD_PAYLOAD_SIZE)
-            return;
+        if (getLength()<=STANDARD_PAYLOAD_SIZE)
+            return null;
     
         try {
-            ggep=new GGEP(payload, STANDARD_PAYLOAD_SIZE, null);
-        } catch (BadGGEPBlockException e) { }
+            return new GGEP(PAYLOAD, STANDARD_PAYLOAD_SIZE, null);
+        } catch (BadGGEPBlockException e) { 
+            return null;
+        }
     }
 
+    // inherit doc comment from message superclass
     public Message stripExtendedPayload() {
         //TODO: if this is too slow, we can alias parts of this, as as the
         //payload.  In fact we could even return a subclass of PingReply that
         //simply delegates to this.
         byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
-        System.arraycopy(payload, 0,
+        System.arraycopy(PAYLOAD, 0,
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
         try {
@@ -462,8 +641,8 @@ public class PingReply extends Message implements Serializable {
      *  supernode. */
     public boolean isMarked() {
         //Returns true if kb is a power of two greater than or equal to eight.
-        long kb=getKbytes();
-        if (kb<8)
+        long kb = getKbytes();
+        if (kb < 8)
             return false;
         return isPowerOf2(ByteOrder.long2int(kb));
     }
@@ -552,6 +731,12 @@ public class PingReply extends Message implements Serializable {
             return 536870912; //1<<29
         else 
             return 1073741824; //1<<30
+    }
+
+    // overrides Object.toString
+    public String toString() {
+        return "PingReply("+getIP()+":"+getPort()
+            +", "+super.toString()+")";
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
