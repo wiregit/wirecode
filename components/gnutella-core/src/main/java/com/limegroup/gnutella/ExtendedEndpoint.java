@@ -347,7 +347,7 @@ public class ExtendedEndpoint extends Endpoint {
         String host;
         int port;
         try {
-            Endpoint tmp=new Endpoint(linea[0], true);
+            Endpoint tmp=new Endpoint(linea[0], false); // do not require numeric
             host=tmp.getAddress();
             port=tmp.getPort();
         } catch (IllegalArgumentException e) {

@@ -233,10 +233,12 @@ public class UDPHostCache {
         if(udpHosts.size() >= PERMANENT_SIZE) {
             Object removed = udpHosts.remove(udpHosts.size() - 1);
             udpHostsSet.remove(removed);
+            if(LOG.isTraceEnabled())
+                LOG.trace("Ejected: " + removed);
         }
         
-        // just insert him at the beginning.  we'll sort later.
-        udpHosts.add(0, e);
+        // just insert.  we'll sort later.
+        udpHosts.add(e);
         udpHostsSet.add(e);
         dirty = true;
         return true;
@@ -286,9 +288,28 @@ public class UDPHostCache {
         /**
          * Constructs a new HostExpirer for the specified hosts.
          */
-        public HostExpirer(Collection hosts) {
-            this.hosts.addAll(hosts);
-            allHosts = new HashSet(hosts);
+        public HostExpirer(Collection hostsToAdd) {
+            hosts.addAll(hostsToAdd);
+            allHosts = new HashSet(hostsToAdd);
+            removeDuplicates(hostsToAdd, hosts);
+        }
+        
+        /**
+         * Removes any hosts that exist in 'all' but not in 'some'.
+         */
+        private void removeDuplicates(Collection all, Collection some) {
+            // Iterate through what's in our collection vs whats in our set.
+            // If any entries exist in the collection but not in the set,
+            // then that means they resolved to the same address.
+            // Automatically eject entries that resolve to the same address.
+            Set duplicates = new HashSet(all);
+            duplicates.removeAll(some); // remove any hosts we're keeping.
+            for(Iterator i = duplicates.iterator(); i.hasNext(); ) {
+                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Removing duplicate entry: " + ep);
+                remove(ep);
+            }
         }
         
         /**

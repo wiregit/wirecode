@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.StringWriter;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.text.ParseException;
 
 import junit.framework.Test;
 
@@ -205,6 +206,28 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         writer = new StringWriter();
         e.write(writer);
         assertEquals("1.3.4.5:6348,,1097611864117,,,en,\n", writer.toString());
+        
+        e = ExtendedEndpoint.read("www.limewire.org:6346,,,,,en,0");
+        assertTrue(e.isUDPHostCache());
+        assertEquals(0, e.getUDPHostCacheFailures());
+    }
+    
+    public void testReadingStuff() throws Exception {
+        ExtendedEndpoint.read("1.2.3.4:6346");
+        ExtendedEndpoint.read("1.2.3.4");
+        ExtendedEndpoint.read("www.limewire.org");
+        try {
+            ExtendedEndpoint.read("<html>1.2.3.4");
+            fail("read");
+        } catch(ParseException pe) {}
+        try {
+            ExtendedEndpoint.read("nothing.nowhere");
+            fail("read");
+        } catch(ParseException pe) {}
+        try {
+            ExtendedEndpoint.read("1.3.nothing.4");
+            fail("read");
+        } catch(ParseException pe) {}
     }
     
     /////////////////////////// Comparators //////////////////////////////
