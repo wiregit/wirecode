@@ -279,15 +279,16 @@ public class QueryReply extends Message implements Serializable{
 
             //c) PART 1: common area flags and controls.  See format in
             //parseResults2.
-            payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
+            payload[i++]=(byte)(
+                (needsPush && !isMulticastReply ? PUSH_MASK : 0) 
                 | BUSY_MASK 
                 | UPLOADED_MASK 
                 | SPEED_MASK
                 | GGEP_MASK);
             payload[i++]=(byte)(PUSH_MASK
-                | (isBusy ? BUSY_MASK : 0) 
+                | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
-                | (measuredSpeed ? SPEED_MASK : 0)
+                | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
                 | (supportsBH || isMulticastReply ? 
                    GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
 

@@ -396,13 +396,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(!qr.isReplyToMulticastQuery());
 
         //Create extended QHD from scratch with different bits set
+        // Do not set multicast, as that will unset pushing, busy, etc..
+        // and generally confuse the test.
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
         responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          true, false, false, true, false, true);
+                          true, false, false, true, false, false);
 
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -411,19 +413,22 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(qr.getIsMeasuredSpeed());
         assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(qr.isReplyToMulticastQuery());
+        assertFalse(qr.isReplyToMulticastQuery());
 
         //And check raw bytes....
         out=new ByteArrayOutputStream();
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, true).length;
+        ggepLen = _ggepUtil.getQRGGEP(true, false).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
-        assertEquals(bytes.length,(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen);
-        assertEquals(bytes[bytes.length-16-6-ggepLen],0x3d); //11101
-        assertEquals(bytes[bytes.length-16-5-ggepLen],0x31); //10001
+        assertEquals(
+            (23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen,
+            bytes.length
+        );
+        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
+        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
         qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
@@ -434,7 +439,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(qr.getIsMeasuredSpeed());
         assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
-        assertTrue(qr.isReplyToMulticastQuery());
+        assertFalse(qr.isReplyToMulticastQuery());
 
         //Create from scratch with no bits set
         responses=new Response[2];

@@ -8,6 +8,7 @@ import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -381,7 +382,8 @@ public abstract class MessageRouter {
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
 		
-        if (NetworkUtils.isLocalAddress(address))
+        if (NetworkUtils.isLocalAddress(address) &&
+          !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
             return;
 		
 		ReplyHandler handler = new UDPReplyHandler(address, port);
@@ -1435,8 +1437,6 @@ public abstract class MessageRouter {
 
             ReplyHandler rh = rrp.getReplyHandler();
 
-			// TODO: What happens if we get a TTL=0 query that's not intended
-			// for us?  At first glance, it looks like we keep forwarding it!
             if(!shouldDropReply(rrp, queryReply.getTTL()) ||
 			   rh == FOR_ME_REPLY_HANDLER) {
                 
@@ -1482,13 +1482,12 @@ public abstract class MessageRouter {
         // drop the reply if we've already sent more than the specified number
         // of results for this GUID
         if(resultsRouted > 100) return true;
+        // drop the reply if the ttl is 0.
+        if(ttl == 0) return true;
 
         int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
         if(ttl > 2 && bytesRouted < 50    * 1024) return false;
-        // send replies with ttl 0 if we've routed under 50K, as this 
-		// shouldn't happen 
-        if(ttl == 0 && bytesRouted < 50   * 1024) return false;
         // send replies with ttl 1 if we've routed under 1000K 
         if(ttl == 1 && bytesRouted < 200 * 1024) return false;
         // send replies with ttl 2 if we've routed under 333K 
@@ -1555,7 +1554,7 @@ public abstract class MessageRouter {
      */
     protected void sendQueryReply(QueryRequest query, QueryReply queryReply)
         throws IOException {
- 
+        
         if(queryReply == null) {
             throw new NullPointerException("null reply");
         }
@@ -1574,7 +1573,6 @@ public abstract class MessageRouter {
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        FOR_ME_REPLY_HANDLER);
-            
             rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else

@@ -72,6 +72,12 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final IntSetting MULTICAST_PORT =
         FACTORY.createIntSetting("MULTICAST_PORT", 6347);
+        
+	/**
+     * Setting for whether or not to allow multicast message loopback.
+     */
+    public static final BooleanSetting ALLOW_MULTICAST_LOOPBACK =
+        FACTORY.createBooleanSetting("ALLOW_MULTICAST_LOOPBACK", false);
 
 	/**
 	 * Setting for whether or not to use connection preferencing -- used
