@@ -651,7 +651,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(allFiles[0].getSHA1Urn() == null) {
 			return QueryRequest.createQuery(extractQueryString());
 		}
-		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
+        return QueryRequest.createQuery(extractQueryString());
     }
 
     /** We need to offer this to subclasses to override because they might
