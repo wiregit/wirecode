@@ -88,7 +88,7 @@ public class GUID /* implements Comparable */ {
 		str = "0" + str;
 	    buf.append( str );	  
 	}
-	return buf.toString();
+	return buf.toString().toUpperCase();
     }
 
 
@@ -140,7 +140,7 @@ public class GUID /* implements Comparable */ {
 //  	Assert.that(out!=null, "Null test 2");
 //  	Assert.that(out.equals("test"), "Get test 2");
 
-//  	String hexString="ff010a00000000000000000000000001";
+//  	String hexString="FF010A00000000000000000000000001";
 //  	byte[] bytes=new byte[16];
 //  	bytes[0]=(byte)255;
 //  	bytes[1]=(byte)1;
