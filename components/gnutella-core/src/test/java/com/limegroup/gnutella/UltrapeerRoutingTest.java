@@ -581,6 +581,94 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
     }
 
+
+    //
+    private void addI18NToQRT() throws Exception {
+        QueryRouteTable qrt = new QueryRouteTable();
+        qrt.add("\u4f5c\u540d");
+        qrt.add("g\u00E9\u00E9whiz"); //gee(e with acute)whiz
+        qrt.add("\u4e3b\u6f14");
+        
+        for(Iterator iter=qrt.encode(null).iterator(); iter.hasNext();) {
+            LEAF.send((RouteTableMessage)iter.next());
+            LEAF.flush();
+        }
+
+        qrt = new QueryRouteTable();
+        qrt.add("h\u00E8llo"); //he(e with grave)llo
+        qrt.add("geewhiz");
+        qrt.add("\u30b9\u30bf\u30b8\u30aa");
+
+        for(Iterator iter=qrt.encode(null).iterator(); iter.hasNext();) {
+            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+            ULTRAPEER_1.flush();
+        }
+        
+        sleep();
+        drainAll();
+        drainAll();
+        sleep();
+        drainAll();
+
+    }
+
+    //
+    public void testI18NRouting() throws Exception {
+        addI18NToQRT();
+        QueryRequest qr = QueryRequest.createQuery("hello", (byte)2);
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+        
+        //ultrapeer1 should get a query for hello since "h\u00e8llo" should
+        //have the \u00e8 converted to an "e" when added to qrt for routing
+        Message m = ULTRAPEER_1.receive(TIMEOUT);
+        assertInstanceof("expected a query request", QueryRequest.class, m);
+        assertEquals("unexpected query", "hello", ((QueryRequest)m).getQuery());
+        
+        //shouldn't get to this leaf
+        assertTrue(!drain(LEAF));
+
+
+        qr = QueryRequest.createQuery("\u4f5c\u540d", (byte)2);
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+        
+        m = LEAF.receive(TIMEOUT);
+        assertInstanceof("expected a query request", QueryRequest.class, m);
+        assertEquals("unexpected query", "\u4f5c\uu540d", ((QueryRequest)m).getQuery());
+        
+        //shouldn't get to ultrapeer
+        assertTrue(!drain(ULTRAPEER_1));
+
+
+
+        qr = QueryRequest.createQuery("\u30b9\u30bf\u30b8\u30aa", (byte)2);
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+        
+        m = ULTRAPEER_1.receive(TIMEOUT);
+        assertInstanceof("expected a query request", QueryRequest.class, m);
+        assertEquals("unexpected query", "\u30b9\u30bf\u30b8\u30aa", ((QueryRequest)m).getQuery());
+        
+        //shouldn't get to LEAF
+        assertTrue(!drain(LEAF));
+
+
+        //should get to both ULTRAPEER_1 and LEAF
+        qr = QueryRequest.createQuery("geewhiz", (byte)2);
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+        
+        m = LEAF.receive(TIMEOUT);
+        assertInstanceof("expected a query request", QueryRequest.class, m);
+        assertEquals("unexpected query", "geewhiz", ((QueryRequest)m).getQuery());
+        
+        m = ULTRAPEER_1.receive(TIMEOUT);
+        assertInstanceof("expected a query request", QueryRequest.class, m);
+        assertEquals("unexpected query", "geewhiz", ((QueryRequest)m).getQuery());
+
+    }
+
 	/**
 	 * Tests broadcasting of queries from the Ultrapeer to other hosts.
 	 * In particular, this tests to make sure that the leaf correctly
