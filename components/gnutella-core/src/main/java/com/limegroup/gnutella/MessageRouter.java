@@ -1601,8 +1601,8 @@ public abstract class MessageRouter {
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
         if ((query.getCapabilitySelector() > 0) &&
-            (ultrapeer.remoteHostWhatIsVersion() <
-             CapabilitiesVM.WHAT_IS_BASE_VERSION)) return;
+            (ultrapeer.getRemoteHostCapabilitySelector() <
+             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)) return;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
@@ -1703,7 +1703,8 @@ public abstract class MessageRouter {
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
         if ((query.getCapabilitySelector() > 0) &&
-            (mc.remoteHostWhatIsVersion() < CapabilitiesVM.WHAT_IS_BASE_VERSION)
+            (mc.getRemoteHostCapabilitySelector() < 
+             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)
             ) return false;
         mc.originateQuery(query);
         return true;

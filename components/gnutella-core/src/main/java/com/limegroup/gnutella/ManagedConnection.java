@@ -400,11 +400,11 @@ public class ManagedConnection extends Connection
         // sure that the remote host can answer the query....
         if (query.getCapabilitySelector() > 0) {
             if (isSupernodeClientConnection())
-                return (remoteHostWhatIsVersion() >= 
+                return (getRemoteHostCapabilitySelector() >= 
                         query.getCapabilitySelector());
             else if (isSupernodeSupernodeConnection())
-                return (remoteHostWhatIsVersion() >=  
-                        CapabilitiesVM.WHAT_IS_BASE_VERSION);
+                return (getRemoteHostCapabilitySelector() >=  
+                        CapabilitiesVM.CAPABILITY_MIN_SELECTOR);
             else return false;
         }
         else if(_lastQRPTableReceived == null) return false;

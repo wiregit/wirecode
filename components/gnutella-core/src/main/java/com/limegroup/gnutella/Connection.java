@@ -1444,11 +1444,12 @@ public class Connection implements IpPort {
         return -1;
     }
 
-    /** @return the version number of capability supported, else -1 if no support.
+    /** @return the maximum selector of capability supported, else -1 if no
+     *  support.
      */
-    public int remoteHostWhatIsVersion() {
+    public int getRemoteHostCapabilitySelector() {
         if (_capabilities != null)
-            return _capabilities.supportsWhatIsCapability();
+            return _capabilities.supportsCapabilityQueries();
         return -1;
     }
 

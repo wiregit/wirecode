@@ -162,7 +162,7 @@ public class StandardMessageRouter extends MessageRouter {
         // have version numbers at or below our supported version
         if ((queryRequest.getCapabilitySelector() > 0) &&
             (queryRequest.getCapabilitySelector() > 
-             CapabilitiesVM.WHAT_IS_CAPABILITY_VERSION)) return false;
+             CapabilitiesVM.CAPABILITY_MAX_SELECTOR)) return false;
                                                 
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"

@@ -14,16 +14,16 @@ public final class CapabilitiesVM extends VendorMessage {
 
     /** Bytes for 'WHAT'.
      */
-    private static final byte[] WHAT_IS_CAPABILITY = {(byte)87, (byte)72,
+    private static final byte[] CAPABILITY_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
-    /** This value can change - it is the version number of the highest 'What
-     *  Is' query we support.
+    /** This value can change - it is the version number of the highest 
+     *  Capability (e.g. What Is New?) query we support.
      */
-    public static final int WHAT_IS_CAPABILITY_VERSION = 1;
+    public static final int CAPABILITY_MAX_SELECTOR = 1;
     /** this value will NEVER change - this is the version number of the first
      *  'What Is' type query
      */
-    public  static final int WHAT_IS_BASE_VERSION = 1;
+    public  static final int CAPABILITY_MIN_SELECTOR = 1;
 
     public static final int VERSION = 0;
 
@@ -80,8 +80,8 @@ public final class CapabilitiesVM extends VendorMessage {
     // ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
     private static void addSupportedMessages(Set hashSet) {
         SupportedMessageBlock smp = null;
-        smp = new SupportedMessageBlock(WHAT_IS_CAPABILITY, 
-                                        WHAT_IS_CAPABILITY_VERSION);
+        smp = new SupportedMessageBlock(CAPABILITY_BYTES, 
+                                        CAPABILITY_MAX_SELECTOR);
         hashSet.add(smp);
     }
 
@@ -118,15 +118,15 @@ public final class CapabilitiesVM extends VendorMessage {
      *  number gives some indication about what exactly is a supported.  if no
      *  support, returns -1.
      */
-    public int supportsWhatIsCapability() {
-        return supportsCapability(WHAT_IS_CAPABILITY);
+    public int supportsCapabilityQueries() {
+        return supportsCapability(CAPABILITY_BYTES);
     }
     
 
     /** @return true if 'what is new' feature is supported.
      */
     public boolean supportsWhatIsNew() {
-        return supportsWhatIsCapability() > 0;
+        return supportsCapabilityQueries() > 0;
     }
 
     // override super

@@ -27,7 +27,7 @@ public class CapabilitiesVMTest
     public void testStaticConstructor() throws Exception {
         CapabilitiesVM vmp = 
             CapabilitiesVM.instance();
-        assertGreaterThan(0, vmp.supportsWhatIsCapability());
+        assertGreaterThan(0, vmp.supportsCapabilityQueries());
         assertTrue(vmp.supportsWhatIsNew());
         assertGreaterThan(0, vmp.supportsCapability("WHAT".getBytes()));
     
@@ -39,7 +39,7 @@ public class CapabilitiesVMTest
             (CapabilitiesVM) Message.read(bais);
         assertEquals(vmp, vmpRead);
 
-        assertGreaterThan(0, vmpRead.supportsWhatIsCapability());
+        assertGreaterThan(0, vmpRead.supportsCapabilityQueries());
         assertTrue(vmpRead.supportsWhatIsNew());
         assertGreaterThan(0, vmpRead.supportsCapability("WHAT".getBytes()));
 
@@ -73,7 +73,7 @@ public class CapabilitiesVMTest
         assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
         assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));
         assertEquals(3,  vmp.supportsCapability("DAWG".getBytes()));
-        assertEquals(-1, vmp.supportsWhatIsCapability());
+        assertEquals(-1, vmp.supportsCapabilityQueries());
         assertFalse(vmp.supportsWhatIsNew());
 
         // now creat another one, mix up the blocks that are supported, and
