@@ -860,11 +860,11 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		assertInstanceof("message not a QueryRequest",
                          QueryRequest.class, m);
 	}
-}
 
-class EmptyResponder implements HandshakeResponder {
-    public HandshakeResponse respond(HandshakeResponse response, 
-            boolean outgoing) throws IOException {
-        return HandshakeResponse.createResponse(new Properties());
+    private static final class EmptyResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response, 
+                                         boolean outgoing) throws IOException {
+            return HandshakeResponse.createResponse(new Properties());
+        }
     }
 }
