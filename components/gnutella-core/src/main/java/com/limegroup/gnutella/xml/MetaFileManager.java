@@ -16,11 +16,11 @@ public class MetaFileManager extends FileManager {
     /**
      * keeps a hash of Hashes of files to files, for all .mp3 files
      */
-    HashMap mp3HashToFiles;
+    HashMap mp3FileToHash;
     /**
      * keeps a hash of Hashes of files to files, for all non-mp3 file
      */
-    HashMap nonMP3HashToFile;
+    HashMap nonMP3FileToHash;
 
     //constructor
     public MetaFileManager(){
@@ -30,6 +30,7 @@ public class MetaFileManager extends FileManager {
     public synchronized Response[] query(QueryRequest request) {        
         String rich = request.getRichQuery();
         Response[] normals=super.query(request);//normal text query.
+        addAudioMetadata(normals);
         RichQueryHandler richHandler = RichQueryHandler.instance();
         Response[] metas=richHandler.query(rich);
         if (metas == null)// the rich query is malformed OR non-existent
@@ -37,7 +38,35 @@ public class MetaFileManager extends FileManager {
         Response[] result = union(normals,metas);
         return result;
     }
-        
+
+    private void addAudioMetadata(Response[] responses){
+        if (responses == null)//responses may be null
+            return;
+        String audioURI = "http://www.limewire.com/schemas/audios.xsd";
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        LimeXMLReplyCollection coll = map.getReplyCollection(audioURI);
+        int z = responses.length;
+        for(int i=0;i<z;i++){
+            FileDesc f = get((int)responses[i].getIndex());
+            File file = new File(f._path);
+            String hash=(String)mp3FileToHash.get(file);
+            LimeXMLDocument doc = coll.getDocForHash(hash);
+            if(doc==null)
+                continue;
+            String XMLString = "";
+            try{
+                XMLString = doc.getXMLString();
+            }catch(Exception e){
+                e.printStackTrace();
+                continue;
+            }
+            if(XMLString!=null && !XMLString.equals("")){
+                //System.out.println("Sumeet audioXML="+XMLString);
+                responses[i].setMetadata(XMLString);
+            }
+        }
+    }
+
     /**This method overrides FileManager.loadSettingsBlocking(), though
      * it calls the super method to load up the shared file DB.  Then, it
      * processes these files and annotates them automatically as apropos.
@@ -55,7 +84,7 @@ public class MetaFileManager extends FileManager {
             return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
-                createHashToFileMaps();
+                createFileToHashMaps();
                 SchemaReplyCollectionMapper mapper = 
                       SchemaReplyCollectionMapper.instance();
                 //created maper schemaURI --> ReplyCollection
@@ -78,11 +107,11 @@ public class MetaFileManager extends FileManager {
                     if (s.equalsIgnoreCase("audios")){
                         //Map nameToFile = getAllMP3FilesRecursive();
                         collection=new LimeXMLReplyCollection
-                        (schemas[i],mp3HashToFiles);
+                        (schemas[i],mp3FileToHash);
                     }
                     else
                         collection = new LimeXMLReplyCollection
-                                           (nonMP3HashToFile,schemas[i]);
+                                           (nonMP3FileToHash,schemas[i]);
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
                 }
@@ -128,12 +157,12 @@ public class MetaFileManager extends FileManager {
      * <p> 
      * Also creates another map that stores the hash to File of non mp3 files
      */
-    public void createHashToFileMaps(){
+    public void createFileToHashMaps(){
         SettingsManager man = SettingsManager.instance();
         ArrayList dirs = new 
                       ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
-        mp3HashToFiles = new HashMap();
-        nonMP3HashToFile = new HashMap();
+        mp3FileToHash = new HashMap();
+        nonMP3FileToHash = new HashMap();
         int k=0;
         while(k < dirs.size()) {
             String dir = (String)dirs.get(k);
@@ -170,9 +199,9 @@ public class MetaFileManager extends FileManager {
                     if(j>0)
                         ext = name.substring(j);
                     if(ext.equalsIgnoreCase(".mp3"))
-                        mp3HashToFiles.put(hash,files[i]);
+                        mp3FileToHash.put(files[i],hash);
                     else
-                        nonMP3HashToFile.put(hash,files[i]);
+                        nonMP3FileToHash.put(files[i],hash);
             }
         }
     }

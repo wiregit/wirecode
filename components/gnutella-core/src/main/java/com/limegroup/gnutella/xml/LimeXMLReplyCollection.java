@@ -36,20 +36,20 @@ public class LimeXMLReplyCollection{
      * for non audio stuff. TODO2: This is BAD! Users may reverse the order
      * by mistake and they would die.
      */
-    public LimeXMLReplyCollection(String URI, Map hashToFile ){
+    public LimeXMLReplyCollection(String URI, Map fileToHash ){
         audio = true;
         MapSerializer ms = initialize(URI);//contains strings now 
         Map hashToXMLStr = ms.getMap();
         ID3Reader id3Reader = new ID3Reader();
-        Iterator hashIter = hashToFile.keySet().iterator();
+        Iterator iter = fileToHash.keySet().iterator();
         LimeXMLDocument doc;
-        while(hashIter.hasNext()) {
+        while(iter.hasNext()) {
             boolean solo=false;
-            String hash = (String)hashIter.next();
+            File file = (File)iter.next();
+            String hash = (String)fileToHash.get(file);
             String fileXMLString=(String)hashToXMLStr.get(hash);
             if(fileXMLString==null || fileXMLString.equals(""))
                 solo = true;//rich data only from ID3
-            File file = (File)hashToFile.get(hash);//this cannot be null
             try{
                 String XMLString = id3Reader.readDocument(file,solo);
                 if(!solo)
@@ -62,14 +62,14 @@ public class LimeXMLReplyCollection{
                 addReply(hash,doc);
         }
         //ensure that the files are documents are consistent with the files.
-        checkDocuments(hashToFile);
+        checkDocuments(fileToHash);
     }
     
     /**
      * @param hashToFile contains all hashes for all the non-mp3 files found
      * by the MetaFileManager
      */
-    public LimeXMLReplyCollection(Map hashToFile, String URI) {
+    public LimeXMLReplyCollection(Map fileToHash, String URI) {
         audio = false;
         MapSerializer ms = initialize(URI);
         Map hashToXMLStr = ms.getMap();
@@ -78,37 +78,34 @@ public class LimeXMLReplyCollection{
             boolean valid = true;
             String hash = (String)iter.next();
             String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
-            File file = (File)hashToFile.get(hash);
             LimeXMLDocument doc=null;
-            if (file == null)//file no longer in library - discard xml
+            try{
+                doc = new LimeXMLDocument(xmlStr);
+            }catch(Exception e){
                 valid = false;
-            else{
-                try{
-                    doc = new LimeXMLDocument(xmlStr);
-                }catch(Exception e){
-                    valid = false;
-                }
             }
             if(valid)
                 addReply(hash,doc);
         }
-        checkDocuments(hashToFile);
+        checkDocuments(fileToHash);
     }
 
-    private void checkDocuments (Map hashToFile){
+    private void checkDocuments (Map fileToHash){
         //compare fileNames  from documents in mainMap to 
         //actual filenames as per the map
-        Iterator iter = mainMap.keySet().iterator();
+        Iterator iter = fileToHash.keySet().iterator();
         while(iter.hasNext()){
-            String hash = (String)iter.next();
-            File file = (File)hashToFile.get(hash);
+            File file  = (File)iter.next();
+            String hash=(String)fileToHash.get(file);
             LimeXMLDocument doc = (LimeXMLDocument)mainMap.get(hash);
+            if(doc==null)//File in current round has no docs of this schema
+                continue;
             String actualName = null;
             try {
                 actualName = file.getCanonicalPath();
             }catch (IOException ioe) {
-                mainMap.remove(hash);
-                Assert.that(false,"Cannot find actual file name.");
+                mainMap.remove(hash);//File don't exist - remove meta-data
+                //Assert.that(false,"Cannot find actual file name.");
             }
             String identifier = doc.getIdentifier();
             if(!actualName.equalsIgnoreCase(identifier))
@@ -305,8 +302,8 @@ public class LimeXMLReplyCollection{
             Object mainValue = mainMap.remove(changedHash);
             mainMap.put(newHash,mainValue);
             MetaFileManager manager = (MetaFileManager)FileManager.instance();
-            Object metaValue = manager.mp3HashToFiles.remove(changedHash);
-            manager.mp3HashToFiles.put(newHash,metaValue);
+            //Object metaValue = manager.mp3HashToFiles.remove(changedHash);
+            manager.mp3FileToHash.put(file,newHash);//replace the old hashValue
             Object outValue = outMap.remove(changedHash);
             outMap.put(changedHash,outValue);
             wrote = write();

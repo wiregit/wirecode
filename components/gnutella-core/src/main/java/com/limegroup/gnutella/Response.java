@@ -58,6 +58,11 @@ public class Response {
         this.metaBytes = metadata.getBytes();
     }
 
+    public void setMetadata(String meta){
+        this.metadata = meta;
+        this.metaBytes = meta.getBytes();
+    }
+
     public long getIndex() {
         return index;
     }

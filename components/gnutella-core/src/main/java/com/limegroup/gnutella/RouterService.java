@@ -543,7 +543,7 @@ public class RouterService
         //anu creating rich query (by duplicating the normal query into
         //both plain and rich areas
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query, query);
+                                         minSpeed, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
