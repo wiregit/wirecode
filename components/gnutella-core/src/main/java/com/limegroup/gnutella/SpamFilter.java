@@ -58,6 +58,9 @@ public abstract class SpamFilter {
         SettingsManager settings=SettingsManager.instance();
         Vector /* of SpamFilter */ buf=new Vector();
 
+        //0. Eliminate old LimeWire requeries.
+        buf.add(new RequeryFilter());
+
         //1. IP-based techniques.
         String[] badIPs=settings.getBannedIps();
         if (badIPs.length!=0) {
