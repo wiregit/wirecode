@@ -35,7 +35,7 @@ public class HTTPUploader implements Runnable {
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
-	System.out.println("In the first upload constructor");
+	// System.out.println("In the first upload constructor");
 
 	file = file.trim();
 
@@ -54,13 +54,13 @@ public class HTTPUploader implements Runnable {
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
-	    System.out.println("ERROR A");
+	    //	    System.out.println("ERROR A");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
-	    System.out.println("ERROR B");
+	    //	    System.out.println("ERROR B");
   	    doNoSuchFile();
     	    return;
     	}
@@ -74,7 +74,7 @@ public class HTTPUploader implements Runnable {
 	    _ostream = _socket.getOutputStream();
 	}
 	catch (Exception e) {
-	    System.out.println("ERROR C");
+	    //	    System.out.println("ERROR C");
 	    uploadError("unable to open outputsetream");
 	}
 
@@ -151,7 +151,7 @@ public class HTTPUploader implements Runnable {
 	}
 	catch (Exception e) {
 	    uploadError("Unknown error occured:");
-	    e.printStackTrace();
+	    // e.printStackTrace();
 	    return;
 	}
 	try {
@@ -159,12 +159,12 @@ public class HTTPUploader implements Runnable {
 	}
 	catch (IOException e) {
 	    uploadError("can't open output stream");
-	    e.printStackTrace();
+	    // e.printStackTrace();
 	    return;
 	}
 	catch (Exception e) {
 	    uploadError("Unknown error occured:");
-	    e.printStackTrace();
+	    // e.printStackTrace();
 	    return;
 	}
 			
@@ -196,11 +196,11 @@ public class HTTPUploader implements Runnable {
 	    return _socket.getInetAddress();
 	else {
 	    try {
-		System.out.println("Host " + new String(_host));
+		//		System.out.println("Host " + new String(_host));
 		return InetAddress.getByName(new String(_host));
 	    }
 	    catch (Exception e) {
-		System.out.println("The get by name didn't work");
+		//   System.out.println("The get by name didn't work");
 	    }
 	}
 	return null;
@@ -240,7 +240,7 @@ public class HTTPUploader implements Runnable {
 
     public void run() {
 
-	System.out.println("In the upload run");
+	//	System.out.println("In the upload run");
 	
 	_callback.addUpload(this);
 	doUpload();
@@ -315,7 +315,7 @@ public class HTTPUploader implements Runnable {
 
     private void uploadError(String str)
     {
-	System.out.println(str);
+	//	System.out.println(str);
 	// These should not go anywhere for uploads
     }
 
