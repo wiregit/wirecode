@@ -338,8 +338,19 @@ public class LimeXMLDocument{
         }
     }
     
+    /**
+     * finds the structure of the document by looking at the names of 
+     * the keys in the NameValue List and creates an XML string.
+     * <p>
+     * The name value list must have the correct ordering. 
+     * <p>
+     * The values are converted into the correect encoding as per the 
+     * XML specifications. So the caller of this method need not 
+     * pre-encode the special XML characters into the values. 
+     */
     public static String constructXML(List namValList, String uri){
-        //OK so we have a list of all the populated fields. In correct order
+        //encode the URI
+        uri = LimeXMLUtils.encodeXML(uri);
         int size = namValList.size();
         String first="";
         String last = "";
@@ -364,7 +375,7 @@ public class LimeXMLDocument{
         for(int i=0; i< size; i++){
             NameValue namevalue = (NameValue)namValList.get(i);
             String currString = namevalue.getName();
-            String value = (String)namevalue.getValue();
+            String value=LimeXMLUtils.encodeXML((String)namevalue.getValue());
             List currFields = XMLStringUtils.split(currString);
             int commonCount = 0;
             List prevFields = null;            
