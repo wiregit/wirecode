@@ -284,6 +284,7 @@ public class FixedSizeSortedSet {
      	public void remove() {
      		_setIterator.remove();
      		_map.remove(_current);
+     		_current=null;
      	}
      	
      }
