@@ -274,6 +274,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * INVARIANT: dloaders.size<=threads 
      */
     private List /*of Threads*/ threads;
+
+    /**
+     * Stores the queued threads and the corresponding queue position
+     */
+    private Map /*Thread -> Integer*/ queuedThreads;
+
     /**
      * The IntervalSet of intervals within the file which have not been
      * allocated to any downloader yet.  This set of intervals represents
@@ -290,9 +296,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc2 */ files;
-    /** keeps a count of worker threads that are queued on uploader, useful 
-     * for setting the state correctly*/
-    private volatile int queuedCount;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -494,6 +497,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.callback=callback;
         dloaders=new LinkedList();
         threads=new ArrayList();
+        queuedThreads = new HashMap();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stealLock = new Object();
@@ -1276,7 +1280,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(QUEUED);  
                 queuePosition="";//initialize
                 queuedVendor="";//initialize
-                queuedCount=0;
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
                 bucketNumber = 0;//reset
@@ -1853,8 +1856,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }
         
-            //OK. We are going to create a thread for each RFD, 
-            for(int i=0; i<connectTo && i<size; i++) {
+            //OK. We are going to create a thread for each RFD. The policy for
+            //the worker threads is to have one more thread than the max swarm
+            //limit, which if successfully starts downloading or gets a better
+            //queued slot than some other worker kills the lowest worker in some
+            //remote queue.
+            for(int i=0; i< (connectTo+1) && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
@@ -1938,41 +1945,52 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean http11 = true;//must enter the loop
 
         while(http11) {
-            //Step 2. OK. Wr have established TCP Connection. This 
+            //Step 2. OK. We have established TCP Connection. This 
             //downloader should choose a part of the file to download
             //and send the appropriate HTTP hearders
-            //Note: 0=disconnected,1=tcp-connected,2=http-connected
-            boolean wasQueued = false;
+            //Note: 0=disconnected,1=tcp-connected,2=http-connected            
             int connected;
             http11 = rfd.isHTTP11();
             while(true) { //while queued, connect and sleep if we queued
-                int[] a = {-1};//reset the sleep value
+                int[] a = {-1,-1};//reset the sleep value, and queue position
                 connected = assignAndRequest(dloader,a,http11);
+                synchronized(this) {
+                    boolean addQueued = killQueuedIfNecessary(connected,a[1]);
+                    //an uploader we want to stay connected with
+                    if(connected == 4)
+                        continue; // and has partial ranges
+                    if(connected!=1)
+                        break;
                 
-                //an uploader we want to stay connected with
-                if(connected == 4)
-                    continue; // and has partial ranges
-                if(connected!=1)
-                    break;
-                if(!wasQueued) {
-                    synchronized(this) {queuedCount++;}
-                    wasQueued = true;
-                }
-                try {
-                    if(a[0] > 0)
-                        Thread.sleep(a[0]);//value from QueuedException
-                } catch (InterruptedException ix) {
-                    debug("worker: interrupted while asleep in queue" +
-                          dloader);
-                    synchronized(this) { queuedCount--; }
-                    dloader.stop();//close connection
-                    // notifying will make no diff, coz the next iteration
-                    // will throw interrupted exception.
-                    return true;
-                }
-            }
-            if(wasQueued) //we have been given a slot, after being queued
-                synchronized(this) { queuedCount--; }
+                    if(a[1] > -1 || a[0] >-1) {//we have a queued thread 
+                        Assert.that(a[0]>-1&&a[1]>-1,"inconsistent queue data");
+                        if(addQueued) {
+                            //I'm queued-someone else was killed for me ||
+                            //retried and was queued again -- update the hashmap
+                            queuedThreads.put(Thread.currentThread(),
+                                                         new Integer(a[1]) );
+                            try {
+                                Thread.sleep(a[0]);//value from QueuedException
+                            } catch (InterruptedException ix) {
+                                debug("worker: interrupted while asleep in "+
+                                      "queue" + dloader);
+                                queuedThreads.remove(Thread.currentThread());
+                                dloader.stop();//close connection
+                                // notifying will make no diff, coz the next 
+                                //iteration will throw interrupted exception.
+                                return true;
+                            }
+                        }
+                        else //I'm queued, but no thread was killed for me. die!
+                            return true;//manager! keep churning more threads
+                    }
+                } //end of synchronized block
+            } //end of while
+            //we have been given a slot remove this thread from queuedThreads
+            synchronized(this) {
+                //no problem even if this thread is  not in there
+                queuedThreads.remove(Thread.currentThread()); 
+            } 
 
             //Now, connected is either 0 or 2
             Assert.that(connected==0 || connected==2 || connected==3,
@@ -1997,6 +2015,52 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
     
+    /**
+     * @param connectCode 0 means no connection, 1 means connection queued, 2
+     * means connection made, 3 means no connection required, 4 means partial
+     * range available
+     * @param queuePos the position of this downloader in the remote queue, MUST
+     * be equal to -1 unless connectCode == 1 
+     * <P>
+     * Interrupts a remotely queued thread if the value of connectCode is 2
+     * (meaning queuePos is -1) or connectCode is 1(meaning queuePos is the the
+     * remote position of this thread) AND a thread has a worse position than
+     * queuePos.  
+     * @return true if there is no need to kill any threads, or if the
+     * currentThread is already in the queuedThreads, or if we did kill a thread
+     * worse than this thread. 
+     */
+    private boolean killQueuedIfNecessary(int connectCode, int queuePos) {
+        Assert.that(connectCode>=0 && connectCode <=4,"Invalid connectCode");
+        if(connectCode==0) //no need to replace a thread, server not available
+            return false;
+        if(connectCode==3) //no need to kill a thread for NoSuchElement
+            return false;
+        if(connectCode==4) //Partial ranges, don't kill now, defer the decision
+            return false;
+        //Either I am queued or downloading, find the highest queued thread
+        Thread killThread = null;
+        synchronized(this) {
+            if(getNumAllowedDownloads() > 0) 
+                return true;//no need to kill a thread, but pretend like we did
+            if(queuedThrreads.contains(Thread.currentThread())
+               return true;//we are already in there, pretend we killed a thread
+            Iterator iter = queuedThreads.keySet().iterator();
+            while(iter.hasNext()) {
+                Object o = iter.next();
+                int currQueue = ((Integer)queuedThreads.get(o)).intValue();
+                if(currQueue > queuePos) //queuePos==-1 for downloading threads
+                    killThread=(Thread)o;
+            }
+            if(killThread == null) //no kill candidate
+                return false;
+            //OK. let's kill this guy
+            killThread.interrupt();
+            return true;
+        }        
+    }
+    
+
     /** 
      * Returns an un-initialized (only established a TCP Connection, 
      * no HTTP headers have been exchanged yet) connectable downloader 
@@ -2043,7 +2107,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (dloaders.size()==0 && getState()!=COMPLETE && 
                 getState()!=ABORTED && getState()!=GAVE_UP && 
                 getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
-                && getState()!=HASHING && getState()!=SAVING && queuedCount==0)
+                && getState()!=HASHING && getState()!=SAVING && 
+                queuedThreads.size()==0)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
@@ -2183,8 +2248,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 DownloadStat.PUSH_FAILURE_LOST.incrementStat();
             throw iox;
         }
-        
-         
         return ret;
     }
     
@@ -2193,16 +2256,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and checks if this downloader has been interrupted.
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
-     * @param refSleepTime this parameter is used for pass by reference, this
-     * method puts the minPollTime as the 0th element of this array.
+     * @param refQueueInfo this parameter is used for pass by reference, this
+     * method puts the minPollTime as the 0th element of this array, and the
+     * remote queue postion of the downloader in the 1st element
      * @return 0 if (the server is not giving us the file)
      * TryAgainLater, FileNotFound, NotSharing, Stopped, Misc IOE
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
      * otherwise if NoSuchElement( we have no areas to steal) return 3
-     * otherwise if rfd was partial uploader and gave us ranges to try return 4
-     */
-    private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime, 
+     * otherwise if rfd was partial uploader and gave us ranges to try return 4 */
+    private int assignAndRequest(HTTPDownloader dloader,int[] refQueueInfo, 
                                                               boolean http11) {
         synchronized(stealLock) {
             RemoteFileDesc rfd = dloader.getRemoteFileDesc();
@@ -2273,7 +2336,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.Q_EXCEPTION.incrementStat();
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
                 //The extra time to sleep can be tuned. For now it's 1 S.
-                refSleepTime[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
+                refQueueInfo[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
+                refQueueInfo[1] = qx.getQueuePosition();
                 synchronized(this) {
                     if(dloaders.size()==0) {
                         setState(REMOTE_QUEUED);
@@ -2391,7 +2455,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getQueuedHostCount() {
-        return queuedCount;
+        return queuedThreads.size();
     }
 
     /**
@@ -3040,7 +3104,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized int getNumDownloaders() {
-        return dloaders.size() + queuedCount;
+        return dloaders.size() + queuedThreads.size();
     }
 
     private final Iterator getHosts(boolean chattableOnly) {
