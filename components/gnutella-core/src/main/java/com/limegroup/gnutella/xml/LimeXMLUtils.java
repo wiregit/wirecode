@@ -310,6 +310,8 @@ public class LimeXMLUtils
                     Assert.that(false, "SchemaNotFound? That's impossible!");
                 }
             }
+            if (queryValue.equals(""))
+                continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
             if((replyDocValue == null) || replyDocValue.equals(""))
                 nullCount++;
