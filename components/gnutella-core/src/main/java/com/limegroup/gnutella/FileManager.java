@@ -895,8 +895,22 @@ public class FileManager {
     		Iterator iter = urns.iterator();
     		while (iter.hasNext()) {
                 // if there were indices for this URN, exit.
-                if( _urnIndex.get(iter.next()) != null)
-                    return;
+                IntSet shared = (IntSet)_urnIndex.get(iter.next());
+                // nothing was shared for this URN, look at another
+                if( shared == null )
+                    continue;
+                    
+                IntSet.IntSetIterator isIter = shared.iterator();
+                for ( ; isIter.hasNext(); ) {
+                    int i = isIter.next();
+                    FileDesc desc = (FileDesc)_files.get(i);
+                    // unshared, keep looking.
+                    if(desc == null)
+                        continue;
+                    // the files are the same, exit.
+                    if( incompleteFile.equals(desc.getFile()) )
+                        return;
+                }
             }
             
             // no indices were found for any URN associated with this
