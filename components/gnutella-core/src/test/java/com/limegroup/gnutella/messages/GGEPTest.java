@@ -114,6 +114,37 @@ public class GGEPTest extends TestCase {
         } catch (IllegalArgumentException pass) { }
     }
 
+
+    /** Test to see if the GGEP can handle datalens that are pretty big.... 
+     */
+    public void testBigValue() {
+        StringBuffer bigBoy = new StringBuffer(GGEP.MAX_VALUE_SIZE_IN_BYTES);
+        for (int i = 0; i < GGEP.MAX_VALUE_SIZE_IN_BYTES; i++)
+            bigBoy.append("1");
+        
+        try {
+            GGEP temp = new GGEP(true);
+            temp.put("Susheel", bigBoy.toString());
+            temp.put("is", bigBoy.toString());
+            temp.put("an", bigBoy.toString());
+            temp.put("Idiot!!", bigBoy.toString());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            temp.write(baos);
+            byte[] ggepBytes = baos.toByteArray();
+            GGEP reconstruct = new GGEP(ggepBytes, 0, null);
+        } 
+        catch (IllegalArgumentException fail1) { 
+            fail("IllegalArgumentException!");
+        }
+        catch (IOException why) {
+            fail("Should not IO Error!");
+        }
+        catch (BadGGEPBlockException fail2) {
+            fail("BadPacketException not expected!!");
+        }
+    }
+
+
     /** Null bytes allowed, e.g., in ping replies */
     public void testValueContainsLegalNull() {
         byte[] bytes = new byte[2];
