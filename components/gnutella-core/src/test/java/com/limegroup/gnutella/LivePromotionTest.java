@@ -26,7 +26,7 @@ public class LivePromotionTest extends ServerSideTestCase {
 	}
 	
 	public static Integer numUPs() {
-		return new Integer(1);
+		return new Integer(30);
 	}
 	
 	public static Integer numLeaves() {
@@ -47,21 +47,26 @@ public class LivePromotionTest extends ServerSideTestCase {
 	public static ActivityCallback getActivityCallback() {
 		return new ActivityCallbackStub() {
 			public void connectionInitializing(Connection c) {
-				System.out.println("initializing " + c);
+				if (c.getPort()==6346 ||
+						c.getPort()==6370)
+					System.out.println("initializing " + c);
 			}
 			public void connectionInitialized(Connection c) {
 				if (c.getPort()==6346 ||
-					c.getPort()==6700)
+					c.getPort()==6370) {
 					System.out.println("initialized "+c + " X-up "+
-					  c.getPropertyWritten("X-Ultrapeer"));
+					  c.isSupernodeConnection());
 					
 					synchronized(connectLock){
 						connectLock.notify();
 					}
+				}
 			}
 			
 			public void connectionClosed(Connection c) {
-				System.out.println("closed "+c);
+				if (c.getPort()==6346 ||
+						c.getPort()==6370)
+					System.out.println("closed "+c);
 			}
 			
 			//just for the heck of it
@@ -82,9 +87,9 @@ public class LivePromotionTest extends ServerSideTestCase {
 	}
 	
 	//Don't run this as part of automated suite, but do uncomment when running it manually.
-	//public static Test suite() {
-    //    return buildTestSuite(LivePromotionTest.class);
-   // }  
+	public static Test suite() {
+       return buildTestSuite(LivePromotionTest.class);
+    }  
 	
 	public void testSetUP(){}
 	/**
@@ -92,14 +97,14 @@ public class LivePromotionTest extends ServerSideTestCase {
 	 */
 	public void testPromotion() throws Exception {
 		
-		//first close all other leafs and UPs
+		//first close all other leafs 
 		ConnectionManager manager = RouterService.getConnectionManager();
 		for (int i=0; i < LEAF.length;i++)
 			LEAF[i].close();
-		for (int i=0; i < ULTRAPEER.length;i++)
-			ULTRAPEER[i].close();
+		//for (int i=0; i < ULTRAPEER.length;i++)
+		//	ULTRAPEER[i].close();
 		
-		
+		assertEquals(0,RouterService.getNumFreeLimeWireNonLeafSlots());
 		
 		//wait until the leaf connects to us.
 		
@@ -112,6 +117,7 @@ public class LivePromotionTest extends ServerSideTestCase {
 		//at this point we should have one live leaf connected to us
 		assertEquals(1,manager.getNumInitializedClientConnections());
 		
+		
 		//sleep some time, let it age
 		try {Thread.sleep(3000);}catch(InterruptedException iox){}
 		
@@ -121,6 +127,7 @@ public class LivePromotionTest extends ServerSideTestCase {
 		
 
 		RouterService.getPromotionManager().requestPromotion();
+		
 		System.out.println("sent promotion request, waiting");
 
 		
@@ -130,13 +137,8 @@ public class LivePromotionTest extends ServerSideTestCase {
 		}
 		
 		//at this point the candidate should have connected back to us, claiming to be an up
-		assertGreaterThan(0,manager.getNumConnections());
-		
-		c = (Connection)manager.getConnections().get(0);
-		assertTrue(c.isInitialized());
-		assertTrue(c.isSupernodeConnection());
-		assertTrue(c.isSupernodeSupernodeConnection());
-		
+		assertGreaterThanOrEquals(30,manager.getNumInitializedConnections());
+		System.out.println("entering long wait");
 		//wait more time for connection to occur
 		Thread.sleep(30000);
 		System.out.println("exiting test");
