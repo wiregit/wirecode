@@ -70,6 +70,7 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static final UDPCrawlerPing msgLocale = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)2);
     private static final UDPCrawlerPing msgBadMask = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
     private static final UDPCrawlerPing msgNewOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x4);
+    private static final UDPCrawlerPing msgAgents = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x8);
 	
     
     /**
@@ -460,6 +461,25 @@ public class ServerSideUPListTest extends BaseTestCase {
  		pong = tryMessage(msgNewOnly);
  		
  		assertEquals(upCons.size(),pong.getUltrapeers().size());
+ 		sleep();
+ 	}
+ 	
+ 	public void testMsgAgents() throws Exception {
+ 		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
+ 		
+ 		UDPCrawlerPong pong = tryMessage(msgAgents);
+ 		
+ 		assertNotNull(pong.getAgents());
+ 		
+ 		//we should have 3 agents reported.
+ 		StringTokenizer tok = new StringTokenizer(pong.getAgents(),
+ 				UDPCrawlerPong.AGENT_SEP);
+ 		
+ 		assertEquals(3,tok.countTokens());
+ 		
+ 		while(tok.hasMoreTokens())
+ 			assertEquals("LimeWire/@version@",tok.nextToken());
+ 		
  	}
  	
  	private UDPCrawlerPong tryMessage(UDPCrawlerPing which) throws Exception {

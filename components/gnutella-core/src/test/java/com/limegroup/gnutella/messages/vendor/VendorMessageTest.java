@@ -426,6 +426,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	//also test one with newer mask - should be trimmed to our mask
     	req = new UDPCrawlerPing(guid, 1,2,(byte)0xFF);
+    	assertTrue(req.hasUserAgent());
     	assertTrue(req.hasFeature(UDPCrawlerPing.FEATURE_MASK));
     	assertEquals(0,req.getFormat() & ~UDPCrawlerPing.FEATURE_MASK);
     }
