@@ -26,7 +26,7 @@ public abstract class MessageRouter
      */
     protected byte[] _clientGUID;
 
-    private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
+    private LoopbackReplyHandler _forMeReplyHandler;
 
     /**
      * The lock to hold before updating or propogating tables.  TODO3: it's 
@@ -55,20 +55,20 @@ public abstract class MessageRouter
      * typically around 2500 entries, but never more than 100,000 entries.
      */
     private RouteTable _pingRouteTable = new RouteTable(2*60, 
-                                                        MAX_ROUTE_TABLE_SIZE);
+														MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
      * typically around 13000 entries, but never more than 100,000 entries.
      */
     private RouteTable _queryRouteTable = new RouteTable(5*60,
-                                                         MAX_ROUTE_TABLE_SIZE);
+														 MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
      * minutes, typically around 3500 entries, but never more than 100,000
      * entries.  
      */
     private RouteTable _pushRouteTable = new RouteTable(7*60,
-                                                        MAX_ROUTE_TABLE_SIZE);
+														MAX_ROUTE_TABLE_SIZE);
 
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.
@@ -142,16 +142,23 @@ public abstract class MessageRouter
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
-                    HostCatcher catcher, UploadManager uploadManager)
+						   HostCatcher catcher, UploadManager uploadManager,
+						   DownloadManager downloadManager, 
+						   ActivityCallback callback,
+						   FileManager fileManager)
     {
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
         _uploadManager = uploadManager;
+		_forMeReplyHandler = 
+		    new LoopbackReplyHandler(acceptor, manager, fileManager, 
+									 callback, downloadManager, 
+									 uploadManager);
     }
 
     public String getPingRouteTableDump()
-    {
+	{
         return _pingRouteTable.toString();
     }
 
@@ -176,7 +183,7 @@ public abstract class MessageRouter
         _pushRouteTable.removeReplyHandler(connection);
     }
 
-        /**
+	/**
      * The handler for all message types.  Processes a message based on the 
      * message type.
      */
@@ -205,7 +212,23 @@ public abstract class MessageRouter
         //clients.
         forwardQueryRouteTables();      
     }
-    
+
+	/**
+     * The handler for all message types.  Processes a message based on the 
+     * message type.
+     */	
+	public void handleUDPMessage(Message msg, ReplyHandler handler)
+    {
+        // Increment hops and decrease TTL.
+        msg.hop();
+
+        if (msg instanceof QueryRequest) {
+            handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, handler);
+		} else if (msg instanceof QueryReply) {
+            handleQueryReply((QueryReply)msg, handler);
+		}
+    }
+	
     
     /**
      * The handler for PingRequests received in
@@ -213,10 +236,10 @@ public abstract class MessageRouter
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handlePingRequestPossibleDuplicate(
-        PingRequest pingRequest, ManagedConnection receivingConnection)
+        PingRequest pingRequest, ReplyHandler receivingConnection)
     {
         if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
-                                      receivingConnection))
+										   receivingConnection))
             handlePingRequest(pingRequest, receivingConnection);
     }
 
@@ -229,9 +252,32 @@ public abstract class MessageRouter
         QueryRequest queryRequest, ManagedConnection receivingConnection)
     {
         if(_queryRouteTable.tryToRouteReply(queryRequest.getGUID(),
-                                            receivingConnection))
+                                            receivingConnection)) {
+			//Hack! If this is the indexing query from a Clip2 reflector, mark the
+			//connection as unkillable so the ConnectionWatchdog will not police it
+			//any more.
+			if ((receivingConnection.getNumMessagesReceived()<=2)
+                && (queryRequest.getHops()<=1)  //actually ==1 will do
+                && (queryRequest.getQuery().equals(FileManager.INDEXING_QUERY))) {
+				receivingConnection.setKillable(false);
+			}
             handleQueryRequest(queryRequest, receivingConnection);
+		}
     }
+	
+	/**
+	 * Special handler for UDP queries.
+	 *
+	 * @param query the UDP <tt>QueryRequest</tt> 
+	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
+	 */
+	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest query,
+													  ReplyHandler handler) 
+	{
+        if(_queryRouteTable.tryToRouteReply(query.getGUID(), handler)) {
+            handleQueryRequest(query, handler);
+		}
+	}
 
     
     /**
@@ -250,7 +296,7 @@ public abstract class MessageRouter
      *      handling framework and just customize responses.
      */
     protected void handlePingRequest(PingRequest pingRequest,
-                                     ManagedConnection receivingConnection)
+                                     ReplyHandler receivingConnection)
     {
         _numPingRequests++;
 
@@ -278,25 +324,17 @@ public abstract class MessageRouter
      *      handling framework and just customize responses.
      */
     protected void handleQueryRequest(QueryRequest queryRequest,
-                                   ManagedConnection receivingConnection)
+									  ReplyHandler handler)
     {
         _numQueryRequests++;
 
-        //Hack! If this is the indexing query from a Clip2 reflector, mark the
-        //connection as unkillable so the ConnectionWatchdog will not police it
-        //any more.
-        if ((receivingConnection.getNumMessagesReceived()<=2)
-                && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals(
-                    FileManager.INDEXING_QUERY))) {
-            receivingConnection.setKillable(false);
-        }
-
-
-        if(queryRequest.getTTL() > 0)
-            broadcastQueryRequest(queryRequest, receivingConnection,
-                                  _manager);
-
+		// in the case of UDP queries, the following check should
+		// never evaluate to true
+        if(queryRequest.getTTL() > 0) {
+            broadcastQueryRequest(queryRequest, handler, _manager);
+		} 
+			
+		forwardQueryRequestToLeaves(queryRequest, handler, _manager);
         respondToQueryRequest(queryRequest, _acceptor, _clientGUID);
     }
 
@@ -353,7 +391,7 @@ public abstract class MessageRouter
      * requests originating here).
      */
     protected void broadcastPingRequest(PingRequest pingRequest,
-                                        ManagedConnection receivingConnection,
+                                        ReplyHandler receivingConnection,
                                         ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
@@ -374,6 +412,41 @@ public abstract class MessageRouter
         }
     }
 
+	/**
+	 * Forwards the query request to any leaf connections.
+	 *
+	 * @param request the query to forward
+	 * @param handler the <tt>ReplyHandler</tt> that responds to the
+	 *  request appropriately
+	 * @param manager the <tt>ConnectionManager</tt> that provides
+	 *  access to any leaf connections that we should forward to
+	 */
+	protected void forwardQueryRequestToLeaves(QueryRequest request,
+											   ReplyHandler handler,
+											   ConnectionManager manager) {
+        //use query routing to route queries to client connections
+        //send queries only to the clients from whom query routing 
+        //table has been received
+        List list = _manager.getInitializedClientConnections2();
+        for(int i=0; i<list.size(); i++) {
+            ManagedConnection c = (ManagedConnection)list.get(i);
+            if(c != handler) {
+                //TODO:
+                //because of some very obscure optimization rules, it's actually
+                //possible that qi could be non-null but not initialized.  Need
+                //to be more careful about locking here.
+                ManagedConnectionQueryInfo qi = c.getQueryRouteState();
+                if (qi==null || qi.lastReceived==null) 
+                    return;
+                else if (qi.lastReceived.contains(request)) {
+                    //A new client with routing entry, or one that hasn't started
+                    //sending the patch.
+                    sendQueryRequest(request, c, handler);
+                }
+            }
+        }
+	}
+
     /**
      * Broadcasts the query request to all initialized connections that
      * are not the receivingConnection, setting up the routing
@@ -385,8 +458,8 @@ public abstract class MessageRouter
      * requests originating here).
      */
     protected void broadcastQueryRequest(QueryRequest queryRequest,
-                                        ManagedConnection receivingConnection,
-                                        ConnectionManager manager)
+										 ReplyHandler receivingConnection,
+										 ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
@@ -403,30 +476,8 @@ public abstract class MessageRouter
                 sendQueryRequest(queryRequest, c, receivingConnection);
             }
         }
-        
-        //use query routing to route queries to client connections
-        //send queries only to the clients from whom query routing 
-        //table has been received
-        list=_manager.getInitializedClientConnections2();
-        for(int i=0; i<list.size(); i++){
-            ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != receivingConnection) {
-                //TODO:
-                //because of some very obscure optimization rules, it's actually
-                //possible that qi could be non-null but not initialized.  Need
-                //to be more careful about locking here.
-                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
-                if (qi==null || qi.lastReceived==null) 
-                    return;
-                else if (qi.lastReceived.contains(queryRequest))
-                {
-                    //A new client with routing entry, or one that hasn't started
-                    //sending the patch.
-                    sendQueryRequest(queryRequest, c, receivingConnection);
-                }
-            }
-        }
-    }
+	}
+
     
     /**
      * Sends the passed query request, received on receivingConnection, 
@@ -437,8 +488,9 @@ public abstract class MessageRouter
      * @param receivingConnection The connection on which we originally
      * received the query
      */
-    protected void sendQueryRequest(QueryRequest queryRequest, ManagedConnection
-        sendConnection, ManagedConnection receivingConnection)
+    protected void sendQueryRequest(QueryRequest queryRequest, 
+									ManagedConnection sendConnection, 
+									ReplyHandler receivingConnection)
     {
         //send the query over this connection only if any of the following
         //is true:
@@ -508,7 +560,7 @@ public abstract class MessageRouter
      * if you do.
      */
     protected void handlePingReply(PingReply pingReply,
-                                   ManagedConnection receivingConnection)
+                                   ReplyHandler receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress=_catcher.add(pingReply, receivingConnection);
@@ -557,7 +609,7 @@ public abstract class MessageRouter
      * if you do.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ManagedConnection receivingConnection)
+                                 ReplyHandler receivingConnection)
     {
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
@@ -603,7 +655,7 @@ public abstract class MessageRouter
      * super.handlePushRequest if you do.
      */
     public void handlePushRequest(PushRequest pushRequest,
-                                  ManagedConnection receivingConnection)
+                                  ReplyHandler receivingConnection)
     {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
@@ -648,6 +700,7 @@ public abstract class MessageRouter
     public void sendQueryReply(QueryReply queryReply)
         throws IOException
     {
+ 
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
@@ -697,8 +750,8 @@ public abstract class MessageRouter
      * Handles a query route table update message that originated from
      * receivingConnection.
      */
-    public void handleRouteTableMessage(RouteTableMessage m,
-                                        ManagedConnection receivingConnection) {
+    private void handleRouteTableMessage(RouteTableMessage m,
+										 ManagedConnection receivingConnection) {
         //if not a supernode-client, ignore
         if(! receivingConnection.isSupernodeClientConnection())
             return;
@@ -785,7 +838,7 @@ public abstract class MessageRouter
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    private QueryRouteTable createRouteTable(ManagedConnection c) {
+    private QueryRouteTable createRouteTable(ReplyHandler c) {
         //TODO: choose size according to what's been propogated.
         QueryRouteTable ret=new QueryRouteTable(
             QueryRouteTable.DEFAULT_TABLE_SIZE,
@@ -797,10 +850,10 @@ public abstract class MessageRouter
 //        //...and those of all neighbors except c.  Use higher TTLs on these.
 //        List list=_manager.getInitializedConnections();
 //        for(int i=0; i<list.size(); i++) { 
-//            ManagedConnection c2=(ManagedConnection)list.get(i);
+//            ReplyHandler c2=(ReplyHandler)list.get(i);
 //            if (c2==c)
 //                continue;
-//            ManagedConnectionQueryInfo qi=c2.getQueryRouteState();
+//            ReplyHandlerQueryInfo qi=c2.getQueryRouteState();
 //            if (qi!=null && qi.lastReceived!=null)
 //                ret.addAll(qi.lastReceived);
 //        }
@@ -932,27 +985,27 @@ public abstract class MessageRouter
      * Implementations typically process that various statistics in the reply.
      * This method is called from the default handlePingReply.
      */
-    protected abstract void handlePingReplyForMe(
-        PingReply pingReply,
-        ManagedConnection receivingConnection);
+//      protected abstract void handlePingReplyForMe(
+//          PingReply pingReply,
+//          ReplyHandler receivingConnection);
 
     /**
      * Handle a reply to a QueryRequest that originated here.
      * Implementations typically display or record the results of the query.
      * This method is called from the default handleQueryReply.
      */
-    protected abstract void handleQueryReplyForMe(
-        QueryReply queryReply,
-        ManagedConnection receivingConnection);
+//      protected abstract void handleQueryReplyForMe(
+//          QueryReply queryReply,
+//          ReplyHandler receivingConnection);
 
     /**
      * Handle a PushRequest reply to a QueryReply that originated here.
      * Implementations typically display or record the results of the query.
      * This method is called from the default handlePushRequest
      */
-    protected abstract void handlePushRequestForMe(
-        PushRequest pushRequest,
-        ManagedConnection receivingConnection);
+//      protected abstract void handlePushRequestForMe(
+//          PushRequest pushRequest,
+//          ReplyHandler receivingConnection);
 
 
 
@@ -1090,43 +1143,5 @@ public abstract class MessageRouter
      */    
     public int getPort() {
         return _acceptor.getPort();
-    }
-
-    //
-    // End Statistics Accessors
-    //
-
-    /**
-     * This is the class that goes in the route table when a request is
-     * sent whose reply is for me.
-     */
-    private final class ForMeReplyHandler
-        implements ReplyHandler
-    {
-        public ForMeReplyHandler() {}
-
-        public void handlePingReply(PingReply pingReply,
-                                    ManagedConnection receivingConnection)
-        {
-            handlePingReplyForMe(pingReply, receivingConnection);
-        }
-
-        public void handleQueryReply(QueryReply queryReply,
-                                     ManagedConnection receivingConnection)
-        {
-            handleQueryReplyForMe(queryReply, receivingConnection);
-        }
-
-        public void handlePushRequest(PushRequest pushRequest,
-                                      ManagedConnection receivingConnection)
-        {
-            handlePushRequestForMe(pushRequest, receivingConnection);
-        }
-
-        public boolean isOpen()
-        {
-            //I'm always ready to handle replies.
-            return true;
-        }
     }
 }

@@ -21,7 +21,7 @@ public class StandardMessageRouter
      * Override of handleQueryRequest to send query strings to the callback.
      */
     protected void handleQueryRequest(QueryRequest queryRequest,
-                                      ManagedConnection receivingConnection)
+                                      ReplyHandler receivingConnection)
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
@@ -130,11 +130,14 @@ public class StandardMessageRouter
     }
     
     protected void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection)
+								   ReplyHandler receivingConnection)
     {
         //We override the super's method so the receiving connection's
         //statistics are updated whether or not this is for me.
-        receivingConnection.updateHorizonStats(pingReply);
+		if(receivingConnection instanceof ManagedConnection) {
+			ManagedConnection mc = (ManagedConnection)receivingConnection;
+			mc.updateHorizonStats(pingReply);
+		}
         super.handlePingReply(pingReply, receivingConnection);
     }
 
@@ -163,7 +166,7 @@ public class StandardMessageRouter
      */
     protected void handlePingReplyForMe(
         PingReply pingReply,
-        ManagedConnection receivingConnection)
+        ReplyHandler handler)
     {
         SettingsManager settings=SettingsManager.instance();
         //Kill incoming connections that don't share.  Note that we randomly
@@ -171,13 +174,14 @@ public class StandardMessageRouter
         //share!)  Note that we only consider killing them on the first ping.
         //(Message 1 is their ping, message 2 is their reply to our ping.)
         if ((pingReply.getHops()<=1)
-               && (receivingConnection.getNumMessagesReceived()<=2)
-               && (! receivingConnection.isOutgoing())
-               && (receivingConnection.isKillable())
-               && (pingReply.getFiles()<settings.getFreeloaderFiles())
-               && ((int)(Math.random()*100.f) >
-                       settings.getFreeloaderAllowed())) {
-            _manager.remove(receivingConnection);
+			&& (handler.getNumMessagesReceived()<=2)
+			&& (! handler.isOutgoing())
+			&& (handler.isKillable())
+			&& (pingReply.getFiles()<settings.getFreeloaderFiles())
+			&& ((int)(Math.random()*100.f) >
+				settings.getFreeloaderAllowed())
+			&& (handler instanceof ManagedConnection)) {
+            _manager.remove((ManagedConnection)handler);
         }
     }
 
@@ -285,7 +289,7 @@ public class StandardMessageRouter
      */
     protected void handleQueryReplyForMe(
         QueryReply queryReply,
-        ManagedConnection receivingConnection)
+        ReplyHandler receivingConnection)
     {
         if (_downloader == null) 
             if (RouterService.instance() != null)
@@ -302,7 +306,7 @@ public class StandardMessageRouter
      */
     protected void handlePushRequestForMe(
         PushRequest pushRequest,
-        ManagedConnection receivingConnection)
+        ReplyHandler receivingConnection)
     {
         //Ignore push request from banned hosts.
         if (receivingConnection.isPersonalSpam(pushRequest))
