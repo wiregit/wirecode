@@ -21,7 +21,7 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
-	private static final UDPService INSTANCE = new UDPService();
+	private static UDPService INSTANCE;
 
 	/** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
@@ -71,6 +71,8 @@ public final class UDPService implements Runnable {
 	 * Instance accessor.
 	 */
 	public static UDPService instance() {
+        if (INSTANCE == null)
+            INSTANCE = new UDPService();
 		return INSTANCE;
 	}
 

@@ -93,11 +93,9 @@ public final class QueryUnicaster {
 	 */
 	private final boolean RECORD_STATS = !CommonUtils.isJava118();
 
-    static {
-        _instance = new QueryUnicaster();
-    }
-
     public static QueryUnicaster instance() {
+        if (_instance == null)
+            _instance = new QueryUnicaster();
         return _instance;
     }
 
