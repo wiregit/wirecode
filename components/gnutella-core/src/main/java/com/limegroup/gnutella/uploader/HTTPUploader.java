@@ -273,7 +273,7 @@ public class HTTPUploader implements Uploader {
 			// Look for the Range: header
 			// it will be in one of three forms.  either
 			// ' - n ', ' m - n', or ' 0 - '
-            if (str.indexOf("Range: bytes=") != -1) {
+            if (indexOfIgnoreCase(str, "Range: bytes=") != -1) {
                 String sub = str.substring(13);
 				// remove the white space
                 sub = sub.trim();   
@@ -301,7 +301,7 @@ public class HTTPUploader implements Uploader {
             }
 
 			// check the User-Agent field of the header information
-			if (str.indexOf("User-Agent:") != -1) {
+			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
 				if (SettingsManager.instance().getAllowBrowser() == false) {
@@ -334,6 +334,17 @@ public class HTTPUploader implements Uploader {
 		if (_uploadEnd == 0)
 			_uploadEnd = _fileSize;
 	}
+
+	
+	private int indexOfIgnoreCase(String str, String section) {
+		// convert both strings to lower case
+		String aaa = str.toLowerCase();
+		String bbb = section.toLowerCase();
+		// then look for the index...
+		return aaa.indexOf(bbb);
+	}
+
+
 
 }
 
