@@ -73,7 +73,9 @@ class HashTreeNodeManager {
      * Registers the given list of nodes for the tree.
      */
     void register(HashTree tree, List nodes) {
-        if(!MAP.containsKey(tree))
+        // don't register depths 0-2 and 7-9
+        int depth = tree.getDepth();
+        if(depth > 2 && depth < 7 && !MAP.containsKey(tree))
             insertEntry(tree, nodes);
     }
 
