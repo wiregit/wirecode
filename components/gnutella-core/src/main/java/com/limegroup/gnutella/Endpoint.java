@@ -342,6 +342,11 @@ com.sun.java.util.collections.Comparable
         else if (bytes[0]==(byte)192 &&
                  bytes[1]==(byte)168)
             return true; //192.168.0.0 - 192.168.255.255
+        else if (bytes[0]==(byte)0 &&
+                 bytes[1]==(byte)0 &&
+                 bytes[2]==(byte)0 &&
+                 bytes[3]==(byte)0)
+            return true; //0.0.0.0 - Gnutella (well BearShare really) convention
         else
             return false;
     }
@@ -433,6 +438,8 @@ com.sun.java.util.collections.Comparable
         e=new Endpoint("11.0.0.0",0);
         Assert.that(! e.isPrivateAddress());
         e=new Endpoint("172.16.0.0",0);
+        Assert.that(e.isPrivateAddress());
+        e=new Endpoint("0.0.0.0");
         Assert.that(e.isPrivateAddress());
 
         Endpoint e1;
