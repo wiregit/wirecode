@@ -161,11 +161,11 @@ public class QueryRequest extends Message implements Serializable{
 	/**
 	 * Creates a new query for the specified file name, with no XML.
 	 *
-	 * @param fileName the file name to search for
+	 * @param query the file name to search for
 	 */
-	public static QueryRequest createQuery(String fileName) {
-		return new QueryRequest(newQueryGUID(false), (byte)6, 0, fileName,
-								"", false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
+	public static QueryRequest createQuery(String query) {
+		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "",
+								false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
 	}
 
