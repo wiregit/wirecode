@@ -67,6 +67,9 @@ public class HostCatcher {
      * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
      * out more than NORMAL_SIZE hosts, then we guarantee that endpoints
      * will be ejected from the ENDPOINT_QUEUE upon startup.
+     * Because we write out best first (and worst last), and thus read in
+     * best first (and worst last) this means that we will be ejecting
+     * our best endpoints and using our worst ones when starting.
      * 
      */
     static final int PERMANENT_SIZE = NORMAL_SIZE;
