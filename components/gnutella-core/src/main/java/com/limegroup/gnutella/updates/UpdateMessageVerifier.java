@@ -3,6 +3,7 @@ package com.limegroup.gnutella.updates;
 import java.security.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
 
 /**
