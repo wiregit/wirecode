@@ -416,7 +416,7 @@ public abstract class MessageRouter
 			
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
-		forwardQueryRequestToLeaves(request, handler, _manager);
+		forwardQueryRequestToLeaves(request, handler);
         respondToQueryRequest(request, _clientGUID);
     }
 
@@ -456,13 +456,14 @@ public abstract class MessageRouter
      * Broadcasts the query request to all initialized connections,
      * setting up the proper reply routing.
      */
-    public void broadcastQueryRequest(QueryRequest queryRequest)
+    public void broadcastQueryRequest(QueryRequest request)
     {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        if (UNICAST_MODE && RouterService.isGUESSCapable()) 
-            unicastQueryRequest(queryRequest);
-        else
-            broadcastQueryRequest(queryRequest, null);
+        _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+        if (UNICAST_MODE && RouterService.isGUESSCapable()) {
+            unicastQueryRequest(request);
+		} else {
+            broadcastQueryRequest(request, null);
+		}
     }
 
     /**
@@ -507,8 +508,8 @@ public abstract class MessageRouter
 	 *  access to any leaf connections that we should forward to
 	 */
 	protected void forwardQueryRequestToLeaves(QueryRequest request,
-											   ReplyHandler handler,
-											   ConnectionManager manager) {
+											   ReplyHandler handler) {
+		if(!RouterService.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
