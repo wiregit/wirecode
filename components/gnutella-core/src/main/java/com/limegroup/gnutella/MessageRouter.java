@@ -2219,6 +2219,12 @@ public abstract class MessageRouter {
 			boolean mcast = queryRequest.isMulticast() && 
                 (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
+            // We should mark our hits if the remote end can do a firewalled
+            // transfer AND so can we AND we don't accept tcp incoming
+            final boolean fwTransfer = 
+                queryRequest.canDoFirewalledTransfer() && 
+                UDPService.instance().canReceiveSolicited() &&
+                !RouterService.acceptedIncomingConnection();
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.
@@ -2227,7 +2233,8 @@ public abstract class MessageRouter {
             List replies =
                 createQueryReply(guid, ttl, speed, res, 
                                  _clientGUID, busy, uploaded, 
-                                 measuredSpeed, mcast);
+                                 measuredSpeed, mcast,
+                                 fwTransfer);
 
             //add to the list
             queryReplies.addAll(replies);
@@ -2249,7 +2256,8 @@ public abstract class MessageRouter {
                                              boolean busy, 
                                              boolean uploaded, 
                                              boolean measuredSpeed, 
-                                             boolean isFromMcast);
+                                             boolean isFromMcast,
+                                             boolean shouldMarkForFWTransfer);
 
     /**
      * Handles a message to reset the query route table for the given
