@@ -262,7 +262,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
         
         assertEquals(32, mgr.getNumFreeNonLeafSlots());
-        assertEquals(29, mgr.getNumFreeLimeWireNonLeafSlots());
+        assertEquals(26, mgr.getNumFreeLimeWireNonLeafSlots());
         assertEquals(30, mgr.getNumFreeLeafSlots());
         assertEquals(28, mgr.getNumFreeLimeWireLeafSlots());
         
