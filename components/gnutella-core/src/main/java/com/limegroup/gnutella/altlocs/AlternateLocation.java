@@ -37,6 +37,11 @@ public final class AlternateLocation implements
 	 * Constant empty clientGUID for RFDs made from locations.
 	 */
 	private static final byte[] EMPTY_GUID = new byte[16];
+
+    /**
+     * LOCKING: obtain this' monitor while changing/accessing _count and 
+     * _demoted as multiple threads could be accessing them.
+     */
     
     /**
      * maintins a count of how many times this alternate location has been seen.
@@ -45,6 +50,19 @@ public final class AlternateLocation implements
      * of 1.
      */
     private int _count = 0;
+
+    /**
+     * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
+     * succeeds, it may be promoted again resetting the value of _demoted.  The
+     * _count attribute does does take into account the case of a good alternate
+     * location with a high count, which has recently failed. 
+     * <p> 
+     * Note that demotion in not intrinsic to the use of this class, some
+     * modules like the download may not want to demote an AlternatLocation, 
+     * other like the uploader may rely on it.
+     */
+    private boolean _demoted = false;
+
 
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -184,6 +202,7 @@ public final class AlternateLocation implements
 		this.URL       = url;
 		this.SHA1_URN  = sha1;
         _count = 1;
+        _demoted = false;
 	}
 
     //////////////////////////////accessors////////////////////////////
@@ -215,14 +234,16 @@ public final class AlternateLocation implements
     /**
      * Accessor to find if this has been demoted
      */
-    public int getCount() { return _count; }
+    public synchronized int getCount() { return _count; }
     
-
+    /**
+     * package access, accessor to the value of _demoted
+     */ 
+    synchronized boolean getDemoted() { return _demoted; }
+    
     ////////////////////////////Mesh utility methods////////////////////////////
 
-	public String httpStringValue() {
-        return this.URL.toExternalForm();
-	}
+	public String httpStringValue() {return this.URL.toExternalForm(); }
 
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
@@ -247,24 +268,21 @@ public final class AlternateLocation implements
 	}
 
     /**
-     * package access method to "demote" an AlternateLocation -- used when 
-     * a downloader claims it failed to use the location. An AlternateLocation
-     * that has been demoted can be removed, so that two consecutive failures
-     * result in removal from the mesh. However, a demoted AlternateLocation
-     * can be re-instated if a download finds that it works. 
-     */
-    public void decrement() {
-        Assert.that(_count > -1, "decrementing AltLoc with count == 0");
-        _count--;
-    }
-
-    /**
      * package access to promote this. 
      * @see demote
      */
-    public void increment() {_count++; }
+    public synchronized void increment() {_count++; }
 
+    /**
+     * package access for demoting this.
+     */
+    synchronized void  demote() { _demoted = true;}
 
+    /**
+     * package access for demoting this.
+     */
+    synchronized void promote() { _demoted = false;}
+    
     ///////////////////////////////helpers////////////////////////////////
 
 	/**
@@ -374,16 +392,16 @@ public final class AlternateLocation implements
 
     /**
      * The idea is that this is smaller than any AlternateLocation who has a
-     * greater value of _count. There is one exception to this rule -- a count
-     * of 0 indicates that the AlternateLocation has the greatest value.  
-     * <p>
+     * greater value of _count. There is one exception to this rule -- a demoted
+     * AlternateLocation has a higher value irrespective of count.
+     * <p> 
      * This is because we want to have a sorted set of AlternateLocation where
-     * any AlternateLocation with a count 0 puts it at the end of the list
+     * any demoted AlternateLocation is put  at the end of the list
      * because it probably does not work.  
      * <p> 
-     * Further we want to get AlternateLocations with smaller counts to be 
+     * Further we want to get AlternateLocations with smaller counts to be
      * propogated more, since this will serve to get better load balancing of
-     * uploader.  
+     * uploader. 
      */
     public int compareTo(Object obj) {
         if (this==obj) //equal
@@ -393,12 +411,12 @@ public final class AlternateLocation implements
         if( !(obj instanceof AlternateLocation) ) //I am greater
             return 1;
         AlternateLocation other = (AlternateLocation) obj;
-        if(_count == other._count) //equal
-            return 0;
-        if(_count==0 && other._count>0) //I am greater
-            return 1;
-        if(_count>0 && other._count==0) //I am smaller
-            return 1;
+        if(_demoted != other._demoted) {
+            if(_demoted) //I am demoted and not him
+                return 1; //I am higher
+            return -1;//he is demoted, and I am not
+        }
+        //both have the same value for _demoted
         return (_count - other._count);
     }
 

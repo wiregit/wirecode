@@ -135,11 +135,12 @@ public final class AlternateLocationCollection
             if(LOCATIONS.contains(al))
                 alt = (AlternateLocation)(LOCATIONS.tailSet(al).first());
             if(alt==null) {//it was not in collections.
-                LOCATIONS.add(al);//no need to increment
+                LOCATIONS.add(al);//no need to increment, no need to promote
                 return true;
             }
             else {
                 alt.increment();
+                alt.promote();
                 LOCATIONS.add(alt); //put it back
                 return false;
             }
@@ -162,10 +163,10 @@ public final class AlternateLocationCollection
                 loc = (AlternateLocation)(LOCATIONS.tailSet(al).first());
             if(loc==null) //it's not in locations, cannot remove
                 return false;
-            if(loc.getCount() == 0) //we did remove it...don't add it back
+            if(loc.getDemoted()) //we did remove it...don't add it back
                 return true;            
             else {
-                loc.decrement();
+                loc.demote(); //one more strike and you are out...
                 LOCATIONS.add(loc); //put it back
                 return false;
             }
@@ -235,7 +236,6 @@ public final class AlternateLocationCollection
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		boolean wrote = false;
-        //Sumeet:TODO2: improve randomization of altlocs
         //Sumeet:TODO2: send all for n-alts
         synchronized(this) {
 	        Iterator iter = LOCATIONS.iterator();            
