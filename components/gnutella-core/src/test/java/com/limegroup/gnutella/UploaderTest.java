@@ -203,6 +203,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("not queued", ioe);
         }
         
+        
         assertEquals("should have 2 queued uploaders",
             2, upManager.getNumQueuedUploads());
         
@@ -240,6 +241,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("wrong exception thrown", e);
         }
         
+
         assertEquals("should have 2 queued uploaders",
             2, upManager.getNumQueuedUploads());
         
@@ -310,7 +312,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("downloader should have got slot, but was queued at: "
                 + e.getQueuePosition(), e);
         }
-
+        
         //test that the first uploader is also given a slot.        
         try {
             connectDloader(d4,false,rfd4,true);
@@ -715,7 +717,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         //connect the first downloader.
         PipedSocketFactory psf = null;
         try {
-            psf = new PipedSocketFactory("127.0.0.1", "1.1.1.1",-1,-1);
+            psf = new PipedSocketFactory("127.0.0.1", "1.1.1.1");
         } catch (Exception e) {
             fail("unable to create piped socket factory", e);
         }
@@ -807,7 +809,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * @param ip the address reported by the downloader.  This need
      *  not be a connectable address, though it must be resolvable
      * @param block if true, force the uploader to block after writing
-     *  hundredth byte
+     *  hundredth byte -- UNUSED.
      * @exception TryAgainLaterException the downloader was denied 
      *  because upman was busy
      * @exception IOException some other exception
@@ -819,8 +821,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Allow some fudging to prevent race conditons.
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
 
-        PipedSocketFactory psf=new PipedSocketFactory(
-                                        "127.0.0.1", ip, block ? 1000 : -1, -1);
+        //PipedSocketFactory psf=new PipedSocketFactory(
+                                        //"127.0.0.1", ip, block ? 5000 : -1, -1);
+        PipedSocketFactory psf = new PipedSocketFactory("127.0.0.1", ip);
         //Socket A either has no limit or a limit of 1000 bytes to write.
         //Socket B has no limit
         final Socket sa=psf.getSocketA();
@@ -855,7 +858,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static void kill(HTTPDownloader downloader) {
         downloader.stop();
-        try { Thread.sleep(400); } catch (InterruptedException ignored) { }
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) { }
     }
  
 }
