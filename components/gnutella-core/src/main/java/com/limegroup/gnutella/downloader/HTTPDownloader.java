@@ -182,7 +182,7 @@ public class HTTPDownloader implements BandwidthTracker {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+        out.write("GET "+_rfd.getUrl().getFile()+" HTTP/1.1\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
         if(supportQueueing)

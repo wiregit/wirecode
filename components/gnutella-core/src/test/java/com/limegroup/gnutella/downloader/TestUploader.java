@@ -14,6 +14,11 @@ public class TestUploader {
 
     /** Number of bytes uploaded */
     private volatile int totalUploaded;
+    /** The number of connections received */
+    private int connects=0;
+    /** The last request sent, e.g., "GET /get/0/file.txt HTTP/1.0" */
+    private String request=null;
+
     /** The throttle rate in kilobytes/sec */
     private volatile float rate;    
     /**The number of bytes this uploader uploads before dying*/
@@ -22,8 +27,6 @@ public class TestUploader {
     private boolean stopped;
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
-    /** The number of connections received */
-    private int connects=0;
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
@@ -151,6 +154,11 @@ public class TestUploader {
         return connects;
     }
         
+    /** Returns the last request sent or null if none. 
+     *  @return a request like "GET /get/0/file.txt HTTP/1.1" */
+    public String getRequest() {
+        return request;
+    }
 
     /**
      * Repeatedly accepts connections and handles them.
@@ -223,8 +231,13 @@ public class TestUploader {
             new BufferedOutputStream(socket.getOutputStream());
         int start = 0;
         int stop = TestFile.length();
+        boolean firstLine=true;
         while (true) {
             String line=input.readLine();
+            if (firstLine) {
+                request=line;
+                firstLine=false;
+            }
             if (line==null)
                 throw new IOException("Unexpected close");
             if (line.equals(""))

@@ -20,6 +20,7 @@ public class AllTests {
         suite.addTest(RequeryDownloadTest.suite());
         suite.addTest(IncompleteFileManagerTest.suite());
         suite.addTest(AutoDownloaderDetailsTest.suite());
+        suite.addTest(URLRemoteFileDescTest.suite());
         return suite;
     }
 

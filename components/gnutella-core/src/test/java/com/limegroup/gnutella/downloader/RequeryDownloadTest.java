@@ -339,7 +339,7 @@ public class RequeryDownloadTest extends TestCase {
             downloader=mgr.download(null,           //no SHA1
                                     "text query",   //requery string
                                     "filename.txt", //display name
-                                    "http://127.0.0.1:6666/path"); //URL
+                                    "http://127.0.0.1:6666/path/file.txt");
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         } catch (IllegalArgumentException e) {
@@ -361,6 +361,8 @@ public class RequeryDownloadTest extends TestCase {
         assertEquals(2, uploader.getConnections());
         //Check that no requeries were sent.
         assertEquals(0, router.broadcasts.size());
+        //Check that the right kind of request was sent
+        assertEquals("GET /path/file.txt HTTP/1.1", uploader.getRequest());
     }
 
     /** Tests that a MAGNET download works from just a URN/keyword */

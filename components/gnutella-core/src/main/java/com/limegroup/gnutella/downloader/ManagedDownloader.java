@@ -173,7 +173,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * should be done.  */
     private ActivityCallback callback;
     /** The complete list of files passed to the constructor.  Must be
-     *  maintained in memory to support resume. */
+     *  maintained in memory to support resume.  allFiles may only contain
+     *  elements of type RemoteFileDesc and URLRemoteFileDesc--no 
+     *  RemoteFileDesc2's are stored in the array. */
     private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
@@ -275,7 +277,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private List /* of RemoteFileDesc2 */ busy;
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
-    private List /*of RemoteFileDesc */ files;
+    private List /*of RemoteFileDesc2 */ files;
     /** keeps a count of worker threads that are queued on uploader, useful 
      * for setting the state correctly*/
     private volatile int queuedCount;

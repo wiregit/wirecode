@@ -128,7 +128,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             if (_urn!=null)
                 urns.add(_urn);
             
-            return new RemoteFileDesc(
+            return new URLRemoteFileDesc(
                 url.getHost(),  //TODO: can this be null?
                 port,
                 0l,             //index--doesn't matter since we won't push
@@ -140,7 +140,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 3,              //four [sic] star quality
                 false,          //no browse host
                 null,           //no metadata
-                urns);
+                urns,
+                url);           //url for GET request
         } catch (IOException e) {
             return null;
         }
