@@ -40,8 +40,8 @@ public class SetDenseTableMessage extends RouteTableMessage {
                                 int stopOffset) {
         //Payload length includes common arguments
         super(ttl,
-            (byte)(BITMAP_PAYLOAD_POSITION+bits2bytes(stopOffset-startOffset+1)),
-            RouteTableMessage.SET_DENSE_BLOCK_VARIANT, tableTTL);    
+              BITMAP_PAYLOAD_POSITION+bits2bytes(stopOffset-startOffset+1),
+              RouteTableMessage.SET_DENSE_BLOCK_VARIANT, tableTTL);    
      
         //Copy bset to bits.  TODO2: we *could* alias bset, avoiding the copy.
         //This would be more efficient, at the loss of modularity.
@@ -153,7 +153,7 @@ public class SetDenseTableMessage extends RouteTableMessage {
             if (bits.get(i)) 
                 x++;
         }
-        return "{TTTL: "+getTableTTL()+", entries: "+x+"}";
+        return "{SET_DENSE, TTTL: "+getTableTTL()+", entries: "+x+"}";
     }
 
     /** Unit test */

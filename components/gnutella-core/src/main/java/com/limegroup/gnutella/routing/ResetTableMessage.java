@@ -24,7 +24,7 @@ public class ResetTableMessage extends RouteTableMessage {
                              byte tableTTL,
                              int tableSize) {
         //Payload length includes common arguments
-        super(ttl, (byte)(2+4), RouteTableMessage.RESET_VARIANT, tableTTL);
+        super(ttl, 2+4, RouteTableMessage.RESET_VARIANT, tableTTL);
         this.tableSize=tableSize;
     }
 
@@ -67,6 +67,11 @@ public class ResetTableMessage extends RouteTableMessage {
     /** Returns the new size of the route table. */
     public int getTableSize() {
         return tableSize;
+    }
+
+    public String toString() {
+        return "{RESET, tableSize: "+getTableSize()
+              +", TTTL: "+getTableTTL()+"}";
     }
 
 

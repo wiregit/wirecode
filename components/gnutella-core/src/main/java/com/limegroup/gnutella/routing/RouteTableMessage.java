@@ -37,7 +37,7 @@ public abstract class RouteTableMessage extends Message {
      * The remaining parameters are the same as in Message's constructor.
      */
     protected RouteTableMessage(byte ttl,
-                                byte length, 
+                                int length, 
                                 byte variant,
                                 byte tableTTL) {
         super(Message.F_ROUTE_TABLE_UPDATE, ttl, length);
