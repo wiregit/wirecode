@@ -3,6 +3,7 @@ package com.limegroup.gnutella.altlocs;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.ByteOrder;
@@ -415,10 +416,44 @@ public final class AlternateLocationCollection
     }
     
     public AltLocDigest getDigest() {
-        return null;
+        AltLocDigest digest = new AltLocDigest(false);
+        FixedSizeSortedSet clone;
+    	
+    	
+    	synchronized(this) {
+    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
+    	}
+    	
+    	for (Iterator iter = clone.iterator();iter.hasNext();) {
+    	    Object o = iter.next();
+    		if (!(o instanceof DirectAltLoc))
+    			continue;
+    		
+    		DirectAltLoc current = (DirectAltLoc)o;
+    		digest.add(current);
+    	}
+    	
+    	return digest;
     }
     
     public AltLocDigest getPushDigest() {
-        return null;
+        AltLocDigest digest = new AltLocDigest(true);
+        FixedSizeSortedSet clone;
+    	
+    	
+    	synchronized(this) {
+    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
+    	}
+    	
+    	for (Iterator iter = clone.iterator();iter.hasNext();) {
+    	    Object o = iter.next();
+    		if (!(o instanceof PushAltLoc))
+    			continue;
+    		
+    		PushAltLoc current = (PushAltLoc)o;
+    		digest.add(current);
+    	}
+    	
+    	return digest;
     }
 }

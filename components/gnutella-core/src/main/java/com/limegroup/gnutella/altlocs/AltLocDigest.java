@@ -5,10 +5,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.BloomFilter;
 import com.limegroup.gnutella.util.HashFunction;
@@ -36,8 +38,8 @@ public class AltLocDigest implements BloomFilter {
     /**
      * constants for which hasing function this digest uses.
      */
-    private static final HashFunction DIRECT = new DirectLocHasher();
-    private static final HashFunction PUSH = new PushLocHasher();
+    private final HashFunction DIRECT = new DirectLocHasher();
+    private final HashFunction PUSH = new PushLocHasher();
     
     /**
      * default size for each element
@@ -65,7 +67,7 @@ public class AltLocDigest implements BloomFilter {
     
     private AltLocDigest() {
         _values = new BitSet();
-        _elementSize = DEFAULT_ELEMENT_SIZE;
+        setElementSize(DEFAULT_ELEMENT_SIZE);
     }
     
     /**
@@ -77,9 +79,14 @@ public class AltLocDigest implements BloomFilter {
     
     /**
      * How many bits are necessary to represent each element.  This determines the
-     * range of the hash function.
+     * range of the hash function.  Use setElementSize() instead of modifying directly.
      */
-    private int _elementSize; 
+    private int _elementSize;
+    
+    /**
+     * the mask to use by the hash functions
+     */
+    private int _mask;
     
     /**
      * the actual hashing function.  Acts differently on altlocs than pushlocs.
@@ -224,7 +231,7 @@ public class AltLocDigest implements BloomFilter {
         
         // create the new altloc digest
         AltLocDigest digest = new AltLocDigest();
-        digest._elementSize = elementSize;
+        digest.setElementSize(elementSize);
         
         // and populate it
         offset+=24;
@@ -280,15 +287,35 @@ public class AltLocDigest implements BloomFilter {
         return parseDigest(digest,0,digest.length);
     }
     
-    private static final class DirectLocHasher implements HashFunction {
+    private final class DirectLocHasher implements HashFunction {
+        /**
+         * hashes a direct altloc. It takes as many bits as possible from the tail
+         * of the ip address.
+         */
        public int hash(Object o) {
-           return -1;
+           DirectAltLoc loc = (DirectAltLoc)o;
+           int full =0;
+           try {
+               byte [] addr = loc.getHost().getHostBytes();
+               full = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
+           }catch (UnknownHostException hmm) {
+               ErrorService.error(hmm);
+           }
+           return full & _mask;
        }
     }
     
-    private static final class PushLocHasher implements HashFunction {
+    private final class PushLocHasher implements HashFunction {
+        /**
+         * hashes a pushloc.  Takes as many bits as possible from the guid
+         */
         public int hash(Object o) {
-            return -1;
+            PushAltLoc push = (PushAltLoc)o;
+            byte [] guid = push.getPushAddress().getClientGUID();
+            
+            int full = (guid[3] << 24) | (guid[2] << 16) | (guid[1]) << 8 | guid[0];
+            
+            return full & _mask;
         }
      }
 
@@ -312,7 +339,7 @@ public class AltLocDigest implements BloomFilter {
     }
     public void xor(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
-        _values.or(digest._values);
+        _values.xor(digest._values);
     }
     
     /**
@@ -320,5 +347,11 @@ public class AltLocDigest implements BloomFilter {
      */
     public void andNot(AltLocDigest other) {
         _values.andNot(other._values);
+    }
+    
+    private void setElementSize(int size) {
+        _elementSize = size;
+        for (int i=0;i < size;i++)
+            _mask |= (1 << i); 
     }
 }

@@ -67,9 +67,10 @@ public class AltLocDigestTest extends BaseTestCase {
 		}
 		
 		GUID g = new GUID(GUID.makeGuid());
+		GUID g2 = new GUID(GUID.makeGuid());
 		_push = AlternateLocationCollection.create(FileDescStub.DEFAULT_SHA1);
         PushEndpoint pe = new PushEndpoint(g.toHexString()+";1:2.2.2.2;1.1.1.1:2");
-        PushEndpoint pe2 = new PushEndpoint(g.toHexString()+";2:3.3.3.3;2.2.2.2:3");
+        PushEndpoint pe2 = new PushEndpoint(g2.toHexString()+";2:3.3.3.3;2.2.2.2:3");
         pa = new PushAltLoc(pe,FileDescStub.DEFAULT_SHA1);
         pa2 = new PushAltLoc(pe2,FileDescStub.DEFAULT_SHA1);
         _push.add(pa);
@@ -177,6 +178,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    assertTrue(Arrays.equals(toByte,stream));
 	    
 	    digest = AltLocDigest.parseDigest(toByte,0,toByte.length);
+	    digest.setDirect();
 	    assertTrue(digest.containsAll(_alternateLocations));
 	}
 	
@@ -193,7 +195,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    
 	    //now both digests will contain a pushloc which should not exist in the final digest
 	    _direct.add(pa);
-	    digest = _direct.getDigest();
+	    digest = _direct.getPushDigest();
 	    assertTrue(digest.contains(pa));
 	    AltLocDigest digest2 = _push.getPushDigest();
 	    assertTrue(digest2.contains(pa));
@@ -212,6 +214,7 @@ public class AltLocDigestTest extends BaseTestCase {
 	    }
 	    
 	    _direct.add(pa);
+	    digest = _direct.getPushDigest();
 	    assertTrue(digest.contains(pa));
 	    assertFalse(digest.contains(pa2));
 	    AltLocDigest digest2 = _push.getPushDigest();
@@ -225,19 +228,20 @@ public class AltLocDigestTest extends BaseTestCase {
 	public void testORing() throws Exception {
 	    //oring with empty = oneself
 	    AltLocDigest digest = _direct.getDigest();
-	    digest.and(_direct.getPushDigest());
+	    digest.or(_direct.getPushDigest());
 	    for (Iterator iter = _alternateLocations.iterator();iter.hasNext();) {
 	        AlternateLocation loc = (AlternateLocation)iter.next();
 	        assertTrue(digest.contains(loc));
 	    }
 	    
 	    _direct.add(pa);
+	    digest = _direct.getPushDigest();
 	    assertTrue(digest.contains(pa));
 	    assertFalse(digest.contains(pa2));
 	    AltLocDigest digest2 = _push.getPushDigest();
 	    assertTrue(digest2.contains(pa));
 	    assertTrue(digest2.contains(pa2));
-	    digest.and(digest2);
+	    digest.or(digest2);
 	    assertTrue(digest.contains(pa));
 	    assertTrue(digest.contains(pa2));
 	}
