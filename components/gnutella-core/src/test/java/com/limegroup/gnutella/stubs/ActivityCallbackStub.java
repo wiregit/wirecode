@@ -55,4 +55,5 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void handleSharedFileUpdate(File file) { }
     public void notifyUserAboutUpdate(String version, boolean isPro, boolean l){
     }
+    public void fileManagerLoaded() {}
 }

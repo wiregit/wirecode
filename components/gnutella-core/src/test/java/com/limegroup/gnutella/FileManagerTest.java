@@ -1,12 +1,44 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 import java.io.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-	private static File _testDir;
+    private static final String EXTENSION = "XYZ";
+    
+    private File f1 = null;
+    private File f2 = null;
+    private File f3 = null;
+    private File f4 = null;
+    private File f5 = null;
+    private File f6 = null;
+    private FileManager fman = null;
+    private Object loaded = new Object();
+    private Response[] responses;
+    private File[] files;
+    
+    private class FManCallback extends ActivityCallbackStub {
+        public void fileManagerLoaded() {
+            synchronized(loaded) {
+                loaded.notify();
+            }
+        }
+    }
+    
+    private void waitForLoad() {
+        fman.loadSettings(false); // true won't matter either
+        synchronized(loaded) {
+            try {
+                loaded.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+    }
 
     public FileManagerTest(String name) {
         super(name);
@@ -15,179 +47,210 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     public static Test suite() {
         return buildTestSuite(FileManagerTest.class);
     }
-
-	//<<<<<<< FileManagerTest.java
-    //File directory=null;
-    //public void setUp() {        
-	//  directory=new File("FileManagerTest_dir");
-	//  directory.mkdirs();
-    //}
-
-    //public void tearDown() {
-	//  directory.delete();
-    //}
-	//=======
-	protected void setUp() {
-		String userDir = System.getProperty("user.dir");
-		_testDir = new File(userDir, "FileManagerTest");
-		_testDir.mkdirs();
-		_testDir.deleteOnExit();
+    
+	public void setUp() throws Exception {
+        SettingsManager settings=SettingsManager.instance();
+        settings.setExtensions(EXTENSION);
+        	    
+	    cleanFiles(_sharedDir, false);
+	    fman = new FileManager();
+	    PrivilegedAccessor.setValue(fman, "_callback", new FManCallback());
+	    
 	}
+	
+	public void tearDown() {
+        if (f1!=null) f1.delete();
+        if (f2!=null) f2.delete();
+        if (f3!=null) f3.delete();
+        if (f4!=null) f4.delete();
+        if (f5!=null) f5.delete();
+        if (f6!=null) f6.delete();	    
+    }
+    
+    
+    
+    public void testGetParentFile() throws Exception {
+        f1 = createNewTestFile(1);
+        assertEquals("getParentFile doesn't work",
+            new File(fman.getParentFile(f1).getCanonicalPath()),
+            new File(_sharedDir.getCanonicalPath()));
+    }
+    
+    public void testGetSharedFilesWithNoShared() throws Exception {
+        File[] files=fman.getSharedFiles(_sharedDir);
+        assertNull("should not be sharing any files", files);
+    }
+    
+    public void testOneSharedFile() throws Exception {
+        f1 = createNewTestFile(1);
+        waitForLoad();
+        f2 = createNewTestFile(3);
+        f3 = createNewTestFile(11);
 
-	//>>>>>>> 1.1.14.1
+        // fman should only have loaded f1
+        assertEquals("Unexpected number of shared files", 
+            1, fman.getNumFiles());
+        assertEquals("Unexpected size of filemanager",
+            1, fman.getSize());
+        responses=fman.query(new QueryRequest((byte)3,0,"unit",
+                                                         false));
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        
+        // should not be able to remove unshared file
+        assertTrue("should have not been able to remove f3", 
+				   !fman.removeFileIfShared(f3));
+				   
+        assertEquals("first file should be f1", f1, fman.get(0).getFile());
+        
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected length of shared files", 1, files.length);
+        assertEquals("files should be the same", files[0], f1);
+        files=fman.getSharedFiles(FileManager.getParentFile(_sharedDir));
+        assertNull("file manager listed shared files in file's parent dir",
+            files);
+    }
+    
+    public void testAddingOneSharedFile() throws Exception {
+        f1 = createNewTestFile(1);
+        waitForLoad();
+        f2 = createNewTestFile(3);
+        f3 = createNewTestFile(11);
 
-    /** Unit test.  REQUIRES JAVA2 FOR createTempFile Note that many tests are
-     *  STRONGER than required by the specifications for simplicity.  For
-     *  example, we assume an order on the values returned by getSharedFiles. */
-    public void testLegacy() throws Exception{
-        //Test some of add/remove capability
-        File f1=null;
-        File f2=null;
-        File f3=null;
-        File f4=null;
-        File f5=null;
-        File f6=null;
-        try {
-            f1=createNewTestFile(1);
-            File directory=FileManager.getParentFile(f1);
-            FileManager fman=new FileManager();
-            File[] files=fman.getSharedFiles(directory);
-            //assertTrue(files==null);
-			assertNotNull("directory should not be null", directory);
-			assertTrue("directory should be a directory", directory.isDirectory());
-
-            //One file
-            SettingsManager settings=SettingsManager.instance();
-            settings.setExtensions("XYZ");
-            settings.setDirectories(new File[] {directory});
-            //Since we don't have a non-blocking loadSettings method, we just
-            //wait a little time and cross our fingers.
-            fman.loadSettings(false);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) { }
-            f2=createNewTestFile(3);
-            f3=createNewTestFile(11);
-
-            assertEquals("The number of shared files should be 1", 1, fman.getNumFiles());
-            assertTrue(fman.getSize()+"", fman.getSize()==1);
-            Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit",
-                                                             false));
-            assertEquals("there should only be one response", 1, responses.length);
-            assertTrue("should have not been able to remove file", 
-					   !fman.removeFileIfShared(f3));
-            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
-            assertEquals("there should only be one response", 1, responses.length);
-            //assertTrue(responses.length==1);
-            assertTrue(fman.getSize()==1);
-            assertTrue(fman.getNumFiles()==1);
-            fman.get(0);
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==1);
-            assertTrue(files[0]+" differs from "+f1, files[0].equals(f1));
-            files=fman.getSharedFiles(FileManager.getParentFile(directory));
-            assertTrue(files==null);
-
-            //Two files
-            assertTrue(fman.addFileIfShared(new File("C:\\bad.ABCDEF"))==false);
-            assertTrue(fman.addFileIfShared(f2)==true);
-            assertTrue(fman.getNumFiles()+"", fman.getNumFiles()==2);
-            assertTrue(fman.getSize()+"", fman.getSize()==4);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
-            assertTrue(responses[0].getIndex()!=responses[1].getIndex());
-            for (int i=0; i<responses.length; i++) {
-                assertTrue(responses[i].getIndex()==0
-                               || responses[i].getIndex()==1);
-            }
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==2);
-            assertTrue(files[0]+" differs from "+f1, files[0].equals(f1));
-            assertTrue(files[1]+" differs from "+f2, files[1].equals(f2));
-
-            //Remove file that's shared.  Back to 1 file.                        
-            assertTrue(fman.removeFileIfShared(f3)==false);
-            assertTrue(fman.removeFileIfShared(f2)==true);
-            assertTrue(fman.getSize()==1);
-            assertTrue(fman.getNumFiles()==1);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
-            assertTrue(responses.length==1);
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==1);
-            assertTrue(files[0]+" differs from "+f1, files[0].equals(f1));
-
-            //Add a new second file, with new index.
-            assertTrue(fman.addFileIfShared(f3)==true);
-            assertTrue("size of files: "+fman.getSize(), fman.getSize()==12);
-            assertTrue("# files: "+fman.getNumFiles(), fman.getNumFiles()==2);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
-            assertTrue("response: "+responses.length, responses.length==2);
-            assertTrue(responses[0].getIndex()!=1);
-            assertTrue(responses[1].getIndex()!=1);
-            fman.get(0);
-            fman.get(2);
-            try {
-                fman.get(1);
-                fail("should not have gotten anything");
-            } catch (IndexOutOfBoundsException e) { }
-
-            responses=fman.query(new QueryRequest((byte)3,0,"*unit*", false));
-            assertTrue("response: "+responses.length, responses.length==2);
-
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==2);
-            assertTrue(files[0]+" differs from "+f1, files[0].equals(f1));
-            assertTrue(files[1]+" differs from "+f3, files[1].equals(f3));
-            files=fman.getSharedFiles(null);
-            assertTrue(files.length==2);
-            assertTrue(files[0]+" differs from "+f1, files[0].equals(f1));
-            assertTrue(files[1]+" differs from "+f3, files[1].equals(f3));
-
-
-            //Rename files
-            assertTrue(fman.renameFileIfShared(f2, f2)==false);
-            assertTrue(fman.renameFileIfShared(f1, f2)==true);
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==2);
-            assertTrue(files[0].equals(f3));
-            assertTrue(files[1].equals(f2));
-            assertTrue(
-                fman.renameFileIfShared(f2,
-                                        new File("C\\garbage.XSADF"))==false);
-            files=fman.getSharedFiles(directory);
-            assertTrue(files.length==1);
-            assertTrue(files[0].equals(f3));
-
-            //Try to add a huge file.  (It will be ignored.)
-            f4=createFakeTestFile(Integer.MAX_VALUE+1l);
-            assertTrue(fman.addFileIfShared(f4)==false);
-            assertTrue(fman.getNumFiles()==1);
-            assertTrue(fman.getSize()==11);
-            //Add really big files.
-            f5=createFakeTestFile(Integer.MAX_VALUE-1);
-            f6=createFakeTestFile(Integer.MAX_VALUE);
-            assertTrue(fman.addFileIfShared(f5)==true);
-            assertTrue(fman.addFileIfShared(f6)==true);
-            assertTrue(fman.getNumFiles()==3);
-            assertTrue(fman.getSize()==Integer.MAX_VALUE);
-            responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*", 
-                                                  false));
-            assertTrue(responses.length==3);
-            assertTrue(responses[0].getName().equals(f3.getName()));
-            assertTrue(responses[1].getName().equals(f5.getName()));
-            assertTrue(responses[2].getName().equals(f6.getName()));
-        } finally {
-            if (f1!=null) f1.delete();
-            if (f2!=null) f2.delete();
-            if (f3!=null) f3.delete();
-            if (f4!=null) f4.delete();
-            if (f5!=null) f5.delete();
-            if (f6!=null) f6.delete();
+        assertTrue("should not have been able to share file",
+                  !fman.addFileIfShared(new File("C:\\bad.ABCDEF")));
+        assertTrue("should have been able to share file", 
+                  fman.addFileIfShared(f2));
+        assertEquals("unexpected number of files", 2, fman.getNumFiles());
+        assertEquals("unexpected fman size", 4, fman.getSize());
+        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        assertTrue("responses gave same index " +
+             "[0:" + responses[0].getIndex() + "], " +
+             "[1:" + responses[1].getIndex() + "]",
+             responses[0].getIndex()!=responses[1].getIndex());
+        for (int i=0; i<responses.length; i++) {
+            assertTrue("responses should be expected indexes", 
+                responses[i].getIndex()==0 || responses[i].getIndex()==1);
         }
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected files length", 2, files.length);
+        assertEquals("first shared file is not f1", files[0], f1);
+        assertEquals("second shared file is not f2", files[1], f2);
+    }
+    
+    public void testRemovingOneSharedFile() throws Exception {
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        waitForLoad();
+        f3 = createNewTestFile(11);
+
+        //Remove file that's shared.  Back to 1 file.                        
+        assertTrue("shouldn't have been able to remove unshared file", 
+            !fman.removeFileIfShared(f3));
+        assertTrue("should have been able to remove shared file", 
+            fman.removeFileIfShared(f2));
+        assertEquals("unexpected fman size", 1, fman.getSize());
+        assertEquals("unexpected number of files", 1, fman.getNumFiles());
+        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        assertEquals("unexpected response length", 1, responses.length);
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected files length", 1, files.length);
+        assertEquals("files differ", files[0], f1);
+    }
+    
+    public void testAddAnotherSharedFileDifferentIndex() throws Exception {
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        waitForLoad();
+        f3 = createNewTestFile(11);
+        fman.removeFileIfShared(f2);
+
+        //Add a new second file, with new index.
+        assertTrue("should have been able to add shared file", 
+            fman.addFileIfShared(f3));
+        assertEquals("unexpected file size", 12, fman.getSize());
+        assertEquals("unexpedted number of files", 2, fman.getNumFiles());
+        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        assertEquals("unexpected response length", 2, responses.length);
+        assertTrue("response[0] index should not be 1", responses[0].getIndex()!=1);
+        assertTrue("response[1] index should not be 1", responses[1].getIndex()!=1);
+        fman.get(0);
+        fman.get(2);
+        try {
+            fman.get(1);
+            fail("should not have gotten anything");
+        } catch (IndexOutOfBoundsException e) { }
+
+        responses=fman.query(new QueryRequest((byte)3,0,"*unit*", false));
+        assertEquals("unexpected responses length", 2, responses.length);
+
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected files length", 2, files.length);
+        assertEquals("files differ", files[0], f1);
+        assertEquals("files differ", files[1], f3);
+        files=fman.getSharedFiles(null);
+        assertEquals("unexpected files length", 2, files.length);
+        assertEquals("files differ", files[0], f1);
+        assertEquals("files differ", files[1], f3);
+    }
+    
+    public void testRenameSharedFiles() throws Exception {
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        waitForLoad();
+        f3 = createNewTestFile(11);
+        fman.removeFileIfShared(f2);
+        fman.addFileIfShared(f3);
+
+        //Rename files
+        assertTrue("shouldn't have been able to rename unshared file", 
+            !fman.renameFileIfShared(f2, f2));
+        assertTrue("should have been able to rename shared file",
+             fman.renameFileIfShared(f1, f2));
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected files length", 2, files.length);
+        assertEquals("files differ", files[0], f3);
+        assertEquals("files differ", files[1], f2);
+        assertTrue("shouldn't have been able to rename shared file", 
+            !fman.renameFileIfShared(f2, new File("C\\garbage.XSADF")));
+        files=fman.getSharedFiles(_sharedDir);
+        assertEquals("unexpected files length", 1, files.length);
+        assertEquals("files differ", files[0], f3);
+    }
+    
+    public void testIgnoreHugeFiles() throws Exception {
+        f3 = createNewTestFile(11);   
+        waitForLoad();
+        f1 = createNewTestFile(1);
+        f2 = createNewTestFile(3);
+        
+        //Try to add a huge file.  (It will be ignored.)
+        f4=createFakeTestFile(Integer.MAX_VALUE+1l);
+        assertTrue("shouldn't have been able to add shared file", 
+            !fman.addFileIfShared(f4));
+        assertEquals("unexpected number of files", 1, fman.getNumFiles());
+        assertEquals("unexpected fman size", 11, fman.getSize());
+        //Add really big files.
+        f5=createFakeTestFile(Integer.MAX_VALUE-1);
+        f6=createFakeTestFile(Integer.MAX_VALUE);
+        assertTrue("should have been able to add shared file",
+            fman.addFileIfShared(f5));
+        assertTrue("should have been able to add shared file",
+            fman.addFileIfShared(f6));
+        assertEquals("unexpected number of files", 3, fman.getNumFiles());
+        assertEquals("unexpected fman size",
+            Integer.MAX_VALUE, fman.getSize());
+        responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*", 
+                                              false));
+        assertEquals("unexpected responses length", 3, responses.length);
+        assertEquals("files differ", responses[0].getName(), f3.getName());
+        assertEquals("files differ", responses[1].getName(), f5.getName());
+        assertEquals("files differ", responses[2].getName(), f6.getName());
     }
 
 
-    static File createNewTestFile(int size) throws Exception {
-		File file = File.createTempFile("FileManager_unit_test", ".XYZ", _testDir);
+    File createNewTestFile(int size) throws Exception {
+		File file = File.createTempFile("FileManager_unit_test", 
+		    "." + EXTENSION , _sharedDir);
 		file.deleteOnExit();
         OutputStream out=new FileOutputStream(file);
         out.write(new byte[size]);
@@ -207,8 +270,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static class HugeFakeFile extends File {
         long length;
 
-        public HugeFakeFile(File directory, String name, long length) {
-            super(directory, name);
+        public HugeFakeFile(File dir, String name, long length) {
+            super(dir, name);
             this.length=length;
         }
 
