@@ -116,7 +116,7 @@ public final class CapabilitiesVM extends VendorMessage {
     private static void addSupportedMessages(Set hashSet) {
         SupportedMessageBlock smp = null;
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
-                                        WHAT_FEATURE_SEARCH_SELECTOR);
+                                        FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
         smp=new SupportedMessageBlock(SIMPP_CAPABILITIES_BYTES, _simppVersion);
         hashSet.add(smp);
