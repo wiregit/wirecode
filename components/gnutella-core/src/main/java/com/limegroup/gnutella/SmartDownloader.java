@@ -102,7 +102,13 @@ public class SmartDownloader extends HTTPDownloader {
 				_sizeOfFile = -1;
 			}
 
+		} // end of while loop
+
+		if (_state != COMPLETE) {
+			_state = ERROR;
+			_stateString = "Error";
 		}
+			
 		
 		
 	}
