@@ -200,7 +200,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
+            LEAF.write((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
 
@@ -209,7 +209,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+            ULTRAPEER_1.write((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
         }
 
@@ -355,7 +355,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
@@ -376,7 +376,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 										 new Response[] {response1},
 										 guid1, false);
         drain(ULTRAPEER_2);
-		LEAF.send(reply1);
+		LEAF.write(reply1);
 		LEAF.flush();
 		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
         assertNotNull(qRep);
@@ -386,7 +386,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend the probe....
         request.setTTL((byte)2);
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         // leaves don't get any unexpected messages, no use using
@@ -413,7 +413,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         request.setTTL((byte)1);
         assertEquals(1, request.getHops());
 
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
@@ -434,7 +434,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 										 new Response[] {response1},
 										 guid1, false);
         drain(ULTRAPEER_2);
-		LEAF.send(reply1);
+		LEAF.write(reply1);
 		LEAF.flush();
 		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
         assertNotNull(qRep);
@@ -444,7 +444,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend the probe....
         request.setTTL((byte)2);
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         // leaves don't get any unexpected messages, no use using
@@ -469,7 +469,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
@@ -482,7 +482,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         Thread.sleep(2*1000);
 
         // test that the duplicate probe doesn't go anywhere it isn't supposed
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         // should NOT be forwarded to leaf again....
@@ -504,7 +504,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.setTTL((byte)1);
 
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
@@ -518,7 +518,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend the probe....
         request.setTTL((byte)3);
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         // leaves don't get any unexpected messages, no use using
@@ -539,7 +539,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 
         // extend it again but make sure it doesn't get through...
         request.setTTL((byte)4);
-        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.write(request);
         ULTRAPEER_2.flush();
 
         // should NOT be forwarded to leaf again....
@@ -563,7 +563,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             QueryRequest request = QueryRequest.createQuery("berkeley");
             request.setTTL((byte)i);
 
-            ULTRAPEER_2.send(request);
+            ULTRAPEER_2.write(request);
             ULTRAPEER_2.flush();
 
             QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
@@ -581,7 +581,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             
             // extend the probe....
             request.setTTL((byte)(i+1));
-            ULTRAPEER_2.send(request);
+            ULTRAPEER_2.write(request);
             ULTRAPEER_2.flush();
 
             // should be counted as a duplicate and not forwarded anywhere...

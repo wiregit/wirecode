@@ -524,7 +524,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
 		c.initialize();
 		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-            c.send(query);
+            c.write(query);
             c.flush();
             QueryReply reply=null;
             while (true) {
@@ -544,7 +544,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
             //Create listening socket, then send push.
             ServerSocket ss=new ServerSocket(callbackPort);
-            c.send(push);
+            c.write(push);
             c.flush();
             Socket s=ss.accept();
             BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -584,7 +584,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
         c.initialize();
         QueryRequest query = QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
+        c.write(query);
         c.flush();
         QueryReply reply=null;
         while (true) {
@@ -604,7 +604,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Create listening socket, then send push.
         ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
+        c.write(push);
         c.flush();
         Socket s=ss.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -831,7 +831,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		Connection c = createConnection();
         c.initialize();
         QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
+        c.write(query);
         c.flush();
         QueryReply reply=null;
         while (true) {
@@ -850,7 +850,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Create listening socket, then send push.
         ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
+        c.write(push);
         c.flush();
         Socket s=ss.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(

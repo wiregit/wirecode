@@ -208,7 +208,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
+            LEAF.write((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
 
@@ -217,7 +217,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+            ULTRAPEER_1.write((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
         }
 
@@ -363,7 +363,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 
         // send a query
         QueryRequest query = QueryRequest.createQuery("metadata");
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // confirm that result has heXML.
@@ -381,7 +381,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 
         // send a query
         QueryRequest query = QueryRequest.createQuery("Alternative", richQuery);
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // confirm that result has heXML.

@@ -220,7 +220,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
+            LEAF.write((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
 
@@ -229,7 +229,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+            ULTRAPEER_1.write((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
         }
 
@@ -382,7 +382,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // we should get a reply via UDP
@@ -412,7 +412,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                  UDP_ACCESS.getLocalPort(), 
                                  InetAddress.getLocalHost().getAddress(), 
                                  10, 10, true, 900, true);
-            ULTRAPEER_1.send(pong);
+            ULTRAPEER_1.write(pong);
             ULTRAPEER_1.flush();
 
             // wait for the ping request from the test UP
@@ -446,7 +446,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             // tell the UP i can support UDP connect back
             MessagesSupportedVendorMessage support = 
                 MessagesSupportedVendorMessage.instance();
-            ULTRAPEER_1.send(support);
+            ULTRAPEER_1.write(support);
             ULTRAPEER_1.flush();
 
             byte[] cbGuid = null;
@@ -487,7 +487,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
@@ -604,7 +604,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
@@ -697,7 +697,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.write(query);
         ULTRAPEER_1.flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
@@ -765,7 +765,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_2.send(query);
+        ULTRAPEER_2.write(query);
         ULTRAPEER_2.flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
@@ -837,11 +837,11 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             query.hop();
 
             if (rand.nextInt(2) == 0) {
-                ULTRAPEER_2.send(query);
+                ULTRAPEER_2.write(query);
                 ULTRAPEER_2.flush();
             }
             else {
-                ULTRAPEER_1.send(query);
+                ULTRAPEER_1.write(query);
                 ULTRAPEER_1.flush();
             }
 
@@ -872,7 +872,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                                   UDP_ACCESS.getLocalPort());
             query.hop();
 
-            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.write(query);
             ULTRAPEER_1.flush();
         }
 
@@ -898,7 +898,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         byte[] crapIP = {0,0,0,0};
         QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
                                                                crapIP, 6346);
-        LEAF.send(query);
+        LEAF.write(query);
         LEAF.flush();
 
         // ultrapeers should NOT get the QR
@@ -913,7 +913,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             QueryRequest.createOutOfBandQuery("berkeley", 
                                               socket.getLocalAddress().getAddress(),
                                               6346);
-        LEAF.send(query);
+        LEAF.write(query);
         LEAF.flush();
 
         Thread.sleep(4000);
@@ -935,7 +935,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             QueryRequest.createOutOfBandQuery("susheel",
                                               UDP_ACCESS.getLocalAddress().getAddress(),
                                               UDP_ACCESS.getLocalPort());
-        ULTRAPEER_2.send(query);
+        ULTRAPEER_2.write(query);
         ULTRAPEER_2.flush();
 
         // ULTRAPEER_2 should get a reply via TCP

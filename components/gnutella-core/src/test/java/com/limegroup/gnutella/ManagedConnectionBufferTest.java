@@ -158,7 +158,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("unexpected # sent messages", 0, out.getNumMessagesSent()); 
         assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
         pr=new PingRequest((byte)3);
-        out.send(pr);
+        out.write(pr);
         start=System.currentTimeMillis();        
         pr=(PingRequest)in.receive();
         elapsed=System.currentTimeMillis()-start;
@@ -200,123 +200,125 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		throws IOException, BadPacketException {
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
-        out.stopOutputRunner();
+        
+        //TODO::NIO
+        //out.stopOutputRunner();
         Message m=null;
 
         // send QueryRequest		
-		out.send(QueryRequest.createQuery("test", (byte)5));
+		out.write(QueryRequest.createQuery("test", (byte)5));
 
         // send PingRequest with one hop
         m=new PingRequest((byte)5);
         m.hop();
-        out.send(m);
+        out.write(m);
 
         // send QueryReply with priority 1
         m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(30000);
-        out.send(m);
+        out.write(m);
         
         // send 3 push requests
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6340));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6341));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6342));
                                  
         // send QueryReply with priority 1
         m=new QueryReply(new byte[16], (byte)5, 6343, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(30000);
-        out.send(m);
+        out.write(m);
                                  
         // send 4 push requests                                 
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6343));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6344));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6345));
-        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+        out.write(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6346));                                                                                                                                    
                                  
         // send QueryReply with priority 7                                 
         m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                          new Response[0], new byte[16], false);
-        out.send(m);
+        out.write(m);
         
         // send PingReply with 3 hops
         m=PingReply.create(new byte[16], (byte)5, 6343, new byte[4]);
         m.hop();  m.hop();  m.hop();        
-        out.send(m);
+        out.write(m);
         
         // send PingReply with 3 hops
         m=PingReply.create(new byte[16], (byte)5, 6344, new byte[4]);
         m.hop();  m.hop();  m.hop();
-        out.send(m);        
+        out.write(m);        
         
         // send QueryReply with priority 2
         m=new QueryReply(new byte[16], (byte)5, 6344, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(20000);
-        out.send(m);
+        out.write(m);
         
         // send QueryReply with priority 0
         m=new QueryReply(new byte[16], (byte)5, 6345, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(50000);
-        out.send(m);              
+        out.write(m);              
         
         // send Reset message
-        out.send(new ResetTableMessage(1024, (byte)2));
+        out.write(new ResetTableMessage(1024, (byte)2));
         
         // send a watchdog pong
-        out.send(PingReply.create(new byte[16], (byte)1, 6342, new byte[4]));
+        out.write(PingReply.create(new byte[16], (byte)1, 6342, new byte[4]));
         
         // send PingReply with 2 hops
         m = PingReply.create(new byte[16], (byte)3, 6340, new byte[4]);
         m.hop();
         m.hop();
-        out.send(m);
+        out.write(m);
         
         // send QueryReply with priority 4
         m=new QueryReply(new byte[16], (byte)5, 6346, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(5000);
-        out.send(m);            
+        out.write(m);            
         
         // send QueryReply with priority 5
         m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(1000);
-        out.send(m);
+        out.write(m);
         
         // send Patch message
-        out.send(new PatchTableMessage((short)1, (short)2, 
+        out.write(new PatchTableMessage((short)1, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 0, 5));
                                        
         // send a watchdog ping                                       
-        out.send(new PingRequest((byte)2));
+        out.write(new PingRequest((byte)2));
         
         // send Patch message
-        out.send(new PatchTableMessage((short)2, (short)2, 
+        out.write(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
 
         // send QueryRequest
-		out.send(QueryRequest.createQuery("test2", (byte)5));
+		out.write(QueryRequest.createQuery("test2", (byte)5));
 				 
         // send QueryRequest with 1 hop
 		m = QueryRequest.createQuery("test far", (byte)5);
         m.hop();
-        out.send(m);
+        out.write(m);
         
         // send QueryRequest with 2 hop
 		m = QueryRequest.createQuery("test farther", (byte)5);
         m.hop(); m.hop();
-        out.send(m);        
+        out.write(m);        
                
         //2. Now we let the messages pass through, as if the receiver's window
         //became non-zero.  Buffers should look this before emptying:
@@ -330,7 +332,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING: x
         //  OTHER: reset patch1 patch2
         out._lastPriority=0;  //cheating to make old tests work
-        out.startOutputRunner();
+		//TODO::NIO
+        //out.startOutputRunner();
 
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
@@ -492,11 +495,13 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             1000, ManagedConnection.QUEUE_TIME);
         
         //Drop one message
-        out.stopOutputRunner();        
-        out.send(QueryRequest.createQuery("0", (byte)3));   
+		//TODO::NIO
+        //out.stopOutputRunner();        
+        out.write(QueryRequest.createQuery("0", (byte)3));   
         sleep(1200);
-        out.send(QueryRequest.createQuery("1200", (byte)3)); 
-        out.startOutputRunner();
+        out.write(QueryRequest.createQuery("1200", (byte)3)); 
+		//TODO::NIO
+        //out.startOutputRunner();
         Message m=(QueryRequest)in.receive(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "1200", ((QueryRequest)m).getQuery());
@@ -509,17 +514,19 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             1, out.getNumSentMessagesDropped());
 
         //Drop many messages
-        out.stopOutputRunner();        
-        out.send(QueryRequest.createQuery("0", (byte)3));   
+		//TODO::NIO
+        //out.stopOutputRunner();        
+        out.write(QueryRequest.createQuery("0", (byte)3));   
         sleep(300);
-        out.send(QueryRequest.createQuery("300", (byte)3));        
+        out.write(QueryRequest.createQuery("300", (byte)3));        
         sleep(300);
-        out.send(QueryRequest.createQuery("600", (byte)3));        
+        out.write(QueryRequest.createQuery("600", (byte)3));        
         sleep(500);
-        out.send(QueryRequest.createQuery("1100", (byte)3));
+        out.write(QueryRequest.createQuery("1100", (byte)3));
         sleep(900);
-        out.send(QueryRequest.createQuery("2000", (byte)3));
-        out.startOutputRunner();
+        out.write(QueryRequest.createQuery("2000", (byte)3));
+		//TODO::NIO
+        //out.startOutputRunner();
         m=in.receive(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "2000", ((QueryRequest)m).getQuery());
@@ -557,20 +564,24 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         Message m=null;
 
         // head...tail
-        out.stopOutputRunner(); 
-        out.send(hopped(new PingRequest((byte)4)));
-        out.send(QueryRequest.createQuery("a", (byte)3));
-        out.startOutputRunner();
+		//TODO::NIO
+        //out.stopOutputRunner(); 
+        out.write(hopped(new PingRequest((byte)4)));
+        out.write(QueryRequest.createQuery("a", (byte)3));
+		//TODO::NIO
+        //out.startOutputRunner();
         assertInstanceof("didn't recieve queryrequest", 
             QueryRequest.class, in.receive());
         assertInstanceof("didn't recieve pingrequest", 
             PingRequest.class, in.receive());
 
         //tail...<wrap>...head
-        out.stopOutputRunner(); 
-        out.send(QueryRequest.createQuery("a", (byte)3));
-        out.send(hopped(new PingRequest((byte)5)));
-        out.startOutputRunner();
+		//TODO::NIO
+        //out.stopOutputRunner(); 
+        out.write(QueryRequest.createQuery("a", (byte)3));
+        out.write(hopped(new PingRequest((byte)5)));
+		//TODO::NIO
+        //out.startOutputRunner();
         assertInstanceof("didn't recieve pingrequest",
             PingRequest.class, in.receive());
         assertInstanceof("didn't recieve queryrequest",
@@ -584,13 +595,15 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING_REPLY: 
         //  PING: 
         //  OTHER: reset
-        out.stopOutputRunner(); 
-        out.send(new PingRequest((byte)1));
-        out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+		//TODO::NIO
+        //out.stopOutputRunner(); 
+        out.write(new PingRequest((byte)1));
+        out.write(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16], false));
-        out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(QueryRequest.createQuery("a", (byte)3));
-        out.startOutputRunner();
+        out.write(new ResetTableMessage(1024, (byte)2));
+        out.write(QueryRequest.createQuery("a", (byte)3));
+		//TODO::NIO
+        //out.startOutputRunner();
         m=in.receive();
         assertInstanceof("Got: "+m, QueryRequest.class, m);
         m=in.receive();
@@ -637,7 +650,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         long initialBytes = out.getBytesSent();
         
         for (int i=0; i<total; i++) {
-            out.send(QueryRequest.createQuery(
+            out.write(QueryRequest.createQuery(
                 "Some reaaaaaalllllly big query", (byte)3));
         }
 

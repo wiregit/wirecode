@@ -123,7 +123,7 @@ public class UnicastSimulator {
                     conn.initialize();
                     debug("UnicastSimulator.tcpLoop(): sending pings.");
                     for (int i = 0; i < _pongs.length; i++) {
-                        conn.send(_pongs[i]);
+                        conn.write(_pongs[i]);
                         Thread.sleep(10);
                     }
                     conn.close();

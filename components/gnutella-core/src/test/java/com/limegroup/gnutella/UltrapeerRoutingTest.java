@@ -207,7 +207,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
+            LEAF.write((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
 
@@ -216,7 +216,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("awesome");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+            ULTRAPEER_1.write((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
         }
 
@@ -235,7 +235,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 */
     public void testBroadcastFromUltrapeer2() throws Exception  {
 		QueryRequest qr = QueryRequest.createQuery("crap");
-        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.write(qr);
         ULTRAPEER_2.flush();
               
         Message m = ULTRAPEER_1.receive(TIMEOUT);
@@ -259,7 +259,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		
 		//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
 		QueryRequest qr = QueryRequest.createQuery("crap");
-		LEAF.send(qr);
+		LEAF.write(qr);
 		LEAF.flush();
 		
 		//Message m;
@@ -292,7 +292,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 										 56,
 										 new Response[] {response1},
 										 clientGUID, false);
-		ULTRAPEER_2.send(reply1);
+		ULTRAPEER_2.write(reply1);
 		ULTRAPEER_2.flush();
 		
 		QueryReply replyRead=(QueryReply)LEAF.receive(TIMEOUT);
@@ -305,7 +305,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryReply reply2 = 
 			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
 						   56, new Response[] {response1}, guid2, false);
-		ULTRAPEER_1.send(reply2);
+		ULTRAPEER_1.write(reply2);
 		ULTRAPEER_1.flush();
 		
 		m = LEAF.receive(TIMEOUT);
@@ -322,7 +322,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		PushRequest push1 = 
             new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 0, 
                             new byte[4], 6346);
-		LEAF.send(push1);
+		LEAF.write(push1);
 		LEAF.flush();
 		m = ULTRAPEER_2.receive(TIMEOUT);
 
@@ -336,7 +336,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		PushRequest push2 = 
             new PushRequest(GUID.makeGuid(),(byte)2, guid2, 1, 
                             new byte[4], 6346);
-		LEAF.send(push2);
+		LEAF.write(push2);
 		LEAF.flush();
 		m = ULTRAPEER_1.receive(TIMEOUT);
 		assertInstanceof("message not a PushRequest", PushRequest.class, m);
@@ -348,7 +348,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		// Check that queries can re-route push routes
 		drain(LEAF);
 		drain(ULTRAPEER_2);
-		ULTRAPEER_1.send(reply1);
+		ULTRAPEER_1.write(reply1);
 		ULTRAPEER_1.flush();
 
 		m = LEAF.receive(TIMEOUT);
@@ -358,7 +358,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
 		PushRequest push3 =
 			new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 3, new byte[4], 6346);
-		LEAF.send(push3);
+		LEAF.write(push3);
 		LEAF.flush();
 
 		m = ULTRAPEER_1.receive(TIMEOUT);
@@ -378,7 +378,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryRequest qr = 
 			QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
 
-		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.write(qr);
 		ULTRAPEER_2.flush();
 		
 		Message m = LEAF.receive(TIMEOUT);
@@ -408,7 +408,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         // first make sure it gets through on NOT last hop...
         QueryRequest qr = QueryRequest.createQuery("junkie junk", (byte)3);
         
-		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.write(qr);
 		ULTRAPEER_2.flush();
 
 		Message m = ULTRAPEER_1.receive(TIMEOUT);
@@ -421,7 +421,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         // now make sure it doesn't get through on last hop
         qr = QueryRequest.createQuery("junkie junk", (byte)2);
         
-		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.write(qr);
 		ULTRAPEER_2.flush();
 
         assertTrue(!drain(ULTRAPEER_1));
@@ -440,7 +440,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         
 
         // old test
-// 		ULTRAPEER_2.send(qr);
+// 		ULTRAPEER_2.write(qr);
 // 		ULTRAPEER_2.flush();
 
 // 		m = ULTRAPEER_1.receive(TIMEOUT);
@@ -458,7 +458,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         /*
         qr = QueryRequest.createQuery("susheel", (byte)2);
         
-		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.write(qr);
 		ULTRAPEER_2.flush();
 
 		m = ULTRAPEER_1.receive(TIMEOUT);
@@ -479,7 +479,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     private static void testLastHop(Connection sender, 
                                     Connection receiver, 
                                     QueryRequest qr) throws Exception {
-		sender.send(qr);
+		sender.write(qr);
 		sender.flush();
 
 		Message m = receiver.receive(TIMEOUT);
@@ -503,7 +503,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryRequest qr = 
 			QueryRequest.createRequery(HugeTestUtils.SHA1);
 
-		ULTRAPEER_1.send(qr);
+		ULTRAPEER_1.write(qr);
 		ULTRAPEER_1.flush();
 		
 		Message m = ULTRAPEER_2.receive(TIMEOUT);
@@ -520,7 +520,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		// is working correctly for URN queries
 		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)2);
 
-		ULTRAPEER_1.send(qr);
+		ULTRAPEER_1.write(qr);
 		ULTRAPEER_1.flush();
 
 		assertTrue("ultrapeer should not have received the query", 
@@ -537,7 +537,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryRequest qr = 
 			QueryRequest.createRequery(HugeTestUtils.SHA1);
 
-		LEAF.send(qr);
+		LEAF.write(qr);
 		LEAF.flush();
 		
 		Message m = ULTRAPEER_1.receive(TIMEOUT);
@@ -563,7 +563,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     public void testBroadcastFromUltrapeer2ToLeaf() throws Exception {
 
         QueryRequest qr = QueryRequest.createQuery("test");
-        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.write(qr);
         ULTRAPEER_2.flush();
               
         Message m = ULTRAPEER_1.receive(TIMEOUT);
@@ -586,7 +586,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 */
     public void testBroadcastFromUltrapeerToBoth() throws Exception {
         QueryRequest qr= QueryRequest.createQuery("susheel test");
-        ULTRAPEER_1.send(qr);
+        ULTRAPEER_1.write(qr);
         ULTRAPEER_1.flush();
               
         Message m=ULTRAPEER_2.receive(TIMEOUT);
@@ -611,7 +611,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     public void testPingBroadcast() throws Exception {
         //Send ping
         Message m=new PingRequest((byte)7);
-        ULTRAPEER_1.send(m);
+        ULTRAPEER_1.write(m);
         ULTRAPEER_1.flush();
               
         m=ULTRAPEER_2.receive(TIMEOUT);
@@ -626,7 +626,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         drain(ULTRAPEER_1);        
         PingReply pong = PingReply.create(m.getGUID(), (byte)7, 6344, new byte[4]);
 
-        ULTRAPEER_2.send(pong);
+        ULTRAPEER_2.write(pong);
         ULTRAPEER_2.flush();
         for (int i=0; i<10; i++) {
             PingReply pongRead=(PingReply)ULTRAPEER_1.receive(TIMEOUT);
@@ -650,7 +650,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
             payload[i] = c;
         
         Message m=new PingRequest(GUID.makeGuid(), (byte)7, (byte)0,payload);
-        LEAF.send(m);
+        LEAF.write(m);
         LEAF.flush();
             
         //1b. Make sure ultrapeer gets it with payload.
@@ -725,7 +725,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
         PingReply pong = 
             PingReply.createFromNetwork(m.getGUID(), (byte)7, (byte)0, payload2);
-        ULTRAPEER_1.send(pong);
+        ULTRAPEER_1.write(pong);
         ULTRAPEER_1.flush();
 
         //2b. Make sure leaf reads it.
@@ -771,7 +771,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
             PingReply.createExternal(GUID.makeGuid(), (byte)6, 7399, 
                                      new byte[4], false);
 
-        ULTRAPEER_1.send(m);
+        ULTRAPEER_1.write(m);
         ULTRAPEER_1.flush();
               
 		assertTrue("should not have drained ultrapeer successfully", 
@@ -788,7 +788,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)0, (byte)143};
         Message m = PingReply.createExternal(guid, (byte)7, 7399, ip, true);
-        ULTRAPEER_1.send(m);
+        ULTRAPEER_1.write(m);
         ULTRAPEER_1.flush();
               
         m=LEAF.receive(TIMEOUT);
@@ -807,7 +807,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     public void testDropAndDuplicate() throws Exception {
         //Send query request from leaf, received by ultrapeer (and ULTRAPEER_2)
         QueryRequest qr = QueryRequest.createQuery("crap");
-        LEAF.send(qr);
+        LEAF.write(qr);
         LEAF.flush();
         
         Message m=ULTRAPEER_1.receive(TIMEOUT);
@@ -824,7 +824,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         drain(ULTRAPEER_1);
         LEAF.close();
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.write(qr);
         ULTRAPEER_2.flush();
 
 		assertTrue("should not have drained ultrapeer successfully", 
