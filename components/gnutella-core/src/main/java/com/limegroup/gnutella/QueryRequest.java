@@ -175,7 +175,7 @@ public class QueryRequest extends Message implements Serializable{
 
             // now write any & all HUGE v0.93 General Extension Mechanism 
 			// extensions
-            boolean addDelimiterBefore = false;
+            boolean addDelimiterBefore = (ggep != null);
 			
 			// add the rich query
             addDelimiterBefore = 
