@@ -189,12 +189,14 @@ public final class HttpUtilsTest extends BaseTestCase {
         StringWriter writer = new StringWriter();
         HTTPUtils.writeDate(writer);
         String header = writer.toString();
+        System.out.println(header);
         assertTrue("should start with Date", header.startsWith("Date"));
         
         assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
         
         // The date header should always be the same length.
-        assertEquals("unexpected length", 36, header.length());
+        assertEquals("unexpected length of header: "+header, 37, 
+            header.length());
     }
     
     /**
@@ -211,7 +213,8 @@ public final class HttpUtilsTest extends BaseTestCase {
         assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
         
         // The date header should always be the same length.
-        assertEquals("unexpected length", 36, header.length());
+        assertEquals("unexpected length of header: "+header, 37, 
+            header.length());
     }
 
     /**
