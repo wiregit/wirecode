@@ -21,6 +21,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_UDP_CONNECT_BACK = 7;
     protected static final int F_LIME_ACK = 11;
     protected static final int F_REPLY_NUMBER = 12;
+    protected static final int F_PUSH_PROXY_REQ = 21;
+    protected static final int F_PUSH_PROXY_ACK = 22;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -219,6 +221,16 @@ public abstract class VendorMessage extends Message {
             // UDP CONNECT BACK
             return new UDPConnectBackVendorMessage(guid, ttl, hops, version, 
                                                    restOf);
+        if ((selector == F_PUSH_PROXY_REQ) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            // Push Proxy Request
+            return new PushProxyRequest(guid, ttl, hops, version, restOf);
+        if ((selector == F_PUSH_PROXY_ACK) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            // Push Proxy Acknowledgement
+            return new PushProxyAcknowledgement(guid, ttl, hops, version, 
+                                                restOf);
+
         throw UNRECOGNIZED_EXCEPTION;
     }
     
