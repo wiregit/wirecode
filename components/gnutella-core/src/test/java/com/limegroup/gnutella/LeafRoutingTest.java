@@ -1,13 +1,8 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 
@@ -24,7 +19,7 @@ import java.net.*;
  * Ultrapeers.
  */
 public class LeafRoutingTest extends BaseTestCase {
-    private static final int PORT=6669;
+    private static final int SERVER_PORT = 6669;
     private static final int TIMEOUT=500;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
@@ -54,7 +49,7 @@ public class LeafRoutingTest extends BaseTestCase {
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(SERVER_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
@@ -78,12 +73,12 @@ public class LeafRoutingTest extends BaseTestCase {
         ActivityCallback callback=new ActivityCallbackStub();
         rs=new RouterService(callback);
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
+            SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
+        RouterService.clearHostCatcher();
         assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
+            SERVER_PORT, ConnectionSettings.PORT.getValue());
+        connect();
     }        
     
     public void setUp() throws Exception  {
@@ -96,20 +91,19 @@ public class LeafRoutingTest extends BaseTestCase {
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
-         throws Exception {
+     private static void connect() throws Exception {
          debug("-Establish connections");
 
-         ultrapeer1 = connect(rs, 6350, true);
-         ultrapeer2 = connect(rs, 6351, true);
-         old1 = connect(rs, 6352, true);
-         old2 = connect(rs, 6353, true);
+         ultrapeer1 = connect(6350, true);
+         ultrapeer2 = connect(6351, true);
+         old1 = connect(6352, true);
+         old2 = connect(6353, true);
      }
      
-    private static Connection connect(RouterService rs, int port, boolean ultrapeer) 
+    private static Connection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -186,8 +180,8 @@ public class LeafRoutingTest extends BaseTestCase {
     public void testLeafBroadcast() 
             throws IOException, BadPacketException {
         debug("-Leaf Broadcast test");        
-        byte[] guid=rs.newQueryGUID();
-        rs.query(guid, "crap");
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "crap");
 
         while (true) {
             assertNotNull("ultrapeer1 is null", ultrapeer1);
@@ -230,7 +224,7 @@ public class LeafRoutingTest extends BaseTestCase {
      */
     public void testRedirect() {
         debug("-Test X-Try/X-Try-Ultrapeer headers");
-        Connection c=new Connection("127.0.0.1", PORT,
+        Connection c=new Connection("127.0.0.1", SERVER_PORT,
                                     new Properties(),
                                     new EmptyResponder()
                                     );
@@ -314,7 +308,7 @@ public class LeafRoutingTest extends BaseTestCase {
      * Tests to make sure that connections to old hosts are not allowed
      */
     public void testConnectionToOldDisallowed() {
-        Connection c=new Connection("127.0.0.1", PORT,
+        Connection c=new Connection("127.0.0.1", SERVER_PORT,
                                     new Properties(),
                                     new EmptyResponder()
                                     );
@@ -330,7 +324,7 @@ public class LeafRoutingTest extends BaseTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(rs.getFileManager().getNumFiles() == 2);
+        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
 
         // send a query that should hit
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
@@ -352,7 +346,7 @@ public class LeafRoutingTest extends BaseTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(rs.getFileManager().getNumFiles() == 2);
+        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
 
         // get the URNS for the files
         File berkeley = 
