@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.NetworkUtils;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
@@ -49,6 +50,10 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
 
             // get the port....
             _port = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+
+            if( !NetworkUtils.isValidPort(_port) )
+                throw new BadPacketException("invalid connectback port.");
+
             if (getVersion() == 1) {
                 // get the guid....
                 byte[] guidBytes = new byte[16];

@@ -186,7 +186,8 @@ public class Response {
 					 byte[] rawMeta) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
-        if( (size &  0xFFFFFFFF00000000L)!=0 )
+        // see note in createFromStream about Integer.MAX_VALUE
+        if (size > Integer.MAX_VALUE || size < 0)
             throw new IllegalArgumentException("invalid size: " + size);
         this.index=index;
         this.size=size;
@@ -248,7 +249,11 @@ public class Response {
         
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IOException("invalid index: " + index);
-        if( (size &  0xFFFFFFFF00000000L)!=0 )
+        // must use Integer.MAX_VALUE instead of mask because
+        // this value is later converted to an int, so we want
+        // to ensure that when it's converted it doesn't become
+        // negative.
+        if (size > Integer.MAX_VALUE || size < 0)
             throw new IOException("invalid size: " + size);        
 
         //The file name is terminated by a null terminator.  
