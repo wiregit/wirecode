@@ -27,6 +27,7 @@ public class HeadTest extends BaseTestCase {
 	 */
 	static FileManagerStub _fm;
 	static UploadManagerStub _um;
+	static ConflictsDM _dm;
 	
 	/**
 	 * two collections of altlocs, one for the complete and one for the incomplete file
@@ -72,6 +73,7 @@ public class HeadTest extends BaseTestCase {
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
 		_fm = new FileManagerStub();
 		_um = new UploadManagerStub();
+		_dm = new ConflictsDM();
 		
 		int base=0;
 		_ranges = new IntervalSet();
@@ -196,6 +198,31 @@ public class HeadTest extends BaseTestCase {
 		assertNull(pongi.getRanges());
 	}
 	
+	/**
+	 * tests whether the downloading flag is set properly.
+	 */
+	public void testDownloading() throws Exception {
+		
+		//replace the downloadManger with a stub
+		Object originalDM = RouterService.getDownloadManager();
+		
+		PrivilegedAccessor.setValue(RouterService.class,"downloader",_dm);
+		_dm._conflicts.add(_havePartial);
+		
+		HeadPing ping = new HeadPing(_havePartial);
+		HeadPong pong = reparse (new HeadPong(ping));
+		
+		assertTrue(pong.isDownloading());
+		
+		_dm._conflicts.clear();
+		
+		pong = reparse (new HeadPong(ping));
+		
+		assertFalse(pong.isDownloading());
+		
+		//restore the original download manager
+		PrivilegedAccessor.setValue(RouterService.class,"downloader",originalDM);
+	}
 	/**
 	 * tests requesting ranges from complete, incomplete files
 	 * as well as requesting too big ranges to fit in packet.
@@ -382,4 +409,11 @@ public class HeadTest extends BaseTestCase {
 		_alCollectionIncomplete.add(firewalled);
 	}
 	
+	
+	static class ConflictsDM extends DownloadManagerStub {
+		public Set _conflicts= new HashSet();
+		public boolean conflicts(URN urn) {
+			return _conflicts.contains(urn);
+		}
+	}
 }
