@@ -38,8 +38,14 @@ public class HTTPHeaderName {
 	/**
 	 * Header for specifying the URN of the file, as per HUGE v0.94.
 	 */
-	public static final HTTPHeaderName CONTENT_URN =
+	public static final HTTPHeaderName GNUTELLA_CONTENT_URN =
 		new HTTPHeaderName("X-Gnutella-Content-URN");
+
+	/**
+	 * Header for specifying the URN of the file, as per HUGE v0.94.
+	 */
+	//public static final HTTPHeaderName CONTENT_URN =
+	//new HTTPHeaderName("X--Content-URN");
 
 	/**
 	 * Header for specifying the byte range of the content.
@@ -77,6 +83,29 @@ public class HTTPHeaderName {
      */
     public static final HTTPHeaderName CONNECTION =
         new HTTPHeaderName("Connection");
+
+	/**
+	 * Header for specifying a THEX URI.  THEX URIs are of the form:<p>
+	 *
+	 * X-Thex-URI: <URI> ; <ROOT>.<p>
+	 *
+	 * This informs the client where the full Tiger tree hash can be 
+	 * retrieved.
+	 */
+	public static final HTTPHeaderName THEX_URI =
+		new HTTPHeaderName("X-Thex-URI");
+
+	/**
+	 * Header for the available ranges of a file currently available,
+	 * as specified in the Partial File Sharing Protocol.  This takes the
+	 * save form as the Content-Range header, as in:<p>
+	 * 
+	 * X-Available-Ranges: bytes 0-10,20-30
+	 */
+	public static final HTTPHeaderName AVAILABLE_RANGES =
+		new HTTPHeaderName("X-Available-Ranges");
+
+
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
