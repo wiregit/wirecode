@@ -370,7 +370,9 @@ public class Acceptor extends Thread {
             } catch (IOException e) {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
-            }
+            } catch(Exception e) {
+				_callback.error(ActivityCallback.INTERNAL_ERROR, e);
+			}
         }
     }
 
