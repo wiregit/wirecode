@@ -109,6 +109,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Finer-grained locking is probably possible but not necessary.  Do not
      * hold lock while performing blocking IO operations.
      ***********************************************************************/
+    
+    private Object downloaderLock = new Object();
+
 
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
@@ -518,6 +521,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         Object lock =  miniRFDToLock.get(mrfd);
         if(lock == null) //not in map. Not intended for me
             return false;
+        }
         threadLockToSocket.put(lock,socket);
         synchronized(lock) {
             lock.notify();
@@ -1078,7 +1082,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         if (stopped) {//this rfd may still be useful remember it
             //throw new InterruptedException();
-            synchronized(this){
+            synchronized(downloaderLock) {
                 files.add(rfd);
             }
             return null;
@@ -1087,11 +1091,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         File incompleteFile=incompleteFileManager.getFile(rfd);
         HTTPDownloader ret;
         boolean needsPush=needsPush(rfd);
-        synchronized (this) {
+        synchronized (downloaderLock) {
             currentLocation=rfd.getHost();
-            //If we're just increasing parallelism, stay in DOWNLOADING
-            //state.  Otherwise the following call is needed to restart
-            //the timer.
+            //TODO2: We need to work out state issues here.
             if (dloaders.size()==0)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
@@ -1115,7 +1117,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Fell thro'... either rfd  needed a push OR 
         //we were not able to connect, so try to push anyway...
 
-        //We the push is complete and we have a socket ready to use
+        //The push is complete and we have a socket ready to use
         //the acceptor thread is going to notify us using this object
         Object threadLock = new Object();
         MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
@@ -1137,9 +1139,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
-        if (pushSocket==null) 
+        if (pushSocket==null)
             return null; //throw new NoSuchElementException();
-        
+
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
         try {
@@ -1158,52 +1160,53 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param dloader The downloader to which this method assigns either
      * a grey area or white area.
      */
-    private synchronized boolean assignAndRequest(HTTPDownloader dloader) {
-        try {
-            if (needed.size()>0)
-                assignWhite(dloader);
-            else
-                assignGrey(dloader); 
-        } catch(TryAgainLaterException talx) {
-            debug("talx thrown in assignAndRequest");
-            updateNeeded(dloader);
-            busy.add(dloader.getRemoteFileDesc());//try this rfd later
-            return false;
-        } catch (FileNotFoundException fnfx) {
-            debug("fnfx thrown in assignAndReplace");
-            updateNeeded(dloader);
-            return false;//discard the rfd of dloader
-        } catch (NotSharingException nsx) {
-            debug("nsx thrown in assignAndReplace");
-            updateNeeded(dloader);
-            return false;//discard the rfd of dloader
-        } catch(NoSuchElementException nsex) {
-            //thrown in assignGrey.The downloader we were trying to steal from
-            //is not mutated.  
-            //DO NOT CALL updateNeeded() here! 
-            debug("nsex thrown in assingAndReplace");
-            files.add(dloader.getRemoteFileDesc());
-            return false;
-        } catch (IOException iox) {
-            debug("iox thrown in assignAndReplace");
-            updateNeeded(dloader);
-            return false; //discard the rfd of dloader
-        }
+    private boolean assignAndRequest(HTTPDownloader dloader) {
+        synchronized(downloaderLock) {
+            try {
+                if (needed.size()>0)
+                    assignWhite(dloader);
+                else
+                    assignGrey(dloader); 
+            } catch(TryAgainLaterException talx) {
+                debug("talx thrown in assignAndRequest");
+                updateNeeded(dloader);
+                busy.add(dloader.getRemoteFileDesc());//try this rfd later
+                return false;
+            } catch (FileNotFoundException fnfx) {
+                debug("fnfx thrown in assignAndReplace");
+                updateNeeded(dloader);
+                return false;//discard the rfd of dloader
+            } catch (NotSharingException nsx) {
+                debug("nsx thrown in assignAndReplace");
+                updateNeeded(dloader);
+                return false;//discard the rfd of dloader
+            } catch(NoSuchElementException nsex) {
+                //thrown in assignGrey.The downloader we were trying to steal
+                //from is not mutated. DO NOT CALL updateNeeded() here!
+                debug("nsex thrown in assingAndReplace");
+                files.add(dloader.getRemoteFileDesc());
+                return false;
+            } catch (IOException iox) {
+                debug("iox thrown in assignAndReplace");
+                updateNeeded(dloader);
+                return false; //discard the rfd of dloader
+            }
 
-        //did not throw exception? OK. we are downloading
-        setState(DOWNLOADING);
-        if (stopped) {
-            debug("Stopped in assignAndRequest");
-            updateNeeded(dloader); //give back a white area
-            files.add(dloader.getRemoteFileDesc());
-            return false;//throw new InterruptedException();
+            //did not throw exception? OK. we are downloading
+            setState(DOWNLOADING);
+            if (stopped) {
+                debug("Stopped in assignAndRequest");
+                updateNeeded(dloader); //give back a white area
+                files.add(dloader.getRemoteFileDesc());
+                return false;//throw new InterruptedException();
+            }
+            dloaders.add(dloader);
+            chatList.addHost(dloader);
+            return true;
+            //System.out.println("MANAGER: downloading from "
+            // +dloader.getInitialReadingPoint()+" to "+
+            //+(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
         }
-        dloaders.add(dloader);
-        chatList.addHost(dloader);
-        return true;
-        //System.out.println("MANAGER: downloading from "
-        // +dloader.getInitialReadingPoint()+" to "+
-        //+(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
     }
 
     /**
@@ -1212,15 +1215,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void assignWhite(HTTPDownloader dloader) throws IOException, 
     TryAgainLaterException, FileNotFoundException, NotSharingException {
-        //Assign "white" (unclaimed) interval to new downloader.
-        //TODO2: choose biggest, earliest, etc.
-        //TODO2: assign to existing downloader if possible, without
-        //      increasing parallelism
-        Interval interval=(Interval)needed.remove(0);
-        //this line can throw a bunch of exceptions.
-        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high);
-        dloader.stopAt(interval.high);
-        debug("WORKER: picking white "+interval+" to "+dloader);
+        //this method called only fm assignAndRequest, locking may be redundant
+        synchronized(downloaderLock) {
+            //Assign "white" (unclaimed) interval to new downloader.
+            //TODO2: choose biggest, earliest, etc.
+            //TODO2: assign to existing downloader if possible, without
+            //      increasing parallelism
+            Interval interval=(Interval)needed.remove(0);
+            //this line can throw a bunch of exceptions.
+            dloader.connectHTTP(getOverlapOffset(interval.low), interval.high);
+            dloader.stopAt(interval.high);
+            debug("WORKER: picking white "+interval+" to "+dloader);
+        }
     }
 
     /**
@@ -1234,66 +1240,69 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void assignGrey(HTTPDownloader dloader) 
         throws NoSuchElementException,  IOException, TryAgainLaterException, 
                FileNotFoundException, NotSharingException {
-        //Split largest "gray" interval, i.e., steal part of another
-        //downloader's region for a new downloader.  
-        //TODO3: split interval into P-|dloaders|, etc., not just half
-        //TODO3: account for speed
-        //TODO3: there is a minor race condition where biggest and 
-        //      dloader could write to the same region of the file
-        //      I think it's ok, though it could result in >100% in the GUI
-        HTTPDownloader biggest=null;
-        synchronized (this) {
-            for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                HTTPDownloader h=(HTTPDownloader)iter.next();
-                if (biggest==null 
-                    || h.getAmountToRead()>biggest.getAmountToRead())
-                    biggest=h;
-            }                
-        }
-        if (biggest==null) {//Not using downloader...but RFD maybe useful
-            throw new NoSuchElementException();
-        }
-        //Note that getAmountToRead() and getInitialReadingPoint() are
-        //constant.  getAmountRead() is not, so we "capture" it into a
-        //variable.
-        int amountRead=biggest.getAmountRead();
-        int left=biggest.getAmountToRead()-amountRead;
-        if (left < MIN_SPLIT_SIZE) { 
-            float bandwidth = -1;//initialize
-            try {
-                bandwidth = biggest.getMeasuredBandwidth();
-            } catch (InsufficientDataException ide) {
+        //this method called only fm assignAndRequest, locking may be redundant
+        synchronized(downloaderLock) {
+            //Split largest "gray" interval, i.e., steal part of another
+            //downloader's region for a new downloader.  
+            //TODO3: split interval into P-|dloaders|, etc., not just half
+            //TODO3: account for speed
+            //TODO3: there is a minor race condition where biggest and 
+            //      dloader could write to the same region of the file
+            //      I think it's ok, though it could result in >100% in the GUI
+            HTTPDownloader biggest=null;
+            synchronized (this) {
+                for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
+                    HTTPDownloader h=(HTTPDownloader)iter.next();
+                    if (biggest==null 
+                        || h.getAmountToRead()>biggest.getAmountToRead())
+                        biggest=h;
+                }                
+            }
+            if (biggest==null) {//Not using downloader...but RFD maybe useful
                 throw new NoSuchElementException();
             }
-            if(bandwidth < MIN_ACCEPTABLE_SPEED) {
-                //replace (bad boy) biggest if possible
+            //Note that getAmountToRead() and getInitialReadingPoint() are
+            //constant.  getAmountRead() is not, so we "capture" it into a
+            //variable.
+            int amountRead=biggest.getAmountRead();
+            int left=biggest.getAmountToRead()-amountRead;
+            if (left < MIN_SPLIT_SIZE) { 
+                float bandwidth = -1;//initialize
+                try {
+                    bandwidth = biggest.getMeasuredBandwidth();
+                } catch (InsufficientDataException ide) {
+                    throw new NoSuchElementException();
+                }
+                if(bandwidth < MIN_ACCEPTABLE_SPEED) {
+                    //replace (bad boy) biggest if possible
+                    int start=
+                    biggest.getInitialReadingPoint()+amountRead;
+                    int stop=
+                    biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                    //this line could throw a bunch of exceptions
+                    dloader.connectHTTP(getOverlapOffset(start), stop);
+                    dloader.stopAt(stop);
+                    debug("WORKER: picking stolen grey "
+                          +start+"-"+stop+" from "+biggest+" to "+dloader);
+                    biggest.stopAt(start);
+                    biggest.stop();
+                }
+                else { //less than MIN_SPLIT_SIZE...but we are doing fine...
+                    throw new NoSuchElementException();
+                }
+            }
+            else { //There is a big enough chunk to split...split it
                 int start=
-                biggest.getInitialReadingPoint()+amountRead;
+                biggest.getInitialReadingPoint()+amountRead+left/2;
                 int stop=
                 biggest.getInitialReadingPoint()+biggest.getAmountToRead();
                 //this line could throw a bunch of exceptions
                 dloader.connectHTTP(getOverlapOffset(start), stop);
                 dloader.stopAt(stop);
-                debug("WORKER: picking stolen grey "
-                      +start+"-"+stop+" from "+biggest+" to "+dloader);
                 biggest.stopAt(start);
-                biggest.stop();
+                debug("MANAGER: assigning split grey "
+                      +start+"-"+stop+" from "+biggest+" to "+dloader);
             }
-            else { //less than MIN_SPLIT_SIZE...but we are doing fine...
-                throw new NoSuchElementException();
-            }
-        }
-        else { //There is a big enough chunk to split...split it
-            int start=
-            biggest.getInitialReadingPoint()+amountRead+left/2;
-            int stop=
-            biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-            //this line could throw a bunch of exceptions
-            dloader.connectHTTP(getOverlapOffset(start), stop);
-            dloader.stopAt(stop);
-            biggest.stopAt(start);
-            debug("MANAGER: assigning split grey "
-                  +start+"-"+stop+" from "+biggest+" to "+dloader);
         }
     }
 
@@ -1330,7 +1339,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
-            synchronized (this) {
+            synchronized (downloaderLock) {
                 dloaders.remove(downloader);
                 if(!problem)
                     files.add(rfd);
@@ -1339,7 +1348,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.getFile(rfd),
                     init,
                     init+downloader.getAmountRead());
-                this.notifyAll();
+                downloaderLock.notifyAll();
             }
         }
     }

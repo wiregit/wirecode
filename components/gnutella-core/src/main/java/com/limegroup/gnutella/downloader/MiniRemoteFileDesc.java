@@ -34,7 +34,8 @@ public class MiniRemoteFileDesc {
 
     ///////////////////method for Hashtable/////////////////
 
-    public boolean equals(MiniRemoteFileDesc other) {
+    public boolean equals(Object o) {
+        MiniRemoteFileDesc other = (MiniRemoteFileDesc)o;
         if(index == other.getIndex() &&
            file.equals(other.getFile()) &&           
            Arrays.equals(clientGUID,other.getGUID())
@@ -46,5 +47,9 @@ public class MiniRemoteFileDesc {
     public int hashCode() {
         GUID guid = new GUID(clientGUID);
         return guid.hashCode();
+    }
+
+    public String toString() {
+        return "<"+file+", "+index+", "+(new GUID(clientGUID))+" >";
     }
 }
