@@ -432,6 +432,9 @@ public class LimeXMLReplyCollection{
         synchronized (mainMap) {
             doc = (LimeXMLDocument) mainMap.get(hash);
         }
+        
+        if(doc == null)
+            return retObjs;
 
         ID3Editor e = new ID3Editor();
         String xml = null;
