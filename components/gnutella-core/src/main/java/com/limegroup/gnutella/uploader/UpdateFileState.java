@@ -20,14 +20,12 @@ public class UpdateFileState implements HTTPMessage {
 
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
-        System.out.println("Sumeet: writeHeaders start");
         //If any of this throws an exception, we will not send the headers.
         File f = new File("lib\\update.xml");
         RandomAccessFile raf = new RandomAccessFile(f,"r");
         int len = (int)raf.length();//not a very long file so no risk
         updateContents = new byte[len];
         raf.read(updateContents);
-        System.out.println("Sumeet: read file...writing to network");
         //Read the file OK. Now send the headers. 
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
@@ -40,7 +38,6 @@ public class UpdateFileState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		str = "\r\n";
         ostream.write(str.getBytes());
-        System.out.println("Sumeet: writeHeaders end");
     }
     
     public void writeMessageBody(OutputStream ostream) throws IOException  {

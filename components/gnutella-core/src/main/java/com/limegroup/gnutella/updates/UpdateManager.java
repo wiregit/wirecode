@@ -97,7 +97,7 @@ public class UpdateManager {
         final Connection c = connection;
         Thread checker = new Thread() {
             public void run() {
-                System.out.println("Sumeet...getting file.");
+                debug("Getting update file");
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
