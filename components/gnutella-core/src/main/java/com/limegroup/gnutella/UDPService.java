@@ -496,6 +496,8 @@ public final class UDPService implements Runnable {
                 return true;
             if(scan(msg, 10091, "network subsystem is unavailable"))
                 return true;
+            if(scan(msg, 10107, "Option unsupported by protocol"))
+                return true;
                 
             // General invalid error on Linux
             if(msg.indexOf("operation not permitted") > -1)
@@ -510,6 +512,8 @@ public final class UDPService implements Runnable {
          */
         private boolean scan(final String msg, int code, final String name) {
             if(msg.indexOf("code="+code) > -1)
+                return true;
+            if(msg.indexOf("error: "+code) > -1)
                 return true;
             if(msg.indexOf(name) > -1)
                 return true;
