@@ -31,7 +31,7 @@ public final class UrnCache {
     /**
      * UrnCache container
      */
-    private final Map /* URNSetKey -> HashSet */ URN_MAP;
+    private final Map /* UrnSetKey -> HashSet */ URN_MAP;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -75,7 +75,7 @@ public final class UrnCache {
         if (file.lastModified() == 0L) {
 			return EMPTY_SET;
 		} 
-		URNSetKey key = new URNSetKey(file);
+		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
@@ -94,7 +94,7 @@ public final class UrnCache {
 	 * @param fileDesc the <tt>FileDesc</tt> instance containing URNs to store
      */
     public void addUrns(File file, Set urns) {
-		URNSetKey key = new URNSetKey(file);
+		UrnSetKey key = new UrnSetKey(file);
         URN_MAP.put(key, Collections.unmodifiableSet(urns));
     }
     
@@ -125,7 +125,7 @@ public final class UrnCache {
         // discard outdated info
         Iterator iter = urnMap.keySet().iterator();
         while (iter.hasNext()) {
-			URNSetKey key = (URNSetKey)iter.next();
+			UrnSetKey key = (UrnSetKey)iter.next();
 
             // check to see if file still exists unmodified
             File f = new File(key._path);
@@ -154,8 +154,10 @@ public final class UrnCache {
 	/**
 	 * Private class for the key for the set of URNs for files.
 	 */
-	private static class URNSetKey implements Serializable {
+	private static class UrnSetKey implements Serializable {
 		
+		static final long serialVersionUID = -7183232365833531645L;
+
 		/**
 		 * Constant for the file modification time.
 		 * @serial
@@ -176,13 +178,13 @@ public final class UrnCache {
 		transient int _hashCode;
 
 		/**
-		 * Constructs a new <tt>URNSetKey</tt> instance from the specified
+		 * Constructs a new <tt>UrnSetKey</tt> instance from the specified
 		 * <tt>File</tt> instance.
 		 *
 		 * @param file the <tt>File</tt> instance to use in constructing the
 		 *  key
 		 */
-		URNSetKey(File file) {
+		UrnSetKey(File file) {
 			_modTime = file.lastModified();
 			_path = file.getAbsolutePath();
 			_hashCode = calculateHashCode();
@@ -211,8 +213,8 @@ public final class UrnCache {
 		 */
 		public boolean equals(Object o) {
 			if(this == o) return true;
-			if(!(o instanceof URNSetKey)) return false;
-			URNSetKey key = (URNSetKey)o;
+			if(!(o instanceof UrnSetKey)) return false;
+			UrnSetKey key = (UrnSetKey)o;
 
 			// note that the path is guaranteed to be non-null
 			return ((_modTime == key._modTime) &&
