@@ -57,11 +57,6 @@ public interface Handshaker {
     public String getHeaderWritten(String string);
 
     /**
-     * @param registered
-     */
-    public void setWriteRegistered(boolean registered);
-
-    /**
      * @return
      */
     public boolean write() throws IOException;
