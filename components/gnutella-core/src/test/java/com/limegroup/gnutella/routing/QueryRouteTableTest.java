@@ -527,7 +527,6 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             qrt.patch(patch);
             fail("bpe should have been thrown - invalid entry bits");
         } catch(BadPacketException e) {
-            e.printStackTrace();
         }
     }
 }
