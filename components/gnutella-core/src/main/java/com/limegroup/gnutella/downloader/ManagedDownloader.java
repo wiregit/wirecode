@@ -246,6 +246,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     private RemoteFileDescGrouper buckets;
     
     /**
+     * The current RFDs that this ManagedDownloader is connecting to.
+     * This is necessary to store so that when an RFD is removed from files,
+     * we can check in this datastructure to ensure that an RFD is not
+     * connected to twice.
+     *
+     * Initialized in tryAllDownloads3.
+     */
+    private List currentRFDs;
+    
+    /**
      * The index of the bucket we are trying to download from. We use it
      * to find the hash of the bucket we are downloading from - so that 
      * we can verify that we downloaded the correct file, once the download is
@@ -563,9 +573,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             FileDesc fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 // Retrieve the alternate locations (without adding ourself)
-                validAlts = fd.getAlternateLocationCollection();
-                Iterator iter = validAlts.iterator();
-                synchronized(validAlts) {
+                AlternateLocationCollection coll = 
+                                            fd.getAlternateLocationCollection();
+                synchronized(coll) {
+                    Iterator iter = coll.iterator();
                     while(iter.hasNext()) {
                         AlternateLocation loc = (AlternateLocation)iter.next();
                         addDownload(loc.createRemoteFileDesc((int)size),false);
@@ -945,10 +956,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         boolean added = false;
-        //Add to buckets (will be seen because buckets exposes representation).
-        //If not already in busy.      
-        if (buckets != null &&
-            (busy==null || (busy != null && !busy.contains(rfd)))) {
+        //Add to buckets (will be seen because buckets exposes representation)
+        //if we don't already contain this RFD.
+        if (shouldAllowRFD(rfd)) {
             // We must always check to see if this RFD was already added to
             // the buckets now that we add downloads before adding to alt locs.
             // (Previously altloccollection filtered out already-seen ones)
@@ -982,7 +992,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         return true;
     }
-
+    
+    private synchronized boolean shouldAllowRFD(RemoteFileDesc rfd) {
+        if( buckets == null)
+            return false;
+        if( busy != null && busy.contains(rfd))
+            return false;
+        if( currentRFDs != null && currentRFDs.contains(rfd))
+            return false;
+        return true;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -1057,6 +1076,22 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if(!rfd.isAltLocCapable())
             return;
+            
+        // Verify that the bucket itself has a hash.  If it does not,
+        // we should not have been getting locations in the first place.
+        URN bucketHash = buckets.getURNForBucket(bucketNumber);
+        Assert.that(bucketHash != null, "null bucketHash.");
+        
+        // Now verify that the SHA1 of the RFD matches the SHA1 of the
+        // bucket hash.
+        Assert.that(bucketHash.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        
+        // If a validAlts collection wasn't created already
+        // (which would only be possible if the initial set of
+        // RFDs did not have a hash, but subsequent searches
+        // produced RFDs with hashes), create the collection.
+        if( validAlts == null )
+            validAlts = AlternateLocationCollection.create(bucketHash);
         
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -1082,8 +1117,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         IncompleteFileDesc ifd = null;
-        if( fd != null && fd instanceof IncompleteFileDesc)
+        if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
+            if(!bucketHash.equals(ifd.getSHA1Urn())) {
+                // Assert that the SHA1 of the IFD and the bucketHash match.
+                Assert.silent(false, "wrong IFD.");
+                fileManager.removeFileIfShared(incompleteFile);
+                ifd = null; // do not use, it's bad.
+            }
+        }
         
         if(good) {
             //check if validAlts contains loc to avoid duplicate stats, and
@@ -1527,25 +1569,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
         }
 
-		boolean firstSHA1RFD = true;
-		RemoteFileDesc tempRFD;
-		
-		// Create a new AlternateLocationCollection (if needed).
-		// The resulting collection's SHA1 is based off the
-		// the SHA1 of the first RFD that has a SHA1.
-		// If an AlternateLocationCollection already existed with that
-		// SHA1, it reuses it.  Otherwise, it creates it new.
-        synchronized (this) {
-            tempRFD = (RemoteFileDesc)files.get(0);
-        }        
-        URN sha1 = tempRFD.getSHA1Urn();
-        
-        // If no alternate location collection existed already, or one existed
-        // but this is the first new RFD, and current SHA1 is different than it,
-        // create a new collection.
-        if( sha1!=null && 
-            (validAlts == null || !validAlts.getSHA1Urn().equals(sha1)) )
-            validAlts  = AlternateLocationCollection.create(sha1);
+        // Create a new validAlts for this sha1.
+		URN sha1 = buckets.getURNForBucket(bucketNumber);
+		if( sha1 != null )
+		    validAlts = AlternateLocationCollection.create(sha1);
         
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
@@ -1777,8 +1804,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
+                    {//debugging block
+                      FileDesc f=fileManager.getFileDescForFile(incompleteFile);
+                      URN bucketHash = buckets.getURNForBucket(bucketNumber);
+                      if(bucketHash != null && f!=null &&
+                         !bucketHash.equals(f.getSHA1Urn())) {
+                            Assert.silent(false,
+                                        "IncompleteFileManager wrong fd");
+                          //dont fail later
+                          fileManager.removeFileIfShared(incompleteFile);
+                      }
+                    }
                 }
-                                
                 //need to get the VerifyingFile ready to write
                 try {
                     commonOutFile.open(incompleteFile,this);
@@ -1802,6 +1839,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //The locations that were busy, for trying later.
         busy=new LinkedList();
+        //The current RFDs that are being connected to.
+        currentRFDs = new LinkedList();
         int size = -1;
         int connectTo = -1;
         int dloadsCount = -1;
@@ -1821,26 +1860,39 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if (stopped) {
                         debug("MANAGER: terminating because of stop");
                         throw new InterruptedException();
-                    } else if (dloaders.size()==0 && needed.isEmpty()) {
+                    } 
+                    
+                    if (dloaders.size()==0 && needed.isEmpty()) {
                         // Verify the commonOutFile is all done.
                         int doneSize =
                             (int)IncompleteFileManager.getCompletedSize(
                                 incompleteFile);
                         Assert.that( completedSize == doneSize,
                             "incomplete files (or size!) changed!");
-                        Assert.that(
-                            !commonOutFile.getFreeBlocks(doneSize).hasNext(),
-                            "file is incomplete, but needed.isEmpty()" );
-                            
-                        //Finished. Interrupt all worker threads
-                        for(int i=threads.size();i>0;i--) {
-                            Thread t = (Thread)threads.get(i-1);
-                            t.interrupt();
-                        }
+                        Iterator freeBlocks =
+                            commonOutFile.getFreeBlocks(doneSize);
+
+                        // An odd bug, but we can recover from it.
+                        if(freeBlocks.hasNext()) {
+                            while(freeBlocks.hasNext())
+                                addToNeeded((Interval)freeBlocks.next());
+                            Assert.silent(false, 
+                                "file is incomplete, but needed.isEmpty." +
+                                " left: " + needed);
+                        } else {
+                            //The normal correct case.
+                            //Finished. Interrupt all worker threads
+                            for(int i=threads.size();i>0;i--) {
+                                Thread t = (Thread)threads.get(i-1);
+                                t.interrupt();
+                            }
                         
-                        debug("MANAGER: terminating because of completion");
-                        return COMPLETE;
-                    } else if (threads.size()==0
+                            debug("MANAGER: terminating because of completion");
+                            return COMPLETE;
+                        }
+                    } 
+                    
+                    if (threads.size()==0
                                && files.size()==0) {
                         //No downloaders worth living for.
                         if (busy.size()>0) {
@@ -1865,20 +1917,32 @@ public class ManagedDownloader implements Downloader, Serializable {
             //remote queue.
             for(int i=0; i< (connectTo+1) && i<size && 
                               dloadsCount < getSwarmCapacity(); i++) {
-                final RemoteFileDesc rfd = removeBest(files);
+                final RemoteFileDesc rfd;
+                synchronized(this) {
+                    rfd = removeBest(files);
+                    currentRFDs.add(rfd);
+                }
                 Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
                         boolean iterate = false;
                         try {
                             iterate = connectAndDownload(rfd);
                         } catch (Throwable e) {
-                            //This is a "firewall" for reporting unhandled
-                            //errors.  We don't really try to recover at this
-                            //point, but we do attempt to display the error in
-                            //the GUI for debugging purposes.
-                            ErrorService.error(e);
+                            iterate = true;
+                             // Ignore InterruptedException -- the JVM throws
+                             // them for some reason at odd times, even though
+                             // we've caught and handled all of them
+                             // appropriately.
+                            if(!(e instanceof InterruptedException)) {
+                                //This is a "firewall" for reporting unhandled
+                                //errors.  We don't really try to recover at
+                                //this point, but we do attempt to display the
+                                //error in the GUI for debugging purposes.
+                                ErrorService.error(e);
+                            }
                         } finally {
-                            synchronized (ManagedDownloader.this) { 
+                            synchronized (ManagedDownloader.this) {
+                                currentRFDs.remove(rfd);
                                 threads.remove(this); 
                                 if(iterate) 
                                     ManagedDownloader.this.notifyAll();
@@ -1929,8 +1993,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //have discovered so far. These will be cleared out after the first
         //write, from them on, only newly successful rfds will be sent as alts
         if(validAlts != null) {
-            Iterator iter = validAlts.iterator();
             synchronized(validAlts) {
+                Iterator iter = validAlts.iterator();
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
                     dloader.addSuccessfulAltLoc((AlternateLocation)iter.next());
@@ -2116,7 +2180,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null;
         }
 
-        File incFile = incompleteFileManager.getFile(rfd);
+        File incFile = incompleteFile;
         HTTPDownloader ret;
         boolean needsPush = needsPush(rfd);
         
@@ -2848,7 +2912,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //locations without hashes if throughput is good enough.
         //and load, but that's hard to do.
         int downloads=threads.size();
-        return Math.max(getSwarmCapacity() - downloads, 0);
+        return getSwarmCapacity() - downloads;
     }
 
     private int getSwarmCapacity() {
@@ -2990,6 +3054,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             needed.clear();
         busy = null;
         files = null;
+        validAlts = null;
     }    
 
     /////////////////////////////Display Variables////////////////////////////

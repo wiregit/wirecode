@@ -1,0 +1,1475 @@
+﻿################################################################################
+# Messages Bundle for LimeWire 2.8.5
+# Specialization for: Hungarian - Hungary
+# Thanks to: Toth Laszlo.
+################################################################################
+LOCALE_LANGUAGE_CODE=hu
+LOCALE_LANGUAGE_NAME=Magyar
+LOCALE_COUNTRY_CODE=
+LOCALE_COUNTRY_NAME=Magyarorszag
+LOCALE_VARIANT_CODE=
+LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Latn
+LOCALE_SCRIPT_NAME=Latin
+# UTF-8 encoded file (uses some Central European characters from ISO-8859-2)
+################################################################################
+# Key/value pair for whether or not bold characters should be used for this
+# locale. Must be "true" or "false" (true only for complex scripts).
+################################################################################
+DISABLE_BOLD_CHARACTERS=false
+
+################################################################################
+# Keys/value pairs for general strings that can be used in any components
+################################################################################
+GENERAL_OK_BUTTON_LABEL=OK
+GENERAL_OK_BUTTON_TIP=Művelet végrehajtás
+GENERAL_CANCEL_BUTTON_LABEL=Törlés
+GENERAL_CANCEL_BUTTON_TIP=Művelet törlés
+GENERAL_APPLY_BUTTON_LABEL=Alkalmazni
+GENERAL_APPLY_BUTTON_TIP=Művelet végrehajtás
+GENERAL_CLOSE_BUTTON_LABEL=Bezár
+GENERAL_CLOSE_BUTTON_TIP=Bezár blak
+GENERAL_BACK_BUTTON_LABEL=<< Vissza
+GENERAL_NEXT_BUTTON_LABEL=Következő >>
+GENERAL_FINISH_BUTTON_LABEL=Befejezés
+GENERAL_DEFAULT_BUTTON_LABEL=Használata
+GENERAL_BROWSE_BUTTON_LABEL=Böngésző...
+GENERAL_BROWSE_HOST_LABEL=Kiszolgáló böngészése
+GENERAL_BROWSE_HOST_TIP=Kiválasztott számítógépen minden file megtekintése
+
+#Options
+OPTIONS_BUTTONS_OK_LABEL=OK
+OPTIONS_BUTTONS_OK_TIP=Változtatások alkalmazása ablak bezárása
+OPTIONS_BUTTONS_CANCEL_LABEL=Törlés
+OPTIONS_BUTTONS_CANCEL_TIP=Változtatások törlése
+OPTIONS_BUTTONS_APPLY_LABEL=Alkalmazni
+OPTIONS_BUTTONS_APPLY_TIP=Változtatások alkalmazása
+
+################################################################################
+# Key/value pairs for general terms, such as "yes" and "no"
+################################################################################
+YES=Igen
+NO=Nem
+
+################################################################################
+# Key/value pairs for general unit terms
+################################################################################
+GENERAL_AVERAGE_BANDWIDTH=Közepes sávszélesség
+#??? GENERAL_STARTED_ON=Started on 
+#??? GENERAL_FINISHED_ON=Finished on 
+#??? GENERAL_TIME_SPENT=Time spent
+
+# StatusLine, Statistics and GUIUtils
+GENERAL_UNIT_TERABYTES=TB
+GENERAL_UNIT_GIGABYTES=GB
+GENERAL_UNIT_MEGABYTES=MB
+GENERAL_UNIT_KILOBYTES=KB
+GENERAL_UNIT_KBPSEC=KB/s
+
+################################################################################
+# Key/value pair for the main application title
+################################################################################
+APP_TITLE=LimeWire: Gnutella network futtatása
+
+################################################################################
+# Key/Value pairs for the about window, accessed through the help menu
+################################################################################
+ABOUT_TITLE=Ismertető LimeWire
+ABOUT_LABEL_START=LimeWire Ügyfél
+ABOUT_LABEL_ADDRESS=http://www.limewire.com
+ABOUT_LABEL_END=Copyright @2000-2002 Lime Wire LLC
+ABOUT_LABEL_TITLE=Ismertető LimeWire
+ABOUT_BUTTON_LABEL=OK
+#??? ABOUT_BUTTON_TIP=Close the About window
+ABOUT_SCROLL_CHECK_BOX_LABEL=Automatikus eltol
+#ABOUT_FILE_NAME=about_hu.html
+#Do not uncomment the above line without providing this translated HTML file!
+
+###################################################################
+# Key/value pairs for the Windows system tray -- Coming soon...
+###################################################################
+TRAY_TOOLTIP=LimeWire: Gnutella network futtatása
+#??? TRAY_RESTORE_LABEL=Restore
+TRAY_ABOUT_LABEL=Leírás
+TRAY_EXIT_LATER_LABEL=Átvitel után kilépés
+TRAY_EXIT_LABEL=Kilépés
+
+################################################################################
+# Key/value pairs for the titles of the main windows
+################################################################################
+SEARCH_TITLE=Keres
+MONITOR_TITLE=Monitor
+CONNECTIONS_TITLE=Kapcsolódás
+LIBRARY_TITLE=Könyvtár
+SHOPPING_TITLE=LimeBolt
+OPTIONS_TITLE=Választás
+STATS_TITLE=Statisztika
+DOWNLOAD_TITLE=Letöltés
+UPLOAD_TITLE=Feltöltés
+
+################################################################################
+# Key/value pairs for the tooltips of the main windows
+################################################################################
+SEARCH_TIP=File keresés letöltés
+MONITOR_TIP=Keresés és feltöltés megtekintés
+CONNECTIONS_TIP=Kapcsolódás másik taghoz
+LIBRARY_TIP=Mentett fileok megtekintése
+SHOPPING_TIP=Vásárlás a LimeWire piacon
+
+################################################################################
+# Key/Value pairs for the pull-down menus in the main window
+################################################################################
+MENU_FILE_TITLE=File
+MENU_FILE_TITLE_MNEMONIC=F
+MENU_FILE_CLOSE=Bezár
+MENU_FILE_CLOSE_MNEMONIC=B
+MENU_FILE_CLOSE_ACCESSIBLE=Program bezárása
+#??? MENU_FILE_QUIT=Quit
+#??? MENU_FILE_QUIT_MNEMONIC=Q
+MENU_FILE_CONNECT=Kapcsolat
+MENU_FILE_CONNECT_MNEMONIC=K
+MENU_FILE_CONNECT_ACCESSIBLE=Kapcsolódás a hálózatra
+MENU_FILE_DISCONNECT=Lekapcsolás
+MENU_FILE_DISCONNECT_MNEMONIC=L
+MENU_FILE_DISCONNECT_ACCESSIBLE=Lekapcsolás a hálózatról
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=Adjon hozzá a megosztott folderekhez
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Adjon fel egy megosztható foldert
+MENU_FILE_LIBRARY_NEW_FOLDER=Uj folder
+MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=U
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Adjon fel egy foldert a kiválasztott könyvtár folderhez
+MENU_FILE_LIBRARY_UNSHARE_FOLDER=Folder megosztás stop
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=M
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Kiválasztott könyvtár folder megosztás stop
+MENU_FILE_LIBRARY_RENAME_FOLDER=Folder átnevezés
+MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=N
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Kiválasztott könyvtár folder átnevezés
+MENU_FILE_LIBRARY_LAUNCH_FILES=File(ok) indítása
+MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=I
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Kiválasztott file(ok) indítása
+MENU_FILE_LIBRARY_DELETE_FILES=File(ok) törlése
+MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=T
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Kiválasztott file(ok) törlése
+MENU_FILE_LIBRARY_REFRESH=Frissítés
+MENU_FILE_LIBRARY_REFRESH_MNEMONIC=F
+MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Könyvtár újratöltése
+
+MENU_NAV_TITLE=Navigálás
+MENU_NAV_TITLE_MNEMONIC=A
+MENU_NAV_SEARCH=Keresés
+MENU_NAV_SEARCH_MNEMONIC=K
+MENU_NAV_SEARCH_ACCESSIBLE=Keresőképernyő megjelenítése
+MENU_NAV_MONITOR=Monitor
+MENU_NAV_MONITOR_MNEMONIC=M
+MENU_NAV_MONITOR_ACCESSIBLE=Monitorképernyő megjelenítése
+MENU_NAV_CONN=Kapcsolatok
+MENU_NAV_CONN_MNEMONIC=A
+MENU_NAV_CONN_ACCESSIBLE=Kapcsolatképernyő megjelenítése
+MENU_NAV_LIB=Könyvtár
+MENU_NAV_LIB_MNEMONIC=N
+MENU_NAV_LIB_ACCESSIBLE=Könyvtárképernyő megjelenítése
+MENU_NAV_SHOPPING=LimeShop
+MENU_NAV_SHOPPING_MNEMONIC=L
+MENU_NAV_SHOPPING_ACCESSIBLE=LimeShop honlap megjelenítése
+
+MENU_VIEW_TITLE=Nézet
+MENU_VIEW_TITLE_MNEMONIC=N
+MENU_VIEW_MONITOR=Monitor
+MENU_VIEW_MONITOR_MNEMONIC=M
+MENU_VIEW_MONITOR_ACCESSIBLE=Monitor ablak megjelenítés
+MENU_VIEW_CONNECTIONS=Kapcsolatok
+MENU_VIEW_CONNECTIONS_MNEMONIC=A
+MENU_VIEW_CONNECTIONS_ACCESSIBLE=Kapcsolat ablak megjelenítés
+MENU_VIEW_LIBRARY=Könyvtár
+MENU_VIEW_LIBRARY_MNEMONIC=N
+MENU_VIEW_LIBRARY_ACCESSIBLE=Könyvtár ablak megjelenítés
+MENU_VIEW_SHOPPING=LimeShop
+MENU_VIEW_SHOPPING_MNEMONIC=L
+MENU_VIEW_SHOPPING_ACCESSIBLE=Bevásárló ablak megjelenítés
+
+MENU_RESOURCES_TITLE=Erőforrások
+MENU_RESOURCES_TITLE_MNEMONIC=R
+MENU_RESOURCES_PRO=LimeWire PRO
+MENU_RESOURCES_PRO_MNEMONIC=P
+MENU_RESOURCES_PRO_ACCESSIBLE=LimeWire PRO honlap megjelenítése
+MENU_RESOURCES_LIMESHOP=LimeShop
+MENU_RESOURCES_LIMESHOP_MNEMONIC=L
+MENU_RESOURCES_LIMESHOP_ACCESSIBLE=LimeShop honlap megjelenítése
+
+MENU_TOOLS_TITLE=Eszközök
+MENU_TOOLS_TITLE_MNEMONIC=E
+MENU_TOOLS_STATISTICS=Statisztika
+MENU_TOOLS_STATISTICS_MNEMONIC=S
+MENU_TOOLS_STATISTICS_ACCESSIBLE=Statisztika képernyő megjelenítése
+MENU_TOOLS_OPTIONS=Beállítások...
+MENU_TOOLS_OPTIONS_MNEMONIC=B
+MENU_TOOLS_OPTIONS_ACCESSIBLE=Beállítások képernyő megjelenítése
+
+MENU_HELP_TITLE=Help
+MENU_HELP_TITLE_MNEMONIC=H
+MENU_HELP_USING_LIMEWIRE=LimeWire használata
+MENU_HELP_USING_LIMEWIRE_MNEMONIC=H
+MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Help LimeWire használatához
+MENU_HELP_FAQ=FAQ
+MENU_HELP_FAQ_MNEMONIC=F
+MENU_HELP_FAQ_ACCESSIBLE=LimeWire gyakran feltett kérdések
+MENU_HELP_FORUM=Fórum
+MENU_HELP_FORUM_MNEMONIC=M
+MENU_HELP_FORUM_ACCESSIBLE=LimeWire user-fórum
+MENU_HELP_FRIEND=Add tovább a barátodnak
+MENU_HELP_FRIEND_MNEMONIC=A
+MENU_HELP_FRIEND_ACCESSIBLE=Tájékoztasd a barátodat a LimeWire-ról
+MENU_HELP_REVIEW=LimeWire áttekintése
+MENU_HELP_REVIEW_MNEMONIC=T
+MENU_HELP_REVIEW_ACCESSIBLE=LimeWire áttekintést elküld
+MENU_HELP_ABOUT=Ismertető...
+MENU_HELP_ABOUT_MNEMONIC=I
+MENU_HELP_ABOUT_ACCESSIBLE=LimeWire információ
+
+################################################################################
+# Keys/value pairs for SearchView stuff....
+################################################################################
+SEARCH_DOWNLOAD_BUTTON_LABEL=Letöltés
+SEARCH_DOWNLOAD_BUTTON_TIP=Minden kiválasztott file letöltése
+SEARCH_WISHLIST_BUTTON_LABEL=Hozzáadás kívánságlistához
+SEARCH_WISHLIST_BUTTON_TIP=LimeWire Robot telepítése tartalom kereséséhez
+SEARCH_BROWSE_HOST_BUTTON_LABEL=Kiszolgáló böngészése
+SEARCH_BROWSE_HOST_BUTTON_TIP=Kiválasztott számítógépen minden file megtekintése
+SEARCH_CHAT_BUTTON_LABEL=Csevegés...
+SEARCH_CHAT_BUTTON_TIP=Csevegés a kiválasztott kiszolgálóval
+SEARCH_BUY_CD_LABEL=Vásárlás...
+SEARCH_BUY_CD_TIP=Kiválasztott tétel megvásárlása
+SEARCH_SEARCH_BUTTON_LABEL=Keresés
+SEARCH_SEARCH_BUTTON_TIP=Megadott szavakat a hálózaton keres
+SEARCH_STOP_BUTTON_LABEL=Stop
+SEARCH_STOP_BUTTON_TIP=Kiválasztott címke keresési eredmémyek leállítása
+SEARCH_PUBLIC_KILL_STRING=Keresés bezárása
+SEARCH_PUBLIC_LAUNCH_STRING=Kció indítása
+SEARCH_PUBLIC_STOP_STRING=Keresés megállítása
+SEARCH_PUBLIC_GROUP_STRING=Csoportosítás
+SEARCH_PUBLIC_BROWSE_STRING=Kiszolgáló tallózása
+SEARCH_PUBLIC_CHAT_STRING=Csevegés a kiszolgálóval
+SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi honlap keresés
+SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Keresés ismétlése
+SEARCH_RESULT_TABLE_LABEL=Eredmények
+SEARCH_SEARCHING_LABEL=Keresés...
+SEARCH_VIRUS_MSG_ONE=A kiválasztott fileok egyike végrehajtható 
+SEARCH_VIRUS_MSG_TWO=program és vírust tartalmazhat. Biztos 
+SEARCH_VIRUS_MSG_THREE=benne, hogy le akarja tölteni?
+SEARCH_SHOW_MESSAGE_MSG=Ne jelenjen meg mégegyszer az üzenet
+SEARCH_DOWNLOAD_DIALOG_CONFIRM=Letöltési kérés
+SEARCH_DEFAULT_FIELD_TITLE=Filenév
+AUTO_DL_CHECKBOX_STRING=Automatikus letöltés
+AUTO_DL_CHECKBOX_TOOLTIP=A LimeWire letölti Önnek a fileokat
+
+#Media Types
+MEDIA_ANY_TYPE=Bármilyen típus
+MEDIA_DOCUMENTS=Documentumok
+MEDIA_PROGRAMS=Programok
+MEDIA_AUDIO=Audio
+MEDIA_VIDEO=Video
+MEDIA_IMAGES=Képek
+
+#ResultPanel Columns for normal view
+RESULT_PANEL_QUALITY=Minőség
+RESULT_PANEL_NAME=Név
+RESULT_PANEL_TYPE=Típus
+RESULT_PANEL_SIZE=Méret
+RESULT_PANEL_SPEED=Sebesség
+RESULT_PANEL_SCORE=Találat
+RESULT_PANEL_CHAT=Csevegés
+RESULT_PANEL_LOCATION=Elhelyezkedés
+RESULT_PANEL_COUNT=#
+
+DOWNLOAD_KILL_BUTTON_LABEL=Letöltés leállítása
+DOWNLOAD_KILL_BUTTON_TIP=Kiválasztott letöltés megállítása
+DOWNLOAD_RESUME_BUTTON_LABEL=Újraindítás kikényszerítése
+DOWNLOAD_RESUME_BUTTON_TIP=Letöltés ismételt megkísérlése
+DOWNLOAD_CLEAR_BUTTON_LABEL=Nem aktív törlése
+DOWNLOAD_CLEAR_BUTTON_TIP=Nem aktív letöltések eltávolítása
+
+LIBRARY_LAUNCH_BUTTON_LABEL=Indítás
+LIBRARY_LAUNCH_BUTTON_TIP=Kiválasztott fileok indítása
+LIBRARY_DELETE_BUTTON_LABEL=Törlés
+LIBRARY_DELETE_BUTTON_TIP=Kiválasztott fileok törlése
+LIBRARY_REFRESH_BUTTON_LABEL=Frissítés
+LIBRARY_REFRESH_BUTTON_TIP=Osztott könyvtárak visszatöltése
+LIBRARY_PLAYLIST_BUTTON_LABEL=Lejátszólistához
+LIBRARY_PLAYLIST_BUTTON_TIP=Kiválasztott fileok hozzáadása a lejátszólistához
+LIBRARY_ANNOTATE_BUTTON_LABEL=Megjelölés...
+LIBRARY_ANNOTATE_BUTTON_TIP=Kiválasztott file megjelölése
+#??? LIBRARY_RESUME_BUTTON_LABEL=Resume
+#??? LIBRARY_RESUME_BUTTON_TIP=Continue downloading selected incomplete file
+
+PLAYLIST_LOAD_BUTTON_LABEL=Megnyitás...
+PLAYLIST_LOAD_BUTTON_TIP=Egy új vagy létező lejátszólista megnyitása
+PLAYLIST_SAVE_BUTTON_LABEL=Mentés...
+PLAYLIST_SAVE_BUTTON_TIP=Az aktuális lejátszólista mentése
+PLAYLIST_DELETE_BUTTON_LABEL=Eltávolítás
+PLAYLIST_DELETE_BUTTON_TIP=Kiválasztott fileok eltávolítása a lejátszólistából
+PLAYLIST_FILE_DESCRIPTION=Lejátszólista (*.m3u)
+
+################################################################################
+# Key/value pairs for the integrated media player....
+################################################################################
+MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Lejátszó
+#??? MEDIA_PLAY_BUTTON_TIP=Play
+#??? MEDIA_PAUSE_BUTTON_TIP=Pause
+MEDIA_STOP_BUTTON_TIP=Stop
+MEDIA_FORWARD_BUTTON_TIP=Következő
+MEDIA_REWIND_BUTTON_TIP=Vissza
+
+#anu added
+PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Felhasználónév
+PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Jelszó
+
+################################################################################
+# Key/value pairs for Statistics String....
+################################################################################
+STATISTICS_AVAILABLE=elérhető
+STATISTICS_FILES=fileok
+STATISTICS_DISCONNECTED=Lekapcsolva / nincs elérhető file
+STATISTICS_SHARING=Megosztás
+STATISTICS_SHARING_TOOLTIP=Az Ön által megosztott fileok száma.
+
+################################################################################
+# Key/value pairs for the download window, including labels for the
+# right-click popop menu and labels for the various column headers and
+# download statistics table cells.
+################################################################################
+DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Letöltés megállítása
+DOWNLOAD_POPUP_MENU_RESUME=Újraindítás kikényszerítése
+DOWNLOAD_POPUP_MENU_LAUNCH=File indítása
+DOWNLOAD_POPUP_MENU_CHAT=Csevegés a kiszolgálóval
+DOWNLOAD_POPUP_MENU_BROWSE=Kiszolgáló böngészése
+DOWNLOAD_NAME_COLUMN=Név
+DOWNLOAD_SIZE_COLUMN=Méret
+DOWNLOAD_STATUS_COLUMN=Állapot
+DOWNLOAD_CHAT_COLUMN=Csevegés
+DOWNLOAD_PROGRESS_COLUMN=Folyamat
+DOWNLOAD_SPEED_COLUMN=Sebesség
+DOWNLOAD_TIME_REMAINING_COLUMN=Idő
+DOWNLOAD_STATUS_QUEUED=Besorolva
+DOWNLOAD_STATUS_CONNECTING=Kapcsolódva...
+DOWNLOAD_STATUS_WAITING_START=Várakozás
+DOWNLOAD_STATUS_WAITING_MIDDLE=válaszra
+DOWNLOAD_STATUS_WAITING_END=foglalt
+DOWNLOAD_STATUS_COMPLETE=Kész
+DOWNLOAD_STATUS_ABORTED=Megszakítva
+DOWNLOAD_STATUS_FAILED=Nem lehet letölteni
+DOWNLOAD_STATUS_DOWNLOADING=Letöltve ...
+DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Nem írható át a könyvtárba
+DOWNLOAD_STATUS_CORRUPT_FILE=File hibás
+DOWNLOAD_STATUS_REQUERYING=Hálózat keresése
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Keresés elküldve, várakozás
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=az eredményre
+DOWNLOAD_HOSTS_LABEL=kiszolgálók
+DOWNLOAD_STATUS_REMOTE_QUEUED=Távoli besorolás a poziciótól
+#??? DOWNLOAD_STATUS_HASHING=Verifying file contents...
+#??? DOWNLOAD_STATUS_SAVING=Saving file...
+
+###################################################################
+# Key/value pairs for UploadView
+###################################################################
+UPLOAD_POPUP_MENU_KILL_UPLOAD=Feltöltést leállít
+UPLOAD_POPUP_MENU_CHAT=Csevegés kiszolgálóval
+UPLOAD_KILL_BUTTON_LABEL=Feltöltést leállít
+UPLOAD_KILL_BUTTON_TIP=Kiválasztott feltöltést leállít
+UPLOAD_CLEAR_BUTTON_LABEL=Inaktívok törlése
+UPLOAD_CLEAR_BUTTON_TIP=Inaktív feltöltések eltávolítása
+UPLOAD_CHAT_BUTTON_LABEL=Csevegés kiszolgálóval
+UPLOAD_TABLE_STRING_NAME=Név
+UPLOAD_TABLE_STRING_HOST=Kiszolgáló
+UPLOAD_TABLE_STRING_SIZE=Méret
+UPLOAD_TABLE_STRING_STATUS=Állapot
+UPLOAD_TABLE_STRING_CHAT=Csevegés
+UPLOAD_TABLE_STRING_PROGRESS=Folyamatban
+UPLOAD_TABLE_STRING_SPEED=Sebesség
+UPLOAD_TABLE_STRING_TIME_REMAINING=Idő
+UPLOAD_TABLE_STRING_USER_AGENT=Ügyfél/verzió
+UPLOAD_TABLE_STRING_CONNECTING=Kapcsolódás
+UPLOAD_TABLE_STRING_UPLOADING=Feltöltés
+UPLOAD_TABLE_STRING_LIMITREACHED=Feltöltési korlátot elérte
+UPLOAD_TABLE_STRING_FREELOADER=Freeloader feltöltés
+UPLOAD_TABLE_STRING_PUSHFAILED=Nem tud kapcsolódni
+UPLOAD_TABLE_STRING_INTERRUPTED=Átvitel megszakítva
+UPLOAD_TABLE_STRING_COMPLETE=Komplett
+UPLOAD_TABLE_STRING_FNF=File nem található
+UPLOAD_TABLE_STRING_QUEUED=Besorolva
+UPLOAD_STRING_KBPSEC=KB/s
+
+###################################################################
+# Key/value pairs for MonitorView
+###################################################################
+MONITOR_VIEW_INCOMING_SEARCHES=Bejövő keresések
+MONITOR_VIEW_ENABLE=Megengedve
+MONITOR_VIEW_SHOW_LAST=Utolsó keresést
+MONITOR_VIEW_SEARCHES=mutasd
+MONITOR_VIEW_LEAF_MESSAGE=Az Ön kliense egy ultrapartner elágazása. Ezért a monitor ablakban kevesebb vagy semmi keresést nem fog látni.
+
+################################################################################
+# Key/value pairs for gui download speed constants -- used in the
+# options window, setup windows, and potentially other places
+################################################################################
+MODEM_SPEED=Modem
+CABLE_SPEED=Kábel/DSL
+T1_SPEED=T1
+T3_SPEED=T3 vagy nagyobb
+
+###################################################################
+# Key/value pairs for ConnectionView
+###################################################################
+CV_PANEL_TITLE=Kapcsolt kiszolgálók
+CV_COLUMN_HOST=Kiszolgáló
+CV_COLUMN_STATUS=Állapot
+CV_COLUMN_MESSAGE=Üzenetek (B/K)
+CV_COLUMN_BANDWIDTH=Sávszélesség (B/K)
+CV_COLUMN_DROPPED=Lekapcsolva (B/K)
+CV_COLUMN_HOSTS=Kiszolgálók
+CV_COLUMN_PROTOCOL=Protokol
+CV_COLUMN_VENDOR=Ügyfél/verzió
+CV_COLUMN_TIME=Idő
+CV_BUTTON_REMOVE=Eltávolít
+CV_BUTTON_TOOLTIP_REMOVE=Kiválasztott kapcsolatok eltávolítása
+CV_BUTTON_ADD=Hozzáad
+CV_BUTTON_TOOLTIP_ADD=Új kimenő kapcsolat létrehozása
+CV_LABEL_KEEP_BEGIN=Hozzávetőleges kapcsolatok
+CV_LABEL_KEEP_END=fenntartása.
+CV_TABLE_STRING_CONNECTING=Kapcsolódás...
+CV_TABLE_STRING_LEAF=Elágazás
+CV_TABLE_STRING_ULTRAPEER=Ultrapartner
+CV_TABLE_STRING_STANDARD=0.6
+CV_TABLE_STRING_INCOMING=Bejövő
+CV_TABLE_STRING_OUTGOING=Kimenő
+#??? CV_TABLE_STRING_CONNECTED_ON=Connected on 
+CV_STRING_CLIENT=[Elágazás]
+CV_STRING_ULTRAPEER=[Ultrapartner]
+CV_TABLE_STRING_KBPSEC=KB/s
+
+################################################################################
+# Key/value pairs for a strings in the library window
+################################################################################
+LIBRARY_TABLE_NAME=Név
+#??? LIBRARY_TABLE_TITLE=Title
+#??? LIBRARY_TABLE_ARTIST=Artist
+LIBRARY_TABLE_SIZE=Méret
+LIBRARY_TABLE_TYPE=Típus
+LIBRARY_TABLE_PATH=Útvonal
+LIBRARY_TABLE_HITCOUNT=Találatok
+LIBRARY_TABLE_NUMALTLOC=Elhelyezkedés
+LIBRARY_TABLE_UPLOAD_COUNT=Feltöltés
+LIBRARY_TREE_NEW_FOLDER_LABEL=Új Folder
+LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Megosztás leállítása
+LIBRARY_TREE_RENAME_FOLDER_LABEL=Átnevezés
+LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Lejátszólistába
+
+################################################################################
+# Key/value pairs for burn cd link
+################################################################################
+LIBRARY_BURN_LABEL=CD írás...
+
+###################################################################
+# Key/value pairs for PlayListGUI
+###################################################################
+PLAYLIST_TITLE=MP3 lejátszólista
+PLAYLIST_TABLE_NAME=Név
+PLAYLIST_TABLE_LENGTH=Hossz
+PLAYLIST_TABLE_BITRATE=Bitmélység
+PLAYLIST_OPTIONS_STRING=Lejátszás beállítások:
+PLAYLIST_OPTIONS_CONTINUE=Folyamatos
+PLAYLIST_OPTIONS_SHUFFLE=Kevert
+PLAYLIST_DIALOG_OPEN_TITLE=Lejátszólista választás (.m3u)
+PLAYLIST_DIALOG_SAVE_TITLE=Lejátszólista mentése, mint...
+PLAYLIST_DIALOG_SAVE_SAVE=Mentés
+
+################################################################################
+# Key/value pairs for the LimeWire initialization wizard that is run
+# if you don't have a limewire.props file
+################################################################################
+SETUP_WELCOME_LABEL=Üdvözli a LimeWire setup varázsló. A LimeWire megmutatja Önnek azokat a lépéseket, amivel a programot a legjobb teljesítményre konfigurálhatja.
+SETUP_SAVE_LABEL=Kérem válassza ki azt a foldert ahova a fileokat le akarja tölteni. e downloaded. Ez a folder alapértelmezésben megosztásra kerül a többi gnutella felhasználóval.
+SETUP_SPEED_LABEL=Kérem válassza ki Internet kapcsolatának sebességét. A sebesség helyes beállítása fontos az optimális hálózati teljesítmény szempontjából. Ha nem tudja biztosan, hogy milyen internet kapcsolata van, válassza ki azt amelyik a leginkább megfelelőnek tűnik.
+SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which directories you would like to share when the scan is complete.
+SETUP_WAIT_LABEL=Kérem várjon, LimeWire a fix lemezén keres...
+SETUP_CONFIRM_LABEL=Az alább látható könyvtárait azonosítottuk, amelyeket Ön megosztana. Amennyiben ezeket meg akarja osztani, jelölje meg a mellette lévő checkboxot. A megosztott könyvtárak alkönyvtárai is megosztottak lesznek.
+SETUP_FINISH_LABEL=LimeWire setup sikeresen befejeződött. Kérem nyomja meg a "Befejezés" gombot a LimeWire használatának megkezdéséért.
+SETUP_WELCOME_TITLE=Üdvözöljük
+SETUP_SAVE_TITLE=Mentés könyvtár
+SETUP_SPEED_TITLE=Kapcsolódás sebessége
+SETUP_SCAN_TITLE=Fileok keresése
+SETUP_WAIT_TITLE=Fix lemez keresésee
+SETUP_CONFIRM_TITLE=Keresés jóváhagyása
+SETUP_FINISH_TITLE=Setup befejezése
+
+################################################################################
+# Key/value pairs for the file chooser
+################################################################################
+DIRECTORY_CHOOSER_CAPTION=Kiválasztás
+
+################################################################################
+# Key/value pairs for a directory file chooser
+################################################################################
+FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Kiválasztás
+FILE_CHOOSER_DIRECTORY_TITLE=Válasszon könyvtárat
+
+################################################################################
+# Key/value pairs for a strings in the init package
+# com.limegroup.gnutella.gui.init -- the wizard to setup the program when
+# limewire.props is not present or when the "INSTALLED" setting is false
+################################################################################
+INIT_SAVE_DIRECTORY_FIELD_LABEL=Könyvtár:
+INIT_SAVE_BROWSE_BUTTON_LABEL=Böngésző...
+INIT_SAVE_BROWSE_BUTTON_TIP=Válasszon más könyvtárat
+INIT_SAVE_DEFAULT_BUTTON_LABEL=Használja az alapértelmezést
+INIT_SAVE_DEFAULT_BUTTON_TIP=Használja az alapértelmezett könyvtárat
+
+################################################################################
+# Key/Value pairs for the pro window on startup
+################################################################################
+PRO_TITLE=Upgrade a PRO változatra
+PRO_LABEL_THANKS=Köszönjük, hogy a hálón a LimetWire programot futtatja. Kérjük térjen át a LimeWire PRO programra a LimeWire és a hálózat fejlesztése érdekében.
+PRO_LABEL_QUESTION=Áttér a LimeWire PRO programra?
+GO_PRO_TIP=LimeWire PRO letöltése most
+WHYGOPRO=Miért a PRO?
+WHYGOPRO_TIP=Mit ad a PRO nekem ?
+GO_PRO_LATER=Később
+GO_PRO_LATER_TIP=LimeWire PRO letöltés később
+
+###################################################################
+# Key/value pairs for XML
+###################################################################
+#MetaEditorFrame
+META_EDITOR_ANNOTATING_FILE=Megjelölt file
+META_EDITOR_SAVE_LABEL=Mentés
+META_EDITOR_CANCEL_LABEL=Mégsem
+META_EDITOR_DELETE_LABEL=Törlés
+META_EDITOR_EDITING_LABEL=Megjelölt típus szerkesztés:
+META_EDITOR_ADDING_LABEL=Megjelölt típus hozzáadás:
+#MetaSearchFrame
+META_SEARCH_TITLE=MetaSearch Input ablak
+META_SEARCH_STRING=Kereső string
+META_SEARCH_CANCEL_BUTTON_LABEL=Mégsem
+META_SEARCH_SEARCH_BUTTON_LABEL=Keres
+#ViewChooserDialog
+VIEW_CHOOSER_TITLE=Megjelenést választ
+VIEW_CHOOSER_OK_BUTTON_LABEL=OK
+VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Mégsem
+#IndentingPanel
+XML_SEARCH_MORE_OPTIONS_LABEL=További keresési beállítások
+
+################################################################################
+# Key/value pairs for the StandardListEditor reusable component
+################################################################################
+LIST_EDITOR_ADD_BUTTON=Hozzáadás...
+LIST_EDITOR_ADD_BUTTON_2=Hozzáadás
+LIST_EDITOR_BROWSE_BUTTON=Böngésző...
+LIST_EDITOR_REMOVE_BUTTON=Eltávolítás
+LIST_EDITOR_ADD_BUTTON_TIP=Új listaelem hozzáadás
+LIST_EDITOR_REMOVE_BUTTON_TIP=Kiválasztott elem eltávolítás
+
+################################################################################
+# Key/value pairs for the InputField reusable component
+################################################################################
+INPUT_FIELD_GENERIC_CAPTION=Input
+
+################################################################################
+# Keys/value pairs for general button labels/tooltips used in various windows
+################################################################################
+GENERAL_CHAT_BUTTON_LABEL=Ccevegés...
+GENERAL_CHAT_BUTTON_TIP=Csevegés a kiszolgálóval
+GENERAL_LAUNCH_BUTTON_LABEL=Indítás
+GENERAL_LAUNCH_BUTTON_TIP=File indítása
+
+################################################################################
+# Keys/value pairs for ButtonRow labels and tooltips
+################################################################################
+CHAT_BLOCK_BUTTON_LABEL=Kiszolgáló leállítás
+CHAT_SEND_BUTTON_LABEL=Üzenet küldés
+CHAT_STOP_BUTTON_LABEL=Csevegés vége
+CHAT_BLOCK_BUTTON_TIP=Aktuális kiszolgáló leállítás
+CHAT_SEND_BUTTON_TIP=Üzenet küldése kiszolgálónak
+CHAT_STOP_BUTTON_TIP=Kiszolgálóval történő csevegés leállítása
+
+################################################################################
+# Key/value pairs for the ChatFrame that is displayed while chatting
+################################################################################
+CHAT_WITH_LABEL=Csevegés vele
+CHAT_HOST_UNAVAILABLE=Kiszolgáló nem elérhető
+CHAT_YOU=Ön
+
+###################################################################
+# Key/value pairs for splash screen status text
+###################################################################
+SPLASH_STATUS_RESOURCE_MANAGER=Erőforrások töltése...
+SPLASH_STATUS_SEARCH_WINDOW=Keresőablak töltése...
+SPLASH_STATUS_OPTIONS_WINDOW=Beállítóablak töltése...
+SPLASH_STATUS_USER_SETTINGS=Felhasználói beállítások töltése...
+SPLASH_STATUS_SHARED_FILES=Megosztott fileok töltése...
+SPLASH_STATUS_INTERFACE=Felhasználói interface töltése...
+SPLASH_STATUS_UPDATES=Update vizsgálata...
+SPLASH_STATUS_CORE_COMPONENTS=Alapösszetevők töltése...
+SPLASH_STATUS_DOWNLOAD_WINDOW=Letöltőablak töltése...
+SPLASH_STATUS_LIBRARY_WINDOW=Könyvtárablak töltése...
+SPLASH_STATUS_UPLOAD_WINDOW=Feltöltőablak töltése...
+SPLASH_STATUS_MONITOR_WINDOW=Monitorablak töltése...
+SPLASH_STATUS_CONNECTION_WINDOW=Kapcsolatablak töltése...
+SPLASH_STATUS_STATISTICS_WINDOW=Statisztikaablak töltése...
+SPLASH_STATUS_STATUS_WINDOW=Státusz ablak töltése...
+SPLASH_STATUS_MENUS=Menük töltése...
+SPLASH_STATUS_MESSAGE_SERVICE=Üzenetek töltése...
+
+##################################################################
+# Key/value pairs for the message displayed to prompt users to 
+# support LimeWire through contributions.
+##################################################################
+#??? SUPPORT_LIMEWIRE_01=Support Future LimeWire Development
+#??? SUPPORT_LIMEWIRE_02=Click Here to Support LimeWire's Development of Open, Peer-to-Peer Networks
+#??? SUPPORT_LIMEWIRE_03=Support Research and Development of the LimeWire Open Networking Platform
+#??? SUPPORT_LIMEWIRE_04=Click Here to Become a Supporter of LimeWire Research
+#??? SUPPORT_LIMEWIRE_05=Support Open Networks
+#??? SUPPORT_LIMEWIRE_06=Click Here to Support Open Source and Open Protocols
+#??? SUPPORT_LIMEWIRE_07=Click here to help LimeWire build the digital commons.
+#??? SUPPORT_LIMEWIRE_08=Contribute to Open Source Peer-to-Peer Networking.
+#??? SUPPORT_LIMEWIRE_09=Support a new distribution community for independent artists.
+#??? SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+
+################################################################################
+# Key/value pairs for the update package, displayed when there is an
+# update of LimeWire available
+################################################################################
+UPDATE_DIALOG_CAPTION=Update LimeWire
+#??? UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
+UPDATE_SUCCEEDED_MESSAGE=LimeWire update sikeresen befejeződött. Kérem indítsa újra a LimeWire programot, hogy az új verziót használhassa.
+UPDATE_WEB_PAGE_ERROR_MESSAGE=Nem lehetett megnyitni a LimeWire honlap oldalát az update végrehajtásához. Az update befejezéséhez kérem nyissa meg böngészőjével a http://www.limewire.com címet.
+UPDATE_ERROR_MESSAGE_START=A LimeWire update a következő hibát találta:
+UPDATE_ERROR_MESSAGE_END=Kérem küldje el a hiba leírást a "support@limewire.com" email címre. Az új verziót letöltheti a www.limewire.com címről.
+UPDATE_ERROR_ACCESSING_FILE=Hiba a szükséges fileok szerveren való elérésekor.
+UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Hiba a szerverrel való kommunikációnál.
+UPDATE_ERROR_LAX_FILE_NOT_FOUND=Hiba a konfigurációs file keresésekor.
+UPDATE_ERROR_LAX_SECURITY=Hiba az Ön filerendszerén a hozzáféréssel.
+UPDATE_ERROR_LAX_IO=Hiba az Ön filerendszerének elérésekor.
+UPDATE_CANCEL_BUTTON_LABEL=Mégsem
+UPDATE_CANCEL_BUTTON_TIP=Update megszakítása
+UPDATE_NOW_TIP=LimeWire update most
+UPDATE_LATER_TIP=LimeWire update később
+
+################################################################################
+# Key/Value pairs for other messages displayed to the user
+################################################################################
+MESSAGE_CAPTION=Üzenet
+MESSAGE_ERROR_CAPTION=Hiba
+MESSAGE_SHARE_SAVE_DIR=Hozzá akarja adni a mentés könyvtárat a megosztott könyvtárak listájához? Ennek a könyvtárnak az alkönyvtárai is megosztottak lesznek.
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Biztos benne, hogy továbbá nem akarja ezt a könyvtárat megosztani?
+MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire nem tudja megszüntetni egy megosztott könyvtár alkönyvtárát.
+MESSAGE_OVERWRITE_EXISTING_FILE=Meglévő file felülírása 
+MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire nem indítja a megadott filet biztonsági okokból.
+MESSAGE_CONFIRM_FILE_DELETE=Biztosan törölni akarja a kijelölt file(oka)t?
+MESSAGE_UNABLE_TO_DELETE_FILE_START=File nem törölhető
+MESSAGE_UNABLE_TO_DELETE_FILE_END=Ezt egy másik program használja.
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Könyvtár nem törölhető 
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. Ezt egy másik program használja.
+MESSAGE_UNABLE_TO_RENAME_FILE_START=File átnevezése nem lehetséges 
+MESSAGE_UNABLE_TO_RENAME_FILE_END=. Ezt egy másik program használja.
+MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire nem engedi meg, hogy 
+MESSAGE_INCOMPLETE_DIRECTORY_END=ebben a folderben tartsa a nem komplett fileokat.
+MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire nem tudja a kijelölt könyvtárat fileok mentésére használni. Kérem adjon meg másik könyvtárat.
+MESSAGE_FILE_CORRUPT=LimeWire hibát talált a fileban 
+MESSAGE_CONTINUE_DOWNLOAD=Folytatni akarja a letöltést?
+
+################################################################################
+# Key/Value pairs for the invalid save directory window that is displayed
+# when the user does not have a valid save directory.
+################################################################################
+#??? INVALID_SAVE_DIR_LABEL=The stored directory for saving files is not valid. Please enter a new directory in the directory chooser.
+
+################################################################################
+# Key/Value pairs for error messages
+################################################################################
+ERROR_PORT_UNAVAILABLE=Port nem áll rendelkezésre. Kérem válasszon egy másikat.
+ERROR_KEEP_ALIVE=LimeWire nem engedi meg ilyen sok kapcsolat fenntartását, mert ez olyan nagy forgalmat hoz létre, amitől eldugul a hálózat.
+ERROR_TOO_LOW_FOR_ULTRAPEER=Az ultrapartner elágazással legalább hat kapcsolat esetén működik csak.
+ERROR_TOO_HIGH_FOR_LEAF=Az elágazás csak egy kapcsolatot igényel, ha ezek ultrapartnerhez kapcsolódnak.
+ERROR_PORT=Nem található port a bejövő kapcsolatokhoz.\nKérem adjon meg egy portot a konfigurációs ablakból.
+ERROR_INCOMING_CONNECTIONS=Nem figyelhető a bejövő kapcsolati pont; megszakítás.
+ERROR_INTERNAL=A LimeWire futtatásakor belső hiba lépett fel. A program a hibán átlép és normálisan dolgozik tovább. Kérjük segítsen a hibát kijavítani, küldje el a hibaüzenetet a bugs@limewire.com címre emailben.
+ERROR_THREE_CHARACTER_SEARCH=Keresésnél legalább három karaktert adjon meg, mert a hálózatot túlterheli.
+ERROR_NETWORK_FLOODING=Ez a keresés igen sok eredményt adna és lelassulna a hálózat. Biztos, hogy folytatni akarja?
+ERROR_BROWSE_FAILED=A kívánt kiszolgálón nem böngészhet fileokat. Ez a gép valószínűleg nem fogad több bejövő kapcsolatot.
+ERROR_INVALID_SAVE_DIRECTORY=Érvénytelen könyvtár a fileok mentéséhez. Kérem használjon másikat, vagy az alapértelmezés szerintit.
+ERROR_INVALID_SAVE_DIRECTORY_WINDOW=A mentés könyvtára érvénytelen. Lehet, hogy Önnek nincs jogosultsága ide beleírni, vagy valami más probléma áll fenn. Kérem, válasszon egy másik könyvtárat.
+ERROR_INVALID_SHARED_DIRECTORY=A filemegosztás könyvtára érvénytelen. Kérem használjon egy másikat, vagy térjen vissza az alapértelmezés szerintihez.
+ERROR_FORCE_IP_PORT_RANGE=1 és 65535 közötti port számot adjon be az IP cím kikényszerítéséhez.
+ERROR_CONNECT_STRING=A kapcsolati szöveg legalább 1 hosszú legyen, egy üres karaktert tartalmazhat, de nem a 'GIV', 'GET', vagy más HTTP kulcsszavakat.
+ERROR_PORT_RANGE=Kérem adjon be egy portot 1 és 65535 között.
+ERROR_INVALID_GROUP=Érvényes csoportot kell kiválasztania.
+ERROR_ALREADY_DOWNLOADING=Már letöltötte 
+#??? ERROR_CANT_RESUME_START=The file
+#??? ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
+ERROR_LOCATING_BROWSER_SUPPORT=LimeWire nem találja az Ön böngészőjét. A LimeWire segítség címe:\n"http://www.limewire.com/support".
+ERROR_LOCATING_BROWSER_FAQ=LimeWire nem találja az Ön böngészőjét. A LimeWire FAQ címe:\n"http://www.limewire.com/support/faq.htm".
+ERROR_LOCATING_BROWSER_FORUM=LimeWire nem találja az Ön böngészőjét. A LimeWire fórum címe:\n"http://www.limewire.com/forum.htm".
+ERROR_LOCATING_BROWSER_FRIEND=LimeWire nem találja az Ön böngészőjét. A LimeWire "Mondd el a barátodnak" űrlap címe:\n"http://www.limewire.com/index.jsp/tell_friend".
+ERROR_LOCATING_BROWSER_GENERAL=LimeWire nem találja az Ön alapértelmezés szerinti böngészőjét.
+ERROR_ACCESSING_SAVE_DIRECTORY=Nem érhető el a mentés könyvtára. Kérem válasszon egy másikat a Beállítások menűből és próbálja újra.
+ERROR_DEL_META_USER=A nem mentett információ nem távolítható el.
+ERROR_DEL_META_SYSTEM=Az adat nem távolítható el.
+ERROR_SAVE_META_DOC=Belső dokument hiba. Adat nem menthető.
+ERROR_SAVE_META_ILLEGAL=Nincs mit menteni.
+ERROR_SAVE_META_FILE=File nem található vagy hibás. Adat nem menthető 
+ERROR_SAVE_META_RW=Olvasási írási hiba. Adat nem menthető.
+ERROR_SAVE_META_ID3=File hibás. Adat nem menthető.
+ERROR_SAVE_META_DISK=Belső hiba. Adat nem menthető.
+ERROR_SAVE_META_BAD=Hibás formátumot adott be. Módosítások nem menthetők.
+ERROR_REMOVE_LAST_COL=Nem kapcsolhatja ki az összes oszlopot.
+ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Kiszolgálón nem böngészhet 
+ERROR_BROWSE_HOST_FAILED_END_KEY=.
+
+################################################################################
+# Keys for the titles of the options panes. The corresponding values represent
+# the visual names of the panes in the options tree
+# package com.limegroup.gnutella.gui.options
+################################################################################
+OPTIONS_LOCALIZE_MAIN_TITLE=Helyi beállítások
+OPTIONS_SAVE_MAIN_TITLE=Mentés
+OPTIONS_SHARED_MAIN_TITLE=Megosztás
+OPTIONS_SPEED_MAIN_TITLE=Sebesség
+OPTIONS_DOWNLOAD_MAIN_TITLE=Letöltések
+OPTIONS_UPLOAD_MAIN_TITLE=Feltöltések
+OPTIONS_UPLOAD_BASIC_MAIN_TITLE=Alapfunkciók
+OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Kiegészítések
+OPTIONS_CONNECTIONS_MAIN_TITLE=Kapcsolatok
+OPTIONS_SHUTDOWN_MAIN_TITLE=Leállítás
+OPTIONS_CHAT_MAIN_TITLE=Csevegés
+OPTIONS_PLAYER_MAIN_TITLE=Lejátszó
+OPTIONS_BROWSER_MAIN_TITLE=Böngésző
+#??? OPTIONS_THEME_MAIN_TITLE=Theme
+OPTIONS_SKIN_MAIN_TITLE=Bőr
+OPTIONS_SEARCH_MAIN_TITLE=Keresés
+OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Korlát
+OPTIONS_SEARCH_QUALITY_MAIN_TITLE=Minőség
+OPTIONS_SEARCH_SPEED_MAIN_TITLE=Sebesség
+OPTIONS_FILTERS_MAIN_TITLE=Szűrők
+OPTIONS_RESULTS_MAIN_TITLE=Kulcsszavak
+OPTIONS_MESSAGES_MAIN_TITLE=Kiszolgálók
+OPTIONS_ADVANCED_MAIN_TITLE=További funkciók
+OPTIONS_PREFERENCING_MAIN_TITLE=Rangsorolás
+OPTIONS_PORT_MAIN_TITLE=Port
+OPTIONS_FIREWALL_MAIN_TITLE=Tűzfalak
+OPTIONS_PRIVATE_NET_MAIN_TITLE=Privát hálózat
+
+################################################################################
+# Key/value pairs for the localization options window item
+# in the options window
+################################################################################
+OPTIONS_LOCALIZE_TITLE=Nemzetközi beállítás
+OPTIONS_LOCALIZE_LABEL=A Limewire beállítható úgy,hogy a megjelenése és a használata az Ön nyelvének és országának a legjobban megfeleljen. Az ország beállítása a világhálón való eligazodást is elősegíti.
+OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Nyelv
+OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Ország
+
+################################################################################
+# Key/value pairs for the save directory options window item
+# in the options window
+################################################################################
+OPTIONS_SAVE_DIR_TITLE=Mentés könyvtára
+OPTIONS_SAVE_DIR_LABEL=Kiválaszthatja a mentett fileok könyvtárát.
+OPTIONS_SAVE_DIR_BOX_LABEL=Könyvtár:
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Böngésző...
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Alapbeállítás használata
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Másik könyvtár választása
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Alapértelmezett könyvtár használata
+OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Befejezetlen fileok
+OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=Automatikusan törölheti a régi és sikertelen letöltéseket.
+OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Hány napig tartsam a befejezetlen fileokat:
+
+################################################################################
+# Key/value pairs for the shared directories options window item
+# in the options window
+################################################################################
+OPTIONS_SHARED_DIRS_TITLE=Osztott könyvtárak
+OPTIONS_SHARED_DIRS_LABEL=Kiválaszthatja az osztott fileok könyvtárát. Az itt lévő fileok megjelennek a könyvtárlistában.
+OPTIONS_SHARED_DIRS_BOX_LABEL=Könyvtárak:
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=Könyvtár hozzáadás...
+OPTIONS_SHARED_DIRS_BUTTON_TIP=Könyvtár felvétele a megosztáshoz
+
+################################################################################
+# Key/value pairs for the shared extension options window item
+# in the options window
+################################################################################
+OPTIONS_SHARED_EXTENSIONS_TITLE=Megosztott filekiterjesztések
+OPTIONS_SHARED_EXTENSIONS_LABEL=Kiválaszthatja, hogy melyik kiterjesztéseket kívánja megosztani.
+OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=Kiterjesztések:
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Alapbeállítás használata
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Alapbeállított kiterjesztés megosztások használata
+
+################################################################################
+# Key/Value pairs for the options for setting the connection speed
+# in the options window
+################################################################################
+OPTIONS_SPEED_TITLE=Kapcsolódási sebességét
+OPTIONS_SPEED_LABEL=Beállíthatja kapcsolódási sebességét, így a LimeWire optimalizálja a teljesítményt.
+OPTIONS_SPEED_BOX_LABEL=Sebesség:
+
+################################################################################
+# Key/Value pairs for disabling supernode support
+################################################################################
+OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Partnerközi kapcsolatok
+OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Amennyiben gyors internet elérése van, a LimeWire a lassúbb felhasználók felé "ultrapartner"-ként viselkedik. Ezt szükség esetén le is tilthatja.
+OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapartner lehetőség tiltása:
+
+################################################################################
+# Key/Value pairs for the options for the maximum number of downloads
+# in the options window
+################################################################################
+OPTIONS_DOWNLOAD_MAX_TITLE=Maximum letöltések
+OPTIONS_DOWNLOAD_MAX_LABEL=Beállíthatja az egyidejűleg alkalmazott letöltések maximális számát.
+OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Maximum letöltések:
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing downloads
+# in the options window
+################################################################################
+OPTIONS_DOWNLOAD_CLEAR_TITLE=Letöltések törlése
+OPTIONS_DOWNLOAD_CLEAR_LABEL=Beállíthatja, hogy a befejezett letöltések törlése automatikusan megtörténjen-e.
+OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Befejezett letöltések automata törlése:
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing uploads
+# in the options window
+################################################################################
+OPTIONS_UPLOAD_CLEAR_TITLE=Feltöltések takarítása
+OPTIONS_UPLOAD_CLEAR_LABEL=Választhat, hogy a befejezett feltöltések automatikusan törölve legyenek-e.
+OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Befejezett feltöltések automatikus takarítása:
+
+################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to uploads in the options window
+################################################################################
+OPTIONS_UPLOAD_BANDWIDTH_TITLE=Feltöltési sávszélesség
+OPTIONS_UPLOAD_BANDWIDTH_LABEL=Megadhatja a sávszélessége feltöltésre szánt százalékos mértékét. Kikapcsolhatja a feltöltést, ha a mértékét zéróra állítja.
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Korlátlan
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Feltöltési sebesség:
+
+################################################################################
+# Key/Value pairs for the options for the hard maximum number of uploads
+################################################################################
+#??? OPTIONS_UPLOAD_MAX_TITLE=Max upload slots
+#??? OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads. This value will only be reached if you have enough bandwidth.
+#??? OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max upload slots:
+
+################################################################################
+# Key/Value pairs for the options for the soft maximum number of uploads
+################################################################################
+OPTIONS_UPLOAD_SOFT_MAX_TITLE=Feltöltési helyek megnyitása
+OPTIONS_UPLOAD_SOFT_MAX_LABEL=Mindig legalább ennyi feltöltés engedélyezve. Ha ezt a határt elérte, csak akkor lehetséges több feltöltés, ha van sávszélesség. Ha ez az érték túl alacsony, akkor ez megóvhat a feltöltési kapacitás határának elérésétől, más felhasználók akadályozásától.
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Feltöltési helyek indítása:
+
+################################################################################
+# Key/Value pairs for the options for the number of uploads per persons
+################################################################################
+OPTIONS_UPLOAD_PER_PERSON_TITLE=Feltöltés személyenként
+OPTIONS_UPLOAD_PER_PERSON_LABEL=Személyenként ennyi feltöltés engedélyezése.
+OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Feltöltés személyenként:
+
+################################################################################
+# Key/Value pairs for connecting on startup
+################################################################################
+OPTIONS_CONNECT_ON_STARTUP_TITLE=Kapcsolat indításkor
+OPTIONS_CONNECT_ON_STARTUP_LABEL=Beállíthatja, hogy a kapcsolat a hálózattal program indításakor létrejöjjön-e vagy sem.
+OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Kapcsolat indításkor:
+
+################################################################################
+# Key/Value pairs for shutdown options
+################################################################################
+OPTIONS_SHUTDOWN_TITLE=Kilépési beállítások
+OPTIONS_SHUTDOWN_LABEL=Beállíthatja a kilépési viselkedési módot.
+OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Kilépés azonnal
+OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Kilépés az átvitel után
+OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimalizálás a tálcára
+
+################################################################################
+# Key/Value pairs for the chat options in the options window
+################################################################################
+OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Csevegés engedélyezése:
+OPTIONS_CHAT_ACTIVE_TITLE=Kiszolgálói kapcsolat
+OPTIONS_CHAT_ACTIVE_LABEL=A csevegést be vagy kikapcsolhatja.
+
+################################################################################
+# Key/Value pairs for the player options in the options window
+################################################################################
+OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 lejátszó használata:
+OPTIONS_PLAYER_PREFERENCE_TITLE=Lejátszó beállítások
+OPTIONS_PLAYER_PREFERENCE_LABEL=A belső lejátszót, vagy a rendszerben lévőt használhatja.
+
+################################################################################
+# Key/Value pairs for browser options
+################################################################################
+OPTIONS_BROWSER_PREFERENCE_TITLE=Böngésző beállítások
+OPTIONS_BROWSER_PREFERENCE_LABEL=Megadhatja, melyik böngészőt akarja használni.
+OPTIONS_BROWSER_BOX_LABEL=Böngésző
+OPTIONS_BROWSER_DEFAULT_BUTTON_LABEL=Alapbeállítás használata
+OPTIONS_BROWSER_DEFAULT_BUTTON_TIP=Alapböngésző használata
+
+################################################################################
+# Key/Value pairs for theme options
+################################################################################
+#??? OPTIONS_THEME_TITLE=Theme options
+#??? OPTIONS_THEME_LABEL=You can select from alternate themes for LimeWire.
+#??? OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate theme file.
+#??? OPTIONS_THEME_DEFAULT_BUTTON_TIP=Use default theme file.
+OPTIONS_THEME_BOX_LABEL=File:
+#??? OPTIONS_THEME_FILE_LABEL=You can choose your current theme.
+#??? OPTIONS_THEME_FILE_CHOOSER_TITLE=Choose your theme
+#??? THEME_FILE_DESCRIPTION=LimeWire theme files (*.lwtp)
+THEME_CHANGED_MESSAGE=A bőr módosítása érdekében indítsa újra a LimeWire programot.
+
+################################################################################
+# Key/Value pairs for skin options
+################################################################################
+OPTIONS_SKIN_TITLE=Bőr beállítások
+OPTIONS_SKIN_LABEL=LimeWire bőr választása. L2FProd.com (http://www.L2FProd.com/) által fejlesztett SkinLF használata.
+OPTIONS_SKIN_BROWSE_BOX_LABEL=Bőr:
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Bőr böngészés...
+OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Előnézet
+OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=Nincs bőr
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Letöltés...
+OPTIONS_SKIN_BROWSE_BUTTON_TIP=Másik bőr választás
+OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Választott bőr előnézet
+OPTIONS_SKIN_DEFAULT_BUTTON_TIP=LimeWire bőr nélkül
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Új bőrök letöltése www.javootoo.com...
+SKIN_APPLY_MESSAGE=A bőr módosítása a LimeWire újraindítása után érvényes...
+SKIN_RESTART_NEEDED=A bőr módosítása érdekében indítsa újra a LimeWire programot.
+
+################################################################################
+# Key/Value pairs for browse for new skins option pane
+################################################################################
+OPTIONS_BROWSE_SKIN_TITLE=Böngészés új bőrökhöz
+OPTIONS_BROWSE_SKIN_LABEL=Bőrök találhatók: http://www.javootoo.com
+
+################################################################################
+# Key/value pairs for the skin options window
+################################################################################
+SKIN_EDITOR_PREVIEW_BUTTON=Előnézet
+SKIN_EDITOR_REMOVE_BUTTON=Alapértelmezés
+SKIN_EDITOR_BROWSE_BUTTON=Böngésző...
+SKIN_EDITOR_PREVIEW_BUTTON_TIP=Bőr előnézet
+SKIN_EDITOR_REMOVE_BUTTON_TIP=Alapértelmezett bőr használata
+SKIN_EDITOR_BROWSE_BUTTON_TIP=Bőrök böngészése
+
+################################################################################
+# Key/Value pairs for the options for the maximum number of searches
+# in the options window
+################################################################################
+OPTIONS_SEARCH_MAX_TITLE=Maximum keresések
+OPTIONS_SEARCH_MAX_LABEL=Beállíthatja az egyidejűleg alkalmazott keresések maximális számát.
+OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maximum keresések:
+
+################################################################################
+# Key/Value pairs for search quality options in the options window
+################################################################################
+OPTIONS_SEARCH_QUALITY_TITLE=Keresés eredményének minősége
+OPTIONS_SEARCH_QUALITY_LABEL=A keresés eredményének "minőségét" kijelölheti. A négycsillagos eredmény azt jelenti, hogy a kiszolgálón nincs tűzfal és szabad feltöltéssel bír.
+OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Csak négycsillagos eredmény kiírása
+OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Csak három és négycsillagos eredmény kiírása
+OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Csak kettő, három, négycsillagos eredmémy kiírása
+OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Mindet kiír
+
+################################################################################
+# Key/Value pairs for minimum search result speed options
+################################################################################
+OPTIONS_SEARCH_SPEED_TITLE=Keresés eredmény sebessége
+OPTIONS_SEARCH_SPEED_LABEL=Kiválaszthatja a legkisebb sebességet, amit a keresés eredménye kiírjon.
+OPTIONS_SEARCH_SPEED_T3_LABEL=Csak a T3 vagy nagyobb sebesség kiírása
+OPTIONS_SEARCH_SPEED_T1_LABEL=Csak a T1 vagy nagyobb sebesség kiírása
+OPTIONS_SEARCH_SPEED_CABLE_LABEL=Csak a kábel/DSL vagy nagyobb sebesség kiírása
+OPTIONS_SEARCH_SPEED_ALL_LABEL=Minden sebesség kiírása
+
+################################################################################
+# Key/Value pairs for result filtering options
+# in the options window
+################################################################################
+#??? OPTIONS_IGNORE_RESULTS_TITLE=Filter results
+#??? OPTIONS_IGNORE_RESULTS_LABEL=You can filter out search results containing specific words.
+
+################################################################################
+# Key/Value pairs for general result type filtering options
+# in the options window
+################################################################################
+OPTIONS_IGNORE_RESULT_TYPES_TITLE=Eredménytípusok szűrése
+OPTIONS_IGNORE_RESULT_TYPES_LABEL=A keresés eredményéből bizonyos típusokat kiszűrhet.
+OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Felnőtt tartalom kiszűrése
+OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=A .htm/.html fileok kiszűrése
+OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=A .vbs fileok kiszűrése
+
+################################################################################
+# Key/Value pairs for message filtering options in the options window
+################################################################################
+OPTIONS_IGNORE_MESSAGES_TITLE=Kiszolgálók szűrése
+OPTIONS_IGNORE_MESSAGES_LABEL=Kiszűrheti bizonyos kiszolgálók üzeneteit, ha a listába beírja IP címüket (pl. "18.239.0.1" vagy "18.*.*.*").
+OPTIONS_ALLOW_MESSAGES_TITLE=Kiszolgálók engedélyezése
+OPTIONS_ALLOW_MESSAGES_LABEL=Engedélyezheti bizonyos kiszolgálók üzeneteit, ha a listába beírja IP címüket (pl. "192.168.0.1" vagy "192.*.*.*"). Ez a lista a tiltólistát felülbírálja.
+
+################################################################################
+# Key/Value pairs for the options for setting connection preferences
+# in the advanced panel of the options window
+################################################################################
+OPTIONS_CONNECT_PREF_TITLE=Kapcsolati beállítások
+OPTIONS_CONNECT_PREF_LABEL=A megosztott fileok száma szerint korlátozhatja, hogy ki kapcsolódhat Önhöz.
+OPTIONS_CONNECT_PREF_BOX_LABEL=Megosztandó fileok, hogy ne legyen szabadon tölthető:
+OPTIONS_CONNECT_PREF_SLIDER_LABEL=Szabad töltés engedélyezése:
+OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Ritkán
+OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Mindig
+
+################################################################################
+# Key/Value pairs for the options for setting the listening port
+# in the options window
+################################################################################
+OPTIONS_PORT_TITLE=Figyelő port
+OPTIONS_PORT_LABEL=Beállíthatja azt a hálózati portot, amelyik más kiszolgálókat figyel.
+OPTIONS_PORT_BOX_LABEL=Figyelő port:
+
+################################################################################
+# Key/Value pairs for the options for forcing your ip address
+# in the advanced panel in the options window
+################################################################################
+OPTIONS_FORCE_IP_TITLE=Helyi IP cím kikényszerítése
+OPTIONS_FORCE_IP_LABEL=Saját IP kikényszerítése a tűzfal mögött, ha új gnutella klienst akar egy írási kérelem küldése nélkül.
+OPTIONS_FORCE_IP_CHECK_BOX_LABEL=IP kikényszerítése
+OPTIONS_FORCE_IP_IP_LABEL=IP Cím:
+OPTIONS_FORCE_IP_PORT_LABEL=Port:
+
+################################################################################
+# Key/Value pairs for the options for setting the connection strings
+# in the advanced panel in the options window
+################################################################################
+OPTIONS_CONNECT_STRING_TITLE=Privát hálózat
+OPTIONS_CONNECT_STRING_LABEL=Beállíthatja a kapcsolati jellemzőt egy privát Gnutella hálózatra. A többi Gnutella kiszolgáló ahova kapcsolódni kíván, ugyanezt a jellemzőt fogja elvárni.
+OPTIONS_CONNECT_STRING_STRING_LABEL=Kapcsolódás adatai:
+OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Ok kapcsolódás adatai:
+
+################################################################################
+# Key/Value pairs for browse for the Private Net options pane
+################################################################################
+OPTIONS_PRIVATE_NET_TITLE=Privát hálózat
+#??? OPTIONS_PRIVATE_NET_LABEL=Configure private network options for LimeWire.
+#??? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a private network?
+OPTIONS_PRIVATE_CACHE_IP_LABEL=Kiszolgálóknév
+OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
+OPTIONS_PRIVATE_CACHE_NAME_LABEL=Felhasználónév
+
+################################################################################
+# Key/value pairs for top-level stats panels
+################################################################################
+STATS_BANDWIDTH_PANE_TITLE=Sávszélesség
+#??? STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
+
+STATS_NET_PANE_TITLE=Hálózat
+#??? STATS_NET_PANE_LABEL=Statistics on the current state of the network. These statistics are quite innaccurate due to the dynamic, distributed nature of Gnutella and should not be taken too literally. They can, however, give you a general idea regarding the current state of your connection.
+
+STATS_ADVANCED_PANE_TITLE=További
+#??? STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. For example, researchers can choose to write any statistic to a file. This file will be named automatically and will be saved in the working directory. Data will be reported in comma-delimited format, easily viewable in any spreadsheet program. Advanced statistics are not displayed by default and are not recommended for most users.
+#??? STATS_ADVANCED_CHECK_BOX_LABEL=Show advanced statistics:
+
+# Advanced Gnutella messages panes
+GNUTELLA_MESSAGES=Gnutella
+
+###################################################################
+# Key/value pairs for StatisticsView
+###################################################################
+STATS_NETWORK_INFO_TITLE=Hálózat információ
+
+STATS_CONNECTION_TITLE=Kapcsolatok
+STATS_UPLOADS=Aktuális feltöltések:
+STATS_DOWNLOADS=Aktuális letöltések:
+STATS_NET=Aktuális kiszolgálók:
+STATS_HOSTS=Összes kiszolgáló:
+STATS_FILES=Összes file:
+STATS_FILE_SIZE=Összes file MBs:
+
+STATS_NETWORK_TITLE=Hálózat
+STATS_TOTAL_MESSAGES=Összes üzenetek:
+STATS_LOCAL_SEARCHES=Helyi keresés:
+STATS_ROUTING_ERRORS=Útvonal hibák:
+STATS_DROPPED_MESSAGES=Kihagyott üzenetek:
+STATS_DOWNLOAD_COUNT=Letöltések száma:
+STATS_UPLOAD_COUNT=Feltöltések száma:
+
+STATS_BUTTON_LABEL=Update
+
+################################################################################
+# Key/value pairs for bandwidth statistics panes
+################################################################################
+BANDWIDTH_KEY=Sávszélesség
+STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=Kimenő
+#??? STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=Total bandwidth used to send outgoing data, either through uploads or Gnutella messages.
+STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=Bejövő
+#??? STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Total bandwidth used to send outgoing data, either through downloads or Gnutella messages.
+
+################################################################################
+################################################################################
+##  TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL
+################################################################################
+################################################################################
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- received messages
+################################################################################
+#??? RECEIVED_MESSAGES=Received
+
+#??? RECEIVED_MESSAGE_NUMBER=Number
+#??? RECEIVED_QUERY_REQUESTS=Queries
+#??? RECEIVED_QUERY_REPLIES=Query hits
+
+#??? RECEIVED_MESSAGE_BYTES=Kilobytes
+#??? RECEIVED_QUERY_REQUESTS_BYTES=Queries
+#??? RECEIVED_QUERY_REPLIES_BYTES=Query hits
+
+RECEIVED_LIMEWIRE=LimeWire üzenetek
+#??? LIME_RECEIVED_MESSAGE_NUMBER=Number
+STATS_RECEIVED_TCP=TCP
+STATS_RECEIVED_UDP=UDP
+#??? LIME_RECEIVED_MESSAGE_BYTES=Kilobytes
+STATS_RECEIVED_TCP_BYTES=TCP
+STATS_RECEIVED_UDP_BYTES=UDP
+
+# number of messages
+STATS_TOTAL_RECEIVED_MESSAGES_TITLE=Összes
+#??? STATS_TOTAL_RECEIVED_MESSAGES_LABEL=All Gnutella messages received by this client.
+STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP 
+#??? STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over TCP, by message type.
+STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
+#??? STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=All Gnutella messages received over UDP, by message type.
+STATS_RECEIVED_TCP_UDP_TITLE=TCP vagy UDP
+#??? STATS_RECEIVED_TCP_UDP_LABEL=Total Gnutella messages received over TCP or UDP.
+#??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=Duplicate TCP queries
+#??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Number of duplicate queries received over TCP versus the total number of queries.
+# Advanced Gnutella Message hops/ttl for queries
+#??? STATS_QUERY_REQUEST_HOPS_TITLE=Hops
+#??? STATS_QUERY_REQUEST_HOPS_LABEL=All received queries, by hops.
+#??? STATS_QUERY_REQUEST_TTL_TITLE=TTL
+#??? STATS_QUERY_REQUEST_TTL_LABEL=All received queries, by time to live (TTL).
+# Advanced Gnutella Message hops/ttl for query hits
+#??? STATS_QUERY_REPLY_HOPS_TITLE=Hops
+#??? STATS_QUERY_REPLY_HOPS_LABEL=All received query hits, by hops.
+#??? STATS_QUERY_REPLY_TTL_TITLE=TTL
+#??? STATS_QUERY_REPLY_TTL_LABEL=All received query hits, by time to live (TTL).
+
+# number of kilobytes
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=Összes
+#??? STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=Total kilobytes for all Gnutella messages received by this client.
+STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
+#??? STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over TCP, by message type.
+STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
+#??? STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over UDP, by message type.
+STATS_RECEIVED_BYTES_TCP_UDP_TITLE=TCP vagy UDP
+#??? STATS_RECEIVED_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages received over TCP or UDP.
+#??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=Duplicate TCP queries
+#??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=Total kilobytes in duplicate queries received over TCP versus the total number of queries.
+# Advanced Gnutella Message hops/ttl for queries in kilobytes
+#??? STATS_QUERY_REQUEST_HOPS_BYTES_TITLE=Hops
+#??? STATS_QUERY_REQUEST_HOPS_BYTES_LABEL=All received queries in kilobytes, by hops.
+#??? STATS_QUERY_REQUEST_TTL_BYTES_TITLE=TTL
+#??? STATS_QUERY_REQUEST_TTL_BYTES_LABEL=All received queries in kilobytes, by time to live (TTL).
+# Advanced Gnutella Message hops/ttl for query hits in kilobytes
+#??? STATS_QUERY_REPLY_HOPS_BYTES_TITLE=Hops
+#??? STATS_QUERY_REPLY_HOPS_BYTES_LABEL=All received query hits in kilobytes, by hops.
+#??? STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
+#??? STATS_QUERY_REPLY_TTL_BYTES_LABEL=All received query hits in kilobytes, by time to live (TTL).
+
+# number of messages received for LimeWire-specific stats -- TCP
+STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Queries
+#??? STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP query hits received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
+# number of messages received for LimeWire-specific stats -- UDP
+STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
+#??? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=UDP pings received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_RECEIVED_UDP_PING_REPLIES_LABEL=UDP pongs received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_UDP_QUERIES_TITLE=Queries
+#??? STATS_LIME_RECEIVED_UDP_QUERIES_LABEL=UDP queries received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_LABEL=UDP query hits received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=UDP pushes received from all Gnutella clients versus other LimeWires.
+
+# number of kilobytes received for LimeWire-specific stats -- TCP
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_TITLE=Queries
+#??? STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
+# number of kilobytes received for LimeWire-specific stats -- UDP
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes for UDP pings received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_TITLE=Queries
+#??? STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes received from all Gnutella clients versus other LimeWires.
+
+STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=Közepes méret
+#??? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=The average size in kilobytes of received Gnutella messages.
+STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Közepes méret
+#??? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=The average size in kilobytes of received messages from LimeWires.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- sent messages
+################################################################################
+#??? SENT_MESSAGES=Sent
+#??? SENT_MESSAGE_NUMBER=Number
+#??? SENT_MESSAGE_BYTES=Kilobytes
+SENT_LIMEWIRE=LimeWire üzenetek
+
+#??? LIME_SENT_MESSAGES_NUMBER=Number
+STATS_SENT_TCP=TCP
+STATS_SENT_UDP=UDP
+#??? LIME_SENT_MESSAGES_BYTES=Kilobytes
+STATS_SENT_TCP_BYTES=TCP
+STATS_SENT_UDP_BYTES=UDP
+
+# number of messages
+STATS_TOTAL_SENT_MESSAGES_TITLE=Összes
+#??? STATS_TOTAL_SENT_MESSAGES_LABEL=All Gnutella messages sent out from this client.
+STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP 
+#??? STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=All Gnutella messages sent over TCP, by message type.
+STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
+#??? STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=All Gnutella messages sent over UDP, by message type.
+STATS_SENT_TCP_UDP_TITLE=TCP vagy UDP
+#??? STATS_SENT_TCP_UDP_LABEL=Total Gnutella messages sent over TCP or UDP.
+
+# number of kilobytes
+STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=Összes
+#??? STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent out from this client.
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
+#??? STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over TCP, by message type.
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
+#??? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
+STATS_SENT_BYTES_TCP_UDP_TITLE=TCP vagy UDP
+#??? STATS_SENT_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages sent over TCP or UDP.
+
+# number of messages sent for LimeWire-specific stats -- TCP
+STATS_LIME_SENT_TCP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_SENT_TCP_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
+#??? STATS_LIME_SENT_TCP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=TCP pings sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_TCP_QUERIES_TITLE=Queries
+#??? STATS_LIME_SENT_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
+# number of messages sent for LimeWire-specific stats -- UDP
+STATS_LIME_SENT_UDP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_SENT_UDP_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
+#??? STATS_LIME_SENT_UDP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_SENT_UDP_PING_REQUESTS_LABEL=UDP pings sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_UDP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=UDP pongs sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_UDP_QUERIES_TITLE=Queries
+#??? STATS_LIME_SENT_UDP_QUERIES_LABEL=UDP queries sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=UDP query hits sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=UDP pushes sent from all Gnutella clients versus other LimeWires.
+
+# number of kilobytes sent for LimeWire-specific stats -- TCP
+STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes sent by other LimeWires.
+#??? STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=Queries
+#??? STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
+# number of kilobytes sent for LimeWire-specific stats -- UDP
+STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=Összes
+#??? STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes sent on behalf of other LimeWires.
+#??? STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+#??? STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes for UDP pings sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+#??? STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=Queries
+#??? STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
+#??? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes sent from all Gnutella clients versus other LimeWires.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- flow control
+################################################################################
+#??? FLOW_CONTROLLED_MESSAGES=Flow control
+#??? STATS_FLOW_CONTROL_TITLE=Number
+#??? STATS_FLOW_CONTROL_LABEL=Statistics for flow controlled messages.
+#??? STATS_FLOW_CONTROL_BYTES_TITLE=Kilobytes
+#??? STATS_FLOW_CONTROL_BYTES_LABEL=Statistics for flow controlled messages in kilobytes.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- route error stats
+################################################################################
+STATS_ROUTE_ERRORS_TITLE=Útvonal hibák
+#??? STATS_ROUTE_ERRORS_LABEL=Total number of errors routing messages to other clients.
+
+#??? STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=Hit routing errors
+#??? STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=Errors routing query hits.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- other stats
+################################################################################
+#??? STATS_FILTERED_MESSAGES_TITLE=Filtered messages
+#??? STATS_FILTERED_MESSAGES_LABEL=Total messages filtered.
+
+STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Kapcsolódás
+#??? STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Total number of Gnutella connection attempts, either initiated internally or externally.
+
+################################################################################
+# Key/value pairs for advanced HTTP statistics
+################################################################################
+#??? STATS_TOTAL_HTTP_REQUESTS_TITLE=HTTP requests
+#??? STATS_TOTAL_HTTP_REQUESTS_LABEL=Total incoming HTTP requests received over time. This includes both HEAD and GET requests.
+
+################################################################################
+# Key/Value pairs for statistics graph axis labels
+################################################################################
+# defaults
+#??? DEFAULT_X_AXIS_LABEL=seconds
+DEFAULT_Y_AXIS_LABEL=üzenetek
+#??? DEFAULT_Y_BYTE_AXIS_LABEL=kilobytes
+#??? Y_AXIS_BANDWIDTH_LABEL=kilobytes
+
+################################################################################
+# Key/Value pairs for statistics graph legend labels and stat window titles
+################################################################################
+# Column names
+STATS_LEGEND_NAME=Név
+STATS_LEGEND_AVERAGE=Közepes
+STATS_LEGEND_MAX=Maximum
+STATS_LEGEND_TOTAL=Összes
+#??? STATS_LEGEND_COLOR=Color
+
+#??? STATS_RECORD_STATS_LABEL=Write statistics for this graph to files.
+
+# Bandwidth
+UPSTREAM_BANDWIDTH=Kimenő
+DOWNSTREAM_BANDWIDTH=Bejövő
+
+# Advanced Gnutella All clients message
+STATS_ALL_CLIENTS=Minden elágazás
+STATS_LIMEWIRE=LimeWire
+
+# Advanced Gnutella Received Messages Total
+#??? ALL_RECEIVED=Received
+#??? ALL_LIME_RECEIVED=Received LimeWire
+# Advanced Gnutella Received Messages TCP/UDP
+RECEIVED_ALL_TCP_MESSAGES=TCP üzenetek
+RECEIVED_ALL_UDP_MESSAGES=UDP üzenetek
+# Advanced Gnutella Received Messages Duplicate TCP queries
+#??? RECEIVED_TCP_DUPLICATE_QUERIES=Duplicate TCP queries
+
+# Advanced Gnutella Received Kilobytes Total
+#??? ALL_RECEIVED_BYTES=Received
+#??? ALL_LIME_RECEIVED_BYTES=Received LimeWire
+# Advanced Gnutella Received Kilobytes TCP/UDP
+RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP üzenetek
+RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP üzenetek
+# Advanced Gnutella Received Kilobytes Duplicate TCP queries
+#??? RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=Duplicate TCP queries
+
+# Advanced Gnutella Sent Messages Total
+#??? ALL_SENT=Sent
+#??? ALL_LIME_SENT=Sent LimeWire
+# Advanced Gnutella Sent Messages TCP/UDP
+#??? SENT_ALL_TCP_MESSAGES=TCP üzenetek
+#??? SENT_ALL_UDP_MESSAGES=UDP üzenetek
+
+# Advanced Gnutella Sent Kilobytes Total
+#??? ALL_SENT_BYTES=Sent
+#??? ALL_LIME_SENT_BYTES=Sent LimeWire
+# Advanced Gnutella Sent Kilobytes TCP/UDP
+#??? SENT_ALL_TCP_MESSAGES_BYTES=TCP üzenetek
+#??? SENT_ALL_UDP_MESSAGES_BYTES=UDP üzenetek
+
+###############################################################################
+#  Key/value pairs for general message labels
+###############################################################################
+GENERAL_ALL_MESSAGES_LABEL=Minden üzenetek
+#??? GENERAL_PING_REQUEST_LABEL=Pings
+#??? GENERAL_PING_REPLY_LABEL=Pongs
+#??? GENERAL_QUERY_REQUEST_LABEL=Queries
+#??? GENERAL_QUERY_REPLY_LABEL=Query hits
+#??? GENERAL_PUSH_REQUEST_LABEL=Pushes
+#??? GENERAL_ROUTE_TABLE_LABEL=Route tables
+
+# Hops labels
+HOPS1=Hops 1
+HOPS2=Hops 2
+HOPS3=Hops 3
+HOPS4=Hops 4
+HOPS5=Hops 5
+HOPS6=Hops 6
+HOPS7=Hops 7
+HOPS8=Hops 8
+HOPS9=Hops 9
+
+# TTL labels
+TTL0=TTL 0
+TTL1=TTL 1
+TTL2=TTL 2
+TTL3=TTL 3
+TTL4=TTL 4
+TTL5=TTL 5
+TTL6=TTL 6
+TTL7=TTL 7
+TTL8=TTL 8
+TTL9=TTL 9
+
+# Advanced Gnutella Message routing errors
+ALL_ROUTE_ERRORS=Útvonal hibák
+#??? PING_REPLY_ROUTE_ERRORS=Pong errors
+#??? QUERY_REPLY_ROUTE_ERRORS=Reply errors
+#??? PUSH_REQUEST_ROUTE_ERRORS=Push errors
+
+# Advanced Gnutella Routing errors Query replies
+#??? HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Hard limit
+#??? NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=No route
+
+# Advanced Gnutella Filtered messages
+#??? ALL_FILTERED_MESSAGES=Filtered messages
+
+# Advanced Gnutella Connections
+#??? ALL_CONNECTION_ATTEMPTS=Connection attempts
+#??? OUTGOING_CONNECTION_ATTEMPTS=Outgoing attempts
+#??? INCOMING_CONNECTION_ATTEMPTS=Incoming attempts
+
+# Advanced HTTP requests
+#??? ALL_HTTP_REQUESTS=All requests
+#??? ALL_HTTP_HEAD_REQUESTS=HEAD requests
+#??? ALL_HTTP_GET_REQUESTS=GET requests

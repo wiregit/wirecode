@@ -887,7 +887,8 @@ public abstract class FileManager {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
         } catch(IOException ioe) {
-            // file doesn't exist?
+            //invalid file?... don't add incomplete file.
+            return;
         }
 
         // We want to ensure that incomplete files are never added twice.

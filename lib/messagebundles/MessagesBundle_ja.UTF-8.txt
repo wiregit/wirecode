@@ -1,0 +1,1808 @@
+﻿################################################################################
+# Messages Bundle for LimeWire 3.7.7
+# Specialization for: Japanese (Nippongo) - Japan
+# Thanks to: Yuji T. Additions by Takanobu Torigoe & Shinada Atsushi.
+################################################################################
+LOCALE_LANGUAGE_CODE=ja
+LOCALE_LANGUAGE_NAME=日本語
+LOCALE_COUNTRY_CODE=
+LOCALE_COUNTRY_NAME=日本
+LOCALE_VARIANT_CODE=
+LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Hira
+LOCALE_SCRIPT_NAME=Hiragana, Katakana, Kanji
+# UTF-8 file created in Windows 2000/XP NotePad with the "Ms Gothic" font.
+################################################################################
+# Key/value pair for whether or not bold characters should be used for this
+# locale. Must be "true" or "false" (true only for complex scripts).
+################################################################################
+DISABLE_BOLD_CHARACTERS=false
+
+################################################################################
+# Key/value pair for whether or not the layout should be adapted for right-to-
+# left scripts. Must be "true" or "false" (true only for semitic scripts).
+################################################################################
+LAYOUT_RIGHT_TO_LEFT=false
+
+################################################################################
+# Key/value pair for whether or not the tips of the day should be displayed.
+# The default is false (set to true in english resource).
+################################################################################
+HAS_TIPS_OF_THE_DAY=true
+
+################################################################################
+# Keys/value pairs for general strings that can be used in any components
+################################################################################
+GENERAL_OK_BUTTON_LABEL=了解
+GENERAL_OK_BUTTON_TIP=変更を適用.
+GENERAL_CANCEL_BUTTON_LABEL=取消
+GENERAL_CANCEL_BUTTON_TIP=変更を取消.
+GENERAL_APPLY_BUTTON_LABEL=適用
+GENERAL_APPLY_BUTTON_TIP=変更を適用.
+GENERAL_CLOSE_BUTTON_LABEL=閉じる
+GENERAL_CLOSE_BUTTON_TIP=プログラムを閉じる.
+GENERAL_BACK_BUTTON_LABEL=<< 戻る
+GENERAL_NEXT_BUTTON_LABEL=次へ >>
+GENERAL_FINISH_BUTTON_LABEL=終了
+GENERAL_DEFAULT_BUTTON_LABEL=標準
+GENERAL_BROWSE_BUTTON_LABEL=閲覧...
+GENERAL_BROWSE_HOST_LABEL=ホストを閲覧
+GENERAL_BROWSE_HOST_TIP=選択されたホストの全てのファイルを表示.
+
+#Options
+OPTIONS_BUTTONS_OK_LABEL=了解
+OPTIONS_BUTTONS_OK_TIP=変更を適用後ウィンドウを閉じる.
+OPTIONS_BUTTONS_CANCEL_LABEL=取消
+OPTIONS_BUTTONS_CANCEL_TIP=変更を取消.
+OPTIONS_BUTTONS_APPLY_LABEL=適用
+OPTIONS_BUTTONS_APPLY_TIP=変更を適用.
+
+################################################################################
+# Key/value pairs for general terms, such as "yes" and "no"
+################################################################################
+YES=はい
+NO=いいえ
+
+################################################################################
+# Key/value pairs for general unit terms
+################################################################################
+GENERAL_AVERAGE_BANDWIDTH=平均帯域
+GENERAL_ALTERNATE_LOCATIONS=有効な代理位置
+GENERAL_STARTED_ON=開始
+GENERAL_FINISHED_ON=終了
+GENERAL_TIME_SPENT=経過時間
+GENERAL_REVERT_TO_DEFAULT=初期設定に戻す。
+GENERAL_MORE_OPTIONS=他のオプション
+
+# StatusLine, Statistics and GUIUtils
+GENERAL_UNIT_TERABYTES=TB
+GENERAL_UNIT_GIGABYTES=GB
+GENERAL_UNIT_MEGABYTES=MB
+GENERAL_UNIT_KILOBYTES=KB
+GENERAL_UNIT_KBPSEC=KB/秒
+
+################################################################################
+# Key/value pair for the main application title
+################################################################################
+APP_TITLE=LimeWire: Gnutella ネットワークを実行中
+
+################################################################################
+# Key/Value pairs for the about window, accessed through the help menu
+################################################################################
+ABOUT_TITLE=LimeWire についての情報
+ABOUT_LABEL_START=LimeWire クライアント
+ABOUT_LABEL_ADDRESS=http://www.limewire.com
+ABOUT_LABEL_END=版権 (C)2000-2002 Lime Wire LLC
+ABOUT_LABEL_TITLE=LimeWire について
+ABOUT_BUTTON_LABEL=了解
+ABOUT_BUTTON_TIP="LimeWire について..." を閉じる
+ABOUT_SCROLL_CHECK_BOX_LABEL=自動的にスクロール
+#ABOUT_FILE_NAME=about_ja.html
+#Do not uncomment the above line without providing this translated HTML file!
+
+###################################################################
+# Key/value pairs for the tip of the day window (not the tips themselves)
+###################################################################
+TOTD_TITLE=今日のワンポイント
+TOTD_INTRODUCTION=知ってますか?
+TOTD_SHOW_AT_STARTUP=起動時にワンポイントを表示する
+TOTD_NEXT=次のワンポイント
+TOTD_PREVIOUS=以前のワンポイント
+TOTD_CLOSE=閉じる
+
+###################################################################
+# Key/value pairs for the Windows system tray -- Coming soon...
+###################################################################
+TRAY_TOOLTIP=LimeWire: Gnutella ネットワークの実行中
+TRAY_RESTORE_LABEL=復元
+TRAY_ABOUT_LABEL=概要...
+TRAY_EXIT_LATER_LABEL=転送後に終了
+TRAY_EXIT_LABEL=終了
+
+################################################################################
+# Key/value pairs for the titles of the main windows
+################################################################################
+SEARCH_TITLE=検索
+MONITOR_TITLE=監視
+CONNECTIONS_TITLE=接続
+LIBRARY_TITLE=ライブラリ
+SHOPPING_TITLE=LimeShop
+OPTIONS_TITLE=オプション
+STATS_TITLE=累計
+DOWNLOAD_TITLE=ダウンロード
+UPLOAD_TITLE=アップロード
+
+################################################################################
+# Key/value pairs for the tooltips of the main windows
+################################################################################
+SEARCH_TIP=ファイルの検索とダウンロード.
+MONITOR_TIP=検索とアップロードを表示.
+CONNECTIONS_TIP=他のクライアントに接続.
+LIBRARY_TIP=保存ファイルのライブラリをを表示.
+SHOPPING_TIP=LimeShop にアクセスして買物.
+
+################################################################################
+# Key/Value pairs for the pull-down menus in the main window
+################################################################################
+MENU_FILE_TITLE=ファイル (F)
+MENU_FILE_TITLE_MNEMONIC=F
+MENU_FILE_CLOSE=閉じる (C)
+MENU_FILE_CLOSE_MNEMONIC=C
+MENU_FILE_CLOSE_ACCESSIBLE=プログラムを閉じる.
+MENU_FILE_QUIT=終了 (Q)
+MENU_FILE_QUIT_MNEMONIC=Q
+MENU_FILE_CONNECT=接続 (O)
+MENU_FILE_CONNECT_MNEMONIC=O
+MENU_FILE_CONNECT_ACCESSIBLE=ネットワークに接続.
+MENU_FILE_DISCONNECT=切断 (I)
+MENU_FILE_DISCONNECT_MNEMONIC=I
+MENU_FILE_DISCONNECT_ACCESSIBLE=ネットワークから切断.
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=共有フォルダを追加 (A)
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=共有したいフォルダを選択して下さい.
+MENU_FILE_LIBRARY_NEW_FOLDER=新規フォルダ (N)
+MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=選択されたライブラリフォルダに新規フォルダを追加.
+MENU_FILE_LIBRARY_UNSHARE_FOLDER=フォルダの共有を停止 (P)
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=選択されたライブラリフォルダの共有を停止.
+MENU_FILE_LIBRARY_RENAME_FOLDER=フォルダの名称変更 (R)
+MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=選択されたライブラリフォルダの名称変更.
+MENU_FILE_LIBRARY_LAUNCH_FILES=ファイルを起動 (L)
+MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=選択されたファイルを起動.
+MENU_FILE_LIBRARY_DELETE_FILES=ファイルの削除 (E)
+MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=選択されたファイルを削除.
+MENU_FILE_LIBRARY_REFRESH=更新 (S)
+MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
+MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=ライブラリを更新.
+MENU_FILE_LIBRARY_EXPLORE=閲覧（X)
+MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
+MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=ライブラリフォルダを開く
+
+MENU_NAV_TITLE=操作 (N)
+MENU_NAV_TITLE_MNEMONIC=N
+MENU_NAV_SEARCH=検索 (S)
+MENU_NAV_SEARCH_MNEMONIC=S
+MENU_NAV_SEARCH_ACCESSIBLE=検索画面を表示.
+MENU_NAV_MONITOR=監視 (M)
+MENU_NAV_MONITOR_MNEMONIC=M
+MENU_NAV_MONITOR_ACCESSIBLE=監視画面を表示.
+MENU_NAV_CONN=接続 (C)
+MENU_NAV_CONN_MNEMONIC=C
+MENU_NAV_CONN_ACCESSIBLE=接続画面を表示.
+MENU_NAV_LIB=ライブラリ (L)
+MENU_NAV_LIB_MNEMONIC=L
+MENU_NAV_LIB_ACCESSIBLE=ライブラリ画面を表示.
+MENU_NAV_SHOPPING=LimeShop
+MENU_NAV_SHOPPING_MNEMONIC=P
+MENU_NAV_SHOPPING_ACCESSIBLE=LimeShop Web サイトを表示.
+
+MENU_VIEW_TITLE=表示 (V)
+MENU_VIEW_TITLE_MNEMONIC=V
+MENU_VIEW_SHOW_HIDE_TITLE=表示/非表示
+MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
+MENU_VIEW_SHOW_HIDE_ACCESSIBLE=タブを表示する/隠す
+MENU_VIEW_MONITOR=監視 (M)
+MENU_VIEW_MONITOR_MNEMONIC=M
+MENU_VIEW_MONITOR_ACCESSIBLE=監視ウィンドウを表示.
+MENU_VIEW_CONNECTIONS=接続 (C)
+MENU_VIEW_CONNECTIONS_MNEMONIC=C
+MENU_VIEW_CONNECTIONS_ACCESSIBLE=接続ウィンドウを表示.
+MENU_VIEW_LIBRARY=ライブラリ (L)
+MENU_VIEW_LIBRARY_MNEMONIC=L
+MENU_VIEW_LIBRARY_ACCESSIBLE=ライブラリウィンドウを表示.
+MENU_VIEW_SHOPPING=LimeShop
+MENU_VIEW_SHOPPING_MNEMONIC=P
+MENU_VIEW_SHOPPING_ACCESSIBLE=買物ウィンドウを表示.
+MENU_VIEW_THEMES_TITLE=テーマを適用
+MENU_VIEW_THEMES_TITLE_MNEMONIC=T
+MENU_VIEW_THEMES_GET_MORE=新しいテーマを取得
+MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
+MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=limewire.comから新しいテーマを取得
+MENU_VIEW_THEMES_REFRESH=テーマをリフレッシュ
+MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
+MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=ディスク上のテーマを最ロードする
+MENU_VIEW_THEMES_USE_DEFAULT=デフォルトテーマを適用
+MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
+MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=ユーザーデフォルトを適用
+
+MENU_RESOURCES_TITLE=リソース (R)
+MENU_RESOURCES_TITLE_MNEMONIC=R
+MENU_RESOURCES_PRO=LimeWire PRO
+MENU_RESOURCES_PRO_MNEMONIC=L
+MENU_RESOURCES_PRO_ACCESSIBLE=LimeWire PRO Web サイトを表示.
+MENU_RESOURCES_LIMESHOP=LimeShop
+MENU_RESOURCES_LIMESHOP_MNEMONIC=P
+MENU_RESOURCES_LIMESHOP_ACCESSIBLE=LimeShop Web サイトを表示.
+
+MENU_TOOLS_TITLE=機能 (T)
+MENU_TOOLS_TITLE_MNEMONIC=T
+MENU_TOOLS_STATISTICS=累計... (S)
+MENU_TOOLS_STATISTICS_MNEMONIC=S
+MENU_TOOLS_STATISTICS_ACCESSIBLE=累計画面を表示.
+MENU_TOOLS_OPTIONS=オプション... (O)
+MENU_TOOLS_OPTIONS_MNEMONIC=O
+MENU_TOOLS_OPTIONS_ACCESSIBLE=オプション画面を表示.
+
+MENU_HELP_TITLE=ヘルプ (H)
+MENU_HELP_TITLE_MNEMONIC=H
+MENU_HELP_USING_LIMEWIRE=LimeWire の使用について
+MENU_HELP_USING_LIMEWIRE_MNEMONIC=L
+MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=LimeWire 使用時のヘルプ.
+MENU_HELP_TOTD=今日のワンポイント
+MENU_HELP_TOTD_MNEMONIC=D
+MENU_HELP_TOTD_ACCESSIBLE=今日のワンポイントを表示する
+MENU_HELP_FAQ=FAQ
+MENU_HELP_FAQ_MNEMONIC=F
+MENU_HELP_FAQ_ACCESSIBLE=LimeWire についてのよくある質問.
+MENU_HELP_FORUM=掲示板 (M)
+MENU_HELP_FORUM_MNEMONIC=M
+MENU_HELP_FORUM_ACCESSIBLE=LimeWire のユーザ掲示板にアクセス.
+MENU_HELP_FRIEND=友人に知らせる (T)
+MENU_HELP_FRIEND_MNEMONIC=T
+MENU_HELP_FRIEND_ACCESSIBLE=LimeWire の事を友人に知らせる.
+MENU_HELP_REVIEW=LimeWire の評価
+MENU_HELP_REVIEW_MNEMONIC=R
+MENU_HELP_REVIEW_ACCESSIBLE=LimeWire についての意見・感想を送る.
+MENU_HELP_ABOUT=LimeWire について...
+MENU_HELP_ABOUT_MNEMONIC=W
+MENU_HELP_ABOUT_ACCESSIBLE=LimeWire についての情報.
+MENU_HELP_ERROR=エラーを発生させる
+MENU_HELP_ERROR_MNEMONIC=E
+MENU_HELP_ERROR_ACCESSIBLE=テスト用のエラーを発生させる
+
+################################################################################
+# Keys/value pairs for general tables info
+################################################################################
+TABLES_USE_ROWSTRIPE=横列の背景色
+TABLES_REAL_TIME_SORTING=自動並び替え
+TABLES_DISPLAY_TOOLTIPS=ツールチップを表示
+
+################################################################################
+# Keys/value pairs for SearchView stuff....
+################################################################################
+SEARCH_DOWNLOAD_BUTTON_LABEL=ダウンロード
+SEARCH_DOWNLOAD_BUTTON_TIP=選択されたファイル全てをダウンロード.
+SEARCH_WISHLIST_BUTTON_LABEL=探し物リストに追加
+SEARCH_WISHLIST_BUTTON_TIP=LimeWire に自動でコンテンツを探させる.
+SEARCH_BROWSE_HOST_BUTTON_LABEL=ホストを閲覧
+SEARCH_BROWSE_HOST_BUTTON_TIP=選択されたホストの全てのファイルを表示.
+SEARCH_CHAT_BUTTON_LABEL=会話...
+SEARCH_CHAT_BUTTON_TIP=選択されたホストと会話.
+SEARCH_BUY_CD_LABEL=購入...
+SEARCH_BUY_CD_TIP=選択された商品を購入.
+SEARCH_SEARCH_BUTTON_LABEL=検索
+SEARCH_SEARCH_BUTTON_TIP=指定した文字列をネットワーク上で検索.
+SEARCH_STOP_BUTTON_LABEL=停止
+SEARCH_STOP_BUTTON_TIP=選択された検索を停止.
+SEARCH_PUBLIC_KILL_STRING=検索を閉じる
+SEARCH_PUBLIC_LAUNCH_STRING=検索開始
+SEARCH_PUBLIC_STOP_STRING=検索停止
+SEARCH_PUBLIC_BROWSE_STRING=ホストを閲覧
+SEARCH_PUBLIC_CHAT_STRING=ホストと会話
+SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi Web で調べる...
+SEARCH_PUBLIC_REPEAT_SEARCH_STRING=再検索
+SEARCH_PUBLIC_BLOCK_STRING=ホストからの結果を拒否
+SEARCH_RESULT_TABLE_LABEL=検索結果
+SEARCH_SEARCHING_LABEL=検索中...
+SEARCH_VIRUS_MSG_ONE=選択されたファイルにウィルスが含まれている,
+SEARCH_VIRUS_MSG_TWO=可能性のあるプログラムがあります.
+SEARCH_VIRUS_MSG_THREE=本当にダウンロードしますか.
+SEARCH_SHOW_MESSAGE_MSG=これからこのメッセージは表示しない
+SEARCH_DOWNLOAD_DIALOG_CONFIRM=ダウンロードの要求
+SEARCH_DEFAULT_FIELD_TITLE=ファイル名
+SEARCH_MULTIPLE_HOSTS=多数
+AUTO_DL_CHECKBOX_STRING=自動ダウンロード
+AUTO_DL_CHECKBOX_TOOLTIP=お探しのファイルを LimeWire は自動的にダウンロードします.
+
+#Media Types
+MEDIA_ANY_TYPE=全種類
+MEDIA_DOCUMENTS=書類
+MEDIA_PROGRAMS=プログラム
+MEDIA_AUDIO=音楽
+MEDIA_VIDEO=動画
+MEDIA_IMAGES=画像
+
+#ResultPanel Columns for normal view
+RESULT_PANEL_QUALITY=☆
+RESULT_PANEL_NAME=ファイル名
+RESULT_PANEL_TYPE=形式
+RESULT_PANEL_SIZE=容量
+RESULT_PANEL_SPEED=速度
+RESULT_PANEL_SCORE=スコア
+RESULT_PANEL_CHAT=会話
+RESULT_PANEL_LOCATION=位置
+RESULT_PANEL_COUNT=数
+RESULT_PANEL_VENDOR=開発元
+
+DOWNLOAD_KILL_BUTTON_LABEL=ダウンロードを切断
+DOWNLOAD_KILL_BUTTON_TIP=選択ダウンロードを停止.
+DOWNLOAD_RESUME_BUTTON_LABEL=再接続
+DOWNLOAD_RESUME_BUTTON_TIP=ダウンロードを再開.
+DOWNLOAD_SOURCES_BUTTON_LABEL=他のソースを検索
+DOWNLOAD_SOURCES_BUTTON_TIP=ダウンロード失敗したファイル用に他のソースを探す
+DOWNLOAD_CLEAR_BUTTON_LABEL=消去
+DOWNLOAD_CLEAR_BUTTON_TIP=無効なダウンロードを除去.
+
+LIBRARY_LAUNCH_BUTTON_LABEL=開く
+LIBRARY_LAUNCH_BUTTON_TIP=選択されたファイルを実行.
+LIBRARY_DELETE_BUTTON_LABEL=削除
+LIBRARY_DELETE_BUTTON_TIP=選択したファイルを削除.
+LIBRARY_REFRESH_BUTTON_LABEL=更新
+LIBRARY_REFRESH_BUTTON_TIP=共有フォルダを更新.
+LIBRARY_EXPLORE_BUTTON_LABEL=閲覧
+LIBRARY_EXPLORE_BUTTON_TIP=ライブラリフォルダを開く
+LIBRARY_PLAYLIST_BUTTON_LABEL=再生リストへ
+LIBRARY_PLAYLIST_BUTTON_TIP=選択されたファイルを再生リストへ追加.
+LIBRARY_ANNOTATE_BUTTON_LABEL=注釈...
+LIBRARY_ANNOTATE_BUTTON_TIP=選択したファイルに注釈を追加.
+LIBRARY_RESUME_BUTTON_LABEL=接続を再開
+LIBRARY_RESUME_BUTTON_TIP=ダウンロードを再開.
+
+PLAYLIST_LOAD_BUTTON_LABEL=開く...
+PLAYLIST_LOAD_BUTTON_TIP=新規/既存の再生リストを開く...
+PLAYLIST_SAVE_BUTTON_LABEL=保存...
+PLAYLIST_SAVE_BUTTON_TIP=現在の再生リストを保存...
+PLAYLIST_DELETE_BUTTON_LABEL=除去
+PLAYLIST_DELETE_BUTTON_TIP=選択したファイルを再生リストから除去.
+PLAYLIST_FILE_DESCRIPTION=ファイルを再生リス (*.m3u)
+
+################################################################################
+# Key/value pairs for the integrated media player....
+################################################################################
+MEDIA_PLAYER_DEFAULT_STRING=MP3 プレイヤー
+MEDIA_PLAY_BUTTON_TIP=再生
+MEDIA_PAUSE_BUTTON_TIP=一時停止
+MEDIA_STOP_BUTTON_TIP=停止
+MEDIA_FORWARD_BUTTON_TIP=早送り
+MEDIA_REWIND_BUTTON_TIP=巻き戻し
+
+#anu added
+PASSWORD_DIALOG_USERNAME_FIELD_LABEL=ユーザー名
+PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=パスワード
+
+################################################################################
+# Key/value pairs for Statistics String....
+################################################################################
+STATISTICS_AVAILABLE=共有可能
+STATISTICS_FILES=ファイル
+STATISTICS_DISCONNECTED=未接続/共有可能ファイルなし
+STATISTICS_SHARING=共有数
+STATISTICS_SHARING_TOOLTIP=共有しているファイル数です.
+STATISTICS_CONNECTION_DISCONNECTED=未接続
+STATISTICS_CONNECTION_DISCONNECTED_TIP=ネットワークに接続されていません. 接続するには、「ファイル」メニューより「接続」を選んでください.
+STATISTICS_CONNECTION_CONNECTING=接続中
+STATISTICS_CONNECTION_CONNECTING_TIP=ネットワークへ接続中です.
+STATISTICS_CONNECTION_POOR=悪い
+STATISTICS_CONNECTION_POOR_TIP=少数のホストへ接続されているため、接続の質はあまり良くありません.
+STATISTICS_CONNECTION_FAIR=普通
+STATISTICS_CONNECTION_FAIR_TIP=ネットワークへの接続が結構安定してきました.
+STATISTICS_CONNECTION_GOOD=良い
+STATISTICS_CONNECTION_GOOD_TIP=まだネットワークに完全に接続されていませんが、安定した接続です.
+STATISTICS_CONNECTION_EXCELLENT=大変良い
+STATISTICS_CONNECTION_EXCELLENT_TIP=大変良い接続を保っています.
+STATISTICS_CONNECTION_TURBO_CHARGED=「ターボ・チャージ」
+STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=ライムワイヤーPROでは「ターボ・チャージ」された接続を経験できます.
+STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=大変優れた接続を保っています.
+STATISTICS_CONNECTION_QUALITY=接続の質：
+
+################################################################################
+# Key/value pairs for the download window, including labels for the
+# right-click popop menu and labels for the various column headers and
+# download statistics table cells.
+################################################################################
+DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=ダウンロード切断
+DOWNLOAD_POPUP_MENU_RESUME=ダウンロード再開
+DOWNLOAD_POPUP_MENU_LAUNCH=ファイルを開く
+DOWNLOAD_POPUP_MENU_CHAT=ホストと会話
+DOWNLOAD_POPUP_MENU_BROWSE=ホストを閲覧
+DOWNLOAD_NAME_COLUMN=ファイル名
+DOWNLOAD_SIZE_COLUMN=容量
+DOWNLOAD_STATUS_COLUMN=接続状況
+DOWNLOAD_CHAT_COLUMN=会話
+DOWNLOAD_PROGRESS_COLUMN=進行状況
+DOWNLOAD_SPEED_COLUMN=速度
+DOWNLOAD_TIME_REMAINING_COLUMN=残り時間
+DOWNLOAD_SERVER_COLUMN=開発元/バージョン
+DOWNLOAD_STATUS_QUEUED=予約
+DOWNLOAD_STATUS_CONNECTING=接続中...
+DOWNLOAD_STATUS_WAITING_START=あと
+DOWNLOAD_STATUS_WAITING_MIDDLE=秒
+DOWNLOAD_STATUS_WAITING_END=混雑中...
+DOWNLOAD_STATUS_COMPLETE=完了
+DOWNLOAD_STATUS_ABORTED=失敗
+DOWNLOAD_STATUS_FAILED=ホスト待機中...
+DOWNLOAD_STATUS_DOWNLOADING=ダウンロード中:
+DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=ライブラリへ移動出来ません
+DOWNLOAD_STATUS_CORRUPT_FILE=ファイルが壊れています
+DOWNLOAD_STATUS_REQUERYING=ネットワークに再接続中
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=問合せ中, あと
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=秒かかります
+DOWNLOAD_STATUS_WAITING_FOR_USER=他のソースが必要
+DOWNLOAD_STATUS_WAITING_FOR_CONN=安定な接続を待つ
+DOWNLOAD_HOSTS_LABEL=ホスト
+DOWNLOAD_STATUS_REMOTE_QUEUED=相手側で順番待状態
+DOWNLOAD_STATUS_HASHING=ファイルを確認中...
+DOWNLOAD_STATUS_SAVING=ファイルを保存中...
+DOWNLOAD_AWAITING_SOURCES=もっと具体的な検索が必要です...
+DOWNLOAD_APPLY_NEW_THEME_START=ダウンロードした新しいテーマ "
+DOWNLOAD_APPLY_NEW_THEME_END="を早速使いますか?
+DOWNLOAD_POSSIBLE_HOSTS=可能ホスト
+DOWNLOAD_BUSY_HOSTS=混雑中ホスト
+DOWNLOAD_QUEUED_HOSTS=予約中
+DOWNLOAD_SEARCHING=ソースを確認中
+DOWNLOAD_COULD_NOT_READ_SNAPSHOT=以前のダウンロードを再開することが出来ませんでした
+DOWNLOAD_DISK_FULL=ハードディスクの空き容量が少ないため, 選択されたファイルをダウロードすることが出来ません. 不必要なファイルを削除してハードディスク の空き容量を増やしてください.
+
+###################################################################
+# Key/value pairs for UploadView
+###################################################################
+UPLOAD_POPUP_MENU_KILL_UPLOAD=アップロードを切断
+UPLOAD_POPUP_MENU_CHAT=ホストと会話
+UPLOAD_KILL_BUTTON_LABEL=アップロードを切断
+UPLOAD_KILL_BUTTON_TIP=選択されたアップロードを切断.
+UPLOAD_CLEAR_BUTTON_LABEL=無効なものを削除
+UPLOAD_CLEAR_BUTTON_TIP=停止中のアップロードを除去.
+UPLOAD_CHAT_BUTTON_LABEL=会話...
+UPLOAD_CHAT_BUTTON_TIP=選択されたホストのユーザーとチャット
+UPLOAD_TABLE_STRING_NAME=ファイル名
+UPLOAD_TABLE_STRING_HOST=ホスト
+UPLOAD_TABLE_STRING_SIZE=容量
+UPLOAD_TABLE_STRING_STATUS=状態
+UPLOAD_TABLE_STRING_CHAT=会話
+UPLOAD_TABLE_STRING_PROGRESS=進行状況
+UPLOAD_TABLE_STRING_SPEED=速度
+UPLOAD_TABLE_STRING_TIME_REMAINING=時間
+UPLOAD_TABLE_STRING_USER_AGENT=ベンダー/バージョン
+UPLOAD_TABLE_STRING_CONNECTING=接続中
+UPLOAD_TABLE_STRING_UPLOADING=アップロード中
+UPLOAD_TABLE_STRING_LIMITREACHED=アップロード上限の限界
+UPLOAD_TABLE_STRING_FREELOADER=ただ乗りへのアップロード中
+UPLOAD_TABLE_STRING_PUSHFAILED=接続出来ません
+UPLOAD_TABLE_STRING_INTERRUPTED=転送中断されました
+UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=範囲無効
+UPLOAD_TABLE_STRING_MALFORMED_REQUEST=奇形リクエスト
+UPLOAD_TABLE_STRING_COMPLETE=完了
+UPLOAD_TABLE_STRING_FNF=ファイルが見つかりません
+UPLOAD_TABLE_STRING_QUEUED=順番待
+UPLOAD_STRING_KBPSEC=KB/秒
+UPLOAD_ACTIVE=アップロード中
+UPLOAD_QUEUED=待機
+
+###################################################################
+# Key/value pairs for MonitorView
+###################################################################
+MONITOR_VIEW_INCOMING_SEARCHES=外部から検索の監視
+MONITOR_VIEW_ENABLE=有効
+MONITOR_VIEW_SHOW_LAST=最近の
+MONITOR_VIEW_SEARCHES=検索を表示
+MONITOR_VIEW_LEAF_MESSAGE=お使いのクライアントは Ultrapeer により保護された Leafnode です. 従って監視ウィンドウでは検索を御覧になれません.
+
+################################################################################
+# Key/value pairs for gui download speed constants -- used in the
+# options window, setup windows, and potentially other places
+################################################################################
+MODEM_SPEED=Modem
+CABLE_SPEED=Cable/DSL
+T1_SPEED=T1
+T3_SPEED=T3
+MULTICAST_SPEED=Ethernet
+
+###################################################################
+# Key/value pairs for ConnectionView
+###################################################################
+CV_PANEL_TITLE=接続中のホスト
+CV_COLUMN_HOST=ホスト
+CV_COLUMN_STATUS=状態
+CV_COLUMN_MESSAGE=メッセージ (入/出)
+CV_COLUMN_BANDWIDTH=帯域 (入/出)
+CV_COLUMN_DROPPED=ヒット (入/出)
+CV_COLUMN_HOSTS=ホスト
+CV_COLUMN_PROTOCOL=プロトコル
+CV_COLUMN_VENDOR=ベンダー/バージョン
+CV_COLUMN_TIME=時間
+CV_COLUMN_COMPRESSION=圧縮 (入/出)
+CV_COLUMN_QRP_FULL=QRP容量 (%)
+CV_BUTTON_REMOVE=除去
+CV_BUTTON_TOOLTIP_REMOVE=選択されたホストを除去.
+CV_BUTTON_ADD=追加
+CV_BUTTON_TOOLTIP_ADD=新規に接続します.
+CV_LABEL_KEEP_BEGIN=およそ
+CV_LABEL_KEEP_END=ホストの接続を維持
+CV_TABLE_STRING_CONNECTING=接続中...
+CV_TABLE_STRING_LEAF=Leafnode
+CV_TABLE_STRING_ULTRAPEER=Ultrapeer
+CV_TABLE_STRING_STANDARD=0.6
+CV_TABLE_STRING_INCOMING=外部から接続
+CV_TABLE_STRING_OUTGOING=内部から接続
+CV_TABLE_STRING_CONNECTED_ON=接続
+CV_STRING_CLIENT=[Leafnode]
+CV_STRING_ULTRAPEER=[Ultrapeer]
+CV_TABLE_STRING_KBPSEC=KB/秒
+
+################################################################################
+# Key/value pairs for a strings in the library window
+################################################################################
+LIBRARY_TABLE_NAME=ファイル名
+LIBRARY_TABLE_TITLE=題名
+LIBRARY_TABLE_ARTIST=アーティスト
+LIBRARY_TABLE_SIZE=容量
+LIBRARY_TABLE_TYPE=形式
+LIBRARY_TABLE_PATH=ファイル位置
+LIBRARY_TABLE_HITCOUNT=ヒット
+LIBRARY_TABLE_NUMALTLOC=位置
+LIBRARY_TABLE_UPLOAD_COUNT=アップロード
+LIBRARY_TREE_NEW_FOLDER_LABEL=新規フォルダ
+LIBRARY_TREE_UNSHARE_FOLDER_LABEL=共有の停止
+LIBRARY_TREE_RENAME_FOLDER_LABEL=名称変更
+LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=再生リストへ
+
+################################################################################
+# Key/value pairs for burn cd link
+################################################################################
+LIBRARY_BURN_LABEL=CD を作成...
+
+###################################################################
+# Key/value pairs for PlayListGUI
+###################################################################
+PLAYLIST_TITLE=MP3 再生リスト
+PLAYLIST_TABLE_NAME=ファイル名
+PLAYLIST_TABLE_LENGTH=時間
+PLAYLIST_TABLE_BITRATE=ビットレート
+PLAYLIST_OPTIONS_STRING=再生オプション:
+PLAYLIST_OPTIONS_CONTINUE=連続
+PLAYLIST_OPTIONS_SHUFFLE=シャッフル
+PLAYLIST_DIALOG_OPEN_TITLE=再生リストを選択 (. m3u)
+PLAYLIST_DIALOG_SAVE_TITLE=再生リストを別名で保存....
+PLAYLIST_DIALOG_SAVE_SAVE=保存
+
+################################################################################
+# Key/value pairs for the LimeWire initialization wizard that is run
+# if you don't have a limewire.props file
+################################################################################
+SETUP_LANGUAGE_TITLE=言語選択
+SETUP_LANGUAGE_LABEL=ライムワイヤーが使用する言語を選択してください。
+SETUP_WELCOME_TITLE=ようこそ
+SETUP_WELCOME_LABEL=LimeWire 起動ウィザードへようこそ. LimeWire を快適にご使用頂く為の調整を, 一連のステップを通してご案内します.
+SETUP_WELCOME_PARTIAL_LABEL=LimeWire 起動ウィザードへようこそ. ライムワイヤーは新しい機能を取り込んだため設定が必要です. これらの設定を一連のステップを通してご案内します.
+SETUP_SAVE_TITLE=保存先フォルダ
+SETUP_SAVE_LABEL=ダウンロードしたファイルを保存するフォルダを選択して下さい. このフォルダは標準で他の Gnutella ユーザに共有されます.
+SETUP_SPEED_TITLE=接続速度
+SETUP_SPEED_LABEL=インターネット接続回線の速度を選択して下さい. ネットワークのパフォーマンスの最適化の為に, この速度を正しく設定する事が重要です. もしお使いの接続回線がはッきりしないか, リスト上にないならば, 単純にどれか一つ, 適当なものを選択して下さい.
+SETUP_STARTUP_TITLE=システム起動
+SETUP_STARTUP_LABEL=コンピューターにログインした時にライムワイヤーを自動的に起動させますか？
+SETUP_STARTUP_CHECKBOX=システム起動時にライムワイヤーを起動
+SETUP_SCAN_TITLE=メディアファイルの検索
+SETUP_SCAN_LABEL=LimeWire にハードディスク内の他のメディアファイルを検索させますか. 検索をすれば, 共有したいフォルダを簡単にお選びいただく事が出来ます.
+SETUP_WAIT_TITLE=ハードディスクを検索中
+SETUP_WAIT_LABEL=LimeWire がハードディスクを検索中です. お待ち下さい...
+SETUP_CONFIRM_TITLE=検索確定
+SETUP_CONFIRM_LABEL=共有候補のフォルダが以下の様に発見されました. このうちの一つを共有したいなら, チェックボックスを有効にして下さい. 選択したフォルダの下位フォルダも同様に共有されます.
+SETUP_FINISH_TITLE=設定終了
+SETUP_FINISH_LABEL=LimeWire の設定は無事に完了しました. "終了" ボタンを押して LimeWire をお使い下さい.
+
+################################################################################
+# Key/value pairs for the file chooser
+################################################################################
+DIRECTORY_CHOOSER_CAPTION=選択してください
+
+################################################################################
+# Key/value pairs for a directory file chooser
+################################################################################
+FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=選択
+FILE_CHOOSER_DIRECTORY_TITLE=フォルダを選択
+
+################################################################################
+# Key/value pairs for a strings in the init package
+# com.limegroup.gnutella.gui.init -- the wizard to setup the program when
+# limewire.props is not present or when the "INSTALLED" setting is false
+################################################################################
+INIT_SAVE_DIRECTORY_FIELD_LABEL=フォルダ:
+INIT_SAVE_BROWSE_BUTTON_LABEL=閲覧...
+INIT_SAVE_BROWSE_BUTTON_TIP=別のフォルダを選択して下さい.
+INIT_SAVE_DEFAULT_BUTTON_LABEL=標準
+INIT_SAVE_DEFAULT_BUTTON_TIP=標準のフォルダを使用.
+
+################################################################################
+# Key/Value pairs for the pro window on startup
+################################################################################
+PRO_TITLE=LimeWire PRO バージョンを入手
+PRO_LABEL_THANKS=選りすぐれたダウンロードを可能にするには、LimeWire PROをご購入ください.　PRO版は,　ベーシックよりパフォーマンスが向上されています.　ライムワイヤーを起動してくださって有難うございます.
+
+PRO_LABEL_QUESTION=LimeWire PRO を入手しますか.
+GO_PRO_TIP=LimeWire PRO を今すぐ入手.
+WHYGOPRO=PROを御勧めする理由
+WHYGOPRO_TIP=PRO にすると何が変わるのですか
+GO_PRO_LATER=無料で使用
+GO_PRO_LATER_TIP=LimeWire PRO を後で入手.
+
+###################################################################
+# Key/value pairs for XML
+###################################################################
+#MetaEditorFrame
+META_EDITOR_ANNOTATING_FILE=ファイルの注釈
+META_EDITOR_SAVE_LABEL=保存
+META_EDITOR_CANCEL_LABEL=取消
+META_EDITOR_DELETE_LABEL=削除
+META_EDITOR_EDITING_LABEL=タイプの注釈を編集:
+META_EDITOR_ADDING_LABEL=タイプの注釈を追加:
+#MetaSearchFrame
+META_SEARCH_TITLE=メタ検索入力ウィンドウ
+META_SEARCH_STRING=検索文字列
+META_SEARCH_CANCEL_BUTTON_LABEL=取消
+META_SEARCH_SEARCH_BUTTON_LABEL=検索
+#ViewChooserDialog
+VIEW_CHOOSER_TITLE=表示の選択
+VIEW_CHOOSER_OK_BUTTON_LABEL=了解
+VIEW_CHOOSER_CANCEL_BUTTON_LABEL=取消
+#IndentingPanel
+XML_SEARCH_MORE_OPTIONS_LABEL=検索オプション...
+
+################################################################################
+# Key/value pairs for the StandardListEditor reusable component
+################################################################################
+LIST_EDITOR_ADD_BUTTON=追加...
+LIST_EDITOR_ADD_BUTTON_2=追加
+LIST_EDITOR_BROWSE_BUTTON=閲覧...
+LIST_EDITOR_REMOVE_BUTTON=除去
+LIST_EDITOR_ADD_BUTTON_TIP=新規リスト項目を追加.
+LIST_EDITOR_REMOVE_BUTTON_TIP=選択項目を除去.
+
+################################################################################
+# Key/value pairs for the InputField reusable component
+################################################################################
+INPUT_FIELD_GENERIC_CAPTION=入力
+
+################################################################################
+# Keys/value pairs for general button labels/tooltips used in various windows
+################################################################################
+GENERAL_CHAT_BUTTON_LABEL=会話...
+GENERAL_CHAT_BUTTON_TIP=ホストと会話.
+GENERAL_LAUNCH_BUTTON_LABEL=開く
+GENERAL_LAUNCH_BUTTON_TIP=ファイルを開く.
+
+################################################################################
+# Keys/value pairs for ButtonRow labels and tooltips
+################################################################################
+CHAT_BLOCK_BUTTON_LABEL=ホストを無視
+CHAT_SEND_BUTTON_LABEL=メッセージを送る
+CHAT_STOP_BUTTON_LABEL=会話を終了
+CHAT_BLOCK_BUTTON_TIP=現在のホストを無視.
+CHAT_SEND_BUTTON_TIP=ホストへメッセージを送る.
+CHAT_STOP_BUTTON_TIP=ホストとの会話を終了.
+
+################################################################################
+# Key/value pairs for the ChatFrame that is displayed while chatting
+################################################################################
+CHAT_WITH_LABEL=会話相手:
+CHAT_HOST_UNAVAILABLE=ホストが繋がりません.
+CHAT_YOU=あなた
+
+###################################################################
+# Key/value pairs for splash screen status text
+###################################################################
+SPLASH_STATUS_RESOURCE_MANAGER=リソースを読込中...
+SPLASH_STATUS_SEARCH_WINDOW=検索ウィンドウを読込中...
+SPLASH_STATUS_OPTIONS_WINDOW=オプションウィンドウを読込中...
+SPLASH_STATUS_USER_SETTINGS=ユーザ設定を読込中...
+SPLASH_STATUS_SHARED_FILES=共有ファイルを読込中...
+SPLASH_STATUS_INTERFACE=インタフェースを読込中...
+SPLASH_STATUS_UPDATES=更新をチェック中...
+SPLASH_STATUS_CORE_COMPONENTS=コアを読込中...
+SPLASH_STATUS_DOWNLOAD_WINDOW=ダウンロードウィンドウを読込中...
+SPLASH_STATUS_LIBRARY_WINDOW=ライブラリウィンドウを読込中...
+SPLASH_STATUS_UPLOAD_WINDOW=アップロードウィンドウを読込中...
+SPLASH_STATUS_MONITOR_WINDOW=監視ウィンドウを読込中...
+SPLASH_STATUS_CONNECTION_WINDOW=接続ウィンドウを読込中...
+SPLASH_STATUS_STATISTICS_WINDOW=累計ウィンドウを読込中...
+SPLASH_STATUS_STATUS_WINDOW=ステータスウィンドウを読込中...
+SPLASH_STATUS_MENUS=メニューを読込中...
+SPLASH_STATUS_MESSAGE_SERVICE=メッセージを読込中...
+
+##################################################################
+# Key/value pairs for the message displayed to prompt users to
+# support LimeWire through contributions.
+##################################################################
+SUPPORT_LIMEWIRE_01=未来の LimeWire の開発をサポート.
+SUPPORT_LIMEWIRE_02=LimeWire の Peer-to-Peer ネットワークのオープンな開発をサポートするにはここをクリックして下さい.
+SUPPORT_LIMEWIRE_03=LimeWire のオープンネットワークのプラットフォームの研究と開発をサポート.
+SUPPORT_LIMEWIRE_04=LimeWire の研究のサポーターになるにはここをクリックして下さい.
+SUPPORT_LIMEWIRE_05=オープンネットワークをサポート.
+SUPPORT_LIMEWIRE_06=オープンソースとオープンプロトコルをサポートするにはここをクリックして下さい.
+SUPPORT_LIMEWIRE_07=LimeWire のネット内活動区の設立をサポートするにはここをクリックして下さい.
+SUPPORT_LIMEWIRE_08=オープンソースの Peer-to-Peer ネットワークに貢献して下さい.
+SUPPORT_LIMEWIRE_09=新しいコミュニティの分布とインディペンデントな表現者たちをサポートして下さい.
+SUPPORT_LIMEWIRE_11=インディペンデントなメディアコンテンツの共有をサポートして下さい.
+
+################################################################################
+# Key/value pairs for the update package, displayed when there is an
+# update of LimeWire available
+################################################################################
+UPDATE_DIALOG_CAPTION=LimeWire の更新
+UPDATE_MESSAGE=最新のライムワイヤーにアップデートしてください. 最新のバージョンは
+UPDATE_MESSAGE_SMALL=最新のライムワイヤーにアップデートしますか?
+UPDATE_SUCCEEDED_MESSAGE=LimeWire の更新は無事に完了しました. 新バージョンを使うには LimeWire を再起動して下さい.
+UPDATE_WEB_PAGE_ERROR_MESSAGE=更新の為の Web ページを開く際にエラーが発生しました. 更新を完了するには Web ブラウザで http://www.limewire.com にアクセスして下さい.
+UPDATE_ERROR_MESSAGE_START=LimeWire の更新中に以下のエラーが発生しました:
+UPDATE_ERROR_MESSAGE_END=このエラーの内容を "support@limewire.com" に電子メールで送ッて下さい. LimeWire の新バージョンは www.limewire.com からダウンロード可能です.
+UPDATE_ERROR_ACCESSING_FILE=サーバ上の必要なファイルへアクセス時にエラーが発生しました.
+UPDATE_ERROR_COMMUNICATING_WITH_SERVER=サーバへ接続時にエラーが発生しました.
+UPDATE_ERROR_LAX_FILE_NOT_FOUND=調整ファイルの特定時にエラーが発生しました.
+UPDATE_ERROR_LAX_SECURITY=ファイルシステムへアクセス中にアクセス権のエラーが発生しました.
+UPDATE_ERROR_LAX_IO=ファイルシステムのアクセス時にエラーが発生しました.
+UPDATE_CANCEL_BUTTON_LABEL=取消
+UPDATE_CANCEL_BUTTON_TIP=更新を取消
+UPDATE_NOW_TIP=今すぐ LimeWire を更新
+UPDATE_LATER_TIP=後で LimeWire を更新
+
+################################################################################
+# Key/Value pairs for other messages displayed to the user
+################################################################################
+MESSAGE_CAPTION=メッセージ
+MESSAGE_ERROR_CAPTION=エラー
+MESSAGE_SHARE_SAVE_DIR=保存先フォルダを共有フォルダに追加しますか. 下位フォルダも同様に共有されます.
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=本当にこのフォルダの共有を停止しますか.
+MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire は共有フォルダの下位フォルダを共有停止出来ません.
+MESSAGE_OVERWRITE_EXISTING_FILE=現存するファイルに上書きします.
+MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=安全上の理由から, LimeWire は指定ファイルを開けません.
+MESSAGE_CONFIRM_FILE_DELETE=選択されたファイルを本当に削除しますか.
+MESSAGE_UNABLE_TO_DELETE_FILE_START=ファイルを削除出来ません
+MESSAGE_UNABLE_TO_DELETE_FILE_END=他のアプリケーションで使用されています.
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=フォルダを削除出来ません
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=フォルダ名を変更できません.
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=他のアプリケーションで使用されています.
+MESSAGE_UNABLE_TO_RENAME_FILE_START=ファイルの名称変更出来ません
+MESSAGE_UNABLE_TO_RENAME_FILE_END=他のアプリケーションで使用されています.
+MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire はそのフォルダを
+MESSAGE_INCOMPLETE_DIRECTORY_END=未完ファイルの保存先にする事は出来ません.
+MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire は指定したフォルダをファイル保存先にする事は出来ません. 別のフォルダを指定して下さい.
+MESSAGE_FILE_CORRUPT=LimeWire はファイル内に破損を発見しました.
+MESSAGE_CONTINUE_DOWNLOAD=ダウンロードを続けますか.
+
+################################################################################
+# Key/Value pairs for the invalid save directory window that is displayed
+# when the user does not have a valid save directory.
+################################################################################
+INVALID_SAVE_DIR_LABEL=ファイルの保存先に指定されたフォルダは無効です. 新規フォルダを選択して下さい.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet
+################################################################################
+NO_INTERNET=インターネットに接続ができません。あなたのコンピューターがインターネットに接続されていないか,ファイアーウオールが接続を拒否しているのかもしれません. あなたのコンピューターが接続されていることまたはファイアーウオールの設定をお確かめした後,「ファイル」メニューより、「接続」を選択してください。
+
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet and you haven't used your machine in awhile, so we'll automatically
+# keep trying.
+################################################################################
+NO_INTERNET_RETRYING=インターネットに接続ができません. あなたのコンピューターがインターネットに接続されていないか,ファイアーウオールが接続を拒否しているのかもしれません. ライムワイヤーは、「ファイル」メニューから「切断」を選択しない限り、再度接続を自動的に試みます。
+
+################################################################################
+# Key/Value pairs for internal error messages
+################################################################################
+ERROR_INTERNAL_TITLE=内部のエラー
+ERROR_INTERNAL_SERVLET=ライムワイヤーの内部でエラーが起きました。ライムワイヤーは回復し、正常に作動し続けます。ライムワイヤーのデバッギングのために、「送信」ボタンをクリックしてください。また、エラーを視察したければ、「視察」ボタンをクリックしてください。ご協力有難うございます。
+ERROR_INTERNAL_SEND=送信
+ERROR_INTERNAL_REVIEW=視察
+ERROR_INTERNAL_DISCARD=放棄する
+ERROR_INTERNAL_COPY=エラーリポートをコピー
+ERROR_INTERNAL_OK=Ok
+ERROR_INTERNAL_ALWAYS_SEND=いつも送信
+ERROR_INTERNAL_ALWAYS_REVIEW=いつも視察
+ERROR_INTERNAL_ALWAYS_DISCARD=いつも放棄する
+ERROR_INTERNAL_SERVLET_FAILED=ライムワイヤーのバグ・サーバーに接続できませんでした. ライムワイヤーのデバッギングのために、エラーをコピーし bugs@limewire.comまで電子メールをお送りください。 有難うございます。
+
+################################################################################
+# Key/Value pairs for error messages
+################################################################################
+ERROR_PORT_UNAVAILABLE=ポートに繋がりません. 別のポートを選択して下さい.
+ERROR_KEEP_ALIVE=これ以上多くの接続を維持すると転送超過を引き起こしネットワークを妨げるので LimeWire はこれを許可しません.
+ERROR_TOO_LOW_FOR_ULTRAPEER=Leafnode 付きの Ultrapeer には少なくとも6接続必要です.
+ERROR_TOO_HIGH_FOR_LEAF=Ultrapeer に接続されているので, リーフに必要な接続はあと1つだけです.
+ERROR_PORT=外部からの受信待ちのポートが見つかりません.\n調整ウィンドウからポートを指定して下さい.
+ERROR_INCOMING_CONNECTIONS=外部からの受信用のソケットが反応しません; 切断中です.
+ERROR_INTERNAL=LimeWire 起動中に内部エラーが発生しました. しかし LimeWire はエラーを修復して正常に動作出来ます. デバッグ作業を助ける為に, 以下のテキストをコピーして bugs@limewire.com に電子メールを送ッて下さい.
+ERROR_THREE_CHARACTER_SEARCH=ネットワークの混雑を避ける為に, 検索は最低3文字以上で行ッて下さい.
+ERROR_NETWORK_FLOODING=この検索にはかなりの結果が返ッてくるのでネットワークを遅らせます. 本当に続けますか.
+ERROR_BROWSE_FAILED=要求されたホスト上のファイルを閲覧出来ません. このマシンはおそらくこれ以上の外部からの受信を受け入れていません.
+ERROR_INVALID_SAVE_DIRECTORY=ファイル保存先のフォルダは無効です. 別フォルダを使うか標準に戻すかして下さい.
+ERROR_INVALID_SAVE_DIRECTORY_WINDOW=保存先フォルダは無効です. 削除済か上書きするアクセス権がないか他の問題があるかもしれません. 別のフォルダを選択して下さい.
+ERROR_INVALID_SAVE_DIRECTORY_SELECTION=選択された保存先フォルダは無効です. 削除済か上書きするアクセス権がないか他の問題があるかもしれません. 以前に選択されたフォルダを使用します. 
+ERROR_INVALID_SHARED_DIRECTORY=ファイル共有先のフォルダは無効です. 別フォルダを使うか標準に戻すかして下さい.
+ERROR_FORCE_IP_PORT_RANGE=強制IPアドレスを設定するにはポート番号を1から 65535 の間で入力する必要があります.
+ERROR_CONNECT_STRING=接続文字列は最低 1 文字以上で, スペースを含み, 'GIV', 'GET' もしくはいかなるHTTPキーワードも含まないようにする必要があります.
+ERROR_PORT_RANGE=ポート番号は 1 から 65535 の間で入力して下さい.
+ERROR_INVALID_GROUP=有効なグループを選択する必要があります.
+ERROR_ALREADY_DOWNLOADING=既にダウンロード中です
+ERROR_CANT_RESUME_START=この未完ファイルは
+ERROR_CANT_RESUME_END=壊れている為レジュームできません.
+ERROR_LOCATING_BROWSER_THEMES=LimeWireはお使いのブラウザを特定出来ません. テーマアドレスは:\n"http://www.limewire.com"です.
+ERROR_LOCATING_BROWSER_SUPPORT=LimeWire はお使いのブラウザを特定出来ません. サポートアドレスは:\n"http://www.limewire.com/support" です.
+ERROR_LOCATING_BROWSER_FAQ=LimeWire はお使いのブラウザを特定出来ません. FAQ アドレスは:\n"http://www.limewire.com/support/faq.htm" です.
+ERROR_LOCATING_BROWSER_FORUM=LimeWire はお使いのブラウザを特定出来ません. 掲示板アドレスは:\n"http://www.limewire.com/forum.htm" です.
+ERROR_LOCATING_BROWSER_FRIEND=LimeWire はお使いのブラウザを特定出来ません. "友人に知らせる" フォームアドレスは:\n"http://www.limewire.com/index.jsp/tell_friend" です.
+ERROR_LOCATING_BROWSER_GENERAL=LimeWire はお使いの標準ブラウザを特定出来ません.
+ERROR_ACCESSING_SAVE_DIRECTORY=保存先フォルダにアクセス出来ません. オプションメニューから新規フォルダを選択してもう一度試して下さい.
+ERROR_DEL_META_USER=未保存の情報は取り除けません.
+ERROR_DEL_META_SYSTEM=データを取り除けません.
+ERROR_SAVE_META_DOC=内部ドキュメントエラーです. データは保存されません.
+ERROR_SAVE_META_ILLEGAL=保存データがありません.
+ERROR_SAVE_META_FILE=ファイルが破損しているか見つかりません. データは保存されません.
+ERROR_SAVE_META_RW=読み/書きのエラーです. データは保存されません.
+ERROR_SAVE_META_ID3=ファイルが破損しています. データは保存されません.
+ERROR_SAVE_META_DISK=内部エラーです. データは保存されません.
+ERROR_SAVE_META_BAD=間違ッた形式が入力されました. 変更は保存されません.
+ERROR_REMOVE_LAST_COL=全てのコラムをオフに出来ません.
+ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=ホストを閲覧出来ません
+ERROR_BROWSE_HOST_FAILED_END_KEY=.
+ERROR_INVALID_THEME_FILE=選択されたテーマファイルは破損しているか存在しません.　他のテーマを選択するかデフォルトテーマを適用ください。
+ERROR_BAD_MAGNET_LINK=マグネット(MAGNET）リンクが無効です
+ERROR_INVALID_URLS_IN_MAGNET=マグネット(MAGNET)リンクに使われているURLが無効です。指定されたファイルは正しくダウンロードしないかもしれません。
+ERROR_ITUNES_SCRIPT=iTunesサポートに必要のスクリプトを取り込むことが出来ませんでしたのでiTunesサポートを無効にします。iTunesサポートは「ライムワイヤー」ー＞「環境設定」メニューでiTunesを選択して有効にできます。
+ERROR_ITUNES_LINK=iTunesサポートに必要のコンポーネントを取り込むことが出来ませんでしたのでiTunesサポートを無効にします。iTunesサポートは「ライムワイヤー」ー＞「環境設定」メニューでiTunesを選択して有効にできます。
+ERROR_ITUNES_INTEGRATION=iTunesサポート上でのエラーが起こりました。今後のエラーが起こらないように、ライムワイヤーはiTunesサポートを無効にしました。 iTunesサポートは「ライムワイヤー」ー＞「環境設定」メニューでiTunesを選択して有効にできます。
+
+################################################################################
+# Keys for the titles of the options panes. The corresponding values represent
+# the visual names of the panes in the options tree
+# package com.limegroup.gnutella.gui.options
+################################################################################
+OPTIONS_LOCALIZE_MAIN_TITLE=ローカライズ
+OPTIONS_SAVE_MAIN_TITLE=保存
+OPTIONS_SHARED_MAIN_TITLE=共有
+OPTIONS_SPEED_MAIN_TITLE=速度
+OPTIONS_DOWNLOAD_MAIN_TITLE=ダウンロード
+OPTIONS_UPLOAD_MAIN_TITLE=アップロード
+OPTIONS_UPLOAD_BASIC_MAIN_TITLE=基本
+OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=スロット
+OPTIONS_CONNECTIONS_MAIN_TITLE=接続
+OPTIONS_SHUTDOWN_MAIN_TITLE=切断
+OPTIONS_CHAT_MAIN_TITLE=会話
+OPTIONS_PLAYER_MAIN_TITLE=MP3 プレイヤー
+OPTIONS_ITUNES_MAIN_TITLE=iTunes
+OPTIONS_APPS_MAIN_TITLE=ヘルパー　アプリケーション
+OPTIONS_BUGS_MAIN_TITLE=バグ表示
+OPTIONS_GUI_MAIN_TITLE=インターフェイス
+OPTIONS_POPUPS_MAIN_TITLE=ポップアップ
+OPTIONS_AUTOCOMPLETE_MAIN_TITLE=オートコンプリート
+OPTIONS_THEME_MAIN_TITLE=テーマ
+OPTIONS_SKIN_MAIN_TITLE=スキン
+OPTIONS_SEARCH_MAIN_TITLE=検索
+OPTIONS_SEARCH_LIMIT_MAIN_TITLE=制限
+OPTIONS_SEARCH_QUALITY_MAIN_TITLE=☆
+OPTIONS_SEARCH_SPEED_MAIN_TITLE=速度
+OPTIONS_FILTERS_MAIN_TITLE=フィルタ
+OPTIONS_RESULTS_MAIN_TITLE=キーワード
+OPTIONS_MESSAGES_MAIN_TITLE=ホスト
+OPTIONS_ADVANCED_MAIN_TITLE=詳細
+OPTIONS_COMPRESSION_MAIN_TITLE=圧縮
+OPTIONS_PREFERENCING_MAIN_TITLE=優先
+OPTIONS_PORT_MAIN_TITLE=ポート
+OPTIONS_FIREWALL_MAIN_TITLE=ファイアウォール
+OPTIONS_PRIVATE_NET_MAIN_TITLE=プライベートネットワーク
+OPTIONS_STARTUP_MAIN_TITLE=システム起動
+
+################################################################################
+# Key/value pairs for the localization options window item
+# in the options window
+################################################################################
+OPTIONS_LOCALIZE_TITLE=ローカライズ
+OPTIONS_LOCALIZE_LABEL=お住まいの国で, その母国語に最適した形で表示できるように Limewire をカスタマイズ出来ます. また指定した国又はコミュニティ名は, ネットワーク上であなた自身の国を定める場合にも使用されます.
+OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=言語
+OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=国
+
+################################################################################
+# Key/value pairs for the save directory options window item
+# in the options window
+################################################################################
+OPTIONS_SAVE_DIR_TITLE=保存先
+OPTIONS_SAVE_DIR_LABEL=ファイル保存先のフォルダを選択出来ます.
+OPTIONS_SAVE_DIR_BOX_LABEL=フォルダ:
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=閲覧...
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=標準
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=別のフォルダを選択して下さい.
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=標準のフォルダを使用.
+OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=ダウンロード未完ファイル
+OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=ダウンロード未完ファイルを自動的に削除出来ます.
+OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=未完ファイルの保管日数:
+
+################################################################################
+# Key/value pairs for the shared directories options window item
+# in the options window
+################################################################################
+OPTIONS_SHARED_DIRS_TITLE=共有フォルダ
+OPTIONS_SHARED_DIRS_LABEL=共有ファイルのフォルダを選択出来ます. 以下のフォルダ内のファイルがライブラリに表示されます.
+OPTIONS_SHARED_DIRS_BOX_LABEL=フォルダ:
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=追加...
+OPTIONS_SHARED_DIRS_BUTTON_TIP=フォルダを共有リストに追加.
+
+################################################################################
+# Key/value pairs for the shared extension options window item
+# in the options window
+################################################################################
+OPTIONS_SHARED_EXTENSIONS_TITLE=共有する拡張子
+OPTIONS_SHARED_EXTENSIONS_LABEL=共有したいファイルの拡張子を選択出来ます.
+OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=拡張子:
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=標準
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=標準の拡張子を共有.
+
+################################################################################
+# Key/Value pairs for the options for setting the connection speed
+# in the options window
+################################################################################
+OPTIONS_SPEED_TITLE=接続速度
+OPTIONS_SPEED_LABEL=LimeWire のパフォーマンス最適化の為に, 接続速度の指定が出来ます.
+OPTIONS_SPEED_BOX_LABEL=速度:
+
+################################################################################
+# Key/Value pairs for disabling supernode support
+################################################################################
+OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer 機能
+OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=お使いのコンピュータが速い回線をお持ちなら, 遅い回線のユーザに対し LimeWire は "Ultrapeer" として機能します. 必要ならこの機能を無効に出来ます.
+OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapeer 機能を無効にする:
+
+################################################################################
+# Key/Value pairs for disabling OOB support
+################################################################################
+OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB検索
+OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band検索機能を使うことによって, 検索結果がより速く送信されます。 しかし, 一部の接続はこの機能を効率的に使用できな いことがあります。
+OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=OOB検索を有効:
+
+################################################################################
+# Key/Value pairs for the options for the maximum number of downloads
+# in the options window
+################################################################################
+OPTIONS_DOWNLOAD_MAX_TITLE=最大ダウンロード数
+OPTIONS_DOWNLOAD_MAX_LABEL=最大同時ダウンロード数を設定出来ます.
+OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=最大ダウンロード数:
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing downloads
+# in the options window
+################################################################################
+OPTIONS_DOWNLOAD_CLEAR_TITLE=ダウンロードの消去
+OPTIONS_DOWNLOAD_CLEAR_LABEL=完了したダウンロードを, 自動的にウィンドウから消去するかどうか選択出来ます.
+OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=完了ダウンロードを自動的に消去:
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing uploads
+# in the options window
+################################################################################
+OPTIONS_UPLOAD_CLEAR_TITLE=アップロードの消去
+OPTIONS_UPLOAD_CLEAR_LABEL=完了したアップロードを, 自動的にウィンドウから消去するかどうか選択出来ます.
+OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=完了アップロードを自動的に消去:
+
+################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to uploads in the options window
+################################################################################
+OPTIONS_UPLOAD_BANDWIDTH_TITLE=アップロード帯域
+OPTIONS_UPLOAD_BANDWIDTH_LABEL=アップロードに使う帯域を割合で設定出来ます.
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=無制限
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=速度:
+
+################################################################################
+# Key/Value pairs for the options for automatically sharing partially downloaded
+# files.
+################################################################################
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=部分的ファイル
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=部分的にダウンロードがされたファイルを共有するかしないかを選択できます。
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=部分的ファイル共有を有効
+
+################################################################################
+# Key/Value pairs for the options for the hard maximum number of uploads
+################################################################################
+OPTIONS_UPLOAD_MAX_TITLE=最大アップロードスロット
+OPTIONS_UPLOAD_MAX_LABEL=これ以上のアップロード数を許可しません. 十分な帯域をお使いの場合のみこの数値に達します.
+OPTIONS_UPLOAD_MAX_NUMBER_LABEL=最大アップロード数:
+
+################################################################################
+# Key/Value pairs for the options for the soft maximum number of uploads
+################################################################################
+OPTIONS_UPLOAD_SOFT_MAX_TITLE=最小アップロードスロット
+OPTIONS_UPLOAD_SOFT_MAX_LABEL=常に少なくともこれだけのアップロードを許可します. いッたん制限に達したら, 帯域の許す範囲でより多くのアップロードを許可します. この数値を下げすぎると, アップロードの許容数に達しないので他のユーザに被害を与えます.
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=最小アップロードスロット:
+
+################################################################################
+# Key/Value pairs for the options for the number of uploads per persons
+################################################################################
+OPTIONS_UPLOAD_PER_PERSON_TITLE=一人当たりのアップロード数
+OPTIONS_UPLOAD_PER_PERSON_LABEL=一人当たりこれだけのアップロードを許可します.
+OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=一人当たりの数:
+
+################################################################################
+# Key/Value pairs for connecting on startup
+################################################################################
+OPTIONS_CONNECT_ON_STARTUP_TITLE=起動時の接続
+OPTIONS_CONNECT_ON_STARTUP_LABEL=アプリケーションの起動時に, 自動的にネットワークに接続するかどうかを選択出来ます.
+OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=起動時に接続:
+
+################################################################################
+# Key/Value pairs for shutdown options
+################################################################################
+OPTIONS_SHUTDOWN_TITLE=終了時のオプション
+OPTIONS_SHUTDOWN_LABEL=標準の終了動作を選択出来ます.
+OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=すぐさま終了
+OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=ファイル転送完了後に終了
+OPTIONS_SHUTDOWN_TO_TRAY_LABEL=ドックにしまう
+
+################################################################################
+# Key/Value pairs for the chat options in the options window
+################################################################################
+OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=会話を有効:
+OPTIONS_CHAT_ACTIVE_TITLE=ホストとの会話
+OPTIONS_CHAT_ACTIVE_LABEL=会話を有効 / 無効に出来ます.
+
+################################################################################
+# Key/Value pairs for the player options in the options window
+################################################################################
+OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 プレイヤーを使う:
+OPTIONS_PLAYER_PREFERENCE_TITLE=プレイヤーオプション
+OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire 又はシステム標準のプレイヤーを使用出来ます. プレイヤーのコントロールを無効/有効にするにはライムワイヤーを 再スタートさせる必要があります。
+
+################################################################################
+# Key/Value pairs for the iTunes options in the options window
+################################################################################
+OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=iTunesサポートを有効にする:
+OPTIONS_ITUNES_PREFERENCE_TITLE=iTunesサポート
+OPTIONS_ITUNES_PREFERENCE_LABEL=iTunesサポートを有効にする.
+
+################################################################################
+# Key/Value pairs for url handler options
+################################################################################
+OPTIONS_BROWSER_PREFERENCE_TITLE=ブラウザオプション
+OPTIONS_BROWSER_PREFERENCE_LABEL=使用するブラウザを選択出来ます.
+OPTIONS_BROWSER_BOX_LABEL=ブラウザ
+#??? OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image options
+#??? OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=You can choose which image viewer to use.
+#??? OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image viewer
+#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video options
+#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
+#??? OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video player
+#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio options
+#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=You can choose which audio player to use.
+#??? OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio player
+
+################################################################################
+# Key/value pairs for asking whether or not to display message bug reports
+################################################################################
+OPTIONS_BUGS_TITLE=バグリポート
+OPTIONS_BUGS_LABEL=バグレポートの送信の仕方を選択できます. 「例を見る」をクリックされるとバグレポートの例をご覧になれます. 「いつも送信」を選択されると, 自動的にバグレポートを ライムワイヤーのバグサーバーに送信します. 「いつも視察」を選択されますと, エラーが起きたとき そのエラーが表示され, 送信するかしないかを選択できます. 「いつも放棄」を選択されますと,エラーを放棄し, 何もしません. 「いつも放棄」を選択することはお勧めしません.
+OPTIONS_BUGS_VIEW_EXAMPLE=例を見る
+
+################################################################################
+# Key/value pairs for asking whether or not to display message popups
+################################################################################
+OPTIONS_DO_NOT_ASK_AGAIN=今後、このメッセージを表示しない.
+OPTIONS_ALWAYS_USE_ANSWER=いつも、この答えを使う.
+OPTIONS_POPUPS_TITLE=ポップアップ　メッセージ
+OPTIONS_POPUPS_LABEL=「今後、このメッセージを表示しない」または 「いつも、この答えを使う」と設定されたメッセージを再表示させる.
+OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=初期設定にもどす.
+
+################################################################################
+# Key/value pairs for the options pane used to enable and disable autocomplete
+# search textfield
+################################################################################
+OPTIONS_AUTOCOMPLETE_TITLE=オートコンプリート
+OPTIONS_AUTOCOMPLETE_LABEL=オートコンプリート機能を有効または無効にすることが出来ます
+OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=オートコンプリートを有効にする
+
+################################################################################
+# Key/Value pairs for theme options
+################################################################################
+OPTIONS_THEME_TITLE=テーマオプション
+OPTIONS_THEME_LABEL=LimewWire のその他のテーマを選ぶ事が出来ます.
+OPTIONS_THEME_BROWSE_BUTTON_TIP=テーマファイルの場所
+OPTIONS_THEME_DEFAULT_BUTTON_TIP=標準のテーマを使用
+OPTIONS_THEME_BOX_LABEL=ファイル:
+OPTIONS_THEME_FILE_LABEL=このテーマを選ぶ事が出来ます.
+OPTIONS_THEME_FILE_CHOOSER_TITLE=テーマの選択
+THEME_FILE_DESCRIPTION=LimeWire のテーマファイル (*.lwtp)
+THEME_CHANGED_MESSAGE=テーマの変更は LimeWire の再起動後に反映されます.
+
+################################################################################
+# Key/Value pairs for skin options
+################################################################################
+OPTIONS_SKIN_TITLE=スキンオプション
+OPTIONS_SKIN_LABEL=LimeWire スキンを選択して下さい. L2FProd.com (http://www.L2FProd.com) が開発したスキンを使用出来ます.
+OPTIONS_SKIN_BROWSE_BOX_LABEL=スキン:
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=閲覧...
+OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=プレビュー表示
+OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=スキンなし
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=ダウンロード...
+OPTIONS_SKIN_BROWSE_BUTTON_TIP=別のスキンを選択.
+OPTIONS_SKIN_PREVIEW_BUTTON_TIP=選択スキンをプレ表示.
+OPTIONS_SKIN_DEFAULT_BUTTON_TIP=LimeWire にスキンを使用しない.
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=www.javootoo.com から新規スキンをダウンロード...
+SKIN_APPLY_MESSAGE=スキンの変更は LimeWire の再起動後に反映されます....
+SKIN_RESTART_NEEDED=スキンの変更を反映するには LimeWire を再起動させる必要があります.
+
+################################################################################
+# Key/Value pairs for browse for new skins option pane
+################################################################################
+OPTIONS_BROWSE_SKIN_TITLE=新規スキンを閲覧
+OPTIONS_BROWSE_SKIN_LABEL=http://www.javootoo.com でスキンを検索
+
+################################################################################
+# Key/value pairs for the skin options window
+################################################################################
+SKIN_EDITOR_PREVIEW_BUTTON=プレビュー表示
+SKIN_EDITOR_REMOVE_BUTTON=標準
+SKIN_EDITOR_BROWSE_BUTTON=閲覧...
+SKIN_EDITOR_PREVIEW_BUTTON_TIP=スキンをプレビュー表示.
+SKIN_EDITOR_REMOVE_BUTTON_TIP=標準のスキンを使う.
+SKIN_EDITOR_BROWSE_BUTTON_TIP=スキンを閲覧.
+
+################################################################################
+# Key/Value pairs for the options for the maximum number of searches
+# in the options window
+################################################################################
+OPTIONS_SEARCH_MAX_TITLE=最大検索数
+OPTIONS_SEARCH_MAX_LABEL=最大同時検索数を設定出来ます.
+OPTIONS_SEARCH_MAX_NUMBER_LABEL=最大検索数:
+
+################################################################################
+# Key/Value pairs for search quality options in the options window
+################################################################################
+OPTIONS_SEARCH_QUALITY_TITLE=検索結果の精度
+OPTIONS_SEARCH_QUALITY_LABEL=表示する検索結果の精度を選択出来ます. 4っ☆ が示すのは, ファイアウォール設定の無い, しかもアップロードスロットの空きがあるホストです.
+OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=4っ☆のみ表示
+OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=3っ☆ と 4っ☆ を表示
+OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=2っ☆, 3っ☆, 4っ☆ を表示
+OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=全てを表示
+
+################################################################################
+# Key/Value pairs for minimum search result speed options
+################################################################################
+OPTIONS_SEARCH_SPEED_TITLE=検索結果の速度
+OPTIONS_SEARCH_SPEED_LABEL=検索結果に表示する速度の最小値を選択出来ます.
+OPTIONS_SEARCH_SPEED_T3_LABEL=T3 以上の速度のみ表示
+OPTIONS_SEARCH_SPEED_T1_LABEL=T1 以上の速度のみ表示
+OPTIONS_SEARCH_SPEED_CABLE_LABEL=Cable/DSL 以上の速度のみ表示
+OPTIONS_SEARCH_SPEED_ALL_LABEL=全ての速度を表示
+
+################################################################################
+# Key/Value pairs for result filtering options
+# in the options window
+################################################################################
+OPTIONS_IGNORE_RESULTS_TITLE=検索結果のフィルタ
+OPTIONS_IGNORE_RESULTS_LABEL=特定の文字列を含む検索結果を除外出来ます.
+
+################################################################################
+# Key/Value pairs for general result type filtering options
+# in the options window
+################################################################################
+OPTIONS_IGNORE_RESULT_TYPES_TITLE=ファイル形式のフィルタ
+OPTIONS_IGNORE_RESULT_TYPES_LABEL=フィルタをかける検索結果の一般的な形式を指定出来ます.
+OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=アダルトコンテンツを無視
+OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=.htm/.html ファイルを無視
+OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=.vbs ファイルを無視
+
+################################################################################
+# Key/Value pairs for message filtering options in the options window
+################################################################################
+OPTIONS_IGNORE_MESSAGES_TITLE=ホストのフィルタ
+OPTIONS_IGNORE_MESSAGES_LABEL=IP アドレス (例; "18.239.0.1" 又は "18.*.*.*") を禁止リストに入力する事によって, 特定のホストからのメッセージを無効に出来ます.
+OPTIONS_ALLOW_MESSAGES_TITLE=ホストの許可
+OPTIONS_ALLOW_MESSAGES_LABEL=IP アドレス (例; "192.168.0.1" 又は "192.*.*.*") を許可リストに入力する事で, 特定のホストからのメッセージ を許可出来ます. このリストは禁止リストに上書きする場合にのみ必要です.
+
+################################################################################
+# Key/Value pairs for disabling compression support
+################################################################################
+OPTIONS_COMPRESSION_TITLE=圧縮機能
+OPTIONS_COMPRESSION_LABEL=ネットワーク上のメッセージを圧縮することによって 使用される帯域を少なくすることが可能です。しかし、 CPUへの負担になるかもしれません。もし、あなたのコンピューターが 通常より重く感じるのであれば 次のオプションを無効にすることを お勧めします。
+OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=メッセージ（出）の圧縮を無効
+OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=メッセージ（入）の圧縮を無効
+
+################################################################################
+# Key/Value pairs for the options for setting connection preferences
+# in the advanced panel of the options window
+################################################################################
+OPTIONS_CONNECT_PREF_TITLE=優先接続
+OPTIONS_CONNECT_PREF_LABEL=共有ファイル数に基づいて, 相手の接続を制限出来ます.
+OPTIONS_CONNECT_PREF_BOX_LABEL=ただ乗りと見なさない最低共有ファイル数:
+OPTIONS_CONNECT_PREF_SLIDER_LABEL=ただ乗りを許可:
+OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=めったに許可しない
+OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=常に許可する
+
+################################################################################
+# Key/Value pairs for the options for setting the listening port
+# in the options window
+################################################################################
+OPTIONS_PORT_TITLE=外部からの受信ポート
+OPTIONS_PORT_LABEL=他のホストを探すネットワークポートを設定出来ます.
+OPTIONS_PORT_BOX_LABEL=外部からの受信ポート:
+
+################################################################################
+# Key/Value pairs for the options for forcing your ip address
+# in the advanced panel in the options window
+################################################################################
+OPTIONS_FORCE_IP_TITLE=強制ローカルIP
+OPTIONS_FORCE_IP_LABEL=あなたがファイアウォール内にいて, "Push" 要求の送信なしに他の Gnutella クライアントと接続したいならば, 強制ローカル IP アドレスを許可して下さい.
+OPTIONS_FORCE_IP_CHECK_BOX_LABEL=強制 IP
+OPTIONS_FORCE_IP_PORT_LABEL=ポート:
+
+################################################################################
+# Key/Value pairs for the options for setting the connection strings
+# in the advanced panel in the options window
+################################################################################
+OPTIONS_CONNECT_STRING_TITLE=プライベートネットワーク
+OPTIONS_CONNECT_STRING_LABEL=プライベート Gnutella ネットワークへの接続回線設定が出来ます. 接続する他の Gnutella ホストも同じ回線が必要です.
+OPTIONS_CONNECT_STRING_STRING_LABEL=接続:
+OPTIONS_CONNECT_STRING_OK_STRING_LABEL=接続正常:
+
+################################################################################
+# Key/Value pairs for browse for the Private Net options pane
+################################################################################
+OPTIONS_PRIVATE_NET_TITLE=プライベートネットワーク
+OPTIONS_PRIVATE_NET_LABEL=LimeWire のプライベートネットワーク機能を設定します.
+OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=プライベートネットワークに接続しますか.
+OPTIONS_PRIVATE_CACHE_IP_LABEL=ホスト
+OPTIONS_PRIVATE_CACHE_PORT_LABEL=ポート
+OPTIONS_PRIVATE_CACHE_NAME_LABEL=名前
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing uploads
+# in the options window
+################################################################################
+OPTIONS_STARTUP_TITLE=システム起動
+OPTIONS_STARTUP_LABEL=コンピューターにログインした時に自動的にライムワイヤーを起動させるかを選択できます。
+OPTIONS_STARTUP_CHECK_BOX_LABEL=システム起動時にライムワイヤーを起動:
+
+################################################################################
+# Key/value pairs for top-level stats panels
+################################################################################
+STATS_BANDWIDTH_PANE_TITLE=帯域
+STATS_BANDWIDTH_PANE_LABEL=帯域状況は上流下流全ての情報を含みます. 見たい状況をカテゴリーから選択してください.
+
+STATS_NET_PANE_TITLE=ネット
+STATS_NET_PANE_LABEL=現在のネットワークの状況. 状況はとても流動的で分散的な性質の為, あまり過剰に気にする必要はありません. しかしこれで現状に対する考察をする事が出来ます.
+
+STATS_ADVANCED_PANE_TITLE=詳細
+STATS_ADVANCED_PANE_LABEL=Gnutella 関係のメッセージや HTTP 通信の詳細状況. この情報は上級者や Gnutella の研究者に とって有益です. 例えば研究者は状況をファイルに記録する事が出来ます. 自動で名前を付け作業フォルダに記録されます. データーはコンマで区切られたスピードシートで見やすいフォーマットで報告されます. 詳細状況は標準では表示されません. 又一般のユーザーには御勧めしません.
+STATS_ADVANCED_CHECK_BOX_LABEL=詳細状況を表示:
+
+# Advanced Gnutella messages panes
+GNUTELLA_MESSAGES=Gnutella
+
+###################################################################
+# Key/value pairs for StatisticsView
+###################################################################
+STATS_NETWORK_INFO_TITLE=ネットワーク情報
+
+STATS_CONNECTION_TITLE=接続
+STATS_UPLOADS=現在のアップロード数:
+STATS_DOWNLOADS=現在のダウンロード数:
+STATS_NET=現在のホスト数:
+STATS_HOSTS=合計ホスト数:
+STATS_FILES=合計ファイル数:
+STATS_FILE_SIZE=合計ファイル容量 (MB):
+
+STATS_NETWORK_TITLE=ネットワーク
+STATS_TOTAL_MESSAGES=合計メッセージ数:
+STATS_LOCAL_SEARCHES=ローカル検索数:
+STATS_ROUTING_ERRORS=中継エラー数:
+STATS_DROPPED_MESSAGES=有効メッセージ数:
+STATS_DOWNLOAD_COUNT=ダウンロード数:
+STATS_UPLOAD_COUNT=アップロード数:
+
+STATS_BUTTON_LABEL=更新
+
+################################################################################
+# Key/value pairs for bandwidth statistics panes
+################################################################################
+BANDWIDTH_KEY=帯域
+STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=上流
+STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=内部からの発信されたデーター量の合計, Gnutella メッセージかアップロードのどちらかです.
+STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=下流
+STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=内部からの発信されたデーター量の合計, Gnutella メッセージかアップロードのどちらかです.
+
+################################################################################
+################################################################################
+## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL
+################################################################################
+################################################################################
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- received messages
+################################################################################
+RECEIVED_MESSAGES=受信しました
+
+RECEIVED_MESSAGE_NUMBER=数
+RECEIVED_QUERY_REQUESTS=Queries
+RECEIVED_QUERY_REPLIES=Query Hits
+
+RECEIVED_MESSAGE_BYTES=KB
+RECEIVED_QUERY_REQUESTS_BYTES=Queries
+RECEIVED_QUERY_REPLIES_BYTES=Query Hits
+
+RECEIVED_LIMEWIRE=LimeWire メッセージ
+LIME_RECEIVED_MESSAGE_NUMBER=数
+STATS_RECEIVED_TCP=TCP
+STATS_RECEIVED_UDP=UDP
+STATS_RECEIVED_MULTICAST=Multicast
+LIME_RECEIVED_MESSAGE_BYTES=KB
+STATS_RECEIVED_TCP_BYTES=TCP
+STATS_RECEIVED_UDP_BYTES=UDP
+STATS_RECEIVED_MULTICAST_BYTES=Multicast
+
+# number of messages
+STATS_TOTAL_RECEIVED_MESSAGES_TITLE=合計
+STATS_TOTAL_RECEIVED_MESSAGES_LABEL=全てのクライアントによって受信された Gnutella メッセージ.
+STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP
+STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=全てのメッセージ形式別の TCP によって受信された Gnutella メッセージ.
+STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
+STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=全てのメッセージ形式別の UDP によって受信された Gnutella メッセージ.
+STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=Multicast
+STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=全てのメッセージ形式別の Multicast によって受信された Gnutella メッセージ.
+STATS_RECEIVED_ALL_TITLE=TCP, UDP 又は Multicast
+STATS_RECEIVED_ALL_LABEL=TCP, UDP 又は Multicast によって受信された合計 Gnutella メッセージ.
+STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=重複した TCP の要求
+STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=TCP で受信した要求の合計に対する重複した要求数.
+STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=重複した Multicast の要求
+STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=Multicast で受信した要求の合計に対する重複した要求数.
+# Advanced Gnutella Message hops/ttl for queries
+STATS_QUERY_REQUEST_HOPS_TITLE=Hops
+#??? STATS_QUERY_REQUEST_HOPS_LABEL=All received queries, by hops.
+STATS_QUERY_REQUEST_TTL_TITLE=TTL
+#??? STATS_QUERY_REQUEST_TTL_LABEL=All received queries, by time to live (TTL).
+# Advanced Gnutella Message hops/ttl for query hits
+STATS_QUERY_REPLY_HOPS_TITLE=Hops
+#??? STATS_QUERY_REPLY_HOPS_LABEL=All received query hits, by hops.
+STATS_QUERY_REPLY_TTL_TITLE=TTL
+#??? STATS_QUERY_REPLY_TTL_LABEL=All received query hits, by time to live (TTL).
+
+# number of kilobytes
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=合計
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=クライアントによって受信された Gnutella メッセージの合計 KB.
+STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
+STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=メッセージ形式別の TCP によって受信された Gnutella メッセージの合計 KB.
+STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
+STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=メッセージ形式別の UDP によって受信された Gnutella メッセージの合計 KB.
+STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
+STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=メッセージ形式別の Multicast によって受信された Gnutella メッセージの合計 KB.
+STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP 又は Multicast
+STATS_RECEIVED_BYTES_ALL_LABEL=TCP, UDP 又は Multicast によって受信された Gnutella メッセージの合計 KB.
+STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=重複した TCP の受信要求 KB.
+STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=TCP で受信した要求の合計に対する重複した要求数 KB.
+STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=重複した Multicast の受信要求 KB.
+STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=Multicast で受信した要求の合計に対する重複した要求数 KB.
+# Advanced Gnutella Message hops/ttl for queries in kilobytes
+STATS_QUERY_REQUEST_HOPS_BYTES_TITLE=Hops
+#??? STATS_QUERY_REQUEST_HOPS_BYTES_LABEL=All received queries in kilobytes, by hops.
+STATS_QUERY_REQUEST_TTL_BYTES_TITLE=TTL
+#??? STATS_QUERY_REQUEST_TTL_BYTES_LABEL=All received queries in kilobytes, by time to live (TTL).
+# Advanced Gnutella Message hops/ttl for query hits in kilobytes
+STATS_QUERY_REPLY_HOPS_BYTES_TITLE=Hops
+#??? STATS_QUERY_REPLY_HOPS_BYTES_LABEL=All received query hits in kilobytes, by hops.
+STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
+#??? STATS_QUERY_REPLY_TTL_BYTES_LABEL=All received query hits in kilobytes, by time to live (TTL).
+
+# number of messages received for LimeWire-specific stats -- TCP
+STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=他の LimeWire から受信したメッセージの合計.
+STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pings.
+STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pongs.
+STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP 要求数.
+STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP 要求ヒット数.
+STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pushes.
+# number of messages received for LimeWire-specific stats -- UDP
+STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=他の LimeWire から受信した合計メッセージ.
+STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pings.
+STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_UDP_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pongs.
+STATS_LIME_RECEIVED_UDP_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_UDP_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP 要求数.
+STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP 要求ヒット数.
+STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pushes.
+# number of messages received for LimeWire-specific stats -- Multicast
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=他の LimeWire から受信した合計メッセージ.
+STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pings.
+STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pongs.
+STATS_LIME_RECEIVED_MULTICAST_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_MULTICAST_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast 要求数.
+STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast 要求ヒット数.
+STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pushes.
+
+# number of kilobytes received for LimeWire-specific stats -- TCP
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=他の LimeWire から受信した合計 KB.
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pings.
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pongs.
+STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP 要求数.
+STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP 要求ヒット数.
+STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した TCP Pushes.
+# number of kilobytes received for LimeWire-specific stats -- UDP
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=他の LimeWire から受信した合計 KB.
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pings の KB.
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pongs の KB.
+STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP 要求数の KB.
+STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP 要求ヒット数の KB.
+STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した UDP Pushes の KB.
+# number of kilobytes received for LimeWire-specific stats -- Multicast
+STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=合計
+STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=他の LimeWire から受信した合計 KB.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pings の KB.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pongs の KB.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=要求数
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast 要求数の KB.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast 要求ヒット数の KB.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=他の Limewire に対して全ての Gnutella クライアントから受信した Multicast Pushes の KB.
+
+#??? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=Average size
+#??? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=The average size in kilobytes of received Gnutella messages.
+#??? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Average size
+#??? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=The average size in kilobytes of received messages from LimeWires.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- sent messages
+################################################################################
+SENT_MESSAGES=送信
+SENT_MESSAGE_NUMBER=数
+SENT_MESSAGE_BYTES=KB
+SENT_LIMEWIRE=LimeWire メッセージ
+SENT_ULTRAPEER=Ultrapeer
+SENT_LEAF=Leafnode
+
+LIME_SENT_MESSAGES_NUMBER=数
+STATS_SENT_TCP=TCP
+STATS_SENT_UDP=UDP
+STATS_SENT_MULTICAST=Multicast
+LIME_SENT_MESSAGES_BYTES=KB
+STATS_SENT_TCP_BYTES=TCP
+STATS_SENT_UDP_BYTES=UDP
+STATS_SENT_MULTICAST_BYTES=Multicast
+
+# number of messages
+STATS_TOTAL_SENT_MESSAGES_TITLE=合計
+STATS_TOTAL_SENT_MESSAGES_LABEL=このクライアントから送信された全ての Gnutella メッセージ.
+STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP
+STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=全ての TCP で送信したメッセージ形式別 Gnutella メッセージ.
+STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
+STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=全ての UDP で送信したメッセージ形式別 Gnutella メッセージ.
+STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
+STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=全ての Multicast で送信したメッセージ形式別 Gnutella メッセージ.
+STATS_SENT_ALL_TITLE=TCP, UDP 又は Multicast
+STATS_SENT_ALL_LABEL=TCP, UDP 又は Multicast で送信した合計 Gnutella メッセージ.
+
+# number of kilobytes
+STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=合計
+STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=このクライアントから送信された Gnutella メッセージの合計 KB.
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=TCP で送信したメッセージ形式別 Gnutella メッセージの合計 KB.
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=UDP で送信したメッセージ形式別 Gnutella メッセージの合計 KB.
+STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
+STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Multicast で送信したメッセージ形式別 Gnutella メッセージの合計 KB.
+STATS_SENT_BYTES_ALL_TITLE=TCP, UDP 又は Multicast
+STATS_SENT_BYTES_ALL_LABEL=TCP, UDP 又は Multicast で送信した Gnutella メッセージの合計 KB.
+
+# number of messages sent for LimeWire-specific stats -- TCP
+STATS_LIME_SENT_TCP_MESSAGES_TITLE=合計
+STATS_LIME_SENT_TCP_MESSAGES_LABEL=他の LimeWire から送信されたメッセージの合計.
+STATS_LIME_SENT_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pings.
+STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pongs.
+STATS_LIME_SENT_TCP_QUERIES_TITLE=要求数
+STATS_LIME_SENT_TCP_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP 要求数.
+STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP 要求ヒット数.
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pushes.
+# number of messages sent for LimeWire-specific stats -- UDP
+STATS_LIME_SENT_UDP_MESSAGES_TITLE=合計
+STATS_LIME_SENT_UDP_MESSAGES_LABEL=他の LimeWire から送信されたメッセージの合計.
+STATS_LIME_SENT_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_UDP_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pings.
+STATS_LIME_SENT_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pongs.
+STATS_LIME_SENT_UDP_QUERIES_TITLE=要求数
+STATS_LIME_SENT_UDP_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP 要求数.
+STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP 要求ヒット数.
+STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pushes.
+# number of messages sent for LimeWire-specific stats -- Multicast
+STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=合計
+STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=他の LimeWire から送信されたメッセージの合計.
+STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pings.
+STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_MULTICAST_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pongs.
+STATS_LIME_SENT_MULTICAST_QUERIES_TITLE=要求数
+STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast 要求数.
+STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast 要求ヒット数.
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pushes.
+
+# number of kilobytes sent for LimeWire-specific stats -- TCP
+STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=合計
+STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=他の LimeWire から送信された合計 KB.
+STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pings.
+STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pongs.
+STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=要求数
+STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP 要求数.
+STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP 要求ヒット数.
+STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された TCP Pushes.
+# number of kilobytes sent for LimeWire-specific stats -- UDP
+STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=合計
+STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=他の LimeWire から半分送信された合計 KB.
+STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pings の KB.
+STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pongs の KB.
+STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=要求数
+STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP 要求数の KB.
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP 要求ヒット数の KB.
+STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された UDP Pushes の KB.
+# number of kilobytes sent for LimeWire-specific stats -- Multicast
+STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=合計
+STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_LABEL=他の LimeWire から半分送信された合計 KB.
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pings の KB.
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pongs の KB.
+STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=要求数
+STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast 要求数の KB.
+STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=要求ヒット数
+STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast 要求ヒット数の KB.
+STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
+STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=他の LimeWire に対して全ての Gnutella クライアントから送信された Multicast Pushes の KB.
+
+# ultrapeer-specific sent stats
+STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=送信
+#??? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
+#??? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not sent
+#??? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
+
+# leaf-specific sent stats
+STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=送信
+#??? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
+#??? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not sent
+#??? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- compression
+################################################################################
+#??? COMPRESSABLE_MESSAGES=Compression
+STATS_COMPRESSABLE_UPSTREAM_TITLE=上流
+#??? STATS_COMPRESSABLE_UPSTREAM_LABEL=Statistics for compressed upstream traffic in kilobytes.
+STATS_COMPRESSABLE_DOWNSTREAM_TITLE=下流
+#??? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=Statistics for compressed downstream traffic in kilobytes.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- flow control
+################################################################################
+#??? FLOW_CONTROLLED_MESSAGES=Flow control
+STATS_FLOW_CONTROL_TITLE=数
+#??? STATS_FLOW_CONTROL_LABEL=Statistics for flow controlled messages.
+STATS_FLOW_CONTROL_BYTES_TITLE=KB
+#??? STATS_FLOW_CONTROL_BYTES_LABEL=Statistics for flow controlled messages in kilobytes.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- route error stats
+################################################################################
+STATS_ROUTE_ERRORS_TITLE=中継エラー
+STATS_ROUTE_ERRORS_LABEL=他のクライアントへの中継エラーの合計.
+
+#??? STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=Hit routing errors
+#??? STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=Errors routing query hits.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- other stats
+################################################################################
+STATS_FILTERED_MESSAGES_TITLE=フィルターされたメッセージ
+STATS_FILTERED_MESSAGES_LABEL=フィルターされたメッセージの合計.
+
+STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=接続数
+STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=内部からおよび外部からの Gnutella 接続試行回数の合計.
+
+################################################################################
+# Key/value pairs for advanced HTTP statistics
+################################################################################
+STATS_TOTAL_HTTP_REQUESTS_TITLE=HTTP 要求
+STATS_TOTAL_HTTP_REQUESTS_LABEL=外部からの時間外 HTTP 要求の合計. これは HEAD と GET 要求を含みます.
+
+################################################################################
+# Key/Value pairs for statistics graph axis labels
+################################################################################
+# defaults
+DEFAULT_X_AXIS_LABEL=秒
+DEFAULT_Y_AXIS_LABEL=メッセージ
+DEFAULT_Y_BYTE_AXIS_LABEL=KB
+Y_AXIS_BANDWIDTH_LABEL=KB
+
+################################################################################
+# Key/Value pairs for statistics graph legend labels and stat window titles
+################################################################################
+# Column names
+STATS_LEGEND_NAME=名前
+STATS_LEGEND_AVERAGE=平均
+STATS_LEGEND_MAX=最大
+STATS_LEGEND_TOTAL=合計
+STATS_LEGEND_COLOR=色
+#??? STATS_LEGEND_CURRENT=Current
+
+STATS_RECORD_STATS_LABEL=このグラフの状態をファイルに書き込みます.
+
+# Bandwidth
+UPSTREAM_BANDWIDTH=上流
+DOWNSTREAM_BANDWIDTH=下流
+#??? HTTP_BANDWIDTH=HTTP total
+#??? HTTP_HEADER_BANDWIDTH=HTTP headers
+#??? HTTP_BODY_BANDWIDTH=HTTP content
+#??? GNUTELLA_BANDWIDTH=Gnutella total
+#??? GNUTELLA_HEADER_BANDWIDTH=Gnutella headers
+#??? GNUTELLA_MESSAGE_BANDWIDTH=Gnutella messages
+
+# Compression
+#??? UNCOMPRESSED_UPSTREAM=Total upstream (potential)
+#??? COMPRESSED_UPSTREAM=Total upstream (actual)
+#??? UNCOMPRESSED_DOWNSTREAM=Total downstream (potential)
+#??? COMPRESSED_DOWNSTREAM=Total downstream (actual)
+#??? HTTP_UNCOMPRESSED=HTTP (potential)
+#??? HTTP_COMPRESSED=HTTP (actual)
+#??? GNUTELLA_UNCOMPRESSED=Gnutella (potential)
+#??? GNUTELLA_COMPRESSED=Gnutella (actual)
+
+# Advanced Gnutella All clients message
+STATS_ALL_CLIENTS=全てのクライアント
+STATS_LIMEWIRE=LimeWire
+
+# Advanced Gnutella Received Messages Total
+ALL_RECEIVED=受信しました
+ALL_LIME_RECEIVED=LimeWire を受信しました
+# Advanced Gnutella Received Messages TCP/UDP/Multicast
+RECEIVED_ALL_TCP_MESSAGES=TCP メッセージ
+RECEIVED_ALL_UDP_MESSAGES=UDP メッセージ
+RECEIVED_ALL_MULTICAST_MESSAGES=Multicast メッセージ
+# Advanced Gnutella Received Messages Duplicate queries
+RECEIVED_TCP_DUPLICATE_QUERIES=重複した TCP 要求数
+RECEIVED_MULTICAST_DUPLICATE_QUERIES=重複した Multicast 要求数
+
+# Advanced Gnutella Received Kilobytes Total
+ALL_RECEIVED_BYTES=受信しました
+ALL_LIME_RECEIVED_BYTES=LimeWire を受信
+# Advanced Gnutella Received Kilobytes TCP/UDP/Multicast
+RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP メッセージ
+RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP メッセージ
+RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast メッセージ
+# Advanced Gnutella Received Kilobytes Duplicate queries
+RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=重複した TCP 要求数
+RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=重複した Multicast 要求数
+
+# Advanced Gnutella Sent Messages Total
+ALL_SENT=送信
+ALL_LIME_SENT=LimeWire に送信
+# Advanced Gnutella Sent Messages TCP/UDP/Multicast
+SENT_ALL_TCP_MESSAGES=TCP メッセージ
+SENT_ALL_UDP_MESSAGES=UDP メッセージ
+SENT_ALL_UDP_MESSAGES=Multicast メッセージ
+
+# Advanced Gnutella Sent Kilobytes Total
+ALL_SENT_BYTES=送信
+ALL_LIME_SENT_BYTES=LimeWire に送信
+# Advanced Gnutella Sent Kilobytes TCP/UDP/Multicast
+SENT_ALL_TCP_MESSAGES_BYTES=TCP メッセージ
+SENT_ALL_UDP_MESSAGES_BYTES=UDP メッセージ
+SENT_ALL_UDP_MESSAGES_BYTES=Multicast メッセージ
+
+###############################################################################
+# Key/value pairs for general message labels
+###############################################################################
+#??? GENERAL_ALL_MESSAGES_LABEL=All messages
+GENERAL_QUERY_REQUEST_LABEL=要求数
+GENERAL_QUERY_REPLY_LABEL=要求ヒット数
+GENERAL_PING_REQUEST_LABEL=Pings
+GENERAL_PING_REPLY_LABEL=Pongs
+GENERAL_PUSH_REQUEST_LABEL=Pushes
+#??? GENERAL_ROUTE_TABLE_LABEL=Route table reset
+#??? GENERAL_RESET_ROUTE_TABLE_LABEL=Route table reset
+#??? GENERAL_PATCH_ROUTE_TABLE_LABEL=Route table patch
+
+# Hops labels
+HOPS1=Hops 1
+HOPS2=Hops 2
+HOPS3=Hops 3
+HOPS4=Hops 4
+HOPS5=Hops 5
+HOPS6=Hops 6
+HOPS7=Hops 7
+HOPS8=Hops 8
+HOPS9=Hops 9
+
+# TTL labels
+TTL0=TTL 0
+TTL1=TTL 1
+TTL2=TTL 2
+TTL3=TTL 3
+TTL4=TTL 4
+TTL5=TTL 5
+TTL6=TTL 6
+TTL7=TTL 7
+TTL8=TTL 8
+TTL9=TTL 9
+
+# Advanced Gnutella Message routing errors
+ALL_ROUTE_ERRORS=中継エラー
+PING_REPLY_ROUTE_ERRORS=Pong エラー
+QUERY_REPLY_ROUTE_ERRORS=応答エラー
+PUSH_REQUEST_ROUTE_ERRORS=Push エラー
+
+# Advanced Gnutella Message routing errors Query replies
+??? HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Hard limit
+??? NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=No route
+
+# Advanced Gnutella Filtered messages
+ALL_FILTERED_MESSAGES=フィルタされたメッセージ
+
+# Advanced Gnutella Connections
+ALL_CONNECTION_ATTEMPTS=接続試行
+OUTGOING_CONNECTION_ATTEMPTS=内部からの発信試行
+INCOMING_CONNECTION_ATTEMPTS=外部からの受信試行
+
+# Advanced HTTP requests
+ALL_HTTP_REQUESTS=全ての要求
+ALL_HTTP_HEAD_REQUESTS=HEAD 要求
+ALL_HTTP_GET_REQUESTS=GET 要求

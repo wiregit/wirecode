@@ -1161,9 +1161,12 @@ public class RouterService {
      * Notifies components that this' IP address has changed.
      */
     public static boolean addressChanged() {
-        // Only continue if the current address/port is valid.
-        if(!NetworkUtils.isValidAddress(getAddress()))
+        // Only continue if the current address/port is valid & not private.
+        byte addr[] = getAddress();
+        if(!NetworkUtils.isValidAddress(addr))
             return false;
+        if(NetworkUtils.isPrivateAddress(addr))
+            return false;            
         if(!NetworkUtils.isValidPort(getPort()))
             return false;
 

@@ -392,6 +392,10 @@ public class Acceptor implements Runnable {
                     _acceptedIncoming = true;
                     ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
                 }
+                
+                // Set our IP address of the local address of this socket.
+                InetAddress localAddress = client.getLocalAddress();
+                setAddress( localAddress );                
 
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =

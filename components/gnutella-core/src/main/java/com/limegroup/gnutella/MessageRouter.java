@@ -301,6 +301,12 @@ public abstract class MessageRouter {
 
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
+		// Verify that the address and port are valid.
+		// If they are not, we cannot send any replies to them.
+		if(!NetworkUtils.isValidAddress(address) ||
+		   !NetworkUtils.isValidPort(port))
+		    return;
+
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
@@ -435,6 +441,10 @@ public abstract class MessageRouter {
 		} else {
 			reply = createPingReply(guid);
 		}
+		
+		// No GUESS endpoints existed and our IP/port was invalid.
+		if( reply == null )
+		    return;
 
         try {
 		    UDPService.instance().send(reply, datagram.getAddress(), 
@@ -456,7 +466,11 @@ public abstract class MessageRouter {
 	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
-            return PingReply.create(guid, (byte)1);
+		    if(NetworkUtils.isValidPort(RouterService.getPort()) &&
+		       NetworkUtils.isValidAddress(RouterService.getAddress()))
+                return PingReply.create(guid, (byte)1);
+            else
+                return null;
 		} else {
             return PingReply.createGUESSReply(guid, (byte)1, 
                                               endpoint.getPort(),
@@ -1688,7 +1702,7 @@ public abstract class MessageRouter {
             _pushRouteTable.getReplyHandler(push.getClientGUID());
 
         if(replyHandler != null)
-            replyHandler.handlePushRequest(push, null);
+            replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else
             throw new IOException("no route for push");
     }

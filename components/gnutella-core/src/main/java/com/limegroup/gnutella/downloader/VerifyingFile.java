@@ -39,10 +39,12 @@ public class VerifyingFile {
     
     public void open(File file, ManagedDownloader md) throws IOException {
         this.managedDownloader = md;
-        // Ensure that the directory this file is in is writeable.
+        // Ensure that the directory this file is in exists & is writeable.
         File parentFile = FileUtils.getParentFile(file);
-        if( parentFile != null )
+        if( parentFile != null ) {
+            parentFile.mkdirs();
             FileUtils.setWriteable(parentFile);
+        }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
     }
@@ -59,6 +61,8 @@ public class VerifyingFile {
 
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
                                                     throws IOException {
+        if(numBytes==0) //nothing to write? return
+            return;
         if(fos == null)
             throw new IOException();
         boolean checkBeforeWrite = false;

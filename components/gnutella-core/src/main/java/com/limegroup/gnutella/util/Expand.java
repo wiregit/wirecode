@@ -111,6 +111,7 @@ public final class Expand {
                 f.mkdirs(); 
             } else if ( ze.getTime() > f.lastModified() ||
                         overwrite ) {
+                FileUtils.setWriteable(f);
                 byte[] buffer = new byte[1024];
                 int length = 0;
                 FileOutputStream fos = new FileOutputStream(f);
