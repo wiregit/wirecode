@@ -7,6 +7,7 @@ import java.util.zip.Deflater;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -115,7 +116,8 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             try {
                 msg.write(OUTPUT_STREAM);
             } catch(IOException e) {
-                CONNECTION.close(); // make sure we close.
+                // make sure we remove the connection
+                RouterService.removeConnection(CONNECTION);
                 throw e;
             }
 
@@ -146,7 +148,8 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             try {
                 OUTPUT_STREAM.flush();
             } catch(IOException e) {
-                CONNECTION.close();
+                // make sure we remove the connection
+                RouterService.removeConnection(CONNECTION);
                 throw e;
             }
 
