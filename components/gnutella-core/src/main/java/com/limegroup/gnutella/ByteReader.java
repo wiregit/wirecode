@@ -120,34 +120,41 @@ public class ByteReader {
         String nl = "\n";
         byte[] nline = nl.getBytes();
 
-        while (true) {
-
-            c = _istream.read();
-
-            if (c == -1) 
-                return null;
-        
-            if ( c == creturn[0] ) {
-                continue;
-            }
-        
-            else if ( c == nline[0] ) { 
-                break;
-            } 
+		try {
+			while (true) {
+				
+				c = _istream.read();
+				
+				if (c == -1) 
+					return null;
+				
+				if ( c == creturn[0] ) {
+					continue;
+				}
+				
+				else if ( c == nline[0] ) { 
+					break;
+				} 
                 
-            else {
-                buf[i++] = (byte)c;
-                numBytes++;
+				else {
+					buf[i++] = (byte)c;
+					numBytes++;
+					
+				}
 
-            }
-
-            if (numBytes == BUFSIZE) {
-				sBuffer.append(new String(buf, 0, numBytes));
-                i = 0;
-                numBytes = 0;
-            }
-
-        }
+				if (numBytes == BUFSIZE) {
+					sBuffer.append(new String(buf, 0, numBytes));
+					i = 0;
+					numBytes = 0;
+				}
+				
+			}
+		} catch(ArrayIndexOutOfBoundsException e) {
+			sBuffer.append(new String(buf, 0, numBytes));
+			throw new ArrayIndexOutOfBoundsException(e.getMessage() + 
+													 " in ByteReader:\r\n"+
+													 sBuffer.toString());													 
+		}
 
 		sBuffer.append(new String(buf, 0, numBytes));
 		return sBuffer.toString();
