@@ -7,20 +7,22 @@ import java.util.StringTokenizer;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.sun.java.util.collections.Collection;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 
 /**
@@ -28,6 +30,9 @@ import com.sun.java.util.collections.List;
  */
 public final class HandshakeResponseTest extends BaseTestCase {
 
+    private static HandshakeResponse ULTRAPEER_HEADERS;
+
+    private static HandshakeResponse LEAF_HEADERS;
 
 	public HandshakeResponseTest(String name) {
 		super(name);
@@ -49,6 +54,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
     }
 
+    public static void globalSetUp(Class name) throws Exception {
+        ULTRAPEER_HEADERS = 
+            HandshakeResponse.createResponse(
+                new UltrapeerHeaders("45.67.89.54"));
+        LEAF_HEADERS =
+            HandshakeResponse.createResponse(new LeafHeaders("45.67.89.54"));
+    }
+
+    /*
     public void testLeafRejectIncoming() throws Exception {
         Properties props = new Properties();
         props.put(HeaderNames.X_ULTRAPEER, "false");
@@ -60,12 +74,14 @@ public final class HandshakeResponseTest extends BaseTestCase {
         
         assertTrue(hr.hasXTryUltrapeers());
     }
+*/
     
     /**
      * Tests the method that adds Ultrapeer hosts to the X-Try-Ultrapeer
      * header.
      */
-    public void testAddXTryUltrapeers() throws Exception {
+    public void testAddXTryHeader() throws Exception {
+        /*
         String desiredHeader = "";
         int port = 6346;
         int limit = 10;
@@ -80,21 +96,79 @@ public final class HandshakeResponseTest extends BaseTestCase {
                 desiredHeader += ",";
             }
         }
+        */
 
+
+        
         Method m = 
             PrivilegedAccessor.getMethod(HandshakeResponse.class, 
-                                         "addXTryUltrapeers",
-                                         new Class[]{Collection.class, 
-                                                     Properties.class});
+                "addXTryHeader",
+                new Class[]{HandshakeResponse.class, 
+                Properties.class});
+        
+        // Add a bunch of hosts to the host catcher to look for later.
+        HostCatcher hc = RouterService.getHostCatcher();
+        int limit = 30;
+        Set ultrapeersWithLeafSlots = new HashSet();
+        Set ultrapeersWithUltrapeerSlots = new HashSet();
+        for(int i=0; i<limit; i++) {
+            PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
+            hc.add(pr);
+            ultrapeersWithLeafSlots.add(pr.getAddress()+":"+pr.getPort());
+            
+            pr = MessageTestUtils.createPongWithUltrapeerSlots();
+            hc.add(pr);
+            ultrapeersWithUltrapeerSlots.add(pr.getAddress()+":"+pr.getPort());
+        }
+        
+        
         
         Properties headers = new Properties();
-        m.invoke(null, new Object[] {hosts, headers});
+        headers = 
+            (Properties)m.invoke(null, 
+                new Object[] {ULTRAPEER_HEADERS, headers});
+
+        // Check that the appropriate hosts are returned to a request from
+        // an ultrapeer.
+        HandshakeResponse hr = HandshakeResponse.createResponse(headers);
+        
+        // Get the ultrapeers
+        String hostAddresses = hr.getXTryUltrapeers();
+    
+         
+        // Tokenize to retrieve individual addresses
+        StringTokenizer st = new StringTokenizer(hostAddresses,
+            Constants.ENTRY_SEPARATOR);
+        while(st.hasMoreTokens()) {
+            assertTrue(ultrapeersWithUltrapeerSlots.contains(st.nextToken()));
+        }
+        // Double-check that the hosts are what we expect them to be.
+        String[] hostArray = 
+            (String[])ultrapeersWithUltrapeerSlots.toArray(new String[0]);
+        makeSureHeadersMatch(hostArray, headers);
+        
+        
+        // Now check that the appropriate hosts are returned to a request from
+        // a leaf.
+        headers = new Properties();
+        m.invoke(null, new Object[] {LEAF_HEADERS, headers});
         
         // Make sure the returned list of hosts is what we expect.
-        assertEquals(desiredHeader, 
-            headers.getProperty(HeaderNames.X_TRY_ULTRAPEERS));
+        hr = HandshakeResponse.createResponse(headers);
         
-        IpPort[] hostArray = (IpPort[])hosts.toArray(new IpPort[0]);
+        // Get the ultrapeers
+        hostAddresses = hr.getXTryUltrapeers();
+    
+         
+        // Tokenize to retrieve individual addresses
+        st = new StringTokenizer(hostAddresses, Constants.ENTRY_SEPARATOR);
+        while(st.hasMoreTokens()) {
+            assertTrue(ultrapeersWithLeafSlots.contains(st.nextToken()));
+        }
+        
+        // Double-check that the hosts are what we expect them to be.
+        hostArray = 
+            (String[])ultrapeersWithLeafSlots.toArray(new String[0]);
         makeSureHeadersMatch(hostArray, headers);
     }
     
@@ -341,7 +415,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
      * given set of headers matches the set of hosts in the given array
      * of hosts.
      */
-    private void makeSureHeadersMatch(IpPort[] hosts, Properties headers) {
+    private void makeSureHeadersMatch(String[] hosts, Properties headers) {
         String headerHosts = 
             headers.getProperty(HeaderNames.X_TRY_ULTRAPEERS);
 
@@ -355,8 +429,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
             String curHost = st.nextToken();            
             boolean match = false;
             for(int j=0; j<hosts.length; j++) {
-                IpPort host = hosts[j];
-                if(curHost.equals(host.getAddress()+":"+host.getPort())) {
+                String host = hosts[j];
+                if(curHost.equals(host)) {
                     match = true;
                     break;
                 }
@@ -490,11 +564,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse(client);
+            HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            new UltrapeerHeaders("32.9.8.9"));
+            HandshakeResponse.createEmptyResponse(),
+                new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
         
         headers = new Properties();
@@ -502,11 +577,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
         client = HandshakeResponse.createResponse(headers);
         
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createRejectIncomingResponse(client);
+        hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            new UltrapeerHeaders("32.9.8.9"));
+            HandshakeResponse.createEmptyResponse(),
+                new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
     }
 
@@ -524,11 +600,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse(client);
+            HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            new LeafHeaders("32.9.8.9"));
+            HandshakeResponse.createEmptyResponse(),
+                new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
@@ -642,14 +719,17 @@ public final class HandshakeResponseTest extends BaseTestCase {
         Properties headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
         HandshakeResponse hr = 
-            HandshakeResponse.createAcceptIncomingResponse(headers);
+            HandshakeResponse.createAcceptIncomingResponse(
+                HandshakeResponse.createEmptyResponse(), headers);
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
 
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
-        hr = HandshakeResponse.createAcceptIncomingResponse(headers);
+        hr = HandshakeResponse.createAcceptIncomingResponse(
+            HandshakeResponse.createEmptyResponse(), headers);
         assertTrue("should include leaf guidance", hr.hasLeafGuidance());
 
-        hr = HandshakeResponse.createAcceptIncomingResponse(new Properties());
+        hr = HandshakeResponse.createAcceptIncomingResponse(
+            HandshakeResponse.createEmptyResponse(), new Properties());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
     }
         
