@@ -904,7 +904,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *             did not want the download fragment, which is now
      *             quarantined.
      *         COULDNT_MOVE_TO_LIBRARY the download completed but the
-     *             temporary file couldn't be moved to the library
+     *             temporary file couldn't be moved to the library OR
+     *             the download couldn't be written to the incomplete file
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
      *             to try again later because some hosts reported busy.
      *             The caller should usually wait before retrying.
@@ -1108,6 +1109,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *             The caller should usually wait before retrying.
      *         GAVE_UP the download attempt failed, and there are 
      *             no more locations to try.
+     *         COULDNT_MOVE_TO_LIBRARY couldn't write the incomplete file
      * @exception InterruptedException if the someone stop()'ed this download.
      *  stop() was called either because the user killed the download or
      *  a corruption was detected and they chose to kill and discard the
@@ -1137,19 +1139,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     commonOutFile.open(incompleteFile,this);
                 } catch(IOException e) {
-                    //TODO: This is not really grounds for an internal error.
-                    //This situation can arise during normal operation, e.g., if
-                    //the user adjusts directory permissions.  However, this is
-                    //happening more often than we expect, so we're adding
-                    //debugging information.
-                    Assert.that(false,"Could not create incomplete file \""
-                                +incompleteFile+"\", "+
-                                incompleteFile.exists()+", "+
-                                incompleteFile.canWrite()+", "+
-                                incompleteFile.canRead()+", "+
-                                incompleteFile.isDirectory()+", "+
-                                incompleteFile.isFile());
-                    return GAVE_UP;
+                    //Ideally we should show the user some sort of message here.
+                    //See GUI core bug #83.
+                    return COULDNT_MOVE_TO_LIBRARY;
                 }
                 //update needed
                 Iterator iter=commonOutFile.getFreeBlocks(rfd.getSize());
