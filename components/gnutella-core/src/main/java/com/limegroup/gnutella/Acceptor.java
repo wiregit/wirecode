@@ -398,7 +398,9 @@ public class Acceptor implements Runnable {
         //   block under certain conditions.
         //   See the notes for _address.
         try {
-            setAddress(InetAddress.getLocalHost());
+            setAddress(UPNP_MANAGER != null ? 
+		UPNP_MANAGER.getLocalAddress() : 
+		InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }

@@ -2,9 +2,14 @@ package com.limegroup.gnutella;
 
 
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.Set;
 
@@ -400,6 +405,34 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 */
 	public void deviceRemoved(Device dev) {}
 	
+	public static InetAddress getLocalAddress() 
+	  throws UnknownHostException {
+		InetAddress addr = InetAddress.getLocalHost();
+               
+		try { 
+	           if (addr.isLoopbackAddress() || !(addr instanceof Inet4Address)) {
+                       addr = null;
+                       Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+                       if (interfaces != null) {
+                           while(addr == null && interfaces.hasMoreElements()) {
+                               NetworkInterface nif = (NetworkInterface)interfaces.nextElement();
+                               Enumeration addresses = nif.getInetAddresses();
+                               while(addresses.hasMoreElements()) {
+                                    InetAddress address = (InetAddress)addresses.nextElement();
+                                    if (!address.isLoopbackAddress() 
+                                           && address instanceof Inet4Address) {
+                                       addr = address;
+                                       break;
+                                   }
+                               }
+                           }
+                        }
+                    }
+		} catch (SocketException se) {}
+
+		return addr;
+	}
+
 	private final class Mapping {
 		public final String _externalAddress;
 		public final int _externalPort;
