@@ -170,7 +170,7 @@ public class QueryReply extends Message implements Serializable{
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply);
         if (xmlBytes.length > XML_MAX_SIZE)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("XML bytes too big: "+xmlBytes.length);
         _xmlBytes = xmlBytes;        
     }
 
