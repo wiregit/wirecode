@@ -165,6 +165,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * LOCKING: this
 	 */
 	private boolean _victim;
+	
+	/**
+	 * Whether this download is a thief
+	 * LOCKING: this
+	 */
+	private boolean _thief;
     
     /**
      * Whether this downloader managed to connect through HTTP.
@@ -1709,6 +1715,10 @@ public class HTTPDownloader implements BandwidthTracker {
         _victim = true;
         stop();
     }
+	
+	public synchronized void setThief(boolean thief) {
+		_thief = thief;
+	}
 
 
     ///////////////////////////// Accessors ///////////////////////////////////
@@ -1720,6 +1730,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getAmountToRead() {return _amountToRead;}
 	public boolean isActive() { return _isActive; }
 	public synchronized boolean isVictim() {return _victim;}
+	public synchronized boolean isThief() {return _thief;}
     public synchronized boolean didConnect() {return _didConnect;}
 
     /** 

@@ -381,13 +381,17 @@ public class DownloadWorker implements Runnable {
         synchronized(_downloader) {
             // do not release ranges for downloaders that we have stolen from
             // since they are still marked as leased
-            if (_downloader.isVictim())
+            if (_downloader.isVictim()) {
+				LOG.debug("not releasing ranges from victim");
                 return;
+            }
             
             // if this was a stealer which couldn't connect, do not unlease his
             // ranges either
-            if (!_downloader.didConnect())
-                return;
+            if (!_downloader.didConnect() && _downloader.isThief()) {
+				LOG.debug("not releasing ranges from connecting thief");
+				return;
+            }
             
             low=_downloader.getInitialReadingPoint()+_downloader.getAmountRead();
             high = _downloader.getInitialReadingPoint()+_downloader.getAmountToRead()-1;
@@ -402,7 +406,8 @@ public class DownloadWorker implements Runnable {
             synchronized(_stealLock) {
                 _commonOutFile.releaseBlock(new Interval(low,high));
             }
-        }
+        } else 
+			LOG.debug("nothing to release!");
     }
     
     /**
@@ -902,6 +907,7 @@ public class DownloadWorker implements Runnable {
         //code below.  Note connectHTTP can throw several exceptions.
         int low = interval.low;
         int high = interval.high; // INCLUSIVE
+		_downloader.setThief(false);
         _downloader.connectHTTP(low, high + 1, true);
         
         //The _downloader may have told us that we're going to read less data than
@@ -1034,6 +1040,7 @@ public class DownloadWorker implements Runnable {
         
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
+		_downloader.setThief(true);
         _downloader.connectHTTP(start, stop, false);
         
         int newLow = _downloader.getInitialReadingPoint();
@@ -1050,6 +1057,8 @@ public class DownloadWorker implements Runnable {
                         ", high: " + newHigh);
             }
             
+			// such stealer should NOT release its ranges.
+			_downloader.setVictim(); //TODO: un-hack this
             throw new IOException("bad stealer.");
         }
         
@@ -1062,26 +1071,26 @@ public class DownloadWorker implements Runnable {
         // stop the victim
         int newStart;
         synchronized(biggest) {
-            biggest.stopAt(stop);
-            biggest.setVictim();
-            
             // free up whatever the victim wrote while we were connecting
             // unless that data is already verified or pending verification
             newStart = biggest.getInitialReadingPoint() + biggest.getAmountRead();
+			
+			//the victim may have even completed their download while we were
+	        // connecting
+	        if (stop <= newStart)
+	            throw new NoSuchElementException();
+			
+			biggest.stopAt(stop);
+            biggest.setVictim();
         }
-        
-        // the victim may have even completed their download while we were
-        // connecting
-        if (stop <= newStart)
-            throw new NoSuchElementException();
         
         if (newStart > start && LOG.isDebugEnabled()) {
             LOG.debug("victim managed to download "+(newStart - start)
                     +" bytes while stealer was connecting");
         }
         
+		//once we've killed the victim, make our ranges release-able
         _downloader.startAt(newStart);
-		
 	}
     
     /**
