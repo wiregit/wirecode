@@ -256,9 +256,6 @@ public final class UploadManager implements BandwidthTracker {
                     // we do NOT throw the IOX again because the
                     // connection is still open.
                     uploader.setState(Uploader.MALFORMED_REQUEST);
-                } catch(IOException ioe) {
-                    uploader.setState(Uploader.INTERRUPTED);
-                    throw ioe;
                 }
                 
                 debug(uploader+" HTTPUploader created and read all headers");
