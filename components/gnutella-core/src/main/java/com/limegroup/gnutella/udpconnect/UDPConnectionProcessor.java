@@ -106,6 +106,10 @@ public class UDPConnectionProcessor {
         synchronized activity can take place */
     private static final long MAX_WRITE_WITHOUT_SLEEP = 4;
 
+    /** Delay the write wakeup event a little so that it isn't constantly
+        firing - This should achieve part of nagles algorithm.  */
+    private static final long WRITE_WAKEUP_DELAY_TIME = 10;
+
     // Define Connection states
     //
     /** The state on first creation before connection is established */
@@ -437,7 +441,8 @@ public class UDPConnectionProcessor {
         if ( _waitingForDataAvailable ) {
             LOG.debug("wakupWriteEvent");
             if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
-                _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
+                _safeWriteWakeup.updateTime(System.currentTimeMillis()+
+                  WRITE_WAKEUP_DELAY_TIME);
                 _scheduler.scheduleEvent(_safeWriteWakeup);
             }
         }
@@ -1094,7 +1099,9 @@ public class UDPConnectionProcessor {
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-//          LOG.debug("shutdown");
+
+                LOG.debug("Keepalive generated shutdown");
+
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
