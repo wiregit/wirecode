@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.stubs.ConnectionListenerStub;
 import java.net.*;
 import java.io.*;
@@ -28,23 +29,41 @@ public class MiniAcceptor implements Runnable {
     Object lock=new Object();
     Connection c=null;
     boolean done=false;
-    int port;
     IOException error=null;
-
+    
+    ServerSocketChannel listener;
+    ConnectionListener observer;
     HandshakeResponder properties;
         
     /** Starts the listen socket on port 6346 without blocking. */
-    public MiniAcceptor(HandshakeResponder properties) {
+    public MiniAcceptor(HandshakeResponder properties) 
+            throws IOException {
         this(properties, 6346);
     }
 
     /** Starts the listen socket without blocking. */
-    public MiniAcceptor(HandshakeResponder properties, int port) {
+    public MiniAcceptor(HandshakeResponder properties, int port) 
+            throws IOException {
+        this (new ConnectionListenerStub(), properties, port);
+    }
+
+
+    public MiniAcceptor(ConnectionListener observer,
+                        HandshakeResponder properties, 
+                        int port) throws IOException {
+        this.observer=observer;
         this.properties=properties;
-        this.port=port;
+        
+        //Listen on port
+        listener=ServerSocketChannel.open();
+        listener.configureBlocking(true);
+        try {
+            listener.socket().setReuseAddress(true);
+        } catch (SocketException ignore) { }
+        listener.socket().bind(new InetSocketAddress(port));
+
         Thread runner=new Thread(this);
         runner.start();
-        Thread.yield();  //hack to make sure runner creates socket
     }
 
     /** Blocks until a connection is available, and returns it. 
@@ -70,39 +89,30 @@ public class MiniAcceptor implements Runnable {
 
     /** Don't call.  For internal use only. */
     public void run() {
-        ServerSocketChannel listener=null;
         boolean bound=false;
         try {
-            //Listen on port
-            listener=ServerSocketChannel.open();
-            listener.configureBlocking(true);
-            listener.socket().bind(new InetSocketAddress(port));
-            bound=true;
-
-            //Accept connection.  Technically "GNUTELLA " should be read from s.
-            //Turns out that out implementation doesn't care;
+            //Accept connection and store.  Technically "GNUTELLA " should be
+            //read from s.  Turns out that out implementation doesn't care;
             Socket s=listener.accept().socket();
             Connection c=new Connection(s, properties);
-            c.initialize(new ConnectionListenerStub());
-
-            //Close listener and store connection.
-            listener.close();
-            listener.socket().close();
+            c.initialize(observer);            
             synchronized (lock) {
                 this.c=c;
                 done=true;
                 lock.notify();
             } 
         } catch (IOException e) {
-            if (!bound) {
-                System.err.println("Couldn't listen to port "+port);
-                e.printStackTrace();  //Couldn't listen?  Serious.
-            }
             error=e;                  //Record for later.
             synchronized (lock) {
                 done=true;
                 lock.notify();
             } 
+        } finally {
+            //Kill listening socket.
+            if (listener!=null) {
+                try { listener.close(); } catch (IOException e) { }
+                try { listener.socket().close(); } catch (IOException e) { }
+            }
         }
     }
 }
