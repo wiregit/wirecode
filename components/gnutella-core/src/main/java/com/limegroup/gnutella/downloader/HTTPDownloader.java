@@ -174,12 +174,16 @@ public class HTTPDownloader implements BandwidthTracker {
         InputStream istream=null;
         try {            
             if (_socket==null) {
-                _socket=Sockets.connect(_host, _port, timeout);
+                long curTime = System.currentTimeMillis();
+                _socket = Sockets.connect(_host, _port, timeout);
+                NumericalDownloadStat.TCP_CONNECT_TIME.
+                    addData((int)(System.currentTimeMillis() -  curTime));
+                
             }
             //If platform supports it, set SO_KEEPALIVE option.  This helps
             //detect a crashed uploader.
             Sockets.setKeepAlive(_socket, true);
-            istream=_socket.getInputStream(); 
+            istream = _socket.getInputStream(); 
         } catch (IOException e) {
             throw new CantConnectException();
         }
