@@ -30,6 +30,26 @@ public final class CommonUtils {
         getMinorVersionNumberInternal(LIMEWIRE_VERSION);
 
     /**
+     * The cached value of the GUESS major revision number.
+     */
+    private static final int _guessMajorVersionNumber = 0;
+
+    /**
+     * The cached value of the GUESS minor revision number.
+     */
+    private static final int _guessMinorVersionNumber = 1;
+
+    /**
+     * The cached value of the Ultrapeer major revision number.
+     */
+    private static final int _upMajorVersionNumber = 0;
+
+    /**
+     * The cached value of the Ultrapeer minor revision number.
+     */
+    private static final int _upMinorVersionNumber = 1;
+
+    /**
      * The vendor code for QHD and GWebCache.  WARNING: to avoid character
      * encoding problems, this is hard-coded in QueryReply as well.  So if you
      * change this, you must change QueryReply.
@@ -154,6 +174,30 @@ public final class CommonUtils {
 		}
 	}
 
+    /** Gets the major version of GUESS supported.
+     */
+    public static int getGUESSMajorVersionNumber() {    
+        return _guessMajorVersionNumber;
+    }
+    
+    /** Gets the minor version of GUESS supported.
+     */
+    public static int getGUESSMinorVersionNumber() {
+        return _guessMinorVersionNumber;
+    }
+
+    /** Gets the major version of Ultrapeer Protocol supported.
+     */
+    public static int getUPMajorVersionNumber() {    
+        return _upMajorVersionNumber;
+    }
+    
+    /** Gets the minor version of Ultrapeer Protocol supported.
+     */
+    public static int getUPMinorVersionNumber() {
+        return _upMinorVersionNumber;
+    }
+
 	/**
 	 * Returns the current version number of LimeWire as
      * a string, e.g., "1.4".
@@ -205,17 +249,6 @@ public final class CommonUtils {
         return 7;
     }
 
-    /** Gets the major revision of the UltraPeer version supported.
-     */
-    public static int getUPMajorVersionNumber() {
-        return 0;
-    }
-
-    /** Gets the minor revision of the UltraPeer version supported.
-     */
-    public static int getUPMinorVersionNumber() {
-        return 1;
-    }
 
 	/**
 	 * Returns a version number appropriate for upload headers.

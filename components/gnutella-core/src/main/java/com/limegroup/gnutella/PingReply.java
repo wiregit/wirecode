@@ -146,11 +146,13 @@ public class PingReply extends Message implements Serializable {
 
             if (isUltrapeer) { 
                 // indicate guess support
-                byte[] vNum = {(byte) 1}; // high nibble is 0, low nibble is 1
+                byte[] vNum = 
+                {convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
+                                      CommonUtils.getGUESSMinorVersionNumber())};
                 ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
 
                 // indicate UP support
-                
+                addUltrapeerExtension(ggep);
             }
 
             // all pongs should have vendor info
@@ -168,23 +170,37 @@ public class PingReply extends Message implements Serializable {
     }
 
 
+    private static void addUltrapeerExtension(GGEP ggep) {
+    }
+
+
     private static void addVendorExtension(GGEP ggep) {
         byte[] payload = new byte[5];
         // set 'LIME'
         System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
                          0, payload, 0,
                          CommonUtils.QHD_VENDOR_NAME.getBytes().length);
-
-        {   // set vendor version 
-            int version = CommonUtils.getMajorVersionNumber();
-            version = version << 4;  // major set
-            // set minor
-            version |= CommonUtils.getMinorVersionNumber(); 
-            payload[4] = (byte) version;
-        }
-
+        payload[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
+                                          CommonUtils.getMinorVersionNumber());
         // add it
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);
+    }
+
+    /** puts major as the high order bits, minor as the low order bits.
+     *  @exception IllegalArgumentException thrown if major/minor is greater than
+     *  15 or less than 0.
+     */
+    private static byte convertToGUESSFormat(int major, int minor) 
+        throws IllegalArgumentException {
+        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
+            throw new IllegalArgumentException();
+        // set major
+        int retInt = major;
+        retInt = retInt << 4;
+        // set minor
+        retInt |= minor;
+
+        return (byte) retInt;
     }
 
 
