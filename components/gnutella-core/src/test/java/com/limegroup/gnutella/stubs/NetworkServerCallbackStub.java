@@ -26,6 +26,7 @@
  * but I'm not about to write the parsing of all those arguments, plus
  * you may not need anything other than notification anyways.
  * 
+ * 
  */
 package com.limegroup.gnutella.stubs;
 
@@ -37,6 +38,7 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 	
 	private final ServerSocket _ss;
 	private Socket _s;
+	private final Thread _listener;
 	
 	
 	
@@ -46,15 +48,34 @@ public class NetworkServerCallbackStub extends ActivityCallbackStub {
 	 */
 	public NetworkServerCallbackStub(int port) throws IOException{
 		_ss = new ServerSocket(port);
+		_listener = new Thread() {
+			public void run() {
+				try{
+					_s = _ss.accept();
+				}catch(IOException ohWell) {}
+			}
+		};
+		
+		_listener.setDaemon(true);
+		_listener.start();
 	}
 	
 	/**
-	 * waits for connection, blocking.  Make sure you run it before using.
-	 * the callback stub is not intended to be re-used.
-	 * @throws IOException couldn't connect.
+	 * make sure the listening and parsing/notifying threads are stopped.
 	 */
-	public void initialize() throws IOException{
-		_s = _ss.accept();
+	protected void finalize() throws Throwable {
+		//interruptible SocketChannel's are a 1.4 feature, so... 
+		_ss.close();
+		_s.close();
+		super.finalize();
+	}
+	
+	/**
+	 * 
+	 * @return whether a client callback is connected.
+	 */
+	public boolean isConnected() {
+		return _s!=null;
 	}
 	
 	private class NotificationDispatcher extends Thread {

@@ -16,6 +16,9 @@
  * 	     }
  * 
  * then do the same at the server end.
+ * 
+ * DO NOT add constructors with different parameters as this class uses
+ * reflection in order to get passed to a different jvm.
  */
 package com.limegroup.gnutella.stubs;
 
@@ -77,9 +80,6 @@ public class NetworkClientCallbackStub implements ActivityCallback {
 		_os = os;
 	}
 	
-	public NetworkClientCallbackStub() {
-		_os=null;
-	}
 	
 	private void write(int code) {
 		try {
