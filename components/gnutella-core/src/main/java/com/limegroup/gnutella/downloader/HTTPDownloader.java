@@ -313,6 +313,7 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
+		
         if (_mode == 1){
             // Need to mutate the original connection into this connection
             //if ( _state != QUEUED )
@@ -555,14 +556,15 @@ public class HTTPDownloader implements Runnable {
             } catch (IOException e) {
                 _state = ERROR;
                 return;
-            }
+			}
 
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
 
-            if (str.indexOf("Content-length:") != -1) {
+            if ((str.indexOf("Content-length:") != -1)  ||
+				(str.indexOf("Content-Length:") != -1))  {
                 String sub;
                 try {
                     sub=str.substring(15);
