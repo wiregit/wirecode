@@ -13,7 +13,7 @@ import com.limegroup.gnutella.ByteOrder;
  *  advanced MP3Info querying.
  *  I also learned very much from http://www.dv.co.yu/mpgscript/mpeghdr.htm .
  */
-public class MP3Info {
+public final class MP3Info {
     
     private final int MAX_KBS_TO_CHECK = 1024 * 200;  // 200 KBs
     private final int HEADER_SIZE_IN_BYTES = 4;
@@ -144,6 +144,9 @@ public class MP3Info {
             retInt = (int)tempVal;
         }
 
+        /* If the computed bit rate (above) is nonsensical, just get the bit rate from
+           the header.  We aren't convinced how useful Variable Bit Rate is yet.
+        */
         if (retInt < 1)
             retInt = _header.getBitRate();
 
@@ -151,7 +154,9 @@ public class MP3Info {
     }
 
 
-
+    /** This method is not useful, so it hasn't been made public.  We still need
+     *  to figure out this whole variable bit rate mumbo jumbo.
+     */
     private int getNumberOfFrames() {
 
         if (!_isVariableBitRate) {
@@ -196,15 +201,16 @@ public class MP3Info {
     }
         
 
-
-    public static void main(String argv[]) throws Exception{
-        for (int i = 0; i < argv.length; i++) {
-            MP3Info mp3Info = new MP3Info(argv[i]);
-            System.out.println("Bitrate for file " +
-                               argv[i] + " is " + mp3Info.getBitRate());
-            System.out.println("-------------------------------------");
-        }
-    }
+    /*
+       public static void main(String argv[]) throws Exception{
+       for (int i = 0; i < argv.length; i++) {
+       MP3Info mp3Info = new MP3Info(argv[i]);
+       System.out.println("Bitrate for file " +
+       argv[i] + " is " + mp3Info.getBitRate());
+       System.out.println("-------------------------------------");
+       }
+       }
+    */
 
         
     private class MP3Header {
@@ -408,11 +414,11 @@ public class MP3Info {
             return _frames;
         }
 
+
         public VBitRate() {
         }
 
-        // This function is quite easy to understand, it loads
-        // 12 chars of information into the CVBitRate class
+
         /** I do not think this method works correctly.  Fortunately, I don't
          *  think it is ever *REALLY* needed, as MP3Header.getBitRate works fine
          *  and accurately.
