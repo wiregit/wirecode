@@ -445,7 +445,7 @@ public class ManagedConnection
     }
 
     private void addDropped(int dropped) {
-        FlowControlStat.SENT_MESSAGES_DROPPED.addData(dropped);
+        FlowControlStat.ALL_SENT_MESSAGES_DROPPED.addData(dropped);
         _numSentMessagesDropped+=dropped;
     }
  
@@ -659,7 +659,7 @@ public class ManagedConnection
                         bestEndPoint.getPort(),
                         bestEndPoint.getHostBytes(), 0, 0);
 					
-					SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
+					//SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
                     // the ttl is 1; and for now the number of files
                     // and kbytes is set to 0 until chris stores more
                     // state in the hostcatcher
@@ -748,7 +748,7 @@ public class ManagedConnection
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
 
-            SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
+            //SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
             //send the message
             super.send(pr);
         }
@@ -905,7 +905,7 @@ public class ManagedConnection
      */
     public void handlePingReply(PingReply pingReply,
                                 ReplyHandler receivingConnection) {
-		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pingReply);
+		//SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pingReply);
         send(pingReply);
     }
 
@@ -917,7 +917,7 @@ public class ManagedConnection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
-		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(queryReply);
+		//SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(queryReply);
         send(queryReply);
     }
 
@@ -929,7 +929,7 @@ public class ManagedConnection
      */
     public void handlePushRequest(PushRequest pushRequest,
                                   ReplyHandler receivingConnection) {
-		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(pushRequest);
+		//SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(pushRequest);
         send(pushRequest);
     }
 
