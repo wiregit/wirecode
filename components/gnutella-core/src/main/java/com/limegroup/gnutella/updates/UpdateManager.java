@@ -71,7 +71,7 @@ public class UpdateManager {
 
     public void checkAndUpdate(Connection connection) {
         String nv=connection.getProperty(ConnectionHandshakeHeaders.X_VERSION);
-        System.out.println("Sumeet:myVersion:"+latestVersion+" theirs: "+nv);
+        debug("myVersion:"+latestVersion+" theirs: "+nv);
         if(!isGreaterVersion(nv))
             return;        
         final Connection c = connection;
@@ -97,7 +97,7 @@ public class UpdateManager {
                     
                     InputStream in = connection.getInputStream();
                     int len = connection.getContentLength();
-                    System.out.println("Sumeet: content len "+len);
+                    debug("Content len "+len);
                     data = new byte[len];
                     int BUF_LEN = 1024;//buffer size
                     byte[] buf = new byte[BUF_LEN];
@@ -116,14 +116,13 @@ public class UpdateManager {
                                                    UpdateMessageVerifier(data);
                     boolean verified = verifier.verifySource();
                     if(!verified) {
-                        System.out.println("Sumeet: verification failed");
+                        debug("Verification failed");
                         return;
                     }
-                    System.out.println("Sumeet: verified file contents");
+                    debug("Verified file contents");
                     String xml = new String(verifier.getMessageBytes(),"UTF-8");
                     UpdateFileParser parser = new UpdateFileParser(xml);
-                    System.out.println("Sumeet: new version: "
-                                                         +parser.getVersion());
+                    debug("New version: "+parser.getVersion());
                     //we checked for new version while handshaking, but we
                     //should check again with the authenticated xml data.
                     String newVersion = parser.getVersion();
@@ -185,5 +184,12 @@ public class UpdateManager {
         if(!deleted)
             throw new IOException();
     }
-
+    
+    private boolean debug = true;
+    
+    private void debug(String str) {
+        if(debug)
+            System.out.println(str);
+    }
+    
 }
