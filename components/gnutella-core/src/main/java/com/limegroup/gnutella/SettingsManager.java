@@ -101,6 +101,8 @@ public class SettingsManager implements SettingsInterface {
      */
     private static SettingsManager instance_;
 
+	private boolean installed_;
+
     private String home_;
     private String fileName_;
     private String ndFileName_;
@@ -430,6 +432,16 @@ public class SettingsManager implements SettingsInterface {
 				else if(key.equals(SESSIONS)) {
 					setSessions(Integer.parseInt(p)+1);
 				}
+				else if(key.equals(INSTALLED)) {
+					boolean install;
+                    if (p.equals("true"))
+                        install=true;
+                    else if (p.equals("false"))
+                        install=false;
+                    else
+                        return;
+					setInstalled(install);
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -508,6 +520,7 @@ public class SettingsManager implements SettingsInterface {
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
+		setInstalled(DEFAULT_INSTALLED);
     }
 
 
@@ -696,6 +709,10 @@ public class SettingsManager implements SettingsInterface {
 		return sessions_;
 	}
 
+	/* gets whether or not the program has been installed */
+	public boolean getInstalled() {
+		return installed_;
+	}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1333,7 +1350,13 @@ public class SettingsManager implements SettingsInterface {
             props_.put(FORCED_PORT, s);
         }
     }
-
+	
+	/* set whether or not the program has been installed */
+	public void setInstalled(boolean installed) {        
+        installed_ = installed;
+        String s = String.valueOf(installed);
+        props_.put(INSTALLED, s);
+    }
 
     /******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
