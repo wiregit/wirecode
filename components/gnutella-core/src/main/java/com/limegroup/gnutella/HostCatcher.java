@@ -1,14 +1,12 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 import java.text.ParseException;
 
 
@@ -264,7 +262,7 @@ public class HostCatcher {
      *  the pong.
      * @return true iff pr was actually added 
      */
-    public boolean add(PingReply pr, ReplyHandler receivingConnection) {
+    public boolean add(PingReply pr) {
         //Convert to endpoint
         ExtendedEndpoint endpoint;
         
