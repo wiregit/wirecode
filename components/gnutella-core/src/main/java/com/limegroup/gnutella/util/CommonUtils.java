@@ -15,7 +15,7 @@ public final class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "@version@";
+	private static final String LIMEWIRE_VERSION = "3.4.4";//"@version@";
 
     /**
      * The cached value of the major revision number.
