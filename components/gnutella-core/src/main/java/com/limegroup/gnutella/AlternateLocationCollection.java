@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.http.*; 
 import com.sun.java.util.collections.*;
 import java.net.*;
+import java.util.StringTokenizer;
+import java.io.*;
 
 /**
  * This class holds a collection of <tt>AlternateLocation</tt> instances,
@@ -20,6 +22,36 @@ public final class AlternateLocationCollection
 	 * <tt>AlternateLocation</tt> instances.
 	 */
 	private SortedMap _alternateLocations;
+
+	/**
+	 * Creates a new <tt>AlternateLocationCollection</tt> with all alternate
+	 * locations contained in the given comma-delimited HTTP header value
+	 * string.  The returned <tt>AlternateLocationCollection</tt> may be empty.
+	 *
+	 * @param value the HTTP header value containing alternate locations
+	 * @return a new <tt>AlternateLocationCollection</tt> with any valid
+	 *  <tt>AlternateLocation</tt>s from the HTTP string
+	 * @throws <tt>NullPointerException</tt> if <tt>value</tt> is <tt>null</tt>
+	 */
+	public static AlternateLocationCollection 
+		createCollectionFromHttpValue(final String value) {
+		if(value == null) {
+			throw new NullPointerException("cannot create an AlternateLocationCollection "+
+										   "from a null value");
+		}
+		StringTokenizer st = new StringTokenizer(value, ",");
+		AlternateLocationCollection alc = new AlternateLocationCollection();
+		while(st.hasMoreTokens()) {
+			String curTok = st.nextToken();
+			try {
+				AlternateLocation al = AlternateLocation.createAlternateLocation(curTok);
+				alc.addAlternateLocation(al);
+			} catch(IOException e) {
+				continue;
+			}
+		}
+		return alc;
+	}
 
 	/**
 	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
@@ -93,8 +125,8 @@ public final class AlternateLocationCollection
 	/**
 	 * Return the new Alternate Locations in alc but not in this
 	 */
-	public AlternateLocationCollection diffAlternateLocationCollection(
-	  AlternateLocationCollection alc) {
+	public synchronized AlternateLocationCollection 
+		diffAlternateLocationCollection(AlternateLocationCollection alc) {
 		AlternateLocationCollection nalc = new AlternateLocationCollection();
 		Iterator iter = alc.values().iterator();
 		AlternateLocation value;
@@ -121,11 +153,18 @@ public final class AlternateLocationCollection
 	}
 
 	/**
-	 * Get the alternate locations as a collection that can be iterated on.
+	 * Returns a <tt>Collection</tt> of <tt>AlternateLocation</tt>s that has
+	 * been randomized to avoid distributed DOS attacks on servants.
+	 *
+	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
 	public Collection values() {
-	    return (_alternateLocations == null? new ArrayList(): 
-          _alternateLocations.values());
+		if(_alternateLocations == null) {
+			return Collections.EMPTY_LIST;
+		}
+		List list = new ArrayList(_alternateLocations.values());
+		Collections.shuffle(list);
+		return list;
 	}
 
 	/**
@@ -141,12 +180,24 @@ public final class AlternateLocationCollection
 		}
 	}
 
-	// implements the HTTP header value interface
+	/**
+	 * Implements the <tt>HTTPHeaderValue</tt> interface.
+	 *
+	 * This adds randomness to the order in which alternate locations are
+	 * reported.
+	 *
+	 * @return an HTTP-compliant string of alternate locations, delimited
+	 *  by commas, or the empty string if there are no alternate locations
+	 *  to report
+	 */	
 	public String httpStringValue() {
-		// if there are no alternate locations, simply return
-		if(_alternateLocations == null) return null;
+		// if there are no alternate locations, simply return the empty
+		// string
+		if(_alternateLocations == null) return "";
 
-		Iterator iter = _alternateLocations.values().iterator();	 
+		List list = new ArrayList(_alternateLocations.values());
+		Collections.shuffle(list);
+		Iterator iter = list.iterator();
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		while(iter.hasNext()) {
@@ -184,11 +235,13 @@ public final class AlternateLocationCollection
 			sb.append("empty");
 		}
 		else {
-			Iterator iter = _alternateLocations.values().iterator();
-			while(iter.hasNext()) {
-				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				sb.append(curLoc.toString());
-				sb.append(" ");
+			synchronized(_alternateLocations) {
+				Iterator iter = _alternateLocations.values().iterator();
+				while(iter.hasNext()) {
+					AlternateLocation curLoc = (AlternateLocation)iter.next();
+					sb.append(curLoc.toString());
+					sb.append(" ");
+				}
 			}
 		}
 		return sb.toString();
