@@ -525,9 +525,54 @@ class LimeXMLSchemaFieldExtractor
         //test for enumeration
         processSimpleTypeForEnumeration(n, fieldInfo);
         
-        //add mapping to fieldInfoList
-        fieldInfoList.addFirst(new SchemaFieldInfoPair(name, fieldInfo));   
+        //add the attribute to the fieldInfoList
+        addAttributeSchemaFieldInfoPair(
+            new SchemaFieldInfoPair(name, fieldInfo), fieldInfoList);
         
+        
+        //add mapping to fieldInfoList
+//        fieldInfoList.addFirst(new SchemaFieldInfoPair(name, fieldInfo));   
+        
+    }
+    
+    
+    /**
+     * Adds the passed schemaFieldInfoPair (which came from some attribute
+     * in schema to the passed fieldInfoList.
+     * This is don eso that the client gets attributes before the other
+     * child elements (Summet needs it), and also so that attributes remain
+     * in order.
+     */
+    private void addAttributeSchemaFieldInfoPair(
+        SchemaFieldInfoPair schemaFieldInfoPair,
+        SchemaFieldInfoList fieldInfoList)
+    {
+        int attributeCount = 0;
+        //iterate over the fieldInfoList
+        for(Iterator iterator = fieldInfoList.iterator();
+                iterator.hasNext();)
+        {
+            //get the next element in the list
+            SchemaFieldInfoPair nextElement = 
+                (SchemaFieldInfoPair)iterator.next();
+            
+            //if the element is an attribute
+            if(isAttribute(nextElement.getField()))
+            {
+                //increment the count of attributes
+                attributeCount++;
+            }
+            else
+            {
+                //break out of the loop (The attributes are placed only in 
+                //the beginning of the fieldInfoList, before any other element)
+                break;
+            }
+        }
+        
+        //now add the passed schemaFieldInfoPair after the existing
+        //attributes
+        fieldInfoList.add(attributeCount, schemaFieldInfoPair);
     }
     
     /**
@@ -725,6 +770,20 @@ class LimeXMLSchemaFieldExtractor
         return false;
     }
     
+    /**
+     * Tests if the passed string represents attribute as per the 
+     * canonicalized field conventions
+     * @return true, if attribute field, false otherwise
+     */
+    public boolean isAttribute(String field)
+    {
+        //return true if ends with the delimiter used to represent
+        //attributes
+       if(field.endsWith(XMLStringUtils.DELIMITER))
+           return true;
+       else
+           return false;
+    }    
     
 /**
  * A List (of SchemaFieldInfoPair) of fields and information corresponding to those
@@ -744,13 +803,14 @@ private static class SchemaFieldInfoList
     }
 
     /**
-     * Adds the given fieldInfo pair in front of other elements in the list
+     * Adds the given fieldInfo pair at the specified index
+     * @param index Th eposition at which ato add the passed fieldInfoPair
      * @param fieldInfoPair the field-info pair to be added
      */
-    public void addFirst(SchemaFieldInfoPair fieldInfoPair)
+    public void add(int index, SchemaFieldInfoPair fieldInfoPair)
     {
         //add to the _elements
-        _elements.addFirst(fieldInfoPair);
+        _elements.add(index, fieldInfoPair);
     }
     
     /**
