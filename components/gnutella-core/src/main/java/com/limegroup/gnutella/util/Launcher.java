@@ -415,7 +415,7 @@ public class Launcher {
 	/** This sets up the file name for nt to escape
 	 *  special characters. */
     private static String checkChars(String str) {
-        String escapeChars = "&()|<>^ ";
+        String escapeChars = "&()|<>^ !";
         char[] chars = str.toCharArray();
         int length = chars.length;
         char[] new_chars = new char[length*3];
