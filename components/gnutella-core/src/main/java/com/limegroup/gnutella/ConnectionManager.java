@@ -395,12 +395,10 @@ public class ConnectionManager {
         List connections=getConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
-            try {
-                if (mc.getInetAddress().getHostAddress().equals(hostName))
-                    return true;
-            } catch (IllegalStateException e) {
-                //Connection still initializing...ignore.
-            }
+            if(!mc.isInitialized()) continue;
+ 
+            if (mc.getInetAddress().getHostAddress().equals(hostName))
+                return true;
         }
         return false;
     }
