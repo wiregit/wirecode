@@ -192,7 +192,8 @@ public class ClientSideLeafGuidanceTest
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private static QueryRequest getFirstQueryRequest(Connection c) {
+    private static QueryRequest getFirstQueryRequest(Connection c)
+        throws BadPacketException, IOException {
         while (true) {
             try {
                 Message m=c.receive(TIMEOUT);
@@ -202,19 +203,14 @@ public class ClientSideLeafGuidanceTest
             catch (InterruptedIOException ie) {
                 return null;
             }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
         }
     }
 
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private static QueryStatusResponse getFirstQueryStatus(Connection c) {
+    private static QueryStatusResponse getFirstQueryStatus(Connection c) 
+        throws BadPacketException, IOException {
         while (true) {
             try {
                 Message m=c.receive(TIMEOUT);
@@ -223,12 +219,6 @@ public class ClientSideLeafGuidanceTest
             }
             catch (InterruptedIOException ie) {
                 return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
             }
         }
     }
@@ -261,6 +251,7 @@ public class ClientSideLeafGuidanceTest
         // now send back results and make sure that we get a QueryStatus
         // from the leaf
         Message m = null;
+        assertGreaterThan(REPORT_INTERVAL, 2*testUPs.length);
         for (int i = 0; i < testUPs.length; i++) {
             Response[] res = new Response[2];
             res[0] = new Response(10, 10, "susheel"+i);
@@ -279,6 +270,17 @@ public class ClientSideLeafGuidanceTest
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
             assertEquals(1, stat.getNumResults());
+        }
+
+        // shut off the query....
+        rs.stopQuery(queryGuid);
+
+        // all UPs should get a QueryStatusResponse with 65535
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertNotNull(stat);
+            assertEquals(new GUID(stat.getGUID()), queryGuid);
+            assertEquals(65535, stat.getNumResults());
         }
     }
 
@@ -302,7 +304,7 @@ public class ClientSideLeafGuidanceTest
         // from the leaf
         Message m = null;
         for (int i = 0; i < testUPs.length; i++) {
-            Response[] res = new Response[20];
+            Response[] res = new Response[REPORT_INTERVAL*4];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10, 10, "susheel good"+i+j);
 
@@ -345,7 +347,7 @@ public class ClientSideLeafGuidanceTest
 
         // now send back results and make sure that we get a QueryStatus
         // from the leaf
-        Response[] res = new Response[20];
+        Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
             res[j] = new Response(10, 10, "anita is pretty"+j);
 
@@ -361,7 +363,7 @@ public class ClientSideLeafGuidanceTest
             QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(5, stat.getNumResults());
+            assertEquals(REPORT_INTERVAL, stat.getNumResults());
         }
 
 
@@ -381,7 +383,7 @@ public class ClientSideLeafGuidanceTest
         // no UPs should get a QueryStatusResponse
         for (int i = 0; i < testUPs.length; i++) {
             QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
-            assertTrue(stat==null);
+            assertNull(stat);
         }
 
         // simply send 2 more responses....
@@ -402,6 +404,47 @@ public class ClientSideLeafGuidanceTest
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
             assertEquals(5+((REPORT_INTERVAL+1)/4), stat.getNumResults());
+        }
+
+        // shut off the query....
+        rs.stopQuery(queryGuid);
+
+        // all UPs should get a QueryStatusResponse with 65535
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertNotNull(stat);
+            assertEquals(new GUID(stat.getGUID()), queryGuid);
+            assertEquals(65535, stat.getNumResults());
+        }
+
+        // more results should not result in more status messages...
+        res = new Response[REPORT_INTERVAL*2];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita is pretty"+j);
+
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // no UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            final int index = i;
+            Thread newThread = new Thread() {
+                    public void run() {
+                        try {
+                            QueryStatusResponse stat = 
+                                getFirstQueryStatus(testUPs[index]);
+                            assertNull(stat);
+                        }
+                        catch (Exception e) {
+                            assertNull(e);
+                        }
+                    }
+                };
+            newThread.start();
         }
     }
 
