@@ -54,18 +54,17 @@ public class HttpClientManager {
     private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
     
     /**
-     * The manager which all client connections use.
+     * The manager which all client connections use if not Java 1.1.8;
      */
     private static final HttpConnectionManager MANAGER;
     
     static {
-        if(CommonUtils.isJava118()) {
-            MANAGER = new SimpleHttpConnectionManager();
-        } else {
+        if(!CommonUtils.isJava118()) {
             MANAGER = new MultiThreadedHttpConnectionManager();
             ((MultiThreadedHttpConnectionManager)MANAGER).
                 setIdleConnectionTime(IDLE_TIME);
-        }
+        } else
+            MANAGER = null; // unused.
     }
             
     /**
@@ -84,7 +83,11 @@ public class HttpClientManager {
      *  wait for data before closing an established socket
      */
     public static HttpClient getNewClient(int connectTimeout, int soTimeout) {
-        HttpClient client = new HttpClient(MANAGER);
+        HttpClient client;
+        if( CommonUtils.isJava118() )
+            client = new HttpClient(); // use a different manager per client
+        else
+            client = new HttpClient(MANAGER); // use the same manager.
         client.setConnectionTimeout(connectTimeout);
         client.setTimeout(soTimeout);
         return client;
