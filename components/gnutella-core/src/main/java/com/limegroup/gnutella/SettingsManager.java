@@ -396,7 +396,7 @@ public class SettingsManager implements SettingsInterface
 		setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 		setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 		setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
-		setDirectories("");
+		setDirectories(home_);
 		setSaveDirectory(home_);
 		setSaveDefault(home_);
 		setIncompleteDirectory(home_);
