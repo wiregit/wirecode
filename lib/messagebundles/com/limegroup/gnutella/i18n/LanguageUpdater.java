@@ -182,7 +182,10 @@ class LanguageUpdater {
                     writer.write("#? ");
                     writer.write(key);
                     writer.write("=");
-                    writer.write(escape(line.getValue()));
+                    // only write the non-translated value if we didn't
+                    // above.
+                    if(!reachedTranslations)
+                        writer.write(escape(line.getValue()));
                 }
             }
             writer.write("\n");
