@@ -890,6 +890,38 @@ public class Connection {
 //          //Assert.that(p.in.getProperty("Query-Routing")==null);
 //          Assert.that(p.out.getProperty("Query-Routing")==null);
 //          disconnect(p);
+
+//          //5.
+//          System.out.println("-Testing IOException reading from closed socket");
+//          p=connect(null, null, null);
+//          Assert.that(p!=null);
+//          p.in.close();
+//          try {
+//              p.out.receive();
+//              Assert.that(false);
+//          } catch (BadPacketException failed) {
+//              Assert.that(false);
+//          } catch (IOException pass) {
+//          }
+
+//          //6.
+//          System.out.println("-Testing IOException writing to closed socket");
+//          p=connect(null, null, null);
+//          Assert.that(p!=null);
+//          p.in.close();
+//          try { Thread.sleep(2000); } catch (InterruptedException e) { }
+//          try {
+//              //You'd think that only one write is needed to get IOException.
+//              //That doesn't seem to be the case, and I'm not 100% sure why.  It
+//              //has something to do with TCP half-close state.  Anyway, this
+//              //slightly weaker test is good enough.
+//              p.out.send(new QueryRequest((byte)3, 0, "las"));
+//              p.out.flush();
+//              p.out.send(new QueryRequest((byte)3, 0, "las"));
+//              p.out.flush();
+//              Assert.that(false);
+//          } catch (IOException pass) {
+//          }
 //      }   
 
 //      private static class ConnectionPair {
