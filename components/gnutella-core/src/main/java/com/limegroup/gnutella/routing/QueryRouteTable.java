@@ -111,14 +111,27 @@ public class QueryRouteTable {
         allWords = allWords.trim();
         //Check that all hashed keywords are reachable with given TTL.
         String[] keywords=HashFunction.keywords(allWords);
+        int totalCount = keywords.length;
+        int matchCount=0;
         int ttl=qr.getTTL();
         for (int i=0; i<keywords.length; i++) {
             String keyword=keywords[i];
             int hash=HashFunction.hash(keyword, log2(table.length));
-            if (table[hash]>ttl || table[hash]>=infinity)
+            /*
+              if (table[hash]>ttl || table[hash]>=infinity)
+              return false;
+            */
+            if (table[hash]<=ttl && table[hash]<infinity)
+                matchCount++;
+        }
+        if(totalCount<3)//less than three word? 100% match required
+            return (totalCount == matchCount);
+        else{// a 67% match will do...
+            if( ((float)matchCount/(float)totalCount) > 0.67)
+                return true;
+            else
                 return false;
         }
-        return true;
     }
     
     /**
