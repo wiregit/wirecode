@@ -930,8 +930,18 @@ public class RouterService
      * @exception IOException in case any I/O error occurs while 
      * connecting/reading/writing from the host
 	 */
-	public void doBrowseHost(String host, int port, GUID guid) 
-        throws IOException{
+	public void doBrowseHost(String host, int port, 
+                             GUID guid, boolean needsPush) 
+        throws IOException {
+        if (needsPush)
+            ;
+        else
+            handleNormalBrowseHost(host, port, guid);
+	}
+
+    // handles the execution of a normal (non-push) browse host
+    private void handleNormalBrowseHost(String host, int port, GUID guid) 
+        throws IOException {
         URLConnection conn 
         = (new URL("http://"+host+":"+port)).openConnection();
         conn.setRequestProperty("Accept", 
@@ -981,7 +991,7 @@ public class RouterService
                 }
             }
         }
-	}
+    }
 
     /**
      * Tells whether the node is a supernode or not
