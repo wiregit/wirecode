@@ -13,23 +13,19 @@ import java.net.*;
 
 public class UploaderTest extends TestCase {
 
-    ActivityCallback ac;
-    MessageRouter mr;
-    FileManager fm;
-    Authenticator a;
-    RouterService rs;
-    RemoteFileDesc rfd1;
-    RemoteFileDesc rfd2;
-    RemoteFileDesc rfd3;
-    RemoteFileDesc rfd4;
-    RemoteFileDesc rfd5;
+    private ActivityCallback ac;
+    private FileManager fm;
+    private RouterService rs;
+    private RemoteFileDesc rfd1;
+    private RemoteFileDesc rfd2;
+    private RemoteFileDesc rfd3;
+    private RemoteFileDesc rfd4;
+    private RemoteFileDesc rfd5;
 
 
     public void setUp() {
         ac = new ActivityCallbackStub();
-        mr = new MessageRouterStub();
         fm = new FileManagerStub();
-        a= new DummyAuthenticator();
         rs = new RouterService(ac);
         try {
             PrivilegedAccessor.setValue(rs,"fileManager",fm);
@@ -38,20 +34,20 @@ public class UploaderTest extends TestCase {
         }
         FileDesc fd = fm.get(0);
         rfd1 = new RemoteFileDesc("1.1.1.1",0,0,"abc.txt",1000000,
-                                             new byte[16], 56, false, 3,
-                                             false, null, null);
+                                  new byte[16], 56, false, 3,
+                                  false, null, HugeTestUtils.URN_SETS[0]);
         rfd2 = new RemoteFileDesc("1.1.1.2",0,0,"abc.txt",1000000,
-                                             new byte[16], 56, false, 3,
-                                             false, null, null);
+                                  new byte[16], 56, false, 3,
+                                  false, null, HugeTestUtils.URN_SETS[0]);
         rfd3 = new RemoteFileDesc("1.1.1.3",0,0,"abc.txt",1000000,
-                                             new byte[16], 56, false, 3,
-                                             false, null, null);
+                                  new byte[16], 56, false, 3,
+                                  false, null, HugeTestUtils.URN_SETS[0]);
         rfd4 = new RemoteFileDesc("1.1.1.4",0,0,"abc.txt",1000000,
-                                             new byte[16], 56, false, 3,
-                                             false, null, null);
+                                  new byte[16], 56, false, 3,
+                                  false, null, HugeTestUtils.URN_SETS[0]);
         rfd5 = new RemoteFileDesc("1.1.1.5",0,0,"abc.txt",1000000,
-                                             new byte[16], 56, false, 3,
-                                             false, null, null);
+                                  new byte[16], 56, false, 3,
+                                  false, null, HugeTestUtils.URN_SETS[0]);
     }
 
     public UploaderTest(String name) {
@@ -60,9 +56,7 @@ public class UploaderTest extends TestCase {
 
     public void tearDown() {
         ac = null;
-        mr = null;
         fm = null;
-        a = null;
         rs = null;
         rfd1 = null;
         rfd2 = null;
