@@ -56,11 +56,15 @@ public class ConnectionManager {
     /** Minimum number of connections that a supernode with leaf connections,
      * must have. */
     public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
-    /** The desired number of old fashioned unrouted connections to keep, in
-     * order to prevent fragmentation of the network.  */
-    public static final int DESIRED_OLD_CONNECTIONS = 2;
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    /** The desired number of slots to reserve for good connections (e.g.,
+     *  LimeWire) unrouted connections. */
+    public static final int RESERVED_GOOD_CONNECTIONS = 2;   
+    /** Similar to RESERVED_GOOD_CONNECTIONS, but measures the number of slots
+     *  allowed for bad leaf connections.  A value of zero means that only
+     *  LimeWire's leaves are allowed.  */
+    public static final int ALLOWED_BAD_LEAF_CONNECTIONS = 4;
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_SUPERNODES headers. */
     private int MAX_SUPERNODE_ENDPOINTS=10;
@@ -459,10 +463,11 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    public boolean hasAvailableIncoming(ManagedConnection c) {
-        return hasAvailableIncoming(
-            c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)!=null,
-            c.isSupernodeClientConnection());
+    public boolean allowConnection(ManagedConnection c) {
+        return allowConnection(
+            c.isOutgoing(),
+            c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE),
+            c.getProperty(ConnectionHandshakeHeaders.USER_AGENT));
     }
     
     /**
@@ -470,31 +475,47 @@ public class ConnectionManager {
      * @return true, if we have incoming slot of some kind,
      * false otherwise
      */
-    public boolean hasAnyAvailableIncoming() {
-        return hasAvailableIncoming(false, false)
-            || hasAvailableIncoming(true, false) 
-            || (isSupernode() && hasAvailableIncoming(true, true));
+    public boolean allowAnyConnection() {
+        int shieldedMax=
+            SettingsManager.instance().getMaxShieldedClientConnections();
+
+        //Stricter than necessary.  
+        //See allowAnyConnection(boolean,String,String).
+        if (hasClientSupernodeConnection())
+            return false;
+
+        //Do we have normal or leaf slots?
+        return getNumInitializedConnections() < _keepAlive
+            || (isSupernode() 
+                    && getNumInitializedClientConnections() < shieldedMax);
     }
     
     /**
      * Returns true if this has slots for an incoming connection, <b>without
      * accounting for this' ultrapeer capabilities</b>.  More specifically:
      * <ul>
-     * <li>if !isUltrapeerAware, returns true if this has space for an incoming
-     *  unrouted 0.4-style connection.  The value of isLeaf is ignored.
-     * <li>if isUltrapeerAware&&isLeaf, returns true if this has slots for an
-     *  incoming leaf connection.
-     * <li>if isUltrapeerAware&&!isLeaf, returns true if this has slots for an
-     *  incoming ultrapeer connection.
+     * <li>if ultrapeerHeader==null, returns true if this has space for an 
+     *  unrouted old-style connection.
+     * <li>if ultrapeerHeader.equals("true"), returns true if this has slots
+     *  for a leaf connection.
+     * <li>if ultrapeerHeader.equals("false"), returns true if this has slots 
+     *  for an ultrapeer connection.
      * </ul>
      *
-     * @param isUltrapeerAware whether the connection wrote the X-Ultrapeer 
-     *  header
-     * @param isLeaf whether the value of the X-Ultrapeer header was false,
-     *  assuming it was written
+     * <tt>useragentHeader</tt> is used to prefer LimeWire and certain trusted
+     * vendors.  <tt>outgoing</tt> is currently unused, but may be used to 
+     * prefer incoming or outgoing connections in the forward.
+     *
+     * @param outgoing true if this is an outgoing connection; true if incoming
+     * @param ultrapeerHeader the value of the X-Ultrapeer header, or null
+     *  if it was not written
+     * @param useragentHeader the value of the User-Agent header, or null if
+     *  it was not written
+     * @return true if a connection of the given type is allowed
      */
-    public synchronized boolean hasAvailableIncoming(boolean isUltrapeerAware,
-                                                     boolean isLeaf) {
+    public synchronized boolean allowConnection(boolean outgoing,
+                                                String ultrapeerHeader,
+                                                String useragentHeader) {
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
@@ -502,13 +523,26 @@ public class ConnectionManager {
         //firewalled hosts become leaf nodes.  Hence we make no distinction
         //between incoming and outgoing.
         //
-        //However, now we prefer ultrapeers to old-fashioned ultrapeer-agnostic
-        //connections.  If the HostCatcher has marked ultrapeer pongs, we never
-        //allow more than DESIRED_OLD_CONNECTIONS old connections--incoming or
-        //outgoing.  In the old days, we would actively kill old connections; we
-        //don't do that anymore.
-
+        //At one point we would actively kill old-fashioned unrouted connections
+        //for ultrapeers.  Later, we preferred ultrapeers to old-fashioned
+        //connections as follows: if the HostCatcher had marked ultrapeer pongs,
+        //we never allowed more than DESIRED_OLD_CONNECTIONS old
+        //connections--incoming or outgoing.
+        //
+        //Now we simply prefer connections by vendor, which has some of the same
+        //effect.  We use BearShare's clumping algorithm.  Let N be the
+        //keep-alive and K be RESERVED_GOOD_CONNECTIONS.  (In BearShare's
+        //implementation, K=1.)  Allow any connections in for the first N-K
+        //slots.  But only allow good vendors for the last K slots.  In other
+        //words, accept a connection C if there are fewer than N connections and
+        //one of the following is true: C is a good vendor or there are fewer
+        //than N-K connections.  With time, this converges on all good
+        //connections.
+        
         SettingsManager settings=SettingsManager.instance();
+        boolean isUltrapeerAware=ultrapeerHeader!=null;
+        boolean isLeaf=ConnectionHandshakeHeaders.isFalse(ultrapeerHeader);
+
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0)
@@ -519,24 +553,27 @@ public class ConnectionManager {
 
         else if (isLeaf && isUltrapeerAware) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
+            //Preference trusted vendors using BearShare's clumping algorithm
+            //(see above).
             int shieldedMax=
                 SettingsManager.instance().getMaxShieldedClientConnections();
-            return getNumInitializedClientConnections() < shieldedMax;
-        } else if (isUltrapeerAware) {
-            //2. Ultrapeer.  In the old days, we used to kill off old
-            //connections for ultrapeers.  Now we simply don't allow extra old
-            //connections in, if we have ultrapeers.  So there's nothing fancy
-            //here.
-            return getNumInitializedConnections() < _keepAlive;
+            return getNumInitializedClientConnections() 
+                < (trustedVendor(useragentHeader)
+                      ? shieldedMax : ALLOWED_BAD_LEAF_CONNECTIONS);
         } else {
-            //3. Old-style, e.g., "0.4" connections.  Only allow if there are
-            //free slots.  If there are plenty of ultrapeer pongs, only allow if
-            //there aren't too many old-fashioned connections.
-            return (getNumInitializedConnections() < _keepAlive)
-                && (_catcher.getNumUltrapeerHosts()>0 
-                        ? oldConnections() < DESIRED_OLD_CONNECTIONS
-                        : true);  
+            //2. Ultrapeer or 0.6.  Preference trusted vendors using BearShare's
+            //clumping algorithm (see above).
+            return getNumInitializedConnections()
+                 < (trustedVendor(useragentHeader)
+                       ? _keepAlive : _keepAlive-RESERVED_GOOD_CONNECTIONS);
         }
+    }
+
+    private static boolean trustedVendor(String useragentHeader) {
+        if (useragentHeader==null)
+            return false;
+        return useragentHeader.startsWith("LimeWire") 
+            || useragentHeader.startsWith("Swapper");
     }
         
     /**
@@ -931,7 +968,7 @@ public class ConnectionManager {
         //achieve KEEP_ALIVE ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
         //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
-        //hasAvailableIncoming(boolean, boolean) and killExcessConnections().
+        //allowConnection(boolean, boolean) and killExcessConnections().
         int goodConnections=getNumInitializedConnections();
         int neededConnections=_keepAlive - goodConnections;
         //Now how many fetchers do we need?  To increase parallelism, we
@@ -1232,7 +1269,7 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && 
-                !hasAvailableIncoming(c)) {
+                !allowConnection(c)) {
             c.loopToReject(_catcher);     
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");

@@ -69,6 +69,7 @@ public class AcceptLimitTest {
                                                    router,
                                                    files,
                                                    new DummyAuthenticator());
+        Assert.that(settings.getPort()==6346, "Bad port: "+settings.getPort());
         rs.initialize();
         rs.clearHostCatcher();
         try {
@@ -88,71 +89,62 @@ public class AcceptLimitTest {
 
         testFetchI(rs, router);
         cleanup(rs);
-        testFetchII(rs, router);
-        cleanup(rs);
+
         testAcceptI(rs, router, host, port);
         cleanup(rs);
         testAcceptII(rs, router, host, port);
         cleanup(rs);
-        testAcceptIII(rs, router, host, port);
     }
 
-    private static void testFetchI(RouterService rs, TestMessageRouter router) {
-        System.out.println("\nTesting fetching with no ultrapeer pongs:");
+    private static void testFetchI(TestRouterService rs, TestMessageRouter router) {
+        System.out.println(
+            "\nTesting fetching won't allow too many non-LimeWire connections:");
         try {
+            ConnectionManager cm=rs.getConnectionManager();
             MiniAcceptor acceptor=null;
             Connection in=null;
             final String LOCALHOST="127.0.0.1";
             rs.setKeepAlive(6);
             
-            //Fetch an 0.6 connection.  Note there is a race condition here: 
-            //we must start listening on the socket before the fetcher starts fetcheing
-            System.out.println("-Testing that first fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6347, new EmptyResponder(), 200);
+            //Fetch connections.  Note there is a race condition here: we must
+            //start listening on the socket before the fetcher starts fetching.
+            //Bind variables to the return values to prevent them from being
+            //closed by the garbage collector.
+            System.out.println("-Testing that first fetched non-LW is accepted");
+            Connection c1=testOneFetch(
+                rs, router, LOCALHOST, 6347, new EmptyResponder(), 200);
+            Assert.that(cm.getNumConnections()==1);
 
-            System.out.println("-Testing that second fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6348, new EmptyResponder(), 200);
+            System.out.println("-Testing that 2nd fetched non-LW is accepted");
+            Connection c2=testOneFetch(
+                rs, router, LOCALHOST, 6348, new EmptyResponder(), 200);
+            Assert.that(cm.getNumConnections()==2);
 
-            System.out.println("-Testing that third fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6349, new EmptyResponder(), 200);
+            System.out.println("-Testing that 3rd fetched non-LW is accepted");
+            Connection c3=testOneFetch(
+                rs, router, LOCALHOST, 6349, new EmptyResponder(), 200);
+            Assert.that(cm.getNumConnections()==3);
 
-            System.out.println("-Testing that fourth fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6350, new EmptyResponder(), 200);
+            System.out.println("-Testing that 4th fetched non-LW is accepted");
+            Connection c4=testOneFetch(
+                rs, router, LOCALHOST, 6350, new EmptyResponder(), 200);
+            Assert.that(cm.getNumConnections()==4, 
+                        "Only have "+cm.getNumConnections());            
 
-            rs.disconnect();
-            rs.clearHostCatcher();
-            rs.setKeepAlive(SettingsManager.instance().getKeepAlive());
-        } catch (BadConnectionSettingException e) {
-            Assert.that(false);
-        }
-    }
+            System.out.println("-Testing that 5th fetched non-LW is REJECTED");
+            Connection c5a=testOneFetch(
+                rs, router, LOCALHOST, 6351, new EmptyResponder(), 503);
+            Assert.that(cm.getNumConnections()==4);
 
+            System.out.println("-Testing that 5th fetched LW is allowed");
+            Connection c5b=testOneFetch(
+                rs, router, LOCALHOST, 6352, new UltrapeerResponder(true), 200);
+            Assert.that(cm.getNumConnections()==5);
 
-    private static void testFetchII(RouterService rs, TestMessageRouter router) {
-        System.out.println("\nTesting fetching with ultrapeer pongs:");
-        try {
-            MiniAcceptor acceptor=null;
-            Connection in=null;
-            final String LOCALHOST="127.0.0.1";
-            rs.setKeepAlive(6);
-            
-            //Fill HostCatcher with bogus pongs.
-            for (int i=0; i<100; i++) 
-                router.addHost("1.1.1."+i, 6340, true);
-
-            //Fetch an 0.6 connection.  Note there is a race condition here: 
-            //we must start listening on the socket before the fetcher starts fetcheing
-            System.out.println("-Testing that first fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6351, new EmptyResponder(), 200);
-
-            System.out.println("-Testing that second fetched 0.6 is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6352, new EmptyResponder(), 200);
-
-            System.out.println("-Testing that third fetched 0.6 is rejected");
-            testOneFetch(rs, router, LOCALHOST, 6353, new EmptyResponder(), 503);
-
-            System.out.println("-Testing that fetched ultrapeer is accepted");
-            testOneFetch(rs, router, LOCALHOST, 6354, new UltrapeerResponder(), 200);
+            System.out.println("-Testing that 6th fetched LW is allowed");
+            Connection c6=testOneFetch(
+                rs, router, LOCALHOST, 6353, new UltrapeerResponder(true), 200);
+            Assert.that(cm.getNumConnections()==6);
 
             rs.disconnect();
             rs.clearHostCatcher();
@@ -172,11 +164,11 @@ public class AcceptLimitTest {
      * @param responder how the server should respond: 503 for reject 
      *  or 200 for OK.
      */
-    private static void testOneFetch(RouterService rs,
-                                     TestMessageRouter router,
-                                     String host, int port, 
-                                     HandshakeResponder responder,
-                                     int code) {
+    private static Connection testOneFetch(RouterService rs,
+                                           TestMessageRouter router,
+                                           String host, int port, 
+                                           HandshakeResponder responder,
+                                           int code) {
         MiniAcceptor acceptor=new MiniAcceptor(responder, port);
         Thread.yield();
         rs.connectToHostAsynchronously(host, port);
@@ -190,6 +182,7 @@ public class AcceptLimitTest {
             Assert.that(e instanceof NoGnutellaOkException);
             Assert.that(((NoGnutellaOkException)e).getCode()==code);
         }
+        return in;
     }
 
 
@@ -211,12 +204,13 @@ public class AcceptLimitTest {
         Assert.that(! rs.getConnectionManager().isConnected(
                                       new Endpoint("27.0.0.1", 6346)));
         testPong(c, true);        
+        final int RESERVE=ConnectionManager.RESERVED_GOOD_CONNECTIONS;
         testLimit(host, port, OLD_06, 
-                  ConnectionManager.DESIRED_OLD_CONNECTIONS, 
+                  KEEP_ALIVE - RESERVE,
                   REJECT_503);  //save slots for ultrapers
         testPong(c, true);
         testLimit(host, port, ULTRAPEER, 
-                  KEEP_ALIVE-ConnectionManager.DESIRED_OLD_CONNECTIONS, 
+                  RESERVE, 
                   REJECT_503);       
         testPong(c, false);
     }        
@@ -244,16 +238,6 @@ public class AcceptLimitTest {
         testPong(c, true); //Still have leaf slots
         c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
         testPong(c, false);
-    }
-
-    private static void testAcceptIII(RouterService rs, 
-                                      TestMessageRouter router, 
-                                      String host, int port) {
-        System.out.println("\nTesting accept III, no ultrapeer pongs:");
-        rs.clearHostCatcher();
-        //ignores guidance
-        Connection c=testLimit(host, port, OLD_06, KEEP_ALIVE, REJECT_503);  
-        testPong(c, true);
     }
 
     /** 
@@ -305,7 +289,7 @@ public class AcceptLimitTest {
         } catch (NoGnutellaOkException e) {
             Assert.that(rejectType==REJECT_503 
                         && e.getCode()==HandshakeResponse.SLOTS_FULL, 
-                        "Unexpected code: "+e.getCode());
+                        "Unexpected code: "+e.getCode()+" "+e.wasMe());
         } catch (IOException e) {
             Assert.that(rejectType==REJECT_SILENT, "Mysterious IO exception: "+e);
         }
@@ -323,9 +307,7 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6340);
         Connection in=acceptor.accept();
-        try {
-            Thread.sleep(100); 
-        } catch (InterruptedException e) { }
+        Assert.that(in!=null, "No connection");
         Assert.that(! rs.isSupernode());
         Assert.that(rs.hasClientSupernodeConnection()); 
         in.close();
@@ -385,7 +367,7 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6344);
         Connection in2=acceptor.accept();
-        Assert.that(in2!=null);
+        Assert.that(in2!=null, "No connection");
         Assert.that(rs.isSupernode());
         Assert.that(rs.getNumConnections()==2);
 
@@ -416,12 +398,15 @@ public class AcceptLimitTest {
                                new LeafProperties(),
                                new EmptyResponder(),
                                false);
-        else if (type==ULTRAPEER)
+        else if (type==ULTRAPEER) {
+            //Ultrapeer means LimeWire for these tests.
+            Properties props=new UltrapeerProperties();
+            props.put("User-Agent", "LimeWire/10.0");
             ret=new Connection(host, port, 
-                               new UltrapeerProperties(),
+                               props,
                                new EmptyResponder(),
                                false);
-        else
+        } else
             Assert.that(false, "Bad type: "+type);
         
         ret.initialize();
@@ -495,6 +480,15 @@ public class AcceptLimitTest {
             //Give server time to cleanup connections.
             Thread.sleep(200);
         } catch (InterruptedException e) { }
+
+        //Restor keep-alive in case of shielded leaf.  If we had a proper
+        //setUp() method, this wouldn't be necessary.
+        try {
+            rs.clearHostCatcher();
+            rs.setKeepAlive(KEEP_ALIVE);
+        } catch (BadConnectionSettingException e) {
+            Assert.that(false, " ");
+        }
     }
 }
 
@@ -502,6 +496,8 @@ public class AcceptLimitTest {
 
 class LeafProperties extends Properties {
     public LeafProperties() {
+        //To foil vendor preferencing.
+        put(ConnectionHandshakeHeaders.USER_AGENT, "LimeWire 2.5");
         put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
     }
@@ -515,9 +511,19 @@ class UltrapeerProperties extends Properties {
 }
 
 class UltrapeerResponder implements HandshakeResponder {
+    boolean isLimeWire=false;
+    public UltrapeerResponder() {
+        this(false);
+    }
+    public UltrapeerResponder(boolean isLimeWire) {
+        this.isLimeWire=isLimeWire;            
+    }
     public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException {
-        return new HandshakeResponse(new UltrapeerProperties());
+        Properties props=new UltrapeerProperties();
+        if (isLimeWire)
+            props.put("User-Agent", "LimeWire 2.5.0");
+        return new HandshakeResponse(props);
     }
 }
 

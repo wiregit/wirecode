@@ -28,6 +28,14 @@ public class ConnectionHandshakeHeaders
     public static final String REMOTE_IP            = "Remote-IP";
     public static final String GGEP                 = "GGEP";
 
+    /** 
+     * The true/false values for some headers.  Note that these are not the only
+     * legal values--case doesn't matter--and LimeWire does not always use these
+     * constants.  Hopefully it will in the future.  
+     */
+    public static final String TRUE                 = "true";
+    public static final String FALSE                = "false";
+
     /**
      * Returns true if v.toLowerCase().equals("true").
      */

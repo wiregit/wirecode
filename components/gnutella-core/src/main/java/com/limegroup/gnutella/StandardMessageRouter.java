@@ -49,7 +49,7 @@ public class StandardMessageRouter
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
         if (   (hops+ttl > 2) 
-            && !_manager.hasAnyAvailableIncoming())
+            && !_manager.allowAnyConnection())
             return;
 
         //SPECIAL CASE: for Crawle ping

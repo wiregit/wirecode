@@ -54,11 +54,9 @@ public class SupernodeHandshakeResponder
             //also add some host addresses in the response
             addHostAddresses(ret, _manager);
 
-            //Decide whether to allow or reject.
-            Properties props=response.getHeaders();
-            String isUltrapeer=
-                props.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-            if (reject(isUltrapeer)) {
+            //Decide whether to allow or reject.  Somewhat complicated because
+            //of ultarpeer guidance.
+            if (reject(outgoing, response.getHeaders())) {
                 return new HandshakeResponse(
                     HandshakeResponse.SLOTS_FULL,
                     HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -69,11 +67,15 @@ public class SupernodeHandshakeResponder
         } else
         {
             //Outgoing connection.  If the other guy is ultrapeer unaware and I
-            //already have enough old-fashioned connections, reject it.
+            //already have enough old-fashioned connections, reject it.  We've
+            //already given ultrapeer guidance at this point, so there's no
+            //"second chance" like in the reject(..) method.
             Properties ret=new Properties();
-            if (response.getHeaders().getProperty(
-                        ConnectionHandshakeHeaders.X_SUPERNODE)==null
-                    && !_manager.hasAvailableIncoming(false, false)) {
+            if (!_manager.allowConnection(outgoing,
+                                          response.getHeaders().getProperty(
+                                              ConnectionHandshakeHeaders.X_SUPERNODE),
+                                          response.getHeaders().getProperty(
+                                              ConnectionHandshakeHeaders.USER_AGENT))) {
                 return new HandshakeResponse(
                     HandshakeResponse.SLOTS_FULL,
                     HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -83,8 +85,8 @@ public class SupernodeHandshakeResponder
             String neededS=response.getHeaders().
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
             if (neededS!=null
-            && !Boolean.valueOf(neededS).booleanValue()
-            && _manager.allowClientMode())
+                && !Boolean.valueOf(neededS).booleanValue()
+                && _manager.allowClientMode())
             {
                 //Fine, we'll become a leaf.
                 ret.put(ConnectionHandshakeHeaders.X_SUPERNODE,
@@ -96,12 +98,11 @@ public class SupernodeHandshakeResponder
     
     /** 
      * Returns true if this incoming connections should be rejected with a 503. 
-     * @param isUltrapeer thevalue of the X_SUPERNODE header, or possibly null. 
      */
-    private boolean reject(String isUltrapeer) { 
+    private boolean reject(boolean outgoing, Properties headers) { 
         //Under some circumstances, we can decide to reject a connection during
         //handshaking because no slots are available.  You might think you could
-        //reject the connection if !_manager.hasAvailableIncoming(A, L), where A
+        //reject the connection if !_manager.allowConnection(A, L), where A
         //is true if the connection is the connection is ultrapeer-aware and L
         //is true if the user is a leaf.  Unfortunately this fails when the
         //incoming connection is an ultrapeer (A&&!L) because of supernode
@@ -109,15 +110,20 @@ public class SupernodeHandshakeResponder
         //we use the following conservative test, and depend on the
         //old-fashioned reject connection mechanism in ConnectionManager for the
         //other cases.
-        return //it's an unrouted old-style connection, and no slot
-               (isUltrapeer==null 
-                   && !_manager.hasAvailableIncoming(false, false))
-               //OR leaf, and no space
-               || (ConnectionHandshakeHeaders.isFalse(isUltrapeer)
-                   && !_manager.hasAvailableIncoming(true, true))
-               //OR no space for leaves or ultrapeers [sic]
-               || (!_manager.hasAvailableIncoming(true, true)
-                   && !_manager.hasAvailableIncoming(true, false));
+        
+        String useragentHeader=headers.getProperty(
+                                   ConnectionHandshakeHeaders.USER_AGENT);
+        String ultrapeerHeader=headers.getProperty(
+                                   ConnectionHandshakeHeaders.X_SUPERNODE);
+        boolean isUltrapeer=ConnectionHandshakeHeaders.isTrue(ultrapeerHeader);
+
+        boolean allowedNow=_manager.allowConnection(
+            outgoing, ultrapeerHeader, useragentHeader);
+        boolean allowedAsLeaf=_manager.allowConnection(
+            outgoing, ConnectionHandshakeHeaders.FALSE, useragentHeader);
+
+        //Reject if not allowed now and guidance not possible.
+        return ! (allowedNow || (isUltrapeer && allowedAsLeaf));
     }    
 }
 

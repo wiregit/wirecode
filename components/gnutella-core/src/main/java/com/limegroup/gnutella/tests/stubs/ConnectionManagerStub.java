@@ -28,8 +28,9 @@ public class ConnectionManagerStub extends ConnectionManager {
         return true;
     }        
 
-    public boolean hasAvailableIncoming(boolean isUltrapeerAware,
-                                        boolean leaf) {
+    public boolean allowConnection(boolean outgoing,
+                                   String ultrapeerHeader,
+                                   String useragentHeader) {
         //Needed to make ConnectionManagerTest pass. 
         //See ConnectionManagerTest.setUp.
         return true;
