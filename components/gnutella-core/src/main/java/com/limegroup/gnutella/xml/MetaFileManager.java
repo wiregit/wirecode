@@ -78,7 +78,6 @@ public class MetaFileManager extends FileManager {
                 String[] schemas = schemaRepository.getAvailableSchemaURIs();
                 //we have a list of schemas
                 int len = schemas.length;
-                //System.out.println("Sumeet: There are "+len+" schemas");
                 for(int i=0;i<len;i++){
                     LimeXMLReplyCollection collection =  
                        new LimeXMLReplyCollection(schemas[i]);
@@ -96,6 +95,11 @@ public class MetaFileManager extends FileManager {
     }//end of loadSettings.
 
     private Response[] union(Response[] normals, Response[] metas){       
+        if(normals == null)
+            return metas;
+        if(metas==null)
+            return normals;
+        //So they are both not null
         HashSet unionSet = new HashSet();
         for(int i =0; i<normals.length; i++)
             unionSet.add(normals[i]);

@@ -20,7 +20,7 @@ import java.util.List;
 class RichQueryHandler{
     
     static RichQueryHandler instance;// the instance
-    
+    private final int INDEX = 75000;//TODO1:Ask Chris what this should be
     
     /**
      * Call this method to get the singleton
@@ -40,6 +40,7 @@ class RichQueryHandler{
      * Warning: Returns null if the XMLQuery is malformed.
      */
     public Response[] query(String XMLQuery){
+        //System.out.println("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
         LimeXMLDocument queryDoc = null;
@@ -52,11 +53,12 @@ class RichQueryHandler{
         }catch(SchemaNotFoundException eee){
             return null;
         }
-        
         String schema = queryDoc.getSchemaURI();
         SchemaReplyCollectionMapper mapper = 
                             SchemaReplyCollectionMapper.instance();
         LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
+        if(replyCol == null)//no matching reply collection for schema
+            return null;
         List matchingReplies = replyCol.getMatchingReplies(queryDoc);
         //matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
@@ -76,7 +78,7 @@ class RichQueryHandler{
             String subjectFile = currDoc.getIdentifier();//returns null if none
             metadata = currDoc.getXMLString();
             if(subjectFile==null){//pure data (data about NO file)
-                index = -1;
+                index = INDEX;
                 name = "";
                 size = metadata.length();//Here: size = size of metadata String
             }

@@ -155,7 +155,7 @@ class LimeXMLReplyCollection{
             String replyDocValue = replyDoc.getValue(currFieldName);
             if(replyDocValue == null)
                 nullCount++;
-            if(replyDocValue.equals(queryValue))
+            else if(replyDocValue.equals(queryValue))
                 matchCount++;
         }
         //The metric of a correct match is that whatever fields are specified
