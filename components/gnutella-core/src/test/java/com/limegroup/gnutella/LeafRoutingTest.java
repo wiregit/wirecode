@@ -126,7 +126,6 @@ public class LeafRoutingTest extends BaseTestCase {
          
          Connection con = new Connection(socket, responder);
          con.initialize();
-         con.buildAndStartQueues();
          replyToPing(con, ultrapeer);
          return con;
      }

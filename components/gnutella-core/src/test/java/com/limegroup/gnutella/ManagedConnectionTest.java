@@ -75,7 +75,6 @@ public class ManagedConnectionTest extends BaseTestCase {
     public void testIsStable() throws Exception {
         Connection mc = new Connection("localhost", Backend.PORT);
         mc.initialize();
-        mc.buildAndStartQueues();
         
         assertTrue("should not yet be considered stable", !mc.isStable());
 
@@ -107,8 +106,7 @@ public class ManagedConnectionTest extends BaseTestCase {
     private void tForwardsGGEP() throws Exception {
         Connection out = 
             new Connection("localhost", Backend.PORT);
-        out.initialize();
-        out.buildAndStartQueues();        
+        out.initialize();      
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
@@ -143,7 +141,6 @@ public class ManagedConnectionTest extends BaseTestCase {
         Connection mc = 
             new Connection("localhost", Backend.PORT);
         mc.initialize();
-        mc.buildAndStartQueues();
         assertTrue("connection should be high degree", 
                    mc.isHighDegreeConnection());
         mc.close();
@@ -152,7 +149,6 @@ public class ManagedConnectionTest extends BaseTestCase {
     public void testHorizonStatistics() {
         HorizonCounter hc = HorizonCounter.instance();
         Connection mc= new Connection("", 1);
-        mc.buildAndStartQueues();
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         HorizonCounter.HORIZON_UPDATE_TIME=1*200;   
@@ -244,7 +240,6 @@ public class ManagedConnectionTest extends BaseTestCase {
                                             new NoGGEPProperties(),
                                             new EmptyResponder());
         out.initialize();
-        out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
         // receive all initial messages.
@@ -278,8 +273,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
         out = new Connection("localhost", Backend.PORT);
-        out.initialize();            
-        out.buildAndStartQueues();
+        out.initialize();       
 
         //in=acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
@@ -302,8 +296,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         
         //2. Remote close: discovered on read
         Connection out = new Connection("localhost", PORT);
-        out.initialize();            
-        out.buildAndStartQueues();
+        out.initialize(); 
         Connection in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
@@ -326,8 +319,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         //for Connection.)
         acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
         out = new Connection("localhost", PORT);
-        out.initialize();            
-        out.buildAndStartQueues();
+        out.initialize();   
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());

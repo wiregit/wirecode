@@ -192,15 +192,12 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
-        ULTRAPEER_2.buildAndStartQueues();
         
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
-        ULTRAPEER_1.buildAndStartQueues();
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
-        LEAF.buildAndStartQueues();
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());

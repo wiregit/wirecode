@@ -918,13 +918,6 @@ public class ConnectionManager {
      */
     private boolean connectionInitialized(Connection c) {
         if(_connections.contains(c)) {
-	        // build the queues and start the output runner.
-	        // this MUST be done before _initializedConnections
-	        // or _initializedClientConnections has added this
-	        // connection to its list.  otherwise, messages may
-	        // attempt to be sent to the connection before it has
-	        // set up its output queues.
-            c.buildAndStartQueues();
             
             //update the appropriate list of connections
             if(!c.isSupernodeClientConnection()){

@@ -178,11 +178,9 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
-        ULTRAPEER_2.buildAndStartQueues();
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
-        ULTRAPEER_1.buildAndStartQueues();
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();

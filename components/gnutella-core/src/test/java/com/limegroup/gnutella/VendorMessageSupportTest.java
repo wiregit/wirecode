@@ -81,8 +81,6 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new EmptyResponder());
         _leaf1.initialize();
         
-        // need to initialize the message writer
-        _leaf1.buildAndStartQueues();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.writer().simpleWrite((RouteTableMessage)iter.next());
         _leaf1.writer().flush();
@@ -95,8 +93,6 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new EmptyResponder());
         _leaf2.initialize();
         
-        // need to initialize the message writer
-        _leaf2.buildAndStartQueues();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.writer().simpleWrite((RouteTableMessage)iter.next());
         _leaf2.writer().flush();

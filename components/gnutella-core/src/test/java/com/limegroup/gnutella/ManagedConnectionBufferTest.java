@@ -80,7 +80,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
 		
 		out.initialize();
-        out.buildAndStartQueues();
 		in = acceptor.accept();
 		assertTrue("out.write should be deflated", out.isWriteDeflated());
 		assertTrue("out.read should be deflated", out.isReadDeflated());
@@ -97,7 +96,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
 		
 		out.initialize();
-        out.buildAndStartQueues();
 		in = acceptor.accept();
 		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
 		assertTrue("out.read should be !deflated", !out.isReadDeflated());
