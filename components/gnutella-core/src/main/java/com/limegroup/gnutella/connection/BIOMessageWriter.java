@@ -224,10 +224,11 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
                 repOk();
             }                
         } catch (IOException e) {
-            // TODO:: tell ConnectionManager to remove the connection??
             CONNECTION.setSenderDied(true);
+            RouterService.removeConnection(CONNECTION);
         } catch(Throwable t) {
-            CONNECTION.setSenderDied(true);     
+            CONNECTION.setSenderDied(true);   
+            RouterService.removeConnection(CONNECTION);  
             ErrorService.error(t);
         }
     }
@@ -236,7 +237,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * Wait until the queue is (probably) non-empty or closed. 
      * @exception IOException this was closed while waiting
      */
-    private final void waitForQueued() throws IOException {
+    private void waitForQueued() throws IOException {
         //The synchronized statement is outside the while loop to
         //protect _queued.
         synchronized (QUEUE_LOCK) {
@@ -262,9 +263,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @throws IOException if there is an IO error sending or flushing the
      *  data
      */
-    private final void sendQueued() throws IOException {    
-        //QUEUE.write();
-        
+    private void sendQueued() throws IOException {    
         Message msg = QUEUE.removeNext();
         while(msg != null) {
             simpleWrite(msg);
