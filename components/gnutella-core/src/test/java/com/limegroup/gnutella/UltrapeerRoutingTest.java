@@ -17,14 +17,40 @@ import java.io.*;
 /**
  * The most important end-to-end message routing test.  Checks whether
  * ultrapeers handle query routing, normal routing, routing of marked pongs,
- * etc.
+ * etc.  The test is structured with one Ultrapeer connected to two other
+ * Ultrapeers as well as to a leaf.  The leaves and two Ultrapeers pass
+ * varios messages to each other, and the tests verify that the correct messages
+ * are received by the other nodes.  This is shown in the diagram below:
+ *
+ *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
+ *                              |
+ *                              |
+ *                              |
+ *                             LEAF
  */
 public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
-    private static final int PORT=6667;
-    private static final int TIMEOUT=500;
 
+	/**
+	 * The port that the central Ultrapeer listens on, and that the other nodes
+	 * connect to it on.
+	 */
+    private static final int PORT = 6667;
+
+	/**
+	 * The timeout value for sockets -- how much time we wait to accept 
+	 * individual messages before giving up.
+	 */
+    private static final int TIMEOUT = 2000;
+
+	/**
+	 * The default TTL to use for request messages.
+	 */
 	private final static byte TTL = 7;
 
+	/**
+	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
+	 * greater than this value have their TTLs automatically reduced
+	 */
 	private static final byte SOFT_MAX = 4;
 
 	/**
@@ -36,18 +62,21 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF;
+    private Connection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static Connection ULTRAPEER_1;
+    private Connection ULTRAPEER_1;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private static Connection ULTRAPEER_2;
+    private Connection ULTRAPEER_2;
 
+	/**
+	 * The central Ultrapeer used in the test.
+	 */
 	private static final RouterService ROUTER_SERVICE = 
 		new RouterService(new ActivityCallbackStub());
 
@@ -65,25 +94,26 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	
 	private void buildConnections() {
 	    LEAF =
-		new Connection("localhost", PORT, 
-					   new LeafProperties(),
-					   new EmptyResponder()
-					   );
+			new Connection("localhost", PORT, 
+						   new LeafProperties(),
+						   new EmptyResponder()
+						   );
         
         ULTRAPEER_1 = 
-		new Connection("localhost", PORT,
-					   new UltrapeerProperties(),
-					   new EmptyResponder()
-					   );
+			new Connection("localhost", PORT,
+						   new UltrapeerProperties(),
+						   new EmptyResponder()
+						   );
 
         ULTRAPEER_2 = 
-		new Connection("localhost", PORT,
-					   new UltrapeerProperties(),
-					   new EmptyResponder()
-					   );
+			new Connection("localhost", PORT,
+						   new UltrapeerProperties(),
+						   new EmptyResponder()
+						   );
     }
 
 	public void setUp() throws Exception {
+		AbstractSettings.revertToDefault();
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
@@ -101,71 +131,56 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.MAX_LEAVES.setValue(1);
-		ConnectionSettings.KEEP_ALIVE.setValue(6);
+		ConnectionSettings.KEEP_ALIVE.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 
 
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
-		if(!ROUTER_SERVICE.isStarted()) {
-			buildConnections();
-			ROUTER_SERVICE.start();
-			ROUTER_SERVICE.clearHostCatcher();
-			ROUTER_SERVICE.connect();	
-			connect();
-		}
+
+		ROUTER_SERVICE.start();
+		ROUTER_SERVICE.clearHostCatcher();
+		ROUTER_SERVICE.connect();	
+		connect();
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
-
-		drainAll();
 	}
 
 	public void tearDown() throws Exception {
-		drainAll();
+		ROUTER_SERVICE.disconnect();
+		sleep();
+		LEAF.close();
+		ULTRAPEER_1.close();
+		ULTRAPEER_2.close();
+		sleep();
 	}
 
-	private static void drainAll() throws Exception {
-		if(ULTRAPEER_1.isOpen()) {
-			drain(ULTRAPEER_1);
-		}
-		if(ULTRAPEER_1.isOpen()) {
-			drain(ULTRAPEER_2);
-		}
-		if(LEAF.isOpen()) {
-			drain(LEAF);
-		}
+	private void sleep() {
+		try {Thread.sleep(300);}catch(InterruptedException e) {}
 	}
 
-	/*
-    public void testLegacy() {
-        //Start actual tests.
-        try {
-            connect();
-            doBroadcastFromLeaf();  //also tests replies, pushes
-            doBroadcastFromOld();
-            doBroadcastFromOldToLeaf();
-            doBroadcastFromUltrapeerToBoth();
-            doPingBroadcast();      //also tests replies
-            doBigPingBroadcast();
-            doMisroutedPong();
-            doUltrapeerPong();
-            doNullQueryURNRequest();
-            doDropAndDuplicate();   //must be last; closes old
-            shutdown();
-        } catch (IOException e) { 
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-        } catch (BadPacketException e) { 
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-        }
-        
-        //System.out.println("Done");
-    }
-	*/
+	/**
+	 * Drains all messages 
+	 */
+ 	private void drainAll() throws Exception {
+ 		if(ULTRAPEER_1.isOpen()) {
+ 			drain(ULTRAPEER_1);
+ 		}
+ 		if(ULTRAPEER_1.isOpen()) {
+ 			drain(ULTRAPEER_2);
+ 		}
+ 		if(LEAF.isOpen()) {
+ 			drain(LEAF);
+ 		}
+ 	}
 
-    private static void connect() throws IOException {
+	/**
+	 * Connects all of the nodes to the central test Ultrapeer.
+	 */
+    private void connect() throws Exception {
+		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
 
@@ -179,11 +194,19 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         qrt.add("susheel");
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
+			LEAF.flush();
         }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 		assertTrue("LEAF should be connected", LEAF.isOpen());
+
+		// make sure we get rid of any initial ping pong traffic exchanges
+		sleep();
+		drainAll();
+		//sleep();
+		//drainAll();
+		sleep();
     }
 
 	/**
@@ -191,7 +214,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Ultrapeer connections -- the one connected to the leaf, as well as the
 	 * other one.
 	 */
-    public static void testBroadcastFromLeaf() throws Exception {
+    public void testBroadcastFromLeaf() throws Exception {
 
 		//System.out.println(
 		//   "-Testing normal broadcast from leaf, with replies and pushes");
@@ -316,14 +339,14 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	/**
 	 * Tests broadcasting of queries from ULTRAPEER_2.
 	 */
-    public static void testBroadcastFromUltrapeer2() 
+    public void testBroadcastFromUltrapeer2() 
              throws Exception  {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", no forwarding to leaf");
         //drain(ULTRAPEER_1);
         //drain(LEAF);
 
-        QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
+        QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
               
@@ -340,8 +363,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	/**
 	 * Tests the broadcasting of queries from ultrapeer 2 to the leaf.
 	 */
-    public static void testBroadcastFromUltrapeer2ToLeaf() 
-             throws Exception {
+    public void testBroadcastFromUltrapeer2ToLeaf() 
+		throws Exception {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", with forwarding to leaf");
         //drain(ULTRAPEER_1);
@@ -366,8 +389,10 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
 	/**
 	 * Tests broadcasting of queries from the Ultrapeer to other hosts.
+	 * In particular, this tests to make sure that the leaf correctly
+	 * receives the query.
 	 */
-    public static void testBroadcastFromUltrapeerToBoth() 
+    public void testBroadcastFromUltrapeerToBoth() 
              throws Exception {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", with forwarding to leaf");
@@ -386,16 +411,17 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
         m=LEAF.receive(TIMEOUT);
 		assertTrue("expected a query request", m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("susheel test"));
+		assertEquals("unexpected query string", "susheel test", 
+					 ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
 		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
     }
 
 	/**
-	 * Tests broadcasting pings between the various hosts.
+	 * Tests broadcasting pings between the various hosts.  In particular,
+	 * this tests to make sure that leaves do not receive ping broadcasts.
 	 */
-    public static void testPingBroadcast() 
-             throws Exception {
+    public void testPingBroadcast() throws Exception {
         //System.out.println("-Testing ping broadcast from ULTRAPEER_2 connnection"
         //                   +", no forwarding to leaf, with reply");
         //drain(ULTRAPEER_2);
@@ -407,19 +433,18 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         ULTRAPEER_1.flush();
               
         m=ULTRAPEER_2.receive(TIMEOUT);
-        assertTrue(m instanceof PingRequest);
+        assertTrue("message should be a ping request", m instanceof PingRequest);
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
 		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
-		assertTrue("should not have drained leaf successfully", 
-				   !drain(LEAF));
+		
+		assertTrue("Leaf should not have received message", !drain(LEAF));
+
         //Send reply
         drain(ULTRAPEER_1);        
-        PingReply pong=new PingReply(m.getGUID(),
-                                     (byte)7,
-                                     6344,
-                                     new byte[4],
-                                     3, 7);
+        PingReply pong = 
+			new PingReply(m.getGUID(), (byte)7, 6344, new byte[4], 3, 7);
+
         ULTRAPEER_2.send(pong);
         ULTRAPEER_2.flush();
         for (int i=0; i<10; i++) {
@@ -434,7 +459,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests the broadcasting of big pings -- pings that include GGEP extensions,
 	 * and so have a payload -- between the various hosts.
 	 */
-    public static void testBigPingBroadcast() 
+    public void testBigPingBroadcast() 
              throws Exception {
         //System.out.println("-Testing big ping broadcast from leaf connnection"
         //                   +", no payload forwarding to ULTRAPEER_2, with big reply");
@@ -563,7 +588,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
 
 
-    public static void testMisroutedPong() 
+    public void testMisroutedPong() 
              throws Exception {
         //System.out.println("-Testing misrouted normal pong"
         //                   +", not forwarded to leaf");
@@ -582,7 +607,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 				   !drain(LEAF));
     }
 
-    public static void testUltrapeerPong() 
+    public void testUltrapeerPong() 
              throws Exception {
         //System.out.println("-Testing misrouted ultrapeer pong"
         //                   +", forwarded to leaf");
@@ -609,7 +634,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     /** This test makes sure that query's with no query string but with
      *  specified urn's get through to leaves, etc.
      */ 
-    public static void testNullQueryURNRequest() 
+    public void testNullQueryURNRequest() 
         throws Exception {
         //System.out.println("-Testing null query string with non-null URN" +
         //                   " QR routing.");
@@ -627,8 +652,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
 
-    private static void urnTest(Connection sndr, Connection rcv1,
-                                Connection rcv2) 
+    private void urnTest(Connection sndr, Connection rcv1,
+						 Connection rcv2) 
         throws Exception {
         // make urns...
         Set currUrnSet = new HashSet();
@@ -673,7 +698,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests that duplicate queries are not forwarded if the connection that
 	 * originated the connection is dropped.
 	 */
-    public static void testDropAndDuplicate() 
+    public void testDropAndDuplicate() 
 		throws Exception {
         //System.out.println("-Testing that duplicates are dropped "
         //                   +"when original connection closed");
@@ -718,17 +743,13 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
+				// we read a null message or received another 
+				// InterruptedIOException, which should mean that no 
+				// messages are left
                 return ret;
             } catch (BadPacketException e) {
             }
         }
-    }
-
-    private static void shutdown() throws IOException {
-        //System.out.println("\nShutting down.");
-        LEAF.close();
-        ULTRAPEER_1.close();
-        ULTRAPEER_2.close();
     }
 }
 
