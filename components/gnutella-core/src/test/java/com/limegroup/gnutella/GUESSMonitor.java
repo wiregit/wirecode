@@ -126,7 +126,7 @@ public class GUESSMonitor extends BaseTestCase {
                                        ReplyHandler handler) {
             super.handlePingReply(reply, handler);
             try {
-                if (!Endpoint.isPrivateAddress(reply.getIPBytes()) &&
+                if (!CommonUtils.isPrivateAddress(reply.getIPBytes()) &&
                     notMe(InetAddress.getByName(reply.getIP()), 
                           reply.getPort()) &&
                     reply.supportsUnicast()) {
