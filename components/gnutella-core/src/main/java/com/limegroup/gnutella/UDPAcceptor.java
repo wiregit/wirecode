@@ -75,13 +75,14 @@ public final class UDPAcceptor implements Runnable {
 		
 		MessageRouter router = RouterService.getMessageRouter();
 
-		byte[] datagramBytes = new byte[BUFFER_SIZE];
-		DatagramPacket datagram = 
-		    new DatagramPacket(datagramBytes, BUFFER_SIZE);
-
-		
 		while(port == RouterService.getPort()) {
-			try {				
+			try {
+                // These NEXT TWO lines may need to be optimized
+                // -------------			
+                byte[] datagramBytes = new byte[BUFFER_SIZE];
+                DatagramPacket datagram = 
+                new DatagramPacket(datagramBytes, BUFFER_SIZE);
+                // -------------			
 				_socket.receive(datagram);
 				byte[] data = datagram.getData();
 				int length = datagram.getLength();
