@@ -59,11 +59,12 @@ public class OnDemandUnicaster {
 
     /** Sends out a UDP query with the specified URN to the specified host.
      *  @throws IllegalArgumentException if ep or queryURN are null.
+     *  @throws InterruptedException useful for guys who want to be notified.
      *  @param ep the location you want to query.
      *  @param queryURN the URN you are querying for.
      */
     public static void query(GUESSEndpoint ep, URN queryURN) 
-        throws IllegalArgumentException {
+        throws IllegalArgumentException, InterruptedException {
 
         // validity checks
         // ------
@@ -83,7 +84,7 @@ public class OnDemandUnicaster {
             }
             catch (IOException ignored) {}
             // wait a little, hope to get the query key
-            try { Thread.sleep(150); } catch (InterruptedException whatever) {}
+            Thread.sleep(150);
             key = (QueryKey) _queryKeys.get(ep);
             // TODO: is this the right thing to do?  i hate it but lets keep it
             // for now.  a couple of options though:

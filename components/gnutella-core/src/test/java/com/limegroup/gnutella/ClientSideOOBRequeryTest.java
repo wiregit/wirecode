@@ -894,7 +894,13 @@ public class ClientSideOOBRequeryTest
             assertEquals(UDP_ACCESS.length, endpoints.size());
         }
         
-        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        long currTime = System.currentTimeMillis();
+        Downloader downloader = 
+            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        
+        Thread.sleep(1000);
+        assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
+
         // we should start getting guess queries on all UDP ports, actually
         // querykey requests
         for (int i = 0; i < UDP_ACCESS.length; i++) {
@@ -918,8 +924,26 @@ public class ClientSideOOBRequeryTest
             }
         }
 
+        Thread.sleep((UDP_ACCESS.length * 1000) - 
+                     (System.currentTimeMillis() - currTime));
+
+        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
 
         callback.clearGUID();
+        downloader.stop();
+
+        Thread.sleep(1000);
+
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
     }
 
 
