@@ -2,9 +2,9 @@ package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
@@ -229,11 +229,13 @@ public final class HandshakeResponse {
         boolean pushFound = false;
         if (PROXY_SERVICES_SUPPORTED) {
             Set services = (Set) headers.get(HeaderNames.X_PROXY_SERVICE);
-            Iterator iter = services.iterator();
-            while (iter.hasNext()) {
-                String currService = (String) iter.next();
-                if (currService.indexOf("Push") != -1)
-                    pushFound = true;
+            if (services != null) {
+                Iterator iter = services.iterator();
+                while (iter.hasNext()) {
+                    String currService = (String) iter.next();
+                    if (currService.indexOf("Push") != -1)
+                        pushFound = true;
+                }
             }
         }
         PUSH_PROXY_ENABLED = pushFound;
@@ -783,7 +785,7 @@ public final class HandshakeResponse {
      *  otherwise <tt>false</tt>
      */
     public boolean desiresProxyServices() {
-        return LEAF && PROXY_SERVICES_SUPPORTED;
+        return PROXY_SERVICES_SUPPORTED;
     }
 
     /**
@@ -793,7 +795,7 @@ public final class HandshakeResponse {
      *  otherwise <tt>false</tt>
      */
     public boolean isPushProxy() {
-        return ULTRAPEER && PROXY_SERVICES_SUPPORTED && PUSH_PROXY_ENABLED;
+        return PROXY_SERVICES_SUPPORTED && PUSH_PROXY_ENABLED;
     }
 
     /**

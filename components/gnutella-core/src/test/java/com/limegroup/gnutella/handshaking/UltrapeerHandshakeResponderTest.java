@@ -120,10 +120,11 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         assertTrue("should have returned that we accepted the connection", 
                    hr.isAccepted());
-        assertEquals("should only have one header", 1, hr.props().size());
+        assertEquals("should have 3 headers", 3, hr.props().size());
         assertTrue("should deflate to leaf (may change)",
                     hr.isDeflateEnabled());
-
+        assertTrue("should have client guid.", hr.desiresProxyServices());
+        assertTrue("should be push proxy.", hr.isPushProxy());
         
         UltrapeerSettings.MAX_LEAVES.setValue(0);
         hr = responder.respondUnauthenticated(headers, true);
@@ -195,10 +196,14 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());
         assertTrue("should tell the leaf to be a leaf", hr.hasLeafGuidance());
-        assertTrue("should be high degree connection", hr.isHighDegreeConnection());
+        assertTrue("should be high degree connection", 
+                   hr.isHighDegreeConnection());
         assertTrue("should be an Ultrapeer query routing connection", 
                    hr.isUltrapeerQueryRoutingConnection());
-        assertTrue("should be deflating to leaf", hr.isDeflateEnabled());                   
+        assertTrue("should be deflating to leaf", hr.isDeflateEnabled());
+        assertTrue("should have client guid.", hr.desiresProxyServices());
+        assertTrue("should be push proxy.", hr.isPushProxy());
+        
 
         //  2) check to make sure that leaves are rejected with X-Try-Ultrapeer
         //     headers when we alread have enough leaves -- create this 

@@ -691,14 +691,27 @@ public class Connection {
             Enumeration enum=props.propertyNames();
             while (enum.hasMoreElements()) {
                 String key=(String)enum.nextElement();
-                String value=props.getProperty(key);
-                // Overwrite any domainname with true IP address
-                if ( HeaderNames.REMOTE_IP.equals(key) )
-                    value=getInetAddress().getHostAddress();
-                if (value==null)
-                    value="";
-                sendString(key+": "+value+CRLF);   
-                HEADERS_WRITTEN.put(key, value);
+                Object obj=props.get(key);
+                if (obj instanceof Set) {
+                    Set vals=(Set)obj;
+                    Iterator iter = vals.iterator();
+                    while (iter.hasNext()) {
+                        String val=(String)iter.next();
+                        if (val==null) val="";
+                        sendString(key+": "+val+CRLF);
+                    }
+                    HEADERS_WRITTEN.put(key, vals);
+                }
+                else if (obj instanceof String) {
+                    String value=(String)obj;
+                    // Overwrite any domainname with true IP address
+                    if ( HeaderNames.REMOTE_IP.equals(key) )
+                        value=getInetAddress().getHostAddress();
+                    if (value==null)
+                        value="";
+                    sendString(key+": "+value+CRLF);   
+                    HEADERS_WRITTEN.put(key, value);
+                }
             }
         }
         //send the trailer
@@ -1520,6 +1533,14 @@ public class Connection {
     boolean isQueryRoutingEnabled() {
 		return _headers.isQueryRoutingEnabled();
     }
+
+
+    /** True if this connection can be used as a PushProxy.
+     */
+    boolean isPushProxy() {
+        return isClientSupernodeConnection() && _headers.isPushProxy();
+    }
+    
 
     // overrides Object.toString
     public String toString() {

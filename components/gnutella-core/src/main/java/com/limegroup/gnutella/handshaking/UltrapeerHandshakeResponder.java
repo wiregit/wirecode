@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import java.util.Properties;
+import com.sun.java.util.collections.*;
 import java.io.IOException;
 
 /**
@@ -123,10 +124,13 @@ public class UltrapeerHandshakeResponder
     private void setupProxyServices(Properties ret, HandshakeResponse response) {
             // part 1 of the protocol
             ret.put(HeaderNames.X_SERVENT_ID,
-                    ret.getProperty(HeaderNames.X_SERVENT_ID));
+                    response.getProperty(HeaderNames.X_SERVENT_ID));
             // part 2 - the proxy services
             // push proxy
-            ret.put(HeaderNames.X_PROXY_SERVICE, HeaderNames.X_PUSH_PROXY);
+            Set proxyServices = new HashSet();
+            proxyServices.add(HeaderNames.X_PUSH_PROXY);
+            // put in whole set
+            ret.put(HeaderNames.X_PROXY_SERVICE, proxyServices);
     }
 
 	/**
