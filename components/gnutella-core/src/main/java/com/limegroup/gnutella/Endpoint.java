@@ -10,7 +10,7 @@ public class Endpoint {
     String hostname;
     int port;
     
-    Endpoint(String hostname, int port) {
+    public Endpoint(String hostname, int port) {
 	this.hostname=hostname;
 	this.port=port;
     }
