@@ -9,9 +9,10 @@ import com.bitzi.util.Base32;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
+
+// make URLDecoder reference unambiguous
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>
@@ -360,11 +361,12 @@ public final class UploadManager implements BandwidthTracker {
             if( uploader != null ) {
                 uploader.stop();
                 cleanupFinishedUploader(uploader, startTime);
-            }
+            } else {
             
-            debug(uploader + " closing socket");
-            //close the socket
-            close(socket);
+                debug(uploader + " closing socket");
+                //close the socket
+                NetworkUtils.closeSocket(socket);
+            }
         }
     }
     
@@ -420,8 +422,6 @@ public final class UploadManager implements BandwidthTracker {
             }
             removeFromList(uploader);
         }
-        
-        uploader.closeFileStreams();
         
         if( RECORD_STATS ) {
             switch(state) {
@@ -686,24 +686,6 @@ public final class UploadManager implements BandwidthTracker {
             throw new IOException("close connection");
     }
 
-    /**
-     * closes the passed socket and its corresponding I/O streams
-     */
-    public void close(Socket socket) {
-        //close the output streams, input streams and the socket
-        try {
-            if (socket != null)
-                socket.getOutputStream().close();
-        } catch (Exception e) {}
-        try {
-            if (socket != null)
-                socket.getInputStream().close();
-        } catch (Exception e) {}
-        try {
-            if (socket != null) 
-                socket.close();
-        } catch (Exception e) {}
-    }
     
     /**
      * Returns whether or not an upload request can be serviced immediately.
