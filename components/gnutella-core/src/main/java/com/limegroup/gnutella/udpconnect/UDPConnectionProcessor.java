@@ -432,6 +432,9 @@ public class UDPConnectionProcessor {
         // Record the second chunk of the message for the next read.
         _trailingChunk = dmsg.getData2Chunk();
 
+		// Remove this record from the receiving window
+		_receiveWindow.clearEarlyWrittenBlocks();	
+
         // Return the first small chunk of data from the GUID
         return dmsg.getData1Chunk();
     }
@@ -736,6 +739,10 @@ log("handleMessage :"+msg+" t:"+_lastReceivedTime);
             } else {
             	// Record the ack
 				_sendWindow.ackBlock(seqNo);
+				
+				// Clear out the acked blocks at window start
+				_sendWindow.clearLowAckedBlocks();	
+
 log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 			}
         } else if (msg instanceof DataMessage) {
