@@ -670,7 +670,8 @@ public class HostCatcher {
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
     public boolean add(Endpoint host, int priority) {
-        LOG.trace("adding host");
+        if (LOG.isTraceEnabled())
+            LOG.trace("adding host "+host);
         if(host instanceof ExtendedEndpoint)
             return add((ExtendedEndpoint)host, priority);
         
@@ -1070,6 +1071,16 @@ public class HostCatcher {
         }
         recoverHosts();
         lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
+        
+        // schedule new runnable to clear the set of endpoints that
+        // were pinged while trying to connect
+        RouterService.schedule(
+                new Runnable() {
+                    public void run() {
+                        UDPHostRanker.resetData();
+                    }
+                },
+                PONG_RANKING_EXPIRE_TIME,0);
     }
 
     /**
@@ -1159,6 +1170,8 @@ public class HostCatcher {
         FETCHER.resetFetchTime();
         gWebCache.resetData();
         udpHostCache.resetData();
+        
+        UDPHostRanker.resetData();
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.

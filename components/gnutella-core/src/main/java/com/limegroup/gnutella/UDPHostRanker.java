@@ -2,13 +2,13 @@ package com.limegroup.gnutella;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +50,11 @@ public class UDPHostRanker {
      * The last time we sent a datagram.
      */
     private static long _lastSentTime;
+    
+    /**
+     * set of endpoints we pinged since last expiration
+     */
+    private static final Set _recent = new TreeSet(IpPort.COMPARATOR);
     
     /**
      * Ranks the specified Collection of hosts.
@@ -136,7 +141,6 @@ public class UDPHostRanker {
         return waits < 10;
     }
         
-    
     /**
      * Sends the given send bundle.
      */
@@ -161,6 +165,13 @@ public class UDPHostRanker {
         
         Iterator iter = hosts.iterator();
         while(iter.hasNext() && !canceller.isCancelled()) {
+            IpPort host = (IpPort)iter.next();
+            
+            if (_recent.contains(host))
+                continue;
+            
+            _recent.add(host);
+            
             long now = System.currentTimeMillis();
             if(now > _lastSentTime + SEND_INTERVAL) {
                 _sentAmount = 0;
@@ -171,8 +182,7 @@ public class UDPHostRanker {
                 } catch(InterruptedException ignored) {}
                 _sentAmount = 0;
             }
-
-            IpPort host = (IpPort)iter.next();
+            
             if(LOG.isTraceEnabled())
                 LOG.trace("Sending to " + host + ": " + message);
             UDPService.instance().send(message, host);
@@ -194,6 +204,18 @@ public class UDPHostRanker {
             // Purge after 20 seconds.
             RouterService.schedule(udpMessagePurger, LISTEN_EXPIRE_TIME, 0);
         }
+    }
+    
+    /**
+     * clears the list of Endpoints we pinged since the last reset,
+     * after sending all currently queued messages.
+     */
+    static void resetData() {
+        QUEUE.add(new Runnable(){
+            public void run() {
+                _recent.clear();
+            }
+        });
     }
     
     /**
