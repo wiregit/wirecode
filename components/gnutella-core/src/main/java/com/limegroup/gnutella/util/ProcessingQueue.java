@@ -32,7 +32,7 @@ public class ProcessingQueue {
     /**
      * The thread doing the processing.
      */
-    Thread _runner = null;
+    private Thread _runner = null;
     
     /**
      * Constructs a new ProcessingQueue using a ManagedThread.
@@ -56,9 +56,9 @@ public class ProcessingQueue {
      */
     public synchronized void add(Runnable r) {
         QUEUE.add(r);
-        if(_runner == null) {
+        notify();
+        if(_runner == null)
             startRunner();
-        }
     }
     
     /**
@@ -79,21 +79,37 @@ public class ProcessingQueue {
      */
     private class Processor implements Runnable {
         public void run() {
-            try {
-                while(QUEUE.size() > 0) {
-                    Runnable next = (Runnable)QUEUE.remove(0);
-                    next.run();
-                }
-            } finally {
-                synchronized(ProcessingQueue.this) {
-                    // If something was added before we grabbed the lock,
-                    // restart the runner immediately.
-                    if(!QUEUE.isEmpty())
-                        startRunner();
-                    // Otherwise, set the runner to be null so that the thread
-                    // is restarted when a new item is added.
-                    else
-                        _runner = null;
+            while(true) {
+                try {
+                    while(QUEUE.size() > 0) {
+                        Runnable next = (Runnable)QUEUE.remove(0);
+                        next.run();
+                    }
+                } finally {
+                    synchronized(ProcessingQueue.this) {
+                        // If something was added before we grabbed the lock,
+                        // process those items immediately instead of waiting
+                        if(!QUEUE.isEmpty())
+                            continue;
+                        
+                        // Wait a little bit to see if something new is going
+                        // to come in, so we don't needlessly kill/recreate
+                        // threads.
+                        try {
+                            ProcessingQueue.this.wait(5 * 1000);
+                        } catch(InterruptedException ignored) {}
+                        
+                        // If something was added and notified us, process it
+                        // instead of exiting.
+                        if(!QUEUE.isEmpty())
+                            continue;
+                        // Otherwise, set the runner to be null so that the thread
+                        // is restarted when a new item is added.
+                        else {
+                            _runner = null;
+                            break;
+                        }
+                    }
                 }
             }
         }
