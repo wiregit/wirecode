@@ -731,6 +731,14 @@ public class FileManager {
         return retList;
     }
     
+
+    /** @return A List of KeyWords from the FS that one does NOT want broken
+     *  upon hashing into a QRT.  Initially being used for schema hashing.
+     */
+    public List getIndivisibleKeyWords() {
+        return new ArrayList();
+    }
+
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
         return new File(f.getCanonicalPath());
