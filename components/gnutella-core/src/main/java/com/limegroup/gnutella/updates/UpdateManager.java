@@ -96,10 +96,10 @@ public class UpdateManager {
     public void checkAndUpdate(Connection connection) {
 		String nv = connection.getVersion();
         debug("myVersion:"+latestVersion+" theirs: "+nv);
-        if(nv.equals(SPECIAL_VERSION))// should never see this on the network!!
-            return;//so this should never happen
         if(!isGreaterVersion(nv,latestVersion))
             return;        
+        if(nv.equals(SPECIAL_VERSION))// should never see this on the network!!
+            return;//so this should never happen
         final Connection c = connection;
         Thread checker = new Thread() {
             public void run() {
