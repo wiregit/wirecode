@@ -393,7 +393,7 @@ public final class SettingsManager {
 		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;wma;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve";
+		"bin;dmg;jve;nsv;med;mod;7z;iso";
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";

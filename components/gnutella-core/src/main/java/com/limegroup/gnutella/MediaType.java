@@ -135,20 +135,20 @@ public class MediaType implements Serializable {
                 "cab", "rpm", "deb", "msi", "msp",
                 "gz", "gzip", "z",
                 "tar", "tgz", "taz", "shar",
-                "hqx", "sit", "dmg"
+                "hqx", "sit", "dmg", "7z"
             });
         MediaType audio = new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
                 "mp3", "mpa", "ogg", "wma",
                 "ra", "rm", "ram", "rmj", "lqt",
                 "wav", "au", "snd",
-                "aif", "aiff", "aifc"
+                "aif", "aiff", "aifc", "mod", "med", "iso"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
                 "mpg", "mpeg", "mpe", "mng",
                 "rm", "ram", "asf", "qt", "mov", "avi",
-                "swf", "dcr", "jve"
+                "swf", "dcr", "jve", "nsv"
             });
         MediaType images = new MediaType(SCHEMA_IMAGES, IMAGES,
             new String[] {
