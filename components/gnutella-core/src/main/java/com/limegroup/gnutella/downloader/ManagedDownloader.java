@@ -903,19 +903,28 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         AlternateLocation loc = null;
-        try {
-            loc = AlternateLocation.create(rfd);
-        } catch (IOException iox) {
-            return;
-        }
-        Assert.that(loc!=null,"null alternateLocation but no exception");
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
+            try { 
+                //create a fresh one for every downloader, bad things happen
+                //when differnt AlternateLocationCollections share
+                //AlternateLocation objects
+                loc = AlternateLocation.create(rfd);
+            } catch (IOException iox) { //failed? quit
+                return;
+            }
             if(good)
                 httpDloader.addSuccessfulAltLoc(loc);
             else
                 httpDloader.addFailedAltLoc(loc);
         }
+        try {
+            loc = AlternateLocation.create(rfd);
+        } catch(IOException iox) {
+            return;
+        }
+        if(!good)
+            validAlts.remove(loc);
     }
 
     public boolean resume() throws AlreadyDownloadingException {

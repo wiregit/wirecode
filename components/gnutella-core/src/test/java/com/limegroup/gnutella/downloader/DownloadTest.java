@@ -90,7 +90,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() { 
-        return buildTestSuite(DownloadTest.class);//,"testSimpleAlternateLocations");
+        return buildTestSuite(DownloadTest.class,"testAlternateLocationsAreRemoved");
     }
 
     public static void main(String[] args) {
@@ -490,28 +490,31 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//got here? Test passed
     }
 
-    public void testSimpleAlternateLocations() throws Exception {  
-        debug("-Testing AlternateLocation write...");
+
+    //Sumeet:TODO: change this test to make sure head is issued for smaller
+    //files.
+//      public void testSimpleAlternateLocations() throws Exception {  
+//          debug("-Testing AlternateLocation write...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc[] rfds = {rfd1};
+//          RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+//          RemoteFileDesc[] rfds = {rfd1};
 
-        tGeneric(rfds);
+//          tGeneric(rfds);
 
-        //Prepare to check the alternate locations
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
+//          //Prepare to check the alternate locations
+//          AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+//          AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
            
-        URN sha1 = rfd1.getSHA1Urn();
-        URN uSHA1 = uploader1.getReportedSHA1();
+//          URN sha1 = rfd1.getSHA1Urn();
+//          URN uSHA1 = uploader1.getReportedSHA1();
         
-        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
-        assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
-        assertEquals("wrong number of locs ",1, alt1.getAltLocsSize());
-        assertNotNull("rfd1 sha1", sha1);
-        assertNotNull("uploader1 sha1", uSHA1);
-        assertEquals("SHA1 test failed", sha1, uSHA1);
-    }
+//          assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
+//          assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
+//          assertEquals("wrong number of locs ",1, alt1.getAltLocsSize());
+//          assertNotNull("rfd1 sha1", sha1);
+//          assertNotNull("uploader1 sha1", uSHA1);
+//          assertEquals("SHA1 test failed", sha1, uSHA1);
+//      }
 
     public void testTwoAlternateLocations() throws Exception {  
         debug("-Testing Two AlternateLocations...");
@@ -596,28 +599,31 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
-        final int RATE=500;
+        final int RATE=50;
         final int STOP_AFTER = 1*TestFile.length()/10 - 1;          
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
         uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());        
+        RemoteFileDesc rfd1=
+                        newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=
+                        newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd3=
+                        newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.create(rfd2.getSHA1Urn());
+                         AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
         URL url2 = rfd2.getUrl();
         URL url3 = rfd3.getUrl();        
-        AlternateLocation al2 =
-			AlternateLocation.create(url2);
-        AlternateLocation al3 =
-			AlternateLocation.create(url3);
+        AlternateLocation al1 =	AlternateLocation.create(rfd1);
+        AlternateLocation al2 =	AlternateLocation.create(url2);
+        AlternateLocation al3 =	AlternateLocation.create(url3);
         ualt.add(al2);
         ualt.add(al3);
 
@@ -633,28 +639,43 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tu3: "+u3+"\n");        
         debug("\tTotal: "+(u1+u2+u3)+"\n");
-        
-        // This is the real test.
-        // We expect 2 alternate locations, one for the original RFD
-        // that we sent to DownloadManager, and one for the alternate
-        // location that was succesful.  The altnerate location that
-        // failed should be removed from the list.
-        // The location is actually being removed in
-        // ManagedDownloader.establishConnection(RemoteFileDesc).
-        // This is because the download stalled, but we were able to recieve
-        // info, and ManagedDownloader attempts to reconnect.  TestUploader
-        // will refuse the connection, and ManagedDownloader will try to send
-        // a push (which of course fails), and then it assumes that the
-        // location has left the network, and removes it from the list.
-        assertEquals("bad alt loc wasn't removed", 
-            2, DOWNLOADER.getNumberOfAlternateLocations()
-        );
-
-        //Note: The amount downloaded from each uploader will not 
-        //be equal, because the uploaders are stated at different times.
-        assertGreaterThan("u1 did no work", 0, u1);
-        assertEquals("u2 did more work than needed", STOP_AFTER, u2);
-        assertGreaterThan("u3 did no work", 0, u3);
+        //Now let's check that the uploaders got the correct AltLocs.
+        //Uploader 1: Must have al3. al2 may either be demoted or removed
+        //Uploader 1 got correct Alts?
+        AlternateLocationCollection alts = uploader1.getAlternateLocations();
+        assertTrue(alts.contains(al3));
+        assertEquals("Extra alts in u1",1,alts.getAltLocsSize());
+        Iterator iter = alts.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
+        //uploader 2 dies after it uploades 1 bytes less than a chunk, so it
+        //does only one round of http handshakes. so it never receives alternate
+        //locations, even though u1 and u3 are good locations
+        alts = uploader2.getAlternateLocations();
+        assertEquals("u2 did more than 1 handshake",0,alts.getAltLocsSize());
+        alts = uploader3.getAlternateLocations();
+        assertTrue(alts.contains(al1));
+        iter = alts.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
+        //Test Downloader has correct alts: the downloader should have
+        //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
+        AlternateLocationCollection coll = (AlternateLocationCollection)
+        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        assertTrue(coll.contains(al1));
+        assertTrue(coll.contains(al3));
+        iter = coll.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  

@@ -49,7 +49,7 @@ public final class AlternateLocation implements
      * it has succeeded. Newly created AlternateLocations start out wit a value
      * of 1.
      */
-    private int _count = 0;
+    private volatile int _count = 0;
 
     /**
      * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
@@ -61,7 +61,7 @@ public final class AlternateLocation implements
      * modules like the download may not want to demote an AlternatLocation, 
      * other like the uploader may rely on it.
      */
-    private boolean _demoted = false;
+    private volatile boolean _demoted = false;
 
 
     ////////////////////////"Constructors"//////////////////////////////
@@ -239,7 +239,7 @@ public final class AlternateLocation implements
     /**
      * package access, accessor to the value of _demoted
      */ 
-    synchronized boolean getDemoted() { return _demoted; }
+    public synchronized boolean getDemoted() { return _demoted; }
     
     ////////////////////////////Mesh utility methods////////////////////////////
 
@@ -270,17 +270,17 @@ public final class AlternateLocation implements
      * package access to promote this. 
      * @see demote
      */
-    public synchronized void increment() {_count++; }
+    public synchronized void increment() { _count++; }
 
     /**
      * package access for demoting this.
      */
-    synchronized void  demote() { _demoted = true;}
+    synchronized void  demote() { _demoted = true; }
 
     /**
      * package access for demoting this.
      */
-    synchronized void promote() { _demoted = false;}
+    synchronized void promote() { _demoted = false; }
     
     ///////////////////////////////helpers////////////////////////////////
 
@@ -417,8 +417,10 @@ public final class AlternateLocation implements
         }
         //both have the same value for _demoted
         int ret = _count - other._count;
-        if(ret!=0)
+        if(ret!=0) 
             return ret;
+        if (this.URL.equals(other.URL)) 
+            return 0;
         ret = this.URL.getHost().compareTo(other.URL.getHost());
         if(ret!=0)
             return ret;
@@ -447,7 +449,7 @@ public final class AlternateLocation implements
 	 * @return the string representation of this alternate location
 	 */
 	public String toString() {
-			return this.URL.toExternalForm();
+        return this.URL.toExternalForm()+","+_count+","+_demoted;
 	}
 
 }
