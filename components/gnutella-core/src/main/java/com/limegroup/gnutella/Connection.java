@@ -532,6 +532,9 @@ public class Connection {
             while (enum.hasMoreElements()) {
                 String key=(String)enum.nextElement();
                 String value=props.getProperty(key);
+                // Overwrite any domainname with true IP address
+                if ( ConnectionHandshakeHeaders.REMOTE_IP.equals(key) )
+                    value=getInetAddress().getHostAddress();
                 if (value==null)
                     value="";
                 sendString(key+": "+value+CRLF);   
