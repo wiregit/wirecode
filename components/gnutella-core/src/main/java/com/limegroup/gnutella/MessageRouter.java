@@ -226,7 +226,7 @@ public abstract class MessageRouter {
 	 * Handle to the <tt>FileManager</tt> instance.
 	 */
 	private static FileManager _fileManager;
-
+    
 	/**
 	 * A handle to the thread that deals with QRP Propagation
 	 */
@@ -2525,11 +2525,26 @@ public abstract class MessageRouter {
 			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime())
+			if (time<c.getNextQRPForwardTime() && 
+                    ( (!_manager.getBusyLeafFlag() && !c.getDelayedLeafBusyFlag()) 
+                            || time<c.getNextBusyLeafQRPForwardTime()) ) {
+                
+                if( _manager.getBusyLeafFlag() ){
+                    //  If we are skipping this host because of time limitations, and
+                    //      if we would have updated him otherwise, then flag the host 
+                    //      so we don't skip him again once his delay timer expires
+                    c.setDelayedLeafBusyFlag(true);                
+                }
 				continue;
+            }
 
-
+            //  If we get here, then we are here because the peer didn't get updated
+            //      the last time a leaf went busy.  Since we are about to update this
+            //      node, we should clear his flag out...
+            c.setDelayedLeafBusyFlag(false);
+            
 			c.incrementNextQRPForwardTime(time);
+            c.incrementNextBusyLeafQRPForwardTime(time);
 				
 			// Create a new query route table if we need to
 			if (table == null) {
@@ -2570,6 +2585,8 @@ public abstract class MessageRouter {
     	    
             c.setQueryRouteTableSent(table);
 		}
+        
+        _manager.setBusyLeafFlag(false);
     }
 
     /**

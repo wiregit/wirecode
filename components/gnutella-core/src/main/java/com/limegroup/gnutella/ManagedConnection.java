@@ -88,6 +88,12 @@ public class ManagedConnection extends Connection
 	 * in milliseconds. 
      */
     private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
+    
+    /**
+     * The time to wait between last-hop QRT table updates between Ultrapeers,
+     * when a leaf becomes busy and signals this to us
+     */
+    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*2; //5 minutes
 
     /** 
      * The time to wait between route table updates for Ultrapeers, 
@@ -246,6 +252,11 @@ public class ManagedConnection extends Connection
     /** The next time I should send a query route table to this connection.
 	 */
     private long _nextQRPForwardTime;
+    
+    /**
+     * The next time to send a QRT update to this peer because of BusyLeaf updates
+     */
+    private long _nextBusyLeafQRPForwardTime;
 
 
     /** 
@@ -261,6 +272,13 @@ public class ManagedConnection extends Connection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
    
+    /**
+     * True iff this connection should be updated because a leaf became busy and we
+     * have not yet updated this host's QRT table because his previous update was too
+     * recent.  -DN 
+     */
+    private boolean _delayedLeafBusyFlag=false;
+    
     /**
      * The domain to which this connection is authenticated
      */
@@ -1302,12 +1320,10 @@ public class ManagedConnection extends Connection
             
             if( m_bSupportsBusyLeaf && isSupernodeClientConnection() ){
                 //	If the connection is to a leaf, and the leaf supports
-                //	the busy leaf QRT scheme, then set the connection's 
-                //	busy leaf flag appropriately
+                //	the busy leaf QRT scheme, then set the global busy 
+                //	leaf flag appropriately
                 if( softMaxHops==0 )
-                    m_bBusyLeaf=true;
-                else
-                    m_bBusyLeaf=false;
+                    _manager.setBusyLeafFlag(true);
             }
         }
         else if (vm instanceof PushProxyAcknowledgement) {
@@ -1524,12 +1540,39 @@ public class ManagedConnection extends Connection
     // End statistics accessors
     //
 
+    /**
+     * Getter for the "This host needs to have a QRT update sent because of a leaf having
+     * become busy in the past" flag
+     * 
+     * @return true iff this host still has not been updated in response to the last leaf
+     * having become busy
+     */
+    public boolean getDelayedLeafBusyFlag() {
+        return _delayedLeafBusyFlag;
+    }
+    
+    /**
+     * Setter for the "This host needs to have a QRT update sent because of a leaf having
+     * become busy in the past" flag
+     * 
+     * @param bSet - Set or Clear the flag
+     */
+    public void setDelayedLeafBusyFlag(boolean bSet) {
+        _delayedLeafBusyFlag=bSet;
+    }
 
     /** Returns the system time that we should next forward a query route table
      *  along this connection.  Only valid if isClientSupernodeConnection() is
      *  true. */
     public long getNextQRPForwardTime() {
         return _nextQRPForwardTime;
+    }
+
+    /** Returns the system time that we should next forward a query route table
+     *  along this connection.  Only valid if isClientSupernodeConnection() is
+     *  true. */
+    public long getNextBusyLeafQRPForwardTime() {
+        return _nextBusyLeafQRPForwardTime;
     }
 
 	/**
@@ -1547,7 +1590,18 @@ public class ManagedConnection extends Connection
 			// otherwise, it's an Ultrapeer
 			_nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
 		}
-	}
+	} 
+    
+    /**
+     * Increments the next time we should forward a QRT update for this connection, because
+     * of 
+     * @param curTime the current time in ms, used to calculate the next update time used if
+     * a leaf has become busy.
+     */
+    public void incrementNextBusyLeafQRPForwardTime(long curTime) {
+        if( isUltrapeerQueryRoutingConnection() )
+            _nextBusyLeafQRPForwardTime = curTime + BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME;        
+    }
 
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
