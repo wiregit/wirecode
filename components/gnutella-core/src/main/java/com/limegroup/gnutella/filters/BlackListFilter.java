@@ -10,7 +10,7 @@ import com.limegroup.gnutella.*;
  *stuff Chris is writing can update the list.
  * @ author Sumeet Thadani
  */
-class BlackListFilter{
+class BlackListFilter extends SpamFilter{
     
     private Vector badHosts = new Vector();
     private ConnectionManager cm;
@@ -18,8 +18,7 @@ class BlackListFilter{
     private String allHosts;
 
     //constructors
-    BlackListFilter(ConnectionManager c){
-	cm = c;
+    protected BlackListFilter(){
 	allHosts = SettingsManager.instance().getBannedIps();
 	StringTokenizer st = new StringTokenizer(allHosts,";");
 	while(st.hasMoreTokens()){
@@ -29,9 +28,9 @@ class BlackListFilter{
     
     /** To ensure the singleton pattern
      */
-    public static BlackListFilter instance(ConnectionManager c){
+    public static BlackListFilter instance(){
 	if (instance == null)
-	    instance = new BlackListFilter(c);
+	    instance = new BlackListFilter();
 	return instance;
     }
     
