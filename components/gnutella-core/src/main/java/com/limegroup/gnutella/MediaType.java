@@ -1,6 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.Serializable;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * A generic type of media, i.e., "video" or "audio".
@@ -184,4 +187,35 @@ public class MediaType implements Serializable {
         // Added by Sumeet Thadani to allow a rich search window to be popped up.
         return new MediaType[] {any, text, programs, audio, video, images};
     }
+
+    /** Utility class for aggregating MediaTypes.
+     *  This class is not synchronized - it should never be used in a fashion
+     *  where synchronization is necessary.  If that changes, add synch.
+     */
+    public class Aggregator {
+        /** A list of MediaType objects.
+         */
+        private List _filters = new LinkedList();
+
+        private Aggregator() {}
+        /** I don't check for duplicates. */
+        private void addFilter(MediaType filter) {
+            _filters.add(filter);
+        }
+
+        /** @return true if the Response falls within one of the MediaTypes
+         *  this aggregates.
+         */
+        public boolean allow(Response resp) {
+            Iterator iter = _filters.iterator();
+            final String fName = resp.getName();
+            while (iter.hasNext()) {
+                MediaType currType = (MediaType)iter.next();
+                if (currType.matches(fName))
+                    return true;
+            }
+            return false;
+        }
+    }
+
 }
