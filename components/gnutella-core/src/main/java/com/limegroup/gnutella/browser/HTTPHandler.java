@@ -31,6 +31,16 @@ public class HTTPHandler {
 		return(handler);
 	}
 
+	/**
+     *  Create and execute the handler without a new thread.
+     */
+	public static HTTPHandler createPage( Socket socket, String content ) {
+
+    	HTTPHandler handler = new HTTPHandler(socket, null);
+		handler.handlePage(content);
+		return(handler);
+	}
+
     public HTTPHandler( Socket socket, String line ) {
         _socket      = socket;
 		_line        = line;
@@ -38,7 +48,7 @@ public class HTTPHandler {
     }
 
     /**
-     *  Handle the request
+     *  Handle a file request
      */
     public void handle() {
 
@@ -57,6 +67,16 @@ public class HTTPHandler {
 
 		// Process Request
 	    processRequest(apath, rpath);
+	}
+
+    /**
+     *  Return a precreated page
+     */
+    public void handlePage(String page) {
+
+		// Setup streams 
+		setupIO();
+		uploadPage(page);
 	}
 
 
@@ -136,6 +156,28 @@ public class HTTPHandler {
 		}
     }
 
+    /**
+     *  Echo back a page.
+     */
+	public void uploadPage(String page) {
+        int             length  = (int)page.length();
+		byte[]          content;
+
+        try {
+			writeHeader(length, getMimeType(".html"));
+			content = page.getBytes();
+            _ostream.write(content);
+
+        } catch( IOException e ) {
+			_inErrorState =true;
+		}
+
+		try {
+		    _ostream.close();
+        } catch( IOException e ) {
+		}
+    }
+
 	/** 
 	 *  Setup the few mime-types currently required.
 	 */
@@ -146,6 +188,8 @@ public class HTTPHandler {
 			return "image/gif";
 		else if ( filename.endsWith(".js") )
 			return "application/x-javascript";
+        else if ( filename.endsWith(".css") )
+            return "text/css";
         return "text/html"; 
 	}
 
