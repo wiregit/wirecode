@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * i.e., the real uploader.  It should send the appropriate header information,
  * followed by the actual file.  
  */
-public class NormalUploadState implements HTTPMessage {
+public final class NormalUploadState implements HTTPMessage {
     /** The amount of time that a send/wait cycle should take for throttled
      *  uploads.  This should be short enough to not be noticeable in the GUI,
      *  but long enough so that waits are not called so often as to be
