@@ -194,7 +194,7 @@ public final class ConnectionChecker implements Runnable {
         head.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         head.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
             "close");
-        head.setFollowRedirects(true);
+        head.setFollowRedirects(false);
         HttpClient client = HttpClientManager.getNewClient(20000, 3000);
         try {
             client.executeMethod(head);
