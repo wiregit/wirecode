@@ -87,8 +87,7 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * Since we have no best candidate at ttl 1 we should still enter it in the table.
 	 */
 	public void testUpdateSingleCandidate() throws Exception {
-		//reset the table.
-		setUp();
+		
 		
 	
 		assertEquals(mediocreCandidate.getInetAddress(), BestCandidates.getBest().getInetAddress());
@@ -140,7 +139,7 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * tests the simple getBest scenario
 	 */
 	public void testGetBest() throws Exception {
-		setUp();
+		
 		
 		//put the worst guy at ttl 1 and the best guy at ttl 2
 		Candidate [] update = new Candidate [2];
@@ -165,7 +164,7 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * then it repeats the process with a better candidate.
 	 */
 	public void testUpdateSameCandidate() throws Exception{
-		setUp();
+		
 		Candidate []update = new Candidate[2];
 		update[0]= mediocreCandidate;
 		update[1]=update[0];
@@ -204,7 +203,7 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * a worse candidate.  It can happen if the current best candidate goes offline.
 	 */
 	public void testChangedMind() throws Exception {
-		setUp();
+		
 		
 		//give myself a bad candidate
 		BestCandidates.update(badCandidate);
@@ -228,6 +227,28 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		//the new best candidate should be mediocreCandidate.
 		assertEquals(mediocreCandidate.getInetAddress(),BestCandidates.getBest().getInetAddress());
+	}
+	
+	/**
+	 * tests the case of failing a candidate.
+	 */
+	public void testFailCandidate() throws Exception {
+		//make my ttl 0 and ttl 2 candidates the same
+		BestCandidates.update(mediocreCandidate);
+		
+		Candidate [] update = new Candidate[2];
+		update[0]=goodCandidate;
+		update[1]=mediocreCandidate;
+		
+		BestCandidates.update(update);
+		
+		//then fail them!
+		BestCandidates.fail(new Endpoint(mediocreCandidate.getInetAddress().getAddress(),
+							mediocreCandidate.getPort()));
+		
+		assertNull(BestCandidates.getCandidates()[0]);
+		assertNotNull(BestCandidates.getCandidates()[1]);
+		assertNull(BestCandidates.getCandidates()[2]);
 	}
 	
 	
