@@ -595,8 +595,6 @@ public abstract class MessageRouter {
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter) {
-
-        System.out.println("MessageRouter::handleQueryRequest:: "+_callback); 
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -870,7 +868,6 @@ public abstract class MessageRouter {
 		if (qi==null || qi.lastReceived==null) 
 			return false;
 		else if (qi.lastReceived.contains(query)) {
-			//System.out.println("MessageRouter::sendRoutedQueryToHost::sending query"); 
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
