@@ -50,7 +50,7 @@ public class PongCacheMessageRouter extends MessageRouter
      * Same as super.broadcastPingRequest, but we don't use a connection manager,
      * so, we have to use our own list of outgoing connections.  
      */
-    protected void broadcastPingRequest()
+    protected void broadcastPingRequest(ManagedConnection receivingConnection)
     { 
         System.out.println("Broadcasting ping request to all outgoing");
         for(int i=0; i < outgoingConnections.size(); i++)
