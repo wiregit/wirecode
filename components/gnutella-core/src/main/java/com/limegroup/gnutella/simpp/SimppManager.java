@@ -187,7 +187,7 @@ public class SimppManager {
      * Saves the simpp.xml file to the user settings directory.
      */
     public boolean save(){
-        File tmp = new File(SIMPP_FILE+".tmp");
+        File tmp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE+".tmp");
         File simpp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE);
         
         OutputStream simppWriter = null;
