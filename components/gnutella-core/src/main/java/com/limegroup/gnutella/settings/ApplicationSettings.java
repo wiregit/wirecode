@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.CommonUtils;
+
 /**
  * Settings for LimeWire application
  */
@@ -10,12 +11,14 @@ public class ApplicationSettings extends LimeProps {
      * The Client ID number
      */
     public static final StringSetting CLIENT_ID = 
-        FACTORY.createStringSetting("CLIENT_ID", "");
+        FACTORY.createStringSetting("CLIENT_ID", "");
+
     /**
      * The average time this user leaves the application running.
      */        
     public static final IntSetting AVERAGE_UPTIME =
-        FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 20*60);   
+        FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 20*60);
+   
     /**
 	 * The total time this user has used the application.
 	 */    
@@ -66,7 +69,8 @@ public class ApplicationSettings extends LimeProps {
 	 * time before this.
 	 */    
     public static final BooleanSetting RUN_ONCE =
-        FACTORY.createBooleanSetting("RUN_ONCE", false);  
+        FACTORY.createBooleanSetting("RUN_ONCE", false);
+  
     /**
 	 * The x position of the window for the next time the application
 	 * is started.
@@ -86,7 +90,8 @@ public class ApplicationSettings extends LimeProps {
 	 * to the system tray on windows.
 	 */
     public static final BooleanSetting MINIMIZE_TO_TRAY =
-        FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY",             CommonUtils.supportsTray());    
+        FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
+            CommonUtils.supportsTray());    
     
     /**
 	 * A flag for whether or not the application should shutdown
@@ -94,28 +99,34 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting SHUTDOWN_AFTER_TRANSFERS =
         FACTORY.createBooleanSetting("SHUTDOWN_AFTER_TRANSFERS", 
-            CommonUtils.isMacOSX() ? false : !CommonUtils.supportsTray());    
+            CommonUtils.isMacOSX() ? false : !CommonUtils.supportsTray());
+    
     /**
 	 * The language to use for the application.
 	 */
     public static final StringSetting LANGUAGE =
-        FACTORY.createStringSetting("LANGUAGE",             System.getProperty("user.language", ""));
+        FACTORY.createStringSetting("LANGUAGE", 
+            System.getProperty("user.language", ""));
     
     /**
 	 * The country to use for the application.
 	 */
     public static final StringSetting COUNTRY =
-        FACTORY.createStringSetting("COUNTRY",             System.getProperty("user.country", ""));    
+        FACTORY.createStringSetting("COUNTRY", 
+            System.getProperty("user.country", ""));
+    
     /**
 	 * The locale variant to use for the application.
 	 */
     public static final StringSetting LOCALE_VARIANT =
-        FACTORY.createStringSetting("LOCALE_VARIANT", "");   
+        FACTORY.createStringSetting("LOCALE_VARIANT", "");
+   
     /**
 	 * Sets whether or not Monitor Tab should be enabled.
 	 */    
     public static final BooleanSetting MONITOR_VIEW_ENABLED =
-        FACTORY.createBooleanSetting("MONITOR_VIEW_ENABLED", true);  
+        FACTORY.createBooleanSetting("MONITOR_VIEW_ENABLED", true);
+  
     /**
 	 * Sets whether or not Connection Tab should be enabled.
 	 */
@@ -126,18 +137,21 @@ public class ApplicationSettings extends LimeProps {
 	 * Sets whether or not Library Tab should be enabled.
 	 */
     public static final BooleanSetting LIBRARY_VIEW_ENABLED =
-        FACTORY.createBooleanSetting("LIBRARY_VIEW_ENABLED", true);    
+        FACTORY.createBooleanSetting("LIBRARY_VIEW_ENABLED", true);
+    
     /**
 	 * Sets whether or not Shopping Tab should be enabled.
 	 */    
     public static final BooleanSetting SHOPPING_VIEW_ENABLED =
-        FACTORY.createBooleanSetting("SHOPPING_VIEW_ENABLED", true);    
+        FACTORY.createBooleanSetting("SHOPPING_VIEW_ENABLED", true);
+    
     /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.
 	 */
     public static final StringSetting JAR_NAME = 
-        FACTORY.createStringSetting("JAR_NAME", "LimeWire.jar");  
+        FACTORY.createStringSetting("JAR_NAME", "LimeWire.jar");
+  
     /**
 	 * Sets the classpath for legacy RunLime.jars.
 	 */
@@ -154,5 +168,6 @@ public class ApplicationSettings extends LimeProps {
 	 * A boolean flag for whether or not we should check again for an update.
 	 */
     public static final BooleanSetting CHECK_AGAIN = 
-        FACTORY.createBooleanSetting("CHECK_AGAIN", true);        
+        FACTORY.createBooleanSetting("CHECK_AGAIN", true);
+        
 }
