@@ -14,6 +14,12 @@ import java.util.StringTokenizer;
 public abstract class AbstractStatistic implements Statistic {
 
 	/**
+	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
+	 */
+	protected static final StatisticsManager STATS_MANAGER = 
+		StatisticsManager.instance();
+
+	/**
 	 * List of all statistics stored over intervals for this
 	 * specific <tt>Statistic</tt> instance.
 	 */
@@ -85,7 +91,7 @@ public abstract class AbstractStatistic implements Statistic {
 	}
 
 	// inherit doc comment
-	public void addData(int data) {
+	public void addData(int data) {		
 		_current += data;
 		_total += data;
 	}
