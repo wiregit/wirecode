@@ -168,6 +168,7 @@ public class ManagedConnection
                       int protocol) { 
         super(host, port,
               protocol!=PROTOCOL_OLD ? createNewProperties() : null,
+              protocol!=PROTOCOL_OLD ? createEmptyResponder() : null,
               protocol==PROTOCOL_BEST ? true : false);
         _router = router;
         _manager = manager;
@@ -189,7 +190,7 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager,
                       int protocol) {
-        super(socket, protocol!=PROTOCOL_OLD ? createNewProperties() : null);
+        super(socket, protocol!=PROTOCOL_OLD ? createNewResponder() : null);
         _router = router;
         _manager = manager;
 
@@ -729,6 +730,25 @@ public class ManagedConnection
         ret.setProperty("Pong-Caching",  "0.1");
         return ret;
     }
+
+    /** Creates a responder that returns the properties of a "new"
+     *  connection. */
+    private static HandshakeResponder createNewResponder() {
+        return new HandshakeResponder() {
+            public Properties respond(Properties read) {
+                return createNewProperties();
+            }
+        };
+    }
+
+    /** Creates a responder that returns no properties */
+    private static HandshakeResponder createEmptyResponder() {
+        return new HandshakeResponder() {
+            public Properties respond(Properties read) {
+                return new Properties();
+            }
+        };
+    }   
 
     /** Returns the query route state associated with this, or null if no
      *  such state. */
