@@ -72,9 +72,33 @@ public class LimeXMLProperties
         = "etc" + File.separator + "STDataMap.dat";
     
     
+    /**
+     * The property that denotes the
+     * name of the file that contains information about the schemas, queries
+     * corresponding to which are to be transformed to http requests for
+     * processing
+     */
     private static final String HTTP_MAPPING_FILE = "HTTP_MAPPING_FILE";
+     /**
+      * Name of the file that contains information about the schemas, queries
+      * corresponding to which are to be transformed to http requests for
+      * processing
+      */
     private static final String HTTP_MAPPING_FILE_DEF =  "etc"
         + File.separator + "httpmapping.xml";
+    
+     /**
+     * The property that denotes the 
+     * name of the file that contains schema => QueryHandler mappings for 
+     * the schemas that are to be handled directly without any transformation
+     */
+    private static final String DIRECT_MAPPING_FILE = "DIRECT_MAPPING_FILE";
+    /**
+     * Name of the file that contains schema => QueryHandler mappings for 
+     * the schemas that are to be handled directly without any transformation
+     */
+    private static final String DIRECT_MAPPING_FILE_DEF =  "etc"
+        + File.separator + "directmapping.xml";
     
     /**
      * Constructor: Initializes various default values, and loads the settings
@@ -171,6 +195,20 @@ public class LimeXMLProperties
             HTTP_MAPPING_FILE_DEF);
 
         return getPath() + httpMappingFile;   
+    }
+    
+    /**
+     * Returns the name of the file that 
+     * contains schema => QueryHandler mappings for 
+     * the schemas that are to be handled directly without any transformation
+     */
+    public String getDirectMappingFile()
+    {
+        String directMappingFile = _properties.getProperty(
+            DIRECT_MAPPING_FILE, 
+            DIRECT_MAPPING_FILE_DEF);
+
+        return getPath() + directMappingFile;   
     }
     
     /**
