@@ -255,7 +255,7 @@ public class ConnectionManager {
             _endpoints=newEndpoints;
 
             //Clean up route tables.
-            _router.removeReplyHandler(c);
+            _router.removeConnection(c);
         }
 
         // Remove from the all connections list and clean up the

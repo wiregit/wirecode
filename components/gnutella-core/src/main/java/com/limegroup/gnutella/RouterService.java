@@ -21,18 +21,10 @@ public class RouterService
      * Create a RouterService accepting connections on the default port
      */
     public RouterService(ActivityCallback activityCallback,
-                         PingRequestHandler pingRequestHandler,
-                         PingReplyHandler pingReplyHandler,
-                         QueryRequestHandler queryRequestHandler,
-                         QueryReplyHandler queryReplyHandler,
-                         PushRequestHandler pushRequestHandler) {
+                         MessageRouter router) {
         this(SettingsManager.instance().getPort(),
              activityCallback,
-             pingRequestHandler,
-             pingReplyHandler,
-             queryRequestHandler,
-             queryReplyHandler,
-             pushRequestHandler);
+             router);
     }
 
     /**
@@ -40,30 +32,20 @@ public class RouterService
      */
     public RouterService(int port,
                          ActivityCallback activityCallback,
-                         PingRequestHandler pingRequestHandler,
-                         PingReplyHandler pingReplyHandler,
-                         QueryRequestHandler queryRequestHandler,
-                         QueryReplyHandler queryReplyHandler,
-                         PushRequestHandler pushRequestHandler) {
+                         MessageRouter router) {
         callback = activityCallback;
 
         // First, construct all the pieces
-        acceptor = new Acceptor(port, callback);
-        manager = new ConnectionManager(callback);
-        router = new MessageRouter(
-            callback,
-            pingRequestHandler,
-            pingReplyHandler,
-            queryRequestHandler,
-            queryReplyHandler,
-            pushRequestHandler);
-        catcher = new HostCatcher(callback);
+        this.acceptor = new Acceptor(port, callback);
+        this.manager = new ConnectionManager(callback);
+        this.router = router;
+        this.catcher = new HostCatcher(callback);
 
         // Now, link all the pieces together, starting the various threads.
-        catcher.initialize(acceptor, manager);
-        router.initialize(acceptor, manager, catcher);
-        manager.initialize(router, catcher);
-        acceptor.initialize(manager, router);
+        this.catcher.initialize(acceptor, manager);
+        this.router.initialize(acceptor, manager, catcher);
+        this.manager.initialize(router, catcher);
+        this.acceptor.initialize(manager, router);
 
         //Now if quick connecting, try hosts.  Otherwise, populate the
         //HostCatcher with the list from the SettingsManager
@@ -77,7 +59,7 @@ public class RouterService
             t2.start();
         } else {
             try {
-                catcher.read(SettingsManager.instance().getHostList());
+                this.catcher.read(SettingsManager.instance().getHostList());
             } catch (FileNotFoundException e) {
                 callback.error(ActivityCallback.ERROR_10);
             } catch (IOException e) {
@@ -413,8 +395,9 @@ public class RouterService
 
         //2. Send a query for "*.*" with a TTL of 1.
         QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
+        router.sendQueryRequest(qr, c);
         try {
-            router.sendQueryRequest(qr, c);
+            c.flush();
         } catch (IOException e) {
             return null;
         }

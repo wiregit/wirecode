@@ -11,21 +11,15 @@ public class Main implements ActivityCallback {
     //Start thread to accept connections.  Optional first arg is the
     //listening port number.
     RouterService service;
+    ActivityCallback callback = new Main();
     if (args.length==1) {
         service=new RouterService(Integer.parseInt(args[0]),
-                                  new Main(),
-                                  FileManagerPingRequestHandler.instance(),
-                                  StandardPingReplyHandler.instance(),
-                                  FileManagerQueryRequestHandler.instance(),
-                                  StandardQueryReplyHandler.instance(),
-                                  FileManagerPushRequestHandler.instance());
+                                  callback,
+                                  new StandardMessageRouter(callback));
     } else {
-        service=new RouterService(new Main(),
-                                  FileManagerPingRequestHandler.instance(),
-                                  StandardPingReplyHandler.instance(),
-                                  FileManagerQueryRequestHandler.instance(),
-                                  StandardQueryReplyHandler.instance(),
-                                  FileManagerPushRequestHandler.instance());
+        service=new RouterService(callback,
+                                  new StandardMessageRouter(callback));
+
     }
 
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));

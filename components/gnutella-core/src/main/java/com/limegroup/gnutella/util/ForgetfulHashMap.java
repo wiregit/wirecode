@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
  * A mapping that "forgets" keys and values using a FIFO replacement
  * policy, much like a cache.<p>
  *
- * More formally, a RouteTable is a sequence of key-value pairs
+ * More formally, a ForgetfulHashMap is a sequence of key-value pairs
  * [ (K1, V1), ... (KN, VN) ] ordered from youngest to oldest.  When
  * inserting a new pair, (KN, VN) is discarded if N is greater than
  * some threshold.  This threshold is fixed when the table is
@@ -42,7 +42,7 @@ public class ForgetfulHashMap extends HashMap {
     private int n;
 
     /**
-     * Create a new RouteTable that holds only the last "size" entries.
+     * Create a new ForgetfulHashMap that holds only the last "size" entries.
      *
      * @param size the number of entries to hold
      * @exception IllegalArgumentException if size is less < 1.

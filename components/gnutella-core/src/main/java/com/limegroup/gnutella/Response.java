@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-/** 
+/**
  * A single result from a query reply message.
  * Create these to respond to a search.   Immutable.
  */
@@ -14,45 +14,45 @@ public class Response {
      */
     private String name;
 
-    /** Creates a fresh new response. 
-      *
-      * @requires index and size can fit in 4 unsigned bytes, i.e.,
-      *  0 <= index, size < 2^32
-      */
+    /** Creates a fresh new response.
+     *
+     * @requires index and size can fit in 4 unsigned bytes, i.e.,
+     *  0 <= index, size < 2^32
+     */
     public Response(long index, long size, String name) {
-	Assert.that((index & 0xFFFFFFFF00000000l)==0, 
-		    "Response constructor: index too big!");
-	Assert.that((size &  0xFFFFFFFF00000000l)==0, 
-		    "Response constructor: size too big!");
+        Assert.that((index & 0xFFFFFFFF00000000l)==0,
+                "Response constructor: index too big!");
+        Assert.that((size &  0xFFFFFFFF00000000l)==0,
+                "Response constructor: size too big!");
 
-	this.index=index;
-	this.size=size;
-	this.name=name;
+        this.index=index;
+        this.size=size;
+        this.name=name;
     }
 
     public long getIndex() {
-	return index;
+        return index;
     }
 
     public long getSize() {
-	return size;
+        return size;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public boolean equals(Object o) {
-	if (! (o instanceof Response))
-	    return false;
-	Response r=(Response)o;
-	return r.getIndex()==getIndex() 
-	    && r.getSize()==getSize()
-	    && r.getName().equals(getName());
+        if (! (o instanceof Response))
+            return false;
+        Response r=(Response)o;
+        return r.getIndex()==getIndex()
+            && r.getSize()==getSize()
+            && r.getName().equals(getName());
     }
 
     public int hashCode() {
-	//Good enough for the moment
-	return name.hashCode()+(int)size+(int)index;
+        //Good enough for the moment
+        return name.hashCode()+(int)size+(int)index;
     }
 }
