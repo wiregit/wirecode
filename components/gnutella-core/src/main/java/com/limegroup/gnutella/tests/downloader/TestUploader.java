@@ -7,11 +7,15 @@ import com.limegroup.gnutella.*;
 
 public class TestUploader {    
     /** My name, for debugging */
-    private String name;
+    private final String name;
+
     /** Number of bytes uploaded */
     private volatile int totalUploaded;
     /** The throttle rate in kilobytes/sec */
-    private volatile int rate=10000;
+    private volatile int rate;    
+    /**The number of bytes this uploader uploads before dying*/
+    private volatile int stopAfter;
+
 
     /** 
      * Creates a TestUploader listening on the given port.  Will upload a
@@ -20,6 +24,7 @@ public class TestUploader {
      */
     public TestUploader(String name, final int port) {
         this.name=name;
+        reset();
         //spawn loop();
         Thread t = new Thread() {
             public void run() {
@@ -30,12 +35,17 @@ public class TestUploader {
         t.start();        
     }
 
-    public int amountUploaded() {
-        return totalUploaded;
+    /** 
+     * Resets the rate, amount uploaded, stop byte, etc.
+     */
+    public void reset() {
+        totalUploaded = 0;
+        stopAfter = -1;
+        rate = 10000;
     }
 
-    public void clearAmountUploaded() {
-        totalUploaded = 0;
+    public int amountUploaded() {
+        return totalUploaded;
     }
     
     /** Sets the upload throttle rate 
@@ -44,7 +54,16 @@ public class TestUploader {
         this.rate=rate;
     }
 
+    /** 
+     * Sets the number of  bytes that this should send.  This lets the user
+     * simulate a broken upload.
+     * @param n the number of  bytes to send, or -1 if no limit 
+     */
+    public void stopAfter(int n) {
+        this.stopAfter = n;
+    }
     
+
     /**
      * Repeatedly accepts connections and handles them.
      */
@@ -131,6 +150,12 @@ public class TestUploader {
             //1 second write cycle
             long startTime=System.currentTimeMillis();
             for (int j=0; j<(rate*1024) && i<stop; j++) {
+                //if we are above the threshold, simulate an interrupted connection
+                if (stopAfter>-1 && totalUploaded>=stopAfter) {
+                    out.flush();
+                    throw new IOException();
+                }
+
                 out.write(TestFile.getByte(i));
                 totalUploaded++;
                 i++;

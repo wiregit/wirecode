@@ -38,7 +38,10 @@ public class DownloadTester {
         cleanup();
         testUnbalancedSwarm();
         cleanup();
+        testSwarmWithInterrupt();
+        cleanup();
         testAddDownload();
+        cleanup();
     }
 
 
@@ -81,6 +84,7 @@ public class DownloadTester {
         check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
     }
 
+
     private static void testUnbalancedSwarm() {
         System.out.print("-Testing swarming from two unbalanced sources...");
         final int RATE=10;
@@ -106,6 +110,34 @@ public class DownloadTester {
 
         check(u1<9*TestFile.length()/10+FUDGE_FACTOR*10, "u1 did all the work");
         check(u2<TestFile.length()/10+FUDGE_FACTOR, "u2 did all the work");
+    }
+
+
+    private static void testSwarmWithInterrupt() {
+        System.out.print("-Testing swarming from two sources (one broken)...");
+        final int RATE=10;
+        final int STOP_AFTER = TestFile.length()/4;       
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        check(u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR, "u1 did all the work");
+        check(u2==STOP_AFTER, "u2 did all the work");
     }
 
 
@@ -227,8 +259,8 @@ public class DownloadTester {
     /** Cleans up the complete file */
     private static void cleanup() {
         file.delete();
-        uploader1.clearAmountUploaded();
-        uploader2.clearAmountUploaded();
-        uploader3.clearAmountUploaded();
+        uploader1.reset();
+        uploader2.reset();
+        uploader3.reset();
     }
 }
