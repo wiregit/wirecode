@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import junit.framework.Test;
@@ -46,7 +47,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
         "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
         "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
-        XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml);
+        XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,3);
         Assert.that(r.schemaURI.equals("http://www.limewire.com/schemas/audio.xsd"));
         Assert.that(r.type.equals("audio"));
         Assert.that(r.canonicalKeyPrefix.equals("audios__audio__"));
@@ -66,14 +67,14 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         map.put("audios__audio__identifier__","def.txt");
         map.put("audios__audio__bitrate__","192");
         list.add(map);
-        Assert.that(r.canonicalAttributeMaps.equals(list));
+        Assert.that(r.equals(list));
         
         String invalid = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "<video something=\"something\"/></audios>";
         
-        r = XMLParsingUtils.parse(invalid);
-        assertFalse(r.canonicalAttributeMaps.isEmpty());
+        r = XMLParsingUtils.parse(invalid,1);
+        assertFalse(r.isEmpty());
         assertNotNull(r.canonicalKeyPrefix);
         assertNotNull(r.schemaURI);
         
@@ -83,26 +84,26 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\">"+
         "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audio></audio></audios>";
         
-        r = XMLParsingUtils.parse(nested);
-        assertFalse(r.canonicalAttributeMaps.isEmpty());
+        r = XMLParsingUtils.parse(nested,3);
+        assertFalse(r.isEmpty());
         assertNotNull(r.canonicalKeyPrefix);
         assertNotNull(r.schemaURI);
-        Assert.that(r.canonicalAttributeMaps.equals(list));
+        Assert.that(r.equals(list));
         
         String empty1 = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "</audios>";
         
-        r = XMLParsingUtils.parse(empty1);
-        assertTrue(r.canonicalAttributeMaps.isEmpty());
+        r = XMLParsingUtils.parse(empty1,1);
+        assertTrue(r.isEmpty());
         assertNotNull(r.canonicalKeyPrefix);
         assertNull(r.schemaURI);
         
         String empty2 = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"/>";
         
-        r = XMLParsingUtils.parse(empty2);
-        assertTrue(r.canonicalAttributeMaps.isEmpty());
+        r = XMLParsingUtils.parse(empty2,1);
+        assertTrue(r.isEmpty());
         assertNotNull(r.canonicalKeyPrefix);
         assertNull(r.schemaURI);
         
@@ -114,7 +115,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
             "<?xml asdf asdf>";
         
         try {
-            result = XMLParsingUtils.parse(invalid);
+            result = XMLParsingUtils.parse(invalid,1);
             fail("parsed invalid xml");
         }catch(SAXException expected){}
         
@@ -124,7 +125,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>";
         
         try {
-            result = XMLParsingUtils.parse(invalid);
+            result = XMLParsingUtils.parse(invalid,1);
             fail("parsed w/o closing audios tag");
         }catch(SAXException expected){}
         
@@ -133,7 +134,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"></audios>";
         
         try {
-            result = XMLParsingUtils.parse(invalid);
+            result = XMLParsingUtils.parse(invalid,1);
             fail("parsed with non-null not-closed audio element");
         }catch(SAXException expected){}
         
@@ -142,7 +143,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt bitrate=\"190\"/></audios>";
         
         try {
-            result = XMLParsingUtils.parse(invalid);
+            result = XMLParsingUtils.parse(invalid,1);
             fail("parsed with malformed attribute");
         }catch(SAXException expected){}
     }

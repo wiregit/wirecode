@@ -28,66 +28,38 @@ public class XMLParsingUtils {
     static final private String XML_START = "<?xml";
     
     /**
-     * a ThreadLocal to contain the instance of the SAX parser
+     * a ThreadLocal to contain the instance of the Lime parser
      */
-    private static ThreadLocal _reader = new ThreadLocal() {
+    private static ThreadLocal _parserContainer = new ThreadLocal() {
         protected Object initialValue() {
-            try{
-                return 
-            		XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
-            }catch(SAXException bad) {
-                ErrorService.error(bad);
-                return null; 
-            }
+            return new LimeParser();
         }
     };
     
     /**
      * Parses our simplified XML
      */
-    public static ParseResult parse(String xml) throws IOException, SAXException {
-        return parse(new InputSource(new StringReader(xml)));
+    public static ParseResult parse(String xml, int responseCount) 
+    	throws IOException, SAXException {
+        return parse(new InputSource(new StringReader(xml)),responseCount);
+    }
+    
+    public static ParseResult parse(InputSource inputSource) 
+    	throws IOException,SAXException{
+        return parse(inputSource,8);
     }
     
     /**
      * Parses our simplified XML
      */
-    public static ParseResult parse(InputSource inputSource) throws IOException, SAXException {
+    public static ParseResult parse(InputSource inputSource, int responseCount) 
+    	throws IOException, SAXException {
         
-        final ParseResult result = new ParseResult();
+        ParseResult result = new ParseResult(responseCount);
+        LimeParser parser = (LimeParser)_parserContainer.get();   
         
-        //if parser creation failed, return empty results for everything.
-        XMLReader reader = (XMLReader)_reader.get();   
-        if (reader == null)
-            return result;
+        parser.parse(result,inputSource);
         
-        reader.setContentHandler(new DefaultHandler() {
-                boolean isFirstElement=true;
-                public void startElement(String namespaceUri, String localName, 
-                                         String qualifiedName, Attributes attributes) {
-                    
-                    if(isFirstElement) {
-                        isFirstElement=false; 
-                        result.canonicalKeyPrefix = localName;
-                        return;
-                    }
-                    
-                    if(result.type==null) {
-                        result.type = localName;
-                        result.schemaURI = "http://www.limewire.com/schemas/"+result.type+".xsd";
-                        result.canonicalKeyPrefix += "__"+localName+"__";
-                    } 
-                    
-                    Map attributeMap = new HashMap();
-                    for(int i=0; i<attributes.getLength(); i++) {
-                        attributeMap.put(result.canonicalKeyPrefix + 
-                                         attributes.getLocalName(i) + "__",
-                                         attributes.getValue(i));
-                    }
-                    result.canonicalAttributeMaps.add(attributeMap);
-                }
-            });
-        reader.parse(inputSource);
         return result;
     }
 
@@ -115,13 +87,82 @@ public class XMLParsingUtils {
     }
     
     /**
-     * A tuple containing the Schema URI, the type, the canonical key prefix
-     * and a list of maps.
+     * A list of maps, also containing the Schema URI, the type and
+     * the canonical key prefix
      */
-    public static class ParseResult {
+    public static class ParseResult extends ArrayList {
+        
+        public ParseResult(int size) {
+            super(size*2/3);
+        }
+        
         public String schemaURI;                              //like http://www.limewire.com/schemas/audio.xsd
         public String type;                                   //e.g. audio, video, etc.
         public String canonicalKeyPrefix;                     //like audios__audio__
-        public List canonicalAttributeMaps = new ArrayList(); //one attribute map per element in xml
+    }
+    
+    /**
+     * this class does the actual parsing of the document.  It is a reusable
+     * DocumentHandler.
+     */
+    private static class LimeParser extends DefaultHandler {
+        private final XMLReader _reader;
+        private ParseResult _result;
+        
+        boolean _isFirstElement=true;
+        
+        LimeParser() {
+            XMLReader reader;
+            try {
+                reader =
+                    XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+                reader.setContentHandler(this);
+            }catch(SAXException bad) {
+                ErrorService.error(bad);
+                reader = null; 
+            }
+            _reader=reader;
+        }
+        
+        /**
+         * parses the given document input.  Any state from previous parsing is
+         * discarded.
+         */
+        public void parse(ParseResult dest, InputSource input) 
+        	throws SAXException, IOException{
+            
+            //if parser creation failed, do not try to parse.
+            if (_reader==null)
+                return;
+            
+            _isFirstElement=true;
+            _result = dest;
+
+            _reader.parse(input);
+        }
+        
+        public void startElement(String namespaceUri, String localName, 
+                                 String qualifiedName, Attributes attributes) {
+            
+            if(_isFirstElement) {
+                _isFirstElement=false; 
+                _result.canonicalKeyPrefix = localName;
+                return;
+            }
+            
+            if(_result.type==null) {
+                _result.type = localName;
+                _result.schemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
+                _result.canonicalKeyPrefix += "__"+localName+"__";
+            } 
+            
+            Map attributeMap = new HashMap();
+            for(int i=0; i<attributes.getLength(); i++) {
+                attributeMap.put(_result.canonicalKeyPrefix + 
+                                 attributes.getLocalName(i) + "__",
+                                 attributes.getValue(i));
+            }
+            _result.add(attributeMap);
+        }
     }
 }

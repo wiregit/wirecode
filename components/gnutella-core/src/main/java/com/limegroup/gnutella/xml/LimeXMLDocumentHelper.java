@@ -42,7 +42,7 @@ public final class LimeXMLDocumentHelper{
             String xmlDocument = (String)xmlDocumentsIterator.next();
             XMLParsingUtils.ParseResult parsingResult;
             try {
-                parsingResult = XMLParsingUtils.parse(xmlDocument);
+                parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
             } catch (SAXException sax) {
                 continue;// bad xml, ignore
             } catch (IOException bad) {
@@ -52,7 +52,7 @@ public final class LimeXMLDocumentHelper{
             String indexKey = parsingResult.canonicalKeyPrefix + "index__";
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
             
-            Iterator mapsIterator = parsingResult.canonicalAttributeMaps.iterator();
+            Iterator mapsIterator = parsingResult.iterator();
             while(mapsIterator.hasNext()) {
                 
                 Map map = (Map)mapsIterator.next();

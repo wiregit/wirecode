@@ -208,10 +208,10 @@ public class LimeXMLDocument implements Serializable {
         
         XMLParsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
         
-        if (result.canonicalAttributeMaps.isEmpty())
+        if (result.isEmpty())
             throw new IOException("No element present");
         
-        fieldToValue = (Map)result.canonicalAttributeMaps.get(0);
+        fieldToValue = (Map)result.get(0);
         schemaUri = result.schemaURI;
     }
 
