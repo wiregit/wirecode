@@ -86,6 +86,19 @@ public class HandshakeResponse {
     public int getStatusCode() {
         return statusCode;
     }
+    
+    /**
+     * Tells if the status returned was OK or not.
+     * @return true, if the status returned was not the OK status, false
+     * otherwise
+     */
+    public boolean notOKStatusCode(){
+        if(statusCode != OK)
+            return true;
+        else
+            return false;
+    }
+    
 
     /**
      * Returns the status code and status message together used in a 
