@@ -91,14 +91,12 @@ public class UDPBufferedInputStream extends InputStream {
 
                     // Load some data
                     wlength = Math.min(_activeChunk.length, len);
-                    System.arraycopy(b, off, 
-                      _activeChunk.data, _activeChunk.start, wlength);
+                    System.arraycopy( _activeChunk.data, _activeChunk.start, 
+                      b, off, wlength);
                     len                 -= wlength;
                     off                 += wlength;
                     _activeChunk.start  += wlength;
                     _activeChunk.length -= wlength;
-if ( (off - origOff) > 2 )
-System.out.println("-- is0: "+b[origOff]+" is1:"+b[origOff+1]+" is2:"+b[origOff+2]);
                     if ( len <= 0 ) 
                         return origLen;
 
