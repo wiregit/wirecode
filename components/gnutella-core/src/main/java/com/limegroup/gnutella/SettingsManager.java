@@ -1661,8 +1661,6 @@ public final class SettingsManager {
 	 */
 	public boolean getEverAcceptedIncoming() {
 		return getBooleanValue(EVER_ACCEPTED_INCOMING);
-		//Boolean b = Boolean.valueOf(PROPS.getProperty(EVER_ACCEPTED_INCOMING));
-		//return b.booleanValue();
 	}
 
 	/**
@@ -1674,8 +1672,7 @@ public final class SettingsManager {
 	 *         application should be shown, <tt>false</tt> otherwise
 	 */
 	public boolean getShowCloseDialog() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(SHOW_CLOSE_DIALOG));
-		return b.booleanValue();	
+		return getBooleanValue(SHOW_CLOSE_DIALOG);
 	}
   
     /**
@@ -1727,8 +1724,7 @@ public final class SettingsManager {
 	 * @return the minimum search quality, on a scale of 0 to 3 inclusive
 	 */
 	public int getMinimumSearchQuality() {
-		String str = PROPS.getProperty(MINIMUM_SEARCH_QUALITY);
-		return Integer.parseInt(str);
+		return getIntValue(MINIMUM_SEARCH_QUALITY);
 	}
 
 	/**
@@ -1738,8 +1734,7 @@ public final class SettingsManager {
 	 * @return the minimum search speed to display
 	 */
 	public int getMinimumSearchSpeed() {
-		String str = PROPS.getProperty(MINIMUM_SEARCH_SPEED);
-		return Integer.parseInt(str);
+		return getIntValue(MINIMUM_SEARCH_SPEED);
 	}
 	
 	/**
@@ -1750,8 +1745,7 @@ public final class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxUpstreamBytesPerSec() {
-		String str = PROPS.getProperty(MAX_UPSTREAM_BYTES_PER_SEC);
-		return Integer.parseInt(str);
+		return getIntValue(MAX_UPSTREAM_BYTES_PER_SEC);
 	}
 
 	/**
@@ -1762,8 +1756,7 @@ public final class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxDownstreamBytesPerSec() {
-		String str = PROPS.getProperty(MAX_DOWNSTREAM_BYTES_PER_SEC);
-		return Integer.parseInt(str);
+		return getIntValue(MAX_DOWNSTREAM_BYTES_PER_SEC);
 	}
     
     //settings for Supernode implementation
@@ -1791,9 +1784,7 @@ public final class SettingsManager {
      *         <tt>false</tt> otherwise
      */
     public boolean getEverSupernodCapable() {
-        Boolean b = 
-            Boolean.valueOf(PROPS.getProperty(EVER_SUPERNODE_CAPABLE));
-        return b.booleanValue();
+		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
     }
     
     /**
