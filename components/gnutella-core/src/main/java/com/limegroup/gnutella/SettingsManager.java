@@ -26,10 +26,6 @@ public class SettingsManager implements SettingsInterface
     private String  forcedIPAddressString_;
     private int forcedPort_;
 
-    /** lastVersionChecked is the most recent version number checked.  Also,
-     * there is a boolean for don't check again. */
-    private final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
-    private String lastVersionChecked_;
     private boolean checkAgain_;
 
     /** Variables for the various settings */
@@ -288,9 +284,6 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(EXTENSIONS)) {
                     setExtensions(p);
                 }
-                else if(key.equals(LAST_VERSION_CHECKED)) {
-                    setLastVersionChecked(p);
-                }
                 else if(key.equals(CHECK_AGAIN)) {
                     boolean bs;
                     if (p.equals("true"))
@@ -443,7 +436,7 @@ public class SettingsManager implements SettingsInterface
 				}
 				else if(key.equals(DELETE_OLD_JAR)) {
 					setDeleteOldJAR(Boolean.getBoolean(p));
-				}
+				} 
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -508,8 +501,6 @@ public class SettingsManager implements SettingsInterface
         setConnectString(DEFAULT_CONNECT_STRING);
         setConnectOkString(DEFAULT_CONNECT_OK_STRING);
 
-        // RJS - setting the default values...
-        setLastVersionChecked(DEFAULT_LAST_VERSION_CHECKED);
         setCheckAgain(DEFAULT_CHECK_AGAIN);
         setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
@@ -691,17 +682,6 @@ public class SettingsManager implements SettingsInterface
         return forcedPort_;
     }
 
-    /**
-     * private methods to handle versioning
-     * control information
-     */
-    public String getCurrentVersion(){ 
-        //This is intentionally hard-coded in.
-        return CURRENT_VERSION;
-    }
-    public String getLastVersionChecked() {
-        return lastVersionChecked_;
-    }
     public boolean getCheckAgain() {
         return checkAgain_;
     }
@@ -1495,15 +1475,7 @@ public class SettingsManager implements SettingsInterface
         props_.put(FREELOADER_FILES, s);
     }
 
-    /**
-     * private methods to handle versioning
-     * control information
-     */
-    public void setLastVersionChecked(String last) {
-        lastVersionChecked_ = last;
-        props_.put(LAST_VERSION_CHECKED, last);
-    }
-
+	
     public void setCheckAgain(boolean check) {
         checkAgain_ = check;
         String c;

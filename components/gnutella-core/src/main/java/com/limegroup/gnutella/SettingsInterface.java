@@ -41,7 +41,7 @@ public interface SettingsInterface
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
-    public static final String  DEFAULT_CLIENT_ID      = null;
+    public static final String  DEFAULT_LIENT_ID      = null;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
@@ -89,7 +89,6 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.4";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
     public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
     public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
@@ -141,7 +140,6 @@ public interface SettingsInterface
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-    public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
     public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
     public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
