@@ -139,7 +139,7 @@ public class ConnectionManager {
      */
     public ManagedConnection createRouterConnection(
             String hostname, int portnum) throws IOException {
-
+            
 		// Use dedicated pong server instead of defaul for LimeWire
 		if ( hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER) ) {
 			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
@@ -652,7 +652,7 @@ public class ConnectionManager {
         }
 
         public void run() {
-            try {
+            try {               
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
@@ -660,10 +660,12 @@ public class ConnectionManager {
 
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
-				if (origHost != null && origHost.equals("router.limewire.com"))
+				if (origHost != null && 
+                    origHost.equals(SettingsInterface.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
+                    _connection.send(pingRequest);
 				}
 				else
                 {
