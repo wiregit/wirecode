@@ -22,12 +22,9 @@ import java.util.StringTokenizer;
 public class SettingsManager implements SettingsInterface
 {
 
-	// these two variables are for version control
-	// the currentVerison is the version number of this
-	// software, and the lastVersionChecked is the most
-	// recent version number checked.  (this is redundant)
-	// Also, there is a boolean for don't check again
-	private static String currentVersion_;
+	/** lastVersionChecked is the most recent version number checked.  Also,
+	 * there is a boolean for don't check again. */
+    private static final String CURRENT_VERSION="0.4e";
 	private String lastVersionChecked_;
 	private boolean checkAgain_;
 
@@ -142,19 +139,14 @@ public class SettingsManager implements SettingsInterface
 	 * control information
 	 */
 	public String getCurrentVersion() {
-		return currentVersion_;
+        //This is intentionally hard-coded in.
+		return CURRENT_VERSION;
 	}
 	public String getLastVersionChecked() {
 		return lastVersionChecked_;
 	}
 	public boolean getCheckAgain() {
 		return checkAgain_;
-	}
-
-	public void setCurrentVersion(String version) {
-		currentVersion_ = version;
-		props_.put(SettingsInterface.CURRENT_VERSION, version);
-        writeProperties();
 	}
 	
 	public void setLastVersionChecked(String last) {
@@ -369,12 +361,6 @@ public class SettingsManager implements SettingsInterface
                     try {setExtensions(p);}
                     catch (IllegalArgumentException ie){}
                 }
-
-
-				else if(key.equals(SettingsInterface.CURRENT_VERSION)) {
-                    try {setCurrentVersion(p);}
-                    catch (IllegalArgumentException ie){}
-                }
 				else if(key.equals(SettingsInterface.LAST_VERSION_CHECKED)) {
                     try {setLastVersionChecked(p);}
                     catch (IllegalArgumentException ie){}
@@ -547,7 +533,6 @@ public class SettingsManager implements SettingsInterface
         setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
 
 		// RJS - setting the default values... 
-		setCurrentVersion(SettingsInterface.DEFAULT_CURRENT_VERSION);
 		setLastVersionChecked(SettingsInterface.DEFAULT_LAST_VERSION_CHECKED);
 		setCheckAgain(SettingsInterface.DEFAULT_CHECK_AGAIN);
 

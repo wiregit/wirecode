@@ -296,19 +296,17 @@ public interface SettingsInterface
 	
 	// RJS - ADDING 3 NEW PROPERTIES
 	
-	public static final String DEFAULT_CURRENT_VERSION = "0.4a";
     public static final String DEFAULT_LAST_VERSION_CHECKED = "0.4a";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
 
-	public static final String CURRENT_VERSION = "0.4a";
     public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
 
+    /** The current version of LimeWire.  This is read-only. */
 	public String getCurrentVersion();
 	public String getLastVersionChecked();
 	public boolean getCheckAgain();
 
-	public void setCurrentVersion(String version);
 	public void setLastVersionChecked(String last);
 	public void setCheckAgain(boolean check);
 
