@@ -1971,27 +1971,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //because IFM.purge() is called frequently in DownloadManager.
         
         // First attempt to rename it.
-        boolean success = incompleteFile.renameTo(completeFile);
-        
-        // If that fails, try killing any partial uploads we may have
-        // to unlock the file, and then rename it.
-        if (!success) {
-            FileDesc fd = RouterService.getFileManager().getFileDescForFile(
-                incompleteFile);
-            if( fd != null ) {
-                UploadManager upMan = RouterService.getUploadManager();
-                // This must all be synchronized so that a new upload
-                // doesn't lock the file before we rename it.
-                synchronized(upMan) {
-                    if( upMan.killUploadsForFileDesc(fd) )
-                        success = incompleteFile.renameTo(completeFile);
-                }
-            }
-        }
-        
-        // If that didn't work, try copying the file.
-        if (!success)
-            success = CommonUtils.copy(incompleteFile, completeFile);
+        boolean success = FileUtils.forceRename(incompleteFile,completeFile);
             
         // If that didn't work, we're out of luck.
         if (!success)
