@@ -899,11 +899,16 @@ public class FileManager {
             //addFileIfShared since the file doesn't exist.
             f4=new HugeFakeFile(directory, "big.XYZ", Integer.MAX_VALUE-1);
             File f5=new HugeFakeFile(directory, "big2.XYZ",
-                                     Integer.MAX_VALUE-1);
+                                     Integer.MAX_VALUE);
             Assert.that(fman.addFile(f4)==true);
             Assert.that(fman.addFile(f5)==true);
             Assert.that(fman.getNumFiles()==3);
             Assert.that(fman.getSize()==Integer.MAX_VALUE);
+            responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*"));
+            Assert.that(responses.length==3);
+            Assert.that(responses[0].getName().equals(f3.getName()));
+            Assert.that(responses[1].getName().equals(f4.getName()));
+            Assert.that(responses[2].getName().equals(f5.getName()));
         } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();
