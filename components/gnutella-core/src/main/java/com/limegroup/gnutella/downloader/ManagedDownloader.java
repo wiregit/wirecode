@@ -795,7 +795,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
         if (! allowAddition(rfd)) {
-            System.out.println("rfd: " + rfd + " not allowed.");
             return false;
         }
         return addDownloadForced(rfd, cache);
@@ -845,8 +844,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Do not check for existing values if it didn't exist in allFiles
             added = (buckets.add(rfd, exists) != -1);
         }
-        
-        System.out.println("added: " + added + " " + rfd);
         
         //Append to allFiles for resume purposes if caching...
         if(cache) {
