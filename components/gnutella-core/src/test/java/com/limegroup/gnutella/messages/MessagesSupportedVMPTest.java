@@ -101,4 +101,81 @@ public class MessagesSupportedVMPTest extends TestCase {
 
     }
 
+
+    public void testBadCases() {
+        MessagesSupportedVMP.SupportedMessageBlock smp1 = 
+            new MessagesSupportedVMP.SupportedMessageBlock("SUSH".getBytes(),
+                                                            10, 10);
+        MessagesSupportedVMP.SupportedMessageBlock smp2 = 
+            new MessagesSupportedVMP.SupportedMessageBlock("NEIL".getBytes(), 
+                                                           5, 5);
+        MessagesSupportedVMP.SupportedMessageBlock smp3 = 
+            new MessagesSupportedVMP.SupportedMessageBlock("DAWG".getBytes(), 
+                                                           3, 3);
+        ByteArrayOutputStream baos = null;
+        try {
+            // test missing info....
+            baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)4, baos);
+            baos.write(smp2.encode());
+            baos.write(smp3.encode());
+            baos.write(smp1.encode());
+            MessagesSupportedVMP vmpOther = 
+                new MessagesSupportedVMP(0, baos.toByteArray());
+            assertTrue(false);
+        }
+        catch (IOException noway) {
+            noway.printStackTrace();
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {
+        }
+        try {
+            // test corrupt info....
+            baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)4, baos);
+            baos.write(smp2.encode());
+            baos.write(smp3.encode());
+            baos.write(smp1.encode());
+            baos.write("crap".getBytes());
+            MessagesSupportedVMP vmpOther = 
+                new MessagesSupportedVMP(0, baos.toByteArray());
+            assertTrue(false);
+        }
+        catch (IOException noway) {
+            noway.printStackTrace();
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {
+        }
+        try {
+            // test semantics....
+            baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)0, baos);
+            baos.write(smp2.encode());
+            baos.write(smp3.encode());
+            baos.write(smp1.encode());
+            MessagesSupportedVMP vmpOther = 
+                new MessagesSupportedVMP(0, baos.toByteArray());
+            baos = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)3, baos);
+            baos.write(smp2.encode());
+            baos.write(smp3.encode());
+            baos.write(smp1.encode());
+            MessagesSupportedVMP vmpOneOther = 
+                new MessagesSupportedVMP(0, baos.toByteArray());
+            assertTrue(!vmpOther.equals(vmpOneOther));
+        }
+        catch (IOException noway) {
+            noway.printStackTrace();
+            assertTrue(false);
+        }
+        catch (BadPacketException noway) {
+            noway.printStackTrace();
+            assertTrue(false);
+        }
+
+    }
+
+
 }
