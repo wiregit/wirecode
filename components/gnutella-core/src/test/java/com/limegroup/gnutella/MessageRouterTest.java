@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.lang.reflect.Method;
 
 import junit.framework.Test;
+import java.net.InetAddress;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -51,10 +52,12 @@ public final class MessageRouterTest extends BaseTestCase {
 	}  
 
     public static void globalSetUp() throws Exception {
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         //TestConnectionManager tcm = new TestConnectionManager(4);
         //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         ROUTER = new StandardMessageRouter();
         ROUTER.initialize();
+        Thread.sleep(5000);
     }
 
 

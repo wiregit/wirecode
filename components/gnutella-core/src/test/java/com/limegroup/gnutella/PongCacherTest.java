@@ -36,6 +36,7 @@ public final class PongCacherTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         //PC.start();
     }
 
