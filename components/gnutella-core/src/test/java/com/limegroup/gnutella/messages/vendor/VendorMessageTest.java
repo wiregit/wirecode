@@ -10,6 +10,8 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.upelection.RemoteCandidate;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -698,6 +700,23 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	testWrite(req);
     	testRead(req);
+    }
+    
+    public void testFeaturesVM() throws Exception {
+    	FeaturesVendorMessage fvm = new FeaturesVendorMessage();
+    	testWrite(fvm);
+    	testRead(fvm);
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	fvm.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	fvm = (FeaturesVendorMessage)Message.read(bais);
+    	
+    	assertEquals(CommonUtils.getJavaVersion(),fvm.getJVM());
+    	assertEquals(CommonUtils.getOS().toLowerCase(),fvm.getOS());
+    	assertEquals(RouterService.getFileManager().getNumFiles(),fvm.getFileShared());
+    	assertTrue(RouterService.getConnectionManager().getMeasuredUpstreamBandwidth() 
+    			== fvm.getBandidth());
     }
 
     private static class VM extends VendorMessage {
