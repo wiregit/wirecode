@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
@@ -183,7 +185,7 @@ public class BrowseHostHandler {
         while(true) {
             try {
                 m = null;
-                m = Message.read(in);
+                m = BIOMessageReader.read(in);
             }
             catch (BadPacketException bpe) {
             }
