@@ -521,7 +521,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         Object lock =  miniRFDToLock.get(mrfd);
         if(lock == null) //not in map. Not intended for me
             return false;
-        }
         threadLockToSocket.put(lock,socket);
         synchronized(lock) {
             lock.notify();
