@@ -547,8 +547,8 @@ public abstract class FileManager {
             //from starting up immediately after checking for null.
             //
             //TODO: the call to join would block if the call to File.list called
-            //by listFiles called by updateDirectories blocks.  If this is the case,
-            //we need to spawn a thread before join'ing.
+            //by listFiles called by updateDirectories blocks.  If this is the 
+            //case, we need to spawn a thread before join'ing.
             if (_loadThread!=null) {
                 _loadThreadInterrupted = true;
                 _loadThread.interrupt();
@@ -594,7 +594,9 @@ public abstract class FileManager {
             resetVariables();
 
             // Load the extensions.
-            String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
+            String[] extensions = 
+                StringUtils.split(
+                    SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
             
             for (int i=0; 
                  (i<extensions.length) && !loadThreadInterrupted();
@@ -604,11 +606,12 @@ public abstract class FileManager {
             //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
             //C:\dir\subdir.  Although this isn't needed for correctness, it may
             //help the GUI show "subdir" as a subdirectory of "dir".  One way of
-            //doing this is to do a full topological sort, but that's a lot of work.
-            //So we just approximate this by sorting by filename length, from
-            //smallest to largest.  Unless directories are specified as
+            //doing this is to do a full topological sort, but that's a lot of 
+            //work. So we just approximate this by sorting by filename length, 
+            //from smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-			final File[] directories = (File[])SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+			final File[] directories = 
+                SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
@@ -686,7 +689,8 @@ public abstract class FileManager {
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
         File[] dir_list = FileUtils.listFiles(directory, DIRECTORY_FILTER);
-        File[] file_list = FileUtils.listFiles(directory, SHAREABLE_FILE_FILTER);
+        File[] file_list = 
+            FileUtils.listFiles(directory, SHAREABLE_FILE_FILTER);
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
@@ -1205,7 +1209,8 @@ public abstract class FileManager {
         Set urns = fd.getUrns();
         Iterator iter = urns.iterator();
         while(iter.hasNext())
-            _queryRouteTable.addIndivisible(((URN)iter.next()).httpStringValue());
+            _queryRouteTable.
+                addIndivisible(((URN)iter.next()).httpStringValue());
     }
 
 
@@ -1348,7 +1353,8 @@ public abstract class FileManager {
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
                 //matches.  As an optimization, if this is the only keyword and
-                //there is only one set returned, return that set without copying.
+                //there is only one set returned, return that set without 
+                //copying.
                 IntSet matches=null;
                 while (iter.hasNext()) {                
                     IntSet s=(IntSet)iter.next();
@@ -1509,7 +1515,8 @@ public abstract class FileManager {
             //c) Ensure properly listed in directory
             try {
                 IntSet siblings=(IntSet)_sharedDirectories.get(
-                    FileUtils.getCanonicalFile(FileUtils.getParentFile(desc.getFile())));
+                    FileUtils.getCanonicalFile(
+                        FileUtils.getParentFile(desc.getFile())));
                 Assert.that(siblings!=null, 
                     "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),
