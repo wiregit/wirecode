@@ -722,7 +722,12 @@ public abstract class MessageRouter {
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc != handler) {
-				sendRoutedQueryToHost(request, mc, handler);
+				boolean sent = sendRoutedQueryToHost(request, mc, handler);
+				if(sent) {
+					RoutedQueryStat.LEAF_SEND.incrementStat();
+				} else {
+					RoutedQueryStat.LEAF_DROP.incrementStat();
+				}				
             }
         }
 	}
@@ -736,21 +741,24 @@ public abstract class MessageRouter {
 	 * @param mc the <tt>ManagedConnection</tt> to forward the query to
 	 * @param handler the <tt>ReplyHandler</tt> that will be entered into
 	 *  the routing tables to handle any replies
+	 * @return <tt>true</tt> if the query was sent, otherwise <tt>false</tt>
 	 */
-	private void sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
-									   ReplyHandler handler) {
+	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
+										  ReplyHandler handler) {
 		//TODO:
 		//because of some very obscure optimization rules, it's actually
 		//possible that qi could be non-null but not initialized.  Need
 		//to be more careful about locking here.
 		ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
 		if (qi==null || qi.lastReceived==null) 
-			return;
+			return false;
 		else if (qi.lastReceived.contains(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
+			return true;
 		}
+		return false;
 	}
 
     /**
@@ -805,7 +813,12 @@ public abstract class MessageRouter {
 				// query route tables, route it.
 				if(lastHop &&
 				   mc.isUltrapeerQueryRoutingConnection()) {
-					sendRoutedQueryToHost(query, mc, handler);
+					boolean sent = sendRoutedQueryToHost(query, mc, handler);
+					if(sent) {
+						RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
+					} else {
+						RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
+					}
 				} else {
 					sendQueryRequest(query, mc, handler);
 				}
