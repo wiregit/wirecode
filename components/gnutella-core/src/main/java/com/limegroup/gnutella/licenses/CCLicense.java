@@ -103,12 +103,20 @@ import org.xml.sax.SAXException;
     }
     
     public boolean isVerified() { return verified; }
-    public boolean isValid() { return valid; }
     public String getLicense() { return license; }
     public URL getLicenseDeed() { return licenseURL; }
     public URN getExpectedURN() { return expectedURN; }
     public long getLastVerifiedTime() { return lastVerifiedTime; }
     public URI getLicenseURI() { return licenseLocation; }
+    
+    public boolean isValid(URN urn) {
+        if(!valid)
+            return false;
+        if(expectedURN == null || urn == null)
+            return true;
+
+        return expectedURN.equals(urn);
+    }
     
     public License copy(String license) {
         CCLicense newL = null;

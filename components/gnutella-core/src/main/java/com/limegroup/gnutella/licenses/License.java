@@ -18,9 +18,9 @@ public interface License {
     public boolean isVerified();
     
     /**
-     * True if this license was verified and is valid.
+     * True if this license was verified and is valid & matches the given URN.
      */
-    public boolean isValid();
+    public boolean isValid(URN urn);
     
     /**
      * Returns a description of this license.
