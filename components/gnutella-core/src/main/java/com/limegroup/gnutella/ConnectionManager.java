@@ -31,12 +31,19 @@ public class ConnectionManager implements Runnable {
     private ActivityCallback callback;
     private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
     public String ClientId;
+    public boolean stats;
 
-
-
+    /** Variables for stastical purpouses */
+    public int total; //total number of messages sent and received
+    public  int PReqCount; //Ping Request count
+    public int PRepCount; //Ping Reply count
+    public int QReqCount; //Query Request count
+    public int QRepCount; //Query Reply count
+    public int pushCount; //Push request count
+    
+    
     public long totalSize;
     public long totalFiles;
-
 
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
@@ -72,6 +79,15 @@ public class ConnectionManager implements Runnable {
 	    ClientId = new String(Message.makeGuid() );
 	    lp.setProperty("ClientID",ClientId);
 	}
+	String statVal=lp.getProperty("stats");
+	if (statVal==null)
+	    lp.setProperty("stats","off");
+	else {
+	    if (statVal.equals("on"))
+		stats= true;
+	    else 
+		stats= false;
+	}	  
     }
 
     /** @modifies network
@@ -114,6 +130,12 @@ public class ConnectionManager implements Runnable {
 	}
     }
     
+    /**
+     *  Return the total number of messages sent and received
+     */
+    public int getTotalMessages() {
+	return total;
+    }
 
     /** @modifies this, network
      *  @effects accepts new incoming connections on a designated port
@@ -135,6 +157,13 @@ public class ConnectionManager implements Runnable {
 	} catch (IOException e) {
 	    ConnectionManager.error("Couldn't bind server socket to port");
 	    return;
+	}
+	// start the statistics thread
+	try{
+	    Stat s = new Stat(this);
+	}
+	catch(IOException e){
+	    ConnectionManager.error("I/O error in Statistics thread!");
 	}
 	while (true) {
 	    try {

@@ -138,7 +138,7 @@ System.out.println("RouterService init");
      *  Return the total number of messages sent and received
      */
     public int getTotalMessages() {
-	return( Connection.getTotalMessages() );
+	return( manager.getTotalMessages() );
     }
 
     /**
