@@ -24,6 +24,7 @@ public class RemoteFileDesc2 extends RemoteFileDesc {
               rfd.getClientGUID(),
               rfd.getSpeed(),
               rfd.chatEnabled(),
+              rfd.browseHostEnabled(),
               rfd.getQuality());
         this._isUnreachable=isUnreachable;
         this._timeStamp=System.currentTimeMillis();

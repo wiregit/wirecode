@@ -30,7 +30,7 @@ Host: w.x.y.z
 User-Agent: Limewire x.y.z Pro
 Accept: text/html, application/x-gnutella-queryreplies
 Content-Length: 0
-Keep-Connection: close
+Connection: close
 
 Server (New BearShare)
 -------------------------
@@ -63,7 +63,9 @@ This media type lacks several important features, such as reporting
 file size. It is recommended that all implementations use the
 "application/x-gnutella-packets" media type as their default but
 implement "text/html" reception (to be compatible with older
-BearShare's).
+BearShare's).  Minimally, all implementation must support the 
+"application/x-gnutella-packets" media type for output while being
+browsed.
 
 Other media types will be followed by different responses, as
 necessary.
@@ -78,10 +80,10 @@ Accept:text/html
 
 Server (LimeWire)
 -------------------------
-HTTP/1.1 404 Not Found
+HTTP/1.1 406 Not Acceptable
 Content-Type: text/html
 
-Old BearShare's only support text/html and LimeWire does not, so a 404
+Old BearShare's only support text/html and LimeWire does not, so a 406
 is returned (This is a example only) .
 
 A servent may impose whatever limitations on responding to Browse
@@ -113,7 +115,7 @@ Host: w.x.y.z
 User-Agent: Limewire x.y.z Pro
 Accept: text/html, application/x-gnutella-queryreplies
 Content-Length: 0
-Keep-Connection: close
+Connection: close
 
 Server
 -------------------------

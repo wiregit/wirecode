@@ -922,8 +922,10 @@ public class QueryReply extends Message implements Serializable{
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;
+        boolean supportsBrowseHost = false;
         try {
             supportsChat = getSupportsChat();
+            supportsBrowseHost = getSupportsBrowseHost();
         }
         catch (BadPacketException ignored) {} // don't let chat kill me....
         
@@ -935,7 +937,9 @@ public class QueryReply extends Message implements Serializable{
                                                    currResp.getName(),
                                                    (int) currResp.getSize(),
                                                    clientGUID, (int) speed,
-                                                   supportsChat, qual);
+                                                   supportsChat, 
+                                                   supportsBrowseHost,
+                                                   qual);
         }
         
         return retArray;

@@ -55,6 +55,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private String _host;
 	
 	private boolean _chatEnabled = false; // for now
+    private boolean _browseEnabled = false; // also for now
 
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
@@ -111,7 +112,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		_port = rfd.getPort();
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
-        
+        _browseEnabled = rfd.browseHostEnabled();
+
 		_amountRead = 0;
         _amountToRead = stop-start;
 		_initialReadingPoint = start;
@@ -467,6 +469,10 @@ public class HTTPDownloader implements BandwidthTracker {
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 	public boolean chatEnabled() {
 		return _chatEnabled;
+	}
+
+	public boolean browseEnabled() {
+		return _browseEnabled;
 	}
 
 	public long getIndex() {return _index;}

@@ -113,4 +113,19 @@ public interface Downloader extends BandwidthTracker {
 	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
 	 */
 	public boolean hasChatEnabledHost();
+
+	/**
+	 * Returns a browse-enabled <tt>Endpoint</tt> instance for this
+	 * <tt>Downloader</tt>.
+	 */
+	public Endpoint getBrowseEnabledHost();
+
+	/**
+	 * Returns whether or not there is a browse-enabled host available for
+	 * this <tt>Downloader</tt>.
+	 *
+	 * @return <tt>true</tt> if there is a browse-enabled host for this 
+	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
+	 */
+	public boolean hasBrowseEnabledHost();
 }

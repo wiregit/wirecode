@@ -224,6 +224,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	private DownloadChatList chatList;
 
+	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
+	 *  instance.
+	 */
+	private DownloadBrowseHostList browseList;
+
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
@@ -298,6 +304,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
+        browseList=new DownloadBrowseHostList();
         stopped=false;
         corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
@@ -1078,6 +1085,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw new InterruptedException();
             dloaders.add(dloader);
 			chatList.addHost(dloader);
+            browseList.addHost(dloader);
         }
         final HTTPDownloader dloaderAlias=dloader;
         Thread worker=new Thread() {
@@ -1318,6 +1326,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             downloader.doDownload(true);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
+            browseList.removeHost(downloader);
         } catch (OverlapMismatchException e) {
             corrupted=true;
             stop();
@@ -1536,6 +1545,14 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 	public synchronized boolean hasChatEnabledHost() {
 		return chatList.hasChatEnabledHost();
+	}
+
+	public synchronized Endpoint getBrowseEnabledHost() {
+		return browseList.getBrowseHostEnabledHost();
+	}
+
+	public synchronized boolean hasBrowseEnabledHost() {
+		return browseList.hasBrowseHostEnabledHost();
 	}
 
     private final Iterator getHosts(boolean chattableOnly) {
