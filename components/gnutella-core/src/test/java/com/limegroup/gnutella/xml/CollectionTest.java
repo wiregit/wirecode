@@ -37,6 +37,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     public CollectionTest(String name) {
         super(name);
     }
+
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+    public static Test suite() {
+        return buildTestSuite(CollectionTest.class);
+    }
     
     protected void setUp() throws Exception {
         
@@ -305,16 +313,4 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         audioFile.renameTo(newAudio);
         videoFile.renameTo(newVideo);
     }
-
-
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
-    }
-
-    public static Test suite() {
-        TestSuite suite =  new TestSuite("LimeXMLReplyCollection Unit Test");
-        suite.addTest(new TestSuite(CollectionTest.class));
-        return suite;
-    }
-
 }
