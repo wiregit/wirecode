@@ -11,6 +11,7 @@ import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
+import com.limegroup.gnutella.Response;
 
 import org.xml.sax.InputSource;
 
@@ -131,6 +132,17 @@ public class LimeXMLUtils
             else
 		writer.write(c);
         }
+    }
+    
+    /**
+     * Creates a Response instance from the passed xml string
+     */
+    public static Response createResponse(String xml)
+    {
+        //create a new response using default values and return it
+        return new Response(
+            LimeXMLProperties.DEFAULT_NONFILE_INDEX,
+                xml.length(), "xml result", xml);
     }
     
 }
