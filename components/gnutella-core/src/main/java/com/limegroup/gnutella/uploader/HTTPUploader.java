@@ -542,7 +542,7 @@ public final class HTTPUploader implements Uploader {
 		try {
             int i=str.indexOf("bytes");    //TODO: use constant
             if (i<0)
-                throw new IOException();
+                throw new IOException("bytes not present in range");
             i+=6;                          //TODO: use constant
 			sub = str.substring(i);
 		} catch (IndexOutOfBoundsException e) {
