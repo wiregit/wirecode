@@ -63,7 +63,12 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
     }
 
 	private static FileDesc[] createFileDescs() {
-		File[] files = CommonUtils.getResourceFile(FILE_PATH).listFiles();
+        File path = CommonUtils.getResourceFile(FILE_PATH);
+        File[] files = path.listFiles(new FileFilter() { 
+            public boolean accept(File file) {
+                return !file.isDirectory();
+            }
+        });
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set urns = FileDesc.calculateAndCacheURN(files[i]);
