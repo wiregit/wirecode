@@ -2,6 +2,7 @@ package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*; 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import junit.framework.*;
@@ -408,11 +409,12 @@ public final class QueryReplyTest extends TestCase {
             assertTrue(false);
         }
         byte[] bytes=out.toByteArray();
+        final int ggepLen = GGEPUtil.getQRGGEP(true).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
-        assertEquals(bytes.length,(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1));
-        assertEquals(bytes[bytes.length-16-6],0x1d); //11101
-        assertEquals(bytes[bytes.length-16-5],0x11); //10001
+        assertEquals(bytes.length,(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen);
+        assertEquals(bytes[bytes.length-16-6-ggepLen],0x3d); //11101
+        assertEquals(bytes[bytes.length-16-5-ggepLen],0x31); //10001
 
         //Create from scratch with no bits set
         responses=new Response[2];
