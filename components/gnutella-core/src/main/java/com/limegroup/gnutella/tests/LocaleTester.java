@@ -5,8 +5,8 @@ import java.io.*;
 
 /**
  * This is a test for locale-specific properties files.  Running
- * this test will output a file called "LOCALE_TEST.txt" to the
- * working directory.  Usage instructions are available via the
+ * this test will output a file called "LOCALE_[INPUT_LANGUAGE]_TEST.txt" 
+ * to the working directory.  Usage instructions are available via the
  * usual command line options.
  */
 public final class LocaleTester {
@@ -29,7 +29,28 @@ public final class LocaleTester {
 		"MENU_FILE_COMMUNITY_LOGOUT_ACCESSIBLE",
 		"MENU_NAV_COMM",
 		"MENU_NAV_COMM_ACCESSIBLE",
-		"COMMUNITY_LOGOUT_BUTTON_LABEL"
+		"COMMUNITY_LOGOUT_BUTTON_LABEL",
+		"MENU_VIEW_MONITOR_MNEMONIC",
+		"MENU_HELP_FAQ_MNEMONIC",
+		"MENU_HELP_FORUM_MNEMONIC",
+		"MENU_NAV_MONITOR_MNEMONIC",
+		"MENU_HELP_TITLE_MNEMONIC",
+		"MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC",
+		"MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC",
+		"MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC",
+		"MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC",
+		"MENU_RESOURCES_LIMESHOP_MNEMONIC",
+		"MENU_TOOLS_TITLE_MNEMONIC",
+		"MENU_VIEW_MONITOR_MNEMONIC",
+		"MENU_FILE_LIBRARY_REFRESH_MNEMONIC",
+		"MENU_NAV_SEARCH_MNEMONIC",
+		"MENU_RESOURCES_TITLE_MNEMONIC",
+		"MENU_TOOLS_OPTIONS_MNEMONIC",
+		"MENU_NAV_TITLE_MNEMONIC",
+		"MENU_RESOURCES_PRO_MNEMONIC",
+		"MENU_TOOLS_STATISTICS_MNEMONIC",
+		"MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC",
+		"MENU_FILE_LIBRARY_DELETE_FOLDER_MNEMONIC"
 	};
 
 	public LocaleTester() {		
