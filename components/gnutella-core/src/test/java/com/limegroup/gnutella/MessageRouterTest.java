@@ -540,7 +540,7 @@ public final class MessageRouterTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         assertFalse(RouterService.isSupernode());
-        Collection hosts = RouterService.getPreferencedHosts(false, null);
+        Collection hosts = RouterService.getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 0, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -556,7 +556,7 @@ public final class MessageRouterTest extends BaseTestCase {
         
         // add some hosts with free leaf slots (just 3), make sure we get'm back.
         addFreeLeafSlotHosts(3);
-        hosts = RouterService.getPreferencedHosts(false, null);
+        hosts = RouterService.getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 3, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -567,10 +567,11 @@ public final class MessageRouterTest extends BaseTestCase {
         stub.sentPongs.clear();
         assertEquals(3, reply.getPackedIPPorts().size());
         
-        // add 20 more free leaf slots, make sure we only get 10.
+        // add 20 more free leaf slots, make sure we only get as many we request.
+        int requested = 10;
         addFreeLeafSlotHosts(20);
-        hosts = RouterService.getPreferencedHosts(false, null);
-        assertEquals(hosts.toString(), 10, hosts.size());
+        hosts = RouterService.getPreferencedHosts(false, null,requested);
+        assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
@@ -578,7 +579,7 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(10, reply.getPackedIPPorts().size());
+        assertEquals(requested, reply.getPackedIPPorts().size());
         
         clearFreeLeafSlotHosts();
         addFreeLeafSlotHosts(2); // odd number, to make sure it isn't impacting other tests.
@@ -590,7 +591,7 @@ public final class MessageRouterTest extends BaseTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         assertTrue(RouterService.isSupernode());
         addFreeUltrapeerSlotHosts(4);
-        hosts = RouterService.getPreferencedHosts(true, null);
+        hosts = RouterService.getPreferencedHosts(true, null,10);
         assertEquals(hosts.toString(), 4, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
@@ -601,10 +602,13 @@ public final class MessageRouterTest extends BaseTestCase {
         stub.sentPongs.clear();
         assertEquals(4, reply.getPackedIPPorts().size());
         
-        // and add a lot again, make sure we only get 10.
+        // and add a lot again, make sure we only get as many we reqeust.
         addFreeUltrapeerSlotHosts(20);
-        hosts = RouterService.getPreferencedHosts(true, null);
-        assertEquals(hosts.toString(), 10, hosts.size());
+        requested = 15;
+        int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
+        ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
+        hosts = RouterService.getPreferencedHosts(true, null,requested);
+        assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
@@ -612,7 +616,8 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(10, reply.getPackedIPPorts().size());
+        assertEquals(requested, reply.getPackedIPPorts().size());
+        ConnectionSettings.NUM_RETURN_PONGS.setValue(original);
         
         // Now try again, without an SCP request, and make sure we got none.
         pr = new PingRequest((byte)1);
