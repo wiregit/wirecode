@@ -149,6 +149,19 @@ public class LimeSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPLimeSentMessageStatBytes();
+
+    /**
+     * <tt>Statistic</tt> for Gnutella TCP GIVE_STATS message
+     */ 
+	public static final Statistic TCP_GIVE_STATS = 
+        new TCPLimeSentMessageStatBytes();
+
+    /**
+     * <tt>Statistic</tt> for Gnutella UDP GIVE_STATS message
+     */ 
+	public static final Statistic UDP_GIVE_STATS = 
+        new UDPLimeSentMessageStatBytes();
+
 	    
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests sent over 

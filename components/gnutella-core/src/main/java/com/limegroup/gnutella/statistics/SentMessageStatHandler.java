@@ -258,6 +258,19 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   LimeSentMessageStat.TCP_HOPS_FLOW,
 								   LimeSentMessageStatBytes.TCP_HOPS_FLOW);
 
+    public static final SentMessageStatHandler TCP_GIVE_STATS = 
+        new SentMessageStatHandler(SentMessageStat.TCP_GIVE_STATS,
+                                   SentMessageStatBytes.TCP_GIVE_STATS,
+                                   LimeSentMessageStat.TCP_GIVE_STATS,
+                                   LimeSentMessageStatBytes.TCP_GIVE_STATS);
+
+	public static final SentMessageStatHandler UDP_GIVE_STATS = 
+	    new SentMessageStatHandler(SentMessageStat.UDP_GIVE_STATS,
+								   SentMessageStatBytes.UDP_GIVE_STATS,
+								   LimeSentMessageStat.UDP_GIVE_STATS,
+								   LimeSentMessageStatBytes.UDP_GIVE_STATS);
+
+    
 
 	public static final SentMessageStatHandler TCP_TCP_CONNECTBACK = 
 	    new SentMessageStatHandler(SentMessageStat.TCP_TCP_CONNECTBACK,

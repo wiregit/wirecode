@@ -10,10 +10,9 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
-
 import com.sun.java.util.collections.*;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.StringTokenizer;
+import java.io.*;
 import java.net.*;
 
 
@@ -372,7 +371,17 @@ public abstract class MessageRouter {
                 ;
             handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
         }
-
+        else if (msg instanceof GiveStatsVendorMessage) {
+            if(RECORD_STATS)
+                ; //TODO: add the statistics recording code
+            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
+        }
+        else if(msg instanceof StatisticVendorMessage) {
+            if(RECORD_STATS) 
+                ;//TODO: add the statistics recording code
+            handleStatisticsMessage(
+                            (StatisticVendorMessage)msg, receivingConnection);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -454,6 +463,16 @@ public abstract class MessageRouter {
 			if(RECORD_STATS)
                 ;
             handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
+        }
+        else if(msg instanceof GiveStatsVendorMessage) {
+            if(RECORD_STATS)
+                ;
+            handleGiveStats((GiveStatsVendorMessage) msg, handler);
+        }
+        else if(msg instanceof StatisticVendorMessage) {
+            if(RECORD_STATS)
+                ;
+            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
     }
     
@@ -1928,6 +1947,46 @@ public abstract class MessageRouter {
 
         // if none of the above conditions holds true, drop the reply
         return true;
+    }
+
+    private void handleGiveStats(final GiveStatsVendorMessage gsm, 
+                                             final ReplyHandler replyHandler) {
+        StatisticVendorMessage statVM = null;
+        try {
+            //create the reply -- StatisticVendorMessage
+            statVM = new StatisticVendorMessage(gsm);
+            //OK. Now send this message back to the client that asked for
+            //stats
+            replyHandler.handleStatisticVM(statVM);
+        } catch (BadPacketException bpx) {
+            return;
+        } catch(IOException iox) {
+            return; //what can we really do now?
+        }
+    }
+
+    private void handleStatisticsMessage(final StatisticVendorMessage svm, 
+                                         final ReplyHandler handler) {
+        Thread statHandler = new Thread("Stat writer ") {
+            public void run() {
+                RandomAccessFile file = null;
+                try {
+                    file = new RandomAccessFile("stats_log.log", "rw");
+                    file.seek(file.length());//go to the end.
+                    file.writeBytes(svm.getReportedStats()+"\n");
+                } catch (IOException iox) {
+                    ErrorService.error(iox);
+                } finally {
+                    try {
+                        file.close();
+                    } catch (IOException iox) {
+                        ErrorService.error(iox);
+                    }
+                }
+            }
+        };
+        if(StatisticsSettings.RECORD_VM_STATS.getValue())
+            statHandler.start();
     }
 
     /**

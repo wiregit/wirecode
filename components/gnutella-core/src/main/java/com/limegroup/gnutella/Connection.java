@@ -1866,6 +1866,10 @@ public class Connection implements IpPort {
 		return _headers.supportsGGEP();
     }
 
+    public void handleStatisticVM(StatisticVendorMessage svm) 
+                                                            throws IOException {
+        send(svm);
+    }
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */

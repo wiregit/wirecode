@@ -1,7 +1,13 @@
 package com.limegroup.gnutella.stubs;
 
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
+import com.sun.java.util.collections.*;
+import java.net.*;
 
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -86,6 +92,8 @@ public class ReplyHandlerStub implements ReplyHandler {
             return null;
         }
     }
+
+    public void handleStatisticVM(StatisticVendorMessage svm) { }
 
     public boolean isStable() {
         return true;

@@ -26,6 +26,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_REPLY_NUMBER = 12;
     protected static final int F_PUSH_PROXY_REQ = 21;
     protected static final int F_PUSH_PROXY_ACK = 22;
+    protected static final int F_GIVE_STATS = 14;
+    protected static final int F_STATISTICS = 15;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -87,7 +89,14 @@ public abstract class VendorMessage extends Message {
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
                             byte[] payload) 
         throws BadPacketException {
-        super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length);
+        this(vendorIDBytes, selector, version, payload, Message.N_UNKNOWN);
+    }
+    
+    protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
+                            byte[] payload, int network) 
+                                                throws BadPacketException  {
+        super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length,
+              network);
         if ((vendorIDBytes.length != 4)) {
             if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();
@@ -109,8 +118,7 @@ public abstract class VendorMessage extends Message {
         _version = version;
         _payload = payload;
         // lastly compute the hash
-        _hashCode = computeHashCode(_version, _selector, _vendorID,
-                                    _payload);
+        _hashCode = computeHashCode(_version, _selector, _vendorID, _payload);
     }
 
     /** Should be used when encountered a Message from the Network.  Primarily
@@ -121,7 +129,14 @@ public abstract class VendorMessage extends Message {
     protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
                             int selector, int version, byte[] payload) 
         throws BadPacketException {
-        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length);
+        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
+    }
+
+    protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
+                            int selector, int version, byte[] payload, 
+                            int network) throws BadPacketException {
+        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
+              network);
         // set the instance params....
         _vendorID = vendorID;
         _selector = selector;
@@ -262,7 +277,14 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_CAPABILITIES) && 
             (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
             return new CapabilitiesVM(guid, ttl, hops, version, restOf);
-
+        if ((selector == F_GIVE_STATS) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf,
+                                              Message.N_UNKNOWN);
+        if ((selector == F_STATISTICS) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
+        
 
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

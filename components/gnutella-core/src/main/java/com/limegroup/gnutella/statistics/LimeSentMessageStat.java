@@ -247,6 +247,18 @@ public class LimeSentMessageStat extends AdvancedStatistic {
 	public static final Statistic TCP_HOPS_FLOW = 
 	    new TCPLimeSentMessageStat();
 
+    /**
+     * <tt>Statistic</tt> for Gnutella TCP GIVE_STATS message
+     */ 
+	public static final Statistic TCP_GIVE_STATS = new TCPLimeSentMessageStat();
+
+    /**
+     * <tt>Statistic</tt> for Gnutella UDP GIVE_STATS message
+     */ 
+	public static final Statistic UDP_GIVE_STATS = new UDPLimeSentMessageStat();
+
+
+
 	/**
 	 * <tt>Statistic</tt> for Gnutella meta-vendor messages sent over 
 	 * TCP.
