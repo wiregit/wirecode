@@ -222,6 +222,14 @@ public class UpdateManager {
                         String runningVersion=CommonUtils.getLimeWireVersion();
                         if(!isGreaterVersion(newVersion, runningVersion))
                             return; //runningVersion <= newVersion -- no message
+                        //OK. We don't want to DDOS ourselves so lets sleep 
+                        //for a random amount of time.
+                        Random rand = new Random();
+                        long max = 7*60*60*1000;//7 hours
+                        long sleep = rand.nextLong() % max;
+                        try {
+                            Thread.sleep(sleep);
+                        } catch(InterruptedException ignored) {}
                         RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(IOException iox) {
