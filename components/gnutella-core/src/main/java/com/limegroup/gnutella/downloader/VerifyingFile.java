@@ -39,6 +39,10 @@ public class VerifyingFile {
     
     public void open(File file, ManagedDownloader md) throws IOException {
         this.managedDownloader = md;
+        // Ensure that the directory this file is in is writeable.
+        File parentFile = FileUtils.getParentFile(file);
+        FileUtils.setWriteable(parentFile);
+        FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
     }
 

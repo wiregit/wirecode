@@ -1563,8 +1563,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // let the user know we're saving the file...
         setState( SAVING );
         
-        //4. Move to library.  
-        //System.out.println("MANAGER: completed");
+        //4. Move to library.
+        // Make sure we can write into the complete file's directory.
+        File completeFileDir = FileUtils.getParentFile(completeFile);
+        FileUtils.setWriteable(completeFileDir);
+        FileUtils.setWriteable(completeFile);
         //Delete target.  If target doesn't exist, this will fail silently.
         completeFile.delete();
 
