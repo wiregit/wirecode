@@ -645,8 +645,7 @@ public final class HandshakeResponse {
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
     public String getUserAgent() {
-        return HEADERS.getProperty(
-            com.limegroup.gnutella.handshaking.HeaderNames.USER_AGENT);
+        return HEADERS.getProperty(HeaderNames.USER_AGENT);
     }
 
     /**
