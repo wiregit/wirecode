@@ -1222,6 +1222,15 @@ public class Connection {
     public long getConnectionTime() {
         return _connectionTime;
     }
+    
+    /**
+     * Accessor for the soft max TTL to use for this connection.
+     * 
+     * @return the soft max TTL for this connection
+     */
+    public byte getSoftMax() {
+        return _softMax;
+    }
 
     /**
      * Checks whether this connection is considered a stable connection,
