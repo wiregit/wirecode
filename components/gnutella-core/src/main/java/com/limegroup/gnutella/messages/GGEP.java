@@ -121,7 +121,14 @@ public class GGEP {
      */
     public GGEP() {
         this(false);
-    }    
+    }
+    
+    /**
+     * Constructs a new GGEP message with the given bytes & offset.
+     */
+    public GGEP(byte[] data, int offset) throws BadGGEPBlockException {
+        this(data, offset, null);
+    }
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is

@@ -1295,22 +1295,24 @@ public class QueryRequest extends Message implements Serializable{
             HUGEExtension huge = new HUGEExtension(extsBytes);
             GGEP ggep = huge.getGGEP();
 
-            try {
-                if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                    byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
-                }
-                if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                    _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
-                    _doNotProxy = true;
-                if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                    _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                    // if the value is something we can't handle, don't even set it
-                    if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
-                        _metaMask = null;
-                }
-            } catch (BadGGEPPropertyException ignored) {}
+            if(ggep != null) {
+                try {
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                        byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                        tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
+                    }
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
+                        _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
+                        _doNotProxy = true;
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                        _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        // if the value is something we can't handle, don't even set it
+                        if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
+                            _metaMask = null;
+                    }
+                } catch (BadGGEPPropertyException ignored) {}
+            }
 
             tempQueryUrns = huge.getURNS();
             tempRequestedUrnTypes = huge.getURNTypes();

@@ -1307,7 +1307,10 @@ public class QueryReply extends Message implements Serializable{
                  } catch (BadGGEPPropertyException bad) {}
             }
             
-            return proxies;
+            if(proxies == null)
+                return Collections.EMPTY_SET;
+            else
+                return proxies;
         }
     }
 
@@ -1346,6 +1349,10 @@ public class QueryReply extends Message implements Serializable{
         // collections
         public int hashCode() {
             return _combo.hashCode() * 17;
+        }
+        
+        public String toString() {
+            return _combo.toString();
         }
     }
 
