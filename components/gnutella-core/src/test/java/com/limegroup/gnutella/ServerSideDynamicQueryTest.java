@@ -255,6 +255,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
                 Message m=c.receive(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
+                if (m instanceof PingRequest)
+                    ;
                 else // we should never get any other sort of message...
                     return false;
             }
@@ -279,6 +281,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             try {
                 Message m=c.receive(TIMEOUT);
                 if (m instanceof RouteTableMessage)
+                    ;
+                if (m instanceof PingRequest)
                     ;
                 else if (m instanceof QueryRequest) 
                     return (QueryRequest)m;
@@ -306,6 +310,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             try {
                 Message m=c.receive(TIMEOUT);
                 if (m instanceof RouteTableMessage)
+                    ;
+                if (m instanceof PingRequest)
                     ;
                 else if (m instanceof QueryReply) 
                     return (QueryReply)m;
