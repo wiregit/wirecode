@@ -37,9 +37,11 @@ public final class QueryDispatcher implements Runnable {
 	private static final QueryDispatcher INSTANCE = 
 		new QueryDispatcher();
 	
-	//list of user killed searches
-    private final Set _toRemove = 
-        Collections.synchronizedSet(new HashSet());
+	/**
+     * Constant <tt>Set</tt> of searches that the user has killed that should 
+     * be removed.
+	 */
+    private final Set TO_REMOVE = Collections.synchronizedSet(new HashSet());
     
 
 	/**
@@ -110,7 +112,8 @@ public final class QueryDispatcher implements Runnable {
      *  from
      * @param handler the <tt>ReplyHandler</tt> to remove
      */
-    private static void removeFromCollection(Collection coll, ReplyHandler handler) {
+    private static void removeFromCollection(Collection coll, 
+		ReplyHandler handler) {
         List toRemove = new LinkedList();
         synchronized(coll) {
             Iterator iter = coll.iterator();
@@ -129,9 +132,6 @@ public final class QueryDispatcher implements Runnable {
      * Removes the specified <tt>ReplyHandler</tt> from the specified
      * <tt>Map</tt>.
      *
-     * TODO: this method can be sped up if the handler object had access
-     * to its guid.
-     *
      * @param map the <tt>Map</tt> to remove the <tt>ReplyHandler</tt>
      *  from
      * @param handler the <tt>ReplyHandler</tt> to remove
@@ -144,14 +144,13 @@ public final class QueryDispatcher implements Runnable {
                 QueryHandler qh = 
                     (QueryHandler)((Map.Entry)iter.next()).getValue();
                 if(qh.getReplyHandler() == handler)
-                    toRemove.add(qh);
+                    toRemove.add(qh.getGUID());
             }
 
 
             iter = toRemove.iterator();
             while (iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
-                map.remove(qh.getGUID());
+                map.remove((GUID)iter.next());
             }
         }     
     }
@@ -198,8 +197,8 @@ public final class QueryDispatcher implements Runnable {
                 QueryHandler handler = 
                     (QueryHandler)((Map.Entry)iter.next()).getValue();
                 
-                if(_toRemove.contains(handler.getGUID())) {
-                    _toRemove.remove(handler.getGUID());
+                if(TO_REMOVE.contains(handler.getGUID())) {
+                    TO_REMOVE.remove(handler.getGUID());
                     expiredQueries.add(handler);
                 }
                 else
@@ -221,8 +220,16 @@ public final class QueryDispatcher implements Runnable {
 	}
 
     
+    /**
+     * Adds the specified <tt>GUID</tt> to the group of searches to remove.  
+     * This MUST only be called to remove searches for this node, such as when
+     * the user cancels a search, and not for searches on behalf of other 
+     * nodes.
+     * 
+     * @param g the <tt>GUID</tt> of the search to remove
+     */
     public void addToRemove(GUID g) {
-        _toRemove.add(g);
+        TO_REMOVE.add(g);
     }
     
     
