@@ -174,7 +174,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				if ( rval != (i % 256) ) {
 					log2("Error on read expected: "+i
 					  +" received: "+rval);
-					break;
+					return false;
 				} 
 				if ( (i % 1000) == 0 ) 
 					log2("Echo status: "+i);
@@ -233,6 +233,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 
             int btest;
 			int len;
+            int printTarget = 0;
 			try {
 				for (int i = 0; i < 512 * numBlocks; i += len) {
 					len = istream.read(bdata);
@@ -244,8 +245,10 @@ public class UTest implements ActivityCallback, ErrorCallback {
 							  +" received: "+bdata[j]);
 							return;
 						} 
-						if ( ((i+j) % 1024) == 0 ) 
+						if ( (i+j) > printTarget ) { 
 							log2("Read status: "+i);
+                            printTarget = i+j+1024;
+                        }
 					}
 				}
 				readSuccess = true;
@@ -276,7 +279,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 					if ( btest != ((i+j) % 256) ) {
 						log2("Error on echo expected: "+(i+j)
 						  +" received: "+bdata[j]);
-						break;
+						return false;
 					} 
 					if ( ((i+j) % 1024) == 0 ) 
 						log2("Echo status: "+i);
