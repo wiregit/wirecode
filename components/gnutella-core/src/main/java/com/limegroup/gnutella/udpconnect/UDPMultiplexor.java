@@ -22,7 +22,7 @@ public class UDPMultiplexor {
 	public static final byte          UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
-	private WeakReference[]  _connections;
+	private volatile WeakReference[]  _connections;
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -54,7 +54,12 @@ public class UDPMultiplexor {
      */
 	public synchronized byte register(UDPConnectionProcessor con) {
 		int connID;
-		for (int i = 1; i <= _connections.length; i++) { 
+		
+		WeakReference []copy = new WeakReference[_connections.length];
+		for (int i= 0 ; i< _connections.length;i++) 
+		    copy[i] = _connections[i];
+		
+		for (int i = 1; i <= copy.length; i++) { 
 			connID = (_lastConnectionID + i) % 256;
 
 			// We don't assign zero.
@@ -62,10 +67,11 @@ public class UDPMultiplexor {
 				continue;
 
 			// If the slot is open, take it.
-			if (_connections[connID] == null ||
-					_connections[connID].get()==null) {
+			if (copy[connID] == null ||
+					copy[connID].get()==null) {
 				_lastConnectionID     = connID;
-				_connections[connID] = new WeakReference(con);
+				copy[connID] = new WeakReference(con);
+				_connections=copy;
 				return (byte) connID;
 			}
 		}
@@ -78,22 +84,29 @@ public class UDPMultiplexor {
      */
 	public synchronized void unregister(UDPConnectionProcessor con) {
 		int connID = (int) con.getConnectionID() & 0xff;
-		if ( _connections[connID]!=null &&
-				_connections[connID].get() == con ) {
-		    _connections[connID].clear();
-		    _connections[connID]=null;
+		
+		WeakReference []copy = new WeakReference[_connections.length];
+		for (int i= 0 ; i< _connections.length;i++) 
+		    copy[i] = _connections[i];
+		
+		if ( copy[connID]!=null &&
+				copy[connID].get() == con ) {
+		    copy[connID].clear();
+		    copy[connID]=null;
 		}
+		_connections=copy;
 	}
 
     /**
      *  Route a message to the UDPConnectionProcessor identified in the messages
 	 *  connectionID;
      */
-	public synchronized void routeMessage(UDPConnectionMessage msg, 
+	public void routeMessage(UDPConnectionMessage msg, 
 	  InetAddress senderIP, int senderPort) {
 
 		UDPConnectionProcessor con;
-
+		WeakReference []array = _connections;
+		
 		int connID = (int) msg.getConnectionID() & 0xff;
 
 		// If connID equals 0 and SynMessage then associate with a connection
@@ -102,11 +115,11 @@ public class UDPMultiplexor {
             if(LOG.isDebugEnabled())  {
                 LOG.debug("Receiving SynMessage :"+msg);
             }
-			for (int i = 1; i < _connections.length; i++) {
-				if (_connections[i]==null)
+			for (int i = 1; i < array.length; i++) {
+				if (array[i]==null)
 					con=null;
 				else
-					con = (UDPConnectionProcessor)_connections[i].get();
+					con = (UDPConnectionProcessor)array[i].get();
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
@@ -123,10 +136,10 @@ public class UDPMultiplexor {
 			// so it is safe to throw away premature ones
 
 		} else {  // If valid connID then send on to connection
-			if (_connections[connID]==null)
+			if (array[connID]==null)
 				con=null;
 			else
-				con = (UDPConnectionProcessor)_connections[connID].get();
+				con = (UDPConnectionProcessor)array[connID].get();
 			if ( con != null &&
                  con.matchAddress(senderIP, senderPort) ) {
 				con.handleMessage(msg);
