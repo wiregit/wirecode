@@ -76,6 +76,11 @@ public final class QueryUnicaster {
 	 */
 	private int _testUDPPingsSent = 0;
 
+	/**
+	 * Constant for whether or not to record stats.
+	 */
+	private final boolean RECORD_STATS = !CommonUtils.isJava118();
+
     static {
         _instance = new QueryUnicaster();
     }
@@ -192,8 +197,9 @@ public final class QueryUnicaster {
 							udpService.send(currQB._qr, ip, 
 											toQuery.getPort());
 							currentHostUsed = true;
-							SentMessageStatHandler.UDP_QUERY_REQUESTS.
-                                addMessage(currQB._qr);
+							if(RECORD_STATS)
+								SentMessageStatHandler.UDP_QUERY_REQUESTS.
+									addMessage(currQB._qr);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
@@ -312,7 +318,8 @@ public final class QueryUnicaster {
 				PingRequest pr = new PingRequest((byte)1);
 				UDPService.instance().send(pr, endpoint.getAddress(), 
 										   endpoint.getPort());
-				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+				if(RECORD_STATS) 
+					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
 			}
 			debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
@@ -418,7 +425,8 @@ public final class QueryUnicaster {
                     InetAddress ip = toReturn.getAddress();				
                     UDPService.instance().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
-                    SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+					if(RECORD_STATS) 
+						SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }
             }
             return toReturn;

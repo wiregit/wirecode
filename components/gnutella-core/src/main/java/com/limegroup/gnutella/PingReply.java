@@ -217,7 +217,9 @@ public class PingReply extends Message implements Serializable {
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
-        SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
+		if(RECORD_STATS) {
+			SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
+		}
     }
 
     public String toString() {
@@ -396,7 +398,9 @@ public class PingReply extends Message implements Serializable {
 
 	// inherit doc comment
 	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
+		if(RECORD_STATS) {
+			DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
+		}
 	}
 
     /** Marks the given kbytes field */

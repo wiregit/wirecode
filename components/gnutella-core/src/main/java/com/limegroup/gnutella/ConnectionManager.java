@@ -1082,7 +1082,9 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+		if(!CommonUtils.isJava118()) {
+			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+		}
         RouterService.getCallback().connectionInitializing(c);
 
         try {
@@ -1297,7 +1299,9 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+			if(!CommonUtils.isJava118()) {
+				ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+			}
             RouterService.getCallback().connectionInitializing(c);
         }
             
@@ -1332,7 +1336,9 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+			if(!CommonUtils.isJava118()) {
+				ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+			}
             RouterService.getCallback().connectionInitializing(c);
         }
 

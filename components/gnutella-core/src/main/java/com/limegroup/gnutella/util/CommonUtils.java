@@ -126,6 +126,12 @@ public final class CommonUtils {
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
 	/**
+	 * Constant for the current running directory.
+	 */
+	private static final File CURRENT_DIRECTORY =
+		new File(PROPS.getProperty("user.dir"));
+
+	/**
 	 * Make sure the constructor can never be called.
 	 */
 	private CommonUtils() {}
@@ -296,7 +302,7 @@ public final class CommonUtils {
 	 *  instance, or <tt>null</tt> if the property is not set
 	 */
 	public static File getCurrentDirectory() {
-		return new File(PROPS.getProperty("user.dir"));
+		return CURRENT_DIRECTORY;
 	}
 
     /**

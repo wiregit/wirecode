@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.http;
 
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
@@ -55,7 +56,8 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value);
 		os.write(header.getBytes());
-		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		if(!CommonUtils.isJava118()) 
+			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**
@@ -83,7 +85,8 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value);
 		out.write(header);
-		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		if(!CommonUtils.isJava118()) 
+			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**

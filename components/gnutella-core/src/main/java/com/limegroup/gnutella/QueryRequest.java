@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
@@ -265,7 +266,9 @@ public class QueryRequest extends Message implements Serializable{
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
-        SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
+		if(RECORD_STATS) {
+			SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
+		}
     }
 
     /** 
@@ -319,7 +322,9 @@ public class QueryRequest extends Message implements Serializable{
 
 	// inherit doc comment
 	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);	   
+		if(RECORD_STATS) {
+			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);	   
+		}
 	}
 
     /** Returns this, because it's always safe to send big queries. */

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.guess.*;
@@ -83,6 +83,11 @@ public abstract class MessageRouter {
 	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
 
+	/**
+	 * Constant for whether or not to record stats.
+	 */
+	private final boolean RECORD_STATS = !CommonUtils.isJava118();
+
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -140,24 +145,30 @@ public abstract class MessageRouter {
         msg.hop();
 	   
         if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
 		} else if (msg instanceof PingReply) {
-			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 		} else if (msg instanceof QueryRequest) {
-			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
 		} else if (msg instanceof QueryReply) {
-			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, receivingConnection);
 		} else if (msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 		} else if (msg instanceof RouteTableMessage) {
-			ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
 		}
@@ -186,23 +197,28 @@ public abstract class MessageRouter {
 		
         if (msg instanceof QueryRequest) {
 			sendAcknowledgement(datagram, msg.getGUID());
-			ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
 			//if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
-			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
-            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
 		} else if(msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
@@ -229,7 +245,8 @@ public abstract class MessageRouter {
 
 		UDPService.instance().send(reply, datagram.getAddress(), 
 								   datagram.getPort());
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
+		if(RECORD_STATS)
+			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**
@@ -300,7 +317,8 @@ public abstract class MessageRouter {
 			}
             handleQueryRequest(request, receivingConnection);
 		} else {
-			ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
 		}
     }
 	
@@ -316,7 +334,8 @@ public abstract class MessageRouter {
         if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler)) {
             handleQueryRequest(request, handler);
 		} else {
-			ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
 		}
 	}
 
@@ -436,10 +455,8 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void sendPingRequest(PingRequest request,
-                                ManagedConnection connection)
-    {
+                                ManagedConnection connection) {
         _pingRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-		//SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
         connection.send(request);
     }
 
@@ -448,10 +465,8 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void sendQueryRequest(QueryRequest request,
-                                 ManagedConnection connection)
-    {
+                                 ManagedConnection connection) {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-		//SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
         connection.send(request);
     }
 
@@ -459,8 +474,7 @@ public abstract class MessageRouter {
      * Broadcasts the ping request to all initialized connections,
      * setting up the proper reply routing.
      */
-    public void broadcastPingRequest(PingRequest pingRequest)
-    {
+    public void broadcastPingRequest(PingRequest pingRequest) {
         _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
         broadcastPingRequest(pingRequest, null, _manager);
     }
@@ -469,8 +483,7 @@ public abstract class MessageRouter {
      * Broadcasts the query request to all initialized connections,
      * setting up the proper reply routing.
      */
-    public void broadcastQueryRequest(QueryRequest request)
-    {
+    public void broadcastQueryRequest(QueryRequest request) {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
         //if (RouterService.isGUESSCapable()) {
 		//  unicastQueryRequest(request, null);
@@ -491,8 +504,7 @@ public abstract class MessageRouter {
      */
     protected void broadcastPingRequest(PingRequest request,
                                         ReplyHandler receivingConnection,
-                                        ConnectionManager manager)
-    {
+                                        ConnectionManager manager) {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
 
@@ -506,7 +518,6 @@ public abstract class MessageRouter {
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-				//SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
                 c.send(request);
             }
         }
@@ -619,7 +630,6 @@ public abstract class MessageRouter {
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
-			//SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
             sendConnection.send(request);
 		}		
     }
@@ -685,8 +695,7 @@ public abstract class MessageRouter {
      * if you do.
      */
     protected void handlePingReply(PingReply reply,
-                                   ReplyHandler handler)
-    {
+                                   ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = 
 		    RouterService.getHostCatcher().add(reply, handler);
@@ -695,13 +704,12 @@ public abstract class MessageRouter {
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(reply.getGUID());
 
-        if(replyHandler != null)
-        {
+        if(replyHandler != null) {
             replyHandler.handlePingReply(reply, handler);
         }
-        else
-        {
-			RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
+        else {
+			if(RECORD_STATS) 
+				RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
 
@@ -717,11 +725,9 @@ public abstract class MessageRouter {
         //pong as they have no routing entry.  Note that if Ultrapeers are very
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
-        if ((newAddress && reply.isMarked()) || supportsUnicast) 
-        {
+        if ((newAddress && reply.isMarked()) || supportsUnicast) {
             List list=_manager.getInitializedClientConnections2();
-            for (int i=0; i<list.size(); i++) 
-            {
+            for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 if (c!=handler && c!=replyHandler) {
 					c.handlePingReply(reply, handler);
@@ -773,14 +779,14 @@ public abstract class MessageRouter {
                 UNICASTER.handleQueryReply(queryReply);
 
             } else {
-                //RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-                RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+				if(RECORD_STATS) 
+					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
                 handler.countDroppedMessage();
             }
         }
         else {
-			//RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-            RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+			if(RECORD_STATS) 
+				RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }
@@ -825,19 +831,17 @@ public abstract class MessageRouter {
      * super.handlePushRequest if you do.
      */
     public void handlePushRequest(PushRequest request,
-                                  ReplyHandler handler)
-    {
+                                  ReplyHandler handler) {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(request.getClientGUID());
 
-        if(replyHandler != null)
-        {
+        if(replyHandler != null) {
             replyHandler.handlePushRequest(request, handler);
         }
-        else
-        {
-			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+        else {
+			if(RECORD_STATS) 
+				RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }
@@ -994,7 +998,6 @@ public abstract class MessageRouter {
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
-					//SentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(m);
                     c.send(m);
                 }
                 qi.lastSent=table;

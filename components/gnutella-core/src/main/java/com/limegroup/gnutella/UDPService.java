@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.statistics.*;
 
 import java.net.*;
 import java.io.*;

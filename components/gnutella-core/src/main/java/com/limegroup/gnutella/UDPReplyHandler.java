@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
@@ -32,6 +33,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * Constant for the <tt>UDPService</tt>.
 	 */
 	private static final UDPService UDP_SERVICE = UDPService.instance();
+
+	/**
+	 * Constant for whether or not to record stats.
+	 */
+	private final boolean RECORD_STATS = !CommonUtils.isJava118();
 	
 	/**
 	 * Constructor that sets the ip and port to reply to.
@@ -55,8 +61,9 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 		UDP_SERVICE.send(pong, IP, PORT);
+		if(RECORD_STATS) 
+			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
 	/**
@@ -69,8 +76,9 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 		UDP_SERVICE.send(hit, IP, PORT);
+		if(RECORD_STATS) 
+			SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
 	/**
@@ -83,8 +91,9 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 		UDP_SERVICE.send(request, IP, PORT);
+		if(RECORD_STATS) 
+			SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
 	public void countDroppedMessage() {}

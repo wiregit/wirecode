@@ -372,12 +372,16 @@ public class Acceptor extends Thread {
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
-					HTTPStat.HTTP_GET_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.GET, _socket);
+					if(!CommonUtils.isJava118()) {
+						HTTPStat.HTTP_GET_REQUESTS.incrementStat();
+					}
                 }
 				else if (word.equals("HEAD")) {
-					HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
+					if(!CommonUtils.isJava118()) {
+						HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
+					}
 				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {

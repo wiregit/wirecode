@@ -245,7 +245,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
-		BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+		if(!CommonUtils.isJava118()) 
+			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str);	
 
         //Note: According to the specification there are 5 headers, LimeWire
@@ -256,7 +257,8 @@ public class HTTPDownloader implements BandwidthTracker {
 			str = _byteReader.readLine();
             if (str==null || str.equals(""))
                 break;
-			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+			if(!CommonUtils.isJava118()) 
+				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
             //As of LimeWire 1.9, we ignore the "Content-length" header;
             //handling an unexpectedly low Content-length value is no different
             //from handling premature connection termination.  Look at LimeWire
@@ -525,7 +527,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 if (c == -1) 
                     break;
                            
-				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
+				if(!CommonUtils.isJava118()) 
+					BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
                 //2. Check that data read matches any non-zero bytes already on
                 //disk, i.e., from previous downloads.  Assumption: "holes" in
                 //file are zeroed.  Be careful not read beyond end of file,

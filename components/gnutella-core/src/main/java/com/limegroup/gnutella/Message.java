@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -52,6 +53,11 @@ public abstract class Message
 	 * an easy optimization.
 	 */
 	//private final static byte[] GUID_BUF = new byte[16];
+
+	/**
+	 * Constant for whether or not to record stats.
+	 */
+	protected final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 	/**
 	 * Cached reference to <tt>SettingsManager</tt>.

@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.messages.*;
 
 /**
  * A query reply.  Contains information about the responding host in addition to
@@ -364,7 +365,9 @@ public class QueryReply extends Message implements Serializable{
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
         out.write(payload);
-        SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
+		if(RECORD_STATS) {
+			SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
+		}
     }
 
     /** Return the associated xml metadata string if the queryreply
@@ -945,7 +948,9 @@ public class QueryReply extends Message implements Serializable{
 
 	// inherit doc comment
 	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
+		if(RECORD_STATS) {
+			DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
+		}
 	}
 
     public final static boolean debugOn = false;

@@ -8,9 +8,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.*;
 
 /**
  * There are two constructors that are necessary.  The 
@@ -356,7 +354,8 @@ public final class HTTPUploader implements Uploader {
 	void setAmountUploaded(int amount) {
 		int newData = amount - _amountRead;
 		if(newData > 0) {
-			BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+			if(!CommonUtils.isJava118()) 
+				BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
 		}
 		_amountRead = amount;
 	}
@@ -446,7 +445,8 @@ public final class HTTPUploader implements Uploader {
         	while (true) {
         		// read the line in from the socket.
                 String str = br.readLine();
-				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+				if(!CommonUtils.isJava118()) 
+					BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank

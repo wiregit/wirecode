@@ -26,6 +26,12 @@ public class ConnectionStat extends AdvancedStatistic {
 	}
 
 	/**
+	 * <tt>Statistic</tt> for all Gnutella connection attempts made.
+	 */
+	public static final Statistic ALL_CONNECTION_ATTEMPTS =
+		new ConnectionStat();
+
+	/**
 	 * <tt>Statistic</tt> for all Gnutella incoming connection attempts
 	 * made (connection attempts initiated from other hosts).
 	 */
@@ -38,10 +44,4 @@ public class ConnectionStat extends AdvancedStatistic {
 	 */
 	public static final Statistic OUTGOING_CONNECTION_ATTEMPTS =
 		new AllConnectionAttemptsStat();
-	
-	/**
-	 * <tt>Statistic</tt> for all Gnutella connection attempts made.
-	 */
-	public static final Statistic ALL_CONNECTION_ATTEMPTS =
-		new ConnectionStat();
 }

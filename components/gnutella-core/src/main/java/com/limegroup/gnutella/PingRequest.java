@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
@@ -64,7 +65,9 @@ public class PingRequest extends Message {
     protected void writePayload(OutputStream out) throws IOException {
         if(payload != null) {
             out.write(payload);
-            SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+			if(RECORD_STATS) {
+				SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+			}
         }
         //Do nothing...there is no payload!
     }
@@ -80,7 +83,9 @@ public class PingRequest extends Message {
 
 	// inherit doc comment
 	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+		if(RECORD_STATS) {
+			DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+		}
 	}
 
     public String toString() {
