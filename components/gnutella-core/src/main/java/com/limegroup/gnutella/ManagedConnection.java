@@ -47,6 +47,9 @@ import com.limegroup.gnutella.connection.*;
 public class ManagedConnection
         extends Connection
         implements ReplyHandler {
+    /** The timeout to use when connecting, in milliseconds. */
+    private static final int CONNECT_TIMEOUT=8000;  //8 seconds
+
     private MessageRouter _router;
     private ConnectionManager _manager;
 
@@ -318,7 +321,7 @@ public class ManagedConnection
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        super.initialize();
+        super.initialize(CONNECT_TIMEOUT);
         //Start the thread to empty the output queue
         new OutputRunner();
     }

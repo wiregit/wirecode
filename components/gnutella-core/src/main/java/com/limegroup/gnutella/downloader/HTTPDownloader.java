@@ -6,7 +6,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.SocketOpener;
+import com.limegroup.gnutella.util.Sockets;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -149,10 +149,7 @@ public class HTTPDownloader implements BandwidthTracker {
         InputStream istream=null;
         try {            
             if (_socket==null) {
-                if (timeout==0)  //minor optimization
-                    _socket=new Socket(_host, _port);
-                else
-                    _socket=(new SocketOpener(_host, _port)).connect(timeout);
+                _socket=Sockets.connect(_host, _port, timeout, true);
             }
             istream=_socket.getInputStream(); 
         } catch (Exception e) {

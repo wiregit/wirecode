@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -180,11 +181,24 @@ public class Connection {
         _propertiesWrittenR=properties;
     }
 
+    /** 
+     * Initializes this without timeout; exactly like initialize(0). 
+     * @see initialize(int)
+     */
+    public void initialize() 
+            throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(0);
+    }
+
     /**
      * Initialize the connection by doing the handshake.  Throws IOException
      * if we were unable to establish a normal messaging connection for
      * any reason.  Do not call send or receive if this happens.
      *
+     * @param timeout for outgoing connections, the timeout in milliseconds
+     *  to use in establishing the socket, or 0 for no timeout.  If the 
+     *  platform does not support native timeouts, it will be emulated with
+     *  threads.
      * @exception IOException we were unable to connect to the host
      * @exception NoGnutellaOkException one of the participants responded
      *  with an error code other than 200 OK (possibly after several rounds
@@ -193,10 +207,10 @@ public class Connection {
      *  the connection, e.g., the server responded with HTTP, closed the
      *  the connection during handshaking, etc.
      */
-    public void initialize() 
+    public void initialize(int timeout) 
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         try {
-            initializeWithoutRetry();
+            initializeWithoutRetry(timeout);
         } catch (NoGnutellaOkException e) {
             //Other guy speaks the same language but doesn't want us.
             //Don't bother to retry
@@ -212,7 +226,7 @@ public class Connection {
                 _propertiesRead = null;
                 _propertiesWrittenP=null;
                 _propertiesWrittenR=null;
-                initializeWithoutRetry();
+                initializeWithoutRetry(timeout);
             } else {
                 throw e;
             }
@@ -222,6 +236,8 @@ public class Connection {
     /*
      * Exactly like initialize, but without the re-connection.
      *
+     * @param timeout for outgoing connections, the timeout in milliseconds
+     *  to use in establishing the socket, or 0 for no timeout
      * @exception IOException couldn't establish the TCP connection
      * @exception NoGnutellaOkException one of the participants responded
      *  with an error code other than 200 OK (possibly after several rounds
@@ -229,12 +245,12 @@ public class Connection {
      * @exception BadHandshakeException some sort of protocol error after
      *  establishing the connection
      */
-    private void initializeWithoutRetry() throws IOException {
+    private void initializeWithoutRetry(int timeout) throws IOException {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
-
+ 
         if(isOutgoing())
-            _socket = new Socket(_host, _port);
+            _socket=Sockets.connect(_host, _port, timeout, true);
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
@@ -852,7 +868,7 @@ public class Connection {
 //          HandshakeResponder standardResponder=new HandshakeResponder() {
 //              public HandshakeResponse respond(HandshakeResponse response,
 //                                               boolean outgoing) {
-//                  return new HandshakeResponse(props);;
+//                  return new HandshakeResponse(props);
 //              }
 //          };        
 //          HandshakeResponder secretResponder=new HandshakeResponder() {
@@ -926,6 +942,20 @@ public class Connection {
 //              p.out.flush();
 //              Assert.that(false);
 //          } catch (IOException pass) {
+//          }
+
+//          //7.
+//          System.out.println("-Testing connect with timeout");
+//          Connection c=new Connection("this-host-does-not-exist.limewire.com", 6346);
+//          int TIMEOUT=1000;
+//          long start=System.currentTimeMillis();
+//          try {
+//              c.initialize(TIMEOUT);
+//              Assert.that(false);
+//          } catch (IOException e) {
+//              //Check that exception happened quickly.  Note fudge factor below.
+//              long elapsed=System.currentTimeMillis()-start;  
+//              Assert.that(elapsed<(3*TIMEOUT)/2, "Took too long to connect: "+elapsed);
 //          }
 //      }   
 

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
