@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /** 
@@ -16,9 +15,6 @@ public class UDPScheduler extends ManagedThread {
     /** This is the default event when nothing is scheduled */
 	public static final  UDPTimerEvent NO_EVENT  = new NoEvent(Long.MAX_VALUE);
 
-    /** This wait time is for waiting while nothing is scheduled */
-	private static final long   LONG_WAIT_TIME = 10*60*1000;
-
     /** The name that the scheduler thread will have */
 	private static final String NAME_OF_THREAD = "UDPScheduler";
 
@@ -27,11 +23,6 @@ public class UDPScheduler extends ManagedThread {
 
     /** The next event to be handled */
 	private UDPTimerEvent       _scheduledEvent;
-
-    /** Waiting is a flag regarding whether it is safe to interrupt the 
-        execution thread.  It should be set to true unless you are 
-        executing external code. */
-	private boolean             _waiting;
 
     private boolean             _started;
 
@@ -43,7 +34,7 @@ public class UDPScheduler extends ManagedThread {
 
     /** For offloading the synchronization issues, maintain a second thread
         for updating events */
-    UpdateThread                _updateThread;
+    private UpdateThread                _updateThread;
     
     /**
      * object used to make sure only one copy of the update thread exists per
@@ -69,7 +60,6 @@ public class UDPScheduler extends ManagedThread {
         super(NAME_OF_THREAD);
 		_connectionEvents    = new ArrayList();
 		_scheduledEvent      = NO_EVENT;
-		_waiting             = true;
         _started             = false;
         _updateThread        = null;
     }
@@ -84,29 +74,11 @@ public class UDPScheduler extends ManagedThread {
 
 	}
 	
-    /**
-     *  Unregister a UDPTimerEvent for scheduling events
-     */
-	public void unregister(UDPTimerEvent evt) {
-		
-		startThreads();
 
-        // Pass the event update to the update thread.
-        _updateThread.unregisterEvent(evt);
-	}
-
-	public final synchronized void registerSync(UDPTimerEvent evt) {
+	private final synchronized void registerSync(UDPTimerEvent evt) {
 		_connectionEvents.add(evt);
 	}
 
-	public final synchronized void unregisterSync(UDPTimerEvent evt) {
-		_connectionEvents.remove(evt);
-	
-		// Replace the removed connection in schedule if necessary
-		if ( _scheduledEvent == evt )
- 			reworkSchedule();
-	}
-	
 	/**
 	 * starts both threads if they haven't been started yet.
 	 */
@@ -143,14 +115,13 @@ public class UDPScheduler extends ManagedThread {
      *  Shortcut test for a second thread to deal with the new schedule handoff
      */
     class UpdateThread extends ManagedThread {
-        ArrayList _listSchedule,_listUnregister,_listRegister;
+        ArrayList _listSchedule,_listRegister;
 
         /**
          *  Initialize the list of pending event updates
          */
         public UpdateThread() {
             _listSchedule = new ArrayList();
-            _listUnregister = new ArrayList();
             _listRegister = new ArrayList();
         }
 
@@ -162,10 +133,6 @@ public class UDPScheduler extends ManagedThread {
               notify();
         }
         
-        public synchronized void unregisterEvent(UDPTimerEvent evt) {
-        	_listUnregister.add(evt);
-        	notify();
-        }
         
         public synchronized void registerEvent(UDPTimerEvent evt) {
         	_listRegister.add(evt);
@@ -177,7 +144,7 @@ public class UDPScheduler extends ManagedThread {
          */
         public void managedRun() {
             UDPTimerEvent evt;
-            ArrayList localListSchedule,localListUnregister,localListRegister;
+            ArrayList localListSchedule,localListRegister;
             while (true) {
                // Make sure that there is some idle time in the event updating
                // Otherwise, it will burn cpu
@@ -189,15 +156,10 @@ public class UDPScheduler extends ManagedThread {
                 synchronized(this) {
                     localListSchedule = (ArrayList) _listSchedule.clone();
                     _listSchedule.clear();
-                    localListUnregister = (ArrayList) _listUnregister.clone();
-                    _listUnregister.clear();
                     localListRegister = (ArrayList) _listRegister.clone();
                     _listRegister.clear();
                 }
 
-                //first remove any events
-                for (Iterator iter = localListUnregister.iterator();iter.hasNext();)
-                	unregisterSync((UDPTimerEvent)iter.next());
                 
                 //then add any events
                 for (Iterator iter = localListRegister.iterator();iter.hasNext();)
@@ -215,7 +177,6 @@ public class UDPScheduler extends ManagedThread {
                 // Wait for more event updates
                 synchronized(this) {
                     if (_listSchedule.size() > 0 || 
-                    		_listUnregister.size() > 0 ||
 							_listRegister.size() > 0)
                         continue;
                     try {
@@ -235,11 +196,8 @@ public class UDPScheduler extends ManagedThread {
                      _connectionEvents.contains(evt) ) {
                     _scheduledEvent      = evt;
                     
-                    // Interrupt the main event processing thread 
-                    // if it is waiting
-                    if (_waiting) {
-                        _myThread.interrupt();
-                    }
+                    // Notifying 
+                    UDPScheduler.this.notify();
                 }
             }
         }
@@ -255,46 +213,40 @@ public class UDPScheduler extends ManagedThread {
         _myThread = Thread.currentThread();
 	
         // Specify that an interrupt is okay
-		_waiting = true;
+
 		while (true) {
             // wait for an existing or future event
             try {
-                synchronized(this) {
+            	synchronized(this) {
                     if ( _scheduledEvent == NO_EVENT ) {
                         // Wait a long time since there is nothing to do
-                        waitTime = LONG_WAIT_TIME;
+                        waitTime = 0;
                     } else {
                         // Wait for specific event
                         waitTime = _scheduledEvent.getEventTime() - 
                           System.currentTimeMillis();
+                        if (waitTime ==0)
+                        	waitTime=-1;
                     }
+                    
+                    if (waitTime >=0)
+                		wait(waitTime);
                 }
-                if ( waitTime > 0 ) 
-                    Thread.sleep(waitTime);
-
             } catch(InterruptedException e) {
             }
 
             // Determine whether to run existing event
             // or to just sleep on a possibly changed event
             synchronized(this) {
-                if ( _scheduledEvent == NO_EVENT )
-                    continue;
-                // If an event changed during sleep, then rework schedule
-                if ( _scheduledEvent.getEventTime() == Long.MAX_VALUE ) {
-                    reworkSchedule();
-                    continue;
-                }
+
                 waitTime = _scheduledEvent.getEventTime() - 
                   System.currentTimeMillis();
                 if ( waitTime > 0 )
                     continue;
             }
-            
-            // Deactivate interrupts, run event and then allow interrupts
-            _waiting = false;
+
+            // Run the event and rework the schedule.
             runEvent();
-            _waiting = true;
             reworkSchedule();
 		}
 	}
@@ -303,9 +255,12 @@ public class UDPScheduler extends ManagedThread {
 	 *  Run the scheduled UDPTimerEvent event
      */
  	private synchronized void runEvent() {
-		if ( _scheduledEvent != NO_EVENT ) {
+
+		if (_scheduledEvent.shouldUnregister())
+			_connectionEvents.remove(_scheduledEvent);
+		else
 			_scheduledEvent.handleEvent();
-		}
+
 	}
 
     /**

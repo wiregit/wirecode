@@ -326,19 +326,19 @@ public class UDPConnectionProcessor {
 
         // Shutdown keepalive event callbacks
         if ( _keepaliveEvent  != null ) 
-        	_scheduler.unregister(_keepaliveEvent);
+        	_keepaliveEvent.unregister();
 
         // Shutdown write event callbacks
         if ( _writeDataEvent != null ) 
-            _scheduler.unregister(_writeDataEvent);
+            _writeDataEvent.unregister();
 
         // Shutdown ack timeout event callbacks
         if ( _ackTimeoutEvent != null ) 
-            _scheduler.unregister(_ackTimeoutEvent);
+            _ackTimeoutEvent.unregister();
 
         // Unregister the safeWriteWakeup handler
         if ( _safeWriteWakeup != null ) 
-            _scheduler.unregister(_safeWriteWakeup);
+            _safeWriteWakeup.unregister();
 
 		// Register that the connection is closed
         _connectionState = FIN_STATE;
@@ -376,7 +376,7 @@ public class UDPConnectionProcessor {
         _multiplexor.unregister(this);
 
         // Clean up my caller
-        _scheduler.unregister(_closedCleanupEvent);
+        _closedCleanupEvent.unregister();
 
         // TODO: Clear up state to streams? Might need more time. Anything else?
     }
@@ -1140,7 +1140,6 @@ public class UDPConnectionProcessor {
                          _receiverWindowSpace > 0 ) {
                         if(LOG.isDebugEnabled())  
                             LOG.debug(" -- KA wakeup");
-                        System.out.println(" -- KA wakeup");
                         writeSpaceActivation();
                     }
                 }
@@ -1286,7 +1285,7 @@ public class UDPConnectionProcessor {
             UDPConnectionProcessor udpCon = 
             	(UDPConnectionProcessor)_udpCon.get();
             
-        	if (unregisterIfNeeded())
+        	if (udpCon==null)
         		return;
 
             long time = System.currentTimeMillis();
@@ -1297,7 +1296,7 @@ public class UDPConnectionProcessor {
             // If connection closed, then make sure that keepalives have ended
 
             if (udpCon.isClosed() ) {
-                udpCon._scheduler.unregister(udpCon._keepaliveEvent);
+                udpCon._keepaliveEvent.unregister();
             }
 
 			// Make sure that some messages are received within timeframe
@@ -1341,7 +1340,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNeeded())
+        	if (udpCon==null)
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1380,7 +1379,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNeeded())
+        	if (udpCon == null)
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1407,7 +1406,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNeeded())
+        	if (udpCon==null)
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1435,7 +1434,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNeeded())
+        	if (udpCon==null)
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1448,7 +1447,7 @@ public class UDPConnectionProcessor {
             if(LOG.isDebugEnabled())  
                 LOG.debug("Closed connection done: "+ System.currentTimeMillis());
             
-            _shouldUnregister=true;
+            unregister();
         }
     }
     //

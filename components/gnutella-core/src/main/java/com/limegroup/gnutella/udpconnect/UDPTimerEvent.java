@@ -18,7 +18,7 @@ public abstract class UDPTimerEvent implements Comparable {
     /** The currently scheduled time. */
     protected volatile long _eventTime;
     
-    protected volatile boolean _shouldUnregister;
+    private volatile boolean _shouldUnregister;
     
     /** the UDPConnectionProcessor this event refers to */
     protected final WeakReference _udpCon;
@@ -37,22 +37,27 @@ public abstract class UDPTimerEvent implements Comparable {
      * Also checks if this is event wants to unregister itself
      * @return whether the UDPConnectionProcessor was unregistered.
      */
-    protected final boolean unregisterIfNeeded() {
+    final boolean shouldUnregister() {
     	
     	if (_udpCon.get() == null || _shouldUnregister) {
-    		LOG.debug("Event unregistering itself");
-    		UDPScheduler.instance().unregisterSync(this);
+    		LOG.debug("Event decided to unregister itself");
     		return  true;
     	}
 
     	return false;
+    }
+    
+    protected final void unregister() {
+    	_shouldUnregister=true;
+    	_eventTime=1;
     }
 
    /**
     *  Change the time that an event is scheduled at.  Note to recall scheduler.
     */
     public void updateTime(long updatedEventTime) {
-        _eventTime = updatedEventTime;
+    	if (!_shouldUnregister)
+    		_eventTime = updatedEventTime;
     }
 
    /**
