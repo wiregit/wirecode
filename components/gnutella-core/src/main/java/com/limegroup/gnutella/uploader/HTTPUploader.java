@@ -10,6 +10,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.altlocs.*;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the
@@ -90,10 +91,23 @@ public final class HTTPUploader implements Uploader {
     private BandwidthTrackerImpl bandwidthTracker=null;
 
 	/**
-	 * Stores any alternate locations specified in the HTTP headers for 
-	 * this upload.
-	 */
-	private AlternateLocationCollection _alternateLocationCollection;
+	 * Stores good AlternateLocations read from the HTTP headers for this
+	 * upload.  
+     */
+	private AlternateLocationCollection _goodLocs;
+
+    /**
+     * Stores bad AlternateLocations read from the HTTP Headers for this upload
+     */
+    private AlternateLocationCollection _badLocs;
+
+
+    /**
+     * The number of AltLocs that this uploader has written out. It is necessary
+     * to rememeber this number beacuse uploader do not want to keep repeating
+     * the same set of alternate locations to potential downloaders
+     */
+    private int _numAltsWritten;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -149,8 +163,9 @@ public final class HTTPUploader implements Uploader {
         _supportsQueueing = false;
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
-        _alternateLocationCollection = null;
         _parameters = params;
+        _goodLocs = null;
+        _badLocs = null;
         
         // If this is the first time we are initializing it,
         // create a new bandwidth tracker and set a few more variables.
@@ -183,6 +198,17 @@ public final class HTTPUploader implements Uploader {
         _fis = _fileDesc.createInputStream();
 	}
 	
+    /**
+     * Creates the valid and failed AlternateLocationCollections with the
+     * correct hash and initializes _goodLocs and _badLocs
+     */
+    public void initializeAltLocs() {
+        Assert.that(_fileDesc!=null,"trying to upload a null file desc");
+        _goodLocs = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        _badLocs = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+    }
+    
+
 	/**
 	 * Initializes the OutputStream for this HTTPUploader to use.
 	 * Throws IOException if the connection was closed.
@@ -214,12 +240,30 @@ public final class HTTPUploader implements Uploader {
             if ( _amountRead < _amountRequested )
                 throw e;
 		} finally {    
-    		if(_alternateLocationCollection != null && _fileDesc != null) {
-    			// making this call now is necessary to avoid writing the 
-    			// same alternate locations back to the requester as were 
-    			// sent in the request headers
-    			_fileDesc.addAlternateLocationCollection(
-    			    _alternateLocationCollection);
+    		if( _fileDesc != null) {
+                //Synchronization note: the following two synchronization blocks
+                //hold the locks of two AlternateLocationCollections
+                //simultaneously. This may seem like a festering ground for
+                //deadlocks, but this is not dangerous because the locks for
+                //goodLoc and badLocs cannot be held by more than one thread.
+                synchronized(_badLocs) {
+                    Iterator iter = _badLocs.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation loc =
+                        ((AlternateLocation)iter.next()).createClone();
+                        Assert.that(loc!=null,"problem cloning AltLoc");
+                        _fileDesc.remove(loc);
+                    }
+                }
+                synchronized(_goodLocs) {
+                    Iterator iter = _goodLocs.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation loc = 
+                        ((AlternateLocation)iter.next()).createClone();
+                        Assert.that(loc!=null,"problem cloning AltLoc");
+                        _fileDesc.add(loc);
+                    }
+                }
             }
         }
 	}
@@ -271,10 +315,10 @@ public final class HTTPUploader implements Uploader {
 			break;
         case QUEUED:
             int pos=RouterService.getUploadManager().positionInQueue(_socket);
-            _state = new QueuedUploadState(pos,_fileDesc);
+            _state = new QueuedUploadState(pos,this);
             break;
 		case LIMIT_REACHED:
-			_state = new LimitReachedUploadState(_fileDesc);
+			_state = new LimitReachedUploadState(this);
 			break;
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
@@ -295,7 +339,7 @@ public final class HTTPUploader implements Uploader {
             _state = new MalformedRequestState();
             break;
         case UNAVAILABLE_RANGE:
-            _state = new UnavailableRangeUploadState(_fileDesc);
+            _state = new UnavailableRangeUploadState(this);
             break;
 		case COMPLETE:
 		case INTERRUPTED:
@@ -442,6 +486,30 @@ public final class HTTPUploader implements Uploader {
 	}
     
     /**
+     * package access, generates an AlternateLocationCollection based on the
+     * number of AltLocs that this Uploader has already sent out.
+     */
+    AlternateLocationCollection getAlternateLocationCollection() {
+        AlternateLocationCollection coll =
+                                    _fileDesc.getAlternateLocationCollection();
+        AlternateLocationCollection ret=
+                    AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        synchronized(coll) {
+            Iterator iter  = coll.iterator();
+            for(int i=0; iter.hasNext() && i < _numAltsWritten ; i++) 
+                iter.next(); //skip the first _numAltsWritten
+            int i;
+            //Synchronization note: We hold the locks of two
+            //AlternateLocationCollections concurrently, but one of them is a
+            //local variable, so we are OK.
+            for(i = 0; i< 10 && iter.hasNext();i++)
+                ret.add((AlternateLocation)iter.next());
+            _numAltsWritten += i;//add as many as we added now.
+            return ret;
+        }
+    }
+    
+    /**
      * Blocks certain vendors from being queued, because of buggy
      * downloading implementations on their side.
      */
@@ -531,6 +599,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readUserAgentHeader(str)   ) ;
                 else if ( readContentURNHeader(str)  ) ;
                 else if ( readAltLocationHeader(str) ) ;
+                else if ( readNAltLocationHeader(str)) ;
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
@@ -756,14 +825,18 @@ public final class HTTPUploader implements Uploader {
 	private boolean readAltLocationHeader(String str) {
         if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
             return false;
-        
-   		if(_alternateLocationCollection == null && _fileDesc != null) 
-   			_alternateLocationCollection = 
-				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
-        if(_alternateLocationCollection != null)
-            HTTPUploader.parseAlternateLocations(
-                str, _alternateLocationCollection);
+                
+        if(_goodLocs != null) 
+            HTTPUploader.parseAlternateLocations(str, _goodLocs);
+        return true;
+    }
 
+    private boolean readNAltLocationHeader(String str) {
+        if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
+            return false;
+        
+        if(_badLocs != null)
+            HTTPUploader.parseAlternateLocations(str,_badLocs);
         return true;
     }
 
@@ -857,30 +930,29 @@ public final class HTTPUploader implements Uploader {
 	 *  locations should be added to
 	 */
 	private static void parseAlternateLocations(final String altHeader,
-      final AlternateLocationCollector alc) {
-		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+                                       final AlternateLocationCollector alc) {
+
+		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-
-		while(st.hasMoreTokens()) {
-			try {
-				// note that the trim method removes any CRLF character
-				// sequences that may be used if the sender is using
-				// continuations.
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
-				
+        while(st.hasMoreTokens()) {
+            try {
+                // note that the trim method removes any CRLF character
+                // sequences that may be used if the sender is using
+                // continuations.
+                AlternateLocation al = 
+                AlternateLocation.create(st.nextToken().trim());
+                
                 URN sha1 = al.getSHA1Urn();
-                if(sha1.equals(alc.getSHA1Urn())) {
-                    alc.addAlternateLocation(al);
-                }
-			} catch(IOException e) {
-				// just return without adding it.
-				continue;
-			}
-		}
+                if(sha1.equals(alc.getSHA1Urn()))
+                    alc.add(al);
+            } catch(IOException e) {
+                // just return without adding it.
+                continue;
+            }
+        }
 	}
 
 	/**

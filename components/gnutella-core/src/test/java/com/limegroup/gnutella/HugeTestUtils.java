@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.*; 
 import com.limegroup.gnutella.http.*; 
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.altlocs.*; 
 import java.io.*;
 import java.net.*;
 
@@ -344,7 +345,7 @@ public final class HugeTestUtils {
 		for(int i=0; i<UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
 				UNEQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.createAlternateLocation(UNEQUAL_URLS[i]);
+					AlternateLocation.create(UNEQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);
@@ -354,7 +355,7 @@ public final class HugeTestUtils {
 		for(int i=0; i<EQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
 				EQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.createAlternateLocation(EQUAL_URLS[i]);
+					AlternateLocation.create(EQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);

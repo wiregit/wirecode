@@ -1,17 +1,13 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.http.*;
+import com.sun.java.util.collections.*;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
+import java.net.*;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
@@ -124,8 +120,8 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		URL sha1Url = new URL("http", "60.23.35.10", 6346, 
 							  "/uri-res/N2R?"+sha1.httpStringValue());
 		AlternateLocation loc =  
-			AlternateLocation.createAlternateLocation(sha1Url);
-		fd.addAlternateLocation(loc);
+			AlternateLocation.create(sha1Url);
+		fd.add(loc);
 	}
 
 	/**
@@ -142,9 +138,9 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 								  HTTPConstants.URI_RES_N2R+
 								  HugeTestUtils.URNS[0]);
 			AlternateLocation loc =  
-				AlternateLocation.createAlternateLocation(sha1Url);
+				AlternateLocation.create(sha1Url);
 			assertNotNull("should not be null", loc.getSHA1Urn());
-			fd.addAlternateLocation(loc);
+			fd.add(loc);
 			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);
 		} catch(IllegalArgumentException e) {
 		} catch(IOException e) {

@@ -8,6 +8,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.altlocs.*;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, 
@@ -87,12 +88,12 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * Adds the alternate location to this FileDesc and also notifies
      * the ManagedDownloader of a new location for this.
      */
-    public boolean addAlternateLocation(AlternateLocation al) {
-        boolean ret = super.addAlternateLocation(al);
+    public boolean add(AlternateLocation al) {
+        boolean ret = super.add(al);
         if (ret) {
             ManagedDownloader md = _verifyingFile.getManagedDownloader();
             if( md != null )
-                md.addAlternateLocation(al, (int)getSize());
+                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
         }
         return ret;
     }
@@ -101,23 +102,25 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * Adds the alternate locations to this FileDesc and also notifies the
      * ManagedDownloader of new locations for this.
      */
-	public int addAlternateLocationCollection(AlternateLocationCollection alc) {
+	public int addAll(AlternateLocationCollection alc) {
 	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
 	    
         // if no downloader, just add the collection.
 	    if( md == null )
-	        return super.addAlternateLocationCollection(alc);
+	        return super.addAll(alc);
 	    
         // otherwise, iterate through and individually add them, to make
         // sure they get added to the downloader.
         int added = 0;
-        for(Iterator iter = alc.values().iterator(); iter.hasNext(); ) {
+        synchronized(alc) {
+        for(Iterator iter = alc.iterator(); iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next();
-            if( super.addAlternateLocation(al) ) {
-                md.addAlternateLocation(al, (int)getSize());
+            if( super.add(al) ) {
+                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
                 added++;
             }
-        }
+        } //end of for
+        } //end of synchronized block
         return added;
 	}    
     

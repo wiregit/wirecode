@@ -80,7 +80,7 @@ public class RichQueryHandler{
                 fd = RouterService.getFileManager().getFileDescForFile(
                     new File(subjectFile));
                 if( fd == null || 
-                   (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
+                   (busy && fd.getAltLocsSize() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.
                     continue;

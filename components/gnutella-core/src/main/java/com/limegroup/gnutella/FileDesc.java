@@ -1,20 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
+import java.io.*;
+import com.limegroup.gnutella.altlocs.*;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.util.DataUtils;
-
-import com.sun.java.util.collections.Collections;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.ArrayList;
 
 
 /**
@@ -139,7 +129,7 @@ public class FileDesc implements AlternateLocationCollector {
 		if(SHA1_URN == null) {
 			throw new IllegalArgumentException("no SHA1 URN");
 		}
-        ALT_LOCS = AlternateLocationCollection.createCollection(SHA1_URN);
+        ALT_LOCS = AlternateLocationCollection.create(SHA1_URN);
         _hits = 0; // Starts off with 0 hits
     }		
 
@@ -334,8 +324,7 @@ public class FileDesc implements AlternateLocationCollector {
 	public AlternateLocationCollection getAlternateLocationCollection() {
         // always renew entry for self before giving out alternate locations
 		try {
-			ALT_LOCS.addAlternateLocation(
-			    AlternateLocation.createAlternateLocation(SHA1_URN));
+			ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
 		} catch (IOException e) {
 			// not much we can do -- also should never happen
 		}
@@ -362,7 +351,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
 	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
 	 */
-	public boolean addAlternateLocation(AlternateLocation al) {
+	public boolean add(AlternateLocation al) {
         if(al == null) {
             throw new NullPointerException("cannot accept null alt locs");
         }
@@ -374,8 +363,27 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("URN does not match:\n"+
 											   SHA1_URN+"\n"+sha1);
 		}
-		return ALT_LOCS.addAlternateLocation(al);
+		return ALT_LOCS.add(al);
 	}
+    /**
+     * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
+	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
+     */
+    public boolean remove(AlternateLocation al) {
+        if(al == null)
+            throw new NullPointerException("cannot accept null alt locs");
+
+		URN sha1 = al.getSHA1Urn();
+		if(sha1 == null)
+			throw new IllegalArgumentException("sha1 cannot be null");
+
+		if(!sha1.equals(SHA1_URN))
+			throw new IllegalArgumentException("URN does not match:\n"+
+											   SHA1_URN+"\n"+sha1);
+
+		return ALT_LOCS.remove(al);
+    }
 
 	/**
      * Implements the <tt>AlternateLocationCollector</tt> interface.
@@ -388,7 +396,7 @@ public class FileDesc implements AlternateLocationCollector {
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
      *  collection to add does not match the collection of <tt>this</tt>
      */
-	public int addAlternateLocationCollection(AlternateLocationCollection alc) {
+	public int addAll(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("cannot accept null alt loc coll");
         }
@@ -396,7 +404,7 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("SHA1 does not match:\n"+
 											   SHA1_URN+"\n"+alc.getSHA1Urn());
 		}
-		return ALT_LOCS.addAlternateLocationCollection(alc);
+		return ALT_LOCS.addAll(alc);
 	}
 
 	// implements AlternateLocationCollector interface
@@ -405,8 +413,8 @@ public class FileDesc implements AlternateLocationCollector {
 	}
 	
 	// implements AlternateLocationCollector interface
-	public int getNumberOfAlternateLocations() {
-	    return ALT_LOCS.getNumberOfAlternateLocations();
+	public int getAltLocsSize() {
+	    return ALT_LOCS.getAltLocsSize();
 	}
 	
     

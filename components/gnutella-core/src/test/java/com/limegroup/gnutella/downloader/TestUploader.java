@@ -3,7 +3,9 @@ package com.limegroup.gnutella.downloader;
 import java.net.*;
 import java.io.*;
 import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -271,6 +273,8 @@ public class TestUploader {
         int start = 0;
         int stop = TestFile.length();
         boolean firstLine=true;
+        AlternateLocationCollection badLocs = null;
+        AlternateLocationCollection goodLocs = null;
         while (true) {
             String line=input.readLine();
             //DownloadTest.debug(line+"\n"); 
@@ -286,16 +290,12 @@ public class TestUploader {
 			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
 				_sha1 = readContentUrn(line);
 			}
+            
+            if(HTTPHeaderName.NALTS.matchesStartOfString(line))
+                badLocs = readAlternateLocations(line);
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
+				goodLocs = readAlternateLocations(line);
 
-			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
-				if(incomingAltLocs == null) {
-					incomingAltLocs =
-						AlternateLocationCollection.createCollection(_sha1);
-				}
-				readAlternateLocations(line, incomingAltLocs);
-            }        
-            
-            
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
             if (i==0) {
@@ -313,9 +313,27 @@ public class TestUploader {
             if(i==0)
                 http11 = line.indexOf("1.1") > 0;
 		}
+        if(_sha1!=null) {
+            if(incomingAltLocs == null)
+                incomingAltLocs = AlternateLocationCollection.create(_sha1);
+            if(badLocs!=null) {
+                synchronized(badLocs) {
+                    Iterator iter = badLocs.iterator();
+                    while(iter.hasNext()) 
+                        incomingAltLocs.remove((AlternateLocation)iter.next());
+                }
+            }
+            if(goodLocs!=null) {
+                synchronized(goodLocs) {
+                    Iterator iter = goodLocs.iterator();
+                    while(iter.hasNext()) 
+                        incomingAltLocs.add((AlternateLocation)iter.next());
+                }        
+            }
+        }
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
-        //Send the data.
+    //Send the data.
         send(output, start, stop);
     }
 
@@ -528,27 +546,33 @@ public class TestUploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private static void readAlternateLocations(final String altHeader,
-											   final AlternateLocationCollector alc) {
-		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+	private AlternateLocationCollection readAlternateLocations
+                                                     (final String altHeader) {
+        AlternateLocationCollection alc=null;
+		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return;
+		if(alternateLocations == null) return null;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-
+        if(_sha1!=null)
+            alc = AlternateLocationCollection.create(_sha1);
+        if (alc==null)
+            return null;
 		while(st.hasMoreTokens()) {
 			try {
 				// note that the trim method removes any CRLF character
 				// sequences that may be used if the sender is using
 				// continuations.
 				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
-				alc.addAlternateLocation(al);
+				    AlternateLocation.create(st.nextToken().trim());
+				alc.add(al);
 			} catch(IOException e) {
+                e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
 		}
+        return alc;
 	}
 
 	/**

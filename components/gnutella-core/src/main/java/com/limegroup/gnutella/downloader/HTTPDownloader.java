@@ -1,7 +1,3 @@
-/**
- * Read data from the net and write to disk.
- */
-
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
@@ -12,12 +8,12 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-
+import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
-
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.altlocs.*;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -35,6 +31,8 @@ import com.sun.java.util.collections.*;
  * dl.connectHTTP(startByte, stopByte);
  * dl.doDownload();
  * </pre> 
+ * LOCKING: _writtenGoodLocs and _goodLocs are both synchronized on _goodLocs
+ * LOCKING: _writtenBadLocs and _badLocs are both synchronized on _badLocs
  */
 
 public class HTTPDownloader implements BandwidthTracker {
@@ -48,7 +46,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * The smallest possible file to be shared with partial file sharing.
      * Non final for testing purposes.
      */
-    private static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
+    static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
     private RemoteFileDesc _rfd;
     private boolean _isPush;
@@ -84,13 +82,29 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private final AlternateLocationCollection _alternateLocationsReceived;
+	private AlternateLocationCollection _altLocsReceived;
 
-	/**
-	 * The alternate locations we already know about for this file.
-	 */
-	private final AlternateLocationCollection _alternateLocationsToSend; 
+    /**
+     *  The good locations to send the uploaders as in the alts list
+     */
+    private Set _goodLocs;
+    
+    /** 
+     * The list to send in the n-alts list
+     */
+    private Set _badLocs;
+    
+    /**
+     * The list of already written alts, used to stop duplicates
+     */
+    private Set _writtenGoodLocs;
+    
+    /**
+     * The list of already written n-alts, used to stop duplicates
+     */ 
+    private Set _writtenBadLocs;
 
+    
 	private int _port;
 	private String _host;
 	
@@ -113,13 +127,10 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param start the place to start reading from the network and writing to 
      *  the file
      * @param stop the last byte to read+1
-     * @param alts collection of alternate locations we know about for this
-     *  file.  May be null
      */
-	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile, 
-						  AlternateLocationCollection alts) {
+	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile, alts);
+        this(null, rfd, incompleteFile);
         _isPush=false;
 	}	
 
@@ -134,11 +145,9 @@ public class HTTPDownloader implements BandwidthTracker {
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
-     * @param alts collection of alternate locations we know about for this
-     *  file.  May be null
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
-      File incompleteFile, AlternateLocationCollection alts) {
+                                                          File incompleteFile) {
         if(rfd == null) {
             throw new NullPointerException("null rfd");
         }
@@ -154,14 +163,21 @@ public class HTTPDownloader implements BandwidthTracker {
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
-		_alternateLocationsToSend   = alts; 
-        _alternateLocationsReceived = (alts == null ? null :
-            AlternateLocationCollection.createCollection(alts.getSHA1Urn()));
-
+        URN urn = rfd.getSHA1Urn();
+        _altLocsReceived = urn==null ? null:
+            AlternateLocationCollection.create(urn);
+        AlternateLocationCollection s = null;
+        AlternateLocationCollection f = null;
+        _goodLocs = new HashSet();
+        _badLocs = new HashSet();
+        _writtenGoodLocs = new HashSet();
+        _writtenBadLocs = new HashSet();
 		_amountRead = 0;
 		_totalAmountRead = 0;
     }
 
+    ////////////////////////Alt Locs methods////////////////////////
+    
     /**
      * Accessor for the alternate locations received from the server for 
      * this download attempt.  
@@ -170,10 +186,38 @@ public class HTTPDownloader implements BandwidthTracker {
      *  received locations, can be <tt>null</tt> if we could not create
      *  a collection, or could be empty
      */
-	public AlternateLocationCollection getAlternateLocations() { 
-	    return _alternateLocationsReceived;
+    AlternateLocationCollection getAltLocsReceived() { 
+	    return _altLocsReceived;
     }
-
+        
+    void addSuccessfulAltLoc(AlternateLocation loc) {
+        synchronized(_badLocs) {
+            //If we ever thought loc was bad, forget that we did, so that we can
+            //add it to the n-alts list again, if it fails -- remove from
+            //writtenBadlocs
+            _writtenBadLocs.remove(loc);           
+            _badLocs.remove(loc);
+        }
+        synchronized(_goodLocs) {
+            if(!_writtenGoodLocs.contains(loc)) //not written earlier
+                _goodLocs.add(loc); //duplicates make no difference
+        }
+    }
+    
+    void addFailedAltLoc(AlternateLocation loc) {
+        //if we ever thought it was good, forget that we did, so we can write it
+        //out as good again -- remove it from writtenGoodLocs if it was there
+        synchronized(_goodLocs) {
+            _writtenGoodLocs.remove(loc);
+            _goodLocs.remove(loc);
+        }
+        
+        synchronized(_badLocs) {
+            if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
+                _badLocs.add(loc); //duplicates make no difference
+        }
+    }
+    
     ///////////////////////////////// Connection /////////////////////////////
 
     /** 
@@ -253,43 +297,66 @@ public class HTTPDownloader implements BandwidthTracker {
         if(supportQueueing) 
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
-		// Create a light-weight copy of AlternateLocations to avoid blocking
-		// while holding the lock
-
-        AlternateLocationCollection alts = null;
-        if (_alternateLocationsToSend != null) {
-            alts = AlternateLocationCollection.createCollection(
-                _alternateLocationsToSend.getSHA1Urn());
-            synchronized(_alternateLocationsToSend) {
-                alts.addAlternateLocationCollection(_alternateLocationsToSend);
-            }
-        }
-        
         // Add ourselves to the mesh if:
         //  This rfd has a SHA1,
         //  We are allowing partial sharing,
         //  The VerifyingFile is not corrupted,
         //  We have downloaded a large enough portion of the file,
         //  and We have accepted incoming during this session.
-        if (_rfd.getSHA1Urn() != null && 
-          UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-          !_outIsCorrupted &&
-          RouterService.acceptedIncomingConnection() &&
-          _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES) {
-            if( alts == null ) // will be null if altsToSend is null.
-                alts = AlternateLocationCollection.createCollection(
-                    _rfd.getSHA1Urn() );
-            AlternateLocation al =
-                AlternateLocation.createAlternateLocation(alts.getSHA1Urn());
-            alts.addAlternateLocation(al);
+        if(_rfd.getSHA1Urn()!=null && 
+           UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+           !_outIsCorrupted &&
+           RouterService.acceptedIncomingConnection() &&
+           _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES) {
+            AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
+            addSuccessfulAltLoc(me);
         }
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
-		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1, out);
-		if(alts != null && alts.getNumberOfAlternateLocations() > 0) {
-			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
-		}
+		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,sha1,out);
+
+        //We don't want to hold locks while doing network operations, so we use
+        //this variable to clone _goodLocs and _badLocs and write to network
+        //while iterating over the clone
+        Set writeClone = null;
+        
+        //write altLocs 
+        synchronized(_goodLocs) {
+            if(_goodLocs.size() > 0) {
+                writeClone = new HashSet();
+                Iterator iter = _goodLocs.iterator();
+                while(iter.hasNext()) {
+                    Object next = iter.next();
+                    writeClone.add(next);
+                    _writtenGoodLocs.add(next);
+                }
+                _goodLocs.clear();
+            }
+        }
+        if(writeClone != null) //have something to write?
+            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+                                 new HTTPHeaderValueCollection(writeClone),out);
+        
+        writeClone = null;
+        //write-nalts        
+        synchronized(_badLocs) {
+            if(_badLocs.size() > 0) {
+                writeClone = new HashSet();
+                Iterator iter = _badLocs.iterator();
+                while(iter.hasNext()) {
+                    Object next = iter.next();
+                    writeClone.add(next);
+                    _writtenBadLocs.add(next);
+                }
+                _badLocs.clear();
+            }
+        }
+
+        if(writeClone != null) //have something to write?
+            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
+                                new HTTPHeaderValueCollection(writeClone),out);
+
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
 		if (ChatSettings.CHAT_ENABLED.getValue() ) {
             int port = RouterService.getPort();
@@ -314,6 +381,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		// Read the response code from the first line and check for any errors
 		String str = _byteReader.readLine();  
+        //System.out.println("\t\t\t"+str);
 		if (str==null || str.equals(""))
             throw new IOException();
 		if(!CommonUtils.isJava118()) 
@@ -325,6 +393,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //Now read each header...
 		while (true) {            
 			str = _byteReader.readLine();
+            //System.out.println("\t\t\t"+str);
             if (str==null || str.equals(""))
                 break;
 			if(!CommonUtils.isJava118()) 
@@ -349,19 +418,16 @@ public class HTTPDownloader implements BandwidthTracker {
             // TODO: we should read the X-Gnutella-Content-URN header here
 
 			// Read any alternate locations
-			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
-                readAlternateLocations(str, _alternateLocationsReceived);
-			}
-            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) {
+			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
+                readAlternateLocations(str);
+            else if(HTTPHeaderName.OLD_ALT_LOCS.matchesStartOfString(str))
+                readAlternateLocations(str);
+            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
                 parseQueueHeaders(str, refQueueInfo);
-            }
-            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) {
+            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) 
                 _server = readServer(str);
-            }
             else if (HTTPHeaderName.AVAILABLE_RANGES.matchesStartOfString(str))
-            {
                 parseAvailableRangesHeader(str, _rfd);
-            }
         }
 
 
@@ -407,29 +473,28 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * for a single file.
 	 *
 	 * @param altHeader the full alternate locations header
-	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
-	 *  locations should be added to
 	 */
-	private static void readAlternateLocations(final String altHeader,
-											   AlternateLocationCollector alc) {
-		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
-		if(alternateLocations == null) return;
-		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+	private void readAlternateLocations(final String altHeader) {
+		final String altStr = HTTPUtils.extractHeaderValue(altHeader);
+		if(altStr == null) return;
+		StringTokenizer st = new StringTokenizer(altStr, ",");
 
 		while(st.hasMoreTokens()) {
 			try {
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
+				AlternateLocation al=AlternateLocation.
+                                              create(st.nextToken().trim());
                 URN alSha1 = al.getSHA1Urn();
                 if(alSha1 == null) {
                     continue;
                 }
-                if(alc == null) {
-                    alc = 
-                        AlternateLocationCollection.createCollection(alSha1);
-                }
-                if(alSha1.equals(alc.getSHA1Urn())) {
-                    alc.addAlternateLocation(al);
+                if(_altLocsReceived == null)
+                    _altLocsReceived = 
+                    AlternateLocationCollection.create(alSha1);
+                
+                if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
+                    synchronized(_altLocsReceived) {
+                        _altLocsReceived.add(al);
+                    }
                 }
 			} catch(IOException e) {
 				// continue without adding it.
@@ -460,7 +525,8 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException some other problem
      *  extracting result code
      */
-    private static int parseHTTPCode(String str, RemoteFileDesc rfd) throws IOException {		
+    private static int parseHTTPCode(String str, RemoteFileDesc rfd) 
+                                                         throws IOException {
 		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
 		String token;
 
@@ -826,7 +892,6 @@ public class HTTPDownloader implements BandwidthTracker {
         return bandwidthTracker.getAverageBandwidth();
     }
             
-	
 	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {
@@ -836,9 +901,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	private HTTPDownloader(String str) {
 		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 		_byteReader = new ByteReader(stream);
-		_alternateLocationsReceived = null;
-		_alternateLocationsToSend = null;
-		_rfd =  new RemoteFileDesc("127.0.0.1", 1,
+		_altLocsReceived = null;
+        _goodLocs = null;
+        _badLocs = null;
+        _writtenGoodLocs = null;
+        _writtenBadLocs = null;
+		_rfd =  new RemoteFileDesc("127.0.0.1", 0,
                                   0, "a", 0, new byte[16],
                                   0, false, 0, false, null, null,
                                   false, false, "", 0, null);

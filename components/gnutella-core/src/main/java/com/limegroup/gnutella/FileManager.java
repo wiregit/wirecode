@@ -1234,7 +1234,7 @@ public abstract class FileManager {
                             "unexpected null in FileManager for query:\n"+
                             request);
             } if(!busy || 
-                 desc.getNumberOfAlternateLocations() < 10) {
+                 desc.getAltLocsSize() < 10) {
                 desc.incrementHitCount();
                 
                 RouterService.getCallback().handleSharedFileUpdate(desc.getFile());

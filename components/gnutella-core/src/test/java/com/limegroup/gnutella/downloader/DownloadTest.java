@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.sun.java.util.collections.*;
 import java.net.URL;
 import com.limegroup.gnutella.*;
@@ -19,7 +20,7 @@ import junit.framework.*;
  * LimeWire.
  */
 public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
-
+    
     /**
      * Port for the first uploader.
      */
@@ -52,7 +53,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static File dataDir = 
         CommonUtils.getResourceFile(filePath);
     private static File saveDir = 
-        CommonUtils.getResourceFile(filePath + "saved");
+        (CommonUtils.getResourceFile(filePath + "saved")).getAbsoluteFile();
     
     // a random name for the saved file
     private static final String savedFileName = "DownloadTester2834343.out";
@@ -88,7 +89,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static Test suite() { 
         return buildTestSuite(DownloadTest.class);
     }
 
@@ -138,7 +139,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader2.stopThread();
         uploader3.stopThread();
         uploader4.stopThread();
-        
+
         deleteAllFiles();
     }
     
@@ -186,10 +187,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("-Measuring time for download at rate "+rate+"... \n");
         uploader1.setRate(rate);
         long start1=System.currentTimeMillis();
-        AlternateLocationCollection dcoll = 
-			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
 
-        HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile,dcoll);
+        HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile);
         VerifyingFile vf = new VerifyingFile(true);
         vf.open(savedFile,null);
         downloader.connectTCP(0);
@@ -204,9 +203,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         long start2=System.currentTimeMillis();
 
-        AlternateLocationCollection dcol = 
-			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
-        downloader=new HTTPDownloader(rfd, savedFile,dcol);
+        downloader=new HTTPDownloader(rfd, savedFile);
         vf = new VerifyingFile(false);
         vf.open(savedFile,null);
         downloader.connectTCP(0);
@@ -493,41 +490,55 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//got here? Test passed
     }
 
-    public void testSimpleAlternateLocations() throws Exception {  
+    public void testDownloaderAddsSmallFilesWithHead() throws Exception {  
         debug("-Testing AlternateLocation write...");
+        Object[] params = new Object[2];
+        params[0] = saveDir;
+        params[1] = new File(".");
+        //add current dir as a save directory so MD sends head request
+        PrivilegedAccessor.invokeMethod
+        (RouterService.getFileManager(),"updateDirectories",params);
+        //make the .out extension shared so FM thinks its shared
+        FileManager man = RouterService.getFileManager();
+        Set exts = (Set) PrivilegedAccessor.getValue(man,"_extensions");
+        exts.add("out");
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=
+                           newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
         tGeneric(rfds);
 
         //Prepare to check the alternate locations
-        //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection ashould = 
-			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-
-        ashould.addAlternateLocation(
-                AlternateLocation.createAlternateLocation(rfd1.getUrl()));
-
-        AlternateLocationCollection adiff = 
-        ashould.diffAlternateLocationCollection(alt1); 
-
+        AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
+           
         URN sha1 = rfd1.getSHA1Urn();
         URN uSHA1 = uploader1.getReportedSHA1();
         
         assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
-        assertTrue("uploader got wrong alt", !adiff.hasAlternateLocations());
+        assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
+        //in the head requester case the uploader will be sent all the locations
+        //including itself. The download has no way of knowing it is sending the
+        //uploader the same uploaders location
+        assertEquals("wrong number of locs ",2, alt1.getAltLocsSize());
         assertNotNull("rfd1 sha1", sha1);
         assertNotNull("uploader1 sha1", uSHA1);
         assertEquals("SHA1 test failed", sha1, uSHA1);
+        exts.remove("out");
     }
 
     public void testTwoAlternateLocations() throws Exception {  
         debug("-Testing Two AlternateLocations...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        final int RATE = 50;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        
+        RemoteFileDesc rfd1=
+                         newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=
+                         newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -536,27 +547,16 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
-        AlternateLocationCollection ashould = 
-			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
 
-        URL url1 = rfd1.getUrl();
-        URL url2 = rfd2.getUrl();
-        AlternateLocation al1 =
-			AlternateLocation.createAlternateLocation(url1);
-        AlternateLocation al2 =
-			AlternateLocation.createAlternateLocation(url2);
-        ashould.addAlternateLocation(al1);
-        ashould.addAlternateLocation(al2);
-
-        AlternateLocationCollection adiff = 
-            ashould.diffAlternateLocationCollection(alt1); 
-        AlternateLocationCollection adiff2 = 
-            alt1.diffAlternateLocationCollection(ashould); 
+        AlternateLocation al1 = AlternateLocation.create(rfd1.getUrl());
+        AlternateLocation al2 = AlternateLocation.create(rfd2.getUrl());
         
         assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
         assertTrue("uploader didn't recieve alt", alt2.hasAlternateLocations());
-        assertTrue("uploader got wrong alt", !adiff.hasAlternateLocations());
-        assertTrue("uploader got wrong alt", !adiff2.hasAlternateLocations());
+        assertTrue("uploader got wrong alt", !alt1.contains(al1));
+        assertEquals("incorrect number of locs ",1,alt1.getAltLocsSize());
+        assertTrue("uploader got wrong alt", !alt2.contains(al2));
+        assertEquals("incorrect number of locs ",1,alt2.getAltLocsSize());
     }
 
     public void testUploaderAlternateLocations() throws Exception {  
@@ -573,18 +573,20 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=
+                          newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=
+                          newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.createCollection(rfd2.getSHA1Urn());
+			AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
         URL url2 = rfd2.getUrl();
         AlternateLocation al2 =
-			AlternateLocation.createAlternateLocation(url2);
-        ualt.addAlternateLocation(al2);
+			AlternateLocation.create(url2);
+        ualt.add(al2);
 
         uploader1.setAlternateLocations(ualt);
 
@@ -609,30 +611,33 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
-        final int RATE=500;
+        final int RATE=50;
         final int STOP_AFTER = 1*TestFile.length()/10 - 1;          
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
         uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());        
+        RemoteFileDesc rfd1=
+                        newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=
+                        newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd3=
+                        newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.createCollection(rfd2.getSHA1Urn());
+                         AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
         URL url2 = rfd2.getUrl();
         URL url3 = rfd3.getUrl();        
-        AlternateLocation al2 =
-			AlternateLocation.createAlternateLocation(url2);
-        AlternateLocation al3 =
-			AlternateLocation.createAlternateLocation(url3);
-        ualt.addAlternateLocation(al2);
-        ualt.addAlternateLocation(al3);
+        AlternateLocation al1 =	AlternateLocation.create(rfd1);
+        AlternateLocation al2 =	AlternateLocation.create(url2);
+        AlternateLocation al3 =	AlternateLocation.create(url3);
+        ualt.add(al2);
+        ualt.add(al3);
 
         uploader1.setAlternateLocations(ualt);
 
@@ -646,78 +651,86 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tu3: "+u3+"\n");        
         debug("\tTotal: "+(u1+u2+u3)+"\n");
-        
-        // This is the real test.
-        // We expect 2 alternate locations, one for the original RFD
-        // that we sent to DownloadManager, and one for the alternate
-        // location that was succesful.  The altnerate location that
-        // failed should be removed from the list.
-        // The location is actually being removed in
-        // ManagedDownloader.establishConnection(RemoteFileDesc).
-        // This is because the download stalled, but we were able to recieve
-        // info, and ManagedDownloader attempts to reconnect.  TestUploader
-        // will refuse the connection, and ManagedDownloader will try to send
-        // a push (which of course fails), and then it assumes that the
-        // location has left the network, and removes it from the list.
-        assertEquals("bad alt loc wasn't removed", 
-            2, DOWNLOADER.getNumberOfAlternateLocations()
-        );
-
-        //Note: The amount downloaded from each uploader will not 
-        //be equal, because the uploaders are stated at different times.
-        assertGreaterThan("u1 did no work", 0, u1);
-        assertEquals("u2 did more work than needed", STOP_AFTER, u2);
-        assertGreaterThan("u3 did no work", 0, u3);
+        //Now let's check that the uploaders got the correct AltLocs.
+        //Uploader 1: Must have al3. al2 may either be demoted or removed
+        //Uploader 1 got correct Alts?
+        AlternateLocationCollection alts = uploader1.getAlternateLocations();
+        assertTrue(alts.contains(al3));
+        assertEquals("Extra alts in u1",1,alts.getAltLocsSize());
+        Iterator iter = alts.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
+        //uploader 2 dies after it uploades 1 bytes less than a chunk, so it
+        //does only one round of http handshakes. so it never receives alternate
+        //locations, even though u1 and u3 are good locations
+        alts = uploader2.getAlternateLocations();
+        assertEquals("u2 did more than 1 handshake",0,alts.getAltLocsSize());
+        alts = uploader3.getAlternateLocations();
+        assertTrue(alts.contains(al1));
+        iter = alts.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
+        //Test Downloader has correct alts: the downloader should have
+        //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
+        AlternateLocationCollection coll = (AlternateLocationCollection)
+        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        assertTrue(coll.contains(al1));
+        assertTrue(coll.contains(al3));
+        iter = coll.iterator();
+        while(iter.hasNext()) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            if(loc.equals(al2))
+                assertTrue("failed loc not demoted",loc.getDemoted());
+        }
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  
         debug("-Testing AlternateLocation write...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
-
-
+        
+        
         //Prebuild some uploader alts
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.createCollection(
+        AlternateLocationCollection.create(
                 HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
 
-        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
-		//AlternateLocation.createAlternateLocation(
+        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
+		//AlternateLocation.create(
 		//genericURL("http://211.211.211.211:PORT_2/get/0/foobar.txt")));
-        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
-		//  AlternateLocation.createAlternateLocation(
+        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
+		//  AlternateLocation.create(
 		//      genericURL("http://211.211.211.211/get/0/foobar.txt")));
-        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
-		//  AlternateLocation.createAlternateLocation(
+        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
+		//  AlternateLocation.create(
 		//      genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
-        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
-		//  AlternateLocation.createAlternateLocation(
+        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+		//  AlternateLocation.create(
 		//      genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
-
-        uploader1.setAlternateLocations(ualt);
-
-        tGeneric(rfds);
-
-        //Prepare to check the alternate locations
-        //Note: adiff should be blank
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection ashould = 
-			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-
-        ashould.addAlternateLocation(
-            AlternateLocation.createAlternateLocation(rfd1));
-
-        //ashould.addAlternateLocationCollection(ualt);
-        AlternateLocationCollection adiff = 
-            ashould.diffAlternateLocationCollection(alt1); 
-
-        AlternateLocationCollection adiff2 = 
-            alt1.diffAlternateLocationCollection(ashould); 
         
-        assertTrue("uploader didn't receive alt", alt1.hasAlternateLocations());
-        assertTrue("uploader got extra alts", !adiff.hasAlternateLocations());
-        assertTrue("uploader didn't get all alts", !adiff2.hasAlternateLocations());
+        uploader1.setAlternateLocations(ualt);
+        
+        tGeneric(rfds);
+        
+        //Check to check the alternate locations
+        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+
+        AlternateLocation agood = AlternateLocation.create(rfd1);
+
+        assertEquals("uploader got bad alt locs",0,alt1.getAltLocsSize());
+        AlternateLocationCollection coll = (AlternateLocationCollection)
+        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        assertTrue(coll.contains(agood));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
     }
 
     public void testStealerInterruptedWithAlternate() throws Exception {
@@ -733,19 +746,19 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
         uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd4=newRFDWithURN(PORT_4, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3,100,TestFile.hash().toString());
+        RemoteFileDesc rfd4=newRFDWithURN(PORT_4,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
 
         //Prebuild an uploader alt in lieu of rdf4
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.createCollection(rfd4.getSHA1Urn());
+			AlternateLocationCollection.create(rfd4.getSHA1Urn());
 
         AlternateLocation al4 =
-			AlternateLocation.createAlternateLocation(rfd4);
-        ualt.addAlternateLocation(al4);
+			AlternateLocation.create(rfd4);
+        ualt.add(al4);
 
         uploader1.setAlternateLocations(ualt);
 
@@ -801,8 +814,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -819,12 +832,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         u2Alt = uploader2.getAlternateLocations();
         assertNotNull(u1Alt);
         assertNotNull(u2Alt);
-        Collection u1Locs = u1Alt.values();
-        Collection u2Locs = u2Alt.values();
-        AlternateLocation al =
-            AlternateLocation.createAlternateLocation(TestFile.hash());
-        assertTrue( u1Locs.contains(al) );
-        assertTrue( u2Locs.contains(al) );        
+
+        AlternateLocation al = AlternateLocation.create(TestFile.hash());
+        assertTrue( u1Alt.contains(al) );
+        assertTrue( u2Alt.contains(al) );        
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are started at different times.
@@ -838,7 +849,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
-            "MIN_PARTIAL_FILE_BYTES", new Integer(TestFile.length()/2) );
+            "MIN_PARTIAL_FILE_BYTES", new Integer((TestFile.length()/3)*2) );
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
@@ -864,8 +875,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.stopAfter(STOP_AFTER);
         uploader1.setCorruption(true);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGenericCorrupt(rfds);
@@ -878,17 +889,14 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("\tTotal: "+(u1+u2)+"\n");
         
         //both uploaders should know that this downloader is an alt loc.
-        u1Alt = uploader1.getAlternateLocations();
-        u2Alt = uploader2.getAlternateLocations();
-        assertNotNull(u1Alt);
+        u1Alt = uploader1.getAlternateLocations(); //should have u2
+        u2Alt = uploader2.getAlternateLocations(); //should have u1 but demoted
+        assertNotNull(u1Alt);  
         assertNotNull(u2Alt);
-        Collection u1Locs = u1Alt.values();
-        Collection u2Locs = u2Alt.values();
-        AlternateLocation al =
-            AlternateLocation.createAlternateLocation(TestFile.hash());
-        assertTrue( !u1Locs.contains(al) );
-        assertTrue( !u2Locs.contains(al) );        
-
+        AlternateLocation al = AlternateLocation.create(TestFile.hash());
+        assertTrue( !u1Alt.contains(al) );
+        assertTrue( !u2Alt.contains(al) );
+        
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are started at different times.
 
@@ -928,14 +936,14 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
                     FileDesc fd = RouterService.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertInstanceof( IncompleteFileDesc.class, fd );
-                    fd.addAlternateLocation(
-                        AlternateLocation.createAlternateLocation(rfd2));
+                    fd.add(
+                        AlternateLocation.create(rfd2));
                     AlternateLocationCollection alcs =
-                        AlternateLocationCollection.createCollection(
+                        AlternateLocationCollection.create(
                             TestFile.hash());
-                    alcs.addAlternateLocation(
-                        AlternateLocation.createAlternateLocation(rfd3));
-                    fd.addAlternateLocationCollection(alcs);
+                    alcs.add(
+                        AlternateLocation.create(rfd3));
+                    fd.addAll(alcs);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -982,13 +990,13 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
         final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
         final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
-        AlternateLocation al1 = AlternateLocation.createAlternateLocation(rfd1);
-        AlternateLocation al2 = AlternateLocation.createAlternateLocation(rfd2);
-        AlternateLocation al3 = AlternateLocation.createAlternateLocation(rfd3);
+        AlternateLocation al1 = AlternateLocation.create(rfd1);
+        AlternateLocation al2 = AlternateLocation.create(rfd2);
+        AlternateLocation al3 = AlternateLocation.create(rfd3);
         AlternateLocationCollection alcs =
-            AlternateLocationCollection.createCollection(TestFile.hash());
-        alcs.addAlternateLocation(al2);
-        alcs.addAlternateLocation(al3);
+            AlternateLocationCollection.create(TestFile.hash());
+        alcs.add(al2);
+        alcs.add(al3);
         
         IncompleteFileManager ifm = dm.getIncompleteFileManager();
         // put the hash for this into IFM.
@@ -1002,8 +1010,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
-        fd.addAlternateLocation(al1);
-        fd.addAlternateLocationCollection(alcs);
+        fd.add(al1);
+        fd.addAll(alcs);
         
         tResume(incFile);
 
@@ -1040,12 +1048,12 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
         AlternateLocationCollection ashould = 
-			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
+			AlternateLocationCollection.create(rfd1.getSHA1Urn());
         try {
             URL url1 = rfd1.getUrl();//  rfdURL(rfd1);
             AlternateLocation al1 =
-				AlternateLocation.createAlternateLocation(url1);
-            ashould.addAlternateLocation(al1);
+				AlternateLocation.create(url1);
+            ashould.add(al1);
         } catch (Exception e) {
             check(false, "Couldn't setup test");
         }
@@ -1124,11 +1132,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
+			AlternateLocationCollection.create(rfd1.getSHA1Urn());
 
         AlternateLocation al2 =
-			AlternateLocation.createAlternateLocation(rfd2);
-        ualt.addAlternateLocation(al2);
+			AlternateLocation.create(rfd2);
+        ualt.add(al2);
 
         uploader1.setAlternateLocations(ualt);
 

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
@@ -125,7 +126,7 @@ final class HeadRequester implements Runnable {
                             AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
                         if (alc == null) continue;
                         if(alc.getSHA1Urn().equals(COLLECTOR.getSHA1Urn())) {
-                            COLLECTOR.addAlternateLocationCollection(alc);
+                            COLLECTOR.addAll(alc);
                         }
                     } catch(IOException e) {
                         continue;

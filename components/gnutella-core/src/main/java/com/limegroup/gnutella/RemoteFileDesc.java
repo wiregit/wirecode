@@ -45,7 +45,7 @@ public class RemoteFileDesc implements Serializable {
 	 *  INVARIANT: _xmlDocs != null -> _xmlDocs.length != 0
 	 */
     private LimeXMLDocument[] _xmlDocs;
-	private Set _urns;
+	private Set /* of URN*/  _urns;
 
     /**
      * Boolean indicating whether or not the remote host has browse host 
@@ -428,6 +428,30 @@ public class RemoteFileDesc implements Serializable {
      */
     public final Set getPushProxies() {
         return _proxies;
+    }
+
+    /**
+     * @return true if I am not firewalled, multicast host or have private IP
+     */
+    public final boolean isAltLocCapable() {
+        boolean isPrivateIP = false;
+        try {
+            isPrivateIP = NetworkUtils.isPrivateAddress(_host);
+        } catch (UnknownHostException e) {
+            isPrivateIP = true; //altloc incapable
+        }
+        if(_replyToMulticast || _firewalled || isPrivateIP)
+            return false;
+        //return true if it's valid        
+        boolean valid = false;
+        try {
+            valid = (NetworkUtils.isValidPort(_port) && 
+                     NetworkUtils.isValidAddress(
+                               InetAddress.getByName(_host).getAddress()) );
+        } catch (UnknownHostException e) {
+            return false;
+        }
+        return valid;
     }
 
 	/**
