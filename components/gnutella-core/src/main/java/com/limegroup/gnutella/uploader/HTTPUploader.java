@@ -522,7 +522,9 @@ public class HTTPUploader implements Uploader {
 				// or other free riding downoaders
                 //Allow them to browse the host though
 				if (SettingsManager.instance().getAllowBrowser() == false
-                    && !(_stateNum == BROWSE_HOST)) {
+                    && !(_stateNum == BROWSE_HOST)  
+					&& !(_fileName.startsWith("limewire"))
+					&& !(_fileName.startsWith("LimeWire"))) {
 					// if we are not supposed to read from them
 					// throw an exception
 					if( (str.indexOf("Mozilla") != -1) ||
