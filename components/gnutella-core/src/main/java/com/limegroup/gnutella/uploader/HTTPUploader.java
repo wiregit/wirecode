@@ -175,8 +175,15 @@ public class HTTPUploader implements Uploader {
 			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
-			
-            //OK. We conneced and sent the GIV, now just return the socket
+
+            InputStream in = _socket.getInputStream(); 
+            //dont read a word of size more than 3
+            String word = IOUtils.readWord(in, 3);
+            if (!word.equalsIgnoreCase("get"))
+                throw new IOException();
+
+            //OK. We connected, sent the GIV, and confirmed the get, 
+            //now just return the socket
             return _socket;
 		} catch (SecurityException e) {
 			this.setState(Uploader.PUSH_FAILED);
@@ -552,7 +559,7 @@ public class HTTPUploader implements Uploader {
     }
 
 
-    private final boolean debugOn = true;
+    private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);
