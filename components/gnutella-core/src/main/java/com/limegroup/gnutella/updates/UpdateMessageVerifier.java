@@ -26,7 +26,7 @@ public class UpdateMessageVerifier {
     public boolean verifySource() {        
         //read the input stream and parse it into signature and xmlMessage
         parse(); 
-        if(CommonUtils.isMacClassic()) //Mac classic has trouble with public key
+        if(CommonUtils.isJava118()) //Java118 installs have trouble w/ publickey
             return true;
         //get the public key
         PublicKey pubKey = null;
