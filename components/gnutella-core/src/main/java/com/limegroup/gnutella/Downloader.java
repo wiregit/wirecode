@@ -21,6 +21,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int GAVE_UP           = 6;
     public static final int COULDNT_MOVE_TO_LIBRARY = 7;
     public static final int WAITING_FOR_RESULTS = 8;
+    public static final int CORRUPT_FILE      = 9;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
@@ -50,7 +51,8 @@ public interface Downloader extends BandwidthTracker {
 
     /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
-     * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
+     * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP, COULDNT_MOVE_TO_LIBRARY,
+     * WAITING_FOR_RESULTS, or CORRUPT_FILE
      */
     public int getState();
 

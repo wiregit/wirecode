@@ -211,6 +211,13 @@ public class IncompleteFileManager implements Serializable {
         repOk();
     }
 
+    /** 
+     * Removes the blocks corresponding to the given incomplete file from this.
+     */
+    public synchronized void removeBlocks(File incompleteFile) {
+        blocks.remove(incompleteFile);
+    }
+
     /**
      * Returns the blocks in this that are not written.  This assumes that no
      * downloaders are currently writing to the file.  <b>Be sure to synchronize
@@ -411,6 +418,8 @@ public class IncompleteFileManager implements Serializable {
         iter=ifm.getFreeBlocks(file, 10);
         Assert.that(iter.next().equals(new Interval(2, 8)));
         Assert.that(! iter.hasNext());   
+
+        TODO: test removeBlocks
     }
     */
 }

@@ -132,18 +132,17 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
+    private static final int MIN_SPLIT_SIZE=10000;      //10 KB        
+    /** The number of bytes to overlap when swarming and resuming, used to help
+     *  verify that different sources are serving the same content. */
+    private static final int OVERLAP_BYTES=500;
 
-    /** The number of times to requery the network.
-     */
+    /** The number of times to requery the network. */
     private static final int REQUERY_ATTEMPTS = 60;
-
-    /** the size of the approx matcher 2d buffer...
-     */
+    /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
-    /** this is used for matching of filenames.  kind of big so we only want
-     *  one.
-     */
+    /** This is used for matching of filenames.  kind of big so we only want
+     *  one. */
     private static ApproximateMatcher matcher = 
         new ApproximateMatcher(MATCHER_BUF_SIZE);
     
@@ -169,6 +168,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private List /* of HTTPDownloader */ dloaders;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
+    /** The cumulative number of corrupt bytes encountered when checking
+     * overlapping regions when resuming and/or swarming.  Reset for each bucket
+     * in tryAllDownloads2. */
+    private int corruptBytes;
     
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
      *  notify's.  See readObject for note on serialization.  LOCKING: use
@@ -655,6 +658,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(COULDNT_MOVE_TO_LIBRARY);
                         manager.remove(this, false);
                         return;
+                    } else if (status==CORRUPT_FILE) {
+                        setState(CORRUPT_FILE);
+                        manager.remove(this, false);
+                        return;
                     } else if (status==WAITING_FOR_RETRY) {
                         waitForRetry=true;
                     } else {
@@ -758,6 +765,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
      *  are removed from files.
      * @return COMPLETE if a file was successfully downloaded
+     *         CORRUPT_FILE more than zero bytes mismatched when checking overlapping
+     *             regions of resume or swarm
      *         COULDNT_MOVE_TO_LIBRARY the download completed but the
      *             temporary file couldn't be moved to the library
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
@@ -800,7 +809,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
         //2. Do the download
+        corruptBytes=0; //New bucket...reset the corruptByte count.
         int status=tryAllDownloads3(files);
+        if (corruptBytes>0) {
+            cleanupCorrupt(incompleteFile, completeFile.getName());
+            return CORRUPT_FILE;
+        }
         if (status!=COMPLETE)
             return status;
                 
@@ -851,9 +865,31 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retVal;
     }
 
+    /** Removes all entries for incompleteFile from incompleteFileManager 
+     *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
+     *  incompleteFile if rename fails. */
+    private void cleanupCorrupt(File incompleteFile, String name) {
+        incompleteFileManager.removeBlocks(incompleteFile);
 
-    /** Like tryDownloads2, but does not deal with the library and hence
-     *  cannot return COULDNT_MOVE_TO_LIBRARY.  Also requires that
+        //Try to rename the incomplete file to a new corrupt file in the same
+        //directory (INCOMPLETE_DIRECTORY).
+        boolean renamed = false;
+        for (int i=0; i<10 && !renamed; i++) {
+            File corruptFile=new File(incompleteFile.getParent(),
+                                      "CORRUPT-"+i+"-"+name);
+            if (corruptFile.exists())
+                continue;
+            renamed=incompleteFile.renameTo(corruptFile);
+        }
+
+        //Could not rename after ten attempts?  Delete.
+        if(!renamed) 
+            incompleteFile.delete();
+    }
+
+
+    /** Like tryDownloads2, but does not deal with the library and hence cannot
+     *  return COULDNT_MOVE_TO_LIBRARY or CORRUPT_FILE.  Also requires that
      *  files.size()>0. */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
@@ -985,9 +1021,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             //TODO2: assign to existing downloader if possible, without
             //      increasing parallelism
             Interval interval=(Interval)needed.remove(0);
-            try {
+            try {                
                 dloader=findConnectable(files, 
-                                        interval.low, interval.high,
+                                        getOverlapOffset(interval.low), 
+                                        interval.high,
                                         busy);
             } catch (NoSuchElementException e) {
                 //Need to re-add the interval.  If there is an existing
@@ -1027,7 +1064,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw new NoSuchElementException();
             int start=biggest.getInitialReadingPoint()+amountRead+left/2;
             int stop=biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-            dloader=findConnectable(files, start, stop, busy);
+            dloader=findConnectable(files, getOverlapOffset(start), stop, busy);
             dloader.stopAt(stop);
             biggest.stopAt(start);
             //System.out.println("MANAGER: assigning grey "+start
@@ -1062,6 +1099,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         worker.setDaemon(true);
         worker.start();
     }
+
+    private int getOverlapOffset(int i) {
+        return Math.max(0, i-OVERLAP_BYTES);
+    }
+
 
     /** 
      * Returns an initialized connectable downloader from the given list
@@ -1170,11 +1212,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void tryOneDownload(HTTPDownloader downloader, 
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
+        int cb = 0;//local corrupt bytes. Cumulative updated in synchronized.
         try {
-            downloader.doDownload();
+            cb = downloader.doDownload(true);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
-        } finally {
+        }
+        finally {
             //int stop=downloader.getInitialReadingPoint()
             //            +downloader.getAmountRead();
             //System.out.println("    WORKER: terminating from "+downloader
@@ -1183,6 +1227,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
             synchronized (this) {
+                corruptBytes += cb;
                 dloaders.remove(downloader);
                 terminated.add(downloader);
                 files.add(rfd);
@@ -1367,19 +1412,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getAmountRead() {
-        //If we're not actually downloading, we just pick some random value.
-        //TODO: this can also mean we've FINISHED the download.  Luckily it
-        //doesn't really matter.
-        if (dloaders.size()==0)
-            return 0;
-        else {
-            //Add all blocks from HTTPDownloaders to IncompleteFileManager.
-            updateIncompleteFileManager();
-            RemoteFileDesc rfd=((HTTPDownloader)dloaders.get(0))
-                                    .getRemoteFileDesc();
-            File incompleteFile=incompleteFileManager.getFile(rfd);
-            return incompleteFileManager.getBlockSize(incompleteFile);
-        }
+        updateIncompleteFileManager();
+        File incompleteFile=incompleteFileManager.getFile(
+            currentFileName, currentFileSize);
+        return incompleteFileManager.getBlockSize(incompleteFile);
     }
      
     public String getAddress() {

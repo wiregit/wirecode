@@ -17,6 +17,9 @@ public class TestUploader {
     private volatile int stopAfter;
     /** This is stopped. */
     private boolean stopped;
+    /** switch to send incorrect bytes to simulate a bad uploader*/
+    private boolean sendCorrupt;
+
 
 
     /** 
@@ -45,6 +48,7 @@ public class TestUploader {
         stopAfter = -1;
         rate = 10000;
         stopped = false;
+        sendCorrupt = false;
     }
 
     public int amountUploaded() {
@@ -55,6 +59,12 @@ public class TestUploader {
       * @param rate kilobytes/sec. */   
     public void setRate(int rate) {
         this.rate=rate;
+    }
+
+
+    /** Sets whether this should send bad data. */
+    public void setCorruption(boolean corrupt) {
+        this.sendCorrupt = corrupt;
     }
 
     /** 
@@ -75,6 +85,7 @@ public class TestUploader {
         try {
             server = new ServerSocket(port);
         } catch (IOException ioe) {
+            System.err.println("Couldn't bind socket to port "+port);
             return;
         }
 
@@ -149,7 +160,8 @@ public class TestUploader {
         str = "\r\n";
 		out.write(str.getBytes());
         
-        //Write data at throttled rate.  See NormalUploadState.  TODO: use ThrottledOutputStream
+        //Write data at throttled rate.  See NormalUploadState.  TODO: use
+        //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
             long startTime=System.currentTimeMillis();
@@ -160,8 +172,10 @@ public class TestUploader {
                     out.flush();
                     throw new IOException();
                 }
-
-                out.write(TestFile.getByte(i));
+                if(sendCorrupt)
+                    out.write(TestFile.getByte(i)+(byte)1);
+                else
+                    out.write(TestFile.getByte(i));
                 totalUploaded++;
                 i++;
             }

@@ -48,7 +48,6 @@ public class HTTPDownloader {
 	private int _initialReadingPoint;
 
 	private ByteReader _byteReader;
-	private RandomAccessFile _fos;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
@@ -357,48 +356,72 @@ public class HTTPDownloader {
      * file.  Blocking.  This MUST be initialized via connect() beforehand, and
      * doDownload MUST NOT have already been called.
      *  
+     * @param checkOverlap check the existing contents of the incomplete file 
+     *  before writing to it.
+     * @return the number of CORRUPT bytes. If !checkOverlap returns 0.
      * @exception FileIncompleteException transfer interrupted, either
      *  locally or remotely.  TODO: is this ALWAYS thrown during 
      *  interruption?
-     * @exception FileCantBeMovedException file downloaded but  couldn't be
-     *  moved to library
-     * @exception IOException file couldn't be downloaded for some other
-     *  reason 
+     * @exception IOException file couldn't be downloaded for some other reason 
      */
-	public void doDownload() throws IOException {
-		_fos = new RandomAccessFile(_incompleteFile, "rw");
-        _fos.seek(_initialReadingPoint);
+	public int doDownload(boolean checkOverlap) throws IOException {
+        RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
+        try {            
+            fos.seek(_initialReadingPoint);
+            int c = -1;
+            byte[] buf = new byte[BUF_LENGTH];
+            byte[] fileBuf = new byte[BUF_LENGTH];
+            int corruptBytes = 0;
+            
+            while (true) {
+                //1. Read from network.  It's possible that we've read more than
+                //requested because of a call to setAmountToRead from another
+                //thread.  This used to be an error resulting in
+                //FileTooLargeException. TODO: what should we do here now?
+                if (_amountRead >= _amountToRead) 
+                    break;
+                
+                int left=_amountToRead - _amountRead;
+                c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
+                
+                if (c == -1) 
+                    break;
+                            
+                //2. Check that data read matches any non-zero bytes already on
+                //disk, i.e., from previous downloads.  Assumption: "holes" in
+                //file are zeroed.  Be careful not read beyond end of file,
+                //which is easy in the case of resuming.  Also note that
+                //amountToCheck can be negative; the file length isn't extended
+                //until the first write after a seek.
+                long currPos = fos.getFilePointer();
+                int amountToCheck=(int)Math.min(c,fos.length()-currPos);
+                if(checkOverlap && amountToCheck>0) {                    
+                    fos.readFully(fileBuf,0,amountToCheck);
+                    for(int i=0;i<amountToCheck;i++) {
+                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
+                            corruptBytes++;
+                    }
+                    //get the fp back where it was before we checked
+                    fos.seek(currPos);
+                }
+            
+                //3. Write to disk.
+                fos.write(buf, 0, c);			
+                _amountRead+=c;
+            }  // end of while loop
 
-		int c = -1;
-		
-		byte[] buf = new byte[BUF_LENGTH];
 
-		while (true) {
-			//It's possible that we've read more than requested because of a
-			//call to setAmountToRead from another thread.  This used to be an
-			//error resulting in FileTooLargeException. TODO: what should we do
-            //here now?
-  			if (_amountRead >= _amountToRead) 
-				break;
-			
-            int left=_amountToRead - _amountRead;
-			c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
-
-			if (c == -1) 
-				break;
-			
-			_fos.write(buf, 0, c);
-			
-			_amountRead+=c;
-
-		}  // end of while loop
-
-		_byteReader.close();
-		_fos.close();
-
-
-		if ( _amountRead != _amountToRead ) {
-            throw new FileIncompleteException();
+            if ( _amountRead != _amountToRead ) {
+                //TODO: what if corruptBytes>0?
+                throw new FileIncompleteException();  
+            }
+            return corruptBytes;
+        } finally {
+            _byteReader.close();
+            try {
+                fos.getFD().sync();
+            } catch (SyncFailedException ignored) { }
+            fos.close();
         }
 	}
 
@@ -410,10 +433,6 @@ public class HTTPDownloader {
 	public void stop() {        
         if (_byteReader != null)
             _byteReader.close();
-        try {
-            if (_fos != null)
-                _fos.close();
-        } catch (IOException e) { }
         try {
             if (_socket != null)
                 _socket.close();
