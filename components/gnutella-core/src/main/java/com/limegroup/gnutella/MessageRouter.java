@@ -907,7 +907,11 @@ public abstract class MessageRouter {
         }
     }
 
-    
+    /** This method should be invoked when this node receives a
+     *  QueryStatusResponse message from the wire.  If this node is an
+     *  Ultrapeer, we should update the Dynamic Querier about the status of
+     *  the leaf's query.
+     */    
     protected void handleQueryStatus(QueryStatusResponse resp,
                                      ManagedConnection leaf) {
         // message only makes sense if i'm a UP and the sender is a leaf

@@ -51,7 +51,7 @@ public final class QueryHandler {
     /**
      * If Leaf Guidance is in effect, the maximum number of hits to route.
      */
-    private static final int MAXIMUM_ROUTED_FOR_LEAVES = 100;
+    private static final int MAXIMUM_ROUTED_FOR_LEAVES = 75;
 
     /**
      * The number of milliseconds to wait per query hop.  So, if we send
@@ -465,11 +465,13 @@ public final class QueryHandler {
         }
                            
 			
-        int results = RESULT_COUNTER.getNumResults();
+        int results = (_numResultsReportedByLeaf > 0 ? 
+                       _numResultsReportedByLeaf : 
+                       RESULT_COUNTER.getNumResults());
         double resultsPerHost = 
             (double)results/(double)_theoreticalHostsQueried;
 			
-        int resultsNeeded = RESULTS - results;        
+        int resultsNeeded = RESULTS - results;
         int hostsToQuery = 40000;
         if(resultsPerHost != 0) {
             hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
@@ -654,7 +656,8 @@ public final class QueryHandler {
      * querying for.
      */
     public void updateLeafResults(int numResults) {
-        _numResultsReportedByLeaf = numResults;
+        if (numResults > _numResultsReportedByLeaf)
+            _numResultsReportedByLeaf = numResults;
     }
 
     /**
