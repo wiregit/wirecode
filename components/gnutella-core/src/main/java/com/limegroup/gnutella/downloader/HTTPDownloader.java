@@ -270,7 +270,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		// Read the response code from the first line and check for any errors
 		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
-			return;
+            throw new IOException();
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str);	
