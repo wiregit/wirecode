@@ -266,7 +266,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testBasicProbeMechanics() throws Exception {
+    public void testBasicProbeMechanicsFromUltrapeer() throws Exception {
         drainAll();
 
         QueryRequest request = QueryRequest.createQuery("berkeley");
@@ -303,6 +303,48 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         assertTrue(reqRecvd.getQuery().equals("berkeley"));
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
         assertEquals(reqRecvd.getHops(), (byte) 1);
+    }
+
+
+    public void testBasicProbeMechanicsFromLeaf() throws Exception {
+        drainAll();
+
+        QueryRequest request = QueryRequest.createQuery("berkeley");
+        request.hop();
+        request.setTTL((byte)1);
+        assertTrue((request.getHops() == 1));
+
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+
+        // should NOT be forwarded to other Ultrapeer
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        Thread.sleep(2*1000);
+
+        // extend the probe....
+        request.setTTL((byte)2);
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        try {
+            LEAF.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+        assertEquals(reqRecvd.getHops(), (byte) 2);
     }
 
 
