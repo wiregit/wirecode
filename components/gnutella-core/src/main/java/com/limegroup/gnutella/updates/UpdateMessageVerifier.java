@@ -18,6 +18,7 @@ public class UpdateMessageVerifier {
     private byte[] signature;
     private byte[] xmlMessage;
     private boolean fromDisk;
+    private static boolean testing118 = false;
     
     /**
      * @param fromDisk true if the byte are being read from disk, false is the
@@ -137,9 +138,8 @@ public class UpdateMessageVerifier {
         //to iterate over all our connections, we simply return false, so
         //machines that are running Java 118 and are UPs will not get the update
         //message
-        if(!connManager.isShieldedLeaf()) //we are a UP with java 118?
+        if(!testing118 && !connManager.isShieldedLeaf())//I am a UP w/ java118?
             return false;
-
         //Let's see what the advertised message in the file is. 
 
         //Note: Java118 machines will have to parse the xml twice, but that's
@@ -161,7 +161,6 @@ public class UpdateMessageVerifier {
         String version = parser.getVersion();
         if(version==null || version.equals(""))
             return false;
-        
         
         //Now iterate over all UP connections and see how many agree
         Iterator iter = connManager.getConnections().iterator();

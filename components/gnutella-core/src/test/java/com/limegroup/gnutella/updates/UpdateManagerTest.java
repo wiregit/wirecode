@@ -422,57 +422,75 @@ public class UpdateManagerTest extends BaseTestCase {
                                               "_isJava118", Boolean.FALSE);
     }
 
-//      public void testJava118NetworkVerification() throws Exception {
-//         UpdateManager man = UpdateManager.instance();
-//         assertEquals("setSettings not working", "2.9.3", man.getVersion());
-//         PrivilegedAccessor.setValue(CommonUtils.class, 
-//                                                "_isJava118", Boolean.TRUE);
-//         PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
-//                                     "_shieldedConnections", new Integer(1));
-//         //Make first connection
-//         TestConnection conn1 = null; 
-//         TestConnection conn2 = null;
-//         TestConnection conn3 = null;
-//         TestConnection conn4 = null;
-//         try {
-//             conn1 = new TestConnection(6677, "3.6.3", NEW);
-//             conn2 = new TestConnection(6678, "3.6.3", NEW);
-//             conn3 = new TestConnection(6679, "3.2.2", MIDDLE);
-//             conn4 = new TestConnection(6680, "3.6.3", NEW);
-//         } catch(IOException iox) {
-//             fail("could not set test up");
-//         }
-//         conn1.start();
-//         conn2.start();
-//         conn3.start();
-//         try {
-//             Thread.sleep(300);
-//         } catch(InterruptedException e) { }
-//         UpdateManager man2 = UpdateManager.instance();
-//         assertEquals("java118 verification problem", "2.9.3", man2.getVersion());
-//         conn4.start();
-//         try {
-//             Thread.sleep(300);
-//         } catch(InterruptedException e) { }
-//         UpdateManager man3 = UpdateManager.instance();
-//         assertEquals("java118 verification problem", "3.6.3", man3.getVersion());
-//         PrivilegedAccessor.setValue(CommonUtils.class, 
-//                                                "_isJava118", Boolean.FALSE);
-//      }
+    public void testJava118NetworkVerification() throws Exception {
+       UpdateManager man = UpdateManager.instance();
+       assertEquals("setSettings not working", "2.9.3", man.getVersion());
+       PrivilegedAccessor.setValue(CommonUtils.class, 
+                                              "_isJava118", Boolean.TRUE);
+       PrivilegedAccessor.setValue(UpdateMessageVerifier.class, 
+                                   "testing118", Boolean.TRUE);
+       //Make first connection
+       TestConnection conn1 = null; 
+       TestConnection conn2 = null;
+       TestConnection conn3 = null;
+       TestConnection conn4 = null;
+       try {
+           conn1 = new TestConnection(6677, "3.6.3", NEW);
+           conn2 = new TestConnection(6678, "3.6.3", NEW);
+           conn3 = new TestConnection(6679, "3.2.2", MIDDLE);
+           conn4 = new TestConnection(6680, "3.6.3", NEW);
+       } catch(IOException iox) {
+           fail("could not set test up");
+       }
+       conn1.start();
+       conn2.start();
+       conn3.start();
+       try {
+           Thread.sleep(500);
+       } catch(InterruptedException e) { }
+       UpdateManager man2 = UpdateManager.instance();
+       assertEquals("java118 verification problem", "2.9.3", man2.getVersion());
+       conn4.start();
+       try {
+           Thread.sleep(300);
+       } catch(InterruptedException e) { }
+       UpdateManager man3 = UpdateManager.instance();
+       assertEquals("java118 verification problem", "3.6.3", man3.getVersion());
+       PrivilegedAccessor.setValue(CommonUtils.class, 
+                                              "_isJava118", Boolean.FALSE);
+    }
 
-
-//      public void testNoMessageOnAtVersion() {
-//          InputStream is = null;
-//          OutputStream os = null;
-//          Socket s = new Socket("localhost",PORT);
-//          os = s.getOutputStream();
-//          is = s.getInputStream();
-//      }
+   public void testUpdateNotRequesteFromSpecial() {
+       updateVersion = OLD;
+       changeUpdateFile();
+       TestConnection conn = null;
+       try {
+           conn = new TestConnection(6681, "@version@", NEW);
+       } catch (IOException e) {
+           fail("could not setup test");
+       }
+       conn.setTestUpdateNotRequested(true);
+       conn.start();
+       try {
+           Thread.sleep(300);
+       } catch (InterruptedException ix) { }
+       UpdateManager man = UpdateManager.instance();
+       assertEquals("should not have requested new file",
+                                              "2.9.3", man.getVersion());
+   }
     
+    /*
+    public void testUpdateMessageDelayed() {
+        //TODO: This test should make sure that the gui blinks after a random
+        //interval of time between 1 and 7 hours from the time of the update
+        //files being published, and after 7 hours starts blinking immediately.
 
-//      public void testUpdateMessageDelayed() {
+        //There is no easy way to do this, since we need to create signed files
+        //at the time of the test starting. So this test will have to wait until
+        //I can think of a way of making this happen
+    }
+    */
 
-//      }
 
     /**
      * puts an update file in the user pref dir based on updateVersion and set
