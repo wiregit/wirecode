@@ -77,12 +77,14 @@ public final class QueryUnicaster {
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
         synchronized (_queryHosts) {
+            debug("QueryUnicaster.getUnicastEndpoints(): obtained lock.");
             int size = _queryHosts.size();
             if (size > 0) {
                 int max = (size > 10 ? 10 : size);
                 for (int i = 0; i < max; i++)
                     retList.add(_queryHosts.get(i));
             }
+            debug("QueryUnicaster.getUnicastEndpoints(): releasing lock.");
         }
         return retList;
     }
@@ -193,8 +195,10 @@ public final class QueryUnicaster {
     public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
         if (endpoint.getUnicastSupport() && notMe(endpoint)) {
             synchronized (_queryHosts) {
+                debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
                 _queryHosts.push(endpoint);
                 _queryHosts.notify();
+                debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
             }
         }
     }
@@ -248,7 +252,7 @@ public final class QueryUnicaster {
     private Endpoint getUnicastHost() throws InterruptedException {
         debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
-
+            debug("QueryUnicaster.getUnicastHost(): obtained lock.");
             if (_queryHosts.isEmpty()) {
                 if ((System.currentTimeMillis() - _lastPingTime) >
                     20000) { // don't sent too many pings..
@@ -261,7 +265,7 @@ public final class QueryUnicaster {
                 // now wait, what else can we do?
                 _queryHosts.wait();
             }
-            debug("QueryUnicaster.getUnicastHost(): got a host!");
+            debug("QueryUnicaster.getUnicastHost(): got a host, let go lock!");
         }
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
