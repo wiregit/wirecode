@@ -8,11 +8,16 @@ public class Const {
     /** Default time-to-live for outgoing messages */
     public static byte TTL=(byte)4;
     /** Maximum allowable TTL.  (Anything about this is dropped. */
-    public static byte MAX_TTL=(byte)10;
+    public static byte MAX_TTL=(byte)15;
 
     /** 
      * Maximum allowed payload length.  This is usually less than
      * the Gnutella-defined value to avoid spamming.  Currently 2kb.
      */
     public static int MAX_LENGTH=2048;
+
+    /** The name of the file containing hosts to contact */
+    public static String HOSTLIST="gnutella.net";
+    /** The number of outgoing connections to maintain */
+    public static int KEEP_ALIVE=4;
 }
