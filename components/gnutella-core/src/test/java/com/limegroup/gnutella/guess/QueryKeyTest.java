@@ -149,4 +149,11 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
+    public void testOddsAndEnds() throws Exception {
+        // test to make clover 100% for QK
+        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(), 6346);
+        assertFalse(qk.equals(new Object()));
+        qk.toString();
+    }
+
 }
