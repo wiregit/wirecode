@@ -22,6 +22,10 @@ import java.io.IOException;
 public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	
 	
+	//some serialized ExtendedEndpoints taken from my gnutella.net file
+	private static String _candidateA = "24.102.60.110:6346,513,1079392562917,1079392566666";
+	private static String _candidateB = "67.8.163.72:6346,1483,1079131813732,1079389012339;1079131820399";
+	
 	public ServerSideBestCandidatesTest(String name){
 		super(name);
 	}
@@ -54,20 +58,12 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		//schedule a second propagator with shorter delay values.
 		Class advertiser = PrivilegedAccessor.getClass(MessageRouter.class,"CandidateAdvertiser");
 		Runnable r = (Runnable)PrivilegedAccessor.invokeConstructor(advertiser,new Object[0],null);
-		RouterService.schedule (r, 4000, 300);
+		RouterService.schedule (r, 4000, 500);
 
 	}
 	
 	public static void setSettings() throws Exception {
 		ServerSideTestCase.setSettings();
-		
-
-		
-		//connect the second leaf
-		_secondLeaf = new CountingConnection("localhost",PORT,
-				new LeafHeaders("somewhere.else"),
-				new EmptyResponder());
-		assertTrue(_secondLeaf.isOpen());
 		
 	}
 	
@@ -100,7 +96,7 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		//the best candidate at ttl 2 should be null
 		assertNull(receivedUpdate[1]);
 		
-		
+		drainInitialVMs();
 	}
 	
 	
@@ -109,7 +105,12 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	 * the second best leaf.
 	 */
 	public void testChangingMind() throws Exception {
-		
+		drainInitialVMs();
+		//connect the second leaf
+		_secondLeaf = new CountingConnection("localhost",PORT,
+				new LeafHeaders("somewhere.else"),
+				new EmptyResponder());
+		assertTrue(_secondLeaf.isOpen());
 		//connect the second leaf now.
 		_secondLeaf.initialize();
 		
@@ -137,19 +138,110 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		
 		assertEquals(expectedCandidate.getInetAddress(),update[0].getInetAddress());
 		
-		//close the second leaf, we don't need it anymore
+		//close the second leaf
 		_secondLeaf.close();
-		//TODO: don't forget to re-initialize the first leaf before the next test, otherwise setUp fails.
+		//_secondLeaf.initialize();
+		
+		//re-init the first leaf to prepare for next test
+		LEAF[0] = new Connection("localhost", PORT, 
+                new LeafHeaders("localhost"),
+                new EmptyResponder()
+                );
+		assertTrue(LEAF[0].isOpen());
+		LEAF[0].initialize();
+		
+		//drain the ultrapeers
+		drainInitialVMs();
+	}
+	
+	/**
+	 * tests advertising at ttl2.  What happens:
+	 * 1. a new ultrapeer connects
+	 * 2. it advertises its ttl 0 and ttl 1 candidates
+	 * 3. ULTRAPEER[0-3] should receive advertisements with the local leaf 
+	 * and the one advertised at ttl 0 by the new guy at ttl 1
+	 * 
+	 * This test also checks whether the advertiser is assigned properly. 
+	 * 
+	 */
+	public void testFullAdvertisement() throws Exception {
+		drainInitialVMs();
+		//create the new UP connection
+		CountingConnection newUP = new CountingConnection("localhost",PORT,
+				new UltrapeerHeaders("1.2.3.4"), new EmptyResponder());
+		
+		newUP.initialize();
+		
+		//wait some time (also necessary for the re-initialized leaf to age a little)
+		try {Thread.sleep(2600);}catch(InterruptedException iex){}
+		
+		//drain the new UP from the two vendor messages
+		Message tmp = newUP.receive();
+		tmp = newUP.receive();
+		
+		//create a VendorMessage with the new candidates.  
+		//first, create new Candidate []
+		
+		Candidate [] update = new Candidate [2];
+		update[0] = new Candidate(_candidateA);
+		update[1] = new Candidate(_candidateB);
+		
+		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(update);
+		
+		//then send this message on the new ultrapeer connection
+		newUP.send(bcvm);
+		newUP.flush();
+		
+		//wait some more time
+		try {Thread.sleep(2600);}catch(InterruptedException iex){}
+		
+		//check whether the ultrapeer received and parsed it properly
+		//and whether it assigned the advertiser
+		Candidate [] ourCandidates = BestCandidates.getCandidates();
+		
+		assertNotNull(ourCandidates[0]);
+		assertNotNull(ourCandidates[1]);
+		assertNotNull(ourCandidates[2]);
+		
+		assertEquals(ourCandidates[1].getInetAddress(), update[0].getInetAddress());
+		assertEquals(ourCandidates[2].getInetAddress(), update[1].getInetAddress());
+		
+		assertEquals(ourCandidates[1].getAdvertiser().getInetAddress(), 
+					newUP.getInetAddress());
+		assertEquals(ourCandidates[2].getAdvertiser().getInetAddress(), 
+				newUP.getInetAddress());
+		
+		//sleep some more?
+		try {Thread.sleep(1000);}catch(InterruptedException iex){}
+		//now check whether the other ultrapeers received an updated message
+		bcvm = readMessage();
+		
+		Candidate [] newUpdate = bcvm.getBestCandidates();
+		
+		//both slots should be full
+		assertEquals(2,newUpdate.length);
+		assertNotNull(newUpdate[0]);
+		assertNotNull(newUpdate[1]);
+		
+		//this should contain LEAF[0] at slot 0 and one of the new leafs at slot 1
+		assertEquals(LEAF[0].getInetAddress(), newUpdate[0].getInetAddress());
+		assertEquals(update[0].getInetAddress(), newUpdate[1].getInetAddress());
+		
+		//close the new ultrapeer, leave the leaf connected
+		newUP.close();
+		
 	}
 	
 	
 	private void drainInitialVMs() throws Exception {
 		Message m;
 		//drain the capabilities and support vms on all UPs
-		for (int i = 0;i<ULTRAPEER.length;i++) {
-			m = ULTRAPEER[i].receive(120);
-			m = ULTRAPEER[i].receive(120);
-		}
+		try {
+			while(true)
+				for (int i = 0;i<ULTRAPEER.length;i++) {
+					m = ULTRAPEER[i].receive(60);
+				}
+		}catch(IOException iox){}
 	}
 	
 	/**
@@ -159,19 +251,28 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		Message m=null;
 		//make sure each UP gets at least one message
 		for (int i=0;i<ULTRAPEER.length;i++) {
-			try {
+			
+			properMessage: {
+				try {
 				
-				m = ULTRAPEER[i].receive(120);
-				if (m instanceof BestCandidatesVendorMessage)
-					continue;
-				else 
-					fail("wrong type of message received at ultrapeer "+i+" out of "+ULTRAPEER.length);
+					while(true) {
+						m = ULTRAPEER[i].receive(120);
+						if (m instanceof BestCandidatesVendorMessage)
+							break properMessage;
+						else if (m instanceof PingRequest)
+							continue;
+						else 
+							fail("wrong type of message received at ultrapeer "+i+" out of "+ULTRAPEER.length+
+									" message type is "+m.getClass());
+					}
 				
-			}catch(IOException notExpected) {
-				fail("ultrapeer "+i+" out of  "+ULTRAPEER.length+" should have received at least one message");
-			}
+				}catch(IOException notExpected) {
+					fail("ultrapeer "+i+" out of  "+ULTRAPEER.length+" should have received at least one message");
+				}
+			} //end of properMessage block
 		}
 		return (BestCandidatesVendorMessage)m;
 		
 	}
+	
 }
