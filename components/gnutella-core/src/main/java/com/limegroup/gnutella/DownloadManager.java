@@ -627,18 +627,34 @@ public class DownloadManager implements BandwidthTracker {
             allowed = false;
 
         if (allowed) {
-            // convert....
-            String[] names = new String[rfds.length];
-            for (int i = 0; i < rfds.length; i++)
-                names[i] = rfds[i].getFileName();
-
-            // construct QRs
-            String[] qStrings= extractQueryStrings(names);
-            QueryRequest[] qReqs = constructQueryRequests(qStrings);
-            
-            // send away....
-            for (int i = 0; i < qReqs.length; i++)
-                router.broadcastQueryRequest(qReqs[i]);            
+            if (rfds.length > 0) { // requery based on filename...
+                // convert....
+                String[] names = new String[rfds.length];
+                for (int i = 0; i < rfds.length; i++)
+                    names[i] = rfds[i].getFileName();
+                
+                // construct QRs
+                String[] qStrings= extractQueryStrings(names);
+                QueryRequest[] qReqs = constructQueryRequests(qStrings);
+                
+                // send away....
+                for (int i = 0; i < qReqs.length; i++)
+                    router.broadcastQueryRequest(qReqs[i]);            
+            }
+            else if ((rfds.length == 0) && 
+                     (requerier instanceof RequeryDownloader)) {
+                // downloader without any files, get the query from the
+                // RequeryDownloader...
+                RequeryDownloader dlder = (RequeryDownloader) requerier;
+                QueryRequest qr = 
+                new QueryRequest(SettingsManager.instance().getTTL(),
+                                 0, dlder.getQuery(),
+                                 dlder.getRichQuery(), true);
+                router.broadcastQueryRequest(qr);
+            }
+            else
+                Assert.that(false, 
+                            "Downloader has no files and is not a Requerier.");
         }
         debug("DM.sendQuery(): returning.");
     }

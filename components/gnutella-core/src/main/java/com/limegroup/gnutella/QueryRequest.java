@@ -79,6 +79,17 @@ public class QueryRequest extends Message implements Serializable{
     }
 
 
+    /**
+     * Builds a new query from scratch, with metadata, marking the GUID
+     * as a requery iff isRequery.
+     */
+    public QueryRequest(byte ttl, int minSpeed, 
+                        String query, String richQuery,
+                        boolean isRequery) {
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery);
+    }
+
+
     /*
      * Build a new query with data snatched from network
      *
