@@ -45,6 +45,7 @@ public final class ChatManager {
 	 * chat connection, like an instant messanger.
 	 */
 	public void accept(Socket socket) {
+        Thread.currentThread().setName("IncommingChatThread");
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
 		boolean allowChats = SettingsManager.instance().getChatEnabled();
