@@ -50,7 +50,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			&& (pingReply.getFiles() < settings.getFreeloaderFiles())
 			&& ((int)(Math.random()*100.f) >
 				settings.getFreeloaderAllowed())
-			&& (handler instanceof ManagedConnection)) {
+			&& (handler instanceof ManagedConnection)
+            && (handler.isStable())) {
 			ConnectionManager cm = RouterService.getConnectionManager();
             cm.remove((ManagedConnection)handler);
         }
@@ -242,6 +243,17 @@ public final class ForMeReplyHandler implements ReplyHandler {
             // may want to do something else here if we ever use this!
             return null;
         }
+    }
+
+    /**
+     * Returns <tt>true</tt> to indicate that this node is always stable.
+     * Simply the fact that this method is being called indicates that the
+     * code is alive and stable (I think, therefore I am...).
+     *
+     * @return <tt>true</tt> since, this node is always stable
+     */
+    public boolean isStable() {
+        return true;
     }
 }
 
