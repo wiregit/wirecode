@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
-import java.awt.event.*;
 
 /**
  * This class determines whether or not this node has all of the necessary
@@ -104,11 +103,6 @@ public final class SupernodeAssigner {
 	private static int _maxDownstreamBytesPerSec = 
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
     
-    /**
-     * True, if the last time we evaluated the node for ultrapeer capability, 
-     * it came out as ultrapeer capable. False, otherwise
-     */
-    private static volatile boolean _wasUltrapeerCapable;
 
 	/**
 	 * Variable for whether or not this node has such good values that it is too
@@ -147,7 +141,6 @@ public final class SupernodeAssigner {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
         _manager = manager;
-        _wasUltrapeerCapable = _manager.isSupernode();
     }
     
 	/**
