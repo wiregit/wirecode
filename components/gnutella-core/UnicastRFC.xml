@@ -127,9 +127,9 @@
 
 		<section anchor="hits" title="Out of Control Query Hits">
 		  <t>While the unpredictable nature of queries presents the first half 
-		  of the problem, the unpredictable nature of query hits has a comparable 
-		  debilitating effect.  The problem with queries spills over into 
-		  hits -- a variable number of nodes queried results 
+		  of the problem, the unpredictable nature of query hits has a 
+		  comparable debilitating effect.  The problem with queries spills 
+		  over into hits -- a variable number of nodes queried results 
 		  in a variable number of query hits.  The problem is more serious 
 		  than this, however.  The number of query hits generated per 
 		  search also varies independently because:
@@ -178,31 +178,37 @@
 		not changed at all.  This simplifies the design and allows 
 		any leaves not implementing this proposal to benefit from it
 		nevertheless.  From the UltraPeer perspective, implementing this
-		proposal means on a high level simply means sending out all 
+		proposal on a high level simply means sending out all 
 		queries with TTL=1 while querying a much larger set of UltraPeers 
-		directly over UDP.
+		directly over either TCP or UDP.
 
 		<vspace/>
 		<vspace/>
 		The details of the UltraPeer changes are significant.  UltraPeers 
-		must send queries iteratively to known UltraPeers via UDP,
-		stopping when enough results are received.  UltraPeers are 
-		also responsible for maintaining a full cache of other 
-		UltraPeers that they can query via UDP.  On the server side,
-		UltraPeers must listen on a UDP port, and they must send their
-		responses over the same UDP port they are listening on.  Aside from
-		the protocol used when sending or receiving messages, however,
-		the changes are minimal.
-		The following sections discuss these changes.  In this discussion,
-		the "client" is the UltraPeer initiating the query, either on its
-		own behalf or on behalf of one of its leaves (most importantly,
-		the "client" is never a leaf -- it is always the UltraPeer).  
-		The "server" is the receiver of the query, which can either
-		be an UltraPeer or a leaf.
+		must send queries iteratively to known UltraPeers supporting GUESS,
+		stopping when enough results are received.  These queries can be
+		sent via TCP if there is a TCP connection available.  Otherwise,
+		they are sent over UDP.  UltraPeers are also responsible
+		for maintaining a full cache of other GUESS UltraPeers to query.  
+		On the server side, UltraPeers must listen on a UDP port, and they 
+		must send their responses over the same UDP port they are 
+		listening on.  Aside from the protocol used when sending or 
+		receiving messages, however, the changes are minimal.
+		The following sections discuss the details of these changes.  In 
+		this discussion, the "client" is the UltraPeer initiating the 
+		query, either on its own behalf or on behalf of one of its 
+		leaves (most importantly, the "client" is never a leaf -- 
+		it is always the UltraPeer).  The "server" is the receiver 
+		of the query, which can be either a leaf or an UltraPeer.
+		Developers implementing this proposal MUST implement both the 
+		client side and the server side.  This means that any developers
+		wishing to implement GUESS also MUST implement 
+		the <xref target="refs.UltraPeer">UltraPeer proposal</xref>.				
 	  </t> 
 	  <section anchor="algorithm" title="Client">
 	    <t>
-		UltraPeers query other UltraPeers one by one until either:
+		UltraPeers send queries to other UltraPeers one by one until 
+		one of the following occurs:
 		  <list style="numbers">
 		    <t>
 			  The desired number of results is received.
@@ -212,29 +218,40 @@
 			</t>
 		  </list>
 		
-		The client MUST pause for a reasonable amount
-		of time between UltraPeer queries, perhaps about
-		200 milliseconds.  This pause accounts for network latency, as it
-		takes a variable amount of time to receive results from an UltraPeer
-		and its leaves.  This interval gives the previous query time to supply
-		all of its results, potentially reaching the desired number
-		and ending the query.  The optimal interval between searches
-		should be determined by experimentation, but implementors MUST
-		send as few queries as possible without degrading user experience. 
-		Implementations may also vary the interval between queries 
-		depending on how many UltraPeers have already been reached.
-		For example, the interval may be 400 milliseconds for the 
-		first 10 UltraPeers, but then go down to 200 for the next 100.
+		To make sure these queries do not flood the network with too
+		much traffic, the client MUST pause for a reasonable amount
+		of time between each query, perhaps about 200 milliseconds.  This 
+		pause accounts for network latency, as it takes a variable 
+		amount of time to receive results from an UltraPeer
+		and its leaves.  The interval allocates time to receive these
+		replies.  During the interval, the desired number of results may
+		be reached, making another query unnecessary.  The optimal 
+		interval between searches should be determined by 
+		experimentation, but implementors MUST send as few queries 
+		as possible without degrading user experience and without 
+		prohibitively increasing the load on participating 
+		UltraPeers. Implementations may also vary the interval 
+		between queries depending on how many UltraPeers 
+		have already been reached.  For example, the interval may 
+		be 400 milliseconds for the first 20 UltraPeers, but then 
+		go down to 200 for the next 100, potentially even getting
+		smaller after that.  Such an algorithm may make sense 
+		because the probability of receiving a reply to a given 
+		query likely gets smaller as more UltraPeers are queried
+		and the desired number of results is not achieved.  At that
+		point, it may make sense to speed up the query to quickly
+		reach as many nodes as possible.
 
 		<vspace/>
 		<vspace/>
-		With regard to 1) above, implementors have some flexibility, 
-		particularly in their technique for
-		determing what they consider "enough" results.  
-		A simple algorithm would be for the client to continue 
-		querying until it has received 100 results or queried 1,000 UltraPeers, 
-		for example.  An alternative would be for the number of results 
-		considered "enough" to decrease as a function
+		With regard to the desired number of results, 
+		implementors have some flexibility, particularly in 
+		their technique for determing what they consider "enough"
+		results to stop the search.  A simple  
+		algorithm would be for the client to continue 
+		querying until it has received 100 results or queried 1,000 
+		UltraPeers, for example.  An alternative would be for the 
+		number of results considered "enough" to decrease as a function
 		of the number of UltraPeers searched.  This algorithm would 
 		recognize, for example, that if a search has returned no
 		results after querying 500 UlraPeers, it is unlikely
@@ -243,12 +260,14 @@
 		at all and stop there.  This would reduce the total number
 		of UltraPeers required to service queries for rare files.
 		The details of these algorithms should also be determined 
-		through experimentation by client developers, again keeping
+		through experimentation by Gnutella developers, again keeping
 		in mind that the overall goal is to reduce query and query 
-		hit traffic for everyone while maintaining searchability and 
-		improving searchability for rare files.  Clients should also 
-		keep in mind that an overly aggressive implementation will
-		ultimately damage their own clients.
+		hit traffic for everyone while maintaining current levels of 
+		searchability for common files and improving searchability 
+		for rare files.  Clients should also keep in mind that an 
+		overly aggressive implementation will ultimately damage 
+		their own clients through increasing everyone's overall 
+		network load.
 		
 		<vspace/>
 		<vspace/>
@@ -264,48 +283,47 @@
 			</t>
 			<t>
 			  Clients MUST NOT query more than 1 UltraPeer every
-			  50 milliseconds.
+			  20 milliseconds.  For the first 20 UltraPeers
+			  queried, however, clients MUST pause for at least 200 
+			  milliseconds between queries.  The query should initially
+			  begin slowly as it in effect determines the popularity
+			  of the file.
 			</t>
 		    <t>
 			  UltraPeers MUST NOT query the same UltraPeer more 
-			  than once.
-			</t>
-			<t>
-			  Although already implied by 4), for clarity, a node
-			  MUST NOT send a second query to an UltraPeer if it
-			  does not receive responses to the first query (it
-			  MUST NOT consider that the datagram was lost and
-			  requery as a result).
+			  than once.  In particular, a node MUST NOT send a 
+			  second query to an UltraPeer if it does not receive responses 
+			  to the first query (it MUST NOT consider that the datagram 
+			  was lost and requery as a result).  If the datagram was,
+			  in fact, lost, this indicates high loss around that node,
+			  and resending the query will only make the situation worse.
 			</t>
 		  </list>
 
-	    These numbers SHOULD be considered the absolute maximum
+	    These numbers should be considered the absolute maximum
 		values, and they are not the settings developers should use.
 		Again, the optimal limits should be determined by 
 		experimentation, but the above rules always apply.  Implementors
 		should keep in mind that Gnutella is a network that relies on
 		the fact that other clients are not overly selfish or
 		abusive -- Gnutella relies on trust to a large degree.  
-		The overall goal of this change is to reduce 
-		query and query hit traffic for 
-		everyone while maintaining current levels of searchability 
-		and even improving
-		searchability for rare files.  The reduction in traffic
-		should reduce the bandwidth, CPU, and memory load on
-		UltraPeers, but this is only possible if developers use 
-		conservative values when writing their implementations.
+		The reduction in traffic should reduce the bandwidth, CPU, 
+		and memory load on all UltraPeers, but this is only possible 
+		if developers use conservative values when writing their 
+		implementations.
 		</t>
 	  </section>
 	  <section anchor="server" title="Server">
 	    <t>
 	    The changes on the server side are less significant.  Again,
-		no changes are required for leaves.  In fact, leaves SHOULD NOT open
-		UDP ports for incoming traffic, as they never receive UDP
-		messages directly.
-		UltraPeers MUST, however, open a port
+		no changes are required for leaves.  In fact, leaves SHOULD NOT 
+		open UDP ports for incoming traffic, as they never receive UDP
+		messages directly.  UltraPeers MUST, however, open a port
 		for incoming UDP traffic, and they MUST use the same 
 		port that they are using for incoming Gnutella messages 
-		over TCP.  When a server receives a message over its open UDP
+		over TCP.  The details of this are discussed in 
+		the <xref target="udp">section</xref> on UDP.
+		When a server receives a message over its open UDP
 		port, it MUST send any replies via UDP and over the same
 		port it is listening on.  As in the current Gnutella 
 		network, all replies are sent back to the sender.  This is
@@ -313,8 +331,9 @@
 		of <xref target="security">security</xref>.  Otherwise,
 		servers should respond to messages just as if they 
 		recieved them over TCP.  Servers SHOULD accept all of the
-		traditional Gnutella messages, as defined in 
-		the <xref target="refs.clip2">Gnutella RFC</xref>.
+		traditional Gnutella messages over their UDP port.  These
+		messages are defined in 
+		the <xref target="refs.clip2">Gnutella Protocol Specification v0.4</xref>.
 		
 		<vspace/>
 		<vspace/>
@@ -329,17 +348,6 @@
 		can be used more productively. 
 		</t>
 	  </section>
-	  <section anchor="latency" title="Latency">
-	    <t>
-		  This change impacts the latency of search results.  If a
-		  given search is sent to 10,000 UltraPeers with an interval
-		  between individual UltraPeer queries of 100, the complete search 
-		  will take 1,000 seconds, or over 15 minutes.  This may be
-		  impractical.  Due to these limitations, developers MAY choose
-		  to decrease the interval between searches as more UltraPeers
-		  are searched.
-		</t>
-	  </section>
 	</section>
 	<section anchor="discovery" title="UltraPeer Discovery">
 	    <t>
@@ -352,7 +360,7 @@
 		  scheme has UltraPeer discovery built in to some degree. 
 		  UltraPeers supporting this proposal MUST advertise this fact
 		  using a <xref target="ggep_pongs">GGEP extension</xref> in
-		  pongs.  there are three techniques for discovering these
+		  pongs.  There are three techniques for discovering these
 		  marked pongs on the network:
 		    <list style="numbers">
 			  <t>
@@ -381,11 +389,13 @@
 		  that are necessary for our purposes.  This built-in distribution 
 		  of host information can dramatically reduce the need for 
 		  any pings and pongs at all -- so much so that UltraPeers 
-		  MUST store the IP and port from all UDP queries they receive.
-		  
+		  MUST store the IP and port from all UDP messages they receive.
+		  Similarly, GUESS UltraPeers MUST include these pongs when
+		  appropriate in response to UDP pings.
+
 		  <vspace/>
 		  <vspace/>
-		  The other specialized technique for UltraPeer discoverty is the
+		  The other specialized technique for UltraPeer discovery is the
 		  use of the normal Gnutella ping, only over UDP.  When UltraPeers
 		  receive pings over UDP, they should take special action.  Instead 
 		  of returning the normal pongs, UltraPeers are REQUIRED to send 
@@ -408,18 +418,11 @@
 		  Because leaves always query the network via their
 		  UltraPeer, leaves do not have to maintain any of this 
 		  information -- this is the UltraPeer's 
-		  responsibility.		  
-		  <vspace/>
-		  <vspace/>
-		  If an UltraPeer's cache of other GUESS-supporting UltraPeers 
-		  drops below a certain threshold, for example 5,000, the
-		  UltraPeer MUST use these techniques to refresh its 
-		  UltraPeer cache.
-		  
-		  <vspace/>
-		  <vspace/>
-		  While UltraPeers MUST maintain an adequate cache of 
-		  other UltraPeers to query, they also MUST send a minimum
+		  responsibility.  If an UltraPeer's cache of other GUESS-supporting 
+		  UltraPeers drops below a certain threshold, for example 5,000,
+		  the UltraPeer MUST use these techniques to refresh its 
+		  UltraPeer cache.  While UltraPeers MUST maintain an adequate 
+		  cache of other UltraPeers to query, they also MUST send a minimum
 		  number of pings to make this possible, less the network
 		  become flooded with ping and pong traffic.
 		</t>
@@ -435,28 +438,33 @@
 		  proposal would use a new, transient connection also over TCP.  
 		  Opening and closing TCP connections incurs significant CPU 
 		  and memory costs, however, potentially making the proposed
-		  change unworkable.  Moreover, Windows 95/98/Me limit TCP
-		  connections to 100.  While this setting can be changed in the
-		  registry, these systems were clearly not designed to handle 
-		  this number of simultaneous connections.  TCP also uses 
-		  significantly more bandwidth and increases delay. 
-		  As others have noted, however, the 
-		  reliability of TCP is not a requirement for Gnutella queries
-		  and hits.<xref target="refs.agthorr"/>  If a 
-		  message is lost, who cares?  
-		  In fact, these queries and their associated replies can 
-		  easily be sent over UDP.  In many ways, UDP is the more 
-		  appropriate transport layer protocol -- we're sending messages 
-		  to an amorphous group of nodes, and reliability is not 
-		  a requirement.  Clients wishing to implement this change
-		  MUST do so over UDP, as a TCP implementation would incur
-		  excessive overhead for other nodes, and would be 
-		  impossible without a new, transient connection.
+		  change unworkable.  Moreover, Windows 95/98/Me do not allow 
+		  more than 100 TCP connections.  While this setting can be 
+		  changed in the registry, these systems were clearly not designed 
+		  to handle high numbers of simultaneous connections.  As opposed 
+		  to UDP, TCP also uses significantly more bandwidth and increases 
+		  delay.  As others have noted, however, the reliability of TCP 
+		  is not a requirement for Gnutella queries and 
+		  hits.<xref target="refs.agthorr"/>  If a message is lost, 
+		  who cares?  In fact, these queries and their associated replies 
+		  can easily be sent over UDP.  In many ways, UDP is the more 
+		  appropriate transport layer protocol, as this scheme sends a 
+		  large number of messages to an amorphous group of nodes
+		  very quickly, and reliability is not a requirement.  In fact, 
+		  with the high transience of Gnutella nodes, reliability cannot
+		  be expected and is undesirable.  Clients wishing to implement 
+		  this change MUST do so over UDP, as a TCP implementation would 
+		  incur excessive overhead for other nodes, and would be 
+		  impossible without a new, transient connection.  If a TCP
+		  connection already exists, UltraPeers MUST send messages
+		  just as if the connection were over UDP, using TTL=1
+		  in particular.
 	    </t>
 		<section anchor="port" title="Open a UDP Port">
 		  <t>
 		    To implement this change, UltraPeers MUST open a UDP
-			port that listens for incoming UDP traffic.  It is
+			port that listens for incoming UDP traffic, as mentioned
+			in the section on server-side changes.  It is
 			RECOMMENDED that UltraPeers listen on port 6346, the 
 			same port registered for Gnutella for TCP.
 			UltraPeers MAY, however, listen 
@@ -465,13 +473,11 @@
 			or when another application is using that port for
 			any reason.  In all cases, clients MUST
 			listen on the same port for both TCP and UDP traffic.
-			This makes the implementation slightly more
-			rigid.  The IP and TCP port are already reported in a
+			While this makes the implementation slightly more
+			rigid, the IP and TCP port are already reported in a
 			number of Gnutella messages, headers, and extensions, 
 			however, and this choice makes the reuse of that 
-			information possible.  One example is the "Listen IP" 
-			connection handshaking header that we will use right
-			away to check the firewalled status of leaves.
+			information possible.  
 		  </t>
 		</section>
 		<section anchor="fragmentation" title="Fragmentation">
@@ -587,12 +593,16 @@
 	      Adoption of this proposal has several additional benefits.  For 
 		  example, concern for cycles in intra-UltraPeer connections is 
 		  eliminated.  In the current network, cycles can be a serious 
-		  problem in the worst case, resulting in nodes receiving many 
-		  duplicate messages, wasting bandwidth, CPU, and 
-		  memory.<xref target="refs.RandomWalk"/>  This eliminates
+		  problem in the worst case.  As a general, the number of cycles 
+		  increases as the connectivity of the network graph increases.
+		  This is highly problematic because there are significant benefits
+		  to having a more highly connected graph.  These cycles result in 
+		  nodes receiving many duplicate messages, wasting bandwidth, CPU, and 
+		  memory.(See <xref target="refs.RandomWalk"/> and <xref target="refs.tutorial"/>
+		  This eliminates
 		  these duplicates except in the case where leaves are connected to 
 		  multiple UltraPeers, and two or more of their UltraPeers are sent
-		  the same query.  
+		  the same query.
 	    </t>
 	  </section>
 	  <section anchor="push" title="Higher Success Rate for Push Downloads">
@@ -620,6 +630,29 @@
 		  Another benefit of this scheme is that the user manually "stopping"
 		  a query can, in fact, stop that query from being sent to more
 		  hosts, saving network resources.
+		</t>
+	  </section>
+	  <section anchor="improved_security" title="Moderately Improved Security">
+	    <t>
+		  GUESS has the added benefit that it makes the most obvious 
+		  DDOS attack on Gnutella less feasible.  In such an attack, a
+		  single attacker can connect to a large number of hosts simultaneously
+		  and send out repeated queries for popular content with a high TTL.  
+		  Given current flow control algorithms, relatively few attackers could
+		  likely have a rapid and dramatic negative impact on overall network
+		  performance.  While attackers can still connect to many UltraPeers
+		  in this scheme, the effective elimination of TTL in GUESS means that
+		  an attacker would have to use far more bandwidth to achieve the
+		  same effect.
+		  <vspace/>
+		  <vspace/>
+		  In addition, GUESS makes Gnutella application-level 
+		  "man in the middle" attacks more difficult.
+		  With GUESS, there are fewer nodes between the sender and the
+		  receiver, so each message will pass through far fewer nodes along
+		  its path to the recipient.  So, while this by no means eliminates the 
+		  ability to view and/or alter messages on the path to the recipient,
+		  it makes it slightly more difficult.
 		</t>
 	  </section>
 	</section>
@@ -803,6 +836,20 @@
 			</address>
           </author>
           <date month="January" year="2002" />
+        </front>
+      </reference>
+
+      <reference anchor="refs.tutorial"
+                 target="http://www.ists.dartmouth.edu/IRIA/knowledge_base/p2p/p2p.pdf">
+        <front>
+          <title>File Sharing Protocols: A Tutorial on Gnutella</title>
+          <author surname="Berk" fullname="Vincent Berk">
+            <organization>Institute for Security Technology Studies</organization>
+          </author>
+          <author surname="Cybenko" fullname="George Cybenko">
+            <organization>Institute for Security Technology Studies</organization>
+          </author>
+          <date month="March" year="2001" />
         </front>
       </reference>
 
