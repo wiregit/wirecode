@@ -46,11 +46,6 @@ public class UpdateHandler {
     private volatile UpdateInformation _updateInfo;
     
     /**
-     * Whether or not we're allowed to show this update info.
-     */
-    private volatile boolean _updateAvailable;
-    
-    /**
      * The most recent id of the update info.
      */
     private volatile int _lastId;
@@ -100,13 +95,11 @@ public class UpdateHandler {
     }
     
     /**
-     * Gets the most recent UpdateInfo, if it was decided that we're showing it.
+     * This will only return information if it was read from disk on startup
+     * and did not have a delay.
      */
     public UpdateInformation getLatestUpdateInfo() {
-        if(_updateAvailable)
-            return _updateInfo;
-        else
-            return null;
+        return _updateInfo;
     }
     
     /**
@@ -160,20 +153,20 @@ public class UpdateHandler {
         int style = Math.min(UpdateInformation.STYLE_MAJOR,
                              UpdateSettings.UPDATE_STYLE.getValue());
         
-        _updateInfo = uc.getUpdateDataFor(limeV, 
-                                          getLanguage(),
-                                          CommonUtils.isPro(),
-                                          style,
-                                          javaV);
+        UpdateInformation info = uc.getUpdateDataFor(limeV, 
+                                                     getLanguage(),
+                                                     CommonUtils.isPro(),
+                                                     style,
+                                                     javaV);
 
-        notifyAboutInfo(uc.getTimestamp(), fromDisk);
+        notifyAboutInfo(uc, info, fromDisk);
     }
     
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(long timestamp, final boolean fromDisk) {
-        if(_updateInfo == null) {
+    private void notifyAboutInfo(UpdateCollection uc, final UpdateInformation update, boolean fromDisk) {
+        if(update == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
         }
@@ -181,8 +174,9 @@ public class UpdateHandler {
         long now = System.currentTimeMillis();
         long delay = UpdateSettings.UPDATE_DELAY.getValue();
         long random = Math.abs(new Random().nextLong() % delay);
+        long timestamp = uc.getTimestamp();
         long then = timestamp + random;
-        final int id = _lastId;
+        final int id = uc.getId();
         if(now < then) {
             if(LOG.isInfoEnabled())
                 LOG.info("Delaying Update." +
@@ -197,21 +191,17 @@ public class UpdateHandler {
                 public void run() {
                     // only run if the ids weren't updated while we waited.
                     if(id == _lastId)
-                        showUpdate(_updateInfo, fromDisk);
+                        RouterService.getCallback().updateAvailable(update);
                 }
             }, then - now, 0);
         } else {
-            showUpdate(_updateInfo, fromDisk);
+            // If this was from the disk, store it for the GUI to pick up later.
+            if(fromDisk)
+                _updateInfo = update;
+            // Otherwise, it came while we were running -- send it off to the GUI.
+            else
+                RouterService.getCallback().updateAvailable(update);
         }
-    }
-    
-    /**
-     * Sends off an update message to the GUI.
-     */
-    private void showUpdate(UpdateInformation update, boolean fromDisk) {
-        _updateAvailable = true;
-        if(!fromDisk)
-            RouterService.getCallback().updateAvailable(update);
     }
     
     /**

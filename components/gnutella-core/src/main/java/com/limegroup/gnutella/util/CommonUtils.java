@@ -23,7 +23,7 @@ public final class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "@version@";
+	private static final String LIMEWIRE_VERSION = "1.0.0";
 
     /**
      * Variable used for testing only, it's value is set to whatever the test
