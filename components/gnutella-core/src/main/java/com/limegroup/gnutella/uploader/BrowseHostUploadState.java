@@ -46,6 +46,8 @@ public final class BrowseHostUploadState implements HTTPMessage {
         
         //get responses from file manager
         Response[] responses = _fileManager.query(indexingQuery);
+        if (responses == null) // we aren't sharing any files....
+            responses = new Response[0];
         
         //convert to QueryReplies
         Iterator /*<QueryReply>*/ iterator 
