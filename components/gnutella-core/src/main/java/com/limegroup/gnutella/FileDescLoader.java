@@ -46,7 +46,7 @@ public final class FileDescLoader implements Runnable {
 	 * @return a new <tt>FileDesc</tt> instance
 	 */
 	public FileDesc createFileDesc(File file, int fileIndex) {
-		HashSet urns = UrnCache.instance().getUrns(file);
+		Collection urns = UrnCache.instance().getUrns(file);
 		FileDesc fileDesc = new FileDesc(file, fileIndex, urns);
 		this.loadFileDesc(fileDesc);
 		return fileDesc;
@@ -85,7 +85,7 @@ public final class FileDescLoader implements Runnable {
 		while(!FILE_QUEUE.isEmpty()) {
 			FileDesc fd = (FileDesc)FILE_QUEUE.remove(0);
 			fd.calculateUrns();
-			UrnCache.instance().persistUrns(fd.getFile(),fd._urns);
+			UrnCache.instance().persistUrns(fd);
 			FILE_MANAGER.updateUrnIndex(fd);
 		}		
 	}	
