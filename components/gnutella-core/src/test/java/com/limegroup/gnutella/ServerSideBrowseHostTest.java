@@ -6,6 +6,7 @@ import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.TestNIOMessageReader;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import junit.framework.*;
@@ -43,11 +44,6 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 	 */
     private static final int TIMEOUT = 2000;
 
-
-    /**
-     * Leaf connection to the Ultrapeer.
-     */
-    private static Connection LEAF;
 
     /**
      * Ultrapeer connection.
@@ -168,9 +164,6 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
  		if(ULTRAPEER_2.isOpen()) {
  			drain(ULTRAPEER_2);
  		}
- 		if((LEAF != null) && LEAF.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
  	}
 
 	/**
@@ -183,7 +176,15 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
-        
+
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+           PrivilegedAccessor.setValue(ULTRAPEER_1, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_1));
+           PrivilegedAccessor.setValue(ULTRAPEER_2, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_2));
+        }
+                
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("leehsus");
@@ -226,103 +227,9 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         }
     }
 
-    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
-     *  QRP stuff) were recieved.
-     */
-    private static boolean noUnexpectedMessages(Connection c) {
-        while (true) {
-            try {
-                Message m=c.reader().read(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-            }
-            catch (InterruptedIOException ie) {
-                return true;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryRequest getFirstQueryRequest(Connection c) {
-        while (true) {
-            try {
-                Message m=c.reader().read(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                else if (m instanceof QueryRequest) 
-                    return (QueryRequest)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrReply received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryReply getFirstQueryReply(Connection c) {
-        while (true) {
-            try {
-                Message m=c.reader().read(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                else if (m instanceof QueryReply) 
-                    return (QueryReply)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-	/**
-	 * Asserts that the given message is a query, printing out the 
-	 * message and failing if it's not.
-	 *
-	 * @param m the <tt>Message</tt> to check
-	 */
-	private static void assertQuery(Message m) {
-		if(m instanceof QueryRequest) return;
-
-		System.out.println(m); 
-		assertInstanceof("message not a QueryRequest",
-		    QueryRequest.class, m);
-	}
-
 
     // BEGIN TESTS
     // ------------------------------------------------------
-
     public void testResultsIndicateBrowseHostSupport() throws Exception {
         drainAll();
 
@@ -354,7 +261,6 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         ByteReader in = new ByteReader(s.getInputStream());
         BufferedWriter out = 
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-
         // first test a GET
         out.write("GET /  HTTP/1.1\r\n");
         out.write("Accept: application/x-gnutella-packets\r\n");
@@ -364,16 +270,13 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         // check opcode
         result = in.readLine();
         assertGreaterThan(result, -1, result.indexOf("200"));
-
         // get to the replies....
         String currLine = null;
         do {
             currLine = in.readLine();
         } while ((currLine != null) && !currLine.equals(""));
-
         QueryReply qr = (QueryReply) BIOMessageReader.read(s.getInputStream());
         assertEquals(2, qr.getResultCount());
-
         assertNull(in.readLine());
         s.close();
         in.close();
