@@ -45,6 +45,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[18]=(byte)1;     //hops
         bytes[19]=(byte)26+10; //payload length
         bytes[23+16]=(byte)3;  //index
+        bytes[23+24]=(byte)1;  //non-zero port.
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read big push
