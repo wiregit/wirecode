@@ -271,34 +271,23 @@ public class LimeXMLUtils
      * @return true if the replyDoc is a match for the queryDoc, false
      * otherwise
      */
-    public static boolean match(LimeXMLDocument replyDoc, 
-        LimeXMLDocument queryDoc){
+    public static boolean match(LimeXMLDocument replyDoc,
+      LimeXMLDocument queryDoc) {
         if(replyDoc==null)
             return false;
+        if(queryDoc == null)
+            throw new NullPointerException("querying with null doc.");
+
         //First find the names of all the fields in the query
-        List queryNameValues = queryDoc.getNameValueList();
+        Set queryNameValues = queryDoc.getNameValueSet();
         int size = queryNameValues.size();
-        List fieldNames = new ArrayList(size);
-        for(int i=0; i<size; i++){
-            NameValue nameValue = (NameValue)queryNameValues.get(i);
-            String fieldName = nameValue.getName();
-            fieldNames.add(fieldName);
-        }
-        //compare these fields with the current reply document
-        //List currDocNameValues = replyDoc.getNameValueList();
-        int matchCount=0;//number of matches
-        int nullCount=0;//num of fields which are in query but null in ReplyDoc
-        for(int j=0; j< size; j++){
-            String currFieldName = (String)fieldNames.get(j);
-            String queryValue = queryDoc.getValue(currFieldName);
-            if(queryValue==null) {
-                try {
-                    Assert.that(false,"Bad query. String = "+
-                                queryDoc.getXMLString());
-                } catch(SchemaNotFoundException snfx) {
-                    Assert.that(false, "SchemaNotFound? That's impossible!");
-                }
-            }
+        int matchCount = 0; // number of matches
+        int nullCount = 0; // number of fields in query not in replyDoc.
+        for(Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            String currFieldName = (String)entry.getKey();
+            String queryValue = (String)entry.getValue();
+            Assert.that( queryValue != null, "null value");            
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);

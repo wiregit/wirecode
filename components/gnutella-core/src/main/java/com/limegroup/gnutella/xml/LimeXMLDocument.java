@@ -339,7 +339,7 @@ public class LimeXMLDocument implements Serializable {
 
 
     /**
-     * Returns a List <NameValue>, where each name-value corresponds to a
+     * Returns a Set of Map.Entry, where each key-value corresponds to a
      * Canonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      * <p>
@@ -359,23 +359,13 @@ public class LimeXMLDocument implements Serializable {
      * with __ (double underscore).
      * So element.attribute ==> element__attribute__
      *
-     * @return a List <NameValue>, where each name-value corresponds to a
+     * @return a Set of Map.Entry, where each key-value corresponds to a
      * canonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      */
-    public List getNameValueList() {
-        int size = fieldToValue.size();
-        Iterator keys = fieldToValue.keySet().iterator();
-        List retList = new ArrayList();
-        for(int i=0; i< size; i++){
-            String name = (String)keys.next();
-            String value  = (String)fieldToValue.get(name);
-            NameValue namVal = new NameValue(name,value);
-            retList.add(namVal);
-        }
-        return retList;
+    public Set getNameValueSet() {
+        return fieldToValue.entrySet();
     }
-
 
     /** This method is only guaranteed to work if getSchemaURI() returns a 
      *  non-null value.
