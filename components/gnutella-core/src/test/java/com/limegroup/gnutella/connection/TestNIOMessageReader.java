@@ -81,7 +81,7 @@ public class TestNIOMessageReader extends NIOMessageReader {
                 try {
                     READ_LOCK.wait(i);
                     if(MESSAGES.isEmpty()) {
-                        throw new InterruptedIOException("null message read");
+                        throw new InterruptedIOException("no message read");
                     }
                     return (Message)MESSAGES.remove(0);
                 } catch (InterruptedException e) {
