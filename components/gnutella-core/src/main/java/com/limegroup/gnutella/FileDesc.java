@@ -90,7 +90,7 @@ public final class FileDesc implements AlternateLocationCollector {
 			UrnCache.instance().addUrns(FILE, URNS);
 		}
 		else {
-			URNS = Collections.unmodifiableSet(urns);
+			URNS = urns;
 		}
     }
 
