@@ -42,6 +42,16 @@ public final class HandshakeResponse {
      * the handshake was successful and the connection can be established.
      */
     public static final String OK_MESSAGE = "OK";
+    
+    /**
+     * HTTP response code for the crawler.
+     */
+    public static final int CRAWLER_CODE = 593;
+    
+    /**
+     * HTTP response message for the crawler.
+     */
+    public static final String CRAWLER_MESSAGE = "Hi";
 
     /** The error code that a shielded leaf node should give to incoming
      *  connections.  */
@@ -194,7 +204,7 @@ public final class HandshakeResponse {
     private final boolean GUESS_CAPABLE;
     
 	/**
-	 * Constant for whether or not this node supports GUESS.
+	 * Constant for whether or not this is a crawler.
 	 */
 	private final boolean IS_CRAWLER;
 	
@@ -405,6 +415,7 @@ public final class HandshakeResponse {
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
+        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
         
 		// add any leaves
         List leaves = 
@@ -419,8 +430,8 @@ public final class HandshakeResponse {
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			
-		return new HandshakeResponse(HandshakeResponse.OK,
-			HandshakeResponse.OK_MESSAGE, headers);        
+		return new HandshakeResponse(HandshakeResponse.CRAWLER_CODE,
+			HandshakeResponse.CRAWLER_MESSAGE, headers);        
 	}
 	
     /**

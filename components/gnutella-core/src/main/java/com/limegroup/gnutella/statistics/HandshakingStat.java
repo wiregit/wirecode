@@ -192,12 +192,6 @@ public class HandshakingStat extends AdvancedStatistic {
         new HandshakingStat();
 
     /**
-     * Statistic for crawler connections.
-     */
-    public static final Statistic CRAWLER_CONNECTION =
-        new HandshakingStat();
-
-    /**
      * Statistic for successful incoming connections.
      */
     public static final Statistic SUCCESSFUL_INCOMING =

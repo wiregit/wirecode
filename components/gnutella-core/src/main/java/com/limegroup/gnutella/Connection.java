@@ -717,7 +717,16 @@ public class Connection implements IpPort {
 				RESPONSE_HEADERS.respond(_headers, false);
 
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.props());                   
+            sendHeaders(ourResponse.props());
+            
+            // if it was the crawler, leave early.
+            if(isCrawler) {
+                // read one response, just to make sure they got ours.
+                readLine();
+                throw new IOException("crawler");
+            }
+                
+            
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
             int code = ourResponse.getStatusCode();
@@ -761,13 +770,6 @@ public class Connection implements IpPort {
             code = ourResponse.getStatusCode();
             if(code == HandshakeResponse.OK) {
                 if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
-                	// if it's the crawler, we throw an exception to make sure  
-                	// we correctly disconnect
-                	if(isCrawler) {
-                        HandshakingStat.CRAWLER_CONNECTION.incrementStat();
-                		throw new IOException("connection from crawler -- " +
-                            "disconnect");
-                	}
                     HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
@@ -788,8 +790,7 @@ public class Connection implements IpPort {
         
         HandshakingStat.INCOMING_NO_CONCLUSION.incrementStat();
         //If we didn't successfully return out of the method, throw an exception
-        //to indicate that handshaking didn't reach any conclusion.  The values
-        //here are kind of a hack.
+        //to indicate that handshaking didn't reach any conclusion.
         throw NoGnutellaOkException.UNRESOLVED_CLIENT;
     }
     

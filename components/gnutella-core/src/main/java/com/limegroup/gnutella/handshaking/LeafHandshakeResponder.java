@@ -87,6 +87,11 @@ public final class LeafHandshakeResponder
      *  headers to send in response to the connection attempt
      */
     private HandshakeResponse respondToIncoming(HandshakeResponse hr) {
+		if(hr.isCrawler()) {
+		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
+			return HandshakeResponse.createCrawlerResponse();
+		}
+        
         Properties ret = new LeafHeaders(getRemoteIP());
         
         //If we already have enough ultrapeers, reject.
