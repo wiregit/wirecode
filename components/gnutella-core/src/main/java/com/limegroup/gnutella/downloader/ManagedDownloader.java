@@ -110,6 +110,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      * hold lock while performing blocking IO operations.
      ***********************************************************************/
     
+    //TODO3: Update this documentation. 
+
+    //The new logic ensures that assigning and requesting are an atomic
+    //operation for each thread. Any other way of implemening this brings a host
+    //of other problems with it. But synchronizing on this is also problematic,
+    //since the GUI thread needds to keep calling getAmountRead(), which is also
+    //synchronized on this. So if many threads are trying to connect and get
+    //their assignments, the GUI freezes up. For this reason, we have changed
+    //the locking. The threads synchronize on a differnt lock than the one the
+    //GUI uses.
+    
+
     private Object downloaderLock = new Object();
 
 
@@ -683,7 +695,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                         files =(List)iter.next();
                         if (files.size() <= 0)
                             continue;
-                        synchronized (this) {
+                        
+                        {
+                            //this block is modifying variables which we should
+                            //synchronize. However, at this point in the code,
+                            //we have not spawened any threads
                             RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                             currentFileName=rfd.getFileName();
                             currentFileSize=rfd.getSize();
@@ -1012,9 +1028,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 connectCreator.start();
             }//end of for 
             //wait for a notification before we continue.
-            synchronized(this) {
+            synchronized(downloaderLock) {
                 try {
-                    this.wait(4000);//if no workers notify in 4 secs, iterate
+                    //if no workers notify in 4 secs, iterate
+                    downloaderLock.wait(4000);
                 } catch (Exception ee ) {
                     //ee.printStackTrace();
                 }
@@ -1249,14 +1266,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             //      dloader could write to the same region of the file
             //      I think it's ok, though it could result in >100% in the GUI
             HTTPDownloader biggest=null;
-            synchronized (this) {
-                for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                    HTTPDownloader h=(HTTPDownloader)iter.next();
-                    if (biggest==null 
-                        || h.getAmountToRead()>biggest.getAmountToRead())
-                        biggest=h;
-                }                
-            }
+            for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
+                HTTPDownloader h=(HTTPDownloader)iter.next();
+                if (biggest==null 
+                    || h.getAmountToRead()>biggest.getAmountToRead())
+                    biggest=h;
+            }                
+
             if (biggest==null) {//Not using downloader...but RFD maybe useful
                 throw new NoSuchElementException();
             }
@@ -1356,18 +1372,21 @@ public class ManagedDownloader implements Downloader, Serializable {
      * adds an interval to needed, if dloader was not able to download a part
      * assigned to it.  
      */
-    private synchronized void updateNeeded(HTTPDownloader dloader) {
-        debug ("downloader failed. adding to white..."+
-               "Downloader: initial, read, toRead :"+
-               dloader+", "+
-               dloader.getInitialReadingPoint()+", "+
-               dloader.getAmountRead()+", "+
-               dloader.getAmountToRead());
-        int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
-        int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
-        if( (high-low)>0) {//dloader failed to download a part assigned to it?
-            Interval in = new Interval(low,high);
-            needed.add(in);
+    private void updateNeeded(HTTPDownloader dloader) {
+        synchronized(downloaderLock) {
+            debug ("downloader failed. adding to white..."+
+                   "Downloader: initial, read, toRead :"+
+                   dloader+", "+
+                   dloader.getInitialReadingPoint()+", "+
+                   dloader.getAmountRead()+", "+
+                   dloader.getAmountToRead());
+            int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
+            int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
+            if( (high-low)>0) {
+                //dloader failed to download a part assigned to it?
+                Interval in = new Interval(low,high);
+                needed.add(in);
+            }
         }
     }
 
