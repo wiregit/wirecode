@@ -243,7 +243,7 @@ public final class AlternateLocationCollection
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
 	 *
 	 * This adds randomness to the order in which alternate locations are
-	 * reported and only reports 10 locations.
+	 * reported and only reports 10 non-firewalled locations.
 	 *
 	 * @return an HTTP-compliant string of alternate locations, delimited
 	 *  by commas, or the empty string if there are no alternate locations
@@ -256,8 +256,11 @@ public final class AlternateLocationCollection
         synchronized(this) {
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
-			    writeBuffer.append((
-                           (HTTPHeaderValue)iter.next()).httpStringValue());
+            	AlternateLocation current = (AlternateLocation)iter.next();
+            	if (current.getPushAddress()!=null)
+            		continue;
+			    writeBuffer.append(
+                           current.httpStringValue());
 			    writeBuffer.append(commaSpace);
 			    wrote = true;
 			}
