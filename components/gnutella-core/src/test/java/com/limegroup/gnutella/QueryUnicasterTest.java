@@ -5,6 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.stubs.*;
 
 public class QueryUnicasterTest extends TestCase {
@@ -86,7 +87,7 @@ public class QueryUnicasterTest extends TestCase {
             Thread.sleep(5 * 1000);
         }
         catch (InterruptedException ignored) {}
-        int numMessages = 0, numQRs = 0, numPings = 0;
+        int numMessages = 0, numQRs = 0, numPings = 0, numQKReqs = 0;
         while (!_messages.isEmpty()) {
             Message currMessage = (Message) _messages.remove(0);
             numMessages++;
@@ -97,6 +98,8 @@ public class QueryUnicasterTest extends TestCase {
             }
             else if (currMessage instanceof PingRequest) {
                 numPings++;
+                if (((PingRequest)currMessage).isQueryKeyRequest())
+                    numQKReqs++;
             }
             else
                 assertTrue("A different message encountered! : " + 
@@ -104,6 +107,10 @@ public class QueryUnicasterTest extends TestCase {
                            false);  // this should never happen!
         }
         assertTrue(numMessages == (numPings + numQRs));
+        // can't send a Query without sending a Ping....
+        assertTrue(numQRs <= numPings);
+        assertTrue(numQRs > 0);
+        assertTrue(numQRs <= numQKReqs);
         debug("QueryUnicasterTest.testQueries(): numMessages = " +
               numMessages);
         debug("QueryUnicasterTest.testQueries(): numQRs = " +
@@ -141,7 +148,7 @@ public class QueryUnicasterTest extends TestCase {
             final int index = i;
             udpLoopers[i] = new Thread() {
                     public void run() {
-                        udpLoop(5000 + index);
+                        udpLoop(5500 + index);
                     }
                 };
             udpLoopers[i].start();
@@ -250,6 +257,7 @@ public class QueryUnicasterTest extends TestCase {
     }
         
 
+    private static byte[] localhost = {(byte)127,(byte)0,(byte)0,(byte)1};
         
 	/**
      * Busy loop that listens on a port for udp messages and then logs them.
@@ -278,6 +286,8 @@ public class QueryUnicasterTest extends TestCase {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
+        QueryKey.SecretKey key = QueryKey.generateSecretKey();
+        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -288,6 +298,25 @@ public class QueryUnicasterTest extends TestCase {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);		
                     if(message == null) continue;
+                    if (message instanceof PingRequest) {
+                        PingRequest pr = (PingRequest)message;
+                        pr.hop();  // need to hop it!!
+                        if (pr.isQueryKeyRequest()) {
+                            // send a QueryKey back!!!
+                            QueryKey qk = 
+                                QueryKey.getQueryKey(datagram.getAddress(),
+                                                     datagram.getPort(),
+                                                     key, pad);
+                            PingReply pRep = new PingReply(pr.getGUID(),
+                                                           (byte)1,
+                                                           port,
+                                                           localhost,
+                                                           2, 2, true, qk);
+                            pRep.hop();
+                            debug("QueryUnicasterTest.udpLoop(): sending QK.");
+                            QueryUnicaster.instance().handleQueryKeyPong(pRep);
+                        }
+                    }
                     // log the message....
                     synchronized (_messages) {
                         _messages.add(message);
