@@ -13,7 +13,7 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	SpamFilter.class \
 	RouterService.class
 
-subpackages = util gui filters
+subpackages = util gui filters networkdiscoverer
 
 all : $(classes) $(subpackages)
 
@@ -32,6 +32,10 @@ util:
 .PHONY: filters
 filters:
 	$(MAKE) -C filters
+
+.PHONY: networkdiscoverer
+filters:
+	$(MAKE) -C networkdiscoverer
 
 # .PHONY: doc
 # doc:
