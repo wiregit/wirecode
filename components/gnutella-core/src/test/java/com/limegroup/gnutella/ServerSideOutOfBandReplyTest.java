@@ -404,6 +404,30 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     // this tests no UDP support - it should just send a UDP reply
     public void testOutOfBandRequest() throws Exception {
         drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("susheel",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.flush();
+
+        // we should get a reply via UDP
+        UDP_ACCESS.setSoTimeout(500);
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            UDP_ACCESS.receive(pack);
+        }
+        catch (IOException bad) {
+            assertTrue("Did not get reply", false);
+        }
+        InputStream in = new ByteArrayInputStream(pack.getData());
+        // as long as we don't get a ClassCastException we are good to go
+        QueryReply reply = (QueryReply) Message.read(in);
     }
 
     // tests basic out of band functionality
