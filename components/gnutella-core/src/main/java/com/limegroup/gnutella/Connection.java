@@ -935,31 +935,40 @@ public class Connection {
     private Message readAndUpdateStatistics()
       throws IOException, BadPacketException {
         int pCompressed = 0, pUncompressed = 0;
-        if(!_closed && isReadDeflated()) {
-            pCompressed = _inflater.getTotalIn();
-            pUncompressed = _inflater.getTotalOut();
+        
+        // The try/catch block is necessary for two reasons...
+        // See the notes in Connection.close above the calls
+        // to end() on the Inflater/Deflater and close()
+        // on the Input/OutputStreams for the details.
+        try {
+            if(isReadDeflated()) {
+                pCompressed = _inflater.getTotalIn();
+                pUncompressed = _inflater.getTotalOut();
+            }
+            
+            // DO THE ACTUAL READ
+            Message m = Message.read(_in, HEADER_BUF, _softMax);
+            
+            // _bytesReceived must be set differently
+            // when compressed because the inflater will
+            // read more input than a single message,
+            // making it appear as if the deflated input
+            // was actually larger.
+            if( isReadDeflated() ) {
+                _compressedBytesReceived = _inflater.getTotalIn();
+                _bytesReceived = _inflater.getTotalOut();
+                if(!CommonUtils.isJava118()) {
+                    CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
+                        (int)(_inflater.getTotalOut() - pUncompressed));
+                    CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
+                        (int)(_inflater.getTotalIn() - pCompressed));
+                }            
+            } else if(m != null) {
+                _bytesReceived += m.getTotalLength();
+            }
+        } catch(NullPointerException npe) {
+            throw CONNECTION_CLOSED;
         }
-        
-        // DO THE ACTUAL READ
-        Message m = Message.read(_in, HEADER_BUF, _softMax);
-        
-        // _bytesReceived must be set differently
-        // when compressed because the inflater will
-        // read more input than a single message,
-        // making it appear as if the deflated input
-        // was actually larger.
-        if( !_closed && isReadDeflated() ) {
-            _compressedBytesReceived = _inflater.getTotalIn();
-            _bytesReceived = _inflater.getTotalOut();
-            if(!CommonUtils.isJava118()) {
-                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalOut() - pUncompressed));
-                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalIn() - pCompressed));
-            }            
-        } else if(m != null) {
-            _bytesReceived += m.getTotalLength();
-        }        
         return m;
     }
 
@@ -978,13 +987,22 @@ public class Connection {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
-        if ( !_closed && isWriteDeflated() ) {
-            priorUncompressed = _deflater.getTotalIn();
-            priorCompressed = _deflater.getTotalOut();
-        }
         
-        m.write(_out);
-        updateWriteStatistics(m, priorUncompressed, priorCompressed);
+        // The try/catch block is necessary for two reasons...
+        // See the notes in Connection.close above the calls
+        // to end() on the Inflater/Deflater and close()
+        // on the Input/OutputStreams for the details.        
+        try {
+            if ( isWriteDeflated() ) {
+                priorUncompressed = _deflater.getTotalIn();
+                priorCompressed = _deflater.getTotalOut();
+            }
+            
+            m.write(_out);
+            updateWriteStatistics(m, priorUncompressed, priorCompressed);
+        } catch(NullPointerException e) {
+            throw CONNECTION_CLOSED;
+        }
     }
 
     /**
@@ -994,14 +1012,24 @@ public class Connection {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
-        if ( !_closed && isWriteDeflated() ) {
-            priorUncompressed = _deflater.getTotalIn();
-            priorCompressed = _deflater.getTotalOut();
-        }        
-        _out.flush();
-        // we must update the write statistics again,
-        // because flushing forces the deflater to deflate.
-        updateWriteStatistics(null, priorUncompressed, priorCompressed);
+        
+        // The try/catch block is necessary for two reasons...
+        // See the notes in Connection.close above the calls
+        // to end() on the Inflater/Deflater and close()
+        // on the Input/OutputStreams for the details.
+        try {            
+            if ( isWriteDeflated() ) {
+                priorUncompressed = _deflater.getTotalIn();
+                priorCompressed = _deflater.getTotalOut();
+            }
+
+            _out.flush();
+            // we must update the write statistics again,
+            // because flushing forces the deflater to deflate.
+            updateWriteStatistics(null, priorUncompressed, priorCompressed);
+        } catch(NullPointerException npe) {
+            throw CONNECTION_CLOSED;
+        }
     }
     
     /**
@@ -1013,7 +1041,7 @@ public class Connection {
     private void updateWriteStatistics(Message m, long pUn, long pComp) {
         if( m != null )
             _bytesSent += m.getTotalLength();
-        if(!_closed && isWriteDeflated()) {
+        if(isWriteDeflated()) {
             _compressedBytesSent = _deflater.getTotalOut();
             if(!CommonUtils.isJava118()) {
                 CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
@@ -1266,16 +1294,16 @@ public class Connection {
        // another closes it.
        // See BugParade ID: 4505257
        
-       // if (_in != null) {
-       //     try {
-       //         _in.close();
-       //     } catch (IOException e) {}
-       // }
-       // if (_out != null) {
-       //     try {
-       //         _out.close();
-       //     } catch (IOException e) {}
-       // }
+       if (_in != null) {
+           try {
+               _in.close();
+           } catch (IOException e) {}
+       }
+       if (_out != null) {
+           try {
+               _out.close();
+           } catch (IOException e) {}
+       }
     }
 
 
