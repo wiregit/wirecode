@@ -40,4 +40,9 @@ public interface ActivityCallback
      *  Add a query reply to a query screen
      */
     public void handleQueryReply( QueryReply qr );
+
+    /**
+     * A miscellaneous error not fitting in any other category.
+     */
+    public void error(String message);
 }
