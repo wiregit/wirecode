@@ -1,11 +1,13 @@
 package com.limegroup.gnutella;
 
+import java.io.Serializable;
+
 /**
  * A helper class for implementing the BandwidthTracker interface.
  * Despite the name, this does NOT implement the BandwidthTracker
  * interface itself.
  */
-public class BandwidthTrackerImpl {
+public class BandwidthTrackerImpl implements Serializable {
     long lastTime;
     int lastAmountRead;
 
