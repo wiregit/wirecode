@@ -319,16 +319,22 @@ public final class UploadManager implements BandwidthTracker {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             debug(uploader + " IOE thrown, closing socket");
-            // if there was a spurious IOException and we hadn't already
-            // changed the state to complete (meaning we never completed
-            // sending the response), then it is interrupted.
+        } finally {
+            // The states SHOULD be INTERRUPTED or COMPLETED
+            // here.  However, it is possible that an IOException
+            // or other uncaught exception (that will be handled
+            // outside of this method) were thrown at random points.
+            // It is not a good idea to throw any exceptions here
+            // because the triggering exception will be lost,
+            // so we just set the state to INTERRUPTED if it was not
+            // already complete.
+            // It is possible to prove that the state is either
+            // interrupted or complete in the case of normal
+            // program flow.
             if( uploader != null ) {
             	if( uploader.getState() != Uploader.COMPLETE )
                 	uploader.setState(Uploader.INTERRUPTED);
             }
-        } finally {
-            if( uploader != null )
-                assertAsFinished( uploader.getState() );
             
             synchronized(this) {
                 // If this uploader is still in the queue, remove it.
