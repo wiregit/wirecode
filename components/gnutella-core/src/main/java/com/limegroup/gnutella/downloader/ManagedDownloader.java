@@ -227,6 +227,15 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /** The connections we're using for the current attempts. */    
     private List /* of HTTPDownloader */ dloaders;
+    /**
+     * The number of worker threads in progress.  Used to make sure that we do
+     * not terminate (in tryAllDownloads3) without hope if threads are
+     * connecting to hosts (i.e., removed from files) but not have not yet been
+     * added to dloaders.  
+     * LOCKING: synchronize on this 
+     * INVARIANT: dloaders.size<=threads 
+     */
+    private int threads=0;
     /** List of intervals within the file which have not been allocated to
      * any downloader yet. The set of these intervals represents the "white"
      * region of the file we are downloading*/
@@ -1078,13 +1087,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         busy=new LinkedList();
         int size = -1;
         int connectTo = -1;
-        //The number of worker threads in progress.  Used to make sure that we
-        //do not terminate without hope if threads are connecting to hosts
-        //(i.e., removed from files) but not have not yet been added to
-        //dloaders.
-        //  LOCKING: synchronize on this
-        //  INVARIANT: dloaders.size<=threads
-        int threads=0;
+        Assert.that(threads==0);
         
         //While there is still an unfinished region of the file...
         while (true) {
@@ -1474,7 +1477,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
-            downloader.doDownload(this,commonOutFile);
+            downloader.doDownload(commonOutFile);
         } catch (IOException e) {
             problem = true;
 			chatList.removeHost(downloader);
@@ -1656,7 +1659,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         miniRFDToLock.clear();
         threadLockToSocket.clear();
         commonOutFile = null;
-        needed = null;
+        if(needed != null) //it's null while before we try first bucket
+            needed.clear();
         busy = null;
         files = null;
     }

@@ -367,7 +367,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(ManagedDownloader md, VerifyingFile commonOutFile) 
+	public void doDownload(VerifyingFile commonOutFile) 
         throws IOException {
         _socket.setSoTimeout(0);//once downloading we can stall for a bit
         long currPos = _initialReadingPoint;
