@@ -465,6 +465,7 @@ public class UploadTest extends BaseTestCase {
     }
     
     public void testFALTNotRequested() throws Exception {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
@@ -510,9 +511,11 @@ public class UploadTest extends BaseTestCase {
             }
         );
         assertTrue(passed);
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
     public void testFALTWhenRequested() throws Exception {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
@@ -557,9 +560,11 @@ public class UploadTest extends BaseTestCase {
             }
        );
        assertTrue(passed);
+       Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
     public void testFWALTWhenRequested() throws Exception {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		URN sha1 = URN.createSHA1Urn(hash);
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
@@ -604,6 +609,7 @@ public class UploadTest extends BaseTestCase {
             }
        );
        assertTrue(passed);
+       Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
     
     public void testUploaderStoresAllAlts() throws Exception {
