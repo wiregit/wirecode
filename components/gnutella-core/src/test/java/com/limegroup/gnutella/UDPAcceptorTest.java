@@ -9,9 +9,9 @@ import java.net.*;
  */
 public class UDPAcceptorTest extends TestCase {
 
-	private static final Backend BACKEND_1 = Backend.instance();
+	private static final Backend BACKEND_1 = Backend.getBackendInstance();
 
-	private static final Backend BACKEND_2 = Backend.instance();
+	private static final Backend BACKEND_2 = Backend.getBackendInstance();
 	
 	private final int BUFFER_SIZE = 1024;
 

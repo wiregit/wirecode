@@ -16,6 +16,10 @@ public class MessageRouterStub extends MessageRouter {
                                                   byte[] clientGUID) {
     }
 
+    protected  void respondToQueryRequest(QueryRequest queryRequest,
+                                                  byte[] clientGUID) {
+    }
+
     protected  void handlePingReplyForMe(
         PingReply pingReply,
         ManagedConnection receivingConnection) {
@@ -42,5 +46,11 @@ public class MessageRouterStub extends MessageRouter {
 
     protected void respondToUDPPingRequest(PingRequest request,
 													Acceptor acceptor) {
+	}
+
+    protected void respondToPingRequest(PingRequest request) {
+	}
+
+    protected void respondToUDPPingRequest(PingRequest request) {
 	}
 }

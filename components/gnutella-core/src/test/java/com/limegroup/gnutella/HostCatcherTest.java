@@ -8,6 +8,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HostCatcherTest extends TestCase {  
     private HostCatcher hc;
+    private RouterService rs;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -21,7 +22,7 @@ public class HostCatcherTest extends TestCase {
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
         HostCatcher.DEBUG=true;
-		RouterService.setCallback(new ActivityCallbackStub());
+		rs = new RouterService(new ActivityCallbackStub());
 
         //This creates an acceptor thread.  We should probably use an Acceptor
         //stub or write a tearDown() method.
