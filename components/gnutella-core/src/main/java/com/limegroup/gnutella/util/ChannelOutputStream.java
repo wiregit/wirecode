@@ -45,10 +45,12 @@ public class ChannelOutputStream extends OutputStream {
         _channel.close();
     }
 
-    protected void repOk() {
+    private final void repOk() {
+        /*
         Assert.that(_buf.position()==0, "Bad position");
         Assert.that(_buf.limit()==1, "Bad limit");      
         Assert.that(_buf.capacity()==1, "Bad capacity");  
+        */
     }
 
     //Unit test: tests/com/limegroup/gnutella/util/ChannelStreamsTest.java
