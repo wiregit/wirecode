@@ -457,8 +457,11 @@ public class LimeXMLReplyCollection {
                 // no matching trie?.. ignore.
                 if(trie == null)
                     continue;
-                final String value = (String)entry.getValue();
-                Iterator /* of List */ iter = trie.getPrefixedBy(value);
+                
+                // This query is from the network, and is therefore already
+                // normalized -- SHOULD NOT NORMALIZE AGAIN!!
+                Iterator /* of List */ iter = 
+                    trie.getPrefixedBy((String)entry.getValue());
                 while(iter.hasNext()) {
                     List matchesVal = (List)iter.next();
                     if( matching == null ) // delayed allocation of the set..
