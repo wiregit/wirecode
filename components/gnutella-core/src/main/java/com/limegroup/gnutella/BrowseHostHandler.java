@@ -291,6 +291,7 @@ public class BrowseHostHandler {
         }
         LOG.debug("BHH.browseExchange(): read HTTP seemingly OK.");
         
+	in = new BufferedInputStream(in);
 
         // ok, everything checks out, proceed and read QRs...
         Message m = null;
