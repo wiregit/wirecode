@@ -28,12 +28,6 @@ public final class ChatManager {
 	private List _chatsInProgress 
 		= Collections.synchronizedList(new LinkedList());
 
-	/** 
-	 * <tt>List</tt> of strings that are the hosts that are blocked.
-	 */
-	private List _blockedHosts 
-		= Collections.synchronizedList(new LinkedList());
-
 	/**
 	 * Instance accessor for the <tt>ChatManager</tt>.
 	 */

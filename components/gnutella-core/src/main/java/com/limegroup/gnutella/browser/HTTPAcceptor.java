@@ -122,7 +122,6 @@ public class HTTPAcceptor implements Runnable {
         // incoming connections.  If there are problems, we can continue
         // onward.
         //1. Try suggested port.
-        int oldPort = _port;
         Exception socketError = null;
         try {
             setListeningPort(_port);
