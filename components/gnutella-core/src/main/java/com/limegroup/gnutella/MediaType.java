@@ -44,21 +44,12 @@ public class MediaType implements Serializable {
     public static final String AUDIO = "MEDIA_AUDIO";
     public static final String VIDEO = "MEDIA_VIDEO";
     public static final String IMAGES = "MEDIA_IMAGES";
-    
-    // An extension that signifies this MediaType, used
-    // for looking up icons in the file system.
-    private static final String EXT_ANY_TYPE = null;
-    private static final String EXT_DOCUMENTS = "rtf";
-    private static final String EXT_PROGRAMS = "exe";
-    private static final String EXT_AUDIO = "mp3";
-    private static final String EXT_VIDEO = "mpg";
-    private static final String EXT_IMAGES = "jpg";
 
     /**
      * Type for 'any file'
      */
     private static final MediaType TYPE_ANY = 
-        new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, EXT_ANY_TYPE, null) {
+        new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
             public boolean matches(String ext) {
                 return true;
             }
@@ -68,7 +59,7 @@ public class MediaType implements Serializable {
      * Type for 'documents'
      */
     private static final MediaType TYPE_DOCUMENTS =
-        new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS, EXT_DOCUMENTS,
+        new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS,
             new String[] {
                 "html", "htm", "xhtml", "mht", "mhtml", "xml",
                 "txt", "ans", "asc", "diz", "eml",
@@ -83,7 +74,7 @@ public class MediaType implements Serializable {
      * Type for linux/osx programs, used for Aggregator.
      */
    private static final MediaType TYPE_LINUX_OSX_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS, EXT_PROGRAMS,
+        new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
                 "bin", "mdb", "sh", "csh", "awk", "pl",
                 "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
@@ -95,7 +86,7 @@ public class MediaType implements Serializable {
      * Type for windows programs, used for Aggregator.
      */
     private static final MediaType TYPE_WINDOWS_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS, EXT_PROGRAMS,
+        new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
                 "exe", "zip", "jar", "cab", "msi", "msp",
                 "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue"
@@ -105,7 +96,7 @@ public class MediaType implements Serializable {
      * Type for 'programs'
      */
     private static final MediaType TYPE_PROGRAMS =
-        new MediaType(SCHEMA_PROGRAMS, PROGRAMS, EXT_PROGRAMS, 
+        new MediaType(SCHEMA_PROGRAMS, PROGRAMS, 
                 makeArray(TYPE_LINUX_OSX_PROGRAMS.exts,
                           TYPE_WINDOWS_PROGRAMS.exts)
         );
@@ -114,7 +105,7 @@ public class MediaType implements Serializable {
      * Type for 'audio'
      */
     private static final MediaType TYPE_AUDIO =
-        new MediaType(SCHEMA_AUDIO, AUDIO, EXT_AUDIO,
+        new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
                 "mp3", "mpa", "mp1", "mpga",
                 "ra", "rm", "ram", "rmj",
@@ -129,7 +120,7 @@ public class MediaType implements Serializable {
      * Type for 'video'
      */
     private static final MediaType TYPE_VIDEO =
-        new MediaType(SCHEMA_VIDEO, VIDEO, EXT_VIDEO,
+        new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
                 "mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
                 "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v",
@@ -144,7 +135,7 @@ public class MediaType implements Serializable {
      * Type for 'images'
      */
     private static final MediaType TYPE_IMAGES =
-        new MediaType(SCHEMA_IMAGES, IMAGES, EXT_IMAGES,
+        new MediaType(SCHEMA_IMAGES, IMAGES,
             new String[] {
                 "gif", "png",
                 "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
@@ -181,11 +172,6 @@ public class MediaType implements Serializable {
     private final Set exts;
     
     /**
-     * The main extension for this MediaType.
-     */
-    private final String mainExt;
-    
-    /**
      * Whether or not this is one of the default media types.
      */
     private final boolean isDefault;
@@ -197,7 +183,6 @@ public class MediaType implements Serializable {
         this.schema = schema;
         this.descriptionKey = null;
         this.exts = DataUtils.EMPTY_SET;
-        this.mainExt = null;
         this.isDefault = false;
     }
     
@@ -210,11 +195,10 @@ public class MediaType implements Serializable {
      *  type.  Must be all lowercase.  If null, this matches
      *  any file.
      */
-    public MediaType(String schema, String descriptionKey, String ext,
+    public MediaType(String schema, String descriptionKey,
                      String[] extensions) {
         this.schema = schema;
         this.descriptionKey = descriptionKey;
-        this.mainExt = ext;
         this.isDefault = true;
         if(extensions == null) {
             this.exts = DataUtils.EMPTY_SET;
@@ -266,13 +250,6 @@ public class MediaType implements Serializable {
      */
     public String getMimeType() {
         return schema;
-    }
-    
-    /**
-     * Returns the probable extension for this media type.
-     */
-    public String getExtension() {
-        return mainExt;
     }
     
     /**
