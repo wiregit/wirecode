@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
+import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -807,6 +808,28 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertEquals(RouterService.getFileManager().getNumFiles(),fvm.getFileShared());
     	assertTrue(RouterService.getConnectionManager().getMeasuredUpstreamBandwidth() 
     			== fvm.getBandidth());
+    	
+    	Properties props = new Properties();
+    	props.setProperty(FeaturesVendorMessage.INCOMING_TCP,"true");
+    	fvm = new FeaturesVendorMessage(props);
+    	
+    	assertTrue(fvm.isTCPCapable());
+    	assertFalse(fvm.isUDPCapable());
+    	assertFalse(fvm.isSolicitedUDPCapable());
+    	
+    	props = new Properties();
+    	props.setProperty(FeaturesVendorMessage.FILES_SHARED,"asdf");
+    	fvm = new FeaturesVendorMessage(props);
+    	assertEquals(0,fvm.getFileShared());
+    	assertEquals(0,fvm.getBandidth());
+    	
+    	props = new Properties();
+    	fvm = new FeaturesVendorMessage(props);
+    	assertEquals(-1,fvm.getFileShared());
+    	assertEquals(-1,fvm.getBandidth());
+    	
+    	
+    	
     }
 
     private static class VM extends VendorMessage {
