@@ -79,6 +79,48 @@ public class QueryReply extends Message implements Serializable{
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = new byte[0];
 
+	/**
+	 * State where the remote server is not firewalled and has available
+	 * slots.
+	 */
+	private static final int NOT_REMOTELY_FIREWALLED_NOT_BUSY = 3;
+
+	/**
+	 * State where the client is not firewalled, but the remote server is
+	 * firewalled, but has open slots.
+	 */
+	private static final int REMOTELY_FIREWALLED_NOT_BUSY = 2;
+
+	/**
+	 * State where the server is not firewalled, but does not have any
+	 * available upload slots.
+	 */
+	private static final int NOT_REMOTELY_FIREWALLED_BUSY = 1;
+
+	/**
+	 * State where the server is not firewalled, but their busy status
+	 * is unkown.
+	 */
+	private static final int NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN = 1;
+
+	/**
+	 * State where the client is not firewalled, but the remote server is
+	 * firewalled and does not have open slots.
+	 */
+	private static final int REMOTELY_FIREWALLED_BUSY = 0;
+
+	/**
+	 * State where the client is not firewalled, but the remote server is
+	 * firewalled and does not have open slots.
+	 */
+	private static final int REMOTELY_FIREWALLED_BUSY_UNKNOWN = 0;
+
+	/**
+	 * The one state where there is absolutely no hope, as both the server
+	 * and the client are behind firewalls.
+	 */
+	private static final int REMOTELY_FIREWALLED_LOCALLY_FIREWALLED = -1;
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -789,6 +831,57 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
+    /** Return all the responses in this QR as an array of
+     *    RemoteFileDescriptors.
+     *   @exception java.lang.Exception Thrown if attempt fails.
+     */
+    public RemoteFileDesc[] toRemoteFileDescArray() throws BadPacketException {
+        List responses = null;
+        try { // get the responses, some data from them is needed...
+            responses = getResultsAsList();
+        }
+        catch (BadPacketException bpe) {
+            debug(bpe);
+            throw bpe;
+        }
+    
+        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
+        
+        Iterator respIter = responses.iterator();
+        int index = 0;
+        // these will be used over and over....
+        final String ip = getIP();
+        final int port = getPort();
+        final int qual = 
+        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
+        final long speed = getSpeed();
+        final byte[] clientGUID = getClientGUID();
+        boolean supportsChat = false;
+        boolean supportsBrowseHost = false;
+        try {
+            supportsChat = getSupportsChat();
+            supportsBrowseHost = getSupportsBrowseHost();
+        }
+        catch (BadPacketException ignored) {} // don't let chat kill me....
+        
+        // construct RFDs....
+        while (respIter.hasNext()) {
+            Response currResp = (Response) respIter.next();
+            retArray[index++] = new RemoteFileDesc(ip, port, 
+                                                   currResp.getIndex(),
+                                                   currResp.getName(),
+                                                   (int) currResp.getSize(),
+                                                   clientGUID, (int) speed,
+                                                   supportsChat, 
+                                                   qual,
+												   supportsBrowseHost,
+												   currResp.getDocument(),
+												   currResp.getUrns());
+        }
+        
+        return retArray;
+    }
+
 
 	/**
      * This method calculates the quality of service for
@@ -854,7 +947,7 @@ public class QueryReply extends Message implements Serializable{
          *  ranking for s1 must not be more than s2.
          *
          *          (push, busy)
-         *             -1,-1               4 stars (yes, it will work)
+         *             -1,-1               5 stars (yes, it will work)
          *               /\
          *              /  \
          *             /    \
@@ -880,9 +973,10 @@ public class QueryReply extends Message implements Serializable{
          *   b) a non-busy host is 3 stars if I'm not firewalled (push may work)
          *   d) anything else is two stars
          * 
-		 *  Note, however, that the returned value is 0-3, not 1-4.
+		 *  Note, however, that the returned value is 0-4, not 1-5.
 		 ********************************************************************/
 
+		/*
         if (push==-1 && busy==-1)
             return 3;
         else if (busy==1)                   //Rule a
@@ -893,60 +987,61 @@ public class QueryReply extends Message implements Serializable{
             return 2;
         else
             return 1;                       //Rule d
+		*/
+
+		if(iFirewalled && push == 1) {           // RULE A
+			// both client and server are firewalled -- impossible case
+			return REMOTELY_FIREWALLED_LOCALLY_FIREWALLED;
+		} else if(push == -1 && busy == -1) {    // RULE B
+			// client firewalled status does not matter since the server
+			// is firewalled
+            return NOT_REMOTELY_FIREWALLED_NOT_BUSY;
+		} else if(push == -1 && busy == 1) {     // RULE C
+			// client firewalled status does not matter since the server
+			// is firewalled
+            return NOT_REMOTELY_FIREWALLED_BUSY;
+		} else if(push == -1 && busy == 0) {     // RULE D
+			// client firewalled status does not matter since the server
+			// is firewalled
+            return NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN;
+		} else if(push == 1 && busy == -1) {     // RULE E
+			// not locally firewalled is implicit, as otherwise the
+			// download would be the impossible case
+            return REMOTELY_FIREWALLED_NOT_BUSY;
+		} else if(push == 1 && busy == 1) {      // RULE F 
+			// not locally firewalled is implicit, as otherwise the
+			// download would be the impossible case
+            return REMOTELY_FIREWALLED_BUSY;
+		} else if(push == 1 && busy == 0) {      // RULE G
+			// not locally firewalled is implicit, as otherwise the
+			// download would be the impossible case
+            return REMOTELY_FIREWALLED_BUSY_UNKNOWN;
+		} else { 
+			// this should never happen
+			return 1;
+		}
 	}
-
-
-
-    /** Return all the responses in this QR as an array of
-     *    RemoteFileDescriptors.
-     *   @exception java.lang.Exception Thrown if attempt fails.
-     */
-    public RemoteFileDesc[] toRemoteFileDescArray() throws BadPacketException {
-        List responses = null;
-        try { // get the responses, some data from them is needed...
-            responses = getResultsAsList();
-        }
-        catch (BadPacketException bpe) {
-            debug(bpe);
-            throw bpe;
-        }
-    
-        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
-        
-        Iterator respIter = responses.iterator();
-        int index = 0;
-        // these will be used over and over....
-        final String ip = getIP();
-        final int port = getPort();
-        final int qual = 
-        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
-        final long speed = getSpeed();
-        final byte[] clientGUID = getClientGUID();
-        boolean supportsChat = false;
-        boolean supportsBrowseHost = false;
-        try {
-            supportsChat = getSupportsChat();
-            supportsBrowseHost = getSupportsBrowseHost();
-        }
-        catch (BadPacketException ignored) {} // don't let chat kill me....
-        
-        // construct RFDs....
-        while (respIter.hasNext()) {
-            Response currResp = (Response) respIter.next();
-            retArray[index++] = new RemoteFileDesc(ip, port, 
-                                                   currResp.getIndex(),
-                                                   currResp.getName(),
-                                                   (int) currResp.getSize(),
-                                                   clientGUID, (int) speed,
-                                                   supportsChat, 
-                                                   qual,
-												   supportsBrowseHost,
-												   currResp.getDocument(),
-												   currResp.getUrns());
-        }
-        
-        return retArray;
-    }
+	
+	/**
+	 * Utility method for determining whether or not the given "quality"
+	 * score for a <tt>QueryReply</tt> denotes that the host is firewalled
+	 * or not.
+	 *
+	 * @param quality the quality, or score, in question
+	 * @return <tt>true</tt> if the quality denotes that the host is 
+	 *  firewalled, otherwise <tt>false</tt>
+	 */
+	public static boolean isFirewalledQuality(int quality) {
+		if(quality == NOT_REMOTELY_FIREWALLED_NOT_BUSY) {
+			return false;
+		} else if(quality == NOT_REMOTELY_FIREWALLED_BUSY) {
+			return false;
+		} else if(quality == NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 
     public final static boolean debugOn = false;
