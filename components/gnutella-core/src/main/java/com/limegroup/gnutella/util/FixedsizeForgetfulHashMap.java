@@ -122,7 +122,7 @@ public class FixedsizeForgetfulHashMap implements Map
     public FixedsizeForgetfulHashMap(int size)
     {
         //allocate space in underlying hashMap
-        map=new HashMap(size * 4/3 + 10, 0.75f);
+        map=new HashMap((size * 4)/3 + 10, 0.75f);
     
         //if size is < 1
         if (size < 1)
@@ -249,6 +249,39 @@ public class FixedsizeForgetfulHashMap implements Map
             Object key=iter.next();
             put(key,t.get(key));
         }
+    }
+    
+    /**
+     * Returns a shallow copy of this Map instance: the keys and
+     * values themselves are not cloned.
+     *
+     * @return a shallow copy of this map.
+     */
+    public Object clone()
+    {
+        //create a clone map of required size
+        Map clone = new HashMap((map.size() * 4)/3 + 10, 0.75f);
+        
+        //get the entrySet corresponding to this map
+        Set entrySet = map.entrySet();
+        
+        //iterate over the elements
+        Iterator iterator = entrySet.iterator();
+        while(iterator.hasNext())
+        {
+            //get the next element
+            Map.Entry entry = (Map.Entry)iterator.next();
+            
+            //add it to the clone map
+            //add only the value (and not the ValueElement wrapper instance
+            //that is stored internally
+            clone.put(entry.getKey(), 
+                                ((ValueElement)entry.getValue()).getValue());
+        }
+        
+        //return the clone
+        return clone;
+        
     }
 
     /**
