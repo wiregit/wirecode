@@ -46,10 +46,8 @@ public final class CompositeQueueTest extends BaseTestCase {
      */
     public void testGetMessage() throws Exception {
         Connection conn = new Connection("localhost", 3435);
-        
-        conn.buildAndStartQueues();
-        MessageWriterProxy proxy = 
-            (MessageWriterProxy)PrivilegedAccessor.getValue(conn, "_messageWriter");
+        MessageWriter proxy = new MessageWriterProxy(conn);
+        PrivilegedAccessor.setValue(conn, "_messageWriter", proxy);
         BIOMessageWriter writer = 
             (BIOMessageWriter)PrivilegedAccessor.getValue(proxy, "DELEGATE");
         
