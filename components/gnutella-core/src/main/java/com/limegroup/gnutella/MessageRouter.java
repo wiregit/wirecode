@@ -177,6 +177,12 @@ public abstract class MessageRouter {
      * GUID -> MessageListener
      */
     private final Map _messageListeners = new Hashtable();
+    
+    /**
+     * keeps a list of the people who have requested our connection lists.
+     * used to make sure we don't get ping-flooded.
+     */
+    private final FixedSizeExpiringSet _UDPListRequestors = new FixedSizeExpiringSet(200, 5*1000);
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -2599,7 +2605,13 @@ public abstract class MessageRouter {
      * @param handler the UDPHandler to send it to.
      */
     private void handleGiveUPVendorMessage(GiveUPVendorMessage msg, ReplyHandler handler){
-    	//REDFLAG: add some code to prevent people from flooding us
+    	
+    	//make sure the same person doesn't request too often
+    	//note: this should only happen on the UDP receiver thread, that's why
+    	//I'm not locking it.
+    	if (!_UDPListRequestors.add(handler.getInetAddress()))
+    		return; //this also takes care of multiple instances running on the same ip address.
+    	
     	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
     	handler.handleUPListVM(newMsg);
     }
