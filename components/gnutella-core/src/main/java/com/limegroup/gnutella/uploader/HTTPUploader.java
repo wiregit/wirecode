@@ -3,6 +3,10 @@ package com.limegroup.gnutella.uploader;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
@@ -27,6 +31,7 @@ import com.limegroup.gnutella.altlocs.*;
  */
 public final class HTTPUploader implements Uploader {
     
+	private static final Log LOG = LogFactory.getLog(HTTPUploader.class);
     /**
      * The outputstream -- a CountingOutputStream so that we can
      * keep track of the amount of bytes written.
@@ -203,15 +208,22 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the file cannot be read from the disk.
 	 */
 	public void setFileDesc(FileDesc fd) throws IOException {
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to set the fd for uploader "+this+ " with "+fd);
 	    _fileDesc = fd;
 	    _fileSize = (int)fd.getSize();
 	    // initializd here because we'll only write locs if a FileDesc exists
 	    // only initialize once, so we don't write out previously written locs
 	    if( _writtenLocs == null )
-	        _writtenLocs = new HashSet(); 
+	        _writtenLocs = new HashSet();
+	    
+	    if( _writtenPushLocs == null )
+	        _writtenPushLocs = new HashSet(); 
 	    
         // if there already was an input stream, close it.
         if( _fis != null ) {
+        	if (LOG.isDebugEnabled())
+        		LOG.debug(this+ " had an existing stream");
             try {
                 _fis.close();
             } catch(IOException ignored) {}
@@ -1072,7 +1084,10 @@ public final class HTTPUploader implements Uploader {
                     else
                         alc.remove(al);
                         
-                    _writtenLocs.add(al);
+                    if (al instanceof DirectAltLoc)
+                    	_writtenLocs.add(al);
+                    else
+                    	_writtenPushLocs.add(al);
                 }
             } catch(IOException e) {
                 // just return without adding it.
