@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /**
  * One of the three classes that make up the core of the backend.  This
@@ -18,6 +19,8 @@ public abstract class MessageRouter
     //reference is better since we access it many times.
     protected PingReplyCache _pongCache;
 
+
+    ///////////////////////////// Core Routing State ///////////////////////    
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
      *         response.
@@ -31,20 +34,32 @@ public abstract class MessageRouter
      * of Ping Request Information used when routing Ping Replies and 
      * throttling Ping Requests from old client.s
      */
-    private HashMap _pingInformationTable = new HashMap();
+    private HashMap /* ManagedConnection -> ManagedConnectionPingInfo */ 
+        _pingInformationTable = new HashMap();
+
+    /**
+     * Keeps track of query route table state for each connection.  
+     * This helps you decide where to send queries.  (Compare with
+     * _queryRouteTable, which helps you decide where to send responses,
+     * and helps filter duplicate queries.)
+     */
+    private HashMap /* ManagedConnection -> QueryRouteTable */ 
+        _queryInformationTable = new HashMap();
 
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
      */
-    private RouteTable _queryRouteTable = new RouteTable(2048);
+    private RouteTable _querySourceTable = new RouteTable(2048);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers
      * Because client GUID's can be re-mapped to different connections, we
      * must force RouteTable to used FixedsizeForgetfulHashMap instead of
      * the lighter ForgetfulHashMap.
      */
-    private RouteTable _pushRouteTable = new RouteTable(2048, true);
+    private RouteTable _pushSourceTable = new RouteTable(2048, true);
 
+
+    ///////////////////////////// Statistics ////////////////////////////////
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.
 
@@ -147,12 +162,12 @@ public abstract class MessageRouter
 
     public String getQueryRouteTableDump()
     {
-        return _queryRouteTable.toString();
+        return _querySourceTable.toString();
     }
 
     public String getPushRouteTableDump()
     {
-        return _pushRouteTable.toString();
+        return _pushSourceTable.toString();
     }
 
     public String getPingInformationTableDump()
@@ -167,8 +182,9 @@ public abstract class MessageRouter
     public void removeConnection(ManagedConnection connection)
     {
         _pingInformationTable.remove(connection);
-        _queryRouteTable.removeReplyHandler(connection);
-        _pushRouteTable.removeReplyHandler(connection);
+        _queryInformationTable.remove(connection);
+        _querySourceTable.removeReplyHandler(connection);
+        _pushSourceTable.removeReplyHandler(connection);
     }
 
     /**
@@ -179,7 +195,7 @@ public abstract class MessageRouter
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest queryRequest, ManagedConnection receivingConnection)
     {
-        if(_queryRouteTable.tryToRouteReply(queryRequest.getGUID(),
+        if(_querySourceTable.tryToRouteReply(queryRequest.getGUID(),
                                             receivingConnection))
             handleQueryRequest(queryRequest, receivingConnection);
     }
@@ -476,7 +492,7 @@ public abstract class MessageRouter
     public void sendQueryRequest(QueryRequest queryRequest,
                                  ManagedConnection connection)
     {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
+        _querySourceTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
         connection.send(queryRequest);
     }
 
@@ -486,7 +502,7 @@ public abstract class MessageRouter
      */
     public void broadcastQueryRequest(QueryRequest queryRequest)
     {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
+        _querySourceTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
         broadcastQueryRequest(queryRequest, null, _manager);
     }
 
@@ -531,8 +547,15 @@ public abstract class MessageRouter
         for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != receivingConnection)
-                c.send(queryRequest);
+            if(c != receivingConnection) {
+                //Send query along any connection to an old client, or to a new client
+                //with routing information for the given keyword.
+                QueryRouteTable qrt=(QueryRouteTable)_queryInformationTable.get(c);
+                if (qrt==null)
+                    c.send(queryRequest);
+                else if (qrt.contains(queryRequest))
+                    c.send(queryRequest);                    
+            }
         }
     }
 
@@ -648,7 +671,7 @@ public abstract class MessageRouter
                                  ManagedConnection receivingConnection)
     {
         ReplyHandler replyHandler =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID());
+            _querySourceTable.getReplyHandler(queryReply.getGUID());
 
         if(replyHandler != null)
         {
@@ -656,7 +679,7 @@ public abstract class MessageRouter
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
-            _pushRouteTable.routeReply(queryReply.getClientGUID(),
+            _pushSourceTable.routeReply(queryReply.getClientGUID(),
                                        receivingConnection);
             replyHandler.handleQueryReply(queryReply,
                                           receivingConnection);
@@ -683,7 +706,7 @@ public abstract class MessageRouter
     {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
+            _pushSourceTable.getReplyHandler(pushRequest.getClientGUID());
 
         if(replyHandler != null)
         {
@@ -707,14 +730,14 @@ public abstract class MessageRouter
         throws IOException
     {
         ReplyHandler replyHandler =
-            _queryRouteTable.getReplyHandler(queryReply.getGUID());
+            _querySourceTable.getReplyHandler(queryReply.getGUID());
 
         if(replyHandler != null)
         {
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
-            _pushRouteTable.routeReply(queryReply.getClientGUID(),
+            _pushSourceTable.routeReply(queryReply.getClientGUID(),
                                        _forMeReplyHandler);
             replyHandler.handleQueryReply(queryReply, null);
         }
@@ -733,7 +756,7 @@ public abstract class MessageRouter
     {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
+            _pushSourceTable.getReplyHandler(pushRequest.getClientGUID());
 
         if(replyHandler != null)
             replyHandler.handlePushRequest(pushRequest, null);

@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.routing;
 
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.FileManager;
+
 /** 
  * The official platform-independent hashing function for query-routing.
  * This experimental version does not necessarily work cross-platform,
@@ -14,7 +17,7 @@ public class HashFunction {
      * Returns the n-bit hash of x, where n="bits".  That is, the returned value
      * value can fit in "bits" unsigned bits.
      */
-    public static int hash(int x, int bits) {
+    private static int hash(int x, int bits) {
         //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
         int prod=x*A_INT;
         int ret=prod>>>(31-bits);
@@ -26,11 +29,26 @@ public class HashFunction {
      * value can fit in "bits" unsigned bits.
      */    
     public static int hash(String x, int bits) {
-        //This is just a temporary hack.  The real algorithm obviously shouldn't
+        //TODO: This is just a temporary hack.  The real algorithm obviously shouldn't
         //be tied to the JDK.  Note that we don't just return x.hashCode()%bits;
         //that wouldn't allow resizing of tables.
         return hash(x.hashCode(), bits);
     }       
+
+    /** 
+     * Returns a list of canonicalized keywords in the given query, suitable
+     * for passing to hash(String,int).
+     */
+    public static String[] keywords(String query) {
+        //TODO1: this isn't a proper implementation.  It should really be
+        //to tokenized by ALL non-alphanumeric characters.
+
+        //TODO2: perhaps we should do an English-specific version that accounts
+        //for plurals, common keywords, etc.  But that's only necessary for 
+        //our own files, since the assumption is that queries have already been
+        //canonicalized.
+        return StringUtils.split(query.toLowerCase(), FileManager.DELIMETERS);
+    }
 
     public static void main(String args[]) {
         for (int i=0; i<100; i++) {

@@ -76,7 +76,7 @@ public class FileManager {
     private static ActivityCallback _callback;
 
     /** Characters used to tokenize queries and file names. */
-    static final String DELIMETERS=" -._+/*()\\";
+    public static final String DELIMETERS=" -._+/*()\\";
     private static final boolean isDelimeter(char c) {
         switch (c) {
         case ' ':
