@@ -1744,7 +1744,7 @@ public class SettingsManager implements SettingsInterface {
 		catch (Exception e){}
 		finally {
 			try {
-				ostream.close();
+				if(ostream != null) ostream.close();
 			}
 			catch(IOException io) {}
 		}
