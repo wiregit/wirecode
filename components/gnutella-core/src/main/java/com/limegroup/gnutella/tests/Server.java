@@ -273,7 +273,7 @@ private void addRequest(QueryRequest request)
 }
 
 
-/**
+/** 
 * Inner class to the SThread class. It receives the requests
 * and notifies SThread of the new requests
 */

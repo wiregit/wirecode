@@ -316,7 +316,8 @@ public class RouterService
         return qr.getGUID();
     }
 
-    /** Same as query(query, minSpeed, null), i.e., searches for files of any type. */
+    /** Same as query(query, minSpeed, null), i.e.,
+      * searches for files of any type. */
     public byte[] query(String query, int minSpeed) {
         return query(query, minSpeed, null);
     }
@@ -355,9 +356,9 @@ public class RouterService
         //...if not, establish a new one.
         if (c==null) {
             try {
-            c = connectToHostBlocking(host, port);
+                c = connectToHostBlocking(host, port);
             } catch (IOException e) {
-            return null;
+                return null;
             }
         }
 
@@ -404,21 +405,21 @@ public class RouterService
      *  Return an iterator on the hostcatcher hosts
      */
     public Iterator getHosts() {
-        return( manager.getCatcher().getHosts() );
+        return manager.getCatcher().getHosts();
     }
 
     /**
      *  Return the number of good hosts
      */
     public int getNumConnections() {
-        return( manager.getNumConnections() );
+        return manager.getNumConnections();
     }
 
     /**
      *  Return the number searches made locally ( QReq )
      */
     public int getNumLocalSearches() {
-        return( manager.QReqCount );
+        return manager.QReqCount;
     }
 
     /**
@@ -435,22 +436,14 @@ public class RouterService
         return SettingsManager.instance();
     }
 
-    /** Returns an instance of the library class */
-    public Library getLibrary() {
-        return Library.instance();
-    }
-
     /**
      * Initialize a download request
      */
     public HTTPDownloader initDownload(String ip, int port, int index,
           String fname, byte[] bguid, int size) {
+        return new HTTPDownloader("http", ip, port, index, fname, manager,
+                                  bguid, size);
 
-        HTTPDownloader down = new
-            HTTPDownloader("http", ip, port, index, fname, manager, bguid,
-          size);
-
-    return( down );
     }
 
     /**
@@ -497,6 +490,14 @@ public class RouterService
         mgr.resume();
 
         kickoffDownload(mgr);
+    }
+
+
+    /**
+     * Return how many files are being shared
+     */
+    public int getNumSharedFiles( ) {
+        return( FileManager.getFileManager().getNumFiles() );
     }
 }
 

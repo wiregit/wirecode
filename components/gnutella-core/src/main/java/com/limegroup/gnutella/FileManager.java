@@ -2,7 +2,7 @@
  * auth: rsoule
  * file: FileManager.java
  * desc: This class will keep track of all the files that
- *       may be shared through the client.  It keeps them 
+ *       may be shared through the client.  It keeps them
  *       in the list _files.  There are methods for adding
  *       one file, or a whole directory.
  *
@@ -10,15 +10,20 @@
  * searches are possible with Regular Expressions. Imported necessary package
  */
 
+// This comment line is just a test to see if Adam is getting the
+// right version of the FileManager. -rob
+
 package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.oroinc.text.regex.*;
+// import java.util.*;
+import java.util.Enumeration;
 
 public class FileManager{
 
-    protected int _size;                   /* the total size of all files */ 
+    protected int _size;                   /* the total size of all files */
     protected int _numFiles;               /* the total number of files */
     public ArrayList _files;             /* the list of shareable files */
     private String[] _extensions;
@@ -34,14 +39,14 @@ public class FileManager{
 
     private static FileManager _myFileManager;
 
-    public FileManager() {               /* the constructor initializes */ 
+    public FileManager() {               /* the constructor initializes */
         _size = 0;                       /* all the provate variables */
         _numFiles = 0;
         _files = new ArrayList();
         _extensions = new String[0];
-    
+
     }
-    
+
     public static synchronized FileManager getFileManager() {
         if(_myFileManager == null)
             _myFileManager = new FileManager();
@@ -68,35 +73,46 @@ public class FileManager{
         FileDesc desc;
         for(int j=0; j < size; j++) {
             desc = (FileDesc)list.get(j);
-            response[j] = 
+            response[j] =
             new Response(desc._index, desc._size, desc._name);
         }
         return response;
     }
 
-    public void setExtensions(String str) {   
+    public void setExtensions(String str) {
         /* recieves a semi-colon separated list of extensions */
         _extensions =  HTTPUtil.stringSplit(str, ';');
-        int length = _extensions.length;
+        // int length = _extensions.length;
     }
 
+
+
+
     public boolean hasExtension(String filename) {
+        int begin = filename.lastIndexOf(".") + 1;
+
+        if (begin == -1)
+            return false;
+
+        int end = filename.length();
+        String ext = filename.substring(begin, end);
+
         int length = _extensions.length;
         for (int i = 0; i < length; i++) {
-            if (filename.indexOf(_extensions[i]) != -1)
+            if (ext.equalsIgnoreCase(_extensions[i])) {
                 return true;
+            }
         }
-    
         return false;
 
     }
-    
-    public synchronized void addFile(String path) { 
-        File myFile = new File(path);  
 
-        if (!myFile.exists())               
-            return;                        
-        /* the addFile method adds */ 
+    public synchronized void addFile(String path) {
+        File myFile = new File(path);
+
+        if (!myFile.exists())
+            return;
+        /* the addFile method adds */
         /* just one single file to */
         String name = myFile.getName();     /* the name of the file */
         int n = (int)myFile.length();       /* the list, and increments */
@@ -108,7 +124,7 @@ public class FileManager{
     }
 
     public void printFirstFive() {
-    
+
         int size = 5;
 
         if (_files.size() < size)
@@ -117,26 +133,52 @@ public class FileManager{
         System.out.println("printing " + size);
 
         for(int i =0; i < size; i++) {
-        
+
             ((FileDesc)_files.get(i)).print();
 
         }
-    
+
     }
 
     public synchronized void addDirectories(String dir_names) {
-    
-        String[] dirs = HTTPUtil.stringSplit(dir_names, ';');
 
-        int length = dirs.length;
+        String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
-        for (int i=0; i < length; i++) {
+        // need to see if there are duplicated directories...
+
+        java.util.Hashtable hash = new java.util.Hashtable();
+
+        int size = names.length;
+
+        for (int i = 0; i < size; i++) {
+            if (!hash.containsKey(names[i]))
+                hash.put(names[i], names[i]);
+        }
+
+        int hashsize = hash.size();
+
+        String[] dirs = new String[hashsize];
+
+        int j=0;
+
+        for(Enumeration e = hash.keys(); e.hasMoreElements() ;) {
+            dirs[j++] = (String)e.nextElement();
+        }
+
+
+        // Collection c = hash.values();
+
+        // String[] dirs = (String[])c.toArray();
+
+        // int length = dirs.length;
+
+        for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);
         }
-    
+
     }
 
-    /** 
+    /**
      *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
      */
     private File[] listFiles(File dir)
@@ -175,10 +217,10 @@ public class FileManager{
         }
     }
 
-    /** 
+    /**
      * Translates the given wildcard search into a Perl5 regular
      * expression.  For example, "*.mp3" gets translated into the
-     * regexp ".*\.mp3".  
+     * regexp ".*\.mp3".
      */
     static String wildcard2regexp(String q) {
         StringBuffer sb = new StringBuffer();
@@ -199,8 +241,8 @@ public class FileManager{
         }//for
         return sb.toString();
     }
-    
-    
+
+
     /** subclasses must override this method */
     protected ArrayList search(String q) {
         ArrayList response_list = new ArrayList();
@@ -215,13 +257,14 @@ public class FileManager{
                 //System.out.println("Rob:"+query);
                 String fileName = desc._name;
                 String file_name = fileName.toLowerCase();
-                if (file_name.indexOf(query) != -1) 
+                if (file_name.indexOf(query) != -1)
                     response_list.add(_files.get(i));
             }
             return response_list;
         }
         for(int i=0; i < _numFiles; i++){
-            FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
+            //Adam will populate the list before calling query.
+            FileDesc desc = (FileDesc)_files.get(i);
             //System.out.println("Sumeet: "+query);
             String fileName = desc._name;
             String file_name = fileName.toLowerCase();
@@ -230,7 +273,7 @@ public class FileManager{
                 response_list.add(_files.get(i));
         }
         return response_list;
-    }    
+    }
 }
 
 

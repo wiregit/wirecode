@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Properties;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.IllegalArgumentException2;
 import java.io.IOException;
 
 /**
@@ -35,6 +36,7 @@ public interface SettingsInterface
     public String     getSaveDefault();
     public String     getDirectories();
     public String     getExtensions();
+    public String     getIncompleteDirectory();
     public String[]   getBannedIps();
     public String[]   getBannedWords();
     public boolean    getFilterDuplicates();
@@ -45,6 +47,7 @@ public interface SettingsInterface
     public String[]   getQuickConnectHosts();
     public int        getParallelSearchMax();
     public int        getMaxSimDownload();
+    public int        getMaxUploads();
     public boolean    getClearCompletedUpload();
     public boolean    getClearCompletedDownload();
     /** special method for getting the number of files scanned */
@@ -87,6 +90,10 @@ public interface SettingsInterface
     public void setKeepAlive(int keepAlive)
         throws IllegalArgumentException;
 
+    /** set the keep alive, ensuring it is not too large. */
+    public void setKeepAlive(int keepAlive, boolean checkUpperLimit)
+        throws IllegalArgumentException2;
+
     /** set the port */
     public void setPort(int port)
         throws IllegalArgumentException;
@@ -107,6 +114,11 @@ public interface SettingsInterface
     public void setMaxConn(int maxConn)
         throws IllegalArgumentException;
 
+    /** set the maximum number of connections,
+     *  ensuring the value is not too large. */
+    public void setMaxConn(int maxConn, boolean checkUpperLimit)
+        throws IllegalArgumentException2;
+
     /** sets the directory for saving files*/
     public void setSaveDirectory(String dir)
         throws IllegalArgumentException;
@@ -120,6 +132,10 @@ public interface SettingsInterface
 
     /** sets the string of extensions*/
     public void setExtensions(String extensions)
+        throws IllegalArgumentException;
+
+    /** sets the directory for saving incomplete files */
+    public void setIncompleteDirectory(String dir)
         throws IllegalArgumentException;
 
     public void setBannedIps(String[] ips)
@@ -144,6 +160,7 @@ public interface SettingsInterface
     public void setQuickConnectHosts(String[] hosts);
     public void setParallelSearchMax(int max);
     public void setMaxSimDownload(int max);
+    public void setMaxUploads(int max);
     public void setClearCompletedUpload(boolean b);
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
@@ -189,7 +206,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_CONN       = 5;
+    public static final int     DEFAULT_MAX_CONN       = 6;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
@@ -219,6 +236,7 @@ public interface SettingsInterface
        "gnet4.ath.cx:6346"};
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
+    public static final int     DEFAULT_MAX_UPLOADS      = 2;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
@@ -238,6 +256,7 @@ public interface SettingsInterface
     public static final String CLIENT_ID      = "CLIENT_ID";
     public static final String MAX_CONN       = "MAXIMUM_NUMBER_OF_CONNECTIONS";
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
+    public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
     public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";
@@ -250,6 +269,7 @@ public interface SettingsInterface
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
     public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
+    public static final String MAX_UPLOADS     ="MAX_UPLOADS";
     public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";

@@ -32,8 +32,8 @@ class RejectConnection extends Connection {
             } catch(IOException e) {
                 // finally does all the cleanup we need.
             } finally {
-                shutdown(); // whether we have an IO Exception or
-                            // a successful set of PONGs, drop the connection
+                close(); // whether we have an IO Exception or
+                         // a successful set of PONGs, drop the connection
             }
         }
     }
@@ -62,10 +62,11 @@ class RejectConnection extends Connection {
                 // get the timeout from SettingsManager
                 m=receive(SettingsManager.instance().getTimeout());
                 if (m==null)
-                    continue;
+                    return; //Timeout has occured and we havent received the ping,
+                            //so just return
             }// end of try for BadPacketEception from socket
             catch (BadPacketException e) {
-                continue;
+                return; //Its a bad packet, just return
             }
             if((m instanceof PingRequest) && (m.getHops()==0)) {
                 // this is the only kind of message we will deal with

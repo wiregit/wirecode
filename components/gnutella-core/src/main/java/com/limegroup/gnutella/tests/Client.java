@@ -8,7 +8,7 @@ import java.util.*;
 * @author Anurag Singla
 */
 
-/** 
+/**
  * The client part of a benchmark for testing Gnutella routing speed.  See
  * also Server.<p>
  *
@@ -37,14 +37,14 @@ import java.util.*;
  * <pre>
  *    java com.limegroup.gnutella.tests.RouteClient 192.168.0.136 6346 10
  * </pre>
- * 
- * This will make 10 connections between the Client and the servent, 
+ *
+ * This will make 10 connections between the Client and the servent,
  * each on a separate thread (ClientThread).
  * If all is working correctly, the ClientThreads will send a query request
  * to the servent, and the servent will forward it to each of the ServerThread
  * connections.  Then the ServerThreads will send repeated replies from each
  * of its connections as fast as it can.  The servent should route these to
- * the appropriate ClientThread connections.  The ClientThreads reads these 
+ * the appropriate ClientThread connections.  The ClientThreads reads these
  * replies as fast as they can.
  * After specified interval of test time, the Client polls all the ClientThreads
  * and gathers statistics from them, to measure the rate of messages that the
@@ -52,7 +52,7 @@ import java.util.*;
  */
 
 public class Client {
-    
+
 /** A string highly unlikely to match on the tester. */
 public static final String QUERY_STRING="alskdjfloqa";
 
@@ -77,9 +77,12 @@ private int numThreads;
 private CThread[] cThreads;
 
 
+/**
+* Number of messages to be received by each client Thread
+*/
 private static final long NUM_MESSAGES = 10000;
 
-private static final long WARMUPTIME = 10000; //10 seconds
+private static final long WARMUPTIME = 15000; //15 seconds
 
 private long timeTaken = 0;
 
@@ -97,84 +100,92 @@ public Client(String host, int port, int numThreads)
     this.numThreads = numThreads;
 }
 
-private static void syntaxError() 
+private static void syntaxError()
 {
     System.err.println("Syntax: java com.limegroup.gnutella.tests.Client "
                        +"<host> <port> <connections>");
     System.exit(1);
 }
 
-public static void main(String args[]) 
+public static void main(String args[])
 {
-    try 
+    try
     {
         //parse host and port number
         String host=args[0];
         int port=Integer.parseInt(args[1]);
         int numThreads = Integer.parseInt(args[2]);
-        
+
         //create a new client instance
         Client client =new Client(host, port, numThreads);
         client.doTest();
-    } 
-    catch (NumberFormatException e) 
+    }
+    catch (NumberFormatException e)
     {
         syntaxError();
-    } 
-    catch (ArrayIndexOutOfBoundsException e) 
+    }
+    catch (ArrayIndexOutOfBoundsException e)
     {
         syntaxError();
-    } 
+    }
 
 }//end of main
 
-public void doTest() 
-{      
+public void doTest()
+{
     //Start the required number of CThreads
-    
+
     //allocate the required number of CThreads
     cThreads = new CThread[numThreads];
-    
+
     //start the Threads
     for(int i=0; i < numThreads; i++)
     {
         cThreads[i] = new CThread();
         new Thread(cThreads[i]).start();
     }
-    
-  
+
+
 }
 
+/**
+* Reports the time taken to receive NUM_MESSAGES (a predefined number of
+* messages
+* NOTE: AT THIS POINT, THE CALCULATIONS HAVE BEEN MODIFIED TO  BE GOOD FOR
+* SINGLE THREAD ONLY
+* @param time The time taken
+*/
 private synchronized void reportTime(long time)
 {
     timeTaken += time;
     numClientsFinished++;
-    
-    long avgTime = timeTaken/numClientsFinished;
-    
+
+    long avgTime = timeTaken/(numClientsFinished < numThreads ?
+                numClientsFinished : numThreads);
     float bandwidth = (float)NUM_MESSAGES * numClientsFinished / (avgTime/1000.f);
-    System.out.println("Reply bandwidth: " + bandwidth +" replies/sec");
+    System.out.println("Reply bandwidth: Tis Time:" + NUM_MESSAGES/time
+            + " Avg. bandwidth" +" replies/sec");
 }
 
 
-protected void report(int messages, float milliseconds) 
+protected void report(int messages, float milliseconds)
 {
     float bandwidth=(float)messages/milliseconds*1000.f;
     System.out.println("Reply bandwidth: "+bandwidth+" replies/sec");
 }
 
 /**
-* A client thread that sends the initial query to the servent and keeps on 
+* A client thread that sends the initial query to the servent and keeps on
 * receiving query responses
-* and record statistics   
+* and record statistics
 */
 private class CThread implements Runnable
 {
- 
+
 /**
 * Send the initial query to the servent and keeps on receiving query responses
-* and record statistics    
-*/    
+* and record statistics
+*/
 public void run()
 {
     try
@@ -186,35 +197,38 @@ public void run()
         //send initial query request
         QueryRequest qr=new QueryRequest((byte)4,0,QUERY_STRING + random.nextInt());
         c.send(qr);
-        
-        
+
+
         //just receive some packets in the waruptime;
         long warmupStartTime = new Date().getTime();
         while( (new Date().getTime() - warmupStartTime) < WARMUPTIME)
         {
             Message m = c.receive();
         }
-        //warming up is over    
+        //warming up is over
 
         //just keep on receiving the packets as fast as we can, without checking
         //what they mean
         //mesaure the time
-        long startTime = new Date().getTime();
-        for(int i=0; i < NUM_MESSAGES ; i++) 
+        while(true)
         {
-                Message m = c.receive();
-                //System.out.println("received" + m); 
+            long startTime = new Date().getTime();
+            for(int i=0; i < NUM_MESSAGES ; i++)
+            {
+                    Message m = c.receive();
+                    //System.out.println("received" + m);
+            }
+            long endTime = new Date().getTime();
+
+            reportTime(endTime - startTime);
         }
-        long endTime = new Date().getTime();
-        
-        reportTime(endTime - startTime);
     }
-    catch (IOException e) 
+    catch (IOException e)
     {
         System.err.println("Connections terminated; test is not valid.");
         System.exit(1);
-    } 
-    catch (BadPacketException e) 
+    }
+    catch (BadPacketException e)
     {
         e.printStackTrace();
         System.err.println("Got bad packet;  test is not valid.");

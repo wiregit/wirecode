@@ -69,6 +69,14 @@ public class HTTPManager {
 
                 readRange();
 
+				// Prevent excess uploads from starting
+				if ( m.getCallback().getNumUploads() >=
+                     SettingsManager.instance().getMaxUploads() )
+				{
+				    HTTPUploader.doLimitReached(s);
+					return;
+				}
+
                 HTTPUploader uploader;
                 uploader = new HTTPUploader(s, _filename, _index, _manager,
                                             _uploadBegin, _uploadEnd);

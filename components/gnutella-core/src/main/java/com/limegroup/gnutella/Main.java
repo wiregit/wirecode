@@ -192,5 +192,7 @@ public class Main implements ActivityCallback {
 
     public void setPort(int port){}
 
+    public int getNumUploads(){ return 0; }
+
 }
 

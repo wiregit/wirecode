@@ -43,13 +43,16 @@ public class HTTPDownloader implements Runnable {
     private ByteReader _br;
     private int _mode;
 
-    private int _state;
+    private int    _state;
+	private String _stateString = null;
 
     private boolean _resume;
     private boolean        _wasShutdown = false;
     private HTTPDownloader _replacement = null;
     private PushRequestedFile savedPRF  = null;
 
+    /** Time count of some requesting operation */
+    private int timeCount;
 
     /**
      * The list of all files we've requested via push messages.  Only
@@ -118,7 +121,7 @@ public class HTTPDownloader implements Runnable {
         _index = index;
         _port = port;
         _guid = guid;
-            _sizeOfFile = size;
+		_sizeOfFile = size;
     }
 
     public void setDownloadInfo(HTTPDownloader down) {
@@ -151,6 +154,7 @@ public class HTTPDownloader implements Runnable {
     public int getContentLength() {return _sizeOfFile;}
     public int getAmountRead() {return _amountRead;}
     public int getState() {return _state;}
+	public String getStateString() { return _stateString; }
     public void setResume() {_resume = true;}
 
     public InetAddress getInetAddress() {
@@ -200,6 +204,8 @@ public class HTTPDownloader implements Runnable {
 
         _state = CONNECTED;
 
+        _resume = false;
+
         //Note that the following code is similar to initTwo except
         //that it does not use the built in Java URL/URLConnection
         //classes (since we've already
@@ -227,6 +233,7 @@ public class HTTPDownloader implements Runnable {
         String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
         _state = NOT_CONNECTED;
+        conn = null;
 
         try {
             URL url = new URL(_protocol, _host, _port, furl);
@@ -240,6 +247,21 @@ public class HTTPDownloader implements Runnable {
             return;
         }
         catch (IOException e) {
+
+			// Handle immediate error cases
+			String str=conn.getHeaderField(0);
+			if ( str != null && str.indexOf(" 404 ") > 0 )
+			{
+				_state = ERROR;
+				_stateString = "File Not Found";
+				return;
+			}
+			else if ( str != null && str.indexOf(" 503 ") > 0 )
+			{
+				_state = ERROR;
+				_stateString = "Try Again Later";
+				return;
+			}
             sendPushRequest();
             return;
         }
@@ -247,6 +269,8 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;
             return;
         }
+
+        _resume = false;
 
         _state = CONNECTED;
     }
@@ -289,6 +313,7 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
+		
         if (_mode == 1){
             // Need to mutate the original connection into this connection
             //if ( _state != QUEUED )
@@ -312,7 +337,7 @@ public class HTTPDownloader implements Runnable {
         } else if (_state == ERROR) {
             _callback.removeDownload(this);
         }
-        //TODO: what if in queued state?
+        //TODO: what if in queued state?  -  GUI Currently Handles it.
     }
 
     public void resume() {
@@ -336,7 +361,9 @@ public class HTTPDownloader implements Runnable {
         if ( _wasShutdown )
             return;
 
-        _state = REQUESTING;
+        _state    = REQUESTING;
+        timeCount = 0;
+		
 
         //Record this push so incoming push connections can be verified.
         Assert.that(clientGUID!=null);
@@ -427,16 +454,22 @@ public class HTTPDownloader implements Runnable {
 
     public void doDownload() {
         readHeader();
-
+		if ( _state == ERROR )
+			return;
+	
         SettingsManager set = SettingsManager.instance();
 
         _downloadDir = set.getSaveDirectory();
 
-        String pathname = _downloadDir + _filename;
+	    String incompleteDir = set.getIncompleteDirectory();
 
+        String pathname = incompleteDir +  _filename;
         File myFile = new File(pathname);
 
-        if ((myFile.exists()) && (!_resume)) {
+	    String path = _downloadDir + _filename;
+        File myTest = new File(path);
+
+        if ((myTest.exists()) && (!_resume)) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
                 _state = ERROR;
@@ -499,8 +532,12 @@ public class HTTPDownloader implements Runnable {
             return;
         }
 
-        if ( _amountRead == _sizeOfFile )
+        if ( _amountRead == _sizeOfFile ) {
+	    String pname = _downloadDir + _filename;
+	    myFile.renameTo(new File(pname));
             _state = COMPLETE;
+	}
+
         else
             _state = ERROR;
     }
@@ -519,13 +556,15 @@ public class HTTPDownloader implements Runnable {
             } catch (IOException e) {
                 _state = ERROR;
                 return;
-            }
+			}
 
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
-            if (str.indexOf("Content-length:") != -1) {
+
+            if ((str.indexOf("Content-length:") != -1)  ||
+				(str.indexOf("Content-Length:") != -1))  {
                 String sub;
                 try {
                     sub=str.substring(15);
@@ -625,6 +664,21 @@ public class HTTPDownloader implements Runnable {
         }
         return false;
     }
+
+	/** 
+     *  Get an integer time count
+     */
+    public int getTimeCount() {
+        return (timeCount);
+    }
+
+	/** 
+     *  Inc an integer time count
+     */
+    public void incTimeCount() {
+        timeCount++;
+    }
+
 }
 
 /** A file that we requested via a push message. */
@@ -669,6 +723,7 @@ class PushRequestedFile {
 //          && Arrays.equals(ip, prf.ip)
             && index==prf.index;
     }
+
 
     public int hashCode() {
         //This is good enough since we'll rarely request the

@@ -10,14 +10,31 @@ public class ManagedConnection
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
 
-    protected int dropped=0;
-    protected int lastReceived=0;
-    protected int lastDropped=0;
+    /*
+     * _recvDropped is the number of packets I read and dropped because
+     * the host made one of the following errors: sent replies to
+     * requests I didn't make, sent bad packets, or sent (route) spam.
+     * It does not include: TTL's of zero, duplicate requests (it's
+     * not their fault), or buffer overflows in sendToAll.  Note that
+     * this is always less than received.  No synchronization is
+     * necessary.
+     *
+     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the
+     * values of sent/sentDropped and received/_recvDropped at the last
+     * call to getPercentDropped.  These are synchronized by this;
+     * finer-grained schemes could be used.
+     */
+    private int _recvDropped=0;
+    private int _lastReceived=0;
+    private int _lastRecvDropped=0;
+
+    private int _lastSent=0;
+    private int _lastSentDropped=0;
 
     /** Statistics about horizon size. */
-    public long totalFileSize;
-    public long numFiles;
-    public long numHosts;
+    private long _totalFileSize;
+    private long _numFiles;
+    private long _numHosts;
 
     /**
      * Creates an outgoing connection.
@@ -34,31 +51,30 @@ public class ManagedConnection
      * @requires the word "GNUTELLA " and nothing else has just been read
      *  from socket
      * @effects wraps a connection around socket and does the rest of the Gnutella
-     *  handshake.  Throws IOException if the connection couldn't be established.
-     *  If such an error happens, the socket is properly closed.
+     *  handshake.
      */
-    ManagedConnection(Socket socket, ConnectionManager manager)
-            throws IOException {
+    ManagedConnection(Socket socket, ConnectionManager manager) {
         super(socket);
         _manager = manager;
     }
 
+    /**
+     * Does the GNUTELLA handshake and, for an outgoing connection, sends the
+     * initial ping.
+     * @throws IOException on error.  The connection is not cleaned up when
+     *         this happens
+     */
     public void initialize() throws IOException {
         super.initialize();
 
         if(isOutgoing()) {
-            try {
-                //Send initial ping request.  HACK: use routeTable to
-                //designate that replies are for me.  Do this *before*
-                //sending message.
-                PingRequest pr=new PingRequest(
-                    SettingsManager.instance().getTTL());
-                _manager.fromMe(pr);
-                send(pr);
-            } catch (IOException e) {
-                shutdown();
-                throw e;
-            }
+            //Send initial ping request.  HACK: use routeTable to
+            //designate that replies are for me.  Do this *before*
+            //sending message.
+            PingRequest pr=new PingRequest(
+                SettingsManager.instance().getTTL());
+            _manager.fromMe(pr);
+            send(pr);
         }
     }
 
@@ -82,7 +98,7 @@ public class ManagedConnection
     private final boolean isRouteSpam(Message m) {
         if (!_routeFilter.allow(m)) {
             _manager.totDropped++;
-            dropped++;
+            _recvDropped++;
             return true;
         } else
             return false;
@@ -126,7 +142,6 @@ public class ManagedConnection
                         _manager.PReqCount++;
                         if (m.hop()!=0){
                             _manager.getRouteTable().put(m.getGUID(),this);
-                            //broadcast to other hosts
                             _manager.sendToAllExcept(m, this);
                             byte[] ip = getLocalAddress().getAddress();
 
@@ -164,9 +179,9 @@ public class ManagedConnection
                             //System.out.println("Sumeet: I am the destination");
                             //Update horizon stats.
                             //This is not necessarily atomic, but that doesn't matter.
-                            totalFileSize += ((PingReply)m).getKbytes();
-                            numFiles += ((PingReply)m).getFiles();
-                            numHosts++;
+                            _totalFileSize += ((PingReply)m).getKbytes();
+                            _numFiles += ((PingReply)m).getFiles();
+                            _numHosts++;
                             //System.out.println("Sumeet : updated stats");
                         }
                         else{//message needs to routed
@@ -177,7 +192,7 @@ public class ManagedConnection
                     else { //Route Table does not know what to do with message
                         //do nothing...drop the message
                         _manager.totDropped++;
-                        dropped++;
+                        _recvDropped++;
                     }
                 }
                 else if (m instanceof QueryRequest){
@@ -196,7 +211,7 @@ public class ManagedConnection
 
                         if (m.hop()!=0){
                             _manager.getRouteTable().put(m.getGUID(),this);
-                            _manager.sendToAllExcept(m,this); //broadcast to other hosts
+                            _manager.sendToAllExcept(m,this);
 
                             FileManager fm = FileManager.getFileManager();
                             Response[] responses = fm.query((QueryRequest)m);
@@ -205,27 +220,28 @@ public class ManagedConnection
                                 byte[] guid = m.getGUID();
                                 byte ttl = (byte)(m.getHops() +1);
                                 int port = _manager.getListeningPort();
-                                byte[] ip= getLocalAddress().getAddress(); //little endian
-                                long speed = SettingsManager.instance().getConnectionSpeed();
+                                byte[] ip= getLocalAddress().getAddress();
+                                long speed = SettingsManager.instance().
+                                    getConnectionSpeed();
                                 byte[] clientGUID = _manager.getClientGUID();
 
                                 // changing the port here to test push:
 
                                 //Modified by Sumeet Thadani
-                                // If the number of responses is more 255, we are going to
-                                // drop the responses after index 255. This can be corrected
-                                //post beta, so that the extra responses can be sent along as
-                                //another query reply.
+                                // If the number of responses is more 255, we
+                                // are going to drop the responses after index
+                                // 255. This can be corrected post beta, so
+                                // that the extra responses can be sent along as
+                                // another query reply.
                                 if (responses.length > 255){
                                     Response[] res = new Response[255];
                                     for(int i=0; i<255;i++)
-                                        res[i] = responses[i]; //copy first 255 elements of old array
-                                    responses = res;//old array will be garbage collected
+                                        //copy first 255 elements of old array
+                                        res[i] = responses[i];
+                                    responses = res;
                                 }
-                                QueryReply qreply = new QueryReply(guid, ttl, port, ip,
-                                                                   speed, responses, clientGUID);
-                                //QueryReply qreply = new QueryReply(guid, ttl, 1234, ip,
-                                //               speed, responses, clientGUID);
+                                QueryReply qreply = new QueryReply(guid, ttl,
+                                    port, ip, speed, responses, clientGUID);
                                 send(qreply);
                                 _manager.QRepCount++;
                             }
@@ -241,9 +257,8 @@ public class ManagedConnection
                 else if (m instanceof QueryReply){
                     Connection outConnection =
                         _manager.getRouteTable().get(m.getGUID());
-                    if(outConnection!=null && _routeFilter.allow(m)){ //we have a place to route it
+                    if(outConnection!=null && _routeFilter.allow(m)){
                         _manager.QRepCount++;
-                        //System.out.println("Sumeet:found connection");
                         QueryReply qrep = (QueryReply)m;
                         _manager.getPushRouteTable().put(qrep.getClientGUID(),
                                                          this);
@@ -263,7 +278,7 @@ public class ManagedConnection
                     else{//route table does not know what to do this message
                         //do nothing...drop the message
                         _manager.totDropped++;
-                        dropped++;
+                        _recvDropped++;
                     }
                 }
                 else if (m instanceof PushRequest){
@@ -282,10 +297,12 @@ public class ManagedConnection
                         nextHost.send(m); //send the message to appropriate host
                     }
 
-                    // This comparison doesn't work:
-                    // // if (_manager.ClientId.equals(DestinationId) ){}
-                    //I am the destination
                     else if (_manager.isClient(req_guid)) {
+                        // Ignore excess upload requests
+                        if ( _manager.getCallback().getNumUploads() >=
+                             SettingsManager.instance().getMaxUploads() )
+                            continue;
+
                         //unpack message
                         //make HTTP connection with originator
                         String host = new String(req.getIP());
@@ -320,13 +337,13 @@ public class ManagedConnection
                         HTTPUploader(h, port, index, req_guid_hexstring, _manager);
                         Thread t=new Thread(up);
                         t.setDaemon(true);
-                        t.run();
+                        t.start();
                     }
                     else{// the message has arrived in error or is spam
                         //do nothing.....drop the message
                         _manager.totRouteError++;
                         _manager.totDropped++;
-                        dropped++;
+                        _recvDropped++;
                     }
                 }// else if
             }//while
@@ -345,24 +362,24 @@ public class ManagedConnection
 
     /** Clears the statistics about files reachable from me. */
     public void clearHorizonStats() {
-        totalFileSize=0;
-        numHosts=0;
-        numFiles=0;
+        _totalFileSize=0;
+        _numHosts=0;
+        _numFiles=0;
     }
 
     /** Returns the number of hosts reachable from me. */
     public long getNumHosts() {
-        return numHosts;
+        return _numHosts;
     }
 
     /** Returns the number of files reachable from me. */
     public long getNumFiles() {
-        return numFiles;
+        return _numFiles;
     }
 
     /** Returns the size of all files reachable from me. */
     public long getTotalFileSize() {
-        return totalFileSize;
+        return _totalFileSize;
     }
 
     /** Returns the number of messages dropped on this connection.<p>
@@ -372,19 +389,39 @@ public class ManagedConnection
      * TTL's of zero, duplicate requests (it's not their fault), or
      * buffer overflows in sendToAll.
      */
-    public long getNumDropped() {
-        return dropped;
+    public long getNumReceivedMessagesDropped() {
+        return _recvDropped;
     }
 
-    /** Return the percentage of messages dropped on this connection since
-     *  the last call to getPercentDropped. */
-    public float getPercentDropped() {
-        int rdiff=getNumMessagesReceived()-lastReceived;
-        int ddiff=dropped-lastDropped;
+    /**
+     * @modifies this
+     * @effects Returns the percentage of messages sent on this
+     *  since the last call to getPercentReceivedDropped that were
+     *  dropped by this end of the connection.
+     */
+    public synchronized float getPercentReceivedDropped() {
+        int rdiff=getNumMessagesReceived()-_lastReceived;
+        int ddiff=_recvDropped-_lastRecvDropped;
         float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
 
-        lastReceived=getNumMessagesReceived();
-        lastDropped=dropped;
+        _lastReceived=getNumMessagesReceived();
+        _lastRecvDropped = _recvDropped;
+        return percent;
+    }
+
+    /**
+     * @modifies this
+     * @effects Returns the percentage of messages sent on this
+     *  since the last call to getPercentSentDropped that were
+     *  dropped by this end of the connection.
+     */
+    public synchronized float getPercentSentDropped() {
+        int rdiff=getNumMessagesSent()-_lastSent;
+        int ddiff=getNumSentMessagesDropped()-_lastSentDropped;
+        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+
+        _lastSent=getNumMessagesSent();
+        _lastSentDropped = getNumSentMessagesDropped();
         return percent;
     }
 

@@ -5,7 +5,6 @@ package com.limegroup.gnutella;
  *  visual world.
  */
 public interface ActivityCallback
-    extends ConnectionListener
 {
     /**
      *  Handle a new connection.
@@ -48,6 +47,9 @@ public interface ActivityCallback
     public void addUpload(HTTPUploader u);
 
     public void removeUpload(HTTPUploader u);
+
+    /** Temp function until we rewrite HTTPManager for counting connections */
+    public int getNumUploads();
 
     /** sets the port in the configuration window */
     public void setPort(int port);

@@ -12,7 +12,7 @@ import com.sun.java.util.collections.*;
 public class Buffer {
     /**
      * The abstraction function is
-     *   [ buf[head], buf[head+1], ..., buf[tail-1] ] if head<tail
+     *   [ buf[head], buf[head+1], ..., buf[tail-1] ] if head<=tail
      * or
      *   [ buf[head], buf[head+1], ..., buf[size-1], 
      *     buf[0], buf[1], ..., buf[tail-1] ]         otherwise
@@ -23,7 +23,10 @@ public class Buffer {
      * See p. 202 of  _Introduction to Algorithms_ by Cormen, 
      * Leiserson, Rivest for details.
      *
-     * INVARIANT: buf.length=size 
+     * Also note that size is really the MAX size of this+1, i.e., 
+     * the capacity, not the current size.
+     *
+     * INVARIANT: buf.length=size
      *            0<=head, tail<size
      *            size>=2
      */
@@ -38,42 +41,81 @@ public class Buffer {
      *  size elements.
      */
     public Buffer(int size) {
-	Assert.that(size>=1);
-	//one element of buf unused
-	this.size=size+1;
-	buf=new Object[size+1];
-	head=0;
-	tail=0;
+        Assert.that(size>=1);
+        //one element of buf unused
+        this.size=size+1;
+        buf=new Object[size+1];
+        head=0;
+        tail=0;
     }
 
     /** Returns true iff this is empty. */
     public boolean isEmpty() {
-	return head==tail;
+        return head==tail;
     }
 
     /** Returns true iff this is full, e.g., adding another element 
      *  would force another out. */
     public boolean isFull() {
-	return increment(tail)==head;
+        return increment(tail)==head;
+    }
+
+    /** Returns the number of elements in this.  Note that this never
+     *  exceeds the value returned by getCapacity. */
+    public int getSize() {
+        if (head<=tail)
+            //tail-1-head+1                  [see abstraction function]
+            return tail-head;
+        else
+            //(size-1-head+1) + (tail-1+1)   [see abstraction function]
+            return size-head+tail;
+    }
+
+    /** Returns the number of elements that this can hold, i.e., the
+     *  max size that was passed to the constructor. */
+    public int getCapacity() {
+        return size-1;
     }
 
     private int decrement(int i) {
-	if (i==0)
-	    return size-1;
-	else
-	    return i-1;
+        if (i==0)
+            return size-1;
+        else
+            return i-1;
     }
 
     private int increment(int i) {
-	if (i==(size-1))
-	    return 0;
-	else
-	    return i+1;
+        if (i==(size-1))
+            return 0;
+        else
+            return i+1;
+    }
+
+    /** Returns the j s.t. buf[j]=this[i]. */
+    private int index(int i) throws IndexOutOfBoundsException {        
+        if (i<0 || i>=getSize())
+            throw new IndexOutOfBoundsException();
+        return (i+head) % size;
+    }
+
+    /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
+      * Else returns this[i] */
+    public Object get(int i) throws IndexOutOfBoundsException {
+        return buf[index(i)];
+    }
+
+    /*
+     * @modifies this[i]
+     * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
+     *  and does not modify this.  Else this[i]=o.
+     */
+    public void set(int i, Object o) throws IndexOutOfBoundsException {
+        buf[index(i)]=o;
     }
 
     /** Same as addFirst(x). */
     public Object add(Object x) {
-	return addFirst(x);
+        return addFirst(x);
     }
 
     /** 
@@ -84,12 +126,12 @@ public class Buffer {
      *  if none was removed.
      */
     public Object addFirst(Object x) {
-	Object ret=null;
-	if (isFull())
-	    ret=removeLast();
-	head=decrement(head);
-	buf[head]=x;
-	return ret;
+        Object ret=null;
+        if (isFull())
+            ret=removeLast();
+        head=decrement(head);
+        buf[head]=x;
+        return ret;
     }
 
     /** 
@@ -100,12 +142,12 @@ public class Buffer {
      *  if none was removed.
      */
     public Object addLast(Object x) {
-	Object ret=null;
-	if (isFull())
-	    ret=removeFirst();
-	buf[tail]=x;
-	tail=increment(tail);
-	return ret;
+        Object ret=null;
+        if (isFull())
+            ret=removeFirst();
+        buf[tail]=x;
+        tail=increment(tail);
+        return ret;
     }
 
     /**
@@ -113,9 +155,9 @@ public class Buffer {
      * this is empty.
      */
     public Object first() throws NoSuchElementException {
-	if (isEmpty())
-	    throw new NoSuchElementException();
-	return buf[head];
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return buf[head];
     }
     
     /**
@@ -123,9 +165,9 @@ public class Buffer {
      * this is empty.
      */
     public Object last() throws NoSuchElementException {
-	if (isEmpty())
-	    throw new NoSuchElementException();
-	return buf[decrement(tail)];
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return buf[decrement(tail)];
     }    
 
     /**
@@ -134,11 +176,11 @@ public class Buffer {
      *   NoSuchElementException if this is empty.
      */
     public Object removeFirst() throws NoSuchElementException {
-	if (isEmpty())
-	    throw new NoSuchElementException();
-	Object ret=buf[head];
-	head=increment(head);
-	return ret;
+        if (isEmpty())
+            throw new NoSuchElementException();
+        Object ret=buf[head];
+        head=increment(head);
+        return ret;
     }
 
     /**
@@ -147,10 +189,19 @@ public class Buffer {
      *   NoSuchElementException if this is empty.
      */
     public Object removeLast() throws NoSuchElementException {
-	if (isEmpty())
-	    throw new NoSuchElementException();
-	tail=decrement(tail);
-	return buf[tail];
+        if (isEmpty())
+            throw new NoSuchElementException();
+        tail=decrement(tail);
+        return buf[tail];
+    }
+
+    /**
+     * @modifies this
+     * @effects removes all elements of this.
+     */
+    public void clear() {
+        head=0;
+        tail=0;
     }
 
     /** 
@@ -159,123 +210,175 @@ public class Buffer {
      * @requires this not modified will iterator in use.
      */
     public Iterator iterator() {
-	return new BufferIterator();
+        return new BufferIterator();
     }
 
     private class BufferIterator extends UnmodifiableIterator {
-	/** The index of the next element to yield. */
-	int i;	
-	/** Defensive programming; detect modifications while
-	 *  iterator in use. */
-	int oldHead;
-	int oldTail;
+        /** The index of the next element to yield. */
+        int i;	
+        /** Defensive programming; detect modifications while
+         *  iterator in use. */
+        int oldHead;
+        int oldTail;
 
-	BufferIterator() {
-	    i=head;
-	    oldHead=head;
-	    oldTail=tail;
-	}
+        BufferIterator() {
+            i=head;
+            oldHead=head;
+            oldTail=tail;
+        }
 
-	public boolean hasNext() {
-	    ensureNoModifications();
-	    return i!=tail;
-	}
+        public boolean hasNext() {
+            ensureNoModifications();
+            return i!=tail;
+        }
 
-	public Object next() throws NoSuchElementException {
-	    ensureNoModifications();
-	    if (!hasNext()) 
-		throw new NoSuchElementException();
+        public Object next() throws NoSuchElementException {
+            ensureNoModifications();
+            if (!hasNext()) 
+                throw new NoSuchElementException();
 
-	    Object ret=buf[i];
-	    i=increment(i);
-	    return ret;
-	}
+            Object ret=buf[i];
+            i=increment(i);
+            return ret;
+        }
 
-	private void ensureNoModifications() {
-	    if (oldHead!=head || oldTail!=tail)
-		throw new ConcurrentModificationException();
-	}
+        private void ensureNoModifications() {
+            if (oldHead!=head || oldTail!=tail)
+                throw new ConcurrentModificationException();
+        }
     }
 
-//      public static void main(String args[]) {
-//  	//1. Tests of old methods.
-//  	Buffer buf=new Buffer(4);
-//  	Iterator iter=null;
+    /*
+    public static void main(String args[]) {
+        //1. Tests of old methods.
+        Buffer buf=new Buffer(4);
+        Iterator iter=null;
 
-//  	iter=buf.iterator();
-//  	Assert.that(!iter.hasNext());
-//  	try {
-//  	    iter.next();
-//  	    Assert.that(false);
-//  	} catch (NoSuchElementException e) {
-//  	    Assert.that(true);
-//  	}
+        Assert.that(buf.getCapacity()==4);
+        Assert.that(buf.getSize()==0);
+        iter=buf.iterator();
+        Assert.that(!iter.hasNext());
+        try {
+            iter.next();
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(true);
+        }
 
-//  	buf.add("test");
-//  	iter=buf.iterator();
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test"));
-//  	Assert.that(!iter.hasNext());
-//  	try {
-//  	    iter.next();
-//  	    Assert.that(false);
-//  	} catch (NoSuchElementException e) {
-//  	    Assert.that(true);
-//  	}
+        buf.add("test");
+        Assert.that(buf.getSize()==1);
+        iter=buf.iterator();
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test"));
+        Assert.that(!iter.hasNext());
+        try {
+            iter.next();
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(true);
+        }
 
-//  	buf.add("test2");
-//  	buf.add("test3");
-//  	iter=buf.iterator();
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test3"));
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test2"));
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test"));
-//  	Assert.that(!iter.hasNext());
+        buf.add("test2");
+        Assert.that(buf.getSize()==2);
+        buf.add("test3");
+        Assert.that(buf.getSize()==3);
+        iter=buf.iterator();
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test3"));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test2"));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test"));
+        Assert.that(!iter.hasNext());
 
-//  	buf.add("test4");
-//  	buf.add("test5");
-//  	iter=buf.iterator();
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test5"));
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test4"));
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test3"));
-//  	Assert.that(iter.hasNext());
-//  	Assert.that(iter.next().equals("test2"));
-//  	Assert.that(!iter.hasNext());	    
+        buf.add("test4");
+        Assert.that(buf.getSize()==4);
+        buf.add("test5");
+        Assert.that(buf.getSize()==4);
+        iter=buf.iterator();
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test5"));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test4"));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test3"));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals("test2"));
+        Assert.that(!iter.hasNext());	    
 
-//  	//2.  Tests of new methods.  These are definitely not sufficient.
-//  	buf=new Buffer(4);
-//  	Assert.that(buf.addLast("a")==null);
-//  	Assert.that(buf.addLast("b")==null);
-//  	Assert.that(buf.addLast("c")==null);
-//  	Assert.that(buf.addLast("d")==null);
-//  	Assert.that(buf.first().equals("a"));
-//  	Assert.that(buf.removeFirst().equals("a"));
-//  	Assert.that(buf.first().equals("b"));
-//  	Assert.that(buf.removeFirst().equals("b"));
-//  	Assert.that(buf.addFirst("b")==null);
-//  	Assert.that(buf.addFirst("a")==null);
-//  	//buf=[a b c d]
+        buf.add("test6");
+        Assert.that(buf.getSize()==4);
 
-//  	Assert.that(buf.addLast("e").equals("a"));
-//  	//buf=[b c d e]
-//  	Assert.that(buf.last().equals("e"));
-//  	Assert.that(buf.first().equals("b"));
-//  	Assert.that(buf.removeLast().equals("e"));
-//  	Assert.that(buf.removeLast().equals("d"));		
+        //2.  Tests of new methods.  These are definitely not sufficient.
+        buf=new Buffer(4);
+        Assert.that(buf.getSize()==0);
+        Assert.that(buf.addLast("a")==null);
+        Assert.that(buf.getSize()==1);
+        Assert.that(buf.addLast("b")==null);
+        Assert.that(buf.getSize()==2);
+        Assert.that(buf.addLast("c")==null);
+        Assert.that(buf.getSize()==3);
+        Assert.that(buf.addLast("d")==null);
+        Assert.that(buf.getSize()==4);
+        Assert.that(buf.first().equals("a"));
+        Assert.that(buf.removeFirst().equals("a"));
+        Assert.that(buf.getSize()==3);
+        Assert.that(buf.first().equals("b"));
+        Assert.that(buf.removeFirst().equals("b"));
+        Assert.that(buf.getSize()==2);
+        Assert.that(buf.addFirst("b")==null);
+        Assert.that(buf.getSize()==3);
+        Assert.that(buf.addFirst("a")==null);
+        Assert.that(buf.getSize()==4);
+        //buf=[a b c d]
 
-//  	buf=new Buffer(4);
-//  	iter=buf.iterator();
-//  	buf.addFirst("a");
-//  	try {
-//  	    iter.hasNext();
-//  	    Assert.that(false);
-//  	} catch (ConcurrentModificationException e) {
-//  	    Assert.that(true);
-//  	}
-//      }
+        Assert.that(buf.addLast("e").equals("a"));
+        //buf=[b c d e]
+        Assert.that(buf.last().equals("e"));
+        Assert.that(buf.first().equals("b"));
+        Assert.that(buf.removeLast().equals("e"));
+        Assert.that(buf.removeLast().equals("d"));		
+
+        buf=new Buffer(4);
+        iter=buf.iterator();
+        buf.addFirst("a");
+        try {
+            iter.hasNext();
+            Assert.that(false);
+        } catch (ConcurrentModificationException e) {
+            Assert.that(true);
+        }
+
+        buf=new Buffer(4);
+        buf.addFirst("a");
+        buf.addLast("b");
+        buf.clear();
+        Assert.that(buf.getSize()==0);
+        iter=buf.iterator();
+        Assert.that(! iter.hasNext());
+
+        //3. Tests of get and set.
+        buf=new Buffer(3);
+        try {
+            buf.get(0);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) {
+        }
+        try {
+            buf.get(-1);
+            Assert.that(false);
+        } catch (IndexOutOfBoundsException e) {
+        }
+
+        buf.addLast("a");
+        buf.addLast("b");
+        buf.addLast("c");
+        buf.addLast("d");  //clobbers a!
+        Assert.that(buf.get(0).equals("b"));
+        Assert.that(buf.get(1).equals("c"));
+        Assert.that(buf.get(2).equals("d"));
+        buf.set(2,"bb");
+        Assert.that(buf.get(2).equals("bb"));        
+    }
+    */
 }

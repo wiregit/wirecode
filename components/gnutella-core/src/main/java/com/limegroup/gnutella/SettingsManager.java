@@ -3,8 +3,8 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
-//import java.io.IOException;
 import java.lang.IllegalArgumentException;
+import com.limegroup.gnutella.util.IllegalArgumentException2;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -39,6 +39,7 @@ public class SettingsManager implements SettingsInterface
     private static String   saveDirectory_;
     private static String   directories_;
     private static String   extensions_;
+    private static String   incompleteDirectory_;
     private static String[] bannedIps_;
     private static String[] bannedWords_;
     private static boolean  filterDuplicates_;
@@ -51,6 +52,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  clearCompletedUpload_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
+    private static int      maxUploads_;
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
 
@@ -260,6 +262,10 @@ public class SettingsManager implements SettingsInterface
                     catch (IllegalArgumentException ie){}
                 }
 
+                else if(key.equals(SettingsInterface.INCOMPLETE_DIR)) {
+                  setIncompleteDirectory(p);
+                }
+
                 else if(key.equals(SettingsInterface.BANNED_IPS)) {
                     try {setBannedIps(decode(p));}
                     catch (IllegalArgumentException ie){}
@@ -371,7 +377,6 @@ public class SettingsManager implements SettingsInterface
         setPort(SettingsInterface.DEFAULT_PORT);
         setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
         setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
-        //setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
         setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
         setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
@@ -384,13 +389,14 @@ public class SettingsManager implements SettingsInterface
         setDirectories("");
         setSaveDirectory(home_);
         setSaveDefault(home_);
-        //setInstallDir("");
+        setIncompleteDirectory(home_);
         setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
         setClearCompletedUpload(SettingsInterface.DEFAULT_CLEAR_UPLOAD);
         setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
         setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
+        setMaxUploads(SettingsInterface.DEFAULT_MAX_UPLOADS);
         setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
         setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
         setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
@@ -437,11 +443,36 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the directory to save to */
     public String getSaveDirectory() {
+        File file = new File(saveDirectory_);
+        if(!file.isDirectory()) {
+            boolean dirsMade = file.mkdirs();
+            if(!dirsMade)
+                return "";
+        }
         return saveDirectory_;
     }
 
+    /** returns the incomplete directory */
+    public String getIncompleteDirectory() {
+        File file = new File(incompleteDirectory_);
+        if(!file.isDirectory()) {
+            boolean dirsMade = file.mkdirs();
+            if(!dirsMade)
+                return "";
+        }
+        return incompleteDirectory_;
+    }
+
     /** returns the default save directory */
-    public String getSaveDefault(){return saveDefault_;}
+    public String getSaveDefault() {
+        File file = new File(saveDefault_);
+        if(!file.isDirectory()) {
+            boolean dirsMade = file.mkdirs();
+            if(!dirsMade)
+                return "";
+        }
+        return saveDefault_;
+    }
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
@@ -460,6 +491,7 @@ public class SettingsManager implements SettingsInterface
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}
     public int getParallelSearchMax(){return parallelSearchMax_;}
     public int getMaxSimDownload(){return maxSimDownload_;}
+    public int getMaxUploads(){return maxUploads_;}
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;}
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;}
     public int getSearchAnimationTime(){ return searchAnimationTime_; }
@@ -485,46 +517,6 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the path of the properties and host list files */
     public String getPath() {return home_;}
-
-
-    /** sets the time to live */
-    public synchronized void setTTL(byte ttl)
-        throws IllegalArgumentException {
-        if(ttl > softmaxttl_ || ttl < 1)
-            throw new IllegalArgumentException();
-        else {
-            ttl_ = ttl;
-            String s = Byte.toString(ttl_);
-            props_.put(SettingsInterface.TTL, s);
-            //writeProperties();
-        }
-    }
-
-    /** sets the soft maximum time to live */
-    public synchronized void setSoftMaxTTL(byte softmaxttl)
-        throws IllegalArgumentException {
-        if(softmaxttl < 0 || softmaxttl > 16)
-            throw new IllegalArgumentException();
-        else {
-            softmaxttl_ = softmaxttl;
-            String s = Byte.toString(softmaxttl);
-            props_.put(SettingsInterface.SOFT_MAX_TTL, s);
-            writeProperties();
-        }
-    }
-
-    /** sets the hard maximum time to live */
-    public synchronized void setMaxTTL(byte maxttl)
-        throws IllegalArgumentException {
-        if(maxttl < 0 || maxttl > 50)
-            throw new IllegalArgumentException();
-        else {
-            maxttl_ = maxttl;
-            String s = Byte.toString(maxttl_);
-            props_.put(SettingsInterface.MAX_TTL, s);
-            //writeProperties();
-        }
-    }
 
     /** sets the maximum length of packets (spam protection)*/
     public synchronized void setMaxLength(int maxLength)
@@ -553,46 +545,55 @@ public class SettingsManager implements SettingsInterface
 
     }
 
-    /** sets the keep alive */
-    public synchronized void setKeepAlive(int keepAlive)
-        throws IllegalArgumentException {
-        if(keepAlive<0)
-            throw new IllegalArgumentException();
-        else {
+    /**
+     * Sets the keepAlive without checking the maximum value.
+     * Exactly the same as setKeepAlive(keepAlive, false).
+     */
+    public synchronized void setKeepAlive(int keepAlive) {
+        setKeepAlive(keepAlive, false);
+    }
+
+    /**
+     * Sets the keep alive. If keepAlive is negative, throws
+     * IllegalArgumentException2 with a suggested value of 0.
+     *
+     * If checkUpperLimit is true, then if keepAlive is too large for
+     * the current connection speed, IllegalArgumentException2 is
+     * thrown with a suggested value appropriate for the connection.
+     * It is guaranteed that calling setKeepAlive with this value will
+     * not throw an exception if the connection speed is not changed.
+     */
+    public synchronized void setKeepAlive(int keepAlive,
+                                          boolean checkUpperLimit)
+        throws IllegalArgumentException2 {
+
+        //I'm copying these numbers out of GUIStyles.  I don't want
+        //this to depend on GUI code, though.
+        if (checkUpperLimit) {
+            int speed=getConnectionSpeed();
+            if (speed<=56) {
+                if (keepAlive>4)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(4)});
+            } else if (speed<=350) {
+                if (keepAlive>8)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(8)});
+            } else if (speed<=1000) {
+                if (keepAlive>14)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(14)});
+            }
+        }
+
+        if (keepAlive<0) {
+            Object[] suggestions={new Integer(0)};
+            throw new IllegalArgumentException2(suggestions);
+        } else {
             keepAlive_ = keepAlive;
             String s = Integer.toString(keepAlive_);
             props_.put(SettingsInterface.KEEP_ALIVE, s);
             writeProperties();
-        }
-    }
-
-    /** sets the port to connect on */
-    public synchronized void setPort(int port)
-        throws IllegalArgumentException {
-        // if the entered port is outside accepted
-        // port numbers, throw the exception
-        if(port > 65536 || port < 0)
-            throw new IllegalArgumentException();
-        else {
-            port_ = port;
-            String s = Integer.toString(port_);
-            props_.put(SettingsInterface.PORT, s);
-            //writeProperties();
-        }
-    }
-
-    /** sets the connection speed.  throws an
-     *  exception if you try to set the speed
-     *  far faster than a T3 line or less than
-     *  0.*/
-    public synchronized void setConnectionSpeed(int speed) {
-        if(speed < 0 || speed > 20000)
-            throw new IllegalArgumentException();
-        else {
-            connectionSpeed_ = speed;
-            String s = Integer.toString(connectionSpeed_);
-            props_.put(SettingsInterface.SPEED, s);
-            //writeProperties();
         }
     }
 
@@ -621,8 +622,49 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** set the maximum number of connections to hold */
-    public synchronized void setMaxConn(int maxConn) {
+    /**
+     * Sets the max number of connections without checking
+     * the maximum value.  Exactly the same as
+     *  setMaxConn(keepAlive, false).
+     */
+    public synchronized void setMaxConn(int maxConn)
+        throws IllegalArgumentException2 {
+        setMaxConn(maxConn, false);
+    }
+
+    /**
+     * Sets the maximum number of connections (incoming and
+     * outgoing). If maxConn is negative, throws
+     * IllegalArgumentException2 with a suggested value of 0.
+     *
+     * If checkUpperLimit is true, then if maxConn is too large for
+     * the current connection speed, IllegalArgumentException2 is
+     * thrown with a suggested value appropriate for the connection.
+     * It is guaranteed that calling setMaxConn with this value will
+     * not throw an exception if the connection speed is not changed.  */
+    public synchronized void setMaxConn(int maxConn,
+                                        boolean checkUpperLimit)
+        throws IllegalArgumentException2 {
+
+        //I'm copying these numbers out of GUIStyles.  I don't want
+        //this to depend on GUI code, though.
+        if (checkUpperLimit) {
+            int speed=getConnectionSpeed();
+            if (speed<=56) {
+                if (maxConn>6)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(6)});
+            } else if (speed<=350) {
+                if (maxConn>12)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(12)});
+            } else if (speed<=1000) {
+                if (maxConn>20)
+                    throw new IllegalArgumentException2(
+                                new Object[] {new Integer(20)});
+            }
+        }
+
         if(maxConn < 0)
             throw new IllegalArgumentException();
         else {
@@ -633,23 +675,34 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** set the directory for saving files */
-    public synchronized void setSaveDirectory(String dir) {
-        boolean fb = dir.endsWith(fileSep_);
-        if(fb == false)
-            dir = dir.concat(fileSep_);
+    public synchronized void setIncompleteDirectory(String dir) {
+        if(!dir.endsWith(fileSep_))
+            dir += fileSep_;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(b == false)
             throw new IllegalArgumentException();
         else {
-            saveDirectory_ = dir;
-            props_.put(SettingsInterface.SAVE_DIRECTORY, dir);
-            //writeProperties();
+            incompleteDirectory_ = dir;
+            props_.put(SettingsInterface.INCOMPLETE_DIR, dir);
         }
     }
 
-    public synchronized void setSaveDefault(String dir) {
+    /** sets the hard maximum time to live */
+    public synchronized void setMaxTTL(byte maxttl)
+        throws IllegalArgumentException {
+        if(maxttl < 0 || maxttl > 50)
+            throw new IllegalArgumentException();
+        else {
+            maxttl_ = maxttl;
+            String s = Byte.toString(maxttl_);
+            props_.put(SettingsInterface.MAX_TTL, s);
+        }
+    }
+
+    public void setSaveDefault(String dir) {
+        if(!dir.endsWith(fileSep_))
+            dir += fileSep_;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(!b)
@@ -661,33 +714,142 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+    /******************************************************
+     *********  START OF CONFIGURATION SETTINGS ***********
+     ******************************************************/
+
+    /** set the directory for saving files */
+    public void setSaveDirectory(String dir) {
+        if(!dir.endsWith(fileSep_))
+            dir += fileSep_;
+        File f = new File(dir);
+        boolean b = f.isDirectory();
+        if(b == false)
+            throw new IllegalArgumentException();
+        else {
+            saveDirectory_ = dir;
+            props_.put(SettingsInterface.SAVE_DIRECTORY, dir);
+        }
+    }
+
     /** set the directories to search */
-    public synchronized void setDirectories(String dir) {
-        // we now set no directories to share by default
-        //if(dir.equals(""))
-        //  throw new IllegalArgumentException();
-        //else
-        //  {
+    public void setDirectories(String dir) {
         FileManager.getFileManager().reset();
         FileManager.getFileManager().addDirectories(dir);
         directories_ = dir;
         props_.put(SettingsInterface.DIRECTORIES, dir);
-        //writeProperties();
-        //  }
     }
 
     /** set the extensions to search for */
-    public synchronized void setExtensions(String ext) {
-        //if(ext.equals(""))
-        //  throw new IllegalArgumentException();
-        //else
-        //  {
+    public void setExtensions(String ext) {
         FileManager.getFileManager().setExtensions(ext);
         extensions_ = ext;
         props_.put(SettingsInterface.EXTENSIONS, ext);
-        //writeProperties();
-        //  }
     }
+
+    /** sets the time to live */
+    public void setTTL(byte ttl)
+        throws IllegalArgumentException {
+        if (ttl < 1 || ttl > 14)
+            throw new IllegalArgumentException();
+        else {
+            ttl_ = ttl;
+            String s = Byte.toString(ttl_);
+            props_.put(SettingsInterface.TTL, s);
+        }
+    }
+
+    /** sets the soft maximum time to live */
+    public void setSoftMaxTTL(byte softmaxttl)
+        throws IllegalArgumentException {
+        if (softmaxttl < 0 || softmaxttl > 14)
+            throw new IllegalArgumentException();
+        else {
+            softmaxttl_ = softmaxttl;
+            String s = Byte.toString(softmaxttl);
+            props_.put(SettingsInterface.SOFT_MAX_TTL, s);
+        }
+    }
+
+    /** sets the port to connect on */
+    public synchronized void setPort(int port)
+        throws IllegalArgumentException {
+        // if the entered port is outside accepted
+        // port numbers, throw the exception
+        if(port > 65536 || port < 0)
+            throw new IllegalArgumentException();
+        else {
+            port_ = port;
+            String s = Integer.toString(port_);
+            props_.put(SettingsInterface.PORT, s);
+        }
+    }
+
+    /** sets the connection speed.  throws an
+     *  exception if you try to set the speed
+     *  far faster than a T3 line or less than
+     *  0.*/
+    public void setConnectionSpeed(int speed) {
+        if(speed < 0 || speed > 20000)
+            throw new IllegalArgumentException();
+        else {
+            connectionSpeed_ = speed;
+            String s = Integer.toString(connectionSpeed_);
+            props_.put(SettingsInterface.SPEED, s);
+        }
+    }
+
+
+    public void setConnectString(String connect)
+        throws IllegalArgumentException {
+        int i=connect.indexOf(" ");
+        String firstWord;
+        String remainder;
+
+        if (connect.length()<1)
+            throw new IllegalArgumentException();
+
+        //No space in connect or (first) space is last is problematic.
+        if (i==-1 || i==(connect.length()-1)) {
+            throw new IllegalArgumentException();
+        }
+
+        firstWord=connect.substring(0,i);
+        remainder=connect.substring(i+1);
+
+
+        //Disallow GIV and GET.  Also disallow other HTTP methods
+        //in case we want them in the future.
+        String uppered=firstWord.toUpperCase();
+        if (uppered.equals("GIV")
+            || uppered.equals("GET")
+            || uppered.equals("PUT")
+            || uppered.equals("POST")
+            || uppered.equals("HEAD")
+            || uppered.equals("DELETE")) {
+            throw new IllegalArgumentException();
+        }
+
+        //Everything ok.
+        connectString_=connect;
+        connectStringFirstWord_=firstWord;
+        connectStringRemainder_=remainder;
+
+        props_.put(SettingsInterface.CONNECT_STRING, connect);
+    }
+
+    public void setConnectOkString(String ok)
+        throws IllegalArgumentException {
+        if (ok.length()<1)
+            throw new IllegalArgumentException();
+
+        connectOkString_=ok;
+        props_.put(SettingsInterface.CONNECT_OK_STRING, ok);
+    }
+
+    /******************************************************
+     *********  END OF CONFIGURATION SETTINGS *************
+     ******************************************************/
 
     public synchronized void setBannedIps(String[] bannedIps) {
         if(bannedIps == null)
@@ -815,6 +977,17 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+    public synchronized void setMaxUploads(int max) {
+        if(false)
+            throw new IllegalArgumentException();
+        else {
+            maxUploads_ = max;
+            String s = String.valueOf(max);
+            props_.put(SettingsInterface.MAX_UPLOADS, s);
+            writeProperties();
+        }
+    }
+
     public synchronized void setClearCompletedUpload(boolean b) {
         if(false)
             throw new IllegalArgumentException();
@@ -859,54 +1032,6 @@ public class SettingsManager implements SettingsInterface
                 // fails to create a file
             }
         }
-    }
-
-    public void setConnectString(String connect)
-        throws IllegalArgumentException {
-        int i=connect.indexOf(" ");
-        String firstWord;
-        String remainder;
-
-        if (connect.length()<1)
-            throw new IllegalArgumentException();
-
-        //No space in connect or (first) space is last is problematic.
-        if (i==-1 || i==(connect.length()-1)) {
-            throw new IllegalArgumentException();
-        }
-
-        firstWord=connect.substring(0,i);
-        remainder=connect.substring(i+1);
-
-
-        //Disallow GIV and GET.  Also disallow other HTTP methods
-        //in case we want them in the future.
-        String uppered=firstWord.toUpperCase();
-        if (uppered.equals("GIV")
-            || uppered.equals("GET")
-            || uppered.equals("PUT")
-            || uppered.equals("POST")
-            || uppered.equals("HEAD")
-            || uppered.equals("DELETE")) {
-            throw new IllegalArgumentException();
-        }
-
-        //Everything ok.
-        connectString_=connect;
-        connectStringFirstWord_=firstWord;
-        connectStringRemainder_=remainder;
-
-        props_.put(SettingsInterface.CONNECT_STRING, connect);
-        //writeProperties();
-    }
-
-    public void setConnectOkString(String ok) throws IllegalArgumentException {
-        if (ok.length()<1)
-            throw new IllegalArgumentException();
-
-        connectOkString_=ok;
-        props_.put(SettingsInterface.CONNECT_OK_STRING, ok);
-        //writeProperties();
     }
 
     /** writes out the Network Discovery specialized
