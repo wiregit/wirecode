@@ -48,8 +48,8 @@ public final class HTTPUploader implements Uploader {
 	private HTTPMessage _state;
 	
 	private boolean _chatEnabled;
-	private String _chatHost;
-	private int _chatPort;
+	private boolean _browseEnabled;
+	private int _gnutellaPort;
     private boolean _supportsQueueing = false;
 
 
@@ -391,13 +391,13 @@ public final class HTTPUploader implements Uploader {
 	public String getHost() {return _hostName;}
 
 	// implements the Uploader interface
-	public boolean chatEnabled() {return _chatEnabled;}
+	public boolean isChatEnabled() {return _chatEnabled;}
+	
+	// implements the Uploader interface
+	public boolean isBrowseHostEnabled() { return _browseEnabled; }
 
 	// implements the Uploader interface
-	public String getChatHost() {return _chatHost;}
-
-	// implements the Uploader interface
-	public int getChatPort() {return _chatPort;}
+	public int getGnutellaPort() {return _gnutellaPort;}
 	
 	//implements the Uploader interface
 	public String getUserAgent() { return _userAgent; }
@@ -513,8 +513,8 @@ public final class HTTPUploader implements Uploader {
 			throw new IOException();
         }
 		_chatEnabled = true;
-		_chatHost = host;
-		_chatPort = port;
+		_browseEnabled = true;
+		_gnutellaPort = port;
         
         return true;
     }
