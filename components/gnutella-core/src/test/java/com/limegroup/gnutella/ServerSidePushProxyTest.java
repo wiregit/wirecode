@@ -232,7 +232,7 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
     
     public void testFirewallTransferPushProxyWorks() throws Exception {
         Map m = new HashMap();
-        m.put("file", new Integer(Integer.MAX_VALUE));
+        m.put("file", new Integer((int)PushRequest.FW_TRANS_INDEX));
         tRequest("GET", "/gnutella/push-proxy", "ServerID",
                  Base32.encode(clientGUID), "127.0.0.1", 6346, m, 202);
     }
