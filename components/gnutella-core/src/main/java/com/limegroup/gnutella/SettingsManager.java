@@ -7,7 +7,6 @@ import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class manages the property settings.  It maintains
@@ -40,9 +39,9 @@ public class SettingsManager implements SettingsInterface {
     private volatile String   _clientID;
     private volatile int      _maxIncomingConn;
     private volatile String   _saveDirectory;
+    private volatile String   _incompleteDirectory;
     private volatile String   _directories;
     private volatile String   _extensions;
-    private volatile String   _incompleteDirectory;
     private volatile String[] _bannedIps;
     private volatile String[] _bannedWords;
     private volatile boolean  _filterDuplicates;
@@ -60,7 +59,6 @@ public class SettingsManager implements SettingsInterface {
     private volatile boolean  _promptExeDownload;
     private volatile int      _maxUploads;
     private volatile int      _searchAnimationTime;
-    private volatile String   _saveDefault;
     private volatile int      _uploadsPerPerson;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
@@ -99,7 +97,7 @@ public class SettingsManager implements SettingsInterface {
      */
     private static SettingsManager _instance = new SettingsManager();
 
-    private String _home;
+    private String _curDir;
     private String _fileName;
     private String _ndFileName;
 
@@ -120,12 +118,12 @@ public class SettingsManager implements SettingsInterface {
     private SettingsManager() {
         _props      = new Properties();
         _ndProps    = new Properties();
-        _home       = System.getProperty("user.dir");
-        _home       += File.separator;
-        _fileName   = _home;
-        _ndFileName = _home;
-        _fileName   += DEFAULT_FILE_NAME;
-        _ndFileName += DEFAULT_ND_PROPS_NAME;
+        _curDir     = System.getProperty("user.dir");
+		
+        _fileName   = _curDir + File.separator;
+        _ndFileName = _curDir + File.separator;
+        _fileName   += PROPS_NAME;
+        _ndFileName += ND_PROPS_NAME;
         FileInputStream fis;
         try {
             fis = new FileInputStream(_ndFileName);
@@ -371,9 +369,6 @@ public class SettingsManager implements SettingsInterface {
                 else if(key.equals(SEARCH_ANIMATION_TIME)) {
                     setSearchAnimationTime(Integer.parseInt(p));
                 }
-                else if(key.equals(SAVE_DEFAULT)){
-                    setSaveDefault(p);
-                }
                 else if(key.equals(CONNECT_STRING)) {
                     setConnectString(p);
                 }
@@ -423,14 +418,8 @@ public class SettingsManager implements SettingsInterface {
 					setSessions(Integer.parseInt(p)+1);
 				}
 				else if(key.equals(INSTALLED)) {
-					boolean install;
-                    if (p.equals("true"))
-                        install=true;
-                    else if (p.equals("false"))
-                        install=false;
-                    else
-                        break;
-					setInstalled(install);
+					Boolean installed = new Boolean(p);
+					setInstalled(installed.booleanValue());
 				}
 				else if(key.equals(APP_WIDTH)) {
 					setAppWidth(Integer.parseInt(p));
@@ -451,36 +440,18 @@ public class SettingsManager implements SettingsInterface {
 				}
 
 				else if(key.equals(SHOW_TRAY_DIALOG)) {
-					boolean showTrayDialog;
-                    if (p.equals("true"))
-                        showTrayDialog = true;
-                    else if (p.equals("false"))
-                        showTrayDialog = false;
-                    else
-                        break;
-					setShowTrayDialog(showTrayDialog);
+					Boolean showTrayDialog = new Boolean(p);
+					setShowTrayDialog(showTrayDialog.booleanValue());
 				}
 
 				else if(key.equals(MINIMIZE_TO_TRAY)) {
-					boolean minimize;
-                    if (p.equals("true"))
-                        minimize = true;
-                    else if (p.equals("false"))
-                        minimize = false;
-                    else
-                        break;
-					setMinimizeToTray(minimize);
+					Boolean minimize = new Boolean(p);
+					setMinimizeToTray(minimize.booleanValue());
 				}
 
 				else if(key.equals(SHOW_CLOSE_DIALOG)) {
-					boolean showCloseDialog;
-                    if (p.equals("true"))
-                        showCloseDialog = true;
-                    else if (p.equals("false"))
-                        showCloseDialog = false;
-                    else
-                        break;
-					setShowCloseDialog(showCloseDialog);
+					Boolean showCloseDialog = new Boolean(p);
+					setShowCloseDialog(showCloseDialog.booleanValue());
 				}
                 else if(key.equals(CLASSPATH)){
                     setClassPath(p);
@@ -514,7 +485,6 @@ public class SettingsManager implements SettingsInterface {
         setTTL(DEFAULT_TTL);
         setMaxLength(DEFAULT_MAX_LENGTH);
         setTimeout(DEFAULT_TIMEOUT);
-        setHostList(DEFAULT_HOST_LIST);
         setKeepAlive(DEFAULT_KEEP_ALIVE);
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_SPEED);
@@ -530,17 +500,14 @@ public class SettingsManager implements SettingsInterface {
         setFilterHtml(DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
         setExtensions(DEFAULT_EXTENSIONS);
-        setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
-        setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
-        setFilterAdult(SettingsInterface.DEFAULT_FILTER_ADULT);
-        setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
-        setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
-        setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
+        setBannedIps(DEFAULT_BANNED_IPS);
+        setBannedWords(DEFAULT_BANNED_WORDS);
+        setFilterAdult(DEFAULT_FILTER_ADULT);
+        setFilterDuplicates(DEFAULT_FILTER_DUPLICATES);
+        setFilterVbs(DEFAULT_FILTER_VBS);
+        setFilterHtml(DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
-        setFilterBearShareQueries(SettingsInterface.DEFAULT_FILTER_BEARSHARE_QUERIES);
-        //setDirectories(home_);
-        //setSaveDirectory(home_);
-        //setSaveDefault(home_);
+        setFilterBearShareQueries(DEFAULT_FILTER_BEARSHARE_QUERIES);
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);
@@ -558,8 +525,7 @@ public class SettingsManager implements SettingsInterface {
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
         setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
         setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
-        setForcedIPAddressString
-        (DEFAULT_FORCED_IP_ADDRESS_STRING);
+        setForcedIPAddressString(DEFAULT_FORCED_IP_ADDRESS_STRING);
         setForcedPort(DEFAULT_FORCED_PORT);
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
@@ -599,9 +565,14 @@ public class SettingsManager implements SettingsInterface {
     /** returns the timeout value*/
     public int getTimeout(){return _timeout;}
 
-    /** returns a string specifying the full
-     *  pathname of the file listing the hosts */
-    public String getHostList(){return _hostList;}
+    /** 
+	 * returns a string specifying the full
+     * pathname of the file listing the hosts 
+	 */
+    public String getHostList() {
+		File hostListFile = new File(_curDir, HOST_LIST_NAME);		
+		return hostListFile.getAbsolutePath();
+	}
 
     /** returns the keep alive value */
     public int getKeepAlive(){return _keepAlive;}
@@ -630,30 +601,37 @@ public class SettingsManager implements SettingsInterface {
     /** returns the directory to save to */
     public String getSaveDirectory() {
         File file = new File(_saveDirectory);
-        if(!file.isDirectory()) {
-			setSaveDirectory(_saveDirectory);
-        }
-        return _saveDirectory;
+        if(!file.isDirectory()) file.mkdirs();
+		return _saveDirectory;
     }
 
-    /** returns the incomplete directory */
+    /** 
+	 * returns the incomplete directory.  it determines the incomplete
+	 * directory dynamically based on the save directory.
+	 */
     public String getIncompleteDirectory() {
-        File incFile = new File(_incompleteDirectory);
+		// if the incomplete directory has already been set, simply
+		// return it.
+		if(_incompleteDirectory != null) return _incompleteDirectory;
 
-        if(!incFile.isDirectory()) {			
-			setSaveDirectory(_saveDirectory);
-        }
+		String saveDir = getSaveDirectory();
+		File saveFileDir = new File(saveDir);
+		String parentDir = saveFileDir.getParent();
+		
+		// if getParent returns null, simply use the current directory
+		// as the parent.
+		if(parentDir == null) parentDir = _curDir;
+		File incFile = new File(parentDir, "Incomplete");
+		incFile.mkdirs();
+		_incompleteDirectory = incFile.getAbsolutePath();		
         return _incompleteDirectory;
     }
 
-    /** returns the default save directory */
-    public String getSaveDefault() {
-		String saveDefault = CommonUtils.getCurrentDirectory();
-		if(!saveDefault.endsWith(File.separator))
-			saveDefault += File.separator;
-		
-		saveDefault += SAVE_DIRECTORY_NAME;
-		return _saveDefault;
+    /** 
+	 * returns the default save directory path. 
+	 */	
+    public String getSaveDefault() {		
+		return _curDir + File.separator + SAVE_DIRECTORY_NAME;
     }
 
     /** returns the directories to search */
@@ -731,7 +709,7 @@ public class SettingsManager implements SettingsInterface {
     public Properties getNDProps(){return _ndProps;}
 
     /** returns the path of the properties and host list files */
-    public String getPath() {return _home;}
+    public String getPath() {return _curDir + File.separator;}
 
     public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
 
@@ -852,7 +830,7 @@ public class SettingsManager implements SettingsInterface {
 	 * the application to the system tray.
 	 */
 	public boolean getMinimizeToTray() {
-		Boolean b = Boolean.valueOf(_props.getProperty(MINIMIZE_TO_TRAY));
+		Boolean b = new Boolean(_props.getProperty(MINIMIZE_TO_TRAY));
 		return b.booleanValue();	
 	}
 
@@ -1102,28 +1080,6 @@ public class SettingsManager implements SettingsInterface {
         }
     }
 
-    /** 
-	 * sets the default save directory for when the user
-     * presses the "use default" button in the config
-     * window.  this method should only get called at
-     * install time, and is therefore not synchronized. 
-	 */
-    public void setSaveDefault(String dir) {
-        File f = new File(dir);
-        boolean b = f.isDirectory();
-        if(!b)
-            throw new IllegalArgumentException();
-        else {
-			String saveDef = dir;
-			try {
-				saveDef = f.getCanonicalPath();
-			}
-			catch(IOException ioe) {}
-            _saveDefault = saveDef;
-            _props.put(SAVE_DEFAULT, _saveDefault);
-        }
-    }
-
     public void setBasicInfoForQuery(int basicInfo) {
         _basicQueryInfo = basicInfo;
         String s = Integer.toString(basicInfo);
@@ -1153,40 +1109,19 @@ public class SettingsManager implements SettingsInterface {
 	 */
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
-		File incFile  = null;
-		String tempPath = "";
 		try {
-			tempPath = saveFile.getCanonicalPath();
-			tempPath = saveFile.getParent();
-			tempPath += File.separator;
-			tempPath += "Incomplete";
-			incFile = new File(tempPath);
-		
 			if(!saveFile.isDirectory()) {
 				if(!saveFile.mkdirs()) throw new IllegalArgumentException();
 			}
-			if(!incFile.isDirectory()) {
-				if(!incFile.mkdirs()) throw new IllegalArgumentException();
-			}
-			
-			String saveDir = "";
-			String incDir = "";
-			saveDir = saveFile.getCanonicalPath();
-			incDir  = incFile.getCanonicalPath();
-			_saveDirectory = saveDir;
-			_incompleteDirectory = incDir;
+			_saveDirectory = saveFile.getCanonicalPath();
 			_props.put(SAVE_DIRECTORY, _saveDirectory);
 		} catch(IOException ioe) {
 			throw new IllegalArgumentException();
-			// this call to set save directory will simply fail
-			// if an io error occurs
 		}
     }
 
     /** 
-	 * set the directories to search.  this is synchronized
-     * because some gui elements may want to make this call
-     * in separate threads. this method will also filter
+	 * set the directories to search.  this method will filter
      * out any duplicate or invalid directories in the string.
      * note, however, that it does not currently filter out
      * listing subdirectories that have parent directories
@@ -1615,9 +1550,8 @@ public class SettingsManager implements SettingsInterface {
      * freeloader.  For example, if files==0, no host is considered a
      * freeloader.  Throws IllegalArgumentException if files<0.
      */
-    public void setFreeloaderFiles(int files)
-        throws IllegalArgumentException
-    {
+    public void setFreeloaderFiles(int files) 
+		throws IllegalArgumentException {
         if (files<0)
             throw new IllegalArgumentException();
         _freeLoaderFiles = files;
@@ -1634,32 +1568,8 @@ public class SettingsManager implements SettingsInterface {
         _props.put(CHECK_AGAIN, b.toString());
     }
 
-    /**
-     * Sets the pathname String for the file that
-     * lists the default hosts.  This is a unique
-     * method in that the host list cannot be set
-     * in the properties file
-     */
-    private void setHostList(String hostList) {
-        String fn = _home + hostList;
-        File f = new File(fn);
-        if(f.isFile() == true)
-            _hostList = fn;
-        else {
-            try {
-                FileWriter fw = new FileWriter(fn);
-                _hostList = fn;
-            }
-            catch(IOException e){
-                // not sure what to do if the filewriter
-                // fails to create a file
-            }
-        }
-    }
-
 	/**
 	 * sets the width that the application should be.
-	 * @requires the width must be greater than zero.
 	 */
 	public void setAppWidth(int width) {
         String s = Integer.toString(width);
@@ -1802,12 +1712,24 @@ public class SettingsManager implements SettingsInterface {
         return ret;
     }
     
-//    	public static void main(String args[]) {
-//    		SettingsManager settings = SettingsManager.instance();
-//    		String incDir  = settings.getIncompleteDirectory();
-//    		String saveDir = settings.getSaveDirectory();
-//    		System.out.println("incDir: "+incDir+"  saveDir: "+saveDir);
-//    	}
+
+	public static void main(String args[]) {
+		SettingsManager settings = SettingsManager.instance();
+		String incDir  = settings.getIncompleteDirectory();
+		String saveDir = settings.getSaveDirectory();
+		String saveDefaultDir = settings.getSaveDefault();
+
+		File incFile = new File(incDir);
+		File saveFile = new File(saveDir);
+		File saveDefaultFile = new File(saveDefaultDir);
+		System.out.println("incDir:         "+incDir);
+		System.out.println("saveDir:        "+saveDir);
+		System.out.println("saveDefaultDir: "+saveDefaultDir);		
+		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
+		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
+		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
+		System.out.println("host list path: " + settings.getHostList());
+	}
 
     //      /** Unit test */
     //      public static void main(String args[]) {
