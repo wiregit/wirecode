@@ -1,11 +1,31 @@
 package com.limegroup.gnutella.util;
 
-public class CommonUtils {
+/**
+ * auth: afisk
+ * file: CommonUtils.java
+ * desc: This class handles common utility functions that many classes
+ *       may want to access.
+ */
+//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
+public class CommonUtils {
+	
+	// variable for the operating system
+	private static String _os;
+
+	// variable for whether or not we're on Windows
 	private static boolean _isWindows    = false;
+
+	// variable for whether or not we're on Mac 9.1 or below
 	private static boolean _isMacClassic = false;
+
+	// variable for whether or not we're on MacOSX
 	private static boolean _isMacOSX     = false;
+
+	// variable for whether or not we're on Linux
 	private static boolean _isLinux      = false;
+
+	// variable for whether or not we're on Solaris
 	private static boolean _isSolaris    = false;
 	
 	/**
@@ -18,19 +38,26 @@ public class CommonUtils {
 	 */
 	public static void initialize() {
 		// get the operating system
-		String os = System.getProperty("os.name");
+		_os = System.getProperty("os.name");
 
 		// set the operating system variables
-		_isWindows = os.indexOf("Windows") != -1;
-		_isSolaris = os.indexOf("Solaris") != -1;
-		_isLinux   = os.indexOf("Linux")   != -1;
-		if(os.startsWith("Mac OS")) {
-			if(os.endsWith("X")) {
+		_isWindows = _os.indexOf("Windows") != -1;
+		_isSolaris = _os.indexOf("Solaris") != -1;
+		_isLinux   = _os.indexOf("Linux")   != -1;
+		if(_os.startsWith("Mac OS")) {
+			if(_os.endsWith("X")) {
 				_isMacOSX = true;
 			} else {
 				_isMacClassic = true;
 			}			
 		}
+	}
+
+	/**
+	 * returns the operating system
+	 */
+	public static String getOS() {
+		return _os;
 	}
 
 	/**
