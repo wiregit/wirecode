@@ -106,12 +106,6 @@ public class RouterService {
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
 
-	//keep the reference around...prevent class GC
-	/**
-	 * <tt>ChatManager</tt> for managing all chat sessions.
-	 */
-    private static final ChatManager chatManager = ChatManager.instance();
-
 	/**
 	 * <tt>Statistics</tt> class for managing statistics.
 	 */
@@ -1085,7 +1079,7 @@ public class RouterService {
 	 * Creates and returns a new chat to the given host and port.
 	 */
 	public static Chatter createChat(String host, int port) {
-		Chatter chatter = chatManager.request(host, port);
+		Chatter chatter = ChatManager.instance().request(host, port);
 		return chatter;
 	}
     
