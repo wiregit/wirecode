@@ -486,7 +486,7 @@ public class LimeXMLReplyCollection {
         List actualMatches = null;
         for(Iterator i = matching.iterator(); i.hasNext(); ) {
             LimeXMLDocument currReplyDoc = (LimeXMLDocument)i.next();
-            if (LimeXMLUtils.match(currReplyDoc, query)) {
+            if (LimeXMLUtils.match(currReplyDoc, query, false)) {
                 if( actualMatches == null ) // delayed allocation of the list..
                     actualMatches = new LinkedList();
                 actualMatches.add(currReplyDoc);

@@ -55,6 +55,67 @@ public class MetaFileManagerTest
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	    
 	}
+	
+	public void testMetaQueriesWithConflictingMatches() throws Exception {
+	    waitForLoad();
+	    
+	    // test a query where the filename is meaningless but XML matches.
+	    File f1 = createNewNamedTestFile(10, "meaningless");
+	    LimeXMLDocument d1 = new LimeXMLDocument(buildAudioXMLString(
+	        "artist=\"Sammy B\" album=\"Jazz in G\""));
+	    List l1 = new ArrayList(); l1.add(d1);
+	    fman.addFileIfShared(f1, l1);
+	    
+	    Response[] r1 = fman.query(QueryRequest.createQuery("sam",
+	                                buildAudioXMLString("artist=\"sam\"")));
+        assertNotNull(r1);
+        assertEquals(1, r1.length);
+        assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
+        
+        // test a match where 50% matches -- should get no matches.
+        Response[] r2 = fman.query(QueryRequest.createQuery("sam jazz in c",
+                                   buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
+        if(r2 != null)
+            assertEquals(0, r2.length);
+            
+            
+        // test where the keyword matches only.
+        Response[] r3 = fman.query(QueryRequest.createQuery("meaningles"));
+        assertNotNull(r3);
+        assertEquals(1, r3.length);
+        assertEquals(d1.getXMLString(), r3[0].getDocument().getXMLString());
+                                  
+        // test where keyword matches, but xml doesn't.
+        Response[] r4 = fman.query(QueryRequest.createQuery("meaningles",
+                                   buildAudioXMLString("artist=\"bob\"")));
+        if(r4 != null)
+            assertEquals(0, r4.length);
+            
+        // more ambiguous tests -- a pure keyword search for "jazz in d"
+        // will work, but a keyword search that included XML will fail for
+        // the same.
+        File f2 = createNewNamedTestFile(10, "jazz in d");
+        LimeXMLDocument d2 = new LimeXMLDocument(buildAudioXMLString(
+            "album=\"jazz in e\""));
+        List l2 = new ArrayList(); l2.add(d2);
+        fman.addFileIfShared(f2, l2);
+        
+        // pure keyword.
+        Response[] r5 = fman.query(QueryRequest.createQuery("jazz in d"));
+        assertNotNull(r5);
+        assertEquals(1, r5.length);
+        assertEquals(d2.getXMLString(), r5[0].getDocument().getXMLString());
+        
+        // keyword, but has XML to check more efficiently.
+        Response[] r6 = fman.query(QueryRequest.createQuery("jazz in d",
+                                   buildAudioXMLString("album=\"jazz in d\"")));
+        if(r6 != null)
+            assertEquals(0, r6.length);
+                            
+        
+                                   
+    }
+	
 
     public void testMetaQRT() throws Exception {
         String dir2 = "director=\"francis loopola\"";
@@ -71,7 +132,7 @@ public class MetaFileManagerTest
         //now test xml metadata in the QRT
         File f2 = createNewNamedTestFile(11, "metadatafile2");
         LimeXMLDocument newDoc2 =
-            new LimeXMLDocument(buildXMLString(dir2));
+            new LimeXMLDocument(buildVideoXMLString(dir2));
 
         List l2 = new ArrayList();
         l2.add(newDoc2);
@@ -81,10 +142,10 @@ public class MetaFileManagerTest
         
         assertTrue("expected in QRT", 
                    qrt.contains 
-                   (get_qr(buildXMLString(dir2))));
+                   (get_qr(buildVideoXMLString(dir2))));
         assertFalse("should not be in QRT", 
                     qrt.contains
-                    (get_qr(buildXMLString("sasami juzo"))));
+                    (get_qr(buildVideoXMLString("sasami juzo"))));
         
         //now remove the file and make sure the xml gets deleted.
         fman.removeFileIfShared(f2);
@@ -92,7 +153,7 @@ public class MetaFileManagerTest
        
         assertFalse("should not be in QRT",
                     qrt.contains
-                    (get_qr(buildXMLString(dir2))));
+                    (get_qr(buildVideoXMLString(dir2))));
     }
 
     public void testMetaQueries() throws Exception {
@@ -102,14 +163,14 @@ public class MetaFileManagerTest
         //make sure there's nothing with this xml query
         Response[] res = 
             fman.query(QueryRequest.createQuery("", 
-                                                buildXMLString(dir1)));
+                                                buildVideoXMLString(dir1)));
         
         assertEquals("there should be no matches", 0, res.length);
         
         File f1 = createNewNamedTestFile(10, "test_this");
         
         LimeXMLDocument newDoc1 = 
-            new LimeXMLDocument(buildXMLString(dir1));
+            new LimeXMLDocument(buildVideoXMLString(dir1));
         List l1 = new ArrayList();
         l1.add(newDoc1);
 
@@ -118,7 +179,7 @@ public class MetaFileManagerTest
         File f2 = createNewNamedTestFile(11, "hmm");
 
         LimeXMLDocument newDoc2 = 
-            new LimeXMLDocument(buildXMLString(dir2));
+            new LimeXMLDocument(buildVideoXMLString(dir2));
         List l2 = new ArrayList();
         l2.add(newDoc2);
 
@@ -127,7 +188,7 @@ public class MetaFileManagerTest
         File f3 = createNewNamedTestFile(12, "testtesttest");
         
         LimeXMLDocument newDoc3 = 
-            new LimeXMLDocument(buildXMLString(dir3));
+            new LimeXMLDocument(buildVideoXMLString(dir3));
         List l3 = new ArrayList();
         l3.add(newDoc3);
         
@@ -137,30 +198,30 @@ public class MetaFileManagerTest
         fman.addFileIfShared(f3, l3);
 
         res = fman.query(QueryRequest.createQuery("", 
-                                                  buildXMLString(dir1)));
+                                                  buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 
         res = fman.query(QueryRequest.createQuery("", 
-                                                 buildXMLString(dir2)));
+                                                 buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
         
         //remove a file
         fman.removeFileIfShared(f1);
 
         res = fman.query(QueryRequest.createQuery("", 
-                                                  buildXMLString(dir1)));
+                                                  buildVideoXMLString(dir1)));
         assertEquals("there should be no matches", 0, res.length);
         
         //make sure the two other files are there
         res = fman.query(QueryRequest.createQuery("",
-                                                  buildXMLString(dir2)));
+                                                  buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
 
         //remove another and check we still have on left
         fman.removeFileIfShared(f2);
         
         res = fman.query(QueryRequest.createQuery("",
-                                                  buildXMLString(dir3)));
+                                                  buildVideoXMLString(dir3)));
         
         assertEquals("there should be one match", 1, res.length);
 
@@ -168,7 +229,7 @@ public class MetaFileManagerTest
         fman.removeFileIfShared(f3);
         
         res = fman.query(QueryRequest.createQuery("",
-                                                  buildXMLString(dir3)));
+                                                  buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
         
     }
@@ -185,11 +246,17 @@ public class MetaFileManagerTest
     }
 
     // build xml string for video
-    private String buildXMLString(String keyname) {
+    private String buildVideoXMLString(String keyname) {
         return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video " 
             + keyname 
             + "></video></videos>";
     }
+    
+    private String buildAudioXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio " 
+            + keyname 
+            + "></audio></audios>";
+    }    
 
 
 }

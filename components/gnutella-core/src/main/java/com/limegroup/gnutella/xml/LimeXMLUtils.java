@@ -270,10 +270,9 @@ public class LimeXMLUtils
      * otherwise
      */
     public static boolean match(LimeXMLDocument replyDoc,
-      LimeXMLDocument queryDoc) {
-        if(replyDoc==null)
-            return false;
-        if(queryDoc == null)
+                                LimeXMLDocument queryDoc,
+                                boolean allowAllNulls) {
+        if(queryDoc == null || replyDoc == null)
             throw new NullPointerException("querying with null doc.");
 
         //First find the names of all the fields in the query
@@ -341,12 +340,14 @@ public class LimeXMLUtils
             if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
                 return false;
             // ok, it passed rate test, now make sure it had SOME matches...
-            if (matchCount > 0)
+            if (allowAllNulls || matchCount > 0)
                 return true;
             else
                 return false;
         }
-        else if (size == 1){
+        else if (size == 1) {
+            if(allowAllNulls && nullCount == 1)
+                return true;
             if(matchCountD/sizeD < 1)
                 return false;
             return true;
