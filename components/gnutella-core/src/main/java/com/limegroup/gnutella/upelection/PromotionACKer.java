@@ -63,7 +63,7 @@ public class PromotionACKer implements MessageListener {
 			UDPService.instance().send(reply, new Endpoint(_host,_port));
 		} 
 		else  { //start the promotion process in its own thread
-			Promoter promoter = new Promoter("promotion thread");
+			Promoter promoter = new Promoter(_host, _port);
 			promoter.setDaemon(true);
 			promoter.start();
 		}

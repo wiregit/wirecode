@@ -1472,6 +1472,55 @@ public class ConnectionManager {
         
         completeConnectionInitialization(mc, true);
     }
+    
+    /**
+     * tries to become an ulrapeer by first disconnecting all existing leaf connections
+     * and then adding the guaranteed up2up connection.  Used for promotion.
+     * @param host the host to connect to that we are sure has a slot waiting for us
+     * @param port the port that host is listening to
+     * @return whether we became an UP successfully.
+     */
+    public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
+    	
+    	//this connection must not fail.  
+		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
+		
+		//let the exception propagate
+		//if we fail to connect for any reason, abort the promotion process.
+		UPconn.initialize();
+    	
+		//now remove all our connections
+		//Question: do we want to remove the fetched but not initialized connections as well?
+		//I think yes, since we'll be doing a crawl for new connections --zab
+		List oldConnections = _connections;
+		
+		//now remove all our open connections 
+		synchronized(this) {
+			_connections = new ArrayList();
+			_initializedConnections = new ArrayList();
+			_initializedClientConnections = new ArrayList();
+		}
+		//and add the new one.
+		processConnectionHeaders(UPconn);
+		completeConnectionInitialization(UPconn, false);
+		
+		//start it off-thread
+		Thread connThread = new ManagedThread() {
+			public void ManagedRun() {
+				try {
+					startConnection(UPconn);
+				}catch(IOException iox) {} //the OutgoingConnector ignores it as well
+			}
+		};
+		connThread.start();
+		
+		//and close the old connections we had.
+		for (Iterator iter = oldConnections.iterator();iter.hasNext();) {
+			ManagedConnection conn = (ManagedConnection)iter.next();
+			conn.close();
+		}
+		
+    }
 
     /** 
      * Indicates that we are a client node, and have received ultrapeer
