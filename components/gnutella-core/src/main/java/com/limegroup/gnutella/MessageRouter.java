@@ -1350,6 +1350,7 @@ public abstract class MessageRouter {
      */
     private void handleRouteTableMessage(RouteTableMessage m,
 										 ManagedConnection receivingConnection) {
+        System.out.println("MessageRouter::handleRouteTableMessage: "+receivingConnection); 
         //if not a supernode-client, ignore
         if(! receivingConnection.isSupernodeClientConnection() &&
 		   ! receivingConnection.isUltrapeerQueryRoutingConnection())
@@ -1386,7 +1387,8 @@ public abstract class MessageRouter {
      * it takes care of throttling.
      *     @modifies connections
      */    
-    private void forwardQueryRouteTables() {		
+    private void forwardQueryRouteTables() {
+		//System.out.println("MessageRouter::forwardQueryRouteTables"); 
         synchronized (queryUpdateLock) {
 			//Check the time to decide if it needs an update.
 			long time = System.currentTimeMillis();
@@ -1403,13 +1405,16 @@ public abstract class MessageRouter {
 				// continue if I'm an Ultrapeer and the node on the
 				// other end doesn't support Ultrapeer-level query
 				// routing
-				if(RouterService.isSupernode() && 
-				   !c.isUltrapeerQueryRoutingConnection()) { 
-					continue;
+				if(RouterService.isSupernode()) { 
+                    // only skip it if it's not an Ultrapeer query routing
+                    // connection
+                    if(!c.isUltrapeerQueryRoutingConnection()) { 
+                        continue;
+                    }
 				} 				
 				// otherwise, I'm a leaf, and don't send routing
-				// tables is it's not a connection to an Ultrapeer
-				// or if query routing is not enabled
+				// tables if it's not a connection to an Ultrapeer
+				// or if query routing is not enabled on the connection
 				else if (!(c.isClientSupernodeConnection() && 
 						   c.isQueryRoutingEnabled())) {
 					continue;
