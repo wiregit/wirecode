@@ -41,36 +41,46 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testBigPush() throws Exception {        
         byte[] bytes=new byte[23+26+10];
         bytes[16]=Message.F_PUSH;
-        bytes[17]=(byte)3;     //hops
-        bytes[18]=(byte)3;     //ttl
+        bytes[17]=(byte)3;     //ttl .. ttl + hops must be <= 4
+        bytes[18]=(byte)1;     //hops
         bytes[19]=(byte)26+10; //payload length
         bytes[23+16]=(byte)3;  //index
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read big push
-        PushRequest pr=(PushRequest)Message.read(in);            
-        assertEquals("unexpected push index", pr.getIndex(), 3);
-        assertEquals("unexpected total length", pr.getTotalLength(), 
-                     bytes.length);
-        assertEquals("unexpected length", pr.getLength(), bytes.length-23);
+        PushRequest pr=(PushRequest)Message.read(in);     
+        assertEquals("unexpected push index", 3, pr.getIndex());
+        assertEquals("unexpected total length", bytes.length,
+            pr.getTotalLength() );
+        assertEquals("unexpected length", bytes.length-23,
+            pr.getLength());
+        assertEquals("unexpected func", Message.F_PUSH, pr.getFunc());
+        assertEquals("unexpected hops", (byte)1, pr.getHops());
+        assertEquals("unexpected ttl", (byte)3, pr.getTTL());
 
         //2. Test that yields returns the same thing
         ByteArrayOutputStream out=new ByteArrayOutputStream();
         pr.write(out);
-        assertTrue("written bytes should be equal", 
-                   Arrays.equals(out.toByteArray(), bytes));
+        byte[] outBytes = out.toByteArray();        
+        assertEquals("written push different length than read push",
+            outBytes.length, bytes.length);
+        for (int i=0; i<outBytes.length; i++)
+            assertEquals("byte # " + i + " not equal", bytes[i], outBytes[i]);
+
+        //assertTrue("written bytes should be equal", 
+        //           Arrays.equals(out.toByteArray(), bytes));
 
         //3. Test that we can strip the payload out
         PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
-        assertEquals("unexpected length", pr2.getLength(), 26);
-        assertEquals("unexpected hops", pr2.getHops(), pr.getHops());
+        assertEquals("unexpected length", 26, pr2.getLength());
+        assertEquals("unexpected hops", pr.getHops(), pr2.getHops());
         ByteArrayOutputStream out2=new ByteArrayOutputStream();
         pr2.write(out2);
         byte[] bytes2=out2.toByteArray();
-        assertEquals("unexpected bytes length", bytes2.length, 23+26);
+        assertEquals("unexpected bytes length", 23+26, bytes2.length);
         for (int i=0; i<bytes2.length; i++)
             if (i!=19) //skip payload length
-                assertEquals(bytes2[i], bytes[i]);
+                assertEquals("byte # " + i + " not equal", bytes[i], bytes2[i]);
 
     }
 
