@@ -2,10 +2,18 @@ package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.xml.*;
+import java.io.IOException;
+import org.xml.sax.SAXException;
+
 
 /**
- * A single result from a query reply message.
- * Create these to respond to a search.   Immutable.
+ * A single result from a query reply message.  (In hindsight, "Result" would
+ * have been a better name.)  Besides basic file information, responses can
+ * include metadata, which is actually stored query reply's QHD.  Metadata comes
+ * in two formats: raw strings or parsed LimeXMLDocument.<p>
+ *
+ * Response was originally intended to be immutable, but it currently includes
+ * mutator methods for metadata; these will be removed in the future.  
  */
 public class Response {
     /** Both index and size must fit into 4 unsigned bytes; see
@@ -20,22 +28,26 @@ public class Response {
 
 
     /**
-     * This class specifies and invariant, that if the metadata is set,
-     * the value of metaBytes must also be set.
+     * Metadata can be stored in one of two forms: raw strings (read from the
+     * network) or LimeXMLDocument (prepared by FileManager).  Storing the
+     * latter makes calculating aggregate strings in the QHD more efficient.
+     * Response provides methods to access both formats, lazily converting
+     * between the two and caching the results as needed.     
+     *
+     * INVARIANT: metadata!=null ==> metaBytes==metadata.getBytes()
+     * INVARIANT: metadata!=null && document!=null ==> metadata and document
+     *  are equivalent but in different formats 
      */
     
-	/** The meta variable is a string of meta information that
-	 *  may be added per response (as opposed to per QueryReply)
-	 */
+	/** Raw unparsed XML metadata. */
 	private String metadata;
 
-    /** The bytes of the metadata instance variable.  There is some special
-     *  processing needed here to deal with internationalization....
-     */
+    /** The bytes of the metadata instance variable, used for
+     * internationalization purposes.  (Remember that
+     * metadata.length()!=metaBytes.length.) */
     private byte[] metaBytes;
 
-    /** The document representing the XML in this response.
-     */
+    /** The document representing the XML in this response. */
     private LimeXMLDocument document;
 
     /** Creates a fresh new response.
@@ -57,8 +69,9 @@ public class Response {
 
 
     /**
-     * This constructor allows for the association of this Response with a
-     * LimeXMLDocument (which presumably contains the responses metadata).
+     * Creates a new response with parsed metadata.  Typically this is used
+     * to respond to query requests.
+     * @param doc the metadata to include
      */
     public Response(long index, long size, String name, LimeXMLDocument doc) {
         this(index,size,name);
@@ -67,8 +80,10 @@ public class Response {
     }
 
 
-    /**Overloaded constructor that allows the creation of Responses with
-     * meta-data
+    /**
+     * Creates a new response with raw unparsed metadata.  Typically this
+     * is used when reading replies from the network.
+     * @param metadata a string of metadata, typically XML
      */
     public Response(long index, long size, String name,String metadata) {
         this(index,size,name);
@@ -79,9 +94,9 @@ public class Response {
     }
 
     /**
-     * Overloaded constructor that picks up data from between the  nulls
-     * That data is then made into a nice xml string that can 
-     * be converted into a LimeXMLDocument
+     * Creates a new response with BearShare/Gnotella-style "between the null"
+     * metadata.  This metadata is converted
+     * @param betweenNulls old-fashioned length and bitrate metadata
      */
     public Response(String betweenNulls, long index, long size, String name){
         this(index,size,name);
@@ -140,9 +155,10 @@ public class Response {
     }
 
     /**
-     * To add metaData to a response after it has been created.
-     * Added to faciliatate setting audio metadata for responses
-     * generated from ordinary searches. 
+     * Sets this' metadata.  Added to faciliatate setting audio metadata for
+     * responses generated from ordinary searches.  Typically this should
+     * only be called if no metadata was passed to this' constructor.
+     * @param meta the unparsed XML metadata
      */
     private void setMetadata(String meta){
         this.metadata=meta;
@@ -151,9 +167,10 @@ public class Response {
     
 
     /**
-     * To add a XMLDOC to a response after it has been created.
-     * Added to faciliatate setting audio metadata for responses
-     * generated from ordinary searches. 
+     * Sets this' metadata.  Added to faciliatate setting audio metadata for
+     * responses generated from ordinary searches.  Typically this should only
+     * be called if no metadata was passed to this' constructor.
+     * @param meta the parsed XML metadata 
      */
     public void setDocument(LimeXMLDocument doc) {
         this.document=doc;
@@ -166,24 +183,6 @@ public class Response {
     public long getSize() {
         return size;
     }
-
-    /**
-     * lazily returns the LimeXMLDocument if possible. Returns null if all 
-     * fails 
-     */
-    public LimeXMLDocument getDocument() {
-        if (document != null) 
-            return document;
-        else if (metadata != null) {
-            try {
-                document = new LimeXMLDocument(metadata);
-            }
-            catch (Exception e) {}
-            return document;
-        }
-        return null;//both document and metadata are null
-    }
-
 
     /**
      * Returns the size of the name in bytes (not the whole response)
@@ -219,10 +218,8 @@ public class Response {
     }
 
     /**
-     * checks if the string is known, otherwise tries to find out (lazily) 
-     * from the document. 
-     * <p>
-     * retruns null if cannot calculate the string
+     * Returns this' metadata as an unparsed XML string.
+     * @return the metadata, or null if none.
      */
 	public String getMetadata() {
         if (metadata != null && !metadata.equals(""))
@@ -237,8 +234,7 @@ public class Response {
                         metadata = null; //reset it
                 }
             } 
-            catch (Exception e) {
-                e.printStackTrace();
+            catch (SchemaNotFoundException e) {
                 metadata = null;
                 metaBytes = null;
             }
@@ -246,6 +242,25 @@ public class Response {
         }
         return null;//metadata and document are both set to null
 	}
+
+    /**
+     * Returns this' metadata as a parsed XML document
+     * @return the metadata, or null if none exists or the metadata
+     *  couldn't be parsed
+     */
+    public LimeXMLDocument getDocument() {
+        if (document != null) 
+            return document;
+        else if (metadata != null) {
+            try {
+                document = new LimeXMLDocument(metadata);
+            } catch (SAXException e) {
+            } catch (SchemaNotFoundException e) {
+            } catch (IOException e) { }
+            return document;
+        }
+        return null;//both document and metadata are null
+    }
 
     
     /**
