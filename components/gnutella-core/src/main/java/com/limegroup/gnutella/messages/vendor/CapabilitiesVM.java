@@ -32,11 +32,10 @@ public final class CapabilitiesVM extends VendorMessage {
     static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
     /**
-     * Bytes for the SIMPP capability 'SIMP'. Public, ManagedConnection needs
-     * access to it
+     * The bytes for supporting SIMPP.  This used to be 'SIMP', but that
+     * implementation was broken.  We now use 'IMPP' to advertise support.
      */
-    public static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
-                                                          (byte)77, (byte)80};
+    private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
     
     /**
      * The current version of this message.
@@ -163,6 +162,13 @@ public final class CapabilitiesVM extends VendorMessage {
     public boolean supportsWhatIsNew() {
         return FeatureSearchData.supportsWhatIsNew(
             supportsCapability(FEATURE_SEARCH_BYTES));
+    }
+    
+    /**
+     * Returns the current SIMPP version.
+     */
+    public int supportsSIMPP() {
+        return supportsCapability(SIMPP_CAPABILITY_BYTES);
     }
 
     // override super

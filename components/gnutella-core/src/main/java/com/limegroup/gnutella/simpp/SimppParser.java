@@ -15,7 +15,12 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 public class SimppParser {
+    
+    private static final Log LOG = LogFactory.getLog(SimppParser.class);
 
     private static DOMParser parser = new DOMParser();
     
@@ -30,13 +35,7 @@ public class SimppParser {
     //<xml for version related info with one tag containing all the props data>
     //TODO1: Change the way this is parsed as per the format described above. 
     public SimppParser(byte[] dataBytes) throws SAXException, IOException {
-        String tmp = null;
-        try {
-            tmp = new String(dataBytes, "UTF-8");
-        } catch (UnsupportedEncodingException uex) {
-            ErrorService.error(uex);
-        }
-        parseInfo(tmp);
+        parseInfo(new String(dataBytes, "UTF-8"));
     }
     
     public int getVersion() {
@@ -72,6 +71,7 @@ public class SimppParser {
                 try {
                     _version = Integer.parseInt(ver);
                 } catch(NumberFormatException nfx) {
+                    LOG.error("Unable to parse version number: " + nfx);
                     _version = -1;
                 }
             }

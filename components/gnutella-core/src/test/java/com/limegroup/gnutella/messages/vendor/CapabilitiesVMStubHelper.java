@@ -16,7 +16,7 @@ public class CapabilitiesVMStubHelper {
         //1. prepare the SMB
         CapabilitiesVM.SupportedMessageBlock simppSMB = 
         (CapabilitiesVM.SupportedMessageBlock) makeSMB(
-                             CapabilitiesVM.SIMPP_CAPABILITY_BYTES,simppNumber);
+                             new byte[] { 'I', 'M', 'P', 'P' }, simppNumber);
         //2. make the payload
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)1, baos);

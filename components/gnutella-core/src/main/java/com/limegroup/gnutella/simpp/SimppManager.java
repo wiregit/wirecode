@@ -20,6 +20,9 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings
  * as necessary.
@@ -27,6 +30,9 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * Uses the singleton pattern
  */
 public class SimppManager {
+    
+    private static final Log LOG = LogFactory.getLog(SimppManager.class);
+    
 
     private static SimppManager INSTANCE;
 
@@ -70,22 +76,24 @@ public class SimppManager {
             try {
                 parser = new SimppParser(verifier.getVerifiedData());
             } catch(SAXException sx) {
+                LOG.error("Unable to parse simpp data on disk", sx);
                 problem = true;
                 return;
             } catch (IOException iox) {
+                LOG.error("IOX parsing simpp on disk", iox);
                 problem = true;
                 return;
             }
             if(parser.getVersion() <= MIN_VERSION) {
+                LOG.error("Version below min on disk, aborting simpp.");
                 problem = true; //set the values to default
                 return;
             }
             this._latestVersion = parser.getVersion();
             this._propsStream = parser.getPropsData();
             this._simppBytes = content;
-        } catch (VerifyError ve) {
-            problem = true;
         } catch (IOException iox) {
+            LOG.error("IOX reading simpp xml on disk", iox);
             problem = true;  
         } finally {
             if(problem) {
@@ -141,13 +149,17 @@ public class SimppManager {
                 try {
                     parser = new SimppParser(verifier.getVerifiedData());
                 } catch(SAXException sx) {
+                    LOG.error("SAX error reading network simpp", sx);
                     return;
                 } catch(IOException iox) {
+                    LOG.error("IOX parsing network simpp", iox);
                     return;
                 }
                 int version = parser.getVersion();
-                if(version <= myVersion)
+                if(version <= myVersion) {
+                    LOG.error("Network simpp below current version, aborting.");
                     return;
+                }
                 //OK. We have a new SimppMessage, take appropriate steps
                 //1. Cache local values. 
                 SimppManager.this._latestVersion = version;

@@ -1308,13 +1308,11 @@ public class ManagedConnection extends Connection
         else if(vm instanceof CapabilitiesVM) {
             //we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM)vm;
-            int publishedSimpp = 
-            capVM.supportsCapability(CapabilitiesVM.SIMPP_CAPABILITY_BYTES);
-            if(publishedSimpp <= SimppManager.instance().getVersion())
-                return;
-            //request the simpp message
-            SimppRequestVM simppReq = new SimppRequestVM();
-            send(simppReq);
+            if(capVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
+                //request the simpp message
+                SimppRequestVM simppReq = new SimppRequestVM();
+                send(simppReq);
+            }
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        
             // If this is a ClientSupernodeConnection and the host supports

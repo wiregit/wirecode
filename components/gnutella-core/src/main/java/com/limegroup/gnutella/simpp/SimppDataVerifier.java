@@ -16,7 +16,13 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 public class SimppDataVerifier {
+    
+    private static final Log LOG = LogFactory.getLog(SimppDataVerifier.class);
+    
     
     private static final byte SEP = (byte)124;
 
@@ -46,9 +52,9 @@ public class SimppDataVerifier {
         try {
             base32 = new String(temp, "UTF-8");
         } catch (UnsupportedEncodingException uex) {
-            ErrorService.error(uex);
             return false;
         }
+
         byte[] signature = Base32.decode(base32);
         byte[] propsData = new byte[simppPayload.length-1-sepIndex];
         System.arraycopy(simppPayload, sepIndex+1, propsData, 
@@ -57,6 +63,7 @@ public class SimppDataVerifier {
         PublicKey pk = getPublicKey();
         if(pk == null)
             return false;
+
         String algo = DSA_ALGORITHM;
         SignatureVerifier verifier = 
                          new SignatureVerifier(propsData, signature, pk, algo);
@@ -81,7 +88,7 @@ public class SimppDataVerifier {
         //1. Get the file that has the public key 
         //File pubKeyFile =
         //SecuritySettings.SIMPP_PUBLIC_KEY_FILE.getValue();
-        File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
+        File pubKeyFile=new File(".", "pub1.key");
         //TODO: work this out with the setting telling us which public key to
         //use
 
@@ -94,7 +101,7 @@ public class SimppDataVerifier {
             raf.readFully(bytes);
             base32Enc = new String(bytes, "UTF-8");
         } catch (IOException iox) {
-            ErrorService.error(iox);
+            LOG.error("IOX reading file", iox);
             return null;
         } finally {
             try {
@@ -111,9 +118,9 @@ public class SimppDataVerifier {
             EncodedKeySpec keySpec = new X509EncodedKeySpec(pubKeyBytes);
             ret = factory.generatePublic(keySpec);
         } catch(NoSuchAlgorithmException nsax) {
-            ErrorService.error(nsax);
+            LOG.error("no algorithm", nsax);
         } catch(InvalidKeySpecException iksx) {
-            ErrorService.error(iksx);
+            LOG.error("invalid key", iksx);
         }
         return ret;
     }

@@ -16,6 +16,8 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.simpp.SimppManager;
 
 public class SimppSettingsManager {
+
+    private static final Log LOG = LogFactory.getLog(SimppSettingsManager.class);
     
     /**
      * The properties we crete from the string we get via simpp message
@@ -50,8 +52,6 @@ public class SimppSettingsManager {
      */
     private static SimppSettingsManager INSTANCE;
 
-    private static final Log LOG=LogFactory.getLog(SimppSettingsManager.class);
-    
     //constructor
     private SimppSettingsManager() {
         _usingUserPrefs = true; //we are using defualt settings by default
@@ -87,7 +87,8 @@ public class SimppSettingsManager {
         try {
             _simppProps.load(bais);
         } catch(IOException iox) {
-            ErrorService.error(iox);//huh? IOEx with a BAIS from String?
+            LOG.error("IOX reading simpp properties", iox);
+            return;
         }
         activateSimppSettings();
     }
