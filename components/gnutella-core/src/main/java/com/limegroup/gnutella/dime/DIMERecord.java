@@ -551,7 +551,7 @@ public class DIMERecord {
         long skipped = 0;
         while(skipped < padding) {
             long current = in.skip(padding - skipped);
-            if(current == -1)
+            if(current == -1 || current == 0)
                 throw new IOException("eof");
             else
                 skipped += current;
@@ -566,7 +566,7 @@ public class DIMERecord {
         int offset = 0;
         while (offset < buffer.length) {
             int read = in.read(buffer, offset, buffer.length - offset);
-            if(read == -1)
+            if(read == -1 || read == 0)
                 throw new IOException("eof");
             else
                 offset += read;
