@@ -8,7 +8,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 
-public class ProxyTester extends BaseTestCase {
+public class ProxyTest extends BaseTestCase {
     
     private final static byte V4 = (byte)4;
     private final static byte V5 = (byte)5;
@@ -24,12 +24,12 @@ public class ProxyTester extends BaseTestCase {
 
     private static FakeProxyServer fps;
 
-    public ProxyTester(String name) {
+    public ProxyTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(ProxyTester.class);
+        return buildTestSuite(ProxyTest.class);
     }
     
     public static void main(String[] args) {
