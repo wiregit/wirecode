@@ -918,9 +918,7 @@ public abstract class MessageRouter {
                 //TODO3: it's somewhat silly to allocate a new table and then
                 //immediately replace its state with RESET.  Probably best to
                 //have QueryRouteTable lazily allocate memory.
-                qi.lastReceived=new QueryRouteTable(
-                    QueryRouteTable.DEFAULT_TABLE_SIZE,
-                    QueryRouteTable.DEFAULT_INFINITY);
+                qi.lastReceived=new QueryRouteTable();
             }
             try {
                 qi.lastReceived.update(m);    
@@ -988,9 +986,7 @@ public abstract class MessageRouter {
      */
     private QueryRouteTable createRouteTable(ReplyHandler c) {
         //TODO: choose size according to what's been propogated.
-        QueryRouteTable ret=new QueryRouteTable(
-            QueryRouteTable.DEFAULT_TABLE_SIZE,
-            (byte)QueryRouteTable.DEFAULT_INFINITY);
+        QueryRouteTable ret=new QueryRouteTable();
         
         //Add my files...
         addQueryRoutingEntries(ret);
