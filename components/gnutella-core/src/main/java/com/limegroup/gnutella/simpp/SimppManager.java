@@ -43,6 +43,10 @@ public class SimppManager {
                 return;
             }
             SimppParser parser = new SimppParser(verifier.getVerifiedData());
+            if(parser.getVersion() < 0) {
+                latestVersion = propsHandler.useDefaultProps();
+                return;
+            }
             _latestVersion = parser.getVersion();
             this._simppBytes = content;
             String propsInXML = parser.getPropsData();
