@@ -97,6 +97,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** If in the wait state, the number of retries we're waiting for.
      *  Otherwise undefined. */
     private int retriesWaiting;
+    /** The name of the last file being attempted.  Needed only to support
+     *  launch(). */
+    private String currentFileName;
+    /** The size of the last file being attempted.  Needed only to support
+     *  launch(). */
+    private int currentFileSize;
+
 
 
     /**
@@ -254,10 +261,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized void launch() {
-        /*
-          //TODO: re-enable
         //We haven't started yet.
-        if (dloader==null)
+        if (currentFileName==null)
             return;
 
         //Unfortunately this must be done in a background thread because the
@@ -265,21 +270,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         //in the future, we can avoid the thread.
         Thread worker=new Thread() {
             public void run() {              
-                String name=dloader.getFileName();
                 File file=null;
 
-                //a) If the file is being downloaded, create *copy* of
-                //incomplete file.  The copy is needed because some programs,
-                //notably Windows Media Player, attempt to grab exclusive file
-                //locks.  If the download hasn't started, the incomplete file
-                //may not even exist--not a problem.
-                if (dloader.getAmountRead()<dloader.getFileSize()) {
+                //a) If the file is being downloaded, create *copy* of first
+                //block of incomplete file.  The copy is needed because some
+                //programs, notably Windows Media Player, attempt to grab
+                //exclusive file locks.  If the download hasn't started, the
+                //incomplete file may not even exist--not a problem.
+                if (state!=COMPLETE) {
                     File incomplete=incompleteFileManager.
-                        getFile(name, dloader.getFileSize());            
+                        getFile(currentFileName, currentFileSize);            
                     file=new File(incomplete.getParent(),
                                   IncompleteFileManager.PREVIEW_PREFIX
                                       +incomplete.getName());
-                    if (! CommonUtils.copy(incomplete, file)) //note side-effect
+                    //Get the size of the first block of the file.  (Remember
+                    //that swarmed downloads don't always write in order.)
+                    int size=amountForPreview(incomplete);
+                    if (size<=0)
+                        return;
+                    //Copy first block, returning if nothing was copied.
+                    if (CommonUtils.copy(incomplete, size, file)<=0) 
                         return;
                 }
                 //b) Otherwise, choose completed file.
@@ -291,7 +301,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 						// simply return if we could not get the save directory.
 						return;
 					}
-					file=new File(saveDir,name);     
+					file=new File(saveDir,currentFileName);     
 				}
 
                 try {
@@ -302,7 +312,36 @@ public class ManagedDownloader implements Downloader, Serializable {
         worker.setDaemon(true);
         worker.setName("Launcher thread");
         worker.start();
-        */
+    }
+
+    /** 
+     * Returns the amount of the file written on disk that can be safely
+     * previewed. 
+     * 
+     * @param incompleteFile the file to examine, which MUST correspond to
+     *  the current download.
+     */
+    private synchronized int amountForPreview(File incompleteFile) {
+        int last=0;
+        //This is tricky. First we search if a previous downloader wrote a block
+        //starting at byte zero.     
+        for (Iterator iter=incompleteFileManager.getBlocks(incompleteFile); 
+                iter.hasNext() ; ) {
+            Interval interval=(Interval)iter.next();
+            if (interval.low==0) {
+                last=interval.high;
+                break;
+            }
+        }
+
+        //Now we search for a downloader starting at the ending place of the
+        //block we found above (which may be zero).
+        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
+            HTTPDownloader dloader=(HTTPDownloader)iter.next();
+            if (dloader.getInitialReadingPoint()==last)
+                return last+dloader.getAmountRead();
+        }
+        return last;
     }
 
 
@@ -328,7 +367,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Try each group, returning on success.
                 //TODO: use downloadManager's queue, releasing during busy wait
                 boolean waitForRetry=false;
-                for (int i=0; i<buckets.length; i++) {     
+                for (int i=0; i<buckets.length; i++) {    
+                    Assert.that(buckets[i].size() > 0, "Empty bucket");
+                    synchronized (this) {
+                        RemoteFileDesc rfd=(RemoteFileDesc)buckets[i].get(0);
+                        currentFileName=rfd.getFileName();
+                        currentFileSize=rfd.getSize();
+                    }
                     int status=tryAllDownloads2(buckets[i]);
                     if (status==SUCCESS) {
                         //Success!  State (COULDNT_MOVE_TO_LIBRARY or COMPLETED)
@@ -893,21 +938,27 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (dloaders.size()==0)
             return allFiles[0].getFileName();
         else 
+            //Could also use currentFileName, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
     }
 
     public synchronized int getContentLength() {
         //If we're not actually downloading, we just pick some random value.
+        //TODO: this can also mean we've FINISHED the download.  Luckily it
+        //doesn't really matter.
         if (dloaders.size()==0)
             return allFiles[0].getSize();
         else 
+            //Could also use currentFileSize, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getSize();
     }
 
     public synchronized int getAmountRead() {
         //If we're not actually downloading, we just pick some random value.
+        //TODO: this can also mean we've FINISHED the download.  Luckily it
+        //doesn't really matter.
         if (dloaders.size()==0)
             return 0;
         else {
