@@ -54,15 +54,30 @@ import com.limegroup.gnutella.updates.*;
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
  */
-public class ManagedConnection
-        extends Connection
-        implements ReplyHandler {
+public final class ManagedConnection extends Connection 
+	implements ReplyHandler {
+
+    /** 
+     * The time to wait between route table updates for leaves, 
+	 * in milliseconds. 
+     */
+    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
+
+    /** 
+     * The time to wait between route table updates for Ultrapeers, 
+	 * in milliseconds. 
+     */
+    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
+
+
     /** The timeout to use when connecting, in milliseconds.  This is NOT used
      *  for bootstrap servers.  */
     private static final int CONNECT_TIMEOUT=4000;  //4 seconds
+
     /** The total amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=12000;
+
     /** The maximum number of times ManagedConnection instances should send UDP
      *  ConnectBack requests.
      */
@@ -77,6 +92,8 @@ public class ManagedConnection
 	 */
     private ConnectionManager _manager;
 
+	/** Filter for filtering out messages that are considered spam.
+	 */
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
@@ -231,8 +248,9 @@ public class ManagedConnection
      * duplicate queries and decide where to send responses.)  
      */
     private volatile ManagedConnectionQueryInfo queryInfo = null;
+
     /** The next time I should send a query route table to this connection.
-     *  Valid only for client-supernode connections. */
+	 */
     private long _nextQRPForwardTime;
 
 
@@ -1406,9 +1424,26 @@ public class ManagedConnection
     /** Sets the system time that we should next forward a query route table
      *  along this connection.  Only valid if isClientSupernodeConnection() is
      *  true. */
-    public void setNextQRPForwardTime(long time) {
-        _nextQRPForwardTime=time;
-    }
+//     public void setNextQRPForwardTime(long time) {
+//         _nextQRPForwardTime=time;
+//     }
+
+	/**
+	 * Increments the next time we should forward query route tables for
+	 * this connection.  This depends on whether or not this is a connection
+	 * to a leaf or to an Ultrapeer.
+	 *
+	 * @param curTime the current time in milliseconds, used to calculate 
+	 *  the next update time
+	 */
+	public void incrementNextQRPForwardTime(long curTime) {
+		if(isLeafConnection()) {
+			_nextQRPForwardTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
+		} else {
+			// otherwise, it's an Ultrapeer
+			_nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
+		}
+	}
 
 	public void setKillable(boolean killable) {
 		this._isKillable=killable;
