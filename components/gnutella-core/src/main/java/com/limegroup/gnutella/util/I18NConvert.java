@@ -1,26 +1,64 @@
 package com.limegroup.gnutella.util;
 
-/*
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.util.*;
+
+import com.limegroup.gnutella.ErrorService;
+
+import com.ibm.icu.text.Normalizer;
+
+
+/**
  * class that handles the removal of accents, etc.
+ * this class now uses the Normalizer of icu4j
  */
 public class I18NConvert {
 
-    /* data class to use for the raw look up of conversions */
-    private final I18NData _data;
+    /** BitSet to check for excluded code points */
+    private final java.util.BitSet _excluded;
+    /** lookup map for locale independent case mapping */
+    private final Map _cMap;
     
     /* instance */
     private final static I18NConvert _instance = new I18NConvert();
     
+    /**
+     * constructor : load in the excluded codepoints and the case map
+     */
     private I18NConvert() {
-        _data = I18NData.instance();
+	java.util.BitSet bs = null;
+	Map hm = null;
+	try {
+	    ClassLoader cl = getClass().getClassLoader();
+	    
+	    //read in the explusion bitset
+	    ObjectInputStream ois = 
+                new ObjectInputStream(cl.getResource("excluded.dat").openStream());
+	    bs = (java.util.BitSet)ois.readObject();
+            
+	    //read in the case map
+            ois = new ObjectInputStream(cl.getResource("caseMap.dat").openStream());
+            hm = (HashMap)ois.readObject();
+
+	}
+	catch(IOException ioe) {
+	    ErrorService.error(ioe);
+	}
+	catch(ClassNotFoundException ce) {
+	    ErrorService.error(ce);
+	}
+
+	_excluded = bs;
+	_cMap = hm;
     }
 
-    /* accesor */
+    /** accesor */
     public static I18NConvert instance() {
         return _instance;
     }
 
-    /*
+    /**
      * Return the converted form of the string s
      * this method will also split the s into the different
      * unicode blocks
@@ -28,11 +66,11 @@ public class I18NConvert {
      * @return the converted string
      */
     public String getNorm(String s) {
-        return blockSplit(getKC(getDK(s)));
+        return convert(s);
     } 
     
     
-    /*
+    /**
      * Returns an array of keywords built from parameter s.
      * The string s will be first converted (removal of accents, etc.)
      * then split into the unicode blocks, then the array will be created
@@ -42,68 +80,47 @@ public class I18NConvert {
      * @return an array of keywords created from s
      */
     public String[] getKeywords(String s) {
-        return StringUtils.split(blockSplit(getKC(getDK(s))), " ");
+        return StringUtils.split(convert(s), "\u0020");
     }
     
-
-    /*
-     * Return the decomposed form of parameter s. For each char
-     * in the String s, we do a look up using the data class
-     * for the decomposed format (this format is not strictly 
-     * a NFKD format since it will also remove accents and symbols)
-     * @param s string to decompose
-     * @return the converted string
+    
+    /**
+     * convert the string into NFKC + removal of accents, symbols, etc.
+     * uses icu4j's Normalizer to first decompose to NFKD form,
+     * then removes all codepoints in the exclusion BitSet 
+     * finally composes to NFC and adds spaces '\u0020' between
+     * different unicode blocks
+     *
+     * @param String to convert
+     * @return converted String
      */
-    private String getDK(String s) {
-        if(s.length() == 0) return  s;
-        else {
-            StringBuffer buf = new StringBuffer();
-            for(int i = 0, n = s.length(); i < n; i++)
-                buf.append(_data.getDK(s.charAt(i)));
-            return buf.toString();
-        }
+    private String convert(String s) {
+	//decompose to NFKD
+	String nfkd = Normalizer.decompose(s, true);
+	StringBuffer buf = new StringBuffer();
+	int len = nfkd.length();
+	String lower;
+	char c;
+
+	//loop through the string and check for excluded chars
+	//and lower case if necessary
+	for(int i = 0; i < len; i++) {
+	    c = nfkd.charAt(i);
+	    if(!_excluded.get(c)) {
+		lower = (String)_cMap.get(String.valueOf(c));
+		if(lower != null)
+		    buf.append(lower);
+		else
+		    buf.append(c);
+	    }
+	}
+	
+	//compose to nfc and split
+	return blockSplit(Normalizer.compose(buf.toString(), false));
     }
 
-    /*
-     * Return the composed form of string s. Do a look up on the data
-     * class for any entries that would combine two chars at a time.
-     * Similar to composition described in Technical Report 15 on 
-     * www.unicode.org site.
-     * @param s String to be composed
-     * @return converted form
-     */
-    private String getKC(String s) {
-        if(s.length() == 0) return s;
-        else {
-            char first = s.charAt(0);
-            StringBuffer b = new StringBuffer();
-            String comped = "";
-            
-            for(int i = 1, n = s.length(); i < n; i++) {
-                //see if these two chars can be combined according
-                //to the look up table
-                //TODO: this look up can use a 32bit int created from the
-                //    : two chars rather than use a string (need to change the
-                //    : underlying data struct for I18NData
-                comped = _data.getKC(String.valueOf(first) + String.valueOf(s.charAt(i)));
-                //able to compose so we set the composed char to
-                //the first to see if more compositions can be made
-                if(comped != null) 
-                    first = comped.charAt(0);
-                else {
-                    //the two chars weren't composed so append to
-                    //buffer and set the first char to the next char
-                    b.append(first);
-                    first = s.charAt(i);
-                }
-            }
-            //append the last char used
-            b.append(first);
-        return b.toString();
-        }
-    }
 
-    /*
+    /**
      * Returns a string split according to the unicode blocks.  A
      * space '\u0020' will be splaced between the blocks.
      * The index to the blockStarts array will be used to compare
@@ -135,7 +152,7 @@ public class I18NConvert {
         }
     }
 
-    /*
+    /**
      * Returns which unicode block the parameter c
      * belongs to. The returned int is the index to the blockStarts
      * array. 
@@ -158,7 +175,7 @@ public class I18NConvert {
 	    return current;
 	}
 
-    /*
+    /**
      * copy from Character.java
      * the boundaries for each of the unicode blocks
      */
