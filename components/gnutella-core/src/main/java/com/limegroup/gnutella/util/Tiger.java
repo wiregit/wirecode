@@ -73,18 +73,18 @@ public final class Tiger extends MessageDigestSpi implements Cloneable {
      * Clones this object.
      */
     public Object clone() {
-	Tiger that = null;
-	try {
-	    that = (Tiger)super.clone();
+		Tiger that = null;
+		try {
+			that = (Tiger)super.clone();
             that.state0 = this.state0;
             that.state1 = this.state1;
             that.state2 = this.state2;
             that.trailing = this.trailing;
             that.trail = (byte[])this.trail.clone();
-	    return that;
-	} catch (CloneNotSupportedException e) {
-	}
-	return that;
+			return that;
+		} catch (CloneNotSupportedException e) {
+		}
+		return that;
     }
 
     /**
@@ -170,7 +170,7 @@ public final class Tiger extends MessageDigestSpi implements Cloneable {
      * @return the digest length in bytes.
      */
     public int engineGetDigestLength() {
-	return TIGER_LENGTH;
+		return TIGER_LENGTH;
     }
 
     /**
@@ -188,15 +188,15 @@ public final class Tiger extends MessageDigestSpi implements Cloneable {
      * @return the length of the digest stored in the output buffer. 
      */
     public byte[] engineDigest() {
-	byte hashvalue[] = new byte[TIGER_LENGTH];
-	try {
-	    int outLen = engineDigest(hashvalue, 0, hashvalue.length);
-	} catch (DigestException e) {
-	    throw new InternalError("");
-	}
-	return hashvalue;
+		byte hashvalue[] = new byte[TIGER_LENGTH];
+		try {
+			int outLen = engineDigest(hashvalue, 0, hashvalue.length);
+		} catch (DigestException e) {
+			throw new InternalError("");
+		}
+		return hashvalue;
     }
-
+	
     /**
      * Completes the hash computation by performing final operations
      * such as padding. Once engineDigest has been called, the engine
@@ -218,13 +218,13 @@ public final class Tiger extends MessageDigestSpi implements Cloneable {
      * @return the length of the digest stored in the output buffer. 
      */
     public int engineDigest(byte[] hashvalue, int offset, int len)
-            throws DigestException {
+		throws DigestException {
         if (len < TIGER_LENGTH)
             throw new DigestException(
-                "partial digests not returned");
-	if (hashvalue.length - offset < TIGER_LENGTH)
+			    "partial digests not returned");
+		if (hashvalue.length - offset < TIGER_LENGTH)
             throw new DigestException(
-                "insufficient space in output buffer to store the digest");
+			    "insufficient space in output buffer to store the digest");
         /* flush the trailing bytes, adding padding bytes into last block */
         trail[trailing++] = (byte)0x01; // required padding byte!
         while (trailing < 64) trail[trailing++] = (byte)0x00;
