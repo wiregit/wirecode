@@ -29,7 +29,8 @@ public class DownloadManager {
     private Acceptor acceptor;
     /** Used to check if the file exists. */
     private FileManager fileManager;
-    /** The repository of incomplete files */
+    /** The repository of incomplete files 
+     *  INVARIANT: incompleteFileManager is same as those of all downloaders */
     private IncompleteFileManager incompleteFileManager
         =new IncompleteFileManager();
 
@@ -74,6 +75,7 @@ public class DownloadManager {
                 new FileOutputStream(
                     SettingsManager.instance().getDownloadSnapshotFile()));
             out.writeObject(buf);
+            out.writeObject(incompleteFileManager);
             out.flush();
             out.close();
             return true;
@@ -85,7 +87,7 @@ public class DownloadManager {
     /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
      *  to this, queued.  The queued downloads will restart immediately if slots
      *  are available.  Returns false iff the file could not be read for any
-     *  reason. */
+     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. */
     public synchronized boolean readSnapshot() {
         //Read downloaders from disk.
         List buf=null;
@@ -93,7 +95,14 @@ public class DownloadManager {
             ObjectInputStream in=new ObjectInputStream(
                 new FileInputStream(
                     SettingsManager.instance().getDownloadSnapshotFile()));
+            //This does not try to maintain backwards compatibility with older
+            //versions of LimeWire, which only wrote the list of downloaders.
+            //Note that there is a minor race condition here; if the user has
+            //started some downloads before this method is called, the new and
+            //old downloads will use different IncompleteFileManager instances.
+            //This doesn't really cause an errors, however.
             buf=(List)in.readObject();
+            incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch (IOException e) {
             return false;
         } catch (ClassCastException e) {
