@@ -137,7 +137,7 @@ public class HTTPDownloader implements Runnable {
     _index = down.getIndex();
     _port = down.getPort();
     _guid = down.getGUID();
-        _sizeOfFile = down.getContentLength();
+	_sizeOfFile = down.getContentLength();
 
     }
 
@@ -322,6 +322,10 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;
             return;
         }
+
+		// TRYING TO FIX THE RESUME DOWNLOAD
+		// _amountRead = (int)start; // is this the right place?
+
         _resume = true;
 
         _state = CONNECTED;
@@ -651,14 +655,45 @@ public class HTTPDownloader implements Runnable {
             }
 
             if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
+
+				String sub;
+				String sub_two;
+				int dash;
+				int slash;
+				int resumeInit;
+                try {
+					str = str.substring(21);
+					dash=str.indexOf('-');
+					slash = str.indexOf('/');
+					sub_two = str.substring(slash+1);
+                    sub=str.substring(0, dash);
+					sub = sub.trim();
+					sub_two = sub_two.trim();
+                } catch (IndexOutOfBoundsException e) {
+                    // _state = ERROR;
+					return;
+                }
+				try {
+					tempSize = java.lang.Integer.parseInt(sub_two);
+                    resumeInit = java.lang.Integer.parseInt(sub);
+                }
+                catch (NumberFormatException e) {
+                    // _state = ERROR;
+                    return;
+                }
+				_amountRead = resumeInit;
+				if (_amountRead > 2)
+					_amountRead--;
                 _resume = true;
-                foundLength = true;
+				foundLength = true;
             }
         }
 
         if (foundLength) {
-            if ( tempSize != -1 )
-            _sizeOfFile = tempSize;
+            if ( tempSize != -1 ) {
+				_sizeOfFile = tempSize;
+
+			}
         } else {
             _state = ERROR;
         }
