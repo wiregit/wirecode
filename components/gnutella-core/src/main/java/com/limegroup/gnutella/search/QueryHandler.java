@@ -153,7 +153,9 @@ public final class QueryHandler {
      * determines more accurately how widely distributed the desired
      * content is.
      */
-    private final LinkedList[] PROBE_LISTS;
+    //private final LinkedList[] PROBE_LISTS;
+
+    private ProbeQuery _probeQuery;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -184,9 +186,12 @@ public final class QueryHandler {
         TTL_2_QUERY = createQuery(QUERY, (byte)2);
         TTL_3_QUERY = createQuery(QUERY, (byte)3);
         TTL_4_QUERY = createQuery(QUERY, (byte)4);
-        PROBE_LISTS = 
-            createProbeLists(_connectionManager.getInitializedConnections2(),
-                             TTL_1_QUERY);
+        _probeQuery = 
+            new ProbeQuery(_connectionManager.getInitializedConnections2(),
+                           TTL_1_QUERY);
+        //PROBE_LISTS = 
+        //  createProbeLists(_connectionManager.getInitializedConnections2(),
+        //                   TTL_1_QUERY);
 	}
 
 
@@ -278,9 +283,6 @@ public final class QueryHandler {
 	/**
 	 * Sends the query to the current connections.  If the query is not
 	 * yet ready to be processed, this returns immediately.
-	 *
-	 * @throws <tt>NullPointerException</tt> if the route table entry
-	 *  is <tt>null</tt>
 	 */
 	public void sendQuery() {
 		if(hasEnoughResults()) return;
@@ -293,6 +295,7 @@ public final class QueryHandler {
         }
             
         if(!_forwardedToLeaves) {
+            System.out.println("forwarding to leaves: "+QUERY.getQuery()); 
             RouterService.getMessageRouter().forwardQueryRequestToLeaves(TTL_1_QUERY, 
                                                                          REPLY_HANDLER); 
             _theoreticalHostsQueried += 25;
@@ -301,24 +304,8 @@ public final class QueryHandler {
             return;
         }
 
-        
-        // should we keep working on the probe??
-        if(!PROBE_LISTS[0].isEmpty() || !PROBE_LISTS[1].isEmpty()) {
-            LinkedList ttl1List = PROBE_LISTS[0];
-            LinkedList ttl2List = PROBE_LISTS[1];
-            if(!ttl1List.isEmpty()) {
-                // send a TTL=1 probe query
-                ManagedConnection mc = 
-                    (ManagedConnection)ttl1List.removeFirst();
-                _theoreticalHostsQueried += 
-                    sendQueryToHost(TTL_1_QUERY, mc, this);
-            } else {
-                // send a TTL=2 probe query
-                ManagedConnection mc = 
-                    (ManagedConnection)ttl2List.removeFirst();
-                _theoreticalHostsQueried += 
-                    sendQueryToHost(TTL_2_QUERY, mc, this);
-            }
+        if(!_probeQuery.finishedProbe()) {
+            _theoreticalHostsQueried += _probeQuery.sendProbe();
         } else {
             // otherwise, just send a normal query
             _theoreticalHostsQueried += 
@@ -418,6 +405,65 @@ public final class QueryHandler {
 	}
     
 
+    private final class ProbeQuery {
+       
+        /**
+         * Constant list of hosts to probe query at ttl=1.
+         */
+        private final LinkedList TTL_1_PROBES;
+
+        /**
+         * Constant list of hosts to probe query at ttl=2.
+         */
+        private final LinkedList TTL_2_PROBES;
+
+        ProbeQuery(List connections, QueryRequest query) {
+            LinkedList[] lists = createProbeLists(connections, query);
+            TTL_1_PROBES = lists[0];
+            TTL_2_PROBES = lists[1];
+            System.out.println("ProbeQuery::ProbeQuery::"+
+                               " ttl1: "+TTL_1_PROBES.size()+
+                               " ttl2: "+TTL_2_PROBES.size()); 
+        }
+
+        /**
+         * Determines whether or not the probe is finished.
+         *
+         * @return <tt>true</tt> if the probe is finished, otherwise
+         *  <tt>false</tt>
+         */
+        boolean finishedProbe() {
+            return (TTL_1_PROBES.isEmpty() &&  TTL_2_PROBES.isEmpty());
+        }
+
+        /**
+         * Sends the next probe query out on the network if there 
+         * are more to send.
+         *
+         * @return the number of hosts theoretically hit by this
+         *  new probe
+         */
+        int sendProbe() {
+            if(!TTL_1_PROBES.isEmpty()) {
+                // send a TTL=1 probe query
+                System.out.println("sending ttl 1 probe: "+QUERY.getQuery()); 
+                ManagedConnection mc = 
+                    (ManagedConnection)TTL_1_PROBES.removeFirst();
+                return sendQueryToHost(TTL_1_QUERY, mc, QueryHandler.this);
+            } else if(!TTL_2_PROBES.isEmpty()) {
+                // send a TTL=2 probe query
+                System.out.println("sending ttl 2 probe: "+QUERY.getQuery()); 
+                ManagedConnection mc = 
+                    (ManagedConnection)TTL_2_PROBES.removeFirst();
+                return sendQueryToHost(TTL_2_QUERY, mc, QueryHandler.this);
+            }
+
+            // this should never happen, as this method should not
+            // be called when both lists are empty
+            return 0;
+        }
+    }
+
     /**
      * Helper method that creates the list of nodes to query for the probe.
      * This list will vary in size depending on how popular the content appears
@@ -446,6 +492,10 @@ public final class QueryHandler {
             }
         }
 
+        System.out.println(query.getQuery()+
+                           " hitConnections:  "+hitConnections.size()+
+                           " missConnections: "+missConnections.size()+
+                           " oldConnections:  "+oldConnections.size()); 
         // final list of connections to query
         LinkedList[] returnLists = new LinkedList[2];
         LinkedList ttl1List = new LinkedList();
@@ -466,7 +516,7 @@ public final class QueryHandler {
         } 
 
         int numHitConnections = hitConnections.size();
-        final double popularity = 
+        double popularity = 
             (double)((double)numHitConnections/
                      ((double)missConnections.size()+numHitConnections));
 
@@ -484,6 +534,8 @@ public final class QueryHandler {
             return returnLists;
         }
 
+        // mitigate the extremes of the popularity measurement a bit
+        popularity = popularity * 0.75;
         
         // the number of TTL=1 nodes we would hit if we had that many
         // connections with hits
@@ -538,6 +590,7 @@ public final class QueryHandler {
                                   int numElements) {
         if(list1.size() >= numElements) {
             listToAddTo.addAll(list1.subList(0, numElements));
+            return;
         } else {
             listToAddTo.addAll(list1);
         }
@@ -675,8 +728,7 @@ public final class QueryHandler {
             handler.QUERIED_HANDLERS.add(mc);
         }
         
-        handler._nextQueryTime = System.currentTimeMillis() + 
-            (ttl * 1000);
+        handler._nextQueryTime = System.currentTimeMillis() + (ttl * 1000);
 
         return calculateNewHosts(mc, ttl);
     }
