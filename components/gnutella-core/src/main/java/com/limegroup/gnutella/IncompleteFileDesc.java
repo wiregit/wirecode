@@ -87,12 +87,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      */
     public String getAvailableRanges() {
         StringBuffer ret = new StringBuffer("bytes");
-        VerifyingFile vf = _verifyingFile;
-        for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
+        for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
             Interval interval = (Interval) iter.next();
-	    // don't offer ranges that are smaller than MIN_CHUNK_SIZE
-	    if (interval.high - interval.low +1 < MIN_CHUNK_SIZE)
-		continue;
+	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
+	        // ( we add one because HTTP values are exclusive )
+	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
+		        continue;
+            // ( we subtract one because HTTP value as exclusive )
             ret.append(" " + interval.low + "-" + (interval.high -1));
             if (iter.hasNext())
                 ret.append(",");
@@ -105,8 +106,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * incomplete file.
      */
     public boolean isRangeSatisfiable(int low, int high) {
-        VerifyingFile vf = _verifyingFile;
-        for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
+        for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
             Interval interval = (Interval) iter.next();
             if (low >= interval.low && high <= interval.high)
                 return true;
