@@ -1410,16 +1410,14 @@ public class HTTPDownloader implements BandwidthTracker {
             	_wantsFalts=true;
             else if (protocol.equals(HTTPConstants.FW_TRANSFER)) {
                 //for this header we care about the version
-                _wantsFalts=true;
-                String versionS = feature.substring(slash+1);
-            	int FWTVersion=0;
-            	try {
-            		FWTVersion = (int)Float.parseFloat(versionS);
-            	}catch(NumberFormatException nfe) {
-            		//we couldn't parse the version number - we should ignore
-            		//this header.
-            		continue;
-            	}
+                int FWTVersion=0;
+                try{
+                    FWTVersion = (int)HTTPUtils.parseFeatureToken(feature);
+                    _wantsFalts=true;
+                }catch(ProblemReadingHeaderException prhe) {
+                    //ignore this header
+                    continue;
+                }
             	
             	// replace the FWT version in the rfd with the one reported
             	// by the header if they don't match

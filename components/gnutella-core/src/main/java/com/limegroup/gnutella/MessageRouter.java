@@ -204,17 +204,7 @@ public abstract class MessageRouter {
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
-        try {
-            _clientGUID = new GUID(GUID.fromHexString(
-                ApplicationSettings.CLIENT_ID.getValue())).bytes();
-        }
-        catch (IllegalArgumentException e) {
-            //This should never happen! But if it does, we can recover.
-            _clientGUID = Message.makeGuid();
-            // And store the next ID in our settings
-            ApplicationSettings.CLIENT_ID.setValue(
-                new GUID(_clientGUID).toHexString() );
-        }
+        _clientGUID=RouterService.getMyGUID();
     }
 
     /**
@@ -2616,10 +2606,6 @@ public abstract class MessageRouter {
     		
     }
     
-    
-    public byte [] getOurGUID() {
-    	return _clientGUID;
-    }
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;

@@ -117,16 +117,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 */
 	public static AlternateLocation create(final String location,
 	                                       final URN urn) throws IOException {
-	    return create(location,urn,"ALT");
-    }
-	
-	/**
-	 * constructs an AlternateLocation based on string argument, URN and a 
-	 * filename.
-	 */
-	public static AlternateLocation create(final String location,
-	        final URN urn, final String fileName) throws IOException {
-        if(location == null || location.equals(""))
+	    if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
             throw new IOException("null URN.");
@@ -144,17 +135,16 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         //the name of the file it is pointing to.
         if (location.indexOf(";")==-1) {
         	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
-			return new DirectAltLoc(addr,fileName, urn);
+			return new DirectAltLoc(addr, urn);
         }
         
         //Case 3. Push Alt loc
         //Note: the AlternateLocation object created this way does not know 
         //the name of the file it is pointing to.  
         PushEndpoint pe = new PushEndpoint(location);
-        return new PushAltLoc(pe,urn,fileName);
-	    
-	}
-
+        return new PushAltLoc(pe,urn);
+    }
+	
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
 	 * <tt>URL</tt> instance.  This constructor creates an alternate
@@ -208,10 +198,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		int port = rfd.getPort();
 
 		if (!rfd.needsPush()) {
-			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()),
-					rfd.getFileName(), urn);
+			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
 		}else {
-			return new PushAltLoc(rfd.getPushAddr(),urn,rfd.getFileName());
+			return new PushAltLoc(rfd.getPushAddr(),urn);
 		}
 	}
 

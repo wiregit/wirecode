@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 /**
  * A push endpoint for myself.  This differs from the standard
@@ -11,11 +12,12 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 public class PushEndpointForSelf extends PushEndpoint {
     
     private static PushEndpointForSelf _instance;
+    
     /**
      * create an empty set of push proxies
      */
     private PushEndpointForSelf() {
-        super(RouterService.getMessageRouter().getOurGUID(),
+        super(RouterService.getMyGUID(),
                 Collections.EMPTY_SET,
                 0,
                 UDPConnection.VERSION);

@@ -7,6 +7,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.messages.*;
 
 import java.util.StringTokenizer;
@@ -150,38 +151,34 @@ public class PushEndpoint implements HTTPHeaderValue{
 	public PushEndpoint(String httpString) throws IOException{
 		
 
-		
-		StringTokenizer tok = new StringTokenizer(httpString,";");
+	    if (httpString.length() < 32 ||
+	            httpString.indexOf(";") > 32)
+	        throw new IOException("http string does not contain valid guid");
 		
 		//the first token is the guid
-		String guidS=null;
-		try{
-			guidS = tok.nextToken();
-		}catch(NoSuchElementException bad) {
-			throw new IOException(bad.getMessage());
-		}
+		String guidS=httpString.substring(0,32);
+		httpString = httpString.substring(32);
 		
 		_clientGUID = GUID.fromHexString(guidS);
 		_guid = new GUID(_clientGUID);
 		
+		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
 		int hashcode = _guid.hashCode();
 		
 		HashSet proxies = new HashSet();
 		
-		int parsedProxies = 0;
 		int fwtVersion =0;
 		
-		while(tok.hasMoreTokens() && parsedProxies < 4) {
+		while(tok.hasMoreTokens() && proxies.size() < 4) {
 			String current = tok.nextToken();
 			
-			//see if this token is the fwt header
+			// see if this token is the fwt header
+			// if this token fails to parse we abort since we must know
+			// if the PE supports fwt or not. 
 			if (current.startsWith(HTTPConstants.FW_TRANSFER)) {
-				int slash = current.indexOf("/");
-				String version = current.substring(slash+1);
-				fwtVersion = (int)Float.parseFloat(version);
+			    fwtVersion = (int) HTTPUtils.parseFeatureToken(current);
 				continue;
-				
 			}
 			
 			int separator = current.indexOf(":");
@@ -192,6 +189,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 				continue;
 				
 			String host = current.substring(0,separator);
+			
+			if (!NetworkUtils.isValidAddress(host))
+			    continue;
+			
 			String portS = current.substring(separator+1);
 			
 			
@@ -204,11 +205,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 				hashcode = 37* hashcode + ppc.hashCode();
 				
 				proxies.add(ppc);
-				parsedProxies++;
 				
 			}catch(UnknownHostException notBad) {
 				continue;
-			}catch(IllegalArgumentException notBad) {
+			}catch(NumberFormatException notBad) {
 				continue;
 			}
 		}
@@ -400,25 +400,27 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	protected final String generateHTTPString() {
-	    String httpString = _guid.toHexString()+";";
+	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
 		if (_fwtVersion!=0)
-			httpString+=HTTPConstants.FW_TRANSFER+"/"+_fwtVersion+";";
+			httpString.append(HTTPConstants.FW_TRANSFER)
+				.append("/")
+				.append(_fwtVersion)
+				.append(";");
 		
 		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			
-			httpString = httpString + 
-				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
-			httpString = httpString +":"+cur.getPushProxyPort()+";";
+			httpString.append(NetworkUtils.ip2string(
+				        cur.getPushProxyAddress().getAddress()));
+			httpString.append(":").append(cur.getPushProxyPort()).append(";");
 		}
 		
 		//trim the ; at the end
-		if (httpString.endsWith(";"))
-			httpString = httpString.substring(0,httpString.length()-1);
+		httpString.deleteCharAt(httpString.length()-1);
 		
-		return httpString;
+		return httpString.toString();
 	}
 	
 	public int getFeatures() {

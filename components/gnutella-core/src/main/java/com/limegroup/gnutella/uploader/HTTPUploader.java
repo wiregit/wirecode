@@ -1057,17 +1057,12 @@ public final class HTTPUploader implements Uploader {
 			else if (protocol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
             else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
-            	_wantsFalts=true;
-            	
-            	//for this header we care about the version.
-            	String versionS = feature.substring(slash+1);
-            	
+                // for this header we care about the version
             	try {
-            		_FWTVersion = (int)Float.parseFloat(versionS);
-            	}catch(NumberFormatException nfe) {
-            		//we couldn't parse the version number - we should ignore
-            		//this header.
-            		continue;
+            	    _FWTVersion = (int)HTTPUtils.parseFeatureToken(protocol);
+            	    _wantsFalts=true;
+            	}catch(ProblemReadingHeaderException prhe){
+            	    continue;
             	}
             }
 			

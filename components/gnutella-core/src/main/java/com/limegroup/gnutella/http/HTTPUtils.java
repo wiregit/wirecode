@@ -34,6 +34,11 @@ public final class HTTPUtils {
 	 * Cached colon to avoid excessive allocations.
 	 */
 	private static final String COLON = ":";
+	
+	/**
+	 * Cached slash to avoid excessive allocations.
+	 */
+	private static final String SLASH = "/";
 
 	/**
 	 * Private constructor to ensure that this class cannot be constructed
@@ -279,11 +284,44 @@ public final class HTTPUtils {
         
        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
        	
+       	//TODO: make this check also UDPService.canDoFWT() when merged
        	if (!RouterService.acceptedIncomingConnection())
        	    features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
         
         return features;
-    }        
+    }
+    
+    /**
+     * Utility method for extracting the version from a feature token.
+     */
+    public static float parseFeatureToken(String token) throws
+    	ProblemReadingHeaderException{
+        int slashIndex = token.indexOf(SLASH);
+        
+        if (slashIndex == -1 || slashIndex >= token.length()-1)
+            throw new ProblemReadingHeaderException("invalid feature token");
+        
+        String versionS = token.substring(slashIndex+1);
+        
+        try {
+            return Float.parseFloat(versionS);
+        }catch (NumberFormatException bad) {
+            throw new ProblemReadingHeaderException(bad);
+        }
+    }
+    
+    /**
+     * Utility method for extracting the version from a feature token
+     * Also performs validation of the feature
+     */
+    public static float parseFeatureToken(String token, String featureName) 
+    	throws ProblemReadingHeaderException{
+        
+        if (!token.startsWith(featureName))
+            throw new ProblemReadingHeaderException("unexpected feature");
+        
+        return parseFeatureToken(token);
+    }
     
     /**
      * Utility method for getting the date value for the "Date" header in

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 
 
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
@@ -26,7 +27,6 @@ public class DirectAltLoc extends AlternateLocation {
 
 	
 	private final IpPort _node;
-	private final String _fileName;
 	
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
@@ -56,7 +56,6 @@ public class DirectAltLoc extends AlternateLocation {
 
         _count = 1;
         _demoted = false;
-        _fileName = url.getFile();
 	}
 	
 	/**
@@ -67,15 +66,13 @@ public class DirectAltLoc extends AlternateLocation {
 		this(new Endpoint(
 				NetworkUtils.ip2string(RouterService.getAddress()),
 				RouterService.getPort()),
-			 "ALT",
 			 sha1);
 	}
 	
-	protected DirectAltLoc(IpPort address, String fileName, URN sha1) 
+	protected DirectAltLoc(IpPort address, URN sha1) 
 		throws IOException{
 		super(sha1);
 		_node=address;
-		_fileName=fileName;
 	}
 	
 	protected String generateHTTPString() {
@@ -90,7 +87,7 @@ public class DirectAltLoc extends AlternateLocation {
 		urnSet.add(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),
-								  0, _fileName, size,  
+								  0, HTTPConstants.URI_RES_N2R+SHA1_URN, size,  
 								  DataUtils.EMPTY_GUID, 1000,
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
@@ -103,7 +100,7 @@ public class DirectAltLoc extends AlternateLocation {
 	public synchronized AlternateLocation createClone() {
         AlternateLocation ret = null;
         try {
-        		ret = new DirectAltLoc(_node, _fileName, this.SHA1_URN);
+        		ret = new DirectAltLoc(_node, this.SHA1_URN);
 
         } catch(IOException ioe) {
             ErrorService.error(ioe);

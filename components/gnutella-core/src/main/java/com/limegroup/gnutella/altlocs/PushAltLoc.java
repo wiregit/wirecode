@@ -11,6 +11,7 @@ import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
 import com.sun.java.util.collections.HashSet;
@@ -21,10 +22,6 @@ import com.sun.java.util.collections.Set;
  */
 public class PushAltLoc extends AlternateLocation {
 
-	/**
-	 * in case we do not have af ull url store the name here.
-	 */
-	private String _fileName;
 	
 	/**
 	 * the host we would send push to.  Null if not firewalled.
@@ -37,7 +34,7 @@ public class PushAltLoc extends AlternateLocation {
 	 * @param sha1
 	 * @throws IOException
 	 */
-	protected PushAltLoc(final PushEndpoint address, final URN sha1, final String name) 
+	protected PushAltLoc(final PushEndpoint address, final URN sha1) 
 		throws IOException {
 		super(sha1);
 		
@@ -48,7 +45,6 @@ public class PushAltLoc extends AlternateLocation {
 		
 		
 		_pushAddress = address;
-		_fileName = name;
 	}
 	
 	/**
@@ -57,7 +53,6 @@ public class PushAltLoc extends AlternateLocation {
 	protected PushAltLoc(URN sha1) throws IOException{
 		
 		super(sha1);
-		_fileName="ALT";
 		_pushAddress = PushEndpointForSelf.instance();
 	}
 	
@@ -72,7 +67,8 @@ public class PushAltLoc extends AlternateLocation {
  
 		
         //invalid ip address - not important.
-		RemoteFileDesc	ret = new RemoteFileDesc("1.1.1.1",6346,0,_fileName,size,
+		RemoteFileDesc	ret = new RemoteFileDesc(
+		        	"1.1.1.1",6346,0,HTTPConstants.URI_RES_N2R+SHA1_URN,size,
 					1000, true, quality, false, null,
 					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
 					-1,_pushAddress);
@@ -85,7 +81,7 @@ public class PushAltLoc extends AlternateLocation {
         AlternateLocation ret = null;
         try {
 
-        		ret = new PushAltLoc(_pushAddress,SHA1_URN,_fileName);
+        		ret = new PushAltLoc(_pushAddress,SHA1_URN);
         } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;

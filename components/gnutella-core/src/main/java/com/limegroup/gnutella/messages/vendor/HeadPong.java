@@ -200,7 +200,7 @@ public class HeadPong extends VendorMessage {
 			_altLocs=readLocs(dais);
 		
 		
-		}catch(IOException oops) {oops.printStackTrace();
+		}catch(IOException oops) {
 			throw new BadPacketException(oops.getMessage());
 		}
 	}
@@ -241,14 +241,14 @@ public class HeadPong extends VendorMessage {
 			
 		byte features = ping.getFeatures();
 		
-		caos.write(features);
+		daos.write(features);
 		if (LOG.isDebugEnabled())
 			LOG.debug("writing features "+features);
 		
 		//if we don't have the file..
 		if (desc == null) {
 			LOG.debug("we do not have the file");
-			caos.write(FILE_NOT_FOUND);
+			daos.write(FILE_NOT_FOUND);
 			return baos.toByteArray();
 		}
 		
@@ -262,20 +262,20 @@ public class HeadPong extends VendorMessage {
 			
 			//also check if the file is currently being downloaded 
 			//or is waiting for sources.  This does not care for queued downloads.
-			DownloadManager dm = RouterService.getDownloadManager();
-			if (dm.conflicts(urn))
+			IncompleteFileDesc idesc = (IncompleteFileDesc)desc;
+			if (idesc.isActivelyDownloading())
 				retCode = (byte) (retCode | DOWNLOADING);
 		}
 		else 
 			retCode = (byte) (retCode | COMPLETE_FILE);
 		
-		caos.write(retCode);
+		daos.write(retCode);
 		
 		if(LOG.isDebugEnabled())
 			LOG.debug("our return code is "+retCode);
 		
 		//write the vendor id
-		caos.write(F_LIME_VENDOR_ID);
+		daos.write(F_LIME_VENDOR_ID);
 		
 		//get our queue status.
 		int queueSize = _uploadManager.getNumQueuedUploads();
@@ -446,7 +446,7 @@ public class HeadPong extends VendorMessage {
 	 */
 	private final IntervalSet readRanges(DataInputStream dais)
 		throws IOException{
-		short rangeLength=dais.readShort();
+		int rangeLength=dais.readUnsignedShort();
 		byte [] ranges = new byte [rangeLength];
 		dais.readFully(ranges);
 		return IntervalSet.parseBytes(ranges);
@@ -457,7 +457,7 @@ public class HeadPong extends VendorMessage {
 	 */
 	private final Set readPushLocs(DataInputStream dais) 
 		throws IOException, BadPacketException {
-		int size = dais.readShort();
+		int size = dais.readUnsignedShort();
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
 		Set ret = new HashSet();
@@ -470,7 +470,7 @@ public class HeadPong extends VendorMessage {
 	 */
 	private final Set readLocs(DataInputStream dais) 
 		throws IOException, BadPacketException {
-		int size = dais.readShort();
+		int size = dais.readUnsignedShort();
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
 		Set ret = new HashSet();
