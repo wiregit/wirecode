@@ -3,6 +3,11 @@ package com.limegroup.gnutella.http;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * This class supplies general facilities for handling HTTP, such as
@@ -213,5 +218,41 @@ public final class HTTPUtils {
     public static void writeHeader(HTTPHeaderName name, int value, 
         OutputStream stream) throws IOException {
         writeHeader(name, String.valueOf(value), stream);
+    }
+    
+    /**
+     * Utility method for writing the "Date" header, as specified in RFC 2616
+     * section 14.18, to a <tt>Writer</tt>.
+     * 
+     * @param writer the <tt>Writer</tt> to write the header to
+     * @throws IOException if a write error occurs
+     */
+    public static void writeDate(Writer writer) throws IOException {
+        writeHeader(HTTPHeaderName.DATE, getDateValue(), writer);
+    }
+  
+    /**
+     * Utility method for writing the "Date" header, as specified in RFC 2616
+     * section 14.18, to a <tt>OutputStream</tt>.
+     * 
+     * @param stream the <tt>OutputStream</tt> to write the header to
+     * @throws IOException if a write error occurs
+     */
+    public static void writeDate(OutputStream stream) throws IOException {
+        writeHeader(HTTPHeaderName.DATE, getDateValue(), stream);       
+    }
+    
+    /**
+     * Utility method for getting the date value for the "Date" header in
+     * standard format.
+     * 
+     * @return the current date as a standardized date string -- see 
+     *  RFC 2616 section 14.18
+     */
+    private static String getDateValue() {
+        DateFormat df = 
+            new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return df.format(new Date());
     }
 }
