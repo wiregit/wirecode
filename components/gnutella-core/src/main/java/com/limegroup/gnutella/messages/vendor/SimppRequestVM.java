@@ -19,17 +19,11 @@ public final class SimppRequestVM extends VendorMessage {
             throw new BadPacketException("UNSUPPORTED VERSION");
 
         //there is no payload 
-
-        //TODO: should the payload include the expected version number of the
-        //SimppMessage we are expecting the other side to send us.
     }
     
     public SimppRequestVM() {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION,
                                                 DataUtils.EMPTY_BYTE_ARRAY);
-        //TODO: no payload...this will need to change if we want to send the
-        //version of the SimppMessge we are expecting in response to this
-        //message
     }
     
     public int getVersion() {
