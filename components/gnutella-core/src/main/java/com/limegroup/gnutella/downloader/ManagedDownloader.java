@@ -1754,7 +1754,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             }            
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            doDownload(dloader,http11);
+            boolean downloadOK = doDownload(dloader,http11);
+            if(!downloadOK)
+                break;
         } // end of while(http11)
         
         //came out of the while loop, http1.0 spawn a thread
@@ -2416,8 +2418,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param downloader the normal or push downloader to use for the transfer,
      * which MUST be initialized (i.e., downloader.connectTCP() and
      * connectHTTP() have been called)
+     *
+     * @return true if there was no IOException while downloading, false
+     * otherwise.  
      */
-    private void doDownload(HTTPDownloader downloader, boolean http11) {
+    private boolean doDownload(HTTPDownloader downloader, boolean http11) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
@@ -2428,6 +2433,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 else
                     DownloadStat.SUCCESFULL_HTTP10.incrementStat();
             }
+            return true;
         } catch (IOException e) {
             if(RECORD_STATS) {
                 if(http11)
@@ -2439,6 +2445,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             informMesh(downloader.getRemoteFileDesc(),false);
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
+            return false;
             //e.printStackTrace();
         }
         finally {
