@@ -180,7 +180,7 @@ public class UploadManager implements BandwidthTracker {
         }
 	}
     
-    private boolean doSingleUpload(Uploader uploader, String host,
+    private void doSingleUpload(Uploader uploader, String host,
         int index) {
         long startTime=-1;
         try {
@@ -219,8 +219,6 @@ public class UploadManager implements BandwidthTracker {
                 _callback.removeUpload(uploader);		
             }
         }
-        //return failure by default
-        return false;
     }
 
     /**
@@ -255,6 +253,8 @@ public class UploadManager implements BandwidthTracker {
 											  String host, int port, 
 											  int index, String guid) { 
 
+        //increment the download count
+        synchronized(this) { _activeUploads++; }
 		clearFailedPushes();
 
 		Uploader uploader = null;
@@ -268,11 +268,13 @@ public class UploadManager implements BandwidthTracker {
                  (! testFailedPush(host, index) ) )
                 return;
 
-            insertAndTest(uploader, host);
             insertAttemptedPush(host, index);
 
             doSingleUpload(uploader, host, index);
         } finally {
+            //decrement the download count
+            synchronized(this) { _activeUploads--; }
+            //close the socket
             if(uploader != null)
                 uploader.stop();
         }
