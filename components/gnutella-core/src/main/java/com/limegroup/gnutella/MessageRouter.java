@@ -465,6 +465,9 @@ public abstract class MessageRouter
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        _forMeReplyHandler);
             replyHandler.handleQueryReply(queryReply, null);
+
+			System.out.println("Sendindg a query Reply");
+
         }
         else
             throw new IOException();
