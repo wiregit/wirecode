@@ -97,7 +97,7 @@ public class UDPService implements Runnable {
     /** The last reported port as seen from the outside 
      *  LOCKING: this
      */
-    private int _lastReportedPort = RouterService.getPort();
+    private int _lastReportedPort = ConnectionSettings.PORT.getValue();
 
     /** The last reported address as seen from the outside 
      * LOCKING: this
@@ -250,12 +250,11 @@ public class UDPService implements Runnable {
                 // if the input is null, then the service will shut off ;) .
                 _socket = (DatagramSocket) datagramSocket;
                 
-                // also reset the state for fwt capability since
-                // we may have better luck with the new socket
+                // set the port in the FWT records
                 synchronized(this) {
-                    _lastReportedIP=datagramSocket.getLocalAddress().getAddress();
+                    _lastReportedIP=_socket.getLocalAddress().getAddress();
+                    _lastReportedPort=_socket.getLocalPort();
                     _portStable=true;
-                    _lastReportedPort=datagramSocket.getLocalPort();
                 }
                 _receiveLock.notify();
                 _sendLock.notify();
@@ -337,7 +336,6 @@ public class UDPService implements Runnable {
                                     // we may receive a late pong after the isp has
                                     // changed our address.  We should not let that pong
                                     // affect us. (port is unaffected)
-                                    
                                     if (_previousIP==null || 
                                             !Arrays.equals(_previousIP,newAddr)) 
                                         _lastReportedIP=newAddr;
@@ -707,11 +705,9 @@ public class UDPService implements Runnable {
 	            _lastReportedIP=addr;
 	        _tcpAddressInitialized=true;
 	    }
-	    else if (canDoFWT()){
+	    else {
 	        _previousIP=_lastReportedIP;
 	        _lastReportedIP=addr;
-	        _lastReportedPort=RouterService.getPort();
-	        _portStable=true;
 	    }
 	}
 	/**
