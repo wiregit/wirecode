@@ -245,9 +245,8 @@ public class Connection {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
-            throw new IOException();
-        }
-
+            throw new IOException("socket is closed");
+        } 
         
         // Check to see if this is an attempt to connect to ourselves
         byte[] localAddress = _socket.getLocalAddress().getAddress();
@@ -261,8 +260,8 @@ public class Connection {
             // Set the Acceptors IP address
             Acceptor.setAddress( localAddress );
             
-            _in = getInputStream(_socket);
-            _out = getOutputStream(_socket);
+            _in = getInputStream();
+            _out = getOutputStream();
             if (_in==null || _out==null) throw new IOException();
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
@@ -472,7 +471,8 @@ public class Connection {
                    HandshakeResponse.UNAUTHORIZED_CODE)) {
                 throw new NoGnutellaOkException(true,
                                                 ourResponse.getStatusCode(),
-                                                "We sent fatal status code:");
+                                                "We sent fatal status code: "+
+                                                ourResponse);
             }
                     
             //3. read the response from the other side.  If we asked the other
@@ -508,7 +508,8 @@ public class Connection {
             //c) Terminate abnormally
             throw new NoGnutellaOkException(false,
                                             theirResponse.getStatusCode(),
-                                            "Initiator sent fatal status code");
+                                            "Initiator sent fatal status code: "+
+                                            theirResponse);
         }        
 
         //If we didn't successfully return out of the method, throw an exception
@@ -568,7 +569,7 @@ public class Connection {
      *     @modifies network 
      */
     private void readHeaders() throws IOException {
-        readHeaders(SETTINGS.getTimeout());
+        readHeaders(Constants.TIMEOUT);
     }
     
     /**
@@ -604,6 +605,9 @@ public class Connection {
      * initialize().  
      *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
+        if(s == null || s.equals("")) {
+            throw new NullPointerException("null or empty string: "+s);
+        }
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
         _out.write(bytes);
@@ -622,7 +626,7 @@ public class Connection {
      * the specified timeout
      */
     private String readLine() throws IOException {
-        return readLine(SETTINGS.getTimeout());
+        return readLine(Constants.TIMEOUT);
     }
 
     /**
@@ -655,13 +659,13 @@ public class Connection {
     /** Returns the stream to use for writing to s.  By default this is a
      *  BufferedOutputStream.  Subclasses may override to decorate the
      *  stream. */
-    protected OutputStream getOutputStream(Socket s)  throws IOException {
+    protected OutputStream getOutputStream()  throws IOException {
         return new BufferedOutputStream(_socket.getOutputStream());
     }
 
     /** Returns the stream to use for reading from s.  By default this is a
      *  BufferedInputStream.  Subclasses may override to decorate the stream. */
-    protected InputStream getInputStream(Socket s) throws IOException {
+    protected InputStream getInputStream() throws IOException {
         return new BufferedInputStream(_socket.getInputStream());
     }
 
