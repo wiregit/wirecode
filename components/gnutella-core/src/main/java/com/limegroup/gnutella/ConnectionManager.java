@@ -510,7 +510,11 @@ public class ConnectionManager {
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && origHost.equals("router.limewire.com"))
-				    pingRequest = _router.createGroupPingRequest("none");
+				{
+                    SettingsManager settings = SettingsManager.instance();
+				    String group = "none:"+settings.getConnectionSpeed();
+				    pingRequest = _router.createGroupPingRequest(group);
+				}
 				else
 				    pingRequest = 
 				      new PingRequest(SettingsManager.instance().getTTL());
