@@ -130,13 +130,15 @@ public class UDPBufferedOutputStream extends OutputStream {
 	 *  Returns null if no data.
      */
     synchronized Chunk getChunk() {
-		Chunk rChunk = new Chunk();
+		Chunk rChunk;
 		if ( chunks.size() > 0 ) {
 			// Return the oldest chunk 
+			rChunk       = new Chunk();
 			rChunk.chunk = (byte[]) chunks.remove(0);
 			rChunk.count = rChunk.chunk.length;
 		} else if (activeCount > 0) {
 			// Return a partial chunk and allocate a fresh one
+			rChunk       = new Chunk();
 			rChunk.chunk = activeChunk;
 			rChunk.count = activeCount;
     		allocateNewChunk();
