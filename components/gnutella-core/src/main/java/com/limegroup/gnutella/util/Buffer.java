@@ -49,7 +49,7 @@ public class Buffer implements Cloneable {
         tail=0;
     }
 
-    /** "Copy constructor": constructs a a new shallow copy of other. */
+    /** "Copy constructor": constructs a new shallow copy of other. */
     public Buffer(Buffer other) {
         this.size=other.size;
         this.head=other.head;
@@ -196,6 +196,7 @@ public class Buffer implements Cloneable {
         if (isEmpty())
             throw new NoSuchElementException();
         Object ret=buf[head];
+        buf[head]=null;     //optimization: don't retain removed values
         head=increment(head);
         return ret;
     }
@@ -209,7 +210,9 @@ public class Buffer implements Cloneable {
         if (isEmpty())
             throw new NoSuchElementException();
         tail=decrement(tail);
-        return buf[tail];
+        Object ret=buf[tail];
+        buf[tail]=null;    //optimization: don't retain removed values
+        return ret;
     }
 
     /**
@@ -339,239 +342,4 @@ public class Buffer implements Cloneable {
         buf.append("]");
         return buf.toString();
     }
-
-
-    /*
-    public static void main(String args[]) {
-        //1. Tests of old methods.
-        Buffer buf=new Buffer(4);
-        Iterator iter=null;
-
-        Assert.that(buf.getCapacity()==4);
-        Assert.that(buf.getSize()==0);
-        iter=buf.iterator();
-        Assert.that(!iter.hasNext());
-        try {
-            iter.next();
-            Assert.that(false);
-        } catch (NoSuchElementException e) {
-            Assert.that(true);
-        }
-
-        buf.add("test");
-        Assert.that(buf.getSize()==1);
-        iter=buf.iterator();
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test"));
-        Assert.that(!iter.hasNext());
-        try {
-            iter.next();
-            Assert.that(false);
-        } catch (NoSuchElementException e) {
-            Assert.that(true);
-        }
-
-        buf.add("test2");
-        Assert.that(buf.getSize()==2);
-        buf.add("test3");
-        Assert.that(buf.getSize()==3);
-        iter=buf.iterator();
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test3"));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test2"));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test"));
-        Assert.that(!iter.hasNext());
-
-        buf.add("test4");
-        Assert.that(buf.getSize()==4);
-        buf.add("test5");
-        Assert.that(buf.getSize()==4);
-        iter=buf.iterator();
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test5"));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test4"));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test3"));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals("test2"));
-        Assert.that(!iter.hasNext());	    
-
-        buf.add("test6");
-        Assert.that(buf.getSize()==4);
-
-        //2.  Tests of new methods.  These are definitely not sufficient.
-        buf=new Buffer(4);
-        Assert.that(buf.getSize()==0);
-        Assert.that(buf.addLast("a")==null);
-        Assert.that(buf.getSize()==1);
-        Assert.that(buf.addLast("b")==null);
-        Assert.that(buf.getSize()==2);
-        Assert.that(buf.addLast("c")==null);
-        Assert.that(buf.getSize()==3);
-        Assert.that(buf.addLast("d")==null);
-        Assert.that(buf.getSize()==4);
-        Assert.that(buf.first().equals("a"));
-        Assert.that(buf.removeFirst().equals("a"));
-        Assert.that(buf.getSize()==3);
-        Assert.that(buf.first().equals("b"));
-        Assert.that(buf.removeFirst().equals("b"));
-        Assert.that(buf.getSize()==2);
-        Assert.that(buf.addFirst("b")==null);
-        Assert.that(buf.getSize()==3);
-        Assert.that(buf.addFirst("a")==null);
-        Assert.that(buf.getSize()==4);
-        //buf=[a b c d]
-
-        Assert.that(buf.addLast("e").equals("a"));
-        //buf=[b c d e]
-        Assert.that(buf.last().equals("e"));
-        Assert.that(buf.first().equals("b"));
-        Assert.that(buf.removeLast().equals("e"));
-        Assert.that(buf.removeLast().equals("d"));		
-
-        buf=new Buffer(4);
-        iter=buf.iterator();
-        buf.addFirst("a");
-        try {
-            iter.hasNext();
-            Assert.that(false);
-        } catch (ConcurrentModificationException e) {
-            Assert.that(true);
-        }
-
-        buf=new Buffer(4);
-        buf.addFirst("a");
-        buf.addLast("b");
-        buf.clear();
-        Assert.that(buf.getSize()==0);
-        iter=buf.iterator();
-        Assert.that(! iter.hasNext());
-
-        //3. Tests of get and set.
-        buf=new Buffer(3);
-        try {
-            buf.get(0);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) {
-        }
-        try {
-            buf.get(-1);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) {
-        }
-
-        buf.addLast("a");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");  //clobbers a!
-        Assert.that(buf.get(0).equals("b"));
-        Assert.that(buf.get(1).equals("c"));
-        Assert.that(buf.get(2).equals("d"));
-        buf.set(2,"bb");
-        Assert.that(buf.get(2).equals("bb"));        
-
-        //4. Tests of remove and removeAll methods.
-        buf=new Buffer(4);
-        buf.addLast("a");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");
-        try {
-            buf.remove(-1);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) { }
-        Assert.that(("a").equals(buf.remove(0)));
-        Assert.that(buf.size()==3);
-        Assert.that(buf.get(0).equals("b"));
-        Assert.that(buf.get(1).equals("c"));
-        Assert.that(buf.get(2).equals("d")); 
-
-        buf=new Buffer(4);
-        buf.addLast("x");
-        buf.addLast("y");
-        buf.addLast("a");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");
-        try {
-            buf.remove(5);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) { }
-        Assert.that(("a").equals(buf.remove(0)));
-        Assert.that(buf.size()==3);
-        Assert.that(buf.get(0).equals("b"));
-        Assert.that(buf.get(1).equals("c"));
-        Assert.that(buf.get(2).equals("d"));  
-
-        buf=new Buffer(4);
-        buf.addLast("a");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");
-        try {
-            buf.remove(5);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) { }
-        Assert.that(("d").equals(buf.remove(3)));
-        Assert.that(buf.size()==3);
-        Assert.that(buf.get(0).equals("a"));
-        Assert.that(buf.get(1).equals("b"));
-        Assert.that(buf.get(2).equals("c"));  
-
-        buf=new Buffer(4);
-        buf.addLast("a");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");
-        try {
-            buf.remove(5);
-            Assert.that(false);
-        } catch (IndexOutOfBoundsException e) { }
-        Assert.that(("b").equals(buf.remove(1)));
-        Assert.that(buf.size()==3);
-        Assert.that(buf.get(0).equals("a"));
-        Assert.that(buf.get(1).equals("c"));
-        Assert.that(buf.get(2).equals("d")); 
-
-        buf=new Buffer(4);
-        buf.addLast("b");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("d");
-        Assert.that(buf.remove("d")==true);
-        Assert.that(buf.remove("b")==true);
-        Assert.that(buf.size()==2);
-        Assert.that(buf.get(0).equals("b"));
-        Assert.that(buf.get(1).equals("c"));
-
-        buf=new Buffer(4);
-        buf.addLast("b");
-        buf.addLast("b");
-        buf.addLast("c");
-        buf.addLast("b");
-        Assert.that(buf.removeAll("b")==true);
-        Assert.that(buf.size()==1);
-        Assert.that(buf.get(0).equals("c"));
-
-        //5. Test clone() method.
-        buf=new Buffer(2);
-        buf.addLast("a");
-        buf.addLast("b");
-        Buffer buf2=new Buffer(buf);
-        Assert.that(buf2.size()==buf.size());
-        Assert.that(buf2.getCapacity()==buf.getCapacity());
-        Assert.that(buf2.first().equals(buf.first()));
-        Assert.that(buf2.last().equals(buf.last()));
-        
-        Assert.that(buf.removeFirst()!=null); //buf2 unmodified
-        Assert.that(buf.size()==1);
-        Assert.that(buf2.size()==2);
-        Assert.that(buf.first().equals("b"));
-        Assert.that(buf2.first().equals("a"));
-        Assert.that(buf2.last().equals("b"));
-    }
-    */
 }

@@ -11,6 +11,7 @@ public class AllTests {
         suite.addTest(FixedsizePriorityQueueTest.suite());
         suite.addTest(StringUtilsTest.suite());
         suite.addTest(BandwidthThrottleTest.suite());
+        suite.addTest(BufferTest.suite());
         return suite;
     }
 
