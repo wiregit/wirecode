@@ -73,19 +73,16 @@
     <antcall target="test class">
       <param name="class" value="UltrapeerRoutingTest"/>
     </antcall>
-    <junit printsummary="withOutAndErr" 
-           haltonfailure="yes"
-	       showoutput="true"
-		   fork="on"
-    >
-	  <formatter type="plain" useFile="false"/>
-	  <test name="com.limegroup.gnutella.AllTests" />
-	  <classpath>
-	    <pathelement location="${builddir}"/>
-	    <pathelement location="${collections}"/>
-	    <pathelement location="${xerces}"/>
-	  </classpath>
-	</junit>
+    <antcall target="test class">
+      <param name="class" value="downloader.AllTests"/>
+    </antcall>
+    <antcall target="test class">
+      <param name="class" value="uploader.AllTests"/>
+    </antcall>
+
+    <antcall target="test class">
+      <param name="class" value="AllTests"/>
+    </antcall>
   </target>
 
   <!-- tests individual class -->
