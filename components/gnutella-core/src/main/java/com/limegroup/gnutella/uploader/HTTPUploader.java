@@ -72,6 +72,7 @@ public final class HTTPUploader implements Uploader {
 	private CountingOutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
+	private int _totalAmountReadBefore;
 	private int _totalAmountRead;
 	private int _amountRead;
 	// useful so we don't have to do _uploadEnd - _uploadBegin everywhere
@@ -225,6 +226,7 @@ public final class HTTPUploader implements Uploader {
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
         _parameters = params;
+        _totalAmountReadBefore = 0;
         
         // If this is the first time we are initializing it,
         // create a new bandwidth tracker and set a few more variables.
@@ -700,8 +702,12 @@ public final class HTTPUploader implements Uploader {
 	            return 0;
 	        else
 	            return _ostream.getAmountWritten();
-	    } else
+	    } else {
+			if ( _totalAmountReadBefore > 0 )
+				return _totalAmountReadBefore + _amountRead;
+			else
 	        return _totalAmountRead + _amountRead;
+    }
     }
 
 	/**
@@ -737,6 +743,7 @@ public final class HTTPUploader implements Uploader {
         _uploadEnd = 0;
         _containedRangeRequest = false;
 		_clientAcceptsXGnutellaQueryreplies = false;
+		_totalAmountReadBefore = 0;
         
 		ByteReader br = new ByteReader(iStream);
         
@@ -770,6 +777,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
                 else if ( readFeatureHeader(str)     ) ;
+                else if ( readXDownloadedHeader(str) ) ;
         	}
         } catch(ProblemReadingHeaderException prhe) {
             // there was a problem reading the header.. gobble up
@@ -798,6 +806,7 @@ public final class HTTPUploader implements Uploader {
             
             _headersParsed = true;
         }
+        
 	}
 	
 
@@ -833,6 +842,28 @@ public final class HTTPUploader implements Uploader {
 		_nodePort = port;
         
         return true;
+    }
+    
+    /**
+	 * Look for X-Downloaded header which represents number 
+	 * of bytes for this file already downloaded by peer
+	 *
+     * @return true if it had a X-Downloaded header
+     */
+    private boolean readXDownloadedHeader(String str) throws IOException {
+        
+        if ( !HTTPHeaderName.DOWNLOADED.matchesStartOfString(str) )
+            return false;
+            
+		try {
+			str = HTTPUtils.extractHeaderValue(str);
+			if ( str != null ) {
+				_totalAmountReadBefore = Integer.parseInt(str);
+			}
+		} 
+		catch (NumberFormatException e) {}
+
+		return true;
     }
     
     /**

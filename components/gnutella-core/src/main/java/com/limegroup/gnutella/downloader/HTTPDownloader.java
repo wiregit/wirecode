@@ -466,7 +466,8 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException could not parse headers
      * @exception UnknownCodeException unknown response code
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing) 
+    public void connectHTTP(int start, int stop, boolean supportQueueing,
+    						int amountDownloaded) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
              NotSharingException, QueuedException, RangeNotAvailableException,
              ProblemReadingHeaderException, UnknownCodeException {
@@ -655,6 +656,13 @@ public class HTTPDownloader implements BandwidthTracker {
                         out);
         }
 		
+        // Write X-Downloaded header to inform uploader about
+        // how many bytes already transferred for this file
+        if ( amountDownloaded > 0 ) {
+            HTTPUtils.writeHeader(HTTPHeaderName.DOWNLOADED,
+                        String.valueOf(amountDownloaded),
+                        out);
+        }
 		
         out.write("\r\n");
         out.flush();

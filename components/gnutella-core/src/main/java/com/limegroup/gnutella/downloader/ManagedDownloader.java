@@ -3189,7 +3189,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //code below.  Note connectHTTP can throw several exceptions.
         int low = interval.low;
         int high = interval.high; // INCLUSIVE
-        dloader.connectHTTP(getOverlapOffset(low), high + 1, true);
+        dloader.connectHTTP(getOverlapOffset(low), high + 1, true, getAmountRead());
         //The dloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
         //note the confusion caused by downloading overlap
@@ -3326,7 +3326,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     throw new NoSuchElementException();
                 //Note: we are not interested in being queued at this point this
                 //line could throw a bunch of exceptions (not queuedException)
-                dloader.connectHTTP(getOverlapOffset(start), stop, false);
+                dloader.connectHTTP(getOverlapOffset(start), stop, false, getAmountRead());
                 int newLow = dloader.getInitialReadingPoint();
                 int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
                 // If the stealer isn't going to give us everything we need,
@@ -3365,7 +3365,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(stop <= start)
                 throw new NoSuchElementException();
             //this line could throw a bunch of exceptions
-            dloader.connectHTTP(getOverlapOffset(start), stop, true);
+            dloader.connectHTTP(getOverlapOffset(start), stop, true, getAmountRead());
             int newLow = dloader.getInitialReadingPoint();
             int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
             if(newHigh < stop) {

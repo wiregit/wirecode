@@ -196,6 +196,13 @@ public class HTTPHeaderName {
     public static final HTTPHeaderName NODE = new HTTPHeaderName("X-Node");
 
 	/**
+	 * Header for informing uploader about amount of already
+	 * downloaded bytes
+	 */
+	public static final HTTPHeaderName DOWNLOADED = 
+		new HTTPHeaderName("X-Downloaded");
+    
+	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.
 	 *
