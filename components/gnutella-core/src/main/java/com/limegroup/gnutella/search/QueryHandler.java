@@ -266,9 +266,11 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
-			//if(ttl == 4 && remainingConnections > 4) {
-			//ttl = 3;
-			//}
+            byte maxTTL = mc.headers().getMaxTTL();
+            if(ttl > maxTTL) {
+                ttl = maxTTL;
+            }
+
 			QueryRequest query = createQuery(ttl);
 
  
