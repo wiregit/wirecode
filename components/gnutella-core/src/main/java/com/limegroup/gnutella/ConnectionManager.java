@@ -749,14 +749,6 @@ public class ConnectionManager {
 		return retList;
 	}
 
-
-    /**
-     * @return Returns endpoint representing its own address and port
-     */
-    public Endpoint getSelfAddress() {
-       return new Endpoint(RouterService.getAddress(), 
-						   RouterService.getPort()); 
-    }
     
     /**
      * Adds an initializing connection.
@@ -1265,6 +1257,7 @@ public class ConnectionManager {
             _catcher.add(e, goodPriority);
         }
     }
+
     
     /**
      * Initializes an outgoing connection created by createConnection or any
