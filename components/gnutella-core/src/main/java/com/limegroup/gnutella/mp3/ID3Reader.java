@@ -217,6 +217,10 @@ public final class ID3Reader {
         for(i = includedLength - 1;
             (i >= 0) && ((bytes[i] == 0) || (bytes[i] == 32));
             i--);
+        //replace the nulls with spaces in the array upto i
+        for(int j=0; j<=i; j++) 
+            if(bytes[j]==0)
+                bytes[j]=(byte)32;
         return i + 1;
     }
     
