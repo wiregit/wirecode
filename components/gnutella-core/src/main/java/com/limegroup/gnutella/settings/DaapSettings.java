@@ -58,7 +58,7 @@ public class DaapSettings extends LimeProps {
      * DAAP_TYPE_NAME.getValue()</code>
      */
 	public static StringSetting DAAP_SERVICE_NAME =
-		FACTORY.createStringSetting("DAAP_SERVICE_NAME", "LimeWire");
+		FACTORY.createStringSetting("DAAP_SERVICE_NAME", "Shared LimeWire Tunes");
 	
     /**
      * This isn't important
