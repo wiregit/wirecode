@@ -15,6 +15,10 @@ import com.sun.java.util.collections.*;
  * a response to an UDPHeadPing.  It is a trimmed down version of the standard HEAD response,
  * since we are trying to keep the sizes of the udp packets small.
  * 
+ * This message can also be used for punching firewalls if the ping requests so. 
+ * Feature like this can be used to allow firewalled nodes to participate more 
+ * in download meshes.
+ * 
  * Since headpings will be sent by clients who have started to download a file whose download
  * mesh contains  this host, it needs to contain information that will help those clients whether 
  * this host is a good bet to start an http download from.  Therefore, the following information should
