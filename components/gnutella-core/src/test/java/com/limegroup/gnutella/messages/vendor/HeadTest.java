@@ -407,6 +407,10 @@ public class HeadTest extends BaseTestCase {
 		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
 		PushEndpoint point = rfd.getPushAddr();
 		assertEquals(pe,point);
+		assertEquals(pe.getProxies().size(),point.getProxies().size());
+		HashSet parsedProxies = new HashSet(point.getProxies());
+		parsedProxies.retainAll(pe.getProxies());
+		assertEquals(pe.getProxies().size(),parsedProxies.size());
 		
 		//now ask only for fwt push locs - nothing returned
 		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);

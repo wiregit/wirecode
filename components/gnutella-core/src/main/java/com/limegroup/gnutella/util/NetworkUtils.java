@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.filters.IPList;
@@ -342,6 +343,8 @@ public final class NetworkUtils {
     	while (i < data.length ) {
     		PushEndpoint current = PushEndpoint.fromBytes(data,i);
     		i+=PushEndpoint.getSizeBytes(current.getProxies());
+    		if (!current.getAddress().equals(RemoteFileDesc.BOGUS_IP))
+    		    i=6;
     		ret.add(current);
     	}
     	

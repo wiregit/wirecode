@@ -4,6 +4,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,7 +33,13 @@ import com.limegroup.gnutella.util.NetworkUtils;
  *    - bits 3-4 the version of the f2f transfer protocol this altloc supports
  *    - bits 5-7 other possible features.
  * bytes 1-16 : the guid
+ * bytes 17-22: ip:port of the address, if known
  * followed by 6 bytes per PushProxy
+ * 
+ * If the size payload on the wire is HEADER+(#of proxies)*PROXY_SIZE then the pushloc
+ * does not carry in itself an external address. If the size is 
+ * HEADER+(#of proxies+1)*PROXY_SIZE then the first 6 bytes is the ip:port of the 
+ * external address.
  * 
  * the http format this is serialized to is an ascii string consisting of
  * ';'-delimited tokens.  The first token is the client GUID represented in hex
@@ -231,6 +238,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		_proxies = proxies;
 		_externalAddr=addr;
 		_fwtVersion=fwtVersion;
+		
 		// its ok to use the _proxies and _size fields directly since altlocs created
 		// from http string do not need to change
 		_features = proxies.size() | (_fwtVersion << 3);
@@ -241,7 +249,10 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	 */
 	public byte [] toBytes() {
 	    Set proxies = getProxies();
-		byte [] ret = new byte[getSizeBytes(proxies)];
+	    int payloadSize = getSizeBytes(proxies);
+	    if (hasExternalAddress())
+	        payloadSize+=6;
+		byte [] ret = new byte[payloadSize];
 		toBytes(ret,0,proxies);
 		return ret;
 	}
@@ -257,16 +268,37 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	
 	private void toBytes(byte []where, int offset, Set proxies) {
 	    
-	    if (where.length-offset < getSizeBytes(proxies))
+	    int neededSpace = getSizeBytes(proxies);
+	    if (hasExternalAddress())
+	        neededSpace+=6;
+	    
+	    if (where.length-offset < neededSpace)
 			throw new IllegalArgumentException ("target array too small");
-		
+	    
 		//store the number of proxies
 		where[offset] = (byte)(Math.min(4,proxies.size()) 
 		        | getFeatures() 
 		        | supportsFWTVersion() << 3);
 		
 		//store the guid
-		System.arraycopy(_clientGUID,0,where,offset+1,16);
+		System.arraycopy(_clientGUID,0,where,++offset,16);
+		offset+=16;
+		
+		//if we know the external address, store that too
+		//if its valid and not private and port is valid
+		if (hasExternalAddress()) {
+		    byte [] addr = getInetAddress().getAddress();
+		    int port = getPort();
+		    if (!getAddress().equals(RemoteFileDesc.BOGUS_IP) &&
+		            NetworkUtils.isValidAddress(addr) && 
+		            !NetworkUtils.isPrivateAddress(addr) &&
+		            NetworkUtils.isValidPort(port)) {
+		        System.arraycopy(addr,0,where,offset,4);
+		        offset+=4;
+		        ByteOrder.short2leb((short)getPort(),where,offset);
+		        offset+=2;
+		    }
+		}
 		
 		//store the push proxies
 		int i=0;
@@ -276,11 +308,18 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 			byte [] addr = ppi.getPushProxyAddress().getAddress();
 			short port = (short)ppi.getPushProxyPort();
 			
-			System.arraycopy(addr,0,where,offset+HEADER_SIZE+i*PROXY_SIZE,4);
-			ByteOrder.short2leb(port,where,offset+HEADER_SIZE+i*PROXY_SIZE+4);
+			System.arraycopy(addr,0,where,offset,4);
+			offset+=4;
+			ByteOrder.short2leb(port,where,offset);
+			offset+=2;
 			i++;
 		}
 	}
+	
+	protected boolean hasExternalAddress() {
+	    return _externalAddr!=null;
+	}
+	
 	/**
 	 * 
 	 * @param data data read from network 
@@ -299,6 +338,8 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		byte [] tmp = new byte[6];
 		byte [] guid =new byte[16];
 		Set proxies = new HashSet(); //PushProxyContainers are good with HashSets
+		IpPort addr = null;
+		boolean hasAddr=false;
 		
 		//get the number of push proxies
 		int number = data[offset] & SIZE_MASK;
@@ -308,17 +349,34 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
 			throw new BadPacketException("not a valid PushEndpoint");
 		
-		//get the guid
-		System.arraycopy(data,offset+1,guid,0,16);
+		if (data.length - offset >= HEADER_SIZE+(number+1)*PROXY_SIZE)
+		    hasAddr=true;
 		
+		//get the guid
+		System.arraycopy(data,++offset,guid,0,16);
+		offset+=16;
+		
+		//get the address if we have one
+		if (hasAddr){
+		    String address = NetworkUtils.ip2string(data,offset);
+		    offset+=4;
+		    int port = ByteOrder.leb2short(data,offset);
+		    offset+=2;
+		    try{
+		        addr = new IpPortImpl(address,port);
+		    }catch(UnknownHostException hmm){
+		        throw new BadPacketException(hmm.getMessage());
+		    }
+		}
 		
 		for (int i=0;i<number;i++) {
-			System.arraycopy(data, offset+HEADER_SIZE+i*PROXY_SIZE,tmp,0,6);
+			System.arraycopy(data, offset,tmp,0,6);
+			offset+=6;
 			proxies.add(new QueryReply.PushProxyContainer(tmp));
 		}
 		
 		/** this adds the read set to the existing proxies */
-		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version);
+		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version,addr);
 		pe.updateProxies(true);
 		return pe;
 	}
@@ -421,11 +479,17 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		}
 		
 		// append the external address of this endpoint if such exists
-		if (_externalAddr!=null) {
-		    httpString.append(getPort())
-		    	.append(":")
-		    	.append(getAddress())
-		    	.append(";");
+		// and is valid, non-private and if the port is valid as well.
+		if (hasExternalAddress()) {
+		    String addr = getAddress();
+	        int port = getPort();
+	        if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
+	                NetworkUtils.isValidPort(port)){
+	            httpString.append(port)
+	            	.append(":")
+	            	.append(addr)
+	            	.append(";");
+	        }
 		}
 		
 		int proxiesWritten=0;

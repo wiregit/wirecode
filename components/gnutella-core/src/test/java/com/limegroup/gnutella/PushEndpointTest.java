@@ -135,6 +135,19 @@ public class PushEndpointTest extends BaseTestCase {
     	sent.retainAll(four.getProxies());
     	assertEquals(four.getProxies().size(),sent.size());
     	
+    	// test a PE that carries its external address
+    	PushEndpoint ext = new PushEndpoint(guid2.bytes(),set6,
+    			0,2, new IpPortImpl("1.2.3.4",5));
+    	network = ext.toBytes();
+    	assertEquals(ext.getSizeBytes(set6)+6,network.length);
+    	
+    	PushEndpoint ext2 = PushEndpoint.fromBytes(network);
+    	assertEquals(ext,ext2);
+    	assertEquals("1.2.3.4",ext2.getAddress());
+    	assertEquals(5,ext2.getPort());
+    	assertEquals(4,ext2.getProxies().size());
+    
+    	
     }
     
     /**

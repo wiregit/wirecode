@@ -530,8 +530,8 @@ public class HeadPong extends VendorMessage {
 		
 		//push altlocs are bigger than normal altlocs, however we 
 		//don't know by how much.  The size can be between
-		//23 and 41 bytes.  We assume its 41.
-		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
+		//23 and 47 bytes.  We assume its 47.
+		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+available+ " push locs to pong");
