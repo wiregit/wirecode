@@ -533,9 +533,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
-        System.out.println("initializing alt locs.");
         if( hash != null ) {
-            System.out.println("hash: " + hash);
             long size = incompleteFileManager.getCompletedSize(incompleteFile);
             // Create our AlternateLocationCollection if we haven't already.
             if( totalAlternateLocations == null )
@@ -1047,9 +1045,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
             // if this was read from the disk, read the alternate locations
-            // that may be stored in the IncompleteFileDesc
+            // that may be stored in the IncompleteFileDesc.
+            // This call is necessary now to allow buckets to be built up
+            // correctly, as the RFDs built from alternate locations are not
+            // added to allFiles, so the RFDGrouper won't add them into
+            // buckets.
             if(deserialized) {
-                System.out.println("deserialized, adding.");
                 initializeAlternateLocations();
             }
         }
@@ -1551,11 +1552,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
                 }
-                
-                //Now that the entry is in incompleteFM, add any
-                //alternate locations that may be stored in the
-                //IncompleteFileDesc from partial file sharing.
-                initializeAlternateLocations();
                                 
                 //need to get the VerifyingFile ready to write
                 try {
