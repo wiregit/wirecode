@@ -48,6 +48,19 @@ class RichQueryHandler{
         LimeXMLReplyCollection replyDocs = mapper.getReplyCollection(schema);
         List matchingReplies = replyDocs.getMatchingReplies(queryDoc);
         //TODO1: Complete
+        //find out if these replyDocuments correspond to dome file 
+        //(by checking the identifier tags.)
+        //If they correspond to files we make responses in the 
+        // regular way...with an index and a a size and a name and the
+        // meta info.
+
+        //however if there is no file, we create the response with a
+        //special index (like -1) if that is legal. And then this will allow
+        //us to put the meta info in and not have the system check for
+        //corresponding file.
+
+        //Also, we have to a have a method called toXMLString in the 
+        //LimeXMLDocument class.
         return null;
     }
 
