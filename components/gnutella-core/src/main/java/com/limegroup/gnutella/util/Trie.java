@@ -5,9 +5,9 @@ import com.sun.java.util.collections.*;
 
 /**
  * An information reTRIEval tree, a.k.a., a prefix tree.  A Trie is similar to a
- * dictionary, but it maps a key to multiple values.  Unlike a dictionary,
- * keys must be strings.  Furthermore, Trie provides an efficient means
- * (getPrefixedBy()) to find all values given just a PREFIX of a key.<p>
+ * dictionary, except that keys must be strings.  Furthermore, Trie provides an
+ * efficient means (getPrefixedBy()) to find all values given just a PREFIX of a
+ * key.<p>
  *
  * All retrieval operations run in O(nm) time, where n is the size of the
  * key/prefix and m is the size of the alphabet.  Some implementations may
@@ -19,158 +19,232 @@ import com.sun.java.util.collections.*;
  * The Trie can be set to ignore case.  Doing so is the same as making all
  * keys and prefixes lower case.  That means the original keys cannot be
  * extracted from the Trie.<p>
- * 
+ *
  * Restrictions (not necessarily limitations!)
  * <ul>
  * <li><b>This class is not synchronized.</b>  Do that externally if you desire.
  * <li>Keys and values may not be null.
- * <li>The interface to this is not complete. 
- * <li>It might be nice to have a boolean that restricts this to a single value.
- *     The reason for making it a one-to-many mapping was that it made the
- *     caller (FileManager) much simpler and more efficient.
- * </ul> 
+ * <li>The interface to this is not complete.
+ * </ul>
+ *
+ * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie.html for a
+ * discussion of Tries.
  */
 public class Trie {
-    /** INVARIANT: because this is a multi-trie, all values of a root are either
-     *  null or non-empty List's. 
-     *  INVARIANT: if ignoreCase==true, then canonicalCase(c)==c for all 
-     *  edges labelled c. */
+    /**
+     * Our representation consists of a tree of nodes whose edges are labelled
+     * by strings.  The first characters of all labels of all edges of a node
+     * must be distinct.  Typically the edges are sorted, but this is determined
+     * by TrieNode.<p>
+     *
+     * An abstract TrieNode is a mapping from String keys to values,
+     * { <K1, V1>, ..., <KN, VN> }, where all Ki and Kj are distinct for i!=j.
+     * For any node N, define KEY(N) to be the concatentation of all labels on
+     * the edges from the root to that node.  Then the abstraction function is
+     *       { <KEY(N), N.getValue() | N is a child of root
+     *                                 and N.getValue()!=null}
+     *
+     * An earlier version used character labels on edges.  This made
+     * implementation simpler but used more memory because one node would be
+     * allocated to each character in long strings if that string had no
+     * common prefixes with other elements of the Trie.
+     *
+     * INVARIANT: for any node N, for any edges Ei and Ej from N,
+     *   i!=j ==> Ei.getLabel().getCharAt(0)!=Ej.getLabel().getCharAt(0)
+     * Also, all invariants for TrieNode and TrieEdge must hold.
+     */
     private TrieNode root;
-    private boolean ignoreCase=false;    
-    
+    /**
+     * True iff case should be ignored during comparisons.
+     *
+     * INVARIANT: if ignoreCase==true, then canonicalCase(c)==c for all
+     *   edges labelled c.
+     */
+    private boolean ignoreCase=false;
+
     /**
      * Constructs a new, empty tree.
-     * Case is ignored in storing and retrieving keys iff ignoreCase==true.     
+     * Case is ignored in storing and retrieving keys iff ignoreCase==true.
      */
     public Trie(boolean ignoreCase) {
         this.ignoreCase=ignoreCase;
         clear();
     }
 
-    /** 
+    /**
      * Makes this empty.
-     * @modifies this
+     *     @modifies this
      */
     public void clear() {
         this.root=new TrieNode();
     }
-    
+
     /** Returns the canonical version of the given character. */
     private final char canonicalCase(char c) {
         return ignoreCase ? Character.toLowerCase(c) : c;
     }
 
+    /** Returns the canonical version of the given character. */
+    private final String canonicalCase(String s) {
+        if (ignoreCase)
+            return s.toLowerCase();
+        else
+            return s;
+    }
+
     /**
-     * Adds a mapping from the given key (which may be empty) to the given
-     * value.  Any other values associated with key are retained.  If key is
-     * already associated with value, this is not modified. Returns true iff
-     * there was already a mapping from key to some value.
+     *  Matches the pattern b against the text a[startOffset...stopOffset-1].
+     *  Ignores case of a when matching if ignoreCase==true.
      *
-     * @requires value!=null
-     * @modifies this */
-    public boolean add(String key, Object value) {
+     *  Returns the first j s.t. 0<=i<b.length() AND
+     *          a[startOffset+j]!=b[j]      [a and b differ]
+     *       OR stopOffset==startOffset+j   [a is undefined]
+     *  Returns -1 if no such j exists, i.e., there is a match.
+     *
+     *  Examples:
+     *    1) a="abcde", startOffset=0, stopOffset=5, b="abc"
+     *              abcde   ==> returns -1
+     *              abc
+     *    2) a="abcde", startOffset=1, stopOffset=5, b="bXd"
+     *              abcde   ==> returns 1
+     *               bXd
+     *    3) a="abcde", startOffset=1, stopOffset=3, b="bcd"
+     *              abc     ==> returns 2
+     *               bcd
+     *
+     *  @requires 0<=startOffset<=stopOffset<=a.length()
+     */
+    private final int match(String a, int startOffset, int stopOffset,
+                            String b) {
+        //j is an index into b
+        //i is a parallel index into a
+        int i=startOffset;
+        for (int j=0; j<b.length(); j++) {
+            Assert.that(i==(j+startOffset), "Bad value for i");  //TODO: remove
+            if ( i>=stopOffset )
+                return j;
+            if (canonicalCase(a.charAt(i))!=b.charAt(j))
+                return j;
+            i++;
+        }
+        return -1;
+    }
+
+
+    /**
+     * Maps the given key (which may be empty) to the given value.  Returns the
+     * old value associated with key, or null if none.
+     *     @requires value!=null
+     *     @modifies this
+     */
+    public Object add(String key, Object value) {
+        //Find the largest prefix of key, key[0..i-1], already in this.
         TrieNode node=root;
         int i=0;
-        //1. Find the largest prefix of key, key[0..i-1], already in this.
-        for ( ; i<key.length(); i++) {
-            TrieNode child=node.get(canonicalCase(key.charAt(i)));
-            if (child==null) 
-                break;
-            node=child;
+        while (i<key.length()) {
+            //Find the edge whose label starts with key[i].
+            TrieEdge edge=node.get(canonicalCase(key.charAt(i)));
+            if (edge==null) {
+                //1) Additive insert.
+                TrieNode newNode=new TrieNode(value);
+                node.put(canonicalCase(key.substring(i)), newNode);
+                return null;
+            }
+
+            //Now check that rest of label matches
+            String label=edge.getLabel();
+            int j=match(key, i, key.length(), label);
+            Assert.that(j!=0, "Label didn't start with prefix[0].");
+            if (j>=0) {
+                //2) Prefix overlaps perfectly with just part of edge label
+                //   Do split insert as follows...
+                //
+                //   node          node         ab = label
+                // ab |      =>   a |           a  = label[0...j-1] (inclusive)
+                //  child      intermediate     b  = label[j...]    (inclusive)
+                //              b /    \ c      c  = key[i+j...]    (inclusive)
+                //             child  newNode
+                //
+                //   ...unless c="", in which case you just do a "splice insert"
+                //   by ommiting newNew and setting intermediate's value.
+                TrieNode child=edge.getChild();
+                TrieNode intermediate=new TrieNode();
+                String a=label.substring(0, j);
+                //Assert.that(canonicalCase(a).equals(a), "Bad edge a");
+                String b=label.substring(j);
+                //Assert.that(canonicalCase(b).equals(b), "Bad edge a");
+                String c=canonicalCase(key.substring(i+j));
+
+                if (c.length() > 0) {
+                    //Split.
+                    TrieNode newNode=new TrieNode(value);
+                    node.remove(label.charAt(0));
+                    node.put(a, intermediate);
+                    intermediate.put(b, child);
+                    intermediate.put(c, newNode);
+                } else {
+                    //Splice.
+                    node.remove(label.charAt(0));
+                    node.put(a, intermediate);
+                    intermediate.put(b, child);
+                    intermediate.setValue(value);
+                }
+                return null;
+            }
+
+            //Prefix overlaps perfectly with all of edge label.  Keep searching.
+            Assert.that(j==-1, "Bad return value from match: "+i);
+            node=edge.getChild();
+            i+=label.length();
         }
-        //2. Insert additional new nodes (if any) for key[i..].
-        for ( ; i<key.length(); i++) {
-            TrieNode child=new TrieNode();
-            node.put(canonicalCase(key.charAt(i)), child);
-            node=child;
-        }
-        //3. Setup value and return.
-        List list=(List)node.getValue();
-        if (list==null) {
-            list=new ArrayList(1);
-            list.add(value);
-            node.setValue(list);
-            return false;
-        } else {
-            if (! list.contains(value))
-                list.add(value);
-            return true;
-        }
+
+        //3. Relabel insert.  Prefix already in this, though not necessarily
+        //associated with a value.
+        Object ret=node.getValue();
+        node.setValue(value);
+        return ret;
     }
+
 
     /** Returns the node associated with prefix, or null if none. */
     private TrieNode fetch(String prefix) {
         TrieNode node=root;
-        for (int i=0; i<prefix.length(); i++) {
-            node=node.get(canonicalCase(prefix.charAt(i)));
-            if (node==null) 
+        for (int i=0; i<prefix.length(); ) {
+            //Find the edge whose label starts with prefix[i].
+            TrieEdge edge=node.get(canonicalCase(prefix.charAt(i)));
+            if (edge==null)
                 return null;
+
+            //Now check that rest of label matches
+            String label=edge.getLabel();
+            int j=match(prefix, i, prefix.length(), label);
+            Assert.that(j!=0, "Label didn't start with prefix[0].");
+            if (j!=-1)
+                return null;
+
+            i+=label.length();
+            node=edge.getChild();
         }
         return node;
     }
 
     /**
-     * Returns a single value associated with the given key, or null if no
-     * mapping.  Exactly which value is undefined; it may even be different
-     * during subsequent calls.  
+     * Returns the value associated with the given key, or null if none.
      */
     public Object get(String key) {
         TrieNode node=fetch(key);
         if (node==null)
             return null;
 
-        List list=(List)node.getValue();
-        if (list==null)
-            return null;
-        else {
-            Assert.that(list.size()>0, "Empty list in tree");
-            return list.get(0);
-        }
+        return node.getValue();
     }
 
     /**
-     * Returns an iterator of all values associated with key, in any order.
-     * Calling the remove() method on the iterator is undefined.
+     * Ensures no values are associated with the given key.  Returns true if
+     * any values were actually removed.
+     *     @modifies this
      */
-    public Iterator getAll(String key) {
-        TrieNode node=fetch(key);
-        if (node==null)
-            return new EmptyIterator();
-
-        List list=(List)node.getValue();
-        if (list==null)
-            return new EmptyIterator();
-        else {
-            return list.iterator();
-        }
-    }
-
-    /** 
-     * Removes the given key/value pair from this.  Returns true if this
-     * contained the pair.
-     * @modifies this
-     */
-    public boolean remove(String key, Object value) {
-        //TODO2: prune unneeded nodes to save space
-        TrieNode node=fetch(key);
-        if (node==null)
-            return false;        
-        List list=(List)node.getValue();
-        if (list==null)
-            return false;
-
-        boolean ret=list.remove(value);  //removeAll not needed
-        if (list.size()==0)              //maintain invariant
-            node.setValue(null);
-        return ret;
-    }
-
-    /** 
-     * Removes all key/value pairs from this.  Returns true if this contained
-     * the key.
-     * @modifies this
-     */
-    public boolean removeAll(String key) {
+    public boolean remove(String key) {
         //TODO2: prune unneeded nodes to save space
         TrieNode node=fetch(key);
         if (node==null)
@@ -181,13 +255,14 @@ public class Trie {
         return ret;
     }
 
+
     /**
-     * Returns an iterator (of Object) of the values mapped by the given prefix,
-     * in any order.  That is, the returned iterator contains exactly the values
-     * v for which there exists a key k s.t. k.startsWith(prefix) and getAll(k) 
-     * contains v.  The remove() operation on the iterator in unimplemented.
-     *
-     * @requires this not modified while iterator in use.  
+     * Returns an iterator (of Object) of the values mapped by keys in this that
+     * start with the given prefix, in any order.  That is, the returned
+     * iterator contains exactly the values v for which there exists a key k
+     * s.t. k.startsWith(prefix) and get(k)==v.  The remove() operation on the
+     * iterator in unimplemented.
+     *     @requires this not modified while iterator in use.
      */
     public Iterator getPrefixedBy(String prefix) {
         return getPrefixedBy(prefix, 0, prefix.length());
@@ -197,62 +272,81 @@ public class Trie {
      * Same as getPrefixedBy(prefix.substring(startOffset, stopOffset). This is
      * useful as an optimization in certain applications to avoid allocations.
      *
-     * @requires 0<=startOffset<=stopOffset<=prefix.length 
+     * @requires 0<=startOffset<=stopOffset<=prefix.length
      */
     public Iterator getPrefixedBy(String prefix,
                                   int startOffset, int stopOffset) {
+        //Find the first node for which "prefix" prefixes KEY(node).  (See the
+        //implementation overview for a definition of KEY(node).) This code is
+        //similar to fetch(prefix), except that if prefix extends into the
+        //middle of an edge label, that edge's child is considered a match.
         TrieNode node=root;
-        //Find first node start with prefix in tree.
-        for (int i=startOffset; i<stopOffset; i++) {
-            node=node.get(canonicalCase(prefix.charAt(i)));
-            if (node==null) 
+        for (int i=startOffset; i<stopOffset; ) {
+            //Find the edge whose label starts with prefix[i].
+            TrieEdge edge=node.get(canonicalCase(prefix.charAt(i)));
+            if (edge==null) {
                 return new EmptyIterator();
+            }
+
+            //Now check that rest of label matches
+            node=edge.getChild();
+            String label=edge.getLabel();
+            int j=match(prefix, i, stopOffset, label);
+            Assert.that(j!=0, "Label didn't start with prefix[0].");
+            if ((i+j)==stopOffset)
+                //a) prefix overlaps perfectly with just part of edge label
+                break;
+            else if (j>=0) {
+                //b) prefix and label differ at some point
+                node=null;
+                break;
+            } else {
+                //c) prefix overlaps perfectly with all of edge label.
+                Assert.that(j==-1, "Bad return value from match: "+i);
+            }
+
+            i+=label.length();
         }
-        //Yield non-null values from it.
-        return new ValueIterator(node);
+
+        //Yield all children of node, including node itself.
+        if (node==null)
+            return new EmptyIterator();
+        else
+            return new ValueIterator(node);
     }
 
-    /** Returns all the non-null values associated with a given
+    /** Returns all the (non-null) values associated with a given
      *  node and its children. */
     private class ValueIterator extends UnmodifiableIterator {
-        /** Queue for DFS. Push and pop from back. */
-        LinkedList /* of TrieNode */ queue=new LinkedList();
-        /** The next element to yield of queue.getLast().
-         *  INVARIANT: this is a valid index of queue.getLast() */
-        int i;
-        
+        /** Queue for DFS. Push and pop from back.  The last element
+         *  of queue is the next node who's value will be returned.
+         *  INVARIANT: queue.size()!=0 => queue.getLast().getValue()!=null */
+        private LinkedList /* of TrieNode */ queue=new LinkedList();
+
         /** Creates a new iterator that yields all the node of start
          *  and its children. */
         ValueIterator(TrieNode start) {
             queue.add(start);
-            i=-1;
-            advance(); 
+            advance();
         }
-        
-        /** 
-         * Modifies i and queue s.t. queue.getLast()[i] is the next
-         * element to yield.  If there are no more elements to yield,
-         * queue is emptied.
-         * @requires queue not empty
+
+        /**
+         * Performs DFS using the queue until the last node of the
+         * queue has a non-null value or the queue is empty.
+         *     @modifies this
          */
-        private void advance() {   
-            Assert.that(queue.size()>0, "Queue empty");
-            //Increment i without modifying queue if possible.
-            i++;
-
-            //Verify it's still good.  If not, use DFS to search for next node
-            //with a non-null value.
-            while (queue.size() > 0) {
+        private void advance() {
+            while (queue.size()>0) {
+                //Stop if tail contains non-null value
                 TrieNode node=(TrieNode)queue.getLast();
-                List list=(List)node.getValue();
-                if (list!=null && i<list.size())
-                    return;     //still good!
+                Object value=node.getValue();
+                if (value!=null)
+                    return;
 
-                //Discard node, expanding it's children.
+                //Remove tail and expand its children.
                 queue.removeLast();
-                for (Iterator iter=node.children(); iter.hasNext(); ) 
+                for (Iterator iter=node.children(); iter.hasNext(); )
                     queue.addLast(iter.next());
-                i=0;
             }
         }
 
@@ -264,18 +358,13 @@ public class Trie {
             if (! hasNext()) {
                 throw new NoSuchElementException();
             }
-            TrieNode node=(TrieNode)queue.getLast();
-            List list=(List)node.getValue();
-            Assert.that(list!=null, "Next node has null value");
-            Object ret=list.get(i);
+            TrieNode node=(TrieNode)queue.removeLast();
+            for (Iterator iter=node.children(); iter.hasNext(); )
+                queue.addLast(iter.next());
             advance();
-            return ret;
+            return node.getValue();
         }
-
-        public String toString() {
-            return queue.toString()+"/"+i;
-        }
-    }   
+    }
 
     /** Yields nothing. */
     private static class EmptyIterator extends UnmodifiableIterator {
@@ -283,44 +372,82 @@ public class Trie {
         public Object next() { throw new NoSuchElementException(); }
     }
 
+    /** Returns a string representation of the tree state of this, i.e., the
+     *  concrete state.  (The version of toString commented out below returns
+     *  a representation of the abstract state of this. */
     public String toString() {
-        StringBuffer buf=new StringBuffer("[");
-        /** INVARIANT: queue.size()==prefix.size(), and queue[i]
-         *  is reachable by following the path prefixes[i] from root. */
-        LinkedList /* of TrieNode */ queue=new LinkedList();
-        LinkedList /* of String */ prefixes=new LinkedList();
-        queue.addLast(root);
-        prefixes.addLast("");
-        /** True iff we've added one pair to buf.  Used to control ", " */
-        boolean gotKey=false;
-        while (queue.size() > 0) {
-            TrieNode node=(TrieNode)queue.removeLast();
-            String prefix=(String)prefixes.removeLast();
-            for (Iterator iter=node.labels(); iter.hasNext(); ) {
-                Character c=(Character)iter.next();
-                TrieNode child=node.get(c.charValue());
-                queue.addLast(child);
-                prefixes.addLast(prefix+c);
-            }
-            Object value=node.getValue();
-            if (value!=null) {
-                if (gotKey) 
-                    buf.append(", ");
-                gotKey=true;
-                buf.append(prefix.toString());
-                buf.append("->");
-                buf.append(value.toString());
-            }
-        }
-        buf.append("]");
+        StringBuffer buf=new StringBuffer();
+        buf.append("<root>");
+        toStringHelper(root, buf, 1);
         return buf.toString();
     }
-   
+
+    /** Prints a description of the substree starting with start to
+     *  buf.  The printing starts with the given indent level. */
+    private void toStringHelper(TrieNode start, StringBuffer buf, int indent) {
+        //Print value of node.
+        if (start.getValue()==null)
+            buf.append("\n");
+        else
+            buf.append(" -> "+start.getValue().toString()+"\n");
+
+        //For each child...
+        for (Iterator iter=start.labels(); iter.hasNext(); ) {
+            //Indent child appropriately.
+            for (int i=0; i<indent; i++)
+                buf.append("  ");
+            //Print edge.
+            String label=(String)iter.next();
+            buf.append(label);
+            //Recurse to print value.
+            TrieNode child=start.get(label.charAt(0)).getChild();
+            toStringHelper(child, buf, indent+1);
+        }
+    }
+
+//      public String toString() {
+//          StringBuffer buf=new StringBuffer("[");
+//          /** INVARIANT: queue.size()==prefix.size(), and queue[i]
+//           *  is reachable by following the path prefixes[i] from root. */
+//          LinkedList /* of TrieNode */ queue=new LinkedList();
+//          LinkedList /* of String */ prefixes=new LinkedList();
+//          queue.addLast(root);
+//          prefixes.addLast("");
+//          /** True iff we've added one pair to buf.  Used to control ", " */
+//          boolean gotKey=false;
+//          while (queue.size() > 0) {
+//              TrieNode node=(TrieNode)queue.removeLast();
+//              String prefix=(String)prefixes.removeLast();
+//              for (Iterator iter=node.labels(); iter.hasNext(); ) {
+//                  Character c=(Character)iter.next();
+//                  TrieNode child=node.get(c.charValue());
+//                  queue.addLast(child);
+//                  prefixes.addLast(prefix+c);
+//              }
+//              Object value=node.getValue();
+//              if (value!=null) {
+//                  if (gotKey)
+//                      buf.append(", ");
+//                  gotKey=true;
+//                  buf.append(prefix.toString());
+//                  buf.append("->");
+//                  buf.append(value.toString());
+//              }
+//          }
+//          buf.append("]");
+//          return buf.toString();
+//      }
+
     /** Unit test. */
+    /*
     public static void main(String args[]) {
         TrieNode.unitTest();
-
         Trie t=new Trie(false);
+
+        Assert.that(t.match("abcde", 0, 5, "abc")==-1);
+        Assert.that(t.match("abcde", 1, 5, "bXd")==1);
+        Assert.that(t.match("abcde", 1, 3, "bcd")==2);
+
         Object anVal0="another value for an";
         Object anVal="value for an";
         Object antVal0="another value for ant";
@@ -330,25 +457,25 @@ public class Trie {
         Iterator iter=null;
         Object tmp1=null, tmp2=null, tmp3=null, tmp4=null;
 
-        Assert.that(t.get("a")==null);        
+        Assert.that(t.get("a")==null);
 
-        Assert.that(t.add("an", anVal)==false);
-        Assert.that(t.add("ant", antVal)==false);
-        Assert.that(t.add("add", addVal)==false);
-        Assert.that(t.add("a", aVal)==false);
+        Assert.that(t.add("ant", antVal0)==null);     //additive insert
+        System.out.println(t.toString());
+        Assert.that(t.add("an", anVal)==null);        //splice insert
+        System.out.println(t.toString());
+        Assert.that(t.add("add", addVal)==null);      //split insert
+        System.out.println(t.toString());
+        Assert.that(t.add("ant", antVal)==antVal0);   //relabel insert (old -> new)
+        System.out.println(t.toString());
+        Assert.that(t.add("a", aVal)==null);          //relabel insert (NULL -> new)
+        System.out.println(t.toString());
 
         Assert.that(t.get("a")==aVal);
         Assert.that(t.get("an")==anVal);
         Assert.that(t.get("ant")==antVal);
-        Assert.that(t.get("add")==addVal);        
-        Assert.that(t.get("aDd")==null);  
-        iter=t.getAll("add");
-        Assert.that(iter.next()==addVal);  Assert.that(! iter.hasNext());
-        iter=t.getAll("ad");
-        Assert.that(iter!=null);
-        Assert.that(! iter.hasNext());
-        iter=t.getAll("aDd");
-        Assert.that(! iter.hasNext());
+        Assert.that(t.get("add")==addVal);
+        Assert.that(t.get("aDd")==null);
+
 
         //Yield no elements...
         iter=t.getPrefixedBy("ab");
@@ -357,18 +484,24 @@ public class Trie {
             iter.next();
             Assert.that(false);
         } catch (NoSuchElementException e) { }
+        iter=t.getPrefixedBy("ants");
+        Assert.that(! iter.hasNext());
+        try {
+            iter.next();
+            Assert.that(false);
+        } catch (NoSuchElementException e) { }
 
-        //Yield 1 element...
-        iter=t.getPrefixedBy("ant");
+        //Yield 1 element...starting in middle of prefix
+        iter=t.getPrefixedBy("ad");
         tmp1=iter.next();
-        Assert.that(tmp1==antVal, tmp1.toString());
+        Assert.that(tmp1==addVal, tmp1.toString());
         Assert.that(! iter.hasNext());
 
         //Yield many elements...
         iter=t.getPrefixedBy("a");
         Assert.that(iter.hasNext());
         tmp1=iter.next();
-        Assert.that(tmp1==aVal || tmp1==anVal || tmp1==addVal || tmp1==antVal);
+        Assert.that(tmp1==aVal);
         tmp2=iter.next();
         Assert.that(tmp2==aVal || tmp2==anVal || tmp2==addVal || tmp2==antVal);
         Assert.that(tmp2!=tmp1);
@@ -398,24 +531,24 @@ public class Trie {
 
         //Case insensitive tests
         t=new Trie(true);
-        Assert.that(t.add("an", anVal)==false);
-//          Assert.that(t.add("An", anVal)==anVal);        
-//          Assert.that(t.add("aN", anVal)==anVal);        
-//          Assert.that(t.add("AN", anVal)==anVal);        
+        Assert.that(t.add("an", anVal)==null);
+//          Assert.that(t.add("An", anVal)==anVal);
+//          Assert.that(t.add("aN", anVal)==anVal);
+//          Assert.that(t.add("AN", anVal)==anVal);
         Assert.that(t.get("an")==anVal);
         Assert.that(t.get("An")==anVal);
         Assert.that(t.get("aN")==anVal);
         Assert.that(t.get("AN")==anVal);
-        Assert.that(t.add("ant", antVal)==false);
+        Assert.that(t.add("ant", antVal)==null);
         Assert.that(t.get("ANT")==antVal);
         iter=t.getPrefixedBy("a");
         Assert.that(iter.next()==anVal);
         Assert.that(iter.next()==antVal);
-        Assert.that(! iter.hasNext());      
+        Assert.that(! iter.hasNext());
 
         //Prefix tests
         t=new Trie(false);
-        Assert.that(t.add("an", anVal)==false);
+        Assert.that(t.add("an", anVal)==null);
         iter=t.getPrefixedBy("XanXX");
         Assert.that(! iter.hasNext());
         iter=t.getPrefixedBy("XanXX", 1, 4);
@@ -427,152 +560,118 @@ public class Trie {
         Assert.that(iter.next()==anVal);
         Assert.that(! iter.hasNext());
 
-        //Multi-map tests.
-        t=new Trie(false);
-        Assert.that(t.add("an", anVal)==false);
-        Assert.that(t.add("an", anVal)==true);
-        Assert.that(t.add("an", anVal0)==true);
-        Assert.that(t.add("an", anVal0)==true);
-        tmp1=t.get("an");
-        Assert.that(tmp1==anVal || tmp1==anVal0);
-        iter=t.getAll("an");
-        tmp1=iter.next();
-        Assert.that(tmp1==anVal || tmp1==anVal0);
-        tmp2=iter.next();
-        Assert.that(tmp2==anVal || tmp2==anVal0);
-        Assert.that(tmp1!=tmp2);
-        Assert.that(! iter.hasNext());
-
-        Assert.that(t.add("ant", antVal)==false);
-        Assert.that(t.add("ant", antVal0)==true);
-        iter=t.getPrefixedBy("an");
-        tmp1=iter.next();
-        Assert.that(tmp1==anVal || tmp1==anVal0
-                    || tmp1==antVal || tmp1==antVal0);
-        tmp2=iter.next();
-        Assert.that(tmp2==anVal || tmp2==anVal0
-                    || tmp2==antVal || tmp2==antVal0);      
-        Assert.that(tmp2!=tmp1);
-        tmp3=iter.next();
-        Assert.that(tmp3==anVal || tmp3==anVal0
-                    || tmp3==antVal || tmp3==antVal0);
-        Assert.that(tmp3!=tmp1);
-        Assert.that(tmp3!=tmp2);
-        tmp4=iter.next();
-        Assert.that(tmp4==anVal || tmp4==anVal0
-                    || tmp4==antVal || tmp4==antVal0);
-        Assert.that(tmp4!=tmp1);
-        Assert.that(tmp4!=tmp2);
-        Assert.that(tmp4!=tmp3);
-        
-
         //Remove tests
         t=new Trie(false);
         t.add("an", anVal);
-        t.add("an", anVal0);
-        Assert.that(t.remove("ax", anVal)==false);
-        Assert.that(t.remove("an", antVal)==false);
-        Assert.that(t.remove("an", anVal)==true);
-        Assert.that(t.get("an")==anVal0);
-        Assert.that(t.remove("an", anVal0)==true);
+        t.add("ant", antVal);
+        Assert.that(t.remove("x")==false);
+        Assert.that(t.remove("a")==false);
+        Assert.that(t.remove("an")==true);
         Assert.that(t.get("an")==null);
-        Assert.that(t.remove("an", anVal0)==false);        
-
-        //RemoveAll tests
-        t=new Trie(false);
-        t.add("an", anVal);
-        t.add("an", anVal0);
-        Assert.that(t.removeAll("ax")==false);
-        Assert.that(t.get("an")!=null);
-        Assert.that(t.removeAll("an")==true);
-        Assert.that(t.get("an")==null);
-        Assert.that(t.removeAll("an")==false);
-        Assert.that(t.get("an")==null);
+        Assert.that(t.get("ant")==antVal);
     }
+    */
 }
 
 
 
-/** 
- * A node of the Trie.  Maps characters to children.  Different implementations
- * may trade space for time.<p>
+/**
+ * A node of the Trie.  Each Trie has a list of children, labelled by strings.
+ * Each of these [String label, TrieNode child] pairs is considered an
+ * "edge".  The first character of each label must be distinct.  When managing
+ * children, different implementations may trade space for time.  Each node also
+ * stores an arbitrary Object value.<p>
  *
  * Design note: this is a "dumb" class.  It is <i>only</i> responsible for
  * managing its value and its children.  None of its operations are recursive;
  * that is Trie's job.  Nor does it deal with case.
  */
-class TrieNode {
-    private static class TrieNodePair implements Comparable {
-        char c;
-        TrieNode node;
-        
-        TrieNodePair(char c, TrieNode node) {
-            this.c=c;
-            this.node=node;
-        }
-
-        public int compareTo(Object other) {
-            return this.c-((TrieNodePair)other).c;
-        }
-
-        public boolean equals(Object other) {
-            if (! (other instanceof TrieNode))
-                return false;
-            return this.c==((TrieNodePair)other).c;
-        }
-    }
-
+final class TrieNode {
     /** The value of this node. */
     private Object value=null;
-    /** The list of children.  INVARIANT: sorted by character. */
-    private TrieNodePair[] children=new TrieNodePair[0];
+    /** The list of children.
+     *  INVARIANT: children are sorted by distinct first characters of edges,
+     *  i.e., for all i<j,
+     *          children[i].edge.charAt(0)<children[j].edge.charAt(0)
+     */
+    private TrieEdge[] children=new TrieEdge[0];
+
+    /** Creates a trie with no children and no value. */
+    public TrieNode() { }
+
+     /** Creates a trie with no children and the given value. */
+    public TrieNode(Object value) { 
+        this.value=value;
+    }
+
 
     /** Gets the value associated with this node, or null if none. */
-    Object getValue() {
+    public Object getValue() {
         return value;
     }
 
     /** Sets the value associated with this node. */
-    void setValue(Object value) {
+    public void setValue(Object value) {
         this.value=value;
     }
 
-    /** Returns the child for the given character, or null if none. */
-    TrieNode get(char c) {
+    /** Returns the edge (at most one) whose label starts with the given
+     *  character, or null if no such edge.  */
+    public TrieEdge get(char labelStart) {
         //TODO3: avoid allocation of dummy by implementing binary search here.
-        TrieNodePair dummy=new TrieNodePair(c, null);
+        TrieEdge dummy=new TrieEdge(String.valueOf(labelStart), null);
         int i=Arrays.binarySearch(children, dummy);
         if (i<0)
             return null;
-        TrieNodePair pair=(TrieNodePair)children[i];
-        Assert.that(pair.c==c);
-        return pair.node;
-    }        
+        TrieEdge ret=(TrieEdge)children[i];
+        Assert.that(ret.getLabel().charAt(0)==labelStart);
+        return ret;
+    }
 
-    /** Maps the given character to the given node.
-     *  This is much slower than get(char).
-     *  @requires c not already mapped to a node. */
-    void put(char c, TrieNode node) {
+    /** Adds an edge with the given label to the given child to this.
+     *     @requires for all edges E in this, label.getLabel[0]!=E not already
+     *      mapped to a node.
+     *     @modifies this */
+    public void put(String label, TrieNode child) {
         //TODO2: It's possible to simply insert the node into children instead
         //of sorting.  That reduces the time from O(n log n) to O(n), where
         //n==children.size().  But that requires a more flexible data structure
         //to store the children.
-        TrieNodePair[] children2=new TrieNodePair[children.length+1];
+        TrieEdge[] children2=new TrieEdge[children.length+1];
         System.arraycopy(children, 0, children2, 0, children.length);
-        children2[children2.length-1]=new TrieNodePair(c, node);
+        children2[children2.length-1]=new TrieEdge(label, child);
         Arrays.sort(children2);
         children=children2;
     }
 
+    /** Removes the edge (at most one) whose label starts with the given
+     *  character.  Returns true if any edges where actually removed. */
+    public boolean remove(char labelStart) {
+        //1. Find index of edge whose label starts with labelStart.
+        //TODO3: avoid allocation of dummy by implementing binary search here.
+        TrieEdge dummy=new TrieEdge(String.valueOf(labelStart), null);
+        int i=Arrays.binarySearch(children, dummy);
+        if (i<0)
+            return false;
+
+        //2. Copy everything but children[i] to a new array, maintaining order.
+        //TODO2: this is expensive.  Use same ideas as in put.
+        TrieEdge[] children2=new TrieEdge[children.length-1];
+        System.arraycopy(children, 0, children2, 0, i);
+        System.arraycopy(children, i+1, children2, i, children.length-i-1);
+        this.children=children2;
+        return true;
+    }
+
     /** Returns the children of this in any order, as an iterator
      *  of TrieNode. */
-    Iterator children() {
+    public Iterator children() {
         return new ChildrenIterator();
     }
 
     /** Returns the labels of the children of this in any order, as an iterator
-     *  of Character. */
-    Iterator labels() {
+     *  of Strings. */
+    public Iterator labels() {
         return new LabelIterator();
     }
 
@@ -586,9 +685,9 @@ class TrieNode {
             if (! hasNext())
                 throw new NoSuchElementException();
 
-            TrieNodePair pair=(TrieNodePair)children[i];
+            TrieEdge edge=(TrieEdge)children[i];
             i++;
-            return pair.node;
+            return edge.getChild();
         }
     }
 
@@ -602,9 +701,9 @@ class TrieNode {
             if (! hasNext())
                 throw new NoSuchElementException();
 
-            TrieNodePair pair=(TrieNodePair)children[i];
+            TrieEdge edge=(TrieEdge)children[i];
             i++;
-            return new Character(pair.c);
+            return edge.getLabel();
         }
     }
 
@@ -616,11 +715,12 @@ class TrieNode {
             return val.toString();
     }
 
+    /*
     static void unitTest() {
         TrieNode node=new TrieNode();
         TrieNode childA=new TrieNode();
         TrieNode childB=new TrieNode();
-        
+
         Assert.that(node.getValue()==null);
         String value="abc";
         node.setValue(value);
@@ -630,17 +730,17 @@ class TrieNode {
         Iterator iter=node.children();
         Assert.that(! iter.hasNext());
 
-        node.put('b', childB);
-        Assert.that(node.get('b')==childB);
-        node.put('a', childA);
-        Assert.that(node.get('a')==childA);
-        Assert.that(node.get('b')==childB);
+        node.put("b", childB);
+        Assert.that(node.get('b').getChild()==childB);
+        node.put("a very long key", childA);
+        Assert.that(node.get('a').getChild()==childA);
+        Assert.that(node.get('b').getChild()==childB);
         Assert.that(node.get('c')==null);
 
         iter=node.children();
-        TrieNode tmp=(TrieNode)iter.next();
+        Object tmp=(TrieNode)iter.next();
         Assert.that(tmp==childA || tmp==childB);
-        TrieNode tmp2=(TrieNode)iter.next();
+        Object tmp2=(TrieNode)iter.next();
         Assert.that(tmp2==childA || tmp2==childB);
         Assert.that(tmp2!=tmp);
         Assert.that(! iter.hasNext());
@@ -649,6 +749,61 @@ class TrieNode {
             Assert.that(false);
         } catch (NoSuchElementException e) {
         }
+
+        iter=node.labels();
+        tmp=(String)iter.next();
+        Assert.that(tmp.equals("b") || tmp.equals("a very long key"));
+        tmp2=(String)iter.next();
+        Assert.that(tmp.equals("b") || tmp.equals("a very long key"));
+        Assert.that(! tmp2.equals(tmp));
+        Assert.that(! iter.hasNext());
+        try {
+            iter.next();
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+        }
+
+
+        node.remove('b');
+        Assert.that(node.get('a').getChild()==childA);
+        Assert.that(node.get('b')==null);
+        Assert.that(node.get('c')==null);
+        node.remove('a');
+        Assert.that(node.get('a')==null);
+    }
+    */
+}
+
+/**
+ * A labelled edge, i.e., a String label and a TrieNode endpoint.
+ */
+final class TrieEdge implements Comparable {
+    private String label;
+    TrieNode child;
+
+    TrieEdge(String label, TrieNode child) {
+        this.label=label;
+        this.child=child;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public TrieNode getChild() {
+        return child;
+    }
+
+    public int compareTo(Object o) {
+        TrieEdge other=(TrieEdge)o;
+        return this.label.charAt(0)-other.label.charAt(0);
+    }
+
+    public boolean equals(Object o) {
+        if (! (o instanceof TrieNode))
+            return false;
+        TrieEdge other=(TrieEdge)o;
+        return this.label.charAt(0)==other.label.charAt(0);
     }
 }
 
