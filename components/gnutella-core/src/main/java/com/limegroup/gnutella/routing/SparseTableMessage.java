@@ -2,6 +2,7 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
 import java.io.*;
+import com.sun.java.util.collections.*;
 
 /**
  * The ADD_SPARSE_BLOCK_VARIANT and REMOVE_SPARSE_BLOCK_VARIANT variants.  (The
@@ -21,18 +22,50 @@ public class SparseTableMessage extends RouteTableMessage {
 
 
     /////////////////////////////// Encoding //////////////////////////////
+    
+    /** 
+     * Creates a new ADD_SPARSE_BLOCK_VARIANT of REMOVE_SPARSE_BLOCK_VARIANT
+     * from scratch.  This method may be more convenient in some cases than the
+     * corresponding constructor, as it figures out block size for you.
+     * Unlike the constructor, blocks is not aliased.  The returned message's 
+     * TTL is always 1.
+     *     @requires all elements of blocks instance of Integer
+     */
+    public static SparseTableMessage create(
+            byte tableTTL, boolean add,  List /* of Integer */ blocks) {
+        int[] blocksA=new int[blocks.size()];
+        byte blockSize=1;    //TODO2: chose block size based on largest i.
+        for (int i=0; i<blocksA.length; i++) {
+            int block=((Integer)blocks.get(i)).intValue();
+            blockSize=(byte)Math.max(blockSize, bytes(block));
+            blocksA[i]=block;
+        }
+        return new SparseTableMessage((byte)1,
+                                      tableTTL, add, blocksA, blockSize);
+    }
+
+    /** Returns the number of bytes needed to represent n in binary.  For
+     *  example, bytes(0)==1, bytes(1)==1, bytes(0xFFF)==2.
+     *      @requires n>=0 */
+    private static byte bytes(int n) {
+        Assert.that(n>=0, "Precondition for bytes(int) violated.");
+        if (n<=0xFF)
+            return 1;
+        else if (n<=0xFFFF)
+            return 2;
+        else if (n<=0xFFFFFF)
+            return 3;
+        else
+            return 4;
+    }
 
     /**
      * Creates a new ADD_SPARSE_BLOCK_VARIANT or REMOVE_SPARSE_BLOCK_VARIANT
      * message from scratch, depending on whether 'add' is true or false,
-     * respectively.  Each block is represented with blockSize BYTES.<p>
+     * respectively.  For efficiency reasons, blocks is aliased internally;
+     * hence callers must not modify the array after calling this.
      *
-     * For efficiency reasons, this uses blocks without copying.  The
-     * exposes the representation of this, but it should be safe in most
-     * typical uses.
-     *
-     * @requires 1<=blockSize<=4
-     *           blocks not modified after use
+     * @requires blockSize<=4 && blockSize>=1, blocks not modified afterwards
      */
     public SparseTableMessage(byte ttl,
                               byte tableTTL,
@@ -40,17 +73,18 @@ public class SparseTableMessage extends RouteTableMessage {
                               int[] blocks,
                               byte blockSize) {
         //Payload length includes common arguments
-        super(ttl,
+        //TODO3: avoid two calls to blocks.  
+        super((byte)ttl,
               BLOCKS_PAYLOAD_POSITION + blockSize*blocks.length,
               add ? RouteTableMessage.ADD_SPARSE_BLOCK_VARIANT
                   : RouteTableMessage.REMOVE_SPARSE_BLOCK_VARIANT, 
               tableTTL);    
-        Assert.that(blockSize<=4, "Block size too big: "+blockSize);
-        Assert.that(blockSize>=1,  "Block size too small: "+blockSize);
 
-        this.blocks=blocks;             //Note that this exposes the rep!
+        Assert.that(blockSize<=4 && blockSize>=1, "Bad block size: "+blockSize);
         this.blockSize=blockSize;
+        this.blocks=blocks;         //Exposes rep!
     }
+
 
     protected void writePayloadData(OutputStream out) throws IOException {
         out.write(blockSize);
@@ -145,9 +179,13 @@ public class SparseTableMessage extends RouteTableMessage {
     public String toString() {
         StringBuffer buf=new StringBuffer();
         if (isAdd())
-            buf.append("{ADD_SPARSE_BLOCK_VARIANT");
+            buf.append("{ADD_SPARSE_BLOCK_VARIANT (");
         else
-            buf.append("{REMOVE_SPARSE_BLOCK_VARIANT");
+            buf.append("{REMOVE_SPARSE_BLOCK_VARIANT (");
+        buf.append(getTableTTL());
+        buf.append(", ");
+        buf.append(blockSize);
+        buf.append(") ");
 
         for (int i=0; i<blocks.length; i++) {
             buf.append(blocks[i]);
@@ -179,6 +217,15 @@ public class SparseTableMessage extends RouteTableMessage {
         Assert.that(bytes[23+BLOCKS_PAYLOAD_POSITION+6]==(byte)3); //blk "66051"
         Assert.that(bytes[23+BLOCKS_PAYLOAD_POSITION+7]==(byte)2);
         Assert.that(bytes[23+BLOCKS_PAYLOAD_POSITION+8]==(byte)1);
+
+        List blocks=new ArrayList();
+        blocks.add(new Integer(1));
+        blocks.add(new Integer(66051));
+        blocks.add(new Integer(513));
+        m=SparseTableMessage.create((byte)5, true, blocks);
+        Assert.that(m.getTTL()==1);
+        Assert.that(m.getSize()==3);
+        Assert.that(m.blockSize==3);
 
         //2. Decoding test.
         try {
