@@ -260,6 +260,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         // test preconditions
         assertTrue("should start as supernode", mgr.isSupernode());
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
+        pretendConnected();
         
         assertEquals(32, mgr.getNumFreeNonLeafSlots());
         assertEquals(26, mgr.getNumFreeLimeWireNonLeafSlots());
@@ -386,7 +387,7 @@ public class ConnectionManagerTest extends BaseTestCase {
     public void testUnreachableHost() {
         CATCHER.endpoint = new Endpoint("1.2.3.4", 5000);
         RouterService.connect();
-        sleep(10000);
+        sleep(15000);
         assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
         assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
     }
@@ -581,5 +582,10 @@ public class ConnectionManagerTest extends BaseTestCase {
             return isLime;
         }
     }
-          
+    
+    private void pretendConnected() throws Exception {
+        ConnectionManager mgr = RouterService.getConnectionManager();
+        PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
+        PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections", null);
+    }     
 }

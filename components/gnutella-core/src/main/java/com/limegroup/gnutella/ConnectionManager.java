@@ -1251,6 +1251,7 @@ public class ConnectionManager {
     public synchronized void disconnect() {
         _disconnectTime = System.currentTimeMillis();
         _preferredConnections = 0;
+        adjustConnectionFetchers(); // kill them all
         //2. Remove all connections.
         for (Iterator iter=getConnections().iterator();
              iter.hasNext(); ) {
@@ -1961,7 +1962,6 @@ public class ConnectionManager {
                     endpoint = _catcher.getAnEndpoint();
                 } while ( !IPFilter.instance().allow(endpoint.getAddress()) ||
                           isConnectedTo(endpoint.getAddress()) );
-
                 Assert.that(endpoint != null);
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
