@@ -9,6 +9,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 
@@ -456,6 +457,8 @@ public class Connection {
             // This does not need to be in a finally clause, because if an
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
+            
+            UpdateManager.instance().checkAndUpdate(this);
 						
         } catch (NoGnutellaOkException e) {
             close();
