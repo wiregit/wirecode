@@ -44,6 +44,12 @@ public class UDPScheduler extends ManagedThread {
     /** For offloading the synchronization issues, maintain a second thread
         for updating events */
     UpdateThread                _updateThread;
+    
+    /**
+     * object used to make sure only one copy of the update thread exists per
+     * enclosing object
+     */
+    private final Object _updateThreadLock = new Object();
 
     /**
      *  Return the UDPScheduler singleton.
@@ -71,39 +77,63 @@ public class UDPScheduler extends ManagedThread {
     /**
      *  Register a UDPTimerEvent for scheduling events
      */
-	public synchronized void register(UDPTimerEvent evt) {
-        _connectionEvents.add(evt);
+	public void register(UDPTimerEvent evt) {
+        
+		startThreads();
+        _updateThread.registerEvent(evt);
 
-        // Fire it up if it wasnt already running
-		if ( !_started ) {
-			setDaemon(true);
-			start();
-            _started = true;
-		}
 	}
-
+	
     /**
      *  Unregister a UDPTimerEvent for scheduling events
      */
-	public synchronized void unregister(UDPTimerEvent evt) {
+	public void unregister(UDPTimerEvent evt) {
+		
+		startThreads();
+
+        // Pass the event update to the update thread.
+        _updateThread.unregisterEvent(evt);
+	}
+
+	private final synchronized void registerPriv(UDPTimerEvent evt) {
+		_connectionEvents.add(evt);
+	}
+
+	private final synchronized void unregisterPriv(UDPTimerEvent evt) {
 		_connectionEvents.remove(evt);
 	
 		// Replace the removed connection in schedule if necessary
 		if ( _scheduledEvent == evt )
  			reworkSchedule();
 	}
+	
+	/**
+	 * starts both threads if they haven't been started yet.
+	 */
+	private final void startThreads() {
+		
+		if ( !_started ) {
+			setDaemon(true);
+			start();
+            _started = true;
+		}
+		
+		synchronized(_updateThreadLock) {
+			if ( _updateThread == null ) {
+				_updateThread = new UpdateThread();
+				_updateThread.setDaemon(true);
+				_updateThread.start();
+			}
+		}
+	}
+
 
     /**
      *  Notify the scheduler that a connection has a new scheduled event
      */
 	public void scheduleEvent(UDPTimerEvent evt) {
 
-        // Fire up the update thread if it isn't running
-        if ( _updateThread == null ) {
-            _updateThread = new UpdateThread();
-            _updateThread.setDaemon(true);
-            _updateThread.start();
-        }
+        startThreads();
 
         // Pass the event update to the update thread.
         _updateThread.addEvent(evt);
@@ -113,23 +143,33 @@ public class UDPScheduler extends ManagedThread {
      *  Shortcut test for a second thread to deal with the new schedule handoff
      */
     class UpdateThread extends Thread {
-        ArrayList _list;
+        ArrayList _listSchedule,_listUnregister,_listRegister;
 
         /**
          *  Initialize the list of pending event updates
          */
         public UpdateThread() {
-            _list = new ArrayList();
+            _listSchedule = new ArrayList();
+            _listUnregister = new ArrayList();
+            _listRegister = new ArrayList();
         }
 
         /**
          *  Schedule an event for update in the main event list
          */
-        public void addEvent(UDPTimerEvent evt) {
-            synchronized(_list) {
-                _list.add(evt);
-                _list.notify();
-            }
+        public synchronized void addEvent(UDPTimerEvent evt) {
+              _listSchedule.add(evt);
+              notify();
+        }
+        
+        public synchronized void unregisterEvent(UDPTimerEvent evt) {
+        	_listUnregister.add(evt);
+        	notify();
+        }
+        
+        public synchronized void registerEvent(UDPTimerEvent evt) {
+        	_listRegister.add(evt);
+        	notify();
         }
         
         /**
@@ -137,7 +177,7 @@ public class UDPScheduler extends ManagedThread {
          */
         public void run() {
             UDPTimerEvent evt;
-            ArrayList localList;
+            ArrayList localListSchedule,localListUnregister,localListRegister;
             while (true) {
                // Make sure that there is some idle time in the event updating
                // Otherwise, it will burn cpu
@@ -146,23 +186,39 @@ public class UDPScheduler extends ManagedThread {
                } catch(InterruptedException e) {}
 
                 // Clone list for safe unlocked access
-                synchronized(_list) {
-                    localList = (ArrayList) _list.clone();
-                    _list.clear();
+                synchronized(this) {
+                    localListSchedule = (ArrayList) _listSchedule.clone();
+                    _listSchedule.clear();
+                    localListUnregister = (ArrayList) _listUnregister.clone();
+                    _listUnregister.clear();
+                    localListRegister = (ArrayList) _listRegister.clone();
+                    _listRegister.clear();
                 }
 
-                // Update events in the main event list
-                for (int i=0; i < localList.size(); i++) {
-                    evt = (UDPTimerEvent) localList.get(i);
+                //first add any events
+                for (Iterator iter = localListRegister.iterator();iter.hasNext();)
+                	registerPriv((UDPTimerEvent)iter.next());
+                
+                //then reschedule any events
+                for (int i=0; i < localListSchedule.size(); i++) {
+                    evt = (UDPTimerEvent) localListSchedule.get(i);
                     updateSchedule(evt);
                 }
+                
+                //then remove any events
+                for (Iterator iter = localListUnregister.iterator();iter.hasNext();)
+                	unregisterPriv((UDPTimerEvent)iter.next());
+                
+
 
                 // Wait for more event updates
-                synchronized(_list) {
-                    if (_list.size() > 0)
+                synchronized(this) {
+                    if (_listSchedule.size() > 0 || 
+                    		_listUnregister.size() > 0 ||
+							_listRegister.size() > 0)
                         continue;
                     try {
-                        _list.wait();
+                        wait();
                     } catch(InterruptedException e) {}
                 }
             }
