@@ -49,7 +49,7 @@ public class UpdateManagerTest extends BaseTestCase {
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);//,"testOldVersionNotAcceptedFromNetwork");
+		return buildTestSuite(UpdateManagerTest.class);//,"testNewerVersionFileWithSameVersionRequested");
 	}
 
 	public static void main(String[] args) {
@@ -175,6 +175,7 @@ public class UpdateManagerTest extends BaseTestCase {
         } catch(IOException iox) {
             fail("could not set up test");
         }
+        conn.start();
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                                                     "2.9.3",man.getVersion());
@@ -190,40 +191,122 @@ public class UpdateManagerTest extends BaseTestCase {
             fail("could not set up test");
         }
         conn.setSendUpdateData(false);
+        conn.start();
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                                                     "2.9.3",man.getVersion());
     }
 
-//      public void testNoMessageOnAtVersion() {
-//          InputStream is = null;
-//          OutputStream os = null;
-//          Socket s = new Socket("localhost",PORT);
-//          os = s.getOutputStream();
-//          is = s.getInputStream();
+
+    public void testBadSignatureFailsOnNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666,"3.6.3", DEF_SIGNATURE);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.start();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                                                    "2.9.3", man.getVersion());
+    }
+
+    public void testEqualVersionNotRequested() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666, "2.9.3", DEF_SIGNATURE);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.setTestUpdateNotRequested(true);
+        conn.start();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                             "2.9.3", man.getVersion());
+    }
+
+    public void testLowerMajorVersionNotRequested() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666, "2.3.3", DEF_SIGNATURE);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.setTestUpdateNotRequested(true);
+        conn.start();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                             "2.9.3", man.getVersion());
+    }
+
+
+    public void testDifferentMinorVersionNotRequested() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666, "2.9.5", DEF_SIGNATURE);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.setTestUpdateNotRequested(true);
+        conn.start();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                             "2.9.3", man.getVersion());
+    }
+
+//      public void testNewerVersionAcceptedonNetwork() {
+//          updateVersion = OLD;
+//          changeUpdateFile();
+//          TestConnection conn = null;
+//          try { //header says same as me, but my version file is older, 
+//              conn = new TestConnection(6666, "3.6.3", NEW);
+//          } catch(IOException iox) {
+//              fail("could not set test up");
+//          }
+//          conn.setTestUpdateNotRequested(true);
+//          conn.start();
+//          UpdateManager man = UpdateManager.instance();
+//          assertEquals("Update should have got new version",
+//                                                      "3.6.3", man.getVersion());
 //      }
 
 
-//      public void testBadSignatureFailsOnNetwork() {
-//          //Now do it with the network
+//      public void testNewerVersionFileWithSameVersionRequested() {
+//          updateVersion = OLD;
+//          changeUpdateFile();
+//          TestConnection conn = null;
+//          try { //header says same as me, but my version file is older, 
+//              conn = new TestConnection(6666, "3.2.2", NEW);
+//          } catch(IOException iox) {
+//              fail("could not set test up");
+//          }
+//          conn.setTestUpdateNotRequested(true);
+//          conn.start();
+//          try {
+//              Thread.sleep(1000);
+//          } catch(Exception e) {}
+//          UpdateManager man = UpdateManager.instance();
+//          assertEquals("Update should have got new version",
+//                                                      "3.6.3", man.getVersion());
 //      }
+
+
 
 //     public void testBadMessageFailsOnNetwork() {
 
 //      }
 
 
-//      public void testNewerVersionAcceptedonNetwork() {
 
-//      }
 
-//      public void testOlderVersionRejected() {
-
-//      }
-
-//      public void testEqualVersionRejected() {
-
-//      }
 
 //      public void testIOXCausesNonAcceptance() {
 
@@ -236,6 +319,16 @@ public class UpdateManagerTest extends BaseTestCase {
 //      public void testJava118NetworkVerification() {
 
 //      }
+
+
+//      public void testNoMessageOnAtVersion() {
+//          InputStream is = null;
+//          OutputStream os = null;
+//          Socket s = new Socket("localhost",PORT);
+//          os = s.getOutputStream();
+//          is = s.getInputStream();
+//      }
+
 
     ///////////////////////////////helper methods/////////////////////////
     
