@@ -293,7 +293,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Actually does the download. */
     private class ManagedDownloadRunner implements Runnable {
         public void run() {
-            //try {
+            try {
                 //Until there are no more downloads left to try...
                 for (int i=0; i<TRIES && !stopped; i++) {
                     synchronized (ManagedDownloader.this) {
@@ -332,7 +332,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     setState(GAVE_UP);
                     manager.remove(ManagedDownloader.this, false);
                 }
-			//}  finally {
+             
+            } finally {
                 //Clean up any queued push downloads.  Also clean up dloader if
                 //still existing.  This isn't needed if an IOException thrown by
                 //Downloader.start means stop need not be called.  But better to
@@ -345,17 +346,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if (dloader!=null)
                         dloader.stop();
                 }
-            //}
+            }
         }
 
 
         /**
          * Tries one round of downloads from all locations.  Returns 1 if a file
-         * was successfully downloaded.  Returns 0 if no file was downloaded,
-         * but it makes sense to try again later, either because there are busy
-         * hosts or more pushes to send.  Returns -1 if there are no more
-         * locations to try.  Throws InterruptedException if the user resume()'s
-         * or stop()'s this.<p>
+         * was successfully downloaded (though not necessarily moved to
+         * library.)  Returns 0 if no file was downloaded, but it makes sense to
+         * try again later, either because there are busy hosts or more pushes
+         * to send.  Returns -1 if there are no more locations to try.  Throws
+         * InterruptedException if the user resume()'s or stop()'s this.<p>
          *
          * Many policies are possible.  The current one is to first try to
          * download from all non-private locations, resuming as necessary until
@@ -405,8 +406,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
         /** Tries download from all locations.  Blocks waiting for a download
-         *  slot first.  Returns true iff a location succeeded.  Throws
-         *  InterruptedException if a call to stop() is detected.
+         *  slot first.  Returns true iff a location succeeded (though not
+         *  necessarily moved to library.)  Throws InterruptedException if a
+         *  call to stop() is detected.
          *      @modifies this.files, this.pushFiles, network  */
         private boolean tryNormalDownloads() throws InterruptedException {
             try {
@@ -435,6 +437,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                     } catch (FileIncompleteException e) {
                         //Interrupted!  Add it back in so we try it again.
                         filesLeft.add(rfd);
+                    } catch (FileCantBeMovedException e) {
+                        //Couldn't move to library.  Treat like a success,
+                        //but put this in a different state.
+                        setState(COULDNT_MOVE_TO_LIBRARY);
+                        return true;
                     } catch (IOException e) {
                         //Miscellaneous problems.  Don't try again.
                         synchronized (ManagedDownloader.this) {
