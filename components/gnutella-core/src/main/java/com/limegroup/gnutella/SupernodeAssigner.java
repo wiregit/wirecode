@@ -109,6 +109,12 @@ public final class SupernodeAssigner {
      */
     private volatile boolean _wasSupernodeCapable;
 
+	/**
+	 * Variable for whether or not this node has such good values that it is too
+	 * good to pass up for becoming an Ultrapeer.
+	 */
+	private static volatile boolean _isTooGoodToPassUp = false;
+
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
 	 *
@@ -175,12 +181,53 @@ public final class SupernodeAssigner {
             //AND I have accepted incoming messages over UDP
             //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
-			SUPERNODE_OS;		
+			SUPERNODE_OS;
+
+		// check if this node has such good values that we simply can't pass
+		// it up as an Ultrapeer -- it will just get forced to be one
+
+		boolean isTooGoodToPassUp =
+			//are upstream and downstream high enough?
+            (_maxUpstreamBytesPerSec >= 
+			 MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND*4 &&
+             _maxDownstreamBytesPerSec >= 
+			 MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND*4 &&
+			 //AND I'm not a modem (in case estimate wrong)
+			 (SETTINGS.getConnectionSpeed() > SpeedConstants.CABLE_SPEED_INT) &&
+			 //AND is my average uptime OR current uptime high enough?
+			 (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME*6 ||
+			  _currentUptime >= MINIMUM_CURRENT_UPTIME*2) &&
+			 //AND am I not firewalled?
+			 ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
+			 //AND I have accepted incoming messages over UDP
+			 //RouterService.isGUESSCapable() &&
+			 //AND am I a capable OS?
+			 CommonUtils.isWindows2000orXP() ||
+			 CommonUtils.isSolaris() ||
+			 CommonUtils.isLinux());
+
+		// TODO:: add HTTP upload bandwidth used as a factor
         
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		}
+
+		if(isTooGoodToPassUp) {
+			_isTooGoodToPassUp = true;
+			RouterService.getConnectionManager().attemptToBecomeAnUltrapeer();
+		}
+	}
+
+	/**
+	 * Accessor for whether or not this machine has settings that are too good
+	 * to pass up for Ultrapeer election.
+	 *
+	 * @return <tt>true</tt> if this node has extremely good Ultrapeer settings,
+	 *  otherwise <tt>false</tt>
+	 */
+	public static boolean isTooGoodToPassUp() {
+		return _isTooGoodToPassUp;
 	}
 
 	/**
