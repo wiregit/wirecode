@@ -592,16 +592,23 @@ public class Response {
 		return urns;
     }
     
-
-	// TODO: do we care that this does not compare all of the elements?
+	// overrides Object.equals to provide a broader and more precise
+	// definition of equality
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof Response))
             return false;
         Response r=(Response)o;
-        return r.getIndex()==getIndex()
-            && r.getSize()==getSize()
-            && r.getName().equals(getName());
+		return (index == r.index &&
+				size == r.size &&
+				name.equals(r.name) &&
+				Arrays.equals(nameBytes, r.nameBytes) &&
+				metadata.equals(r.metadata) &&
+				Arrays.equals(metaBytes, r.metaBytes) &&
+				((document == null) ? (r.document == null) :
+				 document.equals(r.document)) &&
+				urns.equals(r.urns) &&
+				Arrays.equals(extBytes, r.extBytes));
     }
 
     public int hashCode() {
@@ -613,11 +620,12 @@ public class Response {
 	 * Overrides Object.toString to print out a more informative message.
 	 */
 	public String toString() {
-		return "index:    "+index+"\r\n"+
-		       "size:     "+size+"\r\n"+
-		       "name:     "+name+"\r\n"+
-		       "metadata: "+metadata+"\r\n"+
-		       "urns:     "+urns;
+		return ("index:        "+index+"\r\n"+
+				"size:         "+size+"\r\n"+
+				"name:         "+name+"\r\n"+
+				"metadata:     "+metadata+"\r\n"+
+				"xml document: "+document+"\r\n"+
+				"urns:         "+urns);
 	}
 
     //Unit Test Code 
