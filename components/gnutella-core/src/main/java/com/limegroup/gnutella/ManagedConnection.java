@@ -53,30 +53,33 @@ public class ManagedConnection
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
 
-    /*  The underlying socket, its address, and input and output
-     *  streams.  sock, in, and out are null iff this is in the
-     *  unconnected state.  For thread synchronization reasons, it is
-     *  important that this only be modified by the send(m) and
-     *  receive() methods.  TODO: document.
-     *
-     *  One problem with this scheme is that IOExceptions from sending
-     *  data happen asynchronously.  When this happens, _connectionClosed
-     *  is set to true.  Then the next time send is called, an IOException
-     *  is thrown.  
-     */
-
-    /** The size of the queue. Larger values tolerate larger bursts of producer
-     *  traffic, though they waste more memory. */
+    /** The size of the queue per priority. Larger values tolerate larger bursts
+     *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
+    /** The number of different priority levels. */
     private static final int PRIORITIES=7;
-    private static final int PRIORITY_WATCHDOG=0; //highest priority
+    /** Names for each priority, from highest priority to lowest.
+     *  "Other" includes QRP messages and is NOT reordered. */
+    private static final int PRIORITY_WATCHDOG=0;
     private static final int PRIORITY_PUSH=1;
     private static final int PRIORITY_QUERY_REPLY=2;
     private static final int PRIORITY_QUERY=3;
     private static final int PRIORITY_PING_REPLY=4;
     private static final int PRIORITY_PING=5;
-    //lowest priority, QRP included.  NOT reordered.
-    private static final int PRIORITY_OTHER=6;   
+    private static final int PRIORITY_OTHER=6;       
+    /** The ratios of messages to let through. 
+     *  INVARIANT: PRIORITY_RATIOS.length==PRIORITIES
+     *             PRIORITY_RATIOS[i]>0 */
+    private static final int[] PRIORITY_RATIOS=new int[PRIORITIES];
+    {
+        PRIORITY_RATIOS[PRIORITY_WATCHDOG]=1;
+        PRIORITY_RATIOS[PRIORITY_PUSH]=3;
+        PRIORITY_RATIOS[PRIORITY_QUERY_REPLY]=2;
+        PRIORITY_RATIOS[PRIORITY_QUERY]=1;
+        PRIORITY_RATIOS[PRIORITY_PING_REPLY]=1;
+        PRIORITY_RATIOS[PRIORITY_PING]=1;
+        PRIORITY_RATIOS[PRIORITY_OTHER]=1;
+    }
 
     /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
     private Object _outputQueueLock=new Object();
@@ -430,21 +433,25 @@ public class ManagedConnection
 //                 dumpQueueStats();
 
                 try {
-                    //2. Now send queued message of each type (if possible).
-                    //Note that we obtain the lock while removing elements from
-                    //the queue but NOT while actually sending.
+                    //2. Now send PRIORITY_RATIOS[i] queued message of each type
+                    //i (if possible).  Note that we obtain the lock while
+                    //removing elements from the queue but NOT while actually
+                    //sending.  TODO: can avoid inner loop for most message
+                    //types.
                     for (int i=0; i<PRIORITIES; i++) { 
-                        Message m=null;
-                        synchronized (_outputQueueLock) {
-                            if (_outputQueue[i].isEmpty())
-                                continue;
-                            if (i!=PRIORITY_OTHER)
-                                m=(Message)_outputQueue[i].removeLast(); //LIFO
-                            else
-                                m=(Message)_outputQueue[i].removeFirst(); //FIFO
+                        for (int j=0; j<PRIORITY_RATIOS[i]; j++) {
+                            Message m=null;
+                            synchronized (_outputQueueLock) {
+                                if (_outputQueue[i].isEmpty())
+                                    break;
+                                if (i!=PRIORITY_OTHER)  //LIFO
+                                    m=(Message)_outputQueue[i].removeLast(); 
+                                else                    //FIFO
+                                    m=(Message)_outputQueue[i].removeFirst();
+                            }
+                            ManagedConnection.super.send(m);
+                            _bytesSent+=m.getTotalLength();
                         }
-                        ManagedConnection.super.send(m);
-                        _bytesSent+=m.getTotalLength();
                     }
 
                     //3. Flush.  This just forces data from Connection's
@@ -481,6 +488,10 @@ public class ManagedConnection
             System.out.println("* "+queued()+"\n");
         }
     }
+
+
+    //////////////////////////////////////////////////////////////////////////
+
     /**
      * Implements the reject connection mechanism.  Loops until receiving a
      * handshake ping, responds with the best N pongs, and closes the
@@ -1235,8 +1246,14 @@ public class ManagedConnection
         m=new PingRequest((byte)5);
         m.hop();
         out.send(m);
+        out.send(new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
+                                new Response[0], new byte[16]));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
-                                 0, new byte[4], 6346));
+                                 0, new byte[4], 6340));
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6341));
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6342));
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16]));
         m=new PingReply(new byte[16], (byte)5, 6341, new byte[4], 0, 0);
@@ -1257,8 +1274,8 @@ public class ManagedConnection
         //2. Now we let the messages pass through, as if the receiver's window
         //became non-zero.  Buffers look this before emptying:
         //  WATCHDOG: pong/6342 ping
-        //  PUSH: x
-        //  QUERY_REPLY: x/6341 x/6342
+        //  PUSH: x/6340 x/6341 x/6342
+        //  QUERY_REPLY: x/6340 /6341 x/6342
         //  QUERY: "test"
         //  PING_REPLY: x/6341
         //  PING: x
@@ -1272,12 +1289,25 @@ public class ManagedConnection
         Assert.that(m instanceof PingRequest, "Unexpected message: "+m);
         Assert.that(m.getHops()==0, "Unexpected message: "+m);  
 
+        m=in.receive(); //push        
+        Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
+        Assert.that(((PushRequest)m).getPort()==6342);
+
         m=in.receive(); //push
         Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
+        Assert.that(((PushRequest)m).getPort()==6341);
+
+        m=in.receive(); //push
+        Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
+        Assert.that(((PushRequest)m).getPort()==6340);
 
         m=in.receive(); //reply/6342
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6342);
+
+        m=in.receive(); //reply/6341
+        Assert.that(m instanceof QueryReply);
+        Assert.that(((QueryReply)m).getPort()==6341);
 
         m=in.receive(); //query "test"
         Assert.that(m instanceof QueryRequest);
@@ -1300,9 +1330,9 @@ public class ManagedConnection
         Assert.that(((PingReply)m).getPort()==6342);
         Assert.that(m.getHops()==0);  //watchdog response pong
 
-        m=in.receive(); //reply/6341
+        m=in.receive(); //reply/6340
         Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6341);
+        Assert.that(((QueryReply)m).getPort()==6340);
 
         m=in.receive(); //QRP patch1
         Assert.that(m instanceof PatchTableMessage);
