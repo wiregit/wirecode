@@ -54,7 +54,7 @@ public class DuplicateFilter extends SpamFilter {
     /** The time, in milliseconds, allowed between similar queries. */
     private static final int QUERY_LAG=4000;
 
-    public boolean allow(Message m) {
+    public synchronized boolean allow(Message m) {
         if (m instanceof PingRequest)
             return allowPing((PingRequest)m);
         else if (m instanceof QueryRequest)
@@ -63,7 +63,7 @@ public class DuplicateFilter extends SpamFilter {
             return true;        
     }
 
-    public boolean allowPing(PingRequest pr) {
+    public synchronized boolean allowPing(PingRequest pr) {
         PingPair me=new PingPair(pr.getGUID(),
                                  (new Date()).getTime());
 
@@ -90,7 +90,7 @@ public class DuplicateFilter extends SpamFilter {
         return true;        
     }
 
-    public boolean allowQuery(QueryRequest qr) {
+    public synchronized boolean allowQuery(QueryRequest qr) {
         QueryPair me=new QueryPair(qr.getQuery(),
                                    (new Date()).getTime());
     
