@@ -651,23 +651,6 @@ public class ManagedConnection
                     return;
                 }
 
-                Iterator iter = catcher.getNormalHosts(10);
-                 // we are going to send rejected host the top ten
-                 // connections
-                while(iter.hasNext()) {
-                    Endpoint bestEndPoint =(Endpoint)iter.next();
-                    // make a pong with this host info
-                    PingReply pr = new PingReply(m.getGUID(),(byte)1,
-                        bestEndPoint.getPort(),
-                        bestEndPoint.getHostBytes(), 0, 0);
-					
-                    // the ttl is 1; and for now the number of files
-                    // and kbytes is set to 0 until chris stores more
-                    // state in the hostcatcher
-                    super.send(pr);
-                }
-                super.flush();
-                return;
             }// end of (if m is PingRequest)
         } // End of while(true)
         } catch (IOException e) {
