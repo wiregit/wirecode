@@ -5,8 +5,10 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -945,8 +947,8 @@ public class DownloadManager implements BandwidthTracker {
             Iterator iter = proxies.iterator();
             while(iter.hasNext() && !requestSuccessful) {
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                String ppIp = ppi.getPushProxyAddress().getHostAddress();
-                int ppPort = ppi.getPushProxyPort();
+                final String ppIp = ppi.getPushProxyAddress().getHostAddress();
+                final int ppPort = ppi.getPushProxyPort();
                 String connectTo = 
                     "http://" + ppIp + ":" + ppPort + requestString;
                 HeadMethod head = new HeadMethod(connectTo);
@@ -961,6 +963,23 @@ public class DownloadManager implements BandwidthTracker {
                         if(LOG.isInfoEnabled())
                             LOG.info("Succesful push proxy: " + connectTo);
                         requestSuccessful = true;
+                        if (shouldDoFWTransfer) {
+                            // we need to open up our NAT for incoming UDP, so
+                            // start the UDPConnection.  The other side should
+                            // do it soon too so hopefully we can communicate.
+                            Thread startPushThread = new ManagedThread() {
+                                    public void managedRun() {
+                                        try {
+                                            Socket fwTrans = 
+                                                new UDPConnection(ppIp, ppPort);
+                                            acceptDownload(fwTrans);
+                                        }
+                                        catch (IOException crap) {}
+                                    }
+                                };
+                            // client side is not enabled, but we should start
+                            // startPushThread here.
+                        }
                     } else {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Invalid push proxy: " + connectTo +
