@@ -969,6 +969,8 @@ public class PingReply extends Message implements Serializable, IpPort {
     public String toString() {
         return "PingReply("+getAddress()+":"+getPort()+
             ", free slots: "+hasFreeSlots()+
+            ", vendor: "+VENDOR+" "+VENDOR_MAJOR_VERSION+"."+
+                VENDOR_MINOR_VERSION+
             ", "+super.toString()+")";
     }
 
