@@ -6,6 +6,6 @@ import com.sun.java.util.collections.*;
 public abstract class UnmodifiableIterator implements Iterator {
     /** Throws UnsupportedOperationException */
     public void remove() {
-	throw new UnsupportedOperationException();
+	throw new com.sun.java.util.collections.UnsupportedOperationException();
     }
 }
