@@ -431,20 +431,20 @@ public abstract class MessageRouter
     public void sendCrawlerPingReplies(PingRequest pingRequest,
                                        ManagedConnection connection)
     {
-        byte[] guid = pingRequest.getGUID();
-        for (Iterator iter = _pongCache.iterator(1); iter.hasNext(); )
-        {
-            PingReplyCacheEntry entry = (PingReplyCacheEntry)iter.next();
-            if (entry.getManagedConnection() != connection)
-            {
-                PingReply origReply = entry.getPingReply();
-                //ttl = 1 for crawler ping replies.
-                PingReply pr = new PingReply(guid, (byte)1, origReply.getPort(), 
-                    origReply.getIPBytes(), origReply.getFiles(), 
-                    origReply.getKbytes());
-                connection.send(pr);
-            }
-        }
+//          byte[] guid = pingRequest.getGUID();
+//          for (Iterator iter = _pongCache.iterator(1); iter.hasNext(); )
+//          {
+//              PingReplyCacheEntry entry = (PingReplyCacheEntry)iter.next();
+//              if (entry.getManagedConnection() != connection)
+//              {
+//                  PingReply origReply = entry.getPingReply();
+//                  //ttl = 1 for crawler ping replies.
+//                  PingReply pr = new PingReply(guid, (byte)1, origReply.getPort(), 
+//                      origReply.getIPBytes(), origReply.getFiles(), 
+//                      origReply.getKbytes());
+//                  connection.send(pr);
+//              }
+//          }
     }
 
     /**
