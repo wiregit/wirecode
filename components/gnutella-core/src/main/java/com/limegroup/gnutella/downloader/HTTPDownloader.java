@@ -157,6 +157,17 @@ public class HTTPDownloader implements BandwidthTracker {
     
     private String _thexUri = null;
     private String _root32 = null;    
+    /**
+     * Whether or not the retrieval of THEX succeeded.
+     * This is stored here, as opposed to the RemoteFileDesc,
+     * because we may want to re-use the RemoteFileDesc to try
+     * and get the THEX tree later on from this host, if
+     * the first attempt failed from corruption.
+     *
+     * Failures are stored in the RemoteFileDesc because
+     * if it failed we never want to try it again, ever.
+     */
+    private boolean _thexSucceeded = false;
 
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
@@ -529,6 +540,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 HashTree hashTree =
                     HashTree.createHashTree(in, _rfd.getSHA1Urn().toString(),
                                             _root32, (long)_rfd.getSize());
+                _thexSucceeded = true;
                 return ConnectionStatus.getThexResponse(hashTree);
             } catch(IOException ioe) {
                 if(in instanceof CountingInputStream) {
@@ -632,7 +644,6 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		// Read the response code from the first line and check for any errors
 		String str = _byteReader.readLine();  
-
 		if (str==null || str.equals(""))
             throw new IOException();
 
@@ -1389,9 +1400,16 @@ public class HTTPDownloader implements BandwidthTracker {
         return _rfd.isHTTP11();
     }
     
+    /**
+     * Returns TRUE if this downloader has a THEX tree that we have not yet
+     * retrieved.
+     */
     public boolean hasHashTree() {
-        return (_thexUri != null && _root32 != null && !_rfd.hasTHEXFailed());
-    }    
+        return _thexUri != null 
+            && _root32 != null
+            && !_rfd.hasTHEXFailed()
+            && !_thexSucceeded;
+    }
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {

@@ -535,9 +535,12 @@ public class UploadManager implements BandwidthTracker {
             FileDesc fd = null;
             int index = uploader.getIndex();
             // First verify the file index
-            if(fm.isValidIndex(index)) {
-                fd = fm.get(index);
-            } 
+            synchronized(fm) {
+                if(fm.isValidIndex(index)) {
+                    fd = fm.get(index);
+                } 
+            }
+
             // If the index was invalid or the file was unshared, FNF.
             if(fd == null) {
                 if(LOG.isDebugEnabled())

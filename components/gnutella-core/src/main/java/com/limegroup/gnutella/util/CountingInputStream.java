@@ -22,7 +22,14 @@ public final class CountingInputStream extends FilterInputStream {
     }
     
     public int read(byte[] b, int off, int len) throws IOException {
-        int read = super.read(b, off, len);
+        int read;
+        try {
+            read = super.read(b, off, len);
+        } catch(ArrayIndexOutOfBoundsException aioob) {
+            // happens.
+            throw new IOException();
+        }
+        
         _count += read;
         return read;
     }
