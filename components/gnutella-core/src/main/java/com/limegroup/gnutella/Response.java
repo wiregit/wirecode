@@ -197,6 +197,8 @@ public class Response {
     }
 
     public int getMetaBytesSize() {
+        if(metaBytes==null)
+            return 0;
         return metaBytes.length;
     }
 
@@ -295,15 +297,15 @@ public class Response {
         Assert.that(nameSize==5);
         byte[] nameBytes = r.getNameBytes();
         Assert.that (nameBytes[0] == 65);
-        Assert.that((new String(r.getMetaBytes())).equals(""),"Spurios meta");
+        Assert.that(r.getMetaBytes()==null,"Spurios meta");
         Assert.that(r.getMetaBytesSize() == 0,"Meta size not right");
         //
         Response r2 = new Response("",999,4,"blah.txt");
-        Assert.that((new String(r2.getMetaBytes())).equals(""),"bad meta");
+        Assert.that(r2.getMetaBytes()==null,"bad meta");
         Assert.that(r2.getMetaBytesSize() == 0,"Meta size not right");
         String md = "Hello";
         Response r3 = new Response(md,999,4,"king.txt");
-        Assert.that((new String(r3.getMetaBytes())).equals(""),"bad meta");
+        Assert.that(r3.getMetaBytes()==null,"bad meta");
         Assert.that(r3.getMetaBytesSize() == 0,"Meta size not right");
         //The three formats we support
         String[] meta = {"a kbps 44.1 kHz b","akbps 44.1 kHz b", 
@@ -348,6 +350,7 @@ public class Response {
                     "mismatched strings"+ra.getMetadata()+", "+xml1);
         Assert.that(rb.getMetadata().equals(xml2),
                     "mismatched strings"+rb.getMetadata()+", "+xml2);
-    } 
+    }
+ 
 }
 
