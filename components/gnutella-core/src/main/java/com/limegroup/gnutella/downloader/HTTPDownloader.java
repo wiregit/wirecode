@@ -232,51 +232,51 @@ public class HTTPDownloader implements Runnable {
         }
     }
 
+	/**
+	 *  Do a direct socket connect to address with a HTTP request
+	 */
+    private void connect() throws IOException {
+        //1. Establish connection.
+        try {
+            _socket=new Socket(_host, _port);
+        } catch (SecurityException e) {
+            throw new IOException();
+        }
+
+		try {                
+			_br=new ByteReader(_socket.getInputStream());
+		} catch (Exception e) {
+			throw new IOException();
+		}
+
+		BufferedWriter out=null;
+		try {
+			OutputStream os = _socket.getOutputStream();
+			OutputStreamWriter osw = new OutputStreamWriter(os);
+			out=new BufferedWriter(osw);
+		} catch (Exception e) {
+			throw new IOException();
+		}
+
+		out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+		out.write("User-Agent: LimeWire\r\n");
+		out.write("\r\n");
+		out.flush();
+	}
+
+
 
     public void initTwo() {
-        URLConnection conn;
-
-        String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
-
         _state = NOT_CONNECTED;
-        conn = null;
 
         try {
-            URL url = new URL(_protocol, _host, _port, furl);
-            conn = url.openConnection();
-            conn.setRequestProperty("User-Agent", "LimeWire");
-            conn.connect();
-            //The try-catch below work-around for JDK bug 4091706.
-            try {
-                _istream = conn.getInputStream();
-            } catch (Exception e) {
-                throw new IOException();
-            }
-            _br = new ByteReader(_istream);
-        }
-        catch (java.net.MalformedURLException e) {
-            sendPushRequest();
-            return;
+			connect();
         }
         catch (IOException e) {
 
             //  There appears to be a delay in going to Push here so preset it
             _state    = REQUESTING;
 
-            // Handle immediate error cases
-            String str=conn.getHeaderField(0);
-            if ( str != null && str.indexOf(" 404 ") > 0 )
-            {
-                _state = ERROR;
-                _stateString = "File Not Found";
-                return;
-            }
-            else if ( str != null && str.indexOf(" 503 ") > 0 )
-            {
-                _state = ERROR;
-                _stateString = TryAgainLater;
-                return;
-            }
             sendPushRequest();
             return;
         }
@@ -658,8 +658,17 @@ public class HTTPDownloader implements Runnable {
             // Handle errors not conforming to HTTP spec
             if ( lineNumber == 0 )
             {
+                // Handle a Bearshare "Duplicate Request" Message
+                if ( str.indexOf("503 Duplicate Request") >= 0 )
+                {
+                    _stateString = "Duplicate Request";
+                    _state = ERROR;
+                    return;
+                }
+
                 // Handle a 503 error from Gnotella/Gnutella
                 if ( str.equals("3") ||
+					 str.indexOf("503") >= 0 ||            // Gnotella 0.9
                      str.startsWith("3 Upload Limit") ||   // BearShare
                      str.startsWith("3 Upload limit reached") )
                 {
@@ -670,7 +679,8 @@ public class HTTPDownloader implements Runnable {
 
                 // Handle a 404 error from Gnotella/Gnutella
                 if ( str.equals("4") ||
-                     str.startsWith("4 File Not Found") )
+                     str.startsWith("4 File Not Found") ||
+                     str.indexOf("404") >= 0 )
                 {
                     _stateString = "File Not Found";
                     _state = ERROR;
@@ -678,7 +688,7 @@ public class HTTPDownloader implements Runnable {
                 }
 
                 // Handle a Bearshare "Not Sharing" Message
-                if ( str.equals("0 Not Sharing") )
+                if ( str.indexOf("410 Not Sharing") >= 0 )
                 {
                     _stateString = "BearShare Not Sharing";
                     _state = ERROR;
