@@ -22,8 +22,8 @@ import java.net.UnknownHostException;
  * the network format this is serialized to is:
  * byte 0 : 
  *    - bits 0-2 how many push proxies we have (so max is 7)
- *    - bits 3-5 the version of the f2f transfer protocol this altloc supports
- *    - bits 6-7 other possible features.
+ *    - bits 3-4 the version of the f2f transfer protocol this altloc supports
+ *    - bits 5-7 other possible features.
  * bytes 1-16 : the guid
  * followed by 6 bytes per PushProxy
  * 
@@ -62,11 +62,11 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	private static final int SIZE_MASK=0x7; //0000 0111
 	
-	private static final int FWT_VERSION_MASK=0x38; //0011 1000
+	private static final int FWT_VERSION_MASK=0x18; //0001 1000
 	
 	//the features mask does not clear the bits we do not understand
 	//because we may pass on the altloc to someone who does.
-	private static final int FEATURES_MASK=0xC0;   //1100 0000
+	private static final int FEATURES_MASK=0xE0;   //1110 0000
 	
 	/**
 	 * the client guid of the endpoint
@@ -430,7 +430,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public int getFeatures() {
-		return _features;
+		return _features & FEATURES_MASK;
 	}
 	
 }
