@@ -46,6 +46,17 @@ public interface Downloader extends BandwidthTracker {
      *     @modifies this 
      */
     public boolean resume() throws AlreadyDownloadingException;
+    
+    /**
+     * Returns the file that this downloader is using.
+     * This is useful for retrieving information from the file,
+     * such as the icon.
+     *
+     * This should NOT be used for playing the file.  Instead,
+     * use getDownloadFragment for the reasons described in that
+     * method.
+     */
+    public File getFile();
 
     /**
      * If this download is not yet complete, returns a copy of the first
