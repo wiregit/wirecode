@@ -25,7 +25,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * @author  tjones
  */
 public class XMLParsingUtils {
-    private static XMLReader _reader;
+    private static ThreadLocal _reader = new ThreadLocal();
     public static class Result {
         public String schemaURI;                              //like http://www.limewire.com/schemas/audio.xsd
         public String type;                                   //e.g. audio, video, etc.
@@ -50,10 +50,11 @@ public class XMLParsingUtils {
      * @exception SAXException
      */
     public static Result parse(InputSource inputSource) throws IOException, SAXException {
-        if(_reader==null) initializeSharedReaderOnce();
+        if(_reader.get()==null) _reader.set(XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser"));
+        XMLReader reader = (XMLReader)_reader.get();   
         final Result result = new Result();
         synchronized(_reader) {
-            _reader.setContentHandler(new DefaultHandler() {
+            reader.setContentHandler(new DefaultHandler() {
                     boolean isFirstElement=true;
                     public void startElement(String namespaceUri, String localName, 
                                              String qualifiedName, Attributes attributes) {
@@ -71,7 +72,7 @@ public class XMLParsingUtils {
                         result.canonicalAttributeMaps.add(attributeMap);
                     }
                 });
-            _reader.parse(inputSource);
+            reader.parse(inputSource);
         }
         result.schemaURI = "http://www.limewire.com/schemas/"+result.type+".xsd";
         return result;
@@ -101,51 +102,47 @@ public class XMLParsingUtils {
         if(type.endsWith("y")) return type.substring(0,type.length()-1)+"ies";
         return type+"s";
     }
-    static synchronized void initializeSharedReaderOnce() throws SAXException {
-        if(_reader!=null) return;
-        _reader = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
-    }
-    //     public static void main(String[] args) throws Exception { //UNIT TEST
-    //         //test parse
-    //         String xml = "<?xml version=\"1.0\"?>"+
-    //             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
-    //             "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
-    //             "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
-    //             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
-    //         Result r = parse(xml);
-    //         Assert.that(r.schemaURI.equals("http://www.limewire.com/schemas/audio.xsd"));
-    //         Assert.that(r.type.equals("audio"));
-    //         Assert.that(r.canonicalKeyPrefix.equals("audios__audio__"));
-    //         List list = new ArrayList();
-    //         Map map = new TreeMap(Comparators.stringComparator());
-    //         map.put("audios__audio__genre__","Rock");
-    //         map.put("audios__audio__identifier__","def1.txt");
-    //         map.put("audios__audio__bitrate__","190");
-    //         list.add(map);
-    //         map = new TreeMap(Comparators.stringComparator());
-    //         map.put("audios__audio__genre__","Classical");
-    //         map.put("audios__audio__identifier__","def2.txt");
-    //         map.put("audios__audio__bitrate__","2192");
-    //         list.add(map);
-    //         map = new TreeMap(Comparators.stringComparator());
-    //         map.put("audios__audio__genre__","Blues");
-    //         map.put("audios__audio__identifier__","def.txt");
-    //         map.put("audios__audio__bitrate__","192");
-    //         list.add(map);
-    //         Assert.that(r.canonicalAttributeMaps.equals(list));
-    //         //test plural
-    //         Assert.that(plural("book").equals("books"));
-    //         Assert.that(plural("property").equals("properties"));
-    //         //test split
-    //         String xml1 = "<?xml version='1.0'><text>one</text>";
-    //         String xml2 = "<?xml version='1.0'><text>two</text>";
-    //         String xml3 = "<?xml version='1.0'><text>three</text>";
-    //         List split = split(xml1+xml2+xml3);
-    //         Iterator i = split.iterator();
-    //         Assert.that(i.next().equals(xml1));
-    //         Assert.that(i.next().equals(xml2));
-    //         Assert.that(i.next().equals(xml3));
-    //         Assert.that(!i.hasNext());
-    //         System.out.println("XMLParsingUtils passed unit test");
-    //     }
+//     public static void main(String[] args) throws Exception { //UNIT TEST
+//         //test parse
+//         String xml = "<?xml version=\"1.0\"?>"+
+//             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
+//             "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+//             "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
+//             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
+//         Result r = parse(xml);
+//         Assert.that(r.schemaURI.equals("http://www.limewire.com/schemas/audio.xsd"));
+//         Assert.that(r.type.equals("audio"));
+//         Assert.that(r.canonicalKeyPrefix.equals("audios__audio__"));
+//         List list = new ArrayList();
+//         Map map = new TreeMap(Comparators.stringComparator());
+//         map.put("audios__audio__genre__","Rock");
+//         map.put("audios__audio__identifier__","def1.txt");
+//         map.put("audios__audio__bitrate__","190");
+//         list.add(map);
+//         map = new TreeMap(Comparators.stringComparator());
+//         map.put("audios__audio__genre__","Classical");
+//         map.put("audios__audio__identifier__","def2.txt");
+//         map.put("audios__audio__bitrate__","2192");
+//         list.add(map);
+//         map = new TreeMap(Comparators.stringComparator());
+//         map.put("audios__audio__genre__","Blues");
+//         map.put("audios__audio__identifier__","def.txt");
+//         map.put("audios__audio__bitrate__","192");
+//         list.add(map);
+//         Assert.that(r.canonicalAttributeMaps.equals(list));
+//         //test plural
+//         Assert.that(plural("book").equals("books"));
+//         Assert.that(plural("property").equals("properties"));
+//         //test split
+//         String xml1 = "<?xml version='1.0'><text>one</text>";
+//         String xml2 = "<?xml version='1.0'><text>two</text>";
+//         String xml3 = "<?xml version='1.0'><text>three</text>";
+//         List split = split(xml1+xml2+xml3);
+//         Iterator i = split.iterator();
+//         Assert.that(i.next().equals(xml1));
+//         Assert.that(i.next().equals(xml2));
+//         Assert.that(i.next().equals(xml3));
+//         Assert.that(!i.hasNext());
+//         System.out.println("XMLParsingUtils passed unit test");
+//     }
 }
