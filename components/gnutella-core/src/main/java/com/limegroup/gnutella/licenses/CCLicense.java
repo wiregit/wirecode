@@ -115,6 +115,9 @@ class CCLicense implements License, Serializable, Cloneable {
      * Attempts to guess what the license URI is from the license text.
      */    
     private URL guessLicenseDeed() {
+        if(license == null)
+            return null;
+        
         // find where "creativecommons.org/licenses/" is.
         int idx = license.indexOf(CCConstants.CC_URI_PREFIX);
         if(idx == -1)
@@ -123,10 +126,16 @@ class CCLicense implements License, Serializable, Cloneable {
         int httpIdx = license.lastIndexOf("http://", idx);
         if(httpIdx == -1)
             return null;
+        // make sure that there's a space before it or it's the start.
+        if(httpIdx != 0 && license.charAt(httpIdx-1) != ' ')
+            return null;
+
         // find where the first space is after the http://.
         // if it's before the creativecommons.org part, that's bad.
         int spaceIdx = license.indexOf(" ", httpIdx);
-        if(spaceIdx < idx)
+        if(spaceIdx == -1)
+            spaceIdx = license.length();
+        else if(spaceIdx < idx)
             return null;
      
         try {       
@@ -301,14 +310,16 @@ class CCLicense implements License, Serializable, Cloneable {
             return false;
         }
         
-        Document doc = parser.getDocument();
-        NodeList workItems = doc.getElementsByTagName("Work");
+        Node doc = parser.getDocument().getDocumentElement();
+        NodeList children = doc.getChildNodes();
         boolean workPassed = false;
-        for(int i = 0; i < workItems.getLength(); i++)
-            workPassed |= parseWorkItem(workItems.item(i));
-        NodeList licenseItems = doc.getElementsByTagName("License");
-        for(int i = 0; i < licenseItems.getLength(); i++)
-            parseLicenseItem(licenseItems.item(i));
+        for(int i = 0; i < children.getLength(); i++) {
+            Node child = (Node)children.item(i);
+            if(child.getNodeName().equals("Work"))
+                workPassed |= parseWorkItem(child);
+            else if(child.getNodeName().equals("License"))
+                parseLicenseItem(child);
+        }
             
         // so long as we found a valid work item, we're good.
         return workPassed;
