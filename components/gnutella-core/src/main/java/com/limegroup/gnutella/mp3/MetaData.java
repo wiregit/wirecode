@@ -6,11 +6,13 @@ import com.sun.java.util.collections.List;
 import java.io.*;
 
 /**
- * interface for all data objects that contain the metadata 
+ * subclass for all data objects that contain the metadata 
  * of a given media file.
  */
 
 public abstract class MetaData {
+	
+	protected MetaData(){} // use the factory instead of instantiating
 	
 	public static MetaData parse(File f) throws IOException {
 		if (LimeXMLUtils.isSupportedAudioFormat(f))
@@ -33,4 +35,11 @@ public abstract class MetaData {
 	 * it is an excerpt of an XML string.
 	 */
 	public abstract String toXML(String path, boolean complete);
+	
+    /**
+	 * populates this's data fields with data read from the media file
+	 * all subclasses need to implement it
+	 * @throws IOException parsing failed
+	 */
+    protected abstract void parseFile(File f) throws IOException;
 }

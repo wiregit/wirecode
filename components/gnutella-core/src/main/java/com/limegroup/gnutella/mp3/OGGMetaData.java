@@ -1,15 +1,10 @@
 
 package com.limegroup.gnutella.mp3;
-import java.io.*;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
-import com.jcraft.jogg.*;
+import java.io.*;
+
 import com.jcraft.jorbis.*;
-import java.util.Properties;
+
 
 /**
  * this file parses comments from an ogg file
@@ -24,7 +19,7 @@ import java.util.Properties;
  */
 public class OGGMetaData extends AudioMetaData{
 	
-	File _file;
+	
 	
 	//a set of recommended headers by the spec:
 	//note we parse only those tags relevant to the Lime XML Audio schema
@@ -38,18 +33,12 @@ public class OGGMetaData extends AudioMetaData{
 	private static final String ARTIST_TAG = "artist";
 	
 	public OGGMetaData(File f) throws IOException{
-		_file = f;
-		
-		parseOGGFile();
+		super(f);
 		
 	}
 	
-	/**
-	 * populates the Properties object with data read from the ogg file
-	 * also populates length and bitrate fields
-	 * @throws IOException parsing failed
-	 */
-	private void parseOGGFile() throws IOException {
+	
+	protected void parseFile(File file) throws IOException {
 	
 		//throw new Error("not implemented");
 		//read the 0 byte header
@@ -57,7 +46,7 @@ public class OGGMetaData extends AudioMetaData{
 		Comment [] comments;
 		
 		try {
-			vfile = new VorbisFile(_file.getAbsolutePath());
+			vfile = new VorbisFile(file.getAbsolutePath());
 		}catch (JOrbisException failed) {
 			throw new IOException (failed.getMessage());
 		}

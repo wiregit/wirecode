@@ -16,7 +16,7 @@ import java.io.*;
  * Simple class to encapsulate information about ID3 tags.
  * Can write the data to a NameValue list or an XML string.
  */
-public class AudioMetaData extends MetaData {
+public abstract class AudioMetaData extends MetaData {
     private String title;
     private String artist;
     private String album;
@@ -54,6 +54,10 @@ public class AudioMetaData extends MetaData {
     public static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
 
+    public AudioMetaData(File f) throws IOException{
+    	parseFile(f);
+    }
+    
     
     public static AudioMetaData parseAudioFile(File f) throws IOException{
     	if (LimeXMLUtils.isMP3File(f))

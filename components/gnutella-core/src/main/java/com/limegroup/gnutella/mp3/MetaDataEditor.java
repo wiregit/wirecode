@@ -22,6 +22,7 @@ public abstract class MetaDataEditor {
 
     protected LimeXMLDocument correctDocument= null;
 
+    protected MetaDataEditor() {}
 
     private final boolean debugOn = false;
     protected void debug(String out) {

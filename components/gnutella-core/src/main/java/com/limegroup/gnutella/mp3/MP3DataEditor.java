@@ -22,20 +22,16 @@ import de.vdheide.mp3.ID3v2Exception;
 import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * an editor specifically for mp3 files with id3 tags
  */
 public class MP3DataEditor extends AudioMetaDataEditor {
 	
-    private static final String TITLE_STRING   = "title=\"";
-    private static final String ARTIST_STRING  = "artist=\"";
-    private static final String ALBUM_STRING   = "album=\"";
-    private static final String YEAR_STRING    = "year=\"";
-    private static final String TRACK_STRING   = "track=\"";
-    private static final String COMMENT_STRING = "comments=\"";
-    private static final String GENRE_STRING   = "genre=\"";
-    private static final String BITRATE_STRING = "bitrate=\"";
-    private static final String SECONDS_STRING = "seconds=\"";
+	private static final Log LOG =
+        LogFactory.getLog(MP3DataEditor.class);
 
     private static final String ISO_LATIN_1 = "8859_1";
     private static final String UNICODE = "Unicode";
@@ -47,46 +43,6 @@ public class MP3DataEditor extends AudioMetaDataEditor {
     static final String TRACK_ID = "TRCK";
     static final String COMMENT_ID = "COMM";
     static final String GENRE_ID = "TCON";
-	/** 
-	 * @return object[0] = (Integer) index just before beginning of tag=value, 
-	 * object[1] = (Integer) index just after end of tag=value, object[2] =
-	 * (String) value of tag.
-	 * @exception Throw if rip failed.
-	 */
-	private Object[] ripTag(String source, String tagToRip) throws IOException {
-	
-	    Object[] retObjs = new Object[3];
-	
-	    int begin = source.indexOf(tagToRip);
-	    if (begin < 0)
-	        throw new IOException("tag not found");
-	
-	    if (begin != 0)            
-	        retObjs[0] = new Integer(begin-1);
-	    if (begin == 0)            
-	        retObjs[0] = new Integer(begin);
-	
-	    int end = begin;
-	    int i, j; // begin and end of value to return
-	
-	    for ( ; source.charAt(end) != '='; end++)
-	        ; // found '=' sign
-	    
-	    for ( ; source.charAt(end) != '"'; end++)
-	        ; // found first '"' sign
-	    i = ++end;  // set beginning of value
-	
-	    for ( ; source.charAt(end) != '"'; end++)
-	        ; // found second '"' sign
-	    j = end; // set end of value
-	
-	    retObjs[1] = new Integer(end+1);
-	    debug("ID3Editor.ripTag(): i = " + i +
-	          ", j = " + j);
-	    retObjs[2] = source.substring(i,j);
-	                   
-	    return retObjs;
-	}
 	/**
 	 * Actually writes the ID3 tags out to the ID3V3 section of the mp3 file
 	 */
@@ -454,6 +410,8 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	}
     
 	public int commitMetaData(String filename) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("committing mp3 file");
         if(! LimeXMLUtils.isMP3File(filename))
             return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         File f= null;
@@ -494,132 +452,6 @@ public class MP3DataEditor extends AudioMetaDataEditor {
             }
         }
     }
-	/** 
-	 * The caller of this method has the xml string that represents a
-	 * LimeXMLDocument, and wants to write the document out to disk. For this
-	 * method to work effectively, the caller must instantiate this class and
-	 * call this method first, and then call to actually write the ID3
-	 * tags out.
-	 * <p>
-	 * This method reads the complete xml string and removes the id3 *
-	 * components of the xml string, and stores the values of the id3 tags in a
-	 * class variable which will later be used to write the id3 tags in the
-	 * mp3file.
-	 * <p>
-	 * @return a parseable xml string which has the same attributes as the
-	 * xmlStr paramter minus the id3 tags.
-	 */
-	public void populateFromString(String xmlStr) {
-	    //will be used to reconstruct xmlStr after ripping stuff from it
-	    int i, j;
-	    Object[] rippedStuff = null;
-	
-	    //title        
-	    try {
-	        rippedStuff = ripTag(xmlStr, TITLE_STRING);
-	
-	        title_ = (String)rippedStuff[2];
-	        debug("title = "+title_);
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //artist
-	    try {
-	        rippedStuff = ripTag(xmlStr, ARTIST_STRING);
-	
-	        artist_ = (String)rippedStuff[2];
-	        debug("artist = "+artist_);
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //album
-	    try {
-	        rippedStuff = ripTag(xmlStr, ALBUM_STRING);
-	
-	        album_ = (String)rippedStuff[2];
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //year
-	    try {
-	        rippedStuff = ripTag(xmlStr, YEAR_STRING);
-	
-	        year_ = (String)rippedStuff[2];
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //track
-	    try {
-	        rippedStuff = ripTag(xmlStr, TRACK_STRING);
-	
-	        track_ = (String)rippedStuff[2];
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //comment
-	    try {
-	        rippedStuff = ripTag(xmlStr, COMMENT_STRING);
-	
-	        comment_ = (String)rippedStuff[2];
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //genre
-	    try {
-	        rippedStuff = ripTag(xmlStr, GENRE_STRING);
-	
-	        genre_ = (String)rippedStuff[2];
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //bitrate
-	    try {
-	        rippedStuff = ripTag(xmlStr, BITRATE_STRING);
-	
-	        // we get bitrate info from the mp3 file....
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	    //seconds
-	    try {
-	        rippedStuff = ripTag(xmlStr, SECONDS_STRING);
-	
-	        // we get seconds info from the mp3 file....
-	
-	        i = ((Integer)rippedStuff[0]).intValue();
-	        j = ((Integer)rippedStuff[1]).intValue();        
-	        xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
-	    } 
-	    catch (IOException e) {};
-	
-	
-	
-	    //return xmlStr;//this has been suitable modified
-	}
 
 	
 }

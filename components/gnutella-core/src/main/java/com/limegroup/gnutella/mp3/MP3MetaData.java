@@ -18,7 +18,7 @@ import de.vdheide.mp3.*;
 public class MP3MetaData extends AudioMetaData {
 	
 	public MP3MetaData(File f) throws IOException {
-		parseFile(f);
+		super(f);
 	}
 
 	
@@ -29,7 +29,7 @@ public class MP3MetaData extends AudioMetaData {
      * tags first, and if we were not able to find some tags using v2 we get it
      * using v1 if possible 
      */
-    private void parseFile(File file) throws IOException {
+    protected void parseFile(File file) throws IOException {
         parseID3v2Data(file);
         
         MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
