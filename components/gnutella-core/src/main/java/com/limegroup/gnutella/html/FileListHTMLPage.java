@@ -64,8 +64,13 @@ public class FileListHTMLPage {
                           currFile.getName() + "</a><br>");
             }
         }
+        
+        boolean shouldShowMagnets = false;
+        for (int i = 0; (i < sharedFiles.length && !shouldShowMagnets); i++)
+            if(hasEnoughAltLocs(sharedFiles[i]))
+                shouldShowMagnets = true;
 
-        {
+        if (shouldShowMagnets) {
             // put the magnet links
             sb.append(htmlMagnet);
             final String beginURL = "\r\n<a href=\"magnet:?xt=";
@@ -75,6 +80,7 @@ public class FileListHTMLPage {
             final String middle3URL = "\">";
             final String endURL = "</a><br>";
             for (int i = 0; i < sharedFiles.length; i++) {
+                if (!hasEnoughAltLocs(sharedFiles[i])) continue;
                 final String sha1 = sharedFiles[i].getSHA1Urn().toString();
                 final String fname = sharedFiles[i].getFile().getName();
                 sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
@@ -86,5 +92,11 @@ public class FileListHTMLPage {
         sb.append(htmlEnd);
         return sb.toString();
     }
+
+    // 1 is you, so you need 2 (or more)
+    private boolean hasEnoughAltLocs(FileDesc fd) {
+        return (fd.getAlternateLocationCollection().getAltLocsSize() > 1);
+    }
+
 
 }
