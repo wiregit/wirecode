@@ -150,7 +150,7 @@ public class MediaType implements Serializable {
                 "rtf", "wri", "doc", "mcw", "wps",
                 "xls", "wk1", "dif", "csv", "ppt",
                 "hlp", "chm",
-                "tex", "texi", "latex", "info", "man"
+                "tex", "texi", "latex", "info", "man", "pps"
             });
         MediaType programs = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
@@ -171,7 +171,8 @@ public class MediaType implements Serializable {
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
                 "au", "snd", "s3m",
-                "mid", "midi", "rmi", "mod"
+                "mid", "midi", "rmi", "mod",
+                "iso"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
