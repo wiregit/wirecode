@@ -54,28 +54,44 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
     }
 
-    
+    // tests HopsFlowVM and LimeACKVM (very simple messages)
     public void testWriteAndRead() throws Exception {
+        // HOPS FLOW
+        // -----------------------------
         // test network constructor....
-        HopsFlowVendorMessage vm = 
-            new HopsFlowVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
-                                      1, new byte[1]);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        vm.write(baos);
-        ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) Message.read(bais);
-        assertEquals(vm, vmRead);
-
+        VendorMessage vm = new HopsFlowVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                                     (byte) 0, 1, new byte[1]);
+        testWrite(vm);
         // test other constructor....
         vm = new HopsFlowVendorMessage((byte)6);
-        baos = new ByteArrayOutputStream();
-        vm.write(baos);
-        bais = new ByteArrayInputStream(baos.toByteArray());
-        vmRead = (VendorMessage) Message.read(bais);
-        assertEquals(vm,vmRead);
+        testRead(vm);
+
+        // Lime ACK
+        // -----------------------------
+        // test network constructor....
+        vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
+                                      1, new byte[0]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()));
+        testRead(vm);
     }
 
+    private void testWrite(VendorMessage vm) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        VendorMessage vmRead = (VendorMessage) Message.read(bais);
+        assertEquals(vm, vmRead);
+    }
+
+    private void testRead(VendorMessage vm) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        VendorMessage vmRead = (VendorMessage) Message.read(bais);
+        assertEquals(vm,vmRead);
+    }
 
     public void testEquals() throws Exception {
         VM vm1 = new VM("LIME".getBytes(), 1, 1, new byte[0]);
