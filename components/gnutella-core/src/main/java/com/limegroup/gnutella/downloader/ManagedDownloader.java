@@ -187,16 +187,24 @@ public class ManagedDownloader implements Downloader, Serializable {
         The connecting thread consumes data from this map.
     */
     private Map threadLockToSocket = new Hashtable();
-
+    
+    /** List of intervals within the file which have not been allocated to
+     * any downloader yet. The set of these intervals represents the "white"
+     * region of the file we are downloading
+     */
     List /* of Interval */ needed;
 
+    /**List of RemoteFileDesc which were busy when we tried to connect to them.
+     * To be used when we have run out of other options.
+     */
     List /* of RemoteFileDesc2 */ busy;
-    
-    /**The downloaders that finished, either normally or abnormally.*/
-    List /* of HTTPDownloader */ terminated;
-    
+       
+    /** List of RemoteFileDesc to which we actively connect and request parts
+     * of the file.
+     */
     List /*of RemoteFileDesc */ files;
 
+    //TODO1: These dataStructures need to be synchronized.
 
 
     ///////////////////////// Variables for GUI Display  /////////////////
@@ -956,9 +964,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //The locations that were busy, for trying later.
         busy=new LinkedList();
-        //The downloaders that finished, either normally or abnormally.
-        terminated=new LinkedList();
-        
 
         //While there is still an unfinished region of the file...
         while (true) {
@@ -969,8 +974,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //Finished.
                     return COMPLETE;
                 } else if (dloaders.size()==0 
-                           && files.size()==0 
-                           && terminated.size()==0) {
+                           && files.size()==0 ) {
                     //No downloaders worth living for.
                     if (busy.size()>0) {
                         files.addAll(busy);
@@ -1077,21 +1081,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /** 
-     * Increases parallelism by assigning a block (possibly from another
-     * downloader) to a new downloader.
-     * 
-     * @param files a list of files to pick from, all of which MUST be
-     *  "identical" instances of RemoteFileDesc.  Elements are removed
-     *  from this as they are tried.
-     * @param needed a list of Intervals needed, possibly empty.  Used
-     *  to construct range headers.
-     * @param busy a list where busy hosts should be added during 
-     *  connection attempts
-     * @param terminated a list where a host should be added when a 
-     *  download completes.  
+     * Assigns a white area or a grey area to a downloader. Sets the state,
+     * and checks if this downloader has been interrupted.
+     * @param dloader The downloader to which this method assigns either
+     * a grey area or white area.
      * @exception NoSuchElementException no locations could connect
      * @exception InterruptedException this thread was interrupted while
-     *  waiting to connect
+     *  waiting to send/receive HTTP headers.
      */
     private void assignDownload(HTTPDownloader dloader) throws 
     InterruptedException, IOException, TryAgainLaterException, 
@@ -1316,12 +1312,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * parallel for a number of locations.
      * 
      * @param downloader the normal or push downloader to use for the transfer,
-     *  which MUST be initialized (i.e., downloader.connect() has been called)
-     * @param files the list of files where downloader's RemoteFileDesc should
-     *  be added when the download is terminated, so that this location can
-     *  be reused if needed
-     * @param terminated the list to which downloader should be added on
-     *  termination
+     * which MUST be initialized (i.e., downloader.connectTCP() and
+     * connectHTTP() have been called) 
      */
     private void tryOneDownload(HTTPDownloader downloader) {
         boolean problem = false;
@@ -1345,7 +1337,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
             synchronized (this) {
                 dloaders.remove(downloader);
-                terminated.add(downloader);
                 if(!problem)
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
@@ -1442,7 +1433,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         threadLockToSocket.clear();
         needed = null;
         busy = null;
-        terminated = null;
         files = null;
     }
 

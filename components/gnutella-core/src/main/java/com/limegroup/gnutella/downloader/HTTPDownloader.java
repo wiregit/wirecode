@@ -1,7 +1,6 @@
 /**
  * Read data from the net and write to disk.
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 package com.limegroup.gnutella.downloader;
 
@@ -13,20 +12,23 @@ import com.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
 
 /**
- * Downloads a file over an HTTP connection.  This class is as simple as possible.
- * It does not deal with retries, prioritizing hosts, etc.  Nor does it check
- * whether a file already exists; it just writes over anything on disk.<p>
+ * Downloads a file over an HTTP connection.  This class is as simple as
+ * possible.  It does not deal with retries, prioritizing hosts, etc.  Nor does
+ * it check whether a file already exists; it just writes over anything on
+ * disk.<p>
  *
  * It is necessary to explicitly initialize an HTTPDownloader with the
- * connect(..)  method.  (Hence HTTPDownloader behaves much like Connection.)
- * Typical use is as follows: 
+ * connectTCP(..) followed by a connectHTTP(..) method.  (Hence HTTPDownloader
+ * behaves much like Connection.)  Typical use is as follows:
  *
  * <pre>
  * HTTPDownloader dl=new HTTPDownloader(host, port);
- * dl.connect();
+ * dl.connectTCP(timeout);
+ * dl.connectHTTP(startByte, stopByte);
  * dl.doDownload();
- * </pre>
+ * </pre> 
  */
+
 public class HTTPDownloader implements BandwidthTracker {
     /** The length of the buffer used in downloading. */
     public static final int BUF_LENGTH=1024;
@@ -79,7 +81,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	}	
 
 	/**
-     * Creates an uninitialized server-side push download.  Call 
+     * Creates an uninitialized server-side push download. connectTCP() and 
      * connectHTTP() on this before any other methods.  Non-blocking.
      * 
      * @param socket the socket to download from.  The "GIV..." line must
@@ -109,14 +111,6 @@ public class HTTPDownloader implements BandwidthTracker {
 
 
     ///////////////////////////////// Connection /////////////////////////////
-
-    /** 
-     * Initializes this without timeout; same as connect(0). 
-     * @see connect(int)
-     */
-    public void connect() throws IOException {
-        connectTCP(0);        
-    }
 
     /** 
      * Initializes this by connecting to the remote host (in the case of a
@@ -196,8 +190,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	
 
     /*
-     * Reads the headers from this, setting _initialReadingPoint and _amountToRead.
-     * Throws any of the exceptions listed in connect().  
+     * Reads the headers from this, setting _initialReadingPoint and
+     * _amountToRead.  Throws any of the exceptions listed in connect().  
      */
 	private void readHeaders() throws IOException {
 		if (_byteReader == null) 
@@ -251,7 +245,6 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
     }
-
 
     /**
      * Returns the HTTP response code from the given string, throwing
@@ -461,11 +454,10 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
-     * already done so.  Typically this is called to reduce the download window;
+     * already done so. Typically this is called to reduce the download window;
      * doing otherwise will typically result in incomplete downloads.
      * 
-     * @param stop a byte index into the file, using 0 to N-1 notation.  
-     */
+     * @param stop a byte index into the file, using 0 to N-1 notation.  */
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 	public boolean chatEnabled() {
 		return _chatEnabled;
