@@ -2,18 +2,13 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
-import java.net.URL;
 
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.DataUtils;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -106,7 +101,16 @@ public class PushAltLoc extends AlternateLocation {
     public int supportsFWTVersion() {
     	return _pushAddress.supportsFWTVersion();
     }
-	
+    
+    /**
+     * PushLocs are always demoted, so the first call to remove() will
+     * take them out of the collection.  This does not affect ordering
+     * since they are always compared to other demoted PushLocs.
+     */
+    public boolean getDemoted() {
+        return true;
+    }
+
 	public boolean equals(Object o) {
 		if (o==null || !(o instanceof PushAltLoc))
 			return false;

@@ -96,8 +96,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	private final int _fwtVersion;
 	
 	/**
-	 * the set of proxies I have immediately after creating the endpoint
-	 * cleared after registering in the map.
+	 * the set of proxies this has immediately after creating the endpoint
+	 * cleared after registering in the map.  This is used only to 
+	 * hold the parsed proxies until they are put in the map.
 	 */
 	private Set _proxies;
 
@@ -141,7 +142,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * creates a PushEndpoint from a String passed in http header exchange.
 	 * 
 	 */
-	public PushEndpoint(String httpString) throws IOException{
+	private PushEndpoint(String httpString) throws IOException{
 		
 
 	    if (httpString.length() < 32 ||
@@ -306,8 +307,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return a view of the current set of proxies.
 	 */
 	public Set getProxies() {
+	    // if this PE exists, the mapping will not have been finalized.
 	    Set current = (Set)GUID_PROXY_MAP.get(_clientGUID);
-		return current==null ? null : Collections.unmodifiableSet(current);
+	    
+		return Collections.unmodifiableSet(current);
 	}
 	
 	/**
@@ -387,7 +390,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
-	 * Merges the known push proxies for the host specified in the http string  
+	 * Updates the known push proxies for the host specified in the http string  
 	 * with the set contained in the http string.
 	 * @param good whether these proxies were successfull or not (X-FAlt vs X-NFAlt)
 	 * @return a PushEndpoint object with updated proxies
@@ -408,9 +411,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 	        
 	        // if we do not have a mapping for this guid, add a
 	        // new one atomically
-	        if (existing == null && good) {
-	            existing = Collections.synchronizedSet(pe._proxies);
-	            GUID_PROXY_MAP.put(pe._guid,existing);
+	        if (existing == null){ 
+	            if (good) 
+	                GUID_PROXY_MAP.put(pe._guid,pe._proxies);
+	            else
+	                GUID_PROXY_MAP.put(pe._guid,Collections.EMPTY_SET);
+	            
+	            // clear the reference
 	            pe._proxies=null;
 	            return;
 	        }
@@ -429,8 +436,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 	/**
 	 * Overwrites the current known push proxies for the host specified
 	 * in the httpString with the set contained in the httpString
-	 * @param httpString
-	 * @throws IOException
+	 * @param httpString the http representation of the PE
+	 * @throws IOException if parsing of the http fails.
 	 */
 	public static PushEndpoint overwriteProxies(String httpString) 
 		throws IOException{

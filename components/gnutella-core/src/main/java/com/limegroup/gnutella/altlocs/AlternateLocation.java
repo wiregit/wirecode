@@ -109,12 +109,16 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 * 
 	 * If the first is given, then the SHA1 in the string MUST match
 	 * the SHA1 given.
+	 * 
+	 * @param good whether the proxies contained in the string representation
+	 * should be added to or removed from the current set of proxies
 	 *
 	 * @throws <tt>IOException</tt> if there is any problem constructing
 	 *  the new instance.
 	 */
 	public static AlternateLocation create(final String location,
-	                                       final URN urn) throws IOException {
+	                                       final URN urn,
+	                                       boolean good) throws IOException {
 	    if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
@@ -137,7 +141,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         }
         
         //Case 3. Push Alt loc
-        PushEndpoint pe = new PushEndpoint(location);
+        PushEndpoint pe = PushEndpoint.updateProxies(location,good);
         return new PushAltLoc(pe,urn);
     }
 	

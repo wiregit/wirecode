@@ -953,6 +953,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * This method adds them all to the <tt>FileDesc</tt> for this
 	 * uploader.  This will not allow more than 20 alternate locations
 	 * for a single file.
+	 * 
+	 * Since uploaders send only good alternate locations, we add merge
+	 * proxies to the existing sets.
 	 *
 	 * @param altHeader the full alternate locations header
 	 */
@@ -965,7 +968,7 @@ public class HTTPDownloader implements BandwidthTracker {
 			try {
 				AlternateLocation al=(AlternateLocation ) 
 					AlternateLocation.create(
-							st.nextToken().trim(), _rfd.getSHA1Urn());
+							st.nextToken().trim(), _rfd.getSHA1Urn(),true);
                 URN alSha1 = al.getSHA1Urn();
                 if(alSha1 == null) {
                     continue;
@@ -1491,7 +1494,7 @@ public class HTTPDownloader implements BandwidthTracker {
         String updatedString = stripped.httpStringValue()+";"+str;
         
         try {
-            _rfd.setPushAddress(new PushEndpoint(updatedString));
+            PushEndpoint.overwriteProxies(updatedString);
         }catch(IOException tooBad) {
             // invalid header - ignore it.
         }
