@@ -330,20 +330,10 @@ public final class SettingsManager {
     private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
 
 	/**
-	 * Constant for the default ads version.
-	 */
-	private final String DEFAULT_AD_VERSION = "1.0";
-
-	/**
 	 * Constant for the default save directory.
 	 */
 	private final File DEFAULT_SAVE_DIRECTORY =
 	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
-
-	/**
-	 * Constant for the skin theme pack.
-	 */
-	private final File DEFAULT_SKIN_THEME = new File("");
 
 
 	/**
@@ -537,17 +527,6 @@ public final class SettingsManager {
      * information
      */
     private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
-
-	/**
-	 * Constant for the key for the current ads version.
-	 */
-	private final String AD_VERSION = "AD_VERSION";
-
-	/**
-	 * Constant for the key for the current ads version.
-	 */
-	private final String SKIN_THEME = "SKIN_THEME";
-
 
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -1116,17 +1095,11 @@ public final class SettingsManager {
                 else if(key.equals(SERVER)){
                     setServer((new Boolean(p)).booleanValue());
                 }
-				else if(key.equals(AD_VERSION)) {
-					setAdVersion(p);
-				}
 				else if(key.equals(JAR_NAME)) {
 					setJarName(p);
 				}
 				else if(key.equals(CLASSPATH)) {
 					setClasspath(p);
-				}
-				else if(key.equals(SKIN_THEME)) {
-					setSkinTheme(new File(p));
 				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
@@ -1238,10 +1211,8 @@ public final class SettingsManager {
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
-		setAdVersion(DEFAULT_AD_VERSION);
 		setJarName(DEFAULT_JAR_NAME);
 		setClasspath(DEFAULT_CLASSPATH);
-		setSkinTheme(DEFAULT_SKIN_THEME);
     }
 
     /**
@@ -1328,14 +1299,6 @@ public final class SettingsManager {
 	 */
 	public File getSaveDefault() {
 	    return DEFAULT_SAVE_DIRECTORY;
-	}
-
-	/**
-	 * Returns the path to the current theme, or the empty string if there
-	 * is no theme currently set.
-	 */
-	public File getSkinTheme() {
-		return getFileValue(SKIN_THEME);
 	}
 
 	/** Returns true if the chat is enabled */
@@ -1981,15 +1944,6 @@ public final class SettingsManager {
     public boolean isServer() {
         return _server;
     }
-
-	/**
-	 * Returns the version of the ads LimeWire is currently displaying.
-	 *
-	 * @return the version of the ads LimeWire is currently displaying
-	 */
-	public String getAdVersion() {
-		return getStringValue(AD_VERSION);
-	}
 
 	/**
 	 * Updates the average, total, and current update settings based on
@@ -3006,15 +2960,6 @@ public final class SettingsManager {
     public void setLastExpireTime(long lastExpireTime){
         setLongValue(LAST_EXPIRE_TIME, lastExpireTime);
     }
-    
-	/**
-	 * Sets the ad version in use -- only read in from the props file.
-	 *
-	 * @param version the ad version to set
-	 */
-	public void setAdVersion(final String version) {
-		setStringValue(AD_VERSION, version);
-	}
 
 	/**
 	 * Sets the name of the jar file to load on startup, which is read
@@ -3047,16 +2992,6 @@ public final class SettingsManager {
 		// always be the same value
 		setStringValue(JAR_NAME, classpath);
 	}
-
-	/**
-	 * Sets the used skin theme.
-	 *
-	 * @param theme the skin theme to use
-	 */
-	public void setSkinTheme(final File theme) {
-		setFileValue(SKIN_THEME, theme);
-	}
-
 
     /**
      * Sets whether the node is a server or not
