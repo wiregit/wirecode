@@ -566,7 +566,7 @@ public class DIMERecord {
         int offset = 0;
         while (offset < buffer.length) {
             int read = in.read(buffer, offset, buffer.length - offset);
-            if(read == -1 || read == 0)
+            if(read == -1)
                 throw new IOException("eof");
             else
                 offset += read;
