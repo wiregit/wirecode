@@ -1,13 +1,9 @@
-
 package com.limegroup.gnutella.settings;
-
 /**
  * Settings for messages
  */
-public class MessageSettings extends LimeProps {
-    
-    private MessageSettings() {}
-    
+public class MessageSettings extends LimeProps {  
+    private MessageSettings() {}   
     /** 
      * The maximum allowable length of packets
      */
