@@ -23,6 +23,8 @@ public abstract class Message
     public static final byte F_QUERY_REPLY=(byte)0x81;
     public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x30;
 
+    private final static boolean PARSE_GROUP_PINGS = false;
+
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
         return GUID.makeGuid();
@@ -52,8 +54,7 @@ public abstract class Message
                     || func==F_PUSH
                     || func==F_QUERY || func==F_QUERY_REPLY,
                     "Bad function code");
-        //if (func==F_PING) Assert.that(length==0, "Bad ping length: "+length);
-        if (func==F_PING_REPLY) Assert.that(length==14, "Bad pong length: "+length);
+
         if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
         Assert.that(ttl>=0, "Negative TTL: "+ttl);
         Assert.that(hops>=0, "Negative hops: "+hops);
@@ -151,7 +152,6 @@ public abstract class Message
             i+=got;
             }
         }
-
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
@@ -175,15 +175,15 @@ public abstract class Message
         //Dispatch based on opcode.
         switch (func) {
             case F_PING:
-                if (length>=15) {
+                if (PARSE_GROUP_PINGS && length>=15) {
 				    // Build a GroupPingRequest
                     return new GroupPingRequest(guid,ttl,hops,payload);
 				}
-				else if (length>0) break;
+				else if (length>0) //Big ping
+                    return new PingRequest(guid,ttl,hops,payload);
                 return new PingRequest(guid,ttl,hops);
 
             case F_PING_REPLY:
-                if (length!=14) break;
                 return new PingReply(guid,ttl,hops,payload);
             case F_QUERY:
                 if (length<3) break;

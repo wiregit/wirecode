@@ -13,7 +13,7 @@ import java.io.*;
  */
 public class UltrapeerTester {
     static final int PORT=6347;
-    static final int TIMEOUT=500;
+    static final int TIMEOUT=2000;
     static Connection leaf;
     static Connection ultrapeer;
     static Connection old;
@@ -29,6 +29,7 @@ public class UltrapeerTester {
             testBroadcastFromOld();
             testBroadcastFromOldToLeaf();
             testPingBroadcast();      //also tests replies
+            testBigPingBroadcast();
             testMisroutedPong();
             testUltrapeerPong();
             testDropAndDuplicate();   //must be last; closes old
@@ -250,6 +251,121 @@ public class UltrapeerTester {
         Assert.that(false, "Pong wasn't routed");
     }
 
+    private static void testBigPingBroadcast() 
+             throws IOException, BadPacketException {
+        System.out.println("-Testing big ping broadcast from old connnection"
+                           +", no forwarding to leaf, with reply");
+        drain(old);
+        drain(leaf);
+
+        //Send Big ping. 
+        //Note: we are using the GroupPing's constructor for now
+        byte[] payload= new byte[16];
+        byte c = 65; //'A'
+        for(int i=0;i<16;i++, c++)
+            payload[i] = c;
+        
+        Message m=new PingRequest(GUID.makeGuid(), (byte)7, (byte)0,payload);
+        ultrapeer.send(m);
+        ultrapeer.flush();
+              
+        m=old.receive(TIMEOUT);
+        PingRequest ping = null;
+        try{
+            ping = (PingRequest)m;
+        }catch(ClassCastException cce){
+            cce.printStackTrace();
+            Assert.that(false,"Big ping not created properly on old client");
+        }
+        Assert.that(m.getHops()==(byte)1); 
+        Assert.that(m.getTTL()==(byte)6);
+        //lets make sure the payload got there OK
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        try{
+            ping.write(stream);
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+            Assert.that(false, "error while writing payload in old client");
+        }
+        byte[] b = stream.toByteArray();
+        //get rid of bytes 0-22(inclusive) ie the header
+
+        String out = new String(b,23,b.length-23);
+
+        Assert.that(out.equals
+                    ("ABCDEFGHIJKLMNOP"),"wrong payload in old client "+out);
+        
+        Assert.that(! drain(leaf));
+
+        //Send reply
+
+        //create payload for big pong
+        byte[] payload2 = new byte[14+2];
+        //add the port
+        payload2[0] = 0x0F;
+        payload2[1] = 0x00;//port 
+
+        payload2[2] = 0x10;
+        payload2[3] = 0x10;
+        payload2[4] = 0x10;
+        payload2[5] = 0x10;//ip = 16.16.16.16
+
+        payload2[6] = 0x0F;//
+        payload2[7] = 0x00;//
+        payload2[8] = 0x00;//
+        payload2[9] = 0x00;//15 files shared
+
+        payload2[10] = 0x0F;//
+        payload2[11] = 0x00;//
+        payload2[12] = 0x00;//
+        payload2[13] = 0x00;//15 KB
+        //OK Now for the big pong part
+        payload2[14] = (byte) 65;
+        payload2[15] = (byte) 66;
+
+        drain(ultrapeer);       
+
+        PingReply pong=new PingReply(m.getGUID(),
+                                     (byte)7,
+                                     (byte)0,
+                                     payload2);
+        old.send(pong);
+        old.flush();
+        PingReply ourPong = null;
+        for (int i=0; i<10; i++) {
+            PingReply pongRead=(PingReply)ultrapeer.receive(TIMEOUT);
+            if (pongRead.getPort()==pong.getPort()){
+                ourPong = pongRead;
+                break;
+            }
+        }
+        Assert.that(ourPong != null, "Pong wasn't routed");
+        //Lets check that the pong came back in good shape
+        Assert.that(ourPong.getPort() == 15, "wrong port");
+        String ip = ourPong.getIP();
+        Assert.that(ip.equals("16.16.16.16"),"wrong IP");
+        Assert.that(ourPong.getFiles() == 15, "wrong files");
+        Assert.that(ourPong.getKbytes() == 15, "Wrong share size");
+        stream = new ByteArrayOutputStream();
+        try{
+            ourPong.write(stream);
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+            Assert.that(false, "problem with writing out big pong");
+        }
+        byte[] op = stream.toByteArray();
+        byte[] big = new byte[2];
+        big[0] = op[op.length-2];
+        big[1] = op[op.length-1];
+        out = "";//reset
+        out = new String(big);
+        Assert.that(out.equals("AB"), "Big part of pong lost");
+        //come this far means its OK
+        //System.out.println("Passed");
+    }
+
+
+
 
     private static void testMisroutedPong() 
              throws IOException, BadPacketException {
@@ -324,7 +440,7 @@ public class UltrapeerTester {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(500);
+                Message m=c.receive(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
