@@ -483,6 +483,7 @@ public class RouterService
      * The type of returned files is the same as "any"
      */
     public byte[] query(String query, String richQuery, int minSpeed) {
+        System.out.println("Sumeet rich query coming...");
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
         verifier.record(qr, null);

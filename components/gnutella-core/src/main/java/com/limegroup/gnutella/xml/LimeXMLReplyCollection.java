@@ -33,6 +33,11 @@ class LimeXMLReplyCollection{
         int start = URI.lastIndexOf("/");
         //TODO3: Are we sure that / is the correct delimiter???
         int end = URI.lastIndexOf(".");
+        //if either of these is -1 the schemaURI is defective
+        //we are going to return without crating the LimeXMMLReplyCollection
+        //for that schema
+        if (start ==-1 || end == -1)
+            return;
         String schemaName= schemaURI.substring(start+1,end) + ".xml";
         replyDocs = new ArrayList();
         //Load up the docs from the file.
