@@ -45,9 +45,9 @@ public class SettingsManager {
     /** Default setting for the time to live */
     private final byte    DEFAULT_TTL            = (byte)7;
     /** Default setting for the soft maximum time to live */
-    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)10;
+    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)7;
     /** Default setting for the hard maximum time to live */
-    private final byte    DEFAULT_MAX_TTL        = (byte)50;
+    private final byte    DEFAULT_MAX_TTL        = (byte)10;
     /** Default maximum packet length */
     private final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
