@@ -152,6 +152,9 @@ public abstract class Message
             i+=got;
             }
         }
+        else
+            payload = new byte[0];
+
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
@@ -415,40 +418,4 @@ public abstract class Message
              +", ttl="+ttl
              +", priority="+getPriority()+"}";
     }
-
-    /** Unit test. */
-    /*
-    public static void main(String args[]) {
-        //Note: some of Message's code is covered by subclass tests, e.g.,
-        //PushRequestTest.
-    
-        byte[] buf=new byte[10];
-        buf[3]=(byte)192;
-        buf[4]=(byte)168;
-        buf[5]=(byte)0;
-        buf[6]=(byte)1;       
-        Assert.that(ip2string(buf, 3).equals("192.168.0.1"));
-        
-        buf=new byte[4];
-        buf[0]=(byte)0;
-        buf[1]=(byte)1;
-        buf[2]=(byte)2;
-        buf[3]=(byte)3;
-        Assert.that(ip2string(buf).equals("0.1.2.3"));
-
-        buf=new byte[4];
-        buf[0]=(byte)252;
-        buf[1]=(byte)253;
-        buf[2]=(byte)254;
-        buf[3]=(byte)255;
-        Assert.that(ip2string(buf).equals("252.253.254.255"));
-
-        Message m1=new PingRequest((byte)3);
-        Message m2=new PingRequest((byte)3);
-        m2.setPriority(5);
-        Assert.that(m1.compareTo(m2)>0);
-        Assert.that(m2.compareTo(m1)<0);
-        Assert.that(m2.compareTo(m2)==0);
-    }
-    */
 }
