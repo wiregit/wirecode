@@ -45,6 +45,9 @@ public class RemoteFileDesc implements Serializable {
     
     private static final int COPY_INDEX = Integer.MAX_VALUE;
 
+    /** bogus IP we assign to RFDs whose real ip is unknown */
+    public static final String BOGUS_IP = "1.1.1.1";
+    
 	private final String _host;
 	private final int _port;
 	private final String _filename; 
@@ -697,7 +700,17 @@ public class RemoteFileDesc implements Serializable {
     		return Collections.EMPTY_SET;
     }
 
+    /**
+     * @return whether this RFD supports firewall-to-firewall transfer.
+     * For this to be true we need to have some push proxies, indication that
+     * the host supports FWT and we need to know that hosts' external address.
+     */
     public final boolean supportsFWTransfer() {
+        
+        if (_host.equals(BOGUS_IP) ||
+                !NetworkUtils.isValidAddress(_host) || 
+                NetworkUtils.isPrivateAddress(_host))
+            return false;
         
         return _pushAddr == null ? false : _pushAddr.supportsFWTVersion() > 0;
     }

@@ -9,6 +9,8 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -74,6 +76,14 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint three = new PushEndpoint(guid3.bytes(),set2,0x0,1);
     	three.updateProxies(true);
     	assertGreaterThan(0,three.supportsFWTVersion());
+    	assertEquals("1.1.1.1",three.getAddress());
+    	assertEquals(6346,three.getPort());
+    	
+    	//test IpPort constructor
+    	IpPort ip = new IpPortImpl("1.2.3.4",5);
+    	PushEndpoint four = new PushEndpoint(guid3.bytes(),set2,0x0,1,ip);
+    	assertEquals("1.2.3.4",four.getAddress());
+    	assertEquals(5,four.getPort());
     }
     
     
@@ -163,8 +173,9 @@ public class PushEndpointTest extends BaseTestCase {
     	set1.retainAll(one_prim.getProxies());
     	assertEquals(1,set1.size());
     	
-    	//now test a bigger endpoint
-       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2);
+    	//now test a bigger endpoint with an ip in it
+    	IpPort ip = new IpPortImpl("1.2.3.4",5);
+       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2,ip);
        	six.updateProxies(true);
     	httpString = six.httpStringValue();
     	
@@ -174,10 +185,14 @@ public class PushEndpointTest extends BaseTestCase {
     	    	
     	assertEquals(2,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
+    	assertEquals("1.2.3.4",four.getAddress());
+    	assertEquals(5,four.getPort());
     	
     	Set sent = new HashSet(set6);
     	sent.retainAll(four.getProxies());
     	assertEquals(four.getProxies().size(),sent.size());
+    	
+    	//************* parsing tests *****************//
     	
     	//now an endpoint with a feature we do not understand
     	m.clear();
@@ -200,6 +215,24 @@ public class PushEndpointTest extends BaseTestCase {
     	unknown.updateProxies(true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
+    	
+    	//now an endpoint only guid and port:ip
+    	m.clear();
+    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4");
+    	unknown.updateProxies(true);
+    	assertEquals(0,unknown.getProxies().size());
+    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals("1.2.3.4",unknown.getAddress());
+    	assertEquals(5,unknown.getPort());
+    	
+    	//now an endpoint only guid and two port:ips.. the second one should be ignored
+    	m.clear();
+    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4;6:2.3.4.5");
+    	unknown.updateProxies(true);
+    	assertEquals(0,unknown.getProxies().size());
+    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals("1.2.3.4",unknown.getAddress());
+    	assertEquals(5,unknown.getPort());    	
     	
     	
     }

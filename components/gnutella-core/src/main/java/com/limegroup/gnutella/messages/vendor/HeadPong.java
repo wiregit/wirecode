@@ -501,6 +501,9 @@ public class HeadPong extends VendorMessage {
 	private static final boolean writePushLocs(CountingOutputStream caos,
 			FileDesc desc,boolean FWTonly) throws IOException {
 	
+	    // do not write pushlocs for now.
+		if (FWTonly)
+		    return false;
 		
 		DataOutputStream daos = new DataOutputStream(caos);
 		//this operates on a copy of the alternate location collection

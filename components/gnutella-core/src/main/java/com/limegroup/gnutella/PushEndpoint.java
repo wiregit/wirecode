@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,6 +17,8 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 
@@ -34,9 +37,15 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * the http format this is serialized to is an ascii string consisting of
  * ';'-delimited tokens.  The first token is the client GUID represented in hex
  * and is the only required token.  The other tokens can be addresses of push proxies
- * or various feature headers.  Currently the only feature header we parse is the
- * fwawt header that contains the version number of the firewall to firewall transfer
- * protocol supported by the altloc.
+ * or various feature headers.  At most one of the tokens should be the external ip and port 
+ * of the firewalled node in a port:ip format. Currently the only feature header we 
+ * parse is the fwawt header that contains the version number of the firewall to 
+ * firewall transfer protocol supported by the altloc.
+ * 
+ * A PE does not need to know the actual external address of the firewalled host,
+ * however without that knowledge we cannot do firewall-to-firewall transfer with 
+ * the given host.  Also, the RemoteFileDesc objects requires a valid IP for construction,
+ * so in the case we do not know the external address we return a BOGUS_IP.
  * 
  * Examples:
  * 
@@ -44,9 +53,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * 
  * <ThisIsTheGUIDASDF>;fwt/1.0;20.30.40.50:60;1.2.3.4:5567
  * 
- *   //altloc with 1 proxy that doesn't support firewall transfer :
+ *   //altloc with 1 proxy that doesn't support firewall transfer and external address:
  * 
- * <ThisIsTHeGUIDasfdaa527>;1.2.3.4:5564
+ * <ThisIsTHeGUIDasfdaa527>;1.2.3.4:5564;6346:2.3.4.5
  * 
  * //altloc with 1 proxy that supports two features we don't know/care about :
  * 
@@ -57,7 +66,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * 
  * <ThisIsTheGUIDasdf23457>
  */
-public class PushEndpoint implements HTTPHeaderValue{
+public class PushEndpoint implements HTTPHeaderValue,IpPort{
 
 	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
 	public static final int PROXY_SIZE=6; //ip:port
@@ -128,13 +137,22 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * hold the parsed proxies until they are put in the map.
 	 */
 	private Set _proxies;
+	
+	/**
+	 * the external address of this PE.  Needed for firewall-to-firewall
+	 * transfers, but can be null.
+	 */
+	private final IpPort _externalAddr;
 
 	/**
-	 * 
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
 	public PushEndpoint(byte [] guid, Set proxies,int features,int version) {
+		this(guid,proxies,features,version,null);
+	}
+	
+	public PushEndpoint(byte [] guid, Set proxies,int features,int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;
@@ -143,6 +161,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		    _proxies = proxies;
 		else 
 		    _proxies = new HashSet();
+		_externalAddr = addr;
 	}
 	
 	
@@ -180,6 +199,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		int fwtVersion =0;
 		
+		IpPort addr = null;
+		
 		while(tok.hasMoreTokens() && proxies.size() < 4) {
 			String current = tok.nextToken().trim();
 			
@@ -190,17 +211,25 @@ public class PushEndpoint implements HTTPHeaderValue{
 			    fwtVersion = (int) HTTPUtils.parseFeatureToken(current);
 				continue;
 			}
-			
+
 			// if its not the header, try to parse it as a push proxy
-			// ignoring invalid ones
 			try {
 			    proxies.add(parseIpPort(current));
-			}catch(IOException ohWell) {
 			    continue;
+			}catch(IOException ohWell) {} //continue trying to parse port:ip
+			
+			// if its not a push proxy, try to parse it as a port:ip
+			// only the first occurence of port:ip is parsed
+			if (addr==null) {
+			    try {
+			        addr = parsePortIp(current);
+			    }catch(IOException notBad) {}
 			}
+			
 		}
 		
 		_proxies = proxies;
+		_externalAddr=addr;
 		_fwtVersion=fwtVersion;
 		// its ok to use the _proxies and _size fields directly since altlocs created
 		// from http string do not need to change
@@ -384,11 +413,20 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		//if version is not 0, append it to the http string
 	    int fwtVersion=supportsFWTVersion();
-		if (fwtVersion!=0)
+		if (fwtVersion!=0) {
 			httpString.append(HTTPConstants.FW_TRANSFER)
 				.append("/")
 				.append(fwtVersion)
 				.append(";");
+		}
+		
+		// append the external address of this endpoint if such exists
+		if (_externalAddr!=null) {
+		    httpString.append(getPort())
+		    	.append(":")
+		    	.append(getAddress())
+		    	.append(";");
+		}
 		
 		int proxiesWritten=0;
 		for (Iterator iter = getProxies().iterator();
@@ -430,6 +468,30 @@ public class PushEndpoint implements HTTPHeaderValue{
 		if (current!=null)
 			current.setFeatures(features);
 	}
+	
+    /**
+     * Implements the IpPort interface, returning a bogus ip if we don't know
+     * it.
+     */
+    public String getAddress() {
+        return _externalAddr != null ? 
+                _externalAddr.getAddress() : 
+                    RemoteFileDesc.BOGUS_IP;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.util.IpPort#getInetAddress()
+     */
+    public InetAddress getInetAddress() {
+        return _externalAddr != null ? _externalAddr.getInetAddress() : null;
+    }
+    
+    /**
+     * Implements the IpPort interface, returning a bogus port if we don't know it
+     */
+    public int getPort() {
+        return _externalAddr != null ? _externalAddr.getPort() : 6346;
+    }
 	
 	/**
 	 * Updates either the PushEndpoint or the GUID_PROXY_MAP to ensure
@@ -531,7 +593,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			
 		String host = http.substring(0,separator);
 		
-		if (!NetworkUtils.isValidAddress(host))
+		if (!NetworkUtils.isValidAddress(host) || NetworkUtils.isPrivateAddress(host))
 		    throw new IOException();
 		
 		String portS = http.substring(separator+1);
@@ -549,6 +611,38 @@ public class PushEndpoint implements HTTPHeaderValue{
 		}catch(NumberFormatException notBad) {
 		    throw new IOException(notBad.getMessage());
 		}
+	}
+	
+	/** 
+	 * @param http a string representing a port and an ip
+	 * @return an object implementing IpPort 
+	 * @throws IOException parsing failed.
+	 */
+	private static IpPort parsePortIp(String http) throws IOException{
+	    int separator = http.indexOf(":");
+		
+		//see if this is a valid ip:port address; 
+		if (separator == -1 || separator!= http.lastIndexOf(":") ||
+				separator == http.length())
+			throw new IOException();
+		
+		String portS = http.substring(0,separator);
+		int port =0;
+		
+		try {
+			port = Integer.parseInt(portS);
+			if(!NetworkUtils.isValidPort(port))
+			    throw new IOException();
+		}catch(NumberFormatException failed) {
+		    throw new IOException(failed.getMessage());
+		}
+		
+		String host = http.substring(separator+1);
+		
+		if (!NetworkUtils.isValidAddress(host) || NetworkUtils.isPrivateAddress(host))
+		    throw new IOException();
+		
+		return new IpPortImpl(host,port);
 	}
 	
 	private static class GuidSetWrapper {

@@ -14,6 +14,7 @@ import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -170,7 +171,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		            rfd.getClientGUID(),
 		            rfd.getPushAddr().getProxies(),
 		            rfd.getPushAddr().getFeatures(),
-		            rfd.getPushAddr().supportsFWTVersion());
+		            rfd.getPushAddr().supportsFWTVersion(),
+		            new IpPortImpl(rfd.getHost(),rfd.getPort()));
 		    
 			return new PushAltLoc(copy,urn);
 		}

@@ -189,7 +189,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
         //test an rfd with push proxies
-        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+        RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
@@ -198,8 +198,10 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
         assertTrue(loc instanceof PushAltLoc);
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        m.clear();
+        PushAltLoc push = (PushAltLoc)loc;
+        assertEquals("1.2.3.4",push.getPushAddress().getAddress());
+        assertEquals(5,push.getPushAddress().getPort());
+        
         
 	}
 
@@ -224,7 +226,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
         //test an rfd with push proxies
-        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+        RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
@@ -233,13 +235,13 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
         RemoteFileDesc other = loc.createRemoteFileDesc(3);
+        assertEquals("1.2.3.4",other.getHost());
+        assertEquals(5,other.getPort());
         
         assertEquals(fwalled.getClientGUID(),other.getClientGUID());
         assertEquals(fwalled.getPushAddr(),other.getPushAddr());
         
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        m.clear();
-	}
+    }
 	
 	public void testCloningPushLocs() throws Exception {
 	    PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);

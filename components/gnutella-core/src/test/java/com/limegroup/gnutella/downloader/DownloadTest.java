@@ -37,6 +37,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.SupernodeAssigner;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -1259,7 +1260,7 @@ public class DownloadTest extends BaseTestCase {
         
         final int RATE=100;
         
-        
+        UDPService.instance().setReceiveSolicited(true);
         uploader1.setRate(RATE);
         uploader1.stopAfter(900000);
         uploader1.setInterestedInFalts(true);
@@ -1277,7 +1278,7 @@ public class DownloadTest extends BaseTestCase {
         Set expectedProxies = new HashSet(pe.getProxies());
         
         PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+                guid.toHexString()+";5:4.3.2.1;127.0.0.1:"+PPORT_2,TestFile.hash());
         pushLocFWT.updateProxies(true);
         
         assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
