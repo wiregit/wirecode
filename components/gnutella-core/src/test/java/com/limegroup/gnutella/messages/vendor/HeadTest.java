@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
@@ -19,7 +18,7 @@ import junit.framework.Test;
 /**
  * this class tests the handling of udp head requests and responses.
  */
-public class UDPHeadTest extends BaseTestCase {
+public class HeadTest extends BaseTestCase {
 
 	/**
 	 * keep a file manager which shares one complete file and one incomplete file
@@ -48,12 +47,12 @@ public class UDPHeadTest extends BaseTestCase {
 	static IntervalSet _ranges, _rangesMedium, _rangesTooBig;
 	
 	
-	public UDPHeadTest(String name) {
+	public HeadTest(String name) {
 		super(name);
 	}
 	
 	public static Test suite() {
-		return buildTestSuite(UDPHeadTest.class);
+		return buildTestSuite(HeadTest.class);
 	}
 	
 	/**
@@ -120,8 +119,8 @@ public class UDPHeadTest extends BaseTestCase {
 		assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
 		assertEquals(_complete,_fm.getFileDescForUrn(_haveFull));
 		
-		PrivilegedAccessor.setValue(UDPHeadPong.class, "_fileManager",_fm);
-		PrivilegedAccessor.setValue(UDPHeadPong.class, "_uploadManager",_um);
+		PrivilegedAccessor.setValue(HeadPong.class, "_fileManager",_fm);
+		PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager",_um);
 		
 	}
 	
@@ -129,8 +128,8 @@ public class UDPHeadTest extends BaseTestCase {
 	 * tests the scenario where the file cannot be found.
 	 */
 	public void testFileNotFound() throws Exception {
-		UDPHeadPing ping = new UDPHeadPing(_notHave);
-		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
+		HeadPing ping = new HeadPing(_notHave);
+		HeadPong pong = reparse(new HeadPong(ping));
 		
 		assertEquals(pong.getGUID(),ping.getGUID());
 		
@@ -149,10 +148,10 @@ public class UDPHeadTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(false));
 		assertFalse(RouterService.acceptedIncomingConnection());
 		
-		UDPHeadPing ping = new UDPHeadPing(_haveFull);
-		UDPHeadPing pingi = new UDPHeadPing(_havePartial);
-		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
-		UDPHeadPong pongi = reparse(new UDPHeadPong(pingi));
+		HeadPing ping = new HeadPing(_haveFull);
+		HeadPing pingi = new HeadPing(_havePartial);
+		HeadPong pong = reparse(new HeadPong(ping));
+		HeadPong pongi = reparse(new HeadPong(pingi));
 		
 		assertEquals(ping.getGUID(),pong.getGUID());
 		assertEquals(pingi.getGUID(),pongi.getGUID());
@@ -172,10 +171,10 @@ public class UDPHeadTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(true));
 		assertTrue(RouterService.acceptedIncomingConnection());
 		
-		ping = new UDPHeadPing(_haveFull);
-		pingi = new UDPHeadPing(_havePartial);
-		pong = reparse(new UDPHeadPong(ping));
-		pongi = reparse(new UDPHeadPong(pingi));
+		ping = new HeadPing(_haveFull);
+		pingi = new HeadPing(_havePartial);
+		pong = reparse(new HeadPong(ping));
+		pongi = reparse(new HeadPong(pingi));
 		
 		assertEquals(pong.getGUID(),ping.getGUID());
 		assertEquals(pingi.getGUID(),pongi.getGUID());
@@ -199,11 +198,11 @@ public class UDPHeadTest extends BaseTestCase {
 	 */
 	public void testRanges() throws Exception {
 		
-		UDPHeadPing ping = new UDPHeadPing(_haveFull,UDPHeadPing.INTERVALS);
-		UDPHeadPing pingi = new UDPHeadPing(_havePartial,UDPHeadPing.INTERVALS);
+		HeadPing ping = new HeadPing(_haveFull,HeadPing.INTERVALS);
+		HeadPing pingi = new HeadPing(_havePartial,HeadPing.INTERVALS);
 		
-		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
-		UDPHeadPong pongi = reparse(new UDPHeadPong(pingi));
+		HeadPong pong = reparse(new HeadPong(ping));
+		HeadPong pongi = reparse(new HeadPong(pingi));
 		
 		assertTrue(pong.hasCompleteFile());
 		assertFalse(pongi.hasCompleteFile());
@@ -217,8 +216,8 @@ public class UDPHeadTest extends BaseTestCase {
 		//fit in a packet
 		_partial.setRangesByte(_rangesTooBig.toBytes());
 		
-		pingi = new UDPHeadPing(_havePartial,UDPHeadPing.INTERVALS);
-		pongi = reparse(new UDPHeadPong(pingi));
+		pingi = new HeadPing(_havePartial,HeadPing.INTERVALS);
+		pongi = reparse(new HeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
 		assertLessThan(512,pongi.getPayload().length);
@@ -230,29 +229,29 @@ public class UDPHeadTest extends BaseTestCase {
 	 * tests various values for the queue rank
 	 */
 	public void testQueueStatus() throws Exception {
-		UDPHeadPing ping = new UDPHeadPing(_havePartial);
+		HeadPing ping = new HeadPing(_havePartial);
 		
-		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
+		HeadPong pong = reparse(new HeadPong(ping));
 		
 		int allFree =  pong.getQueueStatus();
 		assertLessThan(0,allFree);
 		
 		_um.setUploadsInProgress(10);
-		pong = reparse(new UDPHeadPong(ping));
+		pong = reparse(new HeadPong(ping));
 		assertEquals(allFree+10,pong.getQueueStatus());
 		
 		_um.setNumQueuedUploads(5);
-		pong = reparse(new UDPHeadPong(ping));
+		pong = reparse(new HeadPong(ping));
 		assertEquals(5,pong.getQueueStatus());
 		
 		_um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
 		_um.setNumQueuedUploads(0);
-		pong = reparse(new UDPHeadPong(ping));
+		pong = reparse(new HeadPong(ping));
 		assertEquals(0,pong.getQueueStatus());
 		
 		_um.setIsBusy(true);
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-		pong = reparse(new UDPHeadPong(ping));
+		pong = reparse(new HeadPong(ping));
 		assertGreaterThanOrEquals(127,pong.getQueueStatus());
 	}
 	
@@ -267,12 +266,12 @@ public class UDPHeadTest extends BaseTestCase {
 		//ping 1 should contain alternate locations. 
 		
 		//the second ping should be too big to contain all altlocs.
-		UDPHeadPing ping1 = new UDPHeadPing(_haveFull,UDPHeadPing.ALT_LOCS);
-		UDPHeadPing ping2 = new UDPHeadPing(_havePartial,
-				UDPHeadPing.ALT_LOCS | UDPHeadPing.INTERVALS);
+		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.ALT_LOCS);
+		HeadPing ping2 = new HeadPing(_havePartial,
+				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
 		
-		UDPHeadPong pong1 = reparse (new UDPHeadPong(ping1));
-		UDPHeadPong pong2 = reparse (new UDPHeadPong(ping2));
+		HeadPong pong1 = reparse (new HeadPong(ping1));
+		HeadPong pong2 = reparse (new HeadPong(ping2));
 		
 		assertNull(pong1.getRanges());
 		assertNotNull(pong2.getRanges());
@@ -283,11 +282,11 @@ public class UDPHeadTest extends BaseTestCase {
 		assertLessThan(512,pong2.getPayload().length);
 	}
 	
-	private UDPHeadPong reparse(UDPHeadPong original) throws Exception{
+	private HeadPong reparse(HeadPong original) throws Exception{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		original.write(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		return (UDPHeadPong) UDPHeadPong.read(bais);
+		return (HeadPong) HeadPong.read(bais);
 	}
 	
 	private static void  createCollections() throws Exception{

@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella;
 
 import junit.framework.Test;
@@ -14,22 +13,23 @@ import java.io.*;
 import java.util.*;
 
 /**
- * tests the server side handling of UDP head pings.
+ * tests the server side handling of head pings through UDP.
  */
-public class ServerSideUDPHeadTest extends BaseTestCase {
+public class ServerSideHeadTest extends BaseTestCase {
 	
-	public ServerSideUDPHeadTest(String name) {
+	public ServerSideHeadTest(String name) {
 		super(name);
 	}
 	
     public static Test suite() {
-        return buildTestSuite(ServerSideUDPHeadTest.class);
+        return buildTestSuite(ServerSideHeadTest.class);
     }
     
     static DatagramSocket socket1, socket2;
     static int port1, port2;
-    static DatagramPacket datagram1,datagram2,datagram3;
-    static UDPHeadPing ping1, ping2,ping3;
+    static DatagramPacket datagram1,datagram2,datagram3,datagram4;
+    static HeadPing ping1, ping2,ping3,ping4,pingTcp;
+
     
     public static void globalSetUp() throws Exception {
     	ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(1000l);
@@ -44,10 +44,14 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	socket1.setSoTimeout(300);
     	socket2.setSoTimeout(300);
     	
-    	ping1 = new UDPHeadPing(FileManagerStub._notHave);
-    	ping2 = new UDPHeadPing(URN.createSHA1Urn(FileDescStub.urn));
-    	ping3 = new UDPHeadPing(URN.createSHA1Urn(FileDescStub.urn),
+
+    	ping1 = new HeadPing(FileManagerStub._notHave);
+    	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.urn));
+    	ping3 = new HeadPing(URN.createSHA1Urn(FileDescStub.urn),
     			new Endpoint("127.0.0.1",port2));
+    	ping4 = new HeadPing(FileManagerStub._notHave,
+    			new Endpoint("127.0.0.1",port1));
+
     	
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
     	ping1.write(baos1);
@@ -55,6 +59,8 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	ping2.write(baos2);
     	ByteArrayOutputStream baos3 = new ByteArrayOutputStream();
     	ping3.write(baos3);
+    	ByteArrayOutputStream baos4 = new ByteArrayOutputStream();
+    	ping4.write(baos4);
     	
     	datagram1 = new DatagramPacket(baos1.toByteArray(),baos1.toByteArray().length,
     			InetAddress.getLocalHost(),port1);
@@ -62,9 +68,15 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     			InetAddress.getLocalHost(),port2);
     	datagram3 = new DatagramPacket(baos3.toByteArray(),baos3.toByteArray().length,
     			InetAddress.getLocalHost(),port1);
+    	datagram4 = new DatagramPacket(baos4.toByteArray(),baos4.toByteArray().length,
+    			InetAddress.getLocalHost(),port2);
+    	
+    	FileManagerStub fmanager = new FileManagerStub();
     	
     	RouterService service = new RouterService(new ActivityCallbackStub());
     	service.start();
+    	
+    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
     }
     
     public void tearDown() throws Exception {
@@ -75,7 +87,7 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	socket1.close();
     	socket2.close();
     }
-    
+  
     public void testGeneralBehavior() throws Exception{
     	
     	MessageRouter router = RouterService.getMessageRouter();
@@ -85,7 +97,7 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	DatagramPacket received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);
     	
-    	UDPHeadPong pong = (UDPHeadPong) 
+    	HeadPong pong = (HeadPong) 
 			Message.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
@@ -108,7 +120,7 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
 
     	received = new DatagramPacket(new byte[1024],1024);
     	socket2.receive(received);
-    	pong = (UDPHeadPong) 
+    	pong = (HeadPong) 
 			Message.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping2.getGUID(),pong.getGUID()));
@@ -120,7 +132,7 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	Thread.sleep(100);
     	received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);
-    	pong = (UDPHeadPong) 
+    	pong = (HeadPong) 
 			Message.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
@@ -146,10 +158,26 @@ public class ServerSideUDPHeadTest extends BaseTestCase {
     	
     	
     	
-    	UDPHeadPong pong = (UDPHeadPong) 
+    	HeadPong pong = (HeadPong) 
 		Message.read(new ByteArrayInputStream(received.getData()));
 	
     	assertTrue(Arrays.equals(ping3.getGUID(),pong.getGUID()));
+    	
+    	//now test a redirect message for a file we do not have.
+    	router.handleUDPMessage(ping4,datagram4);
+    	Thread.sleep(100);
+    	
+    	
+    	try{
+    		socket1.receive(received);
+    		fail("pong redirected when file was not found");
+    	}catch(IOException expected) {}
+    	
+    	try{
+    		socket2.receive(received);
+    		fail("pong sent to wrong place");
+    	}catch(IOException expected) {}
+    	
     }
 
 }

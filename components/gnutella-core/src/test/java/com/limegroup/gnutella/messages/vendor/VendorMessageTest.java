@@ -441,21 +441,24 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	testRead(rep);
     }
     
-    public void testUDPHeadPingMessage() throws Exception {
+    public void testHeadPingMessage() throws Exception {
     	URN urn = URN.createSHA1Urn(FileDescStub.urn);
     	
-    	UDPHeadPing ping = new UDPHeadPing(urn);
+    	HeadPing ping = new HeadPing(urn);
     	
-    	assertEquals(UDPHeadPing.PLAIN, ping.getFeatures());
+    	assertEquals(HeadPing.PLAIN, ping.getFeatures());
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
     	
+
+
     	try {
-    		ping = new UDPHeadPing(urn, 0xFF);
+    		ping = new HeadPing(urn, 0xFF);
     		fail("created a redirect ping w/o address");
     	}catch(IllegalArgumentException expected){}
     	
-    	ping = new UDPHeadPing(urn, 0xFF & ~UDPHeadPing.FIREWALL_REDIRECT);
+    	ping = new HeadPing(urn, 0xFF & ~HeadPing.FIREWALL_REDIRECT);
+
     	assertTrue(ping.requestsAltlocs());
     	assertTrue(ping.requestsRanges());
     	assertNull(ping.getAddress());
@@ -463,15 +466,15 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    	UDPHeadPing ping2 = (UDPHeadPing) Message.read(bais);
+    	HeadPing ping2 = (HeadPing) Message.read(bais);
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
     	
     	
     	Endpoint someHost = new Endpoint("1.2.3.4",15);
-    	ping = new UDPHeadPing(urn,someHost);
-    	assertEquals(UDPHeadPing.FIREWALL_REDIRECT,ping.getFeatures());
+    	ping = new HeadPing(urn,someHost);
+    	assertEquals(HeadPing.FIREWALL_REDIRECT,ping.getFeatures());
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
     	assertNotNull(ping.getAddress());
