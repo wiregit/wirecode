@@ -100,6 +100,7 @@ public class ReplyHandlerStub implements ReplyHandler {
     }
 
 
+
     public String getLocalePref() {
         return "en";
     }
@@ -111,7 +112,6 @@ public class ReplyHandlerStub implements ReplyHandler {
 	public void handleUPListVM(UPListVendorMessage m) {
 		
 	}
-
 }
 
 
