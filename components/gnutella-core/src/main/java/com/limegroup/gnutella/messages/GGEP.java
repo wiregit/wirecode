@@ -35,6 +35,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
+    /** The extension header (key) for AlternateLocation support */
+    public static final String GGEP_HEADER_ALTS = "ALT";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
