@@ -7,7 +7,9 @@ package com.limegroup.gnutella.util;
 public class SystemUtils {
     
     static {
-        System.loadLibrary("SystemUtilities");
+        // Only load the library on systems where we've made it.
+        if(CommonUtils.isWindows() || CommonUtils.isMacOSX())
+            System.loadLibrary("SystemUtilities");
     }
     
     private SystemUtils() {}
