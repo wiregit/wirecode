@@ -98,7 +98,10 @@ public class InstantMessenger extends Chat {
 		_message = "";
 		return str;
 	}
-
+	
+	public void blockHost(String host) {
+		_manager.blockHost(host);
+	}
 
 	/**
 	 * a private class that handles the thread for reading

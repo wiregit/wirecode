@@ -17,8 +17,10 @@ public class ChatManager {
 
 	// Attributes
 	private static ChatManager _chatManager = new ChatManager();
-	private List _chatsInProgress;
+	private List _chatsInProgress = new LinkedList();
+	private List _blockedHosts = new LinkedList();
 	private ActivityCallback _activityCallback;
+	private boolean _allowChats = true;
 
 	// Operations
 	public static ChatManager instance() {
@@ -36,6 +38,16 @@ public class ChatManager {
 	public void accept(Socket socket) {
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
+
+		// see if chatting is turned off
+		if (! _allowChats)
+			return;
+
+		// do a check to see it the host has been blocked
+		String host = socket.getInetAddress().getHostAddress();
+		if ( _blockedHosts.contains(host) )
+			return;
+
 		try {
 			InstantMessenger im = new InstantMessenger(socket, this, 
 													   _activityCallback);
@@ -73,9 +85,22 @@ public class ChatManager {
 		_chatsInProgress.remove(chat);
 	}
 
+	/** blocks incoming connections from a particular ip address  */
+	public void blockHost(String host) {
+		if ( ! _blockedHosts.contains(host) )	
+			_blockedHosts.add(host);
+	}
+	
+	public void unblockHost(String host) {
+		_blockedHosts.remove(host);
+	}
+
+	public void allowChats(boolean b) {
+		_allowChats = b;
+	}
+
 	// Private Classes
 	private ChatManager() {
-		_chatsInProgress = new LinkedList();
 	}
 
 }
