@@ -237,6 +237,46 @@ public final class UDPConnectionTest extends BaseTestCase {
           "GET".equals(word));
     }
 
+    public void testBufferedByteReader() throws Exception {
+        String line1 = "GET FOO BAR BLECK";
+        String line2 = "Second Line";
+
+        // Start the second connection in another thread
+        UDPConnection uconn2;
+        ConnStarter t = new ConnStarter();
+        t.setDaemon(true);
+        t.start();
+
+        // Startup connection one in original thread
+        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+
+        // Wait for commpletion of uconn2 startup
+        t.join();
+
+        // Get the initialized connection 2
+        uconn2 = t.getConnection();
+        
+        // Output on the first connection
+        OutputStream ostream = uconn1.getOutputStream();
+        ostream.write((line1+"\r\n"+line2+"\r\n").getBytes());
+
+        // Read to end and one extra on second stream
+        InputStream  istream = uconn2.getInputStream();
+        uconn2.setSoTimeout(Constants.TIMEOUT); 
+        BufferedInputStream bistream = new BufferedInputStream(istream);
+        ByteReader br = new ByteReader(bistream);
+
+        String line = br.readLine();
+
+        uconn1.close();
+        uconn2.close();
+
+        // Validate the results
+        assertTrue("Read of line should be:"+line1, 
+          line1.equals(line));
+    }
+
+
     public void testReadBeyondEnd() throws Exception {
         final int NUM_BYTES = 100;
 
@@ -469,8 +509,8 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     /**
-     * Test that data can be written, echoed and read through flaky
-     * UDPConnections.
+     * Test that data can be written, echoed and read through 
+     * an extrely flaky UDPConnection where 25% of messages are lost.
      * 
      * @throws Exception if an error occurs
      */
@@ -529,45 +569,65 @@ public final class UDPConnectionTest extends BaseTestCase {
             sSuccess);
     }
 
-    public void testBufferedByteReader() throws Exception {
-        String line1 = "GET FOO BAR BLECK";
-        String line2 = "Second Line";
+    /**
+     * Test UDPConnections with a very long delay.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testExtremelySlowConnection() throws Exception {
+        final int NUM_BYTES = 60000;
+
+        // Clear out my standard setup
+        UDPServiceStub.stubInstance().clearReceivers();
+
+        // Add some simulated connections to the UDPServiceStub
+        // Make the connections 25% flaky
+        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 1000, 0);
+        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 1000, 0);
 
         // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
+        // and run it to completion.
+        class SubTest extends Thread {
+            boolean sSuccess = false;
+
+            public void run() {
+                try {
+                    yield();
+                    UDPConnection uconn2 = 
+                      new UDPConnection("127.0.0.1",6348);
+                    sSuccess = UTest.echoServer(uconn2, NUM_BYTES);
+                    
+                } catch(Throwable e) {
+                    sSuccess = false;
+                }
+            }
+
+            public boolean getSuccess() {
+                return sSuccess;
+            }
+        }
+        SubTest t = new SubTest();
         t.setDaemon(true);
         t.start();
 
-        // Startup connection one in original thread
+        // Init the first connection
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
-        // Wait for commpletion of uconn2 startup
+        // Run the first connection
+        boolean cSuccess = UTest.echoClient(uconn1, NUM_BYTES);
+
+        // Wait for the second to finish
         t.join();
 
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
-        
-        // Output on the first connection
-        OutputStream ostream = uconn1.getOutputStream();
-        ostream.write((line1+"\r\n"+line2+"\r\n").getBytes());
-
-        // Read to end and one extra on second stream
-        InputStream  istream = uconn2.getInputStream();
-        uconn2.setSoTimeout(Constants.TIMEOUT); 
-        BufferedInputStream bistream = new BufferedInputStream(istream);
-        ByteReader br = new ByteReader(bistream);
-
-        String line = br.readLine();
-
-        uconn1.close();
-        uconn2.close();
+        // Get the success status of the second connection
+        boolean sSuccess = t.getSuccess();
 
         // Validate the results
-        assertTrue("Read of line should be:"+line1, 
-          line1.equals(line));
+        assertTrue("echoClient should return true ", 
+            cSuccess);
+        assertTrue("echoServer should return true ", 
+            sSuccess);
     }
-
 
     /**
      *  Startup a second UDPConnection in a thread since two connections will
