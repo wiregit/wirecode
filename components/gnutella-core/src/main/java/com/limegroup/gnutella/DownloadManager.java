@@ -992,7 +992,7 @@ public class DownloadManager implements BandwidthTracker {
     	    return true;
     	    
         // if push proxies failed, but we need a fw-fw transfer, give up.
-        if(shouldDoFWTransfer || !RouterService.acceptedIncomingConnection())
+        if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
             return false;
 
         PushRequest pr = 
