@@ -53,7 +53,6 @@ public interface SettingsInterface
     public int        getSearchAnimationTime();
     public String     getConnectString();
     public String     getConnectOkString();
-    public String     getInstallDir();
 
     /** writes out the properties to disk */
     public void writeProperties();
@@ -163,8 +162,6 @@ public interface SettingsInterface
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
 
-    public void setInstallDir(String dir) 
-	throws IllegalArgumentException;
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
@@ -267,7 +264,6 @@ public interface SettingsInterface
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
-    public static final String INSTALL_DIR    = "INSTALL_DIRECTORY";
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";    

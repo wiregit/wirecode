@@ -118,7 +118,6 @@ public class Library {
         }
 
         String s = new String(new_chars);
-
         return s.trim();
     }
 }

@@ -17,7 +17,7 @@ public class RouterService
      */
     public RouterService( )
     {
-	manager = new ConnectionManager();
+		manager = new ConnectionManager();
         initManager();
     }
 
@@ -26,7 +26,7 @@ public class RouterService
      */
     public RouterService( int port )
     {
-	manager = new ConnectionManager( port );
+		manager = new ConnectionManager( port );
         initManager();
     }
 
@@ -35,25 +35,25 @@ public class RouterService
      */
     private void initManager()
     {
-	manager.setKeepAlive(SettingsManager.instance().getKeepAlive());
-	Thread t=new Thread(manager);
-	t.setDaemon(true);
-	t.start();	
-	// FileManager.getFileManager().addDirectory("C:/rjs/src");
-	//FileManager.getFileManager().addDirectory("E:/My Music");
+		manager.setKeepAlive(SettingsManager.instance().getKeepAlive());
+		Thread t=new Thread(manager);
+		t.setDaemon(true);
+		t.start();	
+		// FileManager.getFileManager().addDirectory("C:/rjs/src");
+		//FileManager.getFileManager().addDirectory("E:/My Music");
         //new LimeProperties("Neutella.props",true);
-
+		
         manager.propertyManager();
-	//Now if quick connecting, try hosts.
-	if (SettingsManager.instance().getUseQuickConnect()) {
-	    Thread t2=new Thread() {
-		public void run() {
-		    quickConnect();
-		}
-	    };
-	    t2.setDaemon(true);
-	    t2.start();
-	}	
+		//Now if quick connecting, try hosts.
+		if (SettingsManager.instance().getUseQuickConnect()) {
+			Thread t2=new Thread() {
+				public void run() {
+					quickConnect();
+				}
+			};
+			t2.setDaemon(true);
+			t2.start();
+		}	
     }
 
     /**

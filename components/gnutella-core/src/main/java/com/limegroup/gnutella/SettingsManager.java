@@ -55,7 +55,6 @@ public class SettingsManager implements SettingsInterface
     private static int      maxSimDownload_;
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
-    private static String   installDir_;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -151,6 +150,7 @@ public class SettingsManager implements SettingsInterface
      */
     private void validateFile(Properties tempProps) 
 		throws IOException {
+		write_ = false;
 		String p;
 		byte b;
 		int i;
@@ -349,11 +349,6 @@ public class SettingsManager implements SettingsInterface
 					try{setSaveDefault(p);}
 					catch(IllegalArgumentException e){}
 				}
-
-				else if(key.equals(SettingsInterface.INSTALL_DIR)) {
-					try{setInstallDir(p);}
-					catch(IllegalArgumentException e){}
-				}
 				else if(key.equals(SettingsInterface.CONNECT_STRING)) {
 					try{setConnectString(p);}
 					catch(IllegalArgumentException e){}
@@ -398,6 +393,7 @@ public class SettingsManager implements SettingsInterface
 		setDirectories("");
 		setSaveDirectory(home_);
 		setSaveDefault(home_);
+		//setInstallDir("");
 		setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 		setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
 		setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
@@ -407,6 +403,8 @@ public class SettingsManager implements SettingsInterface
 		setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
 		setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
 		setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
+		write_ = true;
+		writeProperties();
     }
 
     /** returns the time to live */
@@ -463,7 +461,6 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
-    public String getInstallDir(){return installDir_;}
 
     public String[] getBannedIps(){return bannedIps_;}
     public String[] getBannedWords(){return bannedWords_;}
@@ -660,17 +657,6 @@ public class SettingsManager implements SettingsInterface
 			String s = Integer.toString(maxConn_);
 			props_.put(SettingsInterface.MAX_CONN, s);
 			writeProperties();
-		}
-    }
-
-    public synchronized void setInstallDir(String dir) {
-		File file = new File(dir);
-		boolean b = file.isDirectory();
-		if(!b)
-			throw new IllegalArgumentException();
-		else {
-			installDir_ = dir;
-			props_.put(SettingsInterface.INSTALL_DIR, dir);	    
 		}
     }
 
@@ -976,12 +962,7 @@ public class SettingsManager implements SettingsInterface
 		if(write_) {
 			FileOutputStream ostream = null;
 			try {
-				String name = getInstallDir();
-				if(name != null)
-					name += SettingsInterface.DEFAULT_FILE_NAME;
-				else
-					name = SettingsInterface.DEFAULT_FILE_NAME;
-				ostream = new FileOutputStream(name);
+				ostream = new FileOutputStream(fileName_);
 				props_.save(ostream, "");
 				ostream.close();
 			} 
