@@ -39,6 +39,11 @@ public final class LeafHandshakeResponder
      */
     private HandshakeResponse 
         respondToOutgoing(HandshakeResponse response) {
+
+        // leaves should never accept connections to other leaves
+        if(response.isLeaf()) {
+            return HandshakeResponse.createRejectOutgoingResponse(new Properties());
+        }
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
         return HandshakeResponse.createAcceptOutgoingResponse(new Properties());
@@ -52,16 +57,17 @@ public final class LeafHandshakeResponder
      *  headers to send in response to the connection attempt
      */
     private HandshakeResponse 
-        respondToIncoming(HandshakeResponse response) {
+        respondToIncoming(HandshakeResponse hr) {
         Properties props = new LeafHeaders(getRemoteIP());
         
+
         if (RouterService.isLeaf()) {
-            //b) Incoming, with ultrapeer connection: reject (redirect)
+            //a) If we're already a leaf, reject
             return HandshakeResponse.createRejectIncomingResponse(props);
-        } else {
-            //c) Incoming, no ultrapeer: accept...until I find one
-            return HandshakeResponse.createAcceptIncomingResponse(props);
-        }
+        } 
+
+        //b) We're not a leaf yet, so accept the incoming connection
+        return HandshakeResponse.createAcceptIncomingResponse(props);
     }
 }
 
