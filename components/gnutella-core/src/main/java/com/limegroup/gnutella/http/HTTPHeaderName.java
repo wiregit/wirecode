@@ -155,6 +155,20 @@ public class HTTPHeaderName {
         new HTTPHeaderName("X-Create-Time");
 
 	/**
+	 * Header for submitting supported features. Introduced by BearShare.
+	 * 
+	 * Example: X-Features: chat/0.1, browse/1.0, queue/0.1
+	 */
+	public static final HTTPHeaderName X_FEATURES =
+        new HTTPHeaderName("X-Features");
+
+    /**
+     * Header for sending your own "<ip>:
+     * <listening port>"
+     */
+    public static final HTTPHeaderName X_NODE = new HTTPHeaderName("X-Node");
+
+	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.
 	 *

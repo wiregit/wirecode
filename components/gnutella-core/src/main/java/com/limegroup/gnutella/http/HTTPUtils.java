@@ -167,7 +167,7 @@ public final class HTTPUtils {
 		if((name == null) || (valueStr == null)) {
 			throw new NullPointerException("null value in creating http header");
 		}
-		String nameStr  = name.httpStringValue();;
+		String nameStr  = name.httpStringValue();
 		if(nameStr == null) {
 			throw new NullPointerException("null value in creating http header");
 		}

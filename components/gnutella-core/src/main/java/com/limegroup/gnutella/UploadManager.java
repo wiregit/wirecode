@@ -81,8 +81,8 @@ public final class UploadManager implements BandwidthTracker {
     private final int BANNED = 3;
     /** The min and max allowed times (in milliseconds) between requests by
      *  queued hosts. */
-    public static final int MIN_POLL_TIME = 45000; //45 sec, same as Shareaza
-    public static final int MAX_POLL_TIME = 120000; //120 sec, same as Shareaza
+    public static final int MIN_POLL_TIME = 45000; //45 sec
+    public static final int MAX_POLL_TIME = 120000; //120 sec
 
 	/**
 	 * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>

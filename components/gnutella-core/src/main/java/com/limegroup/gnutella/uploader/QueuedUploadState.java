@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import com.sun.java.util.collections.Set;
-
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
 
 public class QueuedUploadState implements HTTPMessage {
 
@@ -48,6 +50,21 @@ public class QueuedUploadState implements HTTPMessage {
                                           ((IncompleteFileDesc)FILE_DESC),
                                           ostream);
                 }
+            }
+        }
+        
+        if (UPLOADER.isFirstReply()) {
+            // write x-features header once because the downloader is
+            // supposed to cache that information anyway
+            Set features = new HashSet();
+            features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
+            if (ChatSettings.CHAT_ENABLED.getValue())
+                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+            // Write X-Features header.
+            if (features.size() > 0) {
+                HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+                        new HTTPHeaderValueCollection(features),
+                                      ostream);
             }
         }
         str = "\r\n";

@@ -129,6 +129,14 @@ public class DownloadStat extends AdvancedStatistic {
     public static final Statistic NSR_EXCEPTION = new DownloadStat();
 
     /**
+	 * Statistic for the number of ContentURNMismatchExceptions from download 
+	 * responses.
+	 */
+	public static final Statistic CONTENT_URN_MISMATCH_EXCEPTION =
+		new DownloadStat();
+
+
+    /**
      * Statistic for the number of 'ok' responses while downloading.
      */
     public static final Statistic RESPONSE_OK =

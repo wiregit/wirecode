@@ -129,16 +129,36 @@ public final class NormalUploadState implements HTTPMessage {
                                           ((IncompleteFileDesc)FILE_DESC),
                                           ostream);
                 }
-                {
-                    // always write out the creation time
+                if (_uploader.isFirstReply()) {
+                    // write the creation time if this is the first reply.
+                    // if this is just a continuation, we don't need to send
+                    // this information again.
+                    // it's possible t do that because we don't use the same
+                    // uploader for different files
                     CreationTimeCache cache = CreationTimeCache.instance();
                     if (cache.getCreationTime(urn) != null)
-                    HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME,
-                                          cache.getCreationTime(urn).toString(),
+                        HTTPUtils.writeHeader(
+                            HTTPHeaderName.CREATION_TIME,
+                            cache.getCreationTime(urn).toString(),
+                            ostream);
+                }
+            }
+            
+            if (_uploader.isFirstReply()) {
+                // write x-features header once because the downloader is
+                // supposed to cache that information anyway
+                Set features = new HashSet();
+                features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
+                if (ChatSettings.CHAT_ENABLED.getValue())
+                    features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+                // Write X-Features header.
+                if (features.size() > 0) {
+                    HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+                             new HTTPHeaderValueCollection(features),
                                           ostream);
                 }
-			}
-			
+            }
+            
 			ostream.write("\r\n");
 			
 			_stalledChecker.activate(network);			
@@ -234,7 +254,7 @@ public final class NormalUploadState implements HTTPMessage {
                 * uSpeed / 100.f
                 // reduced upload speed if we are an ultrapeer
                 - RouterService.getConnectionManager()
-                .getMeasuredUpstreamBandwidth(), 1.f )
+                .getMeasuredUpstreamBandwidth()*1.25f, 1.f )
 	        // we need bytes per second
 	        * 1024;
 	    return ret;

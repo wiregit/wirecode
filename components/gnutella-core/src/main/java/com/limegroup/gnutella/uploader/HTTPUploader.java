@@ -45,10 +45,10 @@ public final class HTTPUploader implements Uploader {
 	private int _stateNum = CONNECTING;
 	private int _lastTransferStateNum;
 	private HTTPMessage _state;
+	private boolean _firstReply = true;
 	
 	private boolean _chatEnabled;
 	private boolean _browseEnabled;
-	private int _gnutellaPort;
     private boolean _supportsQueueing = false;
 
     /**
@@ -150,7 +150,7 @@ public final class HTTPUploader implements Uploader {
         _headersParsed = false;
         _stateNum = CONNECTING;
         _state = null;
-        _gnutellaPort = 0;
+        _nodePort = 0;
         _supportsQueueing = false;
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
@@ -225,6 +225,7 @@ public final class HTTPUploader implements Uploader {
             if ( _amountRead < _amountRequested )
                 throw e;
 		}
+		_firstReply = false;
 	}
 
     /**
@@ -435,7 +436,7 @@ public final class HTTPUploader implements Uploader {
 	public boolean isBrowseHostEnabled() { return _browseEnabled; }
 
 	// implements the Uploader interface
-	public int getGnutellaPort() {return _gnutellaPort;}
+	public int getGnutellaPort() {return _nodePort;}
 	
 	//implements the Uploader interface
 	public String getUserAgent() { return _userAgent; }
@@ -482,6 +483,10 @@ public final class HTTPUploader implements Uploader {
             return true;
 
         return !_userAgent.startsWith("Morpheus 3.0.2");
+    }
+    
+    protected boolean isFirstReply () {
+    	return _firstReply;
     }
     
     public InetAddress getNodeAddress() {return _nodeAddress; }
@@ -627,7 +632,7 @@ public final class HTTPUploader implements Uploader {
         }
 		_chatEnabled = true;
 		_browseEnabled = true;
-		_gnutellaPort = port;
+		_nodePort = port;
         
         return true;
     }
@@ -838,7 +843,7 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had an node description value
      */
     private boolean readNodeHeader(final String str) {
-        if ( StringUtils.indexOfIgnoreCase(str, "X-Node") == -1 )
+        if ( !HTTPHeaderName.X_NODE.matchesStartOfString(str) )
             return false;
            
         StringTokenizer st = 
@@ -864,6 +869,38 @@ public final class HTTPUploader implements Uploader {
         return true;
     }	
 
+	/**
+	 * Reads the X-Features header
+	 *
+	 * @return true if the header had an node description value
+	 */
+	private boolean readFeatureHeader(String str) {
+		if ( !HTTPHeaderName.X_FEATURES.matchesStartOfString(str) )
+			return false;
+        str = HTTPUtils.extractHeaderValue(str);
+        StringTokenizer tok = new StringTokenizer(str, ",");
+        while (tok.hasMoreTokens()) {
+            String feature = tok.nextToken();
+            String protocol = "";
+            int slash = feature.indexOf("/");
+            if(slash == -1) {
+                protocol = feature.toLowerCase().trim();
+            } else {
+                protocol = feature.substring(0, slash).toLowerCase().trim();
+            }
+            // not interested in the version ...
+
+			if (protocol.equals(HTTPConstants.CHAT_PROTOCOL))
+				_chatEnabled = true;
+			else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
+				_browseEnabled = true;
+			else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
+				_supportsQueueing = true;
+			
+		}
+		return true;
+	}
+	
 	/**
 	 * This method parses the "X-Gnutella-Content-URN" header, as specified
 	 * in HUGE v0.93.  This assigns the requested urn value for this 

@@ -325,6 +325,10 @@ public class HTTPDownloader implements BandwidthTracker {
         _totalAmountRead += _amountRead;
         _amountRead = 0;
 		_initialReadingPoint = start;
+		
+		// features to be sent with the X-Features header
+        Set features = new HashSet();
+		
         //Write GET request and headers.  We request HTTP/1.1 since we need
         //persistence for queuing & chunked downloads.
         //(So we can't write "Connection: close".)
@@ -336,8 +340,12 @@ public class HTTPDownloader implements BandwidthTracker {
         out.write("HOST: "+_host+":"+_port+"\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
-        if(supportQueueing) 
-            out.write("X-Queue: 0.1\r\n");//we support remote queueing
+        if (supportQueueing) {
+            // legacy QUEUE header, - to be replaced by X-Features header
+            // as already implemented by BearShare
+            out.write("X-Queue: 0.1\r\n"); //we support remote queueing
+            features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
+        }
 
         // Add ourselves to the mesh if the partial file is valid
         if( isPartialFileValid() ) {
@@ -392,12 +400,28 @@ public class HTTPDownloader implements BandwidthTracker {
 
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
 		if (ChatSettings.CHAT_ENABLED.getValue() &&
-		    RouterService.acceptedIncomingConnection() &&
-		    !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
+           RouterService.acceptedIncomingConnection() &&
+           !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
             String host = NetworkUtils.ip2string(RouterService.getAddress());
-            out.write("Chat: " + host + ":" + port + "\r\n");            
-		}
+            out.write("X-Node: " + host + ":" + port + "\r\n");
+            features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
+            // Legacy chat header. Replaced by X-Features header / X-Node
+            // header
+            if (ChatSettings.CHAT_ENABLED.getValue()) {
+                out.write("Chat: " + host + ":" + port + "\r\n");
+                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+            }
+        }	
+		
+		// Write X-Features header.
+        if (features.size() > 0) {
+            HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+                        new HTTPHeaderValueCollection(features),
+                        out);
+        }
+		
+		
         out.write("\r\n");
         out.flush();
 
@@ -457,8 +481,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 _amountToRead = high - low;
             }
 
-            // TODO: we should read the X-Gnutella-Content-URN header here
-
+            else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str))
+				checkContentUrnHeader(str, _rfd.getSHA1Urn());
 			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
                 readAlternateLocations(str, false);
@@ -474,6 +498,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseRetryAfterHeader(str, _rfd);
             else if (HTTPHeaderName.CREATION_TIME.matchesStartOfString(str))
                 parseCreationTimeHeader(str, _rfd);
+            else if (HTTPHeaderName.X_FEATURES.matchesStartOfString(str))
+            	parseFeatureHeader(str);
         }
 
 
@@ -513,6 +539,34 @@ public class HTTPDownloader implements BandwidthTracker {
 		}        
     }
 
+	/**
+     * Does nothing except for throwing an exception if the
+     * X-Gnutella-Content-URN header does not match
+     * 
+     * @param str
+     *            the header <tt>String</tt>
+     * @param sha1
+     *            the <tt>URN</tt> we expect
+     * @throws ContentUrnMismatchException
+     */
+    private void checkContentUrnHeader(String str, URN sha1)
+        throws ContentUrnMismatchException {
+        if(sha1 == null)
+            return;
+        
+        String contentUrnString = HTTPUtils.extractHeaderValue(str);
+        URN contentUrn = null;
+        try {
+            contentUrn = URN.createSHA1Urn(contentUrnString);
+        } catch (IOException ioe) {
+            // could be an URN type we don't know. So ignore all
+            return;
+        }
+        if (!sha1.equals(contentUrn))
+            throw new ContentUrnMismatchException();
+        // else do nothing at all.
+    }
+	
 	/**
 	 * Reads alternate location header.  The header can contain only one
 	 * alternate location, or it can contain many in the same header.
@@ -901,6 +955,34 @@ public class HTTPDownloader implements BandwidthTracker {
         }
     }
     
+    /**
+     * This method reads the "X-Features" header and looks for features we
+     * understand.
+     * 
+     * @param str
+     *            the header line.
+     */
+    private void parseFeatureHeader(String str) {
+        str = HTTPUtils.extractHeaderValue(str);
+        StringTokenizer tok = new StringTokenizer(str, ",");
+        while (tok.hasMoreTokens()) {
+            String feature = tok.nextToken();
+            String protocol = "";
+            int slash = feature.indexOf("/");
+            if(slash == -1) {
+                protocol = feature.toLowerCase().trim();
+            } else {
+                protocol = feature.substring(0, slash).toLowerCase().trim();
+            }
+            // ignore the version for now.
+
+            if (protocol.equals(HTTPConstants.CHAT_PROTOCOL))
+                _chatEnabled = true;
+            else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
+                _browseEnabled = true;
+        }
+    }
+      
     /////////////////////////////// Download ////////////////////////////////
 
     /*

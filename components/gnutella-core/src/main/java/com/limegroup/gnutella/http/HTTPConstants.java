@@ -45,4 +45,16 @@ public final class HTTPConstants {
 	 */
 	public static final String URI_RES_N2R = "/"+URI_RES+"/"+NAME_TO_RESOURCE;
 
+	/**
+	 * constant strings for the X-Feature header
+	 */
+	public static final String CHAT_PROTOCOL  = "chat";
+	public static final String BROWSE_PROTOCOL = "browse";
+	public static final String QUEUE_PROTOCOL  = "queue";
+	public static final String G2_PROTOCOL = "g2";
+    
+	public static final double CHAT_VERSION = 0.1;
+	public static final double BROWSE_VERSION = 1.0;
+	public static final double QUEUE_VERSION  = 0.1;
+	public static final double G2_VERSION = 1.0;
 }

@@ -2767,6 +2767,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                               dloader, uce);
                 informMesh(rfd, false);
                 return 0; //discard the rfd of dloader
+            } catch (ContentUrnMismatchException cume) {
+            	if(RECORD_STATS)
+            		DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
+            	if(LOG.isDebugEnabled())
+            		LOG.debug("cume thrown in assignAndRequest " + dloader, cume);
+				return 0;            		
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();

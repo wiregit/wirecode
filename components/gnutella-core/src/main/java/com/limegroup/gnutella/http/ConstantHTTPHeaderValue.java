@@ -48,4 +48,36 @@ public class ConstantHTTPHeaderValue implements HTTPHeaderValue {
      */
     public static final HTTPHeaderValue CLOSE_VALUE =
         new ConstantHTTPHeaderValue("close");
+        
+    /**
+     * Constant for the 'browse/version' value sent.
+     */
+    public static final HTTPHeaderValue BROWSE_FEATURE =
+        new ConstantHTTPHeaderValue(
+            HTTPConstants.BROWSE_PROTOCOL + "/" + HTTPConstants.BROWSE_VERSION
+        );
+        
+    /**
+     * Constant for the 'chat/version' value sent.
+     */
+    public static final HTTPHeaderValue CHAT_FEATURE =
+        new ConstantHTTPHeaderValue(
+            HTTPConstants.CHAT_PROTOCOL + "/" + HTTPConstants.CHAT_VERSION
+        );        
+       
+    /**
+     * Constant for the 'queue/version' value sent.
+     */
+    public static final HTTPHeaderValue QUEUE_FEATURE =
+        new ConstantHTTPHeaderValue(
+            HTTPConstants.QUEUE_PROTOCOL + "/" + HTTPConstants.QUEUE_VERSION
+        );
+        
+    /**
+     * Constant for the g2/version' value sent.
+     */
+    public static final HTTPHeaderValue G2_FEATURE =
+        new ConstantHTTPHeaderValue(
+            HTTPConstants.G2_PROTOCOL + "/" + HTTPConstants.G2_VERSION
+        );
 }

@@ -37,6 +37,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -1085,7 +1086,16 @@ public class UploadTest extends BaseTestCase {
                           "cdef", "X-Create-Time: " + cTime));
     }
 
-
+    /////////////// test the feature header is used correctly ///////////
+    public void testFeatureHeader() throws Exception {
+        ChatSettings.CHAT_ENABLED.setValue(true);
+        assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
+                   "X-Features: browse/1.0, chat/0.1"));
+                   
+        ChatSettings.CHAT_ENABLED.setValue(false);
+        assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
+                   "X-Features: browse/1.0"));
+    }
     
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
@@ -1336,6 +1346,8 @@ public class UploadTest extends BaseTestCase {
             String line = in.readLine();
             if( line == null )
                 throw new InterruptedIOException("connection closed");
+            //System.out.println("<< " + line);
+                
             if (line.equals(""))
                 break;
             if (requiredHeader != null) {
