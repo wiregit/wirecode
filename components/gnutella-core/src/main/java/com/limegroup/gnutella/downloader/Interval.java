@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.Serializable;
+
 /** The interval from low to high, inclusive on both ends. */
-public class Interval {
+public class Interval implements Serializable {
     /** INVARIANT: low<=high */
     public int low;
     public int high;
