@@ -246,7 +246,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 				fail("alternate location string should not have been accepted: "+
 					 HugeTestUtils.BAD_PORT_URLS[i]);
 			}			
-		} catch(IllegalArgumentException e) {
+		} catch(IOException e) {
 			// this is what we're expecting
 		}
 	}
