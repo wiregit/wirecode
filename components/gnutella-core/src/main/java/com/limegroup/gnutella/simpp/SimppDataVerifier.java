@@ -40,13 +40,16 @@ public class SimppDataVerifier {
             base32 = new String(temp, "UTF-8");
         } catch (UnsupportedEncodingException uex) {
             ErrorService.error(uex);
+            return false;
         }
         byte[] signature = Base32.decode(base32);
-        byte[] propsData = new byte[simppPayload.length-1-sepIndex];//TODO check
+        byte[] propsData = new byte[simppPayload.length-1-sepIndex];
         System.arraycopy(simppPayload, sepIndex+1, propsData, 
                                            0, simppPayload.length-1-sepIndex);
         
         PublicKey pk = getPublicKey();
+        if(pk == null)
+            return false;
         String algo = DSA_ALGORITHM;
         SignatureVerifier verifier = 
                          new SignatureVerifier(propsData, signature, pk, algo);
@@ -85,9 +88,11 @@ public class SimppDataVerifier {
             base32Enc = new String(bytes, "UTF-8");
         } catch (IOException iox) {
             ErrorService.error(iox);
+            return null;
         } finally {
             try {
-                raf.close();
+                if(raf!=null)
+                    raf.close();
             } catch (IOException iox) {}
         }
         //3. convert the base32 encoded String into the original bytes

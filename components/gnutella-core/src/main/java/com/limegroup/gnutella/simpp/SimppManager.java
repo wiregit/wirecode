@@ -46,11 +46,7 @@ public class SimppManager {
             SimppDataVerifier verifier = new SimppDataVerifier(content);
             boolean verified = false;
             _latestVersion = 0;
-            try {
-                verified = verifier.verifySource();
-            } catch (ClassCastException ccx) {
-                verified = false;
-            }
+            verified = verifier.verifySource();
             if(!verified) {
                 return;
             }
@@ -58,8 +54,10 @@ public class SimppManager {
             try {
                 parser = new SimppParser(verifier.getVerifiedData());
             } catch(SAXException sx) {
+                problem = true;
                 return;
             } catch (IOException iox) {
+                problem = true;
                 return;
             }
             if(parser.getVersion() <= MIN_VERSION) {
@@ -71,10 +69,12 @@ public class SimppManager {
         } catch (VerifyError ve) {
             problem = true;
         } catch (IOException iox) {
-            problem = true;        
+            problem = true;  
         } finally {
             if(problem) {
-                //TODO: do we need to do anything here?
+                _latestVersion = MIN_VERSION;
+                _propsStream = "";
+                _simppBytes = "".getBytes();
             }
             if(raf!=null) {
                 try {
@@ -116,11 +116,7 @@ public class SimppManager {
             public void run() {
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 boolean verified = false;
-                try {
-                    verified = verifier.verifySource();
-                } catch (ClassCastException ccx) {
-                    verified = false;
-                }
+                verified = verifier.verifySource();
                 if(!verified) 
                     return;
                 SimppParser parser=null;
@@ -142,7 +138,7 @@ public class SimppManager {
                 // 2. get the props we just read
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
-                SimppSettingsManager.instance().updateSimppSettings(props,true);
+                SimppSettingsManager.instance().updateSimppSettings(props);
                 // 4. Update the capabilities VM with the new version
                 CapabilitiesVM.updateSimppVersion(version);
                 // 5. Send the new CapabilityVM to all our connections. 

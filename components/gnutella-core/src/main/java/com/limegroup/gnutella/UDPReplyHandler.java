@@ -251,7 +251,8 @@ public final class UDPReplyHandler implements ReplyHandler {
      * As of now there is no need to send SimppMessages via UDP, 
      */ 
     public void handleSimppVM(SimppVM simppVM) {
-        Assert.that(false, "UDP Reply handler was asked to send Simpp message");
+        //This should never happen. But if it does, ignore it and move on
+        return;
     }
     
 

@@ -31,7 +31,9 @@ public class SignatureVerifier {
             return false;
         } catch (SignatureException sx) {
             return false;
-        }        
+        } catch (ClassCastException ccx) {
+            return false;
+        }       
     }
     
 }

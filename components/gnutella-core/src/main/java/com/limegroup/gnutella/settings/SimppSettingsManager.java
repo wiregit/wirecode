@@ -35,7 +35,7 @@ public class SimppSettingsManager {
      * true if we have not applied the simpp settings, or have since reverted to
      * them, false otherwise
      */
-    private boolean _isDefault;
+    private boolean _usingUserPrefs;
      
     /**
      *  The instance
@@ -46,13 +46,13 @@ public class SimppSettingsManager {
     
     //constructor
     private SimppSettingsManager() {
-        _isDefault = true; //we are using defualt settings by default
+        _usingUserPrefs = true; //we are using defualt settings by default
         String simppSettings = SimppManager.instance().getPropsString();
         if(simppSettings == null || simppSettings.equals(""))
             throw new IllegalArgumentException("SimppManager not ready");
         _userPrefs = new HashMap();
         _remainderSimppSettings = new HashMap();
-        updateSimppSettings(simppSettings, true);
+        updateSimppSettings(simppSettings);
     }
 
     //instance 
@@ -66,12 +66,13 @@ public class SimppSettingsManager {
      * Call this method with the verified simppSettings which are used to
      * replace other settings if they exist in the system.
      */
-    public void updateSimppSettings(String simppSettings, boolean activate) {
+    public void updateSimppSettings(String simppSettings) {
         byte[] settings = null;
         try {            
             settings = simppSettings.getBytes("UTF-8");
         } catch (UnsupportedEncodingException uex) {
             ErrorService.error(uex);
+            return;
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(settings);
         _simppProps = new Properties();
@@ -80,8 +81,7 @@ public class SimppSettingsManager {
         } catch(IOException iox) {
             ErrorService.error(iox);//huh? IOEx with a BAIS from String?
         }
-        if(activate)
-            activateSimppSettings();
+        activateSimppSettings();
     }
 
     /**
@@ -98,7 +98,9 @@ public class SimppSettingsManager {
                 Setting simppSetting = getSimppSettingForKey(settingKey);
                 String simppValue = (String)currEntry.getValue();
                 //If this setting is null, it means that the SettingsFactory has
-                //not loaded this setting yet. We need to force it's hand. 
+                //not loaded this setting yet. Let's cache the value in a
+                //hashmap which will be referenced everytime a setting is
+                //created
                 if(simppSetting == null) {//remember it for later
                     _remainderSimppSettings.put(settingKey, simppValue);
                     continue;
@@ -114,13 +116,11 @@ public class SimppSettingsManager {
                 if(LOG.isDebugEnabled())
                     LOG.debug("current value:"+userSetValue);
                 _userPrefs.put(simppSetting, userSetValue);
-                //we never want to write this setting out
-                simppSetting.setAlwaysSave(false);
                 //set the setting to the value that simpp says
                 simppSetting.setValue(simppValue);
             }
         }//end of synchronized block
-        _isDefault = false;
+        _usingUserPrefs = false;
     }
     
     /**
@@ -133,7 +133,7 @@ public class SimppSettingsManager {
      * will go...
      */
     public void revertToUserPrefs() {
-        if(_isDefault) //we are already at default values
+        if(_usingUserPrefs) //we are already at default values
             return;
         synchronized(_simppProps) {
             Set set = _simppProps.keySet();
@@ -143,7 +143,7 @@ public class SimppSettingsManager {
                 currSetting.loadValue(userSetValue);
             }            
         } //end of synchronized 
-        _isDefault = true;
+        _usingUserPrefs = true;
     }
 
     /**
