@@ -724,7 +724,7 @@ public class SettingsManager implements SettingsInterface
             if (keepAlive > max) {
                 throw new BadConnectionSettingException(
                     BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    max, getMaxIncomingConnections());
+                    max, maxConnections(x));
             }
         }
 
@@ -967,6 +967,39 @@ public class SettingsManager implements SettingsInterface
         FileManager.getFileManager().addDirectories(directories_);        
         props_.put(DIRECTORIES, directories_);
     }
+
+	/* adds one directory to the directory string (if
+	 * it is a directory and is not already listed. */
+	public synchronized boolean addDirectory(String dir) {
+		File f = new File(dir);
+		if(f.isDirectory()) {
+			String[] dirs = getDirectoriesAsArray();			
+			String newPath = "";
+			try {newPath = f.getCanonicalPath();}
+			catch(IOException ioe) {return false;}
+			// check for directory
+			int i = 0;
+			while(i < dirs.length) {			
+				File file = new File(dirs[i]);
+				String name = "";
+				try {name = file.getCanonicalPath();}
+				catch(IOException ioe) {break;}
+				if(name.equals(newPath)) {
+					return false;
+				}
+				i++;
+			}
+			if(!directories_.endsWith(";")) 
+				directories_ += ";";				
+			directories_ += newPath;
+			directories_ += ";";
+			FileManager.getFileManager().reset();
+			FileManager.getFileManager().addDirectories(directories_);        
+			props_.put(DIRECTORIES, directories_);
+			return true;
+		}
+		return false;
+	}
 
     /** set the extensions to search for */
     public void setExtensions(String ext) {
