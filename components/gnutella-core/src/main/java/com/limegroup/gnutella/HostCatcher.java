@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.BucketQueue;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
+import java.util.Date;
 
 /**
  * The host catcher.  This peeks at pong messages coming on the
@@ -12,24 +13,38 @@ import java.net.InetAddress;
  * "gnutella.net").  The servent may then connect to these addresses
  * as necessary to maintain full connectivity.<p>
  *
- * Generally speaking, IP addresses from pongs are preferred to those
- * from the gnutella.net file, since they more likely to be live.
- * Hosts we are connected to are not added to the host catcher, but
- * they will be written to disk.
+ * Generally speaking, IP addresses from pong servers (e.g. router.limewire.com)
+ * are preferred to other pongs.  For this reason, the HostCatcher may initiate
+ * outgoing "router" connections.  Also, IP addresses from pongs are preferred to
+ * those from the gnutella.net file, since they more likely to be live.  Hosts
+ * we are connected to are not added to the host catcher, but they will be
+ * written to disk.
  */
 public class HostCatcher {
-    /** The number of elements to store. */
-    private static int SIZE=100;
+    /** The number of router pongs to store. */
+    private static final int GOOD_SIZE=30;
+    /** The number of normal pongs to store. */
+    private static final int NORMAL_SIZE=70;
+    /** The number of private IP pongs to store. */
+    private static final int BAD_SIZE=10;
+    private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+
+    private static final int GOOD_PRIORITY=2;
+    private static final int NORMAL_PRIORITY=1;
+    private static final int BAD_PRIORITY=0;
 
     /* Our representation consists of a set and a queue, both bounded in size.
      * The set lets us quickly check if there are duplicates, while the queue
      * provides ordering.  The elements at the END of the queue have the highest
-     * priority.
+     * priority. Note that if a priority queue is used instead of a bucket
+     * queue, old router pongs must be flushed when reconnecting to the server.
      *
      * INVARIANT: queue contains no duplicates and contains exactly the
-     * same elements as set.
-     * LOCKING: obtain this' monitor before modifying either.  */
-    private Buffer /* of Endpoint */ queue=new Buffer(SIZE);
+     *  same elements as set.
+     * LOCKING: obtain this' monitor before modifying either.
+     */
+    private BucketQueue /* of ComparableEndpoint */ queue=
+        new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
@@ -37,12 +52,44 @@ public class HostCatcher {
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ActivityCallback callback;
+    private SettingsInterface settings=SettingsManager.instance();
+
+    private Thread routerConnectorThread;
+    /* True if the cache has expired and the host catcher has not yet tried
+     * (successfully or not) to connect to the pong cache.  It is also used to
+     * force the first connection fetchers to wait for the initial connection to
+     * the router.  LOCKING: obtain staleLock.
+     */
+    private boolean stale=true;
+    private Object staleLock=new Object();
+    /* The number of threads waiting for stale to become false.  This is used as
+     * an optimization to avoid reconnecting to the server unless someone needs
+     * it. LOCKING: obtain staleWaitersLock.  
+     */
+    private int staleWaiters=0;
+    private Object staleWaitersLock=new Object();
+    /* True iff we have gotten a good pong since setting stale=false.
+     * LOCKING: obtain gotGoodPongLock.
+     */
+    private boolean gotGoodPong=false;
+    private Object gotGoodPongLock=new Object();
+
+    /** The number of MILLISECONDS a server's pong is valid for. */
+    private static final int STALE_TIME=30*60*1000; //30 minutes
+    /** The number of MILLISECONDS to wait before retrying quick-connect. */
+    private static final int RETRY_TIME=5*60*1000; //5 minutes
+    /** The amount of MILLISECONDS to wait after starting a connection before
+     *  trying another. */
+    private static final int CONNECT_TIME=6000;  //6 seconds
+
 
     /**
      * Creates an empty host catcher.  Must call initialize before using.
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
+        routerConnectorThread=new RouterConnectorThread();
+        routerConnectorThread.start();
     }
 
     /**
@@ -59,14 +106,18 @@ public class HostCatcher {
      * host list into the maybe set.  (The likelys set is empty.)  If filename
      * does not exist, then no error message is printed and this is initially
      * empty.  The file is expected to contain a sequence of lines in the format
-     * "<host>:port\n".  Lines not in this format are silently ignored.  
+     * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
                            String filename) {
         this.acceptor = acceptor;
         this.manager = manager;
+        try {
+            read(filename);
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
     }
-
 
 
     /**
@@ -74,7 +125,7 @@ public class HostCatcher {
      * @modifies this
      * @effects read hosts from the given file.
      */
-    public synchronized void read(String filename)
+    private synchronized void read(String filename)
             throws FileNotFoundException, IOException {
         BufferedReader in=null;
         in=new BufferedReader(new FileReader(filename));
@@ -98,10 +149,16 @@ public class HostCatcher {
                 continue;
             }
 
-            //Everything passed!  Add it. 
+            //Everything passed!  Add it.
             Endpoint e = new Endpoint(host, port);
+            if (e.isPrivateAddress())
+                e.setWeight(BAD_PRIORITY);
+            else
+                e.setWeight(NORMAL_PRIORITY);
+
             if ((! set.contains(e)) && (! isMe(host, port))) {
-                Object removed=queue.addFirst(e); //add e to the head.  Order matters!
+                //add e to the head.  Order matters!
+                Object removed=queue.insert(e);
                 //Shouldn't happen...
                 if (removed!=null)
                     set.remove(removed);
@@ -135,7 +192,7 @@ public class HostCatcher {
 
         //2.) Write hosts in this that are not in connections--in order.
         for (int i=queue.size()-1; i>=0; i--) {
-            Endpoint e=(Endpoint)queue.get(i);
+            Endpoint e=(Endpoint)queue.extractMax();
             if (connections.contains(e))
                 continue;
             writeInternal(out, e);
@@ -152,13 +209,10 @@ public class HostCatcher {
 
     /**
      * @modifies this
-     * @effects may choose to add hosts listed in pr to this
+     * @effects may choose to add hosts listed in pr to this.
+     *  If non-null, receivingConnection may be used to prioritize pr.
      */
-    public void spy(PingReply pr) {
-        //We could also get ip addresses from query hits and push
-        //requests, but then we have to guess the ports for incoming
-        //connections.  (These only give ports for HTTP.)
-
+    public void spy(PingReply pr, ManagedConnection receivingConnection) {
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
 
@@ -169,28 +223,30 @@ public class HostCatcher {
         //Skip if this would connect us to our listening port.
         if (isMe(e.getHostname(), e.getPort()))
             return;
- 
-        boolean isPrivate=e.isPrivateAddress();
+
+        //Current policy: "Pong cache" connections are considered good.  Private
+        //addresses are considered real bad (negative weight).  This means that
+        //the host catcher will still work on private networks, although we will
+        //normally ignore private addresses.  Note that if e is already in this,
+        //but with a different weight, we don't bother re-heapifying.
+        if (e.isPrivateAddress())
+            e.setWeight(BAD_PRIORITY);
+        else if (receivingConnection!=null
+                    && receivingConnection.isRouterConnection())
+            e.setWeight(GOOD_PRIORITY);
+        else
+            e.setWeight(NORMAL_PRIORITY);
+
         boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
-                //We don't already have e, so add to both set and queue.
-                //Current policy: add e to the END of queue, so newer points are
-                //used before older.  Exception: if e is a private address, add
-                //it to beginning.  This means that the host catcher will still
-                //work on private networks, although we will normally ignore
-                //private addresses. In either case, adding e may eject an older
-                //point from queue, so we have to cleanup the set to maintain
-                //rep. invariant.
+                //Adding e may eject an older point from queue, so we have to
+                //cleanup the set to maintain rep. invariant.
                 set.add(e);
-                Object ejected;
-                if (! isPrivate) //normal case
-                    ejected=queue.addLast(e);  
-                else             //private network OR junk point
-                    ejected=queue.addFirst(e);  
+                Object ejected=queue.insert(e);
                 if (ejected!=null)
                     set.remove(ejected);
-                
+
                 //If this is not full, notify the callback.  If this is full,
                 //the GUI's display of the host catcher will differ from this.
                 //This is acceptable; the user really doesn't need to see so
@@ -200,33 +256,200 @@ public class HostCatcher {
                 if (ejected==null)
                     notifyGUI=true;
 
-                this.notify(); //notify anybody waiting for a connection
+                this.notify();
+            }
+        }
+
+        //If we're trying to connect to pong, notify the router connection
+        //thread.  This will in turn notify any connection fetchers waiting for
+        //the cache to refresh.
+        if (e.getWeight()==GOOD_PRIORITY) { 
+            synchronized (gotGoodPongLock) {
+                gotGoodPong=true;
+                gotGoodPongLock.notify();
             }
         }
         if (notifyGUI)
-            callback.knownHost(e); 
+            callback.knownHost(e);
     }
 
     /**
-     * @modifies this
-     * @effects atomically returns the highest priority host from this
-     *  and removes it from this.  Throws NoSuchElementException if
-     *  no host could be found.
+     *  @requires this' monitor held by caller
+     *  @effects returns true iff this has a host with weight GOOD_PRIORITY
      */
-    public synchronized Endpoint getAnEndpoint() throws NoSuchElementException {
+    private boolean hasRouterHost() {
+        //Because priorities are only -1, 0, or 1, it suffices to look at the
+        //head of the queue.  If this were not the case, we would likely have
+        //to augment the state of this.
         if (! queue.isEmpty()) {
+            Endpoint e=(Endpoint)queue.getMax();
+            return e.getWeight()==GOOD_PRIORITY;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * This thread loops forever, contacting the pong server about every 30
+     * minutes.  An earlier implementation created a new thread every time a
+     * reconnect was needed, but that proved somewhat complicated.
+     */
+    private class RouterConnectorThread extends Thread {
+        RouterConnectorThread() {
+            setDaemon(true);
+            setName("RouterConnectorThread");
+        }
+
+        /** Repeatedly contacts the pong server at most every STALE_TIME
+         *  milliseconds. */
+        public void run() {
+            while(true) {  
+                stale=true;
+                //1. Wait until someone is waiting on staleLock.  (Really!) The
+                //following code is here solely as an optimization to avoid
+                //connecting to the pong server every STALE_TIME minutes if not
+                //necessary.
+                synchronized (staleWaitersLock) {
+                    while (staleWaiters==0) { 
+                        try {
+                            staleWaitersLock.wait();
+                        } catch (InterruptedException e) {
+                            continue;
+                        }
+                    }
+                }
+
+                //2. Try connecting every RETRY_TIME milliseconds until we get a
+                //good pong...
+                try {
+                    connectUntilPong();
+                } catch (InterruptedException e) {
+                    continue;
+                }
+
+                //3. Sleep until the cache expires and try again.
+                try {
+                    Thread.sleep(STALE_TIME);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            }
+        }
+
+        /** Blocks until we get a good pong. Throws InterruptedException
+         *  if interrupted while waiting. */
+        private void connectUntilPong() throws InterruptedException {
+            gotGoodPong=false;
+            while (! gotGoodPong) {
+                //1) Try each quick-connect host until we connect
+                String[] hosts=settings.getQuickConnectHosts();
+                for (int i=0; i<hosts.length; i++) {
+                    //a) Extract hostname+port and try to connect synchronously.
+                    Endpoint e;
+                    try {
+                        e=new Endpoint(hosts[i]);
+                    } catch (IllegalArgumentException exc) {
+                        continue;
+                    }
+                    try {
+                        manager.createRouterConnection(e.getHostname(),
+                                                       e.getPort());
+                    } catch (IOException exc) {
+                        continue;
+                    }
+
+                    //b) Wait CONNECT_TIME milliseconds for good pong.
+                    //Note the boolean check to avoid missing notify.
+                    synchronized (gotGoodPongLock) {
+                        if (! gotGoodPong) {
+                            gotGoodPongLock.wait(CONNECT_TIME);
+                        }                        
+                    }
+                }
+
+                //2) Regardless of whether we connected or not, anyone waiting
+                //for the cache to be refreshed can continue.  The check for
+                //stale is just a mini optimization.
+                if (stale) {
+                    synchronized (staleLock) {
+                        stale=false;
+                        staleLock.notifyAll();
+                    }
+                }
+                    
+                //3) If we need to retry, sleep a little first.  Otherwise
+                //we'll immediately exit the loop.
+                if (! gotGoodPong) 
+                    Thread.sleep(RETRY_TIME);
+            }
+        }
+    } //end RouterConnectorThread
+
+    /**
+     * @modifies this
+     * @effects atomically removes and returns the highest priority host in
+     *  this.  If no host is available, blocks until one is.  If the calling
+     *  thread is interrupted during this process, throws InterruptedException.
+     */
+    public Endpoint getAnEndpoint() throws InterruptedException {
+        //If cache has expired, wait for reconnect to finish (normally or
+        //timeout).  See RouterConnectionThread.run().
+        if(settings.getUseQuickConnect() && stale) {
+            try {
+                synchronized (staleWaitersLock) {
+                    staleWaiters++;
+                    staleWaitersLock.notify();
+                }
+                synchronized(staleLock) {
+                    if (stale) {
+                        //When you exit the synchronized block, the host catcher
+                        //may still be stale.  Big deal.  This is better than
+                        //waiting for too long here because Java socket timeouts
+                        //are slow.
+                        staleLock.wait(CONNECT_TIME);
+                    }
+                }
+            } finally {
+                synchronized (staleWaitersLock) {
+                    staleWaiters--;
+                }
+            }
+        }
+
+        synchronized (this) {
+            while (true) {                                
+                try {
+                    return getAnEndpointInternal();
+                } catch (NoSuchElementException e) { 
+                    wait(); //throws InterruptedException
+                }
+            }
+        }
+    }
+
+    /**
+     * @requires this' monitor held
+     * @modifies this
+     * @effects returns the highest priority endpoint in queue, regardless
+     *  of quick-connect settings, etc.  Throws NoSuchElementException if
+     *  this is empty.
+     */
+    private Endpoint getAnEndpointInternal()
+            throws NoSuchElementException {
+        if (! queue.isEmpty()) {
+            //            System.out.println("    GAEI: From "+set+",");
             //pop e from queue and remove from set.
-            Endpoint e=(Endpoint)queue.removeLast();
+            Endpoint e=(Endpoint)queue.extractMax();
             boolean ok=set.remove(e);
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
         } else
             throw new NoSuchElementException();
-        }
+    }
 
     /**
-     *  Return the number of good hosts
+     *  Return the number of hosts
      */
     public int getNumHosts() {
         return( queue.size() );
@@ -238,7 +461,7 @@ public class HostCatcher {
      * the modifications will not be observed.
      */
     public synchronized Iterator getHosts() {
-        return getBestHosts(queue.size());
+        return queue.iterator();
     }
 
     /**
@@ -247,17 +470,7 @@ public class HostCatcher {
      *  It's not guaranteed that these are reachable.
      */
     public synchronized Iterator getBestHosts(int n) {
-        Assert.that(n>=0);
-        //Note that we have to add things to everything is REVERSE ORDER
-        //so that they will be yielded from highest priority to lowest.
-        List everything=new ArrayList();
-        int length=queue.size();
-        int last=(length > n) ? (length-n) : 0; //queue[last] is last host yielded
-        for (int i=length-1; i>=last; i--) {
-            Endpoint e=(Endpoint)queue.get(i);
-            everything.add(e);
-        }
-        return( everything.iterator() );
+        return queue.iterator(n);
     }
 
     /**
@@ -278,6 +491,8 @@ public class HostCatcher {
     public synchronized void clear() {
         queue.clear();
         set.clear();
+        //TODO1: this is only for testing.  I'm not sure if it's safe.
+        routerConnectorThread.interrupt();
     }
 
     /**
@@ -309,65 +524,14 @@ public class HostCatcher {
         return queue.toString();
     }
 
-    /** Unit test. */
-    /*
+    /** Unit test: just calls tests.HostCatcherTest, since it
+     *  is too large and complicated for this.
+     */
     public static void main(String args[]) {
-        HostCatcher hc=new HostCatcher(new Main());
-        hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null));
-        PingRequest ping=new PingRequest((byte)3);
-        Iterator iter=null;
-        Endpoint e=null;
-
-        iter=hc.getHosts();
-        Assert.that(! iter.hasNext());
-        iter=hc.getBestHosts(1);
-        Assert.that(! iter.hasNext());
-
-        //add and remove this
-        PingReply pr0=new PingReply(ping.getGUID(), (byte)5, 6346,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)0},
-            10, 20);
-        hc.spy(pr0);
-        hc.removeHost("127.0.0.0", 6346);
-
-        //add these.  pr2 becomes the highest priority.
-        Endpoint e1=new Endpoint("127.0.0.1", 6347);
-        PingReply pr1=new PingReply(ping.getGUID(), (byte)5, 6347,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            0, 0);
-        hc.spy(pr1);
-        Endpoint e2=new Endpoint("127.0.0.2", 6348);
-        PingReply pr2=new PingReply(ping.getGUID(), (byte)5, 6348,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-            10, 20);
-        hc.spy(pr2);
-
-        iter=hc.getBestHosts(10);
-        Assert.that(iter.hasNext());
-        e=(Endpoint)iter.next();
-        Assert.that(e.getFiles()==10);
-        Assert.that(e.getKbytes()==20);
-        Assert.that(e.equals(e2));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(e1));
-        Assert.that(!iter.hasNext());
-
-        iter=hc.getBestHosts(1);
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(e2));
-        Assert.that(!iter.hasNext());
-
-        iter=hc.getHosts();
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(e2));
-        Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(e1));
-        Assert.that(!iter.hasNext());
-
-        hc.clear();
-        Assert.that(!hc.getHosts().hasNext());
+        String newArgs[]={String.valueOf(STALE_TIME),
+                          String.valueOf(RETRY_TIME),
+                          String.valueOf(CONNECT_TIME)};
+        com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
     }
-    */
 }
 
