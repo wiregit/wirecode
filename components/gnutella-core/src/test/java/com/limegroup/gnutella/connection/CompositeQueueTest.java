@@ -45,7 +45,11 @@ public final class CompositeQueueTest extends BaseTestCase {
      */
     public void testGetMessage() throws Exception {
         Connection conn = new Connection("localhost", 3435);
-        MessageWriter proxy = new MessageWriterProxy(conn);
+        MessageWriter proxy = 
+            ConnectionSettings.USE_NIO.getValue() ? 
+            NIOMessageWriter.createWriter(conn) :
+            BIOMessageWriter.createWriter(conn); 
+
         PrivilegedAccessor.setValue(conn, "_messageWriter", proxy);
         BIOMessageWriter writer = 
             (BIOMessageWriter)PrivilegedAccessor.getValue(proxy, "DELEGATE");

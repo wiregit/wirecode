@@ -2,9 +2,10 @@ package com.limegroup.gnutella;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BIOMessageWriter;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionManager;
-import com.limegroup.gnutella.connection.MessageWriterProxy;
+import com.limegroup.gnutella.connection.NIOMessageWriter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -89,11 +90,17 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         l2 = new ClientSupernode();
         
         PrivilegedAccessor.setValue(u1, "_messageWriter", 
-            new MessageWriterProxy(u1));
+            ConnectionSettings.USE_NIO.getValue() ? 
+            NIOMessageWriter.createWriter(u1) :
+			BIOMessageWriter.createWriter(u1));                                       
         PrivilegedAccessor.setValue(l1, "_messageWriter", 
-            new MessageWriterProxy(l1));
-        PrivilegedAccessor.setValue(l2, "_messageWriter", 
-             new MessageWriterProxy(l2));
+            ConnectionSettings.USE_NIO.getValue() ? 
+            NIOMessageWriter.createWriter(l1) :
+            BIOMessageWriter.createWriter(l1));   
+        PrivilegedAccessor.setValue(l2, "_messageWriter",         
+            ConnectionSettings.USE_NIO.getValue() ? 
+            NIOMessageWriter.createWriter(l2) :
+            BIOMessageWriter.createWriter(l2));   
         
         // add a supernode => client connection
         initializeStart(u1);
