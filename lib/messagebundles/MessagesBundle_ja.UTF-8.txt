@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 4.1.6
+# Messages Bundle for LimeWire 4.1.19
 # Specialization for: Japanese (Nippongo) - Japan
 # Thanks to: Yuji T. Additions by Takanobu Torigoe & Shinada Atsushi, "heavy_baby".
 ################################################################################
@@ -34,6 +34,7 @@ HAS_TIPS_OF_THE_DAY=true
 ################################################################################
 # Keys/value pairs for general strings that can be used in any components
 ################################################################################
+NO_TEXT=
 GENERAL_OK_BUTTON_LABEL=了解
 GENERAL_OK_BUTTON_TIP=操作を適用する。
 GENERAL_CANCEL_BUTTON_LABEL=取り消し
@@ -318,6 +319,7 @@ TABLES_DISPLAY_TOOLTIPS=ツールチップを表示
 # Keys/value pairs for SearchView stuff...
 ################################################################################
 SEARCH_NOT_CONNECTED=ネットワークに接続されていません。 接続するには "ファイル" メニューから "接続" を選択してください。
+#??? SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
 SEARCH_DOWNLOAD_BUTTON_LABEL=ダウンロード
 SEARCH_DOWNLOAD_BUTTON_TIP=選択したファイルすべてをダウンロードする
 SEARCH_WISHLIST_BUTTON_LABEL=探し物リストに追加
@@ -407,6 +409,8 @@ DOWNLOAD_SOURCES_BUTTON_LABEL=ソースを検索
 DOWNLOAD_SOURCES_BUTTON_TIP=失敗したダウンロードのためにソースを検索する
 DOWNLOAD_CLEAR_BUTTON_LABEL=無効な項目を消去
 DOWNLOAD_CLEAR_BUTTON_TIP=無効なダウンロードを除去する
+#??? DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
+#??? DOWNLOAD_PAUSE_BUTTON_TIP=Pause the selected downloads.
 
 LIBRARY_LAUNCH_BUTTON_LABEL=開く
 LIBRARY_LAUNCH_BUTTON_TIP=選択したファイルを開く
@@ -481,6 +485,7 @@ DOWNLOAD_POPUP_MENU_RESUME=強制レジューム
 DOWNLOAD_POPUP_MENU_LAUNCH=ファイルを開く
 DOWNLOAD_POPUP_MENU_CHAT=ホストとチャット
 DOWNLOAD_POPUP_MENU_BROWSE=ホストを参照
+#??? DOWNLOAD_PRIORITY_COLUMN=Priority
 DOWNLOAD_NAME_COLUMN=名前
 DOWNLOAD_SIZE_COLUMN=容量
 DOWNLOAD_STATUS_COLUMN=状態
@@ -510,6 +515,8 @@ DOWNLOAD_HOST_LABEL=ホスト
 DOWNLOAD_STATUS_REMOTE_QUEUED=次の順番に予約されました
 DOWNLOAD_STATUS_HASHING=ファイル内容を確認中...
 DOWNLOAD_STATUS_SAVING=ファイルを保存中...
+#??? DOWNLOAD_STATUS_PAUSING=Pausing...
+#??? DOWNLOAD_STATUS_PAUSED=Paused
 DOWNLOAD_AWAITING_SOURCES=もっと具体的な検索が必要です...
 DOWNLOAD_APPLY_NEW_THEME_START=ダウンロードした新しいスキンを早速使いますか。
 DOWNLOAD_APPLY_NEW_THEME_END=
@@ -521,6 +528,11 @@ DOWNLOAD_COULD_NOT_READ_SNAPSHOT=以前のダウンロードをレジューム�
 DOWNLOAD_MAGNET_DIALOG=次のファイルをダウンロードしますか。
 DOWNLOAD_FROM=
 DOWNLOAD_MAGNET_DIALOG_END=
+#??? DOWNLOAD_HASH_ONLY_MAGNET=LimeWire will not be able to start the download you have selected unless you start a search for it.
+#??? DOWNLOAD_PRIORITY_ACTIVE=Active
+#??? DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Move the selected download closer to becoming active
+#??? DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Move the selected download further from becoming active
+#??? DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -668,6 +680,8 @@ PLAYLIST_FILE_UNSUPPORTED=ファイル形式を認識できません。
 PLAYLIST_LINE_UNAVAILABLE=出力する行がありません。
 PLAYLIST_FILE_MISSING=ファイルが見つかりません。
 PLAYLIST_FILE_CORRUPT=ファイルが壊れています。
+#??? PLAYLIST_FILE_UNKNOWN=. There is an unknown error with the audio file.
+#??? PLAYLIST_FILE_PARSE_PROBLEM=. The file cannot be parsed.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
@@ -1438,7 +1452,6 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=常に
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=優先する地域
 OPTIONS_CONNECT_LOCALE_PREF_LABEL=同じ地域として申告しているホストに接続する数を選択できます。 優先する接続の数が多くなると、 ネットワークに接続するのに時間がかかります。
 OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=優先設定を有効：
-OPTIONS_CONNECT_LOCALE_PREF_NUM_LABEL=優先する接続数
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
