@@ -273,8 +273,12 @@ public class QueryRequest extends Message implements Serializable{
 
         qr=new QueryRequest((byte)2, 0, "test", true);
         Assert.that(GUID.isLimeRequeryGUID(qr.getGUID()));
+        Assert.that(GUID.isLimeRequeryGUID(qr.getGUID(), false));
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID(), true));
         qr=new QueryRequest(newQueryGUID(true), (byte)2, 0, "test");
         Assert.that(GUID.isLimeRequeryGUID(qr.getGUID()));
+        Assert.that(GUID.isLimeRequeryGUID(qr.getGUID(), false));
+        Assert.that(! GUID.isLimeRequeryGUID(qr.getGUID(), true));
     }
     */
 }

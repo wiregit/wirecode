@@ -546,8 +546,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // the number of requeries i've done...
         int numRequeries = 0;
-        // the next time to requery....
-        long nextRequeryTime = 0;
+        // the time to next requery.  We don't want to send the first requery
+        // until a few minutes after the initial download attempt--after all,
+        // the user just started a query.  Hence initialize initialize
+        // nextRequeryTime to System.currentTimeMillis() plus a few minutes.
+        long nextRequeryTime = System.currentTimeMillis()
+            + getMinutesToWaitForRequery(numRequeries)*60*1000;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
@@ -607,9 +611,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // should i send a requery?
                 final long currTime = System.currentTimeMillis();
                 if ((currTime >= nextRequeryTime) &&
-                    (numRequeries++ < REQUERY_ATTEMPTS)) {
+                    (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
                     manager.sendQuery(allFiles);
+                    numRequeries++;
                     // set time for next requery...
                     nextRequeryTime = currTime + 
                     (getMinutesToWaitForRequery(numRequeries)*60*1000);
@@ -1335,17 +1340,24 @@ public class ManagedDownloader implements Downloader, Serializable {
         return bandwidthTracker.getMeasuredBandwidth();
     }
 
-    /** @return the number of minutes to wait for your next requery....
+    /**
+     * Returns the time to wait between the n'th and n+1'th automatic requery,
+     * where n=requeries.  Hence getMinutesToWaitForRequery(0) is the time to
+     * wait before the first requery.  getMinutesToWaitForRequery(1) is the time
+     * to wait after that before requerying again.
+     *
+     * @param requeriesthe number of requeries sent, which must be non-negative
+     * @return minutes to wait
      */
-    private int getMinutesToWaitForRequery(int numCalls) {
-        switch (numCalls) {
+    private int getMinutesToWaitForRequery(int requeries) {
+        switch (requeries) {
+        case 0:
+            return 2;   //wait 2 minutes after initial download before requery
         case 1:
-            return 2;
+            return 15;  //wait 15 minutes between first and second requery
         case 2:
-            return 15;
-        case 3:
             return 60;
-        case 4:
+        case 3:
             return 120;
         default:
             return 180;
