@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.gui.Utilities;
+
 /**
  * The list of all connections.  Accepts new connections and creates
  * new threads to handle them.<p>
@@ -41,21 +43,19 @@ public class ConnectionManager {
         new ArrayList();
 
     private int _keepAlive=0;
-    private int _maxIncomingConnections=0;
+    //private int _maxIncomingConnections=0;
 
     private MessageRouter _router;
     private HostCatcher _catcher;
     private ActivityCallback _callback;
-	private boolean _isWindows = false;
+	private SettingsManager _settings;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      */
     public ConnectionManager(ActivityCallback callback) {
-        _callback = callback;
-		String os = System.getProperty("os.name");
-		if(os.startsWith("Windows"))
-			_isWindows = true;
+        _callback = callback;		
+		_settings = SettingsManager.instance(); 
     }
 
     /**
@@ -72,9 +72,9 @@ public class ConnectionManager {
         watchdog.setDaemon(true);
         watchdog.start();
 
-        setKeepAlive(SettingsManager.instance().getKeepAlive());
-        setMaxIncomingConnections(
-            SettingsManager.instance().getMaxIncomingConnections());
+        setKeepAlive(_settings.getKeepAlive());
+        //setMaxIncomingConnections(
+		//SettingsManager.instance().getMaxIncomingConnections());
     }
 
     /**
@@ -133,7 +133,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         if (getNumInConnections() < _maxIncomingConnections) {             
+         if (getNumInConnections() < getNumConnections()) {             
             ManagedConnection connection = new ManagedConnection(socket,
                                                                  _router,
                                                                  this);
@@ -144,7 +144,7 @@ public class ConnectionManager {
                 //stats.  And it won't really affect traffic if people implement
                 //caching properly.
                 _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
+                    new PingRequest(_settings.getTTL()),
                     connection);
                 connection.loopForMessages();
             } catch(IOException e) {
@@ -158,7 +158,7 @@ public class ConnectionManager {
             // looking for and responding to a PingRequest.  It's
             // all synchronous, because we have a dedicated thread
             // right here.
-			if(_isWindows) {
+			if(Utilities.isWindows()) {
 				new RejectConnection(socket, _catcher);
 			}
 
@@ -216,9 +216,9 @@ public class ConnectionManager {
      * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
      * able to vary this without permanently setting the property.
      */
-    public void setMaxIncomingConnections(int max) {
-        _maxIncomingConnections = max;
-    }
+    //public void setMaxIncomingConnections(int max) {
+	//_maxIncomingConnections = max;
+    //}
 
     /**
      * @return true if there is a connection to the given host.
@@ -545,13 +545,12 @@ public class ConnectionManager {
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && origHost.equals("router.limewire.com"))
 				{
-                    SettingsManager settings = SettingsManager.instance();
-				    String group = "none:"+settings.getConnectionSpeed();
+				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
 				}
 				else
 				    pingRequest = 
-				      new PingRequest(SettingsManager.instance().getTTL());
+				      new PingRequest(_settings.getTTL());
 
                 _router.sendPingRequest(pingRequest, _connection);
                 _connection.loopForMessages();
@@ -672,7 +671,7 @@ public class ConnectionManager {
             try {
                 initializeFetchedConnection(connection, this);
                 _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
+                    new PingRequest(_settings.getTTL()),
                     connection);
                 connection.loopForMessages();
             } catch(IOException e) {

@@ -9,10 +9,10 @@ public class FileManagerBenchmark {
     public static final String DIRECTORY="c:\\Documents and Settings\\crohrs\\My Documents\\data\\filemanager\\simulated\\";
     /** The queries to try, in increasing order of nastiness */
     public static final String[] QUERIES={"beethoven",                   //no luck
-                                          "sinead", "mccartney paul",    //some luck
-                                          "and she", "mp3"};             //lots of luck
+                                          "gloria", "cannibal minds",    //some luck
+                                          "the you", "mp3"};             //lots of luck
     /** The sample to try per query. */
-    public static final int QUERY_TRIES=1000;
+    public static final int QUERY_TRIES=3000;
 
     public static void main(String args[]) {
         //Set up FileManager with no files.
@@ -104,7 +104,47 @@ Delivered 18000 query results in 16163 msecs
 Querying files for "mp3"...
 Delivered 1185000 query results in 32747 msecs
 
-~%
+======================================== Small Test ====================================
+
+Old algorithm
+
+Querying files for "beethoven"...
+Delivered 0 query results in 3054 msecs
+
+Querying files for "gloria"...
+Delivered 9000 query results in 3275 msecs
+
+Querying files for "cannibal minds"...
+Delivered 3000 query results in 3275 msecs
+
+Querying files for "the you"...
+Delivered 6000 query results in 4286 msecs
+
+Querying files for "mp3"...
+Delivered 324000 query results in 8171 msecs
+
+
+
+New algo
+
+Adding files...
+Added 109 in 170 msecs
+
+Querying files for "beethoven"...
+Delivered 0 query results in 100 msecs
+
+Querying files for "gloria"...
+Delivered 9000 query results in 381 msecs
+
+Querying files for "cannibal minds"...
+Delivered 3000 query results in 420 msecs
+
+Querying files for "the you"...
+Delivered 3000 query results in 772 msecs
+
+Querying files for "mp3"...
+Delivered 324000 query results in 5558 msecs
+
 
      */
 }

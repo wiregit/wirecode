@@ -196,11 +196,11 @@ public class RouterService
             outgoing = settings.DEFAULT_KEEP_ALIVE;
             settings.setKeepAlive(outgoing);
         }
-        int incoming=settings.getMaxIncomingConnections();
-        if (incoming<1 && outgoing!=0) {
-            incoming = outgoing/2;
-            settings.setMaxIncomingConnections(incoming);
-        }
+        //int incoming=settings.getMaxIncomingConnections();
+        ///if (incoming<1 && outgoing!=0) {
+		// incoming = outgoing/2;
+		//  settings.setMaxIncomingConnections(incoming);
+        //}
         setKeepAlive(oldKeepAlive);
         settings.setUseQuickConnect(useQuickConnect);
     }
@@ -222,11 +222,12 @@ public class RouterService
         //to give the connection fetchers time to do their thing.  Ugh.  A
         //Thread.yield() may work here too, but that's less dependable.  And I
         //do not want to bother with wait/notify's just for this obscure case.
+        SettingsManager settings=SettingsManager.instance();
         boolean useHack=
-            (! SettingsManager.instance().getUseQuickConnect())
+            (!settings.getUseQuickConnect())
                 && catcher.getNumHosts()==0;
         if (useHack) {
-            SettingsManager.instance().setUseQuickConnect(true);
+            settings.setUseQuickConnect(true);
             disconnect();
         }
 
@@ -234,7 +235,6 @@ public class RouterService
         catcher.expire();
 
         //Ensure outgoing connections is positive.
-        SettingsManager settings=SettingsManager.instance();
         int outgoing=settings.getKeepAlive();
         if (outgoing<1) {
             outgoing = settings.DEFAULT_KEEP_ALIVE;
@@ -242,8 +242,8 @@ public class RouterService
         }
         //Actually notify the backend.
         setKeepAlive(outgoing);
-        int incoming=settings.getMaxIncomingConnections();
-        setMaxIncomingConnections(incoming);
+        int incoming=settings.getKeepAlive();
+        //setMaxIncomingConnections(incoming);
 
         //See note above.
         if (useHack) {
@@ -265,7 +265,7 @@ public class RouterService
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.
         setKeepAlive(0);
-        setMaxIncomingConnections(0);
+        //setMaxIncomingConnections(0);
         //2. Remove all connections.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
@@ -318,9 +318,9 @@ public class RouterService
      * connection manager.  This does not affect the permanent
      * MAX_INCOMING_CONNECTIONS property.  
      */
-    public void setMaxIncomingConnections(int max) {
-        manager.setMaxIncomingConnections(max);
-    }
+    //public void setMaxIncomingConnections(int max) {
+	//manager.setMaxIncomingConnections(max);
+    //}
 
     /**
      * Notify the backend that spam filters settings have changed, and that
