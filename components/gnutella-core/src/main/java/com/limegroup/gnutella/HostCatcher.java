@@ -73,9 +73,9 @@ public class HostCatcher {
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
-    private BucketQueue /* of ExtendedEndpoint */ queue=
+    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = //queue =
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
-    private Set /* of ExtendedEndpoint */ set=new HashSet();
+    private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
 
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
@@ -329,15 +329,15 @@ public class HostCatcher {
         boolean ret=false;
         boolean notifyGUI=false;
         synchronized(this) {
-            if (! (set.contains(e))) {
+            if (! (ENDPOINT_SET.contains(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
                 //queue, so we have to cleanup the set to maintain
                 //rep. invariant.
-                set.add(e);
-                Object ejected=queue.insert(e, priority);
+                ENDPOINT_SET.add(e);
+                Object ejected=ENDPOINT_QUEUE.insert(e, priority);
                 if (ejected!=null)
-                    set.remove(ejected);                             
+                    ENDPOINT_SET.remove(ejected);                             
 
                 //If this is not full, notify the callback.  If this is full,
                 //the GUI's display of the host catcher will differ from this.
@@ -494,11 +494,11 @@ public class HostCatcher {
      */
     private ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
-        if (! queue.isEmpty()) {
+        if (! ENDPOINT_QUEUE.isEmpty()) {
             //            System.out.println("    GAEI: From "+set+",");
             //pop e from queue and remove from set.
-            ExtendedEndpoint e=(ExtendedEndpoint)queue.extractMax();
-            boolean ok=set.remove(e);
+            ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
+            boolean ok=ENDPOINT_SET.remove(e);
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
@@ -511,28 +511,28 @@ public class HostCatcher {
      *  getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
      */
     public int getNumHosts() {
-        return( queue.size() );
+        return( ENDPOINT_QUEUE.size() );
     }
 
     /**
      * Returns the number of marked ultrapeer hosts.
      */
     public int getNumUltrapeerHosts() {
-        return queue.size(GOOD_PRIORITY);
+        return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
     }
     
     /**
      * Returns the number of non-marked non-private hosts.
      */
     int getNumNormalHosts() {
-        return queue.size(NORMAL_PRIORITY);
+        return ENDPOINT_QUEUE.size(NORMAL_PRIORITY);
     }
 
     /**
      * Returns the number of non-marked private hosts.
      */
     int getNumPrivateHosts() {
-        return queue.size(BAD_PRIORITY);
+        return ENDPOINT_QUEUE.size(BAD_PRIORITY);
     }
 
     /**
@@ -542,7 +542,7 @@ public class HostCatcher {
      */
     public synchronized Iterator getHosts() {
         //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator();
+        return (new BucketQueue(ENDPOINT_QUEUE)).iterator();
     }
 
     /**
@@ -562,10 +562,10 @@ public class HostCatcher {
      */
     public synchronized Iterator getUltrapeerHosts(int n) {
         //Make n the # of hosts to return--never more than the # of ultrapeers.
-        n=Math.min(n, queue.size(GOOD_PRIORITY));
+        n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
         //Copy n best hosts into temporary buffer.
         ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
-        for (Iterator iter=queue.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
+        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
             buf.add(iter.next());
         //And return iterator of contents.
         return buf.iterator();
@@ -580,7 +580,7 @@ public class HostCatcher {
     public synchronized Iterator getNormalHosts(int n) {
         //Copy n best hosts into temporary buffer.
         ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
-        for (Iterator iter=queue.iterator(NORMAL_PRIORITY, n); iter.hasNext(); )
+        for (Iterator iter=ENDPOINT_QUEUE.iterator(NORMAL_PRIORITY, n); iter.hasNext(); )
             buf.add(iter.next());
         //And return iterator of contents.
         return buf.iterator();
@@ -591,9 +591,9 @@ public class HostCatcher {
      */
     public synchronized void removeHost(String host, int port) {
         Endpoint e=new Endpoint(host, port);
-        boolean removed1=set.remove(e);
-        boolean removed2=queue.removeAll(e);
-        //Check that set.contains(e) <==> queue.contains(e)
+        boolean removed1=ENDPOINT_SET.remove(e);
+        boolean removed2=ENDPOINT_QUEUE.removeAll(e);
+        //Check that ENDPOINT_SET.contains(e) <==> ENDPOINT_QUEUE.contains(e)
         Assert.that(removed1==removed2, "Rep. invariant for HostCatcher broken.");
     }
 
@@ -612,8 +612,8 @@ public class HostCatcher {
      * @effects removes all entries from this
      */
     public synchronized void clear() {
-        queue.clear();
-        set.clear();
+        ENDPOINT_QUEUE.clear();
+        ENDPOINT_SET.clear();
     }
 
 
@@ -643,7 +643,7 @@ public class HostCatcher {
     }
 
     public String toString() {
-        return "[volatile:"+queue.toString()
+        return "[volatile:"+ENDPOINT_QUEUE.toString()
                +", permanent:"+permanentHosts.toString()+"]";
     }
 
@@ -660,20 +660,20 @@ public class HostCatcher {
         if (!DEBUG)
             return;
 
-        //Check set == queue
+        //Check ENDPOINT_SET == ENDPOINT_QUEUE
         outer:
-        for (Iterator iter=set.iterator(); iter.hasNext(); ) {
+        for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
             Object e=iter.next();
-            for (Iterator iter2=queue.iterator(); iter2.hasNext(); ) {
+            for (Iterator iter2=ENDPOINT_QUEUE.iterator(); iter2.hasNext(); ) {
                 if (e.equals(iter2.next()))
                     continue outer;
             }
             Assert.that(false, "Couldn't find "+e+" in queue");
         }
-        for (Iterator iter=queue.iterator(); iter.hasNext(); ) {
+        for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
             Object e=iter.next();
             Assert.that(e instanceof ExtendedEndpoint);
-            Assert.that(set.contains(e));
+            Assert.that(ENDPOINT_SET.contains(e));
         }
 
         //Check permanentHosts === permanentHostsSet
