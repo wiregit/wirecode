@@ -2134,31 +2134,22 @@ public class ManagedDownloader implements Downloader, Serializable {
 	  AlternateLocationCollection alts, int completeSize) {  
 		if (alts == null || !alts.hasAlternateLocations()  )
 			return;
-
-		// Get the new alternate locations and record them in master list
-		AlternateLocationCollection nalts = null;
-		synchronized(totalAlternateLocations) {
-			nalts = 
-			  totalAlternateLocations.diffAlternateLocationCollection(alts);
-			totalAlternateLocations.addAlternateLocationCollection(alts);
-		}
-
-		int added = nalts.getNumberOfAlternateLocations();
-		int notAdded = alts.getNumberOfAlternateLocations() - added;
-        if(RECORD_STATS) {
-            DownloadStat.ALTERNATE_NOT_ADDED.addData(notAdded);
-            DownloadStat.ALTERNATE_COLLECTED.addData(added);
-        }   
-
-		// Add any new AlternateLocations to the available list of 
-	    // download locations
-		Iterator             iter = nalts.values().iterator();
-		AlternateLocation    value;
-		while (iter.hasNext()) {
-			value = (AlternateLocation) iter.next();
-            //don't cache
-			addDownload(value.createRemoteFileDesc(completeSize), false);
-		}
+			
+        // Iterate through the new ones, attempt to add each,
+        // and if they're added succesfully, add them to the download
+        // list.
+        synchronized(totalAlternateLocations) {
+            for(Iterator i = alts.values().iterator(); i.hasNext(); ) {
+    		    AlternateLocation alt;
+    		    alt = (AlternateLocation)i.next();
+    		    if( totalAlternateLocations.addAlternateLocation(alt) ) {
+    		        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+    			    addDownload(alt.createRemoteFileDesc(completeSize), false);
+                } else {
+                    DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                }
+    		}
+        }
 	}
 	
 	/**
