@@ -15,6 +15,7 @@ public interface Downloader {
     public static final int COMPLETE          = 4;
     public static final int ABORTED           = 5;
     public static final int GAVE_UP           = 6;
+    public static final int COULDNT_MOVE_TO_LIBRARY = 7;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.

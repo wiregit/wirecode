@@ -158,6 +158,7 @@ public class HTTPDownloader {
      *     @exception NotSharingException the host isn't sharing files
      *     @exception FileIncompleteException transfer interrupted, either
      *      locally or remotely
+     *     @exception FileCantBeMovedException file couldn't be moved to library
      */
 	public void start() throws IOException {
 		readHeader();
