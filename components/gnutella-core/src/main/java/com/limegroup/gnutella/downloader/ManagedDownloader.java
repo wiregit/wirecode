@@ -2900,17 +2900,28 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Split largest "gray" interval, i.e., steal part of another
         //downloader's region for a new downloader.  
         //TODO3: split interval into P-|dloaders|, etc., not just half
-        //TODO3: account for speed
         //TODO3: there is a minor race condition where biggest and 
         //      dloader could write to the same region of the file
         //      I think it's ok, though it could result in >100% in the GUI
-        HTTPDownloader biggest=null;
+        HTTPDownloader biggest = null;
         synchronized (this) {
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                 HTTPDownloader h = (HTTPDownloader)iter.next();
-                if (h.isActive() && (biggest==null ||
-                  h.getAmountToRead() > biggest.getAmountToRead()))
-                    biggest=h;
+                // If this guy isn't downloading, don't steal from him.
+                if(!h.isActive())
+                    continue;
+                // If we have no one to steal from, use 
+                if(biggest == null)
+                    biggest = h;
+                // Otherwise, steal only if what's left is
+                // larger.
+                else {
+                    int hLeft = h.getAmountToRead() - h.getAmountRead();
+                    int bLeft = biggest.getAmountToRead() - 
+                                biggest.getAmountRead();
+                    if( hLeft > bLeft )
+                        biggest = h;
+                }
             }                
         }
         if (biggest==null) {//Not using downloader...but RFD maybe useful
@@ -2919,8 +2930,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Note that getAmountToRead() and getInitialReadingPoint() are
         //constant.  getAmountRead() is not, so we "capture" it into a
         //variable.
-        int amountRead=biggest.getAmountRead();
-        int left=biggest.getAmountToRead()-amountRead;
+        int amountRead = biggest.getAmountRead();
+        int left = biggest.getAmountToRead()-amountRead;
         //check if we need to steal the last chunk from a slow downloader.
         //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
         if ((http11 && left<CHUNK_SIZE) || (!http11 && left < MIN_SPLIT_SIZE)){ 
