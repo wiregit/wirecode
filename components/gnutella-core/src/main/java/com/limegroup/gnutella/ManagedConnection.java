@@ -386,9 +386,9 @@ public class ManagedConnection extends Connection
     }
 
     /** Throttles the super's OutputStream. */
-//    protected OutputStream getOutputStream()  throws IOException {
-//        return new ThrottledOutputStream(super.getOutputStream(), _throttle);
-//    }
+    protected OutputStream getOutputStream()  throws IOException {
+        return new ThrottledOutputStream(super.getOutputStream(), _throttle);
+    }
 
     /**
      * Override of receive to do ConnectionManager stats and to properly shut

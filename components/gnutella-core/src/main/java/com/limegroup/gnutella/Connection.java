@@ -347,7 +347,7 @@ public class Connection {
             if(isWriteDeflated()) {
                 //System.out.println(this + ": deflating output stream");
                 ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
-                zout.setFlushMode(JZlib.Z_PARTIAL_FLUSH);
+                zout.setFlushMode(JZlib.Z_SYNC_FLUSH);
                 _out = zout;
                 //_out = getOutputStream();
             }            
