@@ -23,20 +23,28 @@ public class HasherSet extends HashSet {
         _hasher=DEFAULT;
     }
     
+    public HasherSet(Hasher h, Collection c) {
+        _hasher = h;
+        addAll(c);
+    }
+    
+    public HasherSet(Collection c) {
+        this(DEFAULT,c);
+    }
+    
     //TODO: override the other constructors - with size, existing collection, etc.
     
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
     public boolean add(Object arg0) {
-        return super.add(new Wrapper(arg0));
+        return super.add(wrap(arg0));
     }
     
     /* (non-Javadoc)
      * @see java.util.Collection#addAll(java.util.Collection)
      */
     public boolean addAll(Collection arg0) {
-        
         return super.addAll(wrap(arg0));
     }
     
@@ -44,7 +52,7 @@ public class HasherSet extends HashSet {
      * @see java.util.Collection#contains(java.lang.Object)
      */
     public boolean contains(Object o) {
-        return super.contains(new Wrapper(o));
+        return super.contains(wrap(o));
     }
     
     /* (non-Javadoc)
@@ -64,7 +72,7 @@ public class HasherSet extends HashSet {
      * @see java.util.Collection#remove(java.lang.Object)
      */
     public boolean remove(Object o) {
-        return super.remove(new Wrapper(o));
+        return super.remove(wrap(o));
     }
     /* (non-Javadoc)
      * @see java.util.Collection#retainAll(java.util.Collection)
@@ -111,17 +119,29 @@ public class HasherSet extends HashSet {
      * original collection
      */
     private Collection wrap(Collection c) {
+        if (c instanceof HasherSet)
+            return c;
+        
         HashSet tmp = new HashSet();
         
         for (Iterator i = c.iterator();i.hasNext();){
-            tmp.add(new Wrapper(i.next()));
+            Object next = i.next();
+            tmp.add(wrap(next));
         }
         
         return tmp;
     }
     
+    private Wrapper wrap(Object o) {
+        if (o instanceof Wrapper)
+            return ((Wrapper)o);
+        else
+            return new Wrapper(o);
+    }
+    
     private final class Wrapper {
         private final Object _obj;
+        
         public Wrapper(Object o) {
             _obj = o;
         }
@@ -131,7 +151,10 @@ public class HasherSet extends HashSet {
         }
         
         public boolean equals(Object other) {
-            return _hasher.areEqual(this,other);
+            if (other instanceof Wrapper)
+                return _hasher.areEqual(_obj,((Wrapper)other).getObj());
+            
+            return false;
         }
         
         public Object getObj() {
