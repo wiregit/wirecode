@@ -10,8 +10,12 @@ import java.io.IOException;
  * connection handshake while accepting incoming connections
  */
 public class SupernodeHandshakeResponder 
-    extends AuthenticationHandshakeResponder
-{
+    extends AuthenticationHandshakeResponder {
+
+	/**
+	 * Handle to the <tt>ConnectionManager</tt> for use in determining
+	 * whether or not connections should be accepted.
+	 */
     private final ConnectionManager _manager;
     
     /**
@@ -22,8 +26,7 @@ public class SupernodeHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public SupernodeHandshakeResponder(String host)
-    {
+    public SupernodeHandshakeResponder(String host) {
         super(RouterService.getConnectionManager(), host);
         this._manager = RouterService.getConnectionManager();
     }
@@ -33,9 +36,7 @@ public class SupernodeHandshakeResponder
         HandshakeResponse response, boolean outgoing) throws IOException {
         
 		if(outgoing) return respondToOutgoing(response);
-		return respondToIncoming(response);
-		
-		
+		return respondToIncoming(response);				
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class SupernodeHandshakeResponder
 										 new Properties());
 		}
 		//Did the server request we become a leaf?
-		String neededS=response.getHeaders().
+		String neededS = response.getHeaders().
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
 
 		Properties ret = new Properties();
@@ -135,11 +136,12 @@ public class SupernodeHandshakeResponder
         //other cases.       
 
         boolean allowedNow = _manager.allowConnection(response);
+		if(allowedNow) return false;
 
 		boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
 
         //Reject if not allowed now and guidance not possible.
-        return ! (allowedNow || (response.isSupernodeConnection() && allowedAsLeaf));
+        return !(response.isSupernodeConnection() && allowedAsLeaf);
     }
 }
 
