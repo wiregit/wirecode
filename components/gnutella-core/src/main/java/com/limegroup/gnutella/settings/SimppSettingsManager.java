@@ -32,6 +32,7 @@ public class SimppSettingsManager {
     
     //constructor
     private SimppSettingsManager() {
+        _isDefault = true; //we are using defualt settings by default
         String simppSettings = SimppManager.instance().getPropsString();        
         if(simppSettings == null || simppSettings.equals(""))
             throw new IllegalArgumentException("SimppManager not ready");
@@ -52,7 +53,7 @@ public class SimppSettingsManager {
      */
     public void updateSimppSettings(String simppSettings, boolean activate) {
         byte[] settings = null;
-        try {
+        try {            
             settings = simppSettings.getBytes("UTF-8");
         } catch (UnsupportedEncodingException uex) {
             ErrorService.error(uex);
