@@ -141,15 +141,36 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(one,one_prim);
     	
     	//now test a bigger endpoint
-       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6);
+       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2);
     	httpString = six.httpStringValue();
     	
     	PushEndpoint four = new PushEndpoint(httpString);
     	assertNotEquals(six,four);
+    	assertEquals(2,four.supportsFWTVersion());
     	
     	Set sent = new HashSet(set6);
     	sent.retainAll(four.getProxies());
     	assertEquals(four.getProxies().size(),sent.size());
+    	
+    	//now an endpoint with a feature we do not understand
+    	PushEndpoint unknown = new PushEndpoint(
+    			"2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
+    	
+    	assertEquals(2,unknown.getProxies().size());
+    	assertEquals(0,unknown.supportsFWTVersion());
+    	
+    	//now an endpoint with the fwt header moved elsewhere
+    	
+    	unknown = new PushEndpoint(
+    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwawt/1.3;1.2.3.6:1235");
+    	assertEquals(2,unknown.getProxies().size());
+    	assertEquals(1,unknown.supportsFWTVersion());
+    	
+    	//now an endpoint only with the guid
+    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500");
+    	assertEquals(0,unknown.getProxies().size());
+    	assertEquals(0,unknown.supportsFWTVersion());
+    	
     	
     }
 }
