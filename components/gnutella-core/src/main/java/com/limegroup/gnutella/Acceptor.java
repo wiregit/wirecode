@@ -250,6 +250,8 @@ public class Acceptor implements Runnable {
         		
 			    //if we created a mapping successfully, update the forced port
 			    if (mappedPort != 0 ) {
+			        UPNP_MANAGER.clearMappingsOnShutdown();
+			        
 			        //  mark UPNP as being on so that if LimeWire shuts
 			        //  down prematurely, we know the FORCE_IP was from UPnP
 			        //  and that we can continue trying to use UPnP
@@ -741,24 +743,21 @@ public class Acceptor implements Runnable {
     void resetLastConnectBackTime() {
         _lastConnectBackTime = 
              System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
-    }    
+    }
 
     /**
      * If we used UPnP Mappings this session, clean them up and revert
      * any relevant settings.
      */
-    public void haltUPnP() {
-    	if (UPNP_MANAGER == null || 
-    			!UPNP_MANAGER.isNATPresent() || 
-				!UPNP_MANAGER.mappingsExist()) 
-    		return;
-   
-    	UPNP_MANAGER.clearMappingsOnShutdown();
-    	
-    	// reset the forced port values - must happen before we save them to disk
-    	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
-    	ConnectionSettings.FORCED_PORT.revertToDefault();
-    	ConnectionSettings.UPNP_IN_USE.revertToDefault();
+    public void shutdown() {
+        if(UPNP_MANAGER != null &&
+           UPNP_MANAGER.isNATPresent() &&
+           UPNP_MANAGER.mappingsExist()) {
+        	// reset the forced port values - must happen before we save them to disk
+        	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
+        	ConnectionSettings.FORCED_PORT.revertToDefault();
+        	ConnectionSettings.UPNP_IN_USE.revertToDefault();
+        }
     }
     
     /**

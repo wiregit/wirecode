@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -190,15 +191,22 @@ public class RouterService {
 	 * messages.
 	 */
     private static MessageRouter router;
+    
+    /**
+     * A list of items that require running prior to shutting down LW.
+     */
+    private static final List SHUTDOWN_ITEMS = 
+        Collections.synchronizedList(new LinkedList());
 
     /**
      * Variable for whether or not that backend threads have been started.
      * 0 - nothing started
      * 1 - pre/while gui tasks started
      * 2 - everything started
-     * LOCKING: RouterService.class 
+     * 3 - shutting down
+     * 4 - shut down
      */
-    private static int _started;
+    private static volatile int _started;
 
 
 	/**
@@ -305,8 +313,10 @@ public class RouterService {
 	    synchronized(RouterService.class) {
     	    LOG.trace("START RouterService");
     	    
-    	    if ( isStarted() ) return;
-    	    	preGuiInit();
+    	    if ( isStarted() )
+    	        return;
+    	        
+            preGuiInit();
             _started = 2;
     
     		// Now, link all the pieces together, starting the various threads.
@@ -448,8 +458,8 @@ public class RouterService {
      * @return <tt>true</tt> if the backend threads have been started,
      *  otherwise <tt>false</tt>
      */
-    public synchronized static boolean isStarted() {
-        return _started == 2;
+    public static boolean isStarted() {
+        return _started >= 2;
     }
 
     /**
@@ -763,17 +773,71 @@ public class RouterService {
     public static long getCurrentUptime() {
         return statistics.getUptime();
     }
+    
+    /**
+     * Adds something that requires shutting down.
+     *
+     * TODO: Make this take a 'Service' or somesuch that
+     *       has a shutdown method, and run the method in its
+     *       own thread.
+     */
+    public static boolean addShutdownItem(Thread t) {
+        if(isShuttingDown() || isShutdown())
+            return false;
 
+        SHUTDOWN_ITEMS.add(t);
+        return true;
+    }
+    
+    /**
+     * Runs all shutdown items.
+     */
+    private static void runShutdownItems() {
+        if(!isShuttingDown())
+            return;
+        
+        // Start each shutdown item.
+        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
+            Thread t = (Thread)i.next();
+            t.start();
+        }
+        
+        // Now that we started them all, iterate back and wait for each one to finish.
+        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
+            Thread t = (Thread)i.next();
+            try {
+                t.join();
+            } catch(InterruptedException ie) {}
+        }
+    }
+    
+    /**
+     * Determines if this is shutting down.
+     */
+    private static boolean isShuttingDown() {
+        return _started >= 3;
+    }
+    
+    /**
+     * Determines if this is shut down.
+     */
+    private static boolean isShutdown() {
+        return _started >= 4;
+    }
 
     /**
      * Shuts down the backend and writes the gnutella.net file.
+     *
+     * TODO: Make all of these things Shutdown Items.
      */
     public static synchronized void shutdown() {
         try {
             if(!isStarted())
                 return;
+                
+            _started = 3;
             
-            getAcceptor().haltUPnP();
+            getAcceptor().shutdown();
             
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
@@ -802,6 +866,10 @@ public class RouterService {
             TigerTreeCache.instance().persistCache();
 
             LicenseFactory.persistCache();
+            
+            runShutdownItems();
+            
+            _started = 4;
             
         } catch(Throwable t) {
             ErrorService.error(t);
