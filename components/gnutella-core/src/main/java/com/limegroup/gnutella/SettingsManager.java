@@ -723,8 +723,8 @@ public class SettingsManager implements SettingsInterface
             //Too high for this connection speed?  Decrease it.
             if (keepAlive > max) {
                 throw new BadConnectionSettingException(
-                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    max, maxConnections(x));
+				    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                    max, maxConnections());
             }
         }
 
