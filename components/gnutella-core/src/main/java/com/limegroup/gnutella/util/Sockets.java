@@ -58,7 +58,7 @@ public class Sockets {
     public static Socket connect(String host, int port, 
                                  int timeout, boolean emulate) 
                                  throws IOException {
-        if (CommonUtils.isJava14()) {   //TODO: or later, e.g. Java 1.5
+        if (CommonUtils.isJava14OrLater()) {
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
             //      SocketAddress addr=new InetSocketAddress(host, port);

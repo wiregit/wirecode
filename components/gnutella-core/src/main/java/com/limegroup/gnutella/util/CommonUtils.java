@@ -263,25 +263,30 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the current JVM is a 1.3.x or later
+	 * Returns whether or not the current JVM is 1.3.x or later
 	 *
 	 * @return <tt>true</tt> if we are running on 1.3.x or later, 
      *  <tt>false</tt> otherwise
 	 */
-	public static boolean isJava13OrLater() {        
-		return !CommonUtils.getJavaVersion().startsWith("1.0") 
-            && !CommonUtils.getJavaVersion().startsWith("1.1") 
-		    && !CommonUtils.getJavaVersion().startsWith("1.2"); 
+	public static boolean isJava13OrLater() {       
+        String version=CommonUtils.getJavaVersion();
+		return !version.startsWith("1.2") 
+            && !version.startsWith("1.1") 
+		    && !version.startsWith("1.0"); 
 	}	
 
 	/**
-	 * Returns whether or not the current JVM is a 1.4.x implementation.
+	 * Returns whether or not the current JVM is 1.4.x or later
 	 *
-	 * @return <tt>true</tt> if we are running on 1.4.x, <tt>false</tt>
-	 *  otherwise
+	 * @return <tt>true</tt> if we are running on 1.4.x or later, 
+     *  <tt>false</tt> otherwise
 	 */
-	public static boolean isJava14() {
-		return CommonUtils.getJavaVersion().startsWith("1.4");
+	public static boolean isJava14OrLater() {
+        String version=CommonUtils.getJavaVersion();
+		return !version.startsWith("1.3") 
+            && !version.startsWith("1.2") 
+		    && !version.startsWith("1.1")  
+		    && !version.startsWith("1.0"); 
 	}	
 
     /** 
@@ -453,6 +458,8 @@ public final class CommonUtils {
 
     /*
     public static void main(String args[]) {
+        System.out.println("Is 1.3 or later? "+isJava13OrLater());
+        System.out.println("Is 1.4 or later? "+isJava14OrLater());
         try {
             File src=new File("src.tmp");
             File dst=new File("dst.tmp");
