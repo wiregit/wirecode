@@ -34,13 +34,13 @@ public class HttpClientManager {
      * host via TCP.  If we exceed this value, an IOException is thrown
      * while trying to connect.
      */
-    private static final int CONNECTION_TIMEOUT = 3000;
+    private static final int CONNECTION_TIMEOUT = 5000;
     
     /**
      * The amount of time to wait while receiving data from a specified
      * host.  Used as an SO_TIMEOUT.
      */
-    private static final int TIMEOUT = 2000;
+    private static final int TIMEOUT = 8000;
     
     /**
      * The maximum number of times to allow redirects from hosts.
