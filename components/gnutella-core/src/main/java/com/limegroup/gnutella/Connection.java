@@ -1337,7 +1337,7 @@ public class Connection {
 
     // inherit doc comment
     public void updatePingTime() {
-        _nextPingTime = System.currentTimeMillis() + 800;
+        _nextPingTime = System.currentTimeMillis() + 1600;
     }
 
     /**
