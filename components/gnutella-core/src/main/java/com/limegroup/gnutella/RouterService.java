@@ -217,9 +217,7 @@ public class RouterService
 	//are to me.
 	PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
 	manager.fromMe(pr);
-	try {
-	    manager.sendToAll(pr);
-	} catch (IOException e) { }
+	manager.sendToAll(pr);
     }
 
     /**
@@ -234,12 +232,8 @@ public class RouterService
 	QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(), minSpeed, query);
 	manager.fromMe(qr);
 	verifier.record(qr); //record the sent query with verifier to be able to find accuracy of replies.
-	try {
-	    manager.sendToAll(qr);
-	    return qr.getGUID();
-	} catch (IOException e) { 
-	    return null;
-	}
+	manager.sendToAll(qr);
+	return qr.getGUID();
     }
 
     public int score(byte[] Guid, Response resp){
