@@ -130,7 +130,31 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         } //end of for
         } //end of synchronized block
         return added;
-	}    
+	}
+	
+	/**
+	 * Returns whether or not we are actively downloading this file.
+	 */
+	public boolean isActivelyDownloading() {
+	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+	    
+	    if(md == null)
+	        return false;
+	        
+        switch(md.getState()) {
+        case Downloader.QUEUED:
+        case Downloader.WAITING_FOR_RETRY:
+        case Downloader.ABORTED:
+        case Downloader.GAVE_UP:
+        case Downloader.COULDNT_MOVE_TO_LIBRARY:
+        case Downloader.CORRUPT_FILE:
+        case Downloader.REMOTE_QUEUED:
+        case Downloader.WAITING_FOR_USER:
+            return false;
+        default:
+            return true;
+        }
+    }
     
     /**
      * Returns the available ranges as an HTTP string value.

@@ -11,7 +11,7 @@ import com.sun.java.util.collections.Set;
 /**
  * An implementaiton of the UploadState that sends an error message 
  * for an unavailable range that has been requested. This is an
- * HTTP 503 error.
+ * HTTP 416 error.
  */
 public class UnavailableRangeUploadState implements HTTPMessage {
     
@@ -21,6 +21,16 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 	private final FileDesc FILE_DESC;
 
     private final HTTPUploader UPLOADER;
+    
+    /**
+     * Constant for the amount of time to wait before retrying if we are
+     * not actively downloading this file. (1 hour)
+     *
+     * The value is meant to be used only as a suggestion to when
+     * newer ranges may be available if we do not have any ranges
+     * that the downloader may want.
+     */
+    private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
 	/**
 	 * The error message to send in the message body.
@@ -29,7 +39,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 		"The requested range is not available".getBytes();
 
 	/**
-	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
+	 * Creates a new <tt>UnavailableRangeUploadState</tt> with the specified
 	 * <tt>FileDesc</tt>.
 	 *
 	 * @param fd the <tt>FileDesc</tt> for the upload
@@ -64,9 +74,14 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 				}
 			}
             if (FILE_DESC instanceof IncompleteFileDesc) {
+                IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
                 HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                      ((IncompleteFileDesc)FILE_DESC),
-                                      ostream);
+                                      ifd, ostream);
+                if(!ifd.isActivelyDownloading()) {
+                    HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
+                                          INACTIVE_RETRY_AFTER,
+                                          ostream);    
+                }                                  
             }
 		}
         
