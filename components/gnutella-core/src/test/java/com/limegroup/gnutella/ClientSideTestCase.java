@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.InetAddress;
 import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -57,7 +59,12 @@ public abstract class ClientSideTestCase
         super(name);
     }
     
-    private static void doSettings() {
+    private static void doSettings() throws Exception {
+        String localIP = InetAddress.getLocalHost().getHostAddress();
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*", localIP});        
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable

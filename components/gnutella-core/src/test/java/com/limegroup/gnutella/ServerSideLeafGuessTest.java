@@ -148,13 +148,11 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
             OutputStream os = null;
             try {
                 sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(),
-                                       SERVER_PORT, 12);
+                                       SERVER_PORT, 1200);
                 os = sock.getOutputStream();
-                os.write("\n\n".getBytes());
+                os.write("CONNECT BACK\r\n\r\n".getBytes());
+                os.flush();
             } catch (IOException ignored) {
-            } catch (SecurityException ignored) {
-            } catch (Throwable t) {
-                ErrorService.error(t);
             } finally {
                 if(sock != null)
                     try { sock.close(); } catch(IOException ignored) {}

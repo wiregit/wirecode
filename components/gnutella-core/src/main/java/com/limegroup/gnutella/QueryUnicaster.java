@@ -25,6 +25,9 @@ import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
  * list of unicast-enabled hosts every n milliseconds.  It interacts with
@@ -32,6 +35,8 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * individual queries by reply counts.
  */ 
 public final class QueryUnicaster {
+    
+    private static final Log LOG = LogFactory.getLog(QueryUnicaster.class);
 
     /** The time in between successive unicast queries.
      */
@@ -140,14 +145,14 @@ public final class QueryUnicaster {
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
         synchronized (_queryHosts) {
-            debug("QueryUnicaster.getUnicastEndpoints(): obtained lock.");
+            LOG.debug("QueryUnicaster.getUnicastEndpoints(): obtained lock.");
             int size = _queryHosts.size();
             if (size > 0) {
                 int max = (size > 10 ? 10 : size);
                 for (int i = 0; i < max; i++)
                     retList.add(_queryHosts.get(i));
             }
-            debug("QueryUnicaster.getUnicastEndpoints(): releasing lock.");
+            LOG.debug("QueryUnicaster.getUnicastEndpoints(): releasing lock.");
         }
         return retList;
     }
@@ -300,15 +305,16 @@ public final class QueryUnicaster {
 
 
     private void waitForQueries() throws InterruptedException {
-        debug("QueryUnicaster.waitForQueries(): waiting for Queries.");
+        LOG.debug("QueryUnicaster.waitForQueries(): waiting for Queries.");
         synchronized (_queries) {
             if (_queries.isEmpty()) {
                 // i'll be notifed when stuff is added...
                 _queries.wait();
 			}
         }
-        debug("QueryUnicaster.waitForQueries(): numQueries = " + 
-              _queries.size());
+        if(LOG.isDebugEnabled())
+            LOG.debug("QueryUnicaster.waitForQueries(): numQueries = " + 
+                      _queries.size());
     }
 
 
@@ -318,7 +324,7 @@ public final class QueryUnicaster {
      * @param reference The originating connection.  OK if NULL.
      */
     public boolean addQuery(QueryRequest query, ReplyHandler reference) {
-        debug("QueryUnicaster.addQuery(): entered.");
+        LOG.debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
         GUID guid = new GUID(query.getGUID());
         // first map the QueryBundle using the guid....
@@ -346,7 +352,8 @@ public final class QueryUnicaster {
             }
             guids.add(guid);
         }
-        debug("QueryUnicaster.addQuery(): returning " + retBool);
+        if(LOG.isDebugEnabled())
+            LOG.debug("QueryUnicaster.addQuery(): returning " + retBool);
         return retBool;
     }
 
@@ -367,7 +374,7 @@ public final class QueryUnicaster {
 	 */
 	private void addUnicastEndpoint(GUESSEndpoint endpoint) {
 		synchronized (_queryHosts) {
-			debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
+			LOG.debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
 			if (_queryHosts.size() == MAX_ENDPOINTS)
 				_queryHosts.removeLast(); // evict a old guy...
 			_queryHosts.addFirst(endpoint);
@@ -386,7 +393,7 @@ public final class QueryUnicaster {
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
 			}
-			debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
+			LOG.debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
 		}
 	}
 
@@ -412,7 +419,7 @@ public final class QueryUnicaster {
      * Use this if a leaf connection dies and you want to stop the query.
      */
     void purgeQuery(ReplyHandler reference) {
-        debug("QueryUnicaster.purgeQuery(RH): entered.");
+        LOG.debug("QueryUnicaster.purgeQuery(RH): entered.");
         if (reference == null)
             return;
         synchronized (_querySets) {
@@ -423,7 +430,7 @@ public final class QueryUnicaster {
             while (iter.hasNext())
                 purgeQuery((GUID) iter.next());
         }
-        debug("QueryUnicaster.purgeQuery(RH): returning.");
+        LOG.debug("QueryUnicaster.purgeQuery(RH): returning.");
     }
 
     /** 
@@ -431,9 +438,9 @@ public final class QueryUnicaster {
      * dies and you want to stop the query.
      */
     void purgeQuery(GUID queryGUID) {
-        debug("QueryUnicaster.purgeQuery(GUID): entered.");
+        LOG.debug("QueryUnicaster.purgeQuery(GUID): entered.");
         _qGuidsToRemove.add(queryGUID);
-        debug("QueryUnicaster.purgeQuery(GUID): returning.");
+        LOG.debug("QueryUnicaster.purgeQuery(GUID): returning.");
     }
 
 
@@ -480,9 +487,9 @@ public final class QueryUnicaster {
     /** May block if no hosts exist.
      */
     private GUESSEndpoint getUnicastHost() throws InterruptedException {
-        debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
+        LOG.debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
-            debug("QueryUnicaster.getUnicastHost(): obtained lock.");
+            LOG.debug("QueryUnicaster.getUnicastHost(): obtained lock.");
             while (_queryHosts.isEmpty()) {
                 if ((System.currentTimeMillis() - _lastPingTime) >
                     20000) { // don't sent too many pings..
@@ -496,7 +503,7 @@ public final class QueryUnicaster {
 				// now wait, what else can we do?
 				_queryHosts.wait();
             }
-            debug("QueryUnicaster.getUnicastHost(): got a host, let go lock!");
+            LOG.debug("QueryUnicaster.getUnicastHost(): got a host, let go lock!");
         }
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
@@ -585,16 +592,4 @@ public final class QueryUnicaster {
             }
         }
     }
-
-
-    private final static boolean debugOn = false;
-    private final static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final static void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
 }
