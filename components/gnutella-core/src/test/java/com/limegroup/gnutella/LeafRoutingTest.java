@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tests;
+package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
@@ -17,7 +17,7 @@ import java.net.*;
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.
  */
-public class LeafTester extends TestCase {
+public class LeafRoutingTest extends TestCase {
     static final int PORT=6669;
     static final int TIMEOUT=500;
     static final byte[] ultrapeerIP=
@@ -30,12 +30,12 @@ public class LeafTester extends TestCase {
     static Connection old1;
     static Connection old2;
 
-    public LeafTester(String name) {
+    public LeafRoutingTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return new TestSuite(LeafTester.class);
+        return new TestSuite(LeafRoutingTest.class);
     }    
 
     public void testLegacy() {

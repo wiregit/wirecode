@@ -21,7 +21,7 @@ public class UploadTest extends TestCase {
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
     private static final int index=0;
     /** Our listening port for pushes. */
-    private static int callbackPort=6350;
+    private static int callbackPort=6671;
 
 	/**
 	 * Creates a new UploadTest with the specified name.

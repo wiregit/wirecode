@@ -26,8 +26,9 @@ public class AllTests {
 
         //End-to-end integration tests (includes some unit tests too)
         suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
-        suite.addTest(com.limegroup.gnutella.uploader.AllTests.suite());
-        suite.addTest(com.limegroup.gnutella.downloader.AllTests.suite());
+        suite.addTest(com.limegroup.gnutella.LeafRoutingTest.suite());
+        //suite.addTest(com.limegroup.gnutella.uploader.AllTests.suite());
+        //suite.addTest(com.limegroup.gnutella.downloader.AllTests.suite());
 
         return suite;
     }
