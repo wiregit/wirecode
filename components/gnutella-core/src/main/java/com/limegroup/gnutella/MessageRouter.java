@@ -926,13 +926,20 @@ public abstract class MessageRouter {
         int size = list.size();
         boolean randomlyForward = false;
         if(size > 3) randomlyForward = true;
+        double percentToIgnore;
         for(int i=0; i<size; i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==FOR_ME_REPLY_HANDLER
 				   || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
 
-                if(randomlyForward && (Math.random() < 0.95)) {
+                if(c.supportsPongCaching()) {
+                    percentToIgnore = 0.20;
+                } else {
+                    percentToIgnore = 0.80;
+                }
+                if(randomlyForward && 
+                   (Math.random() < percentToIgnore)) {
                     continue;
                 } else {
                     c.send(request);
@@ -1268,7 +1275,9 @@ public abstract class MessageRouter {
         boolean newAddress = 
 		    RouterService.getHostCatcher().add(reply, handler);
 
-        if(newAddress) {
+        if(newAddress && 
+           (handler.supportsPongCaching() || 
+            PongCacher.instance().needsPongs())) {
             PongCacher.instance().addPong(reply);
         }
 
@@ -1297,8 +1306,9 @@ public abstract class MessageRouter {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
-                if (c!=handler && c!=replyHandler) {
+                if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
 					c.handlePingReply(reply, handler);
+                    c.updatePongTime();
 				}
             }
         }
