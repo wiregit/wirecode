@@ -9,6 +9,7 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
+import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.sun.java.util.collections.*;
 
 /**
@@ -170,7 +171,10 @@ public class StandardMessageRouter extends MessageRouter {
         if ((queryRequest.getCapabilitySelector() > 0) &&
             (queryRequest.getCapabilitySelector() > 
              CapabilitiesVM.CAPABILITY_MAX_SELECTOR)) return false;
-                                                
+
+        if (RECORD_STATS && queryRequest.isWhatIsNewRequest())
+            ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
+    
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"
         // slots are full.  This allows some spillover into our queue that

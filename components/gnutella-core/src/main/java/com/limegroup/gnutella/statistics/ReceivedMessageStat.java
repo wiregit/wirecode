@@ -98,6 +98,13 @@ public class ReceivedMessageStat extends AdvancedStatistic {
         new ReceivedMessageStat();
 
 
+    /**
+     * <tt>Statistic for all 'What is New' queries recieved.
+     */
+    public static final Statistic WHAT_IS_NEW_QUERY_MESSAGES =
+        new ReceivedMessageStat();
+
+
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
