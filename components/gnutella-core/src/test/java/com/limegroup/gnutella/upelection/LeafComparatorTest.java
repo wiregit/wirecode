@@ -50,6 +50,8 @@ public class LeafComparatorTest extends BaseTestCase {
 	 */
 	public void testGeneralTest() throws Exception {
 		
+		assertEquals(0,comparator.compare(null,null));
+		
 		TreeSet sampleSet = new TreeSet(comparator);
 		sampleSet.addAll(all);
 		

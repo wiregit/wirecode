@@ -8,13 +8,18 @@ package com.limegroup.gnutella.upelection;
 
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
+import com.limegroup.gnutella.messages.vendor.FeaturesVendorMessage;
+import com.limegroup.gnutella.util.*;
 
+import java.util.Properties;
 
 /**
 	 * a stub which claims it is a good candidate for election
 	 */
 	class GoodLeafCandidate extends ManagedConnectionStub {
 		
+		
+		Properties _goodProperties;
 		final short _uptime;
 		final int _filesShared;
 		
@@ -22,13 +27,23 @@ import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 		
 		public GoodLeafCandidate(String host, int port, short uptime, int filesShared) {
 			super(host,port);
+			
+			_goodProperties = new Properties();
+			
+			_goodProperties.setProperty(FeaturesVendorMessage.OS,"nachos ;-)");
+			_goodProperties.setProperty(FeaturesVendorMessage.JVM,"2.0");
+			_goodProperties.setProperty(FeaturesVendorMessage.INCOMING_TCP,"true");
+			_goodProperties.setProperty(FeaturesVendorMessage.INCOMING_UDP,"true");
+			_goodProperties.setProperty(FeaturesVendorMessage.BANDWIDTH,"20");
+			_goodProperties.setProperty(FeaturesVendorMessage.FILES_SHARED,""+filesShared);
+			
 			_uptime = uptime;
 			_filesShared = filesShared;
-			_handler = new CandidateHandler(this) {
-				public int getFileShared() {
-					return _filesShared;
-				}
-			};
+			_handler = new CandidateHandler(this);
+			
+			try {
+				PrivilegedAccessor.setValue(_handler,"_features",_goodProperties);
+			}catch(Exception e) {e.printStackTrace();}
 			
 		}
 		
