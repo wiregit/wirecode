@@ -380,7 +380,9 @@ public class BootstrapServerManager {
             InputStream is = get.getResponseBodyAsStream();
             
             if(is == null) {
-                LOG.warn("Invalid server: "+server);
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("Invalid server: "+server);
+                }
                 // invalid uri? begone.
                 request.handleError(server);
                 return;
