@@ -36,4 +36,8 @@ public interface ActivityCallback
      */
     public void knownHost(Endpoint e);
 
+    /**
+     *  Add a query reply to a query screen
+     */
+    public void handleQueryReply( QueryReply qr );
 }
