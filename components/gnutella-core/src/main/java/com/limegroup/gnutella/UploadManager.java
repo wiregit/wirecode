@@ -172,8 +172,9 @@ public final class UploadManager implements BandwidthTracker {
                     //as we will handle only the next "GET" request
                     String word=IOUtils.readWord(socket.getInputStream(), 3);
                     socket.setSoTimeout(oldTimeout);
-                    if(!word.equalsIgnoreCase("GET") &&
-					   !word.equalsIgnoreCase("HEAD")) {
+                    //TODO: how could this possibly equal 'HEAD' if we only read 3 characters?
+                    if(!word.equalsIgnoreCase("GET") &&				   
+					   !word.equalsIgnoreCase("HEAD")) { 
                         return;
 					}
                 } catch (IOException ioe) {
@@ -191,8 +192,7 @@ public final class UploadManager implements BandwidthTracker {
      * Does some book-keeping and makes the downloader, start the download
      * @param uploader This method assumes that uploader is connected.
      */
-    private void doSingleUpload(Uploader uploader, String host,
-        int index) {
+    private void doSingleUpload(Uploader uploader, String host, int index) {
         long startTime=-1;
 
         // check if it complies with the restrictions.
@@ -228,8 +228,23 @@ public final class UploadManager implements BandwidthTracker {
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
         // way to handle it?
-        startTime=System.currentTimeMillis();		
+        startTime=System.currentTimeMillis();
         uploader.writeResponse();
+        
+        if ( uploader.getState() == Uploader.UPLOADING
+            || uploader.getState() == Uploader.CONNECTING ) {
+            // somehow, some uploaders are getting through while
+            // in the UPLOADING state
+            // [never seen a connecting state...
+            //  but might as well check for it also]
+            // FYI, these all seem to come from the vendor:
+            // Java1.X.X[_0X]
+            // IE: Java1.4.1_04, Java1.3.1, etc...
+            // Also, all of them have the alternate location 
+            // of the local host IP addr.
+            // this is considered a temporary bug fix.
+            uploader.setState(Uploader.INTERRUPTED);
+        }
         // check the state of the upload once the
         // writeResponse method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE) {
@@ -735,7 +750,8 @@ public final class UploadManager implements BandwidthTracker {
                 // the "/", and before the next " ".
                 int f = requestLine.indexOf( " HTTP/", d );
 				try {
-					fileName = URLDecoder.decode(requestLine.substring( (d+1), f));
+					fileName = URLDecoder.decode(
+					             requestLine.substring( (d+1), f));
 				} catch(IllegalArgumentException e) {
 					fileName = requestLine.substring( (d+1), f);
 				}
