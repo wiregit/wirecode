@@ -371,18 +371,18 @@ public class LeafRoutingTest extends BaseTestCase {
 
     public void testLeafAnswersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
-        testURNs();
+        URNtest();
     }
     
     public void testLeafFiltersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
         try {
-            testURNs();
+            URNtest();
             fail("did not filter URN query");
         }catch(IOException expected){};
     }
     
-    private void testURNs() throws Exception {
+    private void URNtest() throws Exception {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
