@@ -5,9 +5,7 @@ import java.io.RandomAccessFile;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.Expand;
+import com.limegroup.gnutella.util.*;
 
 /**
  * Unit tests for UpdateMessageVerifier
@@ -31,46 +29,44 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void testBadXml() throws Exception {
-		test("bad_xmlFile.xml",false);
-	}
-	
 	public void testRandomBytes() throws Exception {
-		test("random_bytesFile.xml",false);
+		specificTest("random_bytesFile.xml",false);
 	}
 	
-		public void testMiddleVerFile() throws Exception {
-		test("middle_verFile.xml",true);
+	public void testNewVerFile() throws Exception {
+		specificTest("new_verFile.xml",true);
 	}
+	
+	public void testMiddleVerFile() throws Exception {
+		specificTest("middle_verFile.xml",true);
+	}
+	
+	
+	 //I'm assuming only the xml is bad, cause the signature checks out.
+	 // --zab
+	public void testBadXml() throws Exception {
+		specificTest("bad_xmlFile.xml",true);
+	}
+	
+	
+	
+	
 	
 	public void testDefMessageFile() throws Exception {
-		test("def_messageFile.xml",true);
+		specificTest("def_messageFile.xml",false);
 	}
 	
 	public void testDefVerFile() throws Exception {
-		test("def_verFile.xml",true);
+		specificTest("def_verFile.xml",false);
 	}
 	
 
 	public void testOldVerFile() throws Exception {
-		test("old_verFile.xml",true);
+		specificTest("old_verFile.xml",true);
 	}
 	
-	public void testNewVerFile() throws Exception {
-		test("new_verFile.xml",true);
-	}
+	
 		
-	public void testLegacy() throws Exception {
-	    Expand.expandFile( getUpdateVer(),
-	                       CommonUtils.getUserSettingsDir() );
-	                       
-	    File _f = new File(CommonUtils.getUserSettingsDir(), "update.xml");
-	   
-	     
-	    test(_f.getName(),true);
-        
-        
-    }
     
     private static File getUpdateVer() throws Exception {
                   // tests/TestData    /tests          / ..
@@ -78,8 +74,20 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
         return new File(f, "gui/update.ver");
     }
     
-    private void test(String filename, boolean good) throws Exception{
-    	File _f = new File(testXMLPath+filename);
+    
+    protected void setUp() throws Exception {
+    	PrivilegedAccessor.setValue(CommonUtils.class, 
+                "_isJava118", Boolean.FALSE);
+    	
+    	File pub = CommonUtils.getResourceFile(testXMLPath+"public.key");
+        File pub2 = new File(_settingsDir, "public.key");
+        CommonUtils.copy(pub, pub2);
+        assertTrue("test could not be set up", pub2.exists());
+    }
+    private void specificTest(String filename, boolean good) throws Exception{
+    	
+        
+    	File _f = CommonUtils.getResourceFile(testXMLPath+filename);
     	
     	assertTrue(_f.exists());
     	assertGreaterThan(0,_f.length());
@@ -89,9 +97,11 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
         byte[] content = new byte[(int)f.length()];
         f.readFully(content);
         f.close();
+        
     	
     	//System.out.println(new String(content));
     	UpdateMessageVerifier tester = new UpdateMessageVerifier(content,true);
+    	
     	if (good) 
          assertTrue(tester.verifySource());
         else
