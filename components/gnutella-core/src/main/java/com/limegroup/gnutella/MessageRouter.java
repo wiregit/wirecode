@@ -380,7 +380,6 @@ public abstract class MessageRouter
      * (i.e., Ping Replies that we received that are 1 hop away from us.  Since
      *  a crawler might send back a dummy PingReply when we send a PingRequest 
      * to it, we have to make sure, we don't send back the dummy PingReply.  
-     * Also, send back our own address to the crawler
      *
      * @requires - sending the pings to a crawler connection (i.e., a Gnutella
      *             crawler connected to us and wants pongs of all of our 
@@ -389,9 +388,6 @@ public abstract class MessageRouter
     public void sendCrawlerPingReplies(PingRequest pingRequest,
                                        ManagedConnection connection)
     {
-        //send our own address back first.
-        respondToPingRequest(pingRequest, _acceptor, connection);
-        
         byte[] guid = pingRequest.getGUID();
         for (Iterator iter = _pongCache.iterator(1); iter.hasNext(); )
         {
