@@ -540,9 +540,14 @@ public class Connection implements Runnable {
 			try {
 			    desc =(FileDesc)fmanager._files.get(index); 
 			}
-			catch (ArrayIndexOutOfBoundsException e) {
-			    // tell the client the file does not exist
-			    return;
+			catch (Exception e) {
+			    //I'm catching Exception because I don't know
+			    //exactly which IndexOutOfBoundsException is
+			    //thrown: from normal util package or com.sun...
+
+			    //TODO?: You could connect and send 404 file
+			    //not found....but why bother?
+			    continue;
 			} 
 			String file = desc._name;
 			
