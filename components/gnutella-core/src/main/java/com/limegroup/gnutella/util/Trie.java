@@ -16,6 +16,10 @@ import com.sun.java.util.collections.*;
  * linear with respect to the sum of the sizes of all keys in the tree, though
  * this may be reduced if many keys have common prefixes.<p>
  *
+ * The Trie can be set to ignore case.  Doing so is the same as making all
+ * keys and prefixes lower case.  That means the original keys cannot be
+ * extracted from the Trie.<p>
+ * 
  * Restrictions:
  * <ul>
  * <li><b>This class is not synchronized.</b>  Do that externally if you desire.
@@ -27,11 +31,14 @@ import com.sun.java.util.collections.*;
  */
 public class Trie {
     private TrieNode root;
-
+    private boolean ignoreCase=false;    
+    
     /**
      * Constructs a new, empty tree.
+     * Case is ignored in storing and retrieving keys iff ignoreCase==true.     
      */
-    public Trie() {
+    public Trie(boolean ignoreCase) {
+        this.ignoreCase=ignoreCase;
         clear();
     }
 
@@ -43,6 +50,11 @@ public class Trie {
         this.root=new TrieNode();
     }
     
+    /** Returns the canonical version of the given character. */
+    private final char canonicalCase(char c) {
+        return ignoreCase ? Character.toLowerCase(c) : c;
+    }
+
     /**
      * Maps the given key to the given value.  Returns the old mapping
      * for key, if any, or null otherwise.  Key may be the empty string.
@@ -55,7 +67,7 @@ public class Trie {
         int i=0;
         //1. Find the largest prefix of key, key[0..i-1], already in this.
         for ( ; i<key.length(); i++) {
-            TrieNode child=node.get(key.charAt(i));
+            TrieNode child=node.get(canonicalCase(key.charAt(i)));
             if (child==null) 
                 break;
             node=child;
@@ -63,7 +75,7 @@ public class Trie {
         //2. Insert additional new nodes (if any) for key[i..].
         for ( ; i<key.length(); i++) {
             TrieNode child=new TrieNode();
-            node.put(key.charAt(i), child);
+            node.put(canonicalCase(key.charAt(i)), child);
             node=child;
         }
         //3. Setup value and return old value, if any.
@@ -78,7 +90,7 @@ public class Trie {
     public Object get(String key) {
         TrieNode node=root;
         for (int i=0; i<key.length(); i++) {
-            node=node.get(key.charAt(i));
+            node=node.get(canonicalCase(key.charAt(i)));
             if (node==null) 
                 return null;
         }
@@ -96,7 +108,7 @@ public class Trie {
         TrieNode node=root;
         //1. Find first node start with prefix in tree.
         for (int i=0; i<prefix.length(); i++) {
-            node=node.get(prefix.charAt(i));
+            node=node.get(canonicalCase(prefix.charAt(i)));
             if (node==null) 
                 return new EmptyIterator();
         }
@@ -164,7 +176,7 @@ public class Trie {
     public static void main(String args[]) {
         TrieNode.unitTest();
 
-        Trie t=new Trie();
+        Trie t=new Trie(false);
         Object anVal0="old value for an";
         Object anVal="value for an";
         Object antVal="value for ant";
@@ -186,6 +198,7 @@ public class Trie {
         Assert.that(t.get("an")==anVal);
         Assert.that(t.get("ant")==antVal);
         Assert.that(t.get("add")==addVal);        
+        Assert.that(t.get("aDd")==null);        
 
         //Yield no elements...
         iter=t.getPrefixedBy("ab");
@@ -220,7 +233,7 @@ public class Trie {
         Assert.that(! iter.hasNext());
 
         //Empty string
-        t=new Trie();
+        t=new Trie(false);
         Assert.that(t.get("")==null);
         t.put("", aVal);
         t.put("an", anVal);
@@ -231,6 +244,23 @@ public class Trie {
         tmp2=iter.next();
         Assert.that(tmp2==aVal || tmp2==anVal);
         Assert.that(tmp1!=tmp2);
+
+        //Case insensitive tests
+        t=new Trie(true);
+        Assert.that(t.put("an", anVal)==null);
+        Assert.that(t.put("An", anVal)==anVal);        
+        Assert.that(t.put("aN", anVal)==anVal);        
+        Assert.that(t.put("AN", anVal)==anVal);        
+        Assert.that(t.get("an")==anVal);
+        Assert.that(t.get("An")==anVal);
+        Assert.that(t.get("aN")==anVal);
+        Assert.that(t.get("AN")==anVal);
+        Assert.that(t.put("ant", antVal)==null);
+        Assert.that(t.get("ANT")==antVal);
+        iter=t.getPrefixedBy("a");
+        Assert.that(iter.next()==anVal);
+        Assert.that(iter.next()==antVal);
+        Assert.that(! iter.hasNext());        
     }
 }
 
@@ -242,7 +272,7 @@ public class Trie {
  *
  * Design note: this is a "dumb" class.  It is <i>only</i> responsible for
  * managing its value and its children.  None of its operations are recursive;
- * that is Trie's job.
+ * that is Trie's job.  Nor does it deal with case.
  */
 class TrieNode {
     private static class TrieNodePair implements Comparable {

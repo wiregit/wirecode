@@ -32,7 +32,7 @@ public class FileManager{
      *  characters without a character from DELIMETERS.  INVARIANT: TODO..
      */
     private Trie /* String -> List<Integer> */ _index;
-    static final String DELIMETERS=" -.+/\\*";
+    static final String DELIMETERS=" -.+/*()\\";
     private String[] _extensions;
 
     private static FileManager _instance = new FileManager();
@@ -47,7 +47,7 @@ public class FileManager{
         _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
-        _index = new Trie();
+        _index = new Trie(true);  //ignore case
         _extensions = new String[0];
         _sharedDirectories = new HashSet();
 
@@ -159,7 +159,7 @@ public class FileManager{
             //"shareValue" method.
 
             //Update index...
-            String[] keywords=StringUtils.split(path.toLowerCase(), DELIMETERS);
+            String[] keywords=StringUtils.split(path, DELIMETERS);
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 Integer j=new Integer(_files.size()-1);
@@ -176,8 +176,6 @@ public class FileManager{
                         indices.add(j);
                 }
             }
-            System.out.println("After adding \""+path+"\", got: ");
-            System.out.println("   "+_index);
         }
     }
 
@@ -237,7 +235,7 @@ public class FileManager{
                 _size-=fd._size;
 
                 //Remove references to this from index.
-                String[] keywords=StringUtils.split(fd._path.toLowerCase(),
+                String[] keywords=StringUtils.split(fd._path,
                                                     DELIMETERS);
                 for (int j=0; j<keywords.length; j++) {
                     String keyword=keywords[j];
@@ -388,7 +386,7 @@ public class FileManager{
         for (int i=0; i<keywords.length; i++) {
             //Find all the files matching that keyword.  TODO2: avoid calling
             //toLowerCase by making Trie have case insensitive option.
-            String keyword=keywords[i].toLowerCase();
+            String keyword=keywords[i];
             Iterator /* of List<Integer> */ iter=_index.getPrefixedBy(keyword);
             //TODO1: avoid allocations, perhaps by making Trie a multimap.
             Set matches2=new TreeSet(ArrayListUtil.integerComparator());
