@@ -116,10 +116,8 @@ public class SettingsManager implements SettingsInterface {
      * to an instance of this class in
      * accordance with the singleton pattern
      */
-    public static SettingsManager instance() {
-		if(instance_ == null) {
-			instance_ = new SettingsManager();
-		}
+    public static synchronized SettingsManager instance() {
+		if(instance_ == null) instance_ = new SettingsManager();
         return instance_;
     }
 
@@ -352,7 +350,6 @@ public class SettingsManager implements SettingsInterface {
                     setFilterGreedyQueries(bs);
                 }
 
-
                 else if(key.equals(FILTER_BEARSHARE_QUERIES)) {
                     boolean bs;
                     if (p.equals("true"))
@@ -448,6 +445,20 @@ public class SettingsManager implements SettingsInterface {
 				else if(key.equals(APP_HEIGHT)) {
 					setAppHeight(Integer.parseInt(p));
 				}
+				else if(key.equals(RUN_ONCE)) {
+					// if this key exists at all, we know
+					// it has been run once, so don't bother
+					// going through all of the boolean
+					// conversions.
+					setRunOnce(true);
+				}
+
+				else if(key.equals(WINDOW_X)) {
+					setWindowX(Integer.parseInt(p));
+				}
+				else if(key.equals(WINDOW_Y)) {
+					setWindowY(Integer.parseInt(p));
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -529,8 +540,7 @@ public class SettingsManager implements SettingsInterface {
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
 		setInstalled(DEFAULT_INSTALLED);
-		setAppWidth(DEFAULT_APP_WIDTH);
-		setAppHeight(DEFAULT_APP_HEIGHT);
+		setRunOnce(DEFAULT_RUN_ONCE);
     }
 
 
@@ -745,6 +755,31 @@ public class SettingsManager implements SettingsInterface {
 	 */
 	public int getAppHeight() {
 		return Integer.parseInt(props_.getProperty(APP_HEIGHT));
+	}
+
+	/**
+	 * returns a boolean specifying whether or not the 
+	 * application has been run one time or not.
+	 */
+	public boolean getRunOnce() {
+		Boolean b = Boolean.valueOf(props_.getProperty(RUN_ONCE));
+		return b.booleanValue();
+	}
+
+	/**
+	 * returns an integer value for the x position of the window
+	 * set by the user in a previous session.
+	 */
+	public int getWindowX() {
+		return Integer.parseInt(props_.getProperty(WINDOW_X));
+	}
+
+	/**
+	 * returns an integer value for the y position of the window
+	 * set by the user in a previous session.
+	 */
+	public int getWindowY() {
+		return Integer.parseInt(props_.getProperty(WINDOW_Y));
 	}
 
     /******************************************************
@@ -1590,6 +1625,30 @@ public class SettingsManager implements SettingsInterface {
 		props_.put(APP_HEIGHT, s);
 	}
 
+	/**
+	 * sets the flag for whether or not the application
+	 * has been run one time before this.
+	 */
+	public void setRunOnce(boolean runOnce) {
+		Boolean b = new Boolean(runOnce);
+		props_.put(RUN_ONCE, b.toString());
+	}
+
+	/**
+	 * set the x position of the window for the next
+	 * time the application is started.
+	 */
+	public void setWindowX(int x) {
+		props_.put(WINDOW_X, Integer.toString(x));
+	}
+
+	/**
+	 * set the y position of the window for the next
+	 * time the application is started.
+	 */
+	public void setWindowY(int y) {
+		props_.put(WINDOW_Y, Integer.toString(y));
+	}
 
     /******************************************************
      ***************  END OF MUTATOR METHODS **************

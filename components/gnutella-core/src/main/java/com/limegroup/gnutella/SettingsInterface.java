@@ -101,6 +101,7 @@ public interface SettingsInterface {
 	public static final boolean DEFAULT_INSTALLED = false;
 	public static final int     DEFAULT_APP_WIDTH = 640;
 	public static final int     DEFAULT_APP_HEIGHT = 620;
+	public static final boolean DEFAULT_RUN_ONCE = false;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
@@ -160,6 +161,9 @@ public interface SettingsInterface {
 	public static final String INSTALLED          = "INSTALLED";
 	public static final String APP_WIDTH          = "APP_WIDTH";
 	public static final String APP_HEIGHT         = "APP_HEIGHT";
+	public static final String RUN_ONCE           = "RUN_ONCE";
+	public static final String WINDOW_X           = "WINDOW_X";
+	public static final String WINDOW_Y           = "WINDOW_Y";
 }
 
 
