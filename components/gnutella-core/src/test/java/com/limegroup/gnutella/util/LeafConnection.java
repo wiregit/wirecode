@@ -20,24 +20,26 @@ public final class LeafConnection extends NewConnection {
     
     public static LeafConnection createAltLeafConnection()  {
         return new LeafConnection(new String[] {ALT_LEAF_KEYWORD},
-            15, "ALT LEAF CONNECTION", false);
+            15, "ALT LEAF CONNECTION", false, true);
     }
 
     public static LeafConnection createWithKeywords(String[] keywords) {
-        return new LeafConnection(keywords, 20, "LEAF CONNECTION", true);
+        return new LeafConnection(keywords, 20, "LEAF CONNECTION", true, true);
     }
 
-    public static LeafConnection createLeafConnection() {
-        // TODO Auto-generated method stub
-        return new LeafConnection(new String[0], 15, "LEAF_CONNECTION", false);
+    
+    public static LeafConnection createLeafConnection(boolean b) {
+        return new LeafConnection(new String[0], 15, "LEAF_CONNECTION", false, b);
     }
+
 
     /**
      * Creates a new LeafConnection with the specified list of keywords, etc.
      */
     private LeafConnection(String[] keywords, int connections, 
-        String descriptor, boolean addStandardKeyword) {
-        super(connections, true);
+        String descriptor, boolean addStandardKeyword, boolean requireMatches) {
+        super(connections, requireMatches);
+
         for(int i=0; i<keywords.length; i++) {
             QRT.add(keywords[i]);
         }
