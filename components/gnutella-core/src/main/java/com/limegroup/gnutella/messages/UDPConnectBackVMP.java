@@ -7,7 +7,7 @@ import java.io.*;
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
  *  Used to ask a host you connect to do a UDP ConnectBack.
  */
-public class UDPConnectBackVMP extends VendorMessagePayload {
+public final class UDPConnectBackVMP extends VendorMessagePayload {
 
     public static final int VERSION = 1;
 
@@ -28,7 +28,7 @@ public class UDPConnectBackVMP extends VendorMessagePayload {
         _payload = payload;
         try {
             if (version > VERSION) // we don't support it!!
-                throw new BadPacketException();
+                throw new BadPacketException("UNSUPPORTED VERSION");
 
             ByteArrayInputStream bais = new ByteArrayInputStream(_payload);
             // get the port....

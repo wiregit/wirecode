@@ -6,7 +6,7 @@ import java.io.*;
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
  *  Used to ask a host you connect to do a TCP ConnectBack.
  */
-public class TCPConnectBackVMP extends VendorMessagePayload {
+public final class TCPConnectBackVMP extends VendorMessagePayload {
 
     public static final int VERSION = 1;
 
@@ -20,7 +20,7 @@ public class TCPConnectBackVMP extends VendorMessagePayload {
     TCPConnectBackVMP(int version, byte[] payload) throws BadPacketException {
         super(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, version);
         if (version > VERSION)
-            throw new BadPacketException();
+            throw new BadPacketException("UNSUPPORTED VERSION");
         if (payload.length != 2)
             throw new BadPacketException();
         // get the port from the payload....
