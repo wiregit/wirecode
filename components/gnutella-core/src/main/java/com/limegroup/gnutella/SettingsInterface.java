@@ -53,7 +53,6 @@ public interface SettingsInterface
     public int        getSearchAnimationTime();
     public String     getConnectString();
     public String     getConnectOkString();
-    public String     getInstallDir();
 
     /** writes out the properties to disk */
     public void writeProperties();
@@ -163,13 +162,12 @@ public interface SettingsInterface
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
 
-    public void setInstallDir(String dir) 
-	throws IllegalArgumentException;
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
     public void writeNDProps();
+	public void setWrite(boolean b);
 
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
@@ -230,7 +228,7 @@ public interface SettingsInterface
 	   "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
 	   "gnet4.ath.cx:6346"};
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
-    public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 2;
+    public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
@@ -267,7 +265,6 @@ public interface SettingsInterface
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
-    public static final String INSTALL_DIR    = "INSTALL_DIRECTORY";
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";    
