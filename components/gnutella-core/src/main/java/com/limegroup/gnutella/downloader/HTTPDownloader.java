@@ -41,8 +41,9 @@ public class HTTPDownloader implements BandwidthTracker {
     
     /**
      * The smallest possible file to be shared with partial file sharing.
+     * Non final for testing purposes.
      */
-    private final static int MIN_PARTIAL_FILE_BYTES = 5*1024*1024; // 5MB
+    private static int MIN_PARTIAL_FILE_BYTES = 5*1024*1024; // 5MB
     
     /**
      * The current minimum size allowed for partial file sharing.

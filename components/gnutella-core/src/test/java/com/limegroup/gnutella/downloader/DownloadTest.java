@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
@@ -67,31 +67,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static ManagedDownloader DOWNLOADER = null;
 	private static Object COMPLETE_LOCK = new Object();
 	
-	/**
-	 * The list of tests to run.
-	 * If it is empty, or if a test's number is in here, it will run.
-	 * Otherwise it will generate a failure (just to let us know it isn't running).
-	 */
-	private static final int[] testsToRun = { };
-	private static final int SIMPLE_DOWNLOAD = 1;
-	private static final int SIMPLE_SWARM = 2;
-	private static final int UNBALANCED_SWARM = 3;
-	private static final int SWARM_WITH_INTERRUPT = 4;
-	private static final int STEALER_INTERRUPTED = 5;
-	private static final int ADD_DOWNLOAD = 6;
-	private static final int STALLING_UPLOADER_REPLACED = 7;
-	private static final int TWO_ALTERNATE_LOCATIONS = 8;
-	private static final int UPLOADER_ALTERNATE_LOCATIONS = 9;
-	private static final int WIERD_ALTERNATE_LOCATIONS = 10;
-	private static final int STEALER_INTERRUPTED_WITH_ALTERNATE = 11;
-	private static final int UPDATE_WHITE_WITH_FAILING_FIRST_UPLOADER = 12;
-	private static final int QUEUED_DOWNLOADER = 13;
-	private static final int ALTERNATE_LOCATIONS_EXCHANGED_WITH_BUSY = 14;
-	private static final int MISMATCHED_VERIFY_HASH = 17;
-	private static final int OVERLAP_CHECK_WHITE = 18;
-	private static final int OVERLAP_CHECK_GREY = 19;
-	private static final int SIMPLE_ALTERNATE_LOCATIONS = 20;
-    private static final int ALTERNATE_LOCATIONS_ARE_REMOVED = 21;
     
     public static void globalSetUp() {
 		RouterService rs = new RouterService(callback);
@@ -201,20 +176,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
             */
     
-    /**
-     * Tests to see if this 'i' is one of the testsToRun
-     */
-    private static void shouldRun(int myTest) {
-        if ( testsToRun.length == 0 ) return;
-       
-        for(int i = 0; i < testsToRun.length; i++) {
-            if ( testsToRun[i] == myTest )
-                return;
-        }
-        
-        fail("ignoring test.");
-    }
-    
     
     ////////////////////////// Test Cases //////////////////////////
     
@@ -258,7 +219,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests a basic download that does not swarm.
      */
     public void testSimpleDownload() throws Exception {
-        shouldRun(SIMPLE_DOWNLOAD);
         debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
@@ -267,7 +227,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public void testSimpleSwarm() throws Exception {
-        shouldRun(SIMPLE_SWARM);
         debug("-Testing swarming from two sources...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -300,7 +259,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testUnbalancedSwarm() throws Exception  {
-        shouldRun(UNBALANCED_SWARM);
         debug("-Testing swarming from two unbalanced sources...");
         
         final int RATE=500;
@@ -330,7 +288,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testSwarmWithInterrupt() throws Exception {
-        shouldRun(SWARM_WITH_INTERRUPT);
         debug("-Testing swarming from two sources (one broken)...");
         
         final int RATE=500;
@@ -360,7 +317,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testStealerInterrupted() throws Exception {
-        shouldRun(STEALER_INTERRUPTED);
         debug("-Testing unequal swarming with stealer dying...");
         
         final int RATE=500;
@@ -393,7 +349,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testAddDownload() throws Exception {
-        shouldRun(ADD_DOWNLOAD);
         debug("-Testing addDownload (increases swarming)...");
         
         final int RATE=500;
@@ -430,7 +385,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testStallingUploaderReplaced() throws Exception  {
-        shouldRun(STALLING_UPLOADER_REPLACED);
         debug("-Testing download completion with stalling downloader...");
         
         //Throttle rate at 500KB/s to give opportunities for swarming.
@@ -466,7 +420,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tOverlapCheckGrey(boolean deleteCorrupt) throws Exception {
-        shouldRun(OVERLAP_CHECK_GREY);
         debug("-Testing overlap checking from Grey area..." +
                          "stop when corrupt "+deleteCorrupt+" ");
                          
@@ -495,7 +448,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tOverlapCheckWhite(boolean deleteCorrupt) throws Exception {
-        shouldRun(OVERLAP_CHECK_WHITE);
         debug("-Testing overlap checking from White area..."+
                          "stop when corrupt "+deleteCorrupt+" ");
                          
@@ -524,7 +476,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void tMismatchedVerifyHash(boolean deleteCorrupt) throws Exception {
-        shouldRun(MISMATCHED_VERIFY_HASH);
         debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
@@ -541,7 +492,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testSimpleAlternateLocations() throws Exception {  
-        shouldRun(SIMPLE_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -572,7 +522,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testTwoAlternateLocations() throws Exception {  
-        shouldRun(TWO_ALTERNATE_LOCATIONS);
         debug("-Testing Two AlternateLocations...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -611,7 +560,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testUploaderAlternateLocations() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        shouldRun(UPLOADER_ALTERNATE_LOCATIONS);
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -656,7 +604,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testAlternateLocationsAreRemoved() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        shouldRun(ALTERNATE_LOCATIONS_ARE_REMOVED);
         debug("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
@@ -722,7 +669,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  
-        shouldRun(WIERD_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
@@ -773,7 +719,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testStealerInterruptedWithAlternate() throws Exception {
-        shouldRun(STEALER_INTERRUPTED_WITH_ALTERNATE);
         debug("-Testing swarming of rfds ignoring alt ...");
         
         int capacity=SettingsManager.instance().getConnectionSpeed();
@@ -825,6 +770,68 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u4 was used", 0, u4);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
+    
+    public void testPartialSourceIsAddedAfterPortion() throws Exception {
+        
+        // change the minimum required bytes so it'll be added.
+        PrivilegedAccessor.setValue(HTTPDownloader.class,
+            "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            "_acceptedIncoming", Boolean.TRUE );
+            
+        debug("-Testing that downloader adds itself to the mesh");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+        
+        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
+        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+                    
+        // neither uploader knows any alt locs.
+        assertNull(u1Alt);
+        assertNull(u2Alt);
+
+        // the rate must be absurdly slow for the incomplete file.length()
+        // check in HTTPDownloader to be updated.
+        final int RATE=50;
+        final int STOP_AFTER = TestFile.length()/3;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //both uploaders should know that this downloader is an alt loc.
+        u1Alt = uploader1.getAlternateLocations();
+        u2Alt = uploader2.getAlternateLocations();
+        assertNotNull(u1Alt);
+        assertNotNull(u2Alt);
+        Collection u1Locs = u1Alt.values();
+        Collection u2Locs = u2Alt.values();
+        AlternateLocation al =
+            AlternateLocation.createAlternateLocation(TestFile.hash());
+        assertTrue( u1Locs.contains(al) );
+        assertTrue( u2Locs.contains(al) );        
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertGreaterThan("u2 did no work", 0, u2);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
 
 	// no longer in use, as alternate locations should always have SHA1s
 	/*
@@ -863,7 +870,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	*/
 
     public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
-        shouldRun(UPDATE_WHITE_WITH_FAILING_FIRST_UPLOADER);
         debug("-Testing corruption of needed. \n");
         
         final int RATE=500;
@@ -890,7 +896,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testQueuedDownloader() throws Exception {
-        shouldRun(QUEUED_DOWNLOADER);
         debug("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
@@ -910,7 +915,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testAlternateLocationsExchangedWithBusy() throws Exception {
         //tests that a downloader reads alternate locations from the
         //uploader even if it receives a 503 from the uploader.
-        shouldRun(ALTERNATE_LOCATIONS_EXCHANGED_WITH_BUSY);
         debug("-Testing dloader gets alt from 503 uploader...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
