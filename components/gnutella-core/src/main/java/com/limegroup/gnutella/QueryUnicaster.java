@@ -182,12 +182,38 @@ public final class QueryUnicaster {
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
     public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
-        if (endpoint.getUnicastSupport()) {
+        if (endpoint.getUnicastSupport() && notMe(endpoint)) {
             synchronized (_queryHosts) {
                 _queryHosts.push(endpoint);
                 _queryHosts.notify();
             }
         }
+    }
+
+    /** Returns whether or not the Endpoint refers to me!  True if it doesn't,
+        false if it does (NOT not me == me).
+     */
+    private boolean notMe(Endpoint e) {
+        boolean retVal = true;
+
+        SettingsManager sm = SettingsManager.instance();
+        if (sm.getForceIPAddress()) {
+            if ((e.getPort() == sm.getForcedPort()) &&
+                e.getHostname().equals(sm.getForcedIPAddressString())
+                )
+                retVal = false;
+        }
+        else {
+            try {
+                if ((e.getPort() == RouterService.getPort()) &&
+                    Arrays.equals(e.getHostBytes(), RouterService.getAddress())
+                    )
+                    retVal = false;
+            }
+            catch (UnknownHostException whatever) {}
+        }
+
+        return retVal;
     }
 
     /** Feed me QRs so I can keep track of stuff.
