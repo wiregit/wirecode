@@ -2737,20 +2737,21 @@ public class ManagedDownloader implements Downloader, Serializable {
      * All other times it will return the amount downloaded.
      * All return values are in bytes.
      */
-    public synchronized int getAmountRead() {
-        if ( state == CORRUPT_FILE )
-            return corruptFileBytes;
-        else if ( state == HASHING ) {
-            if ( incompleteFile == null )
-                return 0;
-            else
-                return URN.getHashingProgress(incompleteFile);
-        } else {
-            if ( commonOutFile == null ){ 
-                return 0;
-            }else {
-                return commonOutFile.getBlockSize();}
+    public int getAmountRead() {
+        VerifyingFile ourFile;
+        synchronized(this) {
+            if ( state == CORRUPT_FILE )
+                return corruptFileBytes;
+            else if ( state == HASHING ) {
+                if ( incompleteFile == null )
+                    return 0;
+                else
+                    return URN.getHashingProgress(incompleteFile);
+            } else {
+                ourFile = commonOutFile;
+            }
         }
+        return ourFile == null ? 0 : ourFile.getBlockSize();                
     }
      
     public String getAddress() {
@@ -2906,11 +2907,19 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}
 	
 	public int getAmountVerified() {
-		return commonOutFile.getVerifiedBlockSize();
+        VerifyingFile ourFile;
+        synchronized(this) {
+            ourFile = commonOutFile;
+        }
+		return ourFile == null? 0 : ourFile.getVerifiedBlockSize();
 	}
 	
 	public int getAmountLost() {
-		return commonOutFile.getAmountLost();
+        VerifyingFile ourFile;
+        synchronized(this) {
+            ourFile = commonOutFile;
+        }
+		return ourFile == null ? 0 : ourFile.getAmountLost();
 	}
 	
     /**
