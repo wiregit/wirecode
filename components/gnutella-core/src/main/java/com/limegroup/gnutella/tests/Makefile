@@ -7,8 +7,7 @@ classes = Client.class Server.class \
     RecorderMessageRouter.class MessageSimulator.class TimeAndMessage.class \
 	ReceivesOnly.class SendsOnly.class \
 	HostCatcherTest.class \
-	ActivityCallbackStub.class MessageRouterStub.class \
-	RegexpTest.class
+	ActivityCallbackStub.class MessageRouterStub.class
 
 all : $(classes)
 
