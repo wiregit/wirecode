@@ -11,6 +11,9 @@ import com.sun.java.util.collections.Iterator;
  */
 public class UDPHostRanker {
 
+    private static final MessageRouter ROUTER = 
+        RouterService.getMessageRouter();
+
     /**
      * Ranks the specified <tt>Collection</tt> of hosts.  It does this simply
      * by sending UDP Gnutella "pings" to each host in the specified 
@@ -21,15 +24,18 @@ public class UDPHostRanker {
      * Returns the new <tt>UDPHostRanker</tt> instance.
      * 
      * @param hosts the <tt>Collection</tt> of hosts to rank
+     * @param listener a MessageListener if you want to spy on the pongs.  can
+     * be null.
      * @return a new <tt>UDPHostRanker</tt> instance
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt> or if the listener argument is <tt>null</tt>
      */
-    public static UDPHostRanker rank(Collection hosts){
+    public static UDPHostRanker rank(Collection hosts,
+                                     MessageListener listener){
         if(hosts == null) {
             throw new NullPointerException("null hosts not allowed");
         }
-        return new UDPHostRanker(hosts);
+        return new UDPHostRanker(hosts, listener);
     }
     
     /**
@@ -39,7 +45,7 @@ public class UDPHostRanker {
      * 
      * @param hosts the hosts to rank
      */
-    private UDPHostRanker(Collection hosts) {
+    private UDPHostRanker(Collection hosts, MessageListener listener) {
         int waits = 0;
         while(!UDPService.instance().isListening() && waits < 10) {
             synchronized(this) {
@@ -55,6 +61,9 @@ public class UDPHostRanker {
         final PingRequest ping = new PingRequest((byte)1);
         final GUID pingGUID = new GUID(ping.getGUID());
         
+        if (listener != null) ROUTER.registerMessageListener(pingGUID, 
+                                                             listener);
+
         Iterator iter = hosts.iterator();
         while(iter.hasNext()) {
             IpPort host = (IpPort)iter.next();
@@ -63,5 +72,21 @@ public class UDPHostRanker {
 
         // now that we've pinged all these bad boys, any replies will get
         // funneled back to the HostCatcher via MessageRouter.handleUDPMessage
+
+        // also take care of any MessageListeners
+        if (listener != null) {
+
+            // Now schedule a runnable that will remove the mapping for the GUID
+            // of the above ping after 20 seconds so that we don't store it 
+            // indefinitely in memory for no reason.
+            Runnable udpPingPurger = new Runnable() {
+                    public void run() {
+                        ROUTER.unregisterMessageListener(pingGUID);
+                    }
+                };
+         
+            // Purge after 20 seconds.
+            RouterService.schedule(udpPingPurger, (long)(20*1000), 0);
+        }
     }
 }

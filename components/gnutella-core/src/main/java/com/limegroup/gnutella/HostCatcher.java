@@ -294,7 +294,7 @@ public class HostCatcher {
     private void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            UDPHostRanker.rank(new HashSet(ENDPOINT_SET));
+            UDPHostRanker.rank(new HashSet(ENDPOINT_SET), null);
         }
     }
     
