@@ -10,8 +10,6 @@ import com.limegroup.gnutella.messages.*;
  */
 public class NewConnection extends TestConnection {    
 
-   
-
     protected NewConnection(int connections, boolean b) {
         this(connections, new QueryRouteTable(), b);
     }
@@ -20,6 +18,15 @@ public class NewConnection extends TestConnection {
                             QueryRouteTable qrt, boolean b) {
         super(connections, b);
         QRT = qrt;
+        try {
+            PrivilegedAccessor.setValue(qrp(), "_lastQRPTableReceived", QRT);
+        } catch (IllegalAccessException e) {
+            // should not happen
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            // should not happen
+            e.printStackTrace();
+        }
     }
 
     protected NewConnection(int connections, 
@@ -59,15 +66,6 @@ public class NewConnection extends TestConnection {
     public boolean isUltrapeerQueryRoutingConnection() {
         return true;
     }
-    
-    public QueryRouteTable getQueryRouteTableReceived() {
-        return QRT;
-    }
-
-    public boolean hitsQueryRouteTable(QueryRequest query) {
-        return QRT.contains(query);
-    }
-
 
     public String toString() {
         return "NEW TEST CONNECTION";
