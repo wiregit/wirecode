@@ -28,7 +28,7 @@ public class MagnetHTML {
             if(start == -1) {
                 throw new IOException("invalid command: "+cmd);
             } else {
-                start -= 1;
+                start++;
             }
             valstr = keystr.substring(start);
             keystr = keystr.substring(0,start-1);
