@@ -645,12 +645,11 @@ public class UDPService implements Runnable {
 	    if (!RouterService.isConnected())
 	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
 	    
-	    if (!NetworkUtils.isValidAddress(RouterService.getExternalAddress()))
-	        return false;
-	    
 	    boolean ret = true;
 	    synchronized(this) {     	
-	        ret= canReceiveSolicited() && 
+	        ret= 
+	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
+	            canReceiveSolicited() && 
 	    		_portStable &&
 	    		_lastReportedPort==RouterService.getPort() &&
 	    		_lastReportedIP!=null &&
