@@ -2,15 +2,14 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import java.io.*;
-import java.net.*;
 import java.util.Properties;
+
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
 /**
  * This class tests <tt>ManagedConnection</tt>'s ability to buffer messages 
@@ -20,7 +19,7 @@ import com.sun.java.util.collections.*;
  */
 public class ManagedConnectionBufferTest extends BaseTestCase {
 	
-    public static final int PORT=6666;
+    public static final int BUFFER_PORT = 6666;
     private ManagedConnection out = null;
     private Connection in = null;
     MiniAcceptor acceptor = null;
@@ -51,13 +50,14 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		ConnectionSettings.REMOVE_ENABLED.setValue(false);
         ConnectionSettings.SOFT_MAX.setValue((byte)4);
 
-        RouterService rs = 
-			new RouterService(new ActivityCallbackStub());
+        new RouterService(new ActivityCallbackStub());
 
-		acceptor = new MiniAcceptor(new DummyResponder("localhost"), PORT);
+		acceptor = new MiniAcceptor(new DummyResponder("localhost"), 
+            BUFFER_PORT);
 
 		ManagedConnection.QUEUE_TIME=1000;
-		out = new ManagedConnection("localhost", PORT);
+		out = new ManagedConnection("localhost", BUFFER_PORT);
+        out.buildAndStartQueues();
     }
     
     public void tearDown() throws Exception {
@@ -150,7 +150,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
 
     private void tSendFlush() 
-		throws IOException, BadPacketException {
+		throws IOException, BadPacketException, InterruptedException {
         PingRequest pr=null;
         long start=0;
         long elapsed=0;
@@ -159,10 +159,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
         pr=new PingRequest((byte)3);
         out.send(pr);
+        Thread.sleep(400);
         start=System.currentTimeMillis();        
         pr=(PingRequest)in.receive();
         elapsed=System.currentTimeMillis()-start;
-        assertEquals("unexpected number of sent messages", 1, out.getNumMessagesSent());
+        assertEquals("unexpected number of sent messages", 1, 
+            out.getNumMessagesSent());
         assertEquals( pr.getTotalLength(), in.getUncompressedBytesReceived() );
         assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
@@ -329,9 +331,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING_REPLY: x/6340/2 x/6344/3
         //  PING: x
         //  OTHER: reset patch1 patch2
-        out._lastPriority=0;  //cheating to make old tests work
+        //out._lastPriority=0;  //cheating to make old tests work
+        out.resetPriority();
         out.startOutputRunner();
 
+        //System.out.println("ManagedConnectionBufferTest::testReorderBuffer::"+
+          //  "buffer size: "+((BIOMessageWriter)out.getWriter()).size());
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
         assertInstanceof("Unexpected message: "+m, PingRequest.class, m);
@@ -633,8 +638,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         int total=500;
 
         int initialDropped = out.getNumSentMessagesDropped();
-        int initialSent = out.getNumMessagesSent();
-        long initialBytes = out.getBytesSent();
         
         for (int i=0; i<total; i++) {
             out.send(QueryRequest.createQuery(
@@ -654,11 +657,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         }
         
         int dropped=out.getNumSentMessagesDropped()-initialDropped;
-        int sent = out.getNumMessagesSent() - initialSent;
-        long bytes = out.getBytesSent() - initialBytes;
-        //System.out.println("Sent messages/bytes: " + sent + "/" + bytes);
-        //System.out.println("Dropped messages: "+dropped);
-        //System.out.println("Read messages/bytes: "+read+"/"+bytesRead);
         
         assertGreaterThan("dropped msg cnt > 0", 0, dropped);
         assertGreaterThan("drop prct > 0", 0, out.getPercentSentDropped());
