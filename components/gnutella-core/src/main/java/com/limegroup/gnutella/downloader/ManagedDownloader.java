@@ -935,8 +935,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         boolean added = false;
-        //Add to buckets (will be seen because buckets exposes representation).        
-        if (buckets != null) {
+        //Add to buckets (will be seen because buckets exposes representation).
+        //If not already in busy.      
+        if (buckets != null && busy != null && !busy.contains(rfd)) {
             // We must always check to see if this RFD was already added to
             // the buckets now that we add downloads before adding to alt locs.
             // (Previously altloccollection filtered out already-seen ones)
