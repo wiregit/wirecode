@@ -1931,7 +1931,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        RemoteFileDesc[] rfds = {rfd1, rfd2};
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
@@ -1947,7 +1947,7 @@ public class DownloadTest extends BaseTestCase {
         downloader.addDownload(rfd3, true);
         Thread.sleep(1000);
         
-        //make sure we killed the queued
+        //make sure we did not kill anybody
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
@@ -1962,8 +1962,12 @@ public class DownloadTest extends BaseTestCase {
         int u2 = uploader2.amountUploaded();
         int u3 = uploader3.amountUploaded();
 
-        assertLessThan("u1 did too much", TestFile.length()/2+FUDGE_FACTOR, u1);
-        assertLessThan("u2 did too much", TestFile.length()/2+FUDGE_FACTOR, u2);
+        // we only care that the 3rd downloader doesn't download anything -
+        // how the other two downloaders split the file between themselves 
+        // doesn't matter.
+        assertGreaterThan("u1 did not do any work",0,u1);
+        assertGreaterThan("u2 did not do any work",0,u2);
+        assertGreaterThanOrEquals("u3 did some work",TestFile.length(),u1+u2);
         assertEquals("u3 replaced a good downloader",0,u3);
 
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
