@@ -14,8 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 
 /**
