@@ -286,7 +286,7 @@ public final class LimeXMLDocumentHelper{
 
     /*
     public static void main(String argv[]) throws Exception {
-        debugOn = true;
+        debugOn = false;
         LimeXMLDocumentHelper help = new LimeXMLDocumentHelper();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         LimeXMLDocument doc = null;
@@ -304,6 +304,7 @@ public final class LimeXMLDocumentHelper{
                   resps[i].getMetadata());
         
         String xmlCollectionString = help.getAggregateString(resps);
+        Assert.that(xmlCollectionString.equals("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Blues\" bitrate=\"192\" index=\"1\" ></audio><audio genre=\"Country\" bitrate=\"128\" index=\"3\" ></audio></audios>"));
         debug("Aggregate String (no disparates) = " + xmlCollectionString); 
         
         resps = new Response[10];
@@ -324,9 +325,10 @@ public final class LimeXMLDocumentHelper{
             debug("resps["+i+"].metadata = " +
                   resps[i].getMetadata());
         
-        System.out.println("----->");
+        debug("----->");
         
         xmlCollectionString = help.getAggregateString(resps);
+        Assert.that(xmlCollectionString.equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story index=\"3\" ><author>Susheel</author><comments>Duh!</comments></story><story index=\"9\" ><title>Oops, I did it Again!</title><image>J. Lo</image></story></backslash><?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation city=\"New York\" format=\"Blues\" index=\"5\" ></radioStation><radioStation format=\"Classic Rock\" index=\"8\" ></radioStation></radioStations><?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Blues\" bitrate=\"192\" index=\"1\" ></audio><audio genre=\"Chamber Music\" bitrate=\"160\" index=\"6\" ></audio><audio genre=\"Pop\" bitrate=\"170\" index=\"7\" ></audio></audios>"));
         debug("Aggregate String (disparates) = " + xmlCollectionString); 
         
         
