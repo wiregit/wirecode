@@ -77,10 +77,7 @@ public class MediaType {
 													 "png", "tif", "tiff"});	
 
         //Added by Sumeet Thadani to allow a rich search window to be popped up.
-        //Changed on 6/6/01
-        MediaType meta = new MediaType("Rich...", null);
-
-		return new MediaType[] {any, text, programs, audio, video, images, meta};
+		return new MediaType[] {any, text, programs, audio, video, images};
     }		    
 
 	//      public static void main(String args[]) {
