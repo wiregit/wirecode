@@ -655,7 +655,12 @@ public class Response {
 		// this is guaranteed to be non-null, although it could be the empty
 		// string
 		metadata = extractMetadata(document);
-		metaBytes = metadata.getBytes();
+        try {
+            metaBytes = metadata.getBytes("UTF-8");
+        }
+        catch(UnsupportedEncodingException uee) {
+            metaBytes = metadata.getBytes();
+        }
 	}
 	
     
