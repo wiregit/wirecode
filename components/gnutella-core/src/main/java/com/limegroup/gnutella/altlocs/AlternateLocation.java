@@ -211,13 +211,16 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 */
 	public static AlternateLocation create(URN urn) {
 		if(urn == null) throw new NullPointerException("null sha1");
-        try {
-            int port = RouterService.getPort();
-            String addr = NetworkUtils.ip2string(RouterService.getAddress());
-            return new DirectAltLoc(new Endpoint(addr,port),"",urn);
-        } catch(IOException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
-        }
+        
+		try {
+			if (RouterService.acceptedIncomingConnection())
+				return new DirectAltLoc(urn);
+			else 
+				return new PushAltLoc(urn);
+		}catch(IOException bad) {
+			ErrorService.error(bad);
+			return null;
+		}
 	}
 
 

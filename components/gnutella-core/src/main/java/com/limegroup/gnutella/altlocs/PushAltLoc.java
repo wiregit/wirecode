@@ -4,10 +4,13 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 import java.net.URL;
 
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
@@ -45,6 +48,20 @@ public class PushAltLoc extends AlternateLocation {
 		
 		_pushAddress = address;
 		_fileName = name;
+	}
+	
+	/**
+	 * creates a new PushLocation for myself
+	 */
+	protected PushAltLoc(URN sha1) throws IOException{
+		
+		super(sha1);
+		Set proxies = RouterService.getConnectionManager().getPushProxies();
+		
+		byte [] guid = RouterService.getMessageRouter().getOurGUID();
+		
+		_fileName="";
+		_pushAddress = new PushEndpoint(guid,proxies,0,UDPConnection.VERSION);
 	}
 	
 	protected String generateHTTPString() {

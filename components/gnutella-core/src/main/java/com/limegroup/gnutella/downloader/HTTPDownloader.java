@@ -474,9 +474,14 @@ public class HTTPDownloader implements BandwidthTracker {
         	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
 
         // Add ourselves to the mesh if the partial file is valid
-        if( isPartialFileValid() ) {
-            AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
-            addSuccessfulAltLoc(me);
+        //if I'm firewalled add myself only if the other guy wants falts
+        if( isPartialFileValid() && 
+        	 (RouterService.acceptedIncomingConnection() ||
+        			_wantsFalts)) {
+        		AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
+        		if (me != null)
+        			addSuccessfulAltLoc(me);
+        	
         }
 
         URN sha1 = _rfd.getSHA1Urn();

@@ -11,6 +11,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -53,6 +54,18 @@ public class DirectAltLoc extends AlternateLocation {
         _count = 1;
         _demoted = false;
         _fileName = url.getFile();
+	}
+	
+	/**
+	 * creates an altloc for myself.
+	 */
+	protected DirectAltLoc(final URN sha1) throws IOException{
+
+		this(new Endpoint(
+				NetworkUtils.ip2string(RouterService.getAddress()),
+				RouterService.getPort()),
+			 "",
+			 sha1);
 	}
 	
 	protected DirectAltLoc(IpPort address, String fileName, URN sha1) 
