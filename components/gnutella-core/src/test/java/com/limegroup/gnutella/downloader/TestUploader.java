@@ -31,7 +31,7 @@ public class TestUploader {
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
-	private URN                         sha1;
+	private URN                         _sha1;
     private boolean http11 = true;
     ServerSocket server = null;
     private boolean busy = false;
@@ -81,8 +81,8 @@ public class TestUploader {
      * Resets the rate, amount uploaded, stop byte, etc.
      */
     public void reset() {
-	    storedAltLocs   = new AlternateLocationCollection();
-	    incomingAltLocs = new AlternateLocationCollection();
+	    storedAltLocs   = null;//new AlternateLocationCollection();
+	    incomingAltLocs = null;//new AlternateLocationCollection();
         totalUploaded = 0;
         stopAfter = -1;
         rate = 10000;
@@ -148,7 +148,7 @@ public class TestUploader {
      * Get the alternate locations that this uploader has read from headers
      */
     public URN getReportedSHA1() {
-        return sha1;
+        return _sha1;
     }
     
     /** Returns the number of connections this accepted. */
@@ -244,12 +244,18 @@ public class TestUploader {
                 throw new IOException("Unexpected close");
             if (line.equals(""))
                 break;
+
+			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
+				_sha1 = readContentUrn(line);
+			}
+
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
+				if(incomingAltLocs == null) {
+					incomingAltLocs =
+						AlternateLocationCollection.createCollection(_sha1);
+				}
 				readAlternateLocations(line, incomingAltLocs);
             }        
-			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
-				sha1 = readContentUrn(line);
-			}
             
             
             int i=line.indexOf("Range:");
@@ -313,7 +319,7 @@ public class TestUploader {
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
 			out.write(str.getBytes());
 		}
-		if(storedAltLocs.hasAlternateLocations()) 
+		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) 
             HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
 		      storedAltLocs, out);
         str = "\r\n";

@@ -182,10 +182,10 @@ public class DownloadTest extends TestCase {
             tStealerInterruptedWithAlternate();
             cleanup();
         }
-        if(args.length == 0 || args[0].equals("18")) {
-            tTwoAlternatesButOneWithNoSHA1();
-            cleanup();
-        }
+        //if(args.length == 0 || args[0].equals("18")) {
+		//  tTwoAlternatesButOneWithNoSHA1();
+		//  cleanup();
+        //}
         if(args.length == 0 || args[0].equals("19")) {
             tUpdateWhiteWithFailingFirstUploader();
             cleanup();
@@ -204,11 +204,12 @@ public class DownloadTest extends TestCase {
     ////////////////////////// Test Cases //////////////////////////
     
     private static void tOverlapCheckSpeed(int rate) {
-        RemoteFileDesc rfd=newRFD(6346, 100);
+        RemoteFileDesc rfd=newRFDWithURN(6346, 100);
         debug("-Measuring time for download at rate "+rate+"... \n");
         uploader1.setRate(rate);
         long start1=System.currentTimeMillis();
-        AlternateLocationCollection dcoll = new AlternateLocationCollection();
+        AlternateLocationCollection dcoll = 
+			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
         try {
             HTTPDownloader downloader=new HTTPDownloader(rfd, file,dcoll);
             VerifyingFile vf = new VerifyingFile(true);
@@ -231,7 +232,8 @@ public class DownloadTest extends TestCase {
         
         long start2=System.currentTimeMillis();
         try {
-            AlternateLocationCollection dcol=new AlternateLocationCollection();
+            AlternateLocationCollection dcol = 
+				AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
             HTTPDownloader downloader=new HTTPDownloader(rfd, file,dcol);
             VerifyingFile vf = new VerifyingFile(false);
             vf.open(file,null);
@@ -248,7 +250,7 @@ public class DownloadTest extends TestCase {
     
     private static void tSimpleDownload() {
         debug("-Testing non-swarmed download...");
-        RemoteFileDesc rfd=newRFD(6346, 100);
+        RemoteFileDesc rfd=newRFDWithURN(6346, 100);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -264,8 +266,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -290,8 +292,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -320,8 +322,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -350,8 +352,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE/10);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -378,8 +380,8 @@ public class DownloadTest extends TestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
 
         Downloader download=null;
         try {
@@ -423,8 +425,8 @@ public class DownloadTest extends TestCase {
         final int RATE=500;
         uploader1.setRate(0);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -449,8 +451,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/100);
         uploader2.setCorruption(true);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         
         Downloader download=null;
         try {
@@ -482,8 +484,8 @@ public class DownloadTest extends TestCase {
         uploader1.setCorruption(true);
         uploader1.stopAfter(TestFile.length()/8);//blinding fast
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         
         Downloader download=null;
         try {
@@ -543,10 +545,11 @@ public class DownloadTest extends TestCase {
         //Prepare to check the alternate locations
         //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection ashould = new AlternateLocationCollection();
+        AlternateLocationCollection ashould = 
+			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
             ashould.addAlternateLocation(
-                                         AlternateLocation.createAlternateLocation(rfdURL(rfd1)));
+                AlternateLocation.createAlternateLocation(rfd1.getUrl()));
         } catch (Exception e) {
             check(false, "Couldn't setup test");
         }
@@ -575,14 +578,15 @@ public class DownloadTest extends TestCase {
         //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
-        AlternateLocationCollection ashould = new AlternateLocationCollection();
+        AlternateLocationCollection ashould = 
+			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
-            URL url1 =   rfdURL(rfd1);
-            URL url2 =   rfdURL(rfd2);
+            URL url1 = rfd1.getUrl();
+            URL url2 = rfd2.getUrl();
             AlternateLocation al1 =
-            AlternateLocation.createAlternateLocation(url1);
+				AlternateLocation.createAlternateLocation(url1);
             AlternateLocation al2 =
-            AlternateLocation.createAlternateLocation(url2);
+				AlternateLocation.createAlternateLocation(url2);
             ashould.addAlternateLocation(al1);
             ashould.addAlternateLocation(al2);
         } catch (Exception e) {
@@ -617,11 +621,12 @@ public class DownloadTest extends TestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
-        AlternateLocationCollection ualt = new AlternateLocationCollection();
+        AlternateLocationCollection ualt = 
+			AlternateLocationCollection.createCollection(rfd2.getSHA1Urn());
         try {
-            URL url2 =   rfdURL(rfd2);
+            URL url2 = rfd2.getUrl();
             AlternateLocation al2 =
-            AlternateLocation.createAlternateLocation(url2);
+				AlternateLocation.createAlternateLocation(url2);
             ualt.addAlternateLocation(al2);
         } catch (Exception e) {
             check(false, "Couldn't setup test");
@@ -650,20 +655,22 @@ public class DownloadTest extends TestCase {
 
 
         //Prebuild some uploader alts
-        AlternateLocationCollection ualt = new AlternateLocationCollection();
+        AlternateLocationCollection ualt = 
+			AlternateLocationCollection.createCollection(
+                HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
         try {
-            ualt.addAlternateLocation(
-                                      AlternateLocation.createAlternateLocation(
-                                                                                genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
-            ualt.addAlternateLocation(
-                                      AlternateLocation.createAlternateLocation(
-                                                                                genericURL("http://211.211.211.211/get/0/foobar.txt")));
-            ualt.addAlternateLocation(
-                                      AlternateLocation.createAlternateLocation(
-                                                                                genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
-            ualt.addAlternateLocation(
-                                      AlternateLocation.createAlternateLocation(
-                                                                                genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
+            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
+			//AlternateLocation.createAlternateLocation(
+			//genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
+            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
+			//  AlternateLocation.createAlternateLocation(
+			//      genericURL("http://211.211.211.211/get/0/foobar.txt")));
+            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
+			//  AlternateLocation.createAlternateLocation(
+			//      genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
+            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+			//  AlternateLocation.createAlternateLocation(
+			//      genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
         } catch (Exception e) {
             check(false, "Couldn't setup test");
         }
@@ -674,10 +681,11 @@ public class DownloadTest extends TestCase {
         //Prepare to check the alternate locations
         //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection ashould = new AlternateLocationCollection();
+        AlternateLocationCollection ashould = 
+			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
             ashould.addAlternateLocation(
-                                         AlternateLocation.createAlternateLocation(rfdURL(rfd1)));
+                AlternateLocation.createAlternateLocation(rfd1.getUrl()));
         } catch (Exception e) {
             check(false, "Couldn't setup test");
         }
@@ -713,11 +721,12 @@ public class DownloadTest extends TestCase {
         RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
 
         //Prebuild an uploader alt in lieu of rdf4
-        AlternateLocationCollection ualt = new AlternateLocationCollection();
+        AlternateLocationCollection ualt = 
+			AlternateLocationCollection.createCollection(rfd4.getSHA1Urn());
         try {
-            URL url4 =   rfdURL(rfd4);
+            URL url4 = rfd4.getUrl();//  rfdURL(rfd4);
             AlternateLocation al4 =
-            AlternateLocation.createAlternateLocation(url4);
+				AlternateLocation.createAlternateLocation(url4);
             ualt.addAlternateLocation(al4);
         } catch (Exception e) {
             check(false, "Couldn't setup test");
@@ -746,10 +755,12 @@ public class DownloadTest extends TestCase {
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
 
+	// no longer in use, as alternate locations should always have SHA1s
+	/*
     private static void tTwoAlternatesButOneWithNoSHA1() {  
         debug("-Testing Two Alternates but one with no sha1...");
         RemoteFileDesc rfd1=newRFDWithURN(6346, 100, testHash.toString());
-        RemoteFileDesc rfd2=newRFD(6347, 100); // No SHA1
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100); // No SHA1
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -758,25 +769,27 @@ public class DownloadTest extends TestCase {
         //Note: adiff should be blank
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
-        AlternateLocationCollection ashould = new AlternateLocationCollection();
+        AlternateLocationCollection ashould = 
+			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
-            URL url1 =   rfdURL(rfd1);
+            URL url1 = rfd1.getUrl();//  rfdURL(rfd1);
             AlternateLocation al1 =
-            AlternateLocation.createAlternateLocation(url1);
+				AlternateLocation.createAlternateLocation(url1);
             ashould.addAlternateLocation(al1);
         } catch (Exception e) {
             check(false, "Couldn't setup test");
         }
         AlternateLocationCollection adiff = 
-        ashould.diffAlternateLocationCollection(alt1); 
+			ashould.diffAlternateLocationCollection(alt1); 
         AlternateLocationCollection adiff2 = 
-        alt1.diffAlternateLocationCollection(ashould); 
+			alt1.diffAlternateLocationCollection(ashould); 
         
         check(alt1.hasAlternateLocations(), "uploader1 didn't receive alt");
         check(alt2.hasAlternateLocations(), "uploader2 didn't receive alt");
         check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
         check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
-    }
+		}
+	*/
 
     private static void tUpdateWhiteWithFailingFirstUploader() {
         debug("-Testing corruption of needed. \n");
@@ -790,8 +803,8 @@ public class DownloadTest extends TestCase {
         uploader1.setRate(RATE);
         uploader1.setBusy(true);
         uploader2.setRate(RATE/4);//slower downloader - guarantee second spot
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         tGeneric(rfds);        
 
@@ -806,7 +819,7 @@ public class DownloadTest extends TestCase {
     private static void tQueuedDownloader() {
         debug("-Testing queued downloader. \n");
         uploader1.setQueue(true);
-        RemoteFileDesc rfd1 = newRFD(6346, 100);
+        RemoteFileDesc rfd1 = newRFDWithURN(6346, 100);
         RemoteFileDesc[] rfds = {rfd1};
         //the queued downloader will resend the query after sleeping,
         //and then it shold complete the download, because TestUploader
@@ -833,11 +846,12 @@ public class DownloadTest extends TestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
-        AlternateLocationCollection ualt = new AlternateLocationCollection();
+        AlternateLocationCollection ualt = 
+			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
         try {
-            URL url2 =   rfdURL(rfd2);
+            URL url2 = rfd2.getUrl();//  rfdURL(rfd2);
             AlternateLocation al2 =
-            AlternateLocation.createAlternateLocation(url2);
+				AlternateLocation.createAlternateLocation(url2);
             ualt.addAlternateLocation(al2);
         } catch (Exception e) {
             check(false, "Couldn't setup test");
@@ -922,6 +936,7 @@ public class DownloadTest extends TestCase {
         }
     }
 
+	/*
     private static URL rfdURL(RemoteFileDesc rfd) {
         String rfdStr;
         URL    rfdURL = null;
@@ -935,6 +950,7 @@ public class DownloadTest extends TestCase {
         }  
         return rfdURL;
     }
+	*/
 
     private static URL genericURL(String url) {
         URL    theURL = null;
@@ -954,14 +970,17 @@ public class DownloadTest extends TestCase {
                                   speed, false, 4, false, null, null);
     }
 
+	private static RemoteFileDesc newRFDWithURN(int port, int speed) {
+		return newRFDWithURN(port, speed, null);
+	}
+
     private static RemoteFileDesc newRFDWithURN(int port, int speed, 
                                                 String urn) {
         com.sun.java.util.collections.Set set = 
-        new com.sun.java.util.collections.HashSet();
+			new com.sun.java.util.collections.HashSet();
         try {
             if (urn == null)
-                set.add(URN.createSHA1Urn(
-                                 "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+                set.add(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
             else
                 set.add(URN.createSHA1Urn(urn));
         } catch(Exception e) {
