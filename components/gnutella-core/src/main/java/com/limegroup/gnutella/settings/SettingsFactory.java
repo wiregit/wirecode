@@ -177,7 +177,7 @@ public final class SettingsFactory {
      * Save setting information to property file
      * We want to NOT save any properties which are the default value,
      * as well as any older properties that are no longer in use.
-     * To avoid having to manually encode the file, we create clone
+     * To avoid having to manually encode the file, we clone
      * the existing properties and manually remove the ones
      * which are default and aren't required to be saved.
      * It is important to do it this way (as opposed to creating a new
