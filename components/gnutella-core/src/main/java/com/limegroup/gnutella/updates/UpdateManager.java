@@ -81,6 +81,8 @@ public class UpdateManager {
     public void postGuiInit(ActivityCallback gui) {
         String myVersion = CommonUtils.getLimeWireVersion();
 
+        if(myVersion.equalsIgnoreCase(latestVersion)) //are we equal?
+            return;
         if(isGreaterVersion(myVersion,latestVersion))
             return;
         //OK. myVersion < latestVersion
