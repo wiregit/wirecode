@@ -92,11 +92,6 @@ public final class QueryHandler {
 		RouterService.getConnectionManager();
 
 	/**
-	 * Variable for the number of hosts that have been queried.
-	 */
-	private volatile int _hostsQueried = 0;
-
-	/**
 	 * Variable for the next time after which a query should be sent.
 	 */
 	private volatile long _nextQueryTime = 0;
@@ -412,7 +407,6 @@ public final class QueryHandler {
         
         
 		int length = list.size();
-        int newHosts = 0;
         byte ttl = 0;
         ManagedConnection mc = null;
 
@@ -467,9 +461,7 @@ public final class QueryHandler {
                 
         
         int hostsToQueryPerConnection = 
-            hostsToQuery/remainingConnections;			
-        
-        byte maxTTL = mc.headers().getMaxTTL();
+            hostsToQuery/remainingConnections;;
         
         ttl = calculateNewTTL(hostsToQueryPerConnection, 
                               mc.getNumIntraUltrapeerConnections(),

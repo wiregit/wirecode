@@ -183,12 +183,9 @@ public final class SearchResultHandler {
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
         int z = allDocsArray.size();
-        int numResults = results.size();
         int k = -1;//for counting iterations...initialized to -1
 
 		byte[] replyGUID = data.getMessageGUID();
-        final boolean isSpecificXMLSearch = 
-			RouterService.isSpecificXMLSearch(replyGUID);
 
         Iterator iter = results.iterator();
         while(iter.hasNext()) {
@@ -199,11 +196,6 @@ public final class SearchResultHandler {
             //Throw away results from Mandragore Worm
             if (RouterService.isMandragoreWorm(replyGUID, response))
                 continue;
-            //Throw away files that are two big to fit in an integer.
-            long size = response.getSize();
-            long index = response.getIndex();
-            String name = response.getName();
-            long maxIndex = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
             
             ArrayList docs = null;
             if(xmlCollectionString==null || xmlCollectionString.equals("")){
@@ -242,23 +234,24 @@ public final class SearchResultHandler {
             RemoteFileDesc rfd = null;
             LimeXMLDocument doc = docs==null||docs.size()==0?null
                                                  :(LimeXMLDocument)docs.get(0);
-            int intSize =  (int)size;//can't change type in rfd, it's serialized
-            rfd = new RemoteFileDesc(data.getIP(),data.getPort(),
-                                                 response.getIndex(),
-                                                 response.getName(),
-                                                 intSize,
-                                                 data.getClientGUID(),
-                                                 data.getSpeed(),
-                                                 data.isChatEnabled(),
-                                                 data.getQuality(),
-                                                 data.isBrowseHostEnabled(),
-                                                 doc,
-                                                 response.getUrns(),
-                                                 data.isReplyToMulticastQuery(),
-                                                 data.isFirewalled(), 
-                                                 data.getVendorCode(),
-                                                 System.currentTimeMillis(),
-                                                 data.getPushProxies());
+            rfd = new RemoteFileDesc(data.getIP(),
+                                     data.getPort(),
+                                     response.getIndex(),
+                                     response.getName(),
+                                     (int)response.getSize(),
+                                     data.getClientGUID(),
+                                     data.getSpeed(),
+                                     data.isChatEnabled(),
+                                     data.getQuality(),
+                                     data.isBrowseHostEnabled(),
+                                     doc,
+                                     response.getUrns(),
+                                     data.isReplyToMulticastQuery(),
+                                     data.isFirewalled(), 
+                                     data.getVendorCode(),
+                                     System.currentTimeMillis(),
+                                     data.getPushProxies()
+                                    );
 			RouterService.getCallback().handleQueryResult(rfd,data);
 
         } //end of response loop
