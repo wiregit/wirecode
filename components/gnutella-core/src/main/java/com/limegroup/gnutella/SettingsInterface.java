@@ -47,6 +47,7 @@ public interface SettingsInterface
     public boolean    getClearCompletedDownload();
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
+    public int        getSearchAnimationTime();
 
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
@@ -140,7 +141,7 @@ public interface SettingsInterface
     public void setParallelSearchMax(int max);
     public void setMaxSimDownload(int max);
     public void setClearCompletedDownload(boolean b);
-
+    public void setSearchAnimationTime(int seconds);
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
@@ -205,6 +206,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 2;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
+    public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -233,6 +235,7 @@ public interface SettingsInterface
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
     public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
+    public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }

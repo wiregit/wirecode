@@ -48,6 +48,7 @@ public class SettingsManager implements SettingsInterface
     private static int      parallelSearchMax_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
+    private static int      searchAnimationTime_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -341,6 +342,14 @@ public class SettingsManager implements SettingsInterface
 			try {setQuickConnectHosts(decode(p));}
 			catch (IllegalArgumentException ie){}
 		    }
+		else if(key.equals(SettingsManager.SEARCH_ANIMATION_TIME))
+		    {			
+			try {
+			    i = Integer.parseInt(p);
+			    try {setSearchAnimationTime(i);}
+			    catch (IllegalArgumentException ie){}
+			} catch(NumberFormatException nfe){}   	
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -379,6 +388,7 @@ public class SettingsManager implements SettingsInterface
 	setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
 	setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
 	setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
+	setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
     }
 
     /** returns the time to live */
@@ -445,6 +455,8 @@ public class SettingsManager implements SettingsInterface
     public int getParallelSearchMax(){return parallelSearchMax_;}    
     public int getMaxSimDownload(){return parallelSearchMax_;}    
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
+    public int getSearchAnimationTime(){ return searchAnimationTime_; }
+
  
     /** specialized method for getting the number 
      *  of files scanned */
@@ -805,6 +817,19 @@ public class SettingsManager implements SettingsInterface
 		String s = String.valueOf(max);
 		props_.setProperty(SettingsInterface.PARALLEL_SEARCH, s);
 		writeProperties();	
+	    }
+    }
+
+    public synchronized void setSearchAnimationTime(int seconds)
+    {
+	if(seconds < 0)
+	    throw new IllegalArgumentException();
+	else	
+	    {
+		searchAnimationTime_=seconds;
+		String s = Integer.toString(seconds);
+		props_.setProperty(SettingsInterface.SEARCH_ANIMATION_TIME, s);
+		writeProperties();
 	    }
     }
 
