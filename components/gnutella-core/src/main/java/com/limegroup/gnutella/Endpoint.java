@@ -6,7 +6,8 @@ import java.io.*;
 
 
 /** Immutable IP/port pair.  Also contains an optional number and size of files. */
-public class Endpoint implements Cloneable, Serializable, Comparable{
+public class Endpoint implements Cloneable, Serializable, 
+				 com.sun.java.util.collections.Comparable{
     String hostname;
     int port;
     /** Number of files at the host, or -1 if unknown */
