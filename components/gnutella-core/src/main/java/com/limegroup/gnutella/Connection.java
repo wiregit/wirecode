@@ -54,6 +54,9 @@ public class Connection {
      * The Inflater to use for inflating read streams, initialized
      * in initialize() if the connection told us it's sending with
      * a Content-Encoding of deflate.
+     * Definitions:
+     *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
+     *   Inflater.getTotalIn  -- The number of COMPRESSED bytes
      */
     private Inflater _inflater;
     
@@ -64,6 +67,9 @@ public class Connection {
      * Note that this is the same as '_out', but is assigned here
      * as the appropriate type so we don't have to cast when we
      * want to measure the compression savings.
+     * Definitions:
+     *   Deflater.getTotalOut -- The number of COMPRESSED bytes
+     *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
     private ZOutputStream _deflater;
     
@@ -881,18 +887,28 @@ public class Connection {
     
     /**
      * Returns the percentage saved through compressing the outgoing data.
+     * Remember that ...
+     *   Deflater.getTotalOut -- The number of COMPRESSED bytes
+     *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes          
      */
-    public double getSentSavedFromCompression() {
+    public float getSentSavedFromCompression() {
         if( !isWriteDeflated() ) return 0;
-        return (1-((double)_deflater.getTotalOut()/(double)_deflater.getTotalIn()))*100;
+        float saved = 1-((float)_deflater.getTotalOut()/(float)_deflater.getTotalIn());
+        System.out.println("Deflater... TotalOut: " + _deflater.getTotalOut() + ", TotalIn: " + _deflater.getTotalIn() + ", saved: " + saved);
+        return saved;
     }
     
     /**
      * Returns the percentage saved from having the incoming data compressed.
+     * Remember that ...
+     *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
+     *   Inflater.getTotalIn  -- The number of COMPRESSED bytes     
      */
-    public double getReadSavedFromCompression() {
+    public float getReadSavedFromCompression() {
         if( !isReadDeflated() ) return 0;
-        return (1-((double)_inflater.getTotalIn()/(double)_inflater.getTotalOut()))*100;
+        float saved = 1-((float)_inflater.getTotalIn()/(float)_inflater.getTotalOut());
+        System.out.println("Inflater... TotalOut: " + _inflater.getTotalOut() + ", TotalIn: " + _inflater.getTotalIn() + ", saved: " + saved);        
+        return saved;
     }
 
     /** Returns the host set at construction */
