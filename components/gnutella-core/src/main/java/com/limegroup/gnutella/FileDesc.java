@@ -13,12 +13,12 @@ import java.io.*;
 import java.security.*;
 import java.util.Enumeration;
 
-public class FileDesc {
+public final class FileDesc {
     
-    public int _index;
-    public String _path;
-    public String _name;
-    public int _size;
+    public final int _index;
+    public final String _path;
+    public final String _name;
+    public final int _size;
     public long _modTime;
     public HashSet /* of Strings */ _urns; // one or more "urn:" names for this file
 		
@@ -31,13 +31,13 @@ public class FileDesc {
      *  files are currently limited to Integer.MAX_VALUE bytes
      *  length, i.e., 2048MB.)
      */
-    public FileDesc(int i, String n, String p, int s, 
-      long modTime, HashSet urns) {
-        _index = i;
-        _name = n;
-        _path = p;
-        _size = s;
-        _modTime = modTime;
+    public FileDesc(File file, int index, HashSet urns) {
+		
+        _index = index;
+        _name = file.getName();
+        _path = file.getAbsolutePath(); //TODO: right method?
+        _size = (int)file.length();
+        _modTime = file.lastModified();
         _urns = urns;
         // if(shouldCalculateUrns()) calculateUrns();
     }
