@@ -89,6 +89,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_GIVE_STATS, 
                                         GiveStatsVendorMessage.VERSION);
         hashSet.add(smp);
+        // Statistics (response to GiveStat)
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_STATISTICS,
+                                        StatisticVendorMessage.VERSION);
+        hashSet.add(smp);
         // Push Proxy Request
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,
                                         PushProxyRequest.VERSION);

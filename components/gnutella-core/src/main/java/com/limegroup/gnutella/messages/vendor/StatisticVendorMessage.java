@@ -8,7 +8,7 @@ import java.io.*;
 
 public class StatisticVendorMessage extends VendorMessage {
     
-    private static final int VERSION = 1;
+    public static final int VERSION = 1;
 
     private static final String DELIMITER = " | ";
 
