@@ -435,6 +435,8 @@ public class Sockets {
 		// skip the rest of the response
 		while (!line.equals("")) {
 			line = reader.readLine();
+            if(line == null)
+                throw new IOException("end of stream");
 		}
 
 		// we should be connected now
