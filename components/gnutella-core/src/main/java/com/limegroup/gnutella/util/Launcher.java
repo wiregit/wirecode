@@ -313,7 +313,7 @@ public class Launcher {
 				FileInputStream fis = new FileInputStream(f);
 				String hex = Integer.toHexString(fis.read());
 				hex += Integer.toHexString(fis.read());
-				fis.close();
+				fis.close();							
 				if(hex.equals("4d5a")) {
 					Utilities.showError("LimeWire will not launch executable files "+
 										"for security reasons.");
