@@ -418,8 +418,16 @@ public class Connection implements Runnable {
     }//run
 
     public String toString() {
-	return "Connection("+(incoming?"incoming":"outgoing")
-	    +", "+sock.toString()+", "+sent+", "+received+")";
+	//hack!
+	if (this==ConnectionManager.ME_CONNECTION)
+	    return "Connection(<ME>)";
+	//unconnected outgoing connection
+	else if (sock==null) 
+	    return "Connection(unconnected, "+host+":"+port+")";
+	//normal, connected connection
+	else
+	    return "Connection("+(incoming?"incoming":"outgoing")
+		+", "+sock.toString()+", "+sent+", "+received+")";
     }
 
     public boolean isOutgoing() {
@@ -476,4 +484,9 @@ public class Connection implements Runnable {
     public long getTotalFileSize() {
 	return totalFileSize;
     }   
+
+//      public static void main(String args[]) {
+//  	System.out.println(ConnectionManager.ME_CONNECTION.toString());
+//  	System.out.println((new Connection("somehost.com",123)).toString());
+//      }	
 }
