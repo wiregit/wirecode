@@ -931,10 +931,17 @@ public class RouterService
      * connecting/reading/writing from the host
 	 */
 	public void doBrowseHost(String host, int port, 
-                             GUID guid, boolean needsPush) 
+                             GUID guid, GUID serventID) 
         throws IOException {
-        if (needsPush)
-            ;
+        if (serventID != null) {
+            PushRequest pr = new PushRequest(GUID.makeGuid(),
+                                             SettingsManager.instance().getTTL(),
+                                             serventID.bytes(), 
+                                             1,
+                                             acceptor.getAddress(),
+                                             acceptor.getPort());
+            //router.sendPushRequest(pr);
+        }
         else
             handleNormalBrowseHost(host, port, guid);
 	}

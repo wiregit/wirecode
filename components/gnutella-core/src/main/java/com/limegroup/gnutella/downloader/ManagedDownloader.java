@@ -1547,7 +1547,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return chatList.hasChatEnabledHost();
 	}
 
-	public synchronized Endpoint getBrowseEnabledHost() {
+	public synchronized RemoteFileDesc getBrowseEnabledHost() {
 		return browseList.getBrowseHostEnabledHost();
 	}
 

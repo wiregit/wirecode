@@ -118,7 +118,7 @@ public interface Downloader extends BandwidthTracker {
 	 * Returns a browse-enabled <tt>Endpoint</tt> instance for this
 	 * <tt>Downloader</tt>.
 	 */
-	public Endpoint getBrowseEnabledHost();
+	public RemoteFileDesc getBrowseEnabledHost();
 
 	/**
 	 * Returns whether or not there is a browse-enabled host available for

@@ -29,14 +29,13 @@ final class DownloadBrowseHostList {
 	 * Returns the first browsable <tt>Endpoint</tt> instance in the list,
 	 * or <tt>null</tt> if the list is empty.
 	 *
-	 * @return the first browsable <tt>Endpoint</tt> instance in the list,
+	 * @return the first browsable <tt>RemoteFileDesc</tt> instance in the list,
 	 *  or <tt>null</tt> if the list is empty.
 	 */
-	synchronized Endpoint getBrowseHostEnabledHost() {		
+	synchronized RemoteFileDesc getBrowseHostEnabledHost() {		
 		if(BROWSE_LIST.isEmpty()) return null;
 		HTTPDownloader downloader = (HTTPDownloader)BROWSE_LIST.get(BROWSE_LIST.size()-1);
-		return new Endpoint(downloader.getInetAddress().getHostAddress(),
-							downloader.getPort());
+		return downloader.getRemoteFileDesc();
 	}
 
 	/**
