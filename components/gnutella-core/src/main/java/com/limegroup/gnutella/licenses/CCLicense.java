@@ -105,10 +105,37 @@ import org.xml.sax.SAXException;
     public boolean isVerifying() { return verified == VERIFYING; }
     public boolean isVerified() { return verified == VERIFIED; }
     public String getLicense() { return license; }
-    public URL getLicenseDeed() { return licenseURL; }
+    public URL getLicenseDeed() { return licenseURL == null ? guessLicenseDeed() : licenseURL; }
     public URN getExpectedURN() { return expectedURN; }
     public long getLastVerifiedTime() { return lastVerifiedTime; }
     public URI getLicenseURI() { return licenseLocation; }
+
+    /**
+     * Attempts to guess what the license URI is from the license text.
+     */    
+    private URL guessLicenseDeed() {
+        // find where "creativecommons.org/licenses/" is.
+        int idx = license.indexOf(CCConstants.CC_URI_PREFIX);
+        if(idx == -1)
+            return null;
+        // find the "http://" before it.
+        int httpIdx = license.lastIndexOf("http://", idx);
+        if(httpIdx == -1)
+            return null;
+        // find where the first space is after the http://.
+        // if it's before the creativecommons.org part, that's bad.
+        int spaceIdx = license.indexOf(" ", httpIdx);
+        if(spaceIdx < idx)
+            return null;
+     
+        try {       
+            return new URL(license.substring(httpIdx, spaceIdx));
+        } catch(MalformedURLException bad) {
+            LOG.warn("Unable to create URL from license: " + license, bad);
+            return null;
+        }
+    }
+        
     
     public boolean isValid(URN urn) {
         if(!valid)
@@ -138,22 +165,31 @@ import org.xml.sax.SAXException;
         StringBuffer sb = new StringBuffer();
         if(permitted != null && !permitted.isEmpty()) {
             sb.append("Permitted: ");
-            for(Iterator i = permitted.iterator(); i.hasNext(); )
+            for(Iterator i = permitted.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
+                if(i.hasNext())
+                    sb.append(", ");
+            }
         }
         if(prohibited != null && !prohibited.isEmpty()) {
             if(sb.length() != 0)
                 sb.append("\n");
             sb.append("Prohibited: ");
-            for(Iterator i = prohibited.iterator(); i.hasNext(); )
+            for(Iterator i = prohibited.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
+                if(i.hasNext())
+                    sb.append(", ");
+            }
         }
         if(required != null && !required.isEmpty()) {
             if(sb.length() != 0)
                 sb.append("\n");
             sb.append("Required: ");
-            for(Iterator i = required.iterator(); i.hasNext(); )
+            for(Iterator i = required.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
+                if(i.hasNext())
+                    sb.append(", ");
+            }
         }
         
         if(sb.length() == 0)
@@ -207,17 +243,16 @@ import org.xml.sax.SAXException;
             return false;
         
         // look for two rdf:RDF's.
-        int startRDF = body.indexOf("rdf:RDF");
+        int startRDF = body.indexOf("<rdf:RDF");
         if(startRDF >= body.length() - 1)
             return false;
             
-        int endRDF = body.indexOf("rdf:RDF", startRDF+1);
+        int endRDF = body.indexOf("rdf:RDF", startRDF+6);
         if(startRDF == -1 || endRDF == -1)
             return false;
         
-        // okay, now we know there's a start & end, find the opening <
-        // and closing >, get that substring, and do a DOM parsing.
-        startRDF = body.lastIndexOf('<', startRDF);
+        // okay, now we know there's a start & end, 
+        // get that substring, and do a DOM parsing.
         endRDF = body.indexOf('>', endRDF);
         if(startRDF == -1 || endRDF == -1)
             return false;
@@ -229,10 +264,10 @@ import org.xml.sax.SAXException;
         try {
             parser.parse(is);
         } catch (IOException ioe) {
-            LOG.debug("IOX parsing RDF", ioe);
+            LOG.debug("IOX parsing RDF\n" + rdf, ioe);
             return false;
         } catch (SAXException saxe) {
-            LOG.debug("SAX parsing RDF", saxe);
+            LOG.debug("SAX parsing RDF\n" + rdf, saxe);
             return false;
         }
         
@@ -272,7 +307,7 @@ import org.xml.sax.SAXException;
                 if(LOG.isDebugEnabled())
                     LOG.debug("Found URN: " + expectedURN);
             } catch(IOException ioe) {
-                LOG.warn("Unable to create URN out of 'about' value", ioe);
+                LOG.warn("Bad URN value: " + value, ioe);
             }
         } else if(LOG.isWarnEnabled()) {
             LOG.warn("No about item!");
@@ -302,7 +337,7 @@ import org.xml.sax.SAXException;
                 if(LOG.isDebugEnabled())
                     LOG.debug("Found licenseURL: " + licenseURL);
             } catch(MalformedURLException murl) {
-                LOG.warn("Unable to get license URL", murl);
+                LOG.warn("Bad License URL: " + value, murl);
             }
         } else if(LOG.isWarnEnabled())
             LOG.warn("No about item!");
@@ -343,9 +378,14 @@ import org.xml.sax.SAXException;
             int slash = value.lastIndexOf('/');
             if(slash != -1 && slash != value.length()-1) {
                 String permission = value.substring(slash+1);
-                permissions.add(permission);
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Added permission: " + permission);
+                if(!permissions.contains(permission)) {
+                    permissions.add(permission);
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Added permission: " + permission);
+                } else {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Duplicate permission: " + permission + "!");
+                }
             } else if (LOG.isWarnEnabled()) {
                 LOG.trace("Unable to find permission name: " + value);
             }
