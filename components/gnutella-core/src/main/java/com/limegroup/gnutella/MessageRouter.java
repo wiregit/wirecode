@@ -62,6 +62,11 @@ public abstract class MessageRouter {
     private final int MAX_BYPASSED_RESULTS = 150;
 
     /**
+     * The maximum number of PushRequests per expire time.
+     */
+    private final int MAX_PUSH_REQUESTS = 5;
+
+    /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
@@ -117,6 +122,14 @@ public abstract class MessageRouter {
      * back attempts will be honored.
      */
     private static final FixedsizeHashMap _tcpConnectBacks = 
+        new FixedsizeHashMap(200);
+
+    
+    /**
+     * Keeps track of what hosts have sent us PushRequests lately.  Only allow
+     * up to MAX_PUSH_REQUESTS per Expire time.
+     */
+    private static final FixedsizeHashMap _pushRequests =
         new FixedsizeHashMap(200);
 
 	/**
@@ -2034,6 +2047,14 @@ public abstract class MessageRouter {
             _pushRouteTable.getReplyHandler(request.getClientGUID());
 
         if(replyHandler != null) {
+            if (replyHandler instanceof ForMeReplyHandler) {
+                // make sure the guy isn't hammering us
+                String ip = NetworkUtils.ip2string(request.getIP());
+                Integer i = (Integer) _pushRequests.get(ip);
+                Integer newI = new Integer((i==null) ? 1 : i.intValue() + 1);
+                _pushRequests.put(ip, newI);
+                if (newI.intValue() > MAX_PUSH_REQUESTS) return;
+            }
             replyHandler.handlePushRequest(request, handler);
         }
         else {
@@ -2607,6 +2628,8 @@ public abstract class MessageRouter {
             try {
                 _tcpConnectBacks.clear();
                 _udpConnectBacks.clear();
+                // also expire the number of PushRequest per host
+                _pushRequests.clear();
             } 
             catch(Throwable t) {
                 ErrorService.error(t);
