@@ -1001,7 +1001,7 @@ public class UDPConnectionProcessor {
                 AckMessage    amsg   = (AckMessage) msg;
 
                 // Extend the windowStart to 8 bytes the same as the 
-                // sequenceNumber (except that it is remote here)
+                // sequenceNumber 
                 amsg.extendWindowStart(
                   _localExtender.extendSequenceNumber(amsg.getWindowStart()) );
 
@@ -1101,15 +1101,11 @@ public class UDPConnectionProcessor {
                 // Ack the Data message
                 safeSendAck(msg);
             } else if (msg instanceof KeepAliveMessage) {
-                // Extend the msgs sequenceNumber to 8 bytes based on past state
-                msg.extendSequenceNumber(
-                  _localExtender.extendSequenceNumber(
-                    msg.getSequenceNumber()) );
-
+                // No need to extend seqNo on KeepAliveMessage since it is zero
                 KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
 
                 // Extend the windowStart to 8 bytes the same 
-                // as the sequenceNumber
+                // as the Ack
                 kmsg.extendWindowStart(
                   _localExtender.extendSequenceNumber(kmsg.getWindowStart()) );
 
