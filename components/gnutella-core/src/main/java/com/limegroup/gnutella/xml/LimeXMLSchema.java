@@ -18,7 +18,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * @author asingla
  * @version
  */
-public class LimeXMLSchema extends LimeXMLDocument{
+public class LimeXMLSchema 
+{
 
     /** 
      * Creates new LimeXMLSchema 
