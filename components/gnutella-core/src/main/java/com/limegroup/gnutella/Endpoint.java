@@ -6,7 +6,7 @@ import java.io.*;
 
 
 /** Immutable IP/port pair. */
-public class Endpoint implements Cloneable{
+public class Endpoint implements Cloneable, Serializable{
     String hostname;
     int port;
     
