@@ -29,13 +29,24 @@ public class ComparatorsTest extends BaseTestCase {
         String b = "b";
         String c = "c";
         Map longMap = new TreeMap(Comparators.longComparator());
+        java.util.Map referenceLongMap = new java.util.TreeMap();
         longMap.put(one, a);
         longMap.put(two, b);
         longMap.put(three, c);
+        
+        referenceLongMap.put(one, a);
+        referenceLongMap.put(two, b);
+        referenceLongMap.put(three, c);
         Iterator iter = longMap.values().iterator();
         assertEquals("unexpected string", a, iter.next());
         assertEquals("unexpected string", b, iter.next());
         assertEquals("unexpected string", c, iter.next());
+        
+        // Now, test against the new code that has existed since Java 1.2
+        java.util.Iterator referenceIter = referenceLongMap.values().iterator();
+        assertEquals("unexpected string", a, referenceIter.next());
+        assertEquals("unexpected string", b, referenceIter.next());
+        assertEquals("unexpected string", c, referenceIter.next());
     }
     
     /**
@@ -54,6 +65,7 @@ public class ComparatorsTest extends BaseTestCase {
         longMap.put(one, a);
         longMap.put(two, b);
         longMap.put(three, c);
+
         Iterator iter = longMap.values().iterator();
         assertEquals("unexpected string", c, iter.next());
         assertEquals("unexpected string", b, iter.next());
