@@ -153,19 +153,24 @@ public class FileViewRequestTest extends ClientSideTestCase {
     public void testHammeringNotAllowed() throws Exception {
 
         final String output = FileListHTMLPage.instance().getSharedFilePage();
+        boolean banned = false;
         // open a bunch of connections
         for (int i = 0; i < 25; i++) {
             URL url = new URL("http", "localhost", SERVER_PORT,
                               UploadManager.FV_REQ_BEGIN + "/" +
                               UploadManager.FV_PASS);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if ((conn.getResponseCode() >= 400) && 
+                (conn.getResponseCode() < 500)) banned = true;
+            if (banned) break;
             InputStream is = conn.getInputStream();
             assertEquals(output.length(), conn.getContentLength());
             Thread.sleep(1*1000);
         }
 
-        // wait a while
-        Thread.sleep(25*1000);
+        if (!banned)
+            // wait a while
+            Thread.sleep(25*1000);
 
         final byte[] error = BannedUploadState.ERROR_MESSAGE;
         // next request should be denied
