@@ -151,6 +151,13 @@ public class SettingsManager {
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
+    
+    //settings for Supernode implementation
+    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
+    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
+    private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
+    private volatile boolean DEFAULT_SUPERNODE_MODE = true;
+    
 
 	/**
 	 * The default minimum number of stars for search results, on a scale
@@ -239,6 +246,15 @@ public class SettingsManager {
 
 	private final String LANGUAGE              = "LANGUAGE";
 	private final String COUNTRY               = "COUNTRY";
+    
+    //settings for Supernode implementation
+    private final String MAX_SHIELDED_CLIENT_CONNECTIONS 
+       = "MAX_SHIELDED_CLIENT_CONNECTIONS";
+    private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
+       = "MIN_SHIELDED_CLIENT_CONNECTIONS";
+    private final String SUPERNODE_PROBATION_TIME 
+       = "SUPERNODE_PROBATION_TIME"; 
+    private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
 
 	/**
 	 * Key for the minimum quality to allow in search results.
@@ -317,6 +333,12 @@ public class SettingsManager {
 	private volatile boolean  _installed;
 	private volatile boolean  _acceptedIncoming = false;
 
+    //settings for Supernode implementation
+    private volatile int _maxShieldedClientConnections;
+    private volatile int _minShieldedClientConnections;
+    private volatile long _supernodeProbationTime;
+    private volatile boolean _supernodeMode;
+    
 
     /** 
 	 * Set up a local variable for the properties
@@ -731,6 +753,22 @@ public class SettingsManager {
 					Boolean messageShown = new Boolean(p);
 					set17SearchMessageShown(messageShown.booleanValue());
 				}
+                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS))
+                {
+                    setMaxShieldedClientConnections((new Integer(p)).intValue());
+                }
+                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS))
+                {
+                    setMinShieldedClientConnections((new Integer(p)).intValue());
+                }
+                else if(key.equals(SUPERNODE_PROBATION_TIME))
+                {
+                    setSupernodeProbationTime((new Long(p)).longValue());
+                }
+                else if(key.equals(SUPERNODE_MODE))
+                {
+                    setSupernodeMode((new Boolean(p)).booleanValue());
+                }
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -825,6 +863,14 @@ public class SettingsManager {
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
 		set17SearchMessageShown(DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN);
+        
+        //settings for Supernode implementation
+        setMaxShieldedClientConnections(
+            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
+        setMinShieldedClientConnections(
+            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
+        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
+        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
     }
 
 
@@ -1276,6 +1322,42 @@ public class SettingsManager {
 		Boolean b = Boolean.valueOf(_props.getProperty(SEARCH_FILTER_MESSAGE_SHOWN));
 		return b.booleanValue();
 	}
+    
+    //settings for Supernode implementation
+    /**
+     * Returns the maximum number of shielded connections to be supported by
+     * the supernode
+     */
+    public int getMaxShieldedClientConnections()
+    {
+        return _maxShieldedClientConnections;
+    }
+    
+    /**
+     * Returns the minimum number of shielded connections to be supported by
+     * the supernode
+     */
+    public int getMinShieldedClientConnections()
+    {
+        return _minShieldedClientConnections;
+    }
+
+    /**
+     * Returns the probation time for s supernode, during which supernode
+     * decides whether to swith to client mode or stay as supernode
+     */
+    public long getSupernodeProbationTime()
+    {
+        return _supernodeProbationTime;
+    }
+    
+    /**
+     * Tells whether the node is gonna be a supernode or not
+     */
+    public boolean isSupernode()
+    {
+        return _supernodeMode;
+    }
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -2221,6 +2303,56 @@ public class SettingsManager {
 		Boolean b = new Boolean(shown);
 		_props.put(SEARCH_FILTER_MESSAGE_SHOWN, b.toString());
 	}
+
+    //settings for Supernode implementation
+    
+    /**
+     * Sets the maximum number of shielded connections to be supported by
+     * the supernode
+     */
+    public void setMaxShieldedClientConnections(
+        int maxShieldedClientConnections)
+    {
+        this._maxShieldedClientConnections = maxShieldedClientConnections;
+        _props.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
+            Integer.toString(maxShieldedClientConnections));
+    }
+    
+    /**
+     * Sets the minimum number of shielded connections to be supported by
+     * the supernode. If the minimum number of connections are not received
+     * over a period of time, then the node may change its status from 
+     * supernode to client-node.
+     */
+    public void setMinShieldedClientConnections(
+        int minShieldedClientConnections)
+    {
+        this._minShieldedClientConnections = minShieldedClientConnections;
+        _props.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
+            Integer.toString(minShieldedClientConnections));
+    }
+
+    /**
+     * Sets the probation time for s supernode, during which supernode
+     * decides whether to swith to client mode or stay as supernode
+     */
+    public void setSupernodeProbationTime(long supernodeProbationTime)
+    {
+        this._supernodeProbationTime = supernodeProbationTime;
+        _props.put(SUPERNODE_PROBATION_TIME, 
+            Long.toString(supernodeProbationTime));
+    }
+    
+    /**
+     * Sets whether the node is gonna be a supernode or not
+     */
+    public void setSupernodeMode(boolean supernodeMode)
+    {
+        this._supernodeMode = supernodeMode;
+        _props.put(SUPERNODE_MODE, 
+            (new Boolean(supernodeMode)).toString());
+    }
+    
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
