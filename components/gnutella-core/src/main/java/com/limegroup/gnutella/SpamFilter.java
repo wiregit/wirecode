@@ -4,21 +4,61 @@ import com.limegroup.gnutella.filters.*;
 import java.util.Vector;
 
 /** 
- * A filter to eliminate Gnutella spam.  Each Gnutella connection
- * has its own SpamFilter.  (Strategy pattern.) Subclass to implement
- * custom spam filters.
+ * A filter to eliminate Gnutella spam.  Subclass to implement custom
+ * filters.  Each Gnutella connection has two SpamFilters; the
+ * personal filter (for filtering results and the search monitor) and
+ * a route filter (for deciding what I even consider).  (Strategy
+ * pattern.)  Note that a packet stopped by the route filter will
+ * never reach the personal filter.<p>
+ *
+ * Because one filter is used per connection, and only one invocation of
+ * the run(..) method is used, filters are <b>not synchronized</b> by
+ * default.  The exception is BlackListFilter, which uses the Singleton
+ * pattern and thus must be synchronized.
  */
 public abstract class SpamFilter {
     /**
      * Returns a new instance of a SpamFilter subclass based on 
-     * the current settings manager.  (Factory method)
+     * the current settings manager.  (Factory method)  This
+     * filter is intended for deciding which packets I display in
+     * search results.
+     */     
+    public static SpamFilter newPersonalFilter() {
+	SettingsManager settings=SettingsManager.instance();
+	//Keyword-based techniques.
+	String[] badWords=settings.getBannedWords();
+	boolean filterAdult=settings.getFilterAdult();
+	boolean filterVbs=settings.getFilterVbs();
+	boolean filterHtml=settings.getFilterHtml();
+	if (badWords.length!=0 || filterAdult || filterVbs || filterHtml) {
+	    KeywordFilter kf=new KeywordFilter();
+	    for (int i=0; i<badWords.length; i++)
+		kf.disallow(badWords[i]);
+	    if (filterAdult)       
+		kf.disallowAdult();
+	    if (filterVbs)
+		kf.disallowVbs();
+	    if (filterHtml)
+		kf.disallowHtml();
+	    return kf;
+	} else {
+	    //This is really just a minor optimization; you could also
+	    //just use an empty KeywordFilter.
+	    return new AllowFilter();
+	}
+    }
+
+    /**
+     * Returns a new instance of a SpamFilter subclass based on 
+     * the current settings manager.  (Factory method)  This
+     * filter is intended for deciding which packets to route.
      */
-    public static SpamFilter newInstance() {
+    public static SpamFilter newRouteFilter() {
 	//Assemble spam filters. Order matters a little bit.
 	SettingsManager settings=SettingsManager.instance();
 	Vector /* of SpamFilter */ buf=new Vector();
 
-	//IP-based techniques.
+	//1. IP-based techniques.
 	String[] badIPs=settings.getBannedIps();
 	if (badIPs.length!=0) {
 	    //BlackListFilter uses the singleton pattern, so it is really
@@ -33,26 +73,22 @@ public abstract class SpamFilter {
 	    }
 	    buf.add(bf);
 	}
-
-	//Keyword-based techniques.
-	String[] badWords=settings.getBannedWords();
-	boolean filterAdult=settings.getFilterAdult();
-	if (badWords.length!=0 || filterAdult) {
-	    KeywordFilter kf=new KeywordFilter();
-	    for (int i=0; i<badWords.length; i++)
-		kf.disallow(badWords[i]);
-	    if (filterAdult)       
-		kf.disallowAdult();
-	    buf.add(kf);
-	}
 	
-	//Duplicate-based techniques.
+	//2. Duplicate-based techniques.
 	if (settings.getFilterDuplicates())
 	    buf.add(new DuplicateFilter());
 
-	SpamFilter[] delegates=new SpamFilter[buf.size()];	
-	buf.copyInto(delegates);
-	return new CompositeFilter(delegates);
+	//As a minor optimization, we avoid a few method calls in
+	//special cases.
+	if (buf.size()==0)
+	    return new AllowFilter();
+	else if (buf.size()==1)
+	    return (SpamFilter)buf.get(0);
+	else {
+	    SpamFilter[] delegates=new SpamFilter[buf.size()];	
+	    buf.copyInto(delegates);
+	    return new CompositeFilter(delegates);
+	}
     }
 
     /** 
