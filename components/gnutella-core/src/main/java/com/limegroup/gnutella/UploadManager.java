@@ -10,7 +10,6 @@ import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.downloader.*; //for testing
 import com.limegroup.gnutella.tests.util.*; //for testing
-import com.limegroup.gnutella.tests.stubs.*; //for testing
 import java.util.StringTokenizer;
 
 /**

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.tests.stubs.*;
 import java.io.*;
 
 /** This is essentially a ManagedDownloader with a few hitches.  First of all,
@@ -120,36 +119,10 @@ public class RequeryDownloader extends ManagedDownloader
     }
 
     /**
-     * Unit test to be called from JUnit. Code is in this class because 
-     * it accesses private members
+     * package access accessor needed for unit test in junit.
      */
-    static void unitTest() {
-        //Test serialization.
-        AutoDownloadDetails details=new AutoDownloadDetails(
-            "test", "", new byte[16], new MediaType("", "", new String[0]));
-        IncompleteFileManager ifm=new IncompleteFileManager();
-        VerifyingFile vf = new VerifyingFile(true);
-        vf.addInterval(new Interval(10,20));
-        ifm.addEntry(new File("T-10-test.txt"), vf);
-        RequeryDownloader downloader=new RequeryDownloader(
-            new DownloadManager(), new FileManager(), ifm, details,
-            new ActivityCallbackStub());
-        try {
-            File tmp=File.createTempFile("RequeryDownloader_test", "dat");
-            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
-            out.writeObject(downloader);
-            out.close();
-            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
-            RequeryDownloader downloader2=(RequeryDownloader)in.readObject();
-            in.close();
-            Assert.that(downloader._hasFile==downloader2._hasFile);   //weak test
-            tmp.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected IO problem.");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Assert.that(false, "Unexpected class cast problem.");
-        }
+    boolean hasFile() {
+        //We dont want to expose the variable
+        return _hasFile;
     }
 }
