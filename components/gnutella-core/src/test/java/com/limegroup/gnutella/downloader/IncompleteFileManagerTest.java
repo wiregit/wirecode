@@ -109,6 +109,27 @@ public class IncompleteFileManagerTest extends TestCase {
         assertEquals(tmp1, tmp2);
     }
 
+    /** Checks that removeEntry clears blocks AND hashes. */
+    public void testRemoveEntry() {       
+        //Populate IFM with a hash.
+        rfd1=newRFD("some file name", 1839, 
+                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
+        File tmp1=ifm.getFile(rfd1);
+        VerifyingFile vf=new VerifyingFile(true);
+        ifm.addEntry(tmp1, vf);
+
+        //After deleting entry there should be no more blocks...
+        ifm.removeEntry(tmp1);      
+        assertEquals(null, ifm.getEntry(tmp1));
+
+        //...and same temp file should be used for different hash. [sic]
+        rfd2=newRFD("some file name", 1839, 
+                    "urn:sha1:LSTHIPQGSGSZTS5FJPAKPZWUGYQYPFBU");
+        File tmp2=ifm.getFile(rfd2);
+        assertEquals(tmp1, tmp2);
+        assertEquals(tmp2, ifm.getFile(newRFD("some file name", 1839, null)));
+    }
+
     public void testCompletedHash_NotFound() {
         File tmp2=new File("T-1839-some file name");
         assertEquals(null, ifm.getCompletedHash(tmp2));

@@ -301,10 +301,21 @@ public class IncompleteFileManager implements Serializable {
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
-     * Removes the entry corresponding to the given incomplete file from this.
+     * Removes the block and hash information for the given incomplete file.
+     * Typically this is called after incompleteFile has been deleted.
+     * @param incompleteFile a temporary file returned by getFile
      */
     public synchronized void removeEntry(File incompleteFile) {
+        //Remove downloaded blocks.
         blocks.remove(incompleteFile);
+        //Remove any key k from hashes for which hashes[k]=incompleteFile.
+        //There should be at most one value of k.
+        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry entry=(Map.Entry)iter.next();
+            if (incompleteFile.equals(entry.getValue()))
+                //Could also break here as a small optimization.
+                iter.remove();
+        }
     }
 
     public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
