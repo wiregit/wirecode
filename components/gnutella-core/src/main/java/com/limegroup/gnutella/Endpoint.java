@@ -19,17 +19,17 @@ public class Endpoint implements Cloneable, Serializable,
      * Needed for Network Discovery. Records information regarding wthether the neighbours
      * of this node has been identified or not
      */
-    public boolean processed = false;
+    public transient boolean processed = false;
     
     /**
      * The number of other nodes that this node is connected to
      */
     private int connectivity = 0;	
 
-	/**
-	* The weight is used in ranking the endpoints 
-	*/
-	private int weight = 0;
+    /**
+    * The weight is used in ranking the endpoints 
+    */
+    private transient int weight = 0;
     
     /**
      * Sets the connectivity of the node
@@ -47,14 +47,14 @@ public class Endpoint implements Cloneable, Serializable,
 		this.weight = weight;
     }
 
-	/**
-	* Gets the weight of this endpoint
-	* @return The weight of the endpoint
-	*/
-	public int getWeight()
-	{
-		return weight;
-	}
+    /**
+    * Gets the weight of this endpoint
+    * @return The weight of the endpoint
+    */
+    public int getWeight()
+    {
+            return weight;
+    }
 	
     /**
      * returns the connectivity of the node
