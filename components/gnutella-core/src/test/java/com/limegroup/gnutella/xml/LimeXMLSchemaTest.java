@@ -56,11 +56,11 @@ public class LimeXMLSchemaTest extends BaseTestCase {
         check( iterator, "title");
         check( iterator, "artist");
         check( iterator, "album");
-        check( iterator, "genre");
         check( iterator, "track");
+        check( iterator, "genre");
         check( iterator, "type");
-        check( iterator, "year");
         check( iterator, "seconds");
+        check( iterator, "year");
         check( iterator, "language");
         check( iterator, "SHA1");
         check( iterator, "bitrate");
