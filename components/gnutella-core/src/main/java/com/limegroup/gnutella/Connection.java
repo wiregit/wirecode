@@ -1348,10 +1348,6 @@ public class Connection implements IpPort {
         return _softMax;
     }
     
-    public byte getSoftMaxFromHopsFlow(){
-        return getSoftMax();   //  Overridden by ManagedConnection 
-    }
-
     /**
      * Checks whether this connection is considered a stable connection,
      * meaning it has been up for enough time to be considered stable.
@@ -1839,11 +1835,11 @@ public class Connection implements IpPort {
     /** Returns true iff this connection is a shielded leaf connection, and has 
      * signalled that he is currently busy (full on upload slots).  If so, we will 
      * not include his QRT table in last hop QRT tables we send out (if we are an 
-     * Ultrapeer) -DN
+     * Ultrapeer) 
      * @return true iff this connection is a busy leaf (don't include his QRT table)
      */
     public boolean isBusyLeaf(){
-        return isSupernodeClientConnection() && getSoftMaxFromHopsFlow()==0;
+        return isSupernodeClientConnection() && getSoftMax()==0;
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,

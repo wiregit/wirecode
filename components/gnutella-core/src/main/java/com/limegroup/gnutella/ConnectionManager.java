@@ -112,23 +112,23 @@ public class ConnectionManager {
      * from the combined tables, but we haven't yet done so.  This globally overrides 
      * the per-connection flag.
      */
-    private volatile boolean bLeafBecameBusy=false; 
+    private volatile boolean _anyLeafHasBecomeBusy=false; 
     
     /**
      * called when a connection is a leaf, and sends a HopsFlow of 0 to us, indicating
      * that it has become busy.  This will cause us to update the last-hop QRT table for
      * our peers to not include that leaf's contributions.
      */
-    public void setBusyLeafFlag(boolean bSet) {
-        bLeafBecameBusy=bSet;
+    public void setAnyLeafHasBecomeBusy(boolean bSet) {
+        _anyLeafHasBecomeBusy=bSet;
     }
     /**
      * Getter for the "a leaf has become busy, and we have not yet sent updated lasthop 
-     * QRTs to our peers..."   -DN 
+     * QRTs to our peers..."    
      * @return true iff a leaf has become busy since and we have not globally updated peers
      */
-    public boolean getBusyLeafFlag() {
-        return bLeafBecameBusy;
+    public boolean isAnyLeafNewlyBusy() {
+        return _anyLeafHasBecomeBusy;
     }
     
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);

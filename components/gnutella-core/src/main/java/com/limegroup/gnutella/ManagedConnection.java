@@ -275,7 +275,7 @@ public class ManagedConnection extends Connection
     /**
      * True iff this connection should be updated because a leaf became busy and we
      * have not yet updated this host's QRT table because his previous update was too
-     * recent.  -DN 
+     * recent.   
      */
     private boolean _delayedLeafBusyFlag=false;
     
@@ -289,15 +289,6 @@ public class ManagedConnection extends Connection
      */
     private volatile int softMaxHops = -1;
 
-    /**
-     * Getter for the most recent HopsFlowMessage softMaxHops received.
-     * 
-     * @return the current hops which we are limited to from HopsFlow message 
-     */
-    public byte getSoftMaxFromHopsFlow(){
-        return (byte)softMaxHops;    
-    }
-    
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
      */
@@ -1332,7 +1323,7 @@ public class ManagedConnection extends Connection
                 //	the busy leaf QRT scheme, then set the global busy 
                 //	leaf flag appropriately
                 if( softMaxHops==0 )
-                    _manager.setBusyLeafFlag(true);
+                    _manager.setAnyLeafHasBecomeBusy(true);
             }
         }
         else if (vm instanceof PushProxyAcknowledgement) {
@@ -1556,7 +1547,7 @@ public class ManagedConnection extends Connection
      * @return true iff this host still has not been updated in response to the last leaf
      * having become busy
      */
-    public boolean getDelayedLeafBusyFlag() {
+    public boolean isDelayedLeafBusyQRT() {
         return _delayedLeafBusyFlag;
     }
     
@@ -1566,7 +1557,7 @@ public class ManagedConnection extends Connection
      * 
      * @param bSet - Set or Clear the flag
      */
-    public void setDelayedLeafBusyFlag(boolean bSet) {
+    public void setDelayedLeafBusyQRT(boolean bSet) {
         _delayedLeafBusyFlag=bSet;
     }
 

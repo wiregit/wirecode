@@ -2526,14 +2526,14 @@ public abstract class MessageRouter {
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
 			if (time<c.getNextQRPForwardTime() && 
-                    ( (!_manager.getBusyLeafFlag() && !c.getDelayedLeafBusyFlag()) 
+                    ( (!_manager.isAnyLeafNewlyBusy() && !c.isDelayedLeafBusyQRT()) 
                             || time<c.getNextBusyLeafQRPForwardTime()) ) {
                 
-                if( _manager.getBusyLeafFlag() ){
+                if( _manager.isAnyLeafNewlyBusy() ){
                     //  If we are skipping this host because of time limitations, and
                     //      if we would have updated him otherwise, then flag the host 
                     //      so we don't skip him again once his delay timer expires
-                    c.setDelayedLeafBusyFlag(true);                
+                    c.setDelayedLeafBusyQRT(true);                
                 }
 				continue;
             }
@@ -2541,7 +2541,7 @@ public abstract class MessageRouter {
             //  If we get here, then the peer is going to get an updated QRT, so we no
             //      longer need to keep his "delayed BusyLeafQRT flag", since this update
             //      will exclude the busy leaf's QRT
-            c.setDelayedLeafBusyFlag(false);
+            c.setDelayedLeafBusyQRT(false);
             
 			c.incrementNextQRPForwardTime(time);
             c.incrementNextBusyLeafQRPForwardTime(time);    
@@ -2589,8 +2589,8 @@ public abstract class MessageRouter {
         //  At this point, if there WAS a busy leaf for whom we were updating QRTs, 
         //      we have either updated all peers with our last-hop QRT, or we have 
         //      flagged all peers we have skipped (because of timing reasons) so that
-        //      we know to update them in the future, as soon as time limits permit.  -DN
-        _manager.setBusyLeafFlag(false);
+        //      we know to update them in the future, as soon as time limits permit.  
+        _manager.setAnyLeafHasBecomeBusy(false);
     }
 
     /**
@@ -2624,9 +2624,9 @@ public abstract class MessageRouter {
 	 * Adds all query routing tables of leaves to the query routing table for
 	 * this node for propagation to other Ultrapeers at 1 hop.
 	 * 
-	 * 3/29/05 - Added "busy leaf" support to prevent a busy leaf from having its 
-	 * 	QRT table added to the Ultrapeer's last-hop QRT table.  This should reduce
-	 *  BW costs for UPs with busy leaves.  -DN
+	 * Added "busy leaf" support to prevent a busy leaf from having its QRT
+	 * 	table added to the Ultrapeer's last-hop QRT table.  This should reduce
+	 *  BW costs for UPs with busy leaves.  
 	 *
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
