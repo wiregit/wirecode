@@ -32,6 +32,7 @@ public class UltrapeerTester {
             testBigPingBroadcast();
             testMisroutedPong();
             testUltrapeerPong();
+            testNullQueryURNRequest();
             testDropAndDuplicate();   //must be last; closes old
             shutdown();
         } catch (IOException e) { 
@@ -170,6 +171,62 @@ public class UltrapeerTester {
         Assert.that(pushRead.getIndex()==3);
         Assert.that(! drain(old));
     }
+
+    /** This test makes sure that query's with no query string but with
+     *  specified urn's get through to leaves, etc.
+     */ 
+    private static void testNullQueryURNRequest() 
+        throws IOException, BadPacketException {
+        System.out.println("-Testing null query string with non-null URN" +
+                           " QR routering.");
+        
+        // drain all connections
+        drain(ultrapeer);
+        drain(leaf);
+        drain(old);
+
+        // make sure it gets through with all combinations of one sender and two
+        // receivers.
+        urnTest(ultrapeer, old, leaf);
+        urnTest(old, leaf, ultrapeer);
+        urnTest(leaf, ultrapeer, old);        
+    }
+
+
+    private static void urnTest(Connection sndr, Connection rcv1,
+                                Connection rcv2) 
+        throws IOException, BadPacketException {
+        // make urns...
+        Set currUrnSet = new HashSet();
+        Set currUrnTypeSet = new HashSet();
+        for(int j = 0; j < HugeTestUtils.URNS.length; j++) {
+            currUrnSet.add(HugeTestUtils.URNS[j]);
+            currUrnTypeSet.add(HugeTestUtils.URNS[j].getUrnType());
+        }
+
+        // build the null QR
+        GUID guid = new GUID(GUID.makeGuid());
+        QueryRequest qr = new QueryRequest(guid.bytes(),
+                                           (byte)7, 0, "", "", false,
+                                           currUrnTypeSet, currUrnSet);
+        
+        // send the QR - FROM sndr
+        sndr.send(qr);
+        sndr.flush();
+
+        // did recv1 get everything a-ok?
+        QueryRequest reqRead=(QueryRequest)rcv1.receive(TIMEOUT);
+        Assert.that(Arrays.equals(guid.bytes(), reqRead.getGUID()));
+        Assert.that(reqRead.getQueryUrns() != null);
+        Assert.that(currUrnSet.equals(reqRead.getQueryUrns()));
+
+        // did recv2 get everything a-ok?
+        reqRead=(QueryRequest)rcv2.receive(TIMEOUT);
+        Assert.that(Arrays.equals(guid.bytes(), reqRead.getGUID()));
+        Assert.that(reqRead.getQueryUrns() != null);
+        Assert.that(currUrnSet.equals(reqRead.getQueryUrns()));
+    }
+
 
     private static void testBroadcastFromOld() 
              throws IOException, BadPacketException {
