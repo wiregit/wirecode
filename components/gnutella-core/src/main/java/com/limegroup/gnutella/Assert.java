@@ -10,7 +10,7 @@ public class Assert {
             System.err.println("Assertion failed: "+msg);
             Thread.dumpStack();
 			RuntimeException re = new AssertFailure(msg);
-			ErrorService.error(re);
+			//ErrorService.error(re);
 			throw re;
         }
     }
