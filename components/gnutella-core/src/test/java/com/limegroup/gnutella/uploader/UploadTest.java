@@ -16,16 +16,12 @@ import com.limegroup.gnutella.stubs.*;
 public class UploadTest extends TestCase {
     private static String address;
     private static int port;
-    /** The file name, plain and encoded. */
     private static String file="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
-    /** The file contents. */
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
-    /** The hash of the file contents. */
-    private static final String hash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     private static final int index=0;
     /** Our listening port for pushes. */
-    private static int callbackPort=6671;
+    private static int callbackPort=6350;
 
 	/**
 	 * Creates a new UploadTest with the specified name.
@@ -51,7 +47,7 @@ public class UploadTest extends TestCase {
   		} catch(UnknownHostException e) {
   			assertTrue("unexpected exception: "+e, false);
   		}
-		port = 6668;
+		port = 6346;
         //This assumes we're running in the limewire/tests directory
 		File testDir = new File("com/limegroup/gnutella/uploader/data");
 		if(!testDir.isDirectory()) {
@@ -63,43 +59,20 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setPort(port);
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
-		SettingsManager.instance().setKeepAlive(8);
+		SettingsManager.instance().setKeepAlive(6);
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
 		SettingsManager.instance().setConnectOnStartup(true);
-        SettingsManager.instance().setFilterDuplicates(false);
-        SettingsManager.instance().setEverSupernodeCapable(true);
-        SettingsManager.instance().setForceSupernodeMode(true);
-        SettingsManager.instance().setDisableSupernodeMode(false);
+		SettingsManager.instance().setQuickConnectHosts(new String[0]);
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
-		FileManager fm = new MetaFileManager();
-		fm.initialize(callback);		
-		MessageRouter mr = new StandardMessageRouter(callback, fm);
-		RouterService router = new RouterService(callback, mr, fm, 
-												 new ServerAuthenticator());
-		router.initialize();
-        assertEquals(port, SettingsManager.instance().getPort());
-
-        //System.out.println(
-        //    "Please make sure your client is listening on port "+port+"\n"
-        //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
-        //    +"with at least one incoming messaging slot.  Also, nothing\n"
-        //    +"may be listening to port "+callbackPort+".\n"
-		//	+"Finally, the file must contain all lower-case characters in\n" 
-		//	+"the alphabet, exactly like the following:\n\n"
-		//	+"abcdefghijklmnopqrstuvwxyz");
-		//System.out.println(); 
+		RouterService rs = new RouterService(callback);
 	}
 
     public void testAll() {
         try {
             boolean passed;
-
-            //UploadTest works fine in isolation, but this sleep seems to be
-            //needed to work as part of AllTests.  I'm not sure why.
-            try {Thread.sleep(200); } catch (InterruptedException e) { }
             
             ///////////////////push downloads with HTTP1.0///////////
             passed = downloadPush(file, null,alphabet);
@@ -122,10 +95,6 @@ public class UploadTest extends TestCase {
             passed=downloadPush1(file, "Range: bytes=2-5","cdef");
             assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
             
-            assertTrue("Persistent push HEAD requests", 
-                       downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
-                                     
-                       
 
             //////////////normal downloads with HTTP 1.0//////////////
             passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
@@ -219,11 +188,7 @@ public class UploadTest extends TestCase {
             passed = pipelineDownloadPush(file,null, 
                                           "abcdefghijklmnopqrstuvwxyz");
             assertTrue("piplining with push download",passed);
-         
-            tMixedPersistentRequests();
-            tPersistentURIRequests();
-
-            System.out.println("passed");
+            
         } catch (IOException e) {
             e.printStackTrace();
 			assertTrue("unexpected exception: "+e, false);
@@ -291,21 +256,7 @@ public class UploadTest extends TestCase {
         return ret.equals(expResp);
     }
 
-
-    /** Does a simple push GET download. */
-    private static boolean downloadPush1(String indexedFile, String header, 
-										 String expResp)
-           		                         throws IOException, BadPacketException{
-        return downloadPush1("GET", "/get/"+index+"/"+indexedFile, header, expResp);        
-    }
-
-    /** 
-     * Does an arbitrary push download. 
-     * @param request an HTTP request such as "GET" or "HEAD"
-     * @param file the full filename, e.g., "/get/0/file.txt"    
-     */
-    private static boolean downloadPush1(String request,
-                                         String file, String header, 
+    private static boolean downloadPush1(String file, String header, 
 										 String expResp) 
 		throws IOException, BadPacketException {
         //Establish push route
@@ -343,12 +294,12 @@ public class UploadTest extends TestCase {
 		in.readLine(); //skip blank line
 
         //Download from the (incoming) TCP connection.
-        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
+        String retStr=downloadInternal1(file, header, out, in,expResp.length());
 		assertEquals("unexpected HTTP response message body", expResp, retStr);
         boolean ret = retStr.equals(expResp);
 
         // reset string variable
-        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
+        retStr = downloadInternal1(file, header, out, in,expResp.length());
 		assertEquals("unexpected HTTP response message body in second request", 
 					 expResp, retStr);
         
@@ -488,26 +439,8 @@ public class UploadTest extends TestCase {
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
-     * @param indexedFile a partially qualified name, e.g. "file.txt".  The 
-     * "/get/<index>" is automatically appended
      */
-    private static String downloadInternal1(String indexedFile,
-											String header,
-											BufferedWriter out,
-											BufferedReader in,
-											int expectedSize) 
-                                            throws IOException {
-        return downloadInternal1("GET", "/get/"+index+"/"+indexedFile, header, 
-                                 out, in, expectedSize);
-    }
-
-    /** 
-     * Sends an arbitrary request, returning the result.
-     * @param file the full filename, e.g., "/get/0/file.txt"     
-     * @param request an HTTP request such as "GET" or "HEAD"
-     */
-    private static String downloadInternal1(String request,
-                                            String file,
+    private static String downloadInternal1(String file,
 											String header,
 											BufferedWriter out,
 											BufferedReader in,
@@ -515,7 +448,7 @@ public class UploadTest extends TestCase {
         throws IOException {
         //Assert.that(out!=null && in!=null,"socket closed my server");
         //1. Send request
-        out.write(request+" "+file+" HTTP/1.1\r\n");
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection: Keep-Alive\r\n");
@@ -654,60 +587,5 @@ public class UploadTest extends TestCase {
             buf.append((char)c1);
         }
         return ret && buf.toString().equals(expResp);
-    }
-
-    /** Makes sure that a HEAD request followed by a GET request does the right
-     *  thing. */
-    public void tMixedPersistentRequests() {
-        Socket s = null;
-        try {
-            //1. Establish connection.
-            s = new Socket(address, port);
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                                                          s.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                                                          s.getOutputStream()));
-            //2. Send HEAD request
-            assertEquals("",
-                downloadInternal1("HEAD", "/get/"+index+"/"+encodedFile, 
-                                  null, out, in, 0));
-            //3. Send GET request, make sure data ok.
-            assertEquals(alphabet,
-                downloadInternal1(encodedFile, null, out, in, alphabet.length()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail ("Mysterious IO problem: "+e);
-        } finally {
-            if (s!=null)
-                try { s.close(); } catch (IOException ignore) { }
-        }
-    }
-
-    /** Tests persistent connections with URI requests.  (Raphael Manfredi claimed this
-     *  was broken.)  */
-    public void tPersistentURIRequests() {
-        Socket s = null;
-        try {
-            //1. Establish connection.
-            s = new Socket(address, port);
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                                                          s.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                                                          s.getOutputStream()));
-            //2. Send GET request in URI form
-            assertEquals(alphabet,
-                         downloadInternal1("GET", "/uri-res/N2R?"+hash,
-                                           null, out, in, alphabet.length()));
-            //3. Send another GET request in URI form
-            assertEquals(alphabet,
-                         downloadInternal1("GET", "/uri-res/N2R?"+hash,
-                                           null, out, in, alphabet.length()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail ("Mysterious IO problem: "+e);
-        } finally {
-            if (s!=null)
-                try { s.close(); } catch (IOException ignore) { }
-        }
     }
 }
