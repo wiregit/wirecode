@@ -49,13 +49,13 @@ public abstract class Message {
 	Assert.that(guid.length==16);
 	Assert.that(func==F_PING || func==F_PING_REPLY
 		    || func==F_PUSH
-		    || func==F_QUERY || func==F_QUERY_REPLY);
-	if (func==F_PING) Assert.that(length==0);
-	if (func==F_PING_REPLY) Assert.that(length==14);
-	if (func==F_PUSH) Assert.that(length==26);
-	Assert.that(ttl>=0);
-	Assert.that(hops>=0);
-	Assert.that(length>=0);
+		    || func==F_QUERY || func==F_QUERY_REPLY, "Bad function code");
+	if (func==F_PING) Assert.that(length==0, "Bad ping length: "+length);
+	if (func==F_PING_REPLY) Assert.that(length==14, "Bad pong length: "+length);
+	if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
+	Assert.that(ttl>=0, "Negative TTL: "+ttl);
+	Assert.that(hops>=0, "Negative hops: "+hops);
+	Assert.that(length>=0, "Negative length: "+length);
     }
 
     ////////////////////// Constructors and Producers /////////////////
@@ -131,12 +131,23 @@ public abstract class Message {
 	    }
 	}
 	
-	//4. Check values.   This catches those TTLs and hops whose
+	//4. Check values.   These are based on the recommendations from the 
+	//   GnutellaDev page.  This also catches those TTLs and hops whose
 	//   high bit is set to 0.
-	if (ttl<0 || ttl>SettingsManager.instance().getMaxTTL()) 
-	    throw new BadPacketException("Unreasonable TTL: "+ttl);
-	if (hops<0 || hops>SettingsManager.instance().getMaxTTL()) 
-	    throw new BadPacketException("Unreasonable hops: "+hops);	 
+	byte softMax=SettingsManager.instance().getSoftMaxTTL();
+	byte hardMax=SettingsManager.instance().getMaxTTL();
+	if (hops<0) 
+	    throw new BadPacketException("Negative (or very large) hops");
+	else if (ttl<0)
+	    throw new BadPacketException("Negative (or very large) TTL");
+	else if (hops>softMax)
+	    throw new BadPacketException("Hops already exceeds soft maximum");
+	else if (ttl+hops > hardMax) 
+	    throw new BadPacketException("TTL+hops exceeds hard max; probably spam");	
+	else if (ttl+hops > softMax) {
+	    ttl=(byte)(softMax - hops);  //overzealous client; readjust accordingly
+	    Assert.that(ttl>=0); 	 //should hold since hops<=softMax ==> new ttl>=0
+	}
 
 	//Dispatch based on opcode. 
 	switch (func) {
