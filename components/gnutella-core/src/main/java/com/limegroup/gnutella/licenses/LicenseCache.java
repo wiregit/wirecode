@@ -90,8 +90,11 @@ class LicenseCache {
                     Map.Entry next = (Map.Entry)i.next();
                     Object key = next.getKey();
                     Object value = next.getValue();
-                    if( !(key instanceof String) || !(value instanceof License) )
+                    if( !(key instanceof URI) || !(value instanceof License) ) {
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Invalid k[" + key + "], v[" + value + "]");
                         i.remove();
+                    }
                 }
             }
             return map;

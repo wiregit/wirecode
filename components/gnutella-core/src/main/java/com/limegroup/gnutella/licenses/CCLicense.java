@@ -45,6 +45,8 @@ class CCLicense implements License, Serializable, Cloneable {
     
     private static final ProcessingQueue VQUEUE = new ProcessingQueue("CCLicense");
     
+    private static final long serialVersionUID = 8213994964631107858L;
+    
     /**
      * Whether or not this license has been verified.
      */
