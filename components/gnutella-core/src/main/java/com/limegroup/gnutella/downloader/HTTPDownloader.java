@@ -338,10 +338,17 @@ public class HTTPDownloader implements Runnable {
 
         if (_state == CONNECTED) {
             doDownload();
+			// check to see if there is an error condition 
+			// after attempting the download
+			if (_state == ERROR) {
+				// if there is, close the streams
+				errorClose();
+			}
             _callback.removeDownload(this);
         } else if (_state == ERROR) {
             _callback.removeDownload(this);
         }
+
         //TODO: what if in queued state?  -  GUI Currently Handles it.
     }
 
@@ -418,8 +425,9 @@ public class HTTPDownloader implements Runnable {
             return;
 
         readHeader();
-        if ( _state == ERROR )
+        if ( _state == ERROR ) {
             return;
+		}
 
         SettingsManager set = SettingsManager.instance();
 
@@ -548,6 +556,19 @@ public class HTTPDownloader implements Runnable {
             _stateString = "Interrupted";
         }
     }
+
+
+	// this method handles cexpplicitly closing the streams 
+	// if an error condition was somehow reached.
+	private void errorClose() {
+		try {
+			_br.close();
+			_fos.close();
+		} catch(IOException e) {
+			return;
+		}
+	}
+
 
     public void readHeader() {
         String str = " ";
