@@ -193,8 +193,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", files[1].getFile(), f3);
         files=fman.getAllSharedFileDescriptors();
         assertEquals("unexpected files length", 2, files.length);
-        assertEquals("files differ", files[1].getFile(), f1);
-        assertEquals("files differ", files[0].getFile(), f3);
+        // we don't know the order the filedescs are returned ...
+        if( files[0].getFile().equals(f1) ) {
+            assertEquals("files differ", files[0].getFile(), f1);
+            assertEquals("files differ", files[1].getFile(), f3);
+        } else {
+            assertEquals("files differ", files[0].getFile(), f3);
+            assertEquals("files differ", files[1].getFile(), f1);
+        }            
     }
     
     public void testRenameSharedFiles() throws Exception {
