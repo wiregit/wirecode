@@ -259,11 +259,16 @@ public class ManagedConnection
             _router.countMessage();
             //if it is a broadcast ping (ie., TTL > 1) and it is not to a pong 
             //cache server, such as "router.limewire.com", then record the 
-            //ping sent in the statistics recorder.
+            //ping sent in the statistics recorder.  Also, make sure to record
+            //if the statistic is for an old client, or for a new client
             if ( (m instanceof PingRequest) && ((int)m.getTTL() > 1) &&
-                 (!_isRouter) )
-                 StatisticsRecorder.addToTotal(
-                     "pings sent", m.getTotalLength(), "bytes");
+                 (!_isRouter) ) {
+                String metricTag = new String("new client pings sent");
+                if (isOldClient())
+                    metricTag = new String("old client pings sent");
+                StatisticsRecorder.addToTotal(metricTag, m.getTotalLength(), 
+                    "bytes");
+            }
                  
             if (_outputQueue.isFull()) {
                 //Drop case. Instead of using a FIFO replacement scheme, we
@@ -440,13 +445,17 @@ public class ManagedConnection
                 continue;
             }
 
-            //if it is a broadcast ping (ie., TTL > 1) and it is from a pong 
+            //if it is a broadcast ping (ie., TTL > 1) and it is not from a pong 
             //cache server, such as "router.limewire.com", then record the 
             //ping received in the statistics recorder.
             if ( (m instanceof PingRequest) && ((int)m.getTTL() > 1) &&
-                 (!_isRouter) )
-                 StatisticsRecorder.addToTotal("pings received", 
-                     m.getTotalLength(), "bytes");
+                 (!_isRouter) ) {
+                String metricTag = new String("new client pings received");
+                if (isOldClient())
+                    metricTag = new String("old client pings received");
+                StatisticsRecorder.addToTotal(metricTag, m.getTotalLength(), 
+                    "bytes");
+            }
 
             //call MessageRouter to handle and process the message
             _router.handleMessage(m, this);
