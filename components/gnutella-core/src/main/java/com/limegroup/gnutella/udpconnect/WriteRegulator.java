@@ -142,7 +142,8 @@ public class WriteRegulator {
         if(LOG.isDebugEnabled())  
             LOG.debug(
               "sleepTime:"+sleepTime+
-              " uS:"+usedSpots+
+              " uS:"+usedSpots+ 
+              " RWS:"+receiverWindowSpace+
               " smoothRTT:"+smoothRTT+
               " realRTT:"+realRTT+
               " rtt:"+rtt+
@@ -180,7 +181,8 @@ public class WriteRegulator {
                 LOG.debug(
                   " -- MAX EXCEED "+
                   " RTT sL:"+_skipLimit + " w:"+ windowStart+
-                  " Rrtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
+                  " Rrtt:"+realRTT+ " base :"+baseWait+
+                  " uS:"+usedSpots+" RWS:"+receiverWindowSpace+
                   " lRTT:"+_sendWindow.lowRoundTripTime()+
                   " sWait:"+sentWait+
                   " mRTT:"+maxRTT+
