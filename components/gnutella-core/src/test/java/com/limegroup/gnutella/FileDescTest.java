@@ -7,6 +7,7 @@ import java.net.URL;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.util.HashSet;
@@ -165,14 +166,16 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
 
 		//create some direct altlocs
-		AlternateLocation d1 = AlternateLocation.create("1.1.1.1:1",sha1,true);
-		AlternateLocation d2 = AlternateLocation.create("2.2.2.2:2",sha1,true);
+		AlternateLocation d1 = AlternateLocation.create("1.1.1.1:1",sha1);
+		AlternateLocation d2 = AlternateLocation.create("2.2.2.2:2",sha1);
 		
 		//and some push ones.
 		AlternateLocation p1 = 
-			AlternateLocation.create(clientGUID1.toHexString()+";1.1.1.1:1",sha1,true);
+			AlternateLocation.create(clientGUID1.toHexString()+";1.1.1.1:1",sha1);
+	    ((PushAltLoc)p1).updateProxies(true);
 		AlternateLocation p2 = 
-			AlternateLocation.create(clientGUID2.toHexString()+";2.2.2.2:2",sha1,true);
+			AlternateLocation.create(clientGUID2.toHexString()+";2.2.2.2:2",sha1);
+        ((PushAltLoc)p2).updateProxies(true);
 		
 		assertEquals(0,fd.getAltLocsSize());
 		

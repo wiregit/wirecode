@@ -428,23 +428,19 @@ public class HeadTest extends BaseTestCase {
 	}
 	
 	private static void  createCollections() throws Exception{
-			
-		
-
-
-        _alCollectionComplete=AlternateLocationCollection.create(_haveFull);
+	    _alCollectionComplete=AlternateLocationCollection.create(_haveFull);
         _alCollectionIncomplete=AlternateLocationCollection.create(_havePartial);
         _pushCollection=AlternateLocationCollection.create(_havePartial);
 		
 		for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull,true);
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
 			_alCollectionComplete.add(al);
 		}
         assertEquals("failed to set test up",10,
         		_alCollectionComplete.getAltLocsSize());
         
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial,true);
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
 			_alCollectionIncomplete.add(al);
 		}
         assertEquals("failed to set test up",10,
@@ -457,7 +453,8 @@ public class HeadTest extends BaseTestCase {
         GUID guid = new GUID(GUID.makeGuid());
 		
 		AlternateLocation firewalled = AlternateLocation.create(guid.toHexString()+
-				";1.2.3.4:5",_havePartial,true);
+				";1.2.3.4:5",_havePartial);
+        ((PushAltLoc)firewalled).updateProxies(true);
 		pe = ((PushAltLoc)firewalled).getPushAddress();
 		_pushCollection=AlternateLocationCollection.create(_havePartial);
 		_pushCollection.add(firewalled);

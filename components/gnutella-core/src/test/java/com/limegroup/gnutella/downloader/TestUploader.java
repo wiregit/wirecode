@@ -20,6 +20,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
@@ -949,8 +950,9 @@ public class TestUploader extends AssertComparisons {
 				// sequences that may be used if the sender is using
 				// continuations.
 				AlternateLocation al = 
-				    AlternateLocation.create(
-				        st.nextToken().trim(), _sha1,good);
+				    AlternateLocation.create(st.nextToken().trim(), _sha1);
+				if(al instanceof PushAltLoc)
+				    ((PushAltLoc)al).updateProxies(true);
 				if (good)
 				    alc.add(al);
 			} catch(IOException e) {

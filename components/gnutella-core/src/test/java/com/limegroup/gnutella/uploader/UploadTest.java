@@ -678,16 +678,13 @@ public class UploadTest extends BaseTestCase {
         Map m =(Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
                 g.toHexString()+";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3",
-                urn,
-                true);
+                urn);
         
         String abcHttp = abc.httpStringValue();
-        m.clear();
         
         PushAltLoc bcd=(PushAltLoc)AlternateLocation.create(
                 g.toHexString()+";2.2.2.2:2;3.3.3.3:3;4.4.4.4:4",
-                urn,
-                true);
+                urn);
         
         String bcdHttp = bcd.httpStringValue();
         

@@ -156,7 +156,8 @@ public class PushEndpointTest extends BaseTestCase {
     	String httpString = one.httpStringValue();
     	
     	m.clear();
-    	PushEndpoint one_prim = PushEndpoint.updateProxies(httpString,true);
+    	PushEndpoint one_prim = new PushEndpoint(httpString);
+    	one_prim.updateProxies(true);
     	
     	
     	assertEquals(1,one_prim.getProxies().size());
@@ -169,7 +170,8 @@ public class PushEndpointTest extends BaseTestCase {
     	httpString = six.httpStringValue();
     	
     	m.clear();
-    	PushEndpoint four = PushEndpoint.updateProxies(httpString,true);
+    	PushEndpoint four = new PushEndpoint(httpString);
+    	four.updateProxies(true);
     	    	
     	assertEquals(2,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
@@ -181,23 +183,22 @@ public class PushEndpointTest extends BaseTestCase {
     	//now an endpoint with a feature we do not understand
     	m.clear();
     	
-    	PushEndpoint unknown = PushEndpoint.updateProxies(
-    			"2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235",true);
-    	
-    	
+        PushEndpoint unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
+        unknown.updateProxies(true);
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	//now an endpoint with the fwt header moved elsewhere
     	m.clear();
-    	unknown = PushEndpoint.updateProxies(
-    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235",true);
+    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235");
+    	unknown.updateProxies(true);
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(1,unknown.supportsFWTVersion());
     	
     	//now an endpoint only with the guid
     	m.clear();
-    	unknown = PushEndpoint.updateProxies("2A8CA57F43E6E0B7FF823F0CC7880500",true);
+    	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500");
+    	unknown.updateProxies(true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	

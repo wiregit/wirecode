@@ -414,12 +414,14 @@ public class PushLocTest extends BaseTestCase {
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
 		
 		
 		fd.add(direct);
@@ -451,13 +453,13 @@ public class PushLocTest extends BaseTestCase {
 		
 		
 		try {
-				while(true){
-					String header = readLine(in);
-					if (header == null)
-						break;
-					if(header.startsWith(HTTPHeaderName.FALT_LOCATION.toString()))
-						fail("responded with Falt locations without being prompted");
-				}
+		    while(true){
+    			String header = readLine(in);
+    			if (header == null)
+    				break;
+    			if(header.startsWith(HTTPHeaderName.FALT_LOCATION.toString()))
+    				fail("responded with Falt locations without being prompted");
+    		}
 		}catch(IOException expected){}
 		
 		//clean up for next test
@@ -478,12 +480,14 @@ public class PushLocTest extends BaseTestCase {
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
 		
 		
 		fd.add(direct);
@@ -559,12 +563,14 @@ public class PushLocTest extends BaseTestCase {
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
 		
 		
 		fd.add(direct);
@@ -645,12 +651,14 @@ public class PushLocTest extends BaseTestCase {
 		GUID clientGUID = new GUID(GUID.makeGuid());
 		GUID clientGUID2 = new GUID(GUID.makeGuid());
 		
-		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1,true);
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
 		AlternateLocation push = AlternateLocation.create(
-				clientGUID.toHexString()+";1.2.3.4:5",sha1,true);
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
 		PushAltLoc pushFwt = (PushAltLoc) 
 			AlternateLocation.create(
-		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1,true);
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
 		
 		
 		
@@ -753,7 +761,9 @@ public class PushLocTest extends BaseTestCase {
                 // continuations.
                 AlternateLocation al = 
                 AlternateLocation.create(st.nextToken().trim(),
-                                         alc.getSHA1Urn(),true);
+                                         alc.getSHA1Urn());
+                if(al instanceof PushAltLoc)
+                    ((PushAltLoc)al).updateProxies(true);
                 
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {

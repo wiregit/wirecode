@@ -168,7 +168,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 			String str = st.nextToken();
 			str = str.trim();
 			AlternateLocation al=
-			        AlternateLocation.create(str, _alCollection.getSHA1Urn(),true);
+			        AlternateLocation.create(str, _alCollection.getSHA1Urn());
 
 			assertTrue(_alCollection.contains(al));
 		}
