@@ -289,8 +289,10 @@ public final class UploadManager implements BandwidthTracker {
             
             // Always clean up the finished uploader
             // from the active list & report the upload speed
-            if( uploader != null )
-                cleanupFinishedUploader(uploader, startTime);            
+            if( uploader != null ) {
+                uploader.stop();
+                cleanupFinishedUploader(uploader, startTime);
+            }
             
             debug(uploader + " closing socket");
             //close the socket
@@ -328,11 +330,12 @@ public final class UploadManager implements BandwidthTracker {
      * This does the following:
      * 1) Reports the speed at which this upload occured.
      * 2) Removes the uploader from the active upload list
-     * 3) Increments the completed uploads in the FileDesc
-     * 4) Removes the uploader from the GUI.
-     * (3 & 4 are only done if 'shouldShowInGUI' is true)
+     * 3) Closes the file streams that the uploader has left open
+     * 4) Increments the completed uploads in the FileDesc
+     * 5) Removes the uploader from the GUI.
+     * (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
-    private void cleanupFinishedUploader(Uploader uploader, long startTime) {
+    private void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
         debug(uploader + " cleaning up finished.");
         long finishTime = System.currentTimeMillis();
         synchronized(this) {
@@ -343,6 +346,8 @@ public final class UploadManager implements BandwidthTracker {
             }
             removeFromList(uploader);
         }
+        
+        uploader.closeFileStreams();
         
         if(uploader.getMethod() != HTTPRequestMethod.HEAD) {
             switch(uploader.getState()) {

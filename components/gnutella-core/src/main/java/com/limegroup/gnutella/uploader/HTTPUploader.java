@@ -367,6 +367,16 @@ public final class HTTPUploader implements Uploader {
 				_socket.close();
 		} catch (IOException e) {}
 	}
+	
+	/**
+	 * Close the file input stream.
+	 */
+	public void closeFileStreams() {
+        try {
+            if( _fis != null )
+                _fis.close();
+        } catch(IOException e) {}
+    }
     
 	/**
 	 * This method changes the appropriate state class based on
