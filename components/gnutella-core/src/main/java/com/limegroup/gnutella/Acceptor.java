@@ -7,6 +7,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -263,7 +264,7 @@ public class Acceptor extends Thread {
             } catch (SecurityException e) {
                 callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 //Internal error!
                 callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
@@ -325,9 +326,11 @@ public class Acceptor extends Thread {
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
+					HTTPStat.HTTP_GET_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.GET, _socket);
                 }
 				else if (word.equals("HEAD")) {
+					HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
 				}
                 //3. Incoming download via push/HTTP.
@@ -345,7 +348,7 @@ public class Acceptor extends Thread {
             } catch (IOException e) {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
-            } catch(Exception e) {
+            } catch(Throwable e) {
 				callback.error(ActivityCallback.INTERNAL_ERROR, e);
 			}
         }

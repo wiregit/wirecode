@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -202,6 +203,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
+		 ConnectionStat.ALL_CONNECTION_ATTEMPTS.incrementStat();
          //1. Initialize connection.  It's always safe to recommend new headers.
          ManagedConnection connection=null;
          try {
