@@ -634,6 +634,9 @@ public class Connection {
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
             //2. Send our response and headers.
 
+			// is this an incoming connection from the crawler??
+			boolean isCrawler = _headers.isCrawler();
+			
 			//Note: in the following code, it appears that we're ignoring
 			//the response code written by the initiator of the connection.
 			//However, you can prove that the last code was always 200 OK.
@@ -680,8 +683,11 @@ public class Connection {
 
             //Decide whether to proceed.
             code = ourResponse.getStatusCode();
-            if(code == HandshakeResponse.OK) {
-                if(theirResponse.getStatusCode()==HandshakeResponse.OK)
+            if(code == HandshakeResponse.OK &&
+                theirResponse.getStatusCode() == HandshakeResponse.OK) {
+                	if(isCrawler) {
+                		throw new IOException("connection from crawler -- disconnect");
+                	}
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
             } else {
@@ -1132,7 +1138,7 @@ public class Connection {
     }
 
     /** Returns the host set at construction */
-    public String getOrigHost() {
+    public String getIPString() {
         return _host;
     }
 
@@ -1673,6 +1679,20 @@ public class Connection {
     public String toString() {
         return "CONNECTION: host=" + _host  + " port=" + _port +", userAgent=" + getUserAgent(); 
     }
+    
+    // override equals so that the same hosts are equal
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof Connection)) return false;
+		Connection otherConnection = (Connection)o;
+		return _host.equals(otherConnection._host) && 
+			_port == otherConnection._port; 
+	}
+	
+	// overridden so that equal ip/port pairs are equal
+	public int hashCode() {
+		return 17 * _host.hashCode() * _port;
+	}
     
     
     /////////////////////////// Unit Tests  ///////////////////////////////////
