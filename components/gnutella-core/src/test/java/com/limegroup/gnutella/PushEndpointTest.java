@@ -206,6 +206,7 @@ public class PushEndpointTest extends BaseTestCase {
     
     private void updateProxies(PushEndpoint pe) throws Exception{
         Set proxies = (Set)PrivilegedAccessor.getValue(pe,"_proxies");
-        m.put(new GUID(pe.getClientGUID()),proxies);
+        GUID guid = (GUID)PrivilegedAccessor.getValue(pe,"_guid");
+        m.put(guid,proxies);
     }
 }

@@ -8,7 +8,9 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.*;
@@ -28,7 +30,6 @@ public class HeadTest extends BaseTestCase {
 	 */
 	static FileManagerStub _fm;
 	static UploadManagerStub _um;
-	static ConflictsDM _dm;
 	
 	/**
 	 * two collections of altlocs, one for the complete and one for the incomplete file
@@ -99,7 +100,6 @@ public class HeadTest extends BaseTestCase {
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
 		_fm = new FileManagerStub();
 		_um = new UploadManagerStub();
-		_dm = new ConflictsDM();
 		
 		int base=0;
 		_ranges = new IntervalSet();
@@ -244,16 +244,13 @@ public class HeadTest extends BaseTestCase {
 		//replace the downloadManger with a stub
 		Object originalDM = RouterService.getDownloadManager();
 		
-		PrivilegedAccessor.setValue(RouterService.class,"downloader",_dm);
-		_dm._conflicts.add(_havePartial);
-		
+		_partial.setActivelyDownloading(true);
 		HeadPing ping = new HeadPing(_havePartial);
 		HeadPong pong = reparse (new HeadPong(ping));
 		
 		assertTrue(pong.isDownloading());
 		
-		_dm._conflicts.clear();
-		
+		_partial.setActivelyDownloading(false);
 		pong = reparse (new HeadPong(ping));
 		
 		assertFalse(pong.isDownloading());
@@ -466,11 +463,4 @@ public class HeadTest extends BaseTestCase {
 		_pushCollection.add(firewalled);
 	}
 	
-	
-	static class ConflictsDM extends DownloadManagerStub {
-		public Set _conflicts= new HashSet();
-		public boolean conflicts(URN urn) {
-			return _conflicts.contains(urn);
-		}
-	}
 }

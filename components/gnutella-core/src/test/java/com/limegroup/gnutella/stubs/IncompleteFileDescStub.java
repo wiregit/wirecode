@@ -26,6 +26,8 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     private static Set localSet2,globalSet;
     public Set localSet;
     
+    private boolean _activelyDownloading;
+    
     private AlternateLocationCollection _altlocCollection,_pushCollection;
     
     private byte [] _ranges;
@@ -129,5 +131,13 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	
 	public boolean remove(AlternateLocation al) {
 	    return _altlocCollection.remove(al);
+	}
+	
+	public void setActivelyDownloading(boolean yes) {
+	    _activelyDownloading=yes;
+	}
+	
+	public boolean isActivelyDownloading() {
+	    return _activelyDownloading;
 	}
 }
