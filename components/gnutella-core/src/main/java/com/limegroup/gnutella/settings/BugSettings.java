@@ -43,4 +43,12 @@ public final class BugSettings extends LimeProps {
      */
     public static final IntSetting MAX_BUGFILE_SIZE =
         FACTORY.createIntSetting("MAX_BUGFILE_SIZE", 1024 * 500); // 500k
+        
+    /**
+     * Setting for the file to use when writing bugs (for serialization)
+     * to disk.
+     */
+    public static final FileSetting BUG_INFO_FILE =
+        FACTORY.createFileSetting("BUG_INFO_FILE",
+            new File(CommonUtils.getUserSettingsDir(), "bugs.data"));
 }
