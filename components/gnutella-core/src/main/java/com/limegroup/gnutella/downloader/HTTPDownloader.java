@@ -102,7 +102,13 @@ public class HTTPDownloader {
 	private void connect(Socket s, String file, int index) throws IOException {
 		_socket = s;
 		try {
-			InputStream istream = _socket.getInputStream();
+            //The try-catch below is a work-around for JDK bug 4091706.
+            InputStream istream=null;
+            try {
+                istream=_socket.getInputStream(); 
+            } catch (Exception e) {
+                throw new IOException();
+            }
 			_byteReader = new ByteReader(istream);
 			OutputStream os = _socket.getOutputStream();
 			OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -154,6 +160,7 @@ public class HTTPDownloader {
 	public int getAmountRead() {return _amountRead;}
 	public int getFileSize() {return _fileSize;}
 	public int getInitialRead() {return _initialReadingPoint;}
+    public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
 	/* Construction time variables */
 	public int getIndex() {return _index;}
