@@ -60,13 +60,10 @@ public final class AlternateLocation
 		createAlternateLocation(final String location) 
 		throws IOException {
 		if(location == null || location.equals("")) {
-			throw new IOException("NULL OR EMPTY STRING IN ALTERNATE LOCATION");
+			throw new IOException("null or empty in alt loc: "+location);
 		}
 
-		URL url = AlternateLocation.createUrl(location);
-        if(url.getPort()==-1)
-            throw new IOException("URL without port, cannot create RFD");
-        
+		URL url = AlternateLocation.createUrl(location);        
 		if(url == null) {
 			throw new IOException("could not parse url for alt loc: "+
 								  location);
@@ -81,7 +78,8 @@ public final class AlternateLocation
 			date = AlternateLocation.createDateInstance(outputDateTime);
 			if(date.after(new Date())) {
 				// the date reported is in the future, so throw exception
-				throw new IOException("reported date is in the future");
+				throw new IOException("reported date is in the future: "+
+                                      location);
 			}
 		}
 		return new AlternateLocation(url, date);
@@ -435,8 +433,23 @@ public final class AlternateLocation
 		String test = locationHeader.toLowerCase();
 
 		if(test.startsWith("http")) {
-			return new URL(AlternateLocation.removeTimestamp(locationHeader));
-
+            String urlStr = AlternateLocation.removeTimestamp(locationHeader);
+            URL url = new URL(urlStr);
+            String host = url.getHost();
+            if(host == null || host.equals("")) {
+                throw new IOException("invalid host in alternate location: "+
+                                      "host: "+host+"header: "+locationHeader);
+            }
+            // check for private addresses if it appears to be in dotted quad 
+            // format..
+            if(Character.isDigit(host.charAt(0))) {
+                InetAddress address = InetAddress.getByName(host);
+                if(Endpoint.isPrivateAddress(address.getAddress())) {
+                    throw new IOException("cannot include private address in "+
+                                          "alt loc: "+host);
+                } 
+            }
+			return url;
 		} else {
 			// we could not understand the beginning of the alternate location
 			// line
