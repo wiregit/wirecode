@@ -355,9 +355,9 @@ public class ConnectionManager {
      * @return true, if Ultrapeer, false otherwise
      */
     public boolean isSupernode() {
-        boolean isCapable =
-			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue();
-        return isCapable && !isShieldedLeaf();
+        return 
+            UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() && 
+            !isShieldedLeaf();
     }
     
     /**
@@ -492,7 +492,7 @@ public class ConnectionManager {
      * @return the number of free non-leaf slots.
      */
     int getNumFreeNonLeafSlots() {
-        return getKeepAlive() - getNumInitializedConnections();
+        return ULTRAPEER_CONNECTIONS - getNumInitializedConnections();
     }
 
 
@@ -673,9 +673,10 @@ public class ConnectionManager {
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
             // If the leaf supports features we're looking for, accept it
             // if we have slots.  Otherwise, only accept it if it's a 
-            // trusted vendor and we have slots available for older clients
+            // trusted vendor and we have slots availble for older clients
 			if(hr.isGoodLeaf()) {
-				return hasFreeLeafSlots(); 
+                return getNumInitializedClientConnections() <
+                    UltrapeerSettings.MAX_LEAVES.getValue();
 			} else {
 				return getNumInitializedClientConnections() <
 					(trustedVendor(hr.getUserAgent()) ?
