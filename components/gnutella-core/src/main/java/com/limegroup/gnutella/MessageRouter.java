@@ -532,14 +532,13 @@ public abstract class MessageRouter
                 //possible that qi could be non-null but not initialized.  Need
                 //to be more careful about locking here.
                 ManagedConnectionQueryInfo qi=c.getQueryRouteState();
-                if (qi==null) 
-                    //Either a new client, or an old client that's not yet
+                if (qi==null || qi.lastReceived==null) 
+                    //Either an old client, or a new client that's not yet
                     //sent us a table message.
                     c.send(queryRequest);
-                else if (!qi.lastReceived.isPatched() 
-                             || qi.lastReceived.contains(queryRequest))
-                    //A new client with routing entry, or one that hasn't yet
-                    //finished sending the patch.
+                else if (qi.lastReceived.contains(queryRequest))
+                    //A new client with routing entry, or one that hasn't started
+                    //sending the patch.
                     c.send(queryRequest);              
             }
         }
@@ -774,9 +773,15 @@ public abstract class MessageRouter
         synchronized (queryUpdateLock) {
             ManagedConnectionQueryInfo qi=receivingConnection.getQueryRouteState();
             if (qi==null) {
-                //There's really no need to check if c is an old client here.
+                //There's really no need to check if c is an old client here;
+                //it certainly didn't send a RouteTableMessage by accident!
                 qi=new ManagedConnectionQueryInfo();
                 receivingConnection.setQueryRouteState(qi);
+            }
+            if (qi.lastReceived==null) {
+                qi.lastReceived=new QueryRouteTable(
+                    QueryRouteTable.DEFAULT_TABLE_SIZE,
+                    QueryRouteTable.DEFAULT_INFINITY);
             }
             try {
                 qi.lastReceived.update(m);    

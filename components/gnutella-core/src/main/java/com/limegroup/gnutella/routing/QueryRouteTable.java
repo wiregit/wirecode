@@ -52,8 +52,6 @@ public class QueryRouteTable {
      *  PATCH messages.  (You may need data from message N-1 to apply the patch
      *  in message N.) */
     private Inflater uncompressor;
-    /** True if this has been fully patched following a reset. */
-    private boolean isPatched;
 
 
 
@@ -83,7 +81,6 @@ public class QueryRouteTable {
         this.sequenceNumber=-1;
         this.sequenceSize=-1;
         this.nextPatch=0;
-        this.isPatched=false;
     }
 
     /**
@@ -169,10 +166,6 @@ public class QueryRouteTable {
         }
     }
 
-    /** Returns true if this has been fully patched following a reset. */
-    public boolean isPatched() {
-        return isPatched;
-    }
 
     /** Returns the number of entries in this. */
     public int entries() {
@@ -294,7 +287,6 @@ public class QueryRouteTable {
             //Sequence complete.
             this.sequenceNumber=-1;
             this.sequenceSize=-1;
-            this.isPatched=true;
             this.nextPatch=0; //TODO: is this right?
         }   
     }
@@ -336,9 +328,9 @@ public class QueryRouteTable {
             if (data[i]<-8 || data[i]>7) //can this fit in 4 signed bits?
                 needsFullByte=true;
         }
-        //As an optimization, we don't send message if no changes.
+        //Optimization: there's nothing to report.  If prev=null, send a single
+        //RESET.  Otherwise send nothing.
         if (!needsPatch) {
-            buf.clear();
             return buf.iterator();
         }
 
@@ -538,7 +530,6 @@ public class QueryRouteTable {
         //3. encode-decode test--with compression
         //qrt={good/1, book/1, bad/3}
         qrt2=new QueryRouteTable(1000, (byte)7);
-        Assert.that(!qrt2.isPatched());
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             System.out.println("Got "+m);
@@ -550,10 +541,7 @@ public class QueryRouteTable {
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
                     ==PatchTableMessage.COMPRESSOR_DEFLATE);
-            if (iter.hasNext())
-                Assert.that(! qrt2.isPatched());
         }
-        Assert.that(qrt2.isPatched());
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
 
         System.out.println();
@@ -576,8 +564,10 @@ public class QueryRouteTable {
         Assert.that(qrt.entries()==qrt2.entries());
 
         Iterator iter=qrt2.encode(qrt);
-        Assert.that(! iter.hasNext());
+        Assert.that(! iter.hasNext());                     //test optimization
+
         iter=(new QueryRouteTable(1000, (byte)7)).encode(null);  //blank table
+        Assert.that(iter.next() instanceof ResetTableMessage);
         Assert.that(! iter.hasNext());
 
         //4. encode-decode test--without compression.  (We know compression
@@ -624,7 +614,6 @@ public class QueryRouteTable {
             }
         }
         Assert.that(qrt2.equals(qrt));
-
 
         //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
         //added to everything!
