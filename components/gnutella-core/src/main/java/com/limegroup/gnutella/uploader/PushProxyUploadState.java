@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.bitzi.util.Base32;
 
 /**
  * An implementaiton of the UploadState interface
@@ -33,7 +34,7 @@ public final class PushProxyUploadState implements HTTPMessage {
         try {
             InetAddress addr = InetAddress.getByName(hostAddress);
             PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
-                                               GUID.fromHexString(clientGUID),
+                                               Base32.decode(clientGUID),
                                                0, addr.getAddress(), hostPort);
             RouterService.getMessageRouter().sendPushRequest(push);
             

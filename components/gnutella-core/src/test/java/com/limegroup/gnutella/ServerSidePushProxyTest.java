@@ -9,6 +9,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
+import com.bitzi.util.*;
 
 import junit.framework.*;
 import java.util.Properties;
@@ -405,7 +406,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
 
         // first test a GET
         out.write("GET /gnutella/pushproxy?ServerID=");
-        out.write((new GUID(clientGUID)).toHexString());
+        out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:127.0.0.1:6346\r\n");
         out.write("\r\n");
@@ -436,7 +437,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
         out.write("HEAD /gnutella/pushproxy?ServerID=");
-        out.write((new GUID(clientGUID)).toHexString());
+        out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:10.238.1.87:6350\r\n");
         out.write("\r\n");
@@ -476,7 +477,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
 
         // first test a GET with a unrecognized guid
         out.write("GET /gnutella/pushproxy?ServerID=");
-        out.write((new GUID(GUID.makeGuid())).toHexString());
+        out.write(Base32.encode(GUID.makeGuid()));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:127.0.0.1:6346\r\n");
         out.write("\r\n");
@@ -503,7 +504,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
         out.write("HEAD /gnutella/pushproxy?ServerID=");
-        out.write((new GUID(clientGUID)).toHexString());
+        out.write(Base32.encode(clientGUID));
         out.write(" HTTP/1.1\r\n");
         out.write("X-Node:www.crapalapadapa.com:6346\r\n");
         out.write("\r\n");

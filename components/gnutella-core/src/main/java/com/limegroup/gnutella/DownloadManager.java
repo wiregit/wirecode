@@ -8,7 +8,7 @@ import java.net.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.NetworkUtils;
-
+import com.bitzi.util.Base32;
 
 
 /** 
@@ -707,9 +707,8 @@ public class DownloadManager implements BandwidthTracker {
             boolean requestSuccessful = false;
 
             // set up request
-            final GUID clientGUID = new GUID(file.getClientGUID());
-            final String requestString = 
-                "/gnutella/pushproxy?ServerID=" + clientGUID.toHexString();
+            final String requestString = "/gnutella/pushproxy?ServerID=" + 
+                Base32.encode(file.getClientGUID());
             final String nodeString = "X-Node:";
             final String nodeValue = 
                 NetworkUtils.ip2string(RouterService.getAddress()) +

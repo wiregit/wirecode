@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.bitzi.util.*;
 
 import junit.framework.*;
 import java.util.Properties;
@@ -345,9 +346,9 @@ public class ClientSideBrowseHostTest
         
         // make sure it sends the correct client GUID
         int beginIndex = currLine.indexOf("ID=") + 3;
-        String guidString = currLine.substring(beginIndex, beginIndex+32);
+        String guidString = currLine.substring(beginIndex, beginIndex+26);
         GUID guidFromBackend = new GUID(clientGUID);
-        GUID guidFromNetwork = new GUID(GUID.fromHexString(guidString));
+        GUID guidFromNetwork = new GUID(Base32.decode(guidString));
         assertEquals(guidFromNetwork, guidFromBackend);
 
         // make sure the node sends the correct X-Node
