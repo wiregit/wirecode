@@ -196,7 +196,7 @@ public class UploadManager implements BandwidthTracker {
 	 * for uploading.  It returns 'false' if there are slots
 	 * available.  
      */
-	public boolean isBusy() {
+	public synchronized boolean isBusy() {
 		// testTotalUploadLimit returns true is there are
 		// slots available, false otherwise.
 		return (! testTotalUploadLimit());
@@ -224,6 +224,7 @@ public class UploadManager implements BandwidthTracker {
     /** Increments the count of uploads in progress for host.
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
      *  Notifies callback of this.
+     *      @requires this' monitor is held
      *      @modifies _uploadsInProgress, uploader, _callback */
 	private void insertAndTest(Uploader uploader, String host) {
 		// add to the Map
@@ -293,7 +294,8 @@ public class UploadManager implements BandwidthTracker {
 	/**
 	 * Returns true iff another upload is allowed.  Note that because this test
 	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
-	 * if a push request takes a long time to respond.  
+	 * if a push request takes a long time to respond.  REQUIRES: this'
+     * monitor is held.
      */
 	private boolean testTotalUploadLimit() {
         //Allow another upload if (a) we currently have fewer than
