@@ -28,6 +28,24 @@ public class SynMessage extends UDPConnectionMessage {
     }
 
     /**
+     * Construct a new SynMessage with both my Connection ID and theirs
+     */
+    public SynMessage(byte connectionID, byte theirConnectionID) {
+
+        super(
+          /* his connectionID           */ theirConnectionID, 
+          /* opcode                     */ OP_SYN, 
+          /* sequenceNumber             */ 0, 
+          /* my data is my connectionID and the protocol version number */ 
+          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
+          /* data length                */ 3
+          );
+          _senderConnectionID    = connectionID;
+          _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
+    }
+
+
+    /**
      * Construct a new SynMessage from the network
      */
     public SynMessage(

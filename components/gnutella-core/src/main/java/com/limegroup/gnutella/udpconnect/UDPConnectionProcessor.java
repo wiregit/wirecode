@@ -149,7 +149,7 @@ public class UDPConnectionProcessor {
 	private byte              _myConnectionID;
 
     /** The connectionID of the other end of connection.  Used for routing */
-	private byte              _theirConnectionID;
+	private volatile byte     _theirConnectionID;
 
     /** The status of the connection */
 	private int               _connectionState;
@@ -184,9 +184,14 @@ public class UDPConnectionProcessor {
     /** The sequence number of a pending fin message */
 	private long              _finSeqNo;
 
-	/** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
-		8 byte longs of essentially infinite size */
-	private SequenceNumberExtender _extender;
+	/** Transformer for mapping 2 byte sequenceNumbers of incoming ACK 
+        messages to 8 byte longs of essentially infinite size - note Acks 
+        echo our seqNo */
+	private SequenceNumberExtender _localExtender;
+
+    /** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
+        8 byte longs of essentially infinite size */
+    private SequenceNumberExtender _extender;
 
     /** The last time that a message was sent to other host */
     private long              _lastSendTime;
@@ -265,8 +270,10 @@ public class UDPConnectionProcessor {
 		// Precreate the receive window for responce reporting
         _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
 
-		// All incoming messages get incremented
-		_extender        = new SequenceNumberExtender();
+		// All incoming seqNo and windowStarts get extended
+        // Acks seqNo need to be extended separately
+		_localExtender     = new SequenceNumberExtender();
+        _extender          = new SequenceNumberExtender();
 
         // Register yourself for incoming messages
 		_myConnectionID    = _multiplexor.register(this);
@@ -919,8 +926,7 @@ public class UDPConnectionProcessor {
             long       waitTime   = 0;
 
             // Build SYN message with my connectionID in it
-            SynMessage synMsg     = null;
-            synMsg     = new SynMessage(_myConnectionID);
+            SynMessage synMsg = new SynMessage(_myConnectionID);
 
             // Keep sending and waiting until you get a Syn and an Ack from 
             // the other side of the connection.
@@ -928,6 +934,13 @@ public class UDPConnectionProcessor {
 
                 if ( waitTime > _connectTimeOut )
                     throw CONNECTION_TIMEOUT;
+
+                // If we have received their connectionID then use it
+                if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
+                    _theirConnectionID != synMsg.getConnectionID()) {
+                    synMsg = 
+                      new SynMessage(_myConnectionID, _theirConnectionID);
+                } 
 
 				// Send a SYN packet with our connectionID 
 				send(synMsg);  
@@ -951,9 +964,6 @@ public class UDPConnectionProcessor {
         boolean doYield = false;  // Trigger a yield at the end if 1k available
 
         synchronized (this) {
-            // Extend the msgs sequenceNumber to 8 bytes based on past state
-            msg.extendSequenceNumber(
-              _extender.extendSequenceNumber(msg.getSequenceNumber()) );
 
             // Record when the last message was received
             _lastReceivedTime = System.currentTimeMillis();
@@ -961,6 +971,11 @@ public class UDPConnectionProcessor {
                 LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
             if (msg instanceof SynMessage) {
+                // Extend the msgs sequenceNumber to 8 bytes based on past state
+                msg.extendSequenceNumber(
+                  _extender.extendSequenceNumber(
+                    msg.getSequenceNumber()) );
+
                 // First Message from other host - get his connectionID.
                 SynMessage smsg        = (SynMessage) msg;
                 byte       theirConnID = smsg.getSenderConnectionID();
@@ -977,9 +992,16 @@ public class UDPConnectionProcessor {
                 // Ack their SYN message
                 safeSendAck(msg);
             } else if (msg instanceof AckMessage) {
+                // Extend the msgs sequenceNumber to 8 bytes based on past state
+                // Note that this sequence number is of local origin
+                msg.extendSequenceNumber(
+                  _localExtender.extendSequenceNumber(
+                    msg.getSequenceNumber()) );
+
                 AckMessage    amsg   = (AckMessage) msg;
 
-                // Extend the windowStart to 8 bytes the same as the sequenceNumber
+                // Extend the windowStart to 8 bytes the same as the 
+                // sequenceNumber (except that it is remote here)
                 amsg.extendWindowStart(
                   _extender.extendSequenceNumber(amsg.getWindowStart()) );
 
@@ -1029,6 +1051,11 @@ public class UDPConnectionProcessor {
                     _chunkLimit = _sendWindow.getWindowSpace();
                 }
             } else if (msg instanceof DataMessage) {
+                // Extend the msgs sequenceNumber to 8 bytes based on past state
+                msg.extendSequenceNumber(
+                  _extender.extendSequenceNumber(
+                    msg.getSequenceNumber()) );
+
                 // Pass the data message to the output window
                 DataMessage dmsg = (DataMessage) msg;
 
@@ -1074,6 +1101,11 @@ public class UDPConnectionProcessor {
                 // Ack the Data message
                 safeSendAck(msg);
             } else if (msg instanceof KeepAliveMessage) {
+                // Extend the msgs sequenceNumber to 8 bytes based on past state
+                msg.extendSequenceNumber(
+                  _extender.extendSequenceNumber(
+                    msg.getSequenceNumber()) );
+
                 KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
 
                 // Extend the windowStart to 8 bytes the same 
@@ -1120,6 +1152,11 @@ public class UDPConnectionProcessor {
                 }
 
             } else if (msg instanceof FinMessage) {
+                // Extend the msgs sequenceNumber to 8 bytes based on past state
+                msg.extendSequenceNumber(
+                  _extender.extendSequenceNumber(
+                    msg.getSequenceNumber()) );
+
                 // Stop sending data
                 _receiverWindowSpace    = 0;
 
