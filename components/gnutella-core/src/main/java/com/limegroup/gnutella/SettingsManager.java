@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.IllegalArgumentException2;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
+
 /**
  *  This class manages the property settings.  It maintains
  *  default settings for values not set in the saved
@@ -614,6 +615,11 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
+	
+	public String[] getDirectoriesAsArray() {
+		directories_.trim();
+		return HTTPUtil.stringSplit(directories_, ';');
+	}
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
