@@ -72,6 +72,11 @@ import com.sun.java.util.collections.Set;
 public class Connection implements ReplyHandler, PushProxyInterface {
     
     /**
+     * Flag for whether or not this connection has completed handshaking.
+     */
+    private boolean _initialized;
+
+    /**
      * Lock for maintaining accurate data for when to allow ping forwarding.
      */
     private final Object PING_LOCK = new Object();
@@ -623,7 +628,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         
                      
         // check for updates from this host  
-        UpdateManager.instance().checkAndUpdate(this);               
+        UpdateManager.instance().checkAndUpdate(this);   
+        
+        _initialized = true ;          
     }
     
 
@@ -638,7 +645,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  the socket established, otherwise <tt>false</tt>
      */
     public boolean isInitialized() {
-        return _socket != null;
+        return _initialized;
     }
 
     
