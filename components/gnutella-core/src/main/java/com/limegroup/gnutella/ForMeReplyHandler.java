@@ -22,13 +22,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
     
-
-
-    /**
-     * The maximum number of PushRequests per 30 seconds.
-     */
-    private final int MAX_PUSH_REQUESTS = 5;    
-    
     /**
      * Keeps track of what hosts have sent us PushRequests lately.
      */
@@ -206,7 +199,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
         } else {
             i.addInt(1);
             // if we're over the max push requests for this host, exit.
-            if(i.getInt() > MAX_PUSH_REQUESTS)
+            if(i.getInt() > UploadSettings.MAX_PUSHES_PER_HOST.getValue())
                 return;
         }
         

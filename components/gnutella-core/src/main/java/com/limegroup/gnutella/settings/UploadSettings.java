@@ -7,6 +7,13 @@ public final class UploadSettings extends LimeProps {
     
     private UploadSettings() {}
     
+    
+    /**
+     * The maximum number of pushes to allow from a single host
+     * within a 30 second span.
+     */
+    public static final IntSetting MAX_PUSHES_PER_HOST =
+        FACTORY.createIntSetting("MAX_PUSHES_PER_HOST", 5);
 
 	/**
 	 * Setting for the number of kilobytes/second to allow for all uploads.
@@ -53,6 +60,10 @@ public final class UploadSettings extends LimeProps {
     public static final IntSetting SOFT_MAX_UPLOADS =
         FACTORY.createIntSetting("SOFT_MAXIMUM_UPLOADS", 5);   
 
+
+    /**
+     * A test SIMPP setting.
+     */
     public static final IntSetting TEST_UPLOAD_SETTING = 
         FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING",4, 
                                                          "test_upload", 20, 3);

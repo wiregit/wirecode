@@ -130,6 +130,7 @@ public class UploadTest extends BaseTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
 		UploadSettings.UPLOADS_PER_PERSON.setValue(10);
+		UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
 
         FilterSettings.FILTER_DUPLICATES.setValue(false);
 
@@ -138,7 +139,7 @@ public class UploadTest extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);        
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         
 		File testDir = CommonUtils.getResourceFile(testDirName);
 		assertTrue("test directory could not be found", testDir.isDirectory());
@@ -1265,6 +1266,46 @@ public class UploadTest extends BaseTestCase {
            		                         throws IOException, BadPacketException{
         return downloadPush1("GET", makeRequest(indexedFile), header, expResp);        
     }
+    
+    /**
+     * Does a push & gets a socket from the incoming connection.
+     */
+    private static Socket getSocketFromPush() throws IOException, BadPacketException {
+		Connection c = createConnection();
+		c.initialize();
+		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
+        c.send(query);
+        c.flush();
+        QueryReply reply=null;
+        for(int i = 0; i < 10; i++) {
+            Message m=c.receive(2000);
+            if (m instanceof QueryReply) {
+                reply=(QueryReply)m;
+                break;
+            } 
+        }
+
+        if(reply == null)
+            throw new IOException("didn't get query reply in time");
+
+        PushRequest push =
+            new PushRequest(GUID.makeGuid(),
+                            (byte)3,
+                            reply.getClientGUID(),
+                            0,
+                            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                            callbackPort);
+
+        //Create listening socket, then send push.
+        ServerSocket ss=new ServerSocket(callbackPort);
+        c.send(push);
+        c.flush();
+        ss.setSoTimeout(2000);
+        c.close();
+        Socket s = ss.accept();
+        ss.close();
+        return s;
+    }
 
     /** 
      * Does an arbitrary push download. 
@@ -1276,57 +1317,30 @@ public class UploadTest extends BaseTestCase {
 										 String expResp) 
         throws IOException, BadPacketException {
             //Establish push route
-		Connection c = createConnection();
-		c.initialize();
-		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-            c.send(query);
-            c.flush();
-            QueryReply reply=null;
-            while (true) {
-                Message m=c.receive(2000);
-                if (m instanceof QueryReply) {
-                    reply=(QueryReply)m;
-                    break;
-                } 
-            }
-            PushRequest push =
-                new PushRequest(GUID.makeGuid(),
-                                (byte)3,
-                                reply.getClientGUID(),
-                                0,
-                                new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-                                callbackPort);
+        Socket s = getSocketFromPush();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
 
-            //Create listening socket, then send push.
-            ServerSocket ss=new ServerSocket(callbackPort);
-            c.send(push);
-            c.flush();
-            Socket s=ss.accept();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                s.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                s.getOutputStream()));
-
-            in.readLine(); //skip GIV
-            in.readLine(); //skip blank line
-            
-            //Download from the (incoming) TCP connection.
-            String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
-            assertEquals("unexpected HTTP response message body", expResp, retStr);
-            boolean ret = retStr.equals(expResp);
-            
-            // reset string variable
-            retStr = downloadInternal1(request, file, header, out, in,expResp.length());
-            assertEquals("unexpected HTTP response message body in second request", 
-                         expResp, retStr);
-            
-            ret = ret && retStr.equals(expResp);
-            
-            //Cleanup
-            c.close();
-            s.close();
-            ss.close();        
-            return ret;
+        in.readLine(); //skip GIV
+        in.readLine(); //skip blank line
+        
+        //Download from the (incoming) TCP connection.
+        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
+        assertEquals("unexpected HTTP response message body", expResp, retStr);
+        boolean ret = retStr.equals(expResp);
+        
+        // reset string variable
+        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
+        assertEquals("unexpected HTTP response message body in second request", 
+                     expResp, retStr);
+        
+        ret = ret && retStr.equals(expResp);
+        
+        //Cleanup
+        s.close();
+        return ret;
     }
 
 
@@ -1335,33 +1349,7 @@ public class UploadTest extends BaseTestCase {
     private static boolean downloadPush(String file, String header, 
 										String expResp) 
             throws IOException, BadPacketException {
-        //Establish push route
-		Connection c = createConnection();
-        c.initialize();
-        QueryRequest query = QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
-        c.flush();
-        QueryReply reply=null;
-        while (true) {
-            Message m=c.receive(2000);
-            if (m instanceof QueryReply) {
-                reply=(QueryReply)m;
-                break;
-            } 
-        }
-		assertNotNull("reply should not be null", reply);
-        PushRequest push=new PushRequest(GUID.makeGuid(),
-            (byte)3,
-            reply.getClientGUID(),
-            0,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            callbackPort);
-
-        //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
-        c.flush();
-        Socket s=ss.accept();
+        Socket s = getSocketFromPush();
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -1374,9 +1362,7 @@ public class UploadTest extends BaseTestCase {
 		assertNotNull("string returned from download should not be null", retStr);
 		
         //Cleanup
-        c.close();
         s.close();
-        ss.close();    
 		assertEquals("wrong response", expResp, retStr);
         return retStr.equals(expResp);
     }
@@ -1707,32 +1693,7 @@ public class UploadTest extends BaseTestCase {
                                                 header, String expResp)
         throws IOException , BadPacketException {
         boolean ret = true;
-        //Establish push route
-		Connection c = createConnection();
-        c.initialize();
-        QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
-        c.send(query);
-        c.flush();
-        QueryReply reply=null;
-        while (true) {
-            Message m=c.receive(2000);
-            if (m instanceof QueryReply) {
-                reply=(QueryReply)m;
-                break;
-            } 
-        }
-        PushRequest push=new PushRequest(GUID.makeGuid(),
-            (byte)3,
-            reply.getClientGUID(),
-            0,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            callbackPort);
-
-        //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
-        c.flush();
-        Socket s=ss.accept();
+        Socket s = getSocketFromPush();
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -1779,7 +1740,6 @@ public class UploadTest extends BaseTestCase {
         in.close();
         out.close();
         s.close();
-        ss.close();
         return ret && buf.toString().equals(expResp);
     }
 
