@@ -98,14 +98,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	 * Adds XML to the responses in a QueryReply.
 	 */
     private boolean addXMLToResponses(QueryReply qr) {
-        List results = null;
-        try {
-            results = qr.getResultsAsList();
-        } catch (BadPacketException e) {
-            LOG.debug("Error gettig results", e);
-            return false;
-        }
-        
         // get xml collection string, then get dis-aggregated docs, then 
         // in loop
         // you can match up metadata to responses
@@ -133,13 +125,23 @@ public final class ForMeReplyHandler implements ReplyHandler {
         if(xmlCollectionString == null || xmlCollectionString.equals(""))
             return true;
         
+        Response[] responses;
+        int responsesLength;
+        try {
+            responses = qr.getResultsArray();
+            responsesLength = responses.length;
+        } catch(BadPacketException bpe) {
+            LOG.trace("Unable to get responses", bpe);
+            return false;
+        }
+        
         if(LOG.isDebugEnabled())
             LOG.debug("xmlCollectionString = " + xmlCollectionString);
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
-                                                               results.size());
-        Iterator iter = results.iterator();
-        for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
-            Response response = (Response)iter.next();
+                                                               responsesLength);        
+        
+        for(int i = 0; i < responsesLength; i++) {
+            Response response = responses[i];
             LimeXMLDocument[] metaDocs;
             for(int schema = 0; schema < allDocsArray.size(); schema++) {
                 metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
@@ -147,8 +149,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
                 if(metaDocs == null)
                     continue;
                 // If this schema had a document for this response, use it.
-                if(metaDocs[currentResponse] != null) {
-                    response.setDocument(metaDocs[currentResponse]);
+                if(metaDocs[i] != null) {
+                    response.setDocument(metaDocs[i]);
                     break; // we only need one, so break out.
                 }
             }

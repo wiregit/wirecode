@@ -489,6 +489,17 @@ public class QueryReply extends Message implements Serializable{
     public long getSpeed() {
         return ByteOrder.ubytes2long(ByteOrder.leb2int(_payload,7));
     }
+    
+    /**
+     * Returns the Response[].  Throws BadPacketException if this
+     * data couldn't be extracted.
+     */
+    public Response[] getResultsArray() throws BadPacketException {
+        parseResults();
+        if(_responses == null)
+            throw new BadPacketException();
+        return _responses;
+    }
 
     /** Returns an iterator that will yield the results, each as an
      *  instance of the Response class.  Throws BadPacketException if
