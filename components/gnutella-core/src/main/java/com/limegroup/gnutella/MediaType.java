@@ -61,14 +61,17 @@ public class MediaType {
 												   "rtf", "doc", "tex"});
 		MediaType programs=new MediaType("Programs",
 										 new String[] {"exe", "zip", "gz", "gzip",
-													   "hqx", "tar", "tgz", "z"});
+													   "hqx", "tar", "tgz", "z",
+										               "sit", "hqx", "bin",
+										               "dmg"});
 		MediaType audio=new MediaType("Audio", 
 									  new String[] {"mp3", "wav", "au", 
 													"aif", "aiff", "ra", 
 													"ram", "rmj", "lqt", "ogg"});
 		MediaType video=new MediaType("Video", 
 									  new String[] {"mpg", "mpeg", "asf", "qt", 
-													"mov", "avi", "mpe", "swf", "dcr"});
+													"mov", "avi", "mpe", "swf", "dcr",
+									                "rm", "ram"});
 		MediaType images=new MediaType("Images",
 									   new String[] {"gif", "jpg", "jpeg", "jpe",
 													 "png", "tif", "tiff"});	
