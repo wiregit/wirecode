@@ -213,6 +213,8 @@ public class BootstrapServerManager {
 												   String line);
         /** Should we go on to another host? */
         protected abstract boolean needsMoreData();
+        /** Called when this is started.  Default: does nothing. */
+        protected void begun() { }
         /** Called when this is done.  Default: does nothing. */
         protected void done() { }
     }
@@ -243,6 +245,10 @@ public class BootstrapServerManager {
         }
         protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
+        }
+        protected void begun() {
+            if(_fetchObserver != null)
+                _fetchObserver.endpointFetchStarted();
         }
         protected void done() {
             _hostFetchInProgress=false;
@@ -339,6 +345,7 @@ public class BootstrapServerManager {
         Thread runner=new Thread() {
             public void run() {
                 try {
+                    request.begun();
                     requestBlocking(request);
                 } catch (Throwable e) {
                     //Internal error!  Display to GUI for debugging.

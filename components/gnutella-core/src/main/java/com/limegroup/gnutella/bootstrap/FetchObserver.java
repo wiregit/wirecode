@@ -10,4 +10,10 @@ public interface FetchObserver {
      * contacting GWebCaches to retrieve endpoints.
      */
     public void endpointFetchFinished(int fetched);
+    
+    /**
+     * Called when the BootstrapServerManager is about
+     * to start contacting GWebCaches to retrieve endpoints.
+     */
+    public void endpointFetchStarted();
 }

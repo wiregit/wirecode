@@ -1939,12 +1939,31 @@ public class ConnectionManager {
     	}
     	
     	/**
+    	 * Notification that we have started contacting GWebCaches.
+    	 *
+    	 * We reset the _connectionAttempts to zero and when the endpoint
+    	 * fetch finishes, we wait until we have tried that many hosts
+    	 * before saying that Gnutella is down.
+    	 */
+    	public void endpointFetchStarted() {
+            LOG.debug("Fetch Started.");
+            
+            _connectionAttempts = 0;
+        }
+    	     
+    	
+    	/**
     	 * Notification that we have finished contacting GWebCaches.
     	 */
         public void endpointFetchFinished(int numAdded) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Fetch Finished, num added: " + numAdded);
             _gwebCachesFinished = true;
+            // Reset the no hosts to use flag to false if we haven't attempted
+            // connecting to all these hosts.
+            if(_connectionAttempts < numAdded)
+                _noMoreHostsToUse = false;
+
             informUser();
         }        
 
@@ -1967,11 +1986,13 @@ public class ConnectionManager {
         private synchronized void informUser() {
             // If we've had a successful connection or we aren't trying to
             // connect, everything's cool.
-           if(_disconnected || _lastSuccessfulConnect > 0)
+           if(_disconnected || isConnected() || 
+              (System.currentTimeMillis() - _lastSuccessfulConnect) < (4*1000))
                 return;
                 
             // If we haven't checked the internet connection, wait till we do.
             if(_hasInternetConnection == UNKNOWN) {
+                LOG.debug("No known internet connection status.");
                 analyzeConnection();
                 return;
             }
@@ -1997,13 +2018,10 @@ public class ConnectionManager {
     	    if(LOG.isDebugEnabled())
     	        LOG.debug("No Gnutella Connection." +
     	                "  GWebCache's Used: " + _gwebCachesFinished +
-    	                ", Has Internet: " + _hasInternetConnection +
-    	                ", Is Connected: " + isConnected() +
-    	                ", Notified About Firewall: " + _notifiedAboutFirewall);
+    	                ", Notified About Firewall: " + _notifiedAboutFirewall +
+    	                ", No More Hosts: " + _noMoreHostsToUse);
     	                
-            if(!_notifiedAboutFirewall &&
-               _gwebCachesFinished &&
-               _hasInternetConnection == YES &&
+            if(!_notifiedAboutFirewall && _gwebCachesFinished &&
                _noMoreHostsToUse) {
                 _notifiedAboutFirewall = true;
     	        // Notify the user that they are able to contact websites,
@@ -2020,8 +2038,8 @@ public class ConnectionManager {
             LOG.debug("No internet at all.");
             
             if(_automaticallyConnecting) {
-                // We've already notified the user about their connection and 
-                // we're alread retrying automatically, so just return.    
+                //We've already notified, so just do the connection if needed.
+                connect();  
                 return;  
             }
             
