@@ -12,7 +12,7 @@ public class ConnectionWatchdog implements Runnable {
      *  before being booted. */
     private static final int EVALUATE_TIME=10000;
     /** Additional time (in msec) to wait before rechecking connections. */
-    private static final int REEVALUATE_TIME=2000;
+    private static final int REEVALUATE_TIME=8000;
 
     private ConnectionManager manager;
     private MessageRouter router;
