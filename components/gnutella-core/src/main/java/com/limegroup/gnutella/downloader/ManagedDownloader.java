@@ -368,8 +368,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         }  
 
         //System.out.println("Adding "+rfd);
-        //Add to buckets (will be seen because buckets exposes representation)...
-        buckets.add(rfd);
+        //Add to buckets (will be seen because buckets exposes
+        //representation)...
+        
+        if (buckets != null)
+            buckets.add(rfd);
         //...append to allFiles for resume purposes...
         RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
         System.arraycopy(allFiles, 0, newAllFiles, 0, allFiles.length);
