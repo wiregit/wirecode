@@ -569,14 +569,14 @@ public class LimeXMLDocument implements Serializable {
 		if(o == this) return true;
 		if(!(o instanceof LimeXMLDocument)) return false;
 		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
-		return ((fieldToValue == null ? xmlDoc.fieldToValue == null : 
-				 fieldToValue.equals(xmlDoc.fieldToValue))  &&
-				(schemaUri == null ? xmlDoc.schemaUri == null :
+		return ((schemaUri == null ? xmlDoc.schemaUri == null :
 				 schemaUri.equals(xmlDoc.schemaUri)) &&
 				(identifier == null ? xmlDoc.identifier == null :
 				 identifier.equals(xmlDoc.identifier)) &&
 				(action == null ? xmlDoc.action == null :
-				 action.equals(xmlDoc.action)));
+				 action.equals(xmlDoc.action)) &&
+				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
+				 fieldToValue.equals(xmlDoc.fieldToValue)));
 	}
 
 	/**
