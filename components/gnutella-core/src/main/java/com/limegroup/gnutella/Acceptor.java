@@ -157,6 +157,8 @@ public class Acceptor implements Runnable {
 
             //Shut off UDPService also!
             UDPService.instance().setListeningSocket(null);
+            //Shut off MulticastServier too!
+            MulticastService.instance().setListeningSocket(null);            
 
             debug("Acceptor.setListeningPort(): service OFF.");
             return;
@@ -181,6 +183,22 @@ public class Acceptor implements Runnable {
                 UDPService.instance().newListeningSocket(port);
 
             debug("Acceptor.setListeningPort(): UDP Service is ready.");
+            
+            MulticastSocket mcastServiceSocket = null;
+            try {
+                InetAddress mgroup = InetAddress.getByName(
+                    ConnectionSettings.MULTICAST_ADDRESS.getValue()
+                );
+                mcastServiceSocket =                            
+                    MulticastService.instance().newListeningSocket(
+                        ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
+                    );
+                debug("Acceptor.setListeningPort(): Multicast Service is ready.");
+            } catch(IOException e) {
+                mcastServiceSocket = null;
+                debug("Acceptor.setListeningPort(): Unable to start multicast service.");
+            }
+            
         
             //a) Try new port.
             ServerSocket newSocket=null;
@@ -210,6 +228,13 @@ public class Acceptor implements Runnable {
 
             // Commit UDPService's new socket
             UDPService.instance().setListeningSocket(udpServiceSocket);
+            // Commit the MulticastService's new socket
+            // if we were able to get it
+            if ( mcastServiceSocket != null ) {
+                MulticastService.instance().setListeningSocket(
+                    mcastServiceSocket
+                );
+            }
 
             debug("Acceptor.setListeningPort(): listening UDP/TCP on " + _port);
         }

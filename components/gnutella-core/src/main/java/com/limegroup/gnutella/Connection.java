@@ -879,11 +879,7 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     protected boolean isLocal() {
-        InetAddress address = getInetAddress();
-        InetAddress localAddress = _socket.getLocalAddress();
-        byte[] byteAddress = address.getAddress();
-        return (address.equals(localAddress) ||
-                byteAddress[0] == 127);
+        return CommonUtils.isLocalAddress(_socket.getInetAddress());
     }
 
     /**

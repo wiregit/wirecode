@@ -58,7 +58,7 @@ public abstract class MessageRouter {
 	 */
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
 		ForMeReplyHandler.instance();
-
+		
     /**
      * The lock to hold before updating or propogating tables.  TODO3: it's 
      * probably possible to use finer-grained locking.
@@ -250,7 +250,7 @@ public abstract class MessageRouter {
 
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
-		UDPReplyHandler handler = new UDPReplyHandler(address, port);
+		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
             //TODO: compare QueryKey with old generation params.  if it matches
@@ -284,6 +284,60 @@ public abstract class MessageRouter {
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
+    
+    /**
+     * The handler for Multicast messages. Processes a message based on the
+     * message type.
+     *
+     * @param msg the <tt>Message</tt> recieved.
+     * @param datagram the <tt>DatagramPacket</tt> containing the IP and
+     *  port of the client node.
+     */
+	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
+        // Increment hops and decrement TTL.
+        msg.hop();
+
+		InetAddress address = datagram.getAddress();
+		int port = datagram.getPort();
+		
+        if (CommonUtils.isLocalAddress(address))
+            return;
+		
+		ReplyHandler handler = new UDPReplyHandler(address, port);
+		
+        if (msg instanceof QueryRequest) {
+            //TODO: compare QueryKey with old generation params.  if it matches
+            //send a new one generated with current params 
+            //if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
+            //    sendAcknowledgement(datagram, msg.getGUID());
+                // a TTL above zero may indicate a malicious client, as UDP
+                // messages queries should not be sent with TTL above 1.
+                //if(msg.getTTL() > 0) return;
+                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
+                                                       handler);
+           // }
+            if(RECORD_STATS)
+                ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+	//	} else if (msg instanceof QueryReply) {			
+	//		if(RECORD_STATS)
+	//			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+    //        handleQueryReply((QueryReply)msg, handler);
+		} else if(msg instanceof PingRequest) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
+												  handler, datagram);
+	//	} else if(msg instanceof PingReply) {
+	//		if(RECORD_STATS)
+	//			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+    //        handleUDPPingReply((PingReply)msg, handler, address, port);
+	//	} else if(msg instanceof PushRequest) {
+	//		if(RECORD_STATS)
+	//			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
+	//		handlePushRequest((PushRequest)msg, handler);
+		}
+    }
+
 
     /**
      * Returns true if the Query has a valid QueryKey.  false if it isn't
@@ -584,7 +638,7 @@ public abstract class MessageRouter {
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
 		forwardQueryRequestToLeaves(request, handler);
-
+		
         // if I'm not firewalled and the source isn't firewalled THEN reply....
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
@@ -715,6 +769,9 @@ public abstract class MessageRouter {
 			broadcastQueryRequest(query, FOR_ME_REPLY_HANDLER);
 		} 
 		
+		// always send the query to your multicast people
+		multicastQueryRequest(query);
+		
 	}
 
 	/**
@@ -844,6 +901,17 @@ public abstract class MessageRouter {
 				
 		UNICASTER.addQuery(query, conn);
 	}
+	
+    /**
+     * Send the query to the multicast group.
+     */
+    protected synchronized void multicastQueryRequest(QueryRequest query) {
+        
+		// set the TTL on outgoing udp queries to 1
+		query.setTTL((byte)1);
+				
+		MulticastService.instance().send(query);
+	}	
 
 
     /**

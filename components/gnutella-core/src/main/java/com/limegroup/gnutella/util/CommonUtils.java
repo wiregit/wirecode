@@ -964,6 +964,20 @@ public final class CommonUtils {
 		if((port & 0xFFFF0000) != 0) return false;
 		return true;
 	}
+	
+	/**
+	 * Returns whether or not the supplied address is a local address.
+	 */
+	public static boolean isLocalAddress(InetAddress addr) {
+	    try {	    
+            InetAddress address = InetAddress.getLocalHost();
+            byte[] byteAddress = address.getAddress();
+            return (address.equals(addr) ||
+                    byteAddress[0] == 127);
+        } catch(UnknownHostException e) {
+            return false;
+        }
+    }
 
     /*
     public static void main(String args[]) {

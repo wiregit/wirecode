@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 
@@ -8,100 +8,94 @@ import java.net.*;
 import java.io.*;
 
 /**
- * This class handles UDP messaging services.  It both sends and
- * receives messages, routing received messages to their appropriate
- * handlers.  This also handles issues related to the GUESS proposal, 
- * such as making sure that the UDP and TCP port match and sending
- * UDP acks for queries.
+ * This class handles Multicast messages.
+ * Currently, this only listens for messages from the Multicast group.
+ * Sending is done on the GUESS port, so that other nodes can reply
+ * appropriately to the individual request, instead of multicasting
+ * replies to the whole group.
  *
- * @see UDPReplyHandler
+ * @see UDPService
  * @see MessageRouter
- * @see QueryUnicaster
  */
-public final class UDPService implements Runnable {
+public final class MulticastService implements Runnable {
 
 	/**
-	 * Constant for the single <tt>UDPService</tt> instance.
+	 * Constant for the single <tt>MulticastService</tt> instance.
 	 */
-	private final static UDPService INSTANCE = new UDPService();
+	private final static MulticastService INSTANCE = new MulticastService();
 
 	/** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
      * before sending.  Moreover, only one thread should be wait()ing on one of
      * these locks at a time or results cannot be predicted.
 	 * This is the socket that handles sending and receiving messages over 
-	 * UDP.
+	 * Multicast.
+	 * (Currently only used for recieving)
 	 */
-	private volatile DatagramSocket _socket;
+	private volatile MulticastSocket _socket;
 	
     /**
-     * Used for synchronized RECEIVE access to the UDP socket.  Should only be
-     * used by the UDP_THREAD.
+     * Used for synchronized RECEIVE access to the Multicast socket.
+     * Should only be used by the Multicast thread.
      */
     private final Object _receiveLock = new Object();
+    
+    /**
+     * The group we're joined to listen to.
+     */
+    private InetAddress _group = null;
+    
+    /**
+     * The port of the group we're listening to.
+     */
+    private int _port = -1;
 
     /**
      * Used for synchronized SEND access to the UDP socket.  Should only be used
      * in the send method.
      */
-    private final Object _sendLock = new Object();
+    //private final Object _sendLock = new Object();
 
 	/**
-	 * Constant for the size of UDP messages to accept -- dependent upon
+	 * Constant for the size of Multicast messages to accept -- dependent upon
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
 
-    /** True if the UDPService has ever received a solicited incoming UDP
-     *  packet.
-     */
-    private boolean _acceptedSolicitedIncoming = false;
-
-    /** True if the UDPService has ever received a unsolicited incoming UDP
-     *  packet.
-     */
-    private boolean _acceptedUnsolicitedIncoming = false;
-
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private final Thread UDP_THREAD = new Thread(this, "UDPService");
-
-    /**
-     * The GUID that we advertise out for UDPConnectBack requests.
-     */
-    private final GUID CONNECT_BACK_GUID = new GUID(GUID.makeGuid());
+	private final Thread MULTICAST_THREAD
+	    = new Thread(this, "MulticastService");
 
 	/**
 	 * Instance accessor.
 	 */
-	public static UDPService instance() {
+	public static MulticastService instance() {
 		return INSTANCE;
 	}
 
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() { }
-
-    /** @return The GUID to send for UDPConnectBack attempts....
-     */
-    public GUID getConnectBackGUID() {
-        return CONNECT_BACK_GUID;
-    }
+	private MulticastService() { }
 
     /** 
-     * Returns a new DatagramSocket that is bound to the given port.  This
-     * value should be passed to setListeningSocket(DatagramSocket) to commit
+     * Returns a new MulticastSocket that is bound to the given port.  This
+     * value should be passed to setListeningSocket(MulticastSocket) to commit
      * to the new port.  If setListeningSocket is NOT called, you should close
      * the return socket.
-     * @return a new DatagramSocket that is bound to the specified port.
-     * @exception IOException Thrown if the DatagramSocket could not be
+     * @return a new MulticastSocket that is bound to the specified port.
+     * @exception IOException Thrown if the MulticastSocket could not be
      * created.
      */
-    DatagramSocket newListeningSocket(int port) throws IOException {
+    MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
         try {
-            return new DatagramSocket(port);
+            _port = port;
+            _group = group;
+            MulticastSocket sock = new MulticastSocket(port);
+            sock.joinGroup(group);
+            return sock;
         }
         catch (SocketException se) {
             throw new IOException("socket could not be set on port: "+port);
@@ -113,20 +107,20 @@ public final class UDPService implements Runnable {
 
 
 	/** 
-     * Changes the DatagramSocket used for sending/receiving.  Typically called
-     * by Acceptor to commit to the new port.
-     * @param datagramSocket the new listening socket, which must be be the
+     * Changes the MulticastSocket used for sending/receiving.
+     * This must be common among all instances of LimeWire on the subnet.
+     * It is not synched with the typical gnutella port, because that can
+     * change on a per-servent basis.
+     * Only MulticastService should mutate this.
+     * @param multicastSocket the new listening socket, which must be be the
      *  return value of newListeningSocket(int).  A value of null disables 
-     *  UDP sending and receiving.
+     *  Multicast sending and receiving.
 	 */
-	void setListeningSocket(DatagramSocket datagramSocket) {
-        // we used to check if we were GUESS capable according to the
-        // SettingsManager.  but in general we want to have the SERVER side of
-        // GUESS active always.  the client side should be shut off from 
-		// MessageRouter.
-        if (!UDP_THREAD.isAlive()) {
-			UDP_THREAD.setDaemon(true);
-            UDP_THREAD.start();
+	void setListeningSocket(MulticastSocket multicastSocket)
+	  throws IOException {
+        if (!MULTICAST_THREAD.isAlive()) {
+			MULTICAST_THREAD.setDaemon(true);
+            MULTICAST_THREAD.start();
             Thread.yield(); // give it a bit of time to start up.
 		}
 
@@ -135,19 +129,19 @@ public final class UDPService implements Runnable {
             _socket.close();
         //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
-            synchronized (_sendLock) {
+            //synchronized (_sendLock) {
                 // if the input is null, then the service will shut off ;) .
-                _socket = (DatagramSocket) datagramSocket;
+                _socket = (MulticastSocket) multicastSocket;
                 _receiveLock.notify();
-                _sendLock.notify();
-            }
+               // _sendLock.notify();
+           // }
         }
 	}
 
 
 	/**
-	 * Busy loop that accepts incoming messages sent over UDP and 
-	 * dispatches them to their appropriate handlers.
+	 * Busy loop that accepts incoming messages sent over the
+	 * multicast socket and dispatches them to their appropriate handlers.
 	 */
 	public void run() {
         try {
@@ -188,17 +182,9 @@ public final class UDPService implements Runnable {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);
-                    if (!isGUESSCapable()) {
-                        if (message instanceof PingRequest) {
-                            GUID guidReceived = new GUID(message.getGUID());
-                            if (CONNECT_BACK_GUID.equals(guidReceived))
-                                _acceptedUnsolicitedIncoming = true;
-                        }
-                        else
-                            _acceptedSolicitedIncoming = true;
-                    }
                     if(message == null) continue;
-                    router.handleUDPMessage(message, datagram);
+                    debug("recieved " + message + " from multicast group.");
+                    router.handleMulticastMessage(message, datagram);
                 }
                 catch (IOException e) {
                     continue;
@@ -214,14 +200,16 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
-     * This method should not be called if the client is not GUESS enabled.
+	 * Sends the <tt>Message</tt> using UDPService to the multicast
+	 * address/port.
      *
 	 * @param msg  the <tt>Message</tt> to send
-	 * @param ip   the <tt>InetAddress</tt> to send to
-	 * @param port the <tt>port</tt> to send to
 	 */
-    public synchronized void send(Message msg, InetAddress ip, int port) {
+    public synchronized void send(Message msg) {
+        debug("Sending " + msg + " to multicast group: "
+              + _group + " port: " + _port +".");
+        UDPService.instance().send(msg, _group, _port);
+        /*
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
@@ -245,37 +233,15 @@ public final class UDPService implements Runnable {
                 e.printStackTrace();
             }
         }
-	}
-
-
-	/**
-	 * Returns whether or not this node is capable of sending its own
-	 * GUESS queries.  This would not be the case only if this node
-	 * has not successfully received an incoming UDP packet.
-	 *
-	 * @return <tt>true</tt> if this node is capable of running its own
-	 *  GUESS queries, <tt>false</tt> otherwise
-	 */	
-	public boolean isGUESSCapable() {
-		return _acceptedSolicitedIncoming && _acceptedUnsolicitedIncoming;
+        */
 	}
 
 	/**
-	 * Returns whether or not this node is capable of receiving UNSOLICITED
-     * UDP packets.  It is false until a UDP ConnectBack ping has been received.
-	 *
-	 * @return <tt>true</tt> if this node has accepted a UNSOLICITED UDP packet.
-	 */	
-	public boolean canReceiveUnsolicited() {
-		return _acceptedUnsolicitedIncoming;
-	}
-
-	/**
-	 * Returns whether or not the UDP socket is listening for incoming
+	 * Returns whether or not the Multicast socket is listening for incoming
 	 * messsages.
 	 *
-	 * @return <tt>true</tt> if the UDP socket is listening for incoming
-	 *  UDP messages, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the Multicast socket is listening for incoming
+	 *  Multicast messages, <tt>false</tt> otherwise
 	 */
 	public boolean isListening() {
 		if(_socket == null) return false;
@@ -286,15 +252,15 @@ public final class UDPService implements Runnable {
 	 * Overrides Object.toString to give more informative information
 	 * about the class.
 	 *
-	 * @return the <tt>DatagramSocket</tt> data
+	 * @return the <tt>MulticastSocket</tt> data
 	 */
 	public String toString() {
-		return "UDPAcceptor\r\nsocket: "+_socket;
+		return "MulticastService\r\nsocket: "+_socket;
 	}
 	
     private static final boolean debug = false;
     private static void debug(String out) {
         if (debug)
             System.out.println(out);
-    }		
+    }	
 }

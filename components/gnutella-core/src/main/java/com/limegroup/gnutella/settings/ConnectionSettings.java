@@ -46,6 +46,18 @@ public final class ConnectionSettings extends AbstractSettings {
 	 */
 	public static final BooleanSetting WATCHDOG_ACTIVE =
 		CFG_FACTORY.createBooleanSetting("WATCHDOG_ACTIVE", true);
+		
+    /**
+     * Setting for the multicast address.
+     */
+    public static final StringSetting MULTICAST_ADDRESS =
+        CFG_FACTORY.createStringSetting("MULTICAST_ADDRESS", "234.21.81.1");
+        
+    /**
+     * Setting for the multicast port.
+     */
+    public static final IntSetting MULTICAST_PORT =
+        CFG_FACTORY.createIntSetting("MULTICAST_PORT", 6347);
 
 }
 
