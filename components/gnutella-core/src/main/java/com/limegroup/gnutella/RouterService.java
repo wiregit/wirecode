@@ -674,33 +674,21 @@ public class RouterService {
      *  Returns the number of good hosts in my horizon.
      */
     public static long getNumHosts() {
-		long ret=0;
-		for (Iterator iter=manager.getInitializedConnections().iterator();
-			 iter.hasNext() ; )
-			ret+=((ManagedConnection)iter.next()).getNumHosts();
-		return ret;
+        return HorizonCounter.instance().getNumHosts();
     }
 
     /**
      * Returns the number of files in my horizon.
      */
     public static long getNumFiles() {
-		long ret=0;
-		for (Iterator iter=manager.getInitializedConnections().iterator();
-			 iter.hasNext() ; )
-			ret+=((ManagedConnection)iter.next()).getNumFiles();
-		return ret;
+        return HorizonCounter.instance().getNumFiles();
     }
 
     /**
      * Returns the size of all files in my horizon, in kilobytes.
      */
     public static long getTotalFileSize() {
-		long ret=0;
-		for (Iterator iter=manager.getInitializedConnections().iterator();
-			 iter.hasNext() ; )
-			ret+=((ManagedConnection)iter.next()).getTotalFileSize();
-		return ret;
+        return HorizonCounter.instance().getTotalFileSize();
     }
 
     /**
@@ -736,10 +724,8 @@ public class RouterService {
      * @modifies this (values returned by getNumFiles, getTotalFileSize, and
      *  getNumHosts) 
      */
-    public static void updateHorizon() {        
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-			 iter.hasNext() ; )
-			((ManagedConnection)iter.next()).refreshHorizonStats();
+    public static void updateHorizon() {
+        HorizonCounter.instance().refresh();
     }
 
     /** 
