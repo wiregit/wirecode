@@ -1,25 +1,27 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
-import java.io.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-
 import com.limegroup.gnutella.util.Comparators;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public class XMLParsingUtils {
     public static class Result {
-        public String schemaURI;
-        public String type;
-        public String canonicalKeyPrefix;
-        public List canonicalAttributeMaps = new ArrayList();
-    }
-    public static List split(String aggregatedXmlDocuments) {
-        List results = new ArrayList();
-        String[] split = aggregatedXmlDocuments.split("<\\?xml");
-        for(int i=1; i<split.length; i++) results.add("<?xml" + split[i]);
-        return results;
+        public String schemaURI; //like http://www.limewire.com/schemas/audio.xsd
+        public String type; //e.g. audio, video, etc.
+        public String canonicalKeyPrefix; //like audios__audio__
+        public List canonicalAttributeMaps = new ArrayList(); //one attribute map per element in xml
     }
     public static Result parse(String xml) throws IOException, SAXException {
         return parse(new InputSource(new StringReader(xml)));
@@ -47,6 +49,12 @@ public class XMLParsingUtils {
         reader.parse(inputSource);
         result.schemaURI = "http://www.limewire.com/schemas/"+result.type+".xsd";
         return result;
+    }
+    public static List split(String aggregatedXmlDocuments) {
+        List results = new ArrayList();
+        String[] split = aggregatedXmlDocuments.split("<\\?xml");
+        for(int i=1; i<split.length; i++) results.add("<?xml" + split[i]);
+        return results;
     }
     //implementation
     private static String plural(String type) {
