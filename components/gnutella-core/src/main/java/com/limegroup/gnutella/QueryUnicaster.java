@@ -254,6 +254,16 @@ public final class QueryUnicaster {
         return retVal;
     }
 
+    /** Gets rid of a Query according to GUID.  Use this if a leaf connection
+     *  dies and you want to stop the query.
+     */
+    void purgeQuery(GUID queryGUID) {
+        synchronized (_queries) {
+            _queries.remove(queryGUID);
+        }
+    }
+
+
     /** Feed me QRs so I can keep track of stuff.
      */
     public void handleQueryReply(QueryReply qr) {
