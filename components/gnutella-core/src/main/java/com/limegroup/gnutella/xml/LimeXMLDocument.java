@@ -448,7 +448,7 @@ public class LimeXMLDocument implements Serializable {
      * yourself with setSchemaURI().
      */
     public String getXMLString() throws SchemaNotFoundException {        
-        if (xmlString == null) {
+        if (xmlString == null || xmlString.equals("")) {
             // derive xml...
             xmlString = constructXML(getOrderedNameValueList(),schemaUri);
         }
