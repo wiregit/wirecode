@@ -1,9 +1,12 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.http.*; 
 import com.bitzi.util.*;
 import java.io.*;
 import java.security.*;
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.HashMap;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as
@@ -61,6 +64,26 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile transient int hashCode = 0;  
+	
+	/**
+	 * The progress of files currently being hashed.
+	 * Files are added to this when hashing is started
+	 * and removed when hashing finishes.
+	 * IntWrapper stores the amount of bytes read.
+	 */
+	private static Map /* File -> IntWrapper */ progressMap = new HashMap();
+	
+	/**
+	 * Gets the amount of bytes hashed for a file that is being hashed.
+	 * Returns -1 if the file is not being hashed at all.
+	 */
+	public static int getHashingProgress(File file) {
+	    IntWrapper progress = (IntWrapper)progressMap.get(file);
+	    if ( progress == null )
+	        return -1;
+	    else
+	        return progress.getInt();
+	}
 
 	/**
 	 * Creates a new <tt>URN</tt> instance with a SHA1 hash.
@@ -410,14 +433,18 @@ public final class URN implements HTTPHeaderValue, Serializable {
         try {
             byte[] buffer = new byte[16384];
             int read;
+            IntWrapper progress = new IntWrapper(0);
+            progressMap.put( file, progress );
             while ((read=fis.read(buffer))!=-1) {
                 long start = System.currentTimeMillis();
                 md.update(buffer,0,read);
+                progress.addInt( read );
                 long end = System.currentTimeMillis();
                 long interval = Math.max(0, end-start);   //ensure non-negative
                 Thread.sleep(interval*2);                 //throws InterruptedException 
             }
         } finally {		
+            progressMap.remove(file);
             fis.close();
         }
 
