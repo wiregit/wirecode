@@ -11,6 +11,7 @@ public class COBSUtil {
      *  PRE: src is not null.
      *  POST: the return array will be a cobs encoded version of src.  namely,
      *  cobsDecode(cobsEncode(src)) ==  src.
+     *  @return a COBS encoded version of src.
      */
     public static byte[] cobsEncode(byte[] src) throws IOException {
         final int srcLen = src.length;
@@ -49,7 +50,9 @@ public class COBSUtil {
     /** Decode a COBS-encoded byte array.  The non-allowable byte value is 0.
      *  PRE: src is not null.
      *  POST: the return array will be a cobs decoded version of src.  namely,
-     *  cobsDecode(cobsEncode(src)) ==  src.
+     *  cobsDecode(cobsEncode(src)) ==  src.  
+     *  @return the original COBS decoded string with a extra trailing 0 at the
+     *  end - feel free to discard it.
      */
     public static byte[] cobsDecode(byte[] src) {
         final int srcLen = src.length;
