@@ -1488,6 +1488,8 @@ GENERAL_CHAT_BUTTON_TIP=دردشة مع المضيف.
 GENERAL_LAUNCH_BUTTON_LABEL=فتح
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=فتح الملف.
+#### GENERAL_CLEAR_HISTORY=Clear History
+#? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips

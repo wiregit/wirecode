@@ -1488,6 +1488,8 @@ GENERAL_CHAT_BUTTON_TIP=Nawiązywanie czatu z wybranym hostem
 GENERAL_LAUNCH_BUTTON_LABEL=Załaduj
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=Ładowanie wybranego pliku
+#### GENERAL_CLEAR_HISTORY=Clear History
+#? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips

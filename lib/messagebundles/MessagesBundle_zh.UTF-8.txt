@@ -1488,6 +1488,8 @@ GENERAL_CHAT_BUTTON_TIP=和对方 聊天.
 GENERAL_LAUNCH_BUTTON_LABEL=运行
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=运行 文件.
+#### GENERAL_CLEAR_HISTORY=Clear History
+#? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips

@@ -1488,6 +1488,8 @@ GENERAL_CHAT_BUTTON_TIP=Konakla sohbet.
 GENERAL_LAUNCH_BUTTON_LABEL=İşlet
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=Dosyayı ışlet.
+#### GENERAL_CLEAR_HISTORY=Clear History
+#? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips
