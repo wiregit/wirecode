@@ -825,11 +825,15 @@ public class HostCatcher {
      */
     public synchronized void recoverHosts() {
         LOG.debug("recovering hosts file");
-        readHostsFile();
+        
         PROBATION_HOSTS.clear();
         EXPIRED_HOSTS.clear();
         _hitCaches = false;
         _failures = 0;
+        
+        // Read the hosts file again.  This will also notify any waiting 
+        // connection fetchers from previous connection attempts.
+        readHostsFile();
     }
 
     /**
