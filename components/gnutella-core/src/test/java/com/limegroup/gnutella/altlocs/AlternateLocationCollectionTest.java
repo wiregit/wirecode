@@ -163,15 +163,16 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	public void testHTTPStringValue() throws Exception {
 		String val = _alCollection.httpStringValue();
 		StringTokenizer st = new StringTokenizer(val, ",");
-		AlternateLocationCollection alc1 = 
-			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
+		
 		while(st.hasMoreTokens()) {
 			String str = st.nextToken();
 			str = str.trim();
-			AlternateLocation al = 
-			    AlternateLocation.create(str, _alCollection.getSHA1Urn());
-			alc1.add(al);
+			AlternateLocation al=
+			        AlternateLocation.create(str, _alCollection.getSHA1Urn());
+
+			assertTrue(_alCollection.contains(al));
 		}
+		
 	}
 	
 	/**

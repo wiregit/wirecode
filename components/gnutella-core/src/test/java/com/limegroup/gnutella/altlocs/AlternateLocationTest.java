@@ -232,6 +232,30 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         assertEquals(fwalled.getClientGUID(),other.getClientGUID());
         assertEquals(fwalled.getPushAddr(),other.getPushAddr());
 	}
+	
+	public void testCloningPushLocs() throws Exception {
+	    PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1);
+        
+        AlternateLocation loc = AlternateLocation.create(fwalled);
+        
+        assertTrue(loc instanceof PushAltLoc);
+        
+        AlternateLocation loc2 = loc.createClone();
+        
+        assertTrue(loc2 instanceof PushAltLoc);
+        
+        assertEquals(loc,loc2);
+	}
 
 	/**
 	 * Tests the constructor that only takes a string argument for 
