@@ -223,10 +223,10 @@ public class FileManager {
             File currDir = (File) dirs.remove(0);
             debug("FileManager.getFilesRecursive(): currDir = " +
                   currDir);
-            File[] listedFiles = currDir.listFiles();
+            String[] listedFiles = currDir.list();
             for (int i = 0; i < listedFiles.length; i++) {
 
-                File currFile = listedFiles[i];
+                File currFile = new File(listedFiles[i]);
                 if (currFile.isDirectory()) // to be dealt with later
                     dirs.add(currFile);
                 else if (currFile.isFile()) { // we have a 'file'....
