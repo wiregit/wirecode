@@ -720,12 +720,12 @@ public class SettingsManager implements SettingsInterface
 	//  throw new IllegalArgumentException();
 	//else
 	//  {
-		FileManager.getFileManager().reset();
-		FileManager.getFileManager().addDirectories(dir);
-		directories_ = dir;
-		props_.put(SettingsInterface.DIRECTORIES, dir);
-		writeProperties();
-		//  }
+	FileManager.getFileManager().reset();
+	FileManager.getFileManager().addDirectories(dir);
+	directories_ = dir;
+	props_.put(SettingsInterface.DIRECTORIES, dir);
+	writeProperties();
+	//  }
     }
     
     /** set the extensions to search for */
@@ -735,11 +735,11 @@ public class SettingsManager implements SettingsInterface
 	//  throw new IllegalArgumentException();
 	//else
 	//  {
-		FileManager.getFileManager().setExtensions(ext);
-		extensions_ = ext;			    
-		props_.put(SettingsInterface.EXTENSIONS, ext);
-		writeProperties();
-		//  }
+	FileManager.getFileManager().setExtensions(ext);
+	extensions_ = ext;			    
+	props_.put(SettingsInterface.EXTENSIONS, ext);
+	writeProperties();
+	//  }
     }
 
     public synchronized void setBannedIps(String[] bannedIps)
