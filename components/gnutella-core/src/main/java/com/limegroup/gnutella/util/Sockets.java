@@ -33,10 +33,9 @@ public class Sockets {
      */
     public static boolean setKeepAlive(Socket socket, boolean on) {
         if (CommonUtils.isJava13OrLater()) {
-            //Call socket.setKeepAlive(on) using reflection.  See below for
-            //any explanation of why reflection must be used.
             try {
                 socket.setKeepAlive(on);
+                return true;
             } catch (SocketException e1) {
                 // all we can do is try to set the keep alive
             }
