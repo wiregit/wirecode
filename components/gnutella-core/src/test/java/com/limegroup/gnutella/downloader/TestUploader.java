@@ -53,6 +53,9 @@ public class TestUploader {
     private final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
     private int partial = 0;
+    
+    boolean unqueue = true;
+
 
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
@@ -122,6 +125,7 @@ public class TestUploader {
         partial = 0;
         minPollTime = -1;
         maxPollTime = -1;
+        unqueue = true;
     }
 
     public int amountUploaded() {
@@ -225,7 +229,8 @@ public class TestUploader {
                                 handleRequest(mySocket);
                                 if (queue) { 
                                     mySocket.setSoTimeout(MAX_POLL);
-                                    queue = false;//second time give slot
+                                    if(unqueue) 
+                                        queue = false;//second time give slot
                                     handleRequest(mySocket);
                                 }
                                 mySocket.setSoTimeout(8000);
