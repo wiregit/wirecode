@@ -92,8 +92,12 @@ public class ManagedConnection
     /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
-    /** The max time to keep messages in the queues, in milliseconds. */
-    private static int QUEUE_TIME=30*1000;
+    /** The max time to keep reply messages and pushes in the queues, in
+     *  milliseconds. */
+    private static int BIG_QUEUE_TIME=10*1000;
+    /** The max time to keep queries, pings, and pongs in the queues, in
+     *  milliseconds. */
+    private static int QUEUE_TIME=5*1000;
     /** The number of different priority levels. */
     private static final int PRIORITIES=7;
     /** Names for each priority. "Other" includes QRP messages and is NOT
@@ -107,12 +111,12 @@ public class ManagedConnection
     private static final int PRIORITY_PING=5;
     private static final int PRIORITY_OTHER=6;       
     {
-        _outputQueue[PRIORITY_WATCHDOG]   
-            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
+        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(3, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY_REPLY]  //sorted
-            = new PriorityMessageQueue(2, QUEUE_TIME, QUEUE_SIZE);
+            = new PriorityMessageQueue(3, BIG_QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_QUERY_REPLY]
+            = new PriorityMessageQueue(2, BIG_QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING_REPLY] 
