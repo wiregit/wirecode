@@ -3,21 +3,22 @@ package com.limegroup.gnutella.xml;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import org.apache.xerces.parsers.DOMParser;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import java.util.Collection;
+import java.util.Iterator;
 
 
 /**
@@ -28,86 +29,99 @@ import org.xml.sax.SAXException;
  */
 public class LimeXMLDocument{
     
-    private Map fieldToValue;
+    public Map fieldToValue;
     
     //constructor
-    public LimeXMLDocument(String XMLString) throws SchemaNotFoundException{
-        DocumentBuilderFactory documentBuilderFactory = 
-                          DocumentBuilderFactory.newInstance();
-        
+    public LimeXMLDocument(String XMLString) {
+        DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder =null;
-        try{
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        }catch(ParserConfigurationException e){
-            e.printStackTrace();
-        }
         InputSource doc = new InputSource(new StringReader(XMLString));
         Document document = null;
         try{
-            document = documentBuilder.parse(doc);
+            parser.parse(doc);
         }catch(SAXException e){
             e.printStackTrace();
         }catch (IOException e){
             e.printStackTrace();
         }
+        document = parser.getDocument();
         createMap(document);
     }
     
-    public LimeXMLDocument(File f) throws SchemaNotFoundException{
-        DocumentBuilderFactory documentBuilderFactory = 
-                             DocumentBuilderFactory.newInstance();
-        
+    public LimeXMLDocument(File f) {
+        DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder=null;
+        InputSource doc = null;
         try{
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        }catch(ParserConfigurationException e){
-            e.printStackTrace();
+            doc = new InputSource(new FileInputStream(f));
+        }catch (FileNotFoundException ee){
+            ee.printStackTrace();
         }
         Document document = null;
         try{
-            document = documentBuilder.parse(f);
+            parser.parse(doc);
         }catch (SAXException e){
             e.printStackTrace();
         } catch (IOException e){
             e.printStackTrace();
         }
+        document=parser.getDocument();
         createMap(document);
     }
     
-    private void createMap(Document doc) throws SchemaNotFoundException{
-        //LimeXMLSchemaReposiory repository = LimeXMLSchemaRepository.instance();
+    private void createMap(Document doc) {
+        fieldToValue = new HashMap();
         Element docElement = doc.getDocumentElement();
-        NamedNodeMap docAttMap = docElement.getAttributes();
-        int numAtt = docAttMap.getLength();
-        //get the schema uri
-        int i=0;
-        String schemaLocation=null;
-        while(i<numAtt){
-            Node n = docAttMap.item(i);
-            String name = n.getNodeName();
-            System.out.println("Sumeet : Name = "+name);
-            if(name.indexOf("SchemaLocation") > 0){//got the attribute
-                schemaLocation = n.getNodeValue();
-                break;
-            }
-            i++;
-        }
-        if(schemaLocation == null)
-            throw(new SchemaNotFoundException());
-        System.out.println("Sumeet: final schema location "+ schemaLocation);
-        //LimeXMLSchema schema = repositoty.getSchema(schemaLocation);
-        
-
+        doAllChildren(docElement,"");
     }
 
-        
-    
+    private void doAllChildren (Node currNode, String parentName){
+        if (!currNode.hasChildNodes()){ //base case
+            doEntry(currNode, parentName);
+            return;
+        }
+        String currString = doEntry(currNode,parentName);
+        List children = DOMUtils.getElements(currNode.getChildNodes());
+        int size = children.size();
+        for(int i=0; i< size; i++){            
+            Node child = (Node)children.get(i);
+            doAllChildren(child,currString);
+        }
+    }
+
+    private String doEntry(Node currNode, String parentName){
+        String currTag;
+        if(!parentName.equals(""))
+            currTag =parentName+XMLStringUtils.DELIMITER+currNode.getNodeName();
+        else
+            currTag = currNode.getNodeName();
+            
+        if (currNode.getNodeType() == Node.CDATA_SECTION_NODE)
+            System.out.println("this node has type  "+ currNode.getNodeType());
+
+        Element currElement = (Element)currNode;
+        String nodeValue = DOMUtils.getText(currElement.getChildNodes());
+        nodeValue = nodeValue.trim();
+        if (nodeValue != null && !nodeValue.equals(""))
+            fieldToValue.put(currTag, nodeValue);
+        //We only want 
+        //add the attributes
+        List attributes = DOMUtils.getAttributes(currNode.getAttributes());
+        int size = attributes.size();
+        for(int i=0; i< size; i++){
+            Node att = (Node)attributes.get(i);
+            String attName = att.getNodeName();
+            String attString = 
+            currTag + XMLStringUtils.DELIMITER+attName+XMLStringUtils.DELIMITER;
+            String attValue = att.getNodeValue();
+            fieldToValue.put(attString,attValue);
+        }
+        return currTag;
+    }
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
      * Canonicalized field name (placeholder), and its corresponding value in
@@ -141,12 +155,18 @@ public class LimeXMLDocument{
 
     //Unit Tester
     public static void main(String args[]){
-        File f = new File("C:/home/etc/xml","all-books-gen.xml");
-        try{
-            LimeXMLDocument l = new LimeXMLDocument(f);
-        }catch(SchemaNotFoundException e){
-        }
+        //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
+        File f = new File("C:/home/etc/xml","all-books-pub.xml");
+        LimeXMLDocument l = new LimeXMLDocument(f);
+        Map m = l.fieldToValue;
+        int size = m.size();
+        Iterator keys = m.keySet().iterator();
+        for(int j =0; j<size; j++){
+            String key = (String)keys.next();            
+            String value = (String)m.get(key);
+            System.out.println("Sumeet: key "+key+"|");
+            System.out.println("Sumeet: value "+value+"|");
+        } 
     }
 }
-
 
