@@ -122,33 +122,31 @@ class LimeXMLSchemaFieldExtractor
      * @requires The document be a valid XML Schema without any errors
      * @return A list (of SchemaFieldInfo) containing all the fields in the 
      * passed document. 
+     * @throws <tt>NullPointerException</tt> if the <tt>Document</tt> argument
+     *  is <tt>null</tt>
      */
-    public List getFields(Document document)
-    {
-        try
-        {
-            //traverse the document and gather information
-            Element root = document.getDocumentElement();
-            traverse(root);
-            
-            //now get the root element below <xsd:schema>
-            String rootElementName = getRootElementName();
-            
-            //create a list to store the field names
-            List fieldNames = new LinkedList(); 
-            
-            //fill the list with field names
-            fillWithFieldNames(fieldNames, 
-                (SchemaFieldInfoList)_nameSchemaFieldInfoListMap.get(rootElementName),
-                rootElementName);
-            
-            //return the list of field names
-            return fieldNames;
+    public List getFields(Document document) {
+        if(document == null) {
+            throw new NullPointerException("null document");
         }
-        catch(NullPointerException npe)
-        {
-            return new LinkedList();
-        }
+
+        //traverse the document and gather information
+        Element root = document.getDocumentElement();
+        traverse(root);
+        
+        //now get the root element below <xsd:schema>
+        String rootElementName = getRootElementName();
+        
+        //create a list to store the field names
+        List fieldNames = new LinkedList(); 
+        
+        //fill the list with field names
+        fillWithFieldNames(fieldNames, 
+                           (SchemaFieldInfoList)_nameSchemaFieldInfoListMap.get(rootElementName),
+                           rootElementName);
+        
+        //return the list of field names
+        return fieldNames;
     }
     
     
