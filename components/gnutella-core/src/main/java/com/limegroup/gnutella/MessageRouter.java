@@ -170,13 +170,6 @@ public abstract class MessageRouter
      */
     public void handleMessage(Message m, ManagedConnection receivingConnection)
     {
-//        //if crawler ping, send back pongs of neighbors.
-//        if (isCrawlerPing(m)) 
-//        {
-//            sendCrawlerPingReplies((PingRequest)m, receivingConnection);
-//            return;
-//        }
-
         // Increment hops and decrease TTL
         m.hop();
 
@@ -378,11 +371,18 @@ public abstract class MessageRouter
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
+        
+        //broadcast the query to other connected nodes (supernodes or
+        //older nodes)
         List list=_manager.getInitializedConnections2();
-        int newClients = 0; //number of new client connections
-        int routedQueries = 0; //number of queries that were routed to new clients
-        for(int i=0; i<list.size(); i++)
-        {
+        for(int i=0; i<list.size(); i++){
+            ManagedConnection c = (ManagedConnection)list.get(i);
+            c.send(queryRequest);
+        }
+        
+        //use query routing to route queries to client connections
+        list=_manager.getInitializedClientConnections2();
+        for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection) {
                 //Send query along any connection to an old cl0ient, or to a new
@@ -397,7 +397,6 @@ public abstract class MessageRouter
                     c.send(queryRequest);
                 else if (qi.lastReceived.contains(queryRequest))
                 {
-                    routedQueries++;
                     //A new client with routing entry, or one that hasn't started
                     //sending the patch.
                     c.send(queryRequest);      
@@ -474,6 +473,8 @@ public abstract class MessageRouter
     {
         ReplyHandler replyHandler =
             _queryRouteTable.getReplyHandler(queryReply.getGUID());
+        System.out.println("Received QueryReply. Reply Handler=" 
+            + replyHandler);
 
         if(replyHandler != null)
         {
@@ -595,6 +596,10 @@ public abstract class MessageRouter
      */
     public void handleRouteTableMessage(RouteTableMessage m,
                                         ManagedConnection receivingConnection) {
+        //if not a supernode, dont handle this message
+        if(!SettingsManager.instance().isSupernode())
+            return;
+                                            
         //Mutate query route table associated with receivingConnection.  
         //(This is legal.)  Create a new one if none exists.
         synchronized (queryUpdateLock) {
