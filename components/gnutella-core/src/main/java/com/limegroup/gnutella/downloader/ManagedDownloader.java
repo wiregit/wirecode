@@ -1115,7 +1115,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
 		// Prepare a fresh set of alternate locations for these file
-		totalAlternateLocations = new AlternateLocationCollection(); 
+		totalAlternateLocations=AlternateLocationCollection.createCollection();
 
 		// null out the alternate locations so we can create a new set
 		// for these files
