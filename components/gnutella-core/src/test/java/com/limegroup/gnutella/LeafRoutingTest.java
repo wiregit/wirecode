@@ -37,7 +37,11 @@ public class LeafRoutingTest extends TestCase {
     
     public static Test suite() {
         return new TestSuite(LeafRoutingTest.class);
-    }    
+    }  
+
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}  
 
     public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
