@@ -964,23 +964,6 @@ public class Response {
         }
         
         /**
-         * Returns a byte array of a GGEP block containing the
-         * set of endpoints
-         */
-        static byte[] getGGEPBytes(GGEPContainer ggep) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                addGGEP(baos, ggep);
-            } catch(IOException impossible) {
-                ErrorService.error(impossible);
-            }
-            
-            return baos.toByteArray();
-        }
-        
-        static final Random RND = new Random();
-        
-        /**
          * Returns a <tt>Set</tt> of other endpoints described
          * in one of the GGEP arrays.
          */

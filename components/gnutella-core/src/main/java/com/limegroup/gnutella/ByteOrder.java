@@ -171,49 +171,49 @@ public class ByteOrder {
             throws IndexOutOfBoundsException, IllegalArgumentException {
         switch (n) {
         case 1:
-            return   (long)x[offset    ] & 0xFF        ;
+            return   (long)x[offset    ] & 0xFFL        ;
         case 2:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8);
         case 3:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16);
         case 4:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16) |
-                   ( (long)x[offset + 3]         << 24);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16) |
+                   (((long)x[offset + 3] & 0xFFL) << 24);
         case 5:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16) |
-                   (((long)x[offset + 3] & 0xFF) << 24) |
-                   ( (long)x[offset + 4]         << 32);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16) |
+                   (((long)x[offset + 3] & 0xFFL) << 24) |
+                   (((long)x[offset + 4] & 0xFFL) << 32);
         case 6:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16) |
-                   (((long)x[offset + 3] & 0xFF) << 24) |
-                   (((long)x[offset + 4] & 0xFF) << 32) |
-                   ( (long)x[offset + 5]         << 40);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16) |
+                   (((long)x[offset + 3] & 0xFFL) << 24) |
+                   (((long)x[offset + 4] & 0xFFL) << 32) |
+                   (((long)x[offset + 5] & 0xFFL) << 40);
         case 7:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16) |
-                   (((long)x[offset + 3] & 0xFF) << 24) |
-                   (((long)x[offset + 4] & 0xFF) << 32) |
-                   (((long)x[offset + 5] & 0xFF) << 40) |
-                   ( (long)x[offset + 6]         << 48);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16) |
+                   (((long)x[offset + 3] & 0xFFL) << 24) |
+                   (((long)x[offset + 4] & 0xFFL) << 32) |
+                   (((long)x[offset + 5] & 0xFFL) << 40) |
+                   (((long)x[offset + 6] & 0xFFL) << 48);
         case 8:
-            return ( (long)x[offset    ] & 0xFF       ) |
-                   (((long)x[offset + 1] & 0xFF) <<  8) |
-                   (((long)x[offset + 2] & 0xFF) << 16) |
-                   (((long)x[offset + 3] & 0xFF) << 24) |
-                   (((long)x[offset + 4] & 0xFF) << 32) |
-                   (((long)x[offset + 5] & 0xFF) << 40) |
-                   (((long)x[offset + 6] & 0xFF) << 48) |
-                   ( (long)x[offset + 7]         << 56);
+            return ( (long)x[offset    ] & 0xFFL       ) |
+                   (((long)x[offset + 1] & 0xFFL) <<  8) |
+                   (((long)x[offset + 2] & 0xFFL) << 16) |
+                   (((long)x[offset + 3] & 0xFFL) << 24) |
+                   (((long)x[offset + 4] & 0xFFL) << 32) |
+                   (((long)x[offset + 5] & 0xFFL) << 40) |
+                   (((long)x[offset + 6] & 0xFFL) << 48) |
+                   ( (long)x[offset + 7]          << 56);
         default:
             throw new IllegalArgumentException("No bytes specified");
         }
