@@ -207,7 +207,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		for (int i = 0; i < numBlocks; i++) {
 			ostream.write(bdata, 0, 512);
 			if ( (i % 8) == 0 ) 
-				log2("Write status: "+i*8);
+				log2("Write status: "+i*512);
 		}
 		log("Done write");
 		
