@@ -436,7 +436,7 @@ public class QueryReply extends Message implements Serializable{
     public List getResultsAsList() throws BadPacketException {
         parseResults();
         if (responses==null)
-            throw new BadPacketException();
+            throw new BadPacketException("results are null");
         List list=Arrays.asList(responses);
         return list;
     }
@@ -638,7 +638,8 @@ public class QueryReply extends Message implements Serializable{
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(payload,i,payload.length-i);
+            InputStream bais = 
+                new ByteArrayInputStream(payload,i,payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = Response.createFromStream(bais);
@@ -651,7 +652,7 @@ public class QueryReply extends Message implements Serializable{
             return;
         } catch (IOException e) {
             return;
-        }           
+        }
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
