@@ -19,6 +19,10 @@ public class TCPConnectBackVMP extends VendorMessagePayload {
 
     TCPConnectBackVMP(int version, byte[] payload) throws BadPacketException {
         super(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, version);
+        if (version > VERSION)
+            throw new BadPacketException();
+        if (payload.length != 2)
+            throw new BadPacketException();
         // get the port from the payload....
         _payload = payload;
         try {
