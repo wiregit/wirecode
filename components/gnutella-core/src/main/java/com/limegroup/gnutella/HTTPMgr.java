@@ -44,9 +44,7 @@ public class HTTPMgr {
 	String command;
 
 	FileManager fm = FileManager.getFileManager();
-	fm.printFirstFive();
-
-
+	
 	try {                          /* try to read the HTTP header */ 
 
 	    InputStream is = _socket.getInputStream();
@@ -58,31 +56,24 @@ public class HTTPMgr {
 	}
 
 	catch (Exception e) {          /* if there is a problem reading */
-	    
+	
+	    e.printStackTrace();
+    
 	    return;                    /* must alert the appropriate */
 	                               /* person */ 
 	}
 
 	if ((command.indexOf("get")) != -1) {  /* check if the stream is GET */
 	                                       /* I need to get the filename */ 
-	    System.out.println("Recieving a GET");
-
 
 	    String parse[] = HTTPUtil.stringSplit(command, '/'); 
 	                                       /* and the index, but i'm */
 	    String parse_two[] = HTTPUtil.stringSplit(parse[2], 'H'); 
 	                                       /* concerned this is way hackey */
-	    
-	    System.out.println("the index "  + parse[1]);
 
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 	    _filename = parse_two[0];
-
-
-	    System.out.println("THe filename: " +  _filename);
-	    System.out.println("The index " + _index);
-
 
 	    HTTPClientMgr client;
 	    client = new HTTPClientMgr(s, _filename, _index);    
@@ -126,3 +117,7 @@ public class HTTPMgr {
     }
 
 }
+
+
+
+

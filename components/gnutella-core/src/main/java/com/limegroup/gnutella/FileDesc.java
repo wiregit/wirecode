@@ -21,4 +21,16 @@ public class FileDesc {
 	_size = s;
     }
 
+    public void print() {
+
+	System.out.println("Name: " + _name);
+	System.out.println("Index: " + _index);
+	System.out.println("Size: " + _size);
+	System.out.println("Path: " + _path);
+	System.out.println(" ");
+
+
+    }
+
+
 }

@@ -64,10 +64,34 @@ public class FileManager {
 	_numFiles++;
     }
 
+    public void printFirstFive() {
+	
+	int size = 5;
+
+	if (_files.size() < size)
+	    size = _files.size();
+
+	System.out.println("printing " + size);
+
+	for(int i =0; i < size; i++) {
+	    
+	    ((FileDesc)_files.get(i)).print();
+
+	}
+	
+    }
+
+
     public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
 	File myFile = new File(dir_name);       /* recursively adds all of */
 	File[] file_list = myFile.listFiles();  /* the files in a specified */
 	int n = file_list.length;               /* directory */
+
+	// go through file_list
+	// get file name
+	// se if it contains extention.
+	// if yes, add to new list...
+
 
 	for (int i=0; i < n; i++) {
 
@@ -76,7 +100,6 @@ public class FileManager {
 	    else                                /* add the file with the */
 		addFile(file_list[i].getAbsolutePath());  /* addFile method */
 	}
-
     }
 
     public ArrayList search(String query) {     /* the search method */

@@ -18,8 +18,6 @@ public class HTTPClientMgr implements Runnable {
     
     String _filename;
     int _index;
-    
-    // private OutputStream _out;
 
     private static int BUFFSIZE = 1024;
 
@@ -34,8 +32,6 @@ public class HTTPClientMgr implements Runnable {
     }
 
     public void run() {
-
-	System.out.println("THe Client Manager is running");
 
 	upload();
 
@@ -53,7 +49,7 @@ public class HTTPClientMgr implements Runnable {
 
   	catch (IOException e) {
 	    
-	    System.out.println("THere was an IO exception.. I'm returning");
+	    e.printStackTrace();
 
   	    return;
   	}
@@ -71,8 +67,6 @@ public class HTTPClientMgr implements Runnable {
 	}                                /* if its not found... */
                                          
 	catch (ArrayIndexOutOfBoundsException e) {
-
-	    System.out.println("There was an index out of bounds error");
 	    
 	    doNoSuchFile();              /* send an HTTP error */
 
@@ -82,12 +76,6 @@ public class HTTPClientMgr implements Runnable {
 
 	if (! fd._name.equals(_filename.trim())) { /* check to see if the index */
 	                                   /* matches the name */
-	    
-	    System.out.println("The filename and the index don't match");
-    
-	    System.out.println("fd._name " + fd._name );
-	    System.out.println("_filename " + _filename );
-
 	    doNoSuchFile();
 		
   	    return;
@@ -112,8 +100,6 @@ public class HTTPClientMgr implements Runnable {
   	    return;
   	}	    
 
-	System.out.println("about to respond with the server info...");
-
 	try {
 	    _out.write("HTTP 200 OK \r\n");
 	    _out.write("Server: Gnutella \r\n");
@@ -131,8 +117,6 @@ public class HTTPClientMgr implements Runnable {
 	                               
   	char[] buf = new char[BUFFSIZE];   	
 
-	System.out.println("about to read the file...");
-	
   	while (true) {
 
 	    try {
@@ -144,12 +128,6 @@ public class HTTPClientMgr implements Runnable {
 		
 		_out.write(buf, 0, got);        /* write to network. */
 		
-		
-		System.out.print("printing data....");
-		
-		for (int i = 0; i < buf.length; i++)
-		    System.out.print(buf[i]);
-
 	    }
 
 	    catch (Exception e) {

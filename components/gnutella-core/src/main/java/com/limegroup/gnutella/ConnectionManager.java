@@ -191,6 +191,9 @@ public class ConnectionManager implements Runnable {
 		try {
 		    InputStream in=client.getInputStream();
 		    String word=readWord(in);
+
+		    System.out.println("The Word: " + word);
+
 		    c = null;
 
 		    if (word.equals("GNUTELLA")) {
@@ -207,19 +210,30 @@ public class ConnectionManager implements Runnable {
 			Thread t=new Thread(c);
 			t.setDaemon(true);
 			t.start();
-		    } else if (word.equals("PUT")) {
-			//b) HTTP with PUT command
-			TransferConnection xfer=new TransferConnection(client,false);
-			Thread t=new Thread(xfer);
-			t.setDaemon(true);
-			t.start();
-		    } else if (word.equals("GET")) {
-			//c) HTTP with GET command
-			TransferConnection xfer=new TransferConnection(client,true);
-			Thread t=new Thread(xfer);
-			t.setDaemon(true);
-			t.start();
-		    } else {
+		    } 
+
+		    else if( word.equals("GET") || word.equals("PUT") ){
+			
+			HTTPMgr mgr = new HTTPMgr(client);
+			
+		    }
+
+		  //    else if (word.equals("PUT")) {
+//  			//b) HTTP with PUT command
+//  			TransferConnection xfer=new TransferConnection(client,false);
+//  			Thread t=new Thread(xfer);
+//  			t.setDaemon(true);
+//  			t.start();
+//  		    } 
+//  		    else if (word.equals("GET")) {
+//  			//c) HTTP with GET command
+//  			TransferConnection xfer=new TransferConnection(client,true);
+//  			Thread t=new Thread(xfer);
+//  			t.setDaemon(true);
+//  			t.start();
+//  		    } 
+
+		    else {
 			throw new IOException();
 		    }
 		} catch (IOException e) { 
