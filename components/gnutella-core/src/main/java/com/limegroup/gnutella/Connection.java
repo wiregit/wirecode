@@ -59,6 +59,12 @@ import com.limegroup.gnutella.statistics.*;
  * TTL traffic generally.
  */
 public class Connection {
+	
+	/**
+	 * Lock for maintaining accurate data for pong forwarding.
+	 */
+    private final Object PONG_LOCK = new Object();
+    
     /** 
      * The underlying socket, its address, and input and output streams.  sock,
      * in, and out are null iff this is in the unconnected state.  For thread
@@ -1394,27 +1400,27 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     public boolean allowNewPongs() {
-        long curTime = System.currentTimeMillis();
-        if(curTime < _nextPongTime) {
-            return false;
-        } 
-        return true;
+    	synchronized(PONG_LOCK) {
+		    long curTime = System.currentTimeMillis();
+		    if(curTime < _nextPongTime) {
+		        return false;
+		    } 
+		    
+			int interval;
+		
+			// if the connection is young, give it a lot of pongs, otherwise
+			// be more conservative
+			if(curTime - getConnectionTime() < 10000) {
+				interval = 300;
+			} else {
+				interval = 12000;
+			}
+			_nextPongTime = curTime + interval;
+					
+		    return true;
+    	}
     }
 
-    // inherit doc comment
-    public void updatePongTime() {
-        long curTime = System.currentTimeMillis();
-        int interval;
-
-        // if the connection is young, give it a lot of pongs, otherwise
-        // be more conservative
-        if(curTime - getConnectionTime() < 10000) {
-            interval = 300;
-        } else {
-            interval = 8000;
-        }
-        _nextPongTime = curTime + interval;
-    }
 
 	/**
 	 * Returns the number of intra-Ultrapeer connections this node maintains.
