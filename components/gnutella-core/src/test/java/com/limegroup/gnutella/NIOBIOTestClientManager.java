@@ -43,7 +43,13 @@ public class NIOBIOTestClientManager {
     private NIOBIOTestClientManager(int num, int delay) {
         for(int i=0; i<num; i++) {
             new TestClient(delay);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+        System.out.println("ALL CLIENTS CONNECTED");
     }
 
 
@@ -64,7 +70,7 @@ public class NIOBIOTestClientManager {
         
         public void run() {
             try {
-                Socket sock = new Socket("localhost", 7777);
+                Socket sock = new Socket("10.254.0.54", 7777);
                 OutputStream os = sock.getOutputStream();
                 InputStream is = sock.getInputStream();
                 while(true) {
