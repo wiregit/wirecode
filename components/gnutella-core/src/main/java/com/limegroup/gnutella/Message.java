@@ -4,21 +4,18 @@ import java.util.Random;
 import java.io.*;
 
 /**
- * A Gnutella message (packet).  All messages have message IDs, function IDs,
- * TTLs, hops taken, and data length.  Messages come in two flavors: requests
- * (ping, search) and replies (pong, search results). Messages are mutable.
- *
- * This class is abstract; subclasses implement specific messages such as
- * search requests.
+ * A Gnutella message (packet).  This class is abstract; subclasses
+ * implement specific messages such as search requests.<p>
+ * 
+ * All messages have message IDs, function IDs, TTLs, hops taken, and
+ * data length.  Messages come in two flavors: requests (ping, search)
+ * and replies (pong, search results).  Only the TTL and hops field of
+ * a message can be changed.
  */
 
 //TODO2: I feel like this is a terrible way of doing things.  It's much easier
 //in C because you just declare a struct and fill in the bytes. Perhaps this 
 //can be optimized by keeping the raw bytes around when calling read.
-
-//TODO1: sign problems!?  What if, for example, the number of hits N in
-//a query response is 0xFF?  Will this be erroneously interpreted as negative?
-
 
 public abstract class Message {       
     //Functional IDs defined by Gnutella protocol.
@@ -32,18 +29,22 @@ public abstract class Message {
     private static Random rand=new Random();
     private static byte[] makeGuid() {
 	byte[] ret=new byte[16];
-	rand.nextBytes(ret); //TODO2: not guaranteed unique
+	rand.nextBytes(ret); //TODO1: not guaranteed unique
 	return ret;
     }
     
     ////////////////////////// Instance Data //////////////////////
 
     private byte[] guid;
-    private byte func; //TODO: sign problems?
-    private byte ttl;
-    private byte hops;
-    private int length; //not necessarily the same byte order as protocol
+    private byte func; 
     
+    /* We do not support TTLs > 2^7, nor do we support packets
+     * of length > 2^31 */
+    private byte ttl; 
+    private byte hops;
+    private int length;
+    
+    /** Rep. invariant */
     protected void repOk() {
 	Assert.that(guid.length==16);
 	Assert.that(func==F_PING || func==F_PING_REPLY
@@ -52,13 +53,16 @@ public abstract class Message {
 	if (func==F_PING) Assert.that(length==0);
 	if (func==F_PING_REPLY) Assert.that(length==14);
 	if (func==F_PUSH) Assert.that(length==26);
+	Assert.that(ttl>=0);
+	Assert.that(hops>=0);
+	Assert.that(length>=0);
     }
 
     ////////////////////// Constructors and Producers /////////////////
 	
     /**
-     * @requires func is a valid functional id (e.g., 0, 1, 64, etc),
-     *  length is the valid payload length
+     * @requires func is a valid functional id (i.e., 0, 1, 64, 128, 129),
+     *  0 &<;= ttl, 0 &<;= length (i.e., high bit not used)
      * @effects Creates a new message with the following data.
      *  The GUID is set appropriately, and the number of hops is set to 0.
      */
@@ -68,11 +72,13 @@ public abstract class Message {
 
     /** 
      * Same as above, but caller specifies TTL and number of hops.
+     * This is used when reading packets off network.
      */
     protected Message(byte[] guid, byte func, byte ttl, 
 		      byte hops, int length) {
 	this.guid=guid; this.func=func;	this.ttl=ttl; 
 	this.hops=hops; this.length=length;
+	repOk();
     }
 
     /** 
@@ -107,11 +113,14 @@ public abstract class Message {
 	byte ttl=buf[17];
 	byte hops=buf[18];	   
 	int length=ByteOrder.leb2int(buf,19);
+	//2.5 If the length is hopelessly off (this includes lengths >
+	//    than 2^31 bytes, throw an irrecoverable exception to
+	//    cause this connection to be closed.
 	if (length<0 || length>Const.MAX_LENGTH)
 	    throw new IOException("Unreasonable message length: "+length);
 
-	//3. Read rest of payload.  It's important to do this before
-	//   checking other fields, so the network can recover.
+	//3. Read rest of payload.  This must be done even for bad
+	//   packets, so we can resume reading packets.
 	byte[] payload=null;		    
 	if (length!=0) {
 	    payload=new byte[length];
@@ -122,14 +131,14 @@ public abstract class Message {
 	    }
 	}
 	
-	//4. Check values.
+	//4. Check values.   This catches those TTLs and hops whose
+	//   high bit is set to 0.
 	if (ttl<0 || ttl>Const.MAX_TTL) 
 	    throw new BadPacketException("Unreasonable TTL: "+ttl);
 	if (hops<0 || hops>Const.MAX_TTL) 
 	    throw new BadPacketException("Unreasonable hops: "+hops);	 
 
 	//Dispatch based on opcode. 
-	//TODO1: push request, handle bad packets more robustly
 	switch (func) {
 	case F_PING:
 	    if (length!=0) break;
