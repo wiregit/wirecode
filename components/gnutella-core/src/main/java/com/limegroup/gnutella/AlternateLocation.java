@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.URLDecoder;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Date;
