@@ -20,6 +20,21 @@ public interface SettingsInterface {
 	 */
 	public static final String  SAVE_DIRECTORY_NAME = "Shared";
 
+	/**
+	 * the name of the host list file.
+	 */
+	public static final String  HOST_LIST_NAME = "gnutella.net";	
+
+    /** 
+	 * Default name for the properties file 
+	 */
+    public static final String  PROPS_NAME = "limewire.props";
+
+    /** 
+	 * Default name for the network discovery properties 
+	 */
+    public static final String  ND_PROPS_NAME  = "nd.props";
+
 	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
@@ -31,12 +46,7 @@ public interface SettingsInterface {
     public static final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
     public static final int     DEFAULT_TIMEOUT        = 8000;
-    /** Default file path for the host list */
-    public static final String  DEFAULT_HOST_LIST      = "gnutella.net";
-    /** Default name for the properties file */
-    public static final String  DEFAULT_FILE_NAME      = "limewire.props";
-    /** Default name for the network discovery properties */
-    public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
+
     /** Default value for the keep alive */
     public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
@@ -165,7 +175,6 @@ public interface SettingsInterface {
     public static final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
-    public static final String SAVE_DEFAULT          = "SAVE_DEFAULT";
 
     public static final String CONNECT_STRING        = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING     = "CONNECT_OK_STRING";
