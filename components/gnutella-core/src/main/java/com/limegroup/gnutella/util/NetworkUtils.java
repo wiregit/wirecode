@@ -53,6 +53,32 @@ public final class NetworkUtils {
     }
 
     /**
+     * Returns whether or not the two ip addresses share the same
+     * first three octets in their address -- the most common
+     * indication that they may be on the same network.
+     *
+     * @param addr0 the first address to compare
+     * @param addr1 the second address to compare
+     */
+    public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
+        return 
+            addr0[0] == addr1[0] &&
+            addr0[1] == addr1[1] &&
+            addr0[2] == addr1[2];
+    }
+
+    /**
+     * Returns whether or not the given ip address shares the same
+     * first three octets as the address for this node -- the most 
+     * common indication that they may be on the same network.
+     *
+     * @param addr the address to compare
+     */
+    public static boolean isVeryCloseIP(byte[] addr) {
+        return isVeryCloseIP(RouterService.getAddress(), addr);
+    }
+
+    /**
      * Checks to see if the given address is a firewalled address.
      * 
      * @param address the address to check
