@@ -79,6 +79,7 @@ public class Response {
         String second = tok.nextToken();
         boolean bearShare1 = false;        
         boolean bearShare2 = false;
+        boolean gnotella = false;
         if(second.startsWith("kbps"))
             bearShare1 = true;
         else if (first.endsWith("kbps"))
@@ -95,19 +96,22 @@ public class Response {
                 length=tok.nextToken();
             //OK we have the bitrate and the length
         }
-        else{
+        else if (betweenNulls.endsWith("kHz")){//Gnotella
+            gnotella = true;
             length=first;
             //extract the bitrate from second
             int i=second.indexOf("kbps");
             bitrate = second.substring(0,i);
         }
-        this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
+        if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
+            this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
                  "\"http://www.limewire.com/schemas/audios.xsd\">"+
                  "<audio title=\""+name+"\" bitrate=\""+bitrate+
                  "\" length=\""+length+"\">"+
                  "</audio></audios>";
-        this.metaBytes=metadata.getBytes();
-        this.index=index;
+            this.metaBytes=metadata.getBytes();
+            this.index=index;
+        }
         this.size=size;
         this.name=name;
         this.nameBytes = name.getBytes(); 
