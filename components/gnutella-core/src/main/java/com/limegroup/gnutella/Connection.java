@@ -316,7 +316,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * Handle to the statistics recording class for this connection.
      */
-    private ConnectionStats _connectionStats;
+    private final ConnectionStats STATS = new ConnectionStats(this);
     
     /**
      * Handle to the class that wraps all calls to the query routing tables
@@ -611,8 +611,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // This does not need to be in a finally clause, because if an
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
-              
-            _connectionStats = new ConnectionStats(this);
               
             // check for updates from this host  
             UpdateManager.instance().checkAndUpdate(this);          
@@ -2129,7 +2127,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  this connection
      */
     public ConnectionStats stats() {
-        return _connectionStats;
+        return STATS;
     }
     
     /**
