@@ -60,7 +60,7 @@ public class LimeXMLReplyCollection{
      * @param fm A pointer to the system wide (Meta)FileManager .
      * @param audio Whether this is a collection of audio files.
      */
-    public LimeXMLReplyCollection(Map fileToHash, String URI, 
+    public LimeXMLReplyCollection(FileDesc[] fds, String URI, 
                                   FileManager fm, boolean audio) {
         this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
@@ -113,63 +113,53 @@ public class LimeXMLReplyCollection{
             debug("requiresConversion: " + requiresConversion);
         }
         
-        synchronized(fileToHash) {
-            Iterator iter = fileToHash.entrySet().iterator();
-            while( (iter != null) && iter.hasNext() ) {
-                Map.Entry entry = (Map.Entry)iter.next();
-                File file = (File)entry.getKey();
-                URN hash = (URN)entry.getValue();
-                debug("looking up: " + hash + ", " + file);
-                Object xml = null;
-                LimeXMLDocument doc = null;
-                
-                //If requiresConversion is true, a lookup of the URN
-                //is pointless because the hashToXML's keys are
-                //a String (mini-hash).
-                if( requiresConversion ) { //Before LimeWire 3.3
-                    String miniHash = null;
-                    try {
-                        miniHash = new String(LimeXMLUtils.hashFile(file));
-                    } catch(IOException e) {
-                        continue; // oh well.
-                    }
-                    xml = hashToXML.get(miniHash);
-                    // If this was between LimeWire 2.5 and LimeWire 3.3...
-                    // and it had some XML..
-                    if( xml != null && xml instanceof LimeXMLDocument ) {
-                        debug("sync: 1");
-                        doc = (LimeXMLDocument)xml;
-                    } else { // Pre LimeWire 2.5 or no XML stored.
-                        debug("sync: 2");
-                        doc = constructDocument((String)xml, file);
-                    }
-                } else { // After LimeWire 3.3
-                    xml = hashToXML.get(hash);
-                    if( xml == null ) { // no XML might exist, try and make some
-                        debug("sync: 3");
-                        doc = constructDocument(null, file);
-                    } else { //it had a doc already.
-                        debug("sync: 4");
-                        doc = (LimeXMLDocument)xml;
-                    }
-                }
-                
-                if( doc == null ) // no document, ignore.
-                    continue;
-                    
-                // Verify the file still exists on disk.
-                String actualName = null;
+        for(int i = 0; i < fds.length; i++) {
+            FileDesc fd = fds[i];
+            if( fd instanceof IncompleteFileDesc ) //ignore incompletes
+                continue;
+
+            File file = fd.getFile();
+            URN hash = fd.getSHA1Urn();
+            debug("looking up: " + hash + ", " + file);
+            Object xml = null;
+            LimeXMLDocument doc = null;
+            
+            //If requiresConversion is true, a lookup of the URN
+            //is pointless because the hashToXML's keys are
+            //a String (mini-hash).
+            if( requiresConversion ) { //Before LimeWire 3.3
+                String miniHash = null;
                 try {
-                    actualName = file.getCanonicalPath();
-                } catch(IOException ioe) {
-                    continue; // it doesn't exist on disk, ignore.
+                    miniHash = new String(LimeXMLUtils.hashFile(file));
+                } catch(IOException e) {
+                    continue; // oh well.
                 }
-                doc.setIdentifier(actualName); // set the identifier
-                doc.setXMLUrn(hash); // set the XML Urn for easy lookups
-                                
-                // We have a document, add it.
-                addReply(hash, doc);
+                xml = hashToXML.get(miniHash);
+                // If this was between LimeWire 2.5 and LimeWire 3.3...
+                // and it had some XML..
+                if( xml != null && xml instanceof LimeXMLDocument ) {
+                    debug("sync: 1");
+                    doc = (LimeXMLDocument)xml;
+                } else { // Pre LimeWire 2.5 or no XML stored.
+                    debug("sync: 2");
+                    doc = constructDocument((String)xml, file);
+                }
+            } else { // After LimeWire 3.3
+                xml = hashToXML.get(hash);
+                if( xml == null ) { // no XML might exist, try and make some
+                    debug("sync: 3");
+                    doc = constructDocument(null, file);
+                } else { //it had a doc already.
+                    debug("sync: 4");
+                    doc = (LimeXMLDocument)xml;
+                }
             }
+            
+            if( doc == null ) // no document, ignore.
+                continue;
+                            
+            // We have a document, add it.
+            addReply(fd, doc);
         }
     
         debug("LimeXMLReplyCollection(): returning.");
@@ -277,23 +267,23 @@ public class LimeXMLReplyCollection{
         return schemaURI;
     }
 
-    public void addReply(URN hash,LimeXMLDocument replyDoc) {
+    public void addReply(FileDesc fd, LimeXMLDocument replyDoc) {
+        URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             mainMap.put(hash,replyDoc);
         }
+        fd.addLimeXMLDocument(replyDoc);        
         replyDoc.setXMLUrn(hash);
+        try {
+            String identifier = fd.getFile().getCanonicalPath();
+            replyDoc.setIdentifier(identifier);
+        } catch(IOException ignored) {}
     }
 
 
-    void addReplyWithCommit(File f, URN hash, LimeXMLDocument replyDoc) {
-        String identifier ="";
-        try{
-            identifier = f.getCanonicalPath();
-        }catch(IOException e){
-            //do nothing
-        }
-        replyDoc.setIdentifier(identifier);
-        addReply(hash, replyDoc);
+    void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc) {
+        URN hash = fd.getSHA1Urn();
+        addReply(fd, replyDoc);
         
         // commit to disk...
         if (audio) {
@@ -344,22 +334,24 @@ public class LimeXMLReplyCollection{
         }
         return matchingReplyDocs;
     }
-
     
     /**
      * @return the older document, which is being replaced. Can be null.
      */
-    public LimeXMLDocument replaceDoc(URN hash, LimeXMLDocument newDoc){
+    public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc){
         LimeXMLDocument oldDoc = null;
+        URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             oldDoc = (LimeXMLDocument)mainMap.get(hash);
             mainMap.put(hash,newDoc);
         }
         newDoc.setXMLUrn(hash);
+        fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
     }
 
-    public boolean removeDoc(URN hash) {
+    public boolean removeDoc(FileDesc fd) {
+        URN hash = fd.getSHA1Urn();
         boolean found;
         Object val;
         synchronized(mainMap){
@@ -369,12 +361,13 @@ public class LimeXMLReplyCollection{
         boolean written = false;
         if(found){
             written = write();
+            if( written )            
+                fd.removeLimeXMLDocument((LimeXMLDocument)val);
         }
         if(!written && found){//put it back to maintin consistency
             synchronized(mainMap){
                 mainMap.put(hash,val);
-            }
-        }
+            }        }
         
         debug("found: " + found + ", written: " + written);
         
@@ -495,7 +488,7 @@ public class LimeXMLReplyCollection{
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        metaFileManager.fileChanged(new File(mp3FileName), oldHash);
+        metaFileManager.fileChanged(new File(mp3FileName));
         return retVal;
     }
 
