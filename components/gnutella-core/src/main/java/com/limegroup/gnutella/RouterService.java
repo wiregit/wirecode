@@ -170,7 +170,7 @@ public final class RouterService {
 		catcher.initialize();
 		acceptor.initialize();
 		
-		if(settings.getForceSupernodeMode()) {
+		if(SETTINGS.getForceSupernodeMode()) {
 			// could this be exploited??  probably...
 			udpAcceptor.ultraPeerConnectionEstablished();
 		}
