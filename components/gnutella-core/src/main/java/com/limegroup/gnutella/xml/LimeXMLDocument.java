@@ -27,7 +27,7 @@ public class LimeXMLDocument{
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
     protected String identifier;
-    protected String action;
+    protected String action="";
 
     //constructor
     public LimeXMLDocument(String XMLString) throws SAXException, 
