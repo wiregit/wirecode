@@ -67,14 +67,14 @@ public final class SettingsFactory {
 	 */
 	SettingsFactory(File settingsFile, String heading) {
         SETTINGS_FILE = settingsFile;
+        if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
         HEADING = heading;
 		reload();
 	}
 
 	/**
-	 * Reloads the settings with the specified settings file from disk.
-	 *
-	 * @param settingsStream the <tt>InputStream</tt> to load
+	 * Reloads the settings with the predefined settings file from
+     * disk.
 	 */
 	public synchronized void reload() {
 		// If the props file doesn't exist, the init sequence will prompt
@@ -147,6 +147,7 @@ public final class SettingsFactory {
         try {
             // since we can't use store, we must test to make sure we can
             // write the output (because save doesn't throw an IOException)
+            if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
             out = new FileOutputStream(SETTINGS_FILE);
             out.write( PRE_HEADER );
             tempProps.save( out, HEADING);            
@@ -253,7 +254,7 @@ public final class SettingsFactory {
 	 * @param defaultValue the default value for the setting
 	 */
 	public synchronized FileSetting createFileSetting(String key, File defaultValue) {
-		File parent = new File(defaultValue.getParent());
+		File parent = new File(defaultValue.getParent());        
 		if(!parent.isDirectory()) parent.mkdirs();
 
 		FileSetting result = 
