@@ -168,12 +168,27 @@ public final class HandshakeResponse {
      * potential connection.
      *
      * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're rejecting
+     *  to send to the node we're accepting
      */
-    static HandshakeResponse createAcceptResponse(Properties headers) {
+    static HandshakeResponse createAcceptIncomingResponse(Properties headers) {
         // add nodes from far away if we can in an attempt to avoid
         // cycles
         addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
+        return new HandshakeResponse(headers);
+    }
+
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
+     * outgoing connection -- the final third step in the handshake.  This
+     * passes no headers, as all necessary headers have already been 
+     * exchanged.  The only possible exception is the potential inclusion
+     * of X-Ultrapeer: false.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're accepting
+     */
+    static HandshakeResponse createAcceptOutgoingResponse(Properties headers) {
         return new HandshakeResponse(headers);
     }
 
@@ -184,8 +199,21 @@ public final class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're rejecting
      */
-    static HandshakeResponse createRejectResponse(Properties headers) {
+    static HandshakeResponse createRejectIncomingResponse(Properties headers) {
         addConnectedUltrapeers(RouterService.getConnectionManager(), headers);
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
                                      headers);        
@@ -292,6 +320,17 @@ public final class HandshakeResponse {
     
 
     /**
+     * Returns whether or not this connection was accepted -- whether
+     * or not the connection returned Gnutella/0.6 200 OK
+     *
+     * @return <tt>true</tt> if the server returned Gnutella/0.6 200 OK,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isAccepted() {
+        return statusCode == OK;
+    }
+
+    /**
      * Returns the status code and status message together used in a 
      * status line. (e.g., "200 OK", "503 Service Not Available")
      */
@@ -330,19 +369,45 @@ public final class HandshakeResponse {
      * @return the maximum TTL that queries sent to this connection
      *  should have -- this will always be 5 or less
      */
-    public int getMaxTTL() {
-        return extractIntHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 5);        
+    public byte getMaxTTL() {
+        return extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);        
     }
     
     /**
-     * Returns whether or not this host needs more Ultrapeers, i.e. sent
-     * X-Ultrapeer-Needed: true.
+     * Accessor for the X-Try-Ultrapeers header.  If the header does not
+     * exist or is empty, this returns the emtpy string.
+     *
+     * @return the string of X-Try-Ultrapeer hosts, or the empty string
+     *  if they do not exist
+     */
+    public String getXTryUltrapeers() {
+        return extractStringHeaderValue(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
+    }
+
+    /**
+     * This is a convenience method to see if the connection passed 
+     * the X-Try-Ultrapeer header.  This simply checks the existence of the
+     * header -- if the header was sent but is empty, this still returns
+     * <tt>true</tt>.
+     *
+     * @return <tt>true</tt> if this connection sent the X-Try-Ultrapeer
+     *  header, otherwise <tt>false</tt>
+     */
+    public boolean hasXTryUltrapeers() {
+        return headerExists(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
+    }
+
+    /**
+     * Returns whether or not this host included leaf guidance, i.e.,
+     * whether or not the host wrote:
+     *
+     * X-Ultrapeer-Needed: false
      *
      * @return <tt>true</tt> if the other host returned 
-     *  X-Ultrapeer-Needed: true, otherwise <tt>false</tt>
+     *  X-Ultrapeer-Needed: false, otherwise <tt>false</tt>
      */
-    public boolean ultrapeerNeeded() {
-        return isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER_NEEDED);
+    public boolean hasLeafGuidance() {
+        return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER_NEEDED);
     }
 
 	/**
@@ -496,21 +561,6 @@ public final class HandshakeResponse {
      *  meaningful in the context of leaf-supernode relationships. */
     public boolean isQueryRoutingEnabled() {
         return isVersionOrHigher(HEADERS, HeaderNames.X_QUERY_ROUTING, 0.1F);
-
-        //We are ALWAYS QRP-enabled, so we only need to look at what the remote
-        //host wrote.
-        /*
-        String value = 
-			HEADERS.getProperty(HeaderNames.X_QUERY_ROUTING);
-        if (value==null)
-            return false;
-        try {            
-            Float f=new Float(value);
-            return f.floatValue() >= 0.1f;   //TODO: factor into constant!
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        */
     }
 
     /**
@@ -523,6 +573,19 @@ public final class HandshakeResponse {
     public boolean usesDynamicQuerying() {
         return isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
     }
+
+    /**
+     * Convenience method that returns whether or not the given header 
+     * exists.
+     * 
+     * @return <tt>true</tt> if the header exists, otherwise <tt>false</tt>
+     */
+    private static boolean headerExists(Properties headers, 
+                                        String headerName) {
+        String value = headers.getProperty(headerName);
+        return value != null;
+    }
+
 
     /**
      * Utility method for checking whether or not a given header
@@ -604,6 +667,48 @@ public final class HandshakeResponse {
 		} catch(NumberFormatException e) {
 			return defaultValue;
 		}
+    }
+
+    /**
+     * Helper method for returning a byte header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @param defaultValue the default value to return if the header value
+     *  could not be properly parsed
+     * @return the byte value for the header
+     */
+    private static byte extractByteHeaderValue(Properties headers, 
+                                               String headerName, 
+                                               byte defaultValue) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return defaultValue;
+		try {
+			return Byte.valueOf(value).byteValue();
+		} catch(NumberFormatException e) {
+			return defaultValue;
+		}
+    }
+
+    /**
+     * Helper method for returning a string header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @return the string value for the header, or the empty string if
+     *  the header could not be found
+     */
+    private static String extractStringHeaderValue(Properties headers, 
+                                                   String headerName) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return "";
+        return value;
     }
 
     public String toString() {
