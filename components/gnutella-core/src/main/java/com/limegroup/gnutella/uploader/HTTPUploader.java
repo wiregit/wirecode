@@ -71,8 +71,8 @@ public final class HTTPUploader implements Uploader {
     private boolean _wantsFalts = false;
     
     /**
-     * the version of the F2F transfer protocol the altloc supports.
-     * if this is greater than 0, the other host is most likely firewalled.
+     * the version of the FWT protocol the remote supports.  
+     * Non-firewalled hosts should not send this feature.
      * INVARIANT: if this is greater than 0, _wantsFalts is set.
      */
     private int _FWTVersion = 0;
@@ -559,14 +559,17 @@ public final class HTTPUploader implements Uploader {
         				continue;
         			
         			//if the downloader indicated that they are firewalled
-        			//but the altloc did not say that it support FWT transfer,
+        			//but the altloc did not say that it supports FWT transfer,
         			//we do not send it.
+        			
+        			//Note: if in the future we introduce incompatible
+        			//versions of the FWT protocol, this is the place to ensure that
+        			//we only send those altlocs that support the appropriate protocol.
         			if (_FWTVersion>0 && al.supportsFWTVersion()==0)
         					continue;
 
-        			
-        			
         			_writtenPushLocs.add(al);
+        			
         			if(ret == null) ret = new HashSet();
         			ret.add(al);
         			i++;
