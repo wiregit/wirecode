@@ -106,11 +106,18 @@ class RouteTable {
      *  time with respect to this' size.
      */
     public synchronized void removeReplyHandler(ReplyHandler replyHandler) {        
+        //The aggressive asserts below are to make sure bug X75 has been fixed.
+        Assert.that(replyHandler!=null,
+                    "Null replyHandler in removeReplyHandler");
         //IMPORTANT: because_map.values() may not be defined (see note above),
         //we can only use _map.keySet().iterator()
         Iterator iter = _map.keySet().iterator();
         while (iter.hasNext()) {
-            if (_map.get(iter.next()).equals(replyHandler))
+            Object key=iter.next();
+            Assert.that(key!=null, "Null key in removeReplyHandler");
+            Object value=_map.get(key);
+            Assert.that(value!=null, "Null value in removeReplyHandler");
+            if (value.equals(replyHandler))
                 iter.remove();
         }
     }
