@@ -42,6 +42,11 @@ public interface ActivityCallback
     public void handleQueryReply( QueryReply qr );
 
     /**
+     *  Add a query string to the monitor screen
+     */
+    public void handleQueryString( String query );
+
+    /**
      * A miscellaneous error not fitting in any other category.
      */
     public void error(String message);
