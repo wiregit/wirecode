@@ -41,8 +41,11 @@ public final class ID3Reader {
         XMLStringUtils.DELIMITER;
     private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
+    private static final String LICENSE_KEY =    KEY_PREFIX + "license" + 
+        XMLStringUtils.DELIMITER;
         
     private static final String LICENSE_RDF_OPEN = "<license rdf:resource=\"";
+    private static final String CC_LICENSE_STRING = "Creative Commons";
 
     /**
      * This class should never be constructed.
@@ -161,6 +164,16 @@ public final class ID3Reader {
         int bitrate = ((Integer) info[7]).intValue();
         int seconds = ((Integer) info[8]).intValue();
         String genre = getGenreString(gen);
+        boolean hasCCLicense = false;
+
+        {   // try and validate a CC license....
+            Set urns = UrnCache.instance().getUrns(file);
+            if ((urns != null) && (urns.size() > 0)) {
+                URN firstURN = (URN) urns.iterator().next();
+                hasCCLicense = hasVerifiedLicense(file.getAbsolutePath(),
+                                                  firstURN.toString());
+            }
+        }
 
         List nameValList = new ArrayList();
         if(!((String)info[0]).equals(""))
@@ -181,6 +194,8 @@ public final class ID3Reader {
             nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
         if(seconds > 0) 
             nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
+        if(hasCCLicense)
+            nameValList.add(new NameValue(LICENSE_KEY, CC_LICENSE_STRING));
         if(nameValList.isEmpty())
             throw new IOException("invalid/no data.");
 
