@@ -49,7 +49,7 @@ public class ByteOrder {
      * @effects returns the value of x[offset..offset+4] as an int, 
      *   assuming x is interpreted as a signed little endian number (i.e., 
      *   x[offset] is LSB) If you want to interpret it as an unsigned number,
-     *   call ubytes2int on the result.
+     *   call ubytes2long on the result.
      */
     public static int leb2int(byte[] x, int offset) {
         //Must mask value after left-shifting, since case from byte
@@ -60,6 +60,25 @@ public class ByteOrder {
         int x3=(x[offset+3]<<24);
         return x3|x2|x1|x0;
     }
+    
+    /**
+     * Big-endian bytes to int.
+     *
+     * @requires x.length-offset>=4
+     * @effects returns the value of x[offset..offset+4] as an int, 
+     *   assuming x is interpreted as a signed big endian number (i.e., 
+     *   x[offset] is MSB) If you want to interpret it as an unsigned number,
+     *   call ubytes2long on the result.
+     */
+    public static int beb2int(byte[] x, int offset) {
+        //Must mask value after left-shifting, since case from byte
+        //to int copies most significant bit to the left!
+        int x0=x[offset+3] & 0x000000FF;
+        int x1=(x[offset+2]<<8) & 0x0000FF00;
+        int x2=(x[offset+1]<<16) & 0x00FF0000;
+        int x3=(x[offset]<<24);
+        return x3|x2|x1|x0;
+    }     
     
     /** 
      * Little-endian bytes to int - stream version
