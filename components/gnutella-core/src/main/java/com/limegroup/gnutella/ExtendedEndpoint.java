@@ -8,8 +8,10 @@ import java.util.Iterator;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * An endpoint with additional history information used to prioritize
@@ -113,6 +115,17 @@ public class ExtendedEndpoint extends Endpoint {
         super(host, port);
         this.timeRecorded=now();
     }
+    
+    /** 
+     * Creates a new ExtendedEndpoint without extended uptime information.  (The
+     * default will be used.)  The creation time is set to the current system
+     * time.  It is assumed that we have not yet attempted a connection to this.  
+     * Does not valid the host address.
+     */
+    public ExtendedEndpoint(String host, int port, boolean strict) { 
+        super(host, port, strict);
+        this.timeRecorded=now();
+    }    
     
     /**
      * creates a new ExtendedEndpoint with the specified locale.
@@ -345,19 +358,34 @@ public class ExtendedEndpoint extends Endpoint {
         //1. Host and port.  As a dirty trick, we use existing code in Endpoint.
         //Note that we strictly validate the address to work around corrupted
         //gnutella.net files from an earlier version
+        boolean pureNumeric;
+        
         String host;
         int port;
         try {
-            Endpoint tmp=new Endpoint(linea[0], false); // do not require numeric
+            Endpoint tmp=new Endpoint(linea[0], true); // require numeric.
             host=tmp.getAddress();
             port=tmp.getPort();
+            pureNumeric = true;
         } catch (IllegalArgumentException e) {
-            throw new ParseException("Couldn't extract address and port", 0);
+            // Alright, pure numeric failed -- let's try constructing without
+            // numeric & without requiring a DNS lookup.
+            try {
+                Endpoint tmp = new Endpoint(linea[0], false, false);
+                host = tmp.getAddress();
+                port = tmp.getPort();
+                pureNumeric = false;
+            } catch(IllegalArgumentException e2) {
+                ParseException e3 = new ParseException("Couldn't extract address and port from: " + linea[0], 0);
+                if(CommonUtils.isJava14OrLater())
+                    e3.initCause(e2);
+                throw e3;
+            }
         }
 
         //Build endpoint without any optional data.  (We'll set it if possible
         //later.)
-        ExtendedEndpoint ret=new ExtendedEndpoint(host, port);                
+        ExtendedEndpoint ret=new ExtendedEndpoint(host, port, false);                
 
         //2. Average uptime (optional)
         if (linea.length>=2) {
@@ -408,6 +436,14 @@ public class ExtendedEndpoint extends Endpoint {
                     ret.udpHostCacheFailures = i;
             } catch(NumberFormatException nfe) {}
         }
+        
+        // validate address if numeric.
+        if(pureNumeric && !NetworkUtils.isValidAddress(host))
+            throw new ParseException("invalid dotted addr: " + ret, 0);        
+            
+        // validate that non UHC addresses were numeric.
+        if(!ret.isUDPHostCache() && !pureNumeric)
+            throw new ParseException("illegal non-UHC endpoint: " + ret, 0);
 
         return ret;
     }

@@ -215,7 +215,10 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
     public void testReadingStuff() throws Exception {
         ExtendedEndpoint.read("1.2.3.4:6346");
         ExtendedEndpoint.read("1.2.3.4");
-        ExtendedEndpoint.read("www.limewire.org");
+        try {
+            ExtendedEndpoint.read("www.limewire.org");
+            fail("read");
+        } catch(ParseException pe) {}
         try {
             ExtendedEndpoint.read("<html>1.2.3.4");
             fail("read");
@@ -226,6 +229,10 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(ParseException pe) {}
         try {
             ExtendedEndpoint.read("1.3.nothing.4");
+            fail("read");
+        } catch(ParseException pe) {}
+        try {
+            ExtendedEndpoint.read("0.0.0.0");
             fail("read");
         } catch(ParseException pe) {}
     }

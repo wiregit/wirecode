@@ -523,8 +523,7 @@ public class HostCatcher {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
-            if(isValidHost(ep))
-                addUDPHostCache(ep);
+            addUDPHostCache(ep);
         }
         
         // if it was a UDPHostCache pong, just add it as that.
@@ -780,6 +779,10 @@ public class HostCatcher {
      *  <tt>false</tt>
      */
     private boolean isValidHost(Endpoint host) {
+        // caches will validate for themselves.
+        if(host.isUDPHostCache())
+            return true;
+        
         byte[] addr;
         try {
             addr = host.getHostBytes();

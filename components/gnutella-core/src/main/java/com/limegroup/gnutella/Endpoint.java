@@ -53,49 +53,54 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
      * new Endpoint("64.61.25.172", true) ==> ok
      * new Endpoint("127.0.0.1:ABC", false) ==> IllegalArgumentException     
      * </pre> 
-     * No DNS lookups are ever involved, so this constructor won't block.
+     *
+     * If requireNumeric is true no DNS lookups are ever involved.
+     * If requireNumeric is false a DNS lookup MAY be performed if the hostname
+     * is not numeric.
      *
      * @see Endpoint (String))
      */
-    public Endpoint(String hostAndPort, boolean requireNumeric) 
-        throws IllegalArgumentException
-    {
+    public Endpoint(String hostAndPort, boolean requireNumeric) {
+        this(hostAndPort, requireNumeric, false);
+    }
+
+    /**
+     * Constructs a new endpoint.
+     * If requireNumeric is true, or strict is false, no DNS lookups are ever involved.
+     * If requireNumeric is false or strict is true, a DNS lookup MAY be performed
+     * if the hostname is not numeric.
+     *
+     * To never block, make sure strict is false.
+     */  
+    public Endpoint(String hostAndPort, boolean requireNumeric, boolean strict) {
         final int DEFAULT=6346;
         int j=hostAndPort.indexOf(":");
-        if (j<0)
-        {
+        if (j<0) {
             this.hostname = hostAndPort;
             this.port=DEFAULT;
-        } else if (j==0)
-        {
+        } else if (j==0) {
             throw new IllegalArgumentException();
-        } else if (j==(hostAndPort.length()-1))
-        {
+        } else if (j==(hostAndPort.length()-1)) {
             this.hostname = hostAndPort.substring(0,j);
             this.port=DEFAULT;
-        } else
-        {
+        } else {
             this.hostname = hostAndPort.substring(0,j);
-            try
-            {
+            try {
                 this.port=Integer.parseInt(hostAndPort.substring(j+1));
-            } catch (NumberFormatException e)
-            {
+            } catch (NumberFormatException e) {
                 throw new IllegalArgumentException();
             }
-			if(!NetworkUtils.isValidPort(getPort())) {
+            
+			if(!NetworkUtils.isValidPort(getPort()))
 			    throw new IllegalArgumentException("invalid port");
-		    }
         }
 
-        if (requireNumeric) 
-        {
+        if (requireNumeric)  {
             //TODO3: implement with fewer allocations
             String[] numbers=StringUtils.split(hostname, '.');
             if (numbers.length!=4)
                 throw new IllegalArgumentException();
-            for (int i=0; i<numbers.length; i++) 
-            {
+            for (int i=0; i<numbers.length; i++)  {
                 try {
                     int x=Integer.parseInt(numbers[i]);
                     if (x<0 || x>255)
@@ -106,15 +111,25 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
             }
         }
         
-        if(!NetworkUtils.isValidAddress(hostname))
+        if(strict && !NetworkUtils.isValidAddress(hostname))
             throw new IllegalArgumentException("invalid address: " + hostname);
     }
 
     public Endpoint(String hostname, int port) {
+        this(hostname, port, true);
+    }
+    
+    /**
+     * Constructs a new endpoint using the specific hostname & port.
+     * If strict is true, this does a DNS lookup against the name,
+     * failing if the lookup couldn't complete.
+     */
+    public Endpoint(String hostname, int port, boolean strict) {
         if(!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
-        if(!NetworkUtils.isValidAddress(hostname))
+        if(strict && !NetworkUtils.isValidAddress(hostname))
             throw new IllegalArgumentException("invalid address: " + hostname);
+
         this.hostname = hostname;
         this.port=port;
     }
@@ -333,6 +348,13 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
         //class C
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
+    }
+    
+    /**
+     * Determines if this is a UDP host cache.
+     */
+    public boolean isUDPHostCache() {
+        return false;
     }
 }
 

@@ -150,14 +150,25 @@ public class UDPHostCache {
         }
         
         // Keep only the first FETCH_AMOUNT of the valid hosts.
-        List validHosts =
-            new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
-        for(Iterator i = udpHosts.iterator();
-         i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
+        List validHosts = new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
+        List invalidHosts = new LinkedList();
+        for(Iterator i = udpHosts.iterator(); i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
             Object next = i.next();
-            if(!attemptedHosts.contains(next))
-                validHosts.add(next);
+            if(attemptedHosts.contains(next))
+                continue;
+                
+            // if it was private (couldn't look up too) drop it.
+            if(NetworkUtils.isPrivateAddress(((ExtendedEndpoint)next).getAddress())) {
+                invalidHosts.add(next);
+                continue;
+            }
+            
+            validHosts.add(next);
         }
+        
+        // Remove all invalid hosts.
+        for(Iterator i = invalidHosts.iterator(); i.hasNext();  )
+            remove((ExtendedEndpoint)i.next());
 
         attemptedHosts.addAll(validHosts);
         
@@ -218,8 +229,6 @@ public class UDPHostCache {
     public synchronized boolean add(ExtendedEndpoint e) {
         Assert.that(e.isUDPHostCache());
         
-        if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
-            return false;
         if (udpHostsSet.contains(e))
             return false;
             
