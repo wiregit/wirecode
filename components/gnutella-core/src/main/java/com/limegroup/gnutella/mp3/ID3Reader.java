@@ -234,8 +234,9 @@ public final class ID3Reader {
                 http.setRequestProperty(  /*no persistence*/
                     HTTPHeaderName.CONNECTION.httpStringValue(), "close");
                 http.setRequestProperty("accept","text/html");//??
-                http.connect();
                 System.out.println("CLIENT: connected, waiting for resp.");
+                InputStream is = http.getInputStream();
+                is.read();
                 if (http.getResponseCode() != http.HTTP_ACCEPTED)
                     return false;
                 System.out.println("CLIENT: connected, got resp.");
