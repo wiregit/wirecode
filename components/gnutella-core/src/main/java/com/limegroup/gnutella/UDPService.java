@@ -292,8 +292,7 @@ public final class UDPService implements Runnable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
-        } 
-        catch(IOException e) {
+        } catch(IOException e) {
             // this should not happen -- we should always be able to write
             // to this output stream in memory
             ErrorService.error(e);
@@ -359,18 +358,23 @@ public final class UDPService implements Runnable {
                     }
                     try {
                         _socket.send(currBundle._dp);
-                    } 
-                    catch(BindException be) {
+                    } catch(BindException be) {
                         // oh well, if we can't bind our socket, ignore it.. 
-                    } 
-                    catch(NoRouteToHostException nrthe) {
+                    } catch(NoRouteToHostException nrthe) {
                         // oh well, if we can't find that host, ignore it ...
-                    } 
-                    catch(IOException ioe) {
+                    } catch(IOException ioe) {
+                        String message = ioe.getMessage();
+                        if( message == null )
+                            message = "";
+                            
                         //If we're full, just drop it.  UDP is unreliable like 
                         //that.
-                        if("No buffer space available".equals(ioe.getMessage()))
+                        if(message.equals("No buffer space available."))
                             return;
+                        //If we were interrupted, ignore.
+                        if(message.indexOf("code=10004") > -1)
+                            return;
+                            
                         String errString = "ip/port: " + 
                                            currBundle._dp.getAddress() + ":" + 
                                            currBundle._dp.getPort();
