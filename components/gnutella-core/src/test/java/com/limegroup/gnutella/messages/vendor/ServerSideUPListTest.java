@@ -67,7 +67,7 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static final GiveUPVendorMessage msgNone = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 0,(byte)0);
     private static final GiveUPVendorMessage msgMore = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 20, 30,(byte)0);
     private static final GiveUPVendorMessage msgTimes = new GiveUPVendorMessage(new GUID(GUID.makeGuid()),3,3,(byte)1);
-    //TODO:add locale tests
+    private static final GiveUPVendorMessage msgLocale = new GiveUPVendorMessage(new GUID(GUID.makeGuid()),3,3,(byte)2);
     private static final GiveUPVendorMessage msgBadMask = new GiveUPVendorMessage(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
 	
     
@@ -372,6 +372,23 @@ public class ServerSideUPListTest extends BaseTestCase {
  		//see if the result we got had any uptime (it should!)
  		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
  		assertGreaterThan(0,result.getDailyUptime());
+ 		sleep();
+ 	}
+ 	
+ 	/**
+ 	 * tests a ping message requesting locale info.
+ 	 */
+ 	public void testLocale() throws Exception {
+ 		PrivilegedAccessor.setValue(UPListVendorMessage.class,"MINUTE",new Long(1));
+ 		UPListVendorMessage reply = tryMessage(msgLocale);
+ 		
+ 		assertFalse(reply.hasConnectionTime());
+ 		assertTrue(reply.hasLocaleInfo());
+ 		
+ 		//see if any of the connections have the locale in them - they should
+ 		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
+ 		assertEquals(ApplicationSettings.LANGUAGE.getValue(),
+ 				result.getClientLocale());
  	}
  	
  	private UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
