@@ -572,6 +572,33 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("1.2.3.4",fromNet.getMyInetAddress().getHostAddress());
         assertEquals(5,fromNet.getMyPort());
         
+        // a pong carrying invalid port
+        e = new Endpoint("1.2.3.4",5) {
+            public int getPort() {
+                return 0;
+            }
+        };
+        
+        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        baos = new ByteArrayOutputStream();
+        p.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingReply)Message.read(bais);
+        
+        assertNull(fromNet.getMyInetAddress());
+        assertEquals(0,fromNet.getMyPort());
+        
+        //a pong carrying private ip
+        e = new Endpoint("192.168.0.1",20);
+        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        baos = new ByteArrayOutputStream();
+        p.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingReply)Message.read(bais);
+        
+        assertNull(fromNet.getMyInetAddress());
+        assertEquals(0,fromNet.getMyPort());
+        
         // a pong not carrying ip:port
         p = PingReply.create(GUID.makeGuid(),(byte)1);
         baos = new ByteArrayOutputStream();
