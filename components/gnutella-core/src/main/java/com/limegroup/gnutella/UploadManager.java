@@ -91,6 +91,10 @@ public class UploadManager implements BandwidthTracker {
      *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
      */
     private volatile int highestSpeed=-1;
+
+    /** The desired minimum quality of service to provide for uploads, in
+     *  KB/s.  See testTotalUploadLimit. */
+    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
     private FileManager _fileManager;
 
@@ -283,17 +287,31 @@ public class UploadManager implements BandwidthTracker {
 		
 
 	/**
-	 * Returns 'false' if the total number of uploads has been
-	 * reached, and true otherwise.  Note that because this test 
-	 * relies on the uploadsInProgress() method, it may sometimes
-	 * be incorrect if a push request takes a long time to respond. 
-	 */
+	 * Returns true iff another upload is allowed.  Note that because this test
+	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
+	 * if a push request takes a long time to respond.  
+     */
 	private boolean testTotalUploadLimit() {
+        //Allow another upload if (a) we currently have fewer than MAX_UPLOADS
+        //uploads or (b) some upload has more than MINIMUM_UPLOAD_SPEED KB/s.
+        //
+        //In other words, we continue to allow uploads until everyone's
+        //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
+        //uploads, the probability that all just happen to have low capacity
+        //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
+        //expensive of quality, making swarmed downloads work better.        
 		int max = SettingsManager.instance().getMaxUploads();
 		int current = uploadsInProgress();
-		if (current >= max)
-			return false;
-		return true;
+		if (current < max) {
+            return true;
+        } else {
+            float fastest=0.0f;
+            for (Iterator iter=_activeUploadList.iterator(); iter.hasNext(); ) {
+                BandwidthTracker upload=(BandwidthTracker)iter.next();
+                fastest=Math.max(fastest, upload.getMeasuredBandwidth());
+            }
+            return fastest>MINIMUM_UPLOAD_SPEED;
+        }
 	}
 
     /** @requires caller has this' monitor */
