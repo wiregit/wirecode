@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 
 /** Immutable IP/port pair.  Also contains an optional number and size of files. */
@@ -241,21 +243,47 @@ public class Endpoint implements Cloneable, Serializable,
     
     /**
      *This method  returns the IP of the end point as an array of bytes
-     * @requires the hostname is is dotted decimal format
      */
-    public byte[] getHostBytes(){
-	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
-	String a = tokenizer.nextToken();
-	String b = tokenizer.nextToken();
-	String c = tokenizer.nextToken();
-	String d = tokenizer.nextToken();
+    public byte[] getHostBytes() throws UnknownHostException
+    {    
+        //check if the IP address is in numeric form or is it a hostname string
+        if(Character.isDigit(hostname.charAt(hostname.length() - 1)))
+	{
+	    //it should be an IP address
+            //we may still need to check that its in proper form
+            try
+            {
+              	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
+                String a = tokenizer.nextToken();
+                String b = tokenizer.nextToken();
+                String c = tokenizer.nextToken();
+                String d = tokenizer.nextToken();
+
+                int a1 = Integer.parseInt(a);
+                int b1 = Integer.parseInt(b);
+                int c1 = Integer.parseInt(c);
+                int d1 = Integer.parseInt(d);
+                byte[] retBytes = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
+                return retBytes;  
+            }
+            catch(Exception e)
+            {
+                throw new UnknownHostException();
+            }
+            
+	}
+        else
+        {
+            //it might be a domain name.
+            //try to get its IP Address   
+            return InetAddress.getByName(hostname).getAddress();
+            
+            //the above fn call might throw UnknownHostException, but thats what
+            //we want in case of DNS failure
+            
+        }
+      
 	
-	int a1 = Integer.parseInt(a);
-	int b1 = Integer.parseInt(b);
-	int c1 = Integer.parseInt(c);
-	int d1 = Integer.parseInt(d);
-	byte[] retBytes = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
-	return retBytes;
     }
     
     
