@@ -69,12 +69,15 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
     }   
 	
 	/**
-	 * tests simple propagation.  In 100 ms the the propagator should send update
+	 * tests simple propagation.  In 500 ms the the propagator should send update
 	 * messages to the ultrapeer connections.
 	 */
 	public void testPropagation() throws Exception {
 		
-
+		//make sure the leaf connection is considered udp capable
+		ManagedConnection conn = (ManagedConnection)
+			RouterService.getConnectionManager().getInitializedClientConnections().get(0);
+		PrivilegedAccessor.setValue(conn,"_UDPCapable", new Boolean(true));
 		
 		drainInitialVMs();
 		
@@ -147,6 +150,7 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		assertTrue(LEAF[0].isOpen());
 		LEAF[0].initialize();
 		
+		
 		//drain the ultrapeers
 		drainInitialVMs();
 	}
@@ -162,6 +166,12 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	 * 
 	 */
 	public void testFullAdvertisement() throws Exception {
+		
+		//make sure the leaf connection is considered udp capable
+		ManagedConnection conn = (ManagedConnection)
+			RouterService.getConnectionManager().getInitializedClientConnections().get(0);
+		PrivilegedAccessor.setValue(conn,"_UDPCapable", new Boolean(true));
+		
 		drainInitialVMs();
 		//create the new UP connection
 		CountingConnection newUP = new CountingConnection("localhost",PORT,
@@ -256,7 +266,8 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 						m = ULTRAPEER[i].receive(120);
 						if (m instanceof BestCandidatesVendorMessage)
 							break properMessage;
-						else if (m instanceof PingRequest)
+						else if (m instanceof PingRequest ||
+								m instanceof MessagesSupportedVendorMessage)
 							continue;
 						else 
 							fail("wrong type of message received at ultrapeer "+i+" out of "+ULTRAPEER.length+
