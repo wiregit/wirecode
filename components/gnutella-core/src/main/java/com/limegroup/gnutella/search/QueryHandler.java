@@ -437,6 +437,7 @@ public final class QueryHandler {
             // connection is dropped, wasting bandwidth
             if(!curConnection.isStable(_curTime)) continue;
             mc = curConnection;
+            break;
         }
 
         int remainingConnections = 
@@ -450,6 +451,8 @@ public final class QueryHandler {
         if(remainingConnections > 4) remainingConnections -= 4;
 
         boolean probeConnection = false;
+        
+        // mc can still be null if the list of connections was empty.
         if(mc == null) {
             // if we have no connections to query, simply return for now
             if(QUERIED_PROBE_CONNECTIONS.isEmpty()) return 0;
