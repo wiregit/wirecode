@@ -55,12 +55,28 @@ public class ConnectionManager {
      * change the behaviour of these methods.
      **********************************************************
      */
-    
-    /** Minimum number of connections that a supernode with leaf connections,
+   
+
+    /** Minimum number of outdegree=30 connections that an ultrapeer 
+	 * with leaf connections must have, meaning the number of ultrapeer
+	 * connections to other ultrapeers that also have 30 connections.*/
+    private static final int MIN_OUT_DEGREE_30_CONNECTIONS = 27;
+
+	/** The maximum number of connections to maintain to older Ultrapeers
+	 * that have low-degrees of intra-Ultrapeer connections --
+	 * connections to the "low-density" network.*/
+	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 20;
+
+    /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
-    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
+    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 
+		MIN_OUT_DEGREE_30_CONNECTIONS + MAX_LOW_DEGREE_ULTRAPEERS;
+
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
+
+	public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
+
     /** The desired number of slots to reserve for good connections (e.g.,
      *  LimeWire) unrouted connections. */
     public static final int RESERVED_GOOD_CONNECTIONS = 2;   
@@ -69,27 +85,36 @@ public class ConnectionManager {
      *  LimeWire's leaves are allowed.  */
     public static final int ALLOWED_BAD_LEAF_CONNECTIONS = 4;
     /** The maximum number of ultrapeer endpoints to give out from the host
-     *  catcher in X_TRY_SUPERNODES headers. */
-    private int MAX_SUPERNODE_ENDPOINTS=10;
+     *  catcher in X_TRY_ULTRAPEER headers. */
+    private static final int MAX_SUPERNODE_ENDPOINTS=10;
+	
+	/** The maximum number of leaves to allow -- also the preferred number.*/		
+	private static final int MAX_LEAVES = 
+		UltrapeerSettings.MAX_LEAVES.getValue();
+
+	/**
+	 * Constant for the version of query routing that we support -- the same
+	 * version is used both for query routing between leaves and Ultrapeers
+	 * and between Ultrapeers.
+	 */
+	public static final String QUERY_ROUTING_VERSION = "0.1";
 
     
-    /* Sister backend classes. */
     private MessageRouter _router;
-    private volatile HostCatcher _catcher;
-	private SettingsManager _settings;
-	private ConnectionWatchdog _watchdog;
+    private HostCatcher _catcher;
+	private final ConnectionWatchdog _watchdog;
 
 
     /** The number of connections to keep up.  */
     private volatile int _keepAlive=0;
     /** Threads trying to maintain the KEEP_ALIVE.  This is generally
      *  some multiple of _keepAlive.   LOCKING: obtain this. */
-    private List /* of ConnectionFetcher */ _fetchers =
+    private final List /* of ConnectionFetcher */ _fetchers =
         new ArrayList();
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
-    private List /* of ManagedConnection */ _initializingFetchedConnections =
+    private final List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
 
@@ -129,7 +154,21 @@ public class ConnectionManager {
     /**
      * For authenticating users
      */
-    private Authenticator _authenticator;
+    private final Authenticator _authenticator;
+
+	/**
+	 * Variable for the number of times since we attempted to force ourselves 
+	 * to become an Ultrapeer that we were told to become leaves.  If this number
+	 * is too great, we give up and become a leaf.
+	 */
+	private volatile int _leafTries;
+
+	/**
+	 * The number of demotions to ignore before allowing ourselves to become 
+	 * a leaf -- this number depends on how good this potential Ultrapeer seems 
+	 * to be.
+	 */	
+	private volatile int _demotionLimit = 0;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -137,7 +176,7 @@ public class ConnectionManager {
      */
     public ConnectionManager(Authenticator authenticator) {
         _authenticator = authenticator; 
-		_settings = SettingsManager.instance(); 
+        _watchdog = new ConnectionWatchdog(this);
     }
 
     /**
@@ -145,22 +184,14 @@ public class ConnectionManager {
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
     public void initialize() {
-        _router = RouterService.getMessageRouter();//router;
-        _catcher = RouterService.getHostCatcher();//catcher;
+        _router = RouterService.getMessageRouter();
+        _catcher = RouterService.getHostCatcher();
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog = new Thread(_watchdog, "ConnectionWatchdog");
         watchdog.setDaemon(true);
   		watchdog.start();
-        
-        //We used to set the keep-alive to zero here, but that caused problems
-        //because connection fetchers could wait in HostCatcher.getAnEndpoint()
-        //before HostCatcher.expire() had been called.  As a result, LimeWire
-        //sometimes failed to connect on startup, esp. if the gnutella.net file
-        //was empty.  Turns out this code isn't needed, as
-        //RouterService.initialize() does the right thing.
     }
 
 
@@ -242,7 +273,7 @@ public class ConnectionManager {
      * Used by killExcess.  Sorts by outgoing/incoming, then by number of
      * messages sent. 
      */
-    private static class ManagedConnectionComparator implements Comparator {
+    private static final class ManagedConnectionComparator implements Comparator {
         public int compare(Object connection1, Object connection2) {
             ManagedConnection mc1=(ManagedConnection)connection1;
             ManagedConnection mc2=(ManagedConnection)connection2;
@@ -287,13 +318,7 @@ public class ConnectionManager {
      * to add more threads.  Ignores request if a shielded leaf node
      * and newKeep>1 (sic).
      */
-    public synchronized void setKeepAlive(int newKeep) {
-        //TODO: we may want to re-enable this...with a higher limit.
-        ////The request for increasing keep alive if we are leaf node is invalid
-        ////This logic is duplicated in RouterService.setKeepAlive.
-        //if ((newKeep > 1) && hasClientSupernodeConnection())
-        //    return;
-        
+    public synchronized void setKeepAlive(int newKeep) {        
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
@@ -318,7 +343,7 @@ public class ConnectionManager {
     public boolean isSupernode() {
         boolean isCapable =
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue();
-        return isCapable && !hasClientSupernodeConnection();
+        return isCapable && !isLeaf();
     }
     
     /**
@@ -326,7 +351,7 @@ public class ConnectionManager {
      * is not required that the supernode support query routing, though that is
      * generally the case.  
      */
-    public boolean hasClientSupernodeConnection() {
+    public boolean isLeaf() {
         //TODO2: should we make this faster by augmenting state?  We could
         //also return false if isSupernode().
         List connections=getInitializedConnections();
@@ -405,7 +430,7 @@ public class ConnectionManager {
      */
     int getNumFreeLeafSlots() {
         if (isSupernode())
-			return UltrapeerSettings.MAX_LEAVES.getValue() - 
+			return MAX_LEAVES - 
 				getNumInitializedClientConnections();
         else
             return 0;
@@ -489,7 +514,8 @@ public class ConnectionManager {
         return allowConnection(
             c.isOutgoing(),
             c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE),
-            c.getProperty(ConnectionHandshakeHeaders.USER_AGENT));
+            c.getProperty(ConnectionHandshakeHeaders.USER_AGENT),
+			c.getNumIntraUltrapeerConnections());
     }
     
     /**
@@ -498,18 +524,15 @@ public class ConnectionManager {
      * false otherwise
      */
     public boolean allowAnyConnection() {
-        int shieldedMax =
-			UltrapeerSettings.MAX_LEAVES.getValue();
-
         //Stricter than necessary.  
         //See allowAnyConnection(boolean,String,String).
-        if (hasClientSupernodeConnection())
+        if (isLeaf())
             return false;
 
         //Do we have normal or leaf slots?
         return getNumInitializedConnections() < _keepAlive
             || (isSupernode() 
-                    && getNumInitializedClientConnections() < shieldedMax);
+				&& getNumInitializedClientConnections() < MAX_LEAVES);
     }
     
     /**
@@ -537,7 +560,9 @@ public class ConnectionManager {
      */
     public synchronized boolean allowConnection(boolean outgoing,
                                                 String ultrapeerHeader,
-                                                String useragentHeader) {
+                                                String userAgentHeader,
+												int degree) {
+
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
@@ -561,7 +586,6 @@ public class ConnectionManager {
         //than N-K connections.  With time, this converges on all good
         //connections.
         
-        SettingsManager settings=SettingsManager.instance();
         boolean isUltrapeerAware=ultrapeerHeader!=null;
         boolean isLeaf=ConnectionHandshakeHeaders.isFalse(ultrapeerHeader);
 
@@ -569,34 +593,59 @@ public class ConnectionManager {
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0) {
             return false;
-		}
-        else if (hasClientSupernodeConnection())
-            //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
+		} else if (RouterService.isLeaf()) {
+			// we're a leaf -- don't allow any incoming connections
             return false;  
-
-        else if (isLeaf && isUltrapeerAware) {
+		} else if (isLeaf && isUltrapeerAware) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-            int shieldedMax =
-				UltrapeerSettings.MAX_LEAVES.getValue();
             return getNumInitializedClientConnections() 
-                < (trustedVendor(useragentHeader)
-                      ? shieldedMax : ALLOWED_BAD_LEAF_CONNECTIONS);
-        } else {
-            //2. Ultrapeer or 0.6.  Preference trusted vendors using BearShare's
+                < (trustedVendor(userAgentHeader)
+				   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
+
+        } else if (isUltrapeerAware) {
+            //2. Ultrapeer.  Preference trusted vendors using BearShare's
             //clumping algorithm (see above).
-            return getNumInitializedConnections()
-                 < (trustedVendor(useragentHeader)
-                       ? _keepAlive : _keepAlive-RESERVED_GOOD_CONNECTIONS);
-        }
+		   
+			int connections = getNumInitializedConnections();
+			boolean degree30Connection = degree == 30;
+
+			if(!degree30Connection) {
+				// if it's not a new high-density connection, only allow it if
+				// our number of connections is below the maximum number of old
+				// connections to allow
+				return connections < 
+					(trustedVendor(userAgentHeader) ? 
+					 MAX_LOW_DEGREE_ULTRAPEERS : 
+					 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
+			}
+
+			// otherwise, it is a high degree connection, so allow it if we 
+			// need more connections
+			return (trustedVendor(userAgentHeader) &&
+					connections < MIN_CONNECTIONS_FOR_SUPERNODE);
+        } else {
+			return false;
+		}
     }
 
-    private static boolean trustedVendor(String useragentHeader) {
-        if (useragentHeader==null)
-            return false;
-        return useragentHeader.startsWith("LimeWire") 
-            || useragentHeader.startsWith("Swapper");
+	/**
+	 * Helper method for determining whether or not the connecting node is
+	 * a "trusted vendor", or a vendor that we have interacted with enough
+	 * to feel confident that they are not sending overly aggressive 
+	 * automated requeries, producing other excessive traffic, or otherwise
+	 * being abusive.
+	 *
+	 * @param userAgentHeader the user-agent for the node, as reported in
+	 *  the 0.6 handshake
+	 * @return <tt>true</tt> if the vendor is considered trusted, otherwise
+	 *  <tt>false</tt>
+	 */
+    private static boolean trustedVendor(String userAgentHeader) {
+        if(userAgentHeader == null) return false;
+        return (userAgentHeader.startsWith("LimeWire") ||
+				userAgentHeader.startsWith("Swapper"));
     }
         
 
@@ -636,8 +685,7 @@ public class ConnectionManager {
     public boolean supernodeNeeded(){
         //if more than 70% slots are full, return true 
         if(isSupernode() &&
-            getNumInitializedClientConnections() > 
-            (UltrapeerSettings.MAX_LEAVES.getValue() * 0.7)){
+		   getNumInitializedClientConnections() > (MAX_LEAVES * 0.7)){
             return true;
         }else{
             //else return false
@@ -684,7 +732,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    List getInitializedConnections2() {
+    public List getInitializedConnections2() {
         return _initializedConnections;
     }
     
@@ -698,6 +746,7 @@ public class ConnectionManager {
     public List getInitializedClientConnections2() {
         return _initializedClientConnections;
     }
+
 
     /**
      * @return a clone of all of this' connections.
@@ -831,9 +880,6 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=ConnectionSettings.KEEP_ALIVE.getValue();
-
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
         //   to ignore the fact that we have a client-supernode connection.
@@ -856,29 +902,11 @@ public class ConnectionManager {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public synchronized void connect() {
-        //HACK. People used to complain to that the connect button wasn't
-        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
-        //This is not a bug; LimeWire isn't supposed to connect to the pong
-        //server in this case.  But this IS admittedly confusing.  So we force a
-        //connection to the pong server in this case by disconnecting and
-        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
-        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
-        //to give the connection fetchers time to do their thing.  Ugh.  A
-        //Thread.yield() may work here too, but that's less dependable.  And I
-        //do not want to bother with wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
-        boolean useHack=
-            (!settings.getUseQuickConnect())
-                && _catcher.getNumHosts()==0;
-        if (useHack) {
-            disconnect();
-        }
 
         //Tell the HostCatcher it's ok to reconnect to router.limewire.com.
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
-        //int outgoing=settings.getKeepAlive();
 		int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
         if (outgoing < 1) {
 			ConnectionSettings.KEEP_ALIVE.revertToDefault();
@@ -886,32 +914,14 @@ public class ConnectionManager {
         }
         //Actually notify the backend.		
         setKeepAlive(outgoing);
-
-        //int incoming=settings.getKeepAlive();
-        //setMaxIncomingConnections(incoming);
-
-        //See note above.
-        if (useHack) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) { }
-        }
     }
     
     /** 
-     * Sends the initial ping request to a newly initialized connection.  If
-     * connection is router.limewire.com (e.g.,
-     * connection.isRouterConnection()), sends a special group ping.  Otherwise
-     * the ttl of the PingRequest will be 1 if we don't need any connections.
+     * Sends the initial ping request to a newly initialized connection.  The
+     * ttl of the PingRequest will be 1 if we don't need any connections.
      * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        PingRequest pr;
-        //Bootstrap server: send group ping.
-        //if (connection.isRouterConnection()) {
-		//  String group = "none:"+_settings.getConnectionSpeed();
-		//  pr = _router.createGroupPingRequest(group);                 //a
-        //}
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -919,10 +929,11 @@ public class ConnectionManager {
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
+        PingRequest pr;
         if (getNumInitializedConnections() >= _keepAlive)
-            pr = new PingRequest((byte)1);                              //b
+            pr = new PingRequest((byte)1);   
         else
-            pr = new PingRequest(SettingsManager.instance().getTTL());  //c
+            pr = new PingRequest((byte)4);   
 
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
@@ -1193,6 +1204,7 @@ public class ConnectionManager {
         if (remoteAddress==null)
             remoteAddress 
                 = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
+
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
         if((remoteAddress != null) && (!connection.isOutgoing()))
@@ -1214,30 +1226,56 @@ public class ConnectionManager {
     }
    
     /** 
-     * Returns true if this can safely switch from supernode to leaf mode.
-     * Typically that means there are no leaf connections, but it could be
-     * stricter.  
+     * Returns true if this can safely switch from Ultrapeer to leaf mode.
+	 * Typically this means that we are an Ultrapeer and have no leaf
+	 * connections.
+	 *
+	 * @return <tt>true</tt> if we will allow ourselves to become a leaf,
+	 *  otherwise <tt>false</tt>
      */
-    public boolean allowClientMode() {
+    public boolean allowLeafDemotion() {
+		_leafTries++;
+
         //if is a supernode, and have other connections (client or ultrapeer),
         //or the supernode status is forced, dont change mode
-        int connections=getNumInitializedConnections()
-                       +getNumInitializedClientConnections();
-        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue()//_settings.getForceSupernodeMode() 
-            || (isSupernode() && connections > 0))
+        int connections = getNumInitializedConnections()
+			+ getNumInitializedClientConnections();
+        
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() 
+            || (isSupernode() && connections > 0)) {
             return false;
-        else
-            return true;
+		} else if(SupernodeAssigner.isTooGoodToPassUp() && 
+				  _leafTries < _demotionLimit) {
+			return false;
+		}
+		return true;
     }
+
+
+	/**
+	 * Notifies the connection manager that it should attempt to become an
+	 * Ultrapeer.  If we already are an Ultrapeer, this will be ignored.
+	 *
+	 * @param demotionLimit the number of attempts by other Ultrapeers to
+	 *  demote us to a leaf that we should allow before giving up in the
+	 *  attempt to become an Ultrapeer
+	 */
+	public void tryToBecomeAnUltrapeer(int demotionLimit) {
+		if(isSupernode()) return;
+		_demotionLimit = demotionLimit;
+		_leafTries = 0;		
+		disconnect();
+		connect();
+	}
     
     /**
      * Updates the addresses in the hostCache by parsing the passed string
      * @param headers The connection headers received
      * @param connection The connection on which we received the headers
      */
-    private void updateHostCache(Properties headers, ManagedConnection
-        connection){
-        //get the supernodes, and add those to the host cache
+    private void updateHostCache(Properties headers, 								 
+								 ManagedConnection connection) {
+        //get the ultrapeers, and add those to the host cache
         updateHostCache(headers.getProperty(
                 ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
                 connection, true);
@@ -1293,7 +1331,7 @@ public class ConnectionManager {
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
     private void initializeExternallyGeneratedConnection(ManagedConnection c)
-            throws IOException {
+		throws IOException {
 
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
@@ -1323,12 +1361,12 @@ public class ConnectionManager {
             processConnectionHeaders(c);
         }
 
+		
         //If there's not space for the connection, reject it.  This mechanism
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
-        if (!c.isOutgoing() && 
-                !allowConnection(c)) {
+        if (!c.isOutgoing() && !allowConnection(c)) {
             c.loopToReject(_catcher);   
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
@@ -1357,8 +1395,7 @@ public class ConnectionManager {
                 connectionOpen = true;
             }
         }
-        if(connectionOpen)
-        {
+        if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
@@ -1381,7 +1418,7 @@ public class ConnectionManager {
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections create through createConnectionAsynchronously and
+     * ManagedConnections created through createConnectionAsynchronously and
      * createConnectionBlocking
      */
     private class OutgoingConnectionThread
@@ -1442,25 +1479,6 @@ public class ConnectionManager {
 		// this can throw IOException
 		conn.loopForMessages();		
 	}
-
-    //------------------------------------------------------------------------
-//     /**
-//      * Create a new connection, blocking until it's initialized, but launching
-//      * a new thread to do the message loop.
-//      */
-//     public ManagedConnection createGroupConnectionBlocking(
-//       String hostname, int portnum, GroupPingRequest specialPing) 
-// 	  throws IOException {
-//         ManagedConnection c = 
-// 		  new ManagedConnection(hostname, portnum, _router, this, true);
-
-//         // Initialize synchronously
-//         initializeExternallyGeneratedConnection(c);
-//         // Kick off a thread for the message loop.
-//         new GroupOutgoingConnectionThread(c, specialPing);
-
-//         return c;
-//     }
     
     /**
      * @requires n>0
@@ -1474,48 +1492,6 @@ public class ConnectionManager {
         //of ManagedConnection have a reference to this but not the HostCatcher.
         return _catcher.getNormalHosts(n);
     }
-    
-
-    /**
-     * This thread does the message loop for ManagedConnections created
-     * through createGroupConnectionBlocking
-     */
-    private class GroupOutgoingConnectionThread extends Thread {
-        private ManagedConnection _connection;
-        private PingRequest       _specialPing;
-
-        /**
-         * The constructor calls start(), so allow you need to do
-         * is construct the thread.
-         */
-        public GroupOutgoingConnectionThread(
-                ManagedConnection connection, PingRequest specialPing) {
-            _connection  = connection;
-            _specialPing = specialPing;
-            setDaemon(true);
-            start();
-        }
-
-        public void run() {
-            try {
-                _router.sendPingRequest(_specialPing, _connection);
-                _connection.loopForMessages();
-            } catch(IOException e) {
-            } catch(Throwable e) {
-                //Internal error!
-                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
-            }
-            finally{
-                if (_connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
-
-            //SettingsManager settings = SettingsManager.instance();
-		    //settings.setUseQuickConnect(true);
-            //setKeepAlive(2);
-        }
-    }
-	//------------------------------------------------------------------------
 
     /**
      * Asynchronously fetches a connection from hostcatcher, then does
@@ -1594,7 +1570,7 @@ public class ConnectionManager {
                     lostShieldedClientSupernodeConnection();
             }
         }
-    }
+	}
 
     /*
     public static void main(String[] args) {

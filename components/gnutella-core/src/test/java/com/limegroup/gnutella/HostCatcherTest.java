@@ -4,7 +4,7 @@ import junit.framework.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.FixedsizePriorityQueue;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HostCatcherTest extends TestCase {  
@@ -30,7 +30,8 @@ public class HostCatcherTest extends TestCase {
 
         //move gnutella.dot before we initialize
         //test it specifically in other places.
-        File gdotnet = new File( SettingsManager.instance().getHostList() );
+        File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
+                                "gnutella.net");
         if ( gdotnet.exists() ) {
             gdotnet.renameTo( new File("gdotnet.tmp") );
         }
@@ -44,7 +45,8 @@ public class HostCatcherTest extends TestCase {
 	    // put the gnutella.dot file back.
 	    File gtmp = new File( "gdotnet.tmp" );
 	    if( gtmp.exists() ) {
-	        gtmp.renameTo( new File(SettingsManager.instance().getHostList()) );
+            File gdotnet = new File(CommonUtils.getUserSettingsDir(), 
+                                    "gnutella.net");
 	    }
 	    
 	}
@@ -208,11 +210,11 @@ public class HostCatcherTest extends TestCase {
                           0l, 0l, false, 3000),
                    null);  //private address (ignored)
             File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp.getAbsolutePath());
+            hc.write(tmp);
 
             //2. read HC from file.
             setUp();
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
             assertEquals(new Endpoint("18.239.0.142", 6342),
                          hc.getAnEndpoint());
@@ -257,12 +259,12 @@ public class HostCatcherTest extends TestCase {
                    null);
 
             File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp.getAbsolutePath());            
+            hc.write(tmp);            
 
             //2. Read
             setUp();
             HostCatcher.DEBUG=false;  //Too darn slow
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertEquals(0, hc.getNumUltrapeerHosts());
             assertEquals(new Endpoint("18.239.0.142", 0),
                          hc.getAnEndpoint());
@@ -342,7 +344,7 @@ public class HostCatcherTest extends TestCase {
 
             //2. Read and verify
             setUp();
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertTrue(hc.getAnEndpoint().equals( 
                 new Endpoint("18.239.0.142", 6342)));
             assertTrue(hc.getAnEndpoint().equals( 

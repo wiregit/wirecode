@@ -174,6 +174,7 @@ public final class QueryUnicaster {
                 try {
                     queryLoop();
                 } catch(Throwable t) {
+					t.printStackTrace();
                     RouterService.error(t);
                 }
 			}
@@ -184,7 +185,10 @@ public final class QueryUnicaster {
     }
 
     
-    public synchronized void initialize() {
+    /**
+     * Starts the query unicaster thread.
+     */
+    public synchronized void start() {
         if (!_initialized) {
             _querier.start();
             
@@ -194,7 +198,6 @@ public final class QueryUnicaster {
             _initialized = true;
         }
     }
-
 
     /** 
      * The main work to be done.

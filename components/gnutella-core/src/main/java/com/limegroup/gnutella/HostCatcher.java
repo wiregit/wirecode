@@ -104,8 +104,6 @@ public class HostCatcher {
      *  initially allowed to. */
     private long nextAllowedFetchTime=Long.MAX_VALUE;
 
-    private SettingsManager settings=SettingsManager.instance();
-
     /**
      * whether or not to always notify the activity callback implementor that
      * a host was added to the host catcher.  This is used when the hostcatcher
@@ -119,6 +117,20 @@ public class HostCatcher {
 	 */
 	private final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
+	/**
+	 * Constant for the host file to read from and write to.
+	 */
+	private final File HOST_FILE;
+
+	/**
+	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
+	 * for the host file location.
+	 */
+	public HostCatcher() {
+		HOST_FILE = 
+			new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
+	}
+
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
      * connect is not specified in the SettingsManager, loads the hosts in the
@@ -128,13 +140,9 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
-        
-		String filename = settings.getHostList();
-		
         //Read gnutella.net
         try {
-            if (filename!=null)
-                read(filename);
+			read(HOST_FILE);
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         }
@@ -175,10 +183,9 @@ public class HostCatcher {
      * @modifies this
      * @effects read hosts from the given file.  
      */
-    synchronized void read(String filename)
-            throws FileNotFoundException, IOException {
-        BufferedReader in=null;
-        in=new BufferedReader(new FileReader(filename));
+    synchronized void read(File hostFile) throws FileNotFoundException, 
+												 IOException {
+        BufferedReader in = new BufferedReader(new FileReader(hostFile));
         while (true) {
             String line=in.readLine();
             if (line==null)
@@ -202,15 +209,24 @@ public class HostCatcher {
         }
     }
 
+	/**
+	 * Writes the host file to the default location.
+	 *
+	 * @throws <tt>IOException</tt> if the file cannot be written
+	 */
+	synchronized void write() throws IOException {
+		write(HOST_FILE);
+	}
+
     /**
      * @modifies the file named filename
      * @effects writes this to the given file.  The file
      *  is prioritized by rough probability of being good.
      *  GWebCache entries are also included in this file.
      */
-    synchronized void write(String filename) throws IOException {
+    synchronized void write(File hostFile) throws IOException {
         repOk();
-        FileWriter out=new FileWriter(filename);       
+        FileWriter out = new FileWriter(hostFile);       
         //Write servers from GWebCache to output.
         synchronized (gWebCache) {
             for (Iterator iter=gWebCache.getBootstrapServers();iter.hasNext();){

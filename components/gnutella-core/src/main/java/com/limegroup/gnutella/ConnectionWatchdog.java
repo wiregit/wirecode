@@ -15,17 +15,17 @@ public class ConnectionWatchdog implements Runnable {
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=8000;
 
-    private ConnectionManager manager;
-    private MessageRouter router;
+    private final ConnectionManager manager;
 
     /** 
-     * @param manager to list of connections to manage
-     * @param router the router to use to send ping requests, if necessary to
-     *  check that a connection is alive
+	 * Creates a new <tt>ConnectionWatchdog</tt> instance to monitor
+	 * connections to make sure they are still up and responding well.
+	 *
+     * @param manager the <tt>ConnectionManager</tt> instance that provides
+	 *  access to the list of connections to monitor
      */
-    public ConnectionWatchdog(ConnectionManager manager, MessageRouter router) {
-        this.manager=manager;
-        this.router=router;
+    public ConnectionWatchdog(ConnectionManager manager) {
+        this.manager = manager;
     }
 
     /** A snapshot of a connection.  Used by run() */
@@ -126,7 +126,8 @@ public class ConnectionWatchdog implements Runnable {
                 continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
-            router.sendPingRequest(new PingRequest((byte)1), c);
+            RouterService.getMessageRouter().sendPingRequest(
+			    new PingRequest((byte)1), c);
         }
         
         //Wait a tiny amount of time.

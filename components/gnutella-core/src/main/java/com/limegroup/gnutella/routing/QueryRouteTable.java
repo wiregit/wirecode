@@ -38,9 +38,9 @@ public class QueryRouteTable {
     /** What should come across the wire if a keyword status is unchanged. */
     public static final byte KEYWORD_NO_CHANGE=(byte)0;
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=1<<14;  //16KB
+    public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
     /** The maximum size of patch messages, in bytes. */
-    public static final int MAX_PATCH_SIZE=1024; //1 KB
+    public static final int MAX_PATCH_SIZE=1<<12;      //4 KB
 
     /** The *new* table implementation.  The table of keywords - each value in
      *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword

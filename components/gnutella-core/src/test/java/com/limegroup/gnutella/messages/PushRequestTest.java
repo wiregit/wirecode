@@ -50,30 +50,33 @@ public class PushRequestTest extends TestCase {
         try {
             //1. Test that we can read big push
             PushRequest pr=(PushRequest)Message.read(in);            
-            assertEquals(pr.getIndex(), 3);
-            assertEquals(pr.getTotalLength(), bytes.length);
-            assertEquals(pr.getLength(), bytes.length-23);
+            assertEquals("unexpected push index", pr.getIndex(), 3);
+            assertEquals("unexpected total length", pr.getTotalLength(), 
+                         bytes.length);
+            assertEquals("unexpected length", pr.getLength(), bytes.length-23);
 
             //2. Test that yields returns the same thing
             ByteArrayOutputStream out=new ByteArrayOutputStream();
             pr.write(out);
-            assertTrue(Arrays.equals(out.toByteArray(),
-                                     bytes));
+            assertTrue("written bytes should be equal", 
+                       Arrays.equals(out.toByteArray(), bytes));
 
             //3. Test that we can strip the payload out
             PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
-            assertEquals(pr2.getLength(), 26);
-            assertEquals(pr2.getHops(), pr.getHops());
+            assertEquals("unexpected length", pr2.getLength(), 26);
+            assertEquals("unexpected hops", pr2.getHops(), pr.getHops());
             ByteArrayOutputStream out2=new ByteArrayOutputStream();
             pr2.write(out2);
             byte[] bytes2=out2.toByteArray();
-            assertEquals(bytes2.length, 23+26);
+            assertEquals("unexpected bytes length", bytes2.length, 23+26);
             for (int i=0; i<bytes2.length; i++)
                 if (i!=19) //skip payload length
                     assertEquals(bytes2[i], bytes[i]);
         } catch (BadPacketException e) {
+            e.printStackTrace();
             fail("Bad packet exception: "+e);
         } catch (IOException e) {
+            e.printStackTrace();
             fail("Unexpected IO problem");
         }
     }

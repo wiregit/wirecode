@@ -7,6 +7,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.*;
 
 import junit.framework.*;
 import java.util.Properties;
@@ -17,14 +18,15 @@ import java.net.*;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.
+ * redirects properly, etc.  The test includes a leaf attached to 3 
+ * Ultrapeers.
  */
 public class LeafRoutingTest extends TestCase {
-    static final int PORT=6669;
-    static final int TIMEOUT=500;
-    static final byte[] ultrapeerIP=
+    private static final int PORT=6669;
+    private static final int TIMEOUT=500;
+    private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-    static final byte[] oldIP=
+    private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
     static Connection ultrapeer1;
@@ -75,7 +77,8 @@ public class LeafRoutingTest extends TestCase {
             doRedirect();
             doLeafBroadcast(rs);
             doBroadcastFromUltrapeer();
-            doNoBroadcastFromOld();
+            doConnectionToOldDisallowed();
+            //doNoBroadcastFromOld();
             shutdown();
         } catch (IOException e) { 
             e.printStackTrace();
@@ -111,15 +114,19 @@ public class LeafRoutingTest extends TestCase {
 
          //System.out.println("Please establish a connection to localhost:6352\n");
          rs.connectToHostAsynchronously("127.0.0.1", 6352);
-         old1=new Connection(accept(6352), new OldResponder());
+         //old1=new Connection(accept(6352), new OldResponder());
+         old1=new Connection(accept(6352), new UltrapeerResponder());
          old1.initialize();
-         replyToPing(old1, false);
+         //replyToPing(old1, false);
+         replyToPing(old1, true);
 
          //System.out.println("Please establish a connection to localhost:6353\n");
          rs.connectToHostAsynchronously("127.0.0.1", 6353);
-         old2=new Connection(accept(6353), new OldResponder());
+         //old2=new Connection(accept(6353), new OldResponder());
+         old2=new Connection(accept(6353), new UltrapeerResponder());
          old2.initialize();
-         replyToPing(old2, false);
+         //replyToPing(old2, false);
+         replyToPing(old2, true);
      }
 
      private static Socket accept(int port) throws IOException { 
@@ -185,62 +192,85 @@ public class LeafRoutingTest extends TestCase {
         while (true) {
             Message m=ultrapeer1.receive(2000);
             if (m instanceof QueryRequest) {
-                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+                assertEquals("unexpected query name", "crap", 
+                             ((QueryRequest)m).getQuery());
                 break;
             }
         }       
         while (true) {
             Message m=ultrapeer2.receive(2000);
             if (m instanceof QueryRequest) {
-                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+                assertEquals("unexpected query name", "crap", 
+                             ((QueryRequest)m).getQuery());
                 break;
             }
         }
         while (true) {
             Message m=old1.receive(2000);
             if (m instanceof QueryRequest) {
-                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
+                assertEquals("unexpected query name", "crap", 
+                             ((QueryRequest)m).getQuery());
                 break;
             }
         }
-        while (true) {
-            Message m=old2.receive(2000);
-            if (m instanceof QueryRequest) {
-                assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-                break;
-            }
-        }
+//          while (true) {
+//              Message m=old2.receive(2000);
+//              if (m instanceof QueryRequest) {
+//                  assertEquals("unexpected query name", "crap", 
+//                               ((QueryRequest)m).getQuery());
+//                  break;
+//              }
+//          }
     }
 
+    /**
+     * Tests that the X-Try and X-Try-Ultrapeer headers are correctly
+     * being transferred in connection headers.
+     */
     private static void doRedirect() {
-        //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder(),
                                     false);
+
         try {
             c.initialize();
-            assertTrue("Handshake succeeded!", false);
+            fail("handshake should not have succeeded");
         } catch (IOException e) {
             String hosts=c.getProperty(ConnectionHandshakeHeaders.X_TRY);
             //System.out.println("X-Try: "+hosts);
-            assertTrue("No hosts", hosts!=null);
+            assertNotNull("hosts should not be null", hosts);
             Set s=list2set(hosts);
-            assertEquals("unexpected set size", 2, s.size());
-            assertTrue(s.contains(new Endpoint(oldIP, 6352)));
-            assertTrue(s.contains(new Endpoint(oldIP, 6353)));
+
+            // size should be 0 since the test contains no non-Ultrapeer nodes
+            assertEquals("unexpected size of X-Try hosts list", 0, s.size());
 
             hosts=c.getProperty(
                                 ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
-            assertTrue(hosts!=null);
+            assertNotNull("unexpected null value", hosts);
             s=list2set(hosts);
-            assertEquals("unexpected set size", 4, s.size());
+            assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+hosts, 
+                         8, s.size());
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6350)));
-            assertTrue(s.contains(new Endpoint(ultrapeerIP, 6351)));
-            assertTrue(s.contains(new Endpoint(localhost, 6350))); 
-            assertTrue(s.contains(new Endpoint(localhost, 6351)));
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(ultrapeerIP, 6350)));
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(ultrapeerIP, 6351)));
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(ultrapeerIP, 6352)));
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(ultrapeerIP, 6353)));
+
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(localhost, 6350))); 
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(localhost, 6351)));
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(localhost, 6352))); 
+            assertTrue("expected Ultrapeer not present in list",
+                       s.contains(new Endpoint(localhost, 6353)));
+
         }
     }
 
@@ -254,11 +284,11 @@ public class LeafRoutingTest extends TestCase {
         ultrapeer1.send(qr);
         ultrapeer1.flush();
 
-        assertTrue(! drain(ultrapeer2));
+        assertTrue("drain should have returned false", !drain(ultrapeer2));
         //We don't care whether this is forwarded to the old connections
     }
 
-
+    /*
     private static void doNoBroadcastFromOld() 
         throws IOException, BadPacketException {
         //System.out.println("-Test query from old not broadcasted");
@@ -274,10 +304,27 @@ public class LeafRoutingTest extends TestCase {
         assertTrue(! drain(ultrapeer2));
         Message m=old2.receive(500);
         assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue(m.getHops()==(byte)1);
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
         // we adjust all TTLs down to 6....
-        assertTrue(m.getTTL()==(byte)5);         
+		assertEquals("unexpected TTL", (byte)5, m.getTTL());        
     }
+    */
+
+    /**
+     * Tests to make sure that connections to old hosts are not allowed
+     */
+    private static void doConnectionToOldDisallowed() {
+        Connection c=new Connection("127.0.0.1", PORT,
+                                    new Properties(),
+                                    new OldResponder(),
+                                    false);
+        try {
+            c.initialize();
+            fail("handshake should not have succeeded");
+        } catch (IOException e) {
+        }        
+    }
+
 
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
@@ -333,6 +380,8 @@ class UltrapeerResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException {
         Properties props=new Properties();
+        props.put(ConnectionHandshakeHeaders.USER_AGENT, 
+                  CommonUtils.getHttpServer());
         props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         props.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
         return new HandshakeResponse(props);

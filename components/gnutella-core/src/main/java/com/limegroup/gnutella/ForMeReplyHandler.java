@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.search.*;
 
 /**
  * This is the class that goes in the route table when a request is
@@ -12,7 +13,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	
 	private final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
-		
+	   
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
         SettingsManager settings = SettingsManager.instance();
@@ -36,8 +37,13 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
 		if(handler.isPersonalSpam(reply)) return;
 			
-		ActivityCallback callback = RouterService.getCallback();
-		callback.handleQueryReply(reply);
+		//ActivityCallback callback = RouterService.getCallback();
+		//callback.handleQueryReply(reply);
+
+		SearchResultHandler resultHandler = 
+			RouterService.getSearchResultHandler();
+		resultHandler.handleQueryReply(reply);
+		
 
 		DownloadManager dm = RouterService.getDownloadManager();
 		dm.handleQueryReply(reply);
@@ -116,6 +122,28 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	
 	public boolean isKillable() {
 		return false;
+	}
+
+	/**
+	 * Implements <tt>ReplyHandler</tt> interface.  Returns whether this
+	 * node is a leaf or an Ultrapeer.
+	 *
+	 * @return <tt>true</tt> if this node is a leaf node, otherwise 
+	 *  <tt>false</tt>
+	 */
+	public boolean isLeafConnection() {
+		return !RouterService.isSupernode();
+	}
+
+	/** 
+	 * Implements <tt>ReplyHandler</tt> interface -- returns the number of
+	 * intra-Ultrapeer connections this host maintains.
+	 *
+	 * @return returns the number of intra-Ultrapeer connections this host 
+	 *  maintains
+	 */
+	public int getNumIntraUltrapeerConnections() {
+		return ConnectionManager.MIN_CONNECTIONS_FOR_SUPERNODE;
 	}
 }
 

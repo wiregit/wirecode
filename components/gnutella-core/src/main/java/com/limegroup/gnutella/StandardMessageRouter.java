@@ -20,20 +20,6 @@ public class StandardMessageRouter extends MessageRouter {
         _fileManager = fm;
     }
 
-    /**
-     * Override of handleQueryRequest to send query strings to the callback.
-     */
-    protected void handleQueryRequest(QueryRequest queryRequest,
-                                      ReplyHandler receivingConnection) {
-        // Apply the personal filter to decide whether the callback
-        // should be informed of the query
-        if (!receivingConnection.isPersonalSpam(queryRequest)) {
-            _callback.handleQueryString(queryRequest.getQuery());
-        }
-
-        super.handleQueryRequest(queryRequest, receivingConnection);
-    }
-
 
     /**
      * Responds to the PingRequest by getting information from the FileManager
@@ -217,22 +203,5 @@ public class StandardMessageRouter extends MessageRouter {
         catch (IOException e) {
             // if there is an error, do nothing..
         }
-    }
-
-    /** @see MessageRouter.addQueryRoutingEntries */
-    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
-        Iterator words = _fileManager.getKeyWords().iterator();
-        while(words.hasNext())
-            qrt.add((String)words.next());
-        // get 'indivisible' words and handle appropriately - you don't want the
-        // qrt to divide these guys up....
-        Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
-        while (indivisibleWords.hasNext()) 
-            qrt.addIndivisible((String) indivisibleWords.next());
-        /*
-          File[] files = _fileManager.getSharedFiles(null);
-          for (int i=0; i<files.length; i++)
-            qrt.add(files[i].getAbsolutePath());
-        */
     }
 }

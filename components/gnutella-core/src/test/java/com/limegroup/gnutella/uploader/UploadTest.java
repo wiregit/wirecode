@@ -4,12 +4,15 @@ import junit.framework.*;
 import junit.extensions.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.handshaking.*;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -17,7 +20,7 @@ import com.limegroup.gnutella.stubs.*;
  */
 public class UploadTest extends TestCase {
     private static String address;
-    private static int port;
+    private static final int PORT = 6668;
     /** The file name, plain and encoded. */
     private static String file="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
@@ -27,7 +30,45 @@ public class UploadTest extends TestCase {
     private static final String hash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     private static final int index=0;
     /** Our listening port for pushes. */
-    private static int callbackPort=6671;
+    private static final int callbackPort = 6671;
+
+    private static final RouterService ROUTER_SERVICE =
+        new RouterService(new ActivityCallbackStub());
+
+    static {
+		try {
+  			address = InetAddress.getLocalHost().getHostAddress();
+  		} catch(UnknownHostException e) {
+  			fail("unexpected exception: "+e);
+  		}
+        SettingsManager.instance().setBannedIps(new String[] {"*.*.*.*"});
+        SettingsManager.instance().setAllowedIps(new String[] {"127.*.*.*"});
+		SettingsManager.instance().setPort(PORT);
+        //This assumes we're running in the limewire/tests directory
+		File testDir = new File("com/limegroup/gnutella/uploader/data");
+		if(!testDir.isDirectory()) {
+			testDir = new File("com/limegroup/gnutella/uploader/data");
+		}
+		assertTrue("shared directory could not be found", testDir.isDirectory());
+		assertTrue("test file should be in shared directory", 
+				   new File(testDir, file).isFile());
+		SettingsManager.instance().setDirectories(new File[] {testDir});
+		SettingsManager.instance().setExtensions("txt");
+		SettingsManager.instance().setMaxUploads(10);
+		SettingsManager.instance().setUploadsPerPerson(10);
+
+        SettingsManager.instance().setFilterDuplicates(false);
+
+
+		ConnectionSettings.KEEP_ALIVE.setValue(8);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+
+        ROUTER_SERVICE.start();
+    }
 
 	/**
 	 * Creates a new UploadTest with the specified name.
@@ -48,46 +89,16 @@ public class UploadTest extends TestCase {
 	}
 
 	protected void setUp() {
-		try {
-  			address = InetAddress.getLocalHost().getHostAddress();
-  		} catch(UnknownHostException e) {
-  			assertTrue("unexpected exception: "+e, false);
-  		}
-		port = 6668;
-        //This assumes we're running in the limewire/tests directory
-		File testDir = new File("com/limegroup/gnutella/uploader/data");
-		if(!testDir.isDirectory()) {
-			testDir = new File("com/limegroup/gnutella/uploader/data");
-		}
-		assertTrue("shared directory could not be found", testDir.isDirectory());
-		assertTrue("test file should be in shared directory", 
-				   new File(testDir, file).isFile());
-		SettingsManager.instance().setPort(port);
-        assertEquals(port, SettingsManager.instance().getPort());
-		SettingsManager.instance().setDirectories(new File[] {testDir});
-		SettingsManager.instance().setExtensions("txt");
-		ConnectionSettings.KEEP_ALIVE.setValue(8);
-		//SettingsManager.instance().setKeepAlive(8);
-		SettingsManager.instance().setMaxUploads(10);
-		SettingsManager.instance().setUploadsPerPerson(10);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		//SettingsManager.instance().setConnectOnStartup(true);
-        SettingsManager.instance().setFilterDuplicates(false);
 
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-        //SettingsManager.instance().setEverSupernodeCapable(true);
-        //SettingsManager.instance().setForceSupernodeMode(true);
-        //SettingsManager.instance().setDisableSupernodeMode(false);
-		SettingsManager.instance().writeProperties();
+        //assertEquals("ports should be equal", PORT, 
+        //           SettingsManager.instance().getPort());
 		
-		ActivityCallback callback = new ActivityCallbackStub();
-		RouterService router = new RouterService(callback);
-		router.start();
-        assertEquals(port, SettingsManager.instance().getPort());
+        //router.connect();
+        assertEquals("ports should be equal",
+                     PORT, SettingsManager.instance().getPort());
 
+
+        try {Thread.sleep(300); } catch (InterruptedException e) { }
         //System.out.println(
         //    "Please make sure your client is listening on port "+port+"\n"
         //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
@@ -99,143 +110,369 @@ public class UploadTest extends TestCase {
 		//System.out.println(); 
 	}
 
-    public void testAll() {
-        try {
-            boolean passed;
-
-            //UploadTest works fine in isolation, but this sleep seems to be
-            //needed to work as part of AllTests.  I'm not sure why.
-            try {Thread.sleep(200); } catch (InterruptedException e) { }
+    //public void testAll() {
+        //UploadTest works fine in isolation, but this sleep seems to be
+        //needed to work as part of AllTests.  I'm not sure why.
+        //try {Thread.sleep(200); } catch (InterruptedException e) { }
             
-            ///////////////////push downloads with HTTP1.0///////////
+    //}
+    
+    ///////////////////push downloads with HTTP1.0///////////
+    public void testHTTP10Push() {
+        boolean passed = false;
+        try {
             passed = downloadPush(file, null,alphabet);
             assertTrue("Push download",passed);
-            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+
+    public void testHTTP10PushEncodedFile() {
+        boolean passed = false;        
+        try {
             passed=downloadPush(encodedFile, null,alphabet);
             assertTrue("Push download, encoded file name",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            passed=downloadPush(file, "Range: bytes=2-5","cdef");
+        }
+    }
+
+    public void testHTTP10PushRange() {
+        boolean passed = false;
+        try {
+            passed =downloadPush(file, "Range: bytes=2-5","cdef");
             assertTrue("Push download, middle range, inclusive",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            ///////////////////push downloads with HTTP1.1///////////////            
+        }
+    }
+
+    ///////////////////push downloads with HTTP1.1///////////////            
+    public void testHTTP11Push() {
+        boolean passed = false;
+        try {
             passed = downloadPush1(file, null, alphabet);
             assertTrue("Push download with HTTP1.1",passed);
-            
-            passed=downloadPush1(encodedFile, null,
-                                "abcdefghijklmnopqrstuvwxyz");
-            assertTrue("Push download, encoded file name with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            passed=downloadPush1(file, "Range: bytes=2-5","cdef");
+        }
+    }
+     
+
+    public void testHTTP11PushEncodedFile() {
+        boolean passed = false;
+        try {
+            passed =downloadPush1(encodedFile, null,
+                             "abcdefghijklmnopqrstuvwxyz");
+            assertTrue("Push download, encoded file name with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+
+    public void testHTTP11PushRange() {
+        boolean passed = false;
+        try {
+            passed =downloadPush1(file, "Range: bytes=2-5","cdef");
             assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
-            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+        }
+    }
+     
+
+    public void testHTTP11Head() {
+        try {
             assertTrue("Persistent push HEAD requests", 
                        downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
-                                     
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+        }
+    }
+        
                        
 
-            //////////////normal downloads with HTTP 1.0//////////////
-            passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
+    //////////////normal downloads with HTTP 1.0//////////////
+
+    public void testHTTP10Download() {
+        boolean passed = false;
+        try {
+            passed =download(file, null,"abcdefghijklmnopqrstuvwxyz");
             assertTrue("No range header",passed);
-            
-            passed=download(file, "Range: bytes=2-", 
-                            "cdefghijklmnopqrstuvwxyz");
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+    
+    public void testHTTP10DownloadRange() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range: bytes=2-", 
+                        "cdefghijklmnopqrstuvwxyz");
             assertTrue("Standard range header",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
+        }
+    }
 
-            passed=download(file, "Range: bytes 2-", 
-                            "cdefghijklmnopqrstuvwxyz");
+    public void testHTTP10DownloadMissingRange() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range: bytes 2-", 
+                        "cdefghijklmnopqrstuvwxyz");
             assertTrue("Range missing \"=\".  (Not legal HTTP, but common.)",
-					   passed);
+                   passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
+        }
+    }
 
-            passed=download(file, "Range: bytes=2-5","cdef",
-                            "Content-range: bytes 2-5/26");
+    public void testHTTP10DownloadMiddleRange() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range: bytes=2-5","cdef",
+                        "Content-range: bytes 2-5/26");
             assertTrue("Middle range, inclusive",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-        
-            passed=download(file, "Range:bytes 2-",
-                            "cdefghijklmnopqrstuvwxyz",
-                            "Content-length:24");
+        }
+    }
+
+    public void testHTTP10DownloadRangeNoSpace() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range:bytes 2-",
+                        "cdefghijklmnopqrstuvwxyz",
+                        "Content-length:24");
             assertTrue("No space after \":\".  (Legal HTTP.)",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            passed=download(file, "Range: bytes=-5","vwxyz");
+        }
+    }
+
+    public void testHTTP10DownloadRangeLastByte() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range: bytes=-5","vwxyz");
             assertTrue("Last bytes of file",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            passed=download(file, "Range: bytes=-30",
-                            "abcdefghijklmnopqrstuvwxyz");
+        }
+    }
+
+    public void testHTTP10DownloadRangeTooBigNegative() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range: bytes=-30",
+                        "abcdefghijklmnopqrstuvwxyz");
             assertTrue("Too big negative range request",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
 
 
-            passed=download(file, "Range:   bytes=  2  -  5 ", "cdef");
+    public void testHTTP10DownloadRangeExtraSpace() {
+        boolean passed = false;
+        try {
+            passed =download(file, "Range:   bytes=  2  -  5 ", "cdef");
             assertTrue("Lots of extra space",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
 
 
-			assertEquals("Unexpected: "+URLDecoder.decode(encodedFile), file,
-						 URLDecoder.decode(encodedFile));
-            //Assert.that(URLDecoder.decode(encodedFile).equals(file),
-			//          "Unexpected: "+URLDecoder.decode(encodedFile));
-            passed=download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+    public void testHTTP10DownloadURLEncoding() {
+        assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile), file,
+                     java.net.URLDecoder.decode(encodedFile));
+        boolean passed = false;
+        try {
+            passed =download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
             assertTrue("URL encoded",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
+        }
+    }
 
-            ////////////normal download with HTTP 1.1////////////////
+    ////////////normal download with HTTP 1.1////////////////
 
-            passed=download1(file, null,"abcdefghijklmnopqrstuvwxyz");
+    public void testHTTP11DownloadNoRangeHeader() {
+        boolean passed = false;
+        try {
+            passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz");
             assertTrue("No range header with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
-            passed=download1(file, "Range: bytes=2-", 
-                            "cdefghijklmnopqrstuvwxyz");
+        }
+    }
+
+    public void testHTTP11DownloadStandardRangeHeader() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range: bytes=2-", 
+                         "cdefghijklmnopqrstuvwxyz");
             assertTrue("Standard range header with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
 
 
-            passed=download1(file, "Range: bytes 2-", 
-                            "cdefghijklmnopqrstuvwxyz");
+    public void testHTTP11DownloadRangeMissingEquals() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range: bytes 2-", 
+                         "cdefghijklmnopqrstuvwxyz");
             assertTrue("Range missing \"=\". (Not legal HTTP, but common.)"+
-                 "with HTTP1.1", passed);
+                   "with HTTP1.1", passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
 
+        }
+    }
 
-            passed=download1(file, "Range: bytes=2-5","cdef");
+    public void testHTTP11DownloadMiddleRange() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range: bytes=2-5","cdef");
             assertTrue("Middle range, inclusive with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+        
+    public void testHTTP11DownloadRangeNoSpaceAfterColon() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range:bytes 2-",
+                         "cdefghijklmnopqrstuvwxyz");
+            assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+
+    public void testHTTP11DownloadRangeLastByte() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range: bytes=-5","vwxyz");
+            assertTrue("Last bytes of file with HTTP1.1",passed);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("unexpected exception: "+e);
+
+        }
+    }
+
+
+    public void testHTTP11DownloadRangeLotsOfExtraSpace() {
+        boolean passed = false;
+        try {
+            passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef");
+            assertTrue("Lots of extra space with HTTP1.1",passed);        
+        } catch(Exception e) {
+            e.printStackTrace(); 
+            fail("unexpected exception: "+e);
+        } 
 
         
-            passed=download1(file, "Range:bytes 2-",
-                            "cdefghijklmnopqrstuvwxyz");
-            assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
+        assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile),
+                     file, java.net.URLDecoder.decode(encodedFile));
+    }
 
-            passed=download1(file, "Range: bytes=-5","vwxyz");
-            assertTrue("Last bytes of file with HTTP1.1",passed);
-
-
-            passed=download1(file, "Range:   bytes=  2  -  5 ", "cdef");
-            assertTrue("Lots of extra space with HTTP1.1",passed);
-
-
-			assertEquals("Unexpected: "+URLDecoder.decode(encodedFile),
-						 file, URLDecoder.decode(encodedFile));
-            //Assert.that(URLDecoder.decode(encodedFile).equals(file),
-			//          "Unexpected: "+URLDecoder.decode(encodedFile));
-            passed=download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+    public void testHTTP11DownloadURLEncoding() {
+        boolean passed = false;
+        try {
+            passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
             assertTrue("URL encoded with HTTP1.1",passed);
-            
-            //////////////////Pipelining tests with HTTP1.1////////////// 
-            passed = pipelineDownloadNormal(file, null, 
-                                            "abcdefghijklmnopqrstuvwxyz");
-            assertTrue("piplining with normal download",passed);
-            
-            passed = pipelineDownloadPush(file,null, 
-                                          "abcdefghijklmnopqrstuvwxyz");
-            assertTrue("piplining with push download",passed);
-         
-            tMixedPersistentRequests();
-            tPersistentURIRequests();
+        } catch(Exception e) {
+            e.printStackTrace(); 
+            fail("unexpected exception: "+e);
+        } 
 
-            System.out.println("passed");
-        } catch (IOException e) {
-            e.printStackTrace();
-			assertTrue("unexpected exception: "+e, false);
-        } catch (BadPacketException e) {
-            e.printStackTrace();
-			assertTrue("unexpected BadPacketException: "+e, false);
+    }
+
+//////////////////Pipelining tests with HTTP1.1//////////////             
+    public void testHTTP11PipeliningDownload() {
+        boolean passed = false;
+        try {
+            passed = pipelineDownloadNormal(file, null, 
+                                        "abcdefghijklmnopqrstuvwxyz");
+        } catch(Exception e) {
+            e.printStackTrace(); 
+            fail("unexpected exception: "+e);
+        } 
+        assertTrue("piplining with normal download",passed);
+    }
+            
+    public void testHTTP11PipeliningDownloadPush() {
+        boolean passed = false;
+        try {
+            passed = pipelineDownloadPush(file,null, 
+                                           "abcdefghijklmnopqrstuvwxyz");
+        } catch(Exception e) {
+            e.printStackTrace(); 
+            fail("unexpected exception: "+e);
+        } 
+        assertTrue("piplining with push download",passed);
+    }
+         
+    public void testHTTP11DownloadMixedPersistent() {
+        try {
+            tMixedPersistentRequests();
+        } catch(Throwable t) {
+            t.printStackTrace();
+            fail("unexpected exception: "+t);
+        }
+    }
+
+    public void testHTTP11DownloadPersistentURI() {
+        try {
+            tPersistentURIRequests();
+        } catch(Throwable t) {
+            t.printStackTrace();
+            fail("unexpected exception: "+t);
         }
     }
 
@@ -252,7 +489,7 @@ public class UploadTest extends TestCase {
 
         //1. Write request
         boolean ret = true;
-        Socket s = new Socket(address, port);
+        Socket s = new Socket("localhost", PORT);
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -284,7 +521,7 @@ public class UploadTest extends TestCase {
         //malformed and slightly malformed headers
         
         //1. Write request
-        Socket s = new Socket(address, port);
+        Socket s = new Socket("localhost", PORT);
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -313,58 +550,59 @@ public class UploadTest extends TestCase {
     private static boolean downloadPush1(String request,
                                          String file, String header, 
 										 String expResp) 
-		throws IOException, BadPacketException {
-        //Establish push route
-        Connection c=new Connection(address, port);
-        c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
-        c.send(query);
-        c.flush();
-        QueryReply reply=null;
-        while (true) {
-            Message m=c.receive(2000);
-            if (m instanceof QueryReply) {
-                reply=(QueryReply)m;
-                break;
-            } 
-        }
-        PushRequest push=new PushRequest(GUID.makeGuid(),
-            (byte)5,
-            reply.getClientGUID(),
-            0,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            callbackPort);
+        throws IOException, BadPacketException {
+            //Establish push route
+            Connection c=new Connection("localhost", PORT);
+            c.initialize();
+            QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
+            c.send(query);
+            c.flush();
+            QueryReply reply=null;
+            while (true) {
+                Message m=c.receive(2000);
+                if (m instanceof QueryReply) {
+                    reply=(QueryReply)m;
+                    break;
+                } 
+            }
+            PushRequest push =
+                new PushRequest(GUID.makeGuid(),
+                                (byte)3,
+                                reply.getClientGUID(),
+                                0,
+                                new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                                callbackPort);
 
-        //Create listening socket, then send push.
-        ServerSocket ss=new ServerSocket(callbackPort);
-        c.send(push);
-        c.flush();
-        Socket s=ss.accept();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
+            //Create listening socket, then send push.
+            ServerSocket ss=new ServerSocket(callbackPort);
+            c.send(push);
+            c.flush();
+            Socket s=ss.accept();
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                s.getInputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                s.getOutputStream()));
 
-		in.readLine(); //skip GIV
-		in.readLine(); //skip blank line
-
-        //Download from the (incoming) TCP connection.
-        String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
-		assertEquals("unexpected HTTP response message body", expResp, retStr);
-        boolean ret = retStr.equals(expResp);
-
-        // reset string variable
-        retStr = downloadInternal1(request, file, header, out, in,expResp.length());
-		assertEquals("unexpected HTTP response message body in second request", 
-					 expResp, retStr);
-        
-        ret = ret && retStr.equals(expResp);
-
-        //Cleanup
-        c.close();
-        s.close();
-        ss.close();        
-        return ret;
+            in.readLine(); //skip GIV
+            in.readLine(); //skip blank line
+            
+            //Download from the (incoming) TCP connection.
+            String retStr=downloadInternal1(request, file, header, out, in,expResp.length());
+            assertEquals("unexpected HTTP response message body", expResp, retStr);
+            boolean ret = retStr.equals(expResp);
+            
+            // reset string variable
+            retStr = downloadInternal1(request, file, header, out, in,expResp.length());
+            assertEquals("unexpected HTTP response message body in second request", 
+                         expResp, retStr);
+            
+            ret = ret && retStr.equals(expResp);
+            
+            //Cleanup
+            c.close();
+            s.close();
+            ss.close();        
+            return ret;
     }
 
 
@@ -374,9 +612,13 @@ public class UploadTest extends TestCase {
 										String expResp) 
             throws IOException, BadPacketException {
         //Establish push route
-        Connection c=new Connection(address, port);
+        Connection c=new Connection("localhost", PORT,
+                                    new UltrapeerProperties(),
+                                    new EmptyResponder(),
+                                    false);
+        System.out.println("initializing connection on: "+PORT); 
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
+        QueryRequest query = new QueryRequest((byte)3, 0, "txt", false);
         c.send(query);
         c.flush();
         QueryReply reply=null;
@@ -389,7 +631,7 @@ public class UploadTest extends TestCase {
         }
 		assertNotNull("reply should not be null", reply);
         PushRequest push=new PushRequest(GUID.makeGuid(),
-            (byte)5,
+            (byte)3,
             reply.getClientGUID(),
             0,
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
@@ -543,7 +785,7 @@ public class UploadTest extends TestCase {
                                                   String expResp) 
         throws IOException {
         boolean ret = true;
-        Socket s = new Socket(address,port);
+        Socket s = new Socket("localhost",PORT);
         BufferedReader in = new BufferedReader(new InputStreamReader
                                                (s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter
@@ -592,9 +834,9 @@ public class UploadTest extends TestCase {
         throws IOException , BadPacketException {
         boolean ret = true;
         //Establish push route
-        Connection c=new Connection(address, port);
+        Connection c=new Connection("localhost", PORT);
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
+        QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
         c.send(query);
         c.flush();
         QueryReply reply=null;
@@ -606,7 +848,7 @@ public class UploadTest extends TestCase {
             } 
         }
         PushRequest push=new PushRequest(GUID.makeGuid(),
-            (byte)5,
+            (byte)3,
             reply.getClientGUID(),
             0,
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
@@ -668,7 +910,7 @@ public class UploadTest extends TestCase {
         Socket s = null;
         try {
             //1. Establish connection.
-            s = new Socket(address, port);
+            s = new Socket("localhost", PORT);
             BufferedReader in = new BufferedReader(new InputStreamReader(
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -695,7 +937,7 @@ public class UploadTest extends TestCase {
         Socket s = null;
         try {
             //1. Establish connection.
-            s = new Socket(address, port);
+            s = new Socket("localhost", PORT);
             BufferedReader in = new BufferedReader(new InputStreamReader(
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -714,6 +956,23 @@ public class UploadTest extends TestCase {
         } finally {
             if (s!=null)
                 try { s.close(); } catch (IOException ignore) { }
+        }
+    }
+
+    private static class UltrapeerProperties extends Properties {
+        public UltrapeerProperties() {
+            put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
+            put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+            put(ConnectionHandshakeHeaders.X_SUPERNODE, "true");
+            put(ConnectionHandshakeHeaders.GGEP, "1.0");  //just for fun
+        }
+    }
+    
+
+    private static class EmptyResponder implements HandshakeResponder {
+        public HandshakeResponse respond(HandshakeResponse response, 
+                                         boolean outgoing) throws IOException {
+            return new HandshakeResponse(new Properties());
         }
     }
 }

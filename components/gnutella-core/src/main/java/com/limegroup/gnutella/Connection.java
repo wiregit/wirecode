@@ -42,7 +42,7 @@ public class Connection {
      * synchronization reasons, it is important that this only be modified by
      * the send(m) and receive() methods.
      */
-    private String _host;
+    private final String _host;
     private int _port;
     private Socket _socket;
     private InputStream _in;
@@ -77,8 +77,7 @@ public class Connection {
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */        
     private boolean _negotiate=false;
-    public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
-    public static final String GNUTELLA_OK_04="GNUTELLA OK";
+
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
@@ -87,8 +86,6 @@ public class Connection {
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
-    /** End of line for Gnutella 0.4 */
-    public static final String LF="\n";
     
     /**
      * Time to wait for inut from user at the remote end. (in milliseconds)
@@ -236,7 +233,6 @@ public class Connection {
      *  establishing the connection
      */
     private void initializeWithoutRetry(int timeout) throws IOException {
-        SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
  
         if(isOutgoing())
@@ -249,20 +245,21 @@ public class Connection {
         } 
         
         // Check to see if this is an attempt to connect to ourselves
-        byte[] localAddress = _socket.getLocalAddress().getAddress();
+		InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-            Arrays.equals(_socket.getInetAddress().getAddress(), localAddress) && 
+            _socket.getInetAddress().equals(localAddress) &&
             _port == SETTINGS.getPort()) {
             throw new IOException("Connection to self");
         }
 
         try {
             // Set the Acceptors IP address
-            Acceptor.setAddress( localAddress );
+            RouterService.getAcceptor().setAddress( localAddress );
             
             _in = getInputStream();
             _out = getOutputStream();
-            if (_in==null || _out==null) throw new IOException();
+            if (_in == null) throw new IOException("null input stream");
+			else if(_out == null) throw new IOException("null output stream");
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
             //NullPointerException if the socket is closed.  (See Sun bug
@@ -274,7 +271,7 @@ public class Connection {
             //blocking operation.  Just to be safe, we also check that in/out
             //are not null.
             close();
-            throw new IOException();
+            throw new IOException("could not establish connection");
         }
 
         try {
@@ -300,28 +297,26 @@ public class Connection {
      * @exception NoGnutellaOkException one of the participants responded
      *  with an error code other than 200 OK (possibly after several rounds
      *  of 401's)
-     * @exception IOException any other error.  May wish to retry at 0.4
+     * @exception IOException any other error.  
      */
     private void initializeOutgoing() throws IOException {
+        System.out.println("Connection::initializeOutgoing"); 
         //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
         //user.  If the other end doesn't understand it--too bad!  There is an
         //option at higher levels to retry.
+
+        // don't accept connections that don't send headers.
         if (_propertiesWrittenP==null || _propertiesWrittenR==null) {
-            sendString(GNUTELLA_CONNECT_04+LF+LF);
-            if (! readLine().equals(GNUTELLA_OK_04))
-                throw new IOException("Bad connect string"); 
-            if (! readLine().equals(""))  //Get second \n
-                throw new IOException("Bad connect string"); 
+            return;
         }
-        else {
-            //1. Send "GNUTELLA CONNECT" and headers
-            sendString(GNUTELLA_CONNECT_06+CRLF);
-            sendHeaders(_propertiesWrittenP);   
-            
-            //conclude the handshake (This may involve exchange of 
-            //information multiple times with the host at the other end).
-            concludeOutgoingHandshake();
-        }
+
+        //1. Send "GNUTELLA CONNECT/0.6" and headers
+        sendString(GNUTELLA_CONNECT_06+CRLF);
+        sendHeaders(_propertiesWrittenP);   
+        
+        //conclude the handshake (This may involve exchange of 
+        //information multiple times with the host at the other end).
+        concludeOutgoingHandshake();
     }
     
     /**
@@ -334,8 +329,7 @@ public class Connection {
      *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
-    private void concludeOutgoingHandshake() throws IOException
-    {
+    private void concludeOutgoingHandshake() throws IOException {
         //This step may involve handshaking multiple times so as
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
@@ -363,7 +357,8 @@ public class Connection {
                                                 theirResponse.getStatusCode(),
                                                 "Server sent fatal response");
 
-            //3. Write "GNUTELLA/0.6 200 OK" and headers.
+            //3. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
+			//   and headers.
             HandshakeResponse ourResponse = _propertiesWrittenR.respond(
                 theirResponse, true);
             sendString(GNUTELLA_06 + " " 
@@ -406,20 +401,8 @@ public class Connection {
      */
     private void initializeIncoming() throws IOException {
         //Dispatch based on first line read.  Remember that "GNUTELLA " has
-        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.4"
-        //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
-        //means we will accidentally allow crazy things like "0.4".  Oh well!
-        String line=readLine();  
-        if ( !SETTINGS.acceptAuthenticatedConnectionsOnly()
-            && GNUTELLA_CONNECT_04.endsWith(line)) {
-            //a) Old style
-            if (! readLine().equals(""))  //Get second \n
-                throw new IOException("Bad connect string"); 
-            sendString(GNUTELLA_OK_04+LF+LF);
-            //If the user requested properties, we can't send them.
-            _propertiesWrittenP=null;
-            _propertiesWrittenR=null;
-        } else if (notLessThan06(line)) {
+        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
+        if (notLessThan06(readLine())) {
             //b) New style
             _propertiesRead=new Properties();
             //1. Read headers (connect line has already been read)
@@ -443,8 +426,7 @@ public class Connection {
      *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
-    private void concludeIncomingHandshake() throws IOException
-    {
+    private void concludeIncomingHandshake() throws IOException {
         //Respond to the handshake.  This step may involve handshaking multiple
         //times so as to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
@@ -605,6 +587,7 @@ public class Connection {
      * initialize().  
      *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
+        System.out.println("Connection::sendString: "+s); 
         if(s == null || s.equals("")) {
             throw new NullPointerException("null or empty string: "+s);
         }
@@ -696,7 +679,7 @@ public class Connection {
         //connections from dying.  The following works around the problem.  Note
         //that Message.read may still throw IOException below.
         if (_closed)
-            throw new IOException();
+            throw new IOException("connection closed");
 
         Message m = null;
         while (m == null) {
@@ -720,15 +703,16 @@ public class Connection {
             throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
-            throw new IOException();
+            throw new IOException("connection closed");
 
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {
             Message m=Message.read(_in);
-            if (m==null)
+            if (m==null) {
                 throw new InterruptedIOException();
+            }
             return m;
         } finally {
             _socket.setSoTimeout(oldTimeout);

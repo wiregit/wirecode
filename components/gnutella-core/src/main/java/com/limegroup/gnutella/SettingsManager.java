@@ -35,11 +35,6 @@ public final class SettingsManager {
 	 */
 	private final String  SAVE_DIRECTORY_NAME = "Shared";
 
-	/**
-	 * Name of the host list file.
-	 */
-	private final String HOST_LIST_NAME = "gnutella.net";
-
     /**
 	 * Default name for the network discovery properties
 	 */
@@ -59,9 +54,9 @@ public final class SettingsManager {
     /** Default setting for the time to live */
     private final byte    DEFAULT_TTL            = (byte)6;
     /** Default setting for the soft maximum time to live */
-    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)6;
+    //private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)6;
     /** Default setting for the hard maximum time to live */
-    private final byte    DEFAULT_MAX_TTL        = (byte)16;
+    //private final byte    DEFAULT_MAX_TTL        = (byte)16;
     /** Default maximum packet length */
     private final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout for persistent HTTP connections */
@@ -97,13 +92,6 @@ public final class SettingsManager {
     private final boolean DEFAULT_FILTER_HTML    = false;
     private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
     private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
-	/** This is limewire's public pong cache */
-    public static final String  DEFAULT_LIMEWIRE_ROUTER =
-	  "router.limewire.com";
-	/** This is limewire's dedicated pong cache */
-    public static final String DEDICATED_LIMEWIRE_ROUTER =
-	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
-    /** List of hosts to try on quick connect */
 
     private final int     DEFAULT_PARALLEL_SEARCH  = 5;
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
@@ -247,20 +235,10 @@ public final class SettingsManager {
     private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
 
 	/**
-	 * Constant for the default ads version.
-	 */
-	private final String DEFAULT_AD_VERSION = "1.0";
-
-	/**
 	 * Constant for the default save directory.
 	 */
 	private final File DEFAULT_SAVE_DIRECTORY =
 	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
-
-	/**
-	 * Constant for the skin theme pack.
-	 */
-	private final File DEFAULT_SKIN_THEME = new File("");
 
 
 	/**
@@ -455,25 +433,14 @@ public final class SettingsManager {
      */
     private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
 
-	/**
-	 * Constant for the key for the current ads version.
-	 */
-	private final String AD_VERSION = "AD_VERSION";
-
-	/**
-	 * Constant for the key for the current ads version.
-	 */
-	private final String SKIN_THEME = "SKIN_THEME";
-
-
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
     private volatile byte[]   _forcedIPAddress;
     private volatile int      _forcedPort;
 	private volatile boolean  _allowBroswer;
     private volatile byte     _ttl;
-    private volatile byte     _softmaxttl;
-    private volatile byte     _maxttl;
+    //private volatile byte     _softmaxttl;
+    //private volatile byte     _maxttl;
     private volatile int      _maxLength;
     private volatile int      _persistentHTTPConnectionTimeout;
     private volatile String   _hostList;
@@ -496,8 +463,6 @@ public final class SettingsManager {
     private volatile boolean  _filterHtml;
     private volatile boolean  _filterGreedyQueries;
     private volatile boolean  _filterBearShare;
-    private volatile boolean  _useQuickConnect;
-    private volatile String[] _quickConnectHosts;
     private volatile int      _parallelSearchMax;
     private volatile boolean  _clearCompletedUpload;
     private volatile boolean  _clearCompletedDownload;
@@ -641,10 +606,10 @@ public final class SettingsManager {
             try {
                 key = (String)enum.nextElement();
                 p = tempProps.getProperty(key);
-                if(key.equals(TTL)) {
-                    setTTL(Byte.parseByte(p));
-                }
-				else if(key.equals(ALLOW_BROWSER)) {
+                //if(key.equals(TTL)) {
+				//  setTTL(Byte.parseByte(p));
+                //}
+				if(key.equals(ALLOW_BROWSER)) {
 					boolean bs;
 					if (p.equals("true"))
                         bs=true;
@@ -654,12 +619,12 @@ public final class SettingsManager {
                         break;
                     setAllowBrowser(bs);
 				}
-                else if(key.equals(SOFT_MAX_TTL)) {
-                    setSoftMaxTTL(Byte.parseByte(p));
-                }
-                else if(key.equals(MAX_TTL)) {
-                    setMaxTTL(Byte.parseByte(p));
-                }
+                //else if(key.equals(SOFT_MAX_TTL)) {
+				//  setSoftMaxTTL(Byte.parseByte(p));
+                //}
+                //else if(key.equals(MAX_TTL)) {
+				//  setMaxTTL(Byte.parseByte(p));
+                //}
                 else if(key.equals(MAX_LENGTH)) {
                     setMaxLength(Integer.parseInt(p));
                 }
@@ -1016,17 +981,11 @@ public final class SettingsManager {
                 else if(key.equals(SERVER)){
                     setServer((new Boolean(p)).booleanValue());
                 }
-				else if(key.equals(AD_VERSION)) {
-					setAdVersion(p);
-				}
 				else if(key.equals(JAR_NAME)) {
 					setJarName(p);
 				}
 				else if(key.equals(CLASSPATH)) {
 					setClasspath(p);
-				}
-				else if(key.equals(SKIN_THEME)) {
-					setSkinTheme(new File(p));
 				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
@@ -1043,8 +1002,8 @@ public final class SettingsManager {
 	 */
     public void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
-        setMaxTTL(DEFAULT_MAX_TTL);
-        setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
+        //setMaxTTL(DEFAULT_MAX_TTL);
+        //setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
         setTTL(DEFAULT_TTL);
         setMaxLength(DEFAULT_MAX_LENGTH);
         setPersistentHTTPConnectionTimeout(
@@ -1135,10 +1094,8 @@ public final class SettingsManager {
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
-		setAdVersion(DEFAULT_AD_VERSION);
 		setJarName(DEFAULT_JAR_NAME);
 		setClasspath(DEFAULT_CLASSPATH);
-		setSkinTheme(DEFAULT_SKIN_THEME);
     }
 
     /**
@@ -1149,14 +1106,16 @@ public final class SettingsManager {
 	 */
 	public boolean getAllowBrowser() {return _allowBroswer;}
 
-    /** Returns the time to live */
+    /** Returns the time to live -- this is only really still here
+	 *  for testing purposes.
+	 */
     public byte getTTL(){return _ttl;}
 
     /** return the soft maximum time to live */
-    public byte getSoftMaxTTL(){return _softmaxttl;}
+    //public byte getSoftMaxTTL(){return _softmaxttl;}
 
     /** Returns the maximum time to live*/
-    public byte getMaxTTL(){return _maxttl;}
+    //public byte getMaxTTL(){return _maxttl;}
 
     /** Returns the maximum allowable length of packets*/
     public int getMaxLength(){return _maxLength;}
@@ -1165,15 +1124,6 @@ public final class SettingsManager {
     public int getPersistentHTTPConnectionTimeout(){
         return _persistentHTTPConnectionTimeout;
     }
-
-    /**
-	 * Returns a string specifying the full pathname of the file listing
-     * the hosts
-	 */
-    public String getHostList() {        
-		return new File(CommonUtils.getUserSettingsDir(), 
-                        HOST_LIST_NAME).getAbsolutePath();
-	}
 
     /** Returns the client's port number */
     public int getPort(){return _port;}
@@ -1220,14 +1170,6 @@ public final class SettingsManager {
 	 */
 	public File getSaveDefault() {
 	    return DEFAULT_SAVE_DIRECTORY;
-	}
-
-	/**
-	 * Returns the path to the current theme, or the empty string if there
-	 * is no theme currently set.
-	 */
-	public File getSkinTheme() {
-		return getFileValue(SKIN_THEME);
 	}
 
 	/** Returns true if the chat is enabled */
@@ -1439,24 +1381,6 @@ public final class SettingsManager {
      *         <tt>false</tt> otherwise
      */
     public boolean getFilterBearShareQueries() { return _filterBearShare; }
-
-    /**
-     * Returns a <tt>boolean</tt> value indicating whether or not automatic
-     * connection to the network via "quick connect" servers should be
-     * enables at startup.
-     *
-     * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
-     *         otherwise
-     */
-    public boolean getUseQuickConnect(){return true;}
-
-    /**
-     * Returns an array of servers to automatically connect to via "quick
-     * connect" on startup.
-     *
-     * @return an array of servers to use for quickly connecting
-     */
-    public String[] getQuickConnectHosts(){return _quickConnectHosts;}
 
     /**
      * Returns the number of simultaneous searches to allow before the oldest
@@ -1868,15 +1792,6 @@ public final class SettingsManager {
     }
 
 	/**
-	 * Returns the version of the ads LimeWire is currently displaying.
-	 *
-	 * @return the version of the ads LimeWire is currently displaying
-	 */
-	public String getAdVersion() {
-		return getStringValue(AD_VERSION);
-	}
-
-	/**
 	 * Updates the average, total, and current update settings based on
 	 * previous settings and the <tt>newTime</tt> argument for the number
 	 * of seconds that have passed since the last update.
@@ -2012,15 +1927,15 @@ public final class SettingsManager {
     /**
 	 * Sets the hard maximum time to live.
 	 */
-    public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
-        if(maxttl < 0 || maxttl > 50)
-            throw new IllegalArgumentException();
-        else {
-            _maxttl = maxttl;
-            String s = Byte.toString(_maxttl);
-            PROPS.put(MAX_TTL, s);
-        }
-    }
+//     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
+//         if(maxttl < 0 || maxttl > 50)
+//             throw new IllegalArgumentException();
+//         else {
+//             _maxttl = maxttl;
+//             String s = Byte.toString(_maxttl);
+//             PROPS.put(MAX_TTL, s);
+//         }
+//     }
 
     public void setBasicInfoForQuery(int basicInfo) {
         _basicQueryInfo = basicInfo;
@@ -2202,28 +2117,28 @@ public final class SettingsManager {
     /**
 	 * Sets the time to live.
 	 */
-    public void setTTL(byte ttl) {
-        if (ttl < 1 || ttl > 14)
-            throw new IllegalArgumentException();
-        else {
-            _ttl = ttl;
-            String s = Byte.toString(_ttl);
-            PROPS.put(TTL, s);
-        }
-    }
+	private void setTTL(byte ttl) {
+		//if (ttl < 1 || ttl > 14)
+		//   throw new IllegalArgumentException();
+		//else {
+		_ttl = ttl;
+		String s = Byte.toString(_ttl);
+		PROPS.put(TTL, s);
+			 //}
+     }
 
     /**
 	 * Sets the soft maximum time to live.
 	 */
-    public void setSoftMaxTTL(byte softmaxttl) {
-        if (softmaxttl < 0 || softmaxttl > 14)
-            throw new IllegalArgumentException();
-        else {
-            _softmaxttl = softmaxttl;
-            String s = Byte.toString(softmaxttl);
-            PROPS.put(SOFT_MAX_TTL, s);
-        }
-    }
+//     public void setSoftMaxTTL(byte softmaxttl) {
+//         if (softmaxttl < 0 || softmaxttl > 14)
+//             throw new IllegalArgumentException();
+//         else {
+//             _softmaxttl = softmaxttl;
+//             String s = Byte.toString(softmaxttl);
+//             PROPS.put(SOFT_MAX_TTL, s);
+//         }
+//     }
 
     /**
 	 * Sets the port to connect on
@@ -2870,15 +2785,6 @@ public final class SettingsManager {
     public void setLastExpireTime(long lastExpireTime){
         setLongValue(LAST_EXPIRE_TIME, lastExpireTime);
     }
-    
-	/**
-	 * Sets the ad version in use -- only read in from the props file.
-	 *
-	 * @param version the ad version to set
-	 */
-	public void setAdVersion(final String version) {
-		setStringValue(AD_VERSION, version);
-	}
 
 	/**
 	 * Sets the name of the jar file to load on startup, which is read
@@ -2911,16 +2817,6 @@ public final class SettingsManager {
 		// always be the same value
 		setStringValue(JAR_NAME, classpath);
 	}
-
-	/**
-	 * Sets the used skin theme.
-	 *
-	 * @param theme the skin theme to use
-	 */
-	public void setSkinTheme(final File theme) {
-		setFileValue(SKIN_THEME, theme);
-	}
-
 
     /**
      * Sets whether the node is a server or not

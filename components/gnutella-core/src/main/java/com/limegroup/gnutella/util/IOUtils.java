@@ -35,6 +35,7 @@ public class IOUtils {
 				return new String(buf,0,i);
             } else if(i != maxSize) { //We dont store the last letter
                 buf[i]=(char)got;
+                System.out.println("assigned value: "+new String(buf, 0, i)); 
 			}
         }
         //if word of size upto maxsize not found, throw an IOException to

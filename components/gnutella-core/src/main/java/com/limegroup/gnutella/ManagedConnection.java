@@ -255,24 +255,6 @@ public class ManagedConnection
 	 * various properties.
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
-    
-    /** 
-     * Creates an outgoing connection. 
-     *
-     * @param host the address to connect to in symbolic or dotted-quad format
-     *  If host names a special bootstrap server, e.g., "router.limewire.com",
-     *  this may take special action, like trying "router4.limewire.com" instead
-     *  with a 0.4 handshake.
-     * @param port the port to connect to
-     * @param router where to report messages
-     * @param where to report my death.  Also used for reject connections.
-     */
-    //ManagedConnection(String host,
-	//                int port,
-    //                  MessageRouter router,
-    //                  ConnectionManager manager) {
-    //    this(translateHost(host), port, router, manager, isRouter(host));
-    //}
 
     /**
      * Creates an outgoing connection.  The connection is considered a special
@@ -284,7 +266,6 @@ public class ManagedConnection
 							 int port,
 							 MessageRouter router,
 							 ConnectionManager manager) {
-		//boolean isRouter) {
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
@@ -297,11 +278,9 @@ public class ManagedConnection
 			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
 			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)),
               true);
-		//!isRouter);
         
         _router = router;
         _manager = manager;
-        //_isRouter = isRouter;
     }
 
     /**
@@ -328,9 +307,6 @@ public class ManagedConnection
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        //if (_isRouter)
-		//  super.initialize();   //no timeout for bootstrap server
-        //else
 		super.initialize(CONNECT_TIMEOUT);
 
         //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
@@ -551,7 +527,6 @@ public class ManagedConnection
                             break;
                     }
 
-					// TODO:: THIS SEND IS NOT CURRENTLY RECORDED IN STATISTICS
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
@@ -720,7 +695,7 @@ public class ManagedConnection
                 pr = new PingReply(m.getGUID(),(byte)2,
                 connection.getOrigPort(),
                 connection.getInetAddress().getAddress(), 0, 0, true);  
-            } else if(connection.isClientConnection() 
+            } else if(connection.isLeafConnection() 
                 || connection.isOutgoing()){
                 //we know the listening port of the host in this case
                 pr = new PingReply(m.getGUID(),(byte)2,
@@ -1139,21 +1114,45 @@ public class ManagedConnection
                 ConnectionHandshakeHeaders.USER_AGENT);
     }
 
-    /** Returns true if this is as a special "router" connection, e.g. to
-     *  router.limewire.com.  */
-    //public boolean isRouterConnection() {
-	//  return this._isRouter;
-    //}
+	// implements ReplyHandler interface -- inherit doc comment
+	public int getNumIntraUltrapeerConnections() {
+		String connections = getProperty(ConnectionHandshakeHeaders.X_DEGREE);
+		if(connections == null) {
+			if(isSupernodeConnection()) return 6;
+			return 0;
+		}
+		
+		// TODO: use something else here!!!
+		return Integer.valueOf(connections).intValue();
+	}
 
-    /** Returns true iff this connection wrote "Supernode: false".
+	/**
+	 * Returns whether or not this connection is to an Ultrapeer that 
+	 * supports query routing between Ultrapeers at 1 hop.
+	 *
+	 * @return <tt>true</tt> if this is an Ultrapeer connection that
+	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isUltrapeerQueryRoutingConnection() {
+		if(!isSupernodeConnection()) return false;
+        String value = 
+            getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
+        if(value == null) return false;
+		
+        return value.equals(ConnectionManager.QUERY_ROUTING_VERSION);
+    }
+
+
+    /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
-    public boolean isClientConnection() {
+    public boolean isLeafConnection() {
         String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
             return false;
         else
-            //X-Supernode: true  ==> false
-            //X-Supernode: false ==> true
+            //X-Ultrapeer: true  ==> false
+            //X-Ultrapeer: false ==> true
             return !Boolean.valueOf(value).booleanValue();
     }
 
@@ -1192,6 +1191,7 @@ public class ManagedConnection
         else 
             return !Boolean.valueOf(value).booleanValue();
     }
+
 
 	/**
 	 * Returns whether or not this connection is to a client supporting
@@ -1267,7 +1267,7 @@ public class ManagedConnection
 	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
-        if (! isClientConnection())
+        if (! isLeafConnection())
             return false;
 
         //...and am I a supernode?
@@ -1354,36 +1354,6 @@ public class ManagedConnection
         this.queryInfo=qi;
     } 
 
-    /** Maps router.limewire.com to router4.limewire.com. 
-     *  Package-access for testing purposes only. */
-    static String translateHost(String hostname) {
-        if (hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER))
-            return SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
-        else
-            return hostname;
-    }
-
-    /** Returns true iff hostname is any of the routerX.limewire.com's (possibly
-     *  in dotted-quad form). */
-	/*
-    public static boolean isRouter(String hostname) {
-        //Taken from the old ConnectionManager.createRouterConnection method.
-        if (hostname.startsWith("router") && hostname.endsWith("limewire.com"))
-            return true;
-        //Take from the old HostCatcher.isRouter method.  
-        //Check for 64.61.25.139-143 and 64.61.25.171
-        if (hostname.startsWith("64.61.25") 
-            && (hostname.endsWith("171")
-                || hostname.endsWith("139")
-                || hostname.endsWith("140")
-                || hostname.endsWith("141")
-                || hostname.endsWith("142")
-                || hostname.endsWith("143"))) 
-            return true;
-        return false;
-    }
-	*/
-
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1399,6 +1369,12 @@ public class ManagedConnection
         }
         */
     }
+
+	// overrides Object.toString
+	public String toString() {
+		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
+			" Leaf: "+isLeafConnection();
+	}
     
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest

@@ -422,7 +422,9 @@
  <target name="test all" depends="clean, prepare, build"> 
 
     <antcall target="run all servers"/>
-    <antcall target="gnutella"/>
+    <antcall target="gnutella">
+      <param name="serversRunning" value="true"/>
+    </antcall>
     <antcall target="bootstrap"/> 
     <antcall target="downloader"/>
     <antcall target="filters"/>

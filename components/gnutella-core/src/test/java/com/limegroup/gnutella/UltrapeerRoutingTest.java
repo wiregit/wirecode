@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
@@ -22,20 +23,30 @@ public class UltrapeerRoutingTest extends TestCase {
     static final int PORT=6667;
     static final int TIMEOUT=500;
 
+	private final static byte TTL = 7;
+
+	private static final byte SOFT_MAX = 4;
+
+	/**
+	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
+	 * determine how widely distributed a file is.
+	 */
+	private static final byte PROBE_QUERY_TTL = 2;
+
     /**
      * Leaf connection to the Ultrapeer.
      */
-    static Connection leaf;
+    private static Connection leaf;
 
     /**
      * Ultrapeer connection.
      */
-    static Connection ultrapeer;
+    private static Connection ultrapeer;
 
     /**
      * Traditional, non-Ultrapeer connection (pre-Ultrapeer).
      */
-    static Connection old;
+    private static Connection old;
 
     public UltrapeerRoutingTest(String name) {
         super(name);
@@ -69,17 +80,11 @@ public class UltrapeerRoutingTest extends TestCase {
 		UltrapeerSettings.MAX_LEAVES.setValue(10);
 		ConnectionSettings.KEEP_ALIVE.setValue(6);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        settings.setSoftMaxTTL((byte)6);
-        //settings.setEverSupernodeCapable(true);
-        //settings.setDisableSupernodeMode(false);
-        //settings.setForceSupernodeMode(true);
-        //settings.setMaxShieldedClientConnections(10);
-        //settings.setKeepAlive(6);
-        //settings.setLocalIsPrivate(false);
+        //settings.setSoftMaxTTL((byte)6);
         ActivityCallback callback=new ActivityCallbackStub();
-        FileManager files=new FileManagerStub();
-        MessageRouter router=new MessageRouterStub();
-        RouterService rs=new RouterService(callback);
+        //FileManager files=new FileManagerStub();
+        //MessageRouter router=new MessageRouterStub();
+        RouterService rs = new RouterService(callback);
         assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
         rs.clearHostCatcher();
@@ -112,8 +117,11 @@ public class UltrapeerRoutingTest extends TestCase {
     }
 
     private static void connect() throws IOException {
-        //1. unrouted 0.4 connection
-        old=new Connection("localhost", PORT);
+        //1. first Ultrapeer connection //unrouted 0.6 connection
+        old=new Connection("localhost", PORT,
+						   new UltrapeerProperties(),
+						   new EmptyResponder(),
+						   false);
         old.initialize();
 
         //2. unrouted ultrapeer connection
@@ -135,35 +143,52 @@ public class UltrapeerRoutingTest extends TestCase {
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             leaf.send((RouteTableMessage)iter.next());
         }
+
+		assertTrue("old should be connected", old.isOpen());
+		assertTrue("ultrapeer should be connected", ultrapeer.isOpen());
+		assertTrue("leaf should be connected", leaf.isOpen());
     }
 
+	/**
+	 * Tests a query sent from the leaf.  The query should be received by both
+	 * Ultrapeer connections -- the one connected to the leaf, as well as the
+	 * other one.
+	 */
     private static void doBroadcastFromLeaf() 
-             throws IOException, BadPacketException {
+		throws IOException, BadPacketException {
         //System.out.println(
         //   "-Testing normal broadcast from leaf, with replies and pushes");
+		assertTrue("old should be connected", old.isOpen());
         drain(old);
         drain(ultrapeer);
 
         //1. Check that query broadcasted to old and ultrapeer
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
+        QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
         leaf.send(qr);
         leaf.flush();
         
+		//Message m;
         Message m = old.receive(TIMEOUT);
         assertTrue("message not a QueryRequest", m instanceof QueryRequest);
-        assertTrue("unexpected query", ((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue("unexpected hops", m.getHops()==(byte)1); //used to be not decremented
-        assertEquals("unexpected TTL",  (byte)5, m.getTTL());
+        assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
+
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+        assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
       
         m=ultrapeer.receive(TIMEOUT);
         assertTrue("message not a QueryRequest", m instanceof QueryRequest);
-        assertTrue("unexpected query", ((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue("unexpected hops", m.getHops()==(byte)1); //used to be not decremented
-        assertEquals("unexpected TTL",  (byte)5, m.getTTL());
+        assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
+
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+        assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
 
         //2. Check that replies are routed back.
         drain(leaf);
-        Response response1=new Response(0l, 0l, "response1.txt");
+        Response response1=new Response(0L, 0L, "response1.txt");
         byte[] guid1=GUID.makeGuid();
         QueryReply reply1=new QueryReply(qr.getGUID(),
                                          (byte)2,
@@ -273,7 +298,7 @@ public class UltrapeerRoutingTest extends TestCase {
         // build the null QR
         GUID guid = new GUID(GUID.makeGuid());
         QueryRequest qr = new QueryRequest(guid.bytes(),
-                                           (byte)7, 0, "", "", false,
+                                           TTL, 0, "", "", false,
                                            currUrnTypeSet, currUrnSet,
                                            false);
         
@@ -302,15 +327,15 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
         drain(leaf);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
+        QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
         old.send(qr);
         old.flush();
               
         Message m=ultrapeer.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         assertTrue(! drain(leaf));
     }
@@ -322,21 +347,21 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
         drain(leaf);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "test", false);
+        QueryRequest qr=new QueryRequest(TTL, 0, "test", false);
         old.send(qr);
         old.flush();
               
         Message m=ultrapeer.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
-        assertEquals("test", ((QueryRequest)m).getQuery());
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected query", "test", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         m=leaf.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("test"));
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected query", "test", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
     }
 
     private static void doBroadcastFromUltrapeerToBoth() 
@@ -346,21 +371,21 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(leaf);
         drain(old);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "susheel test", false);
+        QueryRequest qr=new QueryRequest(TTL, 0, "susheel test", false);
         ultrapeer.send(qr);
         ultrapeer.flush();
               
         Message m=old.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
         assertEquals("susheel test", ((QueryRequest)m).getQuery());
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         m=leaf.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
         assertTrue(((QueryRequest)m).getQuery().equals("susheel test"));
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
     }
 
     private static void doPingBroadcast() 
@@ -377,8 +402,8 @@ public class UltrapeerRoutingTest extends TestCase {
               
         m=old.receive(TIMEOUT);
         assertTrue(m instanceof PingRequest);
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         assertTrue(! drain(leaf));
 
@@ -425,9 +450,11 @@ public class UltrapeerRoutingTest extends TestCase {
             cce.printStackTrace();
             assertTrue("Big ping not created properly on old client", false);
         }
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
-        assertTrue(m.getLength()==16);
+
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
+		assertEquals("unexpected message length", 16, m.getLength());
+        //assertTrue(m.getLength()==16);
         //lets make sure the payload got there OK
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try{
@@ -444,7 +471,8 @@ public class UltrapeerRoutingTest extends TestCase {
         assertTrue("wrong payload in old client "+out,
                    out.equals("ABCDEFGHIJKLMNOP"));
         
-        //1c. Make sure old gets it wihtout payload.
+        //1c. Make sure old also gets it with payload, as old is now also
+		// an ultrapeer
         m=old.receive(TIMEOUT);
         ping = null;
         try{
@@ -453,9 +481,10 @@ public class UltrapeerRoutingTest extends TestCase {
             cce.printStackTrace();
             assertTrue("Big ping not created properly on old client", false);
         }
-        assertTrue(m.getHops()==(byte)1); 
-        assertTrue(m.getTTL()==(byte)5);
-        assertTrue(m.getLength()==0);
+        assertEquals("unexpected hops", (byte)1, m.getHops());
+		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
+        //assertEquals("unexpected message length", 0, m.getLength());
+		assertEquals("unexpected message length", 16, m.getLength());
 
 
         //2a. Send reply from ultrapeer
@@ -576,15 +605,18 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
 
         //Send query request from leaf, received by ultrapeer (and old)
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
+        QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
         leaf.send(qr);
         leaf.flush();
         
         Message m=ultrapeer.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue(m.getHops()==(byte)1); //used to be not decremented
-        assertTrue(m.getTTL()==(byte)5);
+        assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+		assertEquals("unexpected TTL", PROBE_QUERY_TTL, m.getTTL());
 
         //After closing leaf (give it some time to clean up), make sure
         //duplicate query is dropped.
@@ -622,6 +654,7 @@ public class UltrapeerRoutingTest extends TestCase {
 
 class LeafProperties extends Properties {
     public LeafProperties() {
+        put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
         put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
         put(ConnectionHandshakeHeaders.GGEP, "0.5");
@@ -630,6 +663,7 @@ class LeafProperties extends Properties {
 
 class UltrapeerProperties extends Properties {
     public UltrapeerProperties() {
+        put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
         put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "true");
         put(ConnectionHandshakeHeaders.GGEP, "1.0");  //just for fun

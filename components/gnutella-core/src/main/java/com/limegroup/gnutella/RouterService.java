@@ -15,6 +15,7 @@ import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
+import com.limegroup.gnutella.search.*;
 
 
 /**
@@ -95,7 +96,7 @@ public final class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = new UploadManager();
+    private static final UploadManager uploadManager = new UploadManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
@@ -116,6 +117,13 @@ public final class RouterService {
 	 * messages.
 	 */
 	private static final UDPService udpService = UDPService.instance();
+
+	/**
+	 * Constant for the <tt>SearchResultHandler</tt> class that processes
+	 * search results sent back to this client.
+	 */
+	private static final SearchResultHandler RESULT_HANDLER =
+		new SearchResultHandler();
 
     /**
      * isShuttingDown flag
@@ -146,6 +154,11 @@ public final class RouterService {
 
 
 	/**
+	 * Long for the last time this host originated a query.
+	 */
+	private static long _lastQueryTime = 0L;
+
+	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
 	 *
@@ -174,7 +187,6 @@ public final class RouterService {
 		router.initialize();
 		manager.initialize();	   
 		downloader.initialize(); 
-        QueryUnicaster.instance().initialize();
 	    new HTTPAcceptor(callback);	
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
@@ -198,8 +210,7 @@ public final class RouterService {
 
 		// start up the UDP server thread
 		catcher.initialize();
-		acceptor.initialize();
-		
+		acceptor.initialize();		
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.initialize();
@@ -209,6 +220,8 @@ public final class RouterService {
         
         UpdateManager updater = UpdateManager.instance();//initialize
         updater.postGuiInit(callback);
+		RESULT_HANDLER.start();
+		QueryUnicaster.instance().start();
 	}
 
     /**
@@ -307,6 +320,15 @@ public final class RouterService {
      */
 	public static HostCatcher getHostCatcher() {
 		return catcher;
+	}
+
+    /** 
+     * Accessor for the <tt>SearchResultHandler</tt> instance.
+     *
+     * @return the <tt>SearchResultHandler</tt> in use
+     */
+	public static SearchResultHandler getSearchResultHandler() {
+		return RESULT_HANDLER;
 	}
 
     /**
@@ -432,7 +454,7 @@ public final class RouterService {
             
             //Write gnutella.net
             try {
-                catcher.write(SETTINGS.getHostList());
+                catcher.write();
             } catch (IOException e) {}
             finally {
                 SETTINGS.writeProperties();
@@ -718,6 +740,16 @@ public final class RouterService {
 		query(guid, query, "", minSpeed, type);
 	}
 
+    /** 
+     * Searches the network for files with the given query string and 
+     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
+     *
+     * @see query(byte[], String, int, MediaType)
+     */
+    public static void query(byte[] guid, String query, int minSpeed) {
+        query(guid, query, minSpeed, null);
+    }
+
 	/**
 	 * Searches the network for files with the given metadata.
 	 * 
@@ -731,39 +763,37 @@ public final class RouterService {
 							 final int minSpeed, 
 							 final MediaType type) {
 
-		Thread searcherThread = new Thread("SearcherThread") {
-			public void run() {
-                try {
-                    // per HUGE v0.94, ask for URNs on responses
-                    Set reqUrns = new HashSet();
-                    reqUrns.add(UrnType.ANY_TYPE);
-                    
-                    QueryRequest qr = 
-                        new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
-                                         query, richQuery, false, reqUrns, null,
-                                         !acceptedIncomingConnection());
-                    verifier.record(qr, type);
-                    router.broadcastQueryRequest(qr);
-                } catch(Throwable t) {
-                    RouterService.error(t);
-                }
+		try {
+			_lastQueryTime = System.currentTimeMillis();
+			// per HUGE v0.94, ask for URNs on responses
+			Set urnTypes = new HashSet();
+			urnTypes.add(UrnType.ANY_TYPE);
+			Set urns = new HashSet();
+			QueryRequest qr = 
+				new QueryRequest(guid, (byte)6, minSpeed, 
+								 query, richQuery, false, urnTypes, urns,
+								 !acceptedIncomingConnection());
+			verifier.record(qr, type);
+			if(!isSupernode()) {
+				router.broadcastQueryRequest(qr);
+			} else {
+				router.sendDynamicQuery(QueryHandler.createHandler(qr));
 			}
-		};
-		searcherThread.setDaemon(true);
-		searcherThread.start();
-    }
+		} catch(Throwable t) {
+			RouterService.error(t);
+		}
+	}
 
 
-    /** 
-     * Searches the network for files with the given query string and 
-     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
-     *
-     * @see query(byte[], String, int, MediaType)
-     */
-    public static void query(byte[] guid, String query, int minSpeed) {
-        query(guid, query, minSpeed, null);
-    }
-
+	/**
+	 * Accessor for the last time a query was originated from this host.
+	 *
+	 * @return a <tt>long</tt> representing the number of milliseconds since
+	 *  January 1, 1970, that the last query originated from this host
+	 */
+	public static long getLastQueryTime() {
+		return _lastQueryTime;
+	}
 
     /** Will make all attempts to stop a query from executing.  Really only 
      *  applicable to GUESS queries...
@@ -999,7 +1029,7 @@ public final class RouterService {
      * @param type The mediatype associated with this search.
      */
     public static Downloader download(String query, String richQuery,
-                               byte[] guid, MediaType type) 
+									  byte[] guid, MediaType type) 
         throws AlreadyDownloadingException {
         return downloader.download(query, richQuery, guid, type);
     }
@@ -1037,13 +1067,14 @@ public final class RouterService {
         return manager.isSupernode();
     }
 
-    public static boolean hasClientSupernodeConnection() {
-        return manager.hasClientSupernodeConnection();
-    }
-    
-    public static boolean hasSupernodeClientConnection() {
-        return manager.hasSupernodeClientConnection();
-    }
+	/**
+	 * Accessor for whether or not this node is a leaf.
+	 *
+	 * @return <tt>true</tt> if this node is a leaf, <tt>false</tt> otherwise
+	 */
+    public static boolean isLeaf() {
+        return manager.isLeaf();
+    }    
 
 
     /**

@@ -82,11 +82,6 @@ public final class AlternateLocation
 			date = new Date(0);
 		} else {
 			date = AlternateLocation.createDateInstance(outputDateTime);
-			if(date.after(new Date())) {
-				// the date reported is in the future, so throw exception
-				throw new IOException("reported date is in the future: "+
-                                      location);
-			}
 		}
 
 		URN sha1 = null;

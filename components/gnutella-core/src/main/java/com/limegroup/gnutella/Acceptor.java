@@ -31,7 +31,7 @@ public class Acceptor extends Thread {
      */
     private volatile ServerSocket _socket=null;
     private volatile int _port=-1;
-    private Object _socketLock=new Object();
+    private final Object SOCKET_LOCK = new Object();
 
     /**
      * The real address of this host--assuming there's only one--used for pongs
@@ -54,8 +54,16 @@ public class Acceptor extends Thread {
      */
     private static byte[] _address = new byte[4];
 
-    private IPFilter _filter=new IPFilter();;
+	/**
+	 * <tt>IPFilter</tt> that allow LimeWire to only accept connections from
+	 * certain hosts.
+	 */
+    private IPFilter _filter = new IPFilter();;
     
+	/**
+	 * Variable for whether or not we have accepted an incoming connection --
+	 * used to determine firewall status.
+	 */
 	private volatile boolean _acceptedIncoming = false;
 
 
@@ -66,13 +74,18 @@ public class Acceptor extends Thread {
 	 *  to get around JDK bug #4073539, as well as to try to handle the case 
 	 *  of a computer whose IP address keeps changing.
 	 */
-	public static synchronized void setAddress(byte[] address) {
+	public void setAddress(InetAddress address) {
         //Ignore localhost.
-        if (address[0]==(byte)127 && 
-            ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+		byte[] byteAddr = address.getAddress();
+		if(byteAddr[0] == 127 && 
+           ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return;
+        }
+        
 
-		_address = address;
+		synchronized(Acceptor.class) {
+			_address = byteAddr;
+		}
 	}
 
     /**
@@ -136,10 +149,10 @@ public class Acceptor extends Thread {
                     _socket.close();
                 } catch (IOException e) { }
             }
-            synchronized (_socketLock) {
+            synchronized (SOCKET_LOCK) {
                 _socket=null;
                 _port=0;
-                _socketLock.notify();
+                SOCKET_LOCK.notify();
             }
 
             //Shut off UDPService also!
@@ -187,10 +200,10 @@ public class Acceptor extends Thread {
                 } catch (IOException e) { }
             }
             //c) Replace with new sock.  Notify the accept thread.
-            synchronized (_socketLock) {
+            synchronized (SOCKET_LOCK) {
                 _socket=newSocket;
                 _port=port;
-                _socketLock.notify();
+                SOCKET_LOCK.notify();
             }
 
             debug("Acceptor.setListeningPort(): I am ready.");
@@ -230,7 +243,7 @@ public class Acceptor extends Thread {
         //   block under certain conditions.
         //   See the notes for _address.
         try {
-            setAddress(InetAddress.getLocalHost().getAddress());
+            setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }
@@ -269,6 +282,7 @@ public class Acceptor extends Thread {
             settings.setPort(_port);
         }
 
+        System.out.println("Acceptor::listening on port: "+_port); 
         while (true) {
             try {
                 //Accept an incoming connection, make it into a
@@ -278,7 +292,7 @@ public class Acceptor extends Thread {
                 //waiting, IOException will be thrown, forcing us to
                 //release the lock.
                 Socket client=null;
-                synchronized (_socketLock) {
+                synchronized (SOCKET_LOCK) {
                     if (_socket!=null) {
                         try {
                             client=_socket.accept();
@@ -290,7 +304,7 @@ public class Acceptor extends Thread {
                         // be available.  So, just wait for that to happen and
                         // go around the loop again.
                         try {
-                            _socketLock.wait();
+                            SOCKET_LOCK.wait();
                         } catch (InterruptedException e) {
                         }
                         continue;
@@ -357,6 +371,7 @@ public class Acceptor extends Thread {
          * as Gnutella, HTTP, or MAGNET.
          */
         public void run() {
+            System.out.println("ConnectionDispatchRunner::run"); 
 			ActivityCallback callback = RouterService.getCallback();
 			ConnectionManager cm      = RouterService.getConnectionManager();
 			UploadManager um          = RouterService.getUploadManager();
@@ -365,16 +380,23 @@ public class Acceptor extends Thread {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
                 try {
+                    System.out.println("ConnectionDispatchRunner::run::getting stream"); 
                     in=_socket.getInputStream(); 
+                    System.out.println("ConnectionDispatchRunner::run::got stream"); 
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new IOException("could not access socket stream");
                 }
+                System.out.println("ConnectionDispatchRunner::run::setting timeout"); 
                 _socket.setSoTimeout(Constants.TIMEOUT);
+                System.out.println("ConnectionDispatchRunner::run::set timeout"); 
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word = IOUtils.readWord(in,8);
+                System.out.println("Acceptor:: READ WORD1: "+word); 
                 _socket.setSoTimeout(0);
 
+                System.out.println("Acceptor:: READ WORD2: "+word); 
 				// Only selectively allow localhost connections
 				if ( !word.equals("MAGNET") ) {
 					InetAddress address = _socket.getInetAddress();
@@ -431,9 +453,11 @@ public class Acceptor extends Thread {
                     throw new IOException();
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
             } catch(Throwable e) {
+                e.printStackTrace();
 				callback.error(ActivityCallback.INTERNAL_ERROR, e);
 			}
         }

@@ -2,9 +2,11 @@ package com.limegroup.gnutella.stubs;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.*;
 import java.io.*;
+import com.sun.java.util.collections.*;
 
 /**
  * A stub for ActivityCallback.  Does nothing.
@@ -18,7 +20,10 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void connectionInitialized(Connection c) { }
     public void connectionClosed(Connection c) { }
     public void knownHost(Endpoint e) { }
-    public void handleQueryReply( QueryReply qr ) { }
+    //public void handleQueryReply( QueryReply qr ) { }
+
+	public void handleQueryResult(HostData data, Response response, 
+								  List docs) {}
     public void handleQueryString( String query ) { }    
     public void addDownload(Downloader d) { }    
     public void removeDownload(Downloader d) { }    
