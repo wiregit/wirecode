@@ -245,7 +245,8 @@ public final class UDPService implements Runnable {
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
 	 */
-    public void send(Message msg, InetAddress ip, int port) {
+    public void send(Message msg, InetAddress ip, int port) 
+        throws IllegalArgumentException {
         send(msg, ip, port, ErrorService.getErrorCallback());
     }
 
@@ -261,8 +262,17 @@ public final class UDPService implements Runnable {
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
      * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
+     * @throws IllegalArgumentException if msg, ip, or err is null.
 	 */
-    public void send(Message msg, InetAddress ip, int port, ErrorCallback err) {
+    public void send(Message msg, InetAddress ip, int port, ErrorCallback err) 
+        throws IllegalArgumentException {
+        if (err == null)
+            throw new IllegalArgumentException("Null ErrorCallback");
+        if (msg == null)
+            throw new IllegalArgumentException("Null Message");
+        if (ip == null)
+            throw new IllegalArgumentException("Null InetAddress");
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
