@@ -133,7 +133,7 @@ public class HTTPUploader implements Uploader {
 			// this occurs if the output stream could not be opened to
 			// the socket or if the input stream could not be created
 			// from the file
-			setState(INTERRUPTED);
+			setState(FILE_NOT_FOUND);
 		}
 	}
 		
@@ -267,6 +267,8 @@ public class HTTPUploader implements Uploader {
 				}
 			} catch (IOException e2) {};
 		} catch (IOException e) {
+
+			// really what we want to be doing???
 			setState(INTERRUPTED);
 		}
 
