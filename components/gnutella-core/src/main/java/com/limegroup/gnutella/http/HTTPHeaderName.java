@@ -37,6 +37,10 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName ALT_LOCATION = 
 		new HTTPHeaderName("X-AltLocs");
 	
+    public static final HTTPHeaderName OLD_ALT_LOCS = 
+        new HTTPHeaderName("X-Gnutella-Alternate-Location");
+    
+
     /**
      * Header for failed Alternate locations to be added to mesh
      */

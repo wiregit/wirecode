@@ -434,19 +434,16 @@ public class HTTPDownloader implements BandwidthTracker {
             // TODO: we should read the X-Gnutella-Content-URN header here
 
 			// Read any alternate locations
-			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
+			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
                 readAlternateLocations(str);
-			}
-            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) {
+            else if(HTTPHeaderName.OLD_ALT_LOCS.matchesStartOfString(str))
+                readAlternateLocations(str);
+            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
                 parseQueueHeaders(str, refQueueInfo);
-            }
-            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) {
+            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) 
                 _server = readServer(str);
-            }
             else if (HTTPHeaderName.AVAILABLE_RANGES.matchesStartOfString(str))
-            {
                 parseAvailableRangesHeader(str, _rfd);
-            }
         }
 
 
