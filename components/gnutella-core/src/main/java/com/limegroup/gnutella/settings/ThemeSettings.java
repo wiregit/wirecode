@@ -26,7 +26,7 @@ public final class ThemeSettings extends LimeProps {
      */
     public static final String EXTENSION = "lwtp";
     
-    static final File THEME_DIR_FILE =
+    public static final File THEME_DIR_FILE =
 		new File(CommonUtils.getUserSettingsDir(), "themes");
     
     /**
@@ -46,7 +46,7 @@ public final class ThemeSettings extends LimeProps {
      * The default name of the windows laf theme file name.
      */
     public static final String WINDOWS_LAF_THEME_NAME =
-        "windows_laf_theme."+EXTENSION;
+        "windows_theme."+EXTENSION;
     
     /**
      * The full path to the default theme file.
