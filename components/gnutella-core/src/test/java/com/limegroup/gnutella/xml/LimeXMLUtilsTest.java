@@ -19,7 +19,7 @@ public class LimeXMLUtilsTest extends BaseTestCase {
      * 
      * @throws Exception if any error occurs
      */
-    public void testMatch() throws Exception {
+    public void testDocsThatShouldMatch() throws Exception {
         
         LimeXMLDocument doc = 
             new LimeXMLDocument(buildXMLString("director=\"francis loopola\""));
@@ -33,21 +33,41 @@ public class LimeXMLUtilsTest extends BaseTestCase {
         // Make sure the dummy case works.
         assertTrue("docs should match", LimeXMLUtils.match(doc, doc));
         
-        // Make sure that searchs with a single argument match results with
-        // lots of other fields.
+        // Make sure that searches with many criteria match files on disk with
+        // only one criteria, as long as that criteria matches.
         String queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
-            "\"test\"></audio></audios>";
+            "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
+            "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
+            "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
+            "comments=\"test\" action=\"test\"" +
+            "></audio></audios>";
         LimeXMLDocument queryDoc = new LimeXMLDocument(queryString);
         String onDiskString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio " +
+            "title=\"test\"" +
+            "></audio></audios>";
+        LimeXMLDocument onDiskDoc = new LimeXMLDocument(onDiskString);
+        assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc));
+        
+        
+        // Make sure that searches with a single argument match results with
+        // lots of other fields.
+        queryString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
+            "\"test\"></audio></audios>";
+        queryDoc = new LimeXMLDocument(queryString);
+        onDiskString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"></audio></audios>";
-        LimeXMLDocument onDiskDoc = new LimeXMLDocument(onDiskString);
+        onDiskDoc = new LimeXMLDocument(onDiskString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc));
         
         queryString = 
@@ -127,6 +147,8 @@ public class LimeXMLUtilsTest extends BaseTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\"" +
             "></audio></audios>";
+        queryDoc = new LimeXMLDocument(queryString);
+        assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc));
         queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
@@ -205,6 +227,16 @@ public class LimeXMLUtilsTest extends BaseTestCase {
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"nottest\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\"" +
+            " ></audio></audios>";
+        queryDoc = new LimeXMLDocument(queryString);  
+        assertFalse("docs should not match", 
+            LimeXMLUtils.match(onDiskDoc,queryDoc));
+        
+        queryString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
+            "\"test\" artist=\"nottest\" album=\"test\" track=\"test\" type=" +
+            "\"song\" year=\"test\" seconds=\"nottest\" language=\"test\"" +
             " ></audio></audios>";
         queryDoc = new LimeXMLDocument(queryString);  
         assertFalse("docs should not match", 
