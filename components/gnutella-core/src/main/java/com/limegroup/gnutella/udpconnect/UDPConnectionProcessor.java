@@ -72,11 +72,11 @@ public class UDPConnectionProcessor {
         keep the connection alive (and firewalls open).  
  		Note: in an idle state, this affects data writing if the 
 		receivers window is full. */
-	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+	//private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
     /** Schedule the keepalive in such a way that it can do some other 
         work when it kicks in. */
-	private static final long KEEPALIVE_SCHEDULE_TIME = (200);
+	private static final long KEEPALIVE_WAIT_TIME = (200);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
@@ -295,7 +295,7 @@ public class UDPConnectionProcessor {
     private synchronized void scheduleKeepAlive() {
         // Create event with initial time
         _keepaliveEvent  = 
-          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_SCHEDULE_TIME);
+          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_WAIT_TIME);
 
         // Register keepalive event for future event callbacks
         _scheduler.register(_keepaliveEvent);
@@ -995,7 +995,7 @@ log("sendKeepAlive");
             }
 
             // Reschedule keepalive timer
-            _eventTime = _lastSendTime + KEEPALIVE_SCHEDULE_TIME;
+            _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
             _scheduler.scheduleEvent(this);
 log2("end keepalive: "+ System.currentTimeMillis());
         }
