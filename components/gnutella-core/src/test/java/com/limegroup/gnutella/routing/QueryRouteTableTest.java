@@ -519,5 +519,15 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             fail("bpe should have been thrown - patched more than table size");
         } catch(BadPacketException e) {
         }
+        
+        qrt=new QueryRouteTable(); //i. Unknown entryBits value.
+        patch=new PatchTableMessage((short)1, (short)2,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)1, new byte[10], 0, 10);
+        try {
+            qrt.patch(patch);
+            fail("bpe should have been thrown - invalid entry bits");
+        } catch(BadPacketException e) {
+            e.printStackTrace();
+        }
     }
 }
