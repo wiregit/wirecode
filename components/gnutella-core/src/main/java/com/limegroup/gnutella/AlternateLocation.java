@@ -109,6 +109,33 @@ public final class AlternateLocation
 	}
 
 	/**
+	 * Creates a new <tt>AlternateLocation</tt> for the data stored in
+	 * a <tt>RemoteFileDesc</tt>.
+	 *
+	 * @param rfd the <tt>RemoteFileDesc</tt> to use in creating the 
+	 *  <tt>AlternateLocation</tt>
+	 * @return a new <tt>AlternateLocation</tt>
+	 * @throws <tt>IOException</tt> if the <tt>rfd</tt> does not contain
+	 *  a valid urn
+	 * @throww <tt>NullPointerException</tt> if the <tt>rfd</tt> is <tt>null</tt>
+	 */
+	public static AlternateLocation createAlternateLocation(final RemoteFileDesc rfd) 
+		throws IOException {
+		if(rfd == null) {
+			throw new NullPointerException("cannot accept null RFD");
+		}
+		URN urn = rfd.getSHA1Urn();
+		if(urn == null) {
+			throw new IOException("no SHA1 in RFD");
+		}
+		String urlStr = ("http://"+rfd.getHost()+":"+rfd.getPort()+
+						 "/get/"+String.valueOf(rfd.getIndex())+
+						 "/"+rfd.getFileName());
+		URL url = new URL(URLEncoder.encode(urlStr));
+		return new AlternateLocation(url, new Date());
+	}
+
+	/**
 	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
 	 * and <tt>Date</tt> timestamp.
 	 *
