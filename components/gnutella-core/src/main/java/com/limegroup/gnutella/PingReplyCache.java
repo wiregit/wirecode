@@ -135,6 +135,10 @@ public class PingReplyCache
         if (hops > pingReplies.length)
             return null;
         
+        //if no entries for the passed in hops, return null
+        if (pingReplies[hops-1].size() == 0)
+            return null;
+
         ArrayList arrayOfPongs = pingReplies[hops-1];
         int index = random.nextInt(arrayOfPongs.size());
         return (PingReplyCacheEntry)arrayOfPongs.get(index);

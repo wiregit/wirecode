@@ -91,8 +91,6 @@ public class HostCatcher {
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
-        routerConnectorThread=new RouterConnectorThread();
-        routerConnectorThread.start();
     }
 
     /**
@@ -101,6 +99,8 @@ public class HostCatcher {
     public void initialize(Acceptor acceptor, ConnectionManager manager) {
         this.acceptor = acceptor;
         this.manager = manager;
+        routerConnectorThread=new RouterConnectorThread();
+        routerConnectorThread.start();
     }
 
     /**

@@ -741,19 +741,22 @@ public class ConnectionManager {
             Random random = new Random();
             int hops;
             PingReplyCache pongCache = PingReplyCache.instance();
+            PingReplyCacheEntry entry = null;
             PingReply pr = null;
 
             do {
                 try {
                     hops = random.nextInt
                         (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    pr = ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).
-                        getPingReply();
+                    entry = pongCache.getEntry(hops+1);
                     //if nothing in the cache, then try from the reserve cache
-                    if (pr == null) 
+                    if (entry == null) { 
                         endpoint = _catcher.getAnEndpoint();
-                    else
+                    }
+                    else {
+                        pr = entry.getPingReply();
                         endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
+                    }
                 } catch (NoSuchElementException exc2) {
                     //If we get here, it means that even the reserve cache has
                     //either no elements (or only private IPs), so just return
