@@ -126,25 +126,23 @@ public abstract class AuthenticationHandshakeResponder
     {
         
         //get the domains, user has successfully authenticated
-        Set domains = getDomainsAuthenticated(response.getHeaders());
+        Set domains = getDomainsAuthenticated(response.props());
         
         //if couldnt authenticate
-        if(domains == null)
-        {
-            return new HandshakeResponse(
-            HandshakeResponse.UNAUTHORIZED_CODE,
-            HandshakeResponse.UNAUTHORIZED_MESSAGE, null);
-        }else
-        {
+        if(domains == null) {
+            return new HandshakeResponse(HandshakeResponse.UNAUTHORIZED_CODE,
+                                         HandshakeResponse.UNAUTHORIZED_MESSAGE, 
+                                         null);
+        } else {
             _authenticated = true;
             //handle the original request
-            HandshakeResponse ourResponse = respondUnauthenticated(
-            _beforeAuthenticationRequest, false);
+            HandshakeResponse ourResponse = 
+                respondUnauthenticated(_beforeAuthenticationRequest, false);
+
             //add the property in the response letting the
             //remote host know of the domains successfully authenticated
-            ourResponse.getHeaders().put(
-            HeaderNames.X_DOMAINS_AUTHENTICATED,
-            StringUtils.getEntriesAsString(domains));
+            ourResponse.props().put(HeaderNames.X_DOMAINS_AUTHENTICATED,
+                                    StringUtils.getEntriesAsString(domains));
             //return our response
             return ourResponse;
         }
@@ -161,11 +159,10 @@ public abstract class AuthenticationHandshakeResponder
     private Set getDomainsAuthenticated(Properties headersReceived)
     {
         //pass the username and password to authenticator
-        return _manager.getAuthenticator().authenticate(
-        headersReceived.getProperty(
-        HeaderNames.X_USERNAME),
-        headersReceived.getProperty(
-        HeaderNames.X_PASSWORD), null);
+        return 
+            _manager.getAuthenticator().authenticate(
+                headersReceived.getProperty(HeaderNames.X_USERNAME),
+                headersReceived.getProperty(HeaderNames.X_PASSWORD), null);
     }
     
     /**
