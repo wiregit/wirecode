@@ -340,14 +340,21 @@ public class FileManager{
         // Create a GML request document from richQuery, keeping it only
         // if it is the kind of GML Document that we recognize
         GMLDocument gmlDocument = null;
-        try {
-            gmlDocument =
-                SimpleTemplateRepository.instance().parseRequest(richQuery);
-            if(!FileDesc.isGMLDocumentUnderstandable(gmlDocument))
-                gmlDocument = null;
+        if(!richQuery.equals(""))
+        {
+            try {
+                gmlDocument =
+                    SimpleTemplateRepository.instance().parseRequest(richQuery);
+                // If the document isn't a format FileDesc understands,
+                // discard it.
+                if(!FileDesc.isGMLDocumentUnderstandable(gmlDocument))
+                    gmlDocument = null;
+            }
+            // Do nothing on exceptions.  Just leave gmlDocument as null.
+            // This will happen whenever a query carries non-GML metadata
+            catch(TemplateNotFoundException e) {}
+            catch(GMLParseException e) {}
         }
-        catch(TemplateNotFoundException e) {}
-        catch(GMLParseException e) {}
 
         // Scan the files list looking for matches
         ArrayList response_list=null; // Don't allocate until needed
