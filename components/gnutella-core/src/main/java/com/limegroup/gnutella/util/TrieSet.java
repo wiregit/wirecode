@@ -10,6 +10,11 @@ import java.util.Iterator;
  * The goal is to efficiently find Strings that can branch off a prefix.
  *
  * Primarily designed as an AutoCompleteDictionary
+ *
+ * @modified David Soh (yunharla00@hotmail.com)
+ *      1. added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
+ *      2. disallowed adding duplicates
+ *
  */
 public class TrieSet implements AutoCompleteDictionary {
     /**
@@ -33,7 +38,8 @@ public class TrieSet implements AutoCompleteDictionary {
      * the stored values with the case of the last entry.
      */
     public void addEntry(String data) {
-        map.add(data, data);
+        if (!contains(data))    //disallow adding duplicates
+            map.add(data, data);
     }
 
     /**
@@ -70,6 +76,20 @@ public class TrieSet implements AutoCompleteDictionary {
         if (!it.hasNext())
             return null;
         return (String)it.next();
+    }
+
+    /**
+     * Returns all values (entire TrieSet)
+     */
+    public Iterator getIterator() {
+        return map.getIterator();
+    }
+
+    /**
+     * Returns all potential matches off the given String.
+     */
+    public Iterator getIterator(String s) {
+        return map.getPrefixedBy(s);
     }
 }
 

@@ -33,6 +33,10 @@ import com.limegroup.gnutella.Assert;
  *
  * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie.html for a
  * discussion of Tries.
+ *
+ * @modified David Soh (yunharla00@hotmail.com)
+ *      added getIterator() for enhanced AutoCompleteTextField use.
+ *
  */
 public class Trie {
     /**
@@ -72,7 +76,7 @@ public class Trie {
      * If true, keys will be canonicalized to lowercase.
      */
     private boolean ignoreCase;
-    
+
     /**
      * The constant EmptyIterator to return when nothing matches.
      */
@@ -353,6 +357,13 @@ public class Trie {
     }
 
     /**
+     * Returns all values (entire Trie)
+     */
+    public Iterator getIterator() {
+        return new ValueIterator(root);
+    }
+
+    /**
      * Returns all the (non-null) values associated with a given
      * node and its children. (internal)
      */
@@ -382,7 +393,7 @@ public class Trie {
         }
     }
 
-    /** 
+    /**
      * Ensures that this consumes the minimum amount of memory.  If
      * valueCompactor is not null, also sets each node's value to
      * valueCompactor.apply(node).  Any exceptions thrown by a call to
@@ -391,9 +402,9 @@ public class Trie {
      * This method should typically be called after add(..)'ing a number of
      * nodes.  Insertions can be done after the call to compact, but they might
      * be slower.  Because this method only affects the performance of this,
-     * there is no <tt>modifies</tt> clause listed.  
+     * there is no <tt>modifies</tt> clause listed.
      */
-    public void trim(Function valueCompactor) 
+    public void trim(Function valueCompactor)
             throws IllegalArgumentException, ClassCastException {
         if (valueCompactor != null) {
             // For each node in this...
@@ -536,7 +547,7 @@ final class TrieNode {
 
     /**
      * The list of children.  Children are stored as a sorted Vector because
-     * it is a more compact than a tree or linked lists.  Insertions and 
+     * it is a more compact than a tree or linked lists.  Insertions and
      * deletions are more expensive, but they are rare compared to
      * searching.<p>
      *
@@ -554,7 +565,7 @@ final class TrieNode {
     /**
      * Creates a trie with no children and the given value.
      */
-    public TrieNode(Object value) { 
+    public TrieNode(Object value) {
         this.value = value;
     }
 
