@@ -86,7 +86,6 @@ public class PingReply extends Message implements Serializable {
     // performs any necessary static initialization of fields,
     // such as the vendor GGEP extension
     static {
-        byte[] payload = new byte[5];
         // set 'LIME'
         System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
                          0, CACHED_VENDOR, 0,
