@@ -82,6 +82,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((int)1, (int)0);
         assertLessThanOrEquals("string", (int)0, (int)0);
         assertLessThanOrEquals("string", (int)1, (int)0);
+        
+        try {
+            assertNotEquals((int)0, (int)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((int)0, (int)1);        
     }
     
     
@@ -152,6 +159,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((double)1, (double)0);
         assertLessThanOrEquals("string", (double)0, (double)0);
         assertLessThanOrEquals("string", (double)1, (double)0);
+        
+        try {
+            assertNotEquals((double)0, (double)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((double)0, (double)1);        
     }
     
     public void testShortComparisons() {
@@ -221,6 +235,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((short)1, (short)0);
         assertLessThanOrEquals("string", (short)0, (short)0);
         assertLessThanOrEquals("string", (short)1, (short)0);
+        
+        try {
+            assertNotEquals((short)0, (short)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((short)0, (short)1);        
     }
     
     public void testLongComparisons() {
@@ -290,6 +311,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((long)1, (long)0);
         assertLessThanOrEquals("string", (long)0, (long)0);
         assertLessThanOrEquals("string", (long)1, (long)0);
+        
+        try {
+            assertNotEquals((long)0, (long)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((long)0, (long)1);        
     }
     
     public void testFloatComparisons() {
@@ -359,6 +387,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((float)1, (float)0);
         assertLessThanOrEquals("string", (float)0, (float)0);
         assertLessThanOrEquals("string", (float)1, (float)0);
+        
+        try {
+            assertNotEquals((float)0, (float)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((float)0, (float)1);        
     }
     
     public void testByteComparisons() {
@@ -428,6 +463,13 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals((byte)1, (byte)0);
         assertLessThanOrEquals("string", (byte)0, (byte)0);
         assertLessThanOrEquals("string", (byte)1, (byte)0);
+        
+        try {
+            assertNotEquals((byte)0, (byte)0);
+            fail("0 is equal to 0");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals((byte)0, (byte)1);        
     }
     
     public void testStringComparisons() {
@@ -497,6 +539,27 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertLessThanOrEquals("b", "a");
         assertLessThanOrEquals("string", "a", "a");
         assertLessThanOrEquals("string", "b", "a");
+        
+        try {
+            assertNotEquals("a", "a");
+            assertNotEquals("string", "a", "a");
+            fail("a is equal to a");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotEquals("a", "b");
+        assertNotEquals("string", "a", "b");
+    }
+    
+    public void testNotSame() {
+        Object a = new Object();
+        try {
+            assertNotSame(a, a);
+            assertNotSame("string", a, a);
+            fail("objects were the same");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotSame(a, new Object());
+        assertNotSame("string", a, new Object());
     }
     
     public void testInstanceof() {

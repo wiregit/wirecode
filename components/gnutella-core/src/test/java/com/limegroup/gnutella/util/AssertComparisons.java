@@ -13,6 +13,8 @@ public class AssertComparisons extends TestCase {
     private static final int LESS_THAN_OR_EQUALS = 2;
     private static final int GREATER_THAN_OR_EQUALS = 3;
     private static final int INSTANCE_OF = 4;
+    private static final int NOT_EQUAL = 5;
+    private static final int NOT_SAME = 6;
     
     /**
      * Named constructor.
@@ -38,6 +40,141 @@ public class AssertComparisons extends TestCase {
             fail(formatComparison(INSTANCE_OF, msg, 
                     expected.getName(), actual.getClass().getName()));
     }
+    
+    /**
+     * Asserts that actual is not the same as expected.  If they are the same,
+     * an AssertionFailedError is thrown.
+     */
+    static public void assertNotSame(Object expected, Object actual) {
+        assertNotSame(null, expected, actual);
+    }
+    
+    /**
+     * Asserts that actual is not the same as expected.  If they are the same,
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertNotSame(String msg, Object expected, Object actual) {
+        if ( actual == expected )
+            fail(formatComparison(NOT_SAME, msg, expected, actual));
+    }            
+    
+    /**
+     * Asserts that actual is not equal to expected.  If they are equal,
+     * an AssertionFailedError is thrown.
+     */
+    static public void assertNotEquals(Object expected, Object actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Asserts that actual is not equal to expected.  If they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertNotEquals(String msg, Object expected, Object actual) {
+        if ( actual == null && expected != null )
+            return;
+        if ( expected == null && actual != null )
+            return;            
+            
+        if ( expected == null && actual == null || actual.equals(expected) )
+            fail(formatComparison(NOT_EQUAL, msg, expected, actual));
+    }
+    
+   /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(long expected, long actual) {
+        assertNotEquals( new Long(expected), new Long(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, long expected, long actual) {
+        assertNotEquals( msg, new Long(expected), new Long(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(short expected, short actual) {
+        assertNotEquals( new Short(expected), new Short(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, short expected, short actual) {
+        assertNotEquals( msg, new Short(expected), new Short(actual) );
+    }
+
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(int expected, int actual) {
+        assertNotEquals( new Integer(expected), new Integer(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, int expected, int actual) {
+        assertNotEquals( msg, new Integer(expected), new Integer(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(double expected, double actual) {
+        assertNotEquals( new Double(expected), new Double(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, double expected, double actual) {
+        assertNotEquals( msg, new Double(expected), new Double(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(float expected, float actual) {
+        assertNotEquals( new Float(expected), new Float(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, float expected, float actual) {
+        assertNotEquals( msg, new Float(expected), new Float(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown.
+     */    
+    static public void assertNotEquals(byte expected, byte actual) {
+        assertNotEquals( new Byte(expected), new Byte(actual) );
+    }
+    
+    /**
+     * Assertes that actual is not equal to expected.  if they are equal,
+     * an AssertionFailedError is thrown with the given message.
+     */    
+    static public void assertNotEquals(String msg, byte expected, byte actual) {
+        assertNotEquals( msg, new Byte(expected), new Byte(actual) );
+    }    
     
     /**
      * Assertes that actual is greater than expected.  If it isn't,
@@ -485,9 +622,8 @@ public class AssertComparisons extends TestCase {
      */    
     static public void assertLessThanOrEquals(String msg, byte expected, byte actual) {
         assertLessThanOrEquals( msg, new Byte(expected), new Byte(actual) );
-    }    
+    }
 
-    
     /**
      * Assert that an object actual is either less than, greater than,
      * less than or equal to, or greater than or equals to object expected.
@@ -569,6 +705,10 @@ public class AssertComparisons extends TestCase {
             compare = "greater than or equal to"; break;
         case INSTANCE_OF:
             compare = "instanceof"; break;
+        case NOT_EQUAL:
+            compare = "something other than"; break;
+        case NOT_SAME:
+            compare = "something other than"; break;            
         }
         String formatted = "";
         if ( message != null )
