@@ -111,6 +111,10 @@ public class VerifyingFile {
     }
   
     public void close() {
+        // this MUST release the reference to the ManagedDownloader,
+        // otherwise, all downloaders will always stay in memory
+        // (which includes everything the download references)
+        managedDownloader = null;
         if(fos==null)
             return;
         try { 
