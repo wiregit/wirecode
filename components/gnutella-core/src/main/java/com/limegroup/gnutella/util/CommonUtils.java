@@ -4,7 +4,7 @@ import com.limegroup.gnutella.Assert;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
-//import com.apple.mrj.*;
+import com.apple.mrj.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -347,25 +347,37 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public static File getUserSettingsDir() {
+        File settingsDir = null;
 		if(CommonUtils.isWindows()) {
-			return CommonUtils.getCurrentDirectory();
+			settingsDir = CommonUtils.getCurrentDirectory();
 		}
 
 		// return the special user preferences directory on OS X.
 		// this may have problems on 10.0.
-		//else if(CommonUtils.isMacOSX()) {
-		//short userDomainCode = -32763;
-		//File userPrefsDir = MRJFileUtils.findFolder(userDomainCode, 
-		//											new MRJOSType("pref"));
-		//return new File(userPrefsDir, ".limewire");
-		//}
-		
-        final File HOME_DIR = new File(CommonUtils.getUserHomeDir(), 
-									   ".limewire");
-        if(!HOME_DIR.isDirectory()) {
-            HOME_DIR.mkdirs();
+		else if(CommonUtils.isMacOSX()) {
+		    File userPrefsDir;
+		    try {
+		        short userDomainCode = -32763;
+		        userPrefsDir = 
+		            MRJFileUtils.findFolder(userDomainCode, 
+		    							    new MRJOSType("pref"));
+		        settingsDir = new File(userPrefsDir, ".limewire");
+		    } catch(FileNotFoundException e) {
+		        // this will just continue to return the default
+		        // directory for all oses
+		    }
+		} else {
+            settingsDir = new File(CommonUtils.getUserHomeDir(), 
+							       ".limewire");
+		}
+		if(settingsDir == null) {
+		    settingsDir = new File(CommonUtils.getUserHomeDir(), 
+							       ".limewire");
+		}
+        if(!settingsDir.isDirectory()) {
+            settingsDir.mkdirs();
         }
-        return HOME_DIR;
+        return settingsDir;
     }
 	
 
