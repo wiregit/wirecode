@@ -101,7 +101,7 @@ public final class AlternateLocationCollection
 		// if the collection of alternate locations is getting too big,
 		// remove the last element (the least desirable alternate location)
 		// from the Map
-		if(_alternateLocations.size() > 10) {
+		if(_alternateLocations.size() > 100) {
 			_alternateLocations.remove(_alternateLocations.lastKey());
 		}
 	}
@@ -187,7 +187,7 @@ public final class AlternateLocationCollection
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
 	 *
 	 * This adds randomness to the order in which alternate locations are
-	 * reported.
+	 * reported and only reports 10 locations.
 	 *
 	 * @return an HTTP-compliant string of alternate locations, delimited
 	 *  by commas, or the empty string if there are no alternate locations
@@ -198,8 +198,10 @@ public final class AlternateLocationCollection
 		// string
 		if(_alternateLocations == null) return "";
 
-		List list = new ArrayList(_alternateLocations.values());
+        // TODO: Could this be a performance issue??
+		List list = new LinkedList(_alternateLocations.values());
 		Collections.shuffle(list);
+        list = list.subList(0, list.size() >= 10 ? 10 : list.size());
 		Iterator iter = list.iterator();
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
