@@ -211,7 +211,7 @@ public class ConnectionManager {
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
              if(connection != null){
-                    connection.close();
+				 connection.close();
              }
              return;
          }
@@ -695,6 +695,10 @@ public class ConnectionManager {
         return clone;
     }
 
+	public Set getUltraPeersSupportingUdp() {
+		return _catcher.getUltraPeersSupportingUdp();
+	}
+
     /**
      * Returns the endpoints of the best known ultrapeers.  This include
      * both ultrapeers we are connected to and marked ultrapeer pongs.
@@ -802,7 +806,7 @@ public class ConnectionManager {
             if (c.isSupernodeConnection()) {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
                     c.getPort()), true);
-            }
+            }   
         }
     }
 
