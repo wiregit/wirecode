@@ -278,6 +278,19 @@ public class LimeXMLUtils
             if(replyDocValue == null)
                 nullCount++;
             else {
+                try {  
+                    // if this is a parse-able numeric value, doing a prefix
+                    // matching doesn't make sense.  cast it to a double and do
+                    // a straight equals comparison
+                    double rDVD = Double.parseDouble(replyDocValue);
+                    double qVD  = Double.parseDouble(queryValue);
+                    if (rDVD == qVD)
+                        matchCount++;
+                    continue;
+                }
+                catch (NumberFormatException nfe) {
+                    // just roll through and try to do a normal test...
+                } 
                 // we used to do a .equalsIgnoreCase, but that is a little too
                 // rigid.  so do a ignore case prefix match.
                 String queryValueLC = queryValue.toLowerCase();
@@ -287,12 +300,13 @@ public class LimeXMLUtils
             }
         }
         // The metric of a correct match is that whatever fields are specified
-        // in the query must have prefix match with the fields in the reply
+        // in the query must have prefix match* with the fields in the reply
         // unless the reply has a null for that feild, in which case we are OK 
         // with letting it slide.  also, %MATCHING_RATE of the fields must
         // either be a prefix match or null.
         // We make an exception for queries of size 1 field. In this case, there
         // must be a 100% match (which is trivially >= %MATCHING_RATE)
+        // * prefix match assumes a string; for numerics just do an equality test
         double sizeD = (double)size, matchCountD = (double)matchCount, nullCountD = (double)nullCount;
         if(size > 1){
             if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
