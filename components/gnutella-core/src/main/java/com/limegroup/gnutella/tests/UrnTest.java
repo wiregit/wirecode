@@ -11,20 +11,16 @@ import java.io.*;
 public final class UrnTest extends TestCase {
 	
 	private static final String [] VALID_URNS = {
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:bitprint:XLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
-		"urn:Bitprint:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		"urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB",
+		"Urn:sha1:OLSTHIPQGSSZTS5FJUPAKTZWUGZQYPFB",
+		"uRn:sHa1:JLRTHIPQGSSZTS5RJUPAKRZWUGYQYPFB",
+		"urn:sha1:RLPTHIPQGSSZTS5FRUPAKEZWUGYQYPFB",
+		"urn:Sha1:MLSTHIPQGSSZTS5FJRPAKWZWUGYQYPFB",
+		"UrN:sha1:WLSTHIPQGSSZTS5FJURAKQZWUGYQYPFB",
+		"urn:sHa1:ALSTIIPQGSSZTS5FJUPRKAZWUGYQYPFB",
+		"urn:sha1:ZLSTXIPQGSSZTS5FJUPARCZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKXZWUGYQYPFB"
 	};
 	
 	private static final String [] INVALID_URNS = {
@@ -41,11 +37,7 @@ public final class UrnTest extends TestCase {
 		"urn:sha1 :PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB ",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB.."+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB. "+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB "
 	};
 
 	private static final String [] VALID_SHA1_URNS = {
@@ -81,18 +73,23 @@ public final class UrnTest extends TestCase {
 		for(int i=0; i<urns.length; i++) {
 			try {
 				urns[i] = URNFactory.createUrn(VALID_URNS[i]);
-				assertTrue(urns[i] != null);
+				assertNotNull("urn should not be null",urns[i]);
+				assertTrue("should be SHA1", urns[i].isSHA1());
+				assertTrue("urn should not have the empty string", 
+						   !urns[i].toString().equals(""));
 			} catch(IOException e) {
-				assertTrue(false);
+				assertTrue("unexpected exception: "+e, false);
 			}		
 		}
 		sha1Urns = new URN[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
 			try {
 				sha1Urns[i] = URNFactory.createUrn(VALID_SHA1_URNS[i]);
-				assertTrue(sha1Urns[i] != null);
+				assertNotNull("urn should not be null",sha1Urns[i]);
+				assertTrue("urn should not have the empty string", 
+						   !sha1Urns[i].toString().equals(""));
 			} catch(IOException e) {
-				assertTrue(false);
+				assertTrue("unexpected exception: "+e, false);
 			}		
 		}
 	}
@@ -142,7 +139,7 @@ public final class UrnTest extends TestCase {
 				URN urn = URNFactory.createSHA1Urn(curFile);
 				assertTrue(urn.isSHA1());
 				assertTrue(urn.isUrn(urn.toString()));
-				assertTrue(urn.getTypeString().equals(URN.URN_SHA1+":"));
+				assertTrue(urn.getUrnType() == UrnType.SHA1);
 				try {
 					URN newURN = URNFactory.createUrn(urn.toString());
 					assertTrue(newURN.equals(urn));
@@ -178,11 +175,11 @@ public final class UrnTest extends TestCase {
 		};
 		
 		for(int i=0; i<validURNTypes.length; i++) {			
-			assertTrue(URN.isUrnType(validURNTypes[i]));
+			assertTrue(UrnType.isSupportedUrnType(validURNTypes[i]));
 		}
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
-			assertTrue(!URN.isUrnType(invalidURNTypes[i]));
+			assertTrue(!UrnType.isSupportedUrnType(invalidURNTypes[i]));
 		}
 	}
 
@@ -216,19 +213,24 @@ public final class UrnTest extends TestCase {
 		URN curUrn;
 		for(int i=0; i<urns.length; i++) {
 			curUrn = urns[i];
-			assertTrue(curUrn != null);
+			assertTrue("current urn is unexpectedly null", curUrn != null);
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
 					try {
 						URN tempUrn = URNFactory.createUrn(urns[j].toString());
-						assertTrue(curUrn.equals(tempUrn));
+						assertEquals("urns should be equal", curUrn, tempUrn);
 					} catch(IOException e) {
-						assertTrue(false);
+						assertTrue("unexpected exception: "+e, false);
 					}
 					continue;
 				}
-				assertTrue(urns[j] != null);
-				assertTrue(!curUrn.equals(urns[j]));
+				else {
+					assertTrue("urns are unexpectedly equal: curUrn: "+curUrn+"\r\n"+
+							   "                            urns[j]: "+urns[j]+"\r\n"+
+							   "i: "+i+" j: "+j, 
+							   !curUrn.equals(urns[j]));
+				}
+				assertNotNull("urn is unexpectedly null", urns[j]);
 			}
 		}
 	}
