@@ -69,22 +69,20 @@ public class UltrapeerHandshakeResponder
             // Become a leaf if its a good ultrapeer & we can do it.
             if(_manager.allowLeafDemotion() && response.isGoodUltrapeer()) {
                 if( RECORD_STATS )
-                   HandshakingStat.UP_OUTGOING_ACCEPT_GUIDANCE.incrementStat();
+                   HandshakingStat.UP_OUTGOING_GUIDANCE_FOLLOWED.incrementStat();
                 ret.put(HeaderNames.X_ULTRAPEER, "False");
             } else { //Had guidance, but we aren't going to be a leaf.
                 if( RECORD_STATS )
-                   HandshakingStat.UP_OUTGOING_REJECT_GUIDANCE.incrementStat();
-                return HandshakeResponse.createRejectOutgoingResponse();
+                   HandshakingStat.UP_OUTGOING_GUIDANCE_IGNORED.incrementStat();
+                //fall through to accept, we're ignoring the guidance.
             }
-		}
+		} else if( RECORD_STATS )
+            HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
 
 		// deflate if we can ...
 		if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
-		
-        if( RECORD_STATS )
-            HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
 
         // accept the response
         return HandshakeResponse.createAcceptOutgoingResponse(ret);

@@ -61,15 +61,14 @@ public class HandshakingStat extends AdvancedStatistic {
     /**
      * Statistic for an outgoing guided connection to an ultrapeer.
      */
-	public static final Statistic UP_OUTGOING_ACCEPT_GUIDANCE =
+	public static final Statistic UP_OUTGOING_GUIDANCE_FOLLOWED =
 	    new HandshakingStat();
 	    
     /**
      * Statistic for an outgoing guided connection to an ultrapeer
-     * that was rejected because we didn't want to become a leaf
-     * to that ultrapeer.
+     * that gave us guidance, but we ignored it and stayed an ultrapeer
      */
-    public static final Statistic UP_OUTGOING_REJECT_GUIDANCE =
+    public static final Statistic UP_OUTGOING_GUIDANCE_IGNORED =
         new HandshakingStat();
         
 
