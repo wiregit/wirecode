@@ -4,7 +4,7 @@ import junit.framework.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HostCatcherTest extends TestCase {  
     private HostCatcher hc;

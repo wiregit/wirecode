@@ -6,8 +6,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.tests.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 
 public class ManagedConnectionTest extends TestCase {  
@@ -52,8 +51,8 @@ public class ManagedConnectionTest extends TestCase {
         try {
             //Create loopback connection.  Uncomment the MiniAcceptor class in
             //Connection to get this to work.
-            com.limegroup.gnutella.tests.MiniAcceptor acceptor=
-                new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            com.limegroup.gnutella.MiniAcceptor acceptor=
+                new com.limegroup.gnutella.MiniAcceptor(null);
             ManagedConnection.QUEUE_TIME=1000;
             ManagedConnection out=newConnection("localhost", 6346);
             out.initialize();
@@ -374,14 +373,14 @@ public class ManagedConnectionTest extends TestCase {
         try {
             ManagedConnection out=null;
             Connection in=null;
-            com.limegroup.gnutella.tests.MiniAcceptor acceptor=null;                
+            com.limegroup.gnutella.MiniAcceptor acceptor=null;                
             //When receive() or sendQueued() gets IOException, it calls
             //ConnectionManager.remove().  This in turn calls
             //ManagedConnection.close().  Our stub does this.
             ConnectionManager manager=new ConnectionManagerStub(true);
 
             //1. Locally closed
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
             out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 
@@ -395,7 +394,7 @@ public class ManagedConnectionTest extends TestCase {
             in.close(); //needed to ensure connect below works
 
             //2. Remote close: discovered on read
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
             out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 
@@ -415,7 +414,7 @@ public class ManagedConnectionTest extends TestCase {
             //3. Remote close: discovered on write.  Because of TCP's half-close
             //semantics, we need TWO writes to discover this.  (See unit tests
             //for Connection.)
-            acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
             out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 

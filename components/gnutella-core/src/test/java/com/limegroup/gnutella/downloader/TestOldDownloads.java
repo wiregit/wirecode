@@ -4,8 +4,7 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.tests.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 

@@ -3,10 +3,10 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.util.Properties;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.security.DummyAuthenticator;
-import com.limegroup.gnutella.tests.MessageRouterStub;
-import com.limegroup.gnutella.tests.MiniAcceptor;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.MiniAcceptor;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
