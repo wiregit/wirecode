@@ -89,6 +89,9 @@ public class RichQueryHandler{
 					name =  fd.getName();
 					size =  fd.getSize();
 					res = new Response(fd);
+					fd.incrementHitCount();
+                    RouterService.getCallback().handleSharedFileUpdate(
+                        fd.getFile());
                 }
             }
             
