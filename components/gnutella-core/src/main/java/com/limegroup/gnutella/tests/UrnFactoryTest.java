@@ -7,6 +7,8 @@ import java.io.*;
 
 /**
  * This class tests the public methods of the URNFactory class.
+ *
+ * TODO: add tests for methods that return strings.
  */
 public final class UrnFactoryTest extends TestCase {
 	
