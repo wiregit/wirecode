@@ -10,8 +10,10 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocDigest;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.stubs.AltLocDigestStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -453,8 +455,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
     	assertFalse(ping.requestsPushLocs());
-    	assertTrue(ping.supportsBloom());
-    	assertNull(ping.getFilter());
+    	assertTrue(ping.supportsDigests());
+    	assertNull(ping.getDigest());
     	
    		ping = new HeadPing(urn, 0xFF & ~HeadPing.GGEP_PING);
     	assertTrue(ping.requestsPushLocs());
@@ -467,7 +469,11 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	HeadPing ping2 = (HeadPing) Message.read(bais);
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
-    	assertEquals(ping.getFeatures(),ping2.getFeatures());
+    	assertEquals(ping.getFeatures() | HeadPing.GGEP_PING ,ping2.getFeatures());
+    	
+    	assertTrue(ping2.supportsDigests());
+    	assertTrue(ping2.supportsPushDigests());
+    	assertNull(ping.getDigest());
 
     	testWrite(ping);
     	
@@ -482,20 +488,33 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	assertEquals(g,ping2.getClientGuid());
     	
-    	//pings which have the flag but no guid fail.
-    	ping = new HeadPing(urn, 0xFF);
+    	//test a ping which carries bloom filter
+    	AltLocDigest [] digests = new AltLocDigest[] {
+    	        new AltLocDigestStub() {
+    	    		public byte [] toBytes() {
+    	    		    return new byte[5];
+    	    		}
+    			},
+    			null
+    	};
+    	
+    	ping = new HeadPing(urn,
+    	        null,
+    	        digests,
+    			HeadPing.GGEP_PING);
+    	
+    	assertTrue(ping.supportsDigests());
+    	assertTrue(ping2.supportsPushDigests());
+    	assertNotNull(ping.getDigest());
+    	
     	baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
-    	try {
-    	ping2 = (HeadPing) Message.read(bais);
-    		fail("parsed a ping which claimed to have a clientguid but didn't");
-    	}catch(BadPacketException expected) {}
-    	
-    	//test a ping which carries bloom filter
-    	ping = new HeadPing(urn,null,new Object(),HeadPing.GGEP_PING);
-    	assertTrue(ping.supportsBloom());
-    	assertNotNull(ping.getFilter());
+    	ping = (HeadPing) Message.read(bais);
+    	assertTrue(ping.supportsDigests());
+    	assertTrue(ping2.supportsPushDigests());
+    	assertNotNull(ping.getDigest());
+    	assertNotNull(ping.getPushDigest());
     	
     }
     
