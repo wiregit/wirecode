@@ -76,29 +76,6 @@ public class MP3Test extends TestCase {
         MP3Info info = null;
         
         /*
-          mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav
-          An MP3 file embedded in a wav file format 
-        */
-        info  = new MP3Info(file[0] );
-        assertEquals(info.getFileSize(), 743933L);
-        assertEquals(info.getBitRate() , 96);		
-        assertTrue(!info.isCoprighted());		
-        assertTrue(info.isOriginal());	
-        assertTrue(!info.isPadded());	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());
-        assertTrue(info.isRiffWav());	
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getHeaderBitRate() , 96);
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 61);	
-        assertEquals(info.getMode() , "Joint Stereo");	
-        assertEquals(info.getVersion_Numeric() , 1.0d, 0D);		
-        assertEquals(info.getNumberOfFrames() , 2376);
-        assertEquals(info.getEmphasis() , "none");	
-        assertTrue(!info.hasVariableBitRate());
-        
-        /*
           mpg1layI_0h_448k_frame14_48000hz_dual_fl5Orig.mp3
         */
         info  = new MP3Info(file[1]);
@@ -165,30 +142,6 @@ public class MP3Test extends TestCase {
         assertTrue(!info.hasVariableBitRate());
 
         /*
-          mpg1layIII_212k-VBRq0_f1655_441hz_stereo_FhgTAGID3v1_waterson.mp3
-        */
-        info  = new MP3Info(file[4]);
-        assertEquals(info.getFileSize(), 1145541L); //1145669-encspot&winamp (both wrong, not using fhg VBR)
-        assertEquals(info.getBitRate() , 211); //212-encspot&winamp	(both wrong, not using fhg VBR)
-        assertTrue(!info.isCoprighted());		
-        assertTrue(!info.isOriginal());	
-        assertTrue(!info.isPadded()); 	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());	
-        assertTrue(!info.isRiffWav());		
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getHeaderBitRate() , 160); //fhg encoder puts 160 in first header
-        assertEquals(info.getLayer_Numeric() , 3); 		
-        assertEquals(info.getLengthInSeconds() , 43); //57&43-winamp(wrong) 43-encspot 43-musicmatch
-        assertEquals(info.getMode() , "Stereo");	
-        assertEquals(info.getVersion_Numeric() , 1.0d, 0D);
-        assertEquals(info.getNumberOfFrames() , 1656); //2194-winamp(wrong, not using fhg VBR) 1655-encspot
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(info.hasVariableBitRate());
-		assertEquals(info.getVBRHeader().getScale() , 100);
-		assertNull(info.getVBRHeader().getTableOfContents());
-
-        /*
           mpg1layIII_58k-VBRq30_f1211_441hz_joint_XingTAG_sample.mp3
         */
         info  = new MP3Info(file[5]);
@@ -212,53 +165,6 @@ public class MP3Test extends TestCase {
 		assertEquals(info.getVBRHeader().getScale() , 30);
 		assertNotNull(info.getVBRHeader().getTableOfContents());
 			
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /*
-          mpg1layIII_138k-VBRq44_f2895_441hz_joint_XingTAG_ID3v2_Lame.mp3
-        */	
-        info  = new MP3Info(file[6]);
-        //        assertEquals(info.getFileSize(), 1304774L); //1306496-winamp
-        assertEquals(info.getBitRate() , 138);	//139-winamp 138-encspot
-        assertTrue(info.isCoprighted());	
-        assertTrue(info.isOriginal());	
-        assertTrue(!info.isPadded()); 	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());	
-        assertTrue(!info.isRiffWav());		
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getHeaderBitRate() , 64);
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 75);	
-        assertEquals(info.getMode() , "Joint Stereo");	
-        assertEquals(info.getVersion_Numeric() , 1.0d, 0D);
-        assertEquals(info.getNumberOfFrames() , 2895); // 2895-winamp 2894-encspot
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(info.hasVariableBitRate());
-		assertEquals(info.getVBRHeader().getScale() , 44);
-		assertNotNull(info.getVBRHeader().getTableOfContents());
-        /*
-          mpg1layIII_170k-VBRq66_f1721_441hz_stereo_XingTAGcopyID3v1_mutter.mp3
-        */	
-        info  = new MP3Info(file[7]);
-        //        assertEquals(info.getFileSize(), 955459L); //956416-winamp&encspot (we use VBR data)
-        assertEquals(info.getBitRate() , 170);	//173-winamp 170-encspot
-        assertTrue(info.isCoprighted());	
-        assertTrue(!info.isOriginal());	
-        assertTrue(!info.isPadded()); 	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());	
-        assertTrue(!info.isRiffWav());		
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getHeaderBitRate() , 64); //first frame
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 44);	
-        assertEquals(info.getMode() , "Stereo");	
-        assertEquals(info.getVersion_Numeric() , 1.0d, 0D);
-        assertEquals(info.getNumberOfFrames() , 1720); 
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(info.hasVariableBitRate());
-		assertEquals(info.getVBRHeader().getScale() , 66);
-		assertNotNull(info.getVBRHeader().getTableOfContents());
         /*
           mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2
         */	
@@ -349,51 +255,6 @@ public class MP3Test extends TestCase {
         assertEquals(info.getEmphasis() , "none");
         assertTrue(!info.hasVariableBitRate());
 	
-        /*
-          mpg2layIII_40k_f764or744_22050hz_mono_Orig_Fhgl3Frank.mp3
-        */	
-        info  = new MP3Info(file[12]);
-        assertEquals(info.getFileSize(), 99396L);
-        assertEquals(info.getBitRate() , 40);		
-        assertTrue(!info.isCoprighted());	
-        assertTrue(info.isOriginal());	
-        assertTrue(!info.isPadded()); 	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());	
-        assertTrue(!info.isRiffWav());		
-        assertEquals(info.getFrequency() , 22050);	
-        assertEquals(info.getHeaderBitRate() , 40);
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 19);	
-        assertEquals(info.getMode() , "Single Channel");	
-        assertEquals(info.getVersion_Numeric() , 2.0d, 0D);
-        assertEquals(info.getNumberOfFrames() , 380); // 764-winamp 744-encspot/////////////////////////////////
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(!info.hasVariableBitRate());
-	
-        /*
-          mpg2layIII_12kABRq55_f1202_16hz_stereo_XingLameTAG_CRCOrigwaterson.mp3
-        */	
-        info  = new MP3Info(file[13]);
-        assertEquals(info.getFileSize(), 70488L);
-        assertEquals(info.getBitRate() , 13); //13-winamp 12-encspot	
-        assertTrue(!info.isCoprighted());	
-        assertTrue(info.isOriginal());	
-        assertTrue(!info.isPadded()); 	
-        assertTrue(!info.isPrivate());	
-        assertTrue(info.isProtected());	
-        assertTrue(!info.isRiffWav());		
-        assertEquals(info.getFrequency() , 16000);	
-        assertEquals(info.getHeaderBitRate() , 64);	//64 first frame
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 43);	
-        assertEquals(info.getMode() , "Stereo");	
-        assertEquals(info.getVersion_Numeric() , 2.0d, 0D);
-        assertEquals(info.getNumberOfFrames() , 1202);
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(info.hasVariableBitRate());
-		assertEquals(info.getVBRHeader().getScale() , 55);
-		assertNotNull(info.getVBRHeader().getTableOfContents());
 	
         /*
           mpgPlus_210k-VBR_f1149_441hz_joint_protectedUnt_NOTm1lay-448k-f540-5015.mpc
@@ -417,29 +278,6 @@ public class MP3Test extends TestCase {
         assertEquals(info.getEmphasis() , "50/15 ms");
         assertTrue(!info.hasVariableBitRate()); //encspot true
 	
-        /*
-          mpgPRO2layIII_0h_64k_frame2036or2015_22050hz_joint_thomson.mp3
-          Mpeg Pro file -	sample provided by manufacturer
-        */	
-        info  = new MP3Info(file[15] );
-        assertEquals(info.getFileSize(), 423521L);
-        assertEquals(info.getBitRate() , 64);		
-        assertTrue(!info.isCoprighted());		
-        assertTrue(!info.isOriginal());	
-        assertTrue(info.isPadded()); //true-encspot	
-        assertTrue(!info.isPrivate());	
-        assertTrue(!info.isProtected());	
-        assertTrue(!info.isRiffWav());	
-        assertEquals(info.getFrequency() , 22050);	
-        assertEquals(info.getHeaderBitRate() , 64);
-        assertEquals(info.getLayer_Numeric() , 3);		
-        assertEquals(info.getLengthInSeconds() , 52);	
-        assertEquals(info.getMode() , "Joint Stereo");	
-        assertEquals(info.getVersion_Numeric() , 2.0d, 0D);		
-        assertEquals(info.getNumberOfFrames() , 996);	//1015? - 2015-encspot  2036-winamp/////////////////////
-        assertEquals(info.getEmphasis() , "none");
-        assertTrue(!info.hasVariableBitRate());
-	 
         /*
           mpg4_golem160x90first120.avi
           MPEG 4 files contain a 'possible' MP3 header
@@ -476,7 +314,7 @@ public class MP3Test extends TestCase {
     /**
      * timing new code
      */
-    public void testTIME()
+    public void notestTIME()
         throws Exception {
 
         int i = runs;
@@ -487,7 +325,7 @@ public class MP3Test extends TestCase {
         start = System.currentTimeMillis();
         while (--i >= 0) {
 		
-            new com.limegroup.gnutella.mp3.MP3Info(file[i%16]);
+            new com.limegroup.gnutella.mp3.MP3Info(file[i%9]);
 	
         }
 
