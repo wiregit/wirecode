@@ -111,9 +111,8 @@ public class ExtendedEndpointTest extends TestCase {
 
     public void testReadNormal() {
         try {
-            BufferedReader in=new BufferedReader(new StringReader(
-                "127.0.0.1:6348,3492,1, 100,86400113;113\n"));
-            ExtendedEndpoint e=ExtendedEndpoint.read(in);
+            ExtendedEndpoint e=ExtendedEndpoint.read(
+                "127.0.0.1:6348,3492,1, 100,86400113;113\n");
             assertEquals("127.0.0.1", e.getHostname());
             assertEquals(6348, e.getPort());
             assertEquals(3492, e.getDailyUptime());
@@ -125,10 +124,6 @@ public class ExtendedEndpointTest extends TestCase {
             assertEquals(86400113, ((Long)iter.next()).longValue());
             assertEquals(113, ((Long)iter.next()).longValue());
             assertTrue(!iter.hasNext());
-
-            assertNull(ExtendedEndpoint.read(in));
-        } catch (IOException e) {
-            fail("Mysterious IO problem");
         } catch (ParseException e) {
             fail("Mysterious parse error");
         }        
@@ -155,9 +150,8 @@ public class ExtendedEndpointTest extends TestCase {
 
    public void testReadUnknown() {
         try {
-            BufferedReader in=new BufferedReader(new StringReader(
-                "127.0.0.1:6348,,A,, 86400113;113 \n"));
-            ExtendedEndpoint e=ExtendedEndpoint.read(in);
+            ExtendedEndpoint e=ExtendedEndpoint.read(
+                "127.0.0.1:6348,,A,, 86400113;113 \n");
             assertEquals("127.0.0.1", e.getHostname());
             assertEquals(6348, e.getPort());
             assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
@@ -170,8 +164,6 @@ public class ExtendedEndpointTest extends TestCase {
             assertEquals(86400113, ((Long)iter.next()).longValue());
             assertEquals(113, ((Long)iter.next()).longValue());
             assertTrue(!iter.hasNext());
-        } catch (IOException e) {
-            fail("Mysterious IO problem");
         } catch (ParseException e) {
             fail("Mysterious parse error");
         }        
@@ -179,9 +171,8 @@ public class ExtendedEndpointTest extends TestCase {
 
    public void testReadOldStyle() {
         try {
-            BufferedReader in=new BufferedReader(new StringReader(
-                "127.0.0.1:6348"));
-            ExtendedEndpoint e=ExtendedEndpoint.read(in);
+            ExtendedEndpoint e=ExtendedEndpoint.read(
+                "127.0.0.1:6348");
             assertEquals("127.0.0.1", e.getHostname());
             assertEquals(6348, e.getPort());
             assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
@@ -192,8 +183,6 @@ public class ExtendedEndpointTest extends TestCase {
             assertTrue(!iter.hasNext());
             iter=e.getConnectionFailures();
             assertTrue(!iter.hasNext());
-        } catch (IOException e) {
-            fail("Mysterious IO problem");
         } catch (ParseException e) {
             fail("Mysterious parse error");
         }        
