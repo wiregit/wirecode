@@ -9,8 +9,11 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.connection.CompositeQueue;
+import com.limegroup.gnutella.connection.MessageReader;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.NIODispatcher;
+import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
@@ -216,11 +219,11 @@ public class Connection {
 
 
     /** if I am a Ultrapeer shielding the given connection */
-    private Boolean _isLeaf=null;
+    private Boolean _isLeaf = null;
     /** if I am a leaf connected to a supernode  */
-    private Boolean _isUltrapeer=null;
+    private Boolean _isUltrapeer = null;
     /** if I am an Ultrapeer peering to another Ultrapeer */
-    private Boolean _isUltrapeerToUltrapeer=null;
+    private Boolean _isUltrapeerToUltrapeer = null;
 
     /**
      * The "soft max" ttl to use for this connection.
@@ -251,6 +254,34 @@ public class Connection {
      * message writer takes care of writing messages to the network.
      */
     private MessageWriter _messageWriter;
+    
+    /**
+     * Handle to the <tt>MessageReader</tt> for this connection -- the
+     * message reader takes care of reading messages from the network.
+     */
+    private MessageReader _messageReader;
+    
+    /** 
+     * Priority queue of messages to send. 
+     */
+    private final CompositeQueue QUEUE = CompositeQueue.createQueue();
+    
+    /** 
+     * Locking to ensure that messages are not dropped if write() is called
+     * from multiple threads. 
+     */
+    private final Object WRITE_LOCK = new Object();
+    
+    /** 
+     * Filter for filtering out messages that are considered spam.
+     */
+    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
+    
+    /**
+     * Filter for which messages to display in search results.
+     */
+    private volatile SpamFilter _personalFilter =
+        SpamFilter.newPersonalFilter();
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -489,7 +520,8 @@ public class Connection {
         if(CommonUtils.isJava14OrLater()) {
 			NIODispatcher.instance().addReader(this);
         }
-        _messageWriter = new MessageWriter(_socket.getChannel());
+        _messageWriter = MessageWriter.createWriter(_socket.getChannel());
+        _messageReader = MessageReader.createReader();
     }
 
     /**
@@ -892,6 +924,15 @@ public class Connection {
     public SelectableChannel getChannel() {
     	return _socket.getChannel();
     }
+    
+    /**
+     * Accessor for the message reader for this connection.
+     * 
+     * @return
+     */
+    public MessageReader getReader() {
+        return _messageReader;
+    }
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -902,13 +943,117 @@ public class Connection {
         return OUTGOING;
     }
 
+    
     /** 
-	 * Returns true if this has queued data.  For Connection, hasQueued()
-     *  implies that this is unable to accept more messages; subclasses with
-     *  additional buffering may change that. 
-	 */
-    public boolean hasQueued() {
-        return _messageWriter.hasQueued();
+     * Like Connection.write(m), but may queue and write more than one message. 
+     * Never blocks, even if this is a blocking connection.
+     */
+    public void write(Message m) {
+        if (! supportsGGEP())
+            m = m.stripExtendedPayload();
+
+        synchronized (this) {
+            // TODO: re-enable stats!
+            //_numMessagesSent++;
+            QUEUE.add(m);
+            
+//          TODO: re-enable stats!
+            //_numSentMessagesDropped+=QUEUE.resetDropped();    
+        }        
+        if (! isBlocking()) {
+            //NON-BLOCKING IO: attempt to write queued data, not necessarily
+            //m.  This calls super.write(m'), which may call
+            //listener.needsWrite().
+            write();
+        } else {
+            //BLOCKING IO: writing data could stall another reader thread.
+            //So queue it and notify write thread.
+            // TODO:: we need to implement this!!!
+            //return true;
+        }
+    }
+
+    private final boolean isBlocking() {
+        return getChannel().isBlocking();
+    }
+
+    /**
+     * Like Connection.write(), but may write more than one message.  May also
+     * call listener.needsWrite.  If this is a blocking connection, blocks until
+     * data is sent.
+     */
+    public boolean write() {
+        System.out.println("ManagedConnection::write");
+        synchronized (WRITE_LOCK) {
+            
+            // TODO:: we should probably throw IOException here
+            if(!isOpen()) return true;
+            
+            //Terminate when either
+            //a) super cannot send any more data because its send
+            //   buffer is full OR
+            //b) neither super nor this have any queued data
+            //c) the socket is closed
+
+            // Add more queued data if possible.
+            if (!_messageWriter.hasPendingMessage()) {
+                Message m = null;
+                System.out.println("ManagedConnection::write::open::about to get lock");
+                synchronized (this) {
+                    System.out.println("ManagedConnection::write::open::got LOCK!!");
+                    m = QUEUE.removeNext();
+                    if (m == null)
+                        return false;    //Nothing left to send (a)
+                        
+                    // TODO: re-enable stats
+                    //_numSentMessagesDropped += QUEUE.resetDropped();
+                }
+                //boolean hasUnsentData = super.write(m);
+             
+                try {
+                    
+                    // this will add it again to the writers if necessary
+                    return _messageWriter.write(m);
+                } catch (IOException e) {
+                    // TODO we probably want to throw this!!
+                    e.printStackTrace();
+                    return true;
+                }
+                //if (hasUnsentData)
+                  //  return true;         //needs another write (b)
+            }     
+            
+            //Otherwise write pending message.  Abort if this didn't
+            //complete.
+            
+            try {
+                return writePendingMessage();
+            } catch (IOException e) {
+                // TODO we probably want to throw this!!
+                return true;
+            }
+                //boolean hasUnsentData = super.write();
+                //if (hasUnsentData)
+                //  return true;         //needs another write (b)
+        }
+    }
+    
+    /**
+     * Utility method that checks this connection's spam filters to see
+     * if the specified message qualifies as spam.
+     * 
+     * @param m the <tt>Message</tt> instance to check
+     * @return <tt>true</tt> if the message is considered spam, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isSpam(Message m) {
+        if (!_routeFilter.allow(m)) {
+            if(!CommonUtils.isJava118()) {
+                ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
+            }
+            return true;
+        }
+        return false;
     }
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
@@ -1029,6 +1174,7 @@ public class Connection {
      * @return true iff this still has unsent queued data.  If true, the caller
      *  must subsequently call write() again 
      */
+    /*
     public boolean write(Message m) {
         if (!isOpen()) {
             return false;
@@ -1043,6 +1189,7 @@ public class Connection {
             return false;
         }                 
     }
+    */
 
     /**
      * Sends as much queued data as possible, if any.  Calls
@@ -1053,10 +1200,10 @@ public class Connection {
      * needs to know whether to register the write operation.  That's why this
      * returns a value instead of using the callback.
      * 
-     * @return true iff this still has unsent queued data.  If true, the caller
-     *  must subsequently call write() again 
+     * @return <tt>true</tt> if the pending message was successfully written,
+     *  otherwise <tt>false</tt>
      */
-    public boolean write() {
+    private boolean writePendingMessage() throws IOException {
         if (!isOpen()) {
             return false;
         }
@@ -1072,9 +1219,7 @@ public class Connection {
             }    
 			return _messageWriter.write();
 			// TODO1 handle statististics -- compression etc.
-        } catch (IOException e) {
-            return false;
-        }  catch(NullPointerException e) {
+        } catch(NullPointerException e) {
 			return false;
             //throw CONNECTION_CLOSED;
         }               
@@ -1759,6 +1904,39 @@ public class Connection {
     	return _softMax;
     }
 
+    /**
+     * A callback for Message Handler implementations to check to see if a
+     * message is considered to be undesirable by the message's receiving
+     * connection.
+     * Messages ignored for this reason are not considered to be dropped, so
+     * no statistics are incremented here.
+     *
+     * @return true if the message is spam, false if it's okay
+     */
+    public boolean isPersonalSpam(Message m) {
+        return !_personalFilter.allow(m);
+    }
+
+    /**
+     * @modifies this
+     * @effects sets the underlying routing filter.   Note that
+     *  most filters are not thread-safe, so they should not be shared
+     *  among multiple connections.
+     */
+    public void setRouteFilter(SpamFilter filter) {
+        _routeFilter = filter;
+    }
+
+    /**
+     * @modifies this
+     * @effects sets the underlying personal filter.   Note that
+     *  most filters are not thread-safe, so they should not be shared
+     *  among multiple connections.
+     */
+    public void setPersonalFilter(SpamFilter filter) {
+        _personalFilter = filter;
+    }
+    
     // overrides Object.toString
     public String toString() {
         return "CONNECTION: host=" + _host  + " port=" + _port; 
