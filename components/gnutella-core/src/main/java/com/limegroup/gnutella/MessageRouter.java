@@ -148,8 +148,8 @@ public abstract class MessageRouter
      */
     public void initialize()
     {
-        _acceptor = RouterService.getAcceptor();//acceptor;
-        _manager = RouterService.getConnectionManager();//manager;
+        _acceptor = RouterService.getAcceptor();
+        _manager = RouterService.getConnectionManager();
 		_forMeReplyHandler = new ForMeReplyHandler();
     }
 
@@ -222,6 +222,8 @@ public abstract class MessageRouter
         // Increment hops and decrease TTL.
         msg.hop();
 
+		QueryUnicaster.instance().addUnicastEndpoint(datagram.getAddress(), 
+													 datagram.getPort());
 		UDPReplyHandler handler = 
 		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
 		
