@@ -194,6 +194,9 @@ public final class MulticastService implements Runnable {
                     // before RouterService was instantiated.
                     // but we can cache the value for speed
                     if(router == null) router = RouterService.getMessageRouter();
+
+                    // if the router is still null, just continue
+                    if(router == null) continue;
                     router.handleMulticastMessage(message, datagram);
                 }
                 catch (IOException e) {
