@@ -18,6 +18,10 @@ public abstract class UploadState implements HTTPMessage {
 	protected final HTTPUploader UPLOADER;
 	protected final FileDesc FILE_DESC;
 	
+	/** the last set of proxies that I wrote to the other side*/
+	private Set _lastProxies;
+	
+	
 	public UploadState() {
 		this(null);
 	}
@@ -81,7 +85,22 @@ public abstract class UploadState implements HTTPMessage {
 	    if (RouterService.acceptedIncomingConnection())
 	        return;
 	    
+	    
 	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    
+	    if (_lastProxies==null)
+	        _lastProxies = proxies;
+	    else {
+	        // check if any of our proxies changed since last time
+	        Set temp = new HashSet(proxies);
+	        temp.retainAll(_lastProxies);
+	        
+	        // if not, we don't send the header
+	        if (temp.size() == _lastProxies.size())
+	            return;
+	        
+	        _lastProxies=proxies;
+	    }
 	    
 	    StringBuffer buf = new StringBuffer();
 	    int proxiesWritten =0;
