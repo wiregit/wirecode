@@ -1259,19 +1259,17 @@ public class ConnectionManager {
         //set the remote port if not outgoing connection (as for the outgoing
         //connection, we already know the port at which remote host listens)
         if((remoteAddress != null) && (!connection.isOutgoing())) {
+            int colonIndex = remoteAddress.indexOf(':');
+            if(colonIndex == -1) return;
+            colonIndex++;
+            if(colonIndex > remoteAddress.length()) return;
             try {
                 connection.setOrigPort(
-                    Integer.parseInt(remoteAddress.substring(
-                    remoteAddress.indexOf(':') + 1).trim()));
-            }
-            catch(Exception e){
-                //no problem
-                //should never happen though if the other client is well-coded
-            }
+                    Integer.parseInt(remoteAddress.substring(colonIndex).trim()));
+            } catch(NumberFormatException e){
+                // should nothappen though if the other client is well-coded
+            } 
         }
-        
-        //We used to check X_NEED_ULTRAPEER here, but that is no longer
-        //necessary.
     }
    
     /** 
