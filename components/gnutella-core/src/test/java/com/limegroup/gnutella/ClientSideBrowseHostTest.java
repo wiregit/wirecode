@@ -231,15 +231,10 @@ public class ClientSideBrowseHostTest
 
         // tell the leaf to browse host the file, should result in direct HTTP
         // request
-        Thread browseThread = new Thread() {
-            public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 null);
-            }
-        };
-        browseThread.start();
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -333,15 +328,10 @@ public class ClientSideBrowseHostTest
 
         // tell the leaf to browse host the file, should result in PushProxy
         // request
-        Thread browseThread = new Thread() {
-            public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
-            }
-        };
-        browseThread.start();
 
         // wait for the incoming PushProxy request
         Socket httpSock = ss.accept();
@@ -468,16 +458,10 @@ public class ClientSideBrowseHostTest
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file,
-        Thread browseThread = new Thread() {
-            public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+        rs.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
-            }
-        };
-        browseThread.start();
-        Thread.yield();
 
         // nothing works for the guy, we should get a PushRequest
         do {

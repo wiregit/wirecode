@@ -1143,12 +1143,24 @@ public class RouterService {
      * case I need to push....
      * @param proxies the list of PushProxies we can use - may be null.
 	 */
-	public static void doBrowseHost(String host, int port, 
-                                    GUID guid, GUID serventID,
-                                    Set proxies) {
-        BrowseHostHandler handler = new BrowseHostHandler(callback, 
+	public static BrowseHostHandler doAsynchronousBrowseHost(
+	  final String host, final int port, GUID guid, GUID serventID, 
+	  final Set proxies) {
+        final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        handler.browseHost(host, port, proxies);
+        Thread asynch = new Thread( new Runnable() {
+            public void run() {
+                try {
+                    handler.browseHost(host, port, proxies);
+                } catch(Throwable t) {
+                    ErrorService.error(t);
+                }
+            }
+        }, "BrowseHoster" );
+        asynch.setDaemon(true);
+        asynch.start();
+        
+        return handler;
 	}
 
     /**

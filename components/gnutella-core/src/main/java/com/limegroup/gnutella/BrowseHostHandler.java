@@ -8,11 +8,28 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /** Handles all stuff necessary for browsing of networks hosts. 
     Has a instance component, one per browse host, and a static Map of instances
     that is used to coordinate between replies to PushRequests.
  */
 public class BrowseHostHandler {
+    
+    private static final Log LOG = LogFactory.getLog(BrowseHostHandler.class);
+    
+    /**
+     * Various internal states for Browse-Hosting.
+     */
+    private static final int NOT_STARTED = -1;
+    private static final int STARTED = 0;
+    private static final int DIRECTLY_CONNECTING = 1;
+    private static final int PUSHING = 2;
+    private static final int EXCHANGING = 3;
+    private static final int FINISHED = 4;
+
+    private static final int DIRECT_CONNECT_TIME = 10000; // 10 seconds.
 
     private static final long EXPIRE_TIME = 9000; // 9 seconds
 
@@ -34,6 +51,26 @@ public class BrowseHostHandler {
      * needed.
      */
     private GUID _serventID = null;
+    
+    /**
+     * The total length of the http-reply.
+     */
+    private volatile long _replyLength = 0;
+    
+    /**
+     * The current length of the reply.
+     */
+    private volatile long _currentLength = 0;
+    
+    /**
+     * The current state of this BH.
+     */
+    private volatile int _state = NOT_STARTED;
+    
+    /**
+     * The time this state started.
+     */
+    private volatile long _stateStarted = 0;
 
     static {
         Expirer expirer = new Expirer();
@@ -64,6 +101,7 @@ public class BrowseHostHandler {
      * @param proxies the <tt>Set</tt> of push proxies to try
      */
     public void browseHost(String host, int port, Set proxies) {
+        setState(STARTED);
         // flow of operation:
         // 1. check if you need to push.
         //   a. if so, just send a Push out.
@@ -75,10 +113,11 @@ public class BrowseHostHandler {
         case 0: // false
             try {
                 // simply try connecting and getting results....
-                Socket socket = Sockets.connect(host, port, 0);
+                setState(DIRECTLY_CONNECTING);
+                Socket socket = Sockets.connect(host, port,
+                                                DIRECT_CONNECT_TIME);
                 browseExchange(socket);
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 // try pushing for fun.... (if we have the guid of the servent)
                 shouldTryPush = true;
             }
@@ -87,9 +126,8 @@ public class BrowseHostHandler {
         case 1: // true
             // if we're trying to push & we don't have a servent guid, it fails
             if ( _serventID == null ) {
-                _callback.browseHostFailed(_guid);
-            } 
-            else {
+                failed();
+            } else {
                 RemoteFileDesc fakeRFD = 
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
@@ -99,6 +137,8 @@ public class BrowseHostHandler {
                 synchronized (_pushedHosts) {
                     _pushedHosts.put(_serventID, new PushRequestDetails(this));
                 }
+                
+                setState(PUSHING);
 
                 // send the Push after registering in case you get a response 
                 // really quickly.  reuse code in DM cuz that works well
@@ -107,21 +147,70 @@ public class BrowseHostHandler {
                     synchronized (_pushedHosts) {
                         _pushedHosts.remove(_serventID);
                     }
-                    _callback.browseHostFailed(_guid);
+                    failed();
                 }
             }
             break;
         }
     }
 
+    /**
+     * Returns the current percentage complete of the state
+     * of the browse host.
+     */
+    public double getPercentComplete(long currentTime) {
+        long elapsed;
+        
+        switch(_state) {
+        case NOT_STARTED: return 0d;
+        case STARTED: return 0d;
+        case DIRECTLY_CONNECTING:
+            // return how long it'll take to connect.
+            elapsed = currentTime - _stateStarted;
+            return (double) elapsed / DIRECT_CONNECT_TIME;
+        case PUSHING:
+            // return how long it'll take to push.
+            elapsed = currentTime - _stateStarted;
+            return (double) elapsed / EXPIRE_TIME;
+        case EXCHANGING:
+            // return how long it'll take to finish reading,
+            // or stay at .5 if we dunno the length.
+            if( _replyLength > 0 )
+                return (double)_currentLength / _replyLength;
+            else
+                return 0.5;
+        case FINISHED:
+            return 1.0;
+        default:
+            throw new IllegalStateException("invalid state");
+        }
+    }
+        
+    /**
+     * Sets the state and state-time.
+     */
+    private void setState(int state) {
+        _state = state;
+        _stateStarted = System.currentTimeMillis();
+    }    
+     
+    /**
+     * Indicates that this browse host has failed.
+     */   
+    private void failed() {
+        setState(FINISHED);
+        _callback.browseHostFailed(_guid);
+    }
 
     private void browseExchange(Socket socket) throws IOException {
-        debug("BHH.browseExchange(): entered.");
+        LOG.trace("BHH.browseExchange(): entered.");
+        setState(EXCHANGING);
+        
         // first write the request...
         final String LF = "\r\n";
         String str = null;
         OutputStream oStream = socket.getOutputStream();
-        debug("BHH.browseExchange(): got output stream.");
+        LOG.trace("BHH.browseExchange(): got output stream.");
 
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
@@ -140,32 +229,32 @@ public class BrowseHostHandler {
         str = LF;
         oStream.write(str.getBytes());
         oStream.flush();
-        debug("BHH.browseExchange(): wrote request A-OK.");
+        LOG.trace("BHH.browseExchange(): wrote request A-OK.");
         
         // get the results...
         InputStream in = socket.getInputStream();
-        debug("BHH.browseExchange(): got input stream.");
+        LOG.trace("BHH.browseExchange(): got input stream.");
 
         // first check the HTTP code, encoding, etc...
         ByteReader br = new ByteReader(in);
-        debug("BHH.browseExchange(): trying to get HTTP code....");
+        LOG.trace("BHH.browseExchange(): trying to get HTTP code....");
         int code = parseHTTPCode(br.readLine());
         if ((code < 200) || (code >= 300))
             throw new IOException();
-        debug("BHH.browseExchange(): HTTP Response is " + code);
+        if(LOG.isDebugEnabled())
+            LOG.debug("BHH.browseExchange(): HTTP Response is " + code);
 
         // now confirm the content-type, the encoding, etc...
         boolean readingHTTP = true;
         String currLine = null;
         while (readingHTTP) {
             currLine = br.readLine();
-            debug("BHH.browseExchange(): currLine = " + currLine);
+            if(LOG.isDebugEnabled())
+                LOG.debug("BHH.browseExchange(): currLine = " + currLine);
             if ((currLine == null) || currLine.equals("")) {
                 // start processing queries...
                 readingHTTP = false;
             }
-            else if (indexOfIgnoreCase(currLine, "Server") > -1)
-                ; // just skip, who cares?
             else if (indexOfIgnoreCase(currLine, "Content-Type") > -1) {
                 // make sure it is QRs....
                 if (indexOfIgnoreCase(currLine, 
@@ -175,8 +264,13 @@ public class BrowseHostHandler {
             else if (indexOfIgnoreCase(currLine, "Content-Encoding") > -1) {
                 throw new IOException();  //  decompress currently not supported
             }
+            else if (markContentLength(currLine))
+                ; // do nothing special
+            
         }
-        debug("BHH.browseExchange(): read HTTP seemingly OK.");
+        LOG.debug("BHH.browseExchange(): read HTTP seemingly OK.");
+        
+        in = new BufferedInputStream(in);
 
         // ok, everything checks out, proceed and read QRs...
         Message m = null;
@@ -190,19 +284,41 @@ public class BrowseHostHandler {
             catch (IOException bpe) {
                 // thrown when stream is closed
             }
-            if(m == null) 
+            if(m == null) {
                 //we are finished reading the stream
+                setState(FINISHED);
                 return;
-            else {
+            } else {
                 if(m instanceof QueryReply) {
-                    debug("BHH.browseExchange(): read a QR");        
+                    _currentLength += m.getTotalLength();
+                    LOG.trace("BHH.browseExchange(): read a QR");        
                     QueryReply reply = (QueryReply)m;
                     reply.setGUID(_guid);
 					
 					RouterService.getSearchResultHandler().handleQueryReply(reply);
                 }
             }
-        }        
+        }
+    }
+    
+    /**
+     * Reads and marks the content-length for this line, if exists.
+     */
+    private boolean markContentLength(final String line) {
+        int idx = indexOfIgnoreCase(line, "Content-Length:");
+        if( idx < 0 )
+            return false;
+            
+        // get the string after the ':'
+        String length = line.substring("Content-Length:".length()).trim();
+        
+        try {
+            _replyLength = Long.parseLong(length);
+        } catch(NumberFormatException ignored) {
+            // ignore.
+        }
+        
+        return true;
     }
 
 
@@ -264,7 +380,8 @@ public class BrowseHostHandler {
 		
 		String num = token.trim();
 		try {
-            debug("BHH.parseHTTPCode(): returning " + num);
+		    if(LOG.isDebugEnabled())
+                LOG.debug("BHH.parseHTTPCode(): returning " + num);
 			return java.lang.Integer.parseInt(num);
 		} catch (NumberFormatException e) {
 			throw new IOException();
@@ -279,7 +396,7 @@ public class BrowseHostHandler {
     public static boolean handlePush(int index, GUID serventID, Socket socket) 
         throws IOException {
         boolean retVal = false;
-        debug("BHH.handlePush(): entered.");
+        LOG.trace("BHH.handlePush(): entered.");
         if (index == SPECIAL_INDEX)
             ; // you'd hope, but not necessary...
 
@@ -292,9 +409,9 @@ public class BrowseHostHandler {
             retVal = true;
         }
         else
-            debug("BHH.handlePush(): no matching BHH.");
+            LOG.debug("BHH.handlePush(): no matching BHH.");
 
-        debug("BHH.handlePush(): returning.");
+        LOG.trace("BHH.handlePush(): returning.");
         return retVal;
     }
 
@@ -312,9 +429,9 @@ public class BrowseHostHandler {
                         PushRequestDetails currPRD = null;
                         currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
                         if ((currPRD != null) && (currPRD.isExpired())) {
-                            debug("Expirer.run(): expiring a badboy.");
+                            LOG.debug("Expirer.run(): expiring a badboy.");
                             toRemove.add(currKey);
-                            currPRD.bhh._callback.browseHostFailed(currPRD.bhh._guid);
+                            currPRD.bhh.failed();
                         }
                     }
                     // done iterating through _pushedHosts, remove the keys now...
@@ -341,15 +458,4 @@ public class BrowseHostHandler {
             return ((System.currentTimeMillis() - timeStamp) > EXPIRE_TIME);
         }
     }
-
-    private final static boolean debugOn = false;
-    private final static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final static void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
 }
