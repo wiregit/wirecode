@@ -218,7 +218,8 @@ public class Acceptor extends Thread {
      *   changed accordingly.
      */
     public void run() {
-		int tempPort = SettingsManager.instance().getPort();
+		SettingsManager settings = SettingsManager.instance();
+		int tempPort = settings.getPort();
 		ActivityCallback callback = RouterService.getCallback();
 
         //0. Get local address.  This must be done here--not in the static
@@ -255,7 +256,7 @@ public class Acceptor extends Thread {
         }
 
         if (_port!=oldPort) {
-            SettingsManager.instance().setPort(_port);
+            settings.setPort(_port);
         }
 
         while (true) {
@@ -291,7 +292,7 @@ public class Acceptor extends Thread {
 				InetAddress address = client.getInetAddress();
 				byte[] addressBytes = address.getAddress();
                 if (isBannedIP(address.getHostAddress()) ||
-					addressBytes[0] == 127) {
+					(settings.getLocalIsPrivate() && (addressBytes[0] == 127))) {
                     client.close();
                     continue;
                 }
@@ -300,7 +301,7 @@ public class Acceptor extends Thread {
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
-				SettingsManager.instance().setAcceptedIncoming(_acceptedIncoming);
+				settings.setAcceptedIncoming(_acceptedIncoming);
 
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
