@@ -67,8 +67,7 @@ public final class NIOHeaderReader implements HeaderReader {
         if(line == null) {
             return null;
         }
-        if(line.length() == 0) {
-            _headersComplete = true;
+        if(headersComplete()) {
             return null;
         }
         return HTTPHeader.createHeader(line);     
@@ -110,7 +109,7 @@ public final class NIOHeaderReader implements HeaderReader {
      */    
     private String readLine() throws IOException {
         _headersComplete = false;
-        // if there are more headers to read in the buffer, keep reading
+        // If there are more headers to read in the buffer, keep reading
         if(_headerByteBuffer.position() != 0 && 
            _headerByteBuffer.hasRemaining())  {
             String header = read(_headerByteBuffer);
@@ -127,7 +126,7 @@ public final class NIOHeaderReader implements HeaderReader {
         } 
 
     
-        // we can safely clear the buffer here because all data in the buffer
+        // We can safely clear the buffer here because all data in the buffer
         // has been read at this point -- hasRemaining is false
         // prepare the buffer for reading again
         _headerByteBuffer.clear();
@@ -138,7 +137,7 @@ public final class NIOHeaderReader implements HeaderReader {
         int bytesRead = CHANNEL.read(_headerByteBuffer);
 
         if(bytesRead == -1)  {
-            // remove the buffer memory as fast as possible
+            // Remove the buffer memory as fast as possible
             _headerByteBuffer = null;
             throw new IOException("socket closed by remote host");
         }
@@ -151,7 +150,6 @@ public final class NIOHeaderReader implements HeaderReader {
             return null;
         }
     
-        //_header = new HttpHeader();
         return header;         
     }
     
