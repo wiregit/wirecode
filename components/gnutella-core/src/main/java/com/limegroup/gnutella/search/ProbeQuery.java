@@ -77,7 +77,6 @@ final class ProbeQuery {
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
         while(iter.hasNext()) {
-
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
                 QueryHandler.sendQueryToHost(query, 
@@ -167,32 +166,10 @@ final class ProbeQuery {
             return returnLists;
         }
 
-        // mitigate the extremes of the popularity measurement a bit
-        //popularity = popularity * 0.75;
-        
-        // the number of TTL=1 nodes we would hit if we had that many
-        // connections with hits
-        int idealTTL1ConnectionsToHit =
-            Math.max(2, (int)(30.0 * (double)(1.0-popularity)));
-
-        int realTTL1ConnectionsToHit =
-            Math.min(numHitConnections, idealTTL1ConnectionsToHit);
-
-        ttl1List.addAll(hitConnections.subList(0, realTTL1ConnectionsToHit));        
-
-        // the "left over" number of nodes we need to hit after all
-        // of our hit connections are used up.
-        int extraNodesNeeded =
-            idealTTL1ConnectionsToHit - realTTL1ConnectionsToHit;
-        
-        // add more TTL=2 nodes to the probe if we need them
-        if(extraNodesNeeded > 0 && numHitConnections < 3) {
-            if(extraNodesNeeded < 25) {
-                addToList(ttl2List, oldConnections, missConnections, 1);
-            } else {
-                addToList(ttl2List, oldConnections, missConnections, 2);
-            }
-        }
+        // otherwise, it's not very widely distributed content -- send
+        // the query to all hit connections plus 3 TTL=2 connections
+        ttl1List.addAll(hitConnections);        
+        addToList(ttl2List, oldConnections, missConnections, 3);
 
         return returnLists;        
     }
