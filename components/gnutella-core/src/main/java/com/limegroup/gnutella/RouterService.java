@@ -549,23 +549,23 @@ public final class RouterService {
     /**
      *  Returns the total number of messages sent and received.
      */
-    public static int getTotalMessages() {
-        return( router.getNumMessages() );
-    }
+//      public static int getTotalMessages() {
+//          return( router.getNumMessages() );
+//      }
 
     /**
      *  Returns the total number of dropped messages.
      */
-    public static int getTotalDroppedMessages() {
-        return( router.getNumDroppedMessages() );
-    }
+//      public static int getTotalDroppedMessages() {
+//          return( router.getNumDroppedMessages() );
+//      }
 
     /**
      *  Returns the total number of misrouted messages.
      */
-    public static int getTotalRouteErrors() {
-        return( router.getNumRouteErrors() );
-    }
+//      public static int getTotalRouteErrors() {
+//          return( router.getNumRouteErrors() );
+//      }
 
     /**
      *  Returns the number of good hosts in my horizon.
@@ -676,9 +676,11 @@ public final class RouterService {
 	 *  typically in XML format
 	 * @see query(byte[], String, int, MediaType)
 	 */
-	public static void query(final byte[] guid, final String query, 
-					  final String richQuery, 
-					  final int minSpeed, final MediaType type) {
+	public static void query(final byte[] guid, 
+							 final String query, 
+							 final String richQuery, 
+							 final int minSpeed, 
+							 final MediaType type) {
 
 		Thread searcherThread = new Thread() {
 			public void run() {
@@ -785,9 +787,9 @@ public final class RouterService {
     /**
      *  Returns the number searches made to the local database.
      */
-    public static int getNumLocalSearches() {
-        return router.getNumQueryRequests();
-    }
+//      public static int getNumLocalSearches() {
+//          return router.getNumQueryRequests();
+//      }
 
     /**
      *  Ensures that the given host:port pair is not in the host catcher.
