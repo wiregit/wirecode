@@ -44,13 +44,31 @@ public class FixedsizeForgetfulHashMap implements Map
      * list) When the underlying hashMap reaches the user defined size, we
      * remove an element from the underlying hashMap before inserting a new one.
      * The element removed is the one which is first in the removeList (ie the
-     * element that was inserted first
+     * element that was inserted first.)
      *
      * If we insert same 'key' twice to the underlying hashMap, we remove 
      * the previous entry in the removeList(if present) (its similar to
      * changing the remove timestamp for that entry). In other words, adding a
      * key again, removes the previous footprints (ie it again becomes the last
      * element to be removed, irrespective of the history(previous position)) 
+     *
+     * ABSTRACTION FUNCTION: a typical FixedsizeForgetfulHashMap is a list of
+     * key value pairs [ (K1, V1), ... (KN, VN) ] ordered from oldest to
+     * youngest where
+     *         K_I=removeList.get(I)
+     *         V_I=map.get(K_I).getValue()
+     *  
+     * INVARIANTS: here "a=b" is  shorthand for "a.equals(b)"
+     *   +for all keys k in map, where ve==map.get(k),  
+     *          ve.getListElement() is an element of list
+     *          ve.getListElement().getKey()=k
+     *          k!=null && ve!=null && ve.getValue()!=null  (no null values!)
+     *   +for all elements l in removeList, where k=l.getKey() and ve=map.get(l)
+     *          ve!=null (i.e., k is a key in map)
+     *          ve.getListElement=l
+     *
+     * A corrolary of this invariant is that no duplicate keys may be stored in
+     * removeList.
      */
 
     /** The underlying map from keys to [value, list element] pairs */
@@ -168,8 +186,8 @@ public class FixedsizeForgetfulHashMap implements Map
         //add the mapping
         //the method takes care of adding the information to the remove list
         //and other details (like updating current count)
-        Object oldValue = addMapping(key,value);
-    
+        Object oldValue = addMapping(key,value);   
+
         //return the old value
         return oldValue;
     }
@@ -383,12 +401,23 @@ public class FixedsizeForgetfulHashMap implements Map
         public boolean hasNext() {
             return real.hasNext();
         }
+        /** Same as Iterator.remove().  That means that calling remove()
+         *  multiple times may have undefined results! */
         public void remove() {
             if (lastYielded==null)
                 return;
+            //Cleanup entry in removeList.  Note that we cannot simply call
+            //FixedsizeForgetfulHashMap.this.remove(lastYielded) since that may
+            //affect the underlying map--while iterating through it.
+            ValueElement ve = (ValueElement)map.get(lastYielded);
+            if (ve != null)  //not strictly needed by specification of remove.
+            {
+                currentSize--;
+                removeList.remove(ve.getListElement());      
+            }
+            //Cleanup entry in underlying map.  This MUST be done through
+            //the iterator only, to prevent inconsistent state.
             real.remove();
-            //Cleanup entry in removeList.  That's the whole point of this mess!
-            FixedsizeForgetfulHashMap.this.remove(lastYielded); 
         }
     }
 
@@ -407,6 +436,33 @@ public class FixedsizeForgetfulHashMap implements Map
         throw new UnsupportedOperationException();
     }
  
+    //////////////////////////////////////////////////////////////////////
+
+    /** Tests the invariants described above. */
+    public void repOk() {
+        for (Iterator iter=map.keySet().iterator(); iter.hasNext(); ) {
+            Object k=iter.next();
+            Assert.that(k!=null, "Null key (1)");
+            ValueElement ve=(ValueElement)map.get(k);
+            Assert.that(ve!=null, "Null value element (1)");
+            Assert.that(ve.getValue()!=null, "Null real value (1)");
+            Assert.that(removeList.contains(ve.getListElement()), 
+                        "Invariant 1a failed");
+            Assert.that(ve.getListElement().getKey().equals(k),
+                        "Invariant 1b failed");
+        }
+
+        for (Iterator iter=removeList.iterator(); iter.hasNext(); ) {
+            DoublyLinkedList.ListElement l=
+                (DoublyLinkedList.ListElement)iter.next();
+            Object k=l.getKey();
+            Assert.that(k!=null, "Null key (2)");
+            ValueElement ve=(ValueElement)map.get(k);
+            Assert.that(ve!=null, "Null value element (2)");
+            Assert.that(ve.getListElement().equals(l), "Invariant 2b failed");
+        }
+    }
+    
 
     /** Unit test */
     /*
@@ -503,35 +559,48 @@ public class FixedsizeForgetfulHashMap implements Map
 
         //4. keySet().iterator() methods.  (Other methods are incomplete.)
         Iterator iter=null;
-        rt=new FixedsizeForgetfulHashMap(3);
+        rt=new FixedsizeForgetfulHashMap(4);
         rt.put(g1, c1);
-        rt.put(g2, c2);
+        rt.put(g2, c5);
+        rt.put(g2, c2);             //remap c2
         rt.put(g3, c3);
+        rt.put(g4, c4);
         iter=rt.keySet().iterator();
         Assert.that(iter.hasNext());
         Object a1=iter.next();
-        Assert.that(a1==g1 || a1==g2 || a1==g3);
+        Assert.that(a1==g1 || a1==g2 || a1==g3 || a1==g4);
         Assert.that(iter.hasNext());
         Object a2=iter.next();
+        Assert.that(rt.size()==4);
         iter.remove();               //remove a2
-        Assert.that(a2==g1 || a2==g2 || a2==g3);
+        Assert.that(rt.size()==3);
+        Assert.that(a2==g1 || a2==g2 || a2==g3 || a2==g4);
         Assert.that(a1!=a2);
         Assert.that(iter.hasNext());
         Object a3=iter.next();
-        Assert.that(a3==g1 || a3==g2 || a3==g3);
+        Assert.that(rt.size()==3);
+        iter.remove();               //remove a3
+        Assert.that(rt.size()==2);
+        Assert.that(a3==g1 || a3==g2 || a3==g3 || a3==g4);
         Assert.that(a3!=a2);
         Assert.that(a3!=a1);
+        Object a4=iter.next();
+        Assert.that(a4==g1 || a4==g2 || a4==g3 || a4==g4);
+        Assert.that(a4!=a3);
+        Assert.that(a4!=a2);
+        Assert.that(a4!=a1);
         Assert.that(! iter.hasNext());
         
         iter=rt.keySet().iterator();
         Assert.that(rt.containsKey(a1));
         Assert.that(! rt.containsKey(a2));
-        Assert.that(rt.containsKey(a3));
-        Object a4=iter.next();
-        Assert.that(a4==a1 || a4==a3);  //NOT a2
-        Object a5=iter.next();
-        Assert.that(a5==a1 || a5==a3);  //NOT a2
-        Assert.that(a5!=a4);
+        Assert.that(! rt.containsKey(a3));
+        Assert.that(rt.containsKey(a4));
+        Object b1=iter.next();
+        Assert.that(b1==a1 || b1==a4);  //NOT a2, a3
+        Object b2=iter.next();
+        Assert.that(b1==a1 || b1==a4);  //NOT a2, a3
+        Assert.that(b1!=b2);
         Assert.that(! iter.hasNext());
     }
     */

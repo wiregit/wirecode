@@ -14,6 +14,11 @@ import java.net.UnknownHostException;
 public class Endpoint implements Cloneable, Serializable,
 com.sun.java.util.collections.Comparable
 {
+    /**
+    * serial version (needed for serialization/deserialization)
+    */
+    static final long serialVersionUID = 4686711693494625070L;
+    
     String hostname = null;
     int port = 0;
     /** Number of files at the host, or -1 if unknown */

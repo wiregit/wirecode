@@ -20,10 +20,11 @@ public class HTTPManager {
     private ByteReader _br;
     private int _uploadBegin;
     private int _uploadEnd;
+	private String userAgent    = null;
+	//private String userAltruism = null;
 
     /**
-     * @requires If isPush, "GIV " was just read from s.
-     *           Otherwise, "GET " was just read from s.
+     * @requires !isPush and "GET " was just read from s.
      * @effects  Transfers the file over s <i>in the foreground</i>.
      *           Throws IOException if the handshake failed.
      */
@@ -41,7 +42,12 @@ public class HTTPManager {
             //reset the timeout immediately before downloading;
             //otherwise, it isn't touched again.
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
-            _istream = _socket.getInputStream();
+            //The try-catch below is a work-around for JDK bug 4091706.
+            try {
+                _istream = _socket.getInputStream();
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _br = new ByteReader(_istream);
             command = _br.readLine();   /* read in the first line */
             if (command==null)
@@ -75,50 +81,29 @@ public class HTTPManager {
 
                 // Prevent excess uploads from starting
                 //if ( callback.getNumUploads() >=
-                if ( HTTPUploader.getUploadCount() >=
-                     SettingsManager.instance().getMaxUploads() )
+                while ( HTTPUploader.getUploadCount() >=
+                        SettingsManager.instance().getMaxUploads() )
                 {
-                    HTTPUploader.doLimitReached(s);
-                    return;
+					// If you can't blow away a "Gnutella" upload
+					if ( ! HTTPUploader.checkForLowPriorityUpload(userAgent) )
+					{
+						// Report Limit Reached
+                        HTTPUploader.doLimitReached(s);
+                        return;
+					}
                 }
 
                 HTTPUploader uploader;
                 uploader = new HTTPUploader(s, _filename, _index,
                                             callback,
                                             _uploadBegin, _uploadEnd);
+				uploader.setUserAgent(userAgent);
                 Thread.currentThread().setName("HTTPUploader (normal)");
                 uploader.run(); //Ok, since we've already spawned a thread.
             }
 
             else /* isPush */ {
-                //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
-                String next=_br.readLine();
-                if (next==null || (! next.equals(""))) {
-                    throw new IOException();
-                }
-
-                //1. Extract file index.  IndexOutOfBoundsException
-                //   or NumberFormatExceptions will be thrown here if there's
-                //   a problem.  They're caught below.
-                int i=command.indexOf(":");
-                _index=Integer.parseInt(command.substring(0,i));
-                //2. Extract clientID.  This can throw
-                //   IndexOutOfBoundsException or
-                //   IllegalArgumentException, which is caught below.
-                int j=command.indexOf("/", i);
-                byte[] guid=GUID.fromHexString(command.substring(i+1,j));
-                //3. Extract file name.  This can throw
-                //   IndexOutOfBoundsException.
-                _filename=command.substring(j+1);
-
-
-                //Constructor to HTTPUploader checks that we can accept the
-                //file.
-                HTTPDownloader downloader;
-                downloader = new HTTPDownloader(s, _filename, _index, guid,
-                                                router, acceptor, callback);
-                Thread.currentThread().setName("HTTPDownload (push)");
-                downloader.run(); //Ok, since we've already spawned a thread.
+                Assert.that(false, "HTTManager is obsolescent.  Pushes no longer supported.");
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();
@@ -126,10 +111,7 @@ public class HTTPManager {
             throw new IOException();
         } catch (IllegalArgumentException e) {
             throw new IOException();
-        } catch (IllegalAccessException e) {
-            //We never requested the specified file!
-            throw new IOException();
-        }
+        } 
     }
 
     public void readRange() throws IOException {
@@ -171,8 +153,47 @@ public class HTTPManager {
                     }
                 }
             }
-        }
-    }
+
+
+			// TODO2:  Implement some form of altruism
+  			//if (str.indexOf("User-Altruism") != -1) {
+  			//	userAltruism = str;
+  			//}
+
+			// check the User-Agent field of the header information
+			if (str.indexOf("User-Agent:") != -1) {
+				// check for netscape, internet explorer,
+				// or other free riding downoaders
+				if (SettingsManager.instance().getAllowBrowser() == false) {
+
+					// if we are not supposed to read from them
+					// throw an exception
+					if( (str.indexOf("Mozilla") != -1) ||
+						(str.indexOf("DA") != -1) ||
+						(str.indexOf("Download") != -1) ||
+						(str.indexOf("FlashGet") != -1) ||
+						(str.indexOf("GetRight") != -1) ||
+						(str.indexOf("Go!Zilla") != -1) ||
+						(str.indexOf("Inet") != -1) ||
+						(str.indexOf("MIIxpc") != -1) ||
+						(str.indexOf("MSProxy") != -1) ||
+						(str.indexOf("Mass") != -1) ||
+						(str.indexOf("MyGetRight") != -1) ||
+						(str.indexOf("NetAnts") != -1) ||
+						(str.indexOf("NetZip") != -1) ||
+						(str.indexOf("RealDownload") != -1) ||
+						(str.indexOf("SmartDownload") != -1) ||
+						(str.indexOf("Teleport") != -1) ||
+						(str.indexOf("WebDownloader") != -1) ) {
+							HTTPUploader.doFreeloaderResponse(_socket);
+						    throw new IOException("Web Browser");
+						}
+					
+				}
+				userAgent = str.substring(11).trim();
+			}
+		}
+	}
 
     public void shutdown() {
         try {

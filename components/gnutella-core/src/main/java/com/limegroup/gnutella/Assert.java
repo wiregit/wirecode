@@ -7,7 +7,7 @@ public class Assert {
     public static void that(boolean ok, String msg) {
         if (!ok) {
             System.err.println("Assertion failed: "+msg);
-            throw new AssertFailure();
+            throw new AssertFailure(msg);
         }
     }
 
@@ -17,4 +17,7 @@ public class Assert {
 }
     
 class AssertFailure extends RuntimeException {
+    AssertFailure(String msg) {
+        super(msg);
+    }
 }

@@ -91,7 +91,8 @@ public class Connection {
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
-     * asynchronously before initialize() completes.
+     * asynchronously before initialize() completes.  Note that the 
+     * connection may have been remotely closed even if _closed==true.
      */
     private volatile boolean _closed=false;
 
@@ -149,7 +150,7 @@ public class Connection {
             //NullPointerException if the socket is closed.  (See Sun bug
             //4091706.)  Unfortunately the socket may have been closed after the
             //the check above, e.g., if the user pressed disconnect.  So we
-            //catch NullPointerException here--any any other weird possible
+            //catch NullPointerException here--and any other weird possible
             //exceptions.  An alternative is to obtain a lock before doing these
             //calls, but we are afraid that getInput/OutputStream may be a
             //blocking operation.  Just to be safe, we also check that in/out
@@ -174,14 +175,12 @@ public class Connection {
 
     /**
      * Called only from initialize()
-     * @requires _socket is properly set up
+     * @requires _socket, _out are properly set up
      */
     private void sendString(String s) throws IOException {
-        //TODO1: timeout.
         byte[] bytes=s.getBytes();
-        OutputStream out=_socket.getOutputStream();
-        out.write(bytes);
-        out.flush();
+        _out.write(bytes);
+        _out.flush();
     }
 
     /**
@@ -232,6 +231,13 @@ public class Connection {
      *  results in InterruptedIOException.
      */
     public Message receive() throws IOException, BadPacketException {
+        //On the Macintosh, sockets *appear* to return the same ping reply
+        //repeatedly if the connection has been closed remotely.  This prevents
+        //connections from dying.  The following works around the problem.  Note
+        //that Message.read may still throw IOException below.
+        if (_closed)
+            throw new IOException();
+
         Message m = null;
         while (m == null) {
             m = Message.read(_in, HEADER_BUF);
@@ -252,6 +258,10 @@ public class Connection {
      */
     public Message receive(int timeout)
             throws IOException, BadPacketException, InterruptedIOException {
+        //See note in receive().
+        if (_closed)
+            throw new IOException();
+
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);

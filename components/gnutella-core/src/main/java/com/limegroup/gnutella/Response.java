@@ -15,6 +15,12 @@ public class Response {
     private String name;
     private String metadata;
 
+    /** The meta variable is a string of meta information that
+     *  will be added per response (as opposed to per QueryReply
+     */
+    private String meta;
+
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,

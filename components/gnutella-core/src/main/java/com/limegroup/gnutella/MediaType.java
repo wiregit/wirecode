@@ -64,7 +64,8 @@ public class MediaType {
 													   "hqx", "tar", "tgz", "z"});
 		MediaType audio=new MediaType("Audio", 
 									  new String[] {"mp3", "wav", "au", 
-													"aif", "aiff", "ra", "ram"});
+													"aif", "aiff", "ra", 
+													"ram", "rmj", "lqt"});
 		MediaType video=new MediaType("Video", 
 									  new String[] {"mpg", "mpeg", "asf", "qt", 
 													"mov", "avi", "mpe", "swf", "dcr"});

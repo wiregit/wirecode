@@ -77,7 +77,7 @@ public abstract class MessageRouter
     /**
      * The number of PushRequests we actually process after filtering, either by
      * routing to another connection or by launching an HTTPUploader.
-     * Note that excludes PushRequests we generate through HTTPDownloader.
+     * Note that excludes PushRequests we generate through Downloader.
      */
     private volatile int _numPushRequests;
     /**
@@ -622,7 +622,7 @@ public abstract class MessageRouter
     /**
      * @return the number of PushRequests we actually process after filtering,
      * either by routing to another connection or by launching an HTTPUploader.
-     * Note that excludes PushRequests we generate through HTTPDownloader.
+     * Note that excludes PushRequests we generate through Downloader.
      */
     public int getNumPushRequests()
     {

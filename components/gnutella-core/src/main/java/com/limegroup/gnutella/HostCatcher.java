@@ -43,7 +43,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.
      */
-    private BucketQueue /* of ComparableEndpoint */ queue=
+    private BucketQueue /* of Endpoint */ queue=
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
@@ -52,7 +52,7 @@ public class HostCatcher {
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ActivityCallback callback;
-    private SettingsInterface settings=SettingsManager.instance();
+    private SettingsManager settings=SettingsManager.instance();
 
     private Thread routerConnectorThread;
     /* True if the cache has expired and the host catcher has not yet tried

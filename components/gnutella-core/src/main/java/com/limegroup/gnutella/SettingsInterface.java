@@ -1,9 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.util.Properties;
-import com.sun.java.util.collections.*;
-import java.io.IOException;
-
 /**
  *  This class sets up an interface for the SettingsManager
  *  It's designed to make life simpler, so hopefully it
@@ -18,190 +14,7 @@ import java.io.IOException;
 
 public interface SettingsInterface
 {
-    // Accessor methods
-    public byte       getTTL();
-    public byte       getSoftMaxTTL();
-    public byte       getMaxTTL();
-    public int        getMaxLength();
-    public int        getTimeout();
-    public String     getHostList();
-    public int        getKeepAlive();
-    public int        getPort();
-    public int        getConnectionSpeed();
-    public int        getUploadSpeed();
-    public byte       getSearchLimit();
-    public String     getClientID();
-    public int        getMaxIncomingConnections();
-    public String     getSaveDirectory();
-    public String     getSaveDefault();
-    public String     getDirectories();
-    public String     getExtensions();
-    public String     getIncompleteDirectory();
-    public String     getGMLTemplateDirectory();
-    public String     getGMLReplyFile();
-    public String[]   getBannedIps();
-    public String[]   getBannedWords();
-    public boolean    getFilterDuplicates();
-    public boolean    getFilterAdult();
-    public boolean    getFilterVbs();
-    public boolean    getFilterHtml();
-    public boolean    getFilterGreedyQueries();
-    public boolean    getFilterBearShareQueries();
-    public boolean    getUseQuickConnect();
-    public String[]   getQuickConnectHosts();
-    public int        getParallelSearchMax();
-    public int        getMaxSimDownload();
-    public int        getMaxUploads();
-    public boolean    getClearCompletedUpload();
-    public boolean    getClearCompletedDownload();
-    public int        getSearchAnimationTime();
-
-    public String     getConnectString();
-    public String     getConnectOkString();
-
-   /** The current version of LimeWire.  This is read-only. */
-    public String getCurrentVersion();
-    public String getLastVersionChecked();
-    public boolean getCheckAgain();
-
-    /* For Forced IP and Port */
-    public boolean getForceIPAddress();
-    public byte[] getForcedIPAddress();
-    public int getForcedPort();
-
-    public int getFreeloaderFiles();
-    public int getFreeloaderAllowed();
-
-    /** writes out the properties to disk */
-    public void writeProperties();
-
-    /** returns the Properties file for Network Discovery */
-    public Properties getNDProps();
-
-    /** returns the path where the properties and host
-     *  host list file get saved*/
-    public String getPath();
-
-    /** set the user time to live */
-    public void setTTL(byte ttl)
-        throws IllegalArgumentException;
-
-    /** set the soft maximum time to live (TTLs above this are readjusted) */
-    public void setSoftMaxTTL(byte smaxttl)
-        throws IllegalArgumentException;
-
-    /** set the hard maximum time to live (TTLs above this are dropped) */
-    public void setMaxTTL(byte maxttl)
-        throws IllegalArgumentException;
-
-    /** set the maximum length of packets */
-    public void setMaxLength(int maxLength)
-        throws IllegalArgumentException;
-
-    /** set the timeout */
-    public void setTimeout(int timeout)
-        throws IllegalArgumentException;
-
-    /** set the keep alive */
-    public void setKeepAlive(int keepAlive)
-        throws IllegalArgumentException;
-
-    /** set the keep alive, ensuring it is not too large. */
-    public void setKeepAlive(int keepAlive, boolean checkUpperLimit)
-        throws BadConnectionSettingException;
-
-    /** set the port */
-    public void setPort(int port)
-        throws IllegalArgumentException;
-
-    /** set the network connection speed */
-    public void setConnectionSpeed(int speed)
-        throws IllegalArgumentException;
-
-    /** sets the percentage of bandwidth to use for uploads. */
-    public void setUploadSpeed(int speed)
-    throws IllegalArgumentException;
-
-    /** set the maximum number of searches */
-    public void setSearchLimit(byte limit)
-        throws IllegalArgumentException;
-
-    /** set the client (gu) id */
-    public void setClientID(String clientID)
-        throws IllegalArgumentException;
-
-    /** set the maximum number of connections */
-    public void setMaxIncomingConnections(int maxConn)
-        throws IllegalArgumentException;
-
-    /** set the maximum number of incoming connections,
-     *  ensuring the value is not too large. */
-    public void setMaxIncomingConnections(int maxConn, boolean checkUpperLimit)
-        throws BadConnectionSettingException;
-
-    /** sets the directory for saving files*/
-    public void setSaveDirectory(String dir)
-        throws IllegalArgumentException;
-    /** sets the default directory for saving files*/
-    public void setSaveDefault(String dir)
-        throws IllegalArgumentException;
-
-    /** sets the string list of directories*/
-    public void setDirectories(String directories)
-        throws IllegalArgumentException;
-
-    /** sets the string of extensions*/
-    public void setExtensions(String extensions)
-        throws IllegalArgumentException;
-
-    /** sets the directory for saving incomplete files */
-    public void setIncompleteDirectory(String dir)
-        throws IllegalArgumentException;
-
-    public void setBannedIps(String[] ips)
-        throws IllegalArgumentException;
-
-    /** Set the list of words to ban in queries.
-     *  If words is not a semicolon-separated list of white-space
-     *  free words, throws IllegalArgumentException. */
-    public void setBannedWords(String[] words)
-        throws IllegalArgumentException;
-
-    /** Sets whether duplicate packets should be ignored. */
-    public void setFilterDuplicates(boolean b);
-
-    /** Sets whether queries that are not
-     *  family-friendly should be ignored. */
-    public void setFilterAdult(boolean b);
-    public void setFilterVbs(boolean b);
-    public void setFilterHtml(boolean b);
-    public void setFilterGreedyQueries(boolean b);
-    public void setFilterBearShareQueries(boolean b);
-
-    public void setUseQuickConnect(boolean b);
-    public void setQuickConnectHosts(String[] hosts);
-    public void setParallelSearchMax(int max);
-    public void setMaxSimDownload(int max);
-    public void setMaxUploads(int max);
-    public void setClearCompletedUpload(boolean b);
-    public void setClearCompletedDownload(boolean b);
-    public void setSearchAnimationTime(int seconds);
-
-    /** Sets the handshake string for initializing outgoing connections,
-     *  without trailing newlines. */
-    public void setConnectString(String connect);
-    /** Sets the handshake string for initializing outgoing connections,
-     *  without trailing newlines. */
-    public void setConnectOkString(String ok);
-
-    public void setLastVersionChecked(String last);
-    public void setCheckAgain(boolean check);
-
-    public void setFreeloaderFiles(int files);
-    public void setFreeloaderAllowed(int probability);
-
-    public void setWrite(boolean b);
-
+    public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
     /** Default setting for the soft maximum time to live */
@@ -231,7 +44,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
@@ -240,8 +53,11 @@ public interface SettingsInterface
     public static final String  DEFAULT_EXTENSIONS     =
     "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
     "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-    "exe;zip;gz;gzip;hqx;tar;tgz;z";
+    "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi";
 
+
+    /* the number of uplads allowed per person at a given time */
+    public static final int     DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
@@ -272,7 +88,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.6d";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.2b";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
     public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
     public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
@@ -280,8 +96,12 @@ public interface SettingsInterface
     public static final int     DEFAULT_FORCED_PORT = 6346;
     public static final int     DEFAULT_FREELOADER_FILES = 1;
     public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
+    public static final long    DEFAULT_AVERAGE_UPTIME = 200;
+    public static final long    DEFAULT_TOTAL_UPTIME = 0;
+    public static final int     DEFAULT_SESSIONS = 1;
 
     // The property key name constants
+    public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
     public static final String MAX_TTL        = "MAX_TTL";
@@ -333,4 +153,8 @@ public interface SettingsInterface
     public static final String FREELOADER_FILES = "FREELOADER_FILES";
     public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
 
+    public static final String UPLOADS_PER_PERSON = "UPLOADS_PER_PERSON";
+    public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
+    public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
+    public static final String SESSIONS           = "SESSIONS";
 }
