@@ -95,21 +95,31 @@ public final class ID3Reader {
 
     public LimeXMLDocument readDocument(File file) throws IOException {
         Object[] info = parseFile(file);
-        short track = ((Short) info[4]).shortValue(), 
-        gen = ((Short) info[6]).shortValue();
-        int bitrate = ((Integer) info[7]).intValue(),
-        seconds = ((Integer) info[8]).intValue();
+        short track = ((Short) info[4]).shortValue();
+        short gen = ((Short) info[6]).shortValue();
+        int bitrate = ((Integer) info[7]).intValue();
+        int seconds = ((Integer) info[8]).intValue();
+        String genre = getGenreString(gen);
 
         List nameValList = new ArrayList();
-        nameValList.add(new NameValue(TITLE_KEY, info[0]));
-        nameValList.add(new NameValue(ARTIST_KEY, info[1]));
-        nameValList.add(new NameValue(ALBUM_KEY, info[2]));
-        nameValList.add(new NameValue(YEAR_KEY, info[3]));
-        nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
-        nameValList.add(new NameValue(TRACK_KEY, ""+track));
-        nameValList.add(new NameValue(GENRE_KEY, ""+gen));
-        nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
-        nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
+        if(!((String)info[0]).equals(""))
+            nameValList.add(new NameValue(TITLE_KEY, info[0]));
+        if(!((String)info[1]).equals(""))
+            nameValList.add(new NameValue(ARTIST_KEY, info[1]));
+        if(!((String)info[2]).equals(""))
+            nameValList.add(new NameValue(ALBUM_KEY, info[2]));
+        if(!((String)info[3]).equals(""))
+            nameValList.add(new NameValue(YEAR_KEY, info[3]));
+        if(!((String)info[5]).equals(""))
+            nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
+        if(track > 0)
+            nameValList.add(new NameValue(TRACK_KEY, ""+track));
+        if(!genre.equals("") )
+            nameValList.add(new NameValue(GENRE_KEY, genre));
+        if(bitrate > 0)
+            nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
+        if(seconds > 0) 
+            nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
 
         return new LimeXMLDocument(nameValList, schemaURI);
     }
