@@ -18,8 +18,8 @@ public class ConnectionHandshakeHeaders
     public static final String QUERY_ROUTING    = "Query-Routing";
     public static final String PONG_CACHING     = "Pong-Caching";
     public static final String SUPERNODE_NEEDED = "Supernode-Needed";
-    public static final String USERNAME         = "Login";
-    public static final String PASSWORD         = "Password";
-    public static final String DOMAINS_AUTHENTICATED = 
-        "Domains-Authenticated";
+    public static final String X_USERNAME         = "X-Username";
+    public static final String X_PASSWORD         = "X-Password";
+    public static final String X_DOMAINS_AUTHENTICATED = 
+        "X-Domains-Authenticated";
 }
