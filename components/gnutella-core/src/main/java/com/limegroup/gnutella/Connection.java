@@ -7,11 +7,17 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.connection.*;
+import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Set;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -59,7 +65,7 @@ import com.limegroup.gnutella.statistics.*;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection {
+public class Connection implements ReplyHandler, PushProxyInterface {
     
     /**
      * Lock for maintaining accurate data for when to allow ping forwarding.
@@ -70,6 +76,30 @@ public class Connection {
      * Lock for maintaining accurate data for when to allow pong forwarding.
      */
     private final Object PONG_LOCK = new Object();
+    
+    /** 
+     * The maximum number of times ManagedConnection instances should send UDP
+     * ConnectBack requests.
+     */
+    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+
+    /** 
+     * The maximum number of times ManagedConnection instances should send TCP
+     * ConnectBack requests.
+     */
+    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
+    
+    /** 
+     * The time to wait between route table updates for leaves, 
+     * in milliseconds. 
+     */
+    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
+
+    /** 
+     * The time to wait between route table updates for Ultrapeers, 
+     * in milliseconds. 
+     */
+    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
     
     /** 
      * The underlying socket, its address, and input and output streams.  sock,
@@ -106,34 +136,6 @@ public class Connection {
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
     private Deflater _deflater;
-    
-    /**
-     * The number of bytes sent to the output stream.
-     */
-    private volatile long _bytesSent;
-    
-    /**
-     * The number of bytes recieved from the input stream.
-     */
-    private volatile long _bytesReceived;
-    
-    /**
-     * The number of compressed bytes sent to the stream.
-     * This is effectively the same as _deflater.getTotalOut(),
-     * but must be cached because Deflater's behaviour is undefined
-     * after end() has been called on it, which is done when this
-     * connection is closed.
-     */
-    private volatile long _compressedBytesSent;
-    
-    /**
-     * The number of compressed bytes read from the stream.
-     * This is effectively the same as _inflater.getTotalIn(),
-     * but must be cached because Inflater's behaviour is undefined
-     * after end() has been called on it, which is done when this
-     * connection is closed.
-     */
-    private volatile long _compressedBytesReceived;
 
     /** The possibly non-null VendorMessagePayload which describes what
      *  VendorMessages the guy on the other side of this connection supports.
@@ -169,15 +171,17 @@ public class Connection {
     private HandshakeResponse _headersWritten = 
         HandshakeResponse.createEmptyResponse();        
 
-    /** For outgoing Gnutella 0.6 connections, the properties written
-     *  after "GNUTELLA CONNECT".  Null otherwise. */
+    /** 
+     * For outgoing Gnutella 0.6 connections, the properties written
+     * after "GNUTELLA CONNECT".  Null otherwise. 
+     */
     private final Properties REQUEST_HEADERS;
 
     /** 
      * For outgoing Gnutella 0.6 connections, a function calculating the
-     *  properties written after the server's "GNUTELLA OK".  For incoming
-     *  Gnutella 0.6 connections, the properties written after the client's
-     *  "GNUTELLA CONNECT".
+     * properties written after the server's "GNUTELLA OK".  For incoming
+     * Gnutella 0.6 connections, the properties written after the client's
+     * "GNUTELLA CONNECT".
      * Non-final so that the responder can be garbage collected after we've
      * concluded the responding (by setting to null).
      */
@@ -253,7 +257,85 @@ public class Connection {
      */
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
+        
+    /** 
+     * The next time I should send a query route table to this connection.
+     */
+    private long _nextQRPForwardTime;
+    
+    /** 
+     * True iff this should not be policed by the ConnectionWatchdog, e.g.,
+     * because this is a connection to a Clip2 reflector. 
+     */
+    private boolean _isKillable = true;
+    
+    /** 
+     * Use this if a PushProxyAck is received for this MC meaning the remote
+     * Ultrapeer can serve as a PushProxy.
+     */
+    private InetAddress pushProxyAddr = null;
 
+    /** 
+     * Use this if a PushProxyAck is received for this MC meaning the remote
+     * Ultrapeer can serve as a PushProxy.
+     */
+    private int pushProxyPort = -1;
+    
+    /** Use this if a HopsFlowVM instructs us to stop sending queries below
+     *  this certain hops value....
+     */
+    private int softMaxHops = -1;
+
+
+    /** The class wide static counter for the number of udp connect back 
+     *  request sent.
+     */
+    private static int _numUDPConnectBackRequests = 0;
+
+    /** The class wide static counter for the number of tcp connect back 
+     *  request sent.
+     */
+    private static int _numTCPConnectBackRequests = 0;
+
+    /**
+     * Variable for the <tt>QueryRouteTable</tt> sent for this 
+     * connection.
+     */
+    private QueryRouteTable _lastQRPTableSent;
+    
+    /**
+     * Handle to the message writer for this connection.
+     */
+    private MessageWriter _messageWriter;
+    
+    /**
+     * Handle to the message reader for this connection.
+     */
+    private MessageReader _messageReader;
+    
+    /**
+     * Handle to the statistics recording class for this connection.
+     */
+    private ConnectionStats _connectionStats;
+    
+    /**
+     * Handle to the class that wraps all calls to the query routing tables
+     * for this connection.
+     */
+    private QRPHandler QRP_HANDLER = QRPHandler.createHandler();
+    
+    /** 
+     * Filter for filtering out messages that are considered spam.
+     */
+    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
+    private volatile SpamFilter _personalFilter =
+        SpamFilter.newPersonalFilter();
+        
+    /**
+     * The domain to which this connection is authenticated
+     */
+    private Set _domains;
+    
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
@@ -339,6 +421,78 @@ public class Connection {
     protected void handleVendorMessage(VendorMessage vm) {
         if (vm instanceof MessagesSupportedVendorMessage)
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
+            
+        // now i can process
+        if (vm instanceof HopsFlowVendorMessage) {
+            // update the softMaxHops value so it can take effect....
+            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
+            softMaxHops = hops.getHopValue();
+        }
+        else if (vm instanceof PushProxyAcknowledgement) {
+            // this connection can serve as a PushProxy, so note this....
+            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
+            if (Arrays.equals(ack.getGUID(),
+                              RouterService.getMessageRouter()._clientGUID)) {
+                pushProxyPort = ack.getListeningPort();
+                pushProxyAddr = ack.getListeningAddress();
+            }
+            // else mistake on the server side - the guid should be my client
+            // guid - not really necessary but whatever
+        }
+        else if (vm instanceof MessagesSupportedVendorMessage) {
+
+            // see if you need a PushProxy - the remoteHostSupportsPushProxy
+            // test incorporates my leaf status in it.....
+            if (remoteHostSupportsPushProxy() > -1) {
+                // get the client GUID and send off a PushProxyRequest
+                GUID clientGUID =
+                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                try {
+                    PushProxyRequest req = new PushProxyRequest(clientGUID);
+                    send(req);
+                }
+                catch (BadPacketException never) {
+                    ErrorService.error(never);
+                }
+            }
+
+            // if we are ignoring local addresses and the connection is local
+            // or the guy has a similar address then ignore
+            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+               (isLocal() || !isConnectBackCapable()))
+                return;
+
+            // do i need to send any ConnectBack messages????
+            if (!UDPService.instance().canReceiveUnsolicited() &&
+                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsUDPConnectBack() > -1)) {
+                try {
+                    GUID connectBackGUID =
+                        RouterService.getUDPConnectBackGUID();
+                    UDPConnectBackVendorMessage udp = 
+                        new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                        connectBackGUID);
+                    send(udp);
+                    _numUDPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ErrorService.error(ignored);
+                }
+            }
+            if (!RouterService.acceptedIncomingConnection() &&
+                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsTCPConnectBack() > -1)) {
+                try {
+                    TCPConnectBackVendorMessage tcp =
+                       new TCPConnectBackVendorMessage(RouterService.getPort());
+                    send(tcp);
+                    _numTCPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ErrorService.error(ignored);
+                }
+            }
+        }
     }
 
 
@@ -458,6 +612,9 @@ public class Connection {
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
               
+            _connectionStats = new ConnectionStats(this);
+              
+            // check for updates from this host  
             UpdateManager.instance().checkAndUpdate(this);          
         } catch (NoGnutellaOkException e) {
             close();
@@ -872,6 +1029,16 @@ public class Connection {
         return new BufferedInputStream(_socket.getInputStream());
     }    
     
+    /**
+     * Builds queues and starts the OutputRunner.  This is intentionally not
+     * in initialize(), as we do not want to create the queues and start
+     * the OutputRunner for reject connections.
+     */
+    public void buildAndStartQueues() {
+        // at this point, everything's initialized, so create our readers and
+        // writers.
+        _messageWriter = new MessageWriterProxy(this);
+    }        
     
 
     /////////////////////////////////////////////////////////////////////////
@@ -908,6 +1075,9 @@ public class Connection {
         while (m == null) {
             m = readAndUpdateStatistics();
         }
+        
+        // record received message in stats
+        stats().addReceived();
         return m;
     }
 
@@ -936,6 +1106,9 @@ public class Connection {
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             }
+            
+            // record received message in stats
+            stats().addReceived();
             return m;
         } finally {
             _socket.setSoTimeout(oldTimeout);
@@ -974,8 +1147,8 @@ public class Connection {
             // making it appear as if the deflated input
             // was actually larger.
             if( isReadDeflated() ) {
-                _compressedBytesReceived = _inflater.getTotalIn();
-                _bytesReceived = _inflater.getTotalOut();
+                stats().addCompressedBytesReceived(_inflater.getTotalIn());
+                stats().addBytesReceived(_inflater.getTotalOut());
                 if(!CommonUtils.isJava118()) {
                     CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
                         (_inflater.getTotalOut() - pUncompressed));
@@ -983,12 +1156,48 @@ public class Connection {
                         (_inflater.getTotalIn() - pCompressed));
                 }            
             } else if(msg != null) {
-                _bytesReceived += msg.getTotalLength();
+                stats().addBytesReceived(msg.getTotalLength());
             }
         } catch(NullPointerException npe) {
             throw CONNECTION_CLOSED;
         }
         return msg;
+    }
+    
+    /**
+     * Sends a message.  This overrides does extra buffering so that Messages
+     * are dropped if the socket gets backed up.  Will remove any extended
+     * payloads if the receiving connection does not support GGGEP.   Also
+     * updates MessageRouter stats.<p>
+     *
+     * This method IS thread safe.  Multiple threads can be in a send call
+     * at the same time for a given connection.
+     *
+     * @requires this is fully constructed
+     * @modifies the network underlying this
+     * @effects send m on the network.  Throws IOException if the connection
+     *  is already closed.  This is thread-safe and guaranteed not to block.
+     */
+    public void send(Message msg) {
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time....
+        if ((softMaxHops > -1) &&
+            (msg instanceof QueryRequest) &&
+            (msg.getHops() >= softMaxHops)) {
+                
+            //TODO: record stats for this
+            return;
+        }
+
+        if (! supportsGGEP())
+            msg = msg.stripExtendedPayload();
+            
+        try {
+            _messageWriter.write(msg);
+        } catch (IOException e) {
+            // this should never happen
+            ErrorService.error(e);
+        }
     }
 
     /**
@@ -1029,6 +1238,26 @@ public class Connection {
             throw CONNECTION_CLOSED;
         }
     }
+    
+    /**
+     * Updates the write statistics.
+     * @param m the possibly null message to add to the bytes sent
+     * @param pUn the prior uncompressed traffic, used for adding to stats
+     * @param pComp the prior compressed traffic, used for adding to stats
+     */
+    private void updateWriteStatistics(Message m, long pUn, long pComp) {
+        if( m != null )
+            stats().addBytesSent(m.getTotalLength());
+        if(isWriteDeflated()) {
+            stats().addCompressedBytesSent(_deflater.getTotalOut());
+            if(!CommonUtils.isJava118()) {
+                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalIn() - pUn));
+                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
+                    (int)(_deflater.getTotalOut() - pComp));
+            }
+        }
+    }         
 
     /**
      * Flushes any buffered messages sent through the send method.
@@ -1064,85 +1293,66 @@ public class Connection {
     }
     
     /**
-     * Updates the write statistics.
-     * @param m the possibly null message to add to the bytes sent
-     * @param pUn the prior uncompressed traffic, used for adding to stats
-     * @param pComp the prior compressed traffic, used for adding to stats
+     * This method is called when a reply is received for a PingRequest
+     * originating on this Connection.  So, just send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
      */
-    private void updateWriteStatistics(Message m, long pUn, long pComp) {
-        if( m != null )
-            _bytesSent += m.getTotalLength();
-        if(isWriteDeflated()) {
-            _compressedBytesSent = _deflater.getTotalOut();
-            if(!CommonUtils.isJava118()) {
-                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalIn() - pUn));
-                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalOut() - pComp));
-            }
-        }
-    }               
+    public void handlePingReply(PingReply pingReply,
+                                ReplyHandler rh) {
+        send(pingReply);
+    }
+
+    /**
+     * This method is called when a reply is received for a QueryRequest
+     * originating on this Connection.  So, send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
+     */
+    public void handleQueryReply(QueryReply queryReply,
+                                 ReplyHandler rh) {
+        send(queryReply);
+    }
+
+    /**
+     * This method is called when a PushRequest is received for a QueryReply
+     * originating on this Connection.  So, just send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
+     */
+    public void handlePushRequest(PushRequest pushRequest,
+                                  ReplyHandler rh) {
+        send(pushRequest);
+    }  
     
     /**
-     * Returns the number of bytes sent on this connection.
-     * If the outgoing stream is compressed, the return value indicates
-     * the compressed number of bytes sent.
+     * Accessor for the <tt>MessageReader</tt> instance for this connection.
+     * The reader handles reading all messages to the network.
+     * 
+     * @return the <tt>MessageReader</tt> for this connection
      */
-    public long getBytesSent() {
-        if(isWriteDeflated())
-            return _compressedBytesSent;
-        else            
-            return _bytesSent;
-    }
-    
-    /**
-     * Returns the number of uncompressed bytes sent on this connection.
-     * If the outgoing stream is not compressed, this is effectively the same
-     * as calling getBytesSent()
-     */
-    public long getUncompressedBytesSent() {
-        return _bytesSent;
-    }
-    
-    /** 
-     * Returns the number of bytes received on this connection.
-     * If the incoming stream is compressed, the return value indicates
-     * the number of compressed bytes received.
-     */
-    public long getBytesReceived() {
-        if(isReadDeflated())
-            return _compressedBytesReceived;
-        else
-            return _bytesReceived;
+    public MessageReader getReader() {
+        return _messageReader;    
     }
     
     /**
-     * Returns the number of uncompressed bytes read on this connection.
-     * If the incoming stream is not compressed, this is effectively the same
-     * as calling getBytesReceived()
+     * Accessor for the <tt>MessageWriter</tt> instance for this connection.
+     * The writer handles writing all messages to the network.
+     * 
+     * @return the <tt>MessageWriter</tt> for this connection
      */
-    public long getUncompressedBytesReceived() {
-        return _bytesReceived;
+    public MessageWriter getWriter() {
+        return _messageWriter;    
     }
     
     /**
-     * Returns the percentage saved through compressing the outgoing data.
-     * The value may be slightly off until the output stream is flushed,
-     * because the value of the compressed bytes is not calculated until
-     * then.
+     * Accessor for the <tt>QRPHandler</tt> for this connection.
+     * 
+     * @return the <tt>QRPHandler</tt> for this connection
      */
-    public float getSentSavedFromCompression() {
-        if( !isWriteDeflated() || _bytesSent == 0 ) return 0;
-        return 1-((float)_compressedBytesSent/(float)_bytesSent);
-    }
-    
-    /**
-     * Returns the percentage saved from having the incoming data compressed.
-     */
-    public float getReadSavedFromCompression() {
-        if( !isReadDeflated() || _bytesReceived == 0 ) return 0;
-        return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
-    }
+    public QRPHandler qrp() {
+        return QRP_HANDLER;    
+    }   
 
    /**
     * Returns the IP address of the remote host as a string.
@@ -1331,6 +1541,13 @@ public class Connection {
      *  Closes the Connection's socket and thus the connection itself.
      */
     public void close() {
+        
+        // the writer can be null for testing
+        if(_messageWriter != null) {
+            // notify the message writing thread to finish sending and die
+            _messageWriter.close();
+        }
+        
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
         _closed = true;
@@ -1698,11 +1915,243 @@ public class Connection {
         return _headers.isQueryRoutingEnabled();
     }
 
+
+    /** Returns the system time that we should next forward a query route table
+     *  along this connection.  Only valid if isClientSupernodeConnection() is
+     *  true. */
+    public long getNextQRPForwardTime() {
+        return _nextQRPForwardTime;
+    }
+
+    /**
+     * Increments the next time we should forward query route tables for
+     * this connection.  This depends on whether or not this is a connection
+     * to a leaf or to an Ultrapeer.
+     *
+     * @param curTime the current time in milliseconds, used to calculate 
+     *  the next update time
+     */
+    public void incrementNextQRPForwardTime(long curTime) {
+        if(isLeafConnection()) {
+            _nextQRPForwardTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
+        } else {
+            // otherwise, it's an Ultrapeer
+            _nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
+        }
+    }
+
+    /** 
+     * Returns true if this should not be policed by the ConnectionWatchdog,
+     * e.g., because this is a connection to a Clip2 reflector. Default value:
+     * true.
+     */
+    public boolean isKillable() {
+        return _isKillable;
+    }
+    
+    /** 
+     * Accessor for the query route table associated with this.  This is
+     * guaranteed to be non-null, but it may not yet contain any data.
+     *
+     * @return the <tt>QueryRouteTable</tt> instance containing
+     *  query route table data sent along this connection, or <tt>null</tt>
+     *  if no data has yet been sent
+     */
+    public QueryRouteTable getQueryRouteTableSent() {
+        return _lastQRPTableSent;
+    }
+
+    /**
+     * Mutator for the last query route table that was sent along this
+     * connection.
+     *
+     * @param qrt the last query route table that was sent along this
+     *  connection
+     */
+    public void setQueryRouteTableSent(QueryRouteTable qrt) {
+        _lastQRPTableSent = qrt;
+    }
+
+    
+    /** @return a non-negative integer representing the proxy's port for HTTP
+     *  communication, a negative number if PushProxy isn't supported.
+     */
+    public int getPushProxyPort() {
+        return pushProxyPort;
+    }
+
+    /** @return the InetAddress of the remote host - only meaningful if
+     *  getPushProxyPort() > -1
+     *  @see getPushProxyPort()
+     */
+    public InetAddress getPushProxyAddress() {
+        return pushProxyAddr;
+    }
+ 
+    /**
+      * Utility method for checking whether or not this message is considered
+      * spam.
+      * 
+      * @param m the <tt>Message</tt> to check
+      * @return <tt>true</tt> if this is considered spam, otherwise 
+      *  <tt>false</tt>
+      */
+     public boolean isSpam(Message m) {
+         return !_routeFilter.allow(m);
+     }
+
+     //
+     // Begin Message dropping and filtering calls
+     //
+
+     /**
+      * A callback for Message Handler implementations to check to see if a
+      * message is considered to be undesirable by the message's receiving
+      * connection.
+      * Messages ignored for this reason are not considered to be dropped, so
+      * no statistics are incremented here.
+      *
+      * @return true if the message is spam, false if it's okay
+      */
+     public boolean isPersonalSpam(Message m) {
+         return !_personalFilter.allow(m);
+     }
+
+     /**
+      * @modifies this
+      * @effects sets the underlying routing filter.   Note that
+      *  most filters are not thread-safe, so they should not be shared
+      *  among multiple connections.
+      */
+     public void setRouteFilter(SpamFilter filter) {
+         _routeFilter = filter;
+     }
+
+     /**
+      * @modifies this
+      * @effects sets the underlying personal filter.   Note that
+      *  most filters are not thread-safe, so they should not be shared
+      *  among multiple connections.
+      */
+     public void setPersonalFilter(SpamFilter filter) {
+         _personalFilter = filter;
+     }
+    
+     /**
+      * Returns the domain to which this connection is authenticated
+      * @return the set (of String) of domains to which this connection 
+      * is authenticated. Returns
+      * null, in case of unauthenticated connection
+      */
+     public Set getDomains(){
+         //Note that this method is not synchronized, and so _domains may 
+         //get initialized multiple times (in case multiple threads invoke this
+         //method, before domains is initialized). But thats not a problem as
+         //all the instances will have same values, and all but 1 of them 
+         //will get garbage collected
+        
+         if(_domains == null){
+             //initialize domains
+             _domains = createDomainSet();
+         }
+         //return the initialized domains
+         return _domains;
+//         return (String[])_domains.toArray(new String[0]);
+     }
+
+     /**
+      * creates the set (of String) of domains from the properties sent/received
+      * @return the set (of String) of domains
+      */
+     private Set createDomainSet(){
+         Set domainSet;
+         //get the domain property
+         //In case of outgoing connection, we received the domains from the
+         //remote host to whom we authenticated, viceversa for incoming
+         //connection
+         String domainsAuthenticated;
+         if(this.isOutgoing())
+             domainsAuthenticated = getDomainsAuthenticated();
+         else
+             domainsAuthenticated = getPropertyWritten(
+                 HeaderNames.X_DOMAINS_AUTHENTICATED);
+
+         //for unauthenticated connections
+         if(domainsAuthenticated == null){
+             //if no authentication done, initialize to a default domain set
+             domainSet = User.createDefaultDomainSet();
+         }else{
+             domainSet = StringUtils.getSetofValues(domainsAuthenticated);
+         }
+        
+         //return the domain set
+         return domainSet;
+     } 
+
+   
+    /**
+     * Implements <tt>ReplyHandler</tt> interface.  Delegates to stats handler
+     * for this connection.
+     */
+    public void countDroppedMessage() {
+        stats().countDroppedMessage();    
+    }
+    
+    /**
+     * Implements <tt>ReplyHandler</tt> interface.  Delegates to stats handler
+     * for this connection.
+     * 
+     * @return the number of messages received by this connection
+     */
+    public int getNumMessagesReceived() {
+        return stats().getNumMessagesReceived();
+    }
+    
+    /**
+     * Accessor for the stats recording class for this connection.
+     * 
+     * @return the <tt>ConnectionStats</tt> instance for recording stats for
+     *  this connection
+     */
+    public ConnectionStats stats() {
+        return _connectionStats;
+    }
+    
+//////////////////// STATS  //////////////////////////
+
+
+    
     // overrides Object.toString
     public String toString() {
         return "CONNECTION: host=" + _host  + " port=" + _port; 
     }
+
+    /** 
+     * True if the OutputRunner died.  For testing only. 
+     */
+    private boolean _runnerDied = false;
     
+    /**
+     * Sets whether or not the sending thread has died -- USED ONLY
+     * FOR TESTING!
+     * 
+     * @param died specifies whether or not the sender thread has died
+     */
+    public void setSenderDied(boolean died) {
+        _runnerDied = died;    
+    }
+    
+   
+    
+    /***************************************************************************
+     * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionBufferTest
+     **************************************************************************/
+
+
+    /** FOR TESTING PURPOSES ONLY! */
+    boolean runnerDied() {
+        return _runnerDied;
+    }
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is
