@@ -500,7 +500,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        this.dloaderManagerThread=new Thread() {
+        this.dloaderManagerThread=new Thread("ManagedDownload") {
             public void run() {
                 try { 
                     tryAllDownloads(deserialized);
@@ -1647,7 +1647,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //OK. We are going to create a thread for each RFD, 
             for(int i=0; i<connectTo && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
-                Thread connectCreator = new Thread() {
+                Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
                         boolean iterate = false;
                         try {

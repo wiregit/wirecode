@@ -52,7 +52,7 @@ public class URLOpener {
     public synchronized URLConnection connect(int timeout) 
             throws IOException {
         //Asynchronously establish connection.
-        Thread t = new Thread(new URLOpenerThread());
+        Thread t = new Thread(new URLOpenerThread(), "URLOpener");
         t.start();
         
         //Wait for connection to be established, or for timeout.

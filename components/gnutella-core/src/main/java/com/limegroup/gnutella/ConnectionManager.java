@@ -169,7 +169,8 @@ public class ConnectionManager {
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
-        Thread conn = new Thread(new OutgoingConnector(c, false));
+        Thread conn =
+            new Thread(new OutgoingConnector(c, false), "OutgoingConnector");
         conn.setDaemon(true);
         conn.start();
         return c;

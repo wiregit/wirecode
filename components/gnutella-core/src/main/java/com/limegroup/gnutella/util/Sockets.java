@@ -210,7 +210,7 @@ public class Sockets {
             throws IOException {
 			//Asynchronously establish socket.
 			Runnable runner = new SocketOpenerThread();
-			Thread t = new Thread(new SocketOpenerThread());
+			Thread t = new Thread(new SocketOpenerThread(), "SocketOpener");
 			t.setDaemon(true);
 			Assert.that(socket==null, "Socket already established w.o. lock.");
 			t.start();
