@@ -418,9 +418,42 @@ public abstract class MessageRouter {
     protected void handleUDPPingRequest(PingRequest pingRequest,
 										ReplyHandler handler, 
 										DatagramPacket datagram) {
-        respondToUDPPingRequest(pingRequest, datagram);
+        if (pingRequest.isQueryKeyRequest())
+            sendQueryKeyPong(pingRequest, datagram);
+        else
+            respondToUDPPingRequest(pingRequest, datagram);
     }
     
+
+    /**
+     * Generates a QueryKey for the source (described by datagram) and sends the
+     * QueryKey to it via a QueryKey pong....
+     */
+    protected void sendQueryKeyPong(PingRequest pr, DatagramPacket datagram) {
+
+        boolean isSupernode = RouterService.isSupernode();
+        if (isSupernode) { // only UPs should be doling out QKs....
+            // generate a QueryKey (quite quick - current impl. (DES) is super
+            // fast!
+            InetAddress address = datagram.getAddress();
+            int port = datagram.getPort();
+            QueryKey qkToDeliver = QueryKey.getQueryKey(address, port, 
+                                                        _secretKey, _secretPad);
+
+            // respond with Pong with QK, as GUESS requires....
+            int num_files = RouterService.getNumSharedFiles();
+            int kilobytes = RouterService.getSharedFileSize()/1024;
+            
+            PingReply pRep = new PingReply(pr.getGUID(), (byte) 1, 
+                                           RouterService.getPort(),
+                                           RouterService.getAddress(),
+                                           num_files, kilobytes, isSupernode, 
+                                           qkToDeliver);
+            UDPService.instance().send(pRep, datagram.getAddress(),
+                                       datagram.getPort());
+        }
+    }
+
 
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
