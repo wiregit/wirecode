@@ -847,16 +847,17 @@ public final class UploadManager implements BandwidthTracker {
             ret = QUEUED;//queued
         }
         debug(uploader+" checking if given uploader is can be accomodated ");
-        //If uploader can and should be in queue, it is at this point.        
-        if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
+        // If we have atleast one slot available, see if the position
+        // in the queue is small enough to be accepted.
+        if(!this.isBusy() && hasFreeSlot(posInQueue + uploadsInProgress())) {
             ret = ACCEPTED;
             debug(uploader+" accepting upload");
-            //remove this uploader from queue, and get its time
-            _queuedUploads.remove(0);
+            //remove this uploader from queue
+            _queuedUploads.remove(posInQueue);
         }
         else {
-            //(!busy && posInQueue>0) || (busy && we are somewhere in the queue)
-            //In either of these cases, if uploader does not support queueing,
+            //... no slot available for this uploader
+            //If uploader does not support queueing,
             //it should be removed from the queue.
             if(!queue) {//downloader does not support queueing
                 _queuedUploads.remove(posInQueue);//remove it
@@ -925,14 +926,13 @@ public final class UploadManager implements BandwidthTracker {
         }
         return i>=max;
 	}
-
+	
 	/**
-	 * Returns true iff another upload is allowed.  Note that because this test
-	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
-	 * if a push request takes a long time to respond.  REQUIRES: this'
-     * monitor is held.
-     */
-	private boolean testTotalUploadLimit() {
+	 * Returns true iff another upload is allowed assuming that the
+	 * amount of active uploaders is passed off to it.
+	 * REQUIRES: this' monitor is held
+	 */
+	private boolean hasFreeSlot(int current) {
         //Allow another upload if (a) we currently have fewer than
         //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
         //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
@@ -941,9 +941,7 @@ public final class UploadManager implements BandwidthTracker {
         //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
         //uploads, the probability that all just happen to have low capacity
         //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
-        //expensive of quality, making swarmed downloads work better.        
-
-		int current = uploadsInProgress();
+        //expensive of quality, making swarmed downloads work better.
 		if (current >= UploadSettings.MAX_UPLOADS.getValue()) {
             return false;
         } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
@@ -962,6 +960,16 @@ public final class UploadManager implements BandwidthTracker {
             }
             return fastest>MINIMUM_UPLOAD_SPEED;
         }
+    }
+
+	/**
+	 * Returns true iff another upload is allowed.  Note that because this test
+	 * relies on the uploadsInProgress() method, it may sometimes be incorrect
+	 * if a push request takes a long time to respond.  REQUIRES: this'
+     * monitor is held.
+     */
+	private boolean testTotalUploadLimit() {
+	    return hasFreeSlot(uploadsInProgress());
 	}
 
 
