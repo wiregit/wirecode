@@ -512,8 +512,12 @@ public class ManagedDownloader implements Downloader {
     public synchronized String getFileName() {
         if (dloader!=null)
             return dloader.getFileName();
+        //If we're not actually downloading, we just pick some random name.
         else if (! files.isEmpty())
             return ((RemoteFileDesc)files.get(0)).getFileName();
+        else if (! pushFiles.isEmpty())
+            return ((RFDPushPair)pushFiles.get(0)).rfd.getFileName(); 
+        //The downloader is about to die, but respond anyway.
         else
             return null;
     }
@@ -521,8 +525,12 @@ public class ManagedDownloader implements Downloader {
     public synchronized int getContentLength() {
         if (dloader!=null)
             return dloader.getFileSize();
+        //If we're not actually downloading, we just pick some random value.
         else if (! files.isEmpty())
             return ((RemoteFileDesc)files.get(0)).getSize();
+        else if (! pushFiles.isEmpty())
+            return ((RFDPushPair)pushFiles.get(0)).rfd.getSize();
+        //The downloader is about to die, but respond anyway.
         else
             return 0;
     }
