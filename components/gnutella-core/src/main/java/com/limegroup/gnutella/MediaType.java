@@ -4,6 +4,7 @@ import java.io.Serializable;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.Iterator;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * A generic type of media, i.e., "video" or "audio".
@@ -107,6 +108,18 @@ public class MediaType implements Serializable {
     }
     
     // do we really need this static method ?
+    public static MediaType getDocumentMediaType() {
+        // index should match the above constructor
+        return (getDefaultMediaTypes())[1]; /* DOCS */
+    }
+
+    // do we really need this static method ?
+    public static MediaType getProgramMediaType() {
+        // index should match the above constructor
+        return (getDefaultMediaTypes())[2]; /* PROGS */
+    }
+
+    // do we really need this static method ?
     public static MediaType getAudioMediaType() {
         // index should match the above constructor
         return (getDefaultMediaTypes())[3]; /* AUDIO */
@@ -188,11 +201,26 @@ public class MediaType implements Serializable {
         return new MediaType[] {any, text, programs, audio, video, images};
     }
 
+    /** @return a MediaType.Aggregator to use for your query.  Null is a
+     *  possible return value.
+     */
+    public static Aggregator getAggregator(QueryRequest query) {
+        if (query.desiresAll()) return null;
+        Aggregator retAggr = new Aggregator();
+        if (query.desiresLinuxOSXPrograms() || query.desiresWindowsPrograms())
+            retAggr.addFilter(getProgramMediaType());
+        if (query.desiresDocuments()) retAggr.addFilter(getDocumentMediaType());
+        if (query.desiresAudio()) retAggr.addFilter(getAudioMediaType());
+        if (query.desiresVideo()) retAggr.addFilter(getVideoMediaType());
+        if (query.desiresImages()) retAggr.addFilter(getImageMediaType());
+        return retAggr;
+    }
+
     /** Utility class for aggregating MediaTypes.
      *  This class is not synchronized - it should never be used in a fashion
      *  where synchronization is necessary.  If that changes, add synch.
      */
-    public class Aggregator {
+    public static class Aggregator {
         /** A list of MediaType objects.
          */
         private List _filters = new LinkedList();
