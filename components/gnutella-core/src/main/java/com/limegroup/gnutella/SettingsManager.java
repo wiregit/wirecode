@@ -330,7 +330,7 @@ public class SettingsManager implements SettingsInterface
     public void setTTL(byte ttl) 
 	throws IllegalArgumentException
     {
-	if(ttl > maxttl_ || ttl < 0)
+	if(ttl > maxttl_ || ttl < 1)
 	    throw new IllegalArgumentException();
 	else
 	    {
