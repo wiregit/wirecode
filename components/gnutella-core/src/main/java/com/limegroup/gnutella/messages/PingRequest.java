@@ -140,5 +140,16 @@ public class PingRequest extends Message {
         return "PingRequest("+super.toString()+")";
     }
 
+    /**
+     * Accessor for whether or not this ping meets the criteria for being a
+     * "heartbeat" ping, namely having ttl=0 and hops=1.
+     * 
+     * @return <tt>true</tt> if this ping apears to be a "heartbeat" ping,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isHeartbeat() {
+        return (getHops() == 1 && getTTL() == 0);
+    }
+
     //Unit tests: tests/com/limegroup/gnutella/messages/PingRequestTest.java
 }
