@@ -1,21 +1,17 @@
+package com.limegroup.gnutella.i18n;
 
-import java.text.*;
 import java.util.*;
+import java.text.*;
 import java.io.*;
 
-public class CountPercent {
+/**
+ * Writes language info out in HTML format.
+ */
+class HTMLOutput {
+
     static final String PRE_LINK = "http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/";
-    private static final String BUNDLE_NAME = "MessagesBundle";
-    private static final String PROPS_EXT = ".properties";
-    private static final String UTF8_EXT = ".UTF-8.txt";
-    private static final String DEFAULT_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
-    
-    /** minimum completion levels for the status HTML page */
-    private static final double MIN_PERCENTAGE_COMPLETED     = 0.75;
-    private static final double MIN_PERCENTAGE_NEED_REVISION = 0.66;
-    private static final double MIN_PERCENTAGE_MIDWAY        = 0.50;
-    private static final int    MIN_COUNT_STARTED            = 20;
-    
+    private static final String DEFAULT_LINK = PRE_LINK + LanguageLoader.BUNDLE_NAME + LanguageLoader.PROPS_EXT;
+
     /** constant link to the translate mailing list. */
     private static final String HTML_TRANSLATE_EMAIL_ADDRESS =
 "<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
@@ -25,328 +21,35 @@ public class CountPercent {
 "document.write('<a href=\"mai' + \"lto:\" + e_mA_iL_E + '\">' + e_mA_iL_E + '</a>');\n" +
 "//--></script><noscript><a href=\"#\">[Email address protected by JavaScript:\n" +
 "please enable JavaScript to contact me]</a></noscript></b>";
+
+    /** minimum completion levels for the status HTML page */
+    private static final double MIN_PERCENTAGE_COMPLETED     = 0.75;
+    private static final double MIN_PERCENTAGE_NEED_REVISION = 0.66;
+    private static final double MIN_PERCENTAGE_MIDWAY        = 0.50;
+    private static final int    MIN_COUNT_STARTED            = 20;
     
-    private static final int ACTION_STATISTICS = 0;
-    private static final int ACTION_HTML = 1;
-    private static final int ACTION_CHECK = 2;
-    
-    public static void main(String[] args) throws java.io.IOException {
-        final int action;
-        if (args != null && args.length > 0) {
-            if (args[0].equals("html"))
-                action = ACTION_HTML;
-            else if (args[0].equals("check"))
-                action = ACTION_CHECK;
-            else {
-                System.err.println("Usage: java CountPercent [html|check]");
-                return;
-            }
-        } else
-            action = ACTION_STATISTICS;
-        new CountPercent(action);
-    }
-    
+    private final StringBuffer page;
+
     private final DateFormat df;
-    private final NumberFormat rc;
     private final NumberFormat pc;
     private final Map/*<String code, LanguageInfo li>*/ langs;
-    private final Set/*<String key>*/ basicKeys, advancedKeys;
     private final int basicTotal;
 
-    CountPercent(int action) throws java.io.IOException {
-        df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
-
-        rc = NumberFormat.getNumberInstance(Locale.US);
-        rc.setMinimumIntegerDigits(4);
-        rc.setMaximumIntegerDigits(4);
-        rc.setGroupingUsed(false);
-        
-        pc = NumberFormat.getPercentInstance(Locale.US);
-        pc.setMinimumFractionDigits(2);
-        pc.setMaximumFractionDigits(2);
-        pc.setMaximumIntegerDigits(3);
-        
-        langs = new TreeMap();
-        
-        final Properties defaultProps = getDefaultProperties();
-        advancedKeys = getAdvancedKeys();
-        defaultProps.keySet().removeAll(advancedKeys);
-        basicKeys = defaultProps.keySet();
-        basicTotal = basicKeys.size();
-
-        switch (action) {
-        case ACTION_CHECK:
-            loadLanguages();
-            checkBadKeys();
-            break;
-        case ACTION_STATISTICS:
-            loadLanguages();
-            extendVariantLanguages();
-            retainBasicKeys(basicKeys);
-            pc.setMinimumIntegerDigits(3);
-            printStatistics();
-            break;
-        case ACTION_HTML:
-            loadLanguages();
-            extendVariantLanguages();
-            retainBasicKeys(basicKeys);
-            rc.setMinimumIntegerDigits(1);
-            printHTML();
-            break;
-        }
-    }
-    
-    private Properties getDefaultProperties() throws java.io.IOException {
-        Properties p = new Properties();
-        InputStream in = new FileInputStream(new File(BUNDLE_NAME + PROPS_EXT));
-        p.load(in);
-        in.close();
-        return p;
-    }
-    
-    private Set getAdvancedKeys() throws java.io.IOException  {
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new InputStreamReader(
-                new FileInputStream(new File(BUNDLE_NAME + PROPS_EXT)),
-                "ISO-8859-1"));
-        } catch (java.io.UnsupportedEncodingException uee) {
-            System.err.println(uee); //shouldn't occur
-            throw uee;
-        }
-        String read;
-        while ((read = reader.readLine()) != null &&
-               !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"));
-        
-        StringBuffer sb = new StringBuffer();
-        while ((read = reader.readLine()) != null) {
-            if (read.length() == 0 ||
-                read.charAt(0) == '#')
-            continue;
-            sb.append(read).append("\n");
-        }
-        InputStream in;
-        try {
-            in = new ByteArrayInputStream(sb.toString().getBytes("ISO-8859-1"));
-        } catch (java.io.UnsupportedEncodingException uee) {
-            System.err.println(uee); //shouldn't occur
-            throw uee;
-        }
-        Properties p = new Properties();
-        p.load(in);
-        
-        in.close();
-        reader.close();
-        return p.keySet();
+    /**
+     * Constructs a new HTML output.
+     */
+    HTMLOutput(DateFormat df, NumberFormat pc, Map langs, int basicTotal) {
+        this.df = df;
+        this.pc = pc;
+        this.langs = langs;
+        this.basicTotal = basicTotal;
+        this.page = buildHTML();
     }
     
     /**
-     * List and load all available bundles and map them into the languages map.
-     * Note that resources are not expanded here per base language, and not cleaned
-     * here from extra keys (needed to support the resources "check" option).
+     * Creates the HTML.
      */
-    private void loadLanguages() {
-        File lib = new File(".");
-        if (!lib.isDirectory())
-            return;
-        
-        String[] files = lib.list();
-        for (int i = 0; i < files.length; i++) {
-            if (!files[i].startsWith(BUNDLE_NAME + "_") ||
-                !files[i].endsWith(PROPS_EXT) ||
-                 files[i].startsWith(BUNDLE_NAME + "_en"))
-                continue;
-            
-            /* See if a .UTF-8.txt file exists; if so, use that as the link. */
-            String linkFileName = files[i];
-            int idxProperties = linkFileName.indexOf(PROPS_EXT);
-            File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + UTF8_EXT);
-            boolean skipUTF8LeadingBOM;
-            if (utf8.exists()) {
-                /* properties files are normally read as streams of ISO-8859-1 bytes
-                but we want to check the UTF-8 source file. The non ASCII characters
-                in key values will be read as sequences of Extended Latin 1 characters
-                instead of the actual Unicode character coded as Unicode escapes
-                in the .properties file. So they won't have the actual run-time value;
-                however it allows easier checking and validation here for messages
-                printed on the Console, that will output ISO-8859-1; the result output
-                still be interpretable as Unicode UTF-8. */
-                linkFileName = utf8.getName();
-                skipUTF8LeadingBOM = true;
-            } else
-                skipUTF8LeadingBOM = false;
-            
-            try {
-                InputStream in =
-                    new FileInputStream(new File(lib, linkFileName/*files[i]*/));
-                if (skipUTF8LeadingBOM) try { /* skip the three-bytes leading BOM */
-                   /* the leading BOM (U+FEFF), if present, is coded in UTF-8 as three
-                    * bytes 0xEF, 0xBB, 0xBF; they are not part of a resource key. */
-                   in.mark(3);
-                   if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
-                       in.reset();
-                } catch (java.io.IOException ioe) {
-                }
-                loadFile(langs, in, linkFileName, skipUTF8LeadingBOM);
-            } catch (FileNotFoundException fnfe) {
-                // oh well.
-            }
-        }
-    }
-    
-    /**
-     * Loads a single file into the languages map.
-     */
-    private LanguageInfo loadFile(Map langs, InputStream in, String filename, boolean isUTF8) {
-        try {
-            in = new BufferedInputStream(in);
-            final Properties props = new Properties();
-            props.load(in);
-            /* note that the file is read in ISO-8859-1 only, even if it is encoded
-             * with another charset. However, the Properties has its unique legacy parser
-             * and we want to use it to make sure we use the same syntax. So we'll need to
-             * correct the parsed values after the file is read and interpreted as a set of
-             * properties (keys,values).
-             */
-            if (isUTF8) {
-                // actually the file was UTF-8-encoded: convert bytes read incorrectly as
-                // ISO-8859-1 characters, into actual Unicode UTF-16 code units.
-                for (Iterator i = props.entrySet().iterator(); i.hasNext(); ) {
-                    final Map.Entry entry = (Map.Entry)i.next();
-                    final String key = (String)entry.getKey();
-                    final String value = (String)entry.getValue();
-                    byte[] bytes = null;
-                    try {
-                        bytes = value.getBytes("ISO-8859-1");
-                    } catch (java.io.IOException ioe) {
-                        //should not occur
-                    }
-                    try {
-                        final String correctedValue = new String(bytes, "UTF-8");
-                        if (!correctedValue.equals(value))
-                            props.put(key, correctedValue);
-                    } catch (java.io.IOException ioe) {
-                        System.err.println(ioe); //should not occur
-                    }
-                }
-            }
-            String lc = props.getProperty("LOCALE_LANGUAGE_CODE", "");
-            String cc = props.getProperty("LOCALE_COUNTRY_CODE", "");
-            String vc = props.getProperty("LOCALE_VARIANT_CODE", "");
-            String sc = props.getProperty("LOCALE_SCRIPT_CODE", "");
-            String ln = props.getProperty("LOCALE_LANGUAGE_NAME", lc);
-            String cn = props.getProperty("LOCALE_COUNTRY_NAME", cc);
-            String vn = props.getProperty("LOCALE_VARIANT_NAME", vc);
-            String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc);
-            String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
-            boolean rtl = props.getProperty("LAYOUT_RIGHT_TO_LEFT", "false").equals("true");
-            
-            LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
-                                               ln, cn, vn, sn,
-                                               dn, rtl, filename, props);
-            langs.put(li.getCode(), li);
-            return li;
-        } catch (IOException e) {
-            // ignore.
-        } finally {
-            if (in != null)
-                try {
-                   in.close();
-                } catch (IOException ioe) {}
-        }
-        return null;
-    }
-    
-    /**
-     * Check and list extra or badly names names found in resources.
-     * Use the default (English) basic and extended resource keys.
-     */
-    private void checkBadKeys() {
-        System.out.println("List of extra or badly named resource keys:");
-        System.out.println("-------------------------------------------");
-        
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo)entry.getValue();
-            final Properties props = li.getProperties();
-            props.keySet().removeAll(basicKeys);
-            props.keySet().removeAll(advancedKeys);
-            if (props.size() != 0) {
-                System.out.println("(" + code + ") " + li.getName() + ": " + li.getFileName());
-                props.list(System.out);
-                System.out.println("-------------------------------------------");
-            }
-        }
-    }
-    
-    /**
-     * Extend variant resources from *already loaded* base languages.
-     */
-    private void extendVariantLanguages() {
-        /* Extends missing resources with those from the base language */
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo)entry.getValue();
-            final Properties props = li.getProperties();
-            if (li.isVariant()) {
-                final LanguageInfo liBase = (LanguageInfo)langs.get(li.getBaseCode());
-                if (liBase != null) {
-                    /* Get a copy of base properties */
-                    final Properties propsBase = new Properties();
-                    propsBase.putAll(liBase.getProperties());
-                    /* Remove properties already defined in the current locale */
-                    propsBase.keySet().removeAll(props.keySet());
-                    /* Add the remaining base properties to the current locale */
-                    props.putAll(propsBase);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Keep only resources with a basic set of valid keys.
-     */
-    private void retainBasicKeys(Set basicKeys) {
-        /* Extends missing resources with those from the base language */
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo)entry.getValue();
-            final Properties props = li.getProperties();
-            props.keySet().retainAll(basicKeys);
-        }
-    }
-    
-    private void printStatistics() {
-        System.out.println("Total Number of Resources: " + basicTotal);
-        System.out.println("---------------------------------");
-        System.out.println();
-        
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo)entry.getValue();
-            final Properties props = li.getProperties();
-            final int count = props.size();
-            final double percentage = (double)count / (double)basicTotal;
-            System.out.print(
-                "(" + code + ") " +
-                pc.format(percentage) +
-                ", count: " + rc.format(count) +
-                " (" + li.getName() + ": ");
-            try {
-                final byte[] langName = li.toString().getBytes("UTF-8");
-                System.out.write(langName, 0, langName.length);
-            } catch (java.io.UnsupportedEncodingException uee) {
-                //shouldn't occur
-            }
-            System.out.println(")");
-        }
-    }
-    
-    private void printHTML() {
+    StringBuffer buildHTML() {
         List langsCompleted = new LinkedList();
         List langsNeedRevision = new LinkedList();
         List langsMidway = new LinkedList();
@@ -392,7 +95,13 @@ public class CountPercent {
         buildAfterStatus(page);
         buildProgress(page, charsets);
         buildEndOfPage(page);
-
+        return page;
+    }
+        
+    /**
+     * Prints the HTML to 'out'.
+     */
+    void printHTML(PrintStream out) {
         /* Make sure printed page contains only ASCII, converting all
          * other code points to decimal NCRs. This will work whatever
          * charset will be selected by the user's browser.
@@ -402,9 +111,9 @@ public class CountPercent {
             int c = (int)page.charAt(index++); // char's are always positive
             if (c < 160) { /* C0 or Basic Latin or C1 */
                 if (c >= 32 && c < 127 || c == '\t') /* Basic Latin or TAB */
-                    System.out.print((char)c);
+                    out.print((char)c);
                 else if (c == '\n') /* LF */
-                    System.out.println(); /* platform's newline sequence */
+                    out.println(); /* platform's newline sequence */
                 /* ignore all other C0 and C1 controls */
             } else { /* Use NCRs */
                 /* special check for surrogate pairs */
@@ -415,13 +124,16 @@ public class CountPercent {
                         index++;
                     }
                 }
-                System.out.print("&#");
-                System.out.print((int)c);//decimal NCR notation
-                System.out.print(';');
+                out.print("&#");
+                out.print((int)c);//decimal NCR notation
+                out.print(';');
             }
         }
     }
     
+    /**
+     * Builds the start of the page.
+     */
     private void buildStartOfPage(StringBuffer page) {
         page.append(
 "<html>\n" +
@@ -471,6 +183,9 @@ public class CountPercent {
 "     <br />\n");
     }
     
+    /**
+     * Builds the status portion of the page.
+     */
     private void buildStatus(StringBuffer page,
                              List langsCompleted,
                              List langsNeedRevision,
@@ -501,6 +216,9 @@ public class CountPercent {
 "     </ol>\n");
     }
     
+    /**
+     * Builds an individual bullet point in the status portion of the page.
+     */
     private void buildStatus(StringBuffer page,
                              List langs, String status) {
         boolean first = true;
@@ -521,6 +239,9 @@ public class CountPercent {
             page.append("\n" + status + "</li>\n");
     }
 
+    /**
+     * Builds the info after the status portion.
+     */
     private void buildAfterStatus(StringBuffer page) {
         page.append(
 "     <br />\n" +
@@ -710,6 +431,9 @@ public class CountPercent {
 "       href=\"" + PRE_LINK + "\">click here</a></font>.\n");
     }
     
+    /**
+     * Builds the progress table.
+     */
     private void buildProgress(StringBuffer page, Map charsets) {
         page.append(
 "       <table width=\"250\" border=\"0\" cellpadding=\"0\" cellspacing=\"4\">");
@@ -758,6 +482,9 @@ public class CountPercent {
 "       </table>\n");
     }
     
+    /**
+     * Builds the closing footers of the page.
+     */
     private void buildEndOfPage(StringBuffer page) {
         page.append(
 "      </td>\n" +
@@ -772,132 +499,6 @@ public class CountPercent {
 "</table>\n" +
 "<!--#include virtual=\"/includes/bottom.html\" -->\n" +
 "\n");
-    }
-    
-}
-
-class LanguageInfo implements Comparable {
-    
-    private final String languageCode;
-    private final String countryCode;
-    private final String variantCode;
-    private final String scriptCode;
-    private final String languageName;
-    private final String countryName;
-    private final String variantName;
-    private final String scriptName;
-    private boolean isRightToLeft;
-    private final String displayName;
-    private final String fileName;
-    private final Properties properties;
-    private double percentage;
-    
-    /**
-     * Constructs a new LanguageInfo object with the given
-     * languageCode, countryCode, variantCode,
-     * languageName, countryName, and variantName.
-     */
-    public LanguageInfo(String lc, String cc, String vc, String sc,
-                        String ln, String cn, String vn, String sn,
-                        String dn, boolean rtl,
-                        String fn, Properties props) {
-        languageCode = lc.trim();
-        countryCode  = cc.trim();
-        variantCode  = vc.trim();
-        scriptCode   = sc.trim();
-        languageName = ln.trim();
-        countryName  = cn.trim();
-        variantName  = vn.trim();
-        scriptName   = sn.trim();
-        isRightToLeft = rtl;
-        displayName  = dn.trim();
-        fileName     = fn.trim();
-        properties   = props;
-    }
-    
-    /**
-     * Used to map the list of locales codes to their LanguageInfo data and props.
-     * Must be unique per loaded localized properties file.
-     */
-    public int compareTo(Object other) {
-        final LanguageInfo o = (LanguageInfo)other;
-        int comp = languageCode.compareTo(o.languageCode);
-        if (comp != 0)
-            return comp;
-        comp = countryCode.compareTo(o.countryCode);
-        if (comp != 0)
-            return comp;
-        return variantCode.compareTo(o.variantCode);
-    }
-    
-    public boolean isVariant() {
-        return !"".equals(variantCode) || !"".equals(countryCode);
-    }
-    
-    public String getBaseCode() {
-        return languageCode;
-    }
-    
-    public String getCode() {
-        if (!variantCode.equals(""))
-            return languageCode + "_" + countryCode + "_" + variantCode;
-        if (!countryCode.equals(""))
-            return languageCode + "_" + countryCode;
-        return languageCode;
-    }
-    
-    public void setPercentage(double percentage) {
-        this.percentage = percentage;
-    }
-    
-    public double getPercentage() {
-        return percentage;
-    }
-    
-    public Properties getProperties() {
-       return properties;
-    }
-
-    /**
-     * Returns a native description of this language.
-     * If the variantName is not 'international' or '', then 
-     * the display is:
-     *    languageName, variantName (countryName)
-     * Otherwise, the display is:
-     *    languageName (countryName)
-     * If the language is Right-To-Left, the whole string is returned
-     * surrounded by BiDi embedding controls.
-     */
-    public String toString() {
-        final String bidi1, bidi2;
-        if (isRightToLeft) {
-            bidi1 = "\u202b"; /* RLE control: Right-To-Left Embedding */
-            bidi2 = "\u202c"; /* PDF control: Pop Directional Format */
-        } else {
-            bidi1 = "";
-            bidi2 = "";
-        }
-        if (variantName != null &&
-            !variantName.toLowerCase().equals("international") &&
-            !variantName.equals(""))
-            return bidi1 + languageName + ", " + variantName +
-                   " (" + countryName + ")" + bidi2;
-        else
-            return bidi1 + languageName +
-                   " (" + countryName + ")" + bidi2;
-    }
-    
-    public String getScript() { return scriptName; }
-    
-    public String getFileName() { return fileName; }
-    
-    public String getName() { return displayName; }
-    
-    public String getLink() {
-        return
-           "<a href=\"" + CountPercent.PRE_LINK + fileName +
-           "\" title=\"" + toString() + "\">" +
-           displayName + "</a>";
     }
     
 }
