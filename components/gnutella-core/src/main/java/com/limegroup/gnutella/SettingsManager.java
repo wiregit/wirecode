@@ -628,10 +628,6 @@ public class SettingsManager implements SettingsInterface {
     public String getIncompleteDirectory() {
         File incFile = new File(incompleteDirectory_);
 
-		if (incFile == null) {
-			System.out.println("The Incomplete Directory is null");
-		}
-
         if(!incFile.isDirectory()) {			
 			setSaveDirectory(saveDirectory_);
         }
@@ -1129,25 +1125,24 @@ public class SettingsManager implements SettingsInterface {
 			tempPath += File.separator;
 			tempPath += "Incomplete";
 			incFile = new File(tempPath);
-		} catch(IOException ioe) {
-			return;
-		}
 		
-		if(!saveFile.isDirectory()) {
-			saveFile.mkdirs();
-		}
-		if(!incFile.isDirectory()) {
-			incFile.mkdirs();
-		}
-		String saveDir = "";
-		String incDir = "";
-		try {
+			if(!saveFile.isDirectory()) {
+				if(!saveFile.mkdirs()) throw new IllegalArgumentException();
+			}
+			if(!incFile.isDirectory()) {
+				if(!incFile.mkdirs()) throw new IllegalArgumentException();
+			}
+			
+			String saveDir = "";
+			String incDir = "";
+			//try {
 			saveDir = saveFile.getCanonicalPath();
 			incDir  = incFile.getCanonicalPath();
 			saveDirectory_ = saveDir;
 			incompleteDirectory_ = incDir;
 			props_.put(SAVE_DIRECTORY, saveDirectory_);
 		} catch(IOException ioe) {
+			throw new IllegalArgumentException();
 			// this call to set save directory will simply fail
 			// if an io error occurs
 		}
@@ -1259,8 +1254,7 @@ public class SettingsManager implements SettingsInterface {
     /** 
 	 * sets the time to live 
 	 */
-    public void setTTL(byte ttl)
-        throws IllegalArgumentException {
+    public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
             throw new IllegalArgumentException();
         else {
