@@ -212,8 +212,8 @@ public class ConnectionManager {
          }
          
          //dont keep the connection, if we are not a supernode
-         if(!SettingsManager.instance().isSupernode()){
-            synchronized(this){
+         synchronized(this){
+            if(_hasShieldedClientSupernodeConnection){
                 remove(connection);
             }
          }
