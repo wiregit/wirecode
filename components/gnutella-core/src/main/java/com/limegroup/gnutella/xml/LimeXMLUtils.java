@@ -15,15 +15,13 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.ErrorService;
-
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import org.xml.sax.InputSource;
 
 // for compression
 import java.util.zip.*;
 import java.util.Locale;
-import com.limegroup.gnutella.Assert;
 
 // for hashing
 import java.security.*;
@@ -314,7 +312,8 @@ public class LimeXMLUtils
                 // we used to do a .equalsIgnoreCase, but that is a little too
                 // rigid.  so do a ignore case prefix match.
                 String queryValueLC = queryValue.toLowerCase(Locale.US);
-                String replyDocValueLC = replyDocValue.toLowerCase(Locale.US);
+                String replyDocValueLC = 
+                              I18NConvert.instance().getNorm(replyDocValue);
                 if(replyDocValueLC.startsWith(queryValueLC))
                     matchCount++;
             }
