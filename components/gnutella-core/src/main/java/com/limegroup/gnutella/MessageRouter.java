@@ -426,6 +426,11 @@ public abstract class MessageRouter {
         	handleBestCandidatesMessage(
         					(BestCandidatesVendorMessage)msg, receivingConnection);
         }
+        else if (msg instanceof PromotionRequestVendorMessage) {
+        	//TODO: add statistics recording code
+        	handlePromotionRequestVM(
+        					(PromotionRequestVendorMessage)msg,receivingConnection);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
