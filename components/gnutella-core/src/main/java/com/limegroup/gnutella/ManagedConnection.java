@@ -66,6 +66,11 @@ public class ManagedConnection
      *  INVARIANT: _queued==sum of _outputQueue[i].size() 
      *  LOCKING: obtain _outputQueueLock */
     private int _queued=0;
+    /** The priority of the last message added to _outputQueue. This is an
+     *  optimization to keep OutputRunner from iterating through all priorities.
+     *  This value is only a hint and can be legally set to any priority.  Hence
+     *  no locking is necessary. */
+    private int _lastPriority=0;
     /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
@@ -73,8 +78,9 @@ public class ManagedConnection
     private static int QUEUE_TIME=30*1000;
     /** The number of different priority levels. */
     private static final int PRIORITIES=7;
-    /** Names for each priority, from highest priority to lowest.
-     *  "Other" includes QRP messages and is NOT reordered. */
+    /** Names for each priority. "Other" includes QRP messages and is NOT
+     * reordered.  These numbers do NOT translate directly to priorities;
+     * that's determined by the cycle fields passed to MessageQueue. */
     private static final int PRIORITY_WATCHDOG=0;
     private static final int PRIORITY_PUSH=1;
     private static final int PRIORITY_QUERY_REPLY=2;
@@ -366,6 +372,7 @@ public class ManagedConnection
             int dropped=_outputQueue[priority].add(m);
             _numSentMessagesDropped+=dropped;
             _queued+=1-dropped;
+            _lastPriority=priority;
             _outputQueueLock.notify();
         }
         repOk();
@@ -451,13 +458,18 @@ public class ManagedConnection
                 }
             }
         }   
-
+        
         /** Send several queued message of each type. */
         private final void sendQueued() throws IOException {  
             //1. For each priority send as many messages as desired for that
-            //type.  IMPORTANT: we only obtain _outputQueueLock while touching
-            //the queue, not while actually sending (which can block).
-            for (int priority=0; priority<PRIORITIES; priority++) {     
+            //type.  As an optimization, we start with the buffer of the last
+            //message sent, wrapping around the buffer.  You can also search
+            //from 0 to the end.
+            int start=_lastPriority;
+            int priority=start;
+            do {                   
+                //IMPORTANT: we only obtain _outputQueueLock while touching the
+                //queue, not while actually sending (which can block).
                 MessageQueue queue=_outputQueue[priority];
                 queue.resetCycle();
                 while (true) {
@@ -471,15 +483,25 @@ public class ManagedConnection
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
-            }
-
+                
+                //Optimization: the code in the synchronized block is not needed for
+                //correctness but works nicely with the _priorityHint trick.
+                synchronized (_outputQueueLock) {
+                    if (_queued==0)
+                        break;  
+                }
+                priority=(priority+1)%PRIORITIES;
+            } while (priority!=start);
+            
+            
             //2. Now force data from Connection's BufferedOutputStream into the
             //kernel's TCP send buffer.  It doesn't force TCP to
             //actually send the data to the network.  That is determined
             //by the receiver's window size and Nagle's algorithm.
             ManagedConnection.super.flush();
         }
-    }
+    } //end OutputRunner
+
 
     /** 
      * For debugging only: prints to stdout the number of queued messages in
@@ -1180,7 +1202,6 @@ public class ManagedConnection
      * private and final.  Make protected if ManagedConnection is subclassed.
      */
     private final void repOk() {
-        /*
         //Check _queued invariant.
         synchronized (_outputQueueLock) {
             int sum=0;
@@ -1188,11 +1209,9 @@ public class ManagedConnection
                 sum+=_outputQueue[i].size();
             Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
         }
-        */
     }
     
     /** Unit test. */
-    /*
     public static void main(String args[]) {        
         try {
             System.out.println("-Testing initialize");
@@ -1208,6 +1227,7 @@ public class ManagedConnection
             testReorderBuffer(out, in);
             testBufferTimeout(out, in);
             testDropBuffer(out, in);
+            testPriorityHint(out, in);
             in.close();
             out.close();
 
@@ -1309,7 +1329,7 @@ public class ManagedConnection
         //  PING: x
         //  OTHER: reset patch1 patch2
         Assert.that(out._outputRunnerThread==null);
-        //out.dumpQueueStats();
+        out._lastPriority=0;  //cheating to make old tests work
         out.startOutputRunner();
         
         //3. Read them...now in different order!
@@ -1419,6 +1439,59 @@ public class ManagedConnection
         Assert.that(out.getNumSentMessagesDropped()==(1+3));
     }
 
+
+    private static void testPriorityHint(ManagedConnection out, Connection in) 
+            throws IOException, BadPacketException {
+        //Tests wrap-around loop of sendQueuedMessages
+        System.out.println("-Testing priority hint optimization");
+        Message m=null;
+
+        // head...tail
+        out.stopOutputRunner(); 
+        out.send(hopped(new PingRequest((byte)4)));
+        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.startOutputRunner();
+        Assert.that(in.receive() instanceof QueryRequest);
+        Assert.that(in.receive() instanceof PingRequest);
+
+        //tail...<wrap>...head
+        out.stopOutputRunner(); 
+        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.send(hopped(new PingRequest((byte)5)));
+        out.startOutputRunner();
+        Assert.that(in.receive() instanceof PingRequest);
+        Assert.that(in.receive() instanceof QueryRequest);
+
+        //tail...<wrap>...head
+        //  WATCHDOG: ping
+        //  PUSH:
+        //  QUERY_REPLY: reply
+        //  QUERY: query
+        //  PING_REPLY: 
+        //  PING: 
+        //  OTHER: reset
+        out.stopOutputRunner(); 
+        out.send(new PingRequest((byte)1));
+        out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
+                                new Response[0], new byte[16]));
+        out.send(new ResetTableMessage(1024, (byte)2));
+        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.startOutputRunner();
+        m=in.receive();
+        Assert.that(m instanceof QueryRequest, "Got: "+m);
+        m=in.receive();
+        Assert.that(m instanceof ResetTableMessage, "Got: "+m);
+        m=in.receive();
+        Assert.that(m instanceof PingRequest, "Got: "+m);
+        m=in.receive();
+        Assert.that(m instanceof QueryReply, "Got: "+m);
+    }
+
+    private static Message hopped(Message m) {
+        m.hop();
+        return m;
+    }
+
     private static void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
@@ -1521,5 +1594,4 @@ public class ManagedConnection
     private ManagedConnection() {
         super("", 0);
     }
-    */
 }
