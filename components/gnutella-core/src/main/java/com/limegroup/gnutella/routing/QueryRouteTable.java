@@ -173,7 +173,7 @@ public class QueryRouteTable {
     }
     
     private final boolean contains(int hash, int ttl) {
-        return table[hash]<=ttl && table[hash]<infinity;
+        return table[hash]<infinity;
     }
     
     /**
@@ -603,12 +603,18 @@ public class QueryRouteTable {
         Assert.that(qrt.entries()==3);
 
         //1. Simple keyword tests (add, contains)
+        //after the change to the private contains method, if any word is added
+        //then regardless of the depth of the keyword the keyword will be found
         Assert.that(! qrt.contains(new QueryRequest((byte)4, 0, "garbage")));
-        Assert.that(! qrt.contains(new QueryRequest((byte)2, 0, "bad")));
+        Assert.that(qrt.contains(new QueryRequest((byte)2, 0, "bad")));
         Assert.that(qrt.contains(new QueryRequest((byte)3, 0, "bad")));
         Assert.that(qrt.contains(new QueryRequest((byte)4, 0, "bad")));
-        Assert.that(! qrt.contains(new QueryRequest((byte)2, 0, "good bad")));
-        Assert.that(qrt.contains(new QueryRequest((byte)3, 0, "good bad")));
+        Assert.that(qrt.contains(new QueryRequest((byte)2, 0, "good bad")));
+        Assert.that(! qrt.contains(new QueryRequest((byte)3, 0, "good bd")));
+        Assert.that(qrt.contains(new QueryRequest((byte)3, 0, 
+                                                  "good bad book")));
+        Assert.that(! qrt.contains(new QueryRequest((byte)3, 0, 
+                                                    "good bad bok")));
 
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000, (byte)7);
