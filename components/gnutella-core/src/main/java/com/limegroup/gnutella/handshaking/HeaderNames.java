@@ -75,6 +75,13 @@ public final class HeaderNames {
      */
     public static final String X_DYNAMIC_QUERY = "X-Dynamic-Querying";
     
+
+    /**
+     * Header to offer the servent ID (client GUID) during Handshaking
+     */
+    public static final String X_SERVENT_ID = "Servent-ID";
+
+
     /**
      * Header for Content-Encoding. Useful because typing
      * HTTPHeaderName.CONTENT_ENCODING.httpStringValue()

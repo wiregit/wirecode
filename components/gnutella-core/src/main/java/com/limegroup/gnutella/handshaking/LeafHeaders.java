@@ -19,5 +19,6 @@ public class LeafHeaders extends DefaultHeaders {
         super(remoteIP);
         //set Ultrapeer property
         put(HeaderNames.X_ULTRAPEER, "False");
+        put(HeaderNames.X_SERVENT_ID, SettingsManager.instance().getClientID());
     }
 }
