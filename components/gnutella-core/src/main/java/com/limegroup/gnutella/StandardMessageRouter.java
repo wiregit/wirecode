@@ -130,11 +130,14 @@ public class StandardMessageRouter extends MessageRouter {
         byte[] data = request.getSupportsCachedPongData();
         Collection hosts = Collections.EMPTY_LIST;
         if(data != null) {
-            boolean isUltrapeer = data.length >= 1 && 
-		(data[0] & PingRequest.SCP_ULTRAPEER) == PingRequest.SCP_ULTRAPEER;
-            hosts = RouterService.getPreferencedHosts(isUltrapeer, 
-			request.getLocale(),
-			ConnectionSettings.NUM_RETURN_PONGS.getValue());
+            boolean isUltrapeer =
+                data.length >= 1 && 
+		        (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
+		            PingRequest.SCP_ULTRAPEER;
+            hosts = RouterService.getPreferencedHosts(
+                        isUltrapeer, 
+			            request.getLocale(),
+			            ConnectionSettings.NUM_RETURN_PONGS.getValue());
         }        
         
         

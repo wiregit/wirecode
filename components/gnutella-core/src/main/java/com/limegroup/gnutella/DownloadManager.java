@@ -1166,6 +1166,7 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
         };
+        startPushThread.setDaemon(true);
         startPushThread.start();
     }
     

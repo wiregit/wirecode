@@ -3,11 +3,15 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.LinkedList;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -238,5 +242,30 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         pr = PingRequest.createUDPPing();
         assertTrue(pr.requestsIP());
+    }
+    
+    public void testSupportsCachedPongData() throws Exception {
+        List ggeps = new LinkedList();
+        ggeps.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS));
+        PingRequest pr = make(ggeps);
+        assertTrue(pr.supportsCachedPongs());
+        byte[] data = pr.getSupportsCachedPongData();
+        assertNotNull(data);
+        assertEquals(0, data.length);
+        
+        ggeps.clear();
+        ggeps.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[1]));
+        pr = make(ggeps);
+        assertTrue(pr.supportsCachedPongs());
+        data = pr.getSupportsCachedPongData();
+        assertNotNull(data);
+        assertEquals(1, data.length);        
+    }
+    
+    private PingRequest make(List ggeps) throws Exception {
+        return (PingRequest)PrivilegedAccessor.invokeConstructor(
+            PingRequest.class,
+            new Object[] { new byte[16], new Byte((byte)1), ggeps },
+            new Class[] { byte[].class, byte.class, List.class });
     }
 }

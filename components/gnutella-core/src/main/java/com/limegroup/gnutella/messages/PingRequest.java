@@ -26,6 +26,7 @@ public class PingRequest extends Message {
     /**
      * various flags related to the SCP ggep field
      */
+    public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
     public static final byte SCP_LEAF = 0x0;
     public static final byte SCP_ULTRAPEER = 0x1;
    
@@ -278,22 +279,22 @@ public class PingRequest extends Message {
         if(payload == null)
             return null;
         
+        byte[] ret = null;
         try {
             if(_ggeps == null)
                 _ggeps = GGEP.read(payload, 0);
             for(int i = 0; i < _ggeps.length; i++) {
                 if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
-                    byte[] data = _ggeps[i].getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-                    if(data == null)
-                        return DataUtils.EMPTY_BYTE_ARRAY;
-                    else
-                        return data;
+                    ret = DataUtils.EMPTY_BYTE_ARRAY;
+                    // this may throw, which is why we first set it to an empty value.
+                    ret = _ggeps[i].getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+                    return ret;
                 }
             }
         }
         catch(BadGGEPBlockException ignored) {}
         catch(BadGGEPPropertyException ignored) {}
-        return null;
+        return ret;
     }
 
     public boolean isQueryKeyRequest() {
