@@ -56,10 +56,6 @@ public class ClientSideOutOfBandReplyTest
     }
     
     private static void doSettings() {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client in leaf mode to listen on port
-        //6669, with no slots and no connections.  But you need to re-enable
-        //the interactive prompts below.
         ConnectionSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
@@ -93,28 +89,11 @@ public class ClientSideOutOfBandReplyTest
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
     }        
     
     public void setUp() throws Exception  {
         doSettings();
     }
-    
-    public static void globalTearDown() throws Exception {
-        shutdown();
-    }
-
-     ////////////////////////// Initialization ////////////////////////
-
-     private static void connect(RouterService rs) 
-     throws IOException, BadPacketException {
-         debug("-Establish connections");
-         //Ugh, there is a race condition here from the old days when this was
-         //an interactive test.  If rs connects before the listening socket is
-         //created, the test will fail.
-
-         //System.out.println("Please establish a connection to localhost:6350\n");
-     }
      
      private static Connection connect(RouterService rs, int port, 
                                        boolean ultrapeer) 
@@ -200,7 +179,10 @@ public class ClientSideOutOfBandReplyTest
 
         for (int i = 0; i < testUPs.length; i++) {
             testUPs[i] = connect(rs, 6355+i, true);
-            drain(testUPs[i]);
+            assertTrue("should be open", testUPs[i].isOpen());
+            assertTrue("should be up -> leaf",
+                testUPs[i].isSupernodeClientConnection());
+            drain(testUPs[i], 500);
             // OOB client side needs server side leaf guidance
             testUPs[i].send(MessagesSupportedVendorMessage.instance());
             testUPs[i].flush();
@@ -306,6 +288,10 @@ public class ClientSideOutOfBandReplyTest
         // we should now be guess capable and tcp incoming capable....
         assertTrue(rs.isGUESSCapable());
         assertTrue(rs.acceptedIncomingConnection());
+        
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(rs.newQueryGUID());
@@ -402,7 +388,8 @@ public class ClientSideOutOfBandReplyTest
 
         // now stop the query
         rs.stopQuery(queryGuid);
-        Thread.sleep(200);
+        keepAllAlive(testUPs);
+        drainAll();
 
         // send another ReplyNumber
         vm = new ReplyNumberVendorMessage(queryGuid, 5);
@@ -438,6 +425,9 @@ public class ClientSideOutOfBandReplyTest
         DatagramPacket pack = null;
         // send a query and make sure that after it is expired (i.e. enough
         // results are recieved) we don't request OOB replies for it
+        
+        // clear up messages before we test.
+        keepAllAlive(testUPs);
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(rs.newQueryGUID());
@@ -532,14 +522,6 @@ public class ClientSideOutOfBandReplyTest
 
     private void drainAll() throws Exception {
         drainAll(testUPs);
-    }
-
-    private static void shutdown() throws IOException {
-        //System.out.println("\nShutting down.");
-        debug("-Shutting down");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) { }
     }
     
     private static byte[] myIP() {
