@@ -820,7 +820,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		try {
 			return java.lang.Integer.parseInt(num);
 		} catch (NumberFormatException e) {
-			throw new ProblemReadingHeaderException();
+			throw new ProblemReadingHeaderException(e);
 		}
     }
 
@@ -911,7 +911,7 @@ public class HTTPDownloader implements BandwidthTracker {
             // fine.
             if (str.substring(start, slash).equals("*")) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("Content-Range like */?, " + str);
+                    LOG.debug(_rfd + " Content-Range like */?, " + str);
                 return new Interval(0, _amountToRead - 1);
             }
 
@@ -927,16 +927,16 @@ public class HTTPDownloader implements BandwidthTracker {
             //"bytes 0-9/*"
             if (str.substring(slash+1).equals("*")) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("Content-Range like #-#/*, " + str);
+                    LOG.debug(_rfd + " Content-Range like #-#/*, " + str);
 
                 return new Interval(numBeforeDash, numBeforeSlash);
             }
 
             numAfterSlash=Integer.parseInt(str.substring(slash+1));
         } catch (IndexOutOfBoundsException e) {
-            throw new ProblemReadingHeaderException();
+            throw new ProblemReadingHeaderException(str);
         } catch (NumberFormatException e) {
-            throw new ProblemReadingHeaderException();
+            throw new ProblemReadingHeaderException(str);
         }
 
         // In order to be backwards compatible with
@@ -953,7 +953,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("Content-Range like #-#/#, " + str);
+            LOG.debug(_rfd + " Content-Range like #-#/#, " + str);
         return new Interval(numBeforeDash, numBeforeSlash);
     }
 
@@ -1024,7 +1024,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 start = stop + 1;
                 
             } catch (NumberFormatException e) {
-                throw new ProblemReadingHeaderException();
+                throw new ProblemReadingHeaderException(e);
             }
             availableRanges.add(interval);
         }
@@ -1045,7 +1045,7 @@ public class HTTPDownloader implements BandwidthTracker {
         try {
             seconds = Integer.parseInt(str);
         } catch (NumberFormatException e) {
-            throw new ProblemReadingHeaderException();
+            throw new ProblemReadingHeaderException(e);
         }
         // make sure the value is not smaller than MIN_RETRY_AFTER seconds
         seconds = Math.max(seconds, MIN_RETRY_AFTER);
@@ -1068,7 +1068,7 @@ public class HTTPDownloader implements BandwidthTracker {
         try {
             milliSeconds = Long.parseLong(str);
         } catch (NumberFormatException e) {
-            throw new ProblemReadingHeaderException();
+            throw new ProblemReadingHeaderException(e);
         }
         if (rfd.getSHA1Urn() != null) {
             CreationTimeCache ctCache = CreationTimeCache.instance();

@@ -210,8 +210,8 @@ public class VerifyingFile {
      * Removes the specified internal from the set of leased intervals.
      */
     public synchronized void releaseBlock(Interval in) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Releasing interval: " + in);
+        //if(LOG.isDebugEnabled())
+            //LOG.debug("Releasing interval: " + in);
         leasedBlocks.delete(in);
     }
     
@@ -362,8 +362,8 @@ public class VerifyingFile {
      * Leases the specified interval.
      */
     private synchronized void leaseBlock(Interval in) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Obtaining interval: " + in);
+        //if(LOG.isDebugEnabled())
+            //LOG.debug("Obtaining interval: " + in);
         leasedBlocks.add(in);
     }
 }

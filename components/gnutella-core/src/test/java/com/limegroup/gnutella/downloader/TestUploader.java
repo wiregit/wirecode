@@ -26,9 +26,10 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
+import com.limegroup.gnutella.util.AssertComparisons;
 import com.sun.java.util.collections.Iterator;
 
-public class TestUploader {    
+public class TestUploader extends AssertComparisons {    
     
     private static final Log LOG = LogFactory.getLog(TestUploader.class);
     
@@ -120,6 +121,7 @@ public class TestUploader {
      * another thread to do the listening. 
      */
     public TestUploader(String name, final int port) {
+        super(name);
 
         // ensure that only local machines can connect!!
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -435,10 +437,10 @@ public class TestUploader {
                 } catch (Exception e) { 
                     Assert.that(false, "Bad Range request: \""+line+"\"");
                 }
-                start=p.a + lowChunkOffset;
-                if(start < 0) start = 0;
-                stop=p.b + highChunkOffset;
-                if(stop > TestFile.length()) stop = TestFile.length();
+                start = Math.max(0, p.a + lowChunkOffset);
+                stop = Math.min(TestFile.length(),
+                               Math.max(1, p.b + highChunkOffset));
+
             }
             
             i = line.indexOf("GET");
@@ -669,14 +671,14 @@ public class TestUploader {
         //check that the downloader made a correct range request if we are
         //partial and this is the second iteration. 
         if(partial==3) {//check this before checking partial2 -- we set it there
-            Assert.that(start==150000,
-                        "downloader picked incorrect start range in iteration");
-            Assert.that(stop==250010,
-                        "downloader pick incorrect stop range in iteration");
+            assertEquals("downloader picked incorrect start range in iteration",
+                         150010, start);
+            assertEquals("downloader pick incorrect stop range in iteration",
+                         250020, stop);
         }
         if(partial==2) {
-            Assert.that(start==50000,"invalid start range");
-            Assert.that(stop==150010,"invalid stop range was:"+stop);
+            assertEquals("invalid start range", 50000, start);
+            assertEquals("invalid stop range", 150010, stop);
         }                
         return new IntPair(start, stop);
     }

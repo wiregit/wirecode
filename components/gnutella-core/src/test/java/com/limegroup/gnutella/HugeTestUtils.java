@@ -294,7 +294,7 @@ public final class HugeTestUtils {
 			UNIQUE_SHA1 = 
 				URN.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
 		} catch(IOException e) {
-			e.printStackTrace();
+			ErrorService.error(e);
 		}
 		try {
 			BAD_PORT_URLS[0] = new URL("http", "www.limewire.org", -1, "test");

@@ -68,7 +68,7 @@ public class IntervalSet {
             //c) Join with higher
             intervals.remove(higher);
             intervals.add(new Interval(low, higher.high));
-        } else if (lower!=null) {
+        } else /*if (lower!=null)*/ {
             //d) Join with lower
             intervals.remove(lower);
             intervals.add(new Interval(lower.low, high));
@@ -222,7 +222,7 @@ public class IntervalSet {
         IntervalSet ret = new IntervalSet();
         if(maxSize < 1) 
             return ret; //return an empty IntervalSet
-        if (intervals==null || intervals.size()==0) {//Nothing recorded?
+        if (intervals.size()==0) {//Nothing recorded?
             Interval block=new Interval(0, maxSize-1);
             ret.add(block);
             return ret;

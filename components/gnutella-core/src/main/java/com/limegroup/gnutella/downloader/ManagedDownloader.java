@@ -1796,11 +1796,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             // if the user hasn't answered our corrupt question yet, wait.
             waitForCorruptResponse();
+            // if they really wanted to stop, do that instead of anything else
+            if (corruptState == CORRUPT_STOP_STATE) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            }            
         
             if (status == -1) //InterruptedException from tryAllDownloads3
                 throw new InterruptedException();
-            if (status != COMPLETE)
+            if (status != COMPLETE) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("stopping early with status: " + status);
                 return status;
+            }
 
             //3. Find out the hash of the file and verify that its the same
             // as the hash of the bucket it was downloaded from.
@@ -2964,13 +2972,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If it is a partial source, extract the first needed/available range
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
-            IntervalSet availableRanges =
-                dloader.getRemoteFileDesc().getAvailableRanges();
-            if(http11)
-                interval =
-                    commonOutFile.leaseWhite(availableRanges, CHUNK_SIZE);
-            else
-                interval = commonOutFile.leaseWhite(availableRanges);
+            try {
+                IntervalSet availableRanges =
+                    dloader.getRemoteFileDesc().getAvailableRanges();
+                if(http11)
+                    interval =
+                        commonOutFile.leaseWhite(availableRanges, CHUNK_SIZE);
+                else
+                    interval = commonOutFile.leaseWhite(availableRanges);
+            } catch(NoSuchElementException nsee) {
+                // if nothing satisfied this partial source, don't throw NSEE
+                // because that means there's nothing left to download.
+                // throw NSRE, which means that this particular source is done.
+                throw new NoSuchRangeException();
+            }
         }
         
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
@@ -3407,15 +3422,15 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Otherwise, we may continue the download or stop it immediately.
      */
     public void discardCorruptDownload(boolean delete) {
-        if(hashTree != null)
+        if(hashTree != null) {
             corruptState = CORRUPT_CONTINUE_STATE;
-        
-        if(delete) {
+        } else if(delete) {
             corruptState = CORRUPT_STOP_STATE;
             stop();
         } else {
             corruptState = CORRUPT_CONTINUE_STATE;
         }
+
         synchronized(corruptStateLock) {
             corruptStateLock.notify();
         }
