@@ -39,12 +39,13 @@ public class FileListHTMLPage {
         sb.append(host + ":" + port + htmlMiddle);
 
         // get all the Shared files from the FM
-        final String beginURL = "\r\n<a href=http://" + host + ":" + port + "/";
+        final String beginURL = "\r\n<a href=/get/";
         FileManager fm = RouterService.getFileManager();
         FileDesc[] sharedFiles = fm.getAllSharedFileDescriptors();
         for (int i = 0; i < sharedFiles.length; i++) {
             File currFile = sharedFiles[i].getFile();
-            sb.append(beginURL + currFile.getName() + ">" + currFile.getName() +
+            sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
+                      currFile.getName() + ">" + currFile.getName() +
                       "</a><br>");
         }
 
