@@ -129,9 +129,9 @@ public class QueryUnicaster {
         debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
         GUID guid = new GUID(query.getGUID());
-        QueryBundle qb = new QueryBundle(query);
         synchronized (_queries) {
             if (!_queries.containsKey(guid)) {
+                QueryBundle qb = new QueryBundle(query);
                 _queries.put(guid, qb);
                 retBool = true;
             }
