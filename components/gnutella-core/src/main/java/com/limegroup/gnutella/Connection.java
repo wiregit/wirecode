@@ -1134,7 +1134,7 @@ public class Connection {
     public boolean isConnectBackCapable() throws IllegalStateException {
         byte[] remote = getInetAddress().getAddress();
         byte[] local = _socket.getLocalAddress().getAddress();
-        return NetworkUtils.isCloseIP(local, remote);
+        return !NetworkUtils.isCloseIP(local, remote);
     }
 
     /**
