@@ -409,15 +409,17 @@ public class LimeXMLReplyCollection {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
         Set matching = null;
-        for(Iterator i = queryDoc.getValueList().iterator(); i.hasNext(); ) {
-            String val = (String)i.next();
-            Iterator /* of List */ iter = index.getPrefixedBy(val);
-            while(iter.hasNext()) {
-                List matchesVal = (List)iter.next();
-                if( matchesVal != null ) {
-                    if( matching == null )
-                        matching = new HashSet();
-                    matching.addAll(matchesVal);
+        synchronized(mainMap) {
+            for(Iterator i = queryDoc.getValueList().iterator(); i.hasNext(); ) {
+                String val = (String)i.next();
+                Iterator /* of List */ iter = index.getPrefixedBy(val);
+                while(iter.hasNext()) {
+                    List matchesVal = (List)iter.next();
+                    if( matchesVal != null ) {
+                        if( matching == null )
+                            matching = new HashSet();
+                        matching.addAll(matchesVal);
+                    }
                 }
             }
         }
