@@ -766,8 +766,10 @@ public class UDPConnectionProcessor {
         if(LOG.isDebugEnabled())  {
             LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
               _lastSendTime);
-            if ( msg instanceof FinMessage ) 
-                Thread.dumpStack();
+            if ( msg instanceof FinMessage ) { 
+            	Exception ex = new Exception();
+            	LOG.debug("", ex);
+            }
         }
 		_udpService.send(msg, _ip, _port);  
 	}
