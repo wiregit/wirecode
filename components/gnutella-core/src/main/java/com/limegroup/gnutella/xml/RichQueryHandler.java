@@ -79,13 +79,14 @@ public class RichQueryHandler{
         for(int i=0; i<s;i++){
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none
+            FileDesc fd = null;
             if(subjectFile==null){//pure data (data about NO file)
                 index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
                 size = 0;//there is no file, so no size
                 name =" ";//leave blank
             }
             else { //meta-data about a specific file
-                FileDesc fd = fManager.file2index(subjectFile);
+                fd = fManager.file2index(subjectFile);
                 if (fd != null){//we found a file with the right name
 					index = fd._index;
 					name =  fd._name;//need not send whole path; just name + index
@@ -103,7 +104,8 @@ public class RichQueryHandler{
             if (valid) {
                 //if this code is NOT run s times 
                 //there will be nulls at the end of the array
-                res = new Response(index,size,name,currDoc);
+                res = new Response(fd);
+                res.setDocument(currDoc);
                 retResponses[z] = res;
                 z++;
                 try {

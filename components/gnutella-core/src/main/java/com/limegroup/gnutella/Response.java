@@ -592,6 +592,11 @@ public class Response {
 		return urns;
     }
     
+    
+    byte[] getExtBytes() {
+        return extBytes;
+    }
+
 	// overrides Object.equals to provide a broader and more precise
 	// definition of equality
     public boolean equals(Object o) {
@@ -599,21 +604,22 @@ public class Response {
         if (! (o instanceof Response))
             return false;
         Response r=(Response)o;
-		return (index == r.index &&
-				size == r.size &&
-				name.equals(r.name) &&
-				Arrays.equals(nameBytes, r.nameBytes) &&
-				metadata.equals(r.metadata) &&
-				Arrays.equals(metaBytes, r.metaBytes) &&
-				((document == null) ? (r.document == null) :
-				 document.equals(r.document)) &&
-				urns.equals(r.urns) &&
-				Arrays.equals(extBytes, r.extBytes));
+		return (getIndex() == r.getIndex() &&
+                getSize() == r.getSize() &&
+				getName().equals(r.getName()) &&
+                Arrays.equals(getNameBytes(), r.getNameBytes()) &&
+				getMetadata().equals(r.getMetadata()) &&
+				Arrays.equals(getMetaBytes(), r.getMetaBytes()) &&
+				((getDocument() == null) ? (r.getDocument() == null) :
+				 getDocument().equals(r.getDocument())) &&
+				getUrns().equals(r.getUrns()) &&
+				Arrays.equals(getExtBytes(), r.getExtBytes()));
     }
+
 
     public int hashCode() {
         //Good enough for the moment
-        return name.hashCode()+(int)size+(int)index;
+        return getName().hashCode()+(int)getSize()+(int)getIndex();
     }
 
 	/**
