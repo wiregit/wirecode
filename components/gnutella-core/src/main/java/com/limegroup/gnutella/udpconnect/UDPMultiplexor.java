@@ -3,11 +3,17 @@ package com.limegroup.gnutella.udpconnect;
 import java.net.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /** 
  *  Manage the assignment of connectionIDs and the routing of 
  *  UDPConnectionMessages. 
  */
 public class UDPMultiplexor {
+
+    private static final Log LOG =
+      LogFactory.getLog(UDPConnectionProcessor.class);
 
 	/** Keep track of a singleton instance */
     private static UDPMultiplexor     _instance    = null;
@@ -93,6 +99,11 @@ public class UDPMultiplexor {
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
+
+                    if(LOG.isDebugEnabled())  {
+                        LOG.debug("routeMessage to conn:"+i+" Syn:"+msg);
+                    }
+
 					 con.handleMessage(msg);
 					 break;
 				} 
