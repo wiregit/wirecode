@@ -41,26 +41,6 @@ public abstract class MessageRouter {
      */
     protected byte[] _clientGUID;
 
-    /**
-     * The SecretKey used for QueryKey generation.
-     */
-    protected QueryKey.SecretKey _secretKey;
-    /**
-     * The LAST SecretKey used for QueryKey generation.  Used to honor older
-     * (but not too old) requests.
-     */
-    protected QueryKey.SecretKey _lastSecretKey;
-
-    /**
-     * The SecretPad used for QueryKey generation.
-     */
-    protected QueryKey.SecretPad _secretPad;
-    /**
-     * The LAST SecretPad used for QueryKey generation.  Used to honor older
-     * (but not too old) requests.
-     */
-    protected QueryKey.SecretPad _lastSecretPad;
-
 
 	/**
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
@@ -78,21 +58,21 @@ public abstract class MessageRouter {
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
-    private RouteTable _pingRouteTable = new RouteTable(2*60, 
-														MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _pingRouteTable = 
+        new RouteTable(2*60, MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
      * typically around 13000 entries, but never more than 100,000 entries.
      */
-    private RouteTable _queryRouteTable = new RouteTable(5*60,
-														 MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _queryRouteTable = 
+        new RouteTable(5*60, MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
      * minutes, typically around 3500 entries, but never more than 100,000
      * entries.  
      */
-    private RouteTable _pushRouteTable = new RouteTable(7*60,
-														MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _pushRouteTable = 
+        new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
 
     /** How long to buffer up out-of-band replies.
      */
@@ -171,8 +151,6 @@ public abstract class MessageRouter {
             //This should never happen! But if it does, we can recover.
             _clientGUID = Message.makeGuid();
         }
-        _secretKey = QueryKey.generateSecretKey();
-        _secretPad = QueryKey.generateSecretPad();
     }
 
     /**
@@ -424,8 +402,7 @@ public abstract class MessageRouter {
                                        QueryRequest qr) {
         if (qr.getQueryKey() == null)
             return false;
-        QueryKey computedQK = QueryKey.getQueryKey(ip, port, _secretKey,
-                                                   _secretPad);
+        QueryKey computedQK = QueryKey.getQueryKey(ip, port);
         return qr.getQueryKey().equals(computedQK);
     }
 
@@ -648,8 +625,7 @@ public abstract class MessageRouter {
             // fast!
             InetAddress address = datagram.getAddress();
             int port = datagram.getPort();
-            QueryKey key = QueryKey.getQueryKey(address, port, 
-                                                _secretKey, _secretPad);
+            QueryKey key = QueryKey.getQueryKey(address, port);
 
             // respond with Pong with QK, as GUESS requires....
             int num_files = RouterService.getNumSharedFiles();
