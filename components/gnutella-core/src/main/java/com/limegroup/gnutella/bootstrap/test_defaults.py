@@ -3,6 +3,7 @@
 
 from string import *
 from urllib import *
+import timeoutsocket
 
 def valid_line(line):
     return count(line, ".")==3 and count(line, ":")==1
@@ -15,7 +16,9 @@ def valid_file(f):
     line2=f.readline()
     return valid_line(line1) and valid_line(line2)
 
+timeoutsocket.setDefaultSocketTimeout(5)
 file=open("DefaultBootstrapServers.java")
+out=sys.stdout
 while 1:
     line=file.readline()
     if line=="":
@@ -32,12 +35,16 @@ while 1:
     
     if line[:4]=="http":
         try:
+            #print "Opening "+line
             f=urlopen(line+"?hostfile=1")
+            #print "Done"
             if not valid_file(f):
                 raise "Invalid file"
             f.close()
-            #print "%s success" % line
+            out.write(".")
+            #out.write("%s success\n" % line)
         except:
-            print "%s FAILURE" % line
+            out.write("\n%s FAILURE\n" % line)
+        out.flush()
 
 
