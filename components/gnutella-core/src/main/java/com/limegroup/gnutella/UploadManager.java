@@ -365,7 +365,7 @@ public final class UploadManager implements BandwidthTracker {
             
                 debug(uploader + " closing socket");
                 //close the socket
-                NetworkUtils.closeSocket(socket);
+                NetworkUtils.close(socket);
             }
         }
     }

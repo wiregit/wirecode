@@ -232,7 +232,7 @@ public final class HTTPUploader implements Uploader {
 	 */
 	public void stop() {
         closeFileStreams();
-        NetworkUtils.closeSocket(_socket);
+        NetworkUtils.close(_socket);
 	}
 	
 	/**
