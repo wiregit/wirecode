@@ -1247,8 +1247,7 @@ public abstract class MessageRouter {
 			_nextQueryUpdateTime = time + 1000;
 
             //For all connections to new hosts c needing an update...
-            //TODO3: use getInitializedConnections2?
-            List list=_manager.getInitializedConnections();
+            List list=_manager.getInitializedConnections2();
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 
