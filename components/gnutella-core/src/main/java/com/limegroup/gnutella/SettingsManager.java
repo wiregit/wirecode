@@ -49,6 +49,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  filterAdult_;
     private static boolean  filterVbs_;
     private static boolean  filterHtml_;
+    private static boolean  filterGreedyQueries_;
     private static boolean  useQuickConnect_;
     private static String[] quickConnectHosts_;
     private static int      parallelSearchMax_;
@@ -381,7 +382,18 @@ public class SettingsManager implements SettingsInterface
 						return;
 					try {setFilterVbs(bs);}
 					catch (IllegalArgumentException ie){}
-				}
+                }
+                else if(key.equals(SettingsInterface.FILTER_GREEDY_QUERIES)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try {setFilterGreedyQueries(bs);}
+                    catch (IllegalArgumentException ie){}
+                }   
 				else if(key.equals(SettingsInterface.USE_QUICK_CONNECT)) {
 					boolean bs;
 					if (p.equals("true"))
@@ -452,6 +464,8 @@ public class SettingsManager implements SettingsInterface
 		setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
 		setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 		setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
+        setFilterGreedyQueries(
+                    SettingsInterface.DEFAULT_FILTER_GREEDY_QUERIES);
 		setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 		setDirectories(home_);
 		setSaveDirectory(home_);
@@ -560,6 +574,7 @@ public class SettingsManager implements SettingsInterface
     public boolean getFilterDuplicates(){return filterDuplicates_;}
     public boolean getFilterHtml(){return filterHtml_;}
     public boolean getFilterVbs(){return filterVbs_;}
+    public boolean getFilterGreedyQueries() { return filterGreedyQueries_; }
 
     public boolean getUseQuickConnect(){return useQuickConnect_;}
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
@@ -1024,6 +1039,14 @@ public class SettingsManager implements SettingsInterface
 			writeProperties();	
 		}
     }
+
+    public synchronized void setFilterGreedyQueries(boolean yes) {
+        filterGreedyQueries_ = yes;
+        Boolean b = new Boolean(yes);
+        String s = b.toString();
+        props_.put(SettingsInterface.FILTER_GREEDY_QUERIES, s);
+        writeProperties();
+    }    
 	
     public synchronized void setUseQuickConnect(boolean useQuickConnect) {
 		if(false)
