@@ -43,8 +43,8 @@ public class RemoteFileDesc implements Serializable {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality) {	   
-        this(host, port, index, filename, size,
-             clientGUID, speed, chat, quality, null, null);
+		this(host, port, index, filename, size,
+			 clientGUID, speed, chat, quality, null, null);
 	}
 
 	/** 
@@ -117,34 +117,41 @@ public class RemoteFileDesc implements Serializable {
 	}
 
 	public final boolean isPrivate() {
-		// System.out.println("host: " + _host);
 		if (_host == null) return true;
 		Endpoint e = new Endpoint(_host, _port);
 		return e.isPrivateAddress();
 	}
 
 
-	/** Returns true iff o is a RemoteFileDesc with the same value as this.
-     *  Priority and number of attempts is ignored in doing the comparison! */
+	/**
+	 * Overrides <tt>Object.equals</tt> to return instance equality
+	 * based on the equality of all <tt>RemoteFileDesc</tt> fields.
+	 *
+	 * @return <tt>true</tt> if all of fields of this 
+	 *  <tt>RemoteFileDesc</tt> instance are equal to all of the 
+	 *  fields of the specified object, and <tt>false</tt> if this
+	 *  is not the case, or if the specified object is not a 
+	 *  <tt>RemoteFileDesc</tt>.
+	 */
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof RemoteFileDesc))
             return false;
-        RemoteFileDesc other=(RemoteFileDesc)o;
-        
-		// TODO: XML is ignored in this comparison, so this method is really
-		// broken
-        return _host.equals(other._host)
-            && _port==other._port
-            && _filename.equals(other._filename)
-            && _index==other._index 
-            && Arrays.equals(_clientGUID, other._clientGUID)
-            && _speed==other._speed
-            && _size==other._size
-		// this doesn't work since XMLDocuments doesn't override equals, but
-		// that's another issue
-		    && Arrays.equals(_xmlDocs, other._xmlDocs) 
-		    && _urns.equals(other._urns);
+        RemoteFileDesc other=(RemoteFileDesc)o;        
+		return ((_host == null ? other._host == null : 
+				 _host.equals(other._host)) &&
+				(_port == other._port) &&
+				(_filename == null ? other._filename == null :
+				 _filename.equals(other._filename)) &&
+				(_index == other._index) &&
+				(_clientGUID == null ? other._clientGUID == null :
+				 Arrays.equals(_clientGUID, other._clientGUID)) &&
+				(_speed == other._speed) &&
+				(_size == other._size) &&
+				(_xmlDocs == null ? other._xmlDocs == null :
+				 Arrays.equals(_xmlDocs, other._xmlDocs)) &&
+				(_urns == null ? other._urns == null :
+				 _urns.equals(other._urns)));		
     }
 
     public String toString() {
