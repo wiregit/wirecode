@@ -62,12 +62,6 @@ public final class ThemeSettings extends AbstractSettings {
 		DEFAULT_THEME_NAME,
 		DEFAULT_OSX_THEME_NAME,
 		"black_theme."+EXTENSION,
-		"green_theme."+EXTENSION,
-		"amber_theme."+EXTENSION,
-		"ocean_theme."+EXTENSION,
-		"pink_theme."+EXTENSION,
-		"red_theme."+EXTENSION,
-		"white_theme."+EXTENSION,
 	}; 
 	
 	/**
