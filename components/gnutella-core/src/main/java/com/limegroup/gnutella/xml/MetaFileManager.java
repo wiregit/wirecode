@@ -132,10 +132,14 @@ public class MetaFileManager extends FileManager {
             String[] subFiles = currDir.list();
             int z = subFiles.length;
             for(int j=0;j<z;j++){
-                File f = new File(dir+File.separator+subFiles[j]);
+                File f = new File(dir,subFiles[j]);
                 if(f.isDirectory()){
-                    String newDir = dir+File.separator+subFiles[j];
-                    dirs.add(newDir);
+                    try {
+                        String newDir = f.getCanonicalPath();                  
+                        dirs.add(newDir);
+                    } catch (IOException ignored) {
+                        continue;
+                    }
                 }
             }
             //check files in this dir for .mp3 files.
