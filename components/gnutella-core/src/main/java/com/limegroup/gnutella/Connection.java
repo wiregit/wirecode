@@ -271,17 +271,59 @@ public class Connection {
      * from multiple threads. 
      */
     private final Object WRITE_LOCK = new Object();
-    
-    /** 
-     * Filter for filtering out messages that are considered spam.
+       
+    /**
+     * The number of messages received.  This messages that are eventually
+     * dropped.  This stat is synchronized by _outputQueueLock;
      */
-    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
+    private int _numMessagesSent;
+    
+    /**
+     * The number of messages received.  This includes messages that are
+     * eventually dropped.  This stat is not synchronized because receiving
+     * is not thread-safe; callers are expected to make sure only one thread
+     * at a time is calling receive on a given connection.
+     */
+    private int _numMessagesReceived;
+    
+    /**
+     * The number of messages received on this connection either filtered out
+     * or dropped because we didn't know how to route them.
+     */
+    private int _numReceivedMessagesDropped;
+    
+    /**
+     * The number of messages I dropped because the
+     * output queue overflowed.  This happens when the remote host
+     * cannot receive packets as quickly as I am trying to send them.
+     * No synchronization is necessary.
+     */
+    private int _numSentMessagesDropped;
+    
+    
+
+    /**
+     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
+     * of _numMessagesSent/_numSentMessagesDropped and
+     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
+     * getPercentDropped.  LOCKING: These are synchronized by this;
+     * finer-grained schemes could be used. 
+     */
+    private int _lastReceived;
+    private int _lastRecvDropped;
+    private int _lastSent;
+    private int _lastSentDropped;
     
     /**
      * Filter for which messages to display in search results.
      */
     private volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
+        
+    /** 
+     * Filter for filtering out messages that are considered spam.
+     */
+    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -457,7 +499,8 @@ public class Connection {
         }
         
 		SocketChannel channel = _socket.getChannel();
-		Assert.that(channel != null, "Null channel for socket ("+isOutgoing()+")");
+		Assert.that(channel != null, 
+            "Null channel for socket ("+isOutgoing()+")");
 		channel.configureBlocking(true);  //for handshaking; see initialize()
 
         try {
@@ -516,12 +559,14 @@ public class Connection {
             throw new BadHandshakeException(e);
         }
         
-        _socket.getChannel().configureBlocking(false);
-        if(CommonUtils.isJava14OrLater()) {
-			NIODispatcher.instance().addReader(this);
-        }
+        
         _messageWriter = MessageWriter.createWriter(_socket.getChannel());
         _messageReader = MessageReader.createReader();
+        
+        if(CommonUtils.isJava14OrLater()) {
+            _socket.getChannel().configureBlocking(false);
+			NIODispatcher.instance().addReader(this);
+        }
     }
 
     /**
@@ -983,7 +1028,6 @@ public class Connection {
      * data is sent.
      */
     public boolean write() {
-        System.out.println("ManagedConnection::write");
         synchronized (WRITE_LOCK) {
             
             // TODO:: we should probably throw IOException here
@@ -998,22 +1042,26 @@ public class Connection {
             // Add more queued data if possible.
             if (!_messageWriter.hasPendingMessage()) {
                 Message m = null;
-                System.out.println("ManagedConnection::write::open::about to get lock");
                 synchronized (this) {
-                    System.out.println("ManagedConnection::write::open::got LOCK!!");
                     m = QUEUE.removeNext();
-                    if (m == null)
-                        return false;    //Nothing left to send (a)
+                    // should not be reading from QUEUE if there's nothing 
+                    // left on it
+                    Assert.that(m != null);
+                    //if (m == null)
+                      //  return true;    //Nothing left to send (a)
                         
-                    // TODO: re-enable stats
-                    //_numSentMessagesDropped += QUEUE.resetDropped();
+                    _numSentMessagesDropped += QUEUE.resetDropped();
                 }
                 //boolean hasUnsentData = super.write(m);
              
                 try {
                     
                     // this will add it again to the writers if necessary
-                    return _messageWriter.write(m);
+                    if(_messageWriter.write(m)) {
+                        addSent();
+                        return true;
+                    }
+                    return false;
                 } catch (IOException e) {
                     // TODO we probably want to throw this!!
                     e.printStackTrace();
@@ -1217,7 +1265,11 @@ public class Connection {
                 priorUncompressed = _deflater.getTotalIn();
                 priorCompressed = _deflater.getTotalOut();
             }    
-			return _messageWriter.write();
+            if(_messageWriter.write()) {
+                addSent();
+                return true;
+            }
+            return false;
 			// TODO1 handle statististics -- compression etc.
         } catch(NullPointerException e) {
 			return false;
@@ -1935,6 +1987,92 @@ public class Connection {
      */
     public void setPersonalFilter(SpamFilter filter) {
         _personalFilter = filter;
+    }
+    
+    /** Returns the number of messages sent on this connection */
+    public int getNumMessagesSent() {
+        return _numMessagesSent;
+    }
+
+    /** Returns the number of messages received on this connection */
+    public int getNumMessagesReceived() {
+        return _numMessagesReceived;
+    }
+    
+    /**
+     * Adds a message received to stats.
+     */
+    public void addReceived() {
+        _numMessagesReceived++;
+    }
+    
+    /**
+     * Adds a message sent to stats.
+     */
+    public void addSent() {
+        _numMessagesSent++;
+    }
+
+    /** Returns the number of messages I dropped while trying to send
+     *  on this connection.  This happens when the remote host cannot
+     *  keep up with me. */
+    public int getNumSentMessagesDropped() {
+        return _numSentMessagesDropped;
+    }
+
+    /**
+     * The number of messages received on this connection either filtered out
+     * or dropped because we didn't know how to route them.
+     */
+    public long getNumReceivedMessagesDropped() {
+        return _numReceivedMessagesDropped;
+    }
+
+    /**
+     * @modifies this
+     * @effects Returns the percentage of messages sent on this
+     *  since the last call to getPercentReceivedDropped that were
+     *  dropped by this end of the connection.
+     */
+    public synchronized float getPercentReceivedDropped() {
+        int rdiff = _numMessagesReceived - _lastReceived;
+        int ddiff = _numReceivedMessagesDropped - _lastRecvDropped;
+        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+
+        _lastReceived = _numMessagesReceived;
+        _lastRecvDropped = _numReceivedMessagesDropped;
+        return percent;
+    }
+
+    /**
+     * @modifies this
+     * @effects Returns the percentage of messages sent on this
+     *  since the last call to getPercentSentDropped that were
+     *  dropped by this end of the connection.  This value may be
+     *  greater than 100%, e.g., if only one message is sent but
+     *  four are dropped during a given time period.
+     */
+    public synchronized float getPercentSentDropped() {
+        int rdiff = _numMessagesSent - _lastSent;
+        int ddiff = _numSentMessagesDropped - _lastSentDropped;
+        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
+
+        _lastSent = _numMessagesSent;
+        _lastSentDropped = _numSentMessagesDropped;
+        return percent;
+    }
+    
+    private void addDropped(int dropped) {
+        _numSentMessagesDropped+=dropped;
+    }
+    
+    /**
+     * A callback for the ConnectionManager to inform this connection that a
+     * message was dropped.  This happens when a reply received from this
+     * connection has no routing path.
+     */
+    public void countDroppedMessage() {
+        _numReceivedMessagesDropped++;
     }
     
     // overrides Object.toString
