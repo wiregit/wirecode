@@ -65,22 +65,29 @@ public class ManagedConnection
      *  is thrown.  
      */
 
-    /** The (approximate) max time a packet can be queued, in milliseconds. */
-    private static final int QUEUE_TIME=500;
-    /** The number of packets to present to the OS at a time.  This
-     *  should be roughly proportional to the OS's send buffer. */
-    private static final int BATCH_SIZE=50;
-    /** The size of the queue.  This must be larger than BATCH_SIZE.
-     *  Larger values tolerate temporary bursts of producer traffic
-     *  without traffic but may result in overall latency. */
-    private static final int QUEUE_SIZE=200;
+    /** The size of the queue. Larger values tolerate larger bursts of producer
+     *  traffic, though they waste more memory. */
+    private static final int QUEUE_SIZE=100;
+    private static final int PRIORITIES=7;
+    private static final int PRIORITY_WATCHDOG=0; //highest priority
+    private static final int PRIORITY_PUSH=1;
+    private static final int PRIORITY_QUERY_REPLY=2;
+    private static final int PRIORITY_QUERY=3;
+    private static final int PRIORITY_PING_REPLY=4;
+    private static final int PRIORITY_PING=5;
+    private static final int PRIORITY_OTHER=6;   //lowest priority, QRP included
+
     /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
     private Object _outputQueueLock=new Object();
-    /** The producer's queue. One priority per mesage type. */
-    private BucketQueue _outputQueue=new BucketQueue(5, QUEUE_SIZE);
-    /** True iff the output thread should write the queue immediately.
-     *  Synchronized by _outputQueueLock. */
-    private volatile boolean _flushImmediately=false;
+    /** The producer's queues, one priority per mesage type. */
+    private Buffer[] _outputQueue=new Buffer[PRIORITIES]; 
+    {
+        for (int i=0; i<PRIORITIES; i++)
+            _outputQueue[i]=new Buffer(QUEUE_SIZE);
+    }
+    /** The OutputRunner thread.  Needed for debugging only. */
+    private Thread _outputRunnerThread;
+
 
     /**
      * The amount of time to wait for a handshake ping in reject connections, in
@@ -256,8 +263,6 @@ public class ManagedConnection
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
-
-        new OutputRunner(); // Start the thread to empty the output queue
     }
 
     /**
@@ -279,8 +284,14 @@ public class ManagedConnection
                 router, socket.getInetAddress().getHostAddress())));
         _router = router;
         _manager = manager;
+    }
 
-        new OutputRunner(); // Start the thread to empty the output queue
+    public void initialize()
+            throws IOException, NoGnutellaOkException, BadHandshakeException {
+        //Establish the socket (if needed), handshake.
+        super.initialize();
+        //Start the thread to empty the output queue
+        _outputRunnerThread=new OutputRunner();
     }
 
     /**
@@ -333,15 +344,14 @@ public class ManagedConnection
      *  is already closed.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) {
+        _router.countMessage();
+        int priority=calculatePriority(m);
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
-            _router.countMessage();
-            int priority=calculatePriority(m);
-            Message dropped=(Message)_outputQueue.insert(m, priority);
+            Object dropped=_outputQueue[priority].addLast(m);
             if (dropped!=null)
                 _numSentMessagesDropped++;
-            if (_outputQueue.size() >= BATCH_SIZE)
-                _outputQueueLock.notify();
+            _outputQueueLock.notify();
         }
     }
  
@@ -354,42 +364,31 @@ public class ManagedConnection
         //TODO: use switch statement?
         byte opcode=m.getFunc();
         byte hops=m.getHops();
-        if (opcode==Message.F_PUSH
-            || (opcode==Message.F_PING && hops==0)        //watchdog ping
-            || (opcode==Message.F_PING_REPLY && hops==0)) //watchdog pong
-            return 4;
+        if (hops==0 && (opcode==Message.F_PING || opcode==Message.F_PING_REPLY))
+            //watchdog ping/pong
+            return PRIORITY_WATCHDOG;
+        else if (opcode==Message.F_PUSH)
+            return PRIORITY_PUSH;
         else if (opcode==Message.F_QUERY_REPLY) 
-            return 3;
+            return PRIORITY_QUERY_REPLY;
         else if (opcode==Message.F_QUERY) 
-            return 2;
-        else if (opcode==Message.F_PING_REPLY) 
-            return 1;
-        else if (opcode==Message.F_PING) 
-            return 0;
+            return PRIORITY_QUERY;
+        else if (opcode==Message.F_PING_REPLY)
+            return PRIORITY_PING_REPLY;
+        else if (opcode==Message.F_PING)
+            return PRIORITY_PING;
         else {
-            //Assume non-standard messages (e.g. F_ROUTE_TABLE_UPDATE) are of
-            //highest priorities.
-            return 4;
+            //includes QRP table updates
+            return PRIORITY_OTHER;
         }
     }
 
     /**
-     * Hints that this' output buffers should be emptied immediately.  Normally,
-     * there is no need to call this method; the output buffers are
-     * automatically flushed every few seconds (at most).  However, it may be
-     * desirable to call this method in situations where high latencies are not
-     * tolerable, e.g., when sending a group ping request to a bootstrap
-     * server.<p>
-     *
-     * The specification
+     * Does nothing.  Since this automatically takes care of flushing output
+     * buffers, there is nothing to do.  Note that flush() does NOT block for
+     * TCP buffers to be emptied.  
      */
-    public void flush()
-            throws IOException {
-        //TODO: is this right?
-        synchronized (_outputQueueLock) {
-            _flushImmediately=true;
-            _outputQueueLock.notify();
-        }
+    public void flush() throws IOException {        
     }
 
     /** Repeatedly sends all the queued data every few seconds. */
@@ -401,40 +400,54 @@ public class ManagedConnection
 
         public void run() {
             while (isOpen()) {
-                //1. Wait until (1) the queue is full or (2) the
-                //maximum allowable send latency has passed (and the
-                //queue is not empty)...
-                synchronized (_outputQueueLock) {
-                    try {
-                        if (!_flushImmediately &&
-                                _outputQueue.size() < BATCH_SIZE)
-                            _outputQueueLock.wait(QUEUE_TIME);
-                    } catch (InterruptedException e) {
-                    }
-                    _flushImmediately=false;
-                    if (_outputQueue.isEmpty())
-                        continue;
+                //1. Wait until the queue is non-empty.  The synchronized
+                //statement is outside the while loop because queued() is not
+                //thread-safe.
+                if (isInterrupted()) {
+                    //This only happens if I've been killed for debugging
+                    //purposes.  (See unit tests below.)
+                    System.err.println("WARNING: OutputRunner for "
+                                       +ManagedConnection.this
+                                       +" terminating");
+                    return;
                 }
+                synchronized (_outputQueueLock) {
+                    while (queued() <= 0) {
+                        try {
+                            _outputQueueLock.wait();
+                        } catch (InterruptedException e) { 
+                            //For debug only, same as return above.
+                            System.err.println("WARNING: OutputRunner for "
+                                               +ManagedConnection.this
+                                               +" terminating");
+                            return;
+                        }
+                    }
+                } 
 
 //                 System.out.println(System.currentTimeMillis()+" before write");
 //                 dumpQueueStats();
 
                 try {
-                    //2. Now send best QUEUE_SIZE messages from the queue.  Note
-                    //that we obtain the lock while removing elements from the
-                    //queue but NOT while actually sending.
-                    for (int i=0; i<BATCH_SIZE; i++) { 
+                    //2. Now send queued message of each type (if possible).
+                    //Note that we obtain the lock while removing elements from
+                    //the queue but NOT while actually sending.
+                    for (int i=0; i<PRIORITIES; i++) { 
                         Message m=null;
                         synchronized (_outputQueueLock) {
-                            if (_outputQueue.isEmpty())
-                                break;
-                            m=(Message)_outputQueue.extractMax();
+                            if (_outputQueue[i].isEmpty())
+                                continue;
+                            m=(Message)_outputQueue[i].removeLast(); //LIFO!
                         }
                         ManagedConnection.super.send(m);
                         _bytesSent+=m.getTotalLength();
                     }
 
-                    //3. Flush for real.
+                    //3. Flush.  This just forces data from Connection's
+                    //BufferedOutputStream into the kernel's TCP send buffer.
+                    //It doesn't force TCP to actually send the data to the
+                    //network.  That is determined by the receiver's window size
+                    //and Nagle's algorithm.
                     ManagedConnection.super.flush();
                 } catch (IOException e) {
                     _manager.remove(ManagedConnection.this);
@@ -443,16 +456,25 @@ public class ManagedConnection
         }
     }
 
+    /** Returns the number of queued messages in this. 
+     *  @requires caller holds _outputQueueLock */
+    private int queued() {
+        int sum=0;
+        for (int i=0; i<_outputQueue.length; i++) 
+            sum+=_outputQueue[i].size();
+        return sum;
+    }
+
     /** 
      * For debugging only: prints to stdout the number of queued messages in
      * this, by type.
      */
     private void dumpQueueStats() {
         synchronized (_outputQueueLock) {
-            for (int i=0; i<5; i++) {
-                System.out.println(i+" "+_outputQueue.size(i));
+            for (int i=0; i<PRIORITIES; i++) {
+                System.out.println(i+" "+_outputQueue[i].size());
             }
-            System.out.println("* "+_outputQueue.size()+"\n");
+            System.out.println("* "+queued()+"\n");
         }
     }
     /**
@@ -1134,7 +1156,6 @@ public class ManagedConnection
     } 
     
     /** Unit test. */
-    /*
     public static void main(String args[]) {        
         try {
             System.out.println("-Testing initialize");
@@ -1144,7 +1165,7 @@ public class ManagedConnection
                 new com.limegroup.gnutella.tests.MiniAcceptor(null);
             ManagedConnection out=new ManagedConnection("localhost", 6346);
             out.initialize();
-            Connection in=acceptor.accept();                    
+            Connection in=acceptor.accept();      
             testSendFlush(out, in);
             testReorderBuffer(out, in);
             testDropBuffer(out, in);
@@ -1168,42 +1189,43 @@ public class ManagedConnection
         long start=0;
         long elapsed=0;
 
-        System.out.println("-Testing send with flush");
+        System.out.println("-Testing send without flush");
+        Assert.that(out.getNumMessagesSent()==0); 
+        Assert.that(out._bytesSent==0);
         pr=new PingRequest((byte)4);
         out.send(pr);
-        out.flush();
+        start=System.currentTimeMillis();        
+        pr=(PingRequest)in.receive();
+        elapsed=System.currentTimeMillis()-start;
         Assert.that(out.getNumMessagesSent()==1);
         Assert.that(out._bytesSent==pr.getTotalLength());
-        start=System.currentTimeMillis();        
-        pr=(PingRequest)in.receive();
-        elapsed=System.currentTimeMillis()-start;
-        Assert.that(elapsed<QUEUE_TIME,
-                    "Unexpected send time: "+elapsed);
-        Assert.that(pr.getHops()==0);
-        Assert.that(pr.getTTL()==4);
-
-        System.out.println("-Testing send without flush");
-        pr=new PingRequest((byte)4);
-        out.send(pr);
-        Assert.that(out.getNumMessagesSent()==2); 
-        Assert.that(out._bytesSent==pr.getTotalLength()); //flush not called yet
-        start=System.currentTimeMillis();        
-        pr=(PingRequest)in.receive();
-        elapsed=System.currentTimeMillis()-start;
-        Assert.that(out.getNumMessagesSent()==2);
-        Assert.that(out._bytesSent==2*pr.getTotalLength());
-        Assert.that(elapsed>=(QUEUE_TIME-10) && elapsed<2*QUEUE_TIME, 
-                    "Unexpected send time: "+elapsed);
+        Assert.that(elapsed<300, "Unreasonably long send time: "+elapsed);
         Assert.that(pr.getHops()==0);
         Assert.that(pr.getTTL()==4);
 
     }
 
+    private void stopOutputRunner() {
+        if (_outputRunnerThread==null)
+            return;
+
+        _outputRunnerThread.interrupt();
+        try {
+            _outputRunnerThread.join();
+        } catch (InterruptedException ignored) { }
+        _outputRunnerThread=null;
+    }
+
+    private void startOutputRunner() {
+        _outputRunnerThread=new OutputRunner();
+    }
 
     private static void testReorderBuffer(ManagedConnection out, Connection in) 
             throws IOException, BadPacketException {
         System.out.println("-Testing reorder buffer");
-        //Buffer tons of messages
+        //1. Buffer tons of messages.  By killing the old thread and restarting
+        //later, we simulate a stall in the network.
+        out.stopOutputRunner();
         Message m=null;
         out.send(new QueryRequest((byte)5, 0, "test"));
         m=new PingRequest((byte)5);
@@ -1220,29 +1242,51 @@ public class ManagedConnection
         out.send(new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                                 new Response[0], new byte[16]));
         out.send(new PingRequest((byte)5));
+               
+        //2. Now we let the messages pass through, as if the receiver's window
+        //became non-zero.  Buffers look this before emptying:
+        //  WATCHDOG: pong/6342 ping
+        //  PUSH: x
+        //  QUERY_REPLY: x/6341 x/6342
+        //  QUERY: "test"
+        //  PING_REPLY: x/6341
+        //  PING: x
+        //  OTHER:
+        Assert.that(out._outputRunnerThread==null);
+        //out.dumpQueueStats();
+        out.startOutputRunner();
+        
+        //3. Read them...now in different order!
+        m=in.receive(); //watchdog ping
+        Assert.that(m instanceof PingRequest, "Unexpected message: "+m);
+        Assert.that(m.getHops()==0, "Unexpected message: "+m);  
 
-        //Read them...now in different order!
-        m=in.receive();
-        Assert.that(m instanceof PingRequest);
-        Assert.that(m.getHops()==0);  //watchdog ping
-        m=in.receive();
-        Assert.that(m instanceof PingReply);
-        Assert.that(m.getHops()==0);  //watchdog response pong
-        m=in.receive();
+        m=in.receive(); //push
         Assert.that(m instanceof PushRequest, "Unexpected message: "+m);
-        m=in.receive();
+
+        m=in.receive(); //reply/6342
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6342);
-        m=in.receive();
-        Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6341);
-        m=in.receive();
+
+        m=in.receive(); //query "test"
         Assert.that(m instanceof QueryRequest);
-        m=in.receive();
+
+        m=in.receive(); //reply 6341
         Assert.that(m instanceof PingReply);
-        m=in.receive();
+        Assert.that(((PingReply)m).getPort()==6341);
+
+        m=in.receive(); //ping
         Assert.that(m instanceof PingRequest);
         Assert.that(m.getHops()>0);
+
+        m=in.receive(); //watchdog pong/6342
+        Assert.that(m instanceof PingReply);
+        Assert.that(((PingReply)m).getPort()==6342);
+        Assert.that(m.getHops()==0);  //watchdog response pong
+
+        m=in.receive(); //reply/6341
+        Assert.that(m instanceof QueryReply);
+        Assert.that(((QueryReply)m).getPort()==6341);
     }
 
     private static void testDropBuffer(ManagedConnection out, Connection in) 
@@ -1279,7 +1323,6 @@ public class ManagedConnection
     private ManagedConnection(String address, int port) {
         super(address, port);
         this._router=new com.limegroup.gnutella.tests.MessageRouterStub();
-        new OutputRunner();
     }
 
     private static void testHorizonStatistics() {
@@ -1343,5 +1386,4 @@ public class ManagedConnection
     private ManagedConnection() {
         super("", 0);
     }
-    */
 }
