@@ -30,7 +30,7 @@ public class SimppManager {
         RandomAccessFile raf = null;
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(), "settableprops.xml");
+                new File(CommonUtils.getUserSettingsDir(), "simpp.xml");
             raf = new RandomAccessFile(file, "r");
             byte[] content = new byte[(int)raf.length()];
             raf.readFully(content);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.simpp;
 
 import java.security.*;
+import java.security.spec.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.security.*;
@@ -11,6 +12,10 @@ import org.xml.sax.*;
 public class SimppDataVerifier {
     
     private static final byte SEP = (byte)124;
+
+    //We use DSA keys since they are fast, secure and the standard for
+    //signatures
+    public final String DSA_ALGORITHM = "DSA";
 
     private byte[] simppPayload;    
     
@@ -40,11 +45,9 @@ public class SimppDataVerifier {
         byte[] propsData = new byte[simppPayload.length-1-sepIndex];//TODO check
         System.arraycopy(simppPayload, sepIndex+1, propsData, 
                                            0, simppPayload.length-1-sepIndex);
-        //TODO1: Find a better way to store public keys 
-        PublicKey pk = null;
-        //TODO1: Choose a strong encryption Algorith, and now we are not
-        //constrained by java118
-        String algo = null;
+        
+        PublicKey pk = getPublicKey();
+        String algo = DSA_ALGORITHM;
         SignatureVerifier verifier = 
                          new SignatureVerifier(propsData, signature, pk, algo);
         boolean ret = verifier.verifySignature();
@@ -63,6 +66,45 @@ public class SimppDataVerifier {
 
     
     ////////////////////////////helpers/////////////////////
+
+    private PublicKey getPublicKey() {
+        //1. Get the file that has the public key 
+        //File pubKeyFile =
+        //SecuritySettings.SIMPP_PUBLIC_KEY_FILE.getValue();
+        File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
+        //TODO: work this out with the setting telling us which public key to
+        //use
+
+        String base32Enc = null;
+        RandomAccessFile raf = null;
+        //2. read the base32 encoded string of the public key
+        try {
+            raf = new RandomAccessFile(pubKeyFile,"r");
+            byte[] bytes = new byte[(int)raf.length()];
+            raf.readFully(bytes);
+            base32Enc = new String(bytes, "UTF-8");
+        } catch (IOException iox) {
+            ErrorService.error(iox);
+        } finally {
+            try {
+                raf.close();
+            } catch (IOException iox) {}
+        }
+        //3. convert the base32 encoded String into the original bytes
+        byte[] pubKeyBytes = Base32.decode(base32Enc);
+        //4. Make a public key out of it
+        PublicKey ret = null;
+        try {
+            KeyFactory factory = KeyFactory.getInstance(DSA_ALGORITHM);
+            EncodedKeySpec keySpec = new X509EncodedKeySpec(pubKeyBytes);
+            ret = factory.generatePublic(keySpec);
+        } catch(NoSuchAlgorithmException nsax) {
+            ErrorService.error(nsax);
+        } catch(InvalidKeySpecException iksx) {
+            ErrorService.error(iksx);
+        }
+        return ret;
+    }
 
     static int findSeperator(byte[] data) {
         boolean found = false;
