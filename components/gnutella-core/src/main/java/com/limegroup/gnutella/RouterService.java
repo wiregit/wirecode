@@ -138,6 +138,19 @@ public class RouterService
     }
 
     /**
+     * Notify the backend that spam filters settings have changed, and that
+     * extra work must be done.
+     */
+    public void adjustSpamFilters() {
+	//Just replace all the spam filters.  No need to do anything
+	//fancy like incrementally updating them.
+	for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+	    Connection c=(Connection)iter.next();
+	    c.setSpamFilter(SpamFilter.newInstance());
+	}
+    }
+
+    /**
      * @modifies this
      * @effects sets the port on which to listen for incoming connections. 
      *  If that fails, this is <i>not</i> modified and IOException is thrown.

@@ -44,7 +44,10 @@ import java.util.*;
  *
  * You will note that the first constructor doesn't actually connect
  * this.  For that you must call connect().  While this is awkward,
- * it is intentional, as it makes interfacing with the GUI easier.
+ * it is intentional, as it makes interfacing with the GUI easier.<p>
+ *
+ * All connections have an underlying spam filter.  You can modify 
+ * this with setSpamFilter.
  */
 public class Connection implements Runnable { 
     /** These are only needed for the run method.
@@ -55,7 +58,7 @@ public class Connection implements Runnable {
     protected ConnectionManager manager=null;
     protected RouteTable routeTable=null;    
     protected RouteTable pushRouteTable=null;
-    protected SpamFilter spamFilter=SpamFilter.newInstance();
+    protected volatile SpamFilter spamFilter=SpamFilter.newInstance();
 
     /** The underlying socket.  sock, in, and out are null iff this is in
      *  the unconnected state.
@@ -96,6 +99,8 @@ public class Connection implements Runnable {
     /** 
      * Creates a new outgoing connection in the unconnected state.
      * You must call connect() to actually establish the connection.
+     * The connection has a default spam filter, as determined by
+     * settings manager.
      */
     public Connection(String host, int port) {	
 	this.host=host;
@@ -131,6 +136,8 @@ public class Connection implements Runnable {
     /** 
      * Allows for the creation of an incoming connection.
      * Note:  You must call init incoming for a incoming socket.
+     * The connection has a default spam filter, as determined by settings
+     * manager.
      */
     public Connection(String host, int port, boolean incoming) {	
 	this.host=host;
@@ -567,6 +574,16 @@ public class Connection implements Runnable {
     /** Returns the number of messages dropped on this connection */
     public long getNumDropped() {
 	return dropped;
+    }
+
+    /** 	
+     * @modifies this
+     * @effects sets the underlying spam filter.   Note that
+     *  most filters are not thread-safe, so they should not be shared
+     *  among multiple connections.
+     */
+    public void setSpamFilter(SpamFilter filter) {
+	this.spamFilter=filter;
     }
 
 }
