@@ -5,6 +5,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.downloader.Interval;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.NoSuchElementException;
 
 /**
  * Unit tests for IntervalSet
@@ -515,7 +516,7 @@ public class IntervalSetTest extends BaseTestCase {
     }
 
     public void testDeleteFullUpper() {
-        // [0-4], [8-11], [17-20], [28-28], [31-32], [36-40]        
+        // [0-4], [8-11], [17-20], [28-28], [31-32], [36-40]
         iSet.delete(new Interval(35,41));
         assertEquals(5, numIntervals());
         iter = iSet.getAllIntervals();
@@ -535,8 +536,74 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(31, interval.low);
         assertEquals(32, interval.high); 
     }
-
-
+    
+    public void testDeleteIntervalSet() {
+        // [0-4], [8-11], [17-20], [28-28], [31-32], [36-40]
+        IntervalSet toDelete = new IntervalSet();
+        toDelete.add(new Interval(8, 15));
+        toDelete.add(new Interval(18, 19));
+        iSet.delete(toDelete);
+        assertEquals(5, numIntervals());
+        iter = iSet.getAllIntervals();
+        interval = (Interval)iter.next();
+        assertEquals(0, interval.low);
+        assertEquals(4, interval.high);
+        interval = (Interval)iter.next();
+        assertEquals(17, interval.low);
+        assertEquals(17, interval.high);
+        interval = (Interval)iter.next();
+        assertEquals(20, interval.low);
+        assertEquals(20, interval.high);
+        interval = (Interval)iter.next();
+        assertEquals(28, interval.low);
+        assertEquals(28, interval.high);
+        interval = (Interval)iter.next();
+        assertEquals(31, interval.low);
+        assertEquals(32, interval.high); 
+    }
+    
+    public void testRemoveFirstAndIsEmpty() {
+        // [0-4], [17-17], [20-20], [28-28], [31-32]
+        assertEquals(5, numIntervals());
+        assertEquals(new Interval(0, 4), iSet.removeFirst());
+        assertFalse(iSet.isEmpty());
+        assertEquals(new Interval(17, 17), iSet.removeFirst());
+        assertFalse(iSet.isEmpty());
+        assertEquals(new Interval(20, 20), iSet.removeFirst());
+        assertFalse(iSet.isEmpty());
+        assertEquals(new Interval(28, 28), iSet.removeFirst());
+        assertFalse(iSet.isEmpty());
+        assertEquals(new Interval(31, 32), iSet.removeFirst());
+        assertTrue(iSet.isEmpty());
+        try {
+            iSet.removeFirst();
+            fail("expected exception");
+        } catch(NoSuchElementException nsee) {}
+    }
+    
+    public void testInvert() {
+        // no intervals
+        assertEquals(0, numIntervals());
+        IntervalSet inverted = iSet.invert(100);
+        assertEquals(1, inverted.getAllIntervalsAsList().size());
+        assertEquals(new Interval(0, 99), inverted.getAllIntervals().next());
+        iSet.add(new Interval(0, 100));
+        inverted = iSet.invert(0);
+        assertEquals(0, inverted.getAllIntervalsAsList().size());        
+    }
+    
+    public void testClone() {
+        // [0-100]
+        assertEquals(1, numIntervals());
+        IntervalSet clone = (IntervalSet)iSet.clone();
+        assertEquals(1, clone.getAllIntervalsAsList().size());
+        assertEquals(new Interval(0, 100), clone.getAllIntervals().next());
+        clone.removeFirst();
+        assertEquals(0, clone.getAllIntervalsAsList().size());
+        assertEquals(1, numIntervals());
+        assertEquals(new Interval(0, 100), getIntervalAt(0));
+    }
+        
     private int numIntervals() {
         return iSet.getAllIntervalsAsList().size();
     }
