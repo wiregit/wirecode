@@ -96,20 +96,20 @@ public class JOrbisComment {
     
     	out.flush();
     	
-    	if (tempFile.length() == 0)
-    	    throw new IOException("writing of file failed");
-    	
-    	//rename fails on some rare filesystem setups
-    	if (!FileUtils.forceRename(tempFile,file)){
-    		//something's seriously wrong
-    		throw new IOException("couldn't rename file");
-    }
     }finally {
   		if (out!=null)
   		try {out.close(); }catch(IOException ignored){}
   		if (in!=null)
   	  		try {in.close(); }catch(IOException ignored){}
   	}
+    
+	if (tempFile.length() == 0)
+	    throw new IOException("writing of file failed");
+	
+	//rename fails on some rare filesystem setups
+	if (!FileUtils.forceRename(tempFile,file))
+		//something's seriously wrong
+		throw new IOException("couldn't rename file");
     
     
   }
