@@ -83,7 +83,7 @@
  <!-- builds all files, including tests, in the project to the specified directory-->
  <target name="build" depends="prepare">
    <javac debug="on" optimize="off" deprecation="off"
-	      srcdir="${coredir}:${guidir}:${basedir}"
+	      srcdir="${coredir}:${guidir}com/:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
 		  excludes="${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
 
