@@ -194,7 +194,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         //3. encode-decode test--with compression
         //qrt={good, book, bad}
         qrt2=new QueryRouteTable(1000);
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 
@@ -213,7 +213,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt.add("bad");
         qrt.add("other"); //qrt={good, book, bad, other}
         assertNotEquals(qrt2,(qrt));
-        for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 
@@ -230,10 +230,10 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertEquals(qrt2,qrt);
         assertEquals(entries(qrt),entries(qrt2));
 
-        Iterator iter=qrt2.encode(qrt);
+        Iterator iter=qrt2.encode(qrt).iterator();
         assertTrue(! iter.hasNext());                     //test optimization
 
-        iter=(new QueryRouteTable(1000).encode(null));  //blank table
+        iter=(new QueryRouteTable(1000).encode(null).iterator()); //blank table
         assertInstanceof(ResetTableMessage.class, iter.next());
         assertTrue(! iter.hasNext());
         
@@ -249,7 +249,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2=new QueryRouteTable(10);
         assertNotEquals(qrt2,qrt);
 
-        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
+        for (iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 
@@ -274,7 +274,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2=new QueryRouteTable(5000);
         assertNotEquals(qrt2,(qrt));
 
-        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
+        for (iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 

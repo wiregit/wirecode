@@ -458,12 +458,12 @@ public class QueryRouteTable {
     /**
      * Stub for calling encode(QueryRouteTable, true).
      */
-    public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
+    public List /* of RouteTableMessage */ encode(QueryRouteTable prev) {
         return encode(prev, true);
     }
 
     /**
-     * Returns an iterator of RouteTableMessage that will convey the state of
+     * Returns an List of RouteTableMessage that will convey the state of
      * this.  If that is null, this will include a reset.  Otherwise it will
      * include only those messages needed to to convert that to this.  More
      * formally, for any non-null QueryRouteTable's m and that, the following 
@@ -475,7 +475,7 @@ public class QueryRouteTable {
      * Assert.that(prev.equals(m)); 
      * </pre> 
      */
-    public Iterator /* of RouteTableMessage */ encode(
+    public List /* of RouteTableMessage */ encode(
       QueryRouteTable prev, boolean allowCompression) {
         List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
@@ -534,7 +534,7 @@ public class QueryRouteTable {
         //Optimization: there's nothing to report.  If prev=null, send a single
         //RESET.  Otherwise send nothing.
         if (!needsPatch) {
-            return buf.iterator();
+            return buf;
         }
 
 
@@ -569,7 +569,7 @@ public class QueryRouteTable {
                                           data, i, stop));
             chunk++;
         }        
-        return buf.iterator();        
+        return buf;        
     }
 
 

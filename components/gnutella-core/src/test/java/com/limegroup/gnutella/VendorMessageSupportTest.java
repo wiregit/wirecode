@@ -73,7 +73,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new LeafHeaders(""),
                               new EmptyResponder());
         _leaf1.initialize();
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
         _leaf1.flush();
         // don't do postInit() - you don't want him thinking
@@ -84,7 +84,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new LeafHeaders(""),
                               new EmptyResponder());
         _leaf2.initialize();
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());
         _leaf2.flush();
         // don't do postInit() - you don't want him thinking

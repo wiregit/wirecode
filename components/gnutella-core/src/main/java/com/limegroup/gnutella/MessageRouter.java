@@ -1937,6 +1937,8 @@ public abstract class MessageRouter {
 		//For all connections to new hosts c needing an update...
 		List list=_manager.getInitializedConnections2();
 		QueryRouteTable table = null;
+		List /* of RouteTableMessage */ patches = null;
+		QueryRouteTable lastSent = null;
 		for(int i=0; i<list.size(); i++) {                        
 			ManagedConnection c=(ManagedConnection)list.get(i);
 			
@@ -1974,20 +1976,31 @@ public abstract class MessageRouter {
 			} 
 
 			//..and send each piece.
-			//TODO2: use incremental and interleaved update
 			
-			//If writing is deflated, then do not allow the message to be
-			//compressed.  This is because the message is going
-			//to be compressed as a part of the outgoing stream, anyway.
-			//Iterator iter=table.encode(qi.lastSent, !c.isWriteDeflated());
+			// Because we tend to send the same list of patches to lots of
+			// Connections, we can reuse the list of RouteTableMessages
+			// between those connections if their last sent
+			// table is exactly the same.
+			// This allows us to only reduce the amount of times we have
+			// to call encode.
 			
-			// (We always want to allow deflation of the QRP tables. This
-			//  is because we don't want to potentially clutter the stream's
-			//  dictionary with rare data, and because we want better stats.)
-			for (Iterator iter=table.encode(c.getQueryRouteTableSent(), true); 
-                 iter.hasNext();) {  
-				c.send((RouteTableMessage)iter.next());
+			//  (This if works for 'null' sent tables too)
+			if( lastSent == c.getQueryRouteTableSent() ) {
+			    // if we have not constructed the patches yet, then do so.
+			    if( patches == null )
+			        patches = table.encode(lastSent, true);
 			}
+			// If they aren't the same, we have to encode a new set of
+			// patches for this connection.
+			else {
+			    lastSent = c.getQueryRouteTableSent();
+			    patches = table.encode(lastSent, true);
+            }
+            
+		    for(Iterator iter = patches.iterator(); iter.hasNext();) {
+		        c.send((RouteTableMessage)iter.next());
+    	    }
+    	    
             c.setQueryRouteTableSent(table);
 		}
     }

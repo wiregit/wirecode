@@ -198,7 +198,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
@@ -207,7 +207,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         qrt = new QueryRouteTable();
         qrt.add("leehsus");
         qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             ULTRAPEER_1.send((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
         }
