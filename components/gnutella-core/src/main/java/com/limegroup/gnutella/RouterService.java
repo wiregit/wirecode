@@ -47,27 +47,29 @@ import com.limegroup.gnutella.util.*;
 public final class RouterService {
     private static ActivityCallback callback;
 
-    private HostCatcher catcher;
-    private MessageRouter router;
-    private Acceptor acceptor;
-    private ConnectionManager manager;
-    private ResponseVerifier verifier = new ResponseVerifier();
-    private DownloadManager downloader;
-    private UploadManager uploadManager;
-    private FileManager fileManager;
-    private ChatManager chatManager;//keep the reference around...prevent class GC
-    private SimpleTimer timer;
+    private final HostCatcher catcher = new HostCatcher();
+    private final MessageRouter router;
+    private final Acceptor acceptor = 
+		new Acceptor(SettingsManager.instance().getPort());
+    private final ConnectionManager manager;
+    private final ResponseVerifier verifier = new ResponseVerifier();
+    private final DownloadManager downloader = new DownloadManager();
+    private final UploadManager uploadManager;
+    private final FileManager fileManager = new MetaFileManager();
+	//keep the reference around...prevent class GC
+    private final ChatManager chatManager = ChatManager.instance();
+    private final SimpleTimer timer;
 
 	/**
 	 * Constant for the <tt>UDPAcceptor</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private final UDPAcceptor udpAcceptor;
+	private final UDPAcceptor udpAcceptor = UDPAcceptor.instance();
     
     /**
      * For authenticating users
      */
-    private Authenticator authenticator;
+    private Authenticator authenticator = new ServerAuthenticator();
 
     /**
      * isShuttingDown flag
@@ -96,48 +98,22 @@ public final class RouterService {
 
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
-	 * the backend, including fetching new connections, listening for 
-	 * messages, etc.
-	 *
-     * @param activityCallback the object to be notified of backend changes
-     * @param router the algorithm to use for routing messages.
+	 * the backend.
 	 */
   	private RouterService() {
-		this.fileManager = new MetaFileManager();
 		SettingsManager settings = SettingsManager.instance();
-  		this.acceptor = new Acceptor(settings.getPort());
-		this.udpAcceptor = UDPAcceptor.instance();
 
 		// this used to be given as a parameter, allowing other components,
 		// like the server, to use their own MessageRouter.
   		this.router = new MetaEnabledMessageRouter(callback, fileManager);
-        this.authenticator = new ServerAuthenticator();
         this.timer = new SimpleTimer(true, callback);
   		this.manager = new ConnectionManager(callback, authenticator);
-  		this.catcher = new HostCatcher();
-  		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
 											   this.fileManager);
 
-        this.chatManager = ChatManager.instance();
-
 		// Now, link all the pieces together, starting the various threads.
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
-		this.manager.initialize(router, catcher);		
-
-		//We used to call the following code here:
-        //  		if(settings.getConnectOnStartup()) {
-        //  			this.catcher.connectToRouter();
-        //  		}
-        //
-        //But that isn't needed; the call to connect() below calls
-        //ConnnectionManager.connect(), which in turns HostCatcher.expire(),
-        //which in turn calls HostCatcher.connectToRouter().
-        //
-        //If the code above were called (like in the old days)
-        //HostCatcher.expire() would instead call Thread.interrupt, causing
-        //HostCatcher.connectUntilPong to be restarted.       
-
+		this.manager.initialize(router, catcher);	   
 		this.downloader.initialize(callback, router, acceptor, fileManager);
 		
         //Ensure statistcs have started (by loading class).
