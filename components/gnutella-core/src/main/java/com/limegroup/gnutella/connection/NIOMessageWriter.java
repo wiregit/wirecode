@@ -113,5 +113,15 @@ public final class NIOMessageWriter implements MessageWriter {
     		return false;
     	}
     }
+
+    /**
+     * Closes the NIO writer.
+     * 
+     * @see com.limegroup.gnutella.connection.MessageWriter#close()
+     */
+    public void close() {
+        // TODO implement this method if necessary
+        
+    }
     
 }
