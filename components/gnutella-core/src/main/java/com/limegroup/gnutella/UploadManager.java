@@ -751,6 +751,25 @@ public final class UploadManager implements BandwidthTracker {
 	public boolean hadSuccesfulUpload() {
 		return _hadSuccesfulUpload;
 	}
+	
+	/**
+	 * Kills all uploads that are uploading the given FileDesc.
+	 */
+	public synchronized boolean killUploadsForFileDesc(FileDesc fd) {
+	    boolean ret = false;
+	    // This causes the uploader to generate an exception,
+	    // and ultimately remove itself from the list.
+	    for(Iterator i = _activeUploadList.iterator(); i.hasNext();) {
+	        HTTPUploader uploader = (HTTPUploader)i.next();
+	        FileDesc upFD = uploader.getFileDesc();
+	        if( upFD != null && upFD.equals(fd) ) {
+	            ret = true;
+	            uploader.stop();
+            }
+	    }
+	    
+	    return ret;
+    }
 
 
 	/////////////////// Private Interface for Testing Limits /////////////////

@@ -1452,15 +1452,41 @@ public class ManagedDownloader implements Downloader, Serializable {
         //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
         completeFile.delete();
+
         //Try moving file.  If we couldn't move the file, i.e., because
         //someone is previewing it or it's on a different volume, try copy
         //instead.  If that failed, notify user.  
         //   If move is successful, we should remove the corresponding blocks
         //from the IncompleteFileManager, though this is not strictly necessary
         //because IFM.purge() is called frequently in DownloadManager.
-        if (!incompleteFile.renameTo(completeFile))
-            if (! CommonUtils.copy(incompleteFile, completeFile))
-                return COULDNT_MOVE_TO_LIBRARY;
+        
+        // First attempt to rename it.
+        boolean success = incompleteFile.renameTo(completeFile);
+        
+        // If that fails, try killing any partial uploads we may have
+        // to unlock the file, and then rename it.
+        if (!success) {
+            FileDesc fd = RouterService.getFileManager().getFileDescMatching(
+                incompleteFile);
+            if( fd != null ) {
+                UploadManager upMan = RouterService.getUploadManager();
+                // This must all be synchronized so that a new upload
+                // doesn't lock the file before we rename it.
+                synchronized(upMan) {
+                    if( upMan.killUploadsForFileDesc(fd) )
+                        success = incompleteFile.renameTo(completeFile);
+                }
+            }
+        }
+        
+        // If that didn't work, try copying the file.
+        if (!success)
+            success = CommonUtils.copy(incompleteFile, completeFile);
+            
+        // If that didn't work, we're out of luck.
+        if (!success)
+            return COULDNT_MOVE_TO_LIBRARY;
+            
         incompleteFileManager.removeEntry(incompleteFile);
 
         //Add file to library.
