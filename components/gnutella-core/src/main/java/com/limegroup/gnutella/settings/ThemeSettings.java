@@ -36,13 +36,19 @@ public final class ThemeSettings extends LimeProps {
      * OS X.
      */
     public static final String DEFAULT_THEME_NAME =
-		"default_theme."+EXTENSION;
+		"limewire_theme."+EXTENSION;
     
     /**
      * The default name of the theme file name for OS X.
      */
-    public static final String DEFAULT_OSX_THEME_NAME =
-		"default_osx_theme."+EXTENSION;
+    public static final String PINSTRIPES_OSX_THEME_NAME =
+		"pinstripes_theme_osx."+EXTENSION;
+		
+    /**
+     * The metal theme name.
+     */
+    public static final String BRUSHED_METAL_OSX_THEME_NAME =
+        "brushed_metal_theme_osx."+EXTENSION;
     
     /**
      * The default name of the windows laf theme file name.
@@ -55,12 +61,6 @@ public final class ThemeSettings extends LimeProps {
      */
     public static final String DEFAULT_PRO_THEME_NAME =
         "limewirePro_theme."+EXTENSION;
-        
-    /**
-     * The default name of the theme file name for the new LimeWire theme.
-     */
-    public static final String LIMEWIRE_THEME_NAME =
-        "limewire_theme."+EXTENSION;
     
     /**
      * The full path to the default theme file.
@@ -71,8 +71,14 @@ public final class ThemeSettings extends LimeProps {
     /**
      * The full path to the default theme file on OS X.
      */
-    static final File DEFAULT_OSX_THEME_FILE =
-		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
+    static final File PINSTRIPES_OSX_THEME_FILE =
+		new File(THEME_DIR_FILE, PINSTRIPES_OSX_THEME_NAME);
+		
+    /**
+     * The full path to the metal theme file on OS X.
+     */
+    static final File BRUSHED_METAL_OSX_THEME_FILE =
+		new File(THEME_DIR_FILE, BRUSHED_METAL_OSX_THEME_NAME);		
 		
     /** 
      * The full path to the windows theme file for the windows LAF
@@ -223,10 +229,18 @@ public final class ThemeSettings extends LimeProps {
     }
     
     /**
+     * Determines if the theme is the brushed metal theme.
+     */
+    public static boolean isBrushedMetalTheme() {
+        return THEME_FILE.getValue().equals(BRUSHED_METAL_OSX_THEME_FILE);
+    }
+    
+    /**
      * Determines if the current theme is the native OSX theme.
      */
     public static boolean isNativeOSXTheme() {
-        return CommonUtils.isMacOSX() && isDefaultTheme();
+        return CommonUtils.isMacOSX() &&
+              (isDefaultTheme() || isBrushedMetalTheme());
     }
     
     /**
@@ -249,8 +263,11 @@ public final class ThemeSettings extends LimeProps {
         String next;
         for(; st.hasMoreTokens(); ) {
             next = st.nextToken();
+            if(next.equals("osx"))
+                next = "(OSX)";
             formatted.append(" " + next.substring(0,1).toUpperCase(Locale.US));
             if(next.length() > 1) formatted.append(next.substring(1));
+            
         }
         return formatted.toString();
     }        
@@ -260,7 +277,7 @@ public final class ThemeSettings extends LimeProps {
      */
     public static final FileSetting THEME_DEFAULT =
 		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
-								  DEFAULT_OSX_THEME_FILE :
+								  PINSTRIPES_OSX_THEME_FILE :
                                   CommonUtils.isPro() ?
                                   DEFAULT_PRO_THEME_FILE :
 							      DEFAULT_THEME_FILE);
@@ -272,9 +289,9 @@ public final class ThemeSettings extends LimeProps {
         FACTORY.createFileSetting("THEME_DEFAULT_DIR",
 								  CommonUtils.isMacOSX() ?
 							      new File(THEME_DIR_FILE,
-										   "default_osx_theme") :
+										   "pinstripes_theme_osx") :
 								  new File(THEME_DIR_FILE,
-										   "default_theme"));
+										   "brushed_metal_theme_osx"));
 	
 	/**
 	 * Setting for the file name of the theme file.
