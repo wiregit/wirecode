@@ -47,6 +47,17 @@ public abstract class Message
     /** Time this was created.  Not written to network. */
     private long creationTime=System.currentTimeMillis();
 
+	/**
+	 * Constant byte buffer for storing the GUID for incoming messages --
+	 * an easy optimization.
+	 */
+	//private final static byte[] GUID_BUF = new byte[16];
+
+	/**
+	 * Cached reference to <tt>SettingsManager</tt>.
+	 */
+	private static final SettingsManager SETTINGS = SettingsManager.instance();
+   
     /** Rep. invariant */
     protected void repOk() {
         Assert.that(guid.length==16);
@@ -127,14 +138,20 @@ public abstract class Message
             i+=got;
         }
 
+		//System.out.println("Message::read: buf         "+buf); 
         //2. Unpack.
         byte[] guid=new byte[16];
+		//System.out.println("Message::read: guid:        "+guid); 
         for (int i=0; i<16; i++) //TODO3: can optimize
             guid[i]=buf[i];
         byte func=buf[16];
+		//System.out.println("Message::read: func:        "+func); 
         byte ttl=buf[17];
+		//System.out.println("Message::read: ttl:         "+ttl); 
         byte hops=buf[18];
+		//System.out.println("Message::read: hops:        "+hops); 
         int length=ByteOrder.leb2int(buf,19);
+		//System.out.println("Message::read: length:        "+length); 
         //2.5 If the length is hopelessly off (this includes lengths >
         //    than 2^31 bytes, throw an irrecoverable exception to
         //    cause this connection to be closed.
@@ -209,6 +226,101 @@ public abstract class Message
         }
         throw new BadPacketException("Unrecognized function code: "+func);
     }
+
+	/**
+	 * Factory method for constructing a <tt>Message</tt> from the specified
+	 * byte array.  The <tt>Message</tt> returned is one of the Gnutella 
+	 * messages.
+	 *
+	 * @param data the data to use in constructing the <tt>Message</tt>
+	 * @return a new <tt>Message</tt> instance that will be one of 
+	 *  <tt>QueryRequest</tt>, <tt>QueryReply</tt>, <tt>PingRequest</tt>,
+	 *  or <tt>PingReply</tt>
+	 * @throws <tt>BadPacketException</tt> if the data does not have 
+	 *  reasonable values for its various fields, or if it is a message
+	 *  type that is not recognized
+	 * @throw <tt>IllegalArgumentException</tt> if the <tt>data</tt>
+	 *  argument is invalid
+	 */
+	static Message readUdpData(byte[] data) throws BadPacketException {
+		System.out.println("Message::readUdpData: data "+data);
+		if(data.length < 19) 
+			throw new IllegalArgumentException("not enough data for message");
+		//byte[] GUID_BUF = new byte[16];
+		//System.arraycopy(data, 0, GUID_BUF, 0, 16);
+        byte[] GUID_BUF = new byte[16];
+        for (int i=0; i<16; i++) //TODO3: can optimize
+            GUID_BUF[i]=data[i];
+		System.out.println("Message::readUdpData: guid: "+GUID_BUF); 
+        byte func  = data[16];
+		System.out.println("Message::readUdpData: func: "+func); 
+        byte ttl   = data[17];
+		System.out.println("Message::readUdpData: ttl: "+ttl); 
+        byte hops  = data[18];
+		System.out.println("Message::readUdpData: hops: "+hops); 
+        int length = ByteOrder.leb2int(data,19);
+		System.out.println("Message::readUdpData: length: "+length); 
+
+        // If the length is hopelessly off (this includes lengths >
+        // than 2^31 bytes, throw an irrecoverable exception to
+        // cause this connection to be closed.
+        if (length > SettingsManager.instance().getMaxLength())
+            throw new BadPacketException("Unreasonable message length: "+length);
+
+		byte[] payload = new byte[length];
+		System.arraycopy(data, 20, payload, 0, length);
+        //3. Read rest of payload.  This must be done even for bad
+        //   packets, so we can resume reading packets.
+        //byte[] payload=null;
+        //if (length!=0) {
+		//  payload=new byte[length];
+		//for (int i=0; i<length; ) {
+		//	int got=in.read(payload, i, length-i);
+		//  if (got==-1) throw new IOException("Connection closed.");
+		//  i+=got;
+		//  }
+        //}
+        //else
+		//  payload = new byte[0];
+
+
+		
+		//byte[] payload = new byte[length];
+		//System.arraycopy(data, 18, payload, 0, length);
+
+        // Check values.  These are based on the recommendations from the
+        // GnutellaDev page.  This also catches those TTLs and hops whose
+        // high bit is set to 0.
+        byte softMax = SettingsManager.instance().getSoftMaxTTL();
+        byte hardMax = SettingsManager.instance().getMaxTTL();
+        if (hops<0)
+            throw new BadPacketException("Negative (or very large) hops");
+        else if (ttl<0)
+            throw new BadPacketException("Negative (or very large) TTL");
+        else if (hops>softMax)
+            throw new BadPacketException("Hops already exceeds soft maximum");
+        else if (ttl+hops > hardMax)
+            throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
+        else if (ttl+hops > softMax) {
+            ttl=(byte)(softMax - hops);  //overzealous client;
+                                         //readjust accordingly
+            Assert.that(ttl >= 0);     //should hold since hops<=softMax ==>
+                                     //new ttl>=0
+        }
+        //Dispatch based on opcode.
+        switch (func) {
+            case F_QUERY:
+                if (length<3) break;
+                return new QueryRequest(GUID_BUF,ttl,hops,payload);
+            case F_QUERY_REPLY:
+                if (length<26) break;
+                return new QueryReply(GUID_BUF,ttl,hops,payload);
+		    default:
+				throw new BadPacketException("Unrecognized function code: "+func);
+		}
+		
+		return null;
+	}
 
     /**
      * @modifies out
