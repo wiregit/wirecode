@@ -20,6 +20,11 @@ public class BucketQueue implements Cloneable {
      * speed up some of the operations.  
      */
     private Buffer[] buckets;
+    /**
+     * The size, stored for efficiency reasons.
+     * INVARIANT: size=buckets[0].size()+...+buckets[buckets.length-1].size()
+     */
+    private int size=0;
 
     /** 
      * @effects a new queue with the given number of priorities, and
@@ -71,11 +76,15 @@ public class BucketQueue implements Cloneable {
         for (int i=0; i<this.buckets.length; i++) {
             this.buckets[i]=new Buffer(other.buckets[i]); //clone
         }
+        this.size=other.size;
     }
 
     public void clear() {
+        repOk();
         for (int i=0; i<buckets.length; i++) 
             buckets[i].clear();        
+        size=0;
+        repOk();
     }
 
     /**
@@ -87,10 +96,16 @@ public class BucketQueue implements Cloneable {
      */
     public Object insert(Object o, int priority) 
             throws IllegalArgumentException {
+        repOk();
         try {
-            return buckets[priority].addFirst(o);
+            Object ret=buckets[priority].addFirst(o);
+            if (ret==null)
+                size++;     //Maintain invariant
+            return ret;
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Bad priority: "+priority);
+        } finally {
+            repOk();
         }
     }
 
@@ -100,23 +115,43 @@ public class BucketQueue implements Cloneable {
      *  priority is ignored.  Returns true if any elements were removed.
      */
     public boolean removeAll(Object o) {
+        repOk();
+        //1. For each bucket, remove o, noting if any elements were removed.
         boolean ret=false;
         for (int i=0; i<buckets.length; i++) {
             ret=ret | buckets[i].removeAll(o);
         }
+        //2.  Maintain size invariant.  The problem is that removeAll() can
+        //remove multiple elements from this.  As a slight optimization, we
+        //could incrementally update size by looking at buckets[i].getSize()
+        //before and after the call to removeAll(..).  But I favor simplicity.
+        if (ret) {
+            this.size=0;
+            for (int i=0; i<buckets.length; i++)
+                this.size+=buckets[i].getSize();
+        }
+        repOk();
         return ret;
     }
 
     public Object extractMax() throws NoSuchElementException {
-        for (int i=buckets.length-1; i>=0 ;i--) {
-            if (! buckets[i].isEmpty()) {
-                return buckets[i].removeFirst();
+        repOk();
+        try {
+            for (int i=buckets.length-1; i>=0 ;i--) {
+                if (! buckets[i].isEmpty()) {
+                    size--;
+                    return buckets[i].removeFirst();
+                }
             }
+            throw new NoSuchElementException();
+        } finally {
+            repOk();
         }
-        throw new NoSuchElementException();
     }
 
     public Object getMax() throws NoSuchElementException {
+        //TODO: we can optimize this by storing the position of the first
+        //non-empty bucket.
         for (int i=buckets.length-1; i>=0 ;i--) {
             if (! buckets[i].isEmpty()) {
                 return buckets[i].first();
@@ -126,11 +161,7 @@ public class BucketQueue implements Cloneable {
     }
 
     public int size() {
-        int ret=0;
-        for (int i=0; i<buckets.length; i++) {
-            ret+=buckets[i].getSize();
-        }
-        return ret;
+        return size;
     }
 
     /** 
@@ -224,6 +255,16 @@ public class BucketQueue implements Cloneable {
     /** Returns a shallow copy of this, of type BucketQueue */
     public Object clone() {
         return new BucketQueue(this);        
+    }
+
+    private void repOk() {
+        /*
+        int count=0;
+        for (int i=0; i<buckets.length; i++) {
+            count+=buckets[i].getSize();
+        }
+        Assert.that(count==size);
+        */
     }
 
     public String toString() {

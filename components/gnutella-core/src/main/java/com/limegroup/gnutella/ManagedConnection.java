@@ -110,15 +110,15 @@ public class ManagedConnection
         _outputQueue[PRIORITY_WATCHDOG]   
             = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new SimpleMessageQueue(3, QUEUE_TIME, QUEUE_SIZE, true);
+            = new PriorityMessageQueue(3, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY_REPLY]  //sorted
             = new PriorityMessageQueue(2, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
-            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING_REPLY] 
-            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING]       
-            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
+            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
     }                                                             
@@ -1360,6 +1360,11 @@ public class ManagedConnection
     private static void testReorderBuffer(ManagedConnection out, Connection in) 
             throws IOException, BadPacketException {
         System.out.println("-Testing reorder buffer");
+        //This is the most important test in our suite. TODO: simplify this by
+        //breaking it into subparts, e.g., to test that twice as many replies as
+        //queries are sent, that replies are ordered by GUID volume, that
+        //queries with the same hops are LIFO, etc.
+
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
         out.stopOutputRunner();
@@ -1370,7 +1375,7 @@ public class ManagedConnection
         out.send(m);
         m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
                          new Response[0], new byte[16]);
-        m.setPriority(3);
+        m.setPriority(30000);
         out.send(m);
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6340));
@@ -1381,14 +1386,18 @@ public class ManagedConnection
         m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                          new Response[0], new byte[16]);
         out.send(m);
-        m=new PingReply(new byte[16], (byte)5, 6341, new byte[4], 0, 0);
-        m.hop();
+        m=new PingReply(new byte[16], (byte)5, 6343, new byte[4], 0, 0);
+        m.hop();  m.hop();  m.hop();
         out.send(m);
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(new PingReply(new byte[16], (byte)1, 6342, new byte[4], 0, 0));
+        m=new PingReply(new byte[16], (byte)3, 6340, new byte[4], 0, 0);
+        m.hop();
+        m.hop();
+        out.send(m);
         m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                          new Response[0], new byte[16]);
-        m.setPriority(1);
+        m.setPriority(1000);
         out.send(m);
         out.send(new PatchTableMessage((short)1, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
@@ -1397,19 +1406,23 @@ public class ManagedConnection
         out.send(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
+        out.send(new QueryRequest((byte)5, 0, "test2"));
+        m=new QueryRequest((byte)5, 0, "test far");
+        m.hop();
+        out.send(m);
                
         //2. Now we let the messages pass through, as if the receiver's window
         //became non-zero.  Buffers look this before emptying:
         //  WATCHDOG: pong/6342 ping
         //  PUSH: x/6340 x/6341 x/6342
-        //  QUERY_REPLY: 6340/3 6342/1 6341/0 (highest priority)
-        //  QUERY: "test"
-        //  PING_REPLY: x/6341
+        //  QUERY_REPLY: 6340/3 6342/1000 6341/0 (highest priority)
+        //  QUERY: "test far"/1, "test"/0, "test2"/0
+        //  PING_REPLY: x/6340 x/6343
         //  PING: x
         //  OTHER: reset patch1 patch2
         out._lastPriority=0;  //cheating to make old tests work
         out.startOutputRunner();
-        
+
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
         Assert.that(m instanceof PingRequest, "Unexpected message: "+m);
@@ -1429,18 +1442,21 @@ public class ManagedConnection
 
         m=in.receive(); //reply/6341 (high priority)
         Assert.that(m instanceof QueryReply);
-        Assert.that(((QueryReply)m).getPort()==6341);
+        Assert.that(((QueryReply)m).getPort()==6341, 
+                    ((QueryReply)m).getPort()+" "+m.getPriority());
 
         m=in.receive(); //reply/6342 (medium priority)
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6342);
 
-        m=in.receive(); //query "test"
+        
+        m=in.receive(); //query "test2"/0
         Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("test2"), "Got: "+m);
 
-        m=in.receive(); //reply 6341
+        m=in.receive(); //reply 6343
         Assert.that(m instanceof PingReply);
-        Assert.that(((PingReply)m).getPort()==6341);
+        Assert.that(((PingReply)m).getPort()==6343);
 
         m=in.receive(); //ping
         Assert.that(m instanceof PingRequest);
@@ -1460,10 +1476,22 @@ public class ManagedConnection
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6340);
 
+        m=in.receive(); //query "test"/0
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("test"));
+
+        m=in.receive(); //reply 6340
+        Assert.that(m instanceof PingReply);
+        Assert.that(((PingReply)m).getPort()==6340, m.toString());
+
         m=in.receive(); //QRP patch1
         Assert.that(m instanceof PatchTableMessage);
         Assert.that(((PatchTableMessage)m).getSequenceNumber()==1);
 
+
+        m=in.receive(); //query "test"/0
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("test far"));
 
         m=in.receive(); //QRP patch2
         Assert.that(m instanceof PatchTableMessage);
