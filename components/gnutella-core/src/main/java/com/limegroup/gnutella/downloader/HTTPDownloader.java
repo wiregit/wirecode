@@ -160,23 +160,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private int _initialWritingPoint;
     
-	/**
-	 * Whether this download has been terminated due to a theft.
-	 * LOCKING: this
-	 */
-	private boolean _victim;
-	
-	/**
-	 * Whether this download is a thief
-	 * LOCKING: this
-	 */
-	private boolean _thief;
-    
-    /**
-     * Whether this downloader managed to connect through HTTP.
-     * LOCKING: this
-     */
-    private boolean _didConnect;
+	private boolean _shouldRelease;
 	
 	/**
 	 * The content-length of the output, useful only for when we
@@ -515,7 +499,6 @@ public class HTTPDownloader implements BandwidthTracker {
             _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
-            _didConnect = false;
         }
 		
 		// features to be sent with the X-Features header
@@ -702,9 +685,6 @@ public class HTTPDownloader implements BandwidthTracker {
         // if we got here, we connected fine
         if (LOG.isDebugEnabled())
             LOG.debug(this+" completed connectHTTP");
-        synchronized(this) {
-            _didConnect=true;
-        }
 	}
 	
 	/**
@@ -944,7 +924,6 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseProxiesHeader(str);
             
         }
-
 
 		//Accept any 2xx's, but reject other codes.
 		if ( (code < 200) || (code >= 300) ) {
@@ -1712,15 +1691,14 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     public synchronized void setVictim() {
-        _victim = true;
+        _shouldRelease = false;
         stop();
     }
 	
-	public synchronized void setThief(boolean thief) {
-		_thief = thief;
+	public synchronized void shouldRelease(boolean shouldIt) {
+		_shouldRelease = shouldIt;
 	}
-
-
+	
     ///////////////////////////// Accessors ///////////////////////////////////
 
     public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
@@ -1729,9 +1707,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}
 	public boolean isActive() { return _isActive; }
-	public synchronized boolean isVictim() {return _victim;}
-	public synchronized boolean isThief() {return _thief;}
-    public synchronized boolean didConnect() {return _didConnect;}
+	public synchronized boolean shouldRelease() {return _shouldRelease;}
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
