@@ -116,6 +116,16 @@ public class UDPService implements Runnable {
      * useful for nodes behind certain firewalls (notably the MS firewall).
      */
     private static final long PING_PERIOD = 85 * 1000;  // 85 seconds
+    
+    /**
+     * A buffer used for reading the header of incoming messages.
+     */
+    private static final byte[] IN_HEADER_BUF = new byte[23];
+    
+    /**
+     * A buffer used for reading the header of outgoing messages.
+     */
+    private static final byte[] OUT_HEADER_BUF = new byte[23];
 
 	/**
 	 * Instance accessor.
@@ -261,7 +271,7 @@ public class UDPService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_UDP);
+                    Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
                     if(message == null) continue;                    
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
@@ -367,9 +377,9 @@ public class UDPService implements Runnable {
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Invalid Port: " + port);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(msg.getTotalLength());
         try {
-            msg.write(baos);
+            msg.write(baos, OUT_HEADER_BUF);
         } catch(IOException e) {
             // this should not happen -- we should always be able to write
             // to this output stream in memory

@@ -94,7 +94,7 @@ public class QueryReply extends Message implements Serializable{
     private static final byte CHAT_MASK=(byte)0x01;
     
     /** The xml chunk that contains metadata about xml responses*/
-    private byte[] _xmlBytes = new byte[0];
+    private byte[] _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
 
 	/** The raw ip address of the host returning the hit.*/
 	private byte[] _address = new byte[4];

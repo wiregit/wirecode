@@ -57,6 +57,11 @@ public final class MulticastService implements Runnable {
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
+	
+	/**
+	 * Buffer used for reading messages.
+	 */
+	private final byte[] HEADER_BUF = new byte[23];
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -198,7 +203,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_MULTICAST);
+                    Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
                     if(message == null) continue;
                     router.handleMulticastMessage(message, datagram);
                 }

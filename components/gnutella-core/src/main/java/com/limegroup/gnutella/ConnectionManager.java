@@ -1002,14 +1002,10 @@ public class ConnectionManager {
     }
 
     /**
-     * @return a clone of all of this' connections.
-     * The iterator yields items in any order.  It <i>is</i> permissible
-     * to modify this while iterating through the elements of this, but
-     * the modifications will not be visible during the iteration.
+     * @return all of this' connections.
      */
     public List getConnections() {
-        List clone=new ArrayList(_connections);
-        return clone;
+        return _connections;
     }
 
     /**

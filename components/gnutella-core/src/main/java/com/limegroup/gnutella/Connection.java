@@ -1004,7 +1004,7 @@ public class Connection implements IpPort {
     }
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
-    private byte[] HEADER_BUF=new byte[23];
+    private final byte[] HEADER_BUF=new byte[23];
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
      * undefined if two threads are in a receive call at the same time for a
@@ -1107,6 +1107,12 @@ public class Connection implements IpPort {
         }
         return msg;
     }
+    
+    /**
+     * Optimization -- reuse the header buffer since sending will only be
+     * done on one thread.
+     */
+    private final byte[] OUT_HEADER_BUF = new byte[23];
 
     /**
      * Sends a message.  The message may be buffered, so call flush() to
@@ -1138,7 +1144,7 @@ public class Connection implements IpPort {
                 priorCompressed = _deflater.getTotalOut();
             }
             
-            m.write(_out);
+            m.write(_out, OUT_HEADER_BUF);
 
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {

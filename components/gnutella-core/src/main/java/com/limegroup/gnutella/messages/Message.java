@@ -190,6 +190,15 @@ public abstract class Message
 		throws BadPacketException, IOException {
         return Message.read(in, buf, N_UNKNOWN, softMax);
     }
+    
+    /**
+     * Reads a message using the specified buffer & network and the default
+     * soft max.
+     */
+    public static Message read(InputStream in, int network, byte[] buf)
+        throws BadPacketException, IOException {
+            return Message.read(in, buf, network, SOFT_MAX);
+    }
 
 
     /**
@@ -333,13 +342,11 @@ public abstract class Message
         ReceivedErrorStat.INVALID_CODE.incrementStat();
         throw new BadPacketException("Unrecognized function code: "+func);
     }
-
+    
     /**
-     * @modifies out
-     * @effects Writes an encoding of this to out.  Does NOT flush out.
+     * Writes a message out, using the buffer as the temporary header.
      */
-    public void write(OutputStream out) throws IOException {
-        byte[] buf=new byte[23];
+    public void write(OutputStream out, byte[] buf) throws IOException {
         for (int i=0; i<16; i++) //TODO3: can optimize
             buf[i]=guid[i];
         buf[16]=func;
@@ -348,6 +355,14 @@ public abstract class Message
         ByteOrder.int2leb(length, buf, 19);
         out.write(buf);
         writePayload(out);
+    }
+
+    /**
+     * @modifies out
+     * @effects Writes an encoding of this to out.  Does NOT flush out.
+     */
+    public void write(OutputStream out) throws IOException {
+        write(out, new byte[23]);
     }
 
     /** @modifies out
