@@ -333,7 +333,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    //private File incompleteFile;
+    private File incompleteFile;
     /** The fully-qualified name of the downloaded file when this completes, or
      *  null if we haven't started downloading. Used for previewing purposes. */
     private File completeFile;
