@@ -70,7 +70,7 @@ class RejectConnection extends Connection {
                 Iterator iter = _hostCatcher.getBestHosts(10);
                  // we are going to send rejected host the top ten
                  // connections
-                while(iter.hasNext()) {
+                for(int count=0; (count < 10) && iter.hasNext(); count++) {
                     Endpoint bestEndPoint =(Endpoint)iter.next();
                     // make a pong with this host info
                     PingReply pr = new PingReply(m.getGUID(),(byte)1,
