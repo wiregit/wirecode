@@ -163,10 +163,6 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         blockingWriter.start(); 
     }
     
-    public void resetPriority() {
-        QUEUE.resetPriority();
-    }
-    
     /**
      * Accessor for the queue lock, used in testing.
      * 
@@ -190,5 +186,13 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
         }
         */
+    }
+    
+    /**
+     * DO NOT REMOVE -- used in ManagedConnectionBufferTest
+     *
+     */
+    public void resetPriority() {
+        QUEUE.resetPriority();
     }
 }
