@@ -88,6 +88,20 @@ public class GUID /* implements Comparable */ {
 	return buf.toString();
     }
 
+
+    /** 
+     *  Create a GUID bytes from a hex string version.
+     */
+    public static byte[] fromHexString(String sguid) {
+	byte bytes[] = new byte[SZ];
+	for (int i=0; i<SZ; i++)
+	{
+	    bytes[i] = 
+     	      Byte.parseByte(sguid.substring(i*2,i*2+1), 16);
+	}
+	return bytes;
+    }
+
     public static void main(String args[]) {
 	byte[] b1=new byte[16];
 	byte[] b2=new byte[16];
