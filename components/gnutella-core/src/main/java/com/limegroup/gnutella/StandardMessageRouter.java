@@ -167,7 +167,7 @@ public class StandardMessageRouter extends MessageRouter {
         
     }
 
-    public void sendResponses(QueryRequest query, 
+    private void sendResponses(QueryRequest query, 
                               Response[] responses, 
 							  QueryRequest queryRequest,
 							  byte[] clientGUID) {
