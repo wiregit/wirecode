@@ -34,14 +34,14 @@ public final class QueryHandler {
 	 * leaf -- they are connected to 2 other Ultrapeers that may or may
 	 * not use this algorithm.
 	 */
-	private static final int OLD_LEAF_RESULTS = 40;
+	private static final int OLD_LEAF_RESULTS = 30;
 
 	/**
 	 * The number of results to try to get for new leaves -- they only 
 	 * maintain 2 connections and don't generate as much overall traffic,
 	 * so give them a little more.
 	 */
-	private static final int NEW_LEAF_RESULTS = 75;
+	private static final int NEW_LEAF_RESULTS = 50;
 
 	/**
 	 * The number of results to try to get for queries by hash -- really
