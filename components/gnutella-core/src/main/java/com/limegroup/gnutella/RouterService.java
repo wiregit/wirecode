@@ -737,18 +737,18 @@ public final class RouterService {
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public static void query(byte[] guid, String query, int minSpeed, MediaType type) {
-		query(guid, query, "", minSpeed, type);
+    public static void query(byte[] guid, String query, MediaType type) {
+		query(guid, query, "", type);
 	}
 
     /** 
      * Searches the network for files with the given query string and 
      * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
      *
-     * @see query(byte[], String, int, MediaType)
+     * @see query(byte[], String, MediaType)
      */
-    public static void query(byte[] guid, String query, int minSpeed) {
-        query(guid, query, minSpeed, null);
+    public static void query(byte[] guid, String query) {
+        query(guid, query, null);
     }
 
 	/**
@@ -756,12 +756,11 @@ public final class RouterService {
 	 * 
 	 * @param richQuery metadata query to insert between the nulls,
 	 *  typically in XML format
-	 * @see query(byte[], String, int, MediaType)
+	 * @see query(byte[], String, MediaType)
 	 */
 	public static void query(final byte[] guid, 
 							 final String query, 
 							 final String richQuery, 
-							 final int minSpeed, 
 							 final MediaType type) {
 
 		try {
