@@ -1593,7 +1593,6 @@ public abstract class MessageRouter {
      */
     private void handleResetTableMessage(ResetTableMessage rtm,
                                          ManagedConnection mc) {
-
         // if it's not from a leaf or an Ultrapeer advertising 
         // QRP support, ignore it
         if(!isQRPConnection(mc)) return;
@@ -1601,6 +1600,13 @@ public abstract class MessageRouter {
         // reset the query route table for this connection
         synchronized (mc.getQRPLock()) {
             mc.resetQueryRouteTable(rtm);
+        }
+
+        // if this is coming from a leaf, make sure we update
+        // our tables so that the dynamic querier has correct
+        // data
+        if(mc.isLeafConnection()) {
+            _lastQueryRouteTable = createRouteTable();
         }
     }
 
@@ -1622,6 +1628,13 @@ public abstract class MessageRouter {
         // patch the query route table for this connection
         synchronized(mc.getQRPLock()) {
             mc.patchQueryRouteTable(ptm);
+        }
+
+        // if this is coming from a leaf, make sure we update
+        // our tables so that the dynamic querier has correct
+        // data
+        if(mc.isLeafConnection()) {
+            _lastQueryRouteTable = createRouteTable();
         }
     }
 
