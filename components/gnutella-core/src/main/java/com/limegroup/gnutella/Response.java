@@ -228,7 +228,11 @@ public class Response {
 			this.metadata = metadata.trim();
 		}
         Assert.that(this.metadata!=null, "Null metadata");
-		this.metaBytes = this.metadata.getBytes();
+        try { //It's possible to get metadata between the null from others
+            this.metaBytes = this.metadata.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException ueex) {
+            this.metaBytes = this.metadata.getBytes();
+        }
 		
 		// we don't generate this from the metadata string in the case where the
 		// LimeXMLDocument is null and the metadata string is not because the
