@@ -293,6 +293,9 @@ public final class HTTPUploader implements Uploader {
         case BROWSE_HOST:
             _state = new BrowseHostUploadState(this);
             break;
+        case FILE_VIEW:
+            _state = new FileViewUploadState(this);
+            break;
         case PUSH_PROXY:
             _state = new PushProxyUploadState(this);
             break;
@@ -776,6 +779,7 @@ public final class HTTPUploader implements Uploader {
         //Allow them to browse the host though
 		if (SharingSettings.ALLOW_BROWSER.getValue() == false
             && !(_stateNum == BROWSE_HOST)  
+            && !(_stateNum == FILE_VIEW)  
             && !(_stateNum == PUSH_PROXY)  
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
 			// if we are not supposed to read from them

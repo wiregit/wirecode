@@ -169,6 +169,12 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final int PUSH_PROXY_FILE_INDEX = -5;
     
+    /** 
+     * The file index used in this structure to indicate a HTTP File View
+     * download request.
+     */
+    public static final int FILE_VIEW_FILE_INDEX = -6;
+    
     /**
      * Whether or not to record stats.
      */
@@ -408,6 +414,7 @@ public final class UploadManager implements BandwidthTracker {
                uploader.getIndex() != UPDATE_FILE_INDEX &&
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
+               uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -491,6 +498,9 @@ public final class UploadManager implements BandwidthTracker {
         switch(uploader.getIndex()) {
         case BROWSE_HOST_FILE_INDEX:
             uploader.setState(Uploader.BROWSE_HOST);
+            return;
+        case FILE_VIEW_FILE_INDEX:
+            uploader.setState(Uploader.FILE_VIEW);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -1256,6 +1266,12 @@ public final class UploadManager implements BandwidthTracker {
                 fileName = "Browse-Host Request";
                 if( RECORD_STATS )
                     UploadStat.BROWSE_HOST.incrementStat();
+            } else if(fileInfoPart.equals("/gnutella/file-view")) {
+                //special case for browse host request
+                index = FILE_VIEW_FILE_INDEX;
+                fileName = "File-View Request";
+                if( RECORD_STATS )
+                    ;
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
