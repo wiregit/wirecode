@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
@@ -14,6 +15,10 @@ import java.io.*;
  * @see UDPReplyHandler
  * @see MessageRouter
  * @see QueryUnicaster
+ *
+ * //TODO: We need to create a Worker Thread that actually does a send() and
+ * frees up the run() method from potentially blocking send() calls.  At that
+ * point we should stop catching and discarding all exceptions....
  */
 public final class UDPService implements Runnable {
 
@@ -257,6 +262,15 @@ public final class UDPService implements Runnable {
             } catch(IOException ioe) {
                 //If we're full, just drop it.  UDP is unreliable like that.
                 if( "No buffer space available".equals(ioe.getMessage()) )
+                    return;
+                // there seems to be a windows specific java issue with UDP
+                // stuff, though i've never witnessed it meself. since this is
+                // UDP and unreliable, continually throwing the exception prolly
+                // isn't necessary
+                // TODO: see major TODO up top....
+                if( (ioe.getMessage() != null) &&
+                    (ioe.getMessage().indexOf("Datagram send failed") >= 0) &&
+                    CommonUtils.isWindows() )
                     return;
                 throw ioe;
             }
