@@ -5,6 +5,8 @@ import java.io.*;
 
 public class FileManagerTest extends TestCase {
 
+	private static File _testDir;
+
     public FileManagerTest(String name) {
         super(name);
     }
@@ -12,6 +14,13 @@ public class FileManagerTest extends TestCase {
     public static Test suite() {
         return new TestSuite(FileManagerTest.class);
     }
+
+	protected void setUp() {
+		String userDir = System.getProperty("user.dir");
+		_testDir = new File(userDir, "FileManagerTest");
+		_testDir.mkdirs();
+		_testDir.deleteOnExit();
+	}
 
 
     /** Unit test.  REQUIRES JAVA2 FOR createTempFile Note that many tests are
@@ -30,7 +39,9 @@ public class FileManagerTest extends TestCase {
             File directory=FileManager.getParentFile(f1);
             FileManager fman=new FileManager();
             File[] files=fman.getSharedFiles(directory);
-            assertTrue(files==null);
+            //assertTrue(files==null);
+			assertNotNull("directory should not be null", directory);
+			assertTrue("directory should be a directory", directory.isDirectory());
 
             //One file
             SettingsManager settings=SettingsManager.instance();
@@ -45,13 +56,16 @@ public class FileManagerTest extends TestCase {
             f2=createNewTestFile(3);
             f3=createNewTestFile(11);
 
-            assertTrue(fman.getNumFiles()+"", fman.getNumFiles()==1);
+            assertEquals("The number of shared files should be 1", 1, fman.getNumFiles());
+            //assertTrue(fman.getNumFiles()+"", fman.getNumFiles()==1);
             assertTrue(fman.getSize()+"", fman.getSize()==1);
             Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit"));
-            assertTrue(responses.length==1);
-            assertTrue(fman.removeFileIfShared(f3)==false);
+            assertEquals("there should only be one response", 1, responses.length);
+            assertTrue("should have not been able to remove file", 
+					   !fman.removeFileIfShared(f3));
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
-            assertTrue(responses.length==1);
+            assertEquals("there should only be one response", 1, responses.length);
+            //assertTrue(responses.length==1);
             assertTrue(fman.getSize()==1);
             assertTrue(fman.getNumFiles()==1);
             fman.get(0);
@@ -157,19 +171,20 @@ public class FileManagerTest extends TestCase {
         }
     }
 
+
     static File createNewTestFile(int size) {
-        try {
-            File file=File.createTempFile("FileManager_unit_test",".XYZ");
+        try {		   
+			File file = File.createTempFile("FileManager_unit_test", ".XYZ", _testDir);
+			file.deleteOnExit();
             OutputStream out=new FileOutputStream(file);
             out.write(new byte[size]);
             out.flush();
             out.close();
-            //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
+
+            //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
             return FileManager.getCanonicalFile(file);
         } catch (Exception e) {
-            System.err.println("Couldn't run test");
-            e.printStackTrace();
-            System.exit(1);
+			fail("unexpected exception in createNewTestFile: "+e);
             return null; //never executed
         }
     }
