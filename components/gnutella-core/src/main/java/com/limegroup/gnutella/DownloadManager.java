@@ -1153,8 +1153,9 @@ public class DownloadManager implements BandwidthTracker {
         // do it soon too so hopefully we can communicate.
         Thread startPushThread = new ManagedThread("FWIncoming") {
             public void managedRun() {
+                Socket fwTrans=null;
                 try {
-                    Socket fwTrans = 
+                    fwTrans = 
                         new UDPConnection(file.getHost(), file.getPort());
                     DownloadStat.FW_FW_SUCCESS.incrementStat();
                     // TODO: put this out to Acceptor in // the future
@@ -1165,6 +1166,9 @@ public class DownloadManager implements BandwidthTracker {
                     else
                         fwTrans.close();
                 } catch (IOException crap) {
+                    LOG.debug("failed to establish UDP connection",crap);
+                    if (fwTrans!=null)
+                        try {fwTrans.close();}catch(IOException ignored){}
                     DownloadStat.FW_FW_FAILURE.incrementStat();
                 }
             }
