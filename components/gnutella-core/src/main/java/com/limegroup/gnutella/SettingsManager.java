@@ -891,16 +891,22 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    public synchronized void setIncompleteDirectory(String dir) {
-        if(!dir.endsWith(File.separator))
-            dir += File.separator;
+	/** sets the incomplete directory.  this is not 
+	 *  synchronized since it will only get called
+	 *  once on startup. */
+    public void setIncompleteDirectory(String dir) {
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(b == false)
             throw new IllegalArgumentException();
         else {
-            incompleteDirectory_ = dir;
-            props_.put(INCOMPLETE_DIR, dir);
+			String incDir = dir;
+			try {
+				incDir = f.getCanonicalPath();
+			}
+			catch(IOException ioe) {}
+            incompleteDirectory_ = incDir;
+            props_.put(INCOMPLETE_DIR, incompleteDirectory_);
         }
     }
 
@@ -921,15 +927,18 @@ public class SettingsManager implements SettingsInterface
      *  window.  this method should only get called at
      *  install time, and is therefore not synchronized */
     public void setSaveDefault(String dir) {
-        if(!dir.endsWith(File.separator))
-            dir += File.separator;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(!b)
             throw new IllegalArgumentException();
         else {
-            saveDefault_ = dir;
-            props_.put(SAVE_DEFAULT, dir);
+			String saveDef = dir;
+			try {
+				saveDef = f.getCanonicalPath();
+			}
+			catch(IOException ioe) {}
+            saveDefault_ = saveDef;
+            props_.put(SAVE_DEFAULT, saveDefault_);
         }
     }
 
@@ -958,15 +967,18 @@ public class SettingsManager implements SettingsInterface
 
     /** set the directory for saving files */
     public void setSaveDirectory(String dir) {
-        if(!dir.endsWith(File.separator))
-            dir += File.separator;
         File f = new File(dir);
         boolean b = f.isDirectory();
         if(b == false)
             throw new IllegalArgumentException();
         else {
-            saveDirectory_ = dir;
-            props_.put(SAVE_DIRECTORY, dir);
+			String saveDir = dir;
+			try {
+				saveDir = f.getCanonicalPath();
+			}
+			catch(IOException ioe) {}
+            saveDirectory_ = saveDir;
+            props_.put(SAVE_DIRECTORY, saveDirectory_);
         }
     }
 
