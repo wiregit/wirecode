@@ -957,7 +957,7 @@ public class Response {
             }
             
             if(ggep.createTime > 0)
-                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime);
+                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
             
             
             info.write(out);
@@ -1011,7 +1011,9 @@ public class Response {
                 
                 if(ggeps[i].hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
                     try {
-                        createTime = ggeps[i].getLong(GGEP.GGEP_HEADER_CREATE_TIME);
+                        createTime =
+                            ggeps[i].getLong(GGEP.GGEP_HEADER_CREATE_TIME) *
+                            1000;
                     } catch(BadGGEPPropertyException bad) {
                         continue;
                     }
@@ -1026,16 +1028,16 @@ public class Response {
     /**
      * A container for information we're putting in/out of GGEP blocks.
      */
-    private static final class GGEPContainer {
-        private final Set locations;
-        private final long createTime;
+    static final class GGEPContainer {
+        final Set locations;
+        final long createTime;
         private static final GGEPContainer EMPTY = new GGEPContainer();
         
         private GGEPContainer() {
             this(null, -1);
         }
         
-        private GGEPContainer(Set locs, long create) {
+        GGEPContainer(Set locs, long create) {
             locations = locs == null ? DataUtils.EMPTY_SET : locs;
             createTime = create;
         }

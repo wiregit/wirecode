@@ -419,22 +419,30 @@ public class ByteOrder {
                                 }
                                 return new byte[] {(byte)x, (byte)(x >> 8)};
                             }
-                            return new byte[] {(byte)x, (byte)(x >> 8), (byte)(x >> 16)};
+                            return new byte[] {(byte)x, (byte)(x >> 8),
+                                               (byte)(x >> 16)};
                         }
                         return new byte[] {
-                            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24)};
+                            (byte)x, (byte)(x >> 8), (byte)(x >> 16),
+                            (byte)(x >> 24)};
                     }
                     return new byte[] {
-                        (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32)};
+                        (byte)x, (byte)(x >> 8), (byte)(x >> 16), 
+                        (byte)(x >> 24), (byte)(x >> 32)};
                 }
                 return new byte[] {
-                    (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40)};
+                    (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24),
+                    (byte)(x >> 32), (byte)(x >> 40)};
             }
             return new byte[] {
-                (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48)};
+                (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24),
+                (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48)};
         }
+        
         return new byte[] {
-            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48), (byte)(x >> 56)};
+            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24),
+            (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48),
+            (byte)(x >> 56)};
     }    
 
     /**
