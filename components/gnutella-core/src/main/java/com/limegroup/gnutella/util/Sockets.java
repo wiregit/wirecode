@@ -172,7 +172,7 @@ public class Sockets {
 	 *
 	 * This is basically just a hack to work around JDK bug 4110694.  It is
 	 * implemented in a similar way as Wayne Conrad's SocketOpener class, using
-	 * Thread.interrupt().  This is necessary because of bugs in earlier Java 
+	 * Thread.stop().  This is necessary because of bugs in earlier Java 
 	 * implementations, where certain sockets fail to die.
 	 *
 	 * For an outrageous listing of large amounts of SocketOpener threads
@@ -199,6 +199,7 @@ public class Sockets {
 		/** True iff the connecting thread should close the socket if/when it
 		 *  is established. */
 		private boolean timedOut=false;
+		private boolean completed=false;
 		
 		public SocketOpener(String host, int port) {
 			if((port & 0xFFFF0000) != 0) {
@@ -235,7 +236,8 @@ public class Sockets {
 				throw new IOException();
 			}
 			// Ensure that the SocketOpener is killed.
-			t.stop();
+			if( !completed )
+			    t.stop();
 			
 			//a) Normal case
 			if (socket!=null) {
@@ -257,6 +259,7 @@ public class Sockets {
 					} catch (IOException e) { }                
 					
 					synchronized (SocketOpener.this) {
+					    completed = true;
 						if (timedOut && sock!=null)
 							try { sock.close(); } catch (IOException e) { }
 						else {
