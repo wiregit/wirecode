@@ -653,7 +653,7 @@ public class SettingsManager implements SettingsInterface {
         temp.trim();
 		if(!temp.endsWith(";")) 
 			temp += ";";
-		temp += getIncompleteDirectory();
+		temp += getIncompleteDirectory().getAbsolutePath();
         return StringUtils.split(temp, ';');		
 	}
     
