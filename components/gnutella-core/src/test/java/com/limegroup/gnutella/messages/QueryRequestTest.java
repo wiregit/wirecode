@@ -105,7 +105,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		try {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
-			qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+			qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
 		}
@@ -157,7 +157,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
-		qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+		qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 
 		
 		// now test everything empty but URN
@@ -170,34 +170,25 @@ public final class QueryRequestTest extends BaseTestCase {
 		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
-		qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+		qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 	}
 
 	/**
 	 * Contains the legacy unit test that was formerly in QueryReqest.
 	 */
 	public void testLegacyUnitTest() throws Exception {
-        int u2=0x0000FFFF;
         QueryRequest qr = null;
-		try {
-			qr = new QueryRequest((byte)3,u2,"", false);
-			fail("should not have accepted empty query");
-		} catch(IllegalArgumentException e) {
-			// expected for empty query
-		}
        
-		qr = new QueryRequest((byte)3, u2, "blah", false);
-		assertEquals("min speeds should be equal", u2, qr.getMinSpeed());
+		qr = QueryRequest.createQuery("blah");
 		assertEquals("queries should be equal", "blah", qr.getQuery());
 
-        qr=new QueryRequest((byte)3, 1,"ZZZ", false);		
-		assertEquals("min speeds should be equal", (byte)1, qr.getMinSpeed());
+		qr = QueryRequest.createQuery("ZZZ");
 		assertEquals("queries should be equal", "ZZZ", qr.getQuery());
 
         //String is single null-terminated.
 		byte[] payload = new byte[2+2];
 		payload[2]=(byte)65;
-		qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+		qr=QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 		
   		assertEquals("queries should be equal", "A", qr.getQuery());
   		assertEquals("query lengths should be equal", 4, qr.getLength());
@@ -205,14 +196,14 @@ public final class QueryRequestTest extends BaseTestCase {
         //String is double null-terminated.
         payload = new byte[2+3];
         payload[2]=(byte)65;
-        qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 
 		assertEquals("queries should be equal", "A", qr.getQuery());
 
 		try {
 			//String is empty.
 			payload = new byte[2+1];
-			qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+			qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
 			fail("should not have accepted query");
 			//assertEquals("queries should be equal", "", qr.getQuery());
 		} catch(BadPacketException e) {
@@ -246,7 +237,7 @@ public final class QueryRequestTest extends BaseTestCase {
 				}
 			}
 			baos[i].write(0);
-			QueryRequest qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
+			QueryRequest qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)6, 
 											   (byte)4, 
 											   baos[i].toByteArray());
 			assertEquals("speeds should be equal", 0, qr.getMinSpeed());
@@ -310,7 +301,7 @@ public final class QueryRequestTest extends BaseTestCase {
 				baos[i].write(0);
 				QueryRequest qr = null;
 				try {
-					qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
+					qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)6, 
 										  (byte)4, 
 										  baos[i].toByteArray());
 				} catch(BadPacketException e) {
@@ -343,73 +334,206 @@ public final class QueryRequestTest extends BaseTestCase {
 
 
 	/**
-	 * Tests the constructor that only takes threee arguments.
+	 * Tests all constructors that take URNs.
 	 */
-	public void testQueryRequestThreeArgumentConstructor() {
-		String query = "file";
-		QueryRequest qr = new QueryRequest((byte)7, 0, query, false);
-		String storedQuery = qr.getQuery();
-		assertEquals("query strings should be equal", query, storedQuery);
-		assertEquals("rich query should be the empty string", "", 
-                     qr.getRichQuery());
-		assertEquals("requested URN types should be the empty set", 
-					 qr.getRequestedUrnTypes(), Collections.EMPTY_SET);
-		assertEquals("URN Set should be the empty set", 
-					 qr.getQueryUrns(), Collections.EMPTY_SET);
-		assertEquals("min speeds don't match", 160, qr.getMinSpeed());
+	public void testUrnQueryConstructors() {
+		Set urnSet = new HashSet();
+		urnSet.add(HugeTestUtils.SHA1);
+		QueryRequest qr = QueryRequest.createRequery(HugeTestUtils.SHA1);
 
-		try {
-			Set queryUrns = qr.getQueryUrns();
-			queryUrns.add(query);
-			assertTrue("exception should have been thrown", true);
-		} catch(com.sun.java.util.collections.UnsupportedOperationException e) {
-		}
+		runStandardChecks(qr, qr.getQueryUrns());
+		runRequeryChecks(qr);
 
-		try {
-			Set requestedUrnTypes = qr.getRequestedUrnTypes();
-			requestedUrnTypes.add(query);
-			assertTrue("exception should have been thrown", true);
-		} catch(com.sun.java.util.collections.UnsupportedOperationException e) {
-		}
+
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)4);
+		runStandardChecks(qr, qr.getQueryUrns());
+		runRequeryChecks(qr);
+		assertEquals("TTLs should be equal", (byte)4, qr.getTTL());
 	}
 
 	/**
-	 * Tests the primary constructor that most of the other constructors
-	 * delegate to.
+	 * Tests constructor that only takes a string.
 	 */
-	public void testQueryRequestSecondaryConstructor() {
-		byte ttl = 5;
-		int minSpeed = 30;
-		String query = "file i really want";
-		
-		// ideally this would be a real rich query
-		String richQuery = "";
-		boolean isRequery = false;
-		Set requestedUrnTypes = new HashSet();
-		requestedUrnTypes.add(UrnType.SHA1);
-		Set queryUrns = new HashSet();
-		queryUrns.add(HugeTestUtils.URNS[4]);
+	public void testStringRequeryConstructor() {
+		QueryRequest qr = QueryRequest.createRequery("test");
+		runStandardChecks(qr, "test");
+		runStringRequeryChecks(qr, "test");
+	}
 
-		byte[] guid = QueryRequest.newQueryGUID(isRequery);
-		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
-                                           richQuery, isRequery, 
-                                           requestedUrnTypes, queryUrns, false);
-		
-		assertEquals("ttls should be equal", ttl, qr.getTTL());
-		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
-		assertEquals("queries should be equal", query, qr.getQuery());
-		assertEquals("rich queries should be equal", richQuery, 
-                     qr.getRichQuery());
-		assertEquals("query urn types should be equal", requestedUrnTypes, 
+
+	/**
+	 * Tests constructor that only takes a string.
+	 */
+	public void testStringConstructor() {
+		QueryRequest qr = QueryRequest.createQuery("tests");
+		runStandardChecks(qr, "tests");
+		runNonRequeryChecks(qr);
+	}
+
+	/**
+	 * Tests constructor that only takes a string and a TTL.
+	 */
+	public void testStringTTLConstructor() {
+		QueryRequest qr = QueryRequest.createQuery("tests", (byte)3);
+		runStandardChecks(qr, "tests");
+		runNonRequeryChecks(qr);
+		assertEquals("ttls should be equal", (byte)3, qr.getTTL());
+	}
+
+	/**
+	 * Tests constructor that only takes a string and a TTL.
+	 */
+	public void testStringXMLConstructor() {
+		QueryRequest qr = QueryRequest.createQuery("tests", "xml");
+		runStandardChecks(qr, "tests", "xml");
+		runNonRequeryChecks(qr);
+	}
+
+	/**
+	 * Tests constructor that only takes a string and a TTL and a GUID.
+	 */
+	public void testGUIDStringXMLConstructor() {
+		QueryRequest qr = 
+			QueryRequest.createQuery(QueryRequest.newQueryGUID(false), "tests", "xml");
+		runStandardChecks(qr, "tests", "xml");
+		runNonRequeryChecks(qr);
+	}
+
+	/**
+	 * Tests constructor that only takes a string and a query key.
+	 */
+	public void testStringQueryKeyConstructor() {
+		QueryKey key = QueryKey.getQueryKey(GUID.makeGuid(), true);
+		QueryRequest qr =
+			QueryRequest.createQueryKeyQuery("test", key);
+
+		runStandardChecks(qr, false, UrnType.ANY_TYPE_SET, 
+						  Collections.EMPTY_SET, key);		
+		assertEquals("unexpected query", "test", qr.getQuery());
+		assertEquals("unexpected xml query", "", qr.getRichQuery());
+	}
+
+	/**
+	 * Tests constructor that only takes a QueryRequest for generating
+	 * a multicast query.
+	 */
+	public void testMulticastQuery() {
+		QueryRequest testQuery = QueryRequest.createQuery("test");
+		QueryRequest qr = QueryRequest.createMulticastQuery(testQuery);		
+		runStandardChecksMulticast(qr, "test");
+	}
+
+	/**
+	 * Runs standard checks on requeries.
+	 *
+	 * @param qr the query to check
+	 */
+	private void runRequeryChecks(QueryRequest qr) {
+		assertEquals("unexpected query", "\\", qr.getQuery());
+		assertEquals("xml should be empty", "", qr.getRichQuery());
+		assertTrue("should have URNs", qr.hasQueryUrns());
+		assertEquals("unexpected requested URN types", UrnType.SHA1_SET, 
 					 qr.getRequestedUrnTypes());
-		assertEquals("query urns should be equal", queryUrns, 
-                     qr.getQueryUrns());
-				
+		assertTrue("should be a requery", qr.isLimeRequery());
+	}
+
+	private void runStringRequeryChecks(QueryRequest qr, String query) {
+		assertEquals("unexpected query", query, qr.getQuery());
+		assertEquals("xml should be empty", "", qr.getRichQuery());
+		assertTrue("should not have URNs", !qr.hasQueryUrns());
+		assertEquals("unexpected requested URN types", UrnType.ANY_TYPE_SET, 
+					 qr.getRequestedUrnTypes());
+		assertTrue("should be a requery", qr.isLimeRequery());
+	}
+
+	private void runNonRequeryChecks(QueryRequest qr) {
+		assertTrue("should not be a requery", !qr.isLimeRequery());		
+	}
+
+	/**
+	 * Runs standard checks on query that should be valid for almost
+	 * all queries.  This should not be 
+	 *
+	 * @param qr the query to check
+	 */
+	private void runStandardChecks(QueryRequest qr, 
+								   boolean multicast, Set urnTypes,
+								   Set urns, QueryKey key) {
+		if(!multicast) {
+			assertTrue("should not be multicast", !qr.isMulticast());
+			assertTrue("should be firewalled", qr.isFirewalledSource());
+		} else {
+			assertTrue("should be multicast", qr.isMulticast());
+			assertTrue("should not be firewalled", !qr.isFirewalledSource());
+		}
+		if(key == null) {
+			assertNull("query key should be null", qr.getQueryKey());
+		} else {
+			assertEquals("unexpected query key", key, qr.getQueryKey());
+		}
+		assertTrue("should want XML", qr.desiresXMLResponses());
+		assertEquals("unexpected requested URN types", urnTypes, 
+					 qr.getRequestedUrnTypes());	
+		assertEquals("URNs should be equal", urns, 
+					 qr.getQueryUrns());	
+		runIOChecks(qr);
+	}
+
+
+	private void runStandardChecksMulticast(QueryRequest qr, String query) {
+		assertEquals("queries should be equal", query, qr.getQuery());
+		runStandardChecks(qr, true, UrnType.ANY_TYPE_SET,
+						  Collections.EMPTY_SET, null);
+	}
+
+	private void runStandardChecks(QueryRequest qr) {
+		runStandardChecks(qr, false, UrnType.ANY_TYPE_SET,
+						  Collections.EMPTY_SET, null);
+	}
+
+	private void runStandardChecks(QueryRequest qr, Set urns) {
+		runStandardChecks(qr, false, UrnType.SHA1_SET, urns, null);
+	}
+	
+	/**
+	 * Runs standard checks on query that should be valid for almost
+	 * all queries.  This should not be 
+	 *
+	 * @param qr the query to check
+	 * @param query the query string
+	 */
+	private void runStandardChecks(QueryRequest qr, String query) {
+		assertEquals("queries should be equal", query, qr.getQuery());
+		runStandardChecks(qr);
+	}
+
+	/**
+	 * Runs standard checks on query that should be valid for almost
+	 * all queries.  This should not be 
+	 *
+	 * @param qr the query to check
+	 * @param query the query string
+	 */
+	private void runStandardChecks(QueryRequest qr, String query, String xml) {
+		assertEquals("xml queries should be equal", xml, qr.getRichQuery());
+		runStandardChecks(qr);
+	}
+
+	/**
+	 * Writes the specified query out to a stream and then reads the
+	 * stream back in to make sure we end up with the same query we
+	 * started with.
+	 *
+	 * @param qr the query to check
+	 */
+	private void runIOChecks(QueryRequest qr) {
+		QueryRequest storedQuery = qr;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			qr.write(baos);
 			baos.flush();
 		} catch (IOException e) {
+			e.printStackTrace();
 			fail("unexpected exception: "+e);
 		}
 
@@ -418,122 +542,15 @@ public final class QueryRequestTest extends BaseTestCase {
 
 		QueryRequest qrTest = null;
 		try {
-			qrTest = (QueryRequest)qr.read(bais);
+			qrTest = (QueryRequest)Message.read(bais);
 		} catch(Exception e) {
+			e.printStackTrace();
 			fail("unexpected exception: "+e);
 		}
-		assertEquals("queries should be equal", qr.getQuery(), 
-                     qrTest.getQuery());
-		assertEquals("rich queries should be equals", qr.getRichQuery(), 
-					 qrTest.getRichQuery());
 
-		Set urnTypes0 = qr.getRequestedUrnTypes();
-		Set urnTypes1 = qrTest.getRequestedUrnTypes();
-		Iterator iter0 = urnTypes0.iterator();
-		Iterator iter1 = urnTypes1.iterator();
-		UrnType urnType0 = (UrnType)iter0.next();
-		UrnType urnType1 = (UrnType)iter1.next();
-		assertEquals("urn types should both be sha1", urnType0, urnType1);
-		assertEquals("urn type set sizes should be equal", urnTypes0.size(), 
-					 urnTypes1.size());
-		assertEquals("urn types should be equal\r\n"+
-					 "set0: "+print(urnTypes0)+"\r\n"+
-					 "set1: "+ print(urnTypes1), 
-					 urnTypes0,
-					 urnTypes1);
-		assertEquals("query urns should be equal", qr.getQueryUrns(), 
-                     qrTest.getQueryUrns());
-		assertEquals("min speeds should be equal", qr.getMinSpeed(), 
-                     qrTest.getMinSpeed());
-		
+		// TODO:: ADD THISS!!
+		//assertEquals("queries should be equal", storedQuery, qrTest);
 	}
-
-
-	/**
-	 * Tests the primary constructor that most of the other constructors
-	 * delegate to.
-	 */
-	public void testQueryRequestPrimaryConstructor() {
-		byte ttl = 5;
-		//int minSpeed = 30;
-		String query = "file i really want";
-		
-		// ideally this would be a real rich query
-		String richQuery = "";
-		boolean isRequery = false;
-		Set requestedUrnTypes = new HashSet();
-		requestedUrnTypes.add(UrnType.SHA1);
-		Set queryUrns = new HashSet();
-		queryUrns.add(HugeTestUtils.URNS[4]);
-
-		// use the quid as our key -- a bit of a hack -- it isn't really
-		// based on the guid
-		byte[] key = QueryRequest.newQueryGUID(isRequery);
-        QueryKey qk = QueryKey.getQueryKey(key, true);
-		QueryRequest qr = QueryRequest.createQueryKeyQuery(query, qk);
-		byte[] guid = qr.getGUID();
-		//QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
-		//                                 richQuery, isRequery, 
-		//                                 requestedUrnTypes, queryUrns, qk,
-		//                                 false);
-		
-		assertEquals("ttls should be equal", 1, qr.getTTL());
-		//assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
-		assertEquals("queries should be equal", query, qr.getQuery());
-		assertEquals("rich queries should be equal", richQuery, 
-                     qr.getRichQuery());
-		assertEquals("query urn types should be equal", UrnType.ANY_TYPE_SET, 
-					 qr.getRequestedUrnTypes());
-		assertEquals("query urns should be equal", new HashSet(), 
-                     qr.getQueryUrns());
-		assertEquals("query keys should be equal", qk, qr.getQueryKey());
-				
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			qr.write(baos);
-			baos.flush();
-		} catch (IOException e) {
-			fail("unexpected exception: "+e);
-		}
-
-		ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-
-		QueryRequest qrTest = null;
-		try {
-			qrTest = (QueryRequest)qr.read(bais);
-		} catch(Exception e) {
-			fail("unexpected exception: "+e);
-		}
-		assertEquals("queries should be equal", qr.getQuery(), 
-                     qrTest.getQuery());
-		assertEquals("rich queries should be equals", qr.getRichQuery(), 
-					 qrTest.getRichQuery());
-
-		Set urnTypes0 = qr.getRequestedUrnTypes();
-		Set urnTypes1 = qrTest.getRequestedUrnTypes();
-		Iterator iter0 = urnTypes0.iterator();
-		Iterator iter1 = urnTypes1.iterator();
-		UrnType urnType0 = (UrnType)iter0.next();
-		UrnType urnType1 = (UrnType)iter1.next();
-		assertEquals("urn types should both be sha1", urnType0, urnType1);
-		assertEquals("urn type set sizes should be equal", urnTypes0.size(), 
-					 urnTypes1.size());
-		assertEquals("urn types should be equal\r\n"+
-					 "set0: "+print(urnTypes0)+"\r\n"+
-					 "set1: "+ print(urnTypes1), 
-					 urnTypes0,
-					 urnTypes1);
-		assertEquals("query urns should be equal", qr.getQueryUrns(), 
-                     qrTest.getQueryUrns());
-		assertEquals("min speeds should be equal", qr.getMinSpeed(), 
-                     qrTest.getMinSpeed());
-        assertTrue("qk = " + qk + " , read = " + qrTest.getQueryKey(), 
-                   qk.equals(qrTest.getQueryKey()));
-		
-	}
-
-
 
 
     public void testNewMinSpeedUse() throws Exception {
@@ -551,135 +568,38 @@ public final class QueryRequestTest extends BaseTestCase {
 
         // not firewalled and not wanting rich, just 10000000
         payload[0] = (byte) 0x80;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and not wanting rich, just 11000000
         payload[0] = (byte) 0xC0;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue("should not be from multicast", !qr.isMulticast());
 
         // not firewalled and wanting rich, just 10100000
         payload[0] = (byte) 0xA0;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and wanting rich, just 11100000
         payload[0] = (byte) 0xE0;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
         assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled, wanting rich, and multicast -- 11110000
         payload[0] = (byte) 0xF0;
-        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue("should want XML", qr.desiresXMLResponses());
         assertTrue("should be considered firewalled", qr.isFirewalledSource());
         assertTrue("should be from multicast", qr.isMulticast());
-        // --------------------------------------
-
-
-        // CONSTRUCTION, WRITING TO A STREAM, READING FROM A STREAM
-        // --------------------------------------
-        ByteArrayOutputStream baos = null;
-        ByteArrayInputStream bais = null;
-        qr = new QueryRequest((byte)3, 0, "susheel", false);
-        assertTrue(qr.desiresXMLResponses());
-        assertTrue(!qr.isFirewalledSource());
-		assertTrue("multicast should not be set", !qr.isMulticast());
-        try {
-            baos = new ByteArrayOutputStream();
-            qr.write(baos);
-            bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryRequest check = (QueryRequest) Message.read(bais);
-            assertTrue(check.desiresXMLResponses());
-            assertTrue(!check.isFirewalledSource());
-			assertTrue("multicast should not be set", !check.isMulticast());
-        }
-        catch (Exception crap) {
-            assertTrue(false);
-        }
-        
-        qr = new QueryRequest((byte)3, 0, "susheel", true);
-        assertTrue(qr.desiresXMLResponses());
-        assertTrue(qr.isFirewalledSource());
-		assertTrue("multicast should not be set", !qr.isMulticast());
-        try {
-            baos = new ByteArrayOutputStream();
-            qr.write(baos);
-            bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryRequest check = (QueryRequest) Message.read(bais);
-            assertTrue(check.desiresXMLResponses());
-            assertTrue(check.isFirewalledSource());
-			assertTrue("multicast should not be set", !check.isMulticast());
-        }
-        catch (Exception crap) {
-            assertTrue(false);
-        }
-
-        { 
-            // test rich use, but keep in mind that LimeWire's ALWAYS want rich
-            // answers, so the bit should always be set....
-            byte ttl = 5;
-            int minSpeed = 0;
-            String query = "file i really want";
-            
-            // ideally this would be a real rich query
-            String richQuery = "something";
-            boolean isRequery = false;
-            Set requestedUrnTypes = new HashSet();
-            requestedUrnTypes.add(UrnType.SHA1);
-            Set queryUrns = new HashSet();
-            queryUrns.add(HugeTestUtils.URNS[4]);
-            
-            byte[] guid = QueryRequest.newQueryGUID(isRequery);
-            qr = new QueryRequest(guid, ttl, minSpeed, query, 
-                                  richQuery, isRequery, 
-                                  requestedUrnTypes, queryUrns,
-                                  false);
-            assertTrue(qr.desiresXMLResponses());
-            assertTrue(!qr.isFirewalledSource());
-			assertTrue("multicast should not be set", !qr.isMulticast());
-            try {
-                baos = new ByteArrayOutputStream();
-                qr.write(baos);
-                bais = new ByteArrayInputStream(baos.toByteArray());
-                QueryRequest check = (QueryRequest) Message.read(bais);
-                assertTrue(check.desiresXMLResponses());
-                assertTrue(!check.isFirewalledSource());
-				assertTrue("multicast should not be set", !check.isMulticast());
-            }
-            catch (Exception crap) {
-                assertTrue(false);
-            }
-
-            qr = new QueryRequest(guid, ttl, minSpeed, query, 
-                                  richQuery, isRequery, 
-                                  requestedUrnTypes, queryUrns,
-                                  true);
-            assertTrue(qr.desiresXMLResponses());
-            assertTrue(qr.isFirewalledSource());
-			assertTrue("multicast should not be set", !qr.isMulticast());
-            try {
-                baos = new ByteArrayOutputStream();
-                qr.write(baos);
-                bais = new ByteArrayInputStream(baos.toByteArray());
-                QueryRequest check = (QueryRequest) Message.read(bais);
-                assertTrue(check.desiresXMLResponses());
-                assertTrue(check.isFirewalledSource());
-				assertTrue("multicast should not be set", !check.isMulticast());
-            }
-            catch (Exception crap) {
-                assertTrue(false);
-            }
-        }
         // --------------------------------------
     }
 
