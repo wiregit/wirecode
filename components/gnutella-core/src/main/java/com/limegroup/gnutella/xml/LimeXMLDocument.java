@@ -54,7 +54,8 @@ public class LimeXMLDocument{
         initialize(doc);        
     }
     
-    private void initialize(InputSource doc) throws SchemaNotFoundException{
+    private void initialize(InputSource doc) throws SchemaNotFoundException,
+                            IOException, SAXException {
         DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
@@ -66,7 +67,7 @@ public class LimeXMLDocument{
         createMap(document);
     }
 
-    private void grabDocInfo(Document doc) throws SchemaNotFoundEception{
+    private void grabDocInfo(Document doc) throws SchemaNotFoundException{
         Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
@@ -76,10 +77,10 @@ public class LimeXMLDocument{
             String lowerAttName = attName.toLowerCase();
             if (lowerAttName.indexOf("schemalocation") >= 0)
                 schemaUri = att.getNodeValue();
-            else if (loweAttName.indexOf("identifier") >= 0)
+            else if (lowerAttName.indexOf("identifier") >= 0)
                 identifier = att.getNodeValue();
         }
-        if(schemaURI = null)//we cannot have a doc with out a schema
+        if(schemaUri == null)//we cannot have a doc with out a schema
             throw new SchemaNotFoundException();
     }
 
