@@ -2134,8 +2134,8 @@ public class ConnectionManager {
            SystemUtils.getIdleTime() < 30*1000 &&
            !QuestionsHandler.NO_INTERNET.getValue()) {
             // Notify the user that they have no internet connection.
-            MessageService.showError("NO_INTERNET",
-                QuestionsHandler.NO_INTERNET);
+            MessageService.showError("NO_INTERNET", QuestionsHandler.NO_INTERNET);
+            disconnect();
         } else {
             // Notify the user that they have no internet connection and that
             // we will automatically retry
@@ -2158,8 +2158,6 @@ public class ConnectionManager {
                     }
 
                     if(!RouterService.isConnected()) {
-                        recoverHosts();
-
                         // Try to re-connect.  Note this call resets the time
                         // for our last check for a live connection, so we may
                         // hit web servers again to check for a live connection.
