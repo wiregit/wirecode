@@ -92,7 +92,17 @@ public class ByteReader {
      * Note that calling readLine on "ab<EOF>" returns null.
      */
     public String readLine() throws IOException {
-
+        //TODO: this method desperately need cleanup:
+        //1. Internationalization problems.  It assumes that getBytes
+        //   does the right thing.  (We should hardcode the ASCII values.)
+        //   Also, we probably shouldn't use the String(byte[],int,int)
+        //   constructor.
+        //2. There's no need to use buf and sBuffer.  It just makes the
+        //   code confusing.  Just append characters to sBuffer.
+        //3. The i and numBytes variables are redundant.  As far as I can
+        //   tell, they're exactly the same.  Actually if you use the
+        //   above suggestion, you can just call sBuffer.append(..); no
+        //   need for any variables.
         if (_istream == null)
             return "";
 
