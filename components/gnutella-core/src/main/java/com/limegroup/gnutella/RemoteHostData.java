@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.util.Arrays;
+import com.sun.java.util.collections.*;
 
 public class RemoteHostData {
 
