@@ -225,15 +225,15 @@ public class PingRequest extends Message {
                     if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
                     	return _ggeps[i].getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                     
-                System.out.println("not too good");
+                
                 return ApplicationSettings.DEFAULT_LOCALE.getValue();
             }
             catch(BadGGEPBlockException ignored) {}
             catch(BadGGEPPropertyException ignoredToo) {}
             return ApplicationSettings.DEFAULT_LOCALE.getValue();
         }
-        else {System.out.println("bad");
-            return ApplicationSettings.DEFAULT_LOCALE.getValue();}
+        else 
+            return ApplicationSettings.DEFAULT_LOCALE.getValue();
     }
     
     /**
