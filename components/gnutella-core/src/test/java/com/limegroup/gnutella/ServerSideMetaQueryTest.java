@@ -408,4 +408,117 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         }
     }
 
+    public void testWhatIsNewMetaQuery() throws Exception {
+        drainAll();
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
+                             null, null, false, Message.N_TCP, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, 
+                             0);
+        
+        testUP[0].send(query);
+        testUP[0].flush();
+
+        Thread.sleep(250);
+
+        // we should get no responses because of the filter
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(3, results.size());
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
+                             null, null, false, Message.N_TCP, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, 
+                             0 | QueryRequest.AUDIO_MASK);
+        
+        testUP[1].send(query);
+        testUP[1].flush();
+
+        Thread.sleep(250);
+
+        // we should get no responses because of the filter
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(2, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("meta audio.mp3"));
+        assertTrue(names.contains("berkeley.mp3"));
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
+                             null, null, false, Message.N_TCP, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, 
+                             0 | QueryRequest.DOC_MASK);
+        
+        testUP[2].send(query);
+        testUP[2].flush();
+
+        Thread.sleep(250);
+
+        // we should get no responses because of the filter
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(3, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("berkeley.txt"));
+        assertTrue(names.contains("susheel.txt"));
+        assertTrue(names.contains("meta doc.txt"));
+        }
+
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null,
+                             null, null, false, Message.N_TCP, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE, 
+                             0 | QueryRequest.LIN_PROG_MASK);
+        
+        testUP[3].send(query);
+        testUP[3].flush();
+
+        Thread.sleep(250);
+
+        // we should get no responses because of the filter
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[3],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(1, results.size());
+        Set names = new HashSet();
+        for (Iterator iter = results.iterator(); iter.hasNext(); )
+            names.add(((Response)iter.next()).getName());
+        assertTrue(names.contains("meta program txt.bin"));
+        }
+
+
+    }
+
+
 }
