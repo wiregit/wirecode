@@ -1031,7 +1031,7 @@ public abstract class MessageRouter
             // a special case.  in the common case where there
             // are less than 256 responses being sent, there
             // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < 255) ) {
+            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
                 res = responses;
             }
             else {
