@@ -48,7 +48,9 @@ public class UploadTest extends BaseTestCase {
     private FileDesc FD;    
 
     private static final RouterService ROUTER_SERVICE =
-        new RouterService(new ActivityCallbackStub());
+        new RouterService(new FManCallback());
+        
+    private static final Object loaded = new Object();
 
 	/**
 	 * Creates a new UploadTest with the specified name.
@@ -114,7 +116,7 @@ public class UploadTest extends BaseTestCase {
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
 
         if ( !ROUTER_SERVICE.isStarted() ) {
-            ROUTER_SERVICE.start();
+            startAndWaitForLoad();
             Thread.sleep(2000);
         }
 	    
@@ -129,12 +131,7 @@ public class UploadTest extends BaseTestCase {
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set urns = new HashSet();
         urns.add(urn);
-        fm.addIncompleteFile(
-            incFile,
-            urns,
-            incName,
-            1981,
-            vf );
+        fm.addIncompleteFile(incFile, urns, incName, 1981, vf);
         assertEquals( 1, fm.getNumIncompleteFiles() );
         assertEquals( 1, fm.getNumFiles() );
         FD = fm.getFileDescForFile(new File(_sharedDir, fileName));
@@ -150,15 +147,6 @@ public class UploadTest extends BaseTestCase {
         }
 
         try {Thread.sleep(300); } catch (InterruptedException e) { }
-        //System.out.println(
-        //    "Please make sure your client is listening on port "+port+"\n"
-        //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
-        //    +"with at least one incoming messaging slot.  Also, nothing\n"
-        //    +"may be listening to port "+callbackPort+".\n"
-		//	+"Finally, the file must contain all lower-case characters in\n" 
-		//	+"the alphabet, exactly like the following:\n\n"
-		//	+"abcdefghijklmnopqrstuvwxyz");
-		//System.out.println();
 		
 		assertEquals("unexpected uploads in progress",
 		    0, upMan.uploadsInProgress() );
@@ -1706,4 +1694,23 @@ public class UploadTest extends BaseTestCase {
             return HandshakeResponse.createResponse(new Properties());
         }
     }
+    
+    private static class FManCallback extends ActivityCallbackStub {
+        public void fileManagerLoaded() {
+            synchronized(loaded) {
+                loaded.notify();
+            }
+        }
+    }
+
+    private static void startAndWaitForLoad() {
+        synchronized(loaded) {
+            try {
+                ROUTER_SERVICE.start();
+                loaded.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+    }      
 }
