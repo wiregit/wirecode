@@ -41,7 +41,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 
 		try{
 			bestCandidates[0].write(wr); //my best leaf
-			if (bestCandidates[1]!=null)
+			if (bestCandidates[1]!=null) 
 				bestCandidates[1].write(wr); //best leaf at ttl 1
 			wr.flush();
 			bos.flush();
@@ -94,7 +94,6 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 			}
 		} //otherwise, parse both
 		else {
-					
 			String ttl0 = both.substring(0,both.indexOf("\n"));
 			String ttl1 = both.substring(both.indexOf("\n")+1,both.length());
 		
@@ -104,6 +103,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 			}catch(ParseException pex) {
 				throw new BadPacketException();
 			}
+			
 		}
 	}
 	/**
