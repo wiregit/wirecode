@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.Buffer;
-import com.sun.java.util.collections.*;
 
 /** 
  * Stops queries that are bound to match too many files.  
@@ -33,10 +30,10 @@ public class GreedyQueryFilter extends SpamFilter {
             this.isObfuscatedGeneralSearch(query)) {
             int hops = (int)m.getHops();
             int ttl = (int)m.getTTL();
-            if (hops >= this.GREEDY_QUERY_MAX)
+            if (hops >= GreedyQueryFilter.GREEDY_QUERY_MAX)
                 return false;
-            if ( (hops + ttl) > this.GREEDY_QUERY_MAX) 
-                m.setTTL((byte)(this.GREEDY_QUERY_MAX - hops));
+            if ( (hops + ttl) > GreedyQueryFilter.GREEDY_QUERY_MAX) 
+                m.setTTL((byte)(GreedyQueryFilter.GREEDY_QUERY_MAX - hops));
         }
 
         return true;
