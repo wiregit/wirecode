@@ -39,8 +39,18 @@ public class LimitReachedUploadState implements UploadState {
 		_ostream.write(str.getBytes());
 		_ostream.write(errMsg.getBytes());
 		_ostream.flush();
-		_uploader.stop();
-
 	}
+    
+    /**
+     * Tells if the upload state doesnt allow the connection to receive
+     * another request on the same connection. This state never allows 
+     * receiving next request.
+     * @return true, if the upload state doesnt allow the connection to receive
+     * another request on the same connection, false otherwise
+     */
+    public boolean getCloseConnection()
+    {
+        return true;
+    }    
 
 }

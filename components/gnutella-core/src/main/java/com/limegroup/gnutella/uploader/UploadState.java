@@ -28,7 +28,17 @@ public interface UploadState {
 	 * the appropriate error information, such as 404 or 503.
 	 * There is also a failed push implementation that will 
 	 * do nothing.
+     * <p> Note: This method should never attempt to close the I/O streams
+     * but should leave that responsibility with the caller.
 	 */
 	public void doUpload(HTTPUploader uploader) throws IOException;
+    
+    /**
+     * Tells if the upload state doesnt allow the connection to receive 
+     * another request on the same connection.
+     * @return true, if the upload state doesnt allow the connection to receive 
+     * another request on the same connection, false otherwise
+     */
+    public boolean getCloseConnection();
 
 }

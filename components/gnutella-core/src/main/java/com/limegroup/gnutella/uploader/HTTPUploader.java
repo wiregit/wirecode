@@ -39,6 +39,9 @@ public class HTTPUploader implements Uploader {
     private FileManager _fileManager;
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
+    
+    /** Flag indicating if the connection should be closed after this request*/
+    private boolean _closeConnection = false;
 
 
 	/****************** Constructors ***********************/
@@ -223,11 +226,9 @@ public class HTTPUploader implements Uploader {
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
-		stop();
-		
 	}
 
-	/**
+    /**
 	 * closes the outputstream, inputstream, and socket
 	 * if they are not null.
 	 */
@@ -245,7 +246,7 @@ public class HTTPUploader implements Uploader {
 				_socket.close();
 		} catch (IOException e) {}
 	}
-
+    
 	/**
 	 * This method changes the appropriate state class based on
 	 * the integer representing the state.  I'm not sure if this
@@ -287,6 +288,7 @@ public class HTTPUploader implements Uploader {
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
 	public int getUploadBegin() {return _uploadBegin;}
+    public int getUploadEnd() {return _uploadEnd;}
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
 	public UploadManager getManager() {return _manager;}
@@ -499,6 +501,11 @@ public class HTTPUploader implements Uploader {
 
     public float getMeasuredBandwidth() {
         return bandwidthTracker.getMeasuredBandwidth();
+    }
+    
+    //inherit doc comment
+    public boolean getCloseConnection() {
+        return _state.getCloseConnection();
     }
 }
 

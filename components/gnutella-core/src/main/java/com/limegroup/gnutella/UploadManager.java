@@ -127,33 +127,121 @@ public class UploadManager implements BandwidthTracker {
 	 *
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
-    public synchronized void acceptUpload(Socket socket) {
+    public void acceptUpload(Socket socket) {
 
 		HTTPUploader uploader;
 		GETLine line;
 		try {
-			line = parseGET(socket);
-		} catch (IOException e) {
-			// the GET line was wrong, just exit.
-			return;
-		} 
-
-		// check if it complies with the restrictions.
-		// if no, send an error.  
-		// if yes, constroct the uploader
-		uploader = new HTTPUploader(line._file, socket, line._index, this,
-                                    _fileManager);
-
-		String host = socket.getInetAddress().getHostAddress();
-
-		insertAndTest(uploader, host);
-
-		UploadRunner runner = new UploadRunner(uploader, host, line._index);
-		Thread upThread = new Thread(runner);
-		upThread.setDaemon(true);
-		upThread.start();
+            //increment the download count
+            synchronized(this) { _activeUploads++; }
+            
+            //do uploads
+            while(true) {
+                try {
+                //parse the get line
+                line = parseGET(socket);
+                } catch (IOException e) {
+                    // the GET line was wrong, just exit.
+                    return;
+                }
+                //create an uploader
+                uploader = new HTTPUploader(line._file, socket, line._index, 
+                    this, _fileManager);
+                //do the upload
+                doSingleUpload(uploader, 
+                    socket.getInetAddress().getHostAddress(), line._index);
+                
+                //if not to keep the connection open (either due to protocol
+                //not being HTTP 1.1, or due to error state, then return
+                if (!line.isHTTP11() || uploader.getCloseConnection())
+                    return;
+                
+                //read the first word of the next request
+                //and proceed only if "GET" request
+                try {
+                    int oldTimeout = socket.getSoTimeout();
+                    socket.setSoTimeout(SettingsManager.instance(
+                        ).getPersistentHTTPConnectionTimeout());
+                    //dont read a word of size more than 3 
+                    //as we will handle only the next "GET" request
+                    String word=IOUtils.readWord(socket.getInputStream(), 3);
+                    socket.setSoTimeout(oldTimeout);
+                    if(!word.equalsIgnoreCase("GET"))
+                        return;
+                } catch (IOException ioe) {
+                    return;
+                }
+            }//end of while
+        } finally {
+            //decrement the download count
+            synchronized(this) { _activeUploads--; }
+            //close the socket
+            close(socket);
+        }
 	}
+    
+    private boolean doSingleUpload(Uploader uploader, String host,
+        int index) {
+        long startTime=-1;
+        try {
+            // check if it complies with the restrictions.
+            //and set the uploader state accordingly
+            insertAndTest(uploader, host);
+            // connect is always safe to call.  it should be
+            // if it is a non-push upload, then connect should
+            // just return.  if there is an error, it should
+            // be because the connection failed.
+            uploader.connect();
+            // start doesn't throw an exception.  rather, it
+            // handles it internally.  is this the correct
+            // way to handle it?
+            startTime=System.currentTimeMillis();
+            uploader.start();
+            // check the state of the upload once the
+            // start method has finished.  if it is complete...
+            if (uploader.getState() == Uploader.COMPLETE)
+                // then set a flag in the upload manager...
+                _hadSuccesfulUpload = true;
+        } catch (IOException e) {
+            // if it fails, insert it into the push failed list
+            synchronized(UploadManager.this) { insertFailedPush(host, index); }
+        } finally {			    
+            long finishTime=System.currentTimeMillis();
+            synchronized(UploadManager.this) {
+                //Report how quickly we uploaded the data, regardless of
+                //whether the transfer was interrupted, unless we couldn't
+                //connect.  The client will ignore small amounts of data.
+                if (startTime>0)
+                    reportUploadSpeed(finishTime-startTime,
+                                      uploader.amountUploaded());
+                removeFromMapAndList(uploader, host);
+                removeAttemptedPush(host, index);
+                _callback.removeUpload(uploader);		
+            }
+        }
+        //return failure by default
+        return false;
+    }
 
+    /**
+     * closes the passed socket and its corresponding I/O streams
+     */
+    public void close(Socket socket) {
+        //close the output streams, input streams and the socket
+        try {
+            if (socket != null)
+                socket.getOutputStream().close();
+        } catch (Exception e) {}
+        try {
+            if (socket != null)
+                socket.getInputStream().close();
+        } catch (Exception e) {}
+        try {
+            if (socket != null) 
+                socket.close();
+        } catch (Exception e) {}
+    }
+    
 	/**
 	 * Accepts a new push upload, creating a new <tt>HTTPUploader</tt>.
 	 *
@@ -169,24 +257,25 @@ public class UploadManager implements BandwidthTracker {
 
 		clearFailedPushes();
 
-		Uploader uploader;
-		uploader = new HTTPUploader(file, host, port, index, guid, this,
-                                    _fileManager);
-		// testing if we are either currently attempting a push, 
-		// or we have unsuccessfully attempted a push with this host in the
-		// past.
-		if ( (! testAttemptedPush(host, index) )  ||
-			 (! testFailedPush(host, index) ) )
-			return;
+		Uploader uploader = null;
+        try {
+            uploader = new HTTPUploader(file, host, port, index, guid, this,
+                                        _fileManager);
+            // testing if we are either currently attempting a push, 
+            // or we have unsuccessfully attempted a push with this host in the
+            // past.
+            if ( (! testAttemptedPush(host, index) )  ||
+                 (! testFailedPush(host, index) ) )
+                return;
 
-		insertAndTest(uploader, host);
-		insertAttemptedPush(host, index);
+            insertAndTest(uploader, host);
+            insertAttemptedPush(host, index);
 
-		UploadRunner runner = new UploadRunner(uploader, host, index);
-		Thread upThread = new Thread(runner);
-		upThread.setDaemon(true);
-		upThread.start();
-		
+            doSingleUpload(uploader, host, index);
+        } finally {
+            if(uploader != null)
+                uploader.stop();
+        }
 	}
 
 	/** 
@@ -481,7 +570,7 @@ public class UploadManager implements BandwidthTracker {
 
 	
 
-	private GETLine parseGET(Socket socket) throws IOException {
+	private static GETLine parseGET(Socket socket) throws IOException {
 		try {
 			// Set the timeout so that we don't do block reading.
 			socket.setSoTimeout(SettingsManager.instance().getTimeout());
@@ -506,7 +595,12 @@ public class UploadManager implements BandwidthTracker {
 			// the "/", and before the next " ".
 			int f = str.indexOf( " HTTP/", d );
 			String file = str.substring( (d+1), f);
-			return new GETLine(index, file);
+            //check if the protocol is HTTP1.1. Note that this is not a very 
+            //strict check.
+            boolean http11 = false;
+            if(str.endsWith("1.1"))
+                http11 = true;
+			return new GETLine(index, file, http11);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -515,74 +609,23 @@ public class UploadManager implements BandwidthTracker {
   	}
 
 
-	private class GETLine {
-  		public int _index;
-  		public String _file;
-  		public GETLine(int index, String file) {
+	private static class GETLine {
+  		int _index;
+  		String _file;
+        /** flag indicating if the protocol is HTTP1.1 */
+        boolean _http11;
+        
+  		public GETLine(int index, String file, boolean http11) {
   			_index = index;
   			_file = file;
+            _http11 = http11;
   		}
+        
+        boolean isHTTP11() {
+            return _http11;
+        }
 
   	}
-
-    /*
-     * handles the threading 
-     */
-    private class UploadRunner implements Runnable {
-		private Uploader _up;
-		private String _host;
-        private int _index;
-
-		public UploadRunner(Uploader up, String host, int index) {
-			_up = up;
-			_host = host;
-            _index = index;
-		}
-		public void run() {
-            long startTime=-1;
-			try {
-				// connect is always safe to call.  it should be
-				// if it is a non-push upload, then connect should
-				// just return.  if there is an error, it should
-				// be because the connection failed.
-				_up.connect();
-                try {
-                    synchronized(UploadManager.this) { _activeUploads++; }
-                    // start doesn't throw an exception.  rather, it
-                    // handles it internally.  is this the correct
-                    // way to handle it?
-                    startTime=System.currentTimeMillis();
-                    _up.start();
-					// check the state of the upload once the
-					// start method has finished.  if it is complete...
-					if (_up.getState() == Uploader.COMPLETE)
-						// then set a flag in the upload manager...
-						_hadSuccesfulUpload = true;
-                }  finally {
-                    synchronized(UploadManager.this) { _activeUploads--; }
-                }
-			} catch (IOException e) {
-				// if it fails, insert it into the push failed list
-				synchronized(UploadManager.this) { insertFailedPush(_host, _index); }
-				return;
-			} finally {			    
-                long finishTime=System.currentTimeMillis();
-				synchronized(UploadManager.this) {
-                    //Report how quickly we uploaded the data, regardless of
-                    //whether the transfer was interrupted, unless we couldn't
-                    //connect.  The client will ignore small amounts of data.
-                    if (startTime>0)
-                        reportUploadSpeed(finishTime-startTime,
-                                          _up.amountUploaded());
-					removeFromMapAndList(_up, _host);
-					removeAttemptedPush(_host, _index);
-					_callback.removeUpload(_up);		
-				}
-			}
-			
-		}  // run
-	} // class UploadRunner
-	
 
 	/**
 	 * Keeps track of a push requested file and the host that requested it.

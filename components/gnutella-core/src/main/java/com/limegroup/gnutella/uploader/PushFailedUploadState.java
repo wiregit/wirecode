@@ -21,5 +21,17 @@ public class PushFailedUploadState implements UploadState {
 			throw new IOException();
 		// do nothing
 	}
+    
+    /**
+     * Tells if the upload state doesnt allow the connection to receive
+     * another request on the same connection. This state never allows 
+     * receiving next request.
+     * @return true, if the upload state doesnt allow the connection to receive
+     * another request on the same connection, false otherwise
+     */
+    public boolean getCloseConnection()
+    {
+        return true;
+    }    
 
 }
