@@ -336,7 +336,8 @@ public class LimeXMLReplyCollection{
         boolean wrote2 = false;
         //write out to disk in the regular way
         wrote = toDisk(mp3FileName);//write the flat file stuff
-        wrote2 = this.editor.writeID3DataToDisk(mp3FileName);
+        if (this.editor != null)
+            wrote2 = this.editor.writeID3DataToDisk(mp3FileName);
         this.editor= null; //reset the value
         return (wrote && wrote2);
     }    
