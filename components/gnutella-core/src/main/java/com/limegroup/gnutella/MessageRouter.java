@@ -482,7 +482,7 @@ public abstract class MessageRouter {
     public void broadcastQueryRequest(QueryRequest request) {
         _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         //if (RouterService.isGUESSCapable()) {
-		//  unicastQueryRequest(request, null);
+		//unicastQueryRequest(request, null);
 		//} else {
 		broadcastQueryRequest(request, null);
 		//}
@@ -557,7 +557,6 @@ public abstract class MessageRouter {
      * Adds the QueryRequest to the unicaster module.  Not much work done here,
      * see QueryUnicaster for more details.
      */
-	/*
     protected synchronized void unicastQueryRequest(QueryRequest query,
                                                     ReplyHandler conn) {
 		// set the TTL on outgoing udp queries to 1
@@ -565,7 +564,6 @@ public abstract class MessageRouter {
 				
 		UNICASTER.addQuery(query, conn);
 	}
-	*/
 
 
     /**
@@ -898,11 +896,6 @@ public abstract class MessageRouter {
         else
             throw new IOException();
     }
-
-    /**
-     * Allow the controlled creation of a GroupPingRequest
-     */
-     public abstract GroupPingRequest createGroupPingRequest(String group);
      
     /**
      * Handles a query route table update message that originated from
@@ -1001,6 +994,7 @@ public abstract class MessageRouter {
         addQueryRoutingEntries(ret);
         return ret;
     }
+
 
     /**
      * Converts the passed responses to QueryReplies. Each QueryReply can
