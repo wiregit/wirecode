@@ -617,9 +617,11 @@ public class HTTPUploader implements Uploader {
 	 * for a single file.
 	 *
 	 * @param altHeader the full alternate locations header
+	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
+	 *  locations should be added to
 	 */
 	private static void readAlternateLocations(final String altHeader,
-											   final AlternateLocationCollection alc) {
+											   final AlternateLocationCollector alc) {
 		int colonIndex = altHeader.indexOf(":");
 		if(colonIndex == -1) {
 			return;
@@ -635,7 +637,7 @@ public class HTTPUploader implements Uploader {
 			} catch(IOException e) {
 				e.printStackTrace();
 				// just return without adding it.
-				return;
+				continue;
 			}
 		}
 	}
@@ -709,6 +711,17 @@ public class HTTPUploader implements Uploader {
         if (debugOn)
             System.out.println(out);
     }
+
+	// overrides Object.toString
+	public String toString() {
+		return "HTTPUploader:\r\n"+
+		       "File Name: "+_fileName+"\r\n"+
+		       "Host Name: "+_hostName+"\r\n"+
+		       "Port:      "+_port+"\r\n"+
+		       "File Size: "+_fileSize+"\r\n"+
+		       "State:     "+_state;
+		
+	}
 }
 
 
