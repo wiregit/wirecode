@@ -41,7 +41,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         	    
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
-	    PrivilegedAccessor.setValue(fman, "_callback", new FManCallback());
+	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	    
 	}
 	
