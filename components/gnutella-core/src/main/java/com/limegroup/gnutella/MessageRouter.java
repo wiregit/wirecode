@@ -904,7 +904,7 @@ public abstract class MessageRouter {
         //send queries only to the clients from whom query routing 
         //table has been received
         List list = _manager.getInitializedClientConnections2();
-        List hitConnections = new LinkedList();
+        List hitConnections = new ArrayList();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc == handler) continue;
