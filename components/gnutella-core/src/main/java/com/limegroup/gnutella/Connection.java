@@ -235,7 +235,6 @@ public class Connection {
      *  establishing the connection
      */
     private void initializeWithoutRetry(int timeout) throws IOException {
-        SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
  
         if(isOutgoing())
@@ -244,7 +243,7 @@ public class Connection {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
-            throw new IOException();
+            throw new IOException("socket closed");
         }
 
         
@@ -262,7 +261,8 @@ public class Connection {
             
             _in = getInputStream(_socket);
             _out = getOutputStream(_socket);
-            if (_in==null || _out==null) throw new IOException();
+            if (_in == null) throw new IOException("null input stream");
+			else if(_out == null) throw new IOException("null output stream");
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
             //NullPointerException if the socket is closed.  (See Sun bug
@@ -274,7 +274,7 @@ public class Connection {
             //blocking operation.  Just to be safe, we also check that in/out
             //are not null.
             close();
-            throw new IOException();
+            throw new IOException("could not establish connection");
         }
 
         try {
@@ -306,6 +306,9 @@ public class Connection {
         //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
         //user.  If the other end doesn't understand it--too bad!  There is an
         //option at higher levels to retry.
+
+		// TODO: I don't think we ultimately accept this 0.4 connection
+		// anyway -- throw an exception if the properties are null??
         if (_propertiesWrittenP==null || _propertiesWrittenR==null) {
             sendString(GNUTELLA_CONNECT_04+LF+LF);
             if (! readLine().equals(GNUTELLA_OK_04))
@@ -314,7 +317,7 @@ public class Connection {
                 throw new IOException("Bad connect string"); 
         }
         else {
-            //1. Send "GNUTELLA CONNECT" and headers
+            //1. Send "GNUTELLA CONNECT/0.6" and headers
             sendString(GNUTELLA_CONNECT_06+CRLF);
             sendHeaders(_propertiesWrittenP);   
             
