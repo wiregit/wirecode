@@ -65,8 +65,10 @@ public class StandardMessageRouter extends MessageRouter {
 
         // send our own pong if we have free slots or if our average
         // daily uptime is more than 1/2 hour
-        if(RouterService.getConnectionManager().hasFreeSlots() ||
-           Statistics.instance().calculateDailyUptime() > 60*30) {
+        if(RouterService.getConnectionManager().hasFreeSlots()  ||
+           Statistics.instance().calculateDailyUptime() > 60*30 ||
+           (hops == 1 && ttl == 0)  // Answer heartbeat ping
+        ) {
 
             PingReply pr = 
                 PingReply.create(pingRequest.getGUID(), (byte)newTTL);
@@ -90,6 +92,7 @@ public class StandardMessageRouter extends MessageRouter {
             // this indicates that the reply route has been broken,
             // so we stop trying to send more pongs
         }
+
     }
 
 	/**
