@@ -131,10 +131,6 @@ public class ConnectionManager {
      */
     public static final int RESERVED_NON_LIMEWIRE_PEERS = 3;
 
-    /** The maximum number of ultrapeer endpoints to give out from the host
-     *  catcher in X_TRY_ULTRAPEER headers. */
-    private static final int MAX_ULTRAPEER_ENDPOINTS=10;
-
     /**
      * Reference to the <tt>HostCatcher</tt> for retrieving host data as well 
      * as adding host data.
@@ -939,34 +935,6 @@ public class ConnectionManager {
                     currMC.send(stat);
             }
         } 
-    }
-
-    /**
-     * Returns the endpoints of the best known ultrapeers.  This include
-     * both ultrapeers we are connected to and marked ultrapeer pongs.
-     * @return Returns the endpoints it is connected to. 
-     */ 
-    public Set getSupernodeEndpoints(){
-        Set retSet = new HashSet();
-        //get an iterator over _initialized connections, and iterate to
-        //fill the retSet with ultrapeer endpoints
-        for(Iterator iterator = _initializedConnections.iterator();
-            iterator.hasNext();)
-        {
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            if(connection.isSupernodeConnection())
-                retSet.add(new Endpoint(
-                    connection.getInetAddress().getAddress(),
-                    connection.getPort()));
-        }
-        //add the best few endpoints from the hostcatcher.
-        Iterator iterator =
-			RouterService.getHostCatcher().getUltrapeerHosts(MAX_ULTRAPEER_ENDPOINTS);
-        while (iterator.hasNext()) {
-            Endpoint e=(Endpoint)iterator.next();
-            retSet.add(e);
-        }
-        return retSet;
     }
 
 	/**
