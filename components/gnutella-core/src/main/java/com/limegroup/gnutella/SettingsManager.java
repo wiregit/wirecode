@@ -146,6 +146,18 @@ public class SettingsManager {
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
 
+	/**
+	 * The default minimum number of stars for search results, on a scale
+	 * of 0 to 3 inclusive.
+	 */
+	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 2;
+
+	/**
+	 * Value for the default minimum speed to allow in search results.
+	 */
+	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
+		SpeedConstants.MODEM_SPEED_INT;
+
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
     private final String TTL                   = "TTL";
@@ -220,6 +232,18 @@ public class SettingsManager {
 
 	private final String LANGUAGE              = "LANGUAGE";
 	private final String COUNTRY               = "COUNTRY";
+
+	/**
+	 * Key for the minimum quality to allow in search results.
+	 */
+	private final String MINIMUM_SEARCH_QUALITY =
+		"MINIMUM_SEARCH_QAULITY";
+
+	/**
+	 * Key for the minimum speed to allow in search results.
+	 */
+	private final String MINIMUM_SEARCH_SPEED =
+		"MINIMUM_SEARCH_SPEED";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -684,6 +708,12 @@ public class SettingsManager {
 				else if(key.equals(COUNTRY)) {
 					setCountry(p);
 				}
+				else if(key.equals(MINIMUM_SEARCH_QUALITY)) {
+					setMinimumSearchQuality(Integer.parseInt(p));
+				}
+				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
+					setMinimumSearchSpeed(Integer.parseInt(p));
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -774,6 +804,8 @@ public class SettingsManager {
 
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
+		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
+		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
     }
 
 
@@ -783,51 +815,51 @@ public class SettingsManager {
 
 	public boolean getAllowBrowser() {return _allowBroswer;}
 
-    /** returns the time to live */
+    /** Returns the time to live */
     public byte getTTL(){return _ttl;}
 
     /** return the soft maximum time to live */
     public byte getSoftMaxTTL(){return _softmaxttl;}
 
-    /** returns the maximum time to live*/
+    /** Returns the maximum time to live*/
     public byte getMaxTTL(){return _maxttl;}
 
-    /** returns the maximum allowable length of packets*/
+    /** Returns the maximum allowable length of packets*/
     public int getMaxLength(){return _maxLength;}
 
-    /** returns the timeout value*/
+    /** Returns the timeout value*/
     public int getTimeout(){return _timeout;}
 
     /** 
-	 * returns a string specifying the full
+	 * Returns a string specifying the full
      * pathname of the file listing the hosts 
 	 */
     public String getHostList() {
 		return new File(HOST_LIST_NAME).getAbsolutePath();		
 	}
 
-    /** returns the keep alive value */
+    /** Returns the keep alive value */
     public int getKeepAlive(){return _keepAlive;}
 
-    /** returns the client's port number */
+    /** Returns the client's port number */
     public int getPort(){return _port;}
 
-    /** returns the client's connection speed in kilobits/sec
+    /** Returns the client's connection speed in kilobits/sec
      *  (not kilobytes/sec) */
     public int getConnectionSpeed(){return _connectionSpeed;}
 
     public int getUploadSpeed() { return _uploadSpeed; }
 
-    /** returns the client's search speed */
+    /** Returns the client's search speed */
     public byte getSearchLimit(){return _searchLimit;}
 
-    /** returns the client id number */
+    /** Returns the client id number */
     public String getClientID(){return _clientID;}
 
-    /** returns the maximum number of connections to hold */
+    /** Returns the maximum number of connections to hold */
     public int getMaxIncomingConnections(){return _maxIncomingConn;}
 
-	/** returns the maximum number of uploads per person */
+	/** Returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
     /** 
@@ -845,7 +877,7 @@ public class SettingsManager {
 		return _saveDirectory;
 	}
 
-	/** returns true if the chat is enabled */
+	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
 
     /** 
@@ -875,7 +907,7 @@ public class SettingsManager {
 		return new File(SAVE_DIRECTORY_NAME);
     }
 
-    /** returns the directories to search */
+    /** Returns the directories to search */
     public String getDirectories(){return _directories;}
 
 	/** returns the shared directories as an array of pathname strings. */
@@ -886,7 +918,7 @@ public class SettingsManager {
     }
 
 	/**
-	 * returns an array of Strings of directory path names.  these are the
+	 * Returns an array of Strings of directory path names.  these are the
 	 * pathnames of the shared directories as well as the pathname of 
 	 * the Incomplete directory.
 	 */
@@ -927,10 +959,10 @@ public class SettingsManager {
     }
 
 
-    /** returns the string of file extensions*/
+    /** Returns the string of file extensions*/
     public String getExtensions(){return _extensions;}
 
-    /** returns the string of default file extensions to share.*/
+    /** Returns the string of default file extensions to share.*/
     public String getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
@@ -965,10 +997,10 @@ public class SettingsManager {
 
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
-    /** returns the Network Discovery specialized properties file */
+    /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return _ndProps;}
 
-    /** returns the path of the properties and host list files */
+    /** Returns the path of the properties and host list files */
     public String getPath() {return CURRENT_DIRECTORY + File.separator;}
 
     public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
@@ -992,8 +1024,11 @@ public class SettingsManager {
     }
 
 	/**
-	 * returns a boolean indicating whether or not to check again
-	 * for LimeWire updates.
+	 * Returns a boolean indicating whether or not to check again
+	 * for application updates.
+	 *
+	 * @return <tt>true</tt> if we should check again for updates,
+	 *         <tt>false</tt> otherwise
 	 */
     public boolean getCheckAgain() {
 		Boolean b = new Boolean(_props.getProperty(CHECK_AGAIN));
@@ -1008,52 +1043,71 @@ public class SettingsManager {
     }
 
 	/**
-	 * returns the average time that the user runs LimeWire.
+	 * Returns the average time that the user runs the application.
+	 *
+	 * @return the average time the user runs the application in one
+	 *         session
 	 */
 	public long getAverageUptime() {
 		return _averageUptime;
 	}
 
 	/**
-	 * returns the total amount of time that this user has run 
-	 * LimeWire.
+	 * Returns the total amount of time that this user has run 
+	 * the application.
+	 *
+	 * @return the total amount of time that the user has run the 
+	 *         the application over all sessions
 	 */
 	public long getTotalUptime() {
 		return _totalUptime;
 	}
 
 	/**
-	 * returns the number of times LimeWire has been run.
+	 * Returns the number of times the application has been run.
+	 *
+	 * @return the total number of times the application has been run
 	 */
 	public int getSessions() {
 		return _sessions;
 	}
 
 	/** 
-	 * returns a boolean indicating whether or not the program 
+	 * Returns a boolean indicating whether or not the program 
 	 * has been "installed," with the properties set correctly. 
+	 *
+	 * @return <tt>true</tt> if the application has been installed in some
+	 *         manner, either throw an installer or through our own
+	 *         installer, <tt>false</tt> otherwise
 	 */
 	public boolean getInstalled() {
 		return _installed;
 	}
 
 	/**
-	 * returns the width that the application should be sized to.
+	 * Returns the width that the application should be sized to.
+	 *
+	 * @return the width of the application main window in pixels
 	 */
 	public int getAppWidth() {
 		return Integer.parseInt(_props.getProperty(APP_WIDTH));
 	}
 
 	/**
-	 * returns the height that the application should be sized to.
+	 * Returns the height that the application should be sized to.
+	 *
+	 * @return the height of the application main window in pixels
 	 */
 	public int getAppHeight() {
 		return Integer.parseInt(_props.getProperty(APP_HEIGHT));
 	}
 
 	/**
-	 * returns a boolean specifying whether or not the 
+	 * Returns a <tt>boolean</tt> specifying whether or not the 
 	 * application has been run one time or not.
+	 *
+	 * @return <tt>true</tt> if the application has been run once before
+	 *         this session, <tt>false</tt> otherwise
 	 */
 	public boolean getRunOnce() {
 		Boolean b = Boolean.valueOf(_props.getProperty(RUN_ONCE));
@@ -1061,24 +1115,35 @@ public class SettingsManager {
 	}
 
 	/**
-	 * returns an integer value for the x position of the window
+	 * Returns an integer value for the x position of the window
 	 * set by the user in a previous session.
+	 *
+	 * @return the final x position of the main application window
+	 *         in the previous session
 	 */
 	public int getWindowX() {
 		return Integer.parseInt(_props.getProperty(WINDOW_X));
 	}
 
 	/**
-	 * returns an integer value for the y position of the window
+	 * Returns an integer value for the y position of the window
 	 * set by the user in a previous session.
+	 *
+	 * @return the final y position of the main application window
+	 *         in the previous session
 	 */
 	public int getWindowY() {
 		return Integer.parseInt(_props.getProperty(WINDOW_Y));
 	}
 
 	/**
-	 * returns a boolean specifying whether or not the tray
+	 * Returns a boolean specifying whether or not the tray
 	 * dialog window should be shown.
+	 *
+	 * @return <tt>true</tt> if the dialog box prompting the user for
+	 *         whether or not they would like to reduce the application
+	 *         to the system tray should be shown, <tt>false</tt>
+	 *         otherwise
 	 */
 	public boolean getShowTrayDialog() {
 		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_TRAY_DIALOG));
@@ -1086,7 +1151,7 @@ public class SettingsManager {
 	}
 
 	/**
-	 * returns a boolean specifying whether or not to minimize 
+	 * Returns a boolean specifying whether or not to minimize 
 	 * the application to the system tray.
 	 */
 	public boolean getMinimizeToTray() {
@@ -1095,14 +1160,18 @@ public class SettingsManager {
 	}
 
 	/**
-	 * returns true is an incoming connection has ever been established
+	 * Returns true is an incoming connection has ever been established
 	 * during a single session
 	 */
 	public boolean getAcceptedIncoming() {return _acceptedIncoming;}
 
 	/**
-	 * returns a boolean specifying whether or not the close
+	 * Returns a boolean specifying whether or not the close
 	 * dialog window should be shown.
+	 *
+	 * @return <tt>true</tt> if the dialog box prompting the user for
+	 *         whether or not they are sure they want to close the
+	 *         application should be shown, <tt>false</tt> otherwise
 	 */
 	public boolean getShowCloseDialog() {
 		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_CLOSE_DIALOG));
@@ -1151,6 +1220,28 @@ public class SettingsManager {
 		return _props.getProperty(COUNTRY);
 	}
 
+	/**
+	 * Returns the minimum search quality (number of stars) to show in the
+	 * search window.
+	 *
+	 * @return the minimum search quality, on a scale of 0 to 3 inclusive
+	 */
+	public int getMinimumSearchQuality() {
+		String str = _props.getProperty(MINIMUM_SEARCH_QUALITY);
+		return Integer.parseInt(str);
+	}
+
+	/**
+	 * Returns the minimum speed for search results to display in the
+	 * search window.
+	 *
+	 * @return the minimum search speed to display
+	 */
+	public int getMinimumSearchSpeed() {
+		String str = _props.getProperty(MINIMUM_SEARCH_SPEED);
+		return Integer.parseInt(str);
+	}
+
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -1161,8 +1252,11 @@ public class SettingsManager {
      ******************************************************/
 
 	/** 
-	 * updates all of the uptime settings based on the
+	 * Updates all of the uptime settings based on the
 	 * passed in time value for the most recent session. 
+	 *
+	 * @param currentTime the time the applicaiton has been run in
+	 *                    the current session
 	 */
 	public void updateUptime(int currentTime) {
 		_totalUptime += currentTime;
@@ -1172,9 +1266,12 @@ public class SettingsManager {
 	}
 
 	/**  
-	 * sets the total number of times limewire has been run -- 
+	 * Sets the total number of times the application  has been run -- 
 	 * used in calculating the average amount of time this user 
-	 * leaves limewire on.
+	 * leaves the application on.
+	 *
+	 * @param sessions the total number of sessions that the application
+	 *                 has been run
 	 */
 	private void setSessions(int sessions) {
 		if(_sessions < 1)
@@ -1185,7 +1282,10 @@ public class SettingsManager {
 	}
 
 	/** 
-	 * sets the average time this user leaves LimeWire running.
+	 * Sets the average time this user leaves the application running.
+	 *
+	 * @param averageUptime the average time this user leaves the 
+	 *                      application running
 	 */
 	private void setAverageUptime(long averageUptime) {
 		_averageUptime = averageUptime;
@@ -1194,7 +1294,9 @@ public class SettingsManager {
 	}
 
 	/** 
-	 * sets the total time this user has used LimeWire
+	 * Sets the total time this user has used the application
+	 *
+	 * @param totalUptime the total time the application has been run
 	 */
 	private void setTotalUptime(long totalUptime) {
 		_totalUptime = totalUptime;
@@ -1203,7 +1305,7 @@ public class SettingsManager {
 	}
 
     /** 
-	 * sets the maximum length of packets (spam protection)
+	 * Sets the maximum length of packets (spam protection)
 	 */
     public void setMaxLength(int maxLength) {
 		_maxLength = maxLength;
@@ -1212,7 +1314,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the timeout 
+	 * Sets the timeout 
 	 */
     public void setTimeout(int timeout) {
 		_timeout = timeout;
@@ -1285,7 +1387,7 @@ public class SettingsManager {
 
 
     /** 
-	 * sets the limit for the number of searches
+	 * Sets the limit for the number of searches
      * throws an exception on negative limits
      * and limits of 10,000 or more 
 	 */
@@ -1299,7 +1401,7 @@ public class SettingsManager {
         }
     }
 
-    /** sets the client (gu) ID number */
+    /** Sets the client (gu) ID number */
     public void setClientID(String clientID) {
 		_clientID = clientID;
 		_props.put(CLIENT_ID, _clientID);
@@ -1355,7 +1457,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the hard maximum time to live 
+	 * Sets the hard maximum time to live 
 	 */
     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -1538,7 +1640,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the time to live 
+	 * Sets the time to live 
 	 */
     public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
@@ -1551,7 +1653,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the soft maximum time to live 
+	 * Sets the soft maximum time to live 
 	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
@@ -1564,7 +1666,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the port to connect on 
+	 * Sets the port to connect on 
 	 */
     public void setPort(int port) {
         // if the entered port is outside accepted
@@ -1579,7 +1681,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * sets the connection speed.  throws an
+	 * Sets the connection speed.  throws an
      * exception if you try to set the speed
      * far faster than a T3 line or less than
      * 0.
@@ -1748,7 +1850,13 @@ public class SettingsManager {
         }
     }
 	
-	/** set whether or not the program has been installed */
+	/** 
+	 * Sets whether or not the program has been installed, either by
+	 * a third-party installer, or by our own.
+	 *
+	 * @param installed specifies whether or not the application has
+	 *                  been installed
+	 */
 	public void setInstalled(boolean installed) {        
         _installed = installed;
         String s = String.valueOf(installed);
@@ -1872,7 +1980,7 @@ public class SettingsManager {
      * freeloader.  For example, if files==0, no host is considered a
      * freeloader.  Throws IllegalArgumentException if files<0.
      */
-    public void setFreeloaderFiles(int files) 
+    public void setFreeloaderFiles(final int files) 
 		throws IllegalArgumentException {
         if (files<0)
             throw new IllegalArgumentException();
@@ -1883,101 +1991,128 @@ public class SettingsManager {
 
 	
 	/**
-	 * sets the boolean for whether or not we should check again for an update.
+	 * Sets the boolean for whether or not we should check again for an update.
+	 * 
+	 * @param check <tt>boolean</tt> value specifying whether or not to check
+	 *              again for updates
 	 */
-    public void setCheckAgain(boolean check) {
+    public void setCheckAgain(final boolean check) {
 		Boolean b = new Boolean(check);
         _props.put(CHECK_AGAIN, b.toString());
     }
 
 	/**
-	 * sets the width that the application should be.
+	 * Sets the width that the application should be.
+	 *
+	 * @param width the width in pixels of the main application window
 	 */
-	public void setAppWidth(int width) {
+	public void setAppWidth(final int width) {
         String s = Integer.toString(width);
 		_props.put(APP_WIDTH, s);
 	}
 
 	/**
-	 * sets the height that the application should be.
-	 * @requires the height must be greater than zero.
+	 * Sets the height that the application should be.
+	 *
+	 * @param height the height in pixels of the main application window
 	 */
-	public void setAppHeight(int height) {
-        String s = Integer.toString(height);
-		_props.put(APP_HEIGHT, s);
+	public void setAppHeight(final int height) {
+		_props.put(APP_HEIGHT, Integer.toString(height));
 	}
 
 	/**
-	 * sets the flag for whether or not the application
-	 * has been run one time before this.
+	 * Sets the flag for whether or not the application has been run one 
+	 * time before this.
+	 *
+	 * @param runOnce <tt>boolean</tt> for whether or not the application has
+	 *                been run once
 	 */
-	public void setRunOnce(boolean runOnce) {
+	public void setRunOnce(final boolean runOnce) {
 		Boolean b = new Boolean(runOnce);
 		_props.put(RUN_ONCE, b.toString());
 	}
 
 	/**
-	 * set the x position of the window for the next
-	 * time the application is started.
+	 * Set the x position of the window for the next time the application 
+	 * is started.
+	 *
+	 * @param x the x position of the main application window
 	 */
-	public void setWindowX(int x) {
+	public void setWindowX(final int x) {
 		_props.put(WINDOW_X, Integer.toString(x));
 	}
 
 	/**
-	 * set the y position of the window for the next
-	 * time the application is started.
+	 * Set the y position of the window for the next time the application 
+	 * is started.
+	 *
+	 * @param y the y position of the main application window
 	 */
-	public void setWindowY(int y) {
+	public void setWindowY(final int y) {
 		_props.put(WINDOW_Y, Integer.toString(y));
 	}
 
 	/**
-	 * sets the flag for whether or not the tray dialog
-	 * window should be shown.
+	 * Sets the flag for whether or not the tray dialog window should be shown.
+	 *
+	 * @param showDialog <tt>boolean</tt> for whether or not the tray dialog
+	 *                   should be shown in the future
 	 */
-	public void setShowTrayDialog(boolean showDialog) {
+	public void setShowTrayDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
 		_props.put(SHOW_TRAY_DIALOG, b.toString());
 	}
 
 	/**
-	 * sets the flag for whether or not the application
-	 * should be minimized to the system tray on windows
+	 * Sets the flag for whether or not the application should be minimized 
+	 * to the system tray on windows.
+	 *
+	 * @param minimize <tt>boolean</tt> for whether or not the application
+	 *                 should be minimized to the tray 
 	 */
-	public void setMinimizeToTray(boolean minimize) {
+	public void setMinimizeToTray(final boolean minimize) {
 		Boolean b = new Boolean(minimize);
 		_props.put(MINIMIZE_TO_TRAY, b.toString());
 	}	
 
 	/**
-	 * sets whether or not the application has accepted an incoming
+	 * Sets whether or not the application has accepted an incoming
 	 * connection during this session.
+	 *
+	 * @param incoming <tt>boolean</tt> for whether or not an incoming
+	 *                 connection has been accepted within this session
 	 */
-	public void setAcceptedIncoming(boolean incoming) {
+	public void setAcceptedIncoming(final boolean incoming) {
 		_acceptedIncoming = incoming;
     }
 
 	/**
-	 * sets the flag for whether or not the close dialog
-	 * window should be shown.
+	 * Sets the flag for whether or not the close dialog window should be 
+	 * shown again.
+	 *
+	 * @param showDialog <tt>boolean</tt> for whether or not the dialog
+	 *                   window should be shown again
 	 */
-	public void setShowCloseDialog(boolean showDialog) {
+	public void setShowCloseDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
 		_props.put(SHOW_CLOSE_DIALOG, b.toString());
 	}
     
     /**
-     * sets the classpath for loading files at startup.
+     * Sets the classpath for loading files at startup.
+	 *
+	 * @param classpath the classpath to use at startup
      */
-    public void setClassPath(String classpath) {
+    public void setClassPath(final String classpath) {
         _props.put(CLASSPATH, classpath);
     }
 
     /**
-     * sets the main class to use at startup.
+     * Sets the main class to use at startup.
+	 *
+	 * @param mainClass the main class to load at startup
      */
-    public void setMainClass(String mainClass) {
+    public void setMainClass(final String mainClass) {
         _props.put(MAIN_CLASS, mainClass);
     }
 
@@ -1986,7 +2121,7 @@ public class SettingsManager {
 	 *
 	 * @param language the language to use
 	 */
-	public void setLanguage(String language) {
+	public void setLanguage(final String language) {
 		_props.put(LANGUAGE, language);
 	}
 
@@ -1995,8 +2130,28 @@ public class SettingsManager {
 	 *
 	 * @param country the country to use
 	 */
-	public void setCountry(String country) {
+	public void setCountry(final String country) {
 		_props.put(COUNTRY, country);
+	}
+
+	/**
+	 * Sets the minimum quality (number of stars) for search results to
+	 * display.
+	 *
+	 * @param quality the minimum quality for search results, from 0 to 3,
+	 *                inclusive
+	 */
+	public void setMinimumSearchQuality(int quality) {
+		_props.put(MINIMUM_SEARCH_QUALITY, Integer.toString(quality));
+	}
+
+	/**
+	 * Sets the minimum speed for search results to display.
+	 *
+	 * @param speed the minimum speed to display
+	 */
+	public void setMinimumSearchSpeed(int speed) {
+		_props.put(MINIMUM_SEARCH_SPEED, Integer.toString(speed));
 	}
 	
     /******************************************************
@@ -2005,7 +2160,7 @@ public class SettingsManager {
 
 
     /** 
-	 * writes out the properties file to with the specified
+	 * Writes out the properties file to with the specified
      * name in the user's install directory.  This should only
 	 * get called once when the program shuts down.
      */
