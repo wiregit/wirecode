@@ -35,7 +35,7 @@ public class LimeXMLDocument{
     protected Map fieldToValue;
     protected String schemaUri;
     
-    //constructor
+    //constructors
     public LimeXMLDocument(String XMLString)
         throws SAXException, IOException{
         DOMParser parser = new DOMParser();
@@ -49,32 +49,6 @@ public class LimeXMLDocument{
         makeSchemaURI(document);
         createMap(document);
     }
-    
-    private void makeSchemaURI(Document doc){
-        Element docElement = doc.getDocumentElement();
-        List attributes = LimeXMLUtils.getAttributes(docElement.getAttributes());
-        int size = attributes.size();
-        for(int i=0; i< size; i++){
-            Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName();
-            String lowerAttName = attName.toLowerCase();
-            if (lowerAttName.indexOf("schemalocation") >= 0){
-                schemaUri = att.getNodeValue();
-                break;
-            }
-        }
-    }
-
-    /**
-     * Returns the unique identifier which identifies the schema this XML
-     * document conforms to
-     * @return the unique identifier which identifies the schema this XML
-     * document conforms to
-     */
-    public String getSchemaURI(){
-        return schemaUri;
-    }
-    
     
     public LimeXMLDocument(File f)
         throws FileNotFoundException, SAXException, IOException{
@@ -90,6 +64,22 @@ public class LimeXMLDocument{
         createMap(document);
     }
     
+
+    private void makeSchemaURI(Document doc){
+        Element docElement = doc.getDocumentElement();
+        List attributes = LimeXMLUtils.getAttributes(docElement.getAttributes());
+        int size = attributes.size();
+        for(int i=0; i< size; i++){
+            Node att = (Node)attributes.get(i);
+            String attName = att.getNodeName();
+            String lowerAttName = attName.toLowerCase();
+            if (lowerAttName.indexOf("schemalocation") >= 0){
+                schemaUri = att.getNodeValue();
+                break;
+            }
+        }
+    }
+
     private void createMap(Document doc) {
         fieldToValue = new HashMap();
         Element docElement = doc.getDocumentElement();
@@ -139,6 +129,18 @@ public class LimeXMLDocument{
         }
         return currTag;
     }
+
+    /**
+     * Returns the unique identifier which identifies the schema this XML
+     * document conforms to
+     * @return the unique identifier which identifies the schema this XML
+     * document conforms to
+     */
+    public String getSchemaURI(){
+        return schemaUri;
+    }
+    
+
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
      * Canonicalized field name (placeholder), and its corresponding value in
@@ -175,6 +177,11 @@ public class LimeXMLDocument{
             retList.add(namVal);
         }
         return retList;
+    }
+
+    public String getValue(String fieldName){
+        String value = (String)fieldToValue.get(fieldName);
+        return value;
     }
 
     //Unit Tester
