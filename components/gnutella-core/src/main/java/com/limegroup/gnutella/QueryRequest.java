@@ -164,25 +164,30 @@ public class QueryRequest extends Message implements Serializable{
         }
     }
     
-    protected void handleGemExtensionString(String s) {
-        if (s.startsWith("urn")||s.startsWith("URN")) {
-            // HUGE v0.93
-            StringTokenizer stok = new StringTokenizer(s,":");
-            if (stok.countTokens()>2) {
-                // it's an URN to match, of form "urn:namespace:etc"
-                if(queryUrns == null) queryUrns = new HashSet();
-                queryUrns.add(s);
-                // but also, it's an implicit request for similar
-                // URNs on responses, so add the URN prefix there, too
-                requestedUrnTypes.add(s.substring(0,s.indexOf(':',4)+1));
-            } else { 
-                // it's an URN type to return, of form "urn" or "urn:namespace"
-                if(requestedUrnTypes == null) requestedUrnTypes = new HashSet();
-                requestedUrnTypes.add(s);
-            }
-        } else if (s.startsWith("<?xml")) {
+    protected void handleGemExtensionString(String urnString) {
+		if(URN.isURN(urnString)) {
+			// it's an URN to match, of form "urn:namespace:etc"
+			URN urn = null;
+			try {
+				urn = new URN(urnString);
+			} catch(IOException e) {
+				// the urn string is invalid -- just return
+				return;
+			}
+			if(queryUrns == null) {
+				queryUrns = new HashSet();
+			}
+			queryUrns.add(urn);
+			// but also, it's an implicit request for similar
+			// URNs on responses, so add the URN prefix there, too
+			requestedUrnTypes.add(urn.getTypeString());
+		} else if(URN.isURNType(urnString)) {
+			// it's an URN type to return, of form "urn" or "urn:namespace"
+			if(requestedUrnTypes == null) requestedUrnTypes = new HashSet();
+			requestedUrnTypes.add(urnString);
+		} else if (urnString.startsWith("<?xml")) {
             // rich query
-            richQuery = s;
+            richQuery = urnString;
         }
     }
 
