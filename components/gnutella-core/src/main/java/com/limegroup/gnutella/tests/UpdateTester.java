@@ -25,7 +25,7 @@ public class UpdateTester extends JFrame {
 	public UpdateTester() {
 		super("Update Tester");
 		_manager = UpdateManager.instance();
-		Dimension dim = new Dimension(400, 400);
+		Dimension dim = new Dimension(400, 200);
 		setSize(dim);
 		JPanel mainPanel = new JPanel();
 		JPanel boxPanel = new JPanel();
@@ -50,9 +50,11 @@ public class UpdateTester extends JFrame {
 
 		buttonPanel.add(startTestButton);
 		boxPanel.add(_versionBox);
+		boxPanel.add(Box.createHorizontalStrut(6));
 		boxPanel.add(_osBox);
 		
 		mainPanel.add(boxPanel);
+		mainPanel.add(Box.createVerticalStrut(6));
 		mainPanel.add(buttonPanel);
 		getContentPane().add(mainPanel);
 	}
