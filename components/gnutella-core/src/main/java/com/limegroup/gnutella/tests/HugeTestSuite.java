@@ -8,6 +8,9 @@ import junit.framework.*;
  */
 public final class HugeTestSuite {
 	
+	/**
+	 * Runs the suite of HUGE v0.94 tests.
+	 */
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
@@ -28,6 +31,7 @@ public final class HugeTestSuite {
 		suite.addTest(ResponseTest.suite());
 		suite.addTest(UrnHttpRequestTest.suite());
 		suite.addTest(UrnRequestTest.suite());
+		suite.addTest(HttpUtilsTest.suite());
 		return suite;
 	}
 }
