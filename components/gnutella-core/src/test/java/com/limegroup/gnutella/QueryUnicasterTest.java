@@ -70,7 +70,9 @@ public class QueryUnicasterTest extends TestCase {
 
         // add a Query
         QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel");
+        assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
         QueryUnicaster.instance().addQuery(qr);
+        assertTrue(QueryUnicaster.instance().getQueryNumber() == 1);
 
         // give udpLoopers time to execute
         // get messages from vector, should be a message or a ping
@@ -171,6 +173,7 @@ public class QueryUnicasterTest extends TestCase {
         // but should do the job...
         try {
             Thread.sleep(3 * 1000);
+            assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
         }
         catch (InterruptedException ignored) {}
         int numMessages = 0, numQRs = 0, numPings = 0;
@@ -192,6 +195,8 @@ public class QueryUnicasterTest extends TestCase {
         }
         assertTrue(numMessages == (numPings + numQRs));
         assertTrue("numQRs = " + numQRs, numQRs < 11); // 15 * 25 >> 250
+        assertTrue(QueryUnicaster.instance().getUnicastEndpoints().size() >
+                   0);
         debug("QueryUnicasterTest.testQueries(): numMessages = " +
               numMessages);
         debug("QueryUnicasterTest.testQueries(): numQRs = " +
