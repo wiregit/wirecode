@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
 import java.util.*;
 import java.net.*;
 
