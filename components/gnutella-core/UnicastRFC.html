@@ -1,7 +1,7 @@
 Content-Type: text/html
 
-<html><head><title>Gnutella Developer Forum: Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.02</title>
-<meta http-equiv="Expires" content="Sat, 07 Sep 2002 15:26:29 +0000">
+<html><head><title>Gnutella Developer Forum: Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2</title>
+<meta http-equiv="Expires" content="Tue, 10 Sep 2002 15:02:12 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -47,7 +47,7 @@ Content-Type: text/html
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">LimeWire LLC</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 2002</td></tr>
 </table></td></tr></table>
-<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.02</span></b></font></div>
+<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2</span></b></font></div>
 <font face="verdana, helvetica, arial, sans-serif" size="2">
 
 <h3>Abstract</h3>
@@ -722,12 +722,19 @@ Acknowledgements<br></b>
 			in a new GGEP extension 
 			in pongs.<a href="#refs.GGEP" title="Thomas, J., Gnutella Generic Extension Protocol (GGEP) v0.51, Fedruary 2002.">[9]</a>  The GGEP 
 			extension should have the value "GUE" as its
-			extension header.  The extension value should be the version
-			number of the protocol supported, reported as a whole 
-			number. For example, if the node supports GUESS version 
-			.02, the version number in the GGEP block should be 2. 
-			This will allow for potential feature-specific use in the 
-			future.
+			extension header.
+            The extension value will be 1 byte describing the protocol
+			revision number.  The most-significant nibble will be an
+			unsigned integer describing the major revision (the current
+			major revision number is 0, hence 0000b).  The
+			least-significant nibble will be the minor revision number
+			(the current minor revision number is 2, hence 0010b).  Note
+			that the nibbles represent the numbers with the
+			most-significant bit first.  Moreover, this limits the
+			revision numbers - 15 for major and minor revisions
+			(therefore, there will never be a 1.16 or a 16.5 revision).
+			This allows 256 possible unique revision numbers which should
+			do for the life of the protocol.
 		  
 </p>
 <a name="features"><br><hr size="1" shade="0"></a>

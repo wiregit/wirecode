@@ -7,7 +7,7 @@
 <rfc docname="gnutella-unicast-search-01">
   <front>
     <title abbrev="GUESS">
-	  Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.02
+	  Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2
 	</title>
     <author initials="S.D" surname="Daswani" fullname="Susheel Daswani">
 	  <organization>LimeWire LLC</organization>
@@ -600,12 +600,19 @@
 			in a new GGEP extension 
 			in pongs.<xref target="refs.GGEP"/>  The GGEP 
 			extension should have the value "GUE" as its
-			extension header.  The extension value should be the version
-			number of the protocol supported, reported as a whole 
-			number. For example, if the node supports GUESS version 
-			.02, the version number in the GGEP block should be 2. 
-			This will allow for potential feature-specific use in the 
-			future.
+			extension header.
+            The extension value will be 1 byte describing the protocol
+			revision number.  The most-significant nibble will be an
+			unsigned integer describing the major revision (the current
+			major revision number is 0, hence 0000b).  The
+			least-significant nibble will be the minor revision number
+			(the current minor revision number is 2, hence 0010b).  Note
+			that the nibbles represent the numbers with the
+			most-significant bit first.  Moreover, this limits the
+			revision numbers - 15 for major and minor revisions
+			(therefore, there will never be a 1.16 or a 16.5 revision).
+			This allows 256 possible unique revision numbers which should
+			do for the life of the protocol.
 		  </t>
 		</section>
 	  </section>
