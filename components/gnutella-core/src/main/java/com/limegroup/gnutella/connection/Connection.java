@@ -11,7 +11,6 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -593,7 +592,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         }
         // create the output queues for messages
         _messageWriter = new MessageWriterProxy(this); 
-        _messageReader = new MessageReaderProxy();
+        _messageReader = new MessageReaderProxy(this);
          
         //NIODispatcher.instance().addReader(this);
         // check for updates from this host  
@@ -807,7 +806,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                     // if it's the crawler, we throw an exception to make sure we 
                     // correctly disconnect
                     if(isCrawler) {
-                        throw new IOException("connection from crawler -- disconnect");
+                        throw new IOException("crawler connection-disconnect");
                     }
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
@@ -934,6 +933,15 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public OutputStream getOutputStream() {
         return _out;
+    }
+    
+    /**
+     * Accessor for the <tt>Inflater</tt> instance for this connection.
+     * 
+     * @return this connection's inflater
+     */
+    public Inflater getInflater() {
+        return _inflater;
     }
     
     /**
@@ -1115,127 +1123,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return OUTGOING;
     }
 
-    /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
-    private byte[] HEADER_BUF=new byte[23];
-    
-    /**
-     * Receives a message.  This method is NOT thread-safe.  Behavior is
-     * undefined if two threads are in a receive call at the same time for a
-     * given connection.
-     *
-     * @requires this is fully initialized
-     * @effects exactly like Message.read(), but blocks until a
-     *  message is available.  A half-completed message
-     *  results in InterruptedIOException.
-     */
-    public Message receive() throws IOException, BadPacketException {
-        try {
-            //On the Macintosh, sockets *appear* to return the same ping reply
-            //repeatedly if the connection has been closed remotely.  This prevents
-            //connections from dying.  The following works around the problem.  Note
-            //that Message.read may still throw IOException below.
-            //See note on _closed for more information.
-            if (_closed) {
-                throw CONNECTION_CLOSED;
-            }
-    
-            Message msg = null;
-            while (msg == null) {
-                msg = readAndUpdateStatistics();
-            }
-            // record received message in stats
-            stats().addReceived();
-            return msg;
-        } catch(IOException e) {
-            RouterService.getConnectionManager().remove(this);
-            throw e;
-        }
-    }
 
-    /**
-     * Receives a message with timeout.  This method is NOT thread-safe.
-     * Behavior is undefined if two threads are in a receive call at the same
-     * time for a given connection.  THIS METHOD IS ONLY USED FOR TESTING.
-     *
-     * @requires this is fully initialized
-     * @effects exactly like Message.read(), but throws InterruptedIOException
-     *  if timeout!=0 and no message is read after "timeout" milliseconds.  In
-     *  this case, you should terminate the connection, as half a message may
-     *  have been read.
-     */
-    public Message receive(int timeout)
-        throws IOException, BadPacketException, InterruptedIOException {
-        //See note in receive().
-        if (_closed) {
-            throw CONNECTION_CLOSED;
-        }
-
-        //temporarily change socket timeout.
-        int oldTimeout = _socket.getSoTimeout();
-        _socket.setSoTimeout(timeout);
-        try {
-            Message m = readAndUpdateStatistics();
-            if (m==null) {
-                throw new InterruptedIOException("null message read");
-            }
-            
-            // record received message in stats
-            stats().addReceived();
-            return m;
-        } finally {
-            _socket.setSoTimeout(oldTimeout);
-        }
-    }
-    
-    /**
-     * Reads a message from the network and updates the appropriate statistics.
-     */
-    private Message readAndUpdateStatistics()
-      throws IOException, BadPacketException {
-        int pCompressed = 0, pUncompressed = 0;
-        
-        // The try/catch block is necessary for two reasons...
-        // See the notes in Connection.close above the calls
-        // to end() on the Inflater/Deflater and close()
-        // on the Input/OutputStreams for the details.
-        Message msg = null;
-        try {
-            if(isReadDeflated()) {
-                pCompressed = _inflater.getTotalIn();
-                pUncompressed = _inflater.getTotalOut();
-            }
-            
-            // DO THE ACTUAL READ
-            try {
-                msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            } catch(IOException ioe) {
-                close(); // if IOError, make sure we close.
-                throw ioe;
-            }
-            
-            // _bytesReceived must be set differently
-            // when compressed because the inflater will
-            // read more input than a single message,
-            // making it appear as if the deflated input
-            // was actually larger.
-            if( isReadDeflated() ) {
-                stats().addCompressedBytesReceived(_inflater.getTotalIn());
-                stats().addBytesReceived(_inflater.getTotalOut());
-                if(!CommonUtils.isJava118()) {
-                    CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                        (_inflater.getTotalOut() - pUncompressed));
-                    CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                        (_inflater.getTotalIn() - pCompressed));
-                }            
-            } else if(msg != null) {
-                stats().addBytesReceived(msg.getTotalLength());
-            }
-        } catch(NullPointerException npe) {
-            throw CONNECTION_CLOSED;
-        }
-        return msg;
-    }
-    
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
      * are dropped if the socket gets backed up.  Will remove any extended
@@ -1267,8 +1155,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         try {
             _messageWriter.write(msg);
         } catch (IOException e) {
-            // this should never happen
-            ErrorService.error(e);
+            // should only happen in the case of NIO
+            RouterService.removeConnection(this);
         }
     }
 
@@ -1392,6 +1280,17 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             throw new IllegalStateException("Not initialized");
         }
         return _socket;        
+    }
+    
+    /**
+     * Accessor for the <tt>InputStream</tt> for this connection.  The stream
+     * may be a buffered stream, a compressed stream, or any other type of
+     * stream.
+     * 
+     * @return the <tt>InputStream</tt> for this connection
+     */
+    public InputStream getInputStream() {
+        return _in;
     }
 
     /**
@@ -2088,6 +1987,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *         or route messages are silently swallowed, allowing the message
      *         loop to continue.
      */
+    /*
     public void loopForMessages() throws IOException {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
@@ -2121,6 +2021,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             }
         }
     }
+    */
 
 
     
