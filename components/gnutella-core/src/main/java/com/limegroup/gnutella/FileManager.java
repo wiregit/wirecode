@@ -1096,7 +1096,8 @@ public class FileManager {
                 responses.add(new Response(desc));
             } 
         }
-        return (Response[])responses.toArray();
+        Response[] retArray = new Response[responses.size()];
+        return (Response[])responses.toArray(retArray);
     }
 
     public synchronized FileDesc file2index(String fullName) {  
