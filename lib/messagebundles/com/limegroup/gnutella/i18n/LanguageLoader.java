@@ -1,18 +1,41 @@
 package com.limegroup.gnutella.i18n;
 
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 
+/**
+ * @author Admin
+ */
 class LanguageLoader {
     
+    /** @see LanguageInfo#getLink() */
     static final String BUNDLE_NAME = "MessagesBundle";
+    /** @see LanguageInfo#getLink() */
     static final String PROPS_EXT = ".properties";
+    /** @see LanguageInfo#getLink() */
     static final String UTF8_EXT = ".UTF-8.txt";    
     
     private final Map/*<String code, LanguageInfo li>*/ langs;
     private final File lib;
     
+    /**
+     * @param directory
+     */
     LanguageLoader(File directory) {
         langs = new TreeMap();
         lib = directory;
@@ -22,6 +45,7 @@ class LanguageLoader {
      * List and load all available bundles and map them into the languages map.
      * Note that resources are not expanded here per base language, and not cleaned
      * here from extra keys (needed to support the resources "check" option).
+     * @return the languages map (from complete locale codes to LocaleInfo)
      */
     Map loadLanguages() {
         if (!lib.isDirectory())
@@ -74,6 +98,9 @@ class LanguageLoader {
     
     /**
      * Constructs a list of each line in the default English properties file.
+     * @return a list of Line instances
+     * @throws IOException
+     * @see Line
      */
     List /* of Line */ getEnglishLines() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -91,6 +118,8 @@ class LanguageLoader {
     
     /**
      * Retrieves the default properties.
+     * @return the loaded Properties
+     * @throws IOException
      */
     Properties getDefaultProperties() throws java.io.IOException {
         Properties p = new Properties();
@@ -102,6 +131,8 @@ class LanguageLoader {
     
     /**
      * Retrieves the advanced keys.
+     * @return a the Set of Strings for the key names of advanced properties. 
+     * @throws IOException
      */
     Set getAdvancedKeys() throws java.io.IOException  {
         BufferedReader reader;
@@ -136,7 +167,7 @@ class LanguageLoader {
         /* Extends missing resources with those from the base language */
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
+            //final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             if (li.isVariant()) {
@@ -156,12 +187,13 @@ class LanguageLoader {
     
     /**
      * Iterates through all languages and retains only those within 'keys'.
+     * @param keys a Set of String for key names to retain in properties.
      */
     void retainKeys(Set keys) {
         /* Extends missing resources with those from the base language */
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
+            //final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             props.keySet().retainAll(keys);
@@ -171,7 +203,7 @@ class LanguageLoader {
     /**
      * Loads a single file into the languages map.
      */
-    private LanguageInfo loadFile(Map langs, InputStream in, String filename, 
+    private LanguageInfo loadFile(Map newlangs, InputStream in, String filename, 
                                   String baseFileName, boolean isUTF8) {
         try {
             in = new BufferedInputStream(in);
@@ -221,7 +253,7 @@ class LanguageLoader {
                                                ln, cn, vn, sn,
                                                dn, rtl, filename, props,
                                                baseFileName);
-            langs.put(li.getCode(), li);
+            newlangs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {
             // ignore.

@@ -1,14 +1,22 @@
 package com.limegroup.gnutella.i18n;
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * Writes language info out in HTML format.
  */
 class HTMLOutput {
 
+    /** @see LanguageInfo#getLink() */
     static final String PRE_LINK = "http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/";
     private static final String DEFAULT_LINK = PRE_LINK + LanguageLoader.BUNDLE_NAME + LanguageLoader.PROPS_EXT;
 
@@ -37,6 +45,10 @@ class HTMLOutput {
 
     /**
      * Constructs a new HTML output.
+     * @param df
+     * @param pc
+     * @param langs
+     * @param basicTotal
      */
     HTMLOutput(DateFormat df, NumberFormat pc, Map langs, int basicTotal) {
         this.df = df;
@@ -48,6 +60,7 @@ class HTMLOutput {
     
     /**
      * Creates the HTML.
+     * @return the HTML page in a StringBuffer.
      */
     StringBuffer buildHTML() {
         List langsCompleted = new LinkedList();
@@ -59,7 +72,7 @@ class HTMLOutput {
         
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
-            final String code = (String)entry.getKey();
+            //final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             final int count = props.size();
@@ -85,21 +98,22 @@ class HTMLOutput {
             inScript.add(li);
         }
         
-        StringBuffer page = new StringBuffer();
-        buildStartOfPage(page);
-        buildStatus(page, langsCompleted,
+        StringBuffer newpage = new StringBuffer();
+        buildStartOfPage(newpage);
+        buildStatus(newpage, langsCompleted,
                           langsNeedRevision,
                           langsMidway,
                           langsStarted,
                           langsEmbryonic);
-        buildAfterStatus(page);
-        buildProgress(page, charsets);
-        buildEndOfPage(page);
-        return page;
+        buildAfterStatus(newpage);
+        buildProgress(newpage, charsets);
+        buildEndOfPage(newpage);
+        return newpage;
     }
         
     /**
      * Prints the HTML to 'out'.
+     * @param out
      */
     void printHTML(PrintStream out) {
         /* Make sure printed page contains only ASCII, converting all
@@ -108,7 +122,7 @@ class HTMLOutput {
          */
         int pageLength = page.length();
         for (int index = 0; index < pageLength; ) {
-            int c = (int)page.charAt(index++); // char's are always positive
+            int c = page.charAt(index++); // char's are always positive
             if (c < 160) { /* C0 or Basic Latin or C1 */
                 if (c >= 32 && c < 127 || c == '\t') /* Basic Latin or TAB */
                     out.print((char)c);
@@ -118,14 +132,14 @@ class HTMLOutput {
             } else { /* Use NCRs */
                 /* special check for surrogate pairs */
                 if (c >= 0xD800 && c <= 0xDBFF && index < pageLength) {
-                    int c2 = (int)page.charAt(index);
+                    char c2 = page.charAt(index);
                     if (c2 >= 0xDC00 && c2 <= 0xDFFF) {
                         c = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
                         index++;
                     }
                 }
                 out.print("&#");
-                out.print((int)c);//decimal NCR notation
+                out.print(c);//decimal NCR notation
                 out.print(';');
             }
         }
@@ -134,8 +148,8 @@ class HTMLOutput {
     /**
      * Builds the start of the page.
      */
-    private void buildStartOfPage(StringBuffer page) {
-        page.append(
+    private void buildStartOfPage(StringBuffer newpage) {
+        newpage.append(
 "<html>\n" +
 "<head>\n" +
 "<!--#include virtual=\"/includes/top.html\" -->\n" +
@@ -186,64 +200,64 @@ class HTMLOutput {
     /**
      * Builds the status portion of the page.
      */
-    private void buildStatus(StringBuffer page,
+    private void buildStatus(StringBuffer newpage,
                              List langsCompleted,
                              List langsNeedRevision,
                              List langsMidway,
                              List langsStarted,
                              List langsEmbryonic) {
-        page.append(
+        newpage.append(
 "     <b><big>Translations Status:</big></b>\n" +
 "     <br />\n" +
 "     <ol>\n");
-        buildStatus(page, langsCompleted,
+        buildStatus(newpage, langsCompleted,
 "       are complete and will require only small revisions during the project\n" +
 "       evolution.");
-        buildStatus(page, langsNeedRevision,
+        buildStatus(newpage, langsNeedRevision,
 "       are mostly complete and can still be used reliably, but may need some\n" +
 "       revisions and a few missing translations to work best with newest versions.");
-        buildStatus(page, langsMidway,
+        buildStatus(newpage, langsMidway,
 "       have been completed for an old version, but may now require some work, tests\n" +
 "       and revisions plus additional missing translations to reach a reliable status.");
-        buildStatus(page, langsStarted,
+        buildStatus(newpage, langsStarted,
 "       are partly translated but still unfinished, and their use in LimeWire\n" +
 "       may be difficult for native language users. Providing a more complete\n" +
 "       translation would be very much appreciated.");
-        buildStatus(page, langsEmbryonic,
+        buildStatus(newpage, langsEmbryonic,
 "       are only embryonic and actually need a complete translation.\n" +
 "       The current files are only there for demonstration purpose.");
-        page.append(
+        newpage.append(
 "     </ol>\n");
     }
     
     /**
      * Builds an individual bullet point in the status portion of the page.
      */
-    private void buildStatus(StringBuffer page,
-                             List langs, String status) {
+    private void buildStatus(StringBuffer newpage,
+                             List langsList, String status) {
         boolean first = true;
-        for (Iterator i = langs.iterator(); i.hasNext(); ) {
+        for (Iterator i = langsList.iterator(); i.hasNext(); ) {
             LanguageInfo l = (LanguageInfo)i.next();
             if (first)
-                page.append(
+                newpage.append(
 "      <li>\n");
             else if (!i.hasNext())
-                page.append(" and\n");
+                newpage.append(" and\n");
             else
-                page.append(",\n");
-            page.append(
+                newpage.append(",\n");
+            newpage.append(
 "       <b>" + l.getLink() + "</b>");
             first = false;
         }
         if (!first)
-            page.append("\n" + status + "</li>\n");
+            newpage.append("\n" + status + "</li>\n");
     }
 
     /**
      * Builds the info after the status portion.
      */
-    private void buildAfterStatus(StringBuffer page) {
-        page.append(
+    private void buildAfterStatus(StringBuffer newpage) {
+        newpage.append(
 "     <br />\n" +
 "     <b><big>Which tool or editor is needed to work on a translation:</big></b><br />\n" + 
 "     <br />\n" + 
@@ -423,11 +437,11 @@ class HTMLOutput {
     /**
      * Builds the progress table.
      */
-    private void buildProgress(StringBuffer page, Map charsets) {
-        page.append(
+    private void buildProgress(StringBuffer newpage, Map charsets) {
+        newpage.append(
 "       <table width=\"250\" border=\"0\" cellpadding=\"0\" cellspacing=\"4\">");
         List latin = (List)charsets.remove("Latin");
-        page.append(
+        newpage.append(
 "       <tr>\n" +
 "        <td colspan=\"3\" valign=\"top\">" +
 "         <hr noshade size=\"1\">\n" +
@@ -440,7 +454,7 @@ class HTMLOutput {
 "       </tr>\n");
         for (Iterator i = latin.iterator(); i.hasNext(); ) {
             LanguageInfo l = (LanguageInfo)i.next();
-            page.append(
+            newpage.append(
 "       <tr>\n" +
 "        <td><b>" + l.getLink() + "</b></td>\n" +
 "        <td align=\"right\">(" + pc.format(l.getPercentage()) + ")</td>\n" +
@@ -451,7 +465,7 @@ class HTMLOutput {
             Map.Entry entry = (Map.Entry)i.next();
             String code = (String)entry.getKey();
             List l = (List)entry.getValue();
-            page.append(
+            newpage.append(
 "       <tr>\n" +
 "        <td colspan=\"3\" valign=\"top\">\n" +
 "         <hr noshade size=\"1\">\n" +
@@ -459,7 +473,7 @@ class HTMLOutput {
 "       </tr>\n");
             for (Iterator j = l.iterator(); j.hasNext(); ) {
                 LanguageInfo li = (LanguageInfo)j.next();
-                page.append(
+                newpage.append(
 "       <tr>\n" +
 "        <td><b>" + li.getLink() + "</b></td>\n" +
 "        <td align=\"right\">(" + pc.format(li.getPercentage()) + ")</td>\n" +
@@ -467,15 +481,15 @@ class HTMLOutput {
 "       </tr>\n");
             }
         }
-        page.append(
+        newpage.append(
 "       </table>\n");
     }
     
     /**
      * Builds the closing footers of the page.
      */
-    private void buildEndOfPage(StringBuffer page) {
-        page.append(
+    private void buildEndOfPage(StringBuffer newpage) {
+        newpage.append(
 "      </td>\n" +
 "     </tr>\n" +
 "     </table>\n" + /* End of shaded right rectangle */

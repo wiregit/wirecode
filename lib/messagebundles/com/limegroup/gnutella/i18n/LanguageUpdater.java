@@ -1,7 +1,22 @@
 package com.limegroup.gnutella.i18n;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Rebuilds the language files, based on the English one.
@@ -17,6 +32,9 @@ class LanguageUpdater {
    
     /**
      * Constructs a new LanguageUpdater.
+     * @param dir
+     * @param langs
+     * @param englishLines
      */
     LanguageUpdater(File dir, Map langs, List englishLines) {
         this.lib = dir;
@@ -27,6 +45,7 @@ class LanguageUpdater {
     
     /**
      * Determines if stuff should be printed.
+     * @param silent
      */
     void setSilent(boolean silent) {
         verbose = !silent;
@@ -34,17 +53,24 @@ class LanguageUpdater {
     
     /**
      * Prints a message out if we're being verbose.
+     * @param msg
      */
     void print(String msg) {
-        if(verbose)
+        if (verbose)
             System.out.print(msg);
     }
+    /**
+     * @param msg
+     */
     void println(String msg) {
-        if(verbose)
+        if (verbose)
             System.out.println(msg);
     }
+    /**
+     * 
+     */
     void println() {
-        if(verbose)
+        if (verbose)
             System.out.println();
     }
     
@@ -52,10 +78,10 @@ class LanguageUpdater {
      * Updates all languages.
      */
     void updateAllLanguages() {
-        for(Iterator i = langs.values().iterator(); i.hasNext(); ) {
+        for (Iterator i = langs.values().iterator(); i.hasNext(); ) {
             LanguageInfo next = (LanguageInfo)i.next(); 
             // TODO: work with variants.
-            if(next.isVariant())
+            if (next.isVariant())
                 continue;
             updateLanguage(next);
         }
@@ -63,6 +89,7 @@ class LanguageUpdater {
     
     /**
      * Updates a single language.
+     * @param info
      */
     void updateLanguage(LanguageInfo info) {
         if (info == null) {
@@ -118,7 +145,7 @@ class LanguageUpdater {
      * Home-made native2ascii.
      */
     private void native2ascii(LanguageInfo info) {
-        if(!info.isUTF8())
+        if (!info.isUTF8())
             throw new IllegalArgumentException("requires utf8 language.");
 
         InputStream in = null;
@@ -130,9 +157,8 @@ class LanguageUpdater {
             in = new BufferedInputStream(new FileInputStream(info.getFileName()));
             in.mark(3);
             if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
-                in.reset(); 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
-            
+                in.reset();            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
+
             out = new BufferedOutputStream(new FileOutputStream(info.getAlternateFileName()));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "ISO-8859-1"));
             
@@ -147,10 +173,10 @@ class LanguageUpdater {
         } catch(IOException ignored) {
             println("... error! (" + ignored.getMessage() + ")");
         } finally {
-            if(in != null)
-                try { in.close(); } catch(IOException ignored) {}
-            if(out != null)
-                try { out.close(); } catch(IOException ignored) {}
+            if (in != null)
+                try { in.close(); } catch (IOException ignored) {}
+            if (out != null)
+                try { out.close(); } catch (IOException ignored) {}
         }
     }   
 
@@ -162,17 +188,17 @@ class LanguageUpdater {
         try {
             ia = new BufferedInputStream(new FileInputStream(a));
             ib = new BufferedInputStream(new FileInputStream(b));
-            int reada, readb;
-            while( (reada = ia.read()) == (readb = ib.read()) ) {
+            int c;
+            while ((c = ia.read()) == ib.read()) {
                 // if we got here, both got to EOF at same time
-                if(reada == -1)
+                if (c == -1)
                     return false;
             }
-        } catch(IOException ignored) {
+        } catch (IOException ignored) {
         } finally {
-            if(ia != null)
+            if (ia != null)
                 try { ia.close(); } catch(IOException ignored) {}
-            if(ib != null)
+            if (ib != null)
                 try { ib.close(); } catch(IOException ignored) {}
         }
         // if we didn't exit in the loop, a character was different
@@ -183,15 +209,15 @@ class LanguageUpdater {
     /**
      * Writes the body of the bundle.
      */
-    private void printBody(PrintWriter printer, LanguageInfo info) throws IOException {
+    private void printBody(PrintWriter printer, LanguageInfo info) {
         Properties props = info.getProperties();
         boolean reachedTranslations = false;
-        for(Iterator i = englishList.iterator(); i.hasNext(); ) {
+        for (Iterator i = englishList.iterator(); i.hasNext(); ) {
             Line line = (Line)i.next();
-            if(MARKER.equals(line.getLine()))
+            if (MARKER.equals(line.getLine()))
                 reachedTranslations = true;
                 
-            if(line.isComment()) {
+            if (line.isComment()) {
                 printer.println(line.getLine());
             } else {
                 String key = line.getKey();
@@ -217,27 +243,27 @@ class LanguageUpdater {
                     printer.print("=");
                     // only write the non-translated value if we didn't
                     // above.
-                    if(!reachedTranslations)
+                    if (!reachedTranslations)
                         printer.print(escape(line.getValue()));
                     printer.println();
                 }
             }
         }
-        //printer.flush();
     }
     
     /**
      * Writes the initial comments from a given file to fos.
      */
-    private void printInitialComments(PrintWriter printer, BufferedReader reader, LanguageInfo info) throws IOException {
-        InputStream in = null;
-        
+    private void printInitialComments(PrintWriter printer, BufferedReader reader,
+            LanguageInfo info) throws IOException {
+        //TODO: look into initial comments, to see if more information should
+        //be generated from 'info'.
         try {
             String read;
             // Read through and write the initial lines until we reach a non-comment
             while ((read = reader.readLine()) != null) {
                 Line line = new Line(read);
-                if(!line.isComment())
+                if (!line.isComment())
                     break;
                 printer.println(read);
             }
@@ -249,9 +275,9 @@ class LanguageUpdater {
      * Removes the initial comments from the English properties file.
      */
     private void removeInitialComments(List l) {
-        for(Iterator i = l.iterator(); i.hasNext(); ) {
+        for (Iterator i = l.iterator(); i.hasNext(); ) {
             Line line = (Line)i.next();
-            if(line.isComment())
+            if (line.isComment())
                 i.remove();
             else
                 break;
@@ -262,30 +288,30 @@ class LanguageUpdater {
      * Returns a string suitable for insertion into a Properties file.
      */
     private String escape(String s) {
-        StringBuffer sb = new StringBuffer(s.length());
-        for(int i = 0; i < s.length(); i++) {
-            int p = s.codePointAt(i);
-            switch(p) {
+        final int n = s.length();
+        StringBuffer sb = new StringBuffer(n);
+        for (int i = 0; i < n; i++) {
+            int cp;
+            switch (cp = s.codePointAt(i)) {
             // TODO: don't use hard-coded points and instead use generic lookup
             case 0x00a0:
             case 0x2007:
             case 0x202F:
-                sb.append(unicode(p));
+                sb.append(hexUnicode(cp));
                 break;
             default:
-                if(Character.isISOControl(p) || Character.isWhitespace(p)) {
-                    switch(p) {
+                if (Character.isISOControl(cp) ||
+                    Character.isWhitespace(cp)) {
+                    switch (cp) {
                     case ' ': sb.append(' '); break;
                     case '\n': sb.append("\\n"); break;
                     case '\t': sb.append("\\t"); break;
                     case '\f': sb.append("\\f"); break;
                     case '\r': sb.append("\\r"); break;
-                    default:
-                        sb.append(unicode(p));
+                    default: sb.append(hexUnicode(cp));
                     }
-                } else {
-                    sb.appendCodePoint(p);
-                }
+                } else
+                    sb.appendCodePoint(cp);
             }
         }
         return sb.toString();
@@ -294,12 +320,16 @@ class LanguageUpdater {
     /**
      * Converts the input string to ascii, using \\u escapes.
      */
-    private String ascii(String s) {
-        StringBuffer sb = new StringBuffer(s.length() * 5);
-        for(int i = 0; i < s.length(); i++) {
+    private String ascii(final String s) {
+        final int n = s.length();
+        final StringBuffer sb = new StringBuffer(n * 5);
+        for (int i = 0; i < n; i++) {
             int p = s.codePointAt(i);
-            if(p < 0x0020 || p > 0x007e)
-                sb.append(unicode(p));
+            if (p < 0x0020 || // C0 controls
+                p > 0x007e && p < 0x00a1 || // DEL and C1 controls
+                p == 0x00ad || // SHY
+                p > 0x00ff) // not Latin1
+                sb.append(hexUnicode(p));
             else
                 sb.appendCodePoint(p);
         }
@@ -307,15 +337,26 @@ class LanguageUpdater {
     }
     
     /**
-     * Returns the unicode representation of the codepoint.
+     * Returns the escaped unicode hex representation of the codepoint.
+     * @param cp the codepoint to represent;
+     * must be in the 17 first planes, and not a surrogate.
      */
-    private String unicode(int codepoint) {
-        StringBuffer sb = new StringBuffer(6);
-        sb.append("\\u");
-        String hex = Integer.toHexString(codepoint);
-        for(int j = 0 + hex.length(); j < 4; j++)
-            sb.append("0");
-        sb.append(hex);
-        return sb.toString();
+    private String hexUnicode(final int cp) {
+        if (cp <= 0xffff) {
+            
+	        final String hex = Integer.toHexString(cp);
+	        final StringBuffer sb = new StringBuffer(6);
+	        sb.append("\\u");
+	        for (int j = hex.length(); j < 4; j++)
+	            sb.append('0');
+	        sb.append(hex);
+	        return sb.toString();
+        }
+        return new StringBuffer(12)
+        .append("\\u")
+        .append(Integer.toHexString(((cp - 0x10000) >> 10) + 0xD800))
+        .append("\\u")
+        .append(Integer.toHexString((cp & 0x3ff) + 0xDC00))
+        .toString();
     }
-}            
+}

@@ -1,9 +1,28 @@
 package com.limegroup.gnutella.i18n;
 
-import java.text.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
+/**
+ * @author Admin
+ */
 public class CountPercent {
     private static final int ACTION_STATISTICS = 0;
     private static final int ACTION_HTML = 1;
@@ -13,6 +32,12 @@ public class CountPercent {
     
     private static final double RELEASE_PERCENTAGE = .65;
     
+    /**
+	 * Launched from the console with command-line parameters.
+	 * Usage: java CountPercent [html|check|update [<code>]|release]
+     * @param args a possibly empty array of command-line parameters.
+     * @throws IOException
+     */
     public static void main(String[] args) throws java.io.IOException {
         final int action;
         String code = null;
@@ -28,7 +53,8 @@ public class CountPercent {
             } else if(args[0].equals("release")) {
                 action = ACTION_RELEASE;
             } else {
-                System.err.println("Usage: java CountPercent [html|check|update <code>]");
+                System.err.println(
+	                "Usage: java CountPercent [html|check|update [<code>]|release]");
                 return;
             }
         } else
@@ -43,6 +69,11 @@ public class CountPercent {
     private final Set/*<String key>*/ basicKeys, advancedKeys;
     private final int basicTotal;
 
+    /**
+     * @param action
+     * @param code
+     * @throws IOException
+     */
     CountPercent(int action, String code) throws java.io.IOException {
         df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
 
@@ -247,32 +278,40 @@ public class CountPercent {
      * Filter for releasing files.
      */
     private static class ReleaseFilter implements FileFilter {
+        /**
+         * Comment for <code>validLangs</code>
+         */
         final List validLangs;
         
+        /**
+         * @param valid
+         */
         ReleaseFilter(List valid) {
             validLangs = valid;
         }
         
+        /**
+         * @see java.io.FileFilter#accept(java.io.File)
+         */
         public boolean accept(File f) {
-            if(f.isDirectory())
+            if (f.isDirectory())
                 return true;
             String name = f.getName();
-            if(!name.endsWith(".properties"))
+            if (!name.endsWith(".properties"))
                 return false;
-            int idxU = name.indexOf("_");
-            if(idxU == -1)
+            int idxU;
+            if ((idxU = name.indexOf('_')) == -1)
                 return true; // base resource.
-            int idxP = name.indexOf(".");
-            String code = name.substring(idxU + 1, idxP);
-            if(code.equals("en")) // always valid.
+            String code = name.substring(idxU + 1, name.indexOf("."));
+            if (code.equals("en")) // always valid.
                 return true;
             
             // check to see if the code is in the list of valid codes.
-            for(Iterator i = validLangs.iterator(); i.hasNext(); ) {
+            for (Iterator i = validLangs.iterator(); i.hasNext(); ) {
                 LanguageInfo li = (LanguageInfo)i.next();
                 // if its the base of a variant or the variant itself,
                 // accept it.  (need bases so the variant works.)
-                if(code.equals(li.getBaseCode()) || code.equals(li.getCode()))
+                if (code.equals(li.getBaseCode()) || code.equals(li.getCode()))
                     return true;
             }
             return false;

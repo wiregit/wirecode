@@ -30,6 +30,19 @@ class LanguageInfo implements Comparable {
      * Constructs a new LanguageInfo object with the given
      * languageCode, countryCode, variantCode,
      * languageName, countryName, and variantName.
+     * @param lc ISO-639 language code
+     * @param cc ISO-3166 country or region code
+     * @param vc locale variant code
+     * @param sc ISO-10644 script code
+     * @param ln localized language name
+     * @param cn localized country name
+     * @param vn localized variant name
+     * @param sn English script name
+     * @param dn English language name
+     * @param rtl true if locale layout is right-to-left
+     * @param fn name of localized source (ISO-8859-1 or UTF-8) file
+     * @param props properties loaded from localized file
+     * @param alternateFile name of generated ISO-8859-1 file
      */
     public LanguageInfo(String lc, String cc, String vc, String sc,
                         String ln, String cn, String vn, String sn,
@@ -56,6 +69,7 @@ class LanguageInfo implements Comparable {
     /**
      * Used to map the list of locales codes to their LanguageInfo data and props.
      * Must be unique per loaded localized properties file.
+     * @see Comparable#compareTo(Object)
      */
     public int compareTo(Object other) {
         final LanguageInfo o = (LanguageInfo)other;
@@ -68,14 +82,23 @@ class LanguageInfo implements Comparable {
         return variantCode.compareTo(o.variantCode);
     }
     
+    /**
+     * @return true if getCode()==getBaseCode()
+     */
     public boolean isVariant() {
         return !"".equals(variantCode) || !"".equals(countryCode);
     }
     
+    /**
+     * @return the reduced Java locale code with format "lc"
+     */
     public String getBaseCode() {
         return languageCode;
     }
     
+    /**
+     * @return the standard Java locale code with format: "lc[_CC[_vc]]" 
+     */
     public String getCode() {
         if (!variantCode.equals(""))
             return languageCode + "_" + countryCode + "_" + variantCode;
@@ -84,14 +107,24 @@ class LanguageInfo implements Comparable {
         return languageCode;
     }
     
+    /**
+     * @param percentage a completion level value to associate with this. 
+     */
     public void setPercentage(double percentage) {
         this.percentage = percentage;
     }
     
+    /**
+     * @return the percentage previously stored.
+     * @see #setPercentage(double)
+     */
     public double getPercentage() {
         return percentage;
     }
     
+    /**
+     * @return the properties loaded from the source file
+     */
     public Properties getProperties() {
        return properties;
     }
@@ -105,6 +138,8 @@ class LanguageInfo implements Comparable {
      *    languageName (countryName)
      * If the language is Right-To-Left, the whole string is returned
      * surrounded by BiDi embedding controls.
+     * @return the internationalized description string.
+     * @see #getName()
      */
     public String toString() {
         final String bidi1, bidi2;
@@ -120,27 +155,55 @@ class LanguageInfo implements Comparable {
             !variantName.equals(""))
             return bidi1 + languageName + ", " + variantName +
                    " (" + countryName + ')' + bidi2;
-        else
-            return bidi1 + languageName +
-                   " (" + countryName + ')' + bidi2;
+        return bidi1 + languageName +
+               " (" + countryName + ')' + bidi2;
     }
     
+    /**
+     * @return the English script name
+     */
     public String getScript() { return scriptName; }
     
+    /**
+     * @return the ISO script code
+     */
+    public String getScriptCode() { return scriptCode; }
+    
+    /**
+     * @return the source file name
+     */
     public String getFileName() { return fileName; }
     
+    /**
+     * @return the source charset name
+     */
     public String getSourceCharset() {
         return sourceCharset;
     }
     
+    /**
+     * @return true if the source charset is UTF-8, and there's no
+     * alternate file.
+     */
     public boolean isUTF8() {
         return sourceCharset.equals(CHARSET_UTF8);
     }
     
+    /**
+     * @return the alternate file name, when the source file is not
+     * UTF-8 encoded.
+     */
     public String getAlternateFileName() { return alternateFileName; }
     
+    /**
+     * @return the descriptive English language name
+     * @see #toString()
+     */
     public String getName() { return displayName; }
     
+    /**
+     * @return a link to the source file in the repository
+     */
     public String getLink() {
         return
            "<a href=\"" + HTMLOutput.PRE_LINK + fileName +
