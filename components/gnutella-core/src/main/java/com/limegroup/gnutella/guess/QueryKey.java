@@ -122,9 +122,9 @@ public final class QueryKey {
      * Determines if the bytes are valid for a qkey.
      */
     public static boolean isValidQueryKeyBytes(byte[] key) {
-        return key == null ||
-               key.length < MIN_QK_SIZE_IN_BYTES ||
-               key.length > MAX_QK_SIZE_IN_BYTES;
+        return key != null &&
+               key.length >= MIN_QK_SIZE_IN_BYTES &&
+               key.length <= MAX_QK_SIZE_IN_BYTES;
     }
 
 
