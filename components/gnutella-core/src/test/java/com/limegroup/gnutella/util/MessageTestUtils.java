@@ -21,7 +21,9 @@ public class MessageTestUtils {
     
     /**
      * Creates a new <tt>PingReply</tt> instance with the GGEP extension 
-     * advertising free ultrapeer and leaf slots.
+     * advertising free ultrapeer and leaf slots.  The generated pong will
+     * have a random "unique" IP address that is statistically unlikely to 
+     * collide with other addresses returned by this method.
      * 
      * @return a new <tt>PingReply</tt> for testing with the GGEP extension 
      *  advertising free ultrapeer and leaf slots
@@ -29,14 +31,21 @@ public class MessageTestUtils {
     public static PingReply createPongWithFreeLeafSlots() {
         GGEP ggep = newGGEP(20, true, true, true, false);
         
+        byte a = (byte)(40 + (Math.random()*80));
+        byte b = (byte)(40 + (Math.random()*80));
+        byte c = (byte)(40 + (Math.random()*80));
+        byte d = (byte)(40 + (Math.random()*80));
+        
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
-            new byte[]{1,1,1,1}, 10, 10, true, ggep);
+            new byte[]{a,b,c,d}, 10, 10, true, ggep);
         return pr;
     }
     
     /**
      * Creates a new <tt>PingReply</tt> instance with the GGEP extension 
-     * advertising free ultrapeer and leaf slots.
+     * advertising free ultrapeer and leaf slots.  The generated pong will
+     * have a random "unique" IP address that is statistically unlikely to 
+     * collide with other addresses returned by this method.
      * 
      * @return a new <tt>PingReply</tt> for testing with the GGEP extension 
      *  advertising free ultrapeer and leaf slots
@@ -44,8 +53,13 @@ public class MessageTestUtils {
     public static PingReply createPongWithUltrapeerSlots() {
         GGEP ggep = newGGEP(20, true, true, false, true);
         
+        byte a = (byte)(40 + (Math.random()*80));
+        byte b = (byte)(40 + (Math.random()*80));
+        byte c = (byte)(40 + (Math.random()*80));
+        byte d = (byte)(40 + (Math.random()*80));
+        
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
-            new byte[]{1,1,1,1}, 10, 10, true, ggep);
+            new byte[]{a,b,c,d}, 10, 10, true, ggep);
         return pr;
     }
 
