@@ -889,22 +889,36 @@ public abstract class MessageRouter {
 	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
 	 */
-	public final void forwardQueryRequestToLeaves(QueryRequest request,
+	public final void forwardQueryRequestToLeaves(QueryRequest query,
                                                   ReplyHandler handler) {
 		if(!RouterService.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
         List list = _manager.getInitializedClientConnections2();
+        List hitConnections = new LinkedList();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(mc != handler) {
-				boolean sent = sendRoutedQueryToHost(request, mc, handler);
-				if(sent && RECORD_STATS) {
-					RoutedQueryStat.LEAF_SEND.incrementStat();
-				} else if(RECORD_STATS) {
-					RoutedQueryStat.LEAF_DROP.incrementStat();
-				}				
+            if(mc == handler) continue;
+            if(mc.hitsQueryRouteTable(query)) {
+                hitConnections.add(mc);
+            }
+        }
+
+        if(list.size() > 8 && 
+           (double)hitConnections.size()/(double)list.size() > .8) {
+            hitConnections = 
+                hitConnections.subList(0, hitConnections.size()/4);
+        }
+        for(int i=0; i<hitConnections.size(); i++) {
+            ManagedConnection mc = (ManagedConnection)list.get(i);
+            if(mc == handler) continue;
+
+            boolean sent = sendRoutedQueryToHost(query, mc, handler);
+            if(sent && RECORD_STATS) {
+                RoutedQueryStat.LEAF_SEND.incrementStat();
+            } else if(RECORD_STATS) {
+                RoutedQueryStat.LEAF_DROP.incrementStat();
             }
         }
 	}
