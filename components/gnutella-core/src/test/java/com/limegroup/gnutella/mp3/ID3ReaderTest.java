@@ -72,4 +72,15 @@ public class ID3ReaderTest extends BaseTestCase {
                                                 URN.createSHA1Urn(f).toString()));
     }
 
+    public void testGetCCLicense() {
+        File f = new File(actualFile0);
+        assertTrue(f.exists());
+        assertEquals("http://creativecommons.org/licenses/by-sa/1.0/",
+                     ID3Reader.getCCLicense(actualFile0));
+        f = new File(actualFile1);
+        assertTrue(f.exists());
+        assertEquals("http://creativecommons.org/licenses/by-nc-sa/1.0/",
+                     ID3Reader.getCCLicense(actualFile1));
+    }
+
 }
