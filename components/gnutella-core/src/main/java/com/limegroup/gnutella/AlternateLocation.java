@@ -50,9 +50,15 @@ public final class AlternateLocation
 	 * @param location a string containing a single alternate location,
 	 *  including a full URL for a file and an optional date
 	 * @throws <tt>IOException</tt> if there is any problem constructing
-	 *  the new instance from the specified string
+	 *  the new instance from the specified string, or if the <tt<location</tt>
+	 *  argument is either null or the empty string -- we could (should?) 
+	 *  throw NullPointerException here, but since we're already forcing the
+	 *  caller to catch IOException, we might as well throw in in both cases
 	 */
 	public AlternateLocation(final String location) throws IOException {
+		if(location == null || location.equals("")) {
+			throw new IOException("NULL OR EMPTY STRING IN ALTERNATE LOCATION");
+		}
 		try {
 			URL = AlternateLocation.createUrl(location);
 		} catch(MalformedURLException e) {
@@ -83,9 +89,14 @@ public final class AlternateLocation
 	 * @param url the <tt>URL</tt> instance for the resource
 	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
 	 *  could not be succussfully constructed from the supplied arguments
+	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
+	 *  <tt>null</tt>
 	 */
 	public AlternateLocation(final URL url) 
 		throws MalformedURLException {
+		if(url == null) {
+			throw new NullPointerException("AlternateLocation cannot accept null URL");
+		}
 		// create a new URL instance from the data for the given url
 		// and the urn
 		this.URL = new URL(url.getProtocol(), url.getHost(), url.getPort(),
