@@ -14,10 +14,7 @@
      environment with the jar files necessary for compilation appended. -->
 <path id="default.classpath" >
   <pathelement path="${CLASSPATH}" />
-  <pathelement location="lib/collections.jar" />
-  <pathelement location="lib/xerces.jar" />
-  <pathelement location="lib/ui.jar" />
-  <pathelement location="lib/logicrypto.jar" />
+  <fileset dir="lib" includes="*.jar"/>
   <pathelement location="../chord" />
 </path>
 
