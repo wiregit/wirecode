@@ -23,6 +23,10 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    private byte[] bytes(int one, int two, int three, int four) {
+        return new byte[] { (byte)one, (byte)two, (byte)three, (byte)four };
+    }
 
     public void testIPListLegacy() {
         IPList iplist = new IPList();
@@ -39,25 +43,40 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         iplist.add ("10.0.*.*");
 
         assertTrue(iplist.contains (new IP("0.0.0.0")));
+        assertTrue(iplist.contains (new IP(bytes(0, 0, 0, 0))));
         assertTrue(iplist.contains (new IP("255.255.255.255")));
+        assertTrue(iplist.contains (new IP(bytes(255,255,255,255))));
         assertTrue(iplist.contains (new IP("255.255.255.0")));
+        assertTrue(iplist.contains (new IP(bytes(255,255,255,0))));
         assertTrue(!iplist.contains (new IP("255.0.255.255")));
+        assertTrue(!iplist.contains (new IP(bytes(255,0,255,255))));
         assertTrue(!iplist.contains (new IP("192.168.1.2/255.255.255.0")));
         assertTrue(iplist.contains (new IP("192.168.0.2")));
+        assertTrue(iplist.contains (new IP(bytes(192,168,0,2))));
         assertTrue(iplist.contains (new IP("192.168.0.1")));
+        assertTrue(iplist.contains (new IP(bytes(192,168,0,1))));
         assertTrue(!iplist.contains (new IP("192.168.1.1")));
+        assertTrue(!iplist.contains (new IP(bytes(192,168,1,1))));
         assertTrue(iplist.contains (new IP("10.0.1.1")));
-        assertTrue(!iplist.contains (new IP("10.1.0.1")));
+        assertTrue(iplist.contains (new IP(bytes(10,0,1,1))));
+        assertTrue(!iplist.contains (new IP("10.1.0.1")));        
+        assertTrue(!iplist.contains (new IP(bytes(10,1,0,1))));
     }
 
     public void testIPLegacy() {
         IP a=new IP("1.1.1.*");
         IP b=new IP("1.1.1.2");
         IP c=new IP("1.1.2.1");
+        IP b1 = new IP(bytes(1,1,1,2));
+        IP c1 = new IP(bytes(1,1,2,1));
         assertTrue(a.contains(b));
         assertTrue(! b.contains(a));
         assertTrue(! a.contains(c));
         assertTrue(! c.contains(a));
+        assertTrue(b.contains(b1));
+        assertTrue(c.contains(c1));
+        assertTrue(b1.contains(b));
+        assertTrue(c1.contains(c));
 
         assertNotEquals(a,c);
         assertNotEquals(a,b);
@@ -65,6 +84,10 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNotEquals(b,c);
         assertEquals(a, a);
         assertEquals(b,b);
+        assertEquals(b, b1);
+        assertEquals(c, c1);
+        assertEquals(b.hashCode(), b1.hashCode());
+        assertEquals(c.hashCode(), c1.hashCode());
         assertNotEquals("asdf", a);
         IP d=new IP("1.1.1.0/255.255.255.0");
         IP e=new IP("1.1.1.0/24");
@@ -128,6 +151,16 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         try {
             new IP("1.1.1.1/255.1234.255.255");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP(new byte[] {0,0,0});
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
+        
+        try {
+            new IP(new byte[] {0,0,0,0,0});
             fail("illegal argument expected.");
         } catch(IllegalArgumentException ignored) {}
     }

@@ -59,6 +59,19 @@ public class ByteOrderTest extends BaseTestCase {
             0xFF00F300, result3);
     }
     
+    public void testBeb2Int() {
+        byte[] x2 = { (byte)0x1, (byte)0, (byte)0, (byte)0x2 };
+         //2^24+2 = 16777216+2 = 16777218
+        result2 = ByteOrder.beb2int(x2, 0);
+        assertEquals(16777218, result2);
+
+        byte[] x3={(byte)0xFF, (byte)0, (byte)0xF3, (byte)0x00};
+        result3=ByteOrder.beb2int(x3,0);
+        assertEquals("unexpected result3 ("+Integer.toHexString(result3)+")",
+            0xFF00F300, result3);
+
+    }
+    
     public void testLeb2Short() {
 
         byte[] x4={(byte)0xFF, (byte)0xF3};
