@@ -7,6 +7,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.*;
 
 
 public class PromotionACKVendorMessage extends VendorMessage {
@@ -31,8 +32,9 @@ public class PromotionACKVendorMessage extends VendorMessage {
 	/**
 	 * creates a new ACK message.
 	 */
-	public PromotionACKVendorMessage() {
+	public PromotionACKVendorMessage(GUID guid) {
 		super(F_LIME_VENDOR_ID,F_PROMOTION_ACK,VERSION,new byte[0]);
+		setGUID(guid);
 	} 
 	
 }

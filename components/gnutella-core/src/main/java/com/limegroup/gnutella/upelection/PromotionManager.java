@@ -103,7 +103,7 @@ public class PromotionManager {
     	_expirer = new Expirer(LEAF_REQUEST_TIMEOUT);
     	
     	//ping the original requestor
-    	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
+    	PromotionACKVendorMessage ping = new PromotionACKVendorMessage(_guid);
     	_udpService.send( ping, _promotionPartner);
     }
     
@@ -173,7 +173,7 @@ public class PromotionManager {
     	} 
     	else {
     		//we are the originally requesting UP, ACK back.
-    		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
+    		PromotionACKVendorMessage pong = new PromotionACKVendorMessage(_guid);
     		_udpService.send(pong, sender);
     		_expirer = new Expirer(UP_REQUEST_TIMEOUT);
 
