@@ -291,6 +291,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
+         if(true) return;
          //1. Initialize connection.  It's always safe to recommend new headers.
          Thread.currentThread().setName("IncommingConnectionThread");
          ManagedConnection connection = new ManagedConnection(socket);
@@ -688,10 +689,11 @@ public class ConnectionManager {
 		    // Allow incoming if the other side is a good ultrapeer and we
 		    // aren't at our max.
 		    if(hr.isGoodUltrapeer() &&
-		       _shieldedConnections < PREFERRED_CONNECTIONS_FOR_LEAF)
-		       return true;
-            else
+		       _shieldedConnections < PREFERRED_CONNECTIONS_FOR_LEAF) {
+		        return true;
+            } else {
                 return false;
+            }
 		} else if (hr.isLeaf() || leaf) {
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
             int leaves = getNumInitializedClientConnections();
@@ -1552,6 +1554,7 @@ public class ConnectionManager {
             catch(IllegalArgumentException iae){
                 continue;
             }
+            
             //set the good priority, if specified
             //add it to the catcher
             _catcher.add(e, true);
@@ -1800,9 +1803,11 @@ public class ConnectionManager {
                 } catch (NoGnutellaOkException e) {
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
+                    _catcher.putHostOnProbation(endpoint);
                     throw e;                    
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
+                    _catcher.expireHost(endpoint);
                     throw e;
                 }
 
