@@ -335,26 +335,6 @@ public class QueryRequest extends Message implements Serializable{
         queryKey = tempQueryKey;
     }
 
-    // handles parsing of all GGEP blocks.  may need to change return sig
-    // if new things are needed....
-    // TODO: technically there may be multiple GGEP blocks here - we tried to
-    // get all but encountered a infinite loop so just try to get one for now.
-    private final QueryKey parseGGEP(String ggepString) {
-        QueryKey retQK = null;
-        byte[] ggepBytes = ggepString.getBytes();
-        try {
-            GGEP ggepBlock = new GGEP(ggepBytes, 0, null);
-             if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                byte[] qkBytes = 
-                ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                retQK = QueryKey.getQueryKey(qkBytes, false);
-            }
-        }        
-        catch (BadGGEPBlockException ignored) {}
-        catch (BadGGEPPropertyException ignored) {}
-        return retQK;
-    }
-
     /**
      * Returns a new GUID appropriate for query requests.  If isRequery,
      * the GUID query is marked.
