@@ -507,24 +507,22 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             throw new IOException("Connection to self");
         }
 
+        // Set the Acceptors IP address
+        RouterService.getAcceptor().setAddress( localAddress );
         try {
-            // Set the Acceptors IP address
-            RouterService.getAcceptor().setAddress( localAddress );
             
-            _in = createInputStream();
-            _out = createOutputStream();
-            if (_in == null) throw new IOException("null input stream");
-            else if(_out == null) throw new IOException("null output stream");
-        } catch (Exception e) {
+            _in = new BufferedInputStream(_socket.getInputStream());
+            _out = new ThrottledOutputStream(_socket.getOutputStream(), 
+                _throttle);
+        } catch (NullPointerException e) {
             //Apparently Socket.getInput/OutputStream throws
-            //NullPointerException if the socket is closed.  (See Sun bug
-            //4091706.)  Unfortunately the socket may have been closed after the
-            //the check above, e.g., if the user pressed disconnect.  So we
-            //catch NullPointerException here--and any other weird possible
-            //exceptions.  An alternative is to obtain a lock before doing these
+            //NullPointerException if the socket is closed on JVMs prior to 
+            //1.3.  (See Sun bug 4091706.)  Unfortunately the socket may 
+            //have been closed after the the check above, e.g., if the 
+            //user pressed disconnect.  So we catch NullPointerException 
+            //here.  An alternative is to obtain a lock before doing these
             //calls, but we are afraid that getInput/OutputStream may be a
-            //blocking operation.  Just to be safe, we also check that in/out
-            //are not null.
+            //blocking operation.
             close();
             throw new IOException("could not establish connection");
         }
@@ -1070,24 +1068,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         }
     }
 
-    /**
-     * Throttles the this connection's OutputStream.  This works quite well with
-     * compressed streams, because the chaining mechanism writes the
-     * compressed bytes, ensuring that we do not attempt to request
-     * more data (and thus sleep while throttling) than we will actually write.
-     */
-    private OutputStream createOutputStream() throws IOException {
-        return new ThrottledOutputStream(_socket.getOutputStream(), _throttle);
-    }
-
-    /**
-     * Returns the stream to use for reading from s.
-     * By default this is a BufferedInputStream.
-     * Subclasses may override to decorate the stream.
-     */
-    private InputStream createInputStream() throws IOException {
-        return new BufferedInputStream(_socket.getInputStream());
-    }    
     
     /**
      * Builds queues and starts the OutputRunner.  This is intentionally not
