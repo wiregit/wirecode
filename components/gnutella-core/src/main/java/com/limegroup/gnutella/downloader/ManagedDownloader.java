@@ -45,8 +45,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int TRIES=300;
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
-    /** The time to wait trying to establish each connection, in milliseconds.*/
-    private static final int CONNECT_TIME=4000;  //8 seconds
+    /** The time to wait trying to establish each normal connection, in
+     *  milliseconds.*/
+    private static final int NORMAL_CONNECT_TIME=4000; //4 seconds
+    /** The time to wait trying to establish each push connection, in
+     *  milliseconds.  This needs to be larger than the normal time. */
+    private static final int PUSH_CONNECT_TIME=10000;  //10 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
@@ -86,8 +90,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
       *  etc.   Should be modified only through setState. */
     private int state;
-    /** The time as returned by Date.getTime() that this entered the current
-        state.  Should be modified only through setState. */
+    /** The system time that we expect to LEAVE the current state, or
+     *  Integer.MAX_VALUE if we don't know. Should be modified only through
+     *  setState. */
     private long stateTime;
     /** If in the wait state, the number of retries we're waiting for.
      *  Otherwise undefined. */
@@ -383,8 +388,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                         for (int i=0; i<buckets.length; i++)
                             retriesWaiting+=buckets[i].size();
                     }
-                    setState(WAITING_FOR_RETRY);
-                    Thread.sleep(calculateWaitTime());
+                    long time=calculateWaitTime();
+                    setState(WAITING_FOR_RETRY, time);
+                    Thread.sleep(time);
                 } else {
                     setState(GAVE_UP);
                     manager.remove(this, false);
@@ -701,15 +707,17 @@ public class ManagedDownloader implements Downloader, Serializable {
             RemoteFileDesc rfd=removeBest(files);      
             File incompleteFile=incompleteFileManager.getFile(rfd);
             HTTPDownloader ret;
+            boolean needsPush=needsPush(rfd);
             synchronized (this) {
                 currentLocation=rfd.getHost();
                 //If we're just increasing parallelism, stay in DOWNLOADING
                 //state.  Otherwise the following call is needed to restart
                 //the timer.
                 if (dloaders.size()==0)
-                    setState(CONNECTING);
+                    setState(CONNECTING, 
+                        needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
             }
-            if (needsPush(rfd)) {
+            if (needsPush) {
                 //System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
                 synchronized (pushLock) {
@@ -722,7 +730,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //notify()'s don't occur.  (They are not allowed by the Java
                     //Language Specifications.)  Look at acceptDownload for
                     //details.
-                    pushLock.wait(CONNECT_TIME);  
+                    pushLock.wait(PUSH_CONNECT_TIME);  
                     if (pushSocket==null)
                         continue;
 
@@ -740,7 +748,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
 
             try {
-                ret.connect(CONNECT_TIME);
+                ret.connect(NORMAL_CONNECT_TIME);
                 return ret;
             } catch (TryAgainLaterException e) {
                 //Add this for retry later
@@ -954,13 +962,25 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /////////////////////////////   Display Variables ////////////////////////////
 
-    /** Sets this' state, taking care of locking
-     *      @requires newState one of the constants defined in Downloader
-     *      @modifies this.state, this.stateTime */
+    /** Same as setState(newState, Integer.MAX_VALUE). */
     private void setState(int newState) {
         synchronized (this) {
             this.state=newState;
-            this.stateTime=(new Date()).getTime();
+            this.stateTime=Long.MAX_VALUE;
+        }
+    }
+
+    /** 
+     * Sets this' state.
+     * @param newState the state we're entering, which MUST be one of the 
+     *  constants defined in Downloader
+     * @param time the time we expect to state in this state, in 
+     *  milliseconds. 
+     */
+    private void setState(int newState, long time) {
+        synchronized (this) {
+            this.state=newState;
+            this.stateTime=System.currentTimeMillis()+time;
         }
     }
 
@@ -975,21 +995,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getRemainingStateTime() {
-        long now=(new Date()).getTime();
         switch (state) {
         case CONNECTING:
-            return timeDiff(now, CONNECT_TIME);
         case WAITING_FOR_RETRY:
-            return timeDiff(now, calculateWaitTime());
+            long remaining=stateTime-System.currentTimeMillis();
+            return (int)Math.max(remaining, 0)/1000;
         default:
             return Integer.MAX_VALUE;
         }
-    }
-
-    private int timeDiff(long nowTime, long stateLength) {
-        long elapsed=nowTime-stateTime;
-        long remaining=stateLength-elapsed;
-        return (int)Math.max(remaining, 0)/1000;
     }
     
     public synchronized String getFileName() {        
