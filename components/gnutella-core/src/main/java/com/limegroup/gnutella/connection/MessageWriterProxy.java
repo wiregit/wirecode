@@ -2,7 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -26,12 +26,12 @@ public final class MessageWriterProxy implements MessageWriter {
      * @param mc the <tt>ManagedConnection</tt> that ultimately handles some
      *  of the writing
      */
-    public MessageWriterProxy(ManagedConnection mc) {
+    public MessageWriterProxy(Connection conn) {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
-            DELEGATE = NIOMessageWriter.createWriter(mc);       
+            DELEGATE = NIOMessageWriter.createWriter(conn);       
         } else {
-            DELEGATE = BIOMessageWriter.createWriter(mc);
+            DELEGATE = BIOMessageWriter.createWriter(conn);
         }    
     }
     

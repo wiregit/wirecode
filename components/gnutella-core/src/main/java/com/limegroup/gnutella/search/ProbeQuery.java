@@ -113,16 +113,16 @@ final class ProbeQuery {
         // iterate through our connections, adding them to the hit, miss, or
         // old connections list
         while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
+            Connection conn = (Connection)iter.next();
             
-            if(mc.isUltrapeerQueryRoutingConnection()) {
-                if(mc.hitsQueryRouteTable(query)) { 
-                    hitConnections.add(mc);
+            if(conn.isUltrapeerQueryRoutingConnection()) {
+                if(conn.qrp().hitsQueryRouteTable(query)) { 
+                    hitConnections.add(conn);
                 } else {
-                    missConnections.add(mc);
+                    missConnections.add(conn);
                 }
             } else {
-                oldConnections.add(mc);
+                oldConnections.add(conn);
             }
         }
 

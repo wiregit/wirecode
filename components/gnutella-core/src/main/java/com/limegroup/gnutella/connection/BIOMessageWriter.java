@@ -3,8 +3,8 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.messages.Message;
 
 /**
@@ -15,9 +15,9 @@ import com.limegroup.gnutella.messages.Message;
 public final class BIOMessageWriter implements MessageWriter, Runnable {
 
     /**
-     * The <tt>ManagedConnection</tt> instance for this writer.
+     * The <tt>Connection</tt> instance for this writer.
      */
-    private final ManagedConnection CONNECTION;
+    private final Connection CONNECTION;
     
     /** 
      * A lock to protect changes to the message queue for this connection. 
@@ -38,7 +38,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @param conn the <tt>ManagedConnection</tt> containing this writer
      * @return a new <tt>MessageWriter</tt> instance
      */
-    public static MessageWriter createWriter(ManagedConnection conn) {
+    public static MessageWriter createWriter(Connection conn) {
         return new BIOMessageWriter(conn);    
     }
     
@@ -47,7 +47,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * 
      * @param conn the <tt>ManagedConnection</tt> for this writer
      */
-    private BIOMessageWriter(ManagedConnection conn) {
+    private BIOMessageWriter(Connection conn) {
         CONNECTION = conn;  
         QUEUE = CompositeQueue.createQueue(CONNECTION, OUTPUT_QUEUE_LOCK);     
         Thread blockingWriter = new Thread(this, "blocking message writer");
