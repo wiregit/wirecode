@@ -2771,7 +2771,10 @@ public abstract class MessageRouter {
     	
     	//register a new ACK handler 
     	GUID guid = new GUID(msg.getGUID());
-    	registerMessageListener(guid, new PromotionACKer());
+    	registerMessageListener(
+    			guid, 
+				new PromotionACKer(
+    					msg.getRequestor().getAddress(),msg.getRequestor().getPort(),true));
     	
     	//ping the original requestor
     	LimeACKVendorMessage ping = new LimeACKVendorMessage(guid,0);

@@ -22,7 +22,8 @@ public class Promoter extends ManagedThread {
 		try {
 			RouterService.getConnectionManager().becomeAnUPWithBackupConn(_host,_port);
 		}catch(IOException failed) {
-			//we couldn't connect to the guy who asked us to become an UP.  Abort 
+			failed.printStackTrace(System.out);
+			//we couldn't connect to the guy who asked us to become an UP.  Abort
 			return;
 		}
 		

@@ -21,23 +21,18 @@ public class PromotionACKer implements MessageListener {
 	private int _port;
 	
 	/**
-	 * creates a promotion ACKer which replies with another LimeACK
+	 * creates a promotion ACKer which replies with another LimeACK or starts
+	 * a promotion.
 	 * @param host the address of the candidate
 	 * @param port the port
+	 * @param promote whether to wait for an ack or start the promotion
 	 */
-	public PromotionACKer(String host, int port) {
-		_promote=false;
+	public PromotionACKer(String host, int port, boolean promote) {
+		_promote=promote;
 		_host=host;
 		_port=port;
 	}
 	
-	/**
-	 * creates an ACKer which waits for reply from the requesting
-	 * UP and initiates the promotion process.
-	 */
-	public PromotionACKer() {
-		_promote=true;
-	}
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.MessageListener#processMessage(com.limegroup.gnutella.messages.Message)
 	 */

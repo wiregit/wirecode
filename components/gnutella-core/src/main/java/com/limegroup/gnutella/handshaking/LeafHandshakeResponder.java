@@ -76,7 +76,7 @@ public final class LeafHandshakeResponder
      */
     private HandshakeResponse respondToIncoming(HandshakeResponse hr) {
         Properties ret = new LeafHeaders(getRemoteIP());
-        
+        System.out.println("*********************");
         //If we already have enough ultrapeers, reject.
         if(!_manager.allowConnection(hr)) {
             if( RECORD_STATS )

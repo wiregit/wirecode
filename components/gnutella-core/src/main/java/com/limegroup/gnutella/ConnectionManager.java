@@ -661,6 +661,7 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+    	
 
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
@@ -703,7 +704,6 @@ public class ConnectionManager {
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
-            
             if(!allowUltrapeer2LeafConnection(hr)) {
                 return false;
             }
@@ -745,6 +745,7 @@ public class ConnectionManager {
                   RESERVED_GOOD_LEAF_CONNECTIONS);
                             
         } else if (hr.isUltrapeer()) {
+        	
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
@@ -808,7 +809,8 @@ public class ConnectionManager {
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
-        if(userAgent == null) return false;
+        if(userAgent == null) 
+        return false;
         if(userAgent.startsWith("Morpheus")) return false;
         return true;        
     }
@@ -1482,12 +1484,17 @@ public class ConnectionManager {
      */
     public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
     	
+    	//first, lose one of our current UPs in order to free a slot.
+    	ManagedConnection sacrificed = (ManagedConnection)_initializedConnections.get(0);
+    	remove(sacrificed);
+    	
+    	
     	//this connection must not fail.  
 		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
 		
 		//let the exception propagate
 		//if we fail to connect for any reason, abort the promotion process.
-		UPconn.initialize();
+		initializeExternallyGeneratedConnection(UPconn);
     	
 		//now remove all our connections
 		//Question: do we want to remove the fetched but not initialized connections as well?
@@ -1497,6 +1504,7 @@ public class ConnectionManager {
 		//now remove all our open connections 
 		synchronized(this) {
 			_connections = new ArrayList();
+			_connections.add(UPconn);
 			_initializedConnections = new ArrayList();
 			_initializedClientConnections = new ArrayList();
 		}
