@@ -24,7 +24,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(BootstrapServerManagerTest.class, "testRedirect");
+        return buildTestSuite(BootstrapServerManagerTest.class);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -348,7 +348,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         assertNotNull(s3.getRequest());  //original location
         assertNotNull(s1.getRequest());  //was redirected here
         assertNull(s2.getRequest());  //didn't go here
-        assertEquals(RESPONSES_PER_SERVER, catcher.list.size());
+        assertEquals("invalid responses, got: " + catcher.list,
+                RESPONSES_PER_SERVER, catcher.list.size());
     }
 
     private void sleep() {
