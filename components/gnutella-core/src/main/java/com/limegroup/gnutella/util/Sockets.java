@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.limegroup.gnutella.ErrorService;
@@ -28,19 +29,9 @@ public class Sockets {
 	private static Constructor _inetAddressConstructor;
 
 	/**
-	 * Cached <tt>Socket</tt> class.
-	 */
-	private static Class _socketClass;
-
-	/**
 	 * Cached <tt>SocketAddress</tt> class.
 	 */
 	private static Class _socketAddressClass;
-	
-	/**
-	 * Cached <tt>setKeepAlive</tt> method.
-	 */
-	private static Method _setKeepAliveMethod;
 	
 	/**
 	 * Cached <tt>connect</tt> method.
@@ -51,13 +42,6 @@ public class Sockets {
 	// we don't have it inefficiently look them up each time
 	static {
 	    try {
-	        if(CommonUtils.isJava13OrLater()) {
-				_socketClass = Class.forName("java.net.Socket");
-				_setKeepAliveMethod =
-					_socketClass.getMethod(
-						"setKeepAlive",
-				    new Class[] { Boolean.TYPE } );
-            }
     		if(CommonUtils.isJava14OrLater()) {
 				Class socketAddress = 
 					Class.forName("java.net.InetSocketAddress");
@@ -66,7 +50,7 @@ public class Sockets {
 						String.class, Integer.TYPE 
 					});
 				_socketAddressClass = Class.forName("java.net.SocketAddress");
-				_connectMethod = _socketClass.getMethod("connect", 
+				_connectMethod = Socket.class.getMethod("connect", 
                     new Class[] { _socketAddressClass, Integer.TYPE });
             }
 		} catch(Exception e) {
@@ -89,23 +73,12 @@ public class Sockets {
      * @return true if this was able to set SO_KEEPALIVE
      */
     public static boolean setKeepAlive(Socket socket, boolean on) {
-        if (CommonUtils.isJava13OrLater()) {
-            //Call socket.setKeepAlive(on) using reflection.  See below for
-            //any explanation of why reflection must be used.
-            try {
-                _setKeepAliveMethod.invoke(socket, 
-                    new Object[] { on ? Boolean.TRUE : Boolean.FALSE });
-                return true;
-            } catch(IllegalAccessException e) {
-                // this should not happen, and we want to know if it does
-                ErrorService.error(e);
-            } catch(InvocationTargetException e) {
-                // this should be a SocketException, indicating an 
-                // underlying protocol error, which should happen,
-                // for example, if the socket has disconnected
-            }
+        try {
+            socket.setKeepAlive(on);
+            return true;
+        } catch(SocketException se) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -169,9 +142,8 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             try {
-                Socket ret = (Socket)_socketClass.newInstance();
-
-				Object addr = _inetAddressConstructor.newInstance(
+                Socket ret = (Socket)Socket.class.newInstance();
+                Object addr = _inetAddressConstructor.newInstance(
                     new Object[] { host, new Integer(port) });
 
                 _connectMethod.invoke(ret, 
@@ -179,8 +151,6 @@ public class Sockets {
                 return ret;
             } catch (InvocationTargetException e) {
                 Throwable e2 = e.getTargetException();
-                if( !(e2 instanceof IOException) )
-                    ErrorService.error(e2);
                 throw (IOException)e2;
             } catch(InstantiationException e) {
                 // this should never happen -- display the error
