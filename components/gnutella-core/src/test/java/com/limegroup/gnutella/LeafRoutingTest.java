@@ -72,13 +72,14 @@ public class LeafRoutingTest extends TestCase {
             doNoBroadcastFromOld();
             shutdown();
         } catch (IOException e) { 
-            System.err.println("Mysterious IOException:");
             e.printStackTrace();
+            fail("Mysterious IOException: "+e);
         } catch (BadPacketException e) { 
-            System.err.println("Mysterious bad packet:");
             e.printStackTrace();
+            fail("Mysterious bad packet: "+e);
         } catch (Exception e) {
             e.printStackTrace();
+			fail("unexpected exception: "+e);
         }
         
         //System.out.println("Done");
