@@ -192,11 +192,21 @@ public final class CommonUtils {
 	/** 
 	 * Returns whether or not the os is Mac OSX.
 	 *
-	 * @return <tt>true</tt> if the application is running on a Mac OSX, 
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isMacOSX() {
 		return _isMacOSX;
+	}
+
+	/** 
+	 * Returns whether or not the os is any Mac os.
+	 *
+	 * @return <tt>true</tt> if the application is running on Mac OSX
+	 *  or any previous mac version, <tt>false</tt> otherwise
+	 */
+	public static boolean isAnyMac() {
+		return _isMacClassic || _isMacOSX;
 	}
 
 	/** 
