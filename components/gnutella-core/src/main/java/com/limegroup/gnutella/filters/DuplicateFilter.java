@@ -175,7 +175,7 @@ public class DuplicateFilter extends SpamFilter {
     }
 }
 
-class GUIDPair {
+final class GUIDPair {
     byte[] guid;
     long time;
     int hops;
@@ -191,11 +191,12 @@ class GUIDPair {
     }
 }
 
-class QueryPair {
+final class QueryPair {
     String query;
     int hops;
     String xml;
     Set URNs;
+    int cachedHash = 0;
     
     QueryPair(String query, int hops, String xml, Set URNs) {
         this.query=query;
@@ -220,8 +221,11 @@ class QueryPair {
     } */
 
     public boolean equals(Object o) {
-        if (! (o instanceof QueryPair))
+        if ( o == this ) return true;
+        
+        if (!(o instanceof QueryPair))
             return false;
+            
         QueryPair other=(QueryPair)o;
         return (this.hops==other.hops) && 
                this.URNs.equals(other.URNs) &&
@@ -230,12 +234,14 @@ class QueryPair {
     }                
 
     public int hashCode() {
-        int result = 17;
-		result = (37*result) + query.hashCode();
-		result = (37*result) + xml.hashCode();
-		result = (37*result) + URNs.hashCode();
-		result = (37*result) + hops;
-		return result;
+        if ( cachedHash == 0 ) {
+            cachedHash = 17;
+    		cachedHash = (37*cachedHash) + query.hashCode();
+    		cachedHash = (37*cachedHash) + xml.hashCode();
+    		cachedHash = (37*cachedHash) + URNs.hashCode();
+    		cachedHash = (37*cachedHash) + hops;
+        }    		
+		return cachedHash;
     }
     
     public String toString() {
