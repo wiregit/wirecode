@@ -27,7 +27,13 @@ import com.limegroup.gnutella.altlocs.*;
  */
 public final class HTTPUploader implements Uploader {
     
-	private OutputStream _ostream;
+    /**
+     * The outputstream -- a CountingOutputStream so that we can
+     * keep track of the amount of bytes written.
+     * Currently track is only kept for writing a THEX tree, so that
+     * progress of the tree and bandwidth measurement may be done.
+     */
+	private CountingOutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
 	private int _totalAmountRead;
@@ -199,7 +205,7 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the connection was closed.
 	 */
 	public void initializeStreams() throws IOException {
-	    _ostream = _socket.getOutputStream();
+	    _ostream = new CountingOutputStream(_socket.getOutputStream());
 	}
 	    
     
@@ -222,7 +228,7 @@ public final class HTTPUploader implements Uploader {
 		} catch (IOException e) {
             // Only propogate the exception if they did not read
             // as much as they wanted to.
-            if ( _amountRead < _amountRequested )
+            if ( amountUploaded() < getAmountRequested() )
                 throw e;
 		}
 		_firstReply = false;
@@ -269,6 +275,7 @@ public final class HTTPUploader implements Uploader {
 	 */
 	public void setState(int state) {
 		_stateNum = state;
+		_ostream.setIsCounting(false);
 		switch (state) {
 		case UPLOADING:
 			_state = new NormalUploadState(this, STALLED_WATCHDOG);
@@ -305,7 +312,8 @@ public final class HTTPUploader implements Uploader {
         	_state = new BannedUploadState();
         	break;
         case THEX_REQUEST:
-        	_state = new THEXUploadState(this);
+            _ostream.setIsCounting(true);
+        	_state = new THEXUploadState(this, STALLED_WATCHDOG);
         	break;
 		case COMPLETE:
 		case INTERRUPTED:
@@ -316,15 +324,8 @@ public final class HTTPUploader implements Uploader {
             Assert.that(false, "Invalid state: " + state);
 		}
 		
-		// look again to set the last transfer state.
-		switch(state) {
-	    case COMPLETE:
-	    case INTERRUPTED:
-	    case CONNECTING:
-	        break;
-        default:
-            _lastTransferStateNum = state;
-        }
+		if(_state != null)
+		    _lastTransferStateNum = state;
 	}
 	
 	/**
@@ -412,10 +413,20 @@ public final class HTTPUploader implements Uploader {
     public int getUploadEnd() {return _uploadEnd;}
 
 	// implements the Uploader interface
-	public int getFileSize() {return _fileSize;}
+	public int getFileSize() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _fileDesc.getHashTree().getOutputLength();
+	    else
+	        return _fileSize;
+    }
 	
 	// implements the Uploader interface
-	public int getAmountRequested() { return _amountRequested; }
+	public int getAmountRequested() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _fileDesc.getHashTree().getOutputLength();
+	    else
+	        return _amountRequested;
+    }
 
 	// implements the Uploader interface
 	public int getIndex() {return _index;}
@@ -510,7 +521,12 @@ public final class HTTPUploader implements Uploader {
      *
 	 * Implements the Uploader interface.
      */
-	public int amountUploaded() {return _amountRead;}
+	public int amountUploaded() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _ostream.getAmountWritten();
+	    else
+	        return _amountRead;
+    }
 	
 	/**
 	 * The total amount of bytes that this upload and all previous
@@ -518,8 +534,11 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * Implements the Uploader interface.
 	 */
-	public int getTotalAmountUploaded() { 
-	    return _totalAmountRead + _amountRead;
+	public int getTotalAmountUploaded() {
+	    if(_stateNum == THEX_REQUEST)
+	        return _ostream.getAmountWritten();
+	    else
+	        return _totalAmountRead + _amountRead;
     }
 
 	/**
@@ -976,7 +995,8 @@ public final class HTTPUploader implements Uploader {
 	}
 
 	public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
+        bandwidthTracker.measureBandwidth(
+             _totalAmountRead + _amountRead + _ostream.getAmountWritten());
     }
 
     public float getMeasuredBandwidth() {

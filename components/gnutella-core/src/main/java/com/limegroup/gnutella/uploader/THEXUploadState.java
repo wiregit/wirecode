@@ -2,6 +2,7 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
@@ -30,6 +31,7 @@ public class THEXUploadState implements HTTPMessage {
     private final FileDesc FILE_DESC;
     private final HTTPUploader UPLOADER;
     private final HashTree TREE;
+    private final StalledUploadWatchdog WATCHDOG;
 
     /**
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
@@ -43,10 +45,11 @@ public class THEXUploadState implements HTTPMessage {
      * @param uploader
      *            the <tt>HTTPUploader</tt> that sends this message
      */
-    public THEXUploadState(HTTPUploader uploader) {
+    public THEXUploadState(HTTPUploader uploader, StalledUploadWatchdog dog) {
         UPLOADER = uploader;
         FILE_DESC = uploader.getFileDesc();
         TREE = FILE_DESC.getHashTree();
+        WATCHDOG = dog;
     }
 
     /**
@@ -57,9 +60,10 @@ public class THEXUploadState implements HTTPMessage {
      * @throws IOException
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
-    public void writeMessageHeaders(OutputStream os) throws IOException {
-        String str = "HTTP/1.1 200 OK\r\n";
-        os.write(str.getBytes());
+    public void writeMessageHeaders(OutputStream network) throws IOException {
+        StringWriter os = new StringWriter();
+        
+        os.write("HTTP/1.1 200 OK\r\n");
 
         HTTPUtils.writeHeader(
             HTTPHeaderName.SERVER,
@@ -77,8 +81,14 @@ public class THEXUploadState implements HTTPMessage {
             TREE.getOutputLength(),
             os);        
         
-        str = "\r\n";
-        os.write(str.getBytes());
+        os.write("\r\n");
+        
+        WATCHDOG.activate(network);
+        try {
+            network.write(os.toString().getBytes());
+        } finally {
+            WATCHDOG.deactivate();
+        }
     }
 
     /**
@@ -91,7 +101,15 @@ public class THEXUploadState implements HTTPMessage {
      */
     public void writeMessageBody(OutputStream os) throws IOException {
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
-        TREE.write(slowStream);
+        // the tree might be large, but the watchdogs require two minutes,
+        // so this is okay, since if an entire tree wasn't written in two
+        // minutes, there is a problem.
+        WATCHDOG.activate(os);
+        try {
+            TREE.write(slowStream);
+        } finally {
+            WATCHDOG.deactivate();
+        }
     }
 
     /**

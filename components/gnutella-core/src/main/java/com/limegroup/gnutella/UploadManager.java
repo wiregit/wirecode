@@ -406,7 +406,6 @@ public final class UploadManager implements BandwidthTracker {
                uploader.getIndex() != UPDATE_FILE_INDEX &&
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
-               uploader.getState() != Uploader.THEX_REQUEST &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -457,7 +456,8 @@ public final class UploadManager implements BandwidthTracker {
             switch(state) {
                 case Uploader.COMPLETE:
                     UploadStat.COMPLETED.incrementStat();
-                    if( lastState == Uploader.UPLOADING )
+                    if( lastState == Uploader.UPLOADING ||
+                        lastState == Uploader.THEX_REQUEST)
                         UploadStat.COMPLETED_FILE.incrementStat();
                     break;
                 case Uploader.INTERRUPTED:
@@ -470,7 +470,8 @@ public final class UploadManager implements BandwidthTracker {
             FileDesc fd = uploader.getFileDesc();
             if( fd != null && 
               state == Uploader.COMPLETE &&
-              lastState == Uploader.UPLOADING ) {
+              (lastState == Uploader.UPLOADING ||
+               lastState == Uploader.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
                 RouterService.getCallback().handleSharedFileUpdate(
                     fd.getFile());

@@ -170,13 +170,11 @@ public final class NormalUploadState implements HTTPMessage {
 			
 			_stalledChecker.activate(network);			
 			network.write(ostream.toString().getBytes());
+        } finally {
 			// we do not need to check the return value because
 			// if it was stalled, an IOException would have been thrown
 			// causing us to fall out to the catch clause
 			_stalledChecker.deactivate();
-		} catch(IOException e) {
-		    _stalledChecker.deactivate(); // no need to kill now.
-            throw e;
 		} 
 	}
 
