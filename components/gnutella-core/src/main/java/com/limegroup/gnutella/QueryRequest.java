@@ -214,19 +214,13 @@ public class QueryRequest extends Message implements Serializable{
 						tempQueryUrns = new HashSet();
 					}
 					tempQueryUrns.add(urn);
-					if(tempRequestedUrnTypes == null) {
-						tempRequestedUrnTypes = new HashSet();
-					}
-					// but also, it's an implicit request for similar
-					// URNs on responses, so add the URN prefix there, too
-					tempRequestedUrnTypes.add(urn.getUrnType());
 				} else if(UrnType.isSupportedUrnType(curExtStr)) {
 					// it's an URN type to return, of form "urn" or 
 					// "urn:namespace"
 					if(tempRequestedUrnTypes == null) {
 						tempRequestedUrnTypes = new HashSet();
 					}
-					tempRequestedUrnTypes.add(curExtStr);
+					tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
 				} else if (curExtStr.startsWith("<?xml")) {
 					// rich query
 					tempRichQuery = curExtStr;
