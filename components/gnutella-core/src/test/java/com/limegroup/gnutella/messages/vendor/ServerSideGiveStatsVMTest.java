@@ -327,6 +327,16 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
  		}
  	}
 
+    private void stopConnectionsCounting() {
+        LEAF_1.countEnabled = false;
+        LEAF_2.countEnabled = false;
+        LEAF_3.countEnabled = false;
+        LEAF_4.countEnabled = false;
+        ULTRAPEER_1.countEnabled = false;
+        ULTRAPEER_2.countEnabled = false;
+    }
+
+
 	/**
 	 * Connects all of the nodes to the central test Ultrapeer.
 	 */
@@ -555,21 +565,21 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         assertNull("Leaf got  messages when it should not have", qLeaf3);
         assertNull("Leaf got  messages when it should not have", qLeaf4);
 
-        ////////////////////////////////////////////////////
-        //TODO1: Why is Query3 not getting through to UP1 and UP2 when others
-        //queries are
-        ///////////////////////////////////////////////////
         qUP1 = (QueryRequest)getFirstInstanceOfMessageType(
                                                 ULTRAPEER_1,query3.getClass());
         qUP2 = (QueryRequest)getFirstInstanceOfMessageType(
                                                 ULTRAPEER_2,query3.getClass());
-        assertNull("UP1 got query3 ", qUP1);
-        assertNull("UP2 got query3 ", qUP2);
-                                                                   
-//          System.out.println(""+GUID1);
-//          System.out.println(""+GUID2);
-//          System.out.println(""+GUID3);
-
+        //assertNull("UP1 got query3 ", qUP1);
+        //assertNull("UP2 got query3 ", qUP2);
+                                                 
+        assertEquals("Query3 should hav reached UP1", GUID3, 
+                                                    new GUID(qUP1.getGUID()));
+        assertEquals("Query3 should hav reached UP2", GUID3, 
+                                                    new GUID(qUP2.getGUID()));
+                  
+        //System.out.println(""+GUID1);
+        //System.out.println(""+GUID2);
+        //System.out.println(""+GUID3);
 
         //Now let make the leaves send some responses
 
@@ -718,6 +728,11 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
                 continue;
             }
         }
+        
+        //the stats messages have all been received at this point, the
+        //connections are still up and can get pings, we should stop the
+        //counting on the connections to make sure the tests pass.
+        //stopConnectionsCounting();
 
         ////////////////////////////////////////////////
 
@@ -799,7 +814,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         assertEquals("stats message malformed", 
                      giveStatsPayload[1], statsPayload[1]);
 
-        returnedStats = new String(statsAck2.getPayload());
+        returnedStats = new String(statsAck2.getPayload());      
 
         tok = new StringTokenizer(returnedStats,"^|");
         
@@ -815,7 +830,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("UP1 received mismatch", ULTRAPEER_1.incomingCount, 
+
+        assertEquals("UP1 received mismatch", ULTRAPEER_1.incomingCount,
                                                 Integer.parseInt(token.trim()));
         token = tok.nextToken();
         assertEquals("UP1 dropped mismatch", 0, Integer.parseInt(
