@@ -6,6 +6,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -559,7 +560,8 @@ public class FileManager {
         
         // Tell the download manager to notify us of incomplete files.
 		if (! loadThreadInterrupted())
-		    RouterService.getDownloadManager().updateIncompleteFiles();
+		    RouterService.getDownloadManager().getIncompleteFileManager().
+		        registerAllIncompleteFiles();
 		    
 		// write out the cache of URNs
 		UrnCache.instance().persistCache();
@@ -786,16 +788,37 @@ public class FileManager {
      * Adds an incomplete file to be used for partial file sharing.
      *
      * @modifies this
-     * @param IncompleteFileManager to create the new IncompleteFileDesc with
-     * @param URN the Urn to associate with the new IncompleteFileDesc
+     * @param incompleteFile the incomplete file.
+     * @param urns the set of all known URNs for this incomplete file
+     * @param name the completed name of this incomplete file
+     * @param size the completed size of this incomplete file
+     * @param vf the VerifyingFile containing the ranges for this inc. file
      */
-    void addIncompleteFile(IncompleteFileManager ifm, URN urn) {
+    public void addIncompleteFile(File incompleteFile, Set urns, String name,
+                           int size, VerifyingFile vf) {
         synchronized(this) {
+            
+            // We want to ensure that incomplete files are never added twice.
+            // This may happen if IncompleteFileManager is deserialized before
+            // FileManager finishes loading ...
+            // So, every time an incomplete file is added, we check to see if
+            // it already was... and if so, ignore it.
+    		Iterator iter = urns.iterator();
+    		while (iter.hasNext()) {
+                // see if 
+    			URN urn = (URN)iter.next();
+                IntSet indices=(IntSet)_urnIndex.get(urn);
+                // if there were indices for this URN, exit.
+                if( indices != null ) {
+                    return;
+                }
+            }
+            
+            // no indices were found for any URN associated with this
+            // IncompleteFileDesc... add it.
             int fileIndex = _files.size();
-            HashSet urns = new HashSet(1);
-            urns.add(urn);
             IncompleteFileDesc ifd = new IncompleteFileDesc(
-                ifm, fileIndex, urns, urn);
+                incompleteFile, urns, fileIndex, name, size, vf);            
             _files.add(ifd);
             this.updateUrnIndex(ifd);
         }

@@ -22,7 +22,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * Needed to find out what ranges are available
      */
-	private IncompleteFileManager _incompleteFileManager;
+	private VerifyingFile _verifyingFile;
 
 	/**
 	 * The name of the file, as returned by IncompleteFileManager
@@ -38,13 +38,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * Constructor for the IncompleteFileDesc object.
      */
-    public IncompleteFileDesc( IncompleteFileManager ifm, int index, 
-                               Set urns, URN sha1 ) {
-        super(new File(ifm.getFileForUrn(sha1).getAbsolutePath()), 
-              urns, index);
-        _incompleteFileManager = ifm;
-        _name = ifm.getCompletedName(getFile());
-        _size = (int)ifm.getCompletedSize(getFile());
+    public IncompleteFileDesc(File file, Set urns, int index, 
+                              String completedName, int completedSize,
+                              VerifyingFile vf) {
+        super(file, urns, index);
+        _name = completedName;
+        _size = completedSize;
+        _verifyingFile = vf;
     }
 
 	/**
@@ -64,22 +64,6 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	public String getName() {
 		return _name;
 	}
-
-    /**
-     * Hits won't ever happen for incomplete files
-     * @return 0     
-     */    
-    public int incrementHitCount() {
-        return 0;
-    }
-    
-    /** 
-     * Hits won't ever happen for incomplete files
-     * @return 0
-     */
-    public int getHitCount() {
-        return 0;
-    }
     
     /**
      * Opens an input stream to the <tt>File</tt> instance for this
@@ -103,7 +87,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      */
     public String getAvailableRanges() {
         StringBuffer ret = new StringBuffer("bytes");
-        VerifyingFile vf = _incompleteFileManager.getEntry(getFile());
+        VerifyingFile vf = _verifyingFile;
         for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
             Interval interval = (Interval) iter.next();
 	    // don't offer ranges that are smaller than MIN_CHUNK_SIZE
@@ -121,7 +105,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * incomplete file.
      */
     public boolean isRangeSatisfiable(int low, int high) {
-        return isRangeSatisfiable(new Interval(low, high));
+        VerifyingFile vf = _verifyingFile;
+        for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
+            Interval interval = (Interval) iter.next();
+            if (low >= interval.low && high <= interval.high)
+                return true;
+        }
+        return false;
     }
     
     /**
@@ -129,13 +119,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * of our incomplete file.
      */
     public boolean isRangeSatisfiable(Interval range) {
-        VerifyingFile vf = _incompleteFileManager.getEntry(getFile());
-        for (Iterator iter = vf.getBlocks(); iter.hasNext(); ) {
-            Interval interval = (Interval) iter.next();
-            if (range.low >= interval.low && range.high <= interval.high)
-                return true;
-        }
-        return false;
+        return isRangeSatisfiable(range.low, range.high);
     }
     
     // implements HTTPHeaderValue

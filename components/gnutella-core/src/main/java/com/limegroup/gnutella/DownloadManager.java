@@ -117,6 +117,14 @@ public class DownloadManager implements BandwidthTracker {
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
     }
+    
+    /**
+     * Returns the IncompleteFileManager used by this DownloadManager
+     * and all ManagedDownloaders.
+     */
+    public IncompleteFileManager getIncompleteFileManager() {
+        return incompleteFileManager;
+    }    
 
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
@@ -216,33 +224,6 @@ public class DownloadManager implements BandwidthTracker {
         } catch (ClassCastException e) {
             return false;
         }
-    }
-    
-    /**
-     * Registered the incomplete file used by this ManagedDownloader
-     * with the FileManager.
-     *
-     * The file is registered for each URN that this ManagedDownloader
-     * is associated with.
-     */
-    private synchronized void registerIncompleteFile(ManagedDownloader mdl) {
-        for ( Iterator iter = mdl.getUrnsAsIterator(); iter.hasNext(); ) {
-            fileManager.addIncompleteFile( 
-                incompleteFileManager, (URN)iter.next());
-        }
-    }
-    
-    /**
-     * Updates FileManager to contain all the incomplete files that are in use
-     * by all downloaders.
-     */
-    public synchronized void updateIncompleteFiles() {
-	    for (Iterator iter = active.iterator(); iter.hasNext(); ) {
-	        registerIncompleteFile((ManagedDownloader)iter.next());
-	    }
-	    for (Iterator iter = waiting.iterator(); iter.hasNext(); ) {
-	        registerIncompleteFile((ManagedDownloader)iter.next());
-	    }	    
     }
      
     ////////////////////////// Main Public Interface ///////////////////////
@@ -453,14 +434,12 @@ public class DownloadManager implements BandwidthTracker {
      * 1) Initializes the downloader.
      * 2) Adds the download to the waiting list.
      * 3) Notifies the callback about the new downloader.
-     * 4) Registers the incomplete file with FileManager.
-     * 5) Writes the new snapshot out to disk.
+     * 4) Writes the new snapshot out to disk.
      */
     private void startDownload(ManagedDownloader md) {
         md.initialize(this, fileManager, callback, false);
         waiting.add(md);
         callback.addDownload(md);
-        registerIncompleteFile(md);
         writeSnapshot(); // Save state for crash recovery.
     }
 
@@ -936,11 +915,6 @@ public class DownloadManager implements BandwidthTracker {
     private final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
-    }
-
-    /** FOR TESTING ONLY: returns this' list of partially downloaded blocks. */
-    public IncompleteFileManager getIncompleteFileManager() {
-        return incompleteFileManager;
     }
 
 
