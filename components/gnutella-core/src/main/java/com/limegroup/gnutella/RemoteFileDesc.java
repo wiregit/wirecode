@@ -743,36 +743,6 @@ public class RemoteFileDesc implements Serializable {
     }
     
     /**
-     * merges the proxies of the two RFDs.  The rfds should be equals(),
-     * but can have different sets of push proxies and support different
-     * version of the FWT protocol.  In the latter case, the higher number
-     * prevails.
-     */
-    public static RemoteFileDesc mergeProxies(RemoteFileDesc a, RemoteFileDesc b) {
-        
-        if (!a.equals(b))
-            throw new IllegalArgumentException( " different rfds ");
-        
-        if (! Arrays.equals(a.getClientGUID(),b.getClientGUID()))
-            throw new IllegalArgumentException(" different pes");
-        
-        PushEndpoint pea = a.getPushAddr();
-        PushEndpoint peb = b.getPushAddr();
-        
-        if (pea.getFeatures()!=peb.getFeatures())
-            throw new IllegalArgumentException(" different pes");
-        
-        Set newSet = new HashSet(pea.getProxies());
-        newSet.addAll(peb.getProxies());
-        PushEndpoint merged = new PushEndpoint(pea.getClientGUID(),
-                newSet,
-                pea.getFeatures(),
-                Math.max(pea.supportsFWTVersion(),peb.supportsFWTVersion()));
-        
-        return new RemoteFileDesc(a,merged); 
-    }
-    
-    /**
      * 
      * @return the push address.
      */
