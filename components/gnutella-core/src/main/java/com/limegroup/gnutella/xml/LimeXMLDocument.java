@@ -359,7 +359,14 @@ public class LimeXMLDocument implements Serializable {
      */
     public String getSchemaURI(){
         return schemaUri;
-    }    
+    }
+    
+    /**
+     * Returns the LimeXMLSchema associated with this XML document.
+     */
+    public LimeXMLSchema getSchema() {
+        return LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+    }
     
     /**
      * Returns the name of the file that the data in this XML document 
