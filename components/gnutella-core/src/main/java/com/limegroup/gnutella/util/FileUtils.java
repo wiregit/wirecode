@@ -91,10 +91,38 @@ public class FileUtils
     public static File getParentFile(File f) {
         return f.getParentFile();
     }
+    
+    /**
+     * Gets the canonical path, catching buggy Windows errors
+     */
+    public static String getCanonicalPath(File f) throws IOException {
+        try {
+            return f.getCanonicalPath();
+        } catch(IOException ioe) {
+            String msg = ioe.getMessage();
+            // windows bugs out :(
+            if(CommonUtils.isWindows() && msg != null && 
+               msg.indexOf("There are no more files") != -1)
+                return f.getAbsolutePath();
+            else
+                throw ioe;
+        }
+    }
+            
 
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
-        return f.getCanonicalFile();
+        try {
+            return f.getCanonicalFile();
+        } catch(IOException ioe) {
+            String msg = ioe.getMessage();
+            // windows bugs out :(
+            if(CommonUtils.isWindows() && msg != null && 
+               msg.indexOf("There are no more files") != -1)
+                return f.getAbsoluteFile();
+            else
+                throw ioe;
+        }
     }
 
     /**
