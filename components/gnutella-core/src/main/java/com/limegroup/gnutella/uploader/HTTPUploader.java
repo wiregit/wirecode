@@ -60,19 +60,28 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
 		FileDesc desc;
-		boolean failed = false;
+		boolean indexOut = false;
+		boolean ioexcept = false;
+
 		try {
+			// THIS CAN'T BE MOVED OR FILENOTFOUND will have 
+			// a null pointer
+			_ostream = _socket.getOutputStream();
+			// Shouldn't this be FILE_NOT_FOUND
 			desc = FileManager.instance().get(_index);
 			_fileSize = desc._size;
-			_ostream = _socket.getOutputStream();
+
+			// Check if ostream is null...
 		} catch (IndexOutOfBoundsException e) {
-			failed = true;
+			indexOut = true;
 		} catch (IOException e) {
-			failed = true;
+			ioexcept = true;
 		}
-		if (failed)
-			setState(COULDNT_CONNECT);
-		else
+		if (indexOut)
+			setState(FILE_NOT_FOUND);
+		else if (ioexcept) 
+			setState(INTERRUPTED);
+		else 
 			setState(CONNECTING);
 	}
 		
@@ -299,7 +308,11 @@ public class HTTPUploader implements Uploader {
                 sub = sub.trim();   
                 char c;
 				// get the first character
-                c = sub.charAt(0);
+				try {
+					c = sub.charAt(0);
+				} catch (IndexOutOfBoundsException e) {
+					throw new IOException();
+				}
 				// - n  
                 if (c == '-') {  
 					// String second;

@@ -95,16 +95,11 @@ public class UploadManager {
 			// the GET line was wrong, just exit.
 			return;
 		} 
-		
-		clearFailedPushes();
 
 		// check if it complies with the restrictions.
 		// if no, send an error.  
 		// if yes, constroct the uploader
 		uploader = new HTTPUploader(line._file, socket, line._index, this);
-
-		if (uploader.getState() == uploader.COULDNT_CONNECT)
-			return;
 
 		String host = socket.getInetAddress().getHostAddress();
 
@@ -322,7 +317,7 @@ public class UploadManager {
 		float speed = manager.getUploadSpeed();
 		// the total bandwith available then, is the percentage
 		// allocated of the total bandwith.
-		float totalBandwith = ((connectionSpeed*((float)speed/100)));
+		float totalBandwith = ((connectionSpeed*((float)speed/100.F)));
 		return totalBandwith;
 	}
 

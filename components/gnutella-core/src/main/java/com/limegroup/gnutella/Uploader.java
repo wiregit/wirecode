@@ -24,11 +24,10 @@ public interface Uploader {
 	public static final int FREELOADER       = 1;
 	public static final int LIMIT_REACHED    = 2;
 	public static final int UPLOADING        = 3;
- 	public static final int COULDNT_CONNECT  = 4;
-	public static final int COMPLETE         = 5;
-	public static final int INTERRUPTED      = 6;
-	public static final int PUSH_FAILED      = 7;
-	public static final int FILE_NOT_FOUND   = 8;
+	public static final int COMPLETE         = 4;
+	public static final int INTERRUPTED      = 5;
+	public static final int PUSH_FAILED      = 6;
+	public static final int FILE_NOT_FOUND   = 7;
 
 	/**
 	 * Stops this upload.  If the download is already 

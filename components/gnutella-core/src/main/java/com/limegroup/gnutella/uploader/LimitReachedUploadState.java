@@ -41,7 +41,7 @@ public class LimitReachedUploadState implements UploadState {
 		_ostream.write(str.getBytes());
 		_ostream.write(errMsg.getBytes());
 		_ostream.flush();
-		_ostream.close();
+		_uploader.stop();
 
 	}
 
