@@ -208,6 +208,10 @@ public class UDPConnectionProcessor {
         _ip        		         = ip;
         _port      		         = port;
 
+        if(LOG.isDebugEnabled())  {
+            LOG.debug("Creating UDPConn ip:"+ip+" port:"+port);
+        }
+
         // Init default state
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
 		_connectionState         = PRECONNECT_STATE;

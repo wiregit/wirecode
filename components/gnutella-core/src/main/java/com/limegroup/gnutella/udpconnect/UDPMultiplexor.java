@@ -94,6 +94,9 @@ public class UDPMultiplexor {
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
+            if(LOG.isDebugEnabled())  {
+                LOG.debug("Receiving SynMessage :"+msg);
+            }
 			for (int i = 1; i < _connections.length; i++) {
 				con = _connections[i];
 				if ( con != null && 
