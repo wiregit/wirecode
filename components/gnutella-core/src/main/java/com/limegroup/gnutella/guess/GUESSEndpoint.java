@@ -47,4 +47,26 @@ public final class GUESSEndpoint {
 	public int getPort() {
 		return PORT;
 	}
+
+    
+    /** Returns true if two GUESSEndpoint objects are equal.
+     */
+    public boolean equals(Object o) {
+        boolean retBool = false;
+        if (o instanceof GUESSEndpoint) {
+            GUESSEndpoint ep = (GUESSEndpoint) o;
+            retBool = (ADDRESS.equals(ep.ADDRESS)) && (PORT == ep.PORT);
+        }
+        return retBool;
+    }
+            
+    /** Returns this' hashCode.
+     */
+    public int hashCode() {
+        int result = 79;
+        result = 37*result + ADDRESS.hashCode();
+        result = 37*result + PORT;
+        return result;
+    }
+
 }
