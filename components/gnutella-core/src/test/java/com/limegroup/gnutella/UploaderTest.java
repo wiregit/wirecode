@@ -16,6 +16,7 @@ public class UploaderTest extends TestCase {
     private ActivityCallback ac;
     private FileManager fm;
     private RouterService rs;
+    private UploadManager upManager;
     private RemoteFileDesc rfd1;
     private RemoteFileDesc rfd2;
     private RemoteFileDesc rfd3;
@@ -23,15 +24,21 @@ public class UploaderTest extends TestCase {
     private RemoteFileDesc rfd5;
 
 
-    public void setUp() {
+    public void setUp() throws Exception {
         ac = new ActivityCallbackStub();
         fm = new FileManagerStub();
         rs = new RouterService(ac);
+        upManager = new UploadManager();
         try {
             PrivilegedAccessor.setValue(rs,"fileManager",fm);
         } catch(Exception e) {
-            fail("could not initialize test");
+            fail("could not set fileManager in RouterService");
         }
+        try {
+            PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
+        } catch(Exception e) {
+            fail("could not set RouterService's uploadManager");
+        }        
         FileDesc fd = fm.get(0);
         rfd1 = new RemoteFileDesc("1.1.1.1",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
@@ -58,6 +65,7 @@ public class UploaderTest extends TestCase {
         ac = null;
         fm = null;
         rs = null;
+        upManager = null;
         rfd1 = null;
         rfd2 = null;
         rfd3 = null;
@@ -85,8 +93,6 @@ public class UploaderTest extends TestCase {
      * - when an uploader with slot terminates, everyone in queue advances.
      */
     public void testNormalQueueing() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -184,8 +190,6 @@ public class UploaderTest extends TestCase {
      * MUST respond bewteen MIN_POLL_TIME and MAX_POLL_TIME
      */
     public void testQueueTiming() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -257,8 +261,6 @@ public class UploaderTest extends TestCase {
      * support queueing
      */
     public void testNotQueuedUnlessHeaderSent() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -295,8 +297,6 @@ public class UploaderTest extends TestCase {
     }
 
     public void testPerHostLimitedNotQueued() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(2);
@@ -335,8 +335,6 @@ public class UploaderTest extends TestCase {
     }
  
     public void testSoftMax() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(9999);
         SettingsManager.instance().setSoftMaxUploads(2);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -383,8 +381,6 @@ public class UploaderTest extends TestCase {
      * Tests this. 
      */
     public void testUploadLimtIncludesQueue() {
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(1);
@@ -429,8 +425,6 @@ public class UploaderTest extends TestCase {
      * not cause the second request to be queued.
      */
     public void testSameFileSameHostGivenSlot() { 
-        UploadManager upManager = new UploadManager();
-        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -572,14 +566,6 @@ public class UploaderTest extends TestCase {
     private static void kill(HTTPDownloader downloader) {
         downloader.stop();
         try { Thread.sleep(400); } catch (InterruptedException ignored) { }
-    }
-
-    private void setUploadManager(UploadManager manager) {
-        try {
-            PrivilegedAccessor.setValue(rs,"uploadManager",manager);
-        } catch(Exception e) {
-            fail("could not initialize test");
-        }
     }
  
 }
