@@ -53,7 +53,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
 	 * greater than this value have their TTLs automatically reduced
 	 */
-	private static final byte SOFT_MAX = 4;
+	private static final byte SOFT_MAX = 3;
 
 	/**
 	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
@@ -719,6 +719,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                                   6346);
         LEAF.send(query);
         LEAF.flush();
+
+        Thread.sleep(4000);
 
         // ultrapeers should get the QR
         assertTrue(getFirstQueryRequest(ULTRAPEER_1) != null);
