@@ -148,23 +148,29 @@ public class PingReplyTest extends TestCase {
         }
 
         //Encode and check raw bytes.
+        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
+        //this into account....
         byte[] bytes=baos.toByteArray(); 
         int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
                       +1   //data length
-                      +2;  //data bytes
+                      +2   //data bytes
+                      +1   //"UDP" extension flags
+                      +udpLength // ID
+                      +1;   //data length
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
         assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x80 | idLength)); //extension flags
+                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
         assertTrue(bytes[offset+2]==(byte)'D');
         assertTrue(bytes[offset+3]==(byte)'U');
                      //...etc.
-        assertTrue(bytes[bytes.length-2]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1]==(byte)0x02); //big byte of 523
+        assertTrue(bytes[bytes.length-2-(2+udpLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(2+udpLength)]==(byte)0x02); //big byte of 523
 
 
         //Decode and check contents.
