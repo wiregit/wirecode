@@ -79,21 +79,4 @@ public class UpdateMessageVerifier {
             throw new IllegalStateException();
         return xmlMessage;
     }
-    
-    public static void main(String[] args) {
-        try {
-        RandomAccessFile f=new RandomAccessFile(
-                  new File(new File("lib"),"update.xml"),"r");
-        byte[] content = new byte[(int)f.length()];
-        f.readFully(content);
-        f.close();
-        //start the test
-        UpdateMessageVerifier tester = new UpdateMessageVerifier(content);
-        boolean rslt = tester.verifySource();
-        System.out.println(""+rslt);
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed");
-        }
-    }
 }
