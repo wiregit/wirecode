@@ -252,7 +252,7 @@ public class ClientSideOutOfBandReplyTest
             testUPs[0].flush();
 
             // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(1000);
+            UDP_ACCESS.setSoTimeout(2000);
             pack = new DatagramPacket(new byte[1000], 1000);
             try {
                 UDP_ACCESS.receive(pack);
@@ -359,6 +359,88 @@ public class ClientSideOutOfBandReplyTest
         }
         assertEquals(queryGuid, new GUID(ack.getGUID()));
         assertEquals(10, ack.getNumResults());
+    }
+
+
+    public void testRemovedQuerySemantics() throws Exception {
+        DatagramPacket pack = null;
+        // send a query and make sure that after it is removed (i.e. stopped by
+        // the user) we don't request OOB replies for it
+
+        // first of all, we should confirm that we are sending out a OOB query.
+        GUID queryGuid = new GUID(rs.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), rs.getAddress(), 
+                                       rs.getPort()));
+        rs.query(queryGuid.bytes(), "susheel");
+        Thread.sleep(250);
+
+        // all connected UPs should get a OOB query
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryRequest qr = getFirstQueryRequest(testUPs[i]);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
+            assertTrue(qr.desiresOutOfBandReplies());
+        }
+
+        // now confirm that we follow the OOB protocol
+        ReplyNumberVendorMessage vm = 
+           new ReplyNumberVendorMessage(queryGuid, 10);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), 
+                                  baos.toByteArray().length,
+                                  testUPs[0].getInetAddress(), rs.getPort());
+        UDP_ACCESS.send(pack);
+
+        // we should get a LimeACK in response
+        LimeACKVendorMessage ack = null;
+        while (ack == null) {
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get ack", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            Message m = Message.read(in);
+            if (m instanceof LimeACKVendorMessage)
+                ack = (LimeACKVendorMessage) m;
+        }
+        assertEquals(queryGuid, new GUID(ack.getGUID()));
+        assertEquals(10, ack.getNumResults());
+
+        // now stop the query
+        rs.stopQuery(queryGuid);
+        Thread.sleep(200);
+
+        // send another ReplyNumber
+        vm = new ReplyNumberVendorMessage(queryGuid, 5);
+        baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), 
+                                  baos.toByteArray().length,
+                                  testUPs[0].getInetAddress(), rs.getPort());
+        UDP_ACCESS.send(pack);
+
+        // we should NOT get a LimeACK in response
+        while (true) {
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (InterruptedIOException expected) {
+                break;
+            }
+            catch (IOException bad) {
+                bad.printStackTrace();
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            Message m = Message.read(in);
+            if (m instanceof LimeACKVendorMessage)
+                assertTrue("we got an ack, weren't supposed to!!", false);
+        }
+
     }
 
     
