@@ -197,8 +197,8 @@ public class ConnectionManager {
 
 	/**
 	 * Variable for the number of times since we attempted to force ourselves 
-	 * to become an Ultrapeer that we were told to become leaves.  If this number
-	 * is too great, we give up and become a leaf.
+	 * to become an Ultrapeer that we were told to become leaves.  If this 
+	 * number is too great, we give up and become a leaf.
 	 */
 	private volatile int _leafTries;
 
@@ -240,7 +240,8 @@ public class ConnectionManager {
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(String hostname, int portnum) 
+    public ManagedConnection createConnectionBlocking(String hostname, 
+        int portnum) 
 		throws IOException {
         ManagedConnection c = 
 			new ManagedConnection(hostname, portnum);
@@ -453,8 +454,8 @@ public class ConnectionManager {
     }
     
     /**
-     * @return the number of initialized connections, which is less than or equals
-     *  to the number of connections.
+     * @return the number of initialized connections, which is less than or 
+     *  equals to the number of connections.
      */
     public int getNumInitializedConnections() {
 		return _initializedConnections.size();
@@ -673,7 +674,7 @@ public class ConnectionManager {
         //connections.
 
         //Don't allow anything if disconnected.
-        if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive <= 0) {
+        if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive<=0) {
             return false;
 		} else if (RouterService.isShieldedLeaf()) {
 		    // Allow incoming if the other side is a good ultrapeer and we
@@ -869,7 +870,7 @@ public class ConnectionManager {
             Iterator ultrapeers = getInitializedConnections().iterator();
             Set proxies = new HashSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
-                ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
                 if (currMC.getPushProxyPort() >= 0)
                     proxies.add(currMC);
             }
@@ -925,7 +926,7 @@ public class ConnectionManager {
             // value
             Iterator ultrapeers = getInitializedConnections().iterator();
             while (ultrapeers.hasNext()) {
-                ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
                 if (currMC.remoteHostSupportsLeafGuidance() >= 0)
                     currMC.send(stat);
             }
@@ -1375,12 +1376,12 @@ public class ConnectionManager {
         //doing what LimeWire thinks is best and what the user wants.  Ideally
         //we would set the NUM_CONNECTIONS iff the user hasn't recently manually
         //adjusted it.  Because this is a pain to implement, we use a hack; only
-        //adjust the NUM_CONNECTIONS if there is only one shielded leaf-ultrapeer
-        //connection.  Typically this will happen just once, when we enter leaf
-        //mode.  Note that we actually call ultrapeerConnections() instead of a
-        //"clientSupernodeConnections()" method; if this method is called and
-        //ultrapeerConnections()==1, there is exactly one client-ultrapeer
-        //connection.
+        //adjust the NUM_CONNECTIONS if there is only one shielded 
+        //leaf-ultrapeer connection.  Typically this will happen just once, when 
+        //we enter leaf mode.  Note that we actually call ultrapeerConnections() 
+        //instead of a "clientSupernodeConnections()" method; if this method is 
+        //called and ultrapeerConnections()==1, there is exactly one 
+        //client-ultrapeer connection.
         boolean firstShieldedConnection = (ultrapeerConnections()==1) 
             && _keepAlive>0;
         if (firstShieldedConnection)
@@ -1436,10 +1437,11 @@ public class ConnectionManager {
             if(colonIndex > remoteAddress.length()) return;
             try {
                 int port =
-                    Integer.parseInt(remoteAddress.substring(colonIndex).trim());
+                    Integer.parseInt(
+                        remoteAddress.substring(colonIndex).trim());
                 if(NetworkUtils.isValidPort(port)) {
-                	// for incoming connections, set the port based on what it's connection
-                	// headers say the listening port is
+                	// for incoming connections, set the port based on what it's 
+                	// connection headers say the listening port is
                     connection.setListeningPort(port);
                 }
             } catch(NumberFormatException e){
@@ -1544,7 +1546,8 @@ public class ConnectionManager {
         if (c.isOutgoing()) {
             synchronized(this) {
                 connectionInitializing(c);
-                // We've added a connection, so the need for connections went down.
+                // We've added a connection, so the need for connections went 
+                // down.
                 adjustConnectionFetchers();
             }
             RouterService.getCallback().connectionInitializing(c);
@@ -1579,7 +1582,8 @@ public class ConnectionManager {
         if (! c.isOutgoing()) {
             synchronized(this) {
                 connectionInitializingIncoming(c);
-                // We've added a connection, so the need for connections went down.
+                // We've added a connection, so the need for connections went 
+                // down.
                 adjustConnectionFetchers();
             }
             RouterService.getCallback().connectionInitializing(c);
@@ -1837,10 +1841,14 @@ public class ConnectionManager {
                     
                     if(!RouterService.isConnected()) {
                         recoverHosts();
+                        
+                        // Try to re-connect.  Note this call resets the time
+                        // for our last check for a live connection, so we may
+                        // hit web servers again to check for a live connection.
                         connect();
                     }
                 }
-            }, 10*1000, 60*1000);   
+            }, 10*1000, 2*60*1000);   
             _automaticConnectTime = System.currentTimeMillis();
             _automaticallyConnecting = true;         
         }
