@@ -427,7 +427,7 @@ public class SettingsManager implements SettingsInterface
 
  
     /** sets the time to live */
-    public void setTTL(byte ttl) 
+    public synchronized void setTTL(byte ttl) 
 	throws IllegalArgumentException
     {
 	if(ttl > softmaxttl_ || ttl < 1)
@@ -442,7 +442,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the soft maximum time to live */
-    public void setSoftMaxTTL(byte softmaxttl)
+    public synchronized void setSoftMaxTTL(byte softmaxttl)
 	throws IllegalArgumentException
     {
 	if(softmaxttl < 0 || softmaxttl > 16)
@@ -457,7 +457,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the hard maximum time to live */
-    public void setMaxTTL(byte maxttl)
+    public synchronized void setMaxTTL(byte maxttl)
 	throws IllegalArgumentException
     {
 	if(maxttl < 0 || maxttl > 50)
@@ -472,7 +472,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the maximum length of packets (spam protection)*/
-    public void setMaxLength(int maxLength)
+    public synchronized void setMaxLength(int maxLength)
 	throws IllegalArgumentException
     {
 	if(false)
@@ -487,7 +487,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the timeout */
-    public void setTimeout(int timeout)
+    public synchronized void setTimeout(int timeout)
 	throws IllegalArgumentException
     {
 	if(false)
@@ -503,7 +503,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the keep alive */
-    public void setKeepAlive(int keepAlive)
+    public synchronized void setKeepAlive(int keepAlive)
 	throws IllegalArgumentException
     {
 	if(keepAlive<0)
@@ -518,7 +518,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the port to connect on */
-    public void setPort(int port) 
+    public synchronized void setPort(int port) 
 	throws IllegalArgumentException
     {
 	// if the entered port is outside accepted 
@@ -538,7 +538,7 @@ public class SettingsManager implements SettingsInterface
      *  exception if you try to set the speed
      *  far faster than a T3 line or less than
      *  0.*/
-    public void setConnectionSpeed(int speed)
+    public synchronized void setConnectionSpeed(int speed)
     {
 	if(speed < 0 || speed > 20000)
 	    throw new IllegalArgumentException();
@@ -554,7 +554,7 @@ public class SettingsManager implements SettingsInterface
     /** sets the limit for the number of searches 
      *  throws an exception on negative limits 
      *  and limits of 10,000 or more */
-    public void setSearchLimit(byte limit)
+    public synchronized void setSearchLimit(byte limit)
     {
 	if(limit < 0 || limit > 10000)
 	    throw new IllegalArgumentException();
@@ -568,7 +568,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the client (gu) ID number */
-    public void setClientID(String clientID)
+    public synchronized void setClientID(String clientID)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -582,7 +582,7 @@ public class SettingsManager implements SettingsInterface
 
     /** sets a boolean that specifies 
      *  whether a stats file exists */
-    public void setStats(boolean stats)
+    public synchronized void setStats(boolean stats)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -597,7 +597,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** set the maximum number of connections to hold */
-    public void setMaxConn(int maxConn)
+    public synchronized void setMaxConn(int maxConn)
     {
 	if(maxConn < 0)
 	    throw new IllegalArgumentException();
@@ -611,7 +611,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** set the directory for saving files */
-    public void setSaveDirectory(String dir)
+    public synchronized void setSaveDirectory(String dir)
     {
 	File f = new File(dir);
 	boolean b = f.isDirectory();
@@ -626,7 +626,7 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** set the directories to search */
-    public void setDirectories(String dir)
+    public synchronized void setDirectories(String dir)
     {	
 	if(dir == null)
 	    throw new IllegalArgumentException();
@@ -641,7 +641,7 @@ public class SettingsManager implements SettingsInterface
     }
     
     /** set the extensions to search for */
-    public void setExtensions(String ext)
+    public synchronized void setExtensions(String ext)
     {
 	if(ext == null)
 	    throw new IllegalArgumentException();
@@ -654,7 +654,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    public void setBannedIps(String[] bannedIps)
+    public synchronized void setBannedIps(String[] bannedIps)
     {
 	if(bannedIps == null)
 	    throw new IllegalArgumentException();
@@ -667,7 +667,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    public void setBannedWords(String[] bannedWords)
+    public synchronized void setBannedWords(String[] bannedWords)
     {
 	if(bannedWords == null)
 	    throw new IllegalArgumentException();
@@ -680,7 +680,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    public void setFilterAdult(boolean filterAdult)
+    public synchronized void setFilterAdult(boolean filterAdult)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -694,7 +694,7 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
     
-    public void setFilterDuplicates(boolean filterDuplicates)
+    public synchronized void setFilterDuplicates(boolean filterDuplicates)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -707,7 +707,7 @@ public class SettingsManager implements SettingsInterface
 		writeProperties();
 	    }
     }
-    public void setFilterHtml(boolean filterHtml)
+    public synchronized void setFilterHtml(boolean filterHtml)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -721,7 +721,7 @@ public class SettingsManager implements SettingsInterface
 	
 	    }
     }
-    public void setFilterVbs(boolean filterVbs)
+    public synchronized void setFilterVbs(boolean filterVbs)
     {
 	if(false)
 	    throw new IllegalArgumentException();
@@ -767,7 +767,7 @@ public class SettingsManager implements SettingsInterface
     /** writes out the Network Discovery specialized 
      *  properties file
      */
-    public void writeNDProps()
+    public synchronized void writeNDProps()
     {
 	try {
 	    FileOutputStream ostream = new FileOutputStream(ndFileName_);
@@ -780,7 +780,7 @@ public class SettingsManager implements SettingsInterface
     /** writes out the properties file to with the specified
      *  name in the user's home directory
      */
-    public void writeProperties()
+    public synchronized void writeProperties()
     {
         try {
 	    FileOutputStream ostream = new FileOutputStream(fileName_);
