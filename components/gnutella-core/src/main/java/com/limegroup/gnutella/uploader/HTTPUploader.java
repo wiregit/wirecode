@@ -49,6 +49,7 @@ public class HTTPUploader implements Uploader {
 	private String _chatHost;
 	private int _chatPort;
     private final FileManager _fileManager;
+    private boolean _supportsQueueing = false;
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
@@ -255,7 +256,6 @@ public class HTTPUploader implements Uploader {
 	 */
 	public void writeResponse() {
 		try {
-			readHeader();
 			if(_ostream != null) {
 				_method.writeHttpResponse(_state, _ostream);
 			}
@@ -379,6 +379,8 @@ public class HTTPUploader implements Uploader {
 	// implements the Uploader interface
 	public int getChatPort() {return _chatPort;}
 
+    public boolean supportsQueueing() {return _supportsQueueing; }
+
     /**The number of bytes read. The way we calculate the number of bytes 
      * read is a little wierd if the range header begins from the middle of 
      * the file (say from byte x). Then we consider that bytes 0-x have 
@@ -407,13 +409,13 @@ public class HTTPUploader implements Uploader {
     }    
 
 	/**
-	 * Reads the HTTP header sent by the requesting client -- note that the
+     * Reads the HTTP header sent by the requesting client -- note that the
 	 * 'GET' portion of the request header has already been read.
 	 *
 	 * @throws <tt>IOException</tt> if there are any io issues while reading
 	 *  the header
 	 */
-	private void readHeader() throws IOException {
+	public void readHeader() throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
 		String userAgent;
@@ -586,17 +588,27 @@ public class HTTPUploader implements Uploader {
 				HTTPUploader.readAlternateLocations(str, _alternateLocationCollection);
 			}
             //check the "accept:" header
-            if (indexOfIgnoreCase(str, "accept:") != -1) {
+            else if (indexOfIgnoreCase(str, "accept:") != -1) {
                 if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE)
                     != -1) {
                     _clientAcceptsXGnutellaQueryreplies = true;
                 }
+            }
+            else if (indexOfIgnoreCase(str,"x-queue")!=-1) {
+                parseQueueVersion(str);
             }
 		}
 
 		if (_uploadEnd == 0)
 			_uploadEnd = _fileSize;
 	}
+
+    private void parseQueueVersion(String str) {
+        String s = HTTPUtils.extractHeaderValue(str);
+        float version = Float.parseFloat(s);
+        if (version > 0)
+            _supportsQueueing = true;
+    }
 
 	/**
 	 * This method parses the "X-Gnutella-Content-URN" header, as specified

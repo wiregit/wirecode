@@ -81,5 +81,7 @@ public interface Uploader extends BandwidthTracker {
 	 * return the port of the host to chat with
 	 */
 	public int getChatPort();
+
+    public boolean supportsQueueing();
 }
 

@@ -144,8 +144,13 @@ public final class UploadManager implements BandwidthTracker {
 
                 HTTPUploader uploader=new HTTPUploader(method, line._fileName, 
                               socket, line._index, this, _fileManager, _router);
-
-                debug(uploader+" HTTPUploader created");
+                try {
+                    uploader.readHeader();
+                } catch(IOException iox) {
+                    return;
+                }
+                
+                debug(uploader+" HTTPUploader created and read all headers");
 
                 boolean queued = false;
                 try {
@@ -399,6 +404,11 @@ public final class UploadManager implements BandwidthTracker {
         int maxQueueSize = SettingsManager.instance().getUploadQueueSize();
         boolean wontAccept = size >= maxQueueSize;
         int ret = -1;
+        //Note: The current policy is to not put uploadrers in a queue, if they 
+        //do not send am X-Queue header. Further. uploaders are removed from 
+        //the queue if they do not send the header in the subsequent request.
+        //To change this policy, chnage the way queue is set.
+        boolean queue = uploader.supportsQueueing();
 
         Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
@@ -421,7 +431,7 @@ public final class UploadManager implements BandwidthTracker {
             Long prev=(Long)kv.getValue();
             if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
                 _queuedUploads.remove(posInQueue);
-                debug(uploader+" queued uploader flooding - throwing exception");
+                debug(uploader+" queued uploader flooding-throwing exception");
                 throw new IOException();
             }
             kv.setValue(new Long(System.currentTimeMillis()));
@@ -429,12 +439,20 @@ public final class UploadManager implements BandwidthTracker {
             ret = 1;//queued
         }
         debug(uploader+" checking if given uploader is can be accomodated ");
-        //If uploader can and should be in queue, it is at this point.
+        //If uploader can and should be in queue, it is at this point.        
         if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
             ret = 2;
             debug(uploader+" accepting upload");
             //remove this uploader from queue, and get its time
             _queuedUploads.remove(0);
+        }
+        if(!queue) {//downloader does not support queueing
+            //(!busy && posInQueue>0) || (busy && we are somewhere in the queue)
+            //In either of these cases, if uploader does not support queueing, 
+            //it should be removed from the queue.            
+            _queuedUploads.remove(posInQueue);//remove it
+            uploader.setState(Uploader.LIMIT_REACHED);
+            ret = 0;
         }
         return ret;
     }
@@ -843,7 +861,7 @@ public final class UploadManager implements BandwidthTracker {
 		 * Flag indicating if the protocol is HTTP1.1.
 		 */
         final boolean _http11;
-
+        
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance.
 		 *
