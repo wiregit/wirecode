@@ -668,7 +668,8 @@ public final class HTTPUploader implements Uploader {
                 if(RECORD_STATS) 
 					BandwidthStat.
                         HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
-                debug("HTTPUploader.readHeader(): str = " +  str);
+                if (LOG.isDebugEnabled())
+                	LOG.debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank
 
@@ -683,6 +684,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
+                else if ( readFeatureHeader(str)     ) ;
         	}
         } catch(ProblemReadingHeaderException prhe) {
             // there was a problem reading the header.. gobble up
@@ -1019,6 +1021,8 @@ public final class HTTPUploader implements Uploader {
 		if ( !HTTPHeaderName.FEATURES.matchesStartOfString(str) )
 			return false;
         str = HTTPUtils.extractHeaderValue(str);
+        if (LOG.isDebugEnabled())
+        	LOG.debug("reading feature header: "+str);
         StringTokenizer tok = new StringTokenizer(str, ",");
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
