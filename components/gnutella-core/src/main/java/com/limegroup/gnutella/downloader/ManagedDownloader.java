@@ -818,7 +818,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized void stop() {
-        // make redundant calls to stop() safe
+        // make redundant calls to stop() fast
+        // this change is pretty safe because stopped is only set in two
+        // places - initialized and here.  so long as this is true, we know
+        // this is safe.
         if (stopped)
             return;
 
@@ -1108,7 +1111,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         if (instructions[1] > 0) {
                             setState((int) instructions[0], instructions[1]);
                             reqLock.lock(instructions[1]);
-                            timeSpentWaiting = 
+                            timeSpentWaiting += 
                                 System.currentTimeMillis() - currTime;
                         }
                         else {
