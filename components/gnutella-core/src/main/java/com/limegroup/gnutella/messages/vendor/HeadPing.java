@@ -85,7 +85,7 @@ public class HeadPing extends VendorMessage {
 	private final byte _features;
 
 	/** The GGEP fields in this pong, if any */
-	private GGEP _ggep;
+	GGEP _ggep;
 	/** 
 	 * The client GUID of the host we wish this ping routed to.
 	 * null if pinging directly.
@@ -433,7 +433,9 @@ final class GGEPHeadConstants {
                 GGEP_PUSH_BLOOM |
                 RANGES |
                 ALTLOCS |
-                PUSHLOCS)};
+                PUSHLOCS |
+                ALT_MESH_STAT |
+                PUSH_MESH_STAT)};
         dest.put(GGEP_PROPS,supportedFeatures);
         
         //also say that we support only the list of 32-bit ranges format.

@@ -23,7 +23,10 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AltLocDigest;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
@@ -381,6 +384,15 @@ public class HeadPong extends VendorMessage {
     		//if the ping requests ranges, add them
     		if (ping.requestsRanges())
     		    writeRanges(ggep,desc);
+    		//if the ping requests pushlocs, add them
+    		if (ping.requestsPushLocs())
+    		    writePushLocs(ggep,desc,ping);
+    		//if the ping requests altlocs, add them
+    		if (ping.requestsAltlocs())
+    		    writeLocs(ggep,desc,ping);
+    		
+    		// write the ggep block out
+    		ggep.write(daos);
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -428,7 +440,7 @@ public class HeadPong extends VendorMessage {
 	        return;
 	    
 	    try {
-	        byte [] ranges = _ggep.getBytes((char)GGEPHeadConstants.RANGES+"d");
+	        byte [] ranges = _ggep.getBytes((char)GGEPHeadConstants.RANGES+GGEPHeadConstants.DATA);
 	        
 	        // for now we parse only 32 bit range lists
 	        if ((ranges[0] & GGEPHeadConstants.RANGE_LIST) == GGEPHeadConstants.RANGE_LIST) {
@@ -465,7 +477,7 @@ public class HeadPong extends VendorMessage {
 	        return;
 	    
 	    try {
-	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+"d");
+	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(altlocs);
 	        readLocs(new DataInputStream(bais));
 	    } catch (BadGGEPPropertyException bad){}
@@ -496,7 +508,7 @@ public class HeadPong extends VendorMessage {
 	        return;
 	    
 	    try {
-	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+"d");
+	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(pushlocs);
 	        readPushLocs(new DataInputStream(bais));
 	    } catch (BadGGEPPropertyException bad){}
@@ -633,88 +645,139 @@ public class HeadPong extends VendorMessage {
 		dest.putAndCompress((char)GGEPHeadConstants.RANGES + GGEPHeadConstants.DATA,toZip);
 	}
 	
-	private static final boolean writePushLocs(CountingOutputStream caos,
-			FileDesc desc,boolean FWTonly) throws IOException {
 	
-		DataOutputStream daos = new DataOutputStream(caos);
-		//this operates on a copy of the alternate location collection
-		//since it may need to remove any PushLocs that do not support
-		//FW2FW transfer.
-		AlternateLocationCollection altlocs = 
-			AlternateLocationCollection.create(desc.getSHA1Urn());
-		
-		altlocs.addAll(desc.getPushAlternateLocationCollection());
-		
-		
-		if (FWTonly) {
-			LOG.debug("adding only fwt-enabled pushlocs in pong");
-			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
-				PushAltLoc current = (PushAltLoc)iter.next();
-				if (current.supportsFWTVersion() <1)
-					iter.remove();
-			}
-		}
-		
-		//do we have any (left) ?
-		if (altlocs.getAltLocsSize()==0)
-			return false;
-		
-		//push altlocs are bigger than normal altlocs, however we 
-		//don't know by how much.  The size can be between
-		//23 and 47 bytes.  We assume its 47.
-		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
-		
-		if (LOG.isDebugEnabled())
-			LOG.debug("trying to add up to "+available+ " push locs to pong");
-		
-		byte [] altbytes = altlocs.toBytesPush(available);
-		
-		if (altbytes == null){
-			//altlocs will not fit or none available - say we didn't send them
-			LOG.debug("push locs will not fit :(");
-			return false;
-		} else { 
-			LOG.debug("adding push altlocs");
-			daos.writeShort((short)altbytes.length);
-			caos.write(altbytes);
-			return true;
-		}
-
-	}
-	
-	private static final boolean writeLocs(CountingOutputStream caos,
-			FileDesc desc) throws IOException {
-		
-		DataOutputStream daos = new DataOutputStream(caos);
-		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
-		
+	private static final void writeLocs(CountingGGEP dest, FileDesc desc, HeadPing ping) {
+	    AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+	    
 		//do we have any altlocs?
 		if (altlocs==null)
-			return false;
+			return;
 		
-		//how many can we fit in the packet?
-		int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
-		
-		if (LOG.isDebugEnabled())
-			LOG.debug("trying to add up to "+toPack+" locs to pong");
-		
-		byte [] altbytes = altlocs.toBytes(toPack);
-		
-		if (altbytes ==null){
-			//altlocs will not fit or none available - say we didn't send them
-			LOG.debug("altlocs will not fit :(");
-			return false;
-			
-		} else { 
-			LOG.debug("adding altlocs");
-			//TODO: write how many we have total, and how many collided with the digest
-			// they should both be shorts
-			daos.writeShort((short)altbytes.length);
-			caos.write(altbytes);
-			return true;
-		}
+		// the total number of altlocs we know about
+	    short total = (short)altlocs.getAltLocsSize();
+	    
+	    // how many altlocs we will have filtered, if any
+	    short filtered = 0;
+	    
+	    // estimate up to how many altlocs we can fit.
+	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / (ALTLOC_COMPRESSION * 6));
+	    
+	    // nothing will fit - too bad.
+	    if (toPack == 0)
+	        return;
+	    
+	    if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+toPack+"locs to pong");
+	    
+	    // see if the other side sent a filter
+	    AltLocDigest digest = ping.getDigest();
+
+	    // if we have a filter, filter the altlocs
+	    if (digest != null) {
+	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
+	        int sent =0;
+	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
+	            AlternateLocation loc = (AlternateLocation)iter.next();
+	            if (loc instanceof PushAltLoc)
+	                    continue;
+	            
+	            if (digest.contains(loc)) {
+	                filtered++;
+	                continue;
+	            }
+	            temp.add(loc.createClone());
+	            sent++;
+	        }
+	        altlocs = temp;
+	    }
+	    
+	    // put the response in the ggep
+	    byte [] alts = altlocs.toBytes(toPack);
+	    byte [] tmp = new byte[alts.length+2];
+	    ByteOrder.short2beb((short)alts.length,tmp,0);
+	    System.arraycopy(alts,0,tmp,2,alts.length);
+	    dest.putAndCompress(GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA,tmp);
+	    
+	    // if the other side indicated support for statistics, add those too
+	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
+	    if ((pingFeatures[0] & GGEPHeadConstants.ALT_MESH_STAT) 
+	            == GGEPHeadConstants.ALT_MESH_STAT) {
+	        byte [] stats = new byte[4];
+	        ByteOrder.short2leb(total,stats,0);
+	        ByteOrder.short2leb(filtered,stats,2);
+	        dest.put(GGEPHeadConstants.ALT_MESH_STAT+GGEPHeadConstants.DATA,stats);
+	    }
 	}
 	
+	private static final void writePushLocs(CountingGGEP dest, FileDesc desc, HeadPing ping) {
+	    AlternateLocationCollection altlocs = desc.getPushAlternateLocationCollection();
+	    
+		//do we have any altlocs?
+		if (altlocs==null)
+			return;
+		
+		// the total number of altlocs we know about
+	    short total = (short)altlocs.getAltLocsSize();
+	    
+	    // how many altlocs we will have filtered, if any
+	    short filtered = 0;
+	    
+	    // estimate up to how many altlocs we can fit.
+	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / (PUSHLOC_COMPRESSION * 47));
+	    
+	    // nothing will fit - too bad.
+	    if (toPack == 0)
+	        return;
+	    
+	    if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+toPack+"locs to pong");
+	    
+	    // see if the other side sent a filter
+	    AltLocDigest digest = ping.getPushDigest();
+
+	    // if we have a filter, filter the altlocs
+	    if (digest != null) {
+	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
+	        int sent =0;
+	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
+	            AlternateLocation loc = (AlternateLocation)iter.next();
+	            if (loc instanceof DirectAltLoc)
+	                    continue;
+	        
+	            // skip non-fwt capable pushlocs if requested
+	            if (ping.requestsFWTPushLocs()) {
+	                PushAltLoc pushalt = (PushAltLoc)loc;
+	                if (pushalt.supportsFWTVersion() < 1)
+	                    continue;
+	            }
+	            
+	            if (digest.contains(loc)) {
+	                filtered++;
+	                continue;
+	            }
+	            temp.add(loc.createClone());
+	            sent++;
+	        }
+	        altlocs = temp;
+	    }
+	    
+	    // put the response in the ggep
+	    byte [] alts = altlocs.toBytesPush(toPack);
+	    byte [] tmp = new byte[alts.length+2];
+	    ByteOrder.short2beb((short)alts.length,tmp,0);
+	    System.arraycopy(alts,0,tmp,2,alts.length);
+	    dest.putAndCompress(GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA,tmp);
+	    
+	    // if the other side indicated support for statistics, add those too
+	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
+	    if ((pingFeatures[0] & GGEPHeadConstants.PUSH_MESH_STAT) 
+	            == GGEPHeadConstants.PUSH_MESH_STAT) {
+	        byte [] stats = new byte[4];
+	        ByteOrder.short2leb(total,stats,0);
+	        ByteOrder.short2leb(filtered,stats,2);
+	        dest.put(GGEPHeadConstants.PUSH_MESH_STAT+GGEPHeadConstants.DATA,stats);
+	    }
+	}
 	
 }
 	
