@@ -9,7 +9,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.upelection.Candidate;
+import com.limegroup.gnutella.upelection.RemoteCandidate;
 import com.limegroup.gnutella.util.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -360,14 +360,6 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             //good expected behaviour -- keep going
         }
         
-        try {
-            statsVM = new GiveStatsVendorMessage((byte)4, 
-                               GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC,
-                               Message.N_TCP);
-            fail("4 invalid stats control -- too big");
-        } catch (Exception bpx) {
-            //good expected behaviour -- keep going
-        }
 
     }
     
@@ -391,19 +383,19 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     
     public void testGiveUPVendorMessage() throws Exception {
     	GUID guid = new GUID(GUID.makeGuid());
-    	GiveUPVendorMessage req = new GiveUPVendorMessage(guid, 1,2,GiveUPVendorMessage.PLAIN);
+    	UDPCrawlerPing req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.PLAIN);
     	assertEquals(1, req.getNumberUP());
     	assertEquals(2, req.getNumberLeaves());
-    	assertFalse(req.asks4ConnectionTime());
-    	assertFalse(req.asks4LocaleInfo());
-    	assertTrue(req.asks4Feature(GiveUPVendorMessage.PLAIN));
+    	assertFalse(req.hasConnectionTime());
+    	assertFalse(req.hasLocaleInfo());
+    	assertTrue(req.hasFeature(UDPCrawlerPing.PLAIN));
     	testWrite(req);
     	testRead(req);
     	
     	//also test one with newer mask - should be trimmed to our mask
-    	req = new GiveUPVendorMessage(guid, 1,2,(byte)0xFF);
-    	assertTrue(req.asks4Feature(GiveUPVendorMessage.FEATURE_MASK));
-    	assertEquals(0,req.getFormat() & ~GiveUPVendorMessage.FEATURE_MASK);
+    	req = new UDPCrawlerPing(guid, 1,2,(byte)0xFF);
+    	assertTrue(req.hasFeature(UDPCrawlerPing.FEATURE_MASK));
+    	assertEquals(0,req.getFormat() & ~UDPCrawlerPing.FEATURE_MASK);
     }
     
     public void testFeaturesVM() throws Exception {
@@ -424,9 +416,9 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
     
     public void testBestCandidatesVendorMessage() throws Exception {
-    	Candidate [] test = new Candidate[2];
-    	test[0] = new Candidate("1.2.3.4",15,(short)20);
-    	test[1] = new Candidate("1.2.3.5",15,(short)20);
+    	RemoteCandidate [] test = new RemoteCandidate[2];
+    	test[0] = new RemoteCandidate("1.2.3.4",15,(short)20);
+    	test[1] = new RemoteCandidate("1.2.3.5",15,(short)20);
     	BestCandidatesVendorMessage req = new BestCandidatesVendorMessage(test);
     	
     	//pack the candidates into a byte, see if the result is the same
