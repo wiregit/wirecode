@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
@@ -16,6 +18,8 @@ import com.limegroup.gnutella.Response;
 
 public final class LimeXMLDocumentHelper{
 
+    private static final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
+    
     public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
     public static final String XML_NAMESPACE =
         "xsi:noNamespaceSchemaLocation=\"";
@@ -67,9 +71,13 @@ public final class LimeXMLDocumentHelper{
                     return Collections.EMPTY_LIST; // malicious document, can't trust it.
                 
                 if(!attributes.isEmpty()) {
-                    documents[index] = new LimeXMLDocument(attributes,
-                                                           parsingResult.schemaURI,
-                                                           parsingResult.canonicalKeyPrefix);
+                    try {
+                        documents[index] = new LimeXMLDocument(attributes,
+                                parsingResult.schemaURI,
+                                parsingResult.canonicalKeyPrefix);
+                    } catch(IOException ignored) {
+                        LOG.debug("",ignored);
+                    }
                 }
             }
             results.add(documents);

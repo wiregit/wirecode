@@ -118,7 +118,8 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map map, String schemaURI, String keyPrefix) {
+    LimeXMLDocument(Map map, String schemaURI, String keyPrefix) 
+      throws IOException {
         if(map.isEmpty())
             throw new IllegalArgumentException("empty map");
 
@@ -128,7 +129,7 @@ public class LimeXMLDocument implements Serializable {
         fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
         
         if(!isValid())
-            throw new IllegalArgumentException("invalid doc!");
+            throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
         
     }
 
