@@ -50,7 +50,6 @@ public class DefaultBootstrapServers {
         "http://heypete.safepages.com/gc/gc.php",
         "http://ipoh1.org/gwebcache",
         "http://ipoh1.org/gwebcache/gwcii.php",
-        "http://jum.dyndns.org:9006/GWebCache/req",
         "http://mac.gc.dlaikar.de/",
         "http://mikama.host.sk/gcache.php",
         "http://move.along.move.along.there.is.nothing.to.see.here.at.bishopston.net:3558/",
