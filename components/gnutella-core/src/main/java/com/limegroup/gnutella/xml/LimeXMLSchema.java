@@ -17,7 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
+import org.xml.sax.*;
 
 /**
  * Stores a XML schema, and provides access to various components
@@ -56,7 +56,7 @@ public class LimeXMLSchema
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public LimeXMLSchema(InputSource inputSource) throws IOException
+    public LimeXMLSchema(InputSource inputSource) throws IOException 
     {
         //initialize schema
         initializeSchema(inputSource);
@@ -97,9 +97,7 @@ public class LimeXMLSchema
         {
             document = documentBuilder.parse(schemaInputSource);
         }
-        catch(java.net.ConnectException ignored) { }
-        catch(java.net.UnknownHostException ignored) { }
-        catch(Exception e) {
+        catch(SAXException e) {
             throw new IOException("" + e);
         }
         
