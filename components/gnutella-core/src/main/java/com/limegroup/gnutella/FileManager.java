@@ -903,8 +903,8 @@ public class FileManager {
      * Returns true if this file is sharable.
      */
     public static boolean isFileShareable(File file, long fileLength) {
-        if( file.isDirectory() ) return false;
-        
+        if (file.isDirectory() || file.isHidden() || !file.canRead() ) 
+            return false;        
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
             !hasExtension(file.getName())) {
         	return false;
