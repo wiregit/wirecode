@@ -1616,7 +1616,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         if (allDocs.size() > 0) {
-			retArray = (LimeXMLDocument[])allDocs.toArray(mew LimeXMLDocument[0]);
+			retArray = (LimeXMLDocument[])allDocs.toArray(new LimeXMLDocument[0]);
         }
         else
             retArray = null;
