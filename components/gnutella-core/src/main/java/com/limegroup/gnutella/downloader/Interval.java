@@ -51,9 +51,13 @@ public class Interval implements Serializable{
     
     public byte [] toBytes() {
     	byte [] res = new byte[8];
-    	ByteOrder.int2beb(low,res,0);
-    	ByteOrder.int2beb(high,res,4);
+    	toBytes(res,0);
     	return res;
+    }
+    
+    public void toBytes(byte [] dest, int offset) {
+        ByteOrder.int2beb(low,dest,offset);
+        ByteOrder.int2beb(high,dest,offset+4);
     }
    
 

@@ -192,7 +192,7 @@ public class UDPPinger {
         }
         
         if(LOG.isTraceEnabled())
-            LOG.trace("Sending to " + host + ": " + message);
+            LOG.trace("Sending to " + host + ": " + message.getClass()+" "+message);
         UDPService.instance().send(message, host);
         _sentAmount++;
         _lastSentTime = now;

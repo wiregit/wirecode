@@ -182,7 +182,7 @@ public class HeadPong extends VendorMessage {
     		
     		//is the other host firewalled?
     		if ((code & FIREWALLED) == FIREWALLED)
-    			_isFirewalled=true;
+    			_isFirewalled = true;
     		
     		//read the vendor id
     		_vendorId = new byte[4];
