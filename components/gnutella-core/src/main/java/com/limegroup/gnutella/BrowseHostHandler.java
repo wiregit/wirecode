@@ -212,16 +212,11 @@ public class BrowseHostHandler {
      */
     private static int needsPush(String host) {
         //Return true if rfd is private or unreachable
-        try {
-            if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-                NetworkUtils.isPrivateAddress(host))
-                return 1;
-        } catch(UnknownHostException e) {
-            // don't know, assume it's public
+        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+          NetworkUtils.isPrivateAddress(host))
+            return 1;
+        else
             return 0;
-        }
-
-        return 0;
     }
 
 

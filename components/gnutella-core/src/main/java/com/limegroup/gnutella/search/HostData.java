@@ -111,11 +111,7 @@ public final class HostData {
                 NetworkUtils.isPrivateAddress(IP);
 		} catch(BadPacketException e) {
 			firewalled = true;
-		} catch(UnknownHostException e) {
-            firewalled = true;
-            // TODO: we want to handle this!! requires more changes
-            // though
-        }
+		}
 		try {
 			browseHostEnabled = reply.getSupportsBrowseHost();
 		} catch (BadPacketException e){ 
