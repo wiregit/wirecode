@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.StringUtils;
@@ -440,21 +441,29 @@ public class ExtendedEndpoint extends Endpoint {
             ExtendedEndpoint a=(ExtendedEndpoint)extEndpoint1;
             ExtendedEndpoint b=(ExtendedEndpoint)extEndpoint2;
 
-            boolean bLoc = ownLocale.equals(b.getClientLocale());
-            //TODO: preference locale first or after connectScore?
-            if(ownLocale.equals(a.getClientLocale())) {
-                if(!bLoc) 
-                    return 1;
-            }
-            else if(bLoc) 
-                return -1;
-
             int ret=a.connectScore()-b.connectScore();
-            if (ret!=0) 
+            if(ret != 0) 
                 return ret;
-            else
-                return a.getDailyUptime() - b.getDailyUptime();
+     
+            ret = a.localeScore() - b.localeScore();
+            if(ret != 0)
+                return ret;
+                
+            return a.getDailyUptime() - b.getDailyUptime();
         }
+    }
+    
+    /**
+     * Returns +1 if their locale matches our, -1 otherwise.
+     * Returns 0 if locale preferencing isn't enabled.
+     */
+    private int localeScore() {
+        if(!ConnectionSettings.USE_LOCALE_PREF.getValue())
+            return 0;
+        if(ownLocale.equals(_clientLocale))
+            return 1;
+        else
+            return -1;
     }
     
     /** Returns +1 (last connection attempt was a success), 0 (no connection
@@ -469,7 +478,7 @@ public class ExtendedEndpoint extends Endpoint {
         else {            
             long success=((Long)connectSuccesses.last()).longValue();
             long failure=((Long)connectFailures.last()).longValue();
-            //Can use success-failure because of overflow/underflow.
+            //Can't use success-failure because of overflow/underflow.
             if (success>failure)
                 return 1;
             else if (success<failure)

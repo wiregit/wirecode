@@ -936,14 +936,17 @@ public class HostCatcher {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
 
-        if(LOCALE_SET_MAP.containsKey(loc)) {
-            Set locales = (Set)LOCALE_SET_MAP.get(loc);
-            for(Iterator i = base.iterator(); i.hasNext(); ) {
-                Object next = i.next();
-                if(locales.contains(next)) {
-                    i.remove();
-                    locales.remove(next);
-                    return (ExtendedEndpoint)next;
+        // preference a locale host if we haven't matched any locales yet
+        if(!RouterService.getConnectionManager().isLocaleMatched()) {
+            if(LOCALE_SET_MAP.containsKey(loc)) {
+                Set locales = (Set)LOCALE_SET_MAP.get(loc);
+                for(Iterator i = base.iterator(); i.hasNext(); ) {
+                    Object next = i.next();
+                    if(locales.contains(next)) {
+                        i.remove();
+                        locales.remove(next);
+                        return (ExtendedEndpoint)next;
+                    }
                 }
             }
         }

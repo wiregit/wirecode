@@ -252,7 +252,7 @@ public final class ConnectionSettings extends LimeProps {
      * match the local locale
      */
     public static final IntSetting NUM_LOCALE_PREF =
-        FACTORY.createIntSetting("NUM_LOCALE_PREF", 2);
+        FACTORY.createIntSetting("NUMBER_LOCALE_PREF", 2);
     
     /**
      * how many attempts to connect to a remote host must elapse

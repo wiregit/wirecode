@@ -568,6 +568,15 @@ public class ConnectionManager {
                         - getNumLimeWireLocalePrefSlots()
                         );
     }
+    
+    /**
+     * Returns true if we've made a locale-matching connection (or don't
+     * want any at all).
+     */
+    public boolean isLocaleMatched() {
+        return !ConnectionSettings.USE_LOCALE_PREF.getValue() ||
+               _localeMatchingPeers != 0;
+    }
 
     /**
      * @return the number of locale reserved slots to be filled
