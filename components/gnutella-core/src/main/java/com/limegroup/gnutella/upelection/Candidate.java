@@ -153,4 +153,16 @@ public class Candidate implements Comparable{
 	public InetAddress getInetAddress() {
 		return _address.getInetAddress();
 	}
+	/**
+	 * @return the port of the candidate
+	 */
+	public int getPort() {
+		return _address.getPort();
+	}
+	/**
+	 * @return Returns the IP_PORT combo of this candidate.
+	 */
+	public QueryReply.IPPortCombo getAddress() {
+		return _address;
+	}
 }
