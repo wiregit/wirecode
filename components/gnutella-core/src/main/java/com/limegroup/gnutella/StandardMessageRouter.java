@@ -259,10 +259,10 @@ public class StandardMessageRouter
         }
         String file = desc._name;
 
-        HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
-                                           _callback);
-        Thread t=new Thread(up);
-        t.setDaemon(true);
-        t.start();
+//          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
+//                                             _callback);
+//          Thread t=new Thread(up);
+//          t.setDaemon(true);
+//          t.start();
     }
 }
