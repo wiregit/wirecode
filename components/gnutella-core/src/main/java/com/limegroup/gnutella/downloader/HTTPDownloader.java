@@ -129,8 +129,10 @@ public class HTTPDownloader {
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
-		if (SettingsManager.instance().getChatEnabled() )
-			out.write("Chat: " + _host + ":" + _port + "\r\n");;
+		if (SettingsManager.instance().getChatEnabled() ) {
+			int port = SettingsManager.instance().getPort();
+			out.write("Chat: " + _host + ":" + port + "\r\n");;
+		}
         out.write("\r\n");
         out.flush();
 	}
