@@ -22,6 +22,7 @@ public interface Uploader extends BandwidthTracker {
     public static final int MALFORMED_REQUEST = 11;
     public static final int PUSH_PROXY        = 12;
     public static final int UNAVAILABLE_RANGE = 13;
+    public static final int BANNED_GREEDY  	  = 14;
 
     /**
 	 * Stops this upload.  If the download is already 

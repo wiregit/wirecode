@@ -19,6 +19,12 @@ public class UploadStat extends AdvancedStatistic {
 	    new UploadStat();
 	
 	/**
+	 * Statistic for the number of BANNED replies that were sent
+	 */
+	public static final Statistic BANNED =
+		new UploadStat();
+
+	/**
 	 * Statistic for completed uploads.  This is incremented once per
 	 * connection, not once per chunk.
 	 */
@@ -71,6 +77,13 @@ public class UploadStat extends AdvancedStatistic {
      */ 
     public static final Statistic LIMIT_REACHED =
         new UploadStat();
+        
+    /**
+	 * Statistic for uploads whose status is LIMIT_REACHED
+	 * and who did not read our Retry-After header.
+	 */ 
+	public static final Statistic LIMIT_REACHED_GREEDY =
+		new UploadStat();
         
     /**
      * Statistic for uploads whose status is UNAVAILABLE_RANGE.

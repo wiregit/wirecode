@@ -21,6 +21,11 @@ public class LimitReachedUploadState implements HTTPMessage {
 	private final FileDesc FILE_DESC;
 
     private final HTTPUploader UPLOADER;
+    
+    /**
+     * The time to wait for a normal retry after.
+     */
+    public static final int RETRY_AFTER_TIME = 60 * 15;
 
     /**
      * Number of seconds the remote host should wait before retrying in
@@ -32,7 +37,7 @@ public class LimitReachedUploadState implements HTTPMessage {
      * Number of seconds the remote host should wait before retrying in
      * case we still have alt-locs left to send. (15 minute)
      */
-    private static final String NORMAL_RETRY_AFTER = "" + (60 * 15);
+    private static final String NORMAL_RETRY_AFTER = "" + RETRY_AFTER_TIME;
 
 	/**
 	 * The error message to send in the message body.

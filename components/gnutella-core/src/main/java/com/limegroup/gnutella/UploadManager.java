@@ -78,6 +78,7 @@ public final class UploadManager implements BandwidthTracker {
     private final int REJECTED = 0;    
     private final int QUEUED = 1;
     private final int ACCEPTED = 2;
+    private final int BANNED = 3;
     /** The min and max allowed times (in milliseconds) between requests by
      *  queued hosts. */
     public static final int MIN_POLL_TIME = 45000; //45 sec, same as Shareaza
@@ -171,6 +172,14 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final boolean RECORD_STATS = !CommonUtils.isJava118();
     
+                
+	/**
+     * Remembers uploaders to disadvantage uploaders that
+     * hammer us for download slots. Stores up to 250 entries
+     * Maps IP String to RequestCache   
+     */
+    private final Map /* of String to RequestCache */ REQUESTS =
+        new FixedsizeForgetfulHashMap(250);
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
@@ -606,6 +615,9 @@ public final class UploadManager implements BandwidthTracker {
             case REJECTED:
                 uploader.setState(Uploader.LIMIT_REACHED);
                 break;
+            case BANNED:
+            	uploader.setState(Uploader.BANNED_GREEDY);
+            	break;
             case QUEUED:
                 uploader.setState(Uploader.QUEUED);
                 socket.setSoTimeout(MAX_POLL_TIME);
@@ -676,6 +688,10 @@ public final class UploadManager implements BandwidthTracker {
             case Uploader.QUEUED:
                 if( RECORD_STATS )
                     UploadStat.QUEUED.incrementStat();
+                break;
+			case Uploader.BANNED_GREEDY:
+				if( RECORD_STATS )
+					UploadStat.BANNED.incrementStat();
                 break;
             case Uploader.CONNECTING:
                 uploader.setState(Uploader.UPLOADING);
@@ -819,20 +835,52 @@ public final class UploadManager implements BandwidthTracker {
      *  Always accepts Browse Host requests, though.  Notifies callback of this.
      *  
      * @return ACCEPTED if the download may proceed, QUEUED if this is in the
-     *  upload queue, or REJECTED if this is flat-out disallowed (and hence not
-     *  queued).  If REJECTED, <tt>uploader</tt>'s state will be set to
-     *  LIMIT_REACHED.  
+     *  upload queue, REJECTED if this is flat-out disallowed (and hence not
+     *  queued) and BANNED if the downloader is hammering us.  If REJECTED, 
+     *  <tt>uploader</tt>'s state will be set to LIMIT_REACHED. If BANNED,
+     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY 
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
 	private synchronized int checkAndQueue(Uploader uploader,
 	                                       Socket socket) throws IOException {
-        boolean limitReached = hostLimitReached(uploader.getHost());
+	    RequestCache rqc = (RequestCache)REQUESTS.get(uploader.getHost());
+	    if (rqc == null)
+	    	rqc = new RequestCache();
+	    // make sure we don't forget this RequestCache too soon!
+		REQUESTS.put(uploader.getHost(), rqc);
+	    	
+        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
+        if (rqc.isHammering()) {
+            if(LOG.isWarnEnabled())
+                LOG.warn(uploader + " banned.");
+        	return BANNED;
+        }
+
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
         boolean wontAccept = size >= maxQueueSize;
         int ret = -1;
+
+        // if this uploader is greedy and at least on other client is queued
+        // send him another limit reached reply.
+        boolean limitReached = false;
+        if (isGreedy && size >=1) {
+            if(LOG.isWarnEnabled())
+                LOG.warn(uploader + " greedy -- limit reached."); 
+        	if (RECORD_STATS) 
+                UploadStat.LIMIT_REACHED_GREEDY.incrementStat(); 
+        	limitReached = true;
+        } else if (posInQueue < 0) {
+            limitReached = hostLimitReached(uploader.getHost());
+            // remember that we sent a LIMIT_REACHED only
+            // if the limit was actually really reached and not 
+            // if we just keep a greedy client from entering the
+            // QUEUE
+            if(limitReached)
+                rqc.limitReached(uploader.getFileDesc().getSHA1Urn());
+        }
         //Note: The current policy is to not put uploadrers in a queue, if they 
         //do not send am X-Queue header. Further. uploaders are removed from 
         //the queue if they do not send the header in the subsequent request.
@@ -1503,4 +1551,96 @@ public final class UploadManager implements BandwidthTracker {
         Assert.that(upman.measuredUploadSpeed()==80);
     }
 
+	/**
+	 * This class keeps track of client requests.
+	 * 
+	 * IMPORTANT: Always call isGreedy() method, because it counts requests,
+	 * expires lists, etc.
+	 */
+    private static class RequestCache {
+		// we don't allow more than 1 request per 5 seconds
+    	private static final double MAX_REQUESTS = 5 * 1000;
+    	
+    	// don't keep more than this many entries
+    	private static final int MAX_ENTRIES = 10;
+    	
+    	// time we expect the downloader to wait before sending 
+    	// another request after our initial LIMIT_REACHED reply
+    	// must be greater than or equal to what we send in our RetryAfter
+    	// header, otherwise we'll incorrectly mark guys as greedy.
+    	static long WAIT_TIME =
+    	    LimitReachedUploadState.RETRY_AFTER_TIME * 1000;
+
+		// time to wait before checking for hammering: 30 seconds.
+		// if the averge number of requests per time frame exceeds MAX_REQUESTS
+		// after FIRST_CHECK_TIME, the downloader will be banned.
+		static long FIRST_CHECK_TIME = 30*1000;
+		
+		/**
+		 * The set of sha1 requests we've seen in the past WAIT_TIME.
+		 */
+		private final Set /* of SHA1 (URN) */ REQUESTS;
+		
+		/**
+		 * The number of requests we've seen from this host so far.
+		 */
+		private double _numRequests;
+		
+		/**
+		 * The time of the last request.
+		 */
+		private long _lastRequest;
+		
+		/**
+		 * The time of the first request.
+		 */
+		private long _firstRequest;
+ 
+        /**
+         * Constructs a new RequestCache.
+         */
+     	RequestCache() {
+    		REQUESTS = new FixedSizeExpiringSet(MAX_ENTRIES, WAIT_TIME);
+    		_numRequests = 0;
+    		_lastRequest = _firstRequest = System.currentTimeMillis();
+        }
+        
+        /**
+         * Determines whether or not the host is being greedy.
+         *
+         * Calling this method has a side-effect of counting itself
+         * as a request.
+         */
+    	boolean isGreedy(URN sha1) {
+    		countRequest();
+    		return REQUESTS.contains(sha1);
+    	}
+    	
+    	/**
+    	 * Determines whether or not the host is hammering.
+    	 */
+    	boolean isHammering() {
+            if (_lastRequest - _firstRequest <= FIRST_CHECK_TIME) {
+    			return false;
+    		} else  {
+    		    return ((double)(_lastRequest - _firstRequest) / _numRequests)
+    		           < MAX_REQUESTS;
+    		}
+    	}
+    	
+    	/**
+    	 * Informs the cache that the limit has been reached for this SHA1.
+    	 */
+    	void limitReached(URN sha1) {
+			REQUESTS.add(sha1);
+    	}
+    	
+    	/**
+    	 * Adds a new request.
+    	 */
+    	private void countRequest() {
+    		_numRequests++;
+    		_lastRequest = System.currentTimeMillis();
+    	}
+    }
 }

@@ -172,7 +172,9 @@ public final class HTTPUploader implements Uploader {
 	
 	/**
 	 * Sets the FileDesc for this HTTPUploader to use.
-	 * Throws IOException if the file cannot be read from the disk.
+	 * 
+	 * @param fd the <tt>FileDesc</tt> to use
+	 * @throws IOException if the file cannot be read from the disk.
 	 */
 	public void setFileDesc(FileDesc fd) throws IOException {
 	    _fileDesc = fd;
@@ -193,7 +195,8 @@ public final class HTTPUploader implements Uploader {
 
 	/**
 	 * Initializes the OutputStream for this HTTPUploader to use.
-	 * Throws IOException if the connection was closed.
+	 * 
+	 * @throws IOException if the connection was closed.
 	 */
 	public void initializeStreams() throws IOException {
 	    _ostream = _socket.getOutputStream();
@@ -297,6 +300,9 @@ public final class HTTPUploader implements Uploader {
         case UNAVAILABLE_RANGE:
             _state = new UnavailableRangeUploadState(this);
             break;
+        case BANNED_GREEDY:
+        	_state = new BannedUploadState();
+        	break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -747,6 +753,7 @@ public final class HTTPUploader implements Uploader {
 				(str.indexOf("MIIxpc") != -1) ||
 				(str.indexOf("MSProxy") != -1) ||
 				(str.indexOf("Mass") != -1) ||
+				(str.indexOf("MLdonkey") != -1) ||
 				(str.indexOf("MyGetRight") != -1) ||
 				(str.indexOf("NetAnts") != -1) ||
 				(str.indexOf("NetZip") != -1) ||

@@ -12,6 +12,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.QueuedException;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
+import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -458,6 +459,179 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         }            
         //System.out.println("passed");
     }
+    
+    public void testGreedyLimitReached() throws Exception {
+        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
+   
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+        connectDloader(d2,true,rfd1,true);
+        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+        try {
+            connectDloader(d3,true,rfd1,true);
+            fail("Host limit reached, should not have accepted d3");
+        } catch (QueuedException qx) {
+            fail("host limit reached should not queue", qx);
+        } catch (TryAgainLaterException expectedException) {
+        } catch (IOException ioe) {//This is similar to d5 being rejected
+            //in testNormalQueueing, IOE may be thrown if uploader
+            //closes the socket. 
+        }            
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.2",true);
+        try {
+            connectDloader(d4,true,rfd1,true);
+            fail("Host limit reached, should not have accepted d4");
+        } catch (TryAgainLaterException tx) {
+            fail("d4 should have been queued", tx);
+        } catch (QueuedException expectedException) {
+        } catch (IOException ioe) {
+            fail("d4 should have been queued", ioe);
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());                
+        
+        kill(d1);
+        kill(d2);
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+        
+        // We now have room for d3 to connect again, but it shouldn't
+        // be allowed because the 15 minute alloted timespan isn't up
+        // yet.
+        try {
+            d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+            connectDloader(d3,true,rfd1,true);
+            fail("d3 is greedy, should have sent limit reached");
+        } catch (QueuedException qx) {
+            fail("host limit reached should not queue", qx);
+        } catch (TryAgainLaterException expectedException) {
+        } catch (IOException ioe) {//This is similar to d5 being rejected
+            //in testNormalQueueing, IOE may be thrown if uploader
+            //closes the socket. 
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+    }
+    
+    public void testBanning() throws Exception {
+        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
+        Class cache = PrivilegedAccessor.getClass(UploadManager.class,
+                                                  "RequestCache");
+        PrivilegedAccessor.setValue(cache, "WAIT_TIME",
+                                    new Long(20*1000));
+        PrivilegedAccessor.setValue(cache, "FIRST_CHECK_TIME",
+                                    new Long(10*1000));        
+   
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+        connectDloader(d2,true,rfd1,true);
+        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+        try {
+            connectDloader(d3,true,rfd1,true);
+            fail("Host limit reached, should not have accepted d3");
+        } catch (QueuedException qx) {
+            fail("host limit reached should not queue", qx);
+        } catch (TryAgainLaterException expectedException) {
+        } catch (IOException ioe) {//This is similar to d5 being rejected
+            //in testNormalQueueing, IOE may be thrown if uploader
+            //closes the socket. 
+        }            
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.2",true);
+        try {
+            connectDloader(d4,true,rfd1,true);
+            fail("Host limit reached, should not have accepted d4");
+        } catch (TryAgainLaterException tx) {
+            fail("d4 should have been queued", tx);
+        } catch (QueuedException expectedException) {
+        } catch (IOException ioe) {
+            fail("d4 should have been queued", ioe);
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());                
+        
+        kill(d1);
+        kill(d2);
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+        
+        // We now have room for d3 to connect again, but it shouldn't
+        // be allowed because the 15 minute alloted timespan isn't up
+        // yet.
+        try {
+            d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+            connectDloader(d3,true,rfd1,true);
+            fail("d3 is greedy, should have sent limit reached");
+        } catch (QueuedException qx) {
+            fail("host limit reached should not queue", qx);
+        } catch (TryAgainLaterException expectedException) {
+        } catch (IOException ioe) {//This is similar to d5 being rejected
+            //in testNormalQueueing, IOE may be thrown if uploader
+            //closes the socket. 
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+
+        int i = 0;
+        try {
+            for(; i < 20; i++) {
+                Thread.sleep(1000);
+                try {
+                    d3 = addUploader(upManager, rfd3, "1.1.1.1", true);
+                    connectDloader(d3, true, rfd1, true);
+                    fail("should have thrown limit reached");
+                }
+                catch(TryAgainLaterException expected) {}
+                catch(IOException expectedToo) {
+                    if(expectedToo instanceof UnknownCodeException)
+                        throw expectedToo;
+                }
+                
+            }
+            fail("should have thrown exception");
+        } catch(UnknownCodeException expected) {
+            assertEquals("wrong code", 403, expected.getCode());
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 0 active uploads",
+            0, upManager.uploadsInProgress());
+            
+        // now wait awhile and we should be allowed back in.        
+        Thread.sleep(60000);
+        d3 = addUploader(upManager, rfd3, "1.1.1.1", true);
+        connectDloader(d3, true, rfd1, true);
+        
+        // now wait awhile and we should be allowed back in.
+        assertEquals("should have 1 active uploads",
+            1, upManager.uploadsInProgress());        
+    }        
  
     public void testSoftMax() throws Exception {
         UploadSettings.HARD_MAX_UPLOADS.setValue(9999);
