@@ -211,21 +211,21 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         //(various uptimes).
         final int N=HostCatcher.PERMANENT_SIZE;
         for (int i=0; i<=N; i++) {            
-            hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, i,
+            hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, i+1,
                                             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                                             i+10,
                                             false));
         }
         //Now add bad pong--which isn't really added
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+1,
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+2,
                                         new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                                         0,
                                         false));
-        //Now re-add port 0 (which was kicked out earlier).  Note that this
+        //Now re-add port 1 (which was kicked out earlier).  Note that this
         //would fail if line 346 of HostCatcher were not executed.
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 0,
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 1,
                                         new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                                        N+100,
+                                        N+101,
                                         false));
 
         File tmp=File.createTempFile("hc_test", ".net" );
@@ -236,12 +236,12 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         HostCatcher.DEBUG=false;  //Too darn slow
         hc.read(tmp);
         assertEquals(0, hc.getNumUltrapeerHosts());
-        assertEquals(new Endpoint("18.239.0.142", 0),
+        assertEquals(new Endpoint("18.239.0.142", 1),
                      hc.getAnEndpoint());
         // TODO: make sure this test is really working
         for (int i=N; i>601; i--) {
             assertGreaterThan("No more hosts after "+i, 0, hc.getNumHosts());
-            assertEquals(new Endpoint("18.239.0.142", i),
+            assertEquals(new Endpoint("18.239.0.142", i+1),
                          hc.getAnEndpoint());
         }
         assertEquals(0, hc.getNumHosts());
