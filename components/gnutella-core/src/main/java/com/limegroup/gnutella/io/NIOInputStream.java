@@ -11,18 +11,18 @@ import org.apache.commons.logging.*;
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
  *
- * This implements WriteHandler because it uses Pipes to write to a blocking
- * input stream.  The Pipe.SinkChannel is writeable and needs to be notified via
- * NIODispatcher when writing is ready.
+ * This uses a BufferInputStream that waits on a lock when no data is available.
+ * The stream exposes a BufferLock that should be notified when data is available
+ * to be read.
  */
-class NIOInputStream implements WriteHandler {
+class NIOInputStream {
     
     private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
     
     private final NIOSocket handler;
     private final SocketChannel channel;
-    private InputStream source;
-    private Pipe.SinkChannel sink;
+    private BufferInputStream source;
+    private Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
     
@@ -45,15 +45,10 @@ class NIOInputStream implements WriteHandler {
         if(shutdown)
             throw new IOException("Already closed!");
         
-        Pipe pipe = Pipe.open();
-        sink = pipe.sink();
-        sink.configureBlocking(false);
-        pipe.source().configureBlocking(true);
-        source = new TimedInputStream(pipe.source(), handler);
-        
         buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
+        source = new BufferInputStream(buffer, handler);
+        bufferLock = source.getBufferLock();
         
-        NIODispatcher.instance().registerWrite(sink, this);
         NIODispatcher.instance().interestRead(channel);
     }
     
@@ -71,38 +66,22 @@ class NIOInputStream implements WriteHandler {
      * Notification that a read can happen on the SocketChannel.
      */
     boolean readChannel() throws IOException {
-        int read = 0;
-        
-        // read everything we can.
-        while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
-        if(read == -1)
-            throw new IOException("channel closed.");
-        
-        // If there's data in the buffer, we're interested in writing.
-        if(buffer.position() > 0)
-            NIODispatcher.instance().interestWrite(sink);
-
-        // if there's room in the buffer, we're interested in more reading ...
-        // if not, we're not interested in more reading.
-        return buffer.hasRemaining();
-    }
-    
-    /**
-     * Notification that a write can happen on the SinkChannel.
-     */
-    public boolean handleWrite() throws IOException {
-        // write everything we can.
-        buffer.flip();
-        while(buffer.hasRemaining() && sink.write(buffer) > 0);
-        buffer.compact();
-        
-        // If there's room in the buffer, we're interested in reading.
-        if(buffer.hasRemaining())
-            NIODispatcher.instance().interestRead(channel);
+        synchronized(bufferLock) {
+            int read = 0;
             
-        // if we were able to write everything, we're not interested in more writing.
-        // otherwise, we are interested.
-        return buffer.position() > 0;
+            // read everything we can.
+            while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
+            if(read == -1)
+                throw new IOException("channel closed.");
+            
+            // If there's data in the buffer, we're interested in writing.
+            if(buffer.position() > 0)
+                bufferLock.notify();
+    
+            // if there's room in the buffer, we're interested in more reading ...
+            // if not, we're not interested in more reading.
+            return buffer.hasRemaining();
+        }
     }
     
     /**
@@ -120,18 +99,9 @@ class NIOInputStream implements WriteHandler {
     synchronized void shutdown() {
         if(shutdown)
             return;
-        
-        if(sink != null) {
-            try {
-                sink.close();
-            } catch(IOException ignored) {}
-        }
          
-       if(source != null) {       
-            try {
-                source.close();
-            } catch(IOException ignored) {}
-        }
+        if(source != null)
+            source.shutdown();
         
         shutdown = true;
     }
