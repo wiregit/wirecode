@@ -54,7 +54,8 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        UDPHostRanker.rank(list, ml, null, null);
+        PingRequest pr = new PingRequest(GUID.makeGuid(), (byte)1);
+        UDPHostRanker.rank(list, ml, null, pr);
         
         Thread.sleep(500);
         assertTrue(ml.registered);
