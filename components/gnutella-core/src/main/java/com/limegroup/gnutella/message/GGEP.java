@@ -2,6 +2,7 @@ package com.limegroup.gnutella.message;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
+import com.limegroup.gnutella.Assert;
 import java.util.Enumeration;
 
 /** 
@@ -17,21 +18,66 @@ public class GGEP extends Object {
     /** The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BHOST";
 
+    /** The maximum size of a extension header (key). */
+    public static final int MAX_KEY_SIZE_IN_BYTES = 15;
+
+    /** The maximum size of a extension data (value). */
+    public static final int MAX_VALUE_SIZE_IN_BYTES = 262143;
+
     /** The collection of key/value pairs this GGEP instance represents.
      */
     private Map _props = null;
 
     /** Constructs a GGEP instance with the set of specified key/val pairs.
+     *  The key and values you submit should be stringable!  The key string
+     *  should be non-null and not the empty string!  The value, if null, is
+     *  assumed to be not-present (extension data is optional).
      *  @param props The collection of GGEP headers/keys and data/values.
      *  @exception BadGGEPPropertyException Thrown if any of the input
      *  properties are too large).
      */
     public GGEP(Map props) throws BadGGEPPropertyException {
-        boolean propsAreLegit = true;
-        if (!propsAreLegit)
-            throw new BadGGEPPropertyException();
-        _props = props;
+        _props = new HashMap();
+        Iterator keys = props.keySet().iterator();
+        // we need to do the following:
+        // 1) make sure everything is of the right size
+        // 2) input everything into our HashMap as a String...
+        while (keys.hasNext()) {
+            Object currKey = keys.next();
+            Object currValue = props.get(currKey);
+
+            // check the key...
+            if (!(currKey instanceof String))
+                currKey = currKey.toString();
+            validateKey((String)currKey);
+
+            // check the data...
+            if ((currValue != null) && !(currValue instanceof String))
+                currValue = currValue.toString();
+            validateValue((String)currValue);
+
+            // everything checks out...
+            _props.put(currKey, currValue);
+        }
     }
+
+    private static final String EMPTY_STRING = "";
+
+    private void validateKey(String key) throws BadGGEPPropertyException {
+        if ((key == null) ||
+            (key.equals(EMPTY_STRING)) ||
+            (key.getBytes().length > MAX_KEY_SIZE_IN_BYTES)
+            )
+            throw new BadGGEPPropertyException();
+    }
+
+    private void validateValue(String value) throws BadGGEPPropertyException {
+        if ((value != null) && 
+            (value.getBytes().length > MAX_VALUE_SIZE_IN_BYTES)
+            )
+            throw new BadGGEPPropertyException();
+    }
+
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is
@@ -82,13 +128,8 @@ public class GGEP extends Object {
         return new GGEP[0];
     }
 
-    /*
-    public static void main(String argv[]) {
-        // unit test.
-    }
-    */
-
 }
+
 
 
 
