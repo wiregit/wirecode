@@ -56,7 +56,7 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     /**
      * @return whether or not the success rate is good enough.
      */
-    public static boolean successRateIsGood() {
+    public static boolean isSuccessRateGood() {
         // we want a large enough sample space.....
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
