@@ -1,14 +1,18 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.StringTokenizer;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Collection;
+import java.util.zip.GZIPInputStream;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -24,6 +28,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -36,6 +41,11 @@ public class PingReply extends Message implements Serializable, IpPort {
      * The list of extra ip/ports contained in this reply.
      */
     private final List PACKED_IP_PORTS;
+    
+    /**
+     * The list of extra ip/ports contained in this reply.
+     */
+    private final List PACKED_UDP_HOST_CACHES;
 
     /**
      * Constant for whether or not this PingReply contains the GGEP field
@@ -650,6 +660,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                 if(data == null || data.length % 6 != 0)
                     throw new BadPacketException("invalid data");
             }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+                try {
+                    ggep.getBytes(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
+                } catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+            }
                 
         }
 
@@ -693,6 +711,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         int myPort=0;
         boolean udphostcache = false;
         List packedIPs = Collections.EMPTY_LIST;
+        List packedCaches = Collections.EMPTY_LIST;
         
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
@@ -821,8 +840,16 @@ public class PingReply extends Message implements Serializable, IpPort {
                         packedIPs = NetworkUtils.unpackIps(data);
                     } catch(BadPacketException bpe) {}
                 }
-            }            
-
+            }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+                byte[] data = null;
+                try {
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                } catch(BadGGEPPropertyException bad) {}
+                if(data != null)
+                    packedCaches = unzipAndListCaches(data);
+            }
         }
         
         MY_IP = myIP;
@@ -840,6 +867,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         FREE_LOCALE_SLOTS = slots;
         UDP_HOST_CACHE = udphostcache;
         PACKED_IP_PORTS = packedIPs;
+        PACKED_UDP_HOST_CACHES = packedCaches;
     }
 
 
@@ -1136,8 +1164,15 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Gets the list of packed IP/Ports.
      */
-    public List /* of IPPort */ getPackedIPPorts() {
+    public List /* of IpPort */ getPackedIPPorts() {
         return PACKED_IP_PORTS;
+    }
+    
+    /**
+     * Gets a list of packed IP/Ports of UDP Host Caches.
+     */
+    public List /* of IpPort */ getPackedUDPHostCaches() {
+        return PACKED_UDP_HOST_CACHES;
     }
 
     /**
@@ -1181,6 +1216,51 @@ public class PingReply extends Message implements Serializable, IpPort {
 
         return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
                              newPayload, null, IP);
+    }
+    
+    /**
+     * Unzips data about UDP host caches & returns a list of'm.
+     */
+    private List unzipAndListCaches(byte[] data) {
+        try {
+            GZIPInputStream in = new GZIPInputStream(
+                                    new ByteArrayInputStream(data));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[64];
+            while(true) {
+                int read = in.read(buf, 0, buf.length);
+                if(read == -1)
+                    break;
+                out.write(buf, 0, read);
+            }
+            String allCaches = new String(out.toByteArray(), "UTF-8");
+            List theCaches = new LinkedList();
+            StringTokenizer st = new StringTokenizer(allCaches, "\n");
+            while(st.hasMoreTokens()) {
+                String next = st.nextToken();
+                int i = next.indexOf(":");
+                int port = 6346;
+                if(i == 0 || i == next.length()) {
+                    continue;
+                } else if(i != -1) {
+                    try {
+                        port = Integer.valueOf(next.substring(i)).intValue();
+                    } catch(NumberFormatException invalid) {
+                        continue;
+                    }
+                }
+                if(!NetworkUtils.isValidPort(port))
+                    continue;
+                String host = next.substring(0, i-1);
+                try {
+                    theCaches.add(new IpPortImpl(host, port));
+                } catch(UnknownHostException invalid) {
+                    continue;
+                }
+            }
+            return Collections.unmodifiableList(theCaches);
+        } catch(IOException ioe) {}
+        return Collections.EMPTY_LIST;
     }
 
 

@@ -52,6 +52,9 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
     /** The extension header (key) for packed IP/Ports */
     public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension header (key) for packed UDP Host Caches */
+    public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
+    
     /**
      * The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.

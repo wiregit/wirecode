@@ -472,6 +472,15 @@ public class HostCatcher {
                 add(ep, GOOD_PRIORITY);
         }
         
+        // if the pong carried packed UDP host caches, add those as their
+        // own endpoints.
+        for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
+            IpPort ipp = (IpPort)i.next();
+            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            if(isValidHost(ep))
+                addUDPHostCache(ep);
+        }
+        
         // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache())
             return addUDPHostCache(endpoint);
