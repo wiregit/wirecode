@@ -117,7 +117,15 @@ public class UploadManager {
 		// or if the upload limits have been reached for some 
 		// reason.
 		// add it to the uploads in progress
+		try {
+			testAttemptedPush(host);
+		} catch (FailedPushException e) {
+			// if we've attempted this push before, don't
+			// do anything.  
+			return;  
+		}
 		insertIntoMap(host);
+		insertAttemptedPush(host);
 		try {
 			testFailedPush(host);
 			testPerHostLimit(host); 
@@ -143,7 +151,7 @@ public class UploadManager {
 
 		// remove it from the uploads in progress
 		removeFromMap(host);
-
+		removeAttemptedPush(host);
 		
 	}
 
@@ -207,9 +215,19 @@ public class UploadManager {
 	}
 
 	private void insertAttemptedPush(String host) {
-		// not really sure what this is for..
+		_attemptingPushes.add(host);
 	}
 
+	private void testAttemptedPush(String host)
+		throws FailedPushException {
+		if ( _attemptingPushes.contains(host) )
+			throw new FailedPushException();
+			 
+	}
+	
+	private void removeAttemptedPush(String host) {
+		_attemptingPushes.remove(host);
+	}
 
 
 	//////////////////////// Handle Parsing /////////////////////////
