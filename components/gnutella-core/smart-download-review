@@ -33,11 +33,13 @@ core/com/limegroup/gnutella/GUID.java
 core/com/limegroup/gnutella/StandardMessageRouter.java
    *** better to just hold reference to DownloadManager than go
        through RS....if it's possible. DONE
- 
------------------- PENDING
 
 core/com/limegroup/gnutella/downloader/ManagedDownloader.java
-   ***can't lots of requeries happen if a result comes in that doesn't work?
-   ***I'm worried about the code that is similar to TableLine here
-   ***also, if you're going to wait before requerying, why not keep retrying busy hosts as well?
+   ***I'm worried about the code that is similar to TableLine here DONE
+   ***can't lots of requeries happen if a result comes in that doesn't
+work? DONE
+   ***also, if you're going to wait before requerying, why not keep
+retrying busy hosts as well? DONE 
+
+
 
