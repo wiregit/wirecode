@@ -1486,8 +1486,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         }
                     }//end of run
                 };
-                connectCreator.start();
                 synchronized (this) { threads.add(connectCreator); }
+                connectCreator.start();
             }//end of for 
             //wait for a notification before we continue.
             synchronized(this) {
@@ -1623,7 +1623,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (dloaders.size()==0 && getState()!=COMPLETE && 
                 getState()!=ABORTED && getState()!=GAVE_UP && 
                 getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
-                && queuedCount==0)
+                && getState()!=HASHING && getState()!=SAVING && queuedCount==0)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
