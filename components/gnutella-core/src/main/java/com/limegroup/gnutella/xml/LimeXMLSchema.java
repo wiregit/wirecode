@@ -30,13 +30,18 @@ public class LimeXMLSchema
      * List<String> of fields (in canonicalized form to preserve the structural
      * information)
      */
-    private List /* of SchemaFieldInfo */ _canonicalizedFields 
-        = new ArrayList();
+    private final List /* of SchemaFieldInfo */ _canonicalizedFields;
     
     /**
      * The URI for this schema
      */
-    private String _schemaURI = null;
+    private final String _schemaURI;
+    
+    /**
+     * The description for this schema.
+     */
+    private final String _description;
+    
 
     /** 
      * Creates new LimeXMLSchema 
@@ -59,7 +64,11 @@ public class LimeXMLSchema
     public LimeXMLSchema(InputSource inputSource) throws IOException 
     {
         //initialize schema
-        initializeSchema(inputSource);
+        Document document = getDocument(inputSource);
+        _canonicalizedFields =
+            (new LimeXMLSchemaFieldExtractor()).getFields(document);
+        _schemaURI = retrieveSchemaURI(document);
+        _description = getDisplayString(_schemaURI);
     }
     
     /**
@@ -67,7 +76,7 @@ public class LimeXMLSchema
      * @param schemaInputSource The source representing the XML schema definition
      * to be parsed
      */
-    private void initializeSchema(InputSource schemaInputSource)
+    private Document getDocument(InputSource schemaInputSource)
         throws IOException
     {
         //get an instance of DocumentBuilderFactory
@@ -92,27 +101,13 @@ public class LimeXMLSchema
 
         // Parse the schema and create a  document
         Document document=null;  
-        try
-        {
+        try {
             document = documentBuilder.parse(schemaInputSource);
-        }
-        catch(SAXException e) {
+        } catch(SAXException e) {
             throw new IOException("" + e);
         }
-        
-        //print some of the elements
-//        Element root = document.getDocumentElement();
-//        printNode(root);
-        
-        //get the fields
-        _canonicalizedFields = 
-            (new LimeXMLSchemaFieldExtractor()).getFields(document);
-        
-        //also get the schema URI
-        _schemaURI = retrieveSchemaURI(document);
-        
-        //return
-        return;
+
+        return document;
     }
     
     /**
@@ -324,6 +319,13 @@ public class LimeXMLSchema
             //    return null;
         }
     }//end of private innner class
+    
+    /**
+     * Returns the display name of this schema.
+     */
+    public String getDescription() {
+        return _description;
+    }
 
     /**
      * Utility method to be used in the gui to display schemas

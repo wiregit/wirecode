@@ -926,15 +926,15 @@ public class QueryRequest extends Message implements Serializable{
         int metaFlag = 0;
         if (type == null)
             ;
-        else if (type.getDescription() == MediaType.AUDIO)
+        else if (type.getDescriptionKey() == MediaType.AUDIO)
             metaFlag |= AUDIO_MASK;
-        else if (type.getDescription() == MediaType.VIDEO)
+        else if (type.getDescriptionKey() == MediaType.VIDEO)
             metaFlag |= VIDEO_MASK;
-        else if (type.getDescription() == MediaType.IMAGES)
+        else if (type.getDescriptionKey() == MediaType.IMAGES)
             metaFlag |= IMAGE_MASK;
-        else if (type.getDescription() == MediaType.DOCUMENTS)
+        else if (type.getDescriptionKey() == MediaType.DOCUMENTS)
             metaFlag |= DOC_MASK;
-        else if (type.getDescription() == MediaType.PROGRAMS) {
+        else if (type.getDescriptionKey() == MediaType.PROGRAMS) {
             if (CommonUtils.isLinux() || CommonUtils.isAnyMac())
                 metaFlag |= LIN_PROG_MASK;
             else if (CommonUtils.isWindows())

@@ -359,7 +359,25 @@ public class LimeXMLDocument implements Serializable {
      */
     public String getSchemaURI(){
         return schemaUri;
-    }    
+    }
+    
+    /**
+     * Returns the LimeXMLSchema associated with this XML document.
+     */
+    public LimeXMLSchema getSchema() {
+        return LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+    }
+    
+    /**
+     * Returns the description of the schema URI.
+     */
+    public String getSchemaDescription() {
+        LimeXMLSchema schema = getSchema();
+        if(schema != null)
+            return schema.getDescription();
+        else
+            return LimeXMLSchema.getDisplayString(schemaUri);
+    }
     
     /**
      * Returns the name of the file that the data in this XML document 
@@ -407,6 +425,13 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
+     * Returns a set of the names within this LimeXMLDocument.
+     */
+    public Set getNameSet() {
+        return fieldToValue.keySet();
+    }
+    
+    /**
      * Returns a collection of the values of this LimeXMLDocument.
      */
     public Collection getValueList() {
@@ -443,6 +468,13 @@ public class LimeXMLDocument implements Serializable {
         }
             
         return retList;
+    }
+    
+    /**
+     * A faster version of getValue, does no trimming or comparison.
+     */
+    public String getValueFast(final String field) {
+        return (String)fieldToValue.get(field);
     }
 
 

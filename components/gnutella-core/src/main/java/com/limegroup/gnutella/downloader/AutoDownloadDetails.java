@@ -26,12 +26,17 @@ public class AutoDownloadDetails implements Serializable {
     // flag of whether or not we've tried to create the doc.
     private transient boolean xmlCreated = false;
     // the 'filter' associated with this search
-    private MediaType type = null;
+    private transient MediaType type = null;
     // the GUID associated with this search
     private byte[] guid = null;
     // the list of downloads made so far - should not exceed size
     // MAX_DOWNLOADS
     private List /* of RemoteFileDesc */ dlList = null;
+    
+    /**
+     * The description of the media type.
+     */
+    private String mediaDesc;
     
     /** the size of the approx matcher 2d buffer...
      */
@@ -87,9 +92,24 @@ public class AutoDownloadDetails implements Serializable {
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
+        mediaDesc = type.getMimeType();
         guid = inGuid;
         dlList = new Vector();
         wordSet = new HashSet();
+    }
+    
+    /**
+     * Extended to set the media type.
+     */
+    private void readObject(ObjectInputStream stream) throws IOException,
+                                                    ClassNotFoundException {
+        stream.defaultReadObject();
+        if(mediaDesc == null)
+            type = MediaType.getAnyTypeMediaType();
+        else
+            type = MediaType.getMediaTypeForSchema(mediaDesc);
+        if(type == null)
+            type = MediaType.getAnyTypeMediaType();
     }
     
     public String getQuery() {
