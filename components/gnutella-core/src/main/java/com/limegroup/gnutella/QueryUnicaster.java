@@ -122,7 +122,7 @@ public final class QueryUnicaster {
                 waitForQueries();
                 Endpoint toQuery = getUnicastHost();
                 List toRemove = new ArrayList();
-                UDPAcceptor udpService = UDPAcceptor.instance();
+                UDPService udpService = UDPService.instance();
 
                 synchronized (_queries) {
                     Iterator iter = _queries.entrySet().iterator();
@@ -284,7 +284,7 @@ public final class QueryUnicaster {
             // if i haven't pinged him 'recently', then ping him...
             if (_pingList.add(toReturn)) {  
                 PingRequest pr = new PingRequest((byte)1);
-                UDPAcceptor udpService = UDPAcceptor.instance();
+                UDPService udpService = UDPService.instance();
                 try {
                     InetAddress ip = 
                     InetAddress.getByName(toReturn.getHostname());

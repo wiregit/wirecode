@@ -28,9 +28,9 @@ public final class UDPReplyHandler implements ReplyHandler {
 		Collections.unmodifiableSet(new HashSet());
 
 	/**
-	 * Constant for the <tt>UDPAcceptor</tt>.
+	 * Constant for the <tt>UDPService</tt>.
 	 */
-	private static final UDPAcceptor UDP_ACCEPTOR = UDPAcceptor.instance();
+	private static final UDPService UDP_SERVICE = UDPService.instance();
 	
 	/**
 	 * Constructor that sets the ip and port to reply to.
@@ -54,7 +54,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-		UDP_ACCEPTOR.send(pong, IP, PORT);
+		UDP_SERVICE.send(pong, IP, PORT);
 	}
 
 	/**
@@ -67,7 +67,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-		UDP_ACCEPTOR.send(hit, IP, PORT);
+		UDP_SERVICE.send(hit, IP, PORT);
 	}
 
 	/**
@@ -80,11 +80,10 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		UDP_ACCEPTOR.send(request, IP, PORT);
+		UDP_SERVICE.send(request, IP, PORT);
 	}
 
-	public void countDroppedMessage() {
-	}
+	public void countDroppedMessage() {}
 
 	public Set getDomains() {
 		return EMPTY_SET;

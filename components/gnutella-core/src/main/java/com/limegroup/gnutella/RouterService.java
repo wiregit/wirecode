@@ -104,10 +104,10 @@ public final class RouterService {
 	private static final Statistics statistics = Statistics.instance();
 
 	/**
-	 * Constant for the <tt>UDPAcceptor</tt> instance that handles UDP 
+	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private static final UDPAcceptor udpAcceptor = UDPAcceptor.instance();
+	private static final UDPService udpService = UDPService.instance();
 
     /**
      * isShuttingDown flag
@@ -170,7 +170,7 @@ public final class RouterService {
 		catcher.initialize();
 		acceptor.initialize();
 		
-		udpAcceptor.start();
+		udpService.start();
 
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
@@ -223,12 +223,12 @@ public final class RouterService {
     }
 
 	/**
-	 * Accessor for the <tt>UDPAcceptor</tt> instance.
+	 * Accessor for the <tt>UDPService</tt> instance.
 	 *
-	 * @return the <tt>UDPAcceptor</tt> instance in use
+	 * @return the <tt>UDPService</tt> instance in use
 	 */
-	public static UDPAcceptor getUdpAcceptor() {
-		return udpAcceptor;
+	public static UDPService getUdpService() {
+		return udpService;
 	}
 
 	/**
@@ -529,7 +529,7 @@ public final class RouterService {
      */
     public static void setListeningPort(int port) throws IOException {
         acceptor.setListeningPort(port);
-		udpAcceptor.resetPort();
+		udpService.resetPort();
     }
 
     /**
