@@ -171,7 +171,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception NotSharingException the host isn't sharing files (BearShare)
      * @exception IOException miscellaneous  error 
      */
-    public void connectHTTP(int start, int stop ,boolean supportQueueing) 
+    public void connectHTTP(int start, int stop, boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
                NotSharingException, QueuedException {
         _amountToRead = stop-start;
@@ -182,7 +182,7 @@ public class HTTPDownloader implements BandwidthTracker {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.1\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
         if(supportQueueing)
@@ -201,8 +201,10 @@ public class HTTPDownloader implements BandwidthTracker {
 		if(alts.size() > 0) {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}
+        //TODO1: is this range correct??
+        //System.out.println("Sumeet: "+startRange+", "+stop);
+        out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
 
-        out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
             //Get our own address and port.  This duplicates the getAddress an
@@ -493,7 +495,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(VerifyingFile commonOutFile) 
+	public void doDownload(VerifyingFile commonOutFile, boolean http11) 
         throws IOException {
         _socket.setSoTimeout(0);//once downloading we can stall for a bit
         long currPos = _initialReadingPoint;
@@ -536,7 +538,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 throw new FileIncompleteException();  
             }
         } finally {
-            _byteReader.close();
+            if(!http11)
+                _byteReader.close();
         }
 	}
 
