@@ -82,6 +82,22 @@ public final class Expand {
      *  any other IO error
      */
     public static void expandFile(File source, File dest) throws IOException {        
+        expandFile(source, dest, false);
+    }
+
+    /**
+     * Expand the specified source file into the specified destination
+     * directory.
+     *
+     * @param source the source <tt>File</tt> to expand
+     * @param dest the destination directory in which to expand the 
+     *  source file
+     * @throws <tt>IOException</tt> if the source file cannot be found,
+     *  if the destination directory cannot be written to, or there is
+     *  any other IO error
+     */
+    public static void expandFile(File source, File dest, boolean overwrite) 
+        throws IOException {        
         ZipInputStream zis = new ZipInputStream(new FileInputStream(source));
         ZipEntry ze = null;
         
@@ -93,7 +109,8 @@ public final class Expand {
             
             if (ze.isDirectory()) {
                 f.mkdirs(); 
-            } else if ( ze.getTime() > f.lastModified() ) {
+            } else if ( ze.getTime() > f.lastModified() ||
+                        overwrite ) {
                 byte[] buffer = new byte[1024];
                 int length = 0;
                 FileOutputStream fos = new FileOutputStream(f);
