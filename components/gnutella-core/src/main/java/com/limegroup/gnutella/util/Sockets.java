@@ -142,7 +142,7 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             try {
-                Socket ret = new Socket();
+                Socket ret = (Socket)Socket.class.newInstance();
                 Object addr = _inetAddressConstructor.newInstance(
                     new Object[] { host, new Integer(port) });
 
