@@ -1707,9 +1707,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null;
         }
 
-        File incompleteFile=incompleteFileManager.getFile(rfd);
+        File incompleteFile = incompleteFileManager.getFile(rfd);
         HTTPDownloader ret;
         boolean needsPush = needsPush(rfd);
+        
         synchronized (this) {
             currentLocation=rfd.getHost();
             //If we're just increasing parallelism, stay in DOWNLOADING
@@ -1722,27 +1723,80 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
-        debug("WORKER: attempting connect to "
-              +rfd.getHost()+":"+rfd.getPort());
 
-        if(!needsPush) {
-            //Establish normal downloader.              
-            ret=new HTTPDownloader(rfd, incompleteFile, 
-			  totalAlternateLocations); 
-            //System.out.println("MANAGER: trying connect to "+rfd);
+        debug("WORKER: attempting connect to "
+              + rfd.getHost() + ":" + rfd.getPort());        
+        
+        // for multicast replies, try pushes first
+        // and then try direct connects.
+        // this is because newer clients work better with pushes,
+        // but older ones didn't understand them
+        if( rfd.isReplyToMulticast() ) {
+            // DO NOT PUT MULTICAST RFDs IN AlTERNATE LOCATIONS.
+            removeAlternateLocation(rfd);
             try {
-                ret.connectTCP(NORMAL_CONNECT_TIME);
+                ret = connectWithPush(rfd, incompleteFile);
+            } catch(IOException e) {
+                try {
+                    ret = connectDirectly(rfd, incompleteFile);
+                } catch(IOException e2) {
+                    return null; // impossible to connect.
+                }
+            }
+            return ret;
+        }        
+        
+        // otherwise, we're not multicast.
+        // if we need a push, go directly to a push.
+        // if we don't, try direct and if that fails try a push.        
+        if( !needsPush ) {
+            try {
+                ret = connectDirectly(rfd, incompleteFile);
                 return ret;
-            } catch (CantConnectException e) {
-                //Schedule for pushing...let it fall thro'
-            } catch (IOException e) {
-                //Miscellaneous error: never revisit.
+            } catch(IOException e) {
+                // oh well, fall through to the push.
             }
         }
-        //Fell thro'... either rfd  needed a push OR 
-        //we were not able to connect, so try to push anyway...
         
-        //We the push is complete and we have a socket ready to use
+        // ALTERNATE LOCATIONS THAT NEED PUSHES SHOULD NOT BE IN THE MESH.
+        removeAlternateLocation(rfd);
+        
+        try {
+            ret = connectWithPush(rfd, incompleteFile);
+            return ret;
+        } catch(IOException e) {
+            // even the push failed :(
+        }
+        
+        // if we're here, everything failed.
+        return null;
+    }
+        
+
+    /**
+     * Attempts to directly connect through TCP to the remote end.
+     */
+    private HTTPDownloader connectDirectly(RemoteFileDesc rfd, 
+      File incompleteFile) throws IOException {
+        HTTPDownloader ret;
+        //Establish normal downloader.              
+        ret = new HTTPDownloader(rfd, incompleteFile,totalAlternateLocations);
+        // Note that connectTCP can throw IOException
+        // (and the subclassed CantConnectException)
+        ret.connectTCP(NORMAL_CONNECT_TIME);
+        return ret;
+    }
+    
+    /**
+     * Attempts to connect by using a push to the remote end.
+     * BLOCKING.
+     */
+    private HTTPDownloader connectWithPush(RemoteFileDesc rfd,
+      File incompleteFile) throws IOException {
+      
+        HTTPDownloader ret;
+        
+        //When the push is complete and we have a socket ready to use
         //the acceptor thread is going to notify us using this object
         Object threadLock = new Object();
         MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
@@ -1759,30 +1813,27 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //details.
                 try {
                     threadLock.wait(PUSH_CONNECT_TIME);  
-                } catch(InterruptedException e) {//
-                    removeAlternateLocation(rfd);
-                    return null;
+                } catch(InterruptedException e) {
+                    throw new IOException("push interupted.");
                 }
             }
         }
+        
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
         if (pushSocket==null) {
-            removeAlternateLocation(rfd);
-            return null; 
+            throw new IOException("push socket is null");
         }
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
-		  totalAlternateLocations);  
-        try {
-            //This should never really throw an exception since are only
-            //initializing the byteReader with this call.
-            ret.connectTCP(0);//just initializes the byteReader in this case
-        } catch(IOException iox) {
-            removeAlternateLocation(rfd);
-            return null; 
-        }
+		  totalAlternateLocations);
+        
+        //This should never really throw an exception since we are only
+        //initializing the byteReader with this call, but if it does
+        //let the calling method handle it.
+        ret.connectTCP(0);//just initializes the byteReader in this case
+         
         return ret;
     }
     
