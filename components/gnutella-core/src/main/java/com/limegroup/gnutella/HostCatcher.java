@@ -618,7 +618,7 @@ public class HostCatcher {
      * Otherwise, returns true if connecting to host:port would connect to
      *  the manager's listening port.
      */
-    private boolean isMe(String host, int port) {
+    private static boolean isMe(String host, int port) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.*.*.*" since
         //they are aliases this machine.
