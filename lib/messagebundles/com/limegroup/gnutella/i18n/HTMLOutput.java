@@ -178,7 +178,7 @@ class HTMLOutput {
 "     translations.<br />\n" +
 "     <br />\n" + 
 "     <a href=\"" + PRE_LINK + "MessagesBundle_es.properties\"><b>Click\n" +
-"     here to see what a Messages Bundle looks like</b></a>: (In this example, the\n" +
+"     here to see what a Messages Bundle looks like</b></a>. (In this example, the\n" +
 "     Messages Bundle file has been partly translated into Spanish.)<br />\n" +
 "     <br />\n");
     }
@@ -322,7 +322,7 @@ class HTMLOutput {
 "     <b><big>How to submit corrections or enhancements for your language:</big></b><br />\n" +
 "     <br />\n" +
 "     Users that don't have the correct tools to edit a Messages Bundle can send us\n" +
-"     an Email in English or in French, that explain their needs.<br />\n" +
+"     an Email in English or in French, that explain their needs. \n" +
 "     For any discussion with the contributing translators you may write to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
@@ -354,12 +354,7 @@ class HTMLOutput {
 "     preferences file. Lookup for the correct language code to use, in the list\n" +
 "     beside.<br />\n" +
 "     <br />\n" +
-"     Until version 2.4 of LimeWire, bundles used by LimeWire were simply stored in\n" +
-"     a single \"MessagesBundle.properties\" file of your installation\n" +
-"     directory. However these versions support other bundles in the same\n" +
-"     directory.<br />\n" +
-"     <br />\n" +
-"     Since version 2.5, bundles are searched in a single <b>zipped archive</b>\n" +
+"     Bundles are stored in a single <b>zipped archive</b>\n" +
 "     named \"MessagesBundles.jar\" installed with LimeWire. All bundles\n" +
 "     are named \"MessagesBundle_xx.properties\", where \"xx\" is replaced by\n" +
 "     the language code (as shown on the table beside).\n" +
@@ -374,8 +369,7 @@ class HTMLOutput {
 "     <br />\n" +
 "     Users that wish to contribute with a new translation must be fluent in the\n" +
 "     target language, preferably native of a country where this language is\n" +
-"     official. The English version is the reference one, but if needed you can\n" +
-"     look for suggestions at the other completed translations. Before starting\n" +
+"     official. Before starting\n" +
 "     your work, please contact us at\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     During the translation process, you may subscribe to the translate list (see above)\n" +
@@ -383,9 +377,7 @@ class HTMLOutput {
 "     <br />\n" + 
 "     Do not start with the existing Message Bundle installed with your current\n" +
 "     servent. <b>Work on the latest version of a complete Messages Bundle</b> from\n" +
-"     the list of languages on the right of this page (preferably the English\n" +
-"     version or the French version which is constantly maintained in sync and is\n" +
-"     fully translated). Look also to other existing translations if you need tips.<br />\n" +
+"     the list of languages on the top right of this page.<br />\n" +
 "     <br />\n" +
 "     When translating, adopt the <b>common terminology</b> used in your localized\n" +
 "     operating system. In some cases, some terms were imported from English,\n" +
@@ -408,6 +400,7 @@ class HTMLOutput {
 "     After you've plugged in your translations into your language's Messages\n" +
 "     Bundle, send your copy as a plain-text file attachement to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
+"    <br />\n" +
 "     <i>We will review your translations and integrate them into our existing\n" +
 "     versions after review.</i><br />\n"+
 "     <br />\n" +
@@ -421,14 +414,10 @@ class HTMLOutput {
 "      <td valign=\"top\"><br />\n" +
 "       <b>LAST UPDATED: <font color=\"#FF0000\">" + df.format(new Date()) + "</font><br />\n" +
 "       <br />\n" +
-"       LATEST TRANSLATIONS & COMPLETION STATUS:</b><br />\n" +
-"       <br />\n" +
 "       To get the most recent version of a Messages Bundle, <b>click on the\n" +
 "       corresponding language</b> in the following list.<br />\n" +
 "       <br />\n" +
-"       <font color=\"#FF0000\">To view all available Messages Bundle projects\n" +
-"       (new languages may be added), <a\n" +
-"       href=\"" + PRE_LINK + "\">click here</a></font>.\n");
+"       LATEST TRANSLATIONS & COMPLETION STATUS:</b><br />\n");
     }
     
     /**
