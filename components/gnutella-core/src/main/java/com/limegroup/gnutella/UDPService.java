@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
@@ -272,6 +273,8 @@ public final class UDPService implements Runnable {
             throw new IllegalArgumentException("Null Message");
         if (ip == null)
             throw new IllegalArgumentException("Null InetAddress");
+        if (!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("Invalid Port");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
