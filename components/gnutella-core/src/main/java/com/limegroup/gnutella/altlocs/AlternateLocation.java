@@ -101,11 +101,14 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	
 	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
-	 * specified string argument and URN.
+	 * specified string argument and URN.  The location created this way
+	 * assumes the name "ALT" for the file.
 	 *
 	 * @param location a string containing one of the following:
-	 *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS"
-	 *  "1.2.3.4[:6346]"
+	 *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS" or
+	 *  "1.2.3.4[:6346]" or
+	 *  http representation of a PushEndpoint.
+	 * 
 	 * If the first is given, then the SHA1 in the string MUST match
 	 * the SHA1 given.
 	 *
@@ -114,6 +117,15 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	 */
 	public static AlternateLocation create(final String location,
 	                                       final URN urn) throws IOException {
+	    return create(location,urn,"ALT");
+    }
+	
+	/**
+	 * constructs an AlternateLocation based on string argument, URN and a 
+	 * filename.
+	 */
+	public static AlternateLocation create(final String location,
+	        final URN urn, final String fileName) throws IOException {
         if(location == null || location.equals(""))
             throw new IOException("null or empty location");
         if(urn == null)
@@ -132,15 +144,16 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         //the name of the file it is pointing to.
         if (location.indexOf(";")==-1) {
         	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
-			return new DirectAltLoc(addr,"ALT", urn);
+			return new DirectAltLoc(addr,fileName, urn);
         }
         
         //Case 3. Push Alt loc
         //Note: the AlternateLocation object created this way does not know 
         //the name of the file it is pointing to.  
         PushEndpoint pe = new PushEndpoint(location);
-        return new PushAltLoc(pe,urn,"ALT");
-    }
+        return new PushAltLoc(pe,urn,fileName);
+	    
+	}
 
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
