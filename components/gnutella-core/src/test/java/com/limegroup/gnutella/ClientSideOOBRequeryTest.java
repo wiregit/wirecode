@@ -67,7 +67,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
+            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
     }   

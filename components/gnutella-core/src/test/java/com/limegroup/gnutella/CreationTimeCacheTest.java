@@ -103,7 +103,7 @@ public class CreationTimeCacheTest
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         File mp3 = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
+            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));

@@ -35,7 +35,7 @@ public class MulticastTest extends BaseTestCase {
     private static RouterService ROUTER_SERVICE;
         
 	private static final String MP3_NAME =
-        "com/limegroup/gnutella/mp3/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
+        "com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
         
 
     public MulticastTest(String name) {
