@@ -624,7 +624,7 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
+//log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  
 	}
 
@@ -677,8 +677,8 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 
             int start = _sendWindow.getWindowStart();
 
-log2("Soft resend data:"+ start+ " rto:"+rto+
-" uS:"+_sendWindow.getUsedSpots());
+//log2("Soft resend data:"+ start+ " rto:"+rto+
+//" uS:"+_sendWindow.getUsedSpots());
 
             // Scale back on the writing speed if you are hitting limits
             _writeRegulator.hitResendTimeout();
@@ -790,7 +790,7 @@ log2("Soft resending message:"+drec.msg.getSequenceNumber());
 
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
-log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
+//log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.
@@ -972,7 +972,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
-log2("keepalive: "+ time);
+//log2("keepalive: "+ time);
 
             // If write event went to sleep and it is needed then
             // wakeup writing
@@ -985,7 +985,7 @@ log2("keepalive: "+ time);
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-log2("shutdown");
+//log2("shutdown");
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
@@ -995,7 +995,7 @@ log2("shutdown");
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
-log("sendKeepAlive");
+//log("sendKeepAlive");
                     sendKeepAlive();
                 } else {
                     return;
@@ -1005,7 +1005,7 @@ log("sendKeepAlive");
             // Reschedule keepalive timer
             _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
             _scheduler.scheduleEvent(this);
-log2("end keepalive: "+ System.currentTimeMillis());
+//log2("end keepalive: "+ System.currentTimeMillis());
         }
     }
     /** 
@@ -1017,7 +1017,7 @@ log2("end keepalive: "+ System.currentTimeMillis());
         }
 
         public void handleEvent() {
-log2("data timeout :"+ System.currentTimeMillis());
+//log2("data timeout :"+ System.currentTimeMillis());
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -1033,7 +1033,7 @@ log2("data timeout :"+ System.currentTimeMillis());
             if ( isConnected() ) {
                 writeData();
             }
-log2("end data timeout: "+ System.currentTimeMillis());
+//log2("end data timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1047,11 +1047,11 @@ log2("end data timeout: "+ System.currentTimeMillis());
         }
 
         public void handleEvent() {
-log2("ack timeout: "+ System.currentTimeMillis());
+//log2("ack timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 validateAckedData();
             }
-log2("end ack timeout: "+ System.currentTimeMillis());
+//log2("end ack timeout: "+ System.currentTimeMillis());
         }
     }
     //
