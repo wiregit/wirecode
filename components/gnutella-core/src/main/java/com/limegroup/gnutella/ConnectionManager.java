@@ -935,7 +935,7 @@ public class ConnectionManager {
      */
     public List getTCPRedirectUltrapeers() {
         Iterator ultrapeers = getInitializedConnections().iterator();
-        List retList = new ArrayList();
+        List retList = new ArrayList(2);
         while (ultrapeers.hasNext() && (retList.size() < 2)) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsTCPRedirect() >= 0)
@@ -954,7 +954,7 @@ public class ConnectionManager {
      */
     public List getUDPRedirectUltrapeers() {
         Iterator ultrapeers = getInitializedConnections().iterator();
-        List retList = new ArrayList();
+        List retList = new ArrayList(2);
         while (ultrapeers.hasNext() && (retList.size() < 2)) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsUDPRedirect() >= 0)

@@ -1035,39 +1035,27 @@ public abstract class MessageRouter {
         final int portToContact = udp.getConnectBackPort();
         List redirect = _manager.getUDPRedirectUltrapeers();
         if (redirect.size() > 0) {
-            Iterator iter = redirect.iterator();
-            while (iter.hasNext()) {
-                Connection connection = (Connection) iter.next();
-                InetAddress sourceAddr = connection.getInetAddress();
-                try {
-                    // make a new redirect message
-                    UDPConnectBackRedirect redir = 
-                        new UDPConnectBackRedirect(guidToUse, sourceAddr, 
+            InetAddress sourceAddr = source.getInetAddress();
+            UDPConnectBackRedirect redir = null;
+            try {
+                // make a new redirect message
+                redir = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
                                                    portToContact);
-                    // redirect it
-                    connection.send(redir);
-                }
-                catch (IOException ioe) {
-                    // connection went bye-bye?
-                }
-                catch (BadPacketException bpe) {
-                    ErrorService.error(bpe);
-                }
             }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+                return;
+            }
+            Iterator iter = redirect.iterator();
+            while (iter.hasNext())
+                ((ManagedConnection)iter.next()).send(redir);
             return;
         }
 
         // 2)
-        InetAddress addrToContact = null;
-        try {
-            addrToContact = source.getInetAddress();
-        }
-        catch (IllegalStateException ise) {
-            return;
-        }
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        UDPService.instance().send(pr, addrToContact, portToContact);
+        UDPService.instance().send(pr, source.getInetAddress(), portToContact);
     }
 
 
@@ -1133,35 +1121,24 @@ public abstract class MessageRouter {
         final int portToContact = tcp.getConnectBackPort();
         List redirect = _manager.getTCPRedirectUltrapeers();
         if (redirect.size() > 0) {
-            Iterator iter = redirect.iterator();
-            while (iter.hasNext()) {
-                Connection connection = (Connection) iter.next();
-                InetAddress sourceAddr = connection.getInetAddress();
-                try {
-                    // make a new redirect message
-                    TCPConnectBackRedirect redir = new
-                        TCPConnectBackRedirect(sourceAddr, portToContact);
-                    // redirect it
-                    connection.send(redir);
-                }
-                catch (IOException ioe) {
-                    // connection went bye-bye?
-                }
-                catch (BadPacketException bpe) {
-                    ErrorService.error(bpe);
-                }
+            InetAddress sourceAddr = source.getInetAddress();
+            TCPConnectBackRedirect redir = null;
+            try {
+                // make a new redirect message
+                redir = new TCPConnectBackRedirect(sourceAddr, portToContact);
             }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+                return;
+            }
+            Iterator iter = redirect.iterator();
+            while (iter.hasNext())
+                ((ManagedConnection)iter.next()).send(redir);
             return;
         }
 
         // 2)
-        final String addrToContact;
-        try {
-            addrToContact = source.getInetAddress().getHostAddress();
-        }
-        catch (IllegalStateException ise) {
-            return;
-        }
+        final String addrToContact = source.getInetAddress().getHostAddress();
 
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
