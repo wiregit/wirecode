@@ -176,11 +176,11 @@ public class QueryRequest extends Message implements Serializable{
     }
     
     private void handleGemExtensionString(String urnString) {
-		if(URN.isURN(urnString)) {
+		if(URN.isUrn(urnString)) {
 			// it's an URN to match, of form "urn:namespace:etc"
 			URN urn = null;
 			try {
-				urn = URNFactory.createURN(urnString);
+				urn = URNFactory.createUrn(urnString);
 			} catch(IOException e) {
 				// the urn string is invalid -- just return
 				return;
@@ -192,7 +192,7 @@ public class QueryRequest extends Message implements Serializable{
 			// but also, it's an implicit request for similar
 			// URNs on responses, so add the URN prefix there, too
 			requestedUrnTypes.add(urn.getTypeString());
-		} else if(URN.isURNType(urnString)) {
+		} else if(URN.isUrnType(urnString)) {
 			// it's an URN type to return, of form "urn" or "urn:namespace"
 			if(requestedUrnTypes == null) requestedUrnTypes = new HashSet();
 			requestedUrnTypes.add(urnString);
