@@ -127,17 +127,24 @@ public class UDPBufferedOutputStream extends OutputStream {
 
     /**
      *  Package accessor for retrieving and freeing up chunks of data.
+	 *  Returns null if no data.
      */
     synchronized Chunk getChunk() {
 		Chunk rChunk = new Chunk();
 		if ( chunks.size() > 0 ) {
-			rChunk.chunk = (byte[]) chunks.get(0);
+			// Return the oldest chunk 
+			rChunk.chunk = (byte[]) chunks.remove(0);
 			rChunk.count = rChunk.chunk.length;
-		} else {
+		} else if (activeCount > 0) {
+			// Return a partial chunk and allocate a fresh one
 			rChunk.chunk = activeChunk;
 			rChunk.count = activeCount;
     		allocateNewChunk();
+		} else {
+			// If no data currently, return null
+			return null;
 		}
+		// Wakeup any write operation waiting for space
 		notify();
 		return rChunk;
     }
