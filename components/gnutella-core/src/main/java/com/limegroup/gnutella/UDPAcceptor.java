@@ -8,20 +8,29 @@ import java.io.*;
  * dispatching those message the appropriate message routers and 
  * reply handlers.
  */
-public class UDPAcceptor implements Runnable {
+public final class UDPAcceptor implements Runnable {
 
 	/**
 	 * Constant for the single <tt>UDPAcceptor</tt> instance.
 	 */
 	private static final UDPAcceptor INSTANCE = new UDPAcceptor();
 
+	/**
+	 * The socket that handles sending and receiving messages over UDP.
+	 */
 	private final DatagramSocket UDP_SOCKET;
-	private final int BUFFER_SIZE = 8192;
-	//private final MessageRouter ROUTER;
-
-	//private final ReplyHandler UDP_REPLY_HANDLER = 
-	//new UDPReplyHandler();
 	
+	/**
+	 * Constant for the size of UDP messages to accept -- dependent upon
+	 * IP-layer fragmentation.
+	 */
+	private final int BUFFER_SIZE = 8192;
+
+	/**
+	 * Constant buffer used for the message header data.
+	 */
+	private byte[] HEADER_BUF=new byte[23];
+
 	/**
 	 * Instance accessor.
 	 */
@@ -34,7 +43,6 @@ public class UDPAcceptor implements Runnable {
 	 * <tt>DatagramSocket</tt>.
 	 */
 	private UDPAcceptor() {
-		//ROUTER = router;
 		DatagramSocket tempSocket = null;
 		for(int i=6346; i<6357; i++) {
 			try {
@@ -48,7 +56,10 @@ public class UDPAcceptor implements Runnable {
 		UDP_SOCKET = tempSocket;
 	}
 
-    private byte[] HEADER_BUF=new byte[23];
+	/**
+	 * Busy loop that accepts incoming messages sent over UDP and 
+	 * dispatches them to their appropriate handlers.
+	 */
 	public void run() {
 		// if the socket could not be initialized, return
 		if(UDP_SOCKET == null) return;
@@ -70,29 +81,7 @@ public class UDPAcceptor implements Runnable {
 					InputStream in = new ByteArrayInputStream(data);
 					Message message = Message.read(in, HEADER_BUF);		
 					if(message == null) continue;
-
-					if(message instanceof QueryRequest) {
-						QueryRequest request = (QueryRequest)message;
-
-						// temporary solution
-						UDPReplyHandler handler = 
-						    new UDPReplyHandler(datagram.getAddress(), 
-												datagram.getPort());
-						// TODO: if we're an UltraPeer, check to make sure the
-						// ip and port match the ip and port of the datagram
-						router.handleUDPMessage(request, handler);
-					} else if(message instanceof QueryReply) {
-						QueryReply reply = (QueryReply)message;
-
-						// temporary solution
-						UDPReplyHandler handler = 
-						    new UDPReplyHandler(datagram.getAddress(), 
-												datagram.getPort());
-						// TODO: if we're an UltraPeer, check to make sure the
-						// ip and port match the ip and port of the datagram
-						router.handleUDPMessage(reply, handler);						
-					}
-					
+					router.handleUDPMessage(message, datagram);					
 				} catch(BadPacketException e) {
 					continue;
 				}
