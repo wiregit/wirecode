@@ -193,7 +193,7 @@ public class CreativeCommonsResultTest
         Socket s = new Socket(InetAddress.getLocalHost(), PORT);
         s.close();
 
-        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio license=\"Creative Commons\"></audio></audios>";
+        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio license=\"http://creativecommons.org/licenses/\"></audio></audios>";
 
         // we should send a query to the leaf and get results.
         QueryRequest query = QueryRequest.createQuery("cc",

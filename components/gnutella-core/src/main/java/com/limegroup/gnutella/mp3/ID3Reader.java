@@ -45,7 +45,6 @@ public final class ID3Reader {
         XMLStringUtils.DELIMITER;
         
     private static final String LICENSE_RDF_OPEN = "<license rdf:resource=\"";
-    private static final String CC_LICENSE_STRING = "Creative Commons";
 
     /**
      * This class should never be constructed.

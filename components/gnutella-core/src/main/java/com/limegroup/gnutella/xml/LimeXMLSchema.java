@@ -180,6 +180,12 @@ public class LimeXMLSchema
         return _schemaURI;
     }
     
+    /** Returns whether or not this is the audio schema....
+     */
+    public boolean isAudioSchema() {
+        return getSchemaURI().equals("http://www.limewire.com/schemas/audio.xsd");
+    }
+
     /**
      * Returns all the fields(placeholders) in this schema.
      * The field names are canonicalized as mentioned below:
