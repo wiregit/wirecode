@@ -63,14 +63,14 @@ public class UPListVendorMessage extends VendorMessage {
 			//randomized trim
 			int index = (int) Math.floor(Math.random()*
 					(endpointsUP.size()-request.getNumberUP()));
-			endpointsUP = endpointsUP.subList(index,request.getNumberUP());
+			endpointsUP = endpointsUP.subList(index,index+request.getNumberUP());
 		}
 		if (request.getNumberLeaves() != request.ALL && 
 				request.getNumberLeaves() < endpointsLeaf.size()) {
 			//randomized trim
 			int index = (int) Math.floor(Math.random()*
 					(endpointsLeaf.size()-request.getNumberLeaves()));
-			endpointsLeaf = endpointsLeaf.subList(index,request.getNumberLeaves());
+			endpointsLeaf = endpointsLeaf.subList(index,index+request.getNumberLeaves());
 		}
 		
 		
