@@ -62,7 +62,6 @@ public final class HandshakeResponseTest extends BaseTestCase {
             HandshakeResponse.createResponse(new LeafHeaders("45.67.89.54"));
     }
 
-    /*
     public void testLeafRejectIncoming() throws Exception {
         Properties props = new Properties();
         props.put(HeaderNames.X_ULTRAPEER, "false");
@@ -74,32 +73,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
         
         assertTrue(hr.hasXTryUltrapeers());
     }
-*/
     
     /**
      * Tests the method that adds Ultrapeer hosts to the X-Try-Ultrapeer
      * header.
      */
     public void testAddXTryHeader() throws Exception {
-        /*
-        String desiredHeader = "";
-        int port = 6346;
-        int limit = 10;
-        List hosts = new LinkedList();
-        for(int i=0; i<limit; i++) {
-            String curHost = "165.23.9."+i;
-            hosts.add(new Endpoint(curHost, port));
-            desiredHeader += curHost + ":" + port;
-            
-            // Add comma separating hosts.
-            if(i != (limit-1)) {
-                desiredHeader += ",";
-            }
-        }
-        */
-
-
-        
         Method m = 
             PrivilegedAccessor.getMethod(HandshakeResponse.class, 
                 "addXTryHeader",
