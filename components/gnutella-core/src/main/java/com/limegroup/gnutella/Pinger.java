@@ -22,7 +22,7 @@ public final class Pinger implements Runnable {
      * Constant for the number of milliseconds to wait between ping 
      * broadcasts.  Public to make testing easier.
      */
-    public static final int PING_INTERVAL = 2000;
+    public static final int PING_INTERVAL = 3000;
 
     /**
      * Returns the single <tt>Pinger</tt> instance.
