@@ -45,7 +45,7 @@ def make_defaults():
 
 #Fills up CANDIDATES with the entries of START_URL, without verifying.
 def get_new_candidates():
-    f=urlopen(start_url)
+    f=open("urls.txt")
     while 1:
         line=strip(f.readline())
         if line=="":
@@ -98,7 +98,7 @@ assert contains(test_list, "http://b.com/path/index.php")
 
 #Prints the valid URLs of candidates, along with Java formatting.    
 def print_valid_candidates():
-    timeoutsocket.setDefaultSocketTimeout(60)
+    timeoutsocket.setDefaultSocketTimeout(10)
     first_line=1     #Used to keep track of commas
     for url in candidates:
         wrote=0

@@ -80,7 +80,6 @@ public class PushAltLoc extends AlternateLocation {
             ErrorService.error(ioe);
             return null;
         }
-        ret._demoted = this._demoted;
         ret._count = this._count;
         return ret;
     }
@@ -171,6 +170,6 @@ public class PushAltLoc extends AlternateLocation {
 	 * @return the string representation of this alternate location
 	 */
 	public String toString() {
-		return _pushAddress+","+_count+","+_demoted;
+		return _pushAddress+","+_count;
 	}
 }

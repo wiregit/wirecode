@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -381,7 +382,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         try {
             AlternateLocation.create("0.1.2.3", urn);
             fail("IOException expected");
-        } catch(IllegalArgumentException expected) {}
+        } catch(IOException expected) {}
 
         try {
             AlternateLocation.create("1.2.3.4/25", urn);
@@ -463,6 +464,56 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         assertEquals("locations should be equal", loc1, loc2);
         loc2.demote();
         assertEquals("locations should be equal", loc1, loc2);
+    }
+    
+    
+    public void testCompareTo() throws Exception {
+        TreeSet set = new TreeSet();
+        
+        AlternateLocation direct1 = AlternateLocation.create(equalLocs[0]);
+        AlternateLocation direct2 = AlternateLocation.create(equalLocs[0]);
+        
+        set.add(direct1);
+        assertTrue(set.contains(direct2));
+        
+        direct2.increment();
+        assertFalse(set.contains(direct2));
+        assertLessThan(0,direct1.compareTo(direct2));
+        
+        set.remove(direct1);
+        direct1.demote();
+        assertGreaterThan(0,direct1.compareTo(direct2));
+        
+        direct1.promote();
+        assertLessThan(0,direct1.compareTo(direct2));
+        
+        // try some push altlocs
+        GUID clientGUID = new GUID(GUID.makeGuid());
+        String httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
+        
+        URN urn =
+	        URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
+        
+        AlternateLocation push1 = AlternateLocation.create(httpString,urn);
+        AlternateLocation push2 = AlternateLocation.create(httpString,urn);
+        
+        assertTrue(push1.equals(push2));
+        
+        assertEquals(0,push1.compareTo(push2));
+        
+        push2.increment();
+        assertLessThan(0,push1.compareTo(push2));
+        
+        // calling demote() does not affect push locs
+        push1.demote();
+        assertLessThan(0,push1.compareTo(push2));
+        
+        // comparing the two types of altlocs is predictable if their count
+        // values are different
+        assertGreaterThan(0,direct2.compareTo(push1));
+        
+        // it is not easily predictable if they are the same
+        assertNotEquals(0,direct2.compareTo(push2));
     }
 
 

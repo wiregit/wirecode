@@ -27,6 +27,18 @@ public class DirectAltLoc extends AlternateLocation {
 	
 	private final IpPort _node;
 	
+    /**
+     * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
+     * succeeds, it may be promoted again resetting the value of _demoted.  The
+     * _count attribute does does take into account the case of a good alternate
+     * location with a high count, which has recently failed. 
+     * <p> 
+     * Note that demotion in not intrinsic to the use of this class, some
+     * modules like the download may not want to demote an AlternatLocation, 
+     * other like the uploader may rely on it.
+     */
+    protected volatile boolean _demoted = false;
+	
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
 	 * and <tt>Date</tt> timestamp.
@@ -97,7 +109,7 @@ public class DirectAltLoc extends AlternateLocation {
 	}
 	
 	public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = null;
+        DirectAltLoc ret = null;
         try {
         		ret = new DirectAltLoc(_node, this.SHA1_URN);
 
@@ -140,33 +152,49 @@ public class DirectAltLoc extends AlternateLocation {
 		        _node.getPort() == other._node.getPort());
 		
 	}
+	
+	synchronized void demote() { _demoted = true;}
+	
+	synchronized void promote() { _demoted = false; }
+	
+	public synchronized boolean isDemoted() { return _demoted; }
 
 	public int compareTo(Object o) {
-		int ret = super.compareTo(o);
+	    
+	    int ret = super.compareTo(o);
+	    
+	    // if comparing to PushLocs count is all we need.
+	    // if that is the same, compare by hashCode()
+	    if (o instanceof PushAltLoc) { 
+	        if (ret!=0) 
+	            return ret;
+	        else
+	            return hashCode() - o.hashCode();
+	    }
 		
-		if (ret!=0)
-			return ret;
+		DirectAltLoc other = (DirectAltLoc)o;
 		
-		if (o instanceof DirectAltLoc) {
-		
-			DirectAltLoc other = (DirectAltLoc)o;
-		
-			// if I'm demoted, I'm bigger.  Otherwise I'm smaller
-			if (_demoted !=other._demoted) {
-				if (_demoted)
-					return 1;
-				return -1;
-			}
-			
-			ret = _node.getAddress().compareTo(other._node.getAddress());
-			if(ret!=0)
-				return ret;
-			ret = (_node.getPort() - other._node.getPort());
-			if(ret!=0)
-				return ret;
-		}
-		 
-        return hashCode() - o.hashCode();
+		// if I'm demoted, I'm bigger. Otherwise I'm smaller
+        if (_demoted != other._demoted) {
+            if (_demoted)
+                return 1;
+            return -1;
+        }
+
+        // ret still holds the count difference
+        if (ret != 0)
+            return ret;
+
+        ret = _node.getAddress().compareTo(other._node.getAddress());
+        if (ret != 0)
+            return ret;
+        
+        ret = (_node.getPort() - other._node.getPort());
+        
+        // if we got here and ret is still 0, we are the same as the other 
+        // DirectLoc.
+        return ret;
+
 	}
 	
 	public int hashCode() {

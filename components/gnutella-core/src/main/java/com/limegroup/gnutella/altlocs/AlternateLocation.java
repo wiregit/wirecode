@@ -67,18 +67,6 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */
     protected volatile int _count = 0;
 
-    /**
-     * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
-     * succeeds, it may be promoted again resetting the value of _demoted.  The
-     * _count attribute does does take into account the case of a good alternate
-     * location with a high count, which has recently failed. 
-     * <p> 
-     * Note that demotion in not intrinsic to the use of this class, some
-     * modules like the download may not want to demote an AlternatLocation, 
-     * other like the uploader may rely on it.
-     */
-    protected volatile boolean _demoted = false;
-
 
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -258,7 +246,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     /**
      * package access, accessor to the value of _demoted
      */ 
-    public synchronized boolean isDemoted() { return _demoted; }
+    public abstract boolean isDemoted();
     
     ////////////////////////////Mesh utility methods////////////////////////////
 
@@ -298,12 +286,12 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     /**
      * package access for demoting this.
      */
-    synchronized void  demote() { _demoted = true; }
+    abstract void  demote(); 
 
     /**
      * package access for promoting this.
      */
-    synchronized void promote() { _demoted = false; }
+    abstract void promote(); 
 
     /**
      * could return null
@@ -465,14 +453,10 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             return 1;
         AlternateLocation other = (AlternateLocation) obj;
         
-        //both have the same value for _demoted
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;
         
-        ret = SHA1_URN.httpStringValue().compareTo(
-                other.SHA1_URN.httpStringValue());
-
         return ret;
  
         			
