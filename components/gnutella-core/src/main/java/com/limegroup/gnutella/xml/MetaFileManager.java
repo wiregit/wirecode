@@ -1,11 +1,9 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.QueryRequest;
-import com.limegroup.gnutella.FileDesc;
-import java.util.HashSet;
-import java.util.Iterator;
+import com.limegroup.gnutella.*;
+import java.io.File;
+import java.util.*;
+
 
 
 //imports to make the test code work
@@ -90,12 +88,37 @@ public class MetaFileManager extends FileManager {
                 //Now we should read embedded meta-date from files.
                 //for now we just do .mp3 files. We need to add code here 
                 //for every embedded reader we make.
-                //ID3Reader id3Reader = new ID3Reader();
-                //get List for file names
-                
-                //create the first LImeXMLDocument and create the collection
-                //add the remaining LimeXMLDocuments
-                //and add the collection to the mapper
+                ID3Reader id3Reader = new ID3Reader();
+                List mp3Files = getAllMP3FilesRecursive();
+                int size = mp3Files.size();
+                LimeXMLReplyCollection collection = null;
+                List docs = new ArrayList();
+                for(int i=0;i<size;i++){
+                    File f = (File)mp3Files.get(i);
+                    LimeXMLDocument doc = null;
+                    try{
+                        doc = id3Reader.readDocument(f);
+                    }catch(Exception e){
+                        continue;
+                    }
+                    //System.out.println("Sumeet :doc = "+doc);
+                    if(doc!=null)
+                        docs.add(doc);
+                }
+                if(docs.size()>0){
+                    //create Reply Collection with the first Reply
+                    LimeXMLDocument d = (LimeXMLDocument)docs.get(0);
+                    String schemaURI = d.getSchemaURI();
+                    collection = new LimeXMLReplyCollection(schemaURI,d);
+                    //add the remaining Reply's to the ReplyCollection
+                    for(int i=1;i<docs.size();i++){
+                        d = (LimeXMLDocument)docs.get(i);
+                        collection.addReply(d);
+                    }
+                    SchemaReplyCollectionMapper map=
+                                SchemaReplyCollectionMapper.instance();
+                    map.add(schemaURI,collection);
+                }
             }//end of if, now we are initialized
             initialized = true;
             //System.out.println("Sumeet: Printing current xml data");
@@ -130,6 +153,43 @@ public class MetaFileManager extends FileManager {
         }
         return retArray;
     }
+
+    /**
+     * Scans all the shared directories recursively and finds files that
+     * have .mp3 extension. and returns a List of files.
+     */
+    public List getAllMP3FilesRecursive(){
+        SettingsManager man = SettingsManager.instance();
+        List dirs = Arrays.asList(man.getDirectoriesAsArray());
+        List retFiles = new Vector();
+        int k=0;
+        while(k < dirs.size()){
+            String dir = (String)dirs.get(k);
+            k++;
+            File[] files = getSharedFiles(new File(dir));
+            int size = files.length;
+            for(int i=0;i<size;i++){
+                if (files[i].isDirectory()){
+                    String t="";
+                    try{
+                        t = files[i].getCanonicalPath();
+                    }catch(Exception e){
+                        continue;
+                    }
+                    if(t!=null && !t.equals(""))
+                        dirs.add(t);
+                }
+                else{
+                    String name = files[i].getName();
+                    String ext = name.substring(name.lastIndexOf("."));
+                    if(ext.equalsIgnoreCase(".mp3"))
+                        retFiles.add(files[i]);
+                }
+            }
+        }
+        return retFiles;
+    }
+
 
     /**
      * Used only for showing the current XML data in the system. This method
