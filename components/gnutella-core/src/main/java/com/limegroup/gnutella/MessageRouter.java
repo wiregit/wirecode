@@ -401,7 +401,11 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest queryRequest)
     {
         _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        broadcastQueryRequest(queryRequest, null, _manager);
+        boolean shouldUnicastRequest = _manager.isSupernode() && false;
+        if (shouldUnicastRequest) 
+            unicastQueryRequest(queryRequest);
+        else
+            broadcastQueryRequest(queryRequest, null, _manager);
     }
 
     /**
@@ -470,6 +474,14 @@ public abstract class MessageRouter
             }
         }
 	}
+
+    /**
+     * Adds the QueryRequest to the unicaster module.  Not much work done here,
+     * see QueryUnicaster for more details.
+     */
+    protected void unicastQueryRequest(QueryRequest queryRequest) {
+    }
+
 
     /**
      * Broadcasts the query request to all initialized connections that
