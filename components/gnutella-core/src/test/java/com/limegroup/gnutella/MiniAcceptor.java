@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.stubs.ConnectionListenerStub;
 import java.net.*;
 import java.io.*;
 import java.nio.*;
@@ -70,19 +71,22 @@ public class MiniAcceptor implements Runnable {
     /** Don't call.  For internal use only. */
     public void run() {
         ServerSocketChannel listener=null;
+        boolean bound=false;
         try {
             //Listen on port
             listener=ServerSocketChannel.open();
             listener.configureBlocking(true);
             listener.socket().bind(new InetSocketAddress(port));
+            bound=true;
 
             //Accept connection.  Technically "GNUTELLA " should be read from s.
             //Turns out that out implementation doesn't care;
             Socket s=listener.accept().socket();
             Connection c=new Connection(s, properties);
-            c.initialize();
+            c.initialize(new ConnectionListenerStub());
 
             //Close listener and store connection.
+            listener.close();
             listener.socket().close();
             synchronized (lock) {
                 this.c=c;
@@ -90,7 +94,7 @@ public class MiniAcceptor implements Runnable {
                 lock.notify();
             } 
         } catch (IOException e) {
-            if (listener==null) {
+            if (!bound) {
                 System.err.println("Couldn't listen to port "+port);
                 e.printStackTrace();  //Couldn't listen?  Serious.
             }
