@@ -342,7 +342,9 @@ public final class MP3Info {
 			//true VBR file may not have a proper tag, to find out for sure
 			//read every header to calculate true variable rate, length, etc
 
-		} finally { //cleanup
+		} 
+		
+	    } finally { //cleanup
 			try {				
 				if( fis != null )
 				    fis.close(); 
