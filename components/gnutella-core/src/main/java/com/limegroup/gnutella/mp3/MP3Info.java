@@ -17,8 +17,7 @@ import com.limegroup.gnutella.ByteOrder;
  *			One of the Sindhis (both?), limewire team
  *			Gustav "Grim Reaper" Munkby, grd@swipnet.se
  *
- * TODO: remove all of the crazy catch(Throwable) instances from this class
- *       -- add tests?
+ * TODO: add tests?
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789 
 public final class MP3Info {
@@ -912,13 +911,16 @@ public final class MP3Info {
 			  && buffer[12] == 'f'
 			  && buffer[13] == 'm'
 			  && buffer[14] == 't'
-			  && buffer[15] == ' ';		
-			  
-			  fis.close(); //finally not necessary
-	    }
-	    catch (Throwable t) {
-		    //an error isn't important; we know file is NOT RIFF-WAV		    
-	    }
+			  && buffer[15] == ' ';
+	    } catch(IOException ignored) {
+	        // not a riff.
+	    } finally {
+	        if( fis != null ) {
+	            try {
+	                fis.close();
+                } catch(IOException ioe) {}
+            }
+        }
 	    
 	    return result; 
 	}
@@ -1016,34 +1018,30 @@ i 0
 	 *              seek offsets 0-F (from beginning of file)
 	 *              
 	 */
-	private void loadFhgHeader (byte buf[], int pos) {
-	
-		try {	        
-			_vbrHeader = new MP3Info.VBRHeader();
+	private void loadFhgHeader (byte buf[], int pos) {	        
+		_vbrHeader = new MP3Info.VBRHeader();
+		
+		 _vbrHeader.scale = ByteOrder.ubyte2int(buf[pos+=2]);
 			
-			 _vbrHeader.scale = ByteOrder.ubyte2int(buf[pos+=2]);
-				
-			 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
-			 _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
+		 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
+		 _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
 
-			/* TOC ignored  [format is sketchy]
-			byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
-			if((b & (byte)(1 << 2 )) != 0 ) {
-				_vbrHeader.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
-			    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
-			    _vbrHeader.toc = new byte[100];
-			    System.arraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
-			    
-			}
-			*/								 
-		}	
-		catch (Throwable t) {} //bombed trying to build VBitRate
+		/* TOC ignored  [format is sketchy]
+		byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
+		if((b & (byte)(1 << 2 )) != 0 ) {
+			_vbrHeader.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
+		    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
+		    _vbrHeader.toc = new byte[100];
+		    System.arraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
+		    
+		}
+		*/
 	}
 
 	/** 
@@ -1077,31 +1075,27 @@ i 0
 	 *              A VBR quality indicator: 0=best 100=worst 
 	 */
 	private void loadXingHeader (byte buf[], int offset) {
-	
-		try {	        
-			_vbrHeader = new MP3Info.VBRHeader();
-			byte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
-			if ((b & 1) != 0) {	
-		     _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
-			}
-			if((b & 2) != 0 ) {
-			 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
-			}
-			if((b & 4) != 0 ) {
-			    _vbrHeader.toc = new byte[100];
-			    System.arraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
-			    offset += 99;
-			}
-			if((b & 8) != 0 ) {
-				_vbrHeader.scale = ByteOrder.ubyte2int(buf[offset+=4]);
-			}						 
-		}	
-		catch (Throwable t) {} //bombed trying to build VBitRate
+		_vbrHeader = new MP3Info.VBRHeader();
+		byte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
+		if ((b & 1) != 0) {	
+	     _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+		}
+		if((b & 2) != 0 ) {
+		 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+		}
+		if((b & 4) != 0 ) {
+		    _vbrHeader.toc = new byte[100];
+		    System.arraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
+		    offset += 99;
+		}
+		if((b & 8) != 0 ) {
+			_vbrHeader.scale = ByteOrder.ubyte2int(buf[offset+=4]);
+        }
 	}
 }
