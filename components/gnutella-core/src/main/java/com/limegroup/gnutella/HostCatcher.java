@@ -584,13 +584,14 @@ public class HostCatcher {
 
     /** Returns true iff ip is the ip address of router.limewire.com.
      *      @requires ip.length==4 */
-    private boolean isRouter(byte[] ip) {
-        //Check for 64.61.25.139-143
-        return (ip[0]==(byte)64
+    private static boolean isRouter(byte[] ip) {
+        //Check for 64.61.25.139-143 and 64.61.25.171
+        return ip[0]==(byte)64
             && ip[1]==(byte)61
             && ip[2]==(byte)25
-            && ip[3]>=(byte)139
-            && ip[3]<=(byte)143);
+            && (ip[3]==(byte)171
+                    || (ip[3]>=(byte)139 && ip[3]<=(byte)143) );
+                    
     }
 
     public String toString() {
@@ -609,6 +610,23 @@ public class HostCatcher {
 //                            String.valueOf(RETRY_TIME),
 //                            String.valueOf(CONNECT_TIME)};
 //          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
+//      }
+
+//      public static void main(String args[]) {
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)127, (byte)0, (byte)0, (byte)1}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)18, (byte)239, (byte)0, (byte)1}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)171}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)139}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)143}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)138}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)170}));
 //      }
 }
 
