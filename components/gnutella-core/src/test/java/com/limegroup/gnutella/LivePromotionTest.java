@@ -3,7 +3,8 @@
  * the core should connect back to us first through an UDP ping, and then
  * as an UP.
  * 
- * its not part of the suite because it will be hard to automate.
+ * its not part of the suite because it requires interactive input from
+ * the tester.  I'm working on ways to automate it, one of them being RMI.
  */
 package com.limegroup.gnutella;
 
@@ -87,9 +88,9 @@ public class LivePromotionTest extends ServerSideTestCase {
 	}
 	
 	//Don't run this as part of automated suite, but do uncomment when running it manually.
-	public static Test suite() {
-       return buildTestSuite(LivePromotionTest.class);
-    }  
+	//public static Test suite() {
+    //   return buildTestSuite(LivePromotionTest.class);
+    //}  
 	
 	public void testSetUP(){}
 	/**

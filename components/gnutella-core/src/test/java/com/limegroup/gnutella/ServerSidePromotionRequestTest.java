@@ -294,6 +294,20 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 	}
 
 	/**
+	 * This test starts up an Ultrapeer backend and a Leaf backend.
+	 * 
+	 * Then it connects to the ultrapeer, after that it connects to the leaf.
+	 * The leaf should receive the address of the Ultrapeer backend in the X-try up header
+	 * and connect to it.
+	 * At that point the central UP loses the connection to the leaf but maintains the one
+	 * to the ultrapeer.
+	 * 
+	 */
+	//public void testWholeProcess() throws Exception {
+		//throw new RuntimeException("implement!");
+	//}
+	
+	/**
 	 * the candidates need ReplyHandlers, but the stub won't do because I need to
 	 * be receiving things on them.
 	 */
@@ -366,5 +380,27 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 		public boolean isPersonalSpam(Message m) {
 			return false;
 		}
-}
+		public boolean isUDPCapable() {
+			return true;
+		}
+		public void setUDPCapable(boolean b){}
+	}
+	
+	/**
+	 * a callback which will tell us when the other nodes are opening or closing connections
+	 */
+	private class CallbackServer extends NetworkServerCallbackStub{
+		
+		public CallbackServer(int port) throws IOException {
+			super(port);
+		}
+		
+		/**
+		 * we just 
+		 *
+		 */
+		protected void parseConnectionInitialized() {
+			
+		}
+	}
 }
