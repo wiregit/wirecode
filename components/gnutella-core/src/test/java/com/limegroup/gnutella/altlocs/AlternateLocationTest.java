@@ -153,7 +153,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 
             // just make sure this doesn't throw an exception
 			AlternateLocation loc = AlternateLocation.create(rfd);
-			assertNull(loc.getPushAddress());
+			assertFalse(loc instanceof PushAltLoc);
 		}
 
         try {
@@ -193,7 +193,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
-        assertNotNull(loc.getPushAddress());
+        assertTrue(loc instanceof PushAltLoc);
         
 	}
 
@@ -316,7 +316,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		// Now try the new-style values
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        AlternateLocation al = AlternateLocation.create(ip + ":50", urn);
+	        DirectAltLoc al = (DirectAltLoc) AlternateLocation.create(ip + ":50", urn);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(50, ep.getPort());
@@ -326,7 +326,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         // Try without a port.
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
-	        AlternateLocation al = AlternateLocation.create(ip, urn);
+	        DirectAltLoc al = (DirectAltLoc)AlternateLocation.create(ip, urn);
 	        Endpoint ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(6346, ep.getPort());

@@ -361,7 +361,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		Iterator parsedIter = parsed.iterator();
 		
     	for(Iterator iter = _alCollection.iterator();iter.hasNext();) {
-    		AlternateLocation current = (AlternateLocation)iter.next();
+    		DirectAltLoc current = (DirectAltLoc)iter.next();
     		QueryReply.IPPortCombo address = (QueryReply.IPPortCombo) parsedIter.next();
     		
     		assertEquals(current.getHost().getInetAddress(),address.getInetAddress());
