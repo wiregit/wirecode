@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 
@@ -48,103 +48,117 @@ public class ForgetfulHashMap extends HashMap {
      * @exception IllegalArgumentException if size is less < 1.
      */
     public ForgetfulHashMap(int size) {
-	if (size < 1)
-	    throw new IllegalArgumentException();
-	queue=new Object[size];
-	next=0;
-	n=size;
+        if (size < 1)
+            throw new IllegalArgumentException();
+        queue=new Object[size];
+        next=0;
+        n=size;
     }
 
+    /**
+     * @modifies this
+     * @effects Maps the given key to the given value, ensuring that
+     * (key, value) is the newest pair in this.  If adding the key
+     * would make this contain more elements than the size given at
+     * construction, removes the oldest key-value pair and returns it;
+     * otherwise returns null.  
+     */
     public Object put(Object key, Object value) {
-	Object ret=super.put(key,value);
-	//Purge oldest entry if we're all full, or if we'll become full
-	//after adding this entry.  It's ok if queue[next] is no longer
-	//in the map.
-	if (queue[next]!=null) {
-	    super.remove(queue[next]);
-	}
-	//And make (key,value) the newest entry.  It is ok
-	//if key is already in queue.
-	queue[next]=key;
-	next++;
-	if (next>=n) {
-	    next=0;
-	}
-	return ret;
+        Object ret=super.put(key,value);
+        if (ret!=null) {
+            return null;
+        }
+
+        //Purge oldest entry if we're all full, or if we'll become full
+        //after adding this entry.  It's ok if queue[next] is no longer
+        //in the map.
+        Object oldestKey=queue[next];
+        if (queue[next]!=null) {
+            super.remove(oldestKey);
+        }
+        //And make (key,value) the newest entry.  It is ok
+        //if key is already in queue.
+        queue[next]=key;
+        next++;
+        if (next>=n) {
+            next=0;
+        }
+        return oldestKey;
     }
 
     public void putAll(Map t) {
-	Iterator iter=t.keySet().iterator();
-	while (iter.hasNext()) {
-	    Object key=iter.next();
-	    put(key,t.get(key));
-	}
+        Iterator iter=t.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key=iter.next();
+            put(key,t.get(key));
+        }
+        return removed;
     }
 
-//      /** Unit test */
-//      public static void main(String args[]) {
-//  	//The cryptic variable names are um..."legacy variables" =)
-//  	ForgetfulHashMap rt=null;
-//  	String g1="key1";
-//  	String g2="key2";
-//  	String g3="key3";
-//  	String g4="key4";
-//  	String c1="value1";
-//  	String c2="value2";
-//  	String c3="value3";
-//  	String c4="value4";
+    //      /** Unit test */
+    //      public static void main(String args[]) {
+    //  	//The cryptic variable names are um..."legacy variables" =)
+    //  	ForgetfulHashMap rt=null;
+    //  	String g1="key1";
+    //  	String g2="key2";
+    //  	String g3="key3";
+    //  	String g4="key4";
+    //  	String c1="value1";
+    //  	String c2="value2";
+    //  	String c3="value3";
+    //  	String c4="value4";
 	
-//  	//1. FIFO put/get tests
-//  	rt=new ForgetfulHashMaforcep(3);
-//  	rt.put(g1, c1); 
-//  	rt.put(g2, c2); 
-//  	rt.put(g3, c3); 
-//  	Assert.that(rt.get(g1)==c1);
-//  	Assert.that(rt.get(g2)==c2); 
-//  	Assert.that(rt.get(g3)==c3); 
-//  	rt.put(g4, c4); 
-//  	Assert.that(rt.get(g1)==null); 
-//  	Assert.that(rt.get(g2)==c2); 
-//  	Assert.that(rt.get(g3)==c3); 
-//  	Assert.that(rt.get(g4)==c4);
-//  	rt.put(g1, c1); 
-//  	Assert.that(rt.get(g1)==c1); 
-//  	Assert.that(rt.get(g2)==null); 
-//  	Assert.that(rt.get(g3)==c3); 
-//  	Assert.that(rt.get(g4)==c4);
+    //  	//1. FIFO put/get tests
+    //  	rt=new ForgetfulHashMap(3);
+    //  	rt.put(g1, c1); 
+    //  	rt.put(g2, c2); 
+    //  	rt.put(g3, c3); 
+    //  	Assert.that(rt.get(g1)==c1);
+    //  	Assert.that(rt.get(g2)==c2); 
+    //  	Assert.that(rt.get(g3)==c3); 
+    //  	rt.put(g4, c4); 
+    //  	Assert.that(rt.get(g1)==null); 
+    //  	Assert.that(rt.get(g2)==c2); 
+    //  	Assert.that(rt.get(g3)==c3); 
+    //  	Assert.that(rt.get(g4)==c4);
+    //  	rt.put(g1, c1); 
+    //  	Assert.that(rt.get(g1)==c1); 
+    //  	Assert.that(rt.get(g2)==null); 
+    //  	Assert.that(rt.get(g3)==c3); 
+    //  	Assert.that(rt.get(g4)==c4);
 
-//  	rt=new ForgetfulHashMap(1);
-//  	rt.put(g1, c1); 
-//  	Assert.that(rt.get(g1)==c1);
-//  	rt.put(g2, c2); 
-//  	Assert.that(rt.get(g1)==null); 
-//  	Assert.that(rt.get(g2)==c2); 
-//  	rt.put(g3, c3); 
-//  	Assert.that(rt.get(g1)==null); 
-//  	Assert.that(rt.get(g2)==null); 
-//  	Assert.that(rt.get(g3)==c3);
+    //  	rt=new ForgetfulHashMap(1);
+    //  	rt.put(g1, c1); 
+    //  	Assert.that(rt.get(g1)==c1);
+    //  	rt.put(g2, c2); 
+    //  	Assert.that(rt.get(g1)==null); 
+    //  	Assert.that(rt.get(g2)==c2); 
+    //  	rt.put(g3, c3); 
+    //  	Assert.that(rt.get(g1)==null); 
+    //  	Assert.that(rt.get(g2)==null); 
+    //  	Assert.that(rt.get(g3)==c3);
 
-//  	rt=new ForgetfulHashMap(2);
-//  	rt.put(g1,c1);
-//  	rt.remove(g1);
-//  	Assert.that(rt.get(g1)==null);
+    //  	rt=new ForgetfulHashMap(2);
+    //  	rt.put(g1,c1);
+    //  	rt.remove(g1);
+    //  	Assert.that(rt.get(g1)==null);
 
-//  	//2. Remove tests
-//  	rt=new ForgetfulHashMap(2);
-//  	rt.put(g1,c1);
-//  	rt.remove(g1);
-//  	Assert.that(rt.get(g1)==null);
-//  	rt.put(g1,c2);
-//  	Assert.that(rt.get(g1)==c2);
+    //  	//2. Remove tests
+    //  	rt=new ForgetfulHashMap(2);
+    //  	rt.put(g1,c1);
+    //  	rt.remove(g1);
+    //  	Assert.that(rt.get(g1)==null);
+    //  	rt.put(g1,c2);
+    //  	Assert.that(rt.get(g1)==c2);
 	
-//  	//3. putAll tests.
-//  	rt=new ForgetfulHashMap(3);
-//  	Map m=new HashMap();
-//  	m.put(g1,c1);
-//  	m.put(g2,c2);
-//  	rt.putAll(m);
-//  	Assert.that(rt.get(g1)==c1);
-//  	Assert.that(rt.get(g2)==c2);	
-//      }
+    //  	//3. putAll tests.
+    //  	rt=new ForgetfulHashMap(3);
+    //  	Map m=new HashMap();
+    //  	m.put(g1,c1);
+    //  	m.put(g2,c2);
+    //  	rt.putAll(m);
+    //  	Assert.that(rt.get(g1)==c1);
+    //  	Assert.that(rt.get(g2)==c2);	
+    //      }
 }
 
