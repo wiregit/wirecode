@@ -53,8 +53,7 @@ public class COBSUtil {
      *  PRE: src is not null.
      *  POST: the return array will be a cobs decoded version of src.  namely,
      *  cobsDecode(cobsEncode(src)) ==  src.  
-     *  @return the original COBS decoded string with a extra trailing 0 at the
-     *  end - feel free to discard it.
+     *  @return the original COBS decoded string
      */
     public static byte[] cobsDecode(byte[] src) throws IOException {
         final int srcLen = src.length;
@@ -69,12 +68,9 @@ public class COBSUtil {
             for (int i = 1; i < code; i++) {
                 sink.write((int)src[currIndex++]);
             }
-            if (code < 0xFF) sink.write(0);
+            if (currIndex < srcLen) // don't write this last one, it isn't used
+                if (code < 0xFF) sink.write(0);
         }
-        // if the last block is 254 bytes, optimized encoding schemes may not
-        // cause that last extra 0 to be written.  this makes sure everything
-        // cool.
-        if (code == 0xFF) sink.write(0);
 
         return sink.toByteArray();
     }

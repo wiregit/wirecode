@@ -171,11 +171,7 @@ public class GGEP extends Object {
                 // cobs decode this bad boy....
                 if (encoded) {
                     try {
-                        byte[] decoded = COBSUtil.cobsDecode(data);
-                        // decoded has a extra stray 0 at the end....
-                        data = new byte[decoded.length-1];
-                        System.arraycopy(decoded, 0, data, 0, 
-                                         (decoded.length-1));
+                        data = COBSUtil.cobsDecode(data);
                     }
                     catch (IOException badCobsEncoding) {
                         throw new BadGGEPBlockException("Bad COBS Encoding");

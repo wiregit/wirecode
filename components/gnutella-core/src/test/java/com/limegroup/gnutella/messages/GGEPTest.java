@@ -23,7 +23,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             nulls[i] = (byte)(i % 2);
         String someNulls = "Hello" + new String(nulls);
         try {
-            GGEP one = new GGEP(true);
+            GGEP one = new GGEP(false);
             one.put("Susheel", nulls);
             one.put("Daswani", someNulls);
             one.put("Number", 10);

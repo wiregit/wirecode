@@ -30,10 +30,9 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         // some people leave off that last 0, we should react OK
         System.arraycopy(after, 0, afterOptimized, 0, afterOptimized.length);
         byte[] decoded = COBSUtil.cobsDecode(afterOptimized);
-        assertEquals(255, decoded.length);
+        assertEquals(254, decoded.length);
         for (int i = 0; i < bytes.length; i++)
             assertTrue(bytes[i] == decoded[i]);
-        assertEquals(0, decoded[254]);
     }
 
     public void testEncodeAndDecode() throws IOException {
@@ -56,7 +55,6 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] decoded = COBSUtil.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
             assertEquals(bytes[i], decoded[i]);
-        assertEquals(0,decoded[bytes.length]);
 
 
         // test all 1s....
@@ -77,7 +75,6 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         for (int i = 0; i < bytes.length; i++)
             assertEquals("num = " + num + ", i = " + i, 
                        bytes[i], decoded[i]);
-        assertEquals(0,decoded[bytes.length]);
         
         // ----------------------------------
         // build up 'induction' case for 0(1..).  we can trust 'induction' due
@@ -108,7 +105,6 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
                 assertEquals(bytes[i], decoded[i]);
-            assertEquals(0,decoded[bytes.length]);
         }
         // ----------------------------------
 
@@ -135,7 +131,6 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
                 assertEquals(bytes[i] , decoded[i]);
-            assertEquals(decoded[bytes.length] , 0);
         }
         // ----------------------------------
     }
@@ -153,9 +148,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         // so no need for much testing...
         byte[] bytes = (new String("Sush Is Cool!")).getBytes();
         byte[] after = COBSUtil.cobsDecode(COBSUtil.cobsEncode(bytes));
-        assertEquals(bytes.length , (after.length - 1));
-        byte[] afterTrimmed = (new String(after)).trim().getBytes();
-        assertTrue(Arrays.equals(bytes, afterTrimmed));
+        assertEquals(bytes.length , after.length);
     }
 
 
