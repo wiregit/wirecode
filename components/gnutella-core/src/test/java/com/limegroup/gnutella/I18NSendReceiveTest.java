@@ -11,7 +11,8 @@ import com.limegroup.gnutella.xml.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
-public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
+public class I18NSendReceiveTest 
+    extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static Connection CONN_1;
     private static final int PORT = 6667;
@@ -40,7 +41,7 @@ public class I18NSendReceive extends com.limegroup.gnutella.util.BaseTestCase {
     //array of file names, used in the setup stage
     private static final String[] FILES = {FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, META_FILE_2};
 
-    public I18NSendReceive(String name) {
+    public I18NSendReceiveTest(String name) {
         super(name);
     }
 
