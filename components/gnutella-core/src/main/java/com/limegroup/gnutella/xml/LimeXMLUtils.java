@@ -26,6 +26,9 @@ import org.xml.sax.InputSource;
  */
 public class LimeXMLUtils
 {
+
+    private static final double MATCHING_RATE = .9;
+
     /**
      * Returns an instance of InputSource after reading the file, and trimming
      * the extraneous white spaces.
@@ -274,23 +277,30 @@ public class LimeXMLUtils
             String replyDocValue = replyDoc.getValue(currFieldName);
             if(replyDocValue == null)
                 nullCount++;
-            else if(replyDocValue.equalsIgnoreCase(queryValue))
-                matchCount++;
+            else {
+                // we used to do a .equalsIgnoreCase, but that is a little too
+                // rigid.  so do a ignore case prefix match.
+                String queryValueLC = queryValue.toLowerCase();
+                String replyDocValueLC = replyDocValue.toLowerCase();
+                if(replyDocValueLC.startsWith(queryValueLC))
+                    matchCount++;
+            }
         }
-        //The metric of a correct match is that whatever fields are specified
-        //in the query must have perfect match with the fields in the reply
-        //unless the reply has a null for that feild, in which case we are OK 
-        // with letting it slide. But if there is even one mismatch
-        // we are going to return false.
-        //We make an exception for queries of size i field. Here 
-        // there must be a 100% match
+        // The metric of a correct match is that whatever fields are specified
+        // in the query must have prefix match with the fields in the reply
+        // unless the reply has a null for that feild, in which case we are OK 
+        // with letting it slide.  also, %MATCHING_RATE of the fields must
+        // either be a prefix match or null.
+        // We make an exception for queries of size 1 field. In this case, there
+        // must be a 100% match (which is trivially >= %MATCHING_RATE)
+        double sizeD = (double)size, matchCountD = (double)matchCount, nullCountD = (double)nullCount;
         if(size > 1){
-            if( ( (nullCount+matchCount)/size ) < 1)
+            if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
                 return false;
             return true;
         }
         else if (size == 1){
-            if(matchCount/size <1)
+            if(matchCountD/sizeD < 1)
                 return false;
             return true;
         }
