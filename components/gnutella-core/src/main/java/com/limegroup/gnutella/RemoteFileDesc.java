@@ -58,7 +58,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	private int _speed_priority;  
 	private int _numAttempts;  
 
-	
+	private boolean _chatEnabled;
 
 	/** 
 	 * @param host the host's ip
@@ -69,7 +69,8 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 * @param speed the speed of the connection
 	 */
 	public RemoteFileDesc(String host, int port, int index, String filename,
-						  int size, byte[] clientGUID, int speed) {
+						  int size, byte[] clientGUID, int speed, 
+						  boolean chat) {
 		
 		_numAttempts = 0;
 		_speed = speed;
@@ -79,6 +80,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		_filename = filename;
 		_size = size;
 		_clientGUID = clientGUID;
+		_chatEnabled = chat;
 		calculateSpeedPriority();
 		calculatePriority();
 	}
@@ -137,6 +139,8 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int getNumAttempts() {return _numAttempts;}
 	public void setNumAttempts(int n) {_numAttempts = n;}
 	public void incrementNumAttempts() {_numAttempts++;}
+	
+	public boolean chatEnabled() {return _chatEnabled;}
 
 	public boolean isPrivate() {
 		// System.out.println("host: " + _host);

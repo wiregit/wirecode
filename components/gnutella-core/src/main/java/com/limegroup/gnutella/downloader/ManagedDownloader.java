@@ -123,8 +123,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         state.  Should be modified only through setState. */
     private long stateTime;
     /** The current address we're trying, or last address if waiting, or null
-     *  if unknown. */
+		if unknown. */
     private String lastAddress;
+	/** The current port we're trying, or last address if waiting, or null
+		if unknown. */
+	private int lastPort;
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
 
@@ -195,6 +198,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         requested=new LinkedList();
         setState(QUEUED);
         this.lastAddress=null;
+        this.lastPort=0;
         this.tries=0;
             
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
@@ -594,6 +598,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         private void downloadWithResume(RemoteFileDesc rfd)
                 throws IOException, InterruptedException {
             setState(CONNECTING, rfd.getHost());
+			lastPort = rfd.getPort();
             //Create downloader. Since this is blocking it cannot go in the
             //synchronized statement.  Also, we must check if stopped
             //afterwards since creating a downloader MAY be blocking
@@ -765,22 +770,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 			return dloader.chatEnabled();
 	}
 
-	public String getChatHost() {
-		if (dloader == null)
-			return "";
-		else 
-			return dloader.getChatHost();
-	}
-
-	public int getChatPort() {
-		if (dloader == null)
-			return 0;
-		else 
-			return dloader.getChatPort();
-	}
-
-
-
     public synchronized String getFileName() {
         if (dloader!=null)
             return dloader.getFileName();
@@ -817,6 +806,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized String getHost() {
         return lastAddress;
     }
+
+	public synchronized int getPort() {
+		if (dloader != null)
+			return dloader.getPort();
+		else
+			return 0;
+	}
 
     public synchronized int getPushesWaiting() {
         return pushFiles.size();

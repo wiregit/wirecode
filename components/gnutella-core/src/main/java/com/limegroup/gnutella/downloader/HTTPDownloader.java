@@ -34,7 +34,8 @@ public class HTTPDownloader {
 
 	private int _port;
 	private String _host;
-
+	
+	private boolean _chatEnabled = false; // for now
 
 	/**
      * Creates a server-side push download.
@@ -97,6 +98,7 @@ public class HTTPDownloader {
 		_fileSize = rfd.getSize();
 		_port = rfd.getPort();
 		_host = rfd.getHost();
+		_chatEnabled = rfd.chatEnabled();
 
         //If the incomplete file exists, set up a resume just past the end.
         //Otherwise, begin from the start.
@@ -172,12 +174,17 @@ public class HTTPDownloader {
 	public int getInitialRead() {return _initialReadingPoint;}
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
+	public boolean chatEnabled() {
+		return _chatEnabled;
+	}
+
 	/* Construction time variables */
 	public int getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 	public int getPort() {return _port;}
 
+	
 
 	/*************************************************************/
 
