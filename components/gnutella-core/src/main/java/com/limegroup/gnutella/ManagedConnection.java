@@ -300,9 +300,9 @@ public class ManagedConnection extends Connection
 	/**
 	 * More customizable constructor used for testing.
 	 */
-	static ManagedConnection createTestConnection(String host, int port, 
-												  Properties props, 
-												  HandshakeResponder responder) {	
+	static ManagedConnection 
+        createTestConnection(String host, int port, 
+		  Properties props, HandshakeResponder responder) {	
 		return new ManagedConnection(host, port, props, responder);
 	}
 
@@ -346,7 +346,8 @@ public class ManagedConnection extends Connection
         //save a fair bit of memory by not using buffering at all.  But this
         //requires the CompositeMessageQueue class from nio-branch.
         _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, true);
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
+                true);
         _outputQueue[PRIORITY_PUSH]
             = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY_REPLY]
@@ -360,7 +361,8 @@ public class ManagedConnection extends Connection
         _outputQueue[PRIORITY_OUR_QUERY]
             = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, false);
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
+                false);
         
         //Start the thread to empty the output queue
         new OutputRunner();
@@ -465,8 +467,9 @@ public class ManagedConnection extends Connection
                 _manager.remove(this);
             throw e;
         }
-        _numMessagesReceived++;
-		
+        
+        // record received message in stats
+        addReceived();
         return m;
     }
 
@@ -484,7 +487,9 @@ public class ManagedConnection extends Connection
                 _manager.remove(this);
             throw e;
         }
-        _numMessagesReceived++;
+        
+        // record received message in stats
+        addReceived();
         return m;
     }
 
@@ -544,7 +549,7 @@ public class ManagedConnection extends Connection
             _numMessagesSent++;
             _outputQueue[priority].add(m);
             int dropped=_outputQueue[priority].resetDropped();
-            addDropped(dropped);
+            addSentDropped(dropped);
             _queued+=1-dropped;
             _lastPriority=priority;
             _outputQueueLock.notify();
@@ -552,8 +557,27 @@ public class ManagedConnection extends Connection
         repOk();        
     }
 
-    private void addDropped(int dropped) {
-        _numSentMessagesDropped+=dropped;
+    /**
+     * Utility method for adding dropped message data.
+     * 
+     * @param dropped the number of dropped messages to add
+     */
+    private void addSentDropped(int dropped) {
+        _numSentMessagesDropped += dropped;
+    }
+    
+    /**
+     * Increments the number of received messages that have been dropped.
+     */
+    public void addReceivedDropped() {
+        _numReceivedMessagesDropped++;   
+    }
+    
+    /**
+     * Increments the stat for the number of messages received.
+     */
+    public void addReceived() {
+        _numMessagesReceived++;
     }
  
     /** 
@@ -660,9 +684,9 @@ public class ManagedConnection extends Connection
                 while (true) {
                     Message m=null;
                     synchronized (_outputQueueLock) {
-                        m=(Message)queue.removeNext();
+                        m = queue.removeNext();
                         int dropped=queue.resetDropped();
-                        addDropped(dropped);
+                        addSentDropped(dropped);
                         _queued-=(m==null?0:1)+dropped;  //maintain invariant
                         if (_queued==0)
                             emptied=true;                        
@@ -739,11 +763,12 @@ public class ManagedConnection extends Connection
         //thread in this case?
 
         try {
-			//The first message we get from the remote host should be its initial
-			//ping.  However, some clients may start forwarding packets on the
-			//connection before they send the ping.  Hence the following loop.  The
-			//limit of 10 iterations guarantees that this method will not run for
-			//more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
+			//The first message we get from the remote host should be its 
+            //initial ping.  However, some clients may start forwarding packets 
+            //on the connection before they send the ping.  Hence the following 
+            //loop.  The limit of 10 iterations guarantees that this method 
+            //will not run for more than TIMEOUT*10=80 seconds.  Thankfully 
+            //this happens rarely.
 			for (int i=0; i<10; i++) {
 				Message m=null;
 				try {                
@@ -825,12 +850,6 @@ public class ManagedConnection extends Connection
             //mark the pong if supernode
             PingReply pr;
             if(connection.isSupernodeConnection()) {
-                /*
-                pr = new PingReply(m.getGUID(),(byte)2,
-                                   connection.getOrigPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   0, 0, true);  
-                */
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
                                    connection.getListeningPort(),
@@ -839,13 +858,6 @@ public class ManagedConnection extends Connection
             } else if(connection.isLeafConnection() 
                 || connection.isOutgoing()){
                 //we know the listening port of the host in this case
-                /*
-                pr = new PingReply(m.getGUID(),(byte)2,
-                                   connection.getOrigPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   0, 0); 
-                */
-
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
                                    connection.getListeningPort(),
@@ -855,15 +867,8 @@ public class ManagedConnection extends Connection
             else{
                 //Use the port '0' in this case, as we dont know the listening
                 //port of the host
-                /*
-                pr = new PingReply(m.getGUID(),(byte)2, 0,
-                                   connection.getInetAddress().getAddress(), 
-                                   0, 0); 
-                */
-
                 pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 
-                                   0,
+                    createExternal(m.getGUID(), (byte)2, 0,
                                    connection.getInetAddress().getAddress(), 
                                    false);
             }
@@ -917,17 +922,30 @@ public class ManagedConnection extends Connection
             }
 
             // Run through the route spam filter and drop accordingly.
-            if (!_routeFilter.allow(m)) {
+            if (isSpam(m)) {
 				if(!CommonUtils.isJava118()) {
-					ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
+					ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
+                        addMessage(m);
 				}
-                _numReceivedMessagesDropped++;
+                addReceivedDropped();
                 continue;
             }
 
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
+    }
+    
+    /**
+     * Utility method for checking whether or not this message is considered
+     * spam.
+     * 
+     * @param m the <tt>Message</tt> to check
+     * @return <tt>true</tt> if this is considered spam, otherwise 
+     *  <tt>false</tt>
+     */
+    public boolean isSpam(Message m) {
+        return !_routeFilter.allow(m);
     }
 
     //
