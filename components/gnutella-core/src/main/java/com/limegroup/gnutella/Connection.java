@@ -795,7 +795,9 @@ public class Connection {
                 ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
                 StringSetting adr=ConnectionSettings.FORCED_IP_ADDRESS_STRING;
                 String addr = adr.getValue();
-                if(NetworkUtils.isValidAddress(addr) && !value.equals(addr)) {
+                if(NetworkUtils.isValidAddress(value) &&
+                   !NetworkUtils.isPrivateAddress(value) &&
+                   !value.equals(addr)) {
         	        adr.setValue(value);
         	        RouterService.addressChanged();
                 }
