@@ -2,7 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 
 /**

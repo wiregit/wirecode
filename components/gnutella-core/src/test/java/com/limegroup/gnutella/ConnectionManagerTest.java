@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.MessageWriterProxy;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -119,7 +120,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          "responsesToQueryReplies",
                                          paramTypes);
         Response[] res = new Response[20];
-        Arrays.fill(res, new Response((long)0, (long)10, "test"));
+        Arrays.fill(res, new Response(0, 10, "test"));
         QueryRequest query = QueryRequest.createQuery("test");
         Object[] params = new Object[] {
             res,

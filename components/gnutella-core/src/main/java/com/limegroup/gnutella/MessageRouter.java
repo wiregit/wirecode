@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.statistics.*;
@@ -40,7 +41,7 @@ public abstract class MessageRouter {
      * The GUID we attach to QueryReplies to allow PushRequests in
      * responses.
      */
-    protected byte[] _clientGUID;
+    public byte[] _clientGUID;
 
 
 	/**

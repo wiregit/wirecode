@@ -2,7 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.HorizonCounter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.messages.PingReply;

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;

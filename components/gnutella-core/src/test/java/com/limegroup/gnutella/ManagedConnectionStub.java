@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 

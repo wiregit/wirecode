@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 

@@ -3,15 +3,14 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import java.io.*;
-import java.net.*;
 import java.util.Properties;
+
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
 
 /**
@@ -42,7 +41,7 @@ public class ManagedConnectionTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        if(ROUTER_SERVICE.isStarted()) return;
+        if(RouterService.isStarted()) return;
         sleep(4000);
         setStandardSettings();
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
@@ -58,7 +57,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         // HostCatcher in particular
         ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
-        ROUTER_SERVICE.connect();
+        RouterService.connect();
     }
 
     public void tearDown() {

@@ -5,7 +5,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.Connection;
 
 /**
  * This class handles access to query routing tables for a given connection.

@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;

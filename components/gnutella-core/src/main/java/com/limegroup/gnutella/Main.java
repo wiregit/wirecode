@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.search.*;
 

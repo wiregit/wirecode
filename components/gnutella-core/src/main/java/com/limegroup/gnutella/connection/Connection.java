@@ -1,13 +1,23 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.connection;
 
 import java.io.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.Properties;
 import java.util.Enumeration;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -359,7 +369,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * More customizable constructor used for testing.
      */
-    static Connection 
+    public static Connection 
         createTestConnection(String host, int port, 
           Properties props, HandshakeResponder responder) { 
         return new Connection(host, port, props, responder);
@@ -373,7 +383,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * @effects wraps a connection around socket and does the rest of the
      *  Gnutella handshake.
      */
-    Connection(Socket socket) {
+    public Connection(Socket socket) {
         this(socket, 
               RouterService.isSupernode() ? 
               (HandshakeResponder)(new UltrapeerHandshakeResponder(
@@ -1352,7 +1362,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Sets the port where the conected node listens at, not the one
      * got from socket
      */
-    void setListeningPort(int port){
+    public void setListeningPort(int port){
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         this._port = port;
@@ -1881,7 +1891,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */
-    boolean isQueryRoutingEnabled() {
+    public boolean isQueryRoutingEnabled() {
         return _headers.isQueryRoutingEnabled();
     }
 
@@ -2078,7 +2088,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *         or route messages are silently swallowed, allowing the message
      *         loop to continue.
      */
-    void loopForMessages() throws IOException {
+    public void loopForMessages() throws IOException {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
            // anything to do here??
@@ -2142,7 +2152,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
 
     /** FOR TESTING PURPOSES ONLY! */
-    boolean runnerDied() {
+    public boolean runnerDied() {
         return _runnerDied;
     }
 

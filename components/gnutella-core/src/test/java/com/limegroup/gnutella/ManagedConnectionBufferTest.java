@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import com.limegroup.gnutella.connection.BIOMessageWriter;
 import com.limegroup.gnutella.connection.CompositeQueue;
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;

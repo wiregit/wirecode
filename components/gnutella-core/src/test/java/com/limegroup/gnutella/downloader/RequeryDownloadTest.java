@@ -5,7 +5,7 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import junit.framework.*;

@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 
 /**

@@ -7,6 +7,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.connection.NIODispatcher;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.ServerAuthenticator;

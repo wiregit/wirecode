@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*; 
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.guess.*; 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
@@ -21,8 +22,6 @@ public class UnicastSimulator {
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 8192;
-
-	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
 
     private PingReply[] _pongs;
     private Thread[] _unicasters;
@@ -172,7 +171,6 @@ public class UnicastSimulator {
             try {				
                 socket.receive(datagram);
                 byte[] data = datagram.getData();
-                int length = datagram.getLength();
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);

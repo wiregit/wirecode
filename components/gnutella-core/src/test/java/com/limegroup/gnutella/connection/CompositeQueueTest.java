@@ -2,7 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;

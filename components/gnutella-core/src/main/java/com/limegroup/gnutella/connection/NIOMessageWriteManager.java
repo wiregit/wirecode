@@ -3,7 +3,6 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.sun.java.util.collections.Collections;

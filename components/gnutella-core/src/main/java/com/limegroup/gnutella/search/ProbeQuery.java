@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 

@@ -6,11 +6,11 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;

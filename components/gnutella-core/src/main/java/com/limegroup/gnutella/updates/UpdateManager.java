@@ -2,6 +2,7 @@ package com.limegroup.gnutella.updates;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.http.*;
 import org.xml.sax.*;
 import java.net.*;

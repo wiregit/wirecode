@@ -14,6 +14,7 @@ import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.Interval;
 

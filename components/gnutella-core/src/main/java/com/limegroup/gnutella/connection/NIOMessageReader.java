@@ -7,7 +7,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.MessageSettings;

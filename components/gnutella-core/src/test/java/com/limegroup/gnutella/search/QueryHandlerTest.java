@@ -4,9 +4,9 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
