@@ -226,7 +226,7 @@ public class FileManager {
             String[] listedFiles = currDir.list();
             for (int i = 0; i < listedFiles.length; i++) {
 
-                File currFile = new File(listedFiles[i]);
+                File currFile = new File(currDir,listedFiles[i]);
                 if (currFile.isDirectory()) // to be dealt with later
                     dirs.add(currFile);
                 else if (currFile.isFile()) { // we have a 'file'....
