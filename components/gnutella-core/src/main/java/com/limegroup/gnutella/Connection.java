@@ -81,9 +81,6 @@ public class Connection {
      *  _propertiesWrittenR lazily calculates properties according to what it
      *  read. */
     private Properties _propertiesWrittenTotal=new Properties();
-    /** True iff this should try to reconnect at a lower protocol level on
-     *  outgoing connections. */        
-    private boolean _negotiate=false;
 
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
@@ -132,12 +129,10 @@ public class Connection {
      */
     public Connection(String host, int port,
                       Properties properties1,
-                      HandshakeResponder properties2,
-                      boolean negotiate) {
+                      HandshakeResponder properties2) {
         _host = host;
         _port = port;
         _outgoing = true;
-        _negotiate = negotiate;
         _propertiesWrittenP=properties1;
         _propertiesWrittenR=properties2;            
     }
@@ -229,20 +224,7 @@ public class Connection {
             //Don't bother to retry
             throw e;
         } catch (BadHandshakeException e) {
-            //If an outgoing attempt at Gnutella 0.6 failed, and the user
-            //has requested we try lower protocol versions, try again.
-            if (_negotiate 
-				&& isOutgoing() 
-				&& _propertiesWrittenP!=null
-				&& _propertiesWrittenR!=null) {
-                //reset the flags
-                _propertiesRead = null;
-                _propertiesWrittenP=null;
-                _propertiesWrittenR=null;
-                initializeWithoutRetry(timeout);
-            } else {
-                throw e;
-            }
+			throw e;
         }
     }
     
