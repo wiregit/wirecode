@@ -86,7 +86,7 @@ public abstract class MessageRouter {
 
     /** Time between sending HopsFlow messages.
      */
-    private static final long HOPS_FLOW_INTERVAL = 30 * 1000; // 30 seconds
+    private static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
 
     /** The maximum number of UDP replies to buffer up.  Non-final for 
      *  testing.
@@ -2650,7 +2650,7 @@ public abstract class MessageRouter {
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value
-            boolean isBusy = RouterService.getUploadManager().isQueueFull();
+            boolean isBusy = RouterService.getUploadManager().isBusy();
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.
