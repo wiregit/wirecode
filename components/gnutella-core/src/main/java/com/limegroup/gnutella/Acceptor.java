@@ -30,14 +30,6 @@ public class Acceptor extends Thread {
     private ActivityCallback _callback;
 
     /**
-     * Creates an acceptor that listens on the default port. Equivalent to
-     * Acceptor(SettingsManager.instance().getPort())
-     */
-    public Acceptor(ActivityCallback callback) {
-        this(SettingsManager.instance().getPort(), callback);
-    }
-
-    /**
      * Creates an acceptor that tries to listen to incoming connections
      * on the given port.  If this is a bad port, the port will be
      * changed when run is called and SettingsManager will be updated.

@@ -18,53 +18,33 @@ public class RouterService
     private ResponseVerifier verifier = new ResponseVerifier();
 
     /**
-     * Create a connection manager using the default port
+     * Create a RouterService accepting connections on the default port
      */
-    public RouterService(ActivityCallback activityCallback) {
-        callback = activityCallback;
-
-        // First, construct all the pieces
-        acceptor = new Acceptor(callback);
-        manager = new ConnectionManager(callback);
-        router = new MessageRouter(
-            callback,
-            FileManagerPingRequestHandler.instance(),
-            StandardPingReplyHandler.instance(),
-            FileManagerQueryRequestHandler.instance(),
-            StandardQueryReplyHandler.instance(),
-            FileManagerPushRequestHandler.instance());
-        catcher = new HostCatcher(callback);
-
-        // Now, link all the pieces together, starting the various threads.
-        catcher.initialize(acceptor, manager);
-        router.initialize(acceptor, manager, catcher);
-        manager.initialize(router, catcher);
-        acceptor.initialize(manager, router);
-
-        //Now if quick connecting, try hosts.  Otherwise, populate the
-        //HostCatcher with the list from the SettingsManager
-        if (SettingsManager.instance().getUseQuickConnect()) {
-            Thread t2=new Thread() {
-                public void run() {
-                    quickConnect();
-                }
-            };
-            t2.setDaemon(true);
-            t2.start();
-        } else {
-            try {
-                catcher.read(SettingsManager.instance().getHostList());
-            } catch (FileNotFoundException e) {
-                callback.error(ActivityCallback.ERROR_10);
-            } catch (IOException e) {
-            }
-        }
+    public RouterService(ActivityCallback activityCallback,
+                         PingRequestHandler pingRequestHandler,
+                         PingReplyHandler pingReplyHandler,
+                         QueryRequestHandler queryRequestHandler,
+                         QueryReplyHandler queryReplyHandler,
+                         PushRequestHandler pushRequestHandler) {
+        this(SettingsManager.instance().getPort(),
+             activityCallback,
+             pingRequestHandler,
+             pingReplyHandler,
+             queryRequestHandler,
+             queryReplyHandler,
+             pushRequestHandler);
     }
 
     /**
-     * Create a connection manager using the specified port
+     * Create a RouterService accepting connections on the specified port
      */
-    public RouterService(int port, ActivityCallback activityCallback) {
+    public RouterService(int port,
+                         ActivityCallback activityCallback,
+                         PingRequestHandler pingRequestHandler,
+                         PingReplyHandler pingReplyHandler,
+                         QueryRequestHandler queryRequestHandler,
+                         QueryReplyHandler queryReplyHandler,
+                         PushRequestHandler pushRequestHandler) {
         callback = activityCallback;
 
         // First, construct all the pieces
@@ -72,11 +52,11 @@ public class RouterService
         manager = new ConnectionManager(callback);
         router = new MessageRouter(
             callback,
-            FileManagerPingRequestHandler.instance(),
-            StandardPingReplyHandler.instance(),
-            FileManagerQueryRequestHandler.instance(),
-            StandardQueryReplyHandler.instance(),
-            FileManagerPushRequestHandler.instance());
+            pingRequestHandler,
+            pingReplyHandler,
+            queryRequestHandler,
+            queryReplyHandler,
+            pushRequestHandler);
         catcher = new HostCatcher(callback);
 
         // Now, link all the pieces together, starting the various threads.

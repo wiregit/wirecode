@@ -12,9 +12,20 @@ public class Main implements ActivityCallback {
     //listening port number.
     RouterService service;
     if (args.length==1) {
-        service=new RouterService(Integer.parseInt(args[0]), new Main());
+        service=new RouterService(Integer.parseInt(args[0]),
+                                  new Main(),
+                                  FileManagerPingRequestHandler.instance(),
+                                  StandardPingReplyHandler.instance(),
+                                  FileManagerQueryRequestHandler.instance(),
+                                  StandardQueryReplyHandler.instance(),
+                                  FileManagerPushRequestHandler.instance());
     } else {
-        service=new RouterService(new Main());
+        service=new RouterService(new Main(),
+                                  FileManagerPingRequestHandler.instance(),
+                                  StandardPingReplyHandler.instance(),
+                                  FileManagerQueryRequestHandler.instance(),
+                                  StandardQueryReplyHandler.instance(),
+                                  FileManagerPushRequestHandler.instance());
     }
 
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
