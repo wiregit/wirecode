@@ -233,7 +233,7 @@ public final class CompositeQueue {
                 //until an optimal time to start deflating, buffering
                 //up incoming data until that time is reached, or the
                 //data is explicitly flushed.
-                CONNECTION.sendMessage(msg);
+                CONNECTION.writer().simpleWrite(msg);
                 CONNECTION.stats().addSent();
             }
             
@@ -252,7 +252,7 @@ public final class CompositeQueue {
         //Note that if the outgoing stream is compressed 
         //(isWriteDeflated()), then this call may block while the
         //Deflater deflates the data.        
-        CONNECTION.flushMessage();
+        CONNECTION.writer().flush();
     }
 
     /** 
