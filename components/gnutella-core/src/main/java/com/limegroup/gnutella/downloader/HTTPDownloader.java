@@ -172,8 +172,6 @@ public class HTTPDownloader implements BandwidthTracker {
         URN urn = rfd.getSHA1Urn();
         _altLocsReceived = urn==null ? null:
             AlternateLocationCollection.create(urn);
-        AlternateLocationCollection s = null;
-        AlternateLocationCollection f = null;
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
