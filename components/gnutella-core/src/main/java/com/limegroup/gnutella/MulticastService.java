@@ -100,6 +100,7 @@ public final class MulticastService implements Runnable {
             _port = port;
             _group = group;
             MulticastSocket sock = new MulticastSocket(port);
+            sock.setTimeToLive(15);
             sock.joinGroup(group);
             return sock;
         }

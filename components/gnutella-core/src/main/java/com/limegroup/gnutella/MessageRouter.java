@@ -314,7 +314,7 @@ public abstract class MessageRouter {
             //    sendAcknowledgement(datagram, msg.getGUID());
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
-                //if(msg.getTTL() > 0) return;
+                if(msg.getTTL() > 0) return;
                 if(!handleUDPQueryRequestPossibleDuplicate(
                   (QueryRequest)msg, handler) ) {
                     ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
