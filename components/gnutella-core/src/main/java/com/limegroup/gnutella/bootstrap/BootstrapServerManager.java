@@ -56,20 +56,6 @@ public class BootstrapServerManager {
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
-    
-    /**
-     * The amount of time to wait while trying to connect to a specified
-     * host.  If we exceed this value, an IOException is thrown
-     * while trying to connect.
-     */
-    private static final int CONNECTION_TIMEOUT = 3000;
-    
-    /**
-     * The amount of time to wait while receiving data from a specified
-     * host.  Used as an SO_TIMEOUT.
-     */
-    private static final int TIMEOUT = 2000;
-
 
     /////////////////////////// Public Interface //////////////////////
 
@@ -351,8 +337,6 @@ public class BootstrapServerManager {
                              "close");
         get.setFollowRedirects(false);
         HttpClient client = HttpClientManager.getNewClient();
-        client.setConnectionTimeout(CONNECTION_TIMEOUT);
-        client.setTimeout(TIMEOUT);
         try {
             client.executeMethod(get);
             in = new BufferedReader(

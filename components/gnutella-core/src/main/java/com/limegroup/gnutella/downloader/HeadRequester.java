@@ -6,6 +6,10 @@ import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import java.net.*;
 import java.io.*;
 
@@ -77,88 +81,74 @@ final class HeadRequester implements Runnable {
                 }
                 URN urn = rfd.getSHA1Urn();
                 if(urn == null) continue;
-                if(urn.equals(RESOURCE_NAME)) {
-                    URL url = rfd.getUrl();
-                    if(url == null) continue;
-                    HttpURLConnection httpConnection = null;
-                    try {
-                        httpConnection = (HttpURLConnection)url.openConnection();
-                        httpConnection.setRequestMethod("HEAD");
-                        httpConnection.setRequestProperty(
-                            "User-Agent",
-                            CommonUtils.getHttpServer());
-                        httpConnection.setDoOutput(true);
-                        httpConnection.setDoInput(true);
-                        httpConnection.setUseCaches(false);
-                        httpConnection.setAllowUserInteraction(false);
-                        httpConnection.setRequestProperty(
-                            HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue(), 
-                            RESOURCE_NAME.httpStringValue());
-                        httpConnection.setRequestProperty(
-						    HTTPHeaderName.ALT_LOCATION.httpStringValue(),
-						    TOTAL_ALTS.httpStringValue());
-                        httpConnection.setRequestProperty(
-                            HTTPHeaderName.CONNECTION.httpStringValue(),
-                            "close");
-                        httpConnection.connect();
-                        String contentUrn = 
-                            getHeaderField(httpConnection, 
-                                           HTTPHeaderName.GNUTELLA_CONTENT_URN);
+                if(!urn.equals(RESOURCE_NAME)) continue;
+                
+                URL url = rfd.getUrl();
+                String connectTo = url.toExternalForm();
+                HttpMethod head = new HeadMethod(connectTo);
+                head.addRequestHeader("User-Agent",
+                                      CommonUtils.getHttpServer());
+                head.addRequestHeader("Cache-Control", "no-cache");
+                head.addRequestHeader(
+                    HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue(),
+                    RESOURCE_NAME.httpStringValue());
+                head.addRequestHeader(
+                    HTTPHeaderName.ALT_LOCATION.httpStringValue(),
+                    TOTAL_ALTS.httpStringValue());
+                head.addRequestHeader(
+                    HTTPHeaderName.CONNECTION.httpStringValue(),
+                    "close");
+                head.setFollowRedirects(false);
+                HttpClient client = HttpClientManager.getNewClient();
+                try {
+                    client.executeMethod(head);
+                    String contentUrn = getHeader(head,
+                        HTTPHeaderName.GNUTELLA_CONTENT_URN);
+                    if(contentUrn == null)
+                        continue;
 
-                        if(contentUrn == null) {
+                    try {
+                        URN reportedUrn = URN.createSHA1Urn(contentUrn); 
+                        if(!reportedUrn.equals(RESOURCE_NAME)) {
                             continue;
-                        }
-                        try {
-                            URN reportedUrn = URN.createSHA1Urn(contentUrn); 
-                            if(!reportedUrn.equals(RESOURCE_NAME)) {
-                                continue;
-                            }
-                        } catch(IOException e) {
-                            continue;
-                        }
-                        String altLocs = 
-                            getHeaderField(httpConnection, 
-                                           HTTPHeaderName.ALT_LOCATION);
-                        if(altLocs == null) {
-                            continue;
-                        }
-                        AlternateLocationCollection alc = 
-                            AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
-                        if (alc == null) continue;
-                        if(alc.getSHA1Urn().equals(COLLECTOR.getSHA1Urn())) {
-                            COLLECTOR.addAll(alc);
                         }
                     } catch(IOException e) {
                         continue;
-                    } finally {
-                        httpConnection.disconnect();
                     }
+                    
+                    String altLocs = getHeader(head,
+                         HTTPHeaderName.ALT_LOCATION);
+                    if(altLocs == null)
+                        continue;
+
+                    AlternateLocationCollection alc = 
+                        AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
+                    if (alc == null)
+                        continue;
+                        
+                    if(alc.getSHA1Urn().equals(COLLECTOR.getSHA1Urn()))
+                        COLLECTOR.addAll(alc);
+
+                } catch(IOException e) {
+                    continue;
+                } finally {
+                    if(head != null)
+                        head.releaseConnection();
                 }
             }
         } catch(Throwable e) {
             ErrorService.error(e);
         }
 	}
-
-    /**
-     * Helper method that works around bug ID 4111517 in java versions
-     * 1.1.6 - 1.2beta4.  There is no known workaround, so we just catch
-     * the null pointer and throw an IOException.
-     *
-     * @param conn the <tt>HttpURLConnection</tt> to get the header field
-     *  from
-     * @param header the header name to look for
-     */
-    private static String getHeaderField(HttpURLConnection conn, 
-                                         HTTPHeaderName header) 
-        throws IOException {
-        try {
-            return conn.getHeaderField(header.httpStringValue());
-        } catch(NullPointerException e) {
-            // This works around bug ID 4111517 in java versions
-            // 1.1.6 - 1.2beta4.  This apparently occurs when the server load
-            // is high
-            throw new IOException("high server load with 1.1.8 client");
-        }        
-    } 
+	
+	/**
+	 * Simple helper method to retrieve a header from an HttpMethod.
+	 */
+	private static String getHeader(HttpMethod methid, HTTPHeaderName name) {
+        Header header = methid.getResponseHeader(name.httpStringValue());
+        if(header == null)
+            return null;
+        else
+            return header.getValue();
+    }
 }
