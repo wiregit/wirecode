@@ -1045,11 +1045,9 @@ public class ConnectionManager {
         // stuff associated with initialized connections.  For efficiency 
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
-        boolean removed = false;
         if(!c.isSupernodeClientConnection()){
             int i=_initializedConnections.indexOf(c);
             if (i != -1) {
-                removed = true;
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections-[c]
                 List newConnections=new ArrayList();
@@ -1064,7 +1062,6 @@ public class ConnectionManager {
             //check in _initializedClientConnections
             int i=_initializedClientConnections.indexOf(c);
             if (i != -1) {
-                removed = true;
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections-[c]
                 List newConnections=new ArrayList();
