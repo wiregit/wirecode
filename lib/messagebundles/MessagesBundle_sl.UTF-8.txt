@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 2.9.10
+# Messages Bundle for LimeWire 4.1.6
 # Default locale for: Slovenian - Slovenia
 # Thanks to: Aleks Reinhardt.
 ################################################################################
@@ -45,8 +45,8 @@ GENERAL_CLOSE_BUTTON_TIP=Zapre to okno.
 GENERAL_BACK_BUTTON_LABEL=<< Nazaj
 GENERAL_NEXT_BUTTON_LABEL=Naprej >>
 GENERAL_FINISH_BUTTON_LABEL=Končaj
-GENERAL_DEFAULT_BUTTON_LABEL=Privzeto ...
-GENERAL_BROWSE_BUTTON_LABEL=Brskaj ...
+GENERAL_DEFAULT_BUTTON_LABEL=Privzeto...
+GENERAL_BROWSE_BUTTON_LABEL=Brskaj...
 GENERAL_BROWSE_HOST_LABEL=Brskaj po gostitelju
 GENERAL_BROWSE_HOST_TIP=Pregleda vse datoteke na izbranem računalniku.
 
@@ -57,6 +57,9 @@ OPTIONS_BUTTONS_CANCEL_LABEL=Prekliči
 OPTIONS_BUTTONS_CANCEL_TIP=Prekliče spremembe in zapre okno.
 OPTIONS_BUTTONS_APPLY_LABEL=Uporabi
 OPTIONS_BUTTONS_APPLY_TIP=Izvede spremembe.
+#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore defaults
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert all settings to the factory defaults.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -69,10 +72,12 @@ NO=Ne
 ################################################################################
 GENERAL_AVERAGE_BANDWIDTH=Povprečna pasovna širina
 #??? GENERAL_ALTERNATE_LOCATIONS=Valid alternate locations
+#??? GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid alternate locations
 GENERAL_STARTED_ON=Začetek 
 GENERAL_FINISHED_ON=Konec 
 GENERAL_TIME_SPENT=Porabljen čas
 #??? GENERAL_REVERT_TO_DEFAULT=Revert to default
+#??? GENERAL_MORE_OPTIONS=More options
 
 # StatusLine, Statistics and GUIUtils
 GENERAL_UNIT_TERABYTES=TB
@@ -94,14 +99,42 @@ ABOUT_LABEL_START=LimeWire odjemalec
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
 ABOUT_LABEL_END=Avtorske pravice ima (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=O programu LimeWire
+#??? ABOUT_CREDITS_LABEL=Credits
+#??? ABOUT_CREDITS_TIP=Display credits information about LimeWire.
+#??? ABOUT_NOTICE_LABEL=Notice
+#??? ABOUT_NOTICE_TIP=Display distribution and contact information.
+#??? ABOUT_LICENSE_LABEL=License
+#??? ABOUT_LICENSE_TIP=Display the license agreement about this software.
 ABOUT_BUTTON_LABEL=V redu
 ABOUT_BUTTON_TIP=Zapre okno.
 ABOUT_SCROLL_CHECK_BOX_LABEL=Samodejno premikaj
+#Do not uncomment the following line without providing this translated HTML file!
 ABOUT_FILE_NAME=about_sl.html
-#Do not uncomment the above line without providing this translated HTML file!
 
 ###################################################################
-# Key/value pairs for the Windows system tray -- Coming soon...
+# Key/value pairs for the tip of the day window (not the tips themselves)
+###################################################################
+#??? TOTD_TITLE=Tip of the day
+#??? TOTD_INTRODUCTION=Did you know...
+#??? TOTD_SHOW_AT_STARTUP=Show tips at startup
+#??? TOTD_NEXT=Next tip
+#??? TOTD_PREVIOUS=Previous tip
+#??? TOTD_CLOSE=Close
+
+###################################################################
+# Key/value pairs for the Getting Started image
+###################################################################
+#??? GETTING_STARTED_TITLE=Getting started
+#??? GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
+
+###################################################################
+# Key/value pairs for the Going Pro image.
+###################################################################
+#??? GOING_PRO_TITLE=The most advanced file sharing program on the planet!
+#??? GOING_PRO_DESCRIPTION=Better search results\nTurbo charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
+
+###################################################################
+# Key/value pairs for the Windows system tray
 ###################################################################
 TRAY_TOOLTIP=LimeWire: Poganjam mrežo Gnutella
 TRAY_RESTORE_LABEL=Povečaj
@@ -136,115 +169,164 @@ MENU_FILE_TITLE=Datoteka
 MENU_FILE_TITLE_MNEMONIC=D
 MENU_FILE_CLOSE=Zapri
 MENU_FILE_CLOSE_MNEMONIC=Z
-MENU_FILE_CLOSE_ACCESSIBLE=Zapri program
+MENU_FILE_CLOSE_ACCESSIBLE=Zapri program.
 MENU_FILE_QUIT=Izhod
 MENU_FILE_QUIT_MNEMONIC=I
 MENU_FILE_CONNECT=Poveži se
 MENU_FILE_CONNECT_MNEMONIC=P
-MENU_FILE_CONNECT_ACCESSIBLE=Poveži se v mrežo
+MENU_FILE_CONNECT_ACCESSIBLE=Poveži se v mrežo.
 MENU_FILE_DISCONNECT=Zapri povezavo
 MENU_FILE_DISCONNECT_MNEMONIC=R
-MENU_FILE_DISCONNECT_ACCESSIBLE=Zapri povezavo z mrežo
+MENU_FILE_DISCONNECT_ACCESSIBLE=Zapri povezavo z mrežo.
 MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=Začni deliti ta imenik
 MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
-MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Dodaj imenik, ki ga želite deliti z drugimi
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Dodaj imenik, ki ga želite deliti z drugimi.
 MENU_FILE_LIBRARY_NEW_FOLDER=Nov imenik
 MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Dodaj imenik v izbran imenik knjižnice 
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Dodaj imenik v izbran imenik knjižnice .
 MENU_FILE_LIBRARY_UNSHARE_FOLDER=Prenehaj deljenje tega imenika
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Prenehaj deljenje izbranega imenika knjižnice
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Prenehaj deljenje izbranega imenika knjižnice.
 MENU_FILE_LIBRARY_RENAME_FOLDER=Preimenuj imenik
 MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Preimenuj izbran imenik knjižnice
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Preimenuj izbran imenik knjižnice.
 MENU_FILE_LIBRARY_LAUNCH_FILES=Poženi datoteko(i,e)
 MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=N
-MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Poženi izbrano datoteko ali datoteke
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Poženi izbrano datoteko ali datoteke.
 MENU_FILE_LIBRARY_DELETE_FILES=Izbriši datoteko(i,e)
 MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Izbriši izbrano datoteko ali datoteke
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Izbriši izbrano datoteko ali datoteke.
 MENU_FILE_LIBRARY_REFRESH=Osveži
 MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
-MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Ponovno naloži knjižnico
+MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Ponovno naloži knjižnico.
 #??? MENU_FILE_LIBRARY_EXPLORE=Explore
 #??? MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
-#??? MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open library folder
+#??? MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open library folder.
 
 MENU_NAV_TITLE=Navigacija
 MENU_NAV_TITLE_MNEMONIC=N
 MENU_NAV_SEARCH=Iskanje
 MENU_NAV_SEARCH_MNEMONIC=I
-MENU_NAV_SEARCH_ACCESSIBLE=Prikaži okno za iskanje
+MENU_NAV_SEARCH_ACCESSIBLE=Prikaži okno za iskanje.
 MENU_NAV_MONITOR=Nadzor
 MENU_NAV_MONITOR_MNEMONIC=N
-MENU_NAV_MONITOR_ACCESSIBLE=Prikaži okno za nadzor
+MENU_NAV_MONITOR_ACCESSIBLE=Prikaži okno za nadzor.
 MENU_NAV_CONN=Povezave
 MENU_NAV_CONN_MNEMONIC=P
-MENU_NAV_CONN_ACCESSIBLE=Prikaži okno s povezavami
+MENU_NAV_CONN_ACCESSIBLE=Prikaži okno s povezavami.
 MENU_NAV_LIB=Knjižnica
 MENU_NAV_LIB_MNEMONIC=K
-MENU_NAV_LIB_ACCESSIBLE=Prikaži okno knjižnice
+MENU_NAV_LIB_ACCESSIBLE=Prikaži okno knjižnice.
 
 MENU_VIEW_TITLE=Pogled
 MENU_VIEW_TITLE_MNEMONIC=P
+#??? MENU_VIEW_SMALL_ICONS=Small icons
+#??? MENU_VIEW_SMALL_ICONS_MNEMONIC=S
+#??? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use small icons.
+#??? MENU_VIEW_TEXT_WITH_ICONS=Icon text
+#??? MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
+#??? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show text below icons.
+#??? MENU_VIEW_SHOW_HIDE_TITLE=Show/hide
+#??? MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
+#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs.
 MENU_VIEW_MONITOR=Nadzor
 MENU_VIEW_MONITOR_MNEMONIC=N
-MENU_VIEW_MONITOR_ACCESSIBLE=Prikaži okno za nadzor
+MENU_VIEW_MONITOR_ACCESSIBLE=Prikaži okno za nadzor.
 MENU_VIEW_CONNECTIONS=Povezave
 MENU_VIEW_CONNECTIONS_MNEMONIC=P
-MENU_VIEW_CONNECTIONS_ACCESSIBLE=Prikaži okno s povezavami
+MENU_VIEW_CONNECTIONS_ACCESSIBLE=Prikaži okno s povezavami.
 MENU_VIEW_LIBRARY=Knjižnica
 MENU_VIEW_LIBRARY_MNEMONIC=K
-MENU_VIEW_LIBRARY_ACCESSIBLE=Prikaži okno knjižnice
+MENU_VIEW_LIBRARY_ACCESSIBLE=Prikaži okno knjižnice.
+#??? MENU_VIEW_THEMES_TITLE=Apply skins
+#??? MENU_VIEW_THEMES_TITLE_MNEMONIC=A
+#??? MENU_VIEW_THEMES_GET_MORE=Get more skins
+#??? MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
+#??? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more skins from limewire.com.
+#??? MENU_VIEW_THEMES_REFRESH=Refresh skins
+#??? MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
+#??? MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk.
+#??? MENU_VIEW_THEMES_USE_DEFAULT=Use default
+#??? MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
+#??? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin.
+#??? MENU_VIEW_LANGS_TITLE=Change language
+#??? MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+#??? MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help translate LimeWire
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language.
+#??? MENU_VIEW_SEARCH_TITLE=Search
+#??? MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search tab options.
+#??? MENU_VIEW_SEARCH_FILTERS=Result filters
+#??? MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
+#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show search result filters.
+#??? MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
+#??? MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
+#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show the Magnetmix button.
 
 MENU_RESOURCES_TITLE=Sredstva
 MENU_RESOURCES_TITLE_MNEMONIC=S
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
-MENU_RESOURCES_PRO_ACCESSIBLE=Prikaži spletno stran LimeWire PRO
+MENU_RESOURCES_PRO_ACCESSIBLE=Prikaži spletno stran LimeWire PRO.
 
 MENU_TOOLS_TITLE=Orodja
 MENU_TOOLS_TITLE_MNEMONIC=O
-MENU_TOOLS_STATISTICS=Statistika ...
+MENU_TOOLS_STATISTICS=Statistika...
 MENU_TOOLS_STATISTICS_MNEMONIC=S
-MENU_TOOLS_STATISTICS_ACCESSIBLE=Prikaži okno s statistiko
-MENU_TOOLS_OPTIONS=Možnosti ...
+MENU_TOOLS_STATISTICS_ACCESSIBLE=Prikaži okno s statistiko.
+MENU_TOOLS_OPTIONS=Možnosti...
 MENU_TOOLS_OPTIONS_MNEMONIC=M
-MENU_TOOLS_OPTIONS_ACCESSIBLE=Prikaži okno z možnostmi
+MENU_TOOLS_OPTIONS_ACCESSIBLE=Prikaži okno z možnostmi.
 
 MENU_HELP_TITLE=Pomoč
 MENU_HELP_TITLE_MNEMONIC=P
 MENU_HELP_USING_LIMEWIRE=Uporaba programa LimeWire
 MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
-MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Pomoč pri uporabi programa LimeWire
+MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Pomoč pri uporabi programa LimeWire.
+#??? MENU_HELP_TOTD=Tip of the day
+#??? MENU_HELP_TOTD_MNEMONIC=D
+#??? MENU_HELP_TOTD_ACCESSIBLE=Show the "Tip of the day" Window.
 MENU_HELP_FAQ=FAQ
 MENU_HELP_FAQ_MNEMONIC=F
-MENU_HELP_FAQ_ACCESSIBLE=Pogosto zastavljena vprašanja o programu LimeWire
+MENU_HELP_FAQ_ACCESSIBLE=Pogosto zastavljena vprašanja o programu LimeWire.
 MENU_HELP_FORUM=Forum
 MENU_HELP_FORUM_MNEMONIC=M
-MENU_HELP_FORUM_ACCESSIBLE=Dostop do foruma uporabnikov programa LimeWire
+MENU_HELP_FORUM_ACCESSIBLE=Dostop do foruma uporabnikov programa LimeWire.
 MENU_HELP_FRIEND=Povejte prijatelju
-MENU_HELP_FRIEND_MNEMONIC=T
-MENU_HELP_FRIEND_ACCESSIBLE=Povejte prijatelju o programu LimeWire
+MENU_HELP_FRIEND_MNEMONIC=P
+MENU_HELP_FRIEND_ACCESSIBLE=Povejte prijatelju o programu LimeWire.
 MENU_HELP_REVIEW=Preglejte LimeWire
 MENU_HELP_REVIEW_MNEMONIC=R
-MENU_HELP_REVIEW_ACCESSIBLE=Pošljite pregled programa LimeWire
-MENU_HELP_ABOUT=O programu ...
+MENU_HELP_REVIEW_ACCESSIBLE=Pošljite pregled programa LimeWire.
+MENU_HELP_ABOUT=O programu...
 MENU_HELP_ABOUT_MNEMONIC=O
-MENU_HELP_ABOUT_ACCESSIBLE=Podatki o programu LimeWire
+MENU_HELP_ABOUT_ACCESSIBLE=Podatki o programu LimeWire.
+#??? MENU_HELP_ERROR=Generate error
+#??? MENU_HELP_ERROR_MNEMONIC=E
+#??? MENU_HELP_ERROR_ACCESSIBLE=Generate a popup error for testing.
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for general tables info
 ################################################################################
+#??? TABLES_USE_ROWSTRIPE=Stripe rows
+#??? TABLES_REAL_TIME_SORTING=Sort automatically
+#??? TABLES_DISPLAY_TOOLTIPS=Extended tooltips
+
+################################################################################
+# Keys/value pairs for SearchView stuff...
+################################################################################
+#??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
 SEARCH_DOWNLOAD_BUTTON_LABEL=Prenesi
 SEARCH_DOWNLOAD_BUTTON_TIP=Prenese vse izbrane datoteke.
 SEARCH_WISHLIST_BUTTON_LABEL=Dodaj k željam
 SEARCH_WISHLIST_BUTTON_TIP=LimeWire robota pošlje iskat vsebino.
 SEARCH_BROWSE_HOST_BUTTON_LABEL=Brskaj po gost.
 SEARCH_BROWSE_HOST_BUTTON_TIP=Pregleda vse datoteke na gostiteljevem računalniku.
-SEARCH_CHAT_BUTTON_LABEL=Klepet ...
+SEARCH_CHAT_BUTTON_LABEL=Klepet...
 SEARCH_CHAT_BUTTON_TIP=Odpre okno za klepet z izbranim gostiteljem.
-SEARCH_BUY_CD_LABEL=Kupi ...
+SEARCH_BUY_CD_LABEL=Kupi...
 SEARCH_BUY_CD_TIP=Kupi izbrani predmet.
 SEARCH_SEARCH_BUTTON_LABEL=Išči
 SEARCH_SEARCH_BUTTON_TIP=Preišče mrežo za danimi besedami.
@@ -253,21 +335,40 @@ SEARCH_STOP_BUTTON_TIP=Preneha iskati nove zadetke v izbranem zavihku.
 SEARCH_PUBLIC_KILL_STRING=Zapri iskanje
 SEARCH_PUBLIC_LAUNCH_STRING=Poženi
 SEARCH_PUBLIC_STOP_STRING=Prenehaj iskanje
-SEARCH_PUBLIC_BROWSE_STRING=Brskaj po gost.
+SEARCH_PUBLIC_BROWSE_STRING=Brskaj po gost
 SEARCH_PUBLIC_CHAT_STRING=Klepetaj
-SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Spletni pregled Bitzi ...
+SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Spletni pregled Bitzi...
+#??? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
+#??? SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Ponovi iskanje
 SEARCH_PUBLIC_BLOCK_STRING=Blokiraj gostitelja
 SEARCH_RESULT_TABLE_LABEL=Rezultati
-SEARCH_SEARCHING_LABEL=Iščem ...
+SEARCH_SEARCHING_LABEL=Iščem...
 SEARCH_VIRUS_MSG_ONE=Ena izbranih datotek je gonljiv
 SEARCH_VIRUS_MSG_TWO=program in lahko vsebuje virus.
 SEARCH_VIRUS_MSG_THREE=Ste prepričani, da želite nadaljevati?
-SEARCH_SHOW_MESSAGE_MSG=Tega sporočila ne prikaži ponovno.
+SEARCH_SHOW_MESSAGE_MSG=Tega sporočila ne prikaži ponovno
 SEARCH_DOWNLOAD_DIALOG_CONFIRM=Zahteva po prenosu
 SEARCH_DEFAULT_FIELD_TITLE=Ime datoteke
+#??? SEARCH_MULTIPLE_HOSTS=Multiple
 AUTO_DL_CHECKBOX_STRING=Samodejno prenesi
 AUTO_DL_CHECKBOX_TOOLTIP=Program LimeWire vam bo prenesel željene datoteke.
+#??? SEARCH_TYPE_KEYWORD=Keyword
+#??? SEARCH_TYPE_WHATSNEW=What's new
+#??? SEARCH_TYPE_BROWSEHOST=Direct connect
+#??? SEARCH_BROWSEHOST_TITLE=Got friends?
+#??? SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
+#??? SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
+#??? SEARCH_BROWSEHOST_BUTTON=Direct connect
+SEARCH_WHATSNEW_HIDE_ADULT=Ignoriraj vsebino za odrasle
+#??? SEARCH_WHATSNEW_TITLE_ONE=Don't know
+#??? SEARCH_WHATSNEW_TITLE_TWO=what to look for?
+#??? SEARCH_WHATSNEW_DESC=A "What's new" search will search for files that have been recently added to the network.
+#??? SEARCH_CURRENT_SEARCH=Current search:
+SEARCH_WHATS_NEW_SMALL=Nov
+#??? SEARCH_SELECT_TYPE=Select type:
+#??? SEARCH_FILTER_RESULTS=Filter results:
+#??? SEARCH_BACK_TO_SEARCH=Back to search
 
 #Media Types
 MEDIA_ANY_TYPE=Katerikoli tip
@@ -280,18 +381,30 @@ MEDIA_IMAGES=Slike
 #ResultPanel Columns for normal view
 RESULT_PANEL_QUALITY=Kvaliteta
 RESULT_PANEL_NAME=Ime
+#??? RESULT_PANEL_ICON=Icon
 RESULT_PANEL_TYPE=Tip
 RESULT_PANEL_SIZE=Velikost
 RESULT_PANEL_SPEED=Hitrost
 RESULT_PANEL_CHAT=Klepet
 RESULT_PANEL_LOCATION=Mesto
 RESULT_PANEL_COUNT=#
-RESULT_PANEL_VENDOR=Program/različico
+RESULT_PANEL_VENDOR=Program
+#??? RESULT_PANEL_ADDED=Created
 
-DOWNLOAD_KILL_BUTTON_LABEL=Končaj prenos
+#Filter labels.
+SEARCH_FILTER_ALL=Vse
+SEARCH_FILTER_OPTION=Možnost
+SEARCH_FILTER_OPTIONS=Možnosti
+#??? SEARCH_FILTER_MEDIA=Media
+
+DOWNLOAD_LAUNCH_BUTTON_LABEL=Predogled
+#??? DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the selected download.
+DOWNLOAD_KILL_BUTTON_LABEL=Končaj prenosi
 DOWNLOAD_KILL_BUTTON_TIP=Konča izbran prenos ali prenose.
 DOWNLOAD_RESUME_BUTTON_LABEL=Nadaljuj
 DOWNLOAD_RESUME_BUTTON_TIP=Poskuša nadaljevati prenos.
+DOWNLOAD_SOURCES_BUTTON_LABEL=Find sources
+DOWNLOAD_SOURCES_BUTTON_TIP=Try to locate other sources for failed download.
 DOWNLOAD_CLEAR_BUTTON_LABEL=Počisti neaktivne
 DOWNLOAD_CLEAR_BUTTON_TIP=Počisti neaktivne prenose.
 
@@ -310,16 +423,16 @@ LIBRARY_ANNOTATE_BUTTON_TIP=Doda dodatne podatke datoteki.
 LIBRARY_RESUME_BUTTON_LABEL=Nadaljuj
 LIBRARY_RESUME_BUTTON_TIP=Nadaljuje s prenosom izbrane nedokončane datoteke ali datotek.
 
-PLAYLIST_LOAD_BUTTON_LABEL=Odpri ...
+PLAYLIST_LOAD_BUTTON_LABEL=Odpri...
 PLAYLIST_LOAD_BUTTON_TIP=Odpre nov ali že obstoječ seznam za igranje.
-PLAYLIST_SAVE_BUTTON_LABEL=Shrani ...
+PLAYLIST_SAVE_BUTTON_LABEL=Shrani...
 PLAYLIST_SAVE_BUTTON_TIP=Shrani trenutni seznam za igranje.
 PLAYLIST_DELETE_BUTTON_LABEL=Odstrani
 PLAYLIST_DELETE_BUTTON_TIP=Odstrani trenutni seznam za igranje.
 PLAYLIST_FILE_DESCRIPTION=Seznami za igranje - Playliste (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire predvajalnik
 MEDIA_PLAY_BUTTON_TIP=Igraj
@@ -333,20 +446,37 @@ PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Uporabniško ime
 PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Geslo
 
 ################################################################################
-# Key/value pairs for Statistics String....
+# Key/value pairs for Statistics String...
 ################################################################################
 STATISTICS_AVAILABLE=na voljo je
-STATISTICS_FILES=datotek(o,i,e)
+STATISTICS_FILES=datoteki
 STATISTICS_DISCONNECTED=Ni povezave / nobene datoteke ni na voljo
 STATISTICS_SHARING=Delim
 STATISTICS_SHARING_TOOLTIP=Skupno število datotek, ki jih delite z drugimi.
+STATISTICS_CONNECTION_DISCONNECTED=Ni povezave
+#??? STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
+STATISTICS_CONNECTION_CONNECTING=Povezujem se...
+#??? STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
+#??? STATISTICS_CONNECTION_POOR=Poor
+#??? STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
+#??? STATISTICS_CONNECTION_FAIR=Fair
+#??? STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
+#??? STATISTICS_CONNECTION_GOOD=Good
+#??? STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
+#??? STATISTICS_CONNECTION_EXCELLENT=Excellent
+#??? STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TurboCharged connections all the time with LimeWire Pro.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
+STATISTICS_CONNECTION_QUALITY=Kvaliteta:
+#??? STATISTICS_CONNECTION_IDLE=Idle
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
 # right-click popop menu and labels for the various column headers and
 # download statistics table cells.
 ################################################################################
-DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Končaj prenos(a,e)
+DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Končaj prenosa sem
 DOWNLOAD_POPUP_MENU_RESUME=Vsili nadaljevanje
 DOWNLOAD_POPUP_MENU_LAUNCH=Poženi datoteko
 DOWNLOAD_POPUP_MENU_CHAT=Klepet z gostiteljem
@@ -368,25 +498,41 @@ DOWNLOAD_STATUS_FAILED=Ne morem prenesti
 DOWNLOAD_STATUS_DOWNLOADING=Prenašam od
 DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Ne morem premakniti v knjižnico
 DOWNLOAD_STATUS_CORRUPT_FILE=Datoteka ima napake
+#??? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering corrupted file
+#??? DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery failed
 DOWNLOAD_STATUS_REQUERYING=Ponovno sprašujem mrežo
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Ponovno vprašanje poslano, čakam
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s za rezultate
-DOWNLOAD_HOSTS_LABEL=gostiteljev(a)
+#??? DOWNLOAD_STATUS_WAITING_FOR_USER=Need more sources
+#??? DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for stable connections
+DOWNLOAD_HOSTS_LABEL=gostiteljeva
+DOWNLOAD_HOST_LABEL=gostiteljev
 DOWNLOAD_STATUS_REMOTE_QUEUED=Čakam v vrsti, mesto
 DOWNLOAD_STATUS_HASHING=Preverjam vsebino datoteke...
 DOWNLOAD_STATUS_SAVING=Shranjujem datoteko...
-#??? DOWNLOAD_AWAITING_SOURCES=Awaiting more sources...
+#??? DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
+#??? DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
+#??? DOWNLOAD_APPLY_NEW_THEME_END=". Would you like to use this new skin?
+#??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
+#??? DOWNLOAD_BUSY_HOSTS=Busy hosts
+#??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
+#??? DOWNLOAD_SEARCHING=Locating sources...
+#??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
+#??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
+#??? DOWNLOAD_FROM=from
+#??? DOWNLOAD_MAGNET_DIALOG_END=?
 
 ###################################################################
 # Key/value pairs for UploadView
 ###################################################################
-UPLOAD_POPUP_MENU_KILL_UPLOAD=Končaj prenos(a,e) drugim
+UPLOAD_POPUP_MENU_KILL_UPLOAD=Končaj prenosa drugim
 UPLOAD_POPUP_MENU_CHAT=Klepet z gostiteljem
 UPLOAD_KILL_BUTTON_LABEL=Končaj prenos
 UPLOAD_KILL_BUTTON_TIP=Konča z izbranim prenosom ali prenosi drugim.
 UPLOAD_CLEAR_BUTTON_LABEL=Počisti neaktivne
 UPLOAD_CLEAR_BUTTON_TIP=Počisti neaktivne prenose drugim.
 UPLOAD_CHAT_BUTTON_LABEL=Klepet z gostiteljem
+UPLOAD_CHAT_BUTTON_TIP=Odpre okno za klepet z izbranim gostiteljem.
 UPLOAD_TABLE_STRING_NAME=Ime
 UPLOAD_TABLE_STRING_HOST=Gostitelj
 UPLOAD_TABLE_STRING_SIZE=Velikost
@@ -396,16 +542,22 @@ UPLOAD_TABLE_STRING_PROGRESS=Napredek
 UPLOAD_TABLE_STRING_SPEED=Hitrost
 UPLOAD_TABLE_STRING_TIME_REMAINING=Čas
 UPLOAD_TABLE_STRING_USER_AGENT=Program/različico
-UPLOAD_TABLE_STRING_CONNECTING=Povezujem se
+UPLOAD_TABLE_STRING_CONNECTING=Povezujem se...
 UPLOAD_TABLE_STRING_UPLOADING=Prenašam drugim
 UPLOAD_TABLE_STRING_LIMITREACHED=Dosežen je limit prenosov
 UPLOAD_TABLE_STRING_FREELOADER=Prenašam nedelitelju
 UPLOAD_TABLE_STRING_PUSHFAILED=Povezava neuspešna
 UPLOAD_TABLE_STRING_INTERRUPTED=Prenos prekinjen
+#??? UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range unavailable
+#??? UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Malformed request
 UPLOAD_TABLE_STRING_COMPLETE=Končano
+#??? UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned greedy servent
+#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading hash tree
 UPLOAD_TABLE_STRING_FNF=Datoteke ne najdem
 UPLOAD_TABLE_STRING_QUEUED=Čaka v vrsti
 UPLOAD_STRING_KBPSEC=kB/s
+UPLOAD_ACTIVE=aktivne
+UPLOAD_QUEUED=v vrsti
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -424,7 +576,15 @@ MODEM_SPEED=Modem
 CABLE_SPEED=Kabel/DSL
 T1_SPEED=T1
 T3_SPEED=T3 ali hitreje
-#??? MULTICAST_SPEED=Ethernet
+MULTICAST_SPEED=Ethernet
+
+################################################################################
+# HTML Page stuff
+################################################################################
+HTML_PAGE_TITLE=Download page
+# SPACE AT END NEEDS TO BE THERE!!!
+HTML_PAGE_LISTING=File listing for 
+HTML_PAGE_MAGNET=Magnet links for fast downloads (if you have LimeWire installed)
 
 ###################################################################
 # Key/value pairs for ConnectionView
@@ -432,24 +592,32 @@ T3_SPEED=T3 ali hitreje
 CV_PANEL_TITLE=Povezanih gostiteljev
 CV_COLUMN_HOST=Gostitelj
 CV_COLUMN_STATUS=Stanje
-CV_COLUMN_MESSAGE=Sporočila (I/O)
-CV_COLUMN_BANDWIDTH=Pasovna širina (I/O)
-CV_COLUMN_DROPPED=Prekinjenega (I/O)
+CV_COLUMN_MESSAGE=Sporočila (V/I)
+CV_COLUMN_BANDWIDTH=Pasovna širina (V/I)
+CV_COLUMN_DROPPED=Prekinjenega (V/I)
 CV_COLUMN_HOSTS=Gostitelji
 CV_COLUMN_PROTOCOL=Protokol
 CV_COLUMN_VENDOR=Program/različico
 CV_COLUMN_TIME=Čas
-#??? CV_COLUMN_COMPRESSION=Compressed (I/O)
+#??? CV_COLUMN_COMPRESSION=Compressed (V/I)
+CV_COLUMN_QRP_FULL=QRP (%/velikost)
+#??? CV_COLUMN_QRP_USED=QRP empty
 CV_BUTTON_REMOVE=Odstrani
 CV_BUTTON_TOOLTIP_REMOVE=Odstrani izbrano povezavo ali povezave.
 CV_BUTTON_ADD=Dodaj
 CV_BUTTON_TOOLTIP_ADD=Ustvari novo izhodno povezavo.
 CV_LABEL_KEEP_BEGIN=Vselej ohranjaj
-CV_LABEL_KEEP_END=delujočo(i,e,ih) povezav(o,i,e).
+CV_LABEL_KEEP_END=delujočoi povezavi.
 CV_TABLE_STRING_CONNECTING=Povezujem se...
+CV_TABLE_STRING_CONNECTINGS=povezujem se
 CV_TABLE_STRING_LEAF=List
+CV_TABLE_STRING_LEAVES=listi
 CV_TABLE_STRING_ULTRAPEER=Ultrapeer
+CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
+CV_TABLE_STRING_PEER=Peer
+CV_TABLE_STRING_PEERS=peers
 CV_TABLE_STRING_STANDARD=0.6
+#??? CV_TABLE_STRING_STANDARDS=standard
 CV_TABLE_STRING_INCOMING=Vhodno
 CV_TABLE_STRING_OUTGOING=Izhodno
 CV_TABLE_STRING_CONNECTED_ON=Povezava s/z 
@@ -460,6 +628,7 @@ CV_TABLE_STRING_KBPSEC=kB/s
 ################################################################################
 # Key/value pairs for a strings in the library window
 ################################################################################
+#??? LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_NAME=Ime
 LIBRARY_TABLE_TITLE=Naslov
 LIBRARY_TABLE_ARTIST=Izvajalec
@@ -473,11 +642,13 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=Nov imenik
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Prenehaj delitev z drugimi
 LIBRARY_TREE_RENAME_FOLDER_LABEL=Preimenuj
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=K seznamu za igranje
+#??? LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
+#??? LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete Files
 
 ################################################################################
 # Key/value pairs for burn cd link
 ################################################################################
-LIBRARY_BURN_LABEL=Napiši CD ...
+LIBRARY_BURN_LABEL=Napiši CD...
 
 ###################################################################
 # Key/value pairs for PlayListGUI
@@ -490,27 +661,39 @@ PLAYLIST_OPTIONS_STRING=Možnosti za igranje:
 PLAYLIST_OPTIONS_CONTINUE=Nepretrgano
 PLAYLIST_OPTIONS_SHUFFLE=Naključno
 PLAYLIST_DIALOG_OPEN_TITLE=Izberi seznam za igranje (.m3u)
-PLAYLIST_DIALOG_SAVE_TITLE=Shrani seznam za igranje kot ...
+PLAYLIST_DIALOG_SAVE_TITLE=Shrani seznam za igranje kot...
 PLAYLIST_DIALOG_SAVE_SAVE=Shrani
+#??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
+#??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
+#??? PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
+#??? PLAYLIST_FILE_MISSING=. The file cannot be found.
+#??? PLAYLIST_FILE_CORRUPT=. The file is corrupt.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
-SETUP_WELCOME_LABEL=Dobrodošli v namestitvenem čarovniku LimeWire. Sprehodili se boste čez nekaj korakov, ki bodo omogočili optimalno delovanje programa LimeWire.
-SETUP_SAVE_LABEL=Prosim, izberite imenik, v katerega bodo prenešene datoteke, ki jih naložite od drugih. Privzeto je, da boste ta imenik delili z drugimi uporabniki.
-SETUP_SPEED_LABEL=Prosim, izberite hitrost vaše povezave z internetom. Ta nastavitev je pomembna za optimalno delovanje. V primeru, da ne veste, kakšna je vaša povezava do interneta, ali pa vaše povezave ni v seznamu, preprosto izberite tisto možnost, ki se vam zdi najbolj primerna.
-SETUP_SCAN_LABEL=Želite, da LimeWire hitro preišče vaš disk za ostale datoteke, ki jih lahko delite? Ob koncu iskanja boste lahko izbrali, katere od najdenih imenikov želite deliti z drugimi.
-SETUP_WAIT_LABEL=Prosim, počakajte, medtem ko LimeWire preiskuje vaš disk ...
-SETUP_CONFIRM_LABEL=Spodaj našteti imeniki so tisti, ki jih najbrž želite deliti z drugimi. Pri tistih, ki jih želite deliti, preprosto kliknite na opcijski gumb pred imenom. Podimeniki deljenih imenikov bodo prav tako deljeni z drugimi.
-SETUP_FINISH_LABEL=Vaša namestitev programa LimeWire je uspela. Prosim, pritisnite gumb "Končaj", in uporabljati boste lahko začeli LimeWire.
+#??? SETUP_LANGUAGE_TITLE=Language Options
+#??? SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_WELCOME_TITLE=Dobrodošli
+SETUP_WELCOME_LABEL=Dobrodošli v namestitvenem čarovniku LimeWire. Sprehodili se boste čez nekaj korakov, ki bodo omogočili optimalno delovanje programa LimeWire.
+SETUP_WELCOME_PARTIAL_LABEL=Dobrodošli v namestitvenem čarovniku LimeWire. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 SETUP_SAVE_TITLE=Imenik shranjenih datotek
+SETUP_SAVE_LABEL=Prosim, izberite imenik, v katerega bodo prenešene datoteke, ki jih naložite od drugih. Privzeto je, da boste ta imenik delili z drugimi uporabniki.
 SETUP_SPEED_TITLE=Hitrost povezave
+SETUP_SPEED_LABEL=Prosim, izberite hitrost vaše povezave z internetom. Ta nastavitev je pomembna za optimalno delovanje. V primeru, da ne veste, kakšna je vaša povezava do interneta, ali pa vaše povezave ni v seznamu, preprosto izberite tisto možnost, ki se vam zdi najbolj primerna.
+#??? SETUP_STARTUP_TITLE=System startup
+#??? SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
+#??? SETUP_STARTUP_CHECKBOX=Start automatically
 SETUP_SCAN_TITLE=Iskanje datotek
+SETUP_SCAN_LABEL=Želite, da LimeWire hitro preišče vaš disk za ostale datoteke, ki jih lahko delite? Ob koncu iskanja boste lahko izbrali, katere od najdenih imenikov želite deliti z drugimi.
 SETUP_WAIT_TITLE=Iščem po disku
+SETUP_WAIT_LABEL=Prosim, počakajte, medtem ko LimeWire preiskuje vaš disk...
 SETUP_CONFIRM_TITLE=Potrditev iskanja
+SETUP_CONFIRM_LABEL=Spodaj našteti imeniki so tisti, ki jih najbrž želite deliti z drugimi. Pri tistih, ki jih želite deliti, preprosto kliknite na opcijski gumb pred imenom. Podimeniki deljenih imenikov bodo prav tako deljeni z drugimi.
+#??? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_FINISH_TITLE=Konec namestitve
+SETUP_FINISH_LABEL=Vaša namestitev programa LimeWire je uspela. Prosim, pritisnite gumb "Končaj", in uporabljati boste lahko začeli LimeWire.
 
 ################################################################################
 # Key/value pairs for the file chooser
@@ -529,7 +712,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Izbira imenika
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Imenik:
-INIT_SAVE_BROWSE_BUTTON_LABEL=Brskaj ...
+INIT_SAVE_BROWSE_BUTTON_LABEL=Brskaj...
 INIT_SAVE_BROWSE_BUTTON_TIP=Izbere drug imenik.
 INIT_SAVE_DEFAULT_BUTTON_LABEL=Privzeto
 INIT_SAVE_DEFAULT_BUTTON_TIP=Uporabi privzet imenik.
@@ -540,6 +723,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=Uporabi privzet imenik.
 PRO_TITLE=Nadgradnja v PRO
 PRO_LABEL_THANKS=Hvala, ker pomagate mreži z uporabo programa LimeWire. Prosimo, premislite, če želite nadgraditi v LimeWire PRO; s tem boste pomagali podpirati naš razvoj programa in mreže, ki bosta tako postala še boljša.
 PRO_LABEL_QUESTION=Nadgradim v LimeWire PRO?
+
 GO_PRO_TIP=Pridobite LimeWire PRO sedaj.
 WHYGOPRO=Zakaj PRO?
 WHYGOPRO_TIP=Kaj vam lahko PRO ponudi.
@@ -568,12 +752,43 @@ VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Prekliči
 #IndentingPanel
 XML_SEARCH_MORE_OPTIONS_LABEL=Več možnosti za iskanje
 
+META_EDITOR_INFO_TAB_LABEL=Podatki
+META_EDITOR_OK_BUTTON_LABEL=V redu
+META_EDITOR_CANCEL_BUTTON_LABEL=Prekliči
+META_EDITOR_ADVANCED_BUTTON_LABEL=Dodatno
+#??? META_EDITOR_RESET_LABEL=Reset
+
+META_EDITOR_AUDIO_LABEL=Avdio
+META_EDITOR_TITLE_LABEL=Naslov:
+META_EDITOR_ARTIST_LABEL=Izvajalec:
+#??? META_EDITOR_ALBUM_LABEL=Album:
+#??? META_EDITOR_GENRE_LABEL=Genre:
+#??? META_EDITOR_YEAR_LABEL=Year:
+META_EDITOR_TYPE_LABEL=Tip:
+#??? META_EDITOR_TRACK_LABEL=Track:
+META_EDITOR_LANGUAGE_LABEL=Jezik:
+#??? META_EDITOR_SECONDS_LABEL=Length:
+#??? META_EDITOR_BITRATE_LABEL=Bitrate:
+#??? META_EDITOR_COMMENTS_LABEL=Comments:
+META_EDITOR_SHA1_LABEL=SHA1:
+#??? META_EDITOR_PRICE_LABEL=Price:
+#??? META_EDITOR_LINK_LABEL=Link:
+#??? META_EDITOR_ACTION_LABEL=Action:
+#??? META_EDITOR_STARS_LABEL=Stars:
+
+META_EDITOR_SIZE_LABEL=Velikost:
+#??? META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
+#??? META_EDITOR_KIND_LABEL=Kind:
+META_EDITOR_MP3_KIND_LABEL=MPEG-1 Avdio Layer 3
+META_EDITOR_MP4_KIND_LABEL=MPEG-4 Avdio
+META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
+
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
 ################################################################################
-LIST_EDITOR_ADD_BUTTON=Dodaj ...
+LIST_EDITOR_ADD_BUTTON=Dodaj...
 LIST_EDITOR_ADD_BUTTON_2=Dodaj
-LIST_EDITOR_BROWSE_BUTTON=Brskaj ...
+LIST_EDITOR_BROWSE_BUTTON=Brskaj...
 LIST_EDITOR_REMOVE_BUTTON=Odstrani
 LIST_EDITOR_ADD_BUTTON_TIP=Seznamu doda nov predmet.
 LIST_EDITOR_REMOVE_BUTTON_TIP=Odstrani izbrani predmet.
@@ -586,7 +801,7 @@ INPUT_FIELD_GENERIC_CAPTION=Vnos
 ################################################################################
 # Keys/value pairs for general button labels/tooltips used in various windows
 ################################################################################
-GENERAL_CHAT_BUTTON_LABEL=Klepet ...
+GENERAL_CHAT_BUTTON_LABEL=Klepet...
 GENERAL_CHAT_BUTTON_TIP=Klepet z gostiteljem.
 GENERAL_LAUNCH_BUTTON_LABEL=Poženi
 GENERAL_LAUNCH_BUTTON_TIP=Požene datoteko.
@@ -611,35 +826,53 @@ CHAT_YOU=Vi
 ###################################################################
 # Key/value pairs for splash screen status text
 ###################################################################
-SPLASH_STATUS_RESOURCE_MANAGER=Nalagam sredstva ...
-SPLASH_STATUS_SEARCH_WINDOW=Nalagam okno za iskanje ...
-SPLASH_STATUS_OPTIONS_WINDOW=Nalagam okno z možnostmi ...
-SPLASH_STATUS_USER_SETTINGS=Nalagam uporabniške nastavitve ...
-SPLASH_STATUS_SHARED_FILES=Nalagam deljene datoteke ...
-SPLASH_STATUS_INTERFACE=Nalagam uporabniški vmesnik ...
-SPLASH_STATUS_UPDATES=Iščem posodobitve ...
-SPLASH_STATUS_CORE_COMPONENTS=Nalagam osnovne komponente ...
-SPLASH_STATUS_DOWNLOAD_WINDOW=Nalagam okno za prenose ...
-SPLASH_STATUS_LIBRARY_WINDOW=Nalagam okno knjižnice ...
-SPLASH_STATUS_UPLOAD_WINDOW=Nalagam okno za prenose drugim ...
-SPLASH_STATUS_MONITOR_WINDOW=Nalagam nadzorno okno ...
-SPLASH_STATUS_CONNECTION_WINDOW=Nalagam okno s povezavami ...
-SPLASH_STATUS_STATISTICS_WINDOW=Nalagam okno s statistiko ...
-SPLASH_STATUS_STATUS_WINDOW=Nalagam okno stanja ...
-SPLASH_STATUS_MENUS=Nalagam menije ...
-SPLASH_STATUS_MESSAGE_SERVICE=Nalagam sporočila ...
+SPLASH_STATUS_RESOURCE_MANAGER=Nalagam sredstva...
+SPLASH_STATUS_HTML_ENGINE=Nalagam HTML-engine...
+SPLASH_STATUS_SEARCH_WINDOW=Nalagam okno za iskanje...
+SPLASH_STATUS_OPTIONS_WINDOW=Nalagam okno z možnostmi...
+SPLASH_STATUS_USER_SETTINGS=Nalagam uporabniške nastavitve...
+SPLASH_STATUS_SHARED_FILES=Nalagam deljene datoteke...
+SPLASH_STATUS_INTERFACE=Nalagam uporabniški vmesnik...
+SPLASH_STATUS_UPDATES=Iščem posodobitve...
+SPLASH_STATUS_CORE_COMPONENTS=Nalagam osnovne komponente...
+SPLASH_STATUS_DOWNLOAD_WINDOW=Nalagam okno za prenose sem...
+SPLASH_STATUS_LIBRARY_WINDOW=Nalagam okno knjižnice...
+SPLASH_STATUS_UPLOAD_WINDOW=Nalagam okno za prenose drugim...
+SPLASH_STATUS_MONITOR_WINDOW=Nalagam nadzorno okno...
+SPLASH_STATUS_CONNECTION_WINDOW=Nalagam okno s povezavami...
+SPLASH_STATUS_STATISTICS_WINDOW=Nalagam okno s statistiko...
+SPLASH_STATUS_STATUS_WINDOW=Nalagam okno stanja...
+SPLASH_STATUS_PLAYLIST_WINDOW=Nalagam okno z seznam za igranje...
+SPLASH_STATUS_MENUS=Nalagam menije...
+SPLASH_STATUS_MESSAGE_SERVICE=Nalagam sporočila...
+SPLASH_STATUS_ICONS=Nalagam icons...
+SPLASH_STATUS_I18N=Nalagam internationalization-support...
+SPLASH_STATUS_DAAP=Nalagam Digital-Audio-Access-Protocol...
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Nalagam connection-listener...
+SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Nalagam message-router...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Nalagam connection-management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
+SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Nalagam shared-files...
+SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Nalagam old-downloads...
+#??? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Nalagam directed-querier...
+SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Nalagam MAGNET-listener...
+SPLASH_STATUS_COMPONENT_LOADING_PINGER=Nalagam peer-listener...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Nalagam stale-connection-management...
+SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Nalagam saved-files...
+SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Nalagam secure-settings...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to 
 # support LimeWire through contributions.
 ##################################################################
-SUPPORT_LIMEWIRE_01=Podpirajte prihoden razvoj programa LimeWire.
+#??? SUPPORT_LIMEWIRE_01=For TURBO Charged searches get LimeWire Pro.
 SUPPORT_LIMEWIRE_02=Kliknite tukaj; podprli boste podjetje LimeWire pri razvoju odprtih, peer-to-peer mrež.
 SUPPORT_LIMEWIRE_03=Pomagajte mreži Gnutella pri rasti.
-SUPPORT_LIMEWIRE_04=Kliknite tukaj, če želite postati podpornik raziskovanja LimeWire.
+#??? SUPPORT_LIMEWIRE_04=For TURBO Charged downloads get LimeWire Pro.
 SUPPORT_LIMEWIRE_05=Podpirajte odprte mreže.
 SUPPORT_LIMEWIRE_06=Kliknite tu - podprite odprto kodo in odprte protokole.
-SUPPORT_LIMEWIRE_07=Kliknite tukaj, saj boste tako pomagali podjetju LimeWire pri gradnji digitalnih osnov za svet.
+#??? SUPPORT_LIMEWIRE_07=For TURBO Charged performance get LimeWire Pro.
 SUPPORT_LIMEWIRE_08=Prispevajte k razvoju peer-to-peer mrež odprte kode.
 SUPPORT_LIMEWIRE_09=Podprite novo distribucijsko družno neodvisnih umetnikov.
 SUPPORT_LIMEWIRE_11=Pomagajte podpirati deljenju neodvisnih multimedijskih vsebin.
@@ -650,6 +883,7 @@ SUPPORT_LIMEWIRE_11=Pomagajte podpirati deljenju neodvisnih multimedijskih vsebi
 ################################################################################
 UPDATE_DIALOG_CAPTION=Posodobitev LimeWire
 UPDATE_MESSAGE=Obstaja novejša različica programa LimeWire. Prosimo, nadgradite v različico
+#??? UPDATE_MESSAGE_SMALL=A newer version is available, update?
 UPDATE_SUCCEEDED_MESSAGE=Posodobitev programa LimeWire se je uspešno zaključila. Prosim, ponovno zaženite program, da boste uporabljali novo različico.
 UPDATE_WEB_PAGE_ERROR_MESSAGE=Prišlo je do napake pri odpiranju spletne strani LimeWire za posodobitev. Če želite dokončati posodobitev, usmerite vaš spletni brskalnik na naslov http://www.limewire.com/.
 UPDATE_ERROR_MESSAGE_START=Pri posodobitvi programa LimeWire se je pripetila sledeča napaka:
@@ -687,6 +921,7 @@ MESSAGE_INCOMPLETE_DIRECTORY_END=imenika, rezerviranega za nedokončane datoteke
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire ne more uporabljati izbranega imenika za shranjevanje datotek. Prosim, poskusite drug imenik.
 MESSAGE_FILE_CORRUPT=LimeWire opaža nepravilnost v datoteki
 MESSAGE_CONTINUE_DOWNLOAD=Želite ne glede na to nadaljevati prenos?
+#??? MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
@@ -694,11 +929,61 @@ MESSAGE_CONTINUE_DOWNLOAD=Želite ne glede na to nadaljevati prenos?
 ################################################################################
 INVALID_SAVE_DIR_LABEL=Shranjen imenik za shranjevanje datotek ni veljaven. Prosim, vnesite ime drugega imenika.
 
-ERROR_INTERNAL_SERVLET=Pri poganjanju programa LimeWire je prišlo do notranje napake. Vendar pa si lahko LimeWire od te napake opomore in še naprej teče.
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet
+################################################################################
+#??? NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet and you haven't used your machine in awhile, so we'll automatically
+# keep trying.
+################################################################################
+#??? NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire is trying to connect
+# to too many GWebCaches for various reasons.
+################################################################################
+#??? GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#??? GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+
+################################################################################
+# Key/Value pairs for friendly error messages.
+# Every kind of error MUST be implemented for all types.
+# Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
+################################################################################
+#??? ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
+#??? ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
+#??? ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
+#??? ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
+#??? ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete directory. To continue using LimeWire, please choose a different Save Directory.
+#??? ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
+#??? ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#??? ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+
+################################################################################
+# Key/Value pairs for internal error messages
+################################################################################
+#??? ERROR_INTERNAL_TITLE=Internal Error
+#??? ERROR_INTERNAL_SERVLET=Pri poganjanju programa LimeWire je prišlo do notranje napake. Vendar pa si lahko LimeWire od te napake opomore in še naprej teče. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
+#??? ERROR_INTERNAL_SEND=Send
+#??? ERROR_INTERNAL_REVIEW=Review
+#??? ERROR_INTERNAL_DISCARD=Discard
+#??? ERROR_INTERNAL_COPY=Copy report
+ERROR_INTERNAL_OK=V redu
+#??? ERROR_INTERNAL_ALWAYS_SEND=Always send immediately
+#??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
+#??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
+#??? ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
+#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_PORT_UNAVAILABLE=Vrata niso na voljo. Prosim, izberite druga vrata.
 ERROR_KEEP_ALIVE=LimeWire ne dovoli vzdrževanja toliko povezav, kajti to ustvarja nepotreben promet, ki maši mrežo.
 ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeeri z listnimi nodi potrebujejo vsaj šest povezav.
@@ -710,14 +995,19 @@ ERROR_NETWORK_FLOODING=To iskanje lahko dobi veliko zadetkov in lahko tako upoč
 ERROR_BROWSE_FAILED=Ne morem brskati po datotekah na zahtevanem gostitelju. Ta računalnik najbrž ne sprejema še več vhodnih povezav..
 ERROR_INVALID_SAVE_DIRECTORY=Neveljaven imenik za shranjevanje datotek. Prosim, izberite drug imenik, ali pa uporabite privzetega.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Vaš imenik za shranjevanje ni veljaven. Morda ste ga zbrisali, morda nimate pravic pisanja v njem, ali pa je prišlo do kakšnega drugega problema. Prosim, izberite drug imenik.
+#??? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
 ERROR_INVALID_SHARED_DIRECTORY=Neveljaven imenik za deljenje datotek. Prosim, vnesite ime drugega imenika, ali pa uporabite privzetega.
 ERROR_FORCE_IP_PORT_RANGE=Če želite siliti IP naslov, morate vnesti vrata med 1 in 65535.
 ERROR_CONNECT_STRING=Povezovalni nizi morajo biti najmanj dolžine 1, vsebovati en presledek, ne smejo pa vsebovati besed 'GIV', 'GET', ali katerekoli druge HTTP ključne besede.
 ERROR_PORT_RANGE=Prosim, vnesite vrata med 1 in 65535.
 ERROR_INVALID_GROUP=Izbrati morate veljavno skupino.
 ERROR_ALREADY_DOWNLOADING=Že prenašate
+#??? ERROR_ALREADY_EXISTS=You have already downloaded
+#??? NO_PREVIEW_BEGIN=There is nothing to preview for file
+#??? NO_PREVIEW_END=.
 ERROR_CANT_RESUME_START=Datoteka
 ERROR_CANT_RESUME_END=ni veljavna nedokončana datoteka, in je ne morem nadaljevati.
+ERROR_LOCATING_BROWSER_THEMES=LimeWire ne najde vašega brskalnika. Naslov slogi podpore Limewire je:\n"http://www.limewire.com/skins".
 ERROR_LOCATING_BROWSER_SUPPORT=LimeWire ne najde vašega brskalnika. Naslov tehnične podpore Limewire je:\n"http://www.limewire.com/support".
 ERROR_LOCATING_BROWSER_FAQ=LimeWire ne najde vašega brskalnika. LimeWire FAQ datoteka se nahaja na naslovu:\n"http://www.limewire.com/support/faq.htm".
 ERROR_LOCATING_BROWSER_FORUM=LimeWire ne najde vašega brskalnika. Naslov foruma LimeWire je:\n"http://www.limewire.com/forum.htm".
@@ -737,6 +1027,19 @@ ERROR_REMOVE_LAST_COL=Vseh stolpcev ne morete izključiti.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Ne morem brskati po gostitelju
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 #??? ERROR_INVALID_THEME_FILE=The theme file you selected does not exist or is invalid. Please choose another file, or use the default.
+#??? ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid. Please choose another file, or use the default.
+#??? ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
+#??? ERROR_THEME_OUT_OF_DATE_TITLE=Invalid skin
+#??? ERROR_THEME_OUT_OF_DATE_GET_MORE=Get new skins
+ERROR_THEME_OUT_OF_DATE_LATER=Kasneje
+#??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
+#??? ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
+#??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
+#??? ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
+#??? ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -755,11 +1058,15 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=Povezave
 OPTIONS_SHUTDOWN_MAIN_TITLE=Izhod iz programa
 OPTIONS_CHAT_MAIN_TITLE=Klepet
 OPTIONS_PLAYER_MAIN_TITLE=Predvajalnik
+OPTIONS_ITUNES_MAIN_TITLE=iTunes
+#??? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
+#??? OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
 #??? OPTIONS_APPS_MAIN_TITLE=Helper apps
-#??? OPTIONS_GUI_MAIN_TITLE=User interface
+#??? OPTIONS_BUGS_MAIN_TITLE=Bug reports
+OPTIONS_GUI_MAIN_TITLE=Pogled
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
 #??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete text
-OPTIONS_THEME_MAIN_TITLE=Tema
+OPTIONS_THEME_MAIN_TITLE=Slog
 OPTIONS_SKIN_MAIN_TITLE=Slog
 OPTIONS_SEARCH_MAIN_TITLE=Iskanje
 OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Limit
@@ -774,6 +1081,9 @@ OPTIONS_PREFERENCING_MAIN_TITLE=Prednostni seznam
 OPTIONS_PORT_MAIN_TITLE=Vrata
 OPTIONS_FIREWALL_MAIN_TITLE=Požarni zidovi
 OPTIONS_PRIVATE_NET_MAIN_TITLE=Zasebna mreža
+#??? OPTIONS_STARTUP_MAIN_TITLE=System Startup
+OPTIONS_PROXY_MAIN_TITLE=Proxy
+#??? OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale preferencing
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -791,7 +1101,7 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Država
 OPTIONS_SAVE_DIR_TITLE=Imenik za shranjevanje
 OPTIONS_SAVE_DIR_LABEL=Izberete lahko imenik, v katerega bodo shranjene prenešene datoteke.
 OPTIONS_SAVE_DIR_BOX_LABEL=Imenik:
-OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Brskaj ...
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Brskaj...
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Privzeto
 OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Izbere drug imenik.
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Uporabi trenutni imenik.
@@ -806,7 +1116,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Število dni, preden izbrišem stare 
 OPTIONS_SHARED_DIRS_TITLE=Deljeni imeniki
 OPTIONS_SHARED_DIRS_LABEL=Izberete lahko imenike, ki jih delite z drugimi uporabniki. Datoteke v teh imenikih so zapisane v Knjižnici.
 OPTIONS_SHARED_DIRS_BOX_LABEL=Imeniki:
-OPTIONS_SHARED_DIRS_BUTTON_LABEL=Dodaj imenik ...
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=Dodaj imenik...
 OPTIONS_SHARED_DIRS_BUTTON_TIP=Doda imenik za deljenje.
 
 ################################################################################
@@ -835,20 +1145,36 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Če ima vaš računalnik hitro povezavo do 
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapeer zmožnosti so onemogočene:
 
 ################################################################################
+# Key/Value pairs for disabling OOB support
+################################################################################
+#??? OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
+#??? OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Searching results in faster result delivery to your client, though some internet connections may not work well with this feature.
+#??? OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Enable OOB Searching:
+
+################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
 # in the options window
 ################################################################################
-OPTIONS_DOWNLOAD_MAX_TITLE=Število prenosov
+OPTIONS_DOWNLOAD_MAX_TITLE=Število prenosov sem
 OPTIONS_DOWNLOAD_MAX_LABEL=Nastavite lahko največje število sočasnih prenosov.
-OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Največje število prenosov:
+OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Največje število prenosov sem:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
 # in the options window
 ################################################################################
-OPTIONS_DOWNLOAD_CLEAR_TITLE=Čiščenje prenosov
+OPTIONS_DOWNLOAD_CLEAR_TITLE=Čiščenje prenosov sem
 OPTIONS_DOWNLOAD_CLEAR_LABEL=Izberete lahko, če želite, da LimeWire samodejno počisti končane prenose.
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Samočiščenje končanih prenosov:
+
+################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to downloads in the options window
+################################################################################
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Pasovna širina prenosa sem
+OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=Nastavite lahko odstotek pasovne širine, ki jo želite uporabljati za prenose.
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Neomejena
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Hitrost prenosov:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -866,6 +1192,14 @@ OPTIONS_UPLOAD_BANDWIDTH_TITLE=Pasovna širina prenosa drugim
 OPTIONS_UPLOAD_BANDWIDTH_LABEL=Nastavite lahko odstotek pasovne širine, ki jo želite uporabljati za prenose drugim. Za onemogočitev prenosov nastavite to na 0%.
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Neomejena
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Hitrost prenosov drugim:
+
+################################################################################
+# Key/Value pairs for the options for automatically sharing partially downloaded
+# files.
+################################################################################
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Partial files
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow partial sharing
 
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
@@ -919,6 +1253,27 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Nastavitve predvajalnika
 OPTIONS_PLAYER_PREFERENCE_LABEL=Uporabite lahko notranji predvajalnik ali pa privzeti sistemski.
 
 ################################################################################
+# Key/Value pairs for the iTunes options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
+#??? OPTIONS_ITUNES_PREFERENCE_TITLE=Importing
+#??? OPTIONS_ITUNES_PREFERENCE_LABEL=You can have LimeWire import newly downloaded songs into iTunes.
+
+################################################################################
+# Key/Value pairs for the iTunes/DAAP options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your music on the local area network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled players.\n\nEnable compatability mode if you experience problems with iTunes sharing. This mode uses more resources and is slower, but may fix problems.
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability mode
+
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Geslo:
+
+################################################################################
 # Key/Value pairs for url handler options
 ################################################################################
 OPTIONS_BROWSER_PREFERENCE_TITLE=Možnosti brskalnika
@@ -930,9 +1285,16 @@ OPTIONS_IMAGE_VIEWER_BOX_LABEL=Slike-viewer
 OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Nastavitve video
 OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=Izberete lahko, kateri video predvajalnik želite uporabljati.
 OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video predvajalnik
-OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Nastavitve audio
+OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Nastavitve avdio
 OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Izberete lahko, kateri avdio predvajalnik želite uporabljati.
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Avdio predvajalnik
+
+################################################################################
+# Key/value pairs for asking whether or not to display message bug reports
+################################################################################
+#??? OPTIONS_BUGS_TITLE=Bug reports
+#??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard Bugs' will cause LimeWire to ignore all bugs (this is not recommended).
+#??? OPTIONS_BUGS_VIEW_EXAMPLE=View example
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
@@ -970,14 +1332,14 @@ THEME_CHANGED_MESSAGE=Za preskus vaše nove teme morate ponovno zagnati LimeWire
 OPTIONS_SKIN_TITLE=Možnosti slogov
 OPTIONS_SKIN_LABEL=Izberite slog programa LimeWire. Uporablja se SkinLF razvijalca L2FProd.com (http://www.L2FProd.com/).
 OPTIONS_SKIN_BROWSE_BOX_LABEL=Slog:
-OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Brskaj za slogi ...
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Brskaj za slogi...
 OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Predogled
 OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=Brez sloga
-OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Naloži ...
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Naloži...
 OPTIONS_SKIN_BROWSE_BUTTON_TIP=Izbere drug slog.
 OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Pokaže predogled izbranega sloga.
 OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Ne uporabi posebnega sloga za LimeWire.
-OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Naloži nove sloge iz www.javootoo.com ...
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Naloži nove sloge iz www.javootoo.com...
 SKIN_APPLY_MESSAGE=Spremembe sloga so veljavne šele ob ponovnem zagonu programa LimeWire.
 SKIN_RESTART_NEEDED=Program LimeWire morate ponovno zagnati, preden bo sprememba sloga prišla v veljavo.
 
@@ -992,7 +1354,7 @@ OPTIONS_BROWSE_SKIN_LABEL=Nove sloge lahko najdete na naslovu http://www.javooto
 ################################################################################
 SKIN_EDITOR_PREVIEW_BUTTON=Predogled
 SKIN_EDITOR_REMOVE_BUTTON=Privzeto
-SKIN_EDITOR_BROWSE_BUTTON=Brskaj ...
+SKIN_EDITOR_BROWSE_BUTTON=Brskaj...
 SKIN_EDITOR_PREVIEW_BUTTON_TIP=Pokaže predogled sloga.
 SKIN_EDITOR_REMOVE_BUTTON_TIP=Uporabi privzeti slog.
 SKIN_EDITOR_BROWSE_BUTTON_TIP=Brska za slogi.
@@ -1070,6 +1432,15 @@ OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Redko
 OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Vedno
 
 ################################################################################
+# Key/Value pairs for the options for setting connection locale preferences
+# in the advanced panel of the options window
+################################################################################
+#??? OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale preferencing
+#??? OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference connections that are advertising the same locale as you are. Choosing a large number of connection to preference may cause your client to take a long time to connect to the network.
+#??? OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
+#??? OPTIONS_CONNECT_LOCALE_PREF_NUM_LABEL=Number of connections to preference
+
+################################################################################
 # Key/Value pairs for the options for setting the listening port
 # in the options window
 ################################################################################
@@ -1104,6 +1475,31 @@ OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Naj se povežem k zasebni mreži?
 OPTIONS_PRIVATE_CACHE_IP_LABEL=Gostitelj
 OPTIONS_PRIVATE_CACHE_PORT_LABEL=Vrata
 OPTIONS_PRIVATE_CACHE_NAME_LABEL=Ime
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing uploads
+# in the options window
+################################################################################
+#??? OPTIONS_STARTUP_TITLE=System startup
+#??? OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
+#??? OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on system startup:
+
+################################################################################
+# Key/Value pairs for browse for the proxy options pane
+################################################################################
+OPTIONS_PROXY_TITLE=Proxy
+#??? OPTIONS_PROXY_LABEL=Configure proxy options for LimeWire.
+#??? OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No Proxy
+OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
+OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
+OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
+OPTIONS_PROXY_HOST_LABEL=Proxy
+OPTIONS_PROXY_PORT_LABEL=Vrata
+#??? OPTIONS_PROXY_LOGIN_TITLE=Login details
+OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
+OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable authentication. (Does not work for HTTP Proxies)
+OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Uporabniško ime
+OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Geslo
 
 ################################################################################
 # Key/value pairs for top-level stats panels
@@ -1202,6 +1598,9 @@ STATS_QUERY_REQUEST_HOPS_TITLE=Koraki
 STATS_QUERY_REQUEST_HOPS_LABEL=Vse prejete poizvedbe, po korakih.
 STATS_QUERY_REQUEST_TTL_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_LABEL=Vse prejete poizvedbe, po dovoljenem življenjskem času (TTL).
+# Advanced Gnutella Message special queries
+#??? STATS_SPECIAL_QUERIES_TITLE=Special Queries
+#??? STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
 # Advanced Gnutella Message hops/ttl for query hits
 STATS_QUERY_REPLY_HOPS_TITLE=Koraki
 STATS_QUERY_REPLY_HOPS_LABEL=Vsi prejeti zadetki poizvedb, po korakih.
@@ -1318,6 +1717,46 @@ STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=Povprečna velikost
 STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=Povprečna velikost (v kilobyteih) prejetih sporočil Gnutella.
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Povprečna velikost
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=Povprečna velikost (v kilobyteih) prejetih sporočil drugih odjemalcev LimeWire.
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+################################################################################
+QRP_MESSAGES=QRP
+QRP_ULTRAPEER=Ultrapeer
+QRP_LEAF=List
+
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=Poslano
+#??? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=Poslano
+#??? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=Not poslano
+
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Poslano
+#??? STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to leaves, using query routing tables.
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Poslano
+#??? STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Not poslano
+
+STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=Prejeto
+#??? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=All queries that were received from routed connections.
+#??? STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Hit
+#??? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False positive
+
+################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- errors messages
+################################################################################
+ERROR_MESSAGES=Napaki
+
+#??? STATS_ERROR_GENERIC_TITLE=Generic errors
+#??? STATS_ERROR_GENERIC_LABEL=Generic errors while reading messages.
+STATS_ERROR_QUERIES_TITLE=Poizvedbe
+#??? STATS_ERROR_QUERIES_LABEL=Errors while reading query messages.
+STATS_ERROR_QUERY_REPLIES_TITLE=Zadetki poizvedb
+#??? STATS_ERROR_QUERY_REPLIES_LABEL=Errors while reading query reply messages.
+STATS_ERROR_PING_REPLY_TITLE=Pongi
+#??? STATS_ERROR_PING_REPLY_LABEL=Errors while reading ping replies.
+STATS_ERROR_PUSHES_TITLE=Pushi
+#??? STATS_ERROR_PUSHES_LABEL=Errors while reading pushes.
+STATS_ERROR_VENDOR_TITLE=Sporočila Vendor
+#??? STATS_ERROR_VENDOR_LABEL=Errors while reading vendor messages.
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- sent messages
@@ -1453,6 +1892,21 @@ STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Ne poslano
 #??? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=All queries that potentially could have been sent to Ultrapeers for the last hop.
 
 ################################################################################
+# Key/value pairs for advanced Gnutella message statistics -- handshaking
+################################################################################
+#??? HANDSHAKING=Handshaking
+STATS_HANDSHAKING_LEAF_TITLE=List
+#??? STATS_HANDSHAKING_LEAF_LABEL=Statistics for handshaking as a leaf.
+STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
+#??? STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistics for handshaking as an ultrapeer.
+STATS_HANDSHAKING_OUTGOING_TITLE=Izhodno
+#??? STATS_HANDSHAKING_OUTGOING_LABEL=Statistics for outgoing Gnutella connection handshaking.
+STATS_HANDSHAKING_INCOMING_TITLE=Vhodno
+#??? STATS_HANDSHAKING_INCOMING_LABEL=Statistics for incoming Gnutella connection handshaking.
+#??? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Outgoing server reject
+#??? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Statistics for outgoing Gnutella connection handshaking rejections from the server.
+
+################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- compression
 ################################################################################
 #??? COMPRESSABLE_MESSAGES=Compression
@@ -1493,6 +1947,34 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Skupno število poskusov povezav Gnutella,
 ################################################################################
 STATS_TOTAL_HTTP_REQUESTS_TITLE=HTTP zahteve
 STATS_TOTAL_HTTP_REQUESTS_LABEL=Skupno število HTTP zahtev v odvisnosti od časa. Vključuje tako HEAD kot GET zahteve.
+
+################################################################################
+# Key/value pairs for advanced Download statistics
+################################################################################
+DOWNLOAD_STATISTICS=Prenosi sem
+STATS_DOWNLOAD_CONNECTIONS_TITLE=Povezave
+#??? STATS_DOWNLOAD_CONNECTIONS_LABEL=Total outgoing download connections attempts over time. This includes both direct connections and pushed requests.
+#??? STATS_DOWNLOAD_RESPONSES_TITLE=Responses
+#??? STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time. This includes Busy, File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses.
+#??? STATS_DOWNLOAD_ALTERNATE_TITLE=Alt. Locations
+#??? STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
+#??? STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
+#??? STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
+#??? STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP Connect Time
+#??? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
+
+################################################################################
+# Key/value pairs for advanced Upload statistics
+################################################################################
+UPLOAD_STATISTICS=Prenosi drugim
+#??? STATS_UPLOAD_REQUESTS_TITLE=Requests
+#??? STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
+#??? STATS_UPLOAD_RESPONSES_TITLE=Responses
+#??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the number of requests for which we have attempted to transfer a portion of a file.
+#??? STATS_UPLOAD_METHODS_TITLE=Request Methods
+#??? STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
+#??? STATS_UPLOAD_GENERAL_TITLE=General
+#??? STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads. These numbers are incremented per connection, not per chunk. (Stalled uploads will also be counted as an interrupted upload.)
 
 ################################################################################
 # Key/Value pairs for statistics graph axis labels
@@ -1578,6 +2060,42 @@ SENT_ALL_TCP_MESSAGES_BYTES=TCP sporočila
 SENT_ALL_UDP_MESSAGES_BYTES=UDP sporočila
 SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast sporočila
 
+# Generic Errors
+#??? ERROR_ALL_RECEIVED=All Errors
+#??? ERROR_CONNECTION_CLOSED=Connection Closed
+#??? ERROR_INVALID_LENGTH=Invalid Payload Length
+#??? ERROR_INVALID_HOPS=Invalid Hops
+#??? ERROR_INVALID_TTL=Invalid TTL
+#??? ERROR_HOPS_EXCEED_SOFT_MAX=Hops > Soft Max
+#??? ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(Hops + TTL) > Hard Max
+#??? ERROR_INVALID_CODE=Invalid Message Code
+#??? ERROR_ALL_QUERY_ERRORS=All Query Errors
+#??? ERROR_QUERY_URN=URN Query
+#??? ERROR_QUERY_TOO_LARGE=Query Too Large
+#??? ERROR_QUERY_XML_TOO_LARGE=XML Query Too Large
+#??? ERROR_QUERY_EMPTY=Empty Query
+#??? ERROR_QUERY_ILLEGAL_CHARS=Illegal Characters in Query
+#??? ERROR_ALL_QUERY_REPLY_ERRORS=All Query Reply Errors
+#??? ERROR_REPLY_INVALID_PORT=Invalid Reply Port
+#??? ERROR_REPLY_INVALID_ADDRESS=Invalid Reply Address
+#??? ERROR_REPLY_INVALID_SPEED=Invalid Reply Speed
+#??? ERROR_ALL_PING_REPLY_ERRORS=All Ping Reply Errors
+#??? ERROR_PING_REPLY_INVALID_PAYLOAD=Invalid Ping Reply Payload
+#??? ERROR_PING_REPLY_INVALID_PORT=Invalid Ping Reply Port
+#??? ERROR_PING_REPLY_INVALID_ADDRESS=Invalid Ping Reply Address
+#??? ERROR_PING_REPLY_INVALID_GGEP=Invalid GGEP Block
+#??? ERROR_PING_REPLY_INVALID_VENDOR=Invalid Vendor Length
+#??? ERROR_ALL_PUSH_ERRORS=All Push Errors
+#??? ERROR_PUSH_INVALID_PORT=Invalid Push Port
+#??? ERROR_PUSH_INVALID_ADDRESS=Invalid Push Address
+#??? ERROR_PUSH_INVALID_PAYLOAD=Invalid Push Payload
+#??? ERROR_ALL_VENDOR_ERRORS=All Vendor Message Errors
+#??? ERROR_VENDOR_INVALID_ID=Invalid ID
+#??? ERROR_VENDOR_INVALID_SELECTOR=Invalid Selector
+#??? ERROR_VENDOR_INVALID_VERSION=Invalid Version
+#??? ERROR_VENDOR_INVALID_PAYLOAD=Invalid Payload
+#??? ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
+
 ###############################################################################
 #  Key/value pairs for general message labels
 ###############################################################################
@@ -1602,6 +2120,9 @@ HOPS7=Hops 7
 HOPS8=Hops 8
 HOPS9=Hops 9
 
+# Special Query labels
+#??? WHAT_IS_NEW_QUERIES=What's New?
+
 # TTL labels
 TTL0=TTL 0
 TTL1=TTL 1
@@ -1622,6 +2143,12 @@ PUSH_REQUEST_ROUTE_ERRORS=Push napake
 
 # Advanced Gnutella Routing errors Query replies
 HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Trden limit
+HARD_LIMIT_QR_TTL_0=Trden limit (TTL 0)
+HARD_LIMIT_QR_TTL_1=Trden limit (TTL 1)
+HARD_LIMIT_QR_TTL_2=Trden limit (TTL 2)
+HARD_LIMIT_QR_TTL_3=Trden limit (TTL 3)
+HARD_LIMIT_QR_TTL_4=Trden limit (TTL 4)
+HARD_LIMIT_QR_TTL_5=Trden limit (TTL 5+)
 NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=Ni poti
 
 # Advanced Gnutella Filtered messages
@@ -1636,3 +2163,119 @@ INCOMING_CONNECTION_ATTEMPTS=Vhodni poskusi
 ALL_HTTP_REQUESTS=Vse zahteve
 ALL_HTTP_HEAD_REQUESTS=HEAD zahteve
 ALL_HTTP_GET_REQUESTS=GET zahteve
+ALL_HTTP_GIV_REQUESTS=Push zahteve
+ALL_HTTP_GNUTELLA_REQUESTS=Gnutella zahteve
+ALL_HTTP_GNUTELLA_LIMEWIRE_REQUESTS=Gnutella (LimeWire) zahteve
+ALL_HTTP_CHAT_REQUESTS=Klepet zahteve
+ALL_HTTP_MAGNET_REQUESTS=Magnet zahteve
+#??? ALL_HTTP_UNKNOWN_REQUESTS=Unknown requests
+#??? ALL_HTTP_BANNED_REQUESTS=Banned hosts
+#??? ALL_HTTP_CLOSED_REQUESTS=Closed immediately
+
+# Advanced Download statistics
+#??? DOWNLOAD_RESPONSE_OK=Accepted
+#??? DOWNLOAD_BUSY=Busy
+#??? DOWNLOAD_FILE_NOT_FOUND=File Not Found
+#??? DOWNLOAD_NOT_SHARING=Not Sharing Files
+#??? DOWNLOAD_QUEUED=Queued
+#??? DOWNLOAD_RANGE_UNAVAILABLE=Range Unavailable
+#??? DOWNLOAD_PROBLEM_READING_HEADER=Problem Reading Header
+#??? DOWNLOAD_UNKNOWN_CODE=Unknown Response Code
+#??? DOWNLOAD_CONTENT_URN_MISMATCH=Content URN mismatch
+#??? DOWNLOAD_NO_SUCH_RANGE=Incompatible Ranges
+#??? DOWNLOAD_ERROR=I/O Error
+#??? DOWNLOAD_ALTERNATE_COLLECTED=Collected
+#??? DOWNLOAD_ALTERNATE_NOT_ADDED=Failed
+#??? DOWNLOAD_ALTERNATE_WORKED=Succeeded
+#??? DOWNLOAD_SUCCESFULL_HTTP11=Successful HTTP 1.1
+#??? DOWNLOAD_SUCCESFULL_HTTP10=Successful HTTP 1.0
+#??? DOWNLOAD_FAILED_HTTP11=Failed HTTP 1.1
+#??? DOWNLOAD_FAILED_HTTP10=Failed HTTP 1.0
+#??? DOWNLOAD_RETRIED_SUCCESS=Retried Success
+#??? DOWNLOAD_CONNECTION_ATTEMPTS=Attempted
+#??? DOWNLOAD_CONNECT_DIRECT_SUCCESS=Successful Direct Connection
+#??? DOWNLOAD_CONNECT_DIRECT_FAILURES=Failed Direct Connection
+#??? DOWNLOAD_CONNECT_PUSH_SUCCESS=Successful Push Connection
+#??? DOWNLOAD_PUSH_FAILURE_INTERRUPTED=Failed Push (Interrupted)
+#??? DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=Failed Push (No GIV Received)
+#??? DOWNLOAD_PUSH_FAILURE_LOST=Failed Push (Lost Connection)
+#??? DOWNLOAD_TCP_CONNECT_TIME=TCP Connect Time
+#??? DOWNLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
+#??? DOWNLOAD_FW_FW_FAILURE=Failed FW-FW Connection
+
+# Advanced Upload statistics
+UPLOAD_STAT_THEX=THEX zahteve
+#??? UPLOAD_STAT_PUSH_PROXY_SUCCESS=Successful Push Proxy
+#??? UPLOAD_STAT_PUSH_PROXY_BAD=Malformed Push Proxy
+#??? UPLOAD_STAT_PUSH_PROXY_FAILED=Failed Push Proxy
+#??? UPLOAD_STAT_BROWSE_HOST=Browse Host
+#??? UPLOAD_STAT_PUSH_PROXY=Push Proxy
+#??? UPLOAD_STAT_UPDATE_FILE=Update File
+#??? UPLOAD_STAT_TRADITIONAL_GET=Traditional Get
+#??? UPLOAD_STAT_UNKNOWN_URN_GET=Unknown URN Get
+#??? UPLOAD_STAT_URN_GET=URN Get
+#??? UPLOAD_STAT_MALFORMED_REQUEST=Malformed Request
+#??? UPLOAD_STAT_LIMIT_REACHED=Limit Reached
+#??? UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy Request
+#??? UPLOAD_STAT_BANNED=Banned Client
+#??? UPLOAD_STAT_UNAVAILABLE_RANGE=Unavailable Range
+#??? UPLOAD_STAT_FILE_NOT_FOUND=File Not Found
+#??? UPLOAD_STAT_FREELOADER=Freeloader
+#??? UPLOAD_STAT_QUEUED=Queued
+#??? UPLOAD_STAT_NORMAL=Normal
+UPLOAD_STAT_GET=Get
+UPLOAD_STAT_HEAD=Head
+#??? UPLOAD_STAT_UNKNOWN=Unknown
+#??? UPLOAD_STAT_PUSHED_GET=Pushed Get
+#??? UPLOAD_STAT_PUSHED_HEAD=Pushed Head
+#??? UPLOAD_STAT_PUSHED_UNKNOWN=Pushed Unknown
+#??? UPLOAD_STAT_PUSH_FAILED=Push Failed
+#??? UPLOAD_STAT_ATTEMPTED=Attempted
+#??? UPLOAD_STAT_COMPLETED=Completed Responses
+#??? UPLOAD_STAT_INTERRUPTED=Interrupted
+#??? UPLOAD_STAT_STALLED=Stalled
+#??? UPLOAD_STAT_COMPLETED_FILE=Completed File Transfers
+#??? UPLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
+#??? UPLOAD_FW_FW_FAILURE=Failed FW-FW Connection
+
+# Advanced Handshaking statistics
+#??? LEAF_OUTGOING_REJECT_LEAF=Out Rej. (Leaf)
+#??? LEAF_OUTGOING_REJECT_OLD_UP=Out Rej. (Old Ultrapeer)
+#??? LEAF_OUTGOING_ACCEPT=Out Acc.
+#??? LEAF_INCOMING_REJECT=In Rej.
+#??? LEAF_INCOMING_ACCEPT=In Acc.
+#??? UP_OUTGOING_REJECT_FULL=Out Rej. (Full)
+#??? UP_OUTGOING_GUIDANCE_FOLLOWED=Out Acc. (Followed Guidance)
+#??? UP_OUTGOING_GUIDANCE_IGNORED=Out Acc. (Ignored Guidance)
+#??? UP_OUTGOING_ACCEPT=Out Acc. (No Guidance)
+#??? INCOMING_CRAWLER=In Crawler
+#??? UP_INCOMING_REJECT_LEAF=In Rej. (Leaf)
+#??? UP_INCOMING_ACCEPT_LEAF=In Acc. (Leaf)
+#??? UP_INCOMING_GUIDED=In Acc. (Guiding To Leaf)
+#??? UP_INCOMING_ACCEPT_UP=In Acc. (Ultrapeer)
+#??? UP_INCOMING_REJECT_NO_ROOM_LEAF=In Rej. (All Slots Taken)
+#??? UP_INCOMING_REJECT_NO_ROOM_UP=In Rej. (Network Needs Ultrapeer)
+#??? OUTGOING_BAD_CONNECT=Bad Connect
+#??? OUTGOING_SERVER_REJECT=Server Reject
+#??? OUTGOING_SERVER_UNKNOWN=Server Unknown
+#??? OUTGOING_CLIENT_REJECT=Client Reject
+#??? OUTGOING_CLIENT_UNKNOWN=Client Unknown
+#??? SUCCESSFUL_OUTGOING=Successful
+#??? INCOMING_BAD_CONNECT=Bad Connect
+#??? INCOMING_SERVER_UNKNOWN=Server Unknown
+#??? INCOMING_CLIENT_REJECT=Client Reject
+#??? INCOMING_CLIENT_UNKNOWN=Client Unknown
+#??? SUCCESSFUL_INCOMING=Successful
+#??? INCOMING_NO_CONCLUSION=No Conclusion
+#??? CRAWLER_CONNECTION=Crawler
+#??? OUTGOING_LIMEWIRE_ULTRAPEER_REJECT=LimeWire Ultrapeers
+#??? OUTGOING_LIMEWIRE_LEAF_REJECT=LimeWire Leaves
+#??? OUTGOING_OTHER_ULTRAPEER_REJECT=Other Ultrapeers
+#??? OUTGOING_OTHER_LEAF_REJECT=Other Leaves
+
+# Advanced OOB statistics
+#??? ALL_OOB_REQUESTS=Responses Requested
+#??? ALL_OOB_RESPONSES=Responses Received
+#??? ALL_OOB_BYPASSED=Responses Bypassed
+#??? STATS_OOB_THROUGHPUT_TITLE=OOB Success Rate
+#??? STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
