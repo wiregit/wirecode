@@ -68,12 +68,6 @@ public abstract class MessageRouter {
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
 		ForMeReplyHandler.instance();
 		
-    /**
-     * The time when we should next broadcast route table updates.
-     * (Route tables are stored per connection in ManagedConnectionQueryInfo.)
-     * LOCKING: obtain queryUpdateLock
-     */
-    private long _nextQueryUpdateTime = 0L;
     /** 
      * The time to wait between route table updates, in milliseconds. 
      */
@@ -934,7 +928,7 @@ public abstract class MessageRouter {
 		//possible that qi could be non-null but not initialized.  Need
 		//to be more careful about locking here.
 		ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-		if (qi==null || qi.lastReceived==null) 
+		if (qi.lastReceived==null) 
 			return false;
 		else if (qi.lastReceived.contains(query)) {
 			//A new client with routing entry, or one that hasn't started
@@ -1451,12 +1445,6 @@ public abstract class MessageRouter {
         synchronized (receivingConnection.getQRPLock()) {
             ManagedConnectionQueryInfo qi =
                 receivingConnection.getQueryRouteState();
-            if (qi==null) {
-                //There's really no need to check if c is an old client here;
-                //it certainly didn't send a RouteTableMessage by accident!
-                qi=new ManagedConnectionQueryInfo();
-                receivingConnection.setQueryRouteState(qi);
-            }
             if (qi.lastReceived==null) {
                 //TODO3: it's somewhat silly to allocate a new table and then
                 //immediately replace its state with RESET.  Probably best to
@@ -1507,9 +1495,6 @@ public abstract class MessageRouter {
 
 		//Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
-		if(time < _nextQueryUpdateTime) return;
-
-		_nextQueryUpdateTime = time + 1000;
 
 		//For all connections to new hosts c needing an update...
 		List list=_manager.getInitializedConnections2();
@@ -1541,30 +1526,23 @@ public abstract class MessageRouter {
 			if (time<c.getNextQRPForwardTime())
 				continue;
 
-			// Lock up this connections QRP structures
-			synchronized (c.getQRPLock()) {
 
-				c.incrementNextQRPForwardTime(time);
+			c.incrementNextQRPForwardTime(time);
 
-				ManagedConnectionQueryInfo qi=c.getQueryRouteState();
-				if (qi==null) {
-					qi=new ManagedConnectionQueryInfo();
-					c.setQueryRouteState(qi);
-				}
-					
-				//Create table to send on this connection...
-				if (table == null) {
-					table=createRouteTable();
-				}                    
+			ManagedConnectionQueryInfo qi=c.getQueryRouteState();
+				
+			//Create table to send on this connection...
+			if (table == null) {
+				table=createRouteTable();
+			}                    
 
-				//..and send each piece.
-				//TODO2: use incremental and interleaved update
-				for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
-					RouteTableMessage m=(RouteTableMessage)iter.next();
-					c.send(m);
-				}
-				qi.lastSent=table;
+			//..and send each piece.
+			//TODO2: use incremental and interleaved update
+			for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
+				RouteTableMessage m=(RouteTableMessage)iter.next();
+				c.send(m);
 			}
+			qi.lastSent=table;
 		}
     }
 
@@ -1736,11 +1714,12 @@ public abstract class MessageRouter {
 		
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
-			ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-			if(qi != null && qi.lastReceived != null) {
-				qrt.addAll(qi.lastReceived);
+        	synchronized (mc.getQRPLock()) {
+				ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+				if(qi.lastReceived != null) {
+					qrt.addAll(qi.lastReceived);
+				}
 			}
-			
 		}
 	}
 }

@@ -249,7 +249,8 @@ public class ManagedConnection extends Connection
      * (Compare with _querySourceTable of MessageRouter, which helps filter
      * duplicate queries and decide where to send responses.)  
      */
-    private volatile ManagedConnectionQueryInfo queryInfo = null;
+    private final ManagedConnectionQueryInfo queryInfo = 
+        new ManagedConnectionQueryInfo();
 
     /** The next time I should send a query route table to this connection.
 	 */
@@ -1257,13 +1258,6 @@ public class ManagedConnection extends Connection
         return queryInfo;
     }
     
-    /** Associates the given query route state with this.  Typically this method
-     *  is called once per connection. 
-     */
-    void setQueryRouteState(ManagedConnectionQueryInfo qi) {
-        this.queryInfo=qi;
-    } 
-
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
