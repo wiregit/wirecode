@@ -10,7 +10,7 @@ import com.limegroup.gnutella.stubs.*;
 
 public class BaseTestCase extends TestCase implements ErrorCallback {
     
-    protected File _baseDir;
+    protected static File _baseDir;
     protected File _sharedDir;
     protected File _savedDir;
     protected File _incompleteDir;
@@ -90,16 +90,16 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     /**
      * Recursively delete a directory.
      */
-    protected void cleanFiles(File dir) {
+    protected static void cleanFiles(File dir, boolean deleteDirs) {
         File[] files = dir.listFiles();
         for(int i=0; i< files.length; i++) {
             if ( files[i].isDirectory() ) {
-                cleanFiles(files[i]);
+                cleanFiles(files[i], deleteDirs);
             } else {
                 files[i].delete();
             }
         }
-        dir.delete();
+        if ( deleteDirs ) dir.delete();
     }
     
     /**
@@ -217,7 +217,15 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      */
     public void postTearDown() {
         if ( _baseDir != null )
-            cleanFiles(_baseDir);
+            cleanFiles(_baseDir, false);
+    }
+    
+    /**
+     * Runs after all tests are completed.
+     */
+    public static void afterAllTestsTearDown() {
+        cleanFiles(_baseDir, true);
+        shutdownBackends();
     }
     
     /**
@@ -234,7 +242,10 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Sets this test up to have unique directories.
      */
     public void setupUniqueDirectories() throws Exception {
-        _baseDir = new File( this.getClass().getName() + "_" + hashCode() );
+        
+        if( _baseDir == null ) {        
+            _baseDir = new File( this.getClass().getName() + "_" + hashCode() );
+        }
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");
         _settingsDir = new File(_baseDir, "settings");

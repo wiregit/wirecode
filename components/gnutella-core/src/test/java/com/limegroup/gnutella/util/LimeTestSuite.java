@@ -39,7 +39,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
             _beforeTests = false;
             ErrorService.setErrorCallback(this);
             Backend.setErrorCallback(this);
-            BaseTestCase.shutdownBackends();
+            BaseTestCase.afterAllTestsTearDown();
         }
     }
     
