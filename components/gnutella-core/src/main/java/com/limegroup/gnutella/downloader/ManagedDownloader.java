@@ -873,7 +873,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             for (Iterator iter2=files.iterator(); iter2.hasNext(); ) {
                 RemoteFileDesc2 rfd2=(RemoteFileDesc2)iter2.next();
                 if (rfd2.getQuality()>=DECENT_QUALITY) {
-					bandwidth+=Math.min(rfd2.getSpeed(), SpeedConstants.T3_SPEED_INT);
+                    //TODO2: don't normalize measured speeds.
+					bandwidth+=normalize(rfd2.getSpeed());
 				}
             }
             float time=(float)size/(float)bandwidth;
@@ -886,6 +887,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         for (i=0; i<pairs.length; i++)
             ret[i]=(List)buckets.get(pairs[i].file);
         return ret;
+    }
+
+    /** Normalizes the given speed, e.g., reports "50 KB/s" for T3 speeds
+     *  @param speed the reported speed in kilobits/s
+     *  @return the normalized speed, in kilobytes/s */
+    private static int normalize(int speed) {
+        if (speed<SpeedConstants.MODEM_SPEED_INT) {
+            return 3;
+        } else if (speed<SpeedConstants.CABLE_SPEED_INT) {
+            return 30;
+        } else if (speed<SpeedConstants.T1_SPEED_INT) {
+            return 40;
+        } else {
+            return 50;
+        }
+
     }
 
     private static class FilePair
@@ -1114,7 +1131,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return bandwidthTracker.getMeasuredBandwidth();
     }
   
-	
 	/*
 	  // Adam's unit test on the bucket() method.
 	public static void main(String args[]) {
@@ -1170,7 +1186,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		RemoteFileDesc rfd=(RemoteFileDesc)files[0].get(0);
 		System.out.println(rfd.getSize());
 	}	
-	*/
+    */
 	
 
     /*
