@@ -117,6 +117,7 @@ public class QueryRouteTable {
         //2. Now we extract meta information in the query.  If there isn't any,
         //   declare success now.  Otherwise ensure that the URI is in the 
         //   table.  TODO: avoid allocations.
+        //TODO2: avoid parsing if possible
         String richQuery = qr.getRichQuery();
         if (richQuery.equals(""))
             //Normal case for matching query with no metadata.
@@ -126,12 +127,11 @@ public class QueryRouteTable {
             doc = new LimeXMLDocument(richQuery);
             String docSchemaURI = doc.getSchemaURI();
             int hash = HashFunction.hash(docSchemaURI, bits);
-            if (! contains(hash, ttl))
+            if (! contains(hash, ttl))//don't know the URI? can't answer query
                 return false;
-        } catch(Exception e) {
+        } catch(Exception e) {//malformed XML
             //TODO: avoid generic catch(Exception)
-            //TODO2: avoid parsing if possible
-            return true;
+            return true;//coz leaf can answer based on normal query
         }
             
         //3. Finally check that "enough" of the metainformation keywords are in
