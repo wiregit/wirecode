@@ -183,6 +183,20 @@ public final class ConnectionSettings extends LimeProps {
     public static final IntSetting FORCED_PORT =
         FACTORY.createIntSetting("FORCED_PORT", 6346);
     
+    /**
+     * Whether we should not try to use UPnP to open ports.
+     */
+    public static final BooleanSetting DISABLE_UPNP =
+    	FACTORY.createBooleanSetting("DISABLE_UPNP", false);
+    
+    /**
+     * Whether we are currently using UPNP - used to detect whether clearing
+     * of the mappings on shutdown was definitely not successful.  Since the
+     * shutdown hooks may fail, this cannot guarantee if it was successful. 
+     */
+    public static final BooleanSetting UPNP_IN_USE =
+    	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
+    
     public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     
     public static final StringSetting CONNECT_STRING =

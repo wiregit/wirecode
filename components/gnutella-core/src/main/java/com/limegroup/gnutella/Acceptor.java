@@ -46,7 +46,8 @@ public class Acceptor implements Runnable {
     
     /** the UPnPManager to use */
     private static final UPnPManager UPNP_MANAGER = 
-    	CommonUtils.isJava14OrLater() ? UPnPManager.instance() : null;
+    	(CommonUtils.isJava14OrLater() && !ConnectionSettings.DISABLE_UPNP.getValue()) 
+			? UPnPManager.instance() : null;
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -456,7 +457,9 @@ public class Acceptor implements Runnable {
         	
         	boolean natted = UPNP_MANAGER.isNATPresent();
         	boolean validPort = NetworkUtils.isValidPort(_port);
-        	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+        	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
+				!ConnectionSettings.UPNP_IN_USE.getValue();
+        	
         	if(LOG.isDebugEnabled())
         	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
@@ -472,6 +475,7 @@ public class Acceptor implements Runnable {
 			        //  and that we can continue trying to use UPnP
         		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        	        ConnectionSettings.UPNP_IN_USE.setValue(true);
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we just trigger another connect back request
@@ -734,6 +738,7 @@ public class Acceptor implements Runnable {
     	// reset the forced port values - must happen before we save them to disk
     	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
     	ConnectionSettings.FORCED_PORT.revertToDefault();
+    	ConnectionSettings.UPNP_IN_USE.revertToDefault();
     }
     
     /**
