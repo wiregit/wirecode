@@ -47,7 +47,26 @@ public final class Backend {
 	public static Backend createLongLivedBackend(ActivityCallback callback) {
 		return new Backend(callback, 0);
 	}
+
+    /**
+     * @return a BackEnd that will live until you shutdown() it.
+     */
+	public static Backend createLongLivedBackend(ActivityCallback callback,
+                                                 MessageRouter router) {
+		return new Backend(callback, router, 0);
+	}
+
+    /**
+     * @return a BackEnd that will live until you shutdown() it.
+     */
+	public static Backend createLongLivedBackend(MessageRouter router) {
+		return new Backend(new ActivityCallbackStub(), router, 0);
+	}
     
+
+    private Backend(ActivityCallback callback, int timeout) {
+        this(callback, null, timeout);
+    }
 
 
 	/**
@@ -56,7 +75,8 @@ public final class Backend {
      * In that case, be sure to call shutdown() yourself!!  Any positive timeout
      * will cause the BackEnd to be shutoff in timeout milliseconds.
 	 */
-	private Backend(ActivityCallback callback, int timeout) {
+	private Backend(ActivityCallback callback, MessageRouter router,
+                    int timeout) {
 		System.out.println("STARTING BACKEND"); 
 		File gnutellaDotNet = new File("gnutella.net");
 		File propsFile = new File("limewire.props");
@@ -86,7 +106,10 @@ public final class Backend {
 		settings.setExtensions("java");
 		settings.setGuessEnabled(true);		
 
-		ROUTER_SERVICE = new RouterService(callback);
+        if (router == null)
+            ROUTER_SERVICE = new RouterService(callback);
+        else
+            ROUTER_SERVICE = new RouterService(callback, router);
         ROUTER_SERVICE.start();
 		try {
 			// sleep to let the file manager initialize
