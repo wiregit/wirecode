@@ -811,34 +811,22 @@ public class QueryReply extends Message implements Serializable{
         //verified for these to be acceptable.  Also note that exceptions are
         //silently caught.
         int left=getResultCount();          //number of records left to get
-        Response[] responses=new Response[left];
+        Response[] responses;
         try {
             InputStream bais = 
                 new ByteArrayInputStream(_payload,i,_payload.length-i);
-            //For each record...
+            //For each record, parse and filter
+            List allowedResponses = new ArrayList(left);
+            ResponseFilter responseFilter = ResponseFilter.instance();
             for ( ; left > 0; left--) {
                 Response r = Response.createFromStream(bais);
-                responses[responses.length-left] = r;
                 i+=r.getLength();
-            }
-            //Filter out responses
-            ResponseFilter responseFilter = ResponseFilter.instance();
-            List allowedResponses = new ArrayList(responses.length);
-            for(int n=0; n< responses.length; n++) {
-                Response r = responses[n];
                 if(responseFilter.allow(r)) 
                     allowedResponses.add(r);
             }
-            responses = new Response[allowedResponses.size()];
-            int index = 0;
-            Iterator iter = allowedResponses.iterator();
-            while(iter.hasNext()) {
-                Response r = (Response)iter.next();
-                responses[index] = r;
-                index++;
-            }
             //All set.  Accept parsed results.
-            this._responses=responses;
+            this._responses= new Response[allowedResponses.size()];
+            allowedResponses.toArray(this._responses);
         } catch (ArrayIndexOutOfBoundsException e) {
             return;
         } catch (IOException e) {

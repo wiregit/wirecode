@@ -10,13 +10,13 @@ import com.limegroup.gnutella.Response;
  * by the factory.
  */
 public abstract class ResponseFilter {
-    private static URNResponseFilter urnResponseFilter_ = new URNResponseFilter();
+    private static URNResponseFilter _urnResponseFilter = new URNResponseFilter();
     /**
      * Used to obtain the only ResponseFilter instance
      */
     public static ResponseFilter instance() {
         //could return composite in future
-        return urnResponseFilter_;
+        return _urnResponseFilter;
     }
     /**
      * Should this Response be allowed or not? If not, it will be filtered out

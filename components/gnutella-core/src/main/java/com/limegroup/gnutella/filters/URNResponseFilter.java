@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.filters;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,16 +34,23 @@ public final class URNResponseFilter extends ResponseFilter {
      */
     public synchronized void refresh() {
         _blockedURNs = new HashSet();
-        String[] urns = FilterSettings.BLOCKED_URNS.getValue();
-        for (int i=0; i<urns.length; i++)
-            _blockedURNs.add(urns[i]);
+        String[] urnStrings = FilterSettings.BLOCKED_URNS.getValue();
+        for (int i=0; i<urnStrings.length; i++) {
+            URN urn;
+            try {
+                urn = URN.createSHA1Urn(urnStrings[i]);
+                _blockedURNs.add(urn);
+            } catch(IOException exception) {
+                //ignore
+            } 
+        }
     }
 
     /**
      * Returns whether the given URN string should be allowed, 
      * public for testing purposes
      */
-    public boolean allow(String urn) {
+    public boolean allow(URN urn) {
         return !_blockedURNs.contains(urn);
     }
 
@@ -53,7 +61,7 @@ public final class URNResponseFilter extends ResponseFilter {
         Collection urns = m.getUrns();
         Iterator i = urns.iterator();
         while(i.hasNext()) {
-            String urn = ((URN)i.next()).toString();
+            URN urn = ((URN)i.next());
             if(!allow(urn)) return false;
         }
         return true;
