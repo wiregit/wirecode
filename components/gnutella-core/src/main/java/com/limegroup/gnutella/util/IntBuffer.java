@@ -381,15 +381,4 @@ public final class IntBuffer implements Cloneable {
         buf.append("]");
         return buf.toString();
     }
-
-	public static void main(String[] args) {
-		IntBuffer buf = new IntBuffer(10);
-		for(int i=0; i<11; i++) {
-			buf.addLast(i);
-		}
-
-		for(int i=0; i<11; i++) {
-			System.out.print(i+": "+buf.get(i)); 
-		}
-	}
 }
