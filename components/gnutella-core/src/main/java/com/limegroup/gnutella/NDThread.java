@@ -160,7 +160,31 @@ try
 			}
 			
 		}//end of if
-		else 
+		else if(message instanceof PingRequest) //also reply to PINGs
+		//but dont forward the PINGs
+		{
+			Connection inConnection = manager.routeTable.get(message.getGUID()); 
+		    //connection has never been encountered before...
+		    if (inConnection==null)
+			{
+			if (message.hop()!=0)
+			{
+			    manager.routeTable.put(message.getGUID(),connection);//add to Reply Route Table
+
+				//no need to FWD to others
+			    //manager.sendToAllExcept(message, this);//broadcast to other hosts
+
+				//says little-endian, but is big-endian
+			    byte[] ip=connection.getLocalAddress().getAddress(); //little endian
+			    Message pingReply = new PingReply(message.getGUID(),message.getTTL(),manager.getListeningPort(),
+							      ip,
+							      0, //I think we will get this value from Rob's code
+							      0); //Kilobytes also from Robs code
+			    connection.send(pingReply);
+			}
+			}
+		}
+		else
 		{ 
 			//do nothing
 		}	

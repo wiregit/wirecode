@@ -196,7 +196,7 @@ public class Connection implements Runnable {
 			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
 			    manager.sendToAllExcept(m, this);//broadcast to other hosts
 			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),sock.getLocalPort(),
+			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),manager.getListeningPort(),
 							      ip,
 							      0, //I think we will get this value from Rob's code
 							      0); //Kilobytes also from Robs code

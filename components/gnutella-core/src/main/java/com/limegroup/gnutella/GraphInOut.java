@@ -96,7 +96,7 @@ public static void makeDotFile(Map graph)
 		Map.Entry e = (Map.Entry) iterator.next();
 
 		//output the node
-		out.println(e.getKey() + "");
+		out.println(getIdentifier((Endpoint)e.getKey()) + "");
 
 		//Get the iterator over the connected nodes
 		connectedIterator = ((Set)e.getValue()).iterator();
@@ -107,7 +107,7 @@ public static void makeDotFile(Map graph)
 			Endpoint endP = (Endpoint)connectedIterator.next();
 
 			//output the edge
-			out.println(e.getKey() + " -- " + endP + " ;");
+			out.println(getIdentifier((Endpoint)e.getKey()) + " -- " + getIdentifier(endP) + " ;");
 		}	
 	}
 
@@ -143,7 +143,12 @@ private static String getNewFileName()
 */
 private static String getIdentifier(Endpoint ep)
 {
+	//Convert . to _
+	String id = ep.getHostname().replace('.', '_');
+	//append port num to make it unique
+	id += "_" + ep.getPort();
 
+	return id;
 }
 
 }

@@ -39,6 +39,15 @@ public class ConnectionManager implements Runnable {
 	propertyManager();
     }
 
+	/**
+	* Returns the port at which the Connection Manager listens for incoming connections
+	* 	@return the listening port
+	*/
+	public int getListeningPort()
+	{
+		return port;
+	}
+
     /** Creates a manager that listens on the default port (6346) for
      *	incoming connections. */
     public ConnectionManager() {
