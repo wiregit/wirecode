@@ -57,7 +57,7 @@ public class FixedSizeSortedSet {
      */ 
     public boolean add(Object o) {
         if(o==null) 
-            System.out.println("Sumeet:adding null element");
+            return false;
         Object val = _map.get(o);
         if(val != null) {//we have the object
             boolean removed = _sortedSet.remove(val);
