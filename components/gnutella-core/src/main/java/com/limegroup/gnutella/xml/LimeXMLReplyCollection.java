@@ -54,7 +54,7 @@ public class LimeXMLReplyCollection{
               audio);
 
         // construct a backing store object (for serialization)
-        MapSerializer ms = initialize(URI);
+        MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXMLStr;
         boolean shouldWrite = true;
 
@@ -88,10 +88,13 @@ public class LimeXMLReplyCollection{
             Object xml = hashToXMLStr.get(hash); //cannot be null
             LimeXMLDocument doc=null;
             try{
-                if (xml instanceof LimeXMLDocument) 
+                if (xml instanceof LimeXMLDocument) // NEW
                     doc = (LimeXMLDocument) xml;
-                else 
+                else { // OLD
+                    // old style still exists, we need to write...
+                    shouldWrite = true;  
                     doc = new LimeXMLDocument((String) xml);
+                }
                 addReply(hash, doc);
             }
             catch(Exception e){
@@ -123,11 +126,13 @@ public class LimeXMLReplyCollection{
             while(iter.hasNext()) {
                 File file = (File)iter.next();
                 String hash = metaFileManager.readFromMap(file, audio);
-                Object xml = hashToXMLStr.get(hash);
+                // you should remove them so the usual stuff doesn't duplicate
+                // the work.
+                Object xml = hashToXMLStr.remove(hash);
                 try{
-                    if (xml instanceof LimeXMLDocument) 
+                    if (xml instanceof LimeXMLDocument) // NEW
                         doc = (LimeXMLDocument) xml;
-                    else {
+                    else { // OLD
                         String fileXMLString = (String) xml;
                         solo = ((fileXMLString == null) || 
                                 fileXMLString.equals(""));
@@ -205,7 +210,7 @@ public class LimeXMLReplyCollection{
      * returns null if there was an exception while creating the
      * MapSerializer
      */
-    private MapSerializer initialize(String URI){
+    private MapSerializer initializeMapSerializer(String URI){
         String fname = LimeXMLSchema.getDisplayString(URI)+".sxml";
         LimeXMLProperties props = LimeXMLProperties.instance();
         String path = props.getXMLDocsDir();
