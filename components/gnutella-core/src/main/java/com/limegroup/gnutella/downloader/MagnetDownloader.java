@@ -101,7 +101,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			RemoteFileDesc defaultRFD=createRemoteFileDesc(_defaultURLs[i],
 														   _filename,
 														   _urn);
-System.out.println("RFD: "+defaultRFD);
 			if (defaultRFD!=null) {
 				//Add the faked up location before starting download. Note that 
 				//we must force ManagedDownloader to accept this RFD in case 
@@ -129,9 +128,7 @@ System.out.println("RFD: "+defaultRFD);
             return null;
 
         try {
-System.out.println("Creating Remote:"+defaultURL);
             URL url=new URL(defaultURL);
-System.out.println("URL:"+url);
             int port=url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
@@ -155,7 +152,6 @@ System.out.println("URL:"+url);
                 urns,
                 url);           //url for GET request
         } catch (IOException e) {
-System.out.println("Exception:"+e);
             return null;
         }
 
