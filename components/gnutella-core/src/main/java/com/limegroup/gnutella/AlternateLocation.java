@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.sun.java.util.collections.*;
 import java.net.*;
@@ -164,6 +165,23 @@ public final class AlternateLocation
 		}		
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+		return new AlternateLocation(url, new Date(), urn);
+	}
+
+	/**
+	 * Creates a new <tt>AlternateLocation</tt> for a file stored locally 
+	 * with the specified <tt>URN</tt>.
+	 *
+	 * @param urn the <tt>URN</tt> of the locally stored file
+	 */
+	public static AlternateLocation createAlternateLocation(URN urn) 
+		throws IOException {
+		if(urn == null) throw new NullPointerException("null sha1");
+		URL url = 
+			new URL("http", 
+					Message.ip2string(RouterService.getAddress()), 
+					RouterService.getPort(), 
+					HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 		return new AlternateLocation(url, new Date(), urn);
 	}
 
