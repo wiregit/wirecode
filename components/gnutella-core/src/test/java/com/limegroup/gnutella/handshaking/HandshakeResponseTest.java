@@ -376,4 +376,301 @@ public final class HandshakeResponseTest extends BaseTestCase {
     }
 
 
+    /**
+     * Test to make sure that the X-Max-TTL header is being created and
+     * passed correctly.
+     */
+    public void testXMaxTTL() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractByteHeaderValue",
+                                         new Class[]{Properties.class,
+                                                     String.class, 
+                                                     Byte.TYPE}); 
+
+        Properties headers = new UltrapeerHeaders("3.7.6.8");
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = HeaderNames.X_MAX_TTL;         
+        params[2] = new Byte((byte)5);
+        
+        Byte ttl = (Byte)m.invoke(null, params);
+
+        assertEquals("should have X-Max-TTL: 4", (byte)4, ttl.byteValue());
+    }
+
+    /**
+     * Test to make sure that the extractByteHeaderValue method is 
+     * working correctly.
+     */
+    public void testExtractByteHeaderValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractByteHeaderValue",
+                                         new Class[]{Properties.class,
+                                                     String.class, 
+                                                     Byte.TYPE}); 
+
+        Properties headers = new UltrapeerHeaders("3.7.6.8");
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = HeaderNames.X_MAX_TTL; 
+        params[2] = new Byte((byte)5);
+        
+        Byte ttl = (Byte)m.invoke(null, params);
+
+        // should use contain 4 from the UltrapeerHeaders
+        assertEquals("should have X-Max-TTL: 4", 
+                     4, ttl.byteValue());
+
+        params[0] = new Properties();
+        ttl = (Byte)m.invoke(null, params);
+
+        // should use the default value of 5, since the header is not
+        // present
+        assertEquals("should have X-Max-TTL: 5", 
+                     ((Byte)params[2]).byteValue(), ttl.byteValue());
+
+        ((Properties)params[0]).put(HeaderNames.X_MAX_TTL, "fjajfl");
+
+        ttl = (Byte)m.invoke(null, params);
+
+        // should use the default value of 5, since the header is 
+        // gibberish
+        assertEquals("should have X-Max-TTL: 5", 
+                     ((Byte)params[2]).byteValue(), ttl.byteValue());
+    }
+
+
+    /**
+     * Test to make sure that the extractIntHeaderValue method is 
+     * working correctly.
+     */
+    public void testExtractIntHeaderValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractIntHeaderValue",
+                                         new Class[]{Properties.class,
+                                                     String.class, 
+                                                     Integer.TYPE}); 
+
+        Properties headers = new UltrapeerHeaders("3.7.6.8");
+
+        // construct the parameters to pass to the method
+        Object[] params = new Object[3];
+        params[0] = headers;
+        params[1] = HeaderNames.X_DEGREE; 
+        params[2] = new Integer(20);
+        
+        Integer degree = (Integer)m.invoke(null, params);
+
+        // should use the default degree from the UltrapeerHeaders
+        assertEquals("should have different X-Degree", 
+                     15, degree.intValue());
+
+        params[0] = new Properties();
+        degree = (Integer)m.invoke(null, params);
+
+        // should use the default value of 20, since the header is not
+        // present
+        assertEquals("should have different X-Degree", 
+                     ((Integer)params[2]).intValue(), degree.intValue());
+
+        ((Properties)params[0]).put(HeaderNames.X_DEGREE, "fjajfl");
+
+        degree = (Integer)m.invoke(null, params);
+
+        // should use the default value of 5, since the header is 
+        // gibberish
+        assertEquals("should have different X-Degree", 
+                     ((Integer)params[2]).intValue(), degree.intValue());
+    }
+
+
+    /**
+     * Test to make sure that the extractStringHeaderValue method is 
+     * working correctly.
+     */
+    public void testExtractStringHeaderValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractStringHeaderValue",
+                                         new Class[]{Properties.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        String host = "54.78.54.8:6346";
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, host);
+        
+        // construct the parameters to pass to the method
+        Object[] params = new Object[2];
+        params[0] = headers;
+        params[1] = HeaderNames.X_TRY_ULTRAPEERS; 
+        
+        String hosts = (String)m.invoke(null, params);
+
+        
+        assertEquals("should have different X-Try-Ultrapeer", 
+                     host, hosts);
+
+        params[0] = new Properties();
+        hosts = (String)m.invoke(null, params);
+
+        // should use the default value of "", since the header is not
+        // present
+        assertEquals("should have different X-Try-Ultrapeer", 
+                     "", hosts);
+    }
+
+
+    /**
+     * Tests the headerExists method.
+     */
+    public void testHeaderExists() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "headerExists",
+                                         new Class[]{Properties.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        String host = "54.78.54.8:6346";
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, host);
+        
+        // construct the parameters to pass to the method
+        Object[] params = new Object[2];
+        params[0] = headers;
+        params[1] = HeaderNames.X_TRY_ULTRAPEERS; 
+        
+        Boolean exists = (Boolean)m.invoke(null, params);
+        assertTrue("header should exist", exists.booleanValue());
+
+        // this header should not be there, so make sure it isn't!
+        params[1] = HeaderNames.X_ULTRAPEER_QUERY_ROUTING;
+
+        exists = (Boolean)m.invoke(null, params);
+        assertTrue("header should not exists", !exists.booleanValue());        
+    }
+
+    /**
+     * Tests the isFalseValue method to make sure it's working correctly
+     */
+    public void testIsFalseValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "isFalseValue",
+                                         new Class[]{Properties.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        // construct the parameters to pass to the method
+        Object[] params = new Object[2];
+        params[0] = headers;
+        params[1] = HeaderNames.X_ULTRAPEER; 
+
+        // this header should not exist, and so should not be false
+        Boolean isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue());
+
+
+        // this should be false
+        headers.put(HeaderNames.X_ULTRAPEER, "false");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should be false", isFalse.booleanValue());
+
+
+        // this should be false
+        headers.put(HeaderNames.X_ULTRAPEER, "False");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should be false", isFalse.booleanValue());
+
+
+        // this should not be false
+        headers.put(HeaderNames.X_ULTRAPEER, "FIPEUI");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue());
+        
+        // this should not be false
+        headers.put(HeaderNames.X_ULTRAPEER, "true");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue());        
+
+        // this should not be false
+        headers.put(HeaderNames.X_ULTRAPEER, "True");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue());        
+
+        // this should not be false
+        headers.put(HeaderNames.X_ULTRAPEER, "falsee");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue()); 
+
+        // this should not be false
+        headers.put(HeaderNames.X_ULTRAPEER, "");
+        isFalse = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be false", !isFalse.booleanValue()); 
+    }
+
+    /**
+     * Tests the isTrueValue method to make sure it's working correctly
+     */
+    public void testIsTrueValue() throws Exception {
+		Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "isTrueValue",
+                                         new Class[]{Properties.class,
+                                                     String.class});
+
+        Properties headers = new Properties();
+
+        // construct the parameters to pass to the method
+        Object[] params = new Object[2];
+        params[0] = headers;
+        params[1] = HeaderNames.X_ULTRAPEER; 
+
+        // this header should not exist, and so should not be true
+        Boolean isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue());
+
+
+        // this should be true
+        headers.put(HeaderNames.X_ULTRAPEER, "true");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should be true", isTrue.booleanValue());
+
+
+        // this should be true
+        headers.put(HeaderNames.X_ULTRAPEER, "True");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should be true", isTrue.booleanValue());
+
+
+        // this should not be true
+        headers.put(HeaderNames.X_ULTRAPEER, "FIPEUI");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue());
+        
+        // this should not be true
+        headers.put(HeaderNames.X_ULTRAPEER, "false");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue());        
+
+        // this should not be true
+        headers.put(HeaderNames.X_ULTRAPEER, "False");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue());        
+
+        // this should not be true
+        headers.put(HeaderNames.X_ULTRAPEER, "truee");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue()); 
+
+        // this should not be true
+        headers.put(HeaderNames.X_ULTRAPEER, "");
+        isTrue = (Boolean)m.invoke(null, params);
+        assertTrue("header should not be true", !isTrue.booleanValue()); 
+    }
 }
