@@ -54,7 +54,7 @@ public class RouterService
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
-    private DownloadManager downloader;
+    private static DownloadManager downloader;
     private UploadManager uploadManager;
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
@@ -875,5 +875,16 @@ public class RouterService
     public boolean hasClientSupernodeConnection() {
         return manager.hasClientSupernodeConnection();
     }
+
+    /** NOTE: This is a HACK - a temporary one - There might be a better
+     *    way for StandardMessageRouter to talk to DownloadManager.
+     *    For the present, this suffices.....
+     */
+    static void sendQRToDownloadManager(QueryReply qr) {
+        if (downloader != null)
+            downloader.handleQueryReply(qr);
+    }
+    
+
 
 }

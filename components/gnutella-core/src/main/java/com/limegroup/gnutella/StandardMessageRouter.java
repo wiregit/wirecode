@@ -172,7 +172,7 @@ public class StandardMessageRouter
         sendResponses(responses, queryRequest, acceptor, clientGUID);
         
     }
-    
+
     public void sendResponses(Response[] responses, 
                                         QueryRequest queryRequest,
                                          Acceptor acceptor,
@@ -298,8 +298,10 @@ public class StandardMessageRouter
         QueryReply queryReply,
         ManagedConnection receivingConnection)
     {
-        if (!receivingConnection.isPersonalSpam(queryReply))
+        if (!receivingConnection.isPersonalSpam(queryReply)) {
             _callback.handleQueryReply(queryReply);
+            RouterService.sendQRToDownloadManager(queryReply);
+        }
     }
 
     /**

@@ -470,4 +470,15 @@ public class DownloadManager implements BandwidthTracker {
     public void internalError(Throwable e) { 
         callback.error(ActivityCallback.ASSERT_ERROR, e);
     }
+
+    private final boolean debugOn = false;
+    private final void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private final void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
+    }
+
 }
