@@ -58,7 +58,7 @@ public final class UDPConnectionTest extends BaseTestCase {
     
 
     public void tearDown() throws Exception {
-        // Clrear out the receiver parameters for the UDPServiceStub
+        // Clear out the receiver parameters for the UDPServiceStub
         UDPServiceStub.stubInstance().clearReceivers();
     }  
 

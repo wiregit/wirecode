@@ -238,6 +238,9 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				for (int i = 0; i < 512 * numBlocks; i += len) {
 					len = istream.read(bdata);
 
+                    if ( len != 512 ) 
+                        log2("Abnormal data size: "+len+" loc: "+i);
+
 					for (int j = 0; j < len; j++) {
                         btest = bdata[j] & 0xff;
 						if ( btest != ((i+j) % 256) ) {
@@ -273,6 +276,9 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		try {
 			for (int i = 0; i < 512 * numBlocks; i += len) {
 				len = istream.read(bdata);
+
+                if ( len != 512 ) 
+                    log2("Abnormal data size: "+len+" loc: "+i);
 
 				for (int j = 0; j < len; j++) {
                     btest = bdata[j] & 0xff;
