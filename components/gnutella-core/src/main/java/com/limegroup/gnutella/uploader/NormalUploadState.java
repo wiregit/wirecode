@@ -144,8 +144,6 @@ public class NormalUploadState implements UploadState {
         } else {
 			/* matches the name */
 			if ( !name.equals(_filename) ) {
-				System.out.println("_filename '" + _filename + "'");
-				System.out.println("name '" + name + "'");
 				throw new IOException();
 			}
         }
