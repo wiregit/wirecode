@@ -18,7 +18,7 @@ import com.limegroup.gnutella.messages.vendor.*;
  * only the TTL, hops, and priority field can be changed.
  */
 public abstract class Message 
-        implements Serializable, com.sun.java.util.collections.Comparable {
+    implements Serializable, com.sun.java.util.collections.Comparable {
     //Functional IDs defined by Gnutella protocol.
     public static final byte F_PING=(byte)0x0;
     public static final byte F_PING_REPLY=(byte)0x1;
@@ -457,7 +457,7 @@ public abstract class Message
      */
     public void setTTL(byte ttl) throws IllegalArgumentException {
         if (ttl < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("invalid TTL: "+ttl);
         this.ttl = ttl;
     }
     
