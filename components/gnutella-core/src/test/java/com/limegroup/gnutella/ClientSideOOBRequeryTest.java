@@ -41,7 +41,7 @@ public class ClientSideOOBRequeryTest
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private static DatagramSocket[] UDP_ACCESS;
 
     public ClientSideOOBRequeryTest(String name) {
         super(name);
@@ -173,9 +173,11 @@ public class ClientSideOOBRequeryTest
     ///////////////////////// Actual Tests ////////////////////////////
 
     // MUST RUN THIS TEST FIRST
-    public void testBasicProtocol() throws Exception {
+    public void testBypassedDSCreationDeletion() throws Exception {
         DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket();
+        UDP_ACCESS = new DatagramSocket[10];
+        for (int i = 0; i < UDP_ACCESS.length; i++)
+            UDP_ACCESS[i] = new DatagramSocket();
 
         for (int i = 0; i < testUPs.length; i++) {
             testUPs[i] = connect(rs, 6355+i, true);
@@ -195,17 +197,17 @@ public class ClientSideOOBRequeryTest
             drainAll();
             PingReply pong = 
                 PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS.getLocalPort(), 
+                                 UDP_ACCESS[0].getLocalPort(), 
                                  InetAddress.getLocalHost().getAddress(), 
                                  10, 10, true, 900, true);
             testUPs[0].send(pong);
             testUPs[0].flush();
 
             // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(2000);
+            UDP_ACCESS[0].setSoTimeout(2000);
             pack = new DatagramPacket(new byte[1000], 1000);
             try {
-                UDP_ACCESS.receive(pack);
+                UDP_ACCESS[0].receive(pack);
             }
             catch (IOException bad) {
                fail("Did not get ping", bad);
@@ -217,14 +219,14 @@ public class ClientSideOOBRequeryTest
             // send the pong in response to the ping
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS.getLocalPort(), 
+                                    UDP_ACCESS[0].getLocalPort(), 
                                     InetAddress.getLocalHost().getAddress(), 
                                     10, 10, true, 900, true);
             pong.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
                                       pack.getAddress(), pack.getPort());
-            UDP_ACCESS.send(pack);
+            UDP_ACCESS[0].send(pack);
         }
 
         // set up unsolicited UDP support
@@ -258,7 +260,7 @@ public class ClientSideOOBRequeryTest
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
                                       testUPs[0].getInetAddress(), cbPort);
-            UDP_ACCESS.send(pack);
+            UDP_ACCESS[0].send(pack);
         }
 
         // you also have to set up TCP incoming....
@@ -293,6 +295,70 @@ public class ClientSideOOBRequeryTest
         // clear up any messages before we begin the test.
         drainAll();
 
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "whatever");
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // ok, the leaf is sending OOB queries - good stuff, now we should send
+        // a lot of results back and make sure it buffers the bypassed OOB ones
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[200];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+        
+        // wait for processing
+        Thread.sleep(500);
+
+        for (int i = 0; i < UDP_ACCESS.length; i++) {
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(), PORT);
+            UDP_ACCESS[i].send(pack);
+        }
+
+        // wait for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNotNull(endpoints);
+            assertEquals(UDP_ACCESS.length, endpoints.size());
+        }
+
+        {
+            // now we should make sure MessageRouter clears the map
+            rs.stopQuery(new GUID(qr.getGUID()));
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
     }
 
     //////////////////////////////////////////////////////////////////
