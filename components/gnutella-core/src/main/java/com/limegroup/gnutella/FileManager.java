@@ -1172,7 +1172,7 @@ public abstract class FileManager {
      * A copy is returned so that FileManager does not expose
      * its internal data structure.
      */
-    public QueryRouteTable getQRT() {
+    public synchronized QueryRouteTable getQRT() {
         if(_needRebuild) {
             buildQRT();
             _needRebuild = false;
@@ -1188,7 +1188,7 @@ public abstract class FileManager {
      * QRT by calling buildQRT and then adding directly to the 
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
-    protected void buildQRT() {
+    protected synchronized void buildQRT() {
 
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
