@@ -19,25 +19,28 @@ public class BearShareFilter extends SpamFilter {
         if ((m.getHops()+m.getTTL()) <= 2)
             return true;
 
-        //Get query string
-        String query=((QueryRequest)m).getQuery();
-        if (query.length() < MAX_HIGHBITS) //An optimization
+        //Edited by Sumeet Thadani (2/27/01)
+        QueryRequest qReq = (QueryRequest)m;
+        int rawQueryLength = qReq.getQueryLength();
+        //Not enough bytes in payload to be above threshold
+        if (rawQueryLength < MAX_HIGHBITS)
             return true;
-        byte[] bytes=query.getBytes();
-        if (bytes.length==0)               //Not really needed
-            return true;
-        
-        //Counts bytes with high bit set.
         int highbits=0;
-        for (int i=0; i<bytes.length && highbits<MAX_HIGHBITS; i++) {
-            if (((bytes[i] & 0x80)!=0)) { //1000 0000
+        byte currByte;
+        for(int i=0; i<rawQueryLength; i++){
+            currByte = qReq.getQueryByteAt(i);
+            if((currByte & 0x80)!=0)
                 highbits++;
-            }
         }
-        
+	//Note: This method has been changed. Initially it would get the 
+	//the query string and then get appropriate bytes from it. That
+	//would cause it to fail on some Japanese Macs. Now we use methods
+	//in the QueryRequest that get the specified bytes directly.
+        //End of code added by Sumeet Thadani
+
         return highbits<MAX_HIGHBITS;
     }           
-
+    
     /*
     public static void main(String args[]) {
         BearShareFilter f=new BearShareFilter();

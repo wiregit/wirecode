@@ -14,18 +14,15 @@ import java.io.*;
  */
 public abstract class Message implements Serializable{
     //Functional IDs defined by Gnutella protocol.
-    protected static final byte F_PING=(byte)0x0;
-    protected static final byte F_PING_REPLY=(byte)0x1;
-    protected static final byte F_PUSH=(byte)0x40;
-    protected static final byte F_QUERY=(byte)0x80;
-    protected static final byte F_QUERY_REPLY=(byte)0x81;
+    public static final byte F_PING=(byte)0x0;
+    public static final byte F_PING_REPLY=(byte)0x1;
+    public static final byte F_PUSH=(byte)0x40;
+    public static final byte F_QUERY=(byte)0x80;
+    public static final byte F_QUERY_REPLY=(byte)0x81;
 
-    //Temporary code for managing GUIDs
-    private static Random rand=new Random();
+    /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
-        byte[] ret=new byte[16];
-        rand.nextBytes(ret); //TODO1: not guaranteed unique
-        return ret;
+        return GUID.makeGuid();
     }
 
     ////////////////////////// Instance Data //////////////////////
@@ -76,7 +73,7 @@ public abstract class Message implements Serializable{
         this.hops=hops; this.length=length;
         //repOk();
     }
-
+	
     /**
      * @modifies in
      * @effects reads a packet from the network and returns it as an
@@ -227,6 +224,18 @@ public abstract class Message implements Serializable{
 
     public byte getTTL() {
         return ttl;
+    }
+
+    /**
+     * If ttl is less than zero, throws IllegalArgumentException.  Otherwise sets
+     * this TTL to the given value.  This is useful when you want certain messages
+     * to travel less than others.
+     *    @modifies this' TTL
+     */
+    public void setTTL(byte ttl) throws IllegalArgumentException {
+        if (ttl < 0)
+            throw new IllegalArgumentException();
+        this.ttl = ttl;
     }
 
     public byte getHops() {

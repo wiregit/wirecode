@@ -22,7 +22,7 @@ public class ForgetfulHashMap extends HashMap {
     /* The current implementation is a hashtable for the mapping and
      * a queue maintaining the ordering.
      *
-     * The abstraction function is
+     * The ABSTRACTION FUNCTION is
      *   [ (queue[next-1], super.get(queue[next-1])), ...,
      *     (queue[0], super.get(queue[0])),
      *     (queue[n], super.get(queue[n])), ...,
@@ -30,8 +30,12 @@ public class ForgetfulHashMap extends HashMap {
      * BUT with null keys and/or values removed.  This means that
      * not all entries of queue need be valid keys into the map.
      *
-     * The rep. invariant is
-     *            n==queue.length
+     * The REP. INVARIANT is
+     *    n==queue.length
+     *    {k | map.get(k)!=null} <= {x | queue[i]==x && x!=null}
+     *
+     * Here "<=" means "is a subset of".  In other words, every key in
+     * the map must be in the queue, though the opposite need not hold.
      *
      * Note that you could reduce the number of hashes necessary to
      * purge old entries by exposing the rep. of the hashtable and

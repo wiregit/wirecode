@@ -39,17 +39,23 @@ public class ConnectionManager {
         new ArrayList();
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
+
     private int _keepAlive=0;
+    private int _maxIncomingConnections=0;
 
     private MessageRouter _router;
     private HostCatcher _catcher;
     private ActivityCallback _callback;
+	private boolean _isWindows = false;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      */
     public ConnectionManager(ActivityCallback callback) {
         _callback = callback;
+		String os = System.getProperty("os.name");
+		if(os.startsWith("Windows"))
+			_isWindows = true;
     }
 
     /**
@@ -67,6 +73,8 @@ public class ConnectionManager {
         watchdog.start();
 
         setKeepAlive(SettingsManager.instance().getKeepAlive());
+        setMaxIncomingConnections(
+            SettingsManager.instance().getMaxIncomingConnections());
     }
 
     /**
@@ -125,8 +133,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-        if (getNumInConnections() 
-                < SettingsManager.instance().getMaxIncomingConnections()) {
+         if (getNumInConnections() < _maxIncomingConnections) {             
             ManagedConnection connection = new ManagedConnection(socket,
                                                                  _router,
                                                                  this);
@@ -151,7 +158,25 @@ public class ConnectionManager {
             // looking for and responding to a PingRequest.  It's
             // all synchronous, because we have a dedicated thread
             // right here.
-            new RejectConnection(socket, _catcher);
+			if(_isWindows) {
+				new RejectConnection(socket, _catcher);
+			}
+
+			// Otherwise, we're not on windows.  We did this 
+			// because we know that RejectConnection was causing
+			// problems on the Mac (periodically freezing the
+			// system and leading to a 40% approval rating on
+			// download.com), and we have not been able to test
+			// it on other systems.  Since we know that not using
+			// a reject connection will not cause a problem, then
+			// we might as well just be safe and not use one on 
+			// non-windows systems.
+			else {
+				try {
+					socket.close();
+				}
+				catch(IOException ioe) {}
+			}
         }
      }
 
@@ -184,6 +209,15 @@ public class ConnectionManager {
     public synchronized void setKeepAlive(int newKeep) {
         _keepAlive = newKeep;
         adjustConnectionFetchers();
+    }
+
+    /**
+     * Sets the maximum number of incoming connections.  This does not
+     * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
+     * able to vary this without permanently setting the property.
+     */
+    public void setMaxIncomingConnections(int max) {
+        _maxIncomingConnections = max;
     }
 
     /**

@@ -26,7 +26,8 @@ public class Acceptor extends Thread {
 
     private Vector _badHosts = new Vector();
 
-    private ConnectionManager _manager;
+    private ConnectionManager _connectionManager;
+    private DownloadManager _downloadManager;
     private MessageRouter _router;
     private ActivityCallback _callback;
 
@@ -83,9 +84,12 @@ public class Acceptor extends Thread {
      * Links the HostCatcher up with the other back end pieces and launches
      * the port monitoring thread
      */
-    public void initialize(ConnectionManager manager, MessageRouter router) {
-        _manager = manager;
+    public void initialize(ConnectionManager connectionManager,
+                           MessageRouter router,
+                           DownloadManager downloadManager) {
+        _connectionManager = connectionManager;
         _router = router;
+        _downloadManager = downloadManager;
 
         setDaemon(true);
         start();
@@ -298,10 +302,10 @@ public class Acceptor extends Thread {
                          SettingsInterface.DEFAULT_CONNECT_STRING);
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
-                    _manager.acceptConnection(_socket);
+                    _connectionManager.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {
-                    _manager.acceptConnection(_socket);
+                    _connectionManager.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
@@ -310,8 +314,7 @@ public class Acceptor extends Thread {
                 }
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
-                    HTTPManager mgr = new HTTPManager(_socket, _router,
-                        Acceptor.this, _callback, true);
+                    _downloadManager.acceptDownload(_socket);
                 }
                 //4. Unknown protocol
                 else {

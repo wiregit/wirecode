@@ -44,13 +44,31 @@ public class FixedsizeForgetfulHashMap implements Map
      * list) When the underlying hashMap reaches the user defined size, we
      * remove an element from the underlying hashMap before inserting a new one.
      * The element removed is the one which is first in the removeList (ie the
-     * element that was inserted first
+     * element that was inserted first.)
      *
      * If we insert same 'key' twice to the underlying hashMap, we remove 
      * the previous entry in the removeList(if present) (its similar to
      * changing the remove timestamp for that entry). In other words, adding a
      * key again, removes the previous footprints (ie it again becomes the last
      * element to be removed, irrespective of the history(previous position)) 
+     *
+     * ABSTRACTION FUNCTION: a typical FixedsizeForgetfulHashMap is a list of
+     * key value pairs [ (K1, V1), ... (KN, VN) ] ordered from oldest to
+     * youngest where
+     *         K_I=removeList.get(I)
+     *         V_I=map.get(K_I).getValue()
+     *  
+     * INVARIANTS: here "a=b" is  shorthand for "a.equals(b)"
+     *   +for all keys k in map, where ve==map.get(k),  
+     *          ve.getListElement() is an element of list
+     *          ve.getListElement().getKey()=k
+     *          k!=null && ve!=null && ve.getValue()!=null  (no null values!)
+     *   +for all elements l in removeList, where k=l.getKey() and ve=map.get(l)
+     *          ve!=null (i.e., k is a key in map)
+     *          ve.getListElement=l
+     *
+     * A corrolary of this invariant is that no duplicate keys may be stored in
+     * removeList.
      */
 
     /** The underlying map from keys to [value, list element] pairs */
@@ -168,8 +186,8 @@ public class FixedsizeForgetfulHashMap implements Map
         //add the mapping
         //the method takes care of adding the information to the remove list
         //and other details (like updating current count)
-        Object oldValue = addMapping(key,value);
-    
+        Object oldValue = addMapping(key,value);   
+
         //return the old value
         return oldValue;
     }
@@ -418,6 +436,33 @@ public class FixedsizeForgetfulHashMap implements Map
         throw new UnsupportedOperationException();
     }
  
+    //////////////////////////////////////////////////////////////////////
+
+    /** Tests the invariants described above. */
+    public void repOk() {
+        for (Iterator iter=map.keySet().iterator(); iter.hasNext(); ) {
+            Object k=iter.next();
+            Assert.that(k!=null, "Null key (1)");
+            ValueElement ve=(ValueElement)map.get(k);
+            Assert.that(ve!=null, "Null value element (1)");
+            Assert.that(ve.getValue()!=null, "Null real value (1)");
+            Assert.that(removeList.contains(ve.getListElement()), 
+                        "Invariant 1a failed");
+            Assert.that(ve.getListElement().getKey().equals(k),
+                        "Invariant 1b failed");
+        }
+
+        for (Iterator iter=removeList.iterator(); iter.hasNext(); ) {
+            DoublyLinkedList.ListElement l=
+                (DoublyLinkedList.ListElement)iter.next();
+            Object k=l.getKey();
+            Assert.that(k!=null, "Null key (2)");
+            ValueElement ve=(ValueElement)map.get(k);
+            Assert.that(ve!=null, "Null value element (2)");
+            Assert.that(ve.getListElement().equals(l), "Invariant 2b failed");
+        }
+    }
+    
 
     /** Unit test */
     /*
