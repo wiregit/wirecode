@@ -83,23 +83,6 @@ public class SettingsManager implements SettingsInterface
     {
 	props_      = new Properties();
 	ndProps_    = new Properties();
-	// the "/" maps the classpath to the root of our
-	// package structure
-	//fileName_   = "/" + SettingsInterface.DEFAULT_FILE_NAME;
-	//ndFileName_ = "/" + SettingsInterface.DEFAULT_ND_PROPS_NAME;
-	//InputStream fis  = getClass().getResourceAsStream(fileName_);
-	//InputStream ndis = getClass().getResourceAsStream(ndFileName_);
-	
-	//if(fis != null)
-	//  initSettings(fis);
-	//else
-	//    loadDefaults();
-	//if(ndis != null)
-	//  {
-	//      try{ndProps_.load(ndis);}
-	//      catch(IOException ioe){}
-	//  }
-	
 	home_       = System.getProperty("user.home");
 	home_       += System.getProperty("file.separator");
 	fileName_   = home_;
