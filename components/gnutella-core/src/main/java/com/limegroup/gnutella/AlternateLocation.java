@@ -430,7 +430,7 @@ public final class AlternateLocation
 			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
 		}
 		if(isTimestamped() && al.isTimestamped()) {
-			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
+			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? -1 : -1));
 		}
 		if(isTimestamped()) {
 			return -1;
@@ -463,6 +463,50 @@ public final class AlternateLocation
 				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
 				(URL == null ? al.URL == null :
 				 URL.equals(al.URL)));
+	}
+
+	/**
+	 * Allow the comparison of just the URL component.
+     *
+	 * @param al the <tt>AlternateLocation</tt> instance to compare to
+	 * @return <tt>true</tt> if the <tt>URL</tt> matches
+	 *  and otherwise returns <tt>false</tt>
+	 */
+	public boolean equalsURL(AlternateLocation al) {
+		return (URL == null ? al.URL == null :
+				URL.equals(al.URL));
+	}
+
+	/**
+	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
+     *
+	 * @return new <tt>RemoteFileDesc</tt> based off of this.
+	 */
+	public RemoteFileDesc createRemoteFileDesc(int size, Set urns) {
+		RemoteFileDesc ret = null;
+
+		// Determine if this is a classic Gnutella location 
+		// and if yes, handle it by parsing the index and filename
+		// otherwise, we can't currently handle
+		String fname = URL.getFile();
+		if (fname != null && fname.startsWith("/get/")) {
+			fname = fname.substring(5);
+			int dloc = fname.indexOf("/");
+			if ( dloc >= 1 ) {
+				String snum = fname.substring(0,dloc);
+				int    index = 0;
+				try {
+				    index = Integer.parseInt(snum);
+				} catch(NumberFormatException e) {
+					return null;
+				}
+				fname = fname.substring(dloc+1);
+		        ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
+				  index, fname, size,  GUID.makeGuid(), 1000,
+				  true, 3, false, null, urns);
+			}
+		}
+		return ret;
 	}
 
 	/**

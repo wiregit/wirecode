@@ -44,7 +44,6 @@ public final class HTTPUtils {
 		os.write(createHeader(name, value).getBytes());
 	}
 
-//AAAAA
 	/**
 	 * Writes an single http header to the specified 
 	 * <tt>OutputStream</tt> instance, with the specified header name 
@@ -64,7 +63,6 @@ public final class HTTPUtils {
 		}
 		out.write(createHeader(name, value));
 	}
-//AAAAA
 
 	/**
 	 * Create a single http header String with the specified header name 

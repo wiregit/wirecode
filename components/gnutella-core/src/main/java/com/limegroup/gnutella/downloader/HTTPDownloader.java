@@ -55,8 +55,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
-	private AlternateLocationCollection _alternateLocationsReceived;//AAAAAAA
-	private AlternateLocationCollection _alternateLocationsToSend; //AAAAAAA
+	private AlternateLocationCollection _alternateLocationsReceived;
+	private AlternateLocationCollection _alternateLocationsToSend; 
 
 	private int _port;
 	private String _host;
@@ -113,14 +113,13 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
 
-		_alternateLocationsToSend   = alts; //AAAAAAA
+		_alternateLocationsToSend   = alts; 
 		_alternateLocationsReceived = new AlternateLocationCollection(); 
-        //AAAAA
 
 		_amountRead = 0;
     }
 
-	public AlternateLocationCollection getAlternateLocations() { //AAAAAAA
+	public AlternateLocationCollection getAlternateLocations() { 
 	    return _alternateLocationsReceived;
     }
 
@@ -183,9 +182,9 @@ public class HTTPDownloader implements BandwidthTracker {
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
-//AAAAA
+		// Create a light-weight copy of AlternateLocations to avoid blocking
+		// while holding the lock
 		AlternateLocationCollection alts = new AlternateLocationCollection();
-
 		synchronized(_alternateLocationsToSend) {
 		    alts.addAlternateLocationCollection(_alternateLocationsToSend);
 		}
@@ -194,11 +193,7 @@ public class HTTPDownloader implements BandwidthTracker {
 							  //out);
 		if(alts.size() > 0) {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
-//System.out.println("Downloader Send ("+_host+":"+_port+"):");
-//System.out.println(alts);
-//System.out.println("------");
 		}
-//AAAAA
 
         out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
@@ -278,13 +273,10 @@ public class HTTPDownloader implements BandwidthTracker {
                     throw new IOException(
                         "Unexpected start offset; too dumb to recover");
             }
-//AAAAA
+			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
 				readAlternateLocations(str, _alternateLocationsReceived);
-                //System.out.println("Downloader Receive ("+_host+":"+_port+"):");
-                //System.out.println(_alternateLocationsReceived);
 			}
-//AAAAA
         }
         
     }

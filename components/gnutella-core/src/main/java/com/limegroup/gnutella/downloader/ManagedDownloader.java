@@ -246,7 +246,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
 	
-	private AlternateLocationCollection totalAlternateLocations; //AAAAA
+	/**  LOCKING: AlternateLocationCollection is thread-safe. 
+      *           this' lock not needed.
+      */
+	private AlternateLocationCollection totalAlternateLocations; 
 
     private VerifyingFile commonOutFile;
     
@@ -930,7 +933,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
         }           
 
-//AAAAA
 		// Prepare a fresh set of alternate locations for these file
 		totalAlternateLocations = new AlternateLocationCollection(); 
 		RemoteFileDesc tempRFD;
@@ -939,6 +941,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (this) {
             for (Iterator iter=files.iterator(); iter.hasNext(); ) {
                 tempRFD = (RemoteFileDesc)iter.next();
+				// This really should be a method on RemoteFileDesc
 				rfdStr = "http://"+tempRFD.getHost()+":"+
 				  tempRFD.getPort()+"/get/"+String.valueOf(tempRFD.getIndex())+
 				  "/"+tempRFD.getFileName();
@@ -947,11 +950,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 				    totalAlternateLocations.addAlternateLocation(
 					    AlternateLocation.createAlternateLocation(rfdURL));
 				} catch( IOException e ) {
-                    ManagedDownloader.this.manager.internalError(e);
                 }  
 			}
         }
-//AAAAA
         
 
         //2. Do the download
@@ -1005,8 +1006,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             fileManager.removeFileIfShared(completeFile);
         fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
-//AAAAA
-		
+		// Add the alternate locations to the newly saved local file
 		if(totalAlternateLocations != null) {
 			FileDesc fileDesc = 
               fileManager.getFileDescMatching(completeFile);  
@@ -1016,7 +1016,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 			if (fileDesc != null)
 			   fileDesc.addAlternateLocationCollection(totalAlternateLocations);
 		}
-//AAAAA
         return COMPLETE;
     }   
 
@@ -1271,7 +1270,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(!needsPush) {
             //Establish normal downloader.              
             ret=new HTTPDownloader(rfd, incompleteFile, 
-			  totalAlternateLocations); //AAAAA
+			  totalAlternateLocations); 
             //System.out.println("MANAGER: trying connect to "+rfd);
             try {
                 ret.connectTCP(NORMAL_CONNECT_TIME);
@@ -1312,7 +1311,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
-		  totalAlternateLocations);  //AAAAA
+		  totalAlternateLocations);  
         try {
             //This should never really throw an exception since are only
             //initializing the byteReader with this call.
@@ -1393,32 +1392,44 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dloaders.add(dloader);
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
-				addAlternateLocations(dloader.getAlternateLocations());//AAAAA
+				addAlternateLocations(dloader.getAlternateLocations(),
+				  dloader.getRemoteFileDesc() );
             }
             return true;
         }
     }
 
-//AAAAA
-	private void addAlternateLocations(AlternateLocationCollection alts) {  
+    /**
+     * Record new alternate locations and schedule them for use 
+     * in future swarming.  
+     * Note that alternate locations should have lower priority than
+     * QueryReplies.
+     */
+	private void addAlternateLocations(AlternateLocationCollection alts,
+	  RemoteFileDesc rfd) {  
 		if (alts == null || !alts.hasAlternateLocations()  )
 			return;
 
+		// Get the new alternate locations and record them in master list
+		AlternateLocationCollection nalts = null;
 		synchronized(totalAlternateLocations) {
+			nalts = 
+			  totalAlternateLocations.diffAlternateLocationCollection(alts);
 			totalAlternateLocations.addAlternateLocationCollection(alts);
 		}
-		/*
-		AlternateLocation tempAlt;
-		synchronized(totalAlternateLocations) {
-			for (Iterator iter=alts.iterator(); iter.hasNext(); ) {
-				tempAlt = (AlternateLocation)iter.next();
-				if ( !totalAlternateLocations.contains(tempAlt) )
-					totalAlternateLocations.add(tempAlt);
-			}
+
+		// Add any new AlternateLocations to the available list of 
+	    // download locations
+		Iterator             iter = nalts.values().iterator();
+		AlternateLocation    value;
+		RemoteFileDesc       nrfd;
+		while (iter.hasNext()) {
+			value = (AlternateLocation) iter.next();
+			nrfd  = value.createRemoteFileDesc(rfd.getSize(), rfd.getUrns());
+			if (nrfd != null)
+			    addDownload(nrfd);
 		}
-		*/
 	}
-//AAAAA
 
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.

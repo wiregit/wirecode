@@ -91,6 +91,44 @@ public final class AlternateLocationCollection
 	}
 
 	/**
+	 * Return the new Alternate Locations in alc but not in this
+	 */
+	public AlternateLocationCollection diffAlternateLocationCollection(
+	  AlternateLocationCollection alc) {
+		AlternateLocationCollection nalc = new AlternateLocationCollection();
+		Iterator iter = alc.values().iterator();
+		AlternateLocation value;
+		Iterator iter2;
+		AlternateLocation value2;
+		boolean  matches;
+		while (iter.hasNext()) {
+			value = (AlternateLocation) iter.next();
+            iter2 = values().iterator();
+			matches = false;
+
+			// Compare to all of this list for a match
+		    while (iter2.hasNext()) {
+			    value2 = (AlternateLocation) iter2.next();
+				matches = value.equalsURL(value2);
+				if (matches) 
+				    break;
+			}
+			if ( !matches ) {
+			    nalc.addAlternateLocation(value);
+			}
+		}
+		return nalc;
+	}
+
+	/**
+	 * Get the alternate locations as a collection that can be iterated on.
+	 */
+	public Collection values() {
+	    return (_alternateLocations == null? new ArrayList(): 
+          _alternateLocations.values());
+	}
+
+	/**
 	 * Constructs a synchronized map instance for the alternate locations
 	 * if it's not already created.
 	 */
