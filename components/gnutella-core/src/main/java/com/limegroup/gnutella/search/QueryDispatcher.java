@@ -83,7 +83,6 @@ public final class QueryDispatcher implements Runnable {
 			NEW_QUERIES.clear();
 		}
 
-		//System.out.println("QueryDispatcher::processQueries::got lock"); 
 		Iterator iter = _queries.iterator();
 		while(iter.hasNext()) {
 			QueryHandler handler = (QueryHandler)iter.next();
