@@ -63,6 +63,9 @@ public class FileManager {
 
     /** The single instance of FileManager.  (Singleton pattern.) */
     private static FileManager _instance = new FileManager();
+    /** The callback for adding shared directories and files, or null
+     *  if this has no callback.  */
+    private static ActivityCallback _callback;
 
     /** Characters used to tokenize queries and file names. */
     static final String DELIMETERS=" -._+/*()\\";
@@ -98,12 +101,21 @@ public class FileManager {
     }
 
     
-    /** Returns the single instance of the FileManager.  The FileManager
-     *  has no files until loadSettings() is called.  */
+    /** Returns the single instance of the FileManager.  The FileManager has no
+     *  files or callback until loadSettings() or initialize is called.  */
     public static FileManager instance() {
         return _instance;
     }
 
+    /** Asynchronously loads all files by calling loadSettings.  Sets this'
+     *  callback to be "callback", and notifies "callback" of all file loads.
+     *      @modifies this
+     *      @see loadSettings */
+    public void initialize(ActivityCallback callback) {
+        this._callback=callback;
+        loadSettings();
+    }
+    
     /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
 
@@ -270,7 +282,8 @@ public class FileManager {
                 //directory already added.  Don't re-add.
                 return;
             _sharedDirectories.put(directory, new IntSet());
-            //_callback.addSharedDirectory(directory, parent);
+            if (_callback!=null)
+                _callback.addSharedDirectory(directory, parent);
         }
 
         File[] file_list = listFiles(directory);    /* the files in a specified */
@@ -346,7 +359,8 @@ public class FileManager {
                 "Add directory \""+parent+"\" not in "+_sharedDirectories);
             boolean added=siblings.add(j);
             Assert.that(added, "File "+j+" already found in "+siblings);
-            //_callback.addSharedFile(file, parent);
+            if (_callback!=null)
+                _callback.addSharedFile(file, parent);
 
             //Index the filename.  For each keyword...
             String[] keywords=StringUtils.split(path, DELIMETERS);
