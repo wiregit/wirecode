@@ -154,19 +154,16 @@ public class MacOSXUtils {
     }
     
     /**
-     * Retrieves the app directory.
-     * If the user is running off CVS (as distinguished by the version
-     * being @version@), then a dummy directory of 
-     * /Applications/LimeWire/LimeWire.app/ is returned.
+     * Retrieves the app directory & name.
+     * If the user is not running from the bundled app as we named it,
+     * defaults to /Applications/LimeWire/ as the directory of the app.
      */
     private static String getAppDir() {
-        if(CommonUtils.isTestingVersion()) {
-            return "/Applications/LimeWire/" + APP_NAME;
-        } else {
-            String appDir = CommonUtils.getCurrentDirectory().getPath();
-            int app = appDir.indexOf("LimeWire.app");
-            appDir = appDir.substring(0, app) + APP_NAME;
-            return appDir;
-        }
+        String appDir = "/Applications/LimeWire/";
+        String path = CommonUtils.getCurrentDirectory().getPath();
+        int app = path.indexOf("LimeWire.app");
+        if(app != -1)
+            appDir = path.substring(0, app);
+        return appDir + APP_NAME;
     }
 }
