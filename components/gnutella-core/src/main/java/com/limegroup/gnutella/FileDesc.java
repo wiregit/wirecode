@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.Date;
 import java.security.*;
 import java.util.Enumeration;
+import java.net.URL;
 
 /**
  * This class contains data for an individual shared file.  It also provides
@@ -58,6 +59,11 @@ public class FileDesc implements AlternateLocationCollector {
 	 * Constant for the <tt>File</tt> instance.
 	 */
 	private final File FILE;
+
+	/**
+	 * Constant for the SHA1 <tt>URN</tt> instance.
+	 */
+	private final URN SHA1_URN;
 
 	/**
 	 * The collection of alternate locations for the file.
@@ -120,6 +126,10 @@ public class FileDesc implements AlternateLocationCollector {
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
         URNS = Collections.unmodifiableSet(urns);
+		SHA1_URN = extractSHA1();
+		if(SHA1_URN == null) {
+			throw new IllegalArgumentException("no SHA1 URN");
+		}
         _hits = 0; // Starts off with 0 hits
     }		
 
@@ -130,11 +140,18 @@ public class FileDesc implements AlternateLocationCollector {
      * 
      * @return an unmodifiable <tt>Set</tt> of <tt>URN</tt>.  If the calling
      * thread is interrupted while executing this, returns an empty set.  
+	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument is
+	 *  <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>file</tt> argument
+	 *  denotes a file that is not a file on disk
      */
     public static Set /* of URN */ calculateAndCacheURN(File file) {
         if(file == null) {
             throw new NullPointerException("cannot accept null file argument");
-        }
+        } 
+		if(!file.isFile()) {
+			throw new IllegalArgumentException("file does not exist: "+file);
+		}
 		Set urns = UrnCache.instance().getUrns(file);
 		if(urns.size() == 0) {			
 			// expensive the first time a new file is added
@@ -194,10 +211,17 @@ public class FileDesc implements AlternateLocationCollector {
     /**
      * Return SHA1 <tt>URN</tt> instance, if available.
 	 *
-	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
-	 *  otherwise
+	 * @return the SHA1 <tt>URN</tt> instance
      */
     public URN getSHA1Urn() {
+		return SHA1_URN;
+	}
+
+
+	/**
+	 * Extracts the SHA1 URN from the set of urns.
+	 */
+	private URN extractSHA1() {
         Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
@@ -254,11 +278,25 @@ public class FileDesc implements AlternateLocationCollector {
 		return _altLocs;
 	}
 
-	// implements AlternateLocationCollector interface
+	/** 
+	 * Implements <tt>AlternateLocationCollector</tt> interface.
+	 *
+	 * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
+	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
+	 */
 	public void addAlternateLocation(AlternateLocation al) {
         if(al == null) {
             throw new NullPointerException("cannot accept null alt locs");
         }
+		URN sha1 = al.getSHA1Urn();
+		if(sha1 == null) {
+			throw new IllegalArgumentException("sha1 cannot be null");
+		}
+		if(!sha1.equals(SHA1_URN)) {
+			throw new IllegalArgumentException("URN does not match");
+		}
+		URL url = al.getUrl();
 		createAlternateLocations();
 		_altLocs.addAlternateLocation(al);
 	}
@@ -289,7 +327,9 @@ public class FileDesc implements AlternateLocationCollector {
 	 * Constructs the alternate location collection instance if it's null.
 	 */
 	private void createAlternateLocations() {
-		if(_altLocs == null) _altLocs = new AlternateLocationCollection();		
+		if(_altLocs == null) 
+			_altLocs = 
+				AlternateLocationCollection.createCollection(SHA1_URN);
 	}
 	
     
