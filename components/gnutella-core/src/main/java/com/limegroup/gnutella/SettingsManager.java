@@ -963,8 +963,15 @@ public class SettingsManager implements SettingsInterface
 			}
 			directories_ = sb.toString();
 		}
-        FileManager.getFileManager().reset();
-        FileManager.getFileManager().addDirectories(directories_);        
+		Thread fileManagerThread = new Thread() {
+			public void run() {
+				FileManager.getFileManager().reset();
+				FileManager.getFileManager().addDirectories(directories_);        
+			}
+		};
+		fileManagerThread.setDaemon(true);
+		fileManagerThread.start();
+
         props_.put(DIRECTORIES, directories_);
     }
 
