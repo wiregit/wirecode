@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 /**
  * Headers that should be sent only by Ultrapeers.
  */
-public class UltrapeerHeaders extends Headers {
+public class UltrapeerHeaders extends DefaultHeaders {
     
     /**
      * Creates a new <tt>UltrapeerHeaders</tt> instance with the specified

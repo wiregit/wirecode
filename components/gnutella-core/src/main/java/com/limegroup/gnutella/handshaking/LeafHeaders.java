@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 /**
  * Properties for connection handshake, if the node is a client
  */
-public class LeafHeaders extends Headers {
+public class LeafHeaders extends DefaultHeaders {
 
     /**
      * Creates a new <tt>LeafHeaders</tt> instance with the specified
