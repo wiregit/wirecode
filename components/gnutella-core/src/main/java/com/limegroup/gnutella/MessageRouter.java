@@ -441,6 +441,10 @@ public abstract class MessageRouter {
 		} else {
 			reply = createPingReply(guid);
 		}
+		
+		// No GUESS endpoints existed and our IP/port was invalid.
+		if( reply == null )
+		    return;
 
         try {
 		    UDPService.instance().send(reply, datagram.getAddress(), 
@@ -462,7 +466,11 @@ public abstract class MessageRouter {
 	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
-            return PingReply.create(guid, (byte)1);
+		    if(NetworkUtils.isValidPort(RouterService.getPort()) &&
+		       NetworkUtils.isValidAddress(RouterService.getAddress()))
+                return PingReply.create(guid, (byte)1);
+            else
+                return null;
 		} else {
             return PingReply.createGUESSReply(guid, (byte)1, 
                                               endpoint.getPort(),
