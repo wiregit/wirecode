@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
@@ -215,7 +216,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  remove locations from buckets if they don't pan out.  We don't remove
      *  them from allFiles to support resumes.)
      */
-    RemoteFileDescGrouper buckets;
+    private RemoteFileDescGrouper buckets;
     
     /**
      * The index of the bucket we are trying to download from. We use it
@@ -1044,18 +1045,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
-        fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+        boolean fileAdded = 
+		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(totalAlternateLocations != null) {
+		if(totalAlternateLocations != null && fileAdded) {
 			FileDesc fileDesc = 
-              fileManager.getFileDescMatching(completeFile);  
+			    fileManager.getFileDescMatching(completeFile);  
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
-			if (fileDesc != null)
-			   fileDesc.addAlternateLocationCollection(totalAlternateLocations);
-		}
+			if (fileDesc != null) {
+				fileDesc.addAlternateLocationCollection(totalAlternateLocations);
+				HeadRequester requester = 
+			        new HeadRequester(files, fileHash, 
+									  fileDesc, totalAlternateLocations);
+				Thread headThread = new Thread(requester);
+				headThread.setDaemon(true);
+				headThread.start();
+			}
+		} 
         return COMPLETE;
     }   
 
@@ -1448,7 +1457,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Note that alternate locations should have lower priority than
      * QueryReplies.
      */
-	private void addAlternateLocations(AlternateLocationCollection alts,
+	private void addAlternateLocations(AlternateLocationCollection alts,					   
 	  RemoteFileDesc rfd) {  
 		if (alts == null || !alts.hasAlternateLocations()  )
 			return;
@@ -1930,8 +1939,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int getMinutesToWaitForRequery(int requeries) {
         return 5;
     }
-
-
 
     /** Synchronization Primitive for auto-requerying....
      *  Can be underst00d as follows:
