@@ -3345,6 +3345,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             else  // Otherwise obey push rule for private rfds.
                 return true;
         }
+        //if the remote has push proxies, it needs push.
+        if (rfd.getPushProxies() != null &&
+                       rfd.getPushProxies().size() > 0)
+               return true;
+
         else if (!NetworkUtils.isValidPort(rfd.getPort()))
             return true;
         else
