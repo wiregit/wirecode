@@ -249,8 +249,22 @@ public final class ID3Reader {
                 data.setAlbum(frameContent);
             else if(ID3Editor.YEAR_ID.equals(frameID)) 
                 data.setYear(frameContent);
-            else if(ID3Editor.COMMENT_ID.equals(frameID)) 
+            else if(ID3Editor.COMMENT_ID.equals(frameID)) {
+                //ID3v2 comments field has null separators embedded to encode
+                //language etc, the real content begins after the last null
+                byte[] bytes = frame.getContent();
+                int startIndex = 0;
+                for(int i=bytes.length-1; i>= 0; i--) {
+                    if(bytes[i] != (byte)0)
+                        continue;
+                    //OK we are the the last 0
+                    startIndex = i;
+                    break;
+                }
+                frameContent = 
+                      new String(bytes, startIndex, bytes.length-startIndex);
                 data.setComment(frameContent);
+            }
            else if(ID3Editor.TRACK_ID.equals(frameID)) {
                 try {
                     data.setTrack(Short.parseShort(frameContent));
