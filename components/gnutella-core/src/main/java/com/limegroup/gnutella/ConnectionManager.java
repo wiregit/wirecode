@@ -389,7 +389,9 @@ public class ConnectionManager {
      * @return true if incoming connection slots are still available.
      */
     public boolean hasAvailableIncoming() {
-        return (_incomingConnections < _keepAlive);
+        return ((_incomingConnections < _keepAlive)
+            || (isSupernode() && (_incomingClientConnections < 
+            _settings.getMaxShieldedClientConnections())));
     }
 
     /**
