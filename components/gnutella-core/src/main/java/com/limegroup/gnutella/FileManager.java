@@ -921,8 +921,10 @@ public class FileManager {
                 // unshared, keep looking.
                 if(desc == null)
                     continue;
+                String incPath = incompleteFile.getAbsolutePath();
+                String path  = desc.getFile().getAbsolutePath();
                 // the files are the same, exit.
-                if( incompleteFile.equals(desc.getFile()) )
+                if( incPath.equals(path) )
                     return;
             }
         }

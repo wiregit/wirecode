@@ -528,7 +528,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * IncompleteFileDesc for this download.
      */
     private synchronized void initializeAlternateLocations() {
-        Assert.that( incompleteFile != null, "null incomplete file");
+        if( incompleteFile == null ) // no incomplete, no big deal.
+            return;
             
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
