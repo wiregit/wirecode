@@ -10,7 +10,7 @@ import java.lang.ref.WeakReference;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, IpPort, Comparable
+public class Endpoint implements Cloneable, IpPort
 {
     
     private String hostname = null;
@@ -19,79 +19,6 @@ public class Endpoint implements Cloneable, IpPort, Comparable
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
-
-    /**
-     * Needed for Network Discovery. Records information regarding
-     * wthether the neighbours of this node has been identified or not
-     */
-    public transient boolean processed = false;
-
-    /**
-     * The number of other nodes that this node is connected to
-     */
-    private int connectivity = 0;
-
-    /**
-     * The weight is used in ranking the endpoints
-     */
-    private transient int weight = 0;
-    
-    /**
-     * Sets the connectivity of the node
-     * @param connectivity the connectivity to be set
-     */
-    public void setConnectivity(int connectivity)
-    {
-        this.connectivity = connectivity;
-    }
-
-    /**
-     * Sets the weight of the node
-     * @param weight the weight to be set
-     */
-    public void setWeight(int weight)
-    {
-        this.weight = weight;
-    }
-
-    /**
-     * Gets the weight of this endpoint
-     * @return The weight of the endpoint
-     */
-    public int getWeight()
-    {
-        return weight;
-    }
-
-    /**
-     * returns the connectivity of the node
-     * @return The connectivity of the node
-     */
-    public int getConnectivity()
-    {
-        return connectivity;
-    }
-
-    /**
-     * The comparison function (It uses the connectivity as the
-     * measure for comparison ie if a.connectivity > b.connectivity
-     * then a.compareTo(b) > 0
-     * @param o the other object to be compared to
-     */
-    public int compareTo(Object o)
-    {
-        //Check for the class of the passed object
-        if(o == null)
-        throw new ClassCastException();
-
-        Endpoint other = (Endpoint) o;
-
-        if(weight > other.weight)
-        return 1;
-        if(weight < other.weight)
-        return -1;
-        return 0;
-    }
 
     /**
      * Returns a new Endpoint from a Gnutella-style host/port pair:
@@ -237,20 +164,15 @@ public class Endpoint implements Cloneable, IpPort, Comparable
     */
     public Endpoint(Endpoint ep)
     {
-        //copy the fields
-        this.connectivity = ep.connectivity;
         this.files = ep.files;
         this.hostname = ep.hostname;
         this.kbytes = ep.kbytes;
         this.port = ep.port;
-        this.processed = ep.processed;
-        this.weight = ep.weight;
     }
 
     public String toString()
     {
-        return hostname+":"+port + " connectivity=" + connectivity + " files="
-        + files + " kbytes=" + kbytes;
+        return hostname+":"+port + " files="+ files + " kbytes=" + kbytes;
     }
 
     public String getAddress()
@@ -349,10 +271,11 @@ public class Endpoint implements Cloneable, IpPort, Comparable
      * Endpoints are equal if their hostnames and ports are.  The number
      * and size of files does not matter.
      */
-    public boolean equals(Object o)
-    {
-        if (! (o instanceof Endpoint))
-        return false;
+    public boolean equals(Object o) {
+        if(!(o instanceof Endpoint))
+            return false;
+        if(o == this)
+            return true;
         Endpoint e=(Endpoint)o;
         return hostname.equals(e.hostname) && port==e.port;
     }

@@ -310,8 +310,6 @@ public class HostCatcherTest extends BaseTestCase {
         Endpoint e2=new ExtendedEndpoint("18.239.0.147", 6347);
         assertNotEquals("e1 vs e2", e1, e2);
         assertNotEquals("e2 vs e1", e2, e1);
-        assertEquals("compareTo on e1", 0, e1.compareTo(e2));
-        assertEquals("compareTo on e2", 0, e2.compareTo(e1));
         
         FixedsizePriorityQueue queue=new FixedsizePriorityQueue(
             ExtendedEndpoint.priorityComparator(),
