@@ -119,6 +119,6 @@ public final class ConnectionSettings extends LimeProps {
      * via deflate.
      */
     public static final BooleanSetting ENCODE_DEFLATE =
-        FACTORY.createBooleanSetting("ENCODE_DEFLATE", true);		
+        FACTORY.createBooleanSetting("ENCODE_DEFLATE", false);		
 }
 
