@@ -158,7 +158,8 @@ public class PromotionManager {
     	//*************************
     	//we know we have received a proper ACK.
     	//postpone the expiration 
-    	_expirer.cancel();    	
+    	if (_expirer!=null)
+    		_expirer.cancel();    	
     	
     	
     	//then, proceed as appropriate:
