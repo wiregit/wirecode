@@ -218,7 +218,7 @@ public final class CommonUtils {
         return _minorVersionNumber;
     }
 
-    private static int getMajorVersionNumberInternal(String version) {
+    static int getMajorVersionNumberInternal(String version) {
         if (!version.equals("@version@")) {
             try {
                 int firstDot = version.indexOf(".");
@@ -233,7 +233,7 @@ public final class CommonUtils {
     }
 
 
-    private static int getMinorVersionNumberInternal(String version) {
+    static int getMinorVersionNumberInternal(String version) {
         if (!version.equals("@version@")) {
             try {
                 int firstDot = version.indexOf(".");
