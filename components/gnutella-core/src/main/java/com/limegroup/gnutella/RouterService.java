@@ -217,8 +217,8 @@ public class RouterService
         }
 
 		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoingNew < 10 ) {
-			outgoingNew = 10;
+		if ( outgoingOld < 10 ) {
+			outgoingOld = 10;
 			manager.activateUltraFastConnectShutdown();
 		}
         //Actually notify the backend.
@@ -251,8 +251,8 @@ public class RouterService
         }
 
 		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoingNew < 10 ) {
-			outgoingNew = 10;
+		if ( outgoingOld < 10 ) {
+			outgoingOld = 10;
 			manager.activateUltraFastConnectShutdown();
 		}
         //Actually notify the backend.

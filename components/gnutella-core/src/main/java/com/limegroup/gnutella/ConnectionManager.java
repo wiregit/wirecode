@@ -487,15 +487,15 @@ public class ConnectionManager {
     }
 
     /**
-     * This Runnable resets the KeepAlive to the appropriate value
-	 * if there are an acceptible number of stable connections
+     * This Runnable resets the KeepAlive (of old clients) to the appropriate 
+     * value if there are an acceptible number of stable connections
      */
     private class AllowUltraFastConnect implements Runnable {
 		
 		public void run() {
             SettingsManager settings=SettingsManager.instance();
-        	int outgoing=settings.getKeepAlive();
-			int desired = Math.min(outgoing, 3);
+        	int outgoingOld=settings.getKeepAliveOld();
+			int desired = Math.min(outgoingOld, 3);
 
 			// Determine if we have 3/desired stable connections
             Iterator iter=getConnections().iterator();
@@ -506,7 +506,7 @@ public class ConnectionManager {
 				    desired--;
             }
 			if ( desired <= 0 ) {
-        	    setKeepAlive(outgoing, true);
+        	    setKeepAlive(outgoingOld, false);
 				// Deactivate extra ConnectionWatchdog Process
 		        deactivateUltraFastConnectShutdown(); 
 			}
