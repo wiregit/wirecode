@@ -251,15 +251,6 @@ public class ManagedConnection extends Connection
     private long _nextNumHorizonHosts=0;
     
 
-    /**
-     * The query routing state for each "new client" connection, or null if the
-     * connection doesn't support QRP.  Helps you decide when to send queries.
-     * (Compare with _querySourceTable of MessageRouter, which helps filter
-     * duplicate queries and decide where to send responses.)  
-     */
-    private final ManagedConnectionQueryInfo QUERY_INFO = 
-        new ManagedConnectionQueryInfo();
-
     /** The next time I should send a query route table to this connection.
 	 */
     private long _nextQRPForwardTime;
@@ -299,9 +290,16 @@ public class ManagedConnection extends Connection
     private static int _numTCPConnectBackRequests = 0;
 
     /**
-     * Variable for the <tt>QueryRouteTable</tt> for this connection.
+     * Variable for the <tt>QueryRouteTable</tt> received for this 
+     * connection.
      */
     private QueryRouteTable _lastQRPTableReceived;
+
+    /**
+     * Variable for the <tt>QueryRouteTable</tt> sent for this 
+     * connection.
+     */
+    private QueryRouteTable _lastQRPTableSent;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -390,23 +388,42 @@ public class ManagedConnection extends Connection
         updater.checkAndUpdate(this);
     }
 
+
     /**
-     * Updates the query route table for this connection with data
-     * from the specified <tt>RouteTableMessage</tt>.
+     * Resets the query route table for this connection.  The new table
+     * will be of the size specified in <tt>rtm</tt> and will contain
+     * no data.  If there is no <tt>QueryRouteTable</tt> yet created for
+     * this connection, this method will create one.
      *
-     * @param rtm the <tt>RouteTableMessage</tt> with new query route
-     *  table data
+     * @param rtm the <tt>ResetTableMessage</tt> 
      */
-    public void updateQueryRouteTable(RouteTableMessage rtm) {
+    public void resetQueryRouteTable(ResetTableMessage rtm) {
+        if(_lastQRPTableReceived == null) {
+            _lastQRPTableReceived = new QueryRouteTable(rtm.getTableSize());
+        } else {
+            _lastQRPTableReceived.reset(rtm);
+        }
+    }
+
+    /**
+     * Patches the <tt>QueryRouteTable</tt> for this connection.
+     *
+     * @param ptm the patch with the data to update
+     */
+    public void patchQueryRouteTable(PatchTableMessage ptm) {
+
+        // we should always get a reset before a patch, but 
+        // allocate a table in case we don't
         if(_lastQRPTableReceived == null) {
             _lastQRPTableReceived = new QueryRouteTable();
         }
         try {
-            _lastQRPTableReceived.update(rtm);
+            _lastQRPTableReceived.patch(ptm);
         } catch(BadPacketException e) {
             // not sure what to do here!!
-        }
+        }                    
     }
+
 
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
@@ -420,6 +437,18 @@ public class ManagedConnection extends Connection
     public boolean hitsQueryRouteTable(QueryRequest query) {
         if(_lastQRPTableReceived == null) return false;
         return _lastQRPTableReceived.contains(query);
+    }
+
+    /**
+     * Accessor for the <tt>QueryRouteTable</tt> received along this 
+     * connection.  Can be <tt>null</tt> if no query routing table has been 
+     * received yet.
+     *
+     * @return the last <tt>QueryRouteTable</tt> received along this
+     *  connection
+     */
+    public QueryRouteTable getQueryRouteTableReceived() {
+        return _lastQRPTableReceived;
     }
 
     /** Throttles the super's OutputStream. */
@@ -1297,15 +1326,28 @@ public class ManagedConnection extends Connection
 	}
     
     /** 
-     * Accessor for the query route state associated with this.  This is
+     * Accessor for the query route table associated with this.  This is
      * guaranteed to be non-null, but it may not yet contain any data.
      *
-     * @return the <tt>ManagedConnectionQueryInfo</tt> instance containing
-     *  query route table data for this connection
+     * @return the <tt>QueryRouteTable</tt> instance containing
+     *  query route table data sent along this connection, or <tt>null</tt>
+     *  if no data has yet been sent
      */
-    public ManagedConnectionQueryInfo getQueryRouteState() {
-        return QUERY_INFO;
+    public QueryRouteTable getQueryRouteTableSent() {
+        return _lastQRPTableSent;
     }
+
+    /**
+     * Mutator for the last query route table that was sent along this
+     * connection.
+     *
+     * @param qrt the last query route table that was sent along this
+     *  connection
+     */
+    public void setQueryRouteTableSent(QueryRouteTable qrt) {
+        _lastQRPTableSent = qrt;
+    }
+
     
     /** 
      * Tests representation invariants.  For performance reasons, this is
