@@ -142,9 +142,11 @@ public final class URNFactory {
 		throws IOException {
 		int index = header.indexOf(HTTPHeaderName.CONTENT_URN.httpStringValue());
 		if(index == -1) {
-			throw new IOException("INVALID FORMAT FOR CONTENT URN HEADER");
+			throw new IOException("INVALID FORMAT FOR CONTENT URN HEADER: "+
+								  header);
 		}
-		return new URN(header.substring(index+1));
+		return new URN(header.substring(
+		    HTTPHeaderName.CONTENT_URN.httpStringValue().length()+1).trim());
 	}
 
 	/**
