@@ -8,9 +8,14 @@ package com.limegroup.gnutella.xml;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.SAXException;
+import javax.xml.parsers.ParserConfigurationException;
 import com.limegroup.gnutella.Response;
 
 import org.xml.sax.InputSource;
@@ -50,6 +55,57 @@ public class LimeXMLUtils
       
         //get & return the input source
         return new InputSource(new StringReader(sb.toString()));
+    }
+    
+    /**
+     * Returns an instance of org.w3c.dom.Document after parsing the
+     * passed xml file
+     * @param file The file from where to read
+     * @return The instance of org.w3c.dom.Document after parsing the
+     * passed xml file
+     * @exception IOException If file doesnt get opened or other I/O problems
+     * @exception ParserConfigurationException if problem in getting parser
+     * @exception SAXException If any problem in parsing
+     */
+    public static Document getDocument(File file) throws IOException, 
+        ParserConfigurationException, SAXException
+    {
+        //get an input source out of it for parsing
+        InputSource inputSource = 
+            LimeXMLUtils.getInputSource(file);
+
+        //get a document builder
+        DocumentBuilder documentBuilder = 
+            DocumentBuilderFactory.newInstance().newDocumentBuilder();
+
+        // Parse the xml file and create a  document
+        Document document = documentBuilder.parse(inputSource);
+        
+        //return the document
+        return document;
+    }
+    
+    
+    /**
+     * Returns the value of the specified attribute
+     * @param attributes attribute nodes in which to search for the 
+     * specified attribute
+     * @param soughtAttribute The attribute whose value is sought
+     * @return the value of the specified attribute, or null if the specified
+     * attribute doesnt exist in the passed set of attributes
+     */
+    public static String getAttributeValue(NamedNodeMap  attributes, String
+        soughtAttribute)
+    {
+        //get the required attribute node
+        Node requiredNode = attributes.getNamedItem(soughtAttribute);
+        
+        //if the attribute node is null, return null
+        if(requiredNode == null)
+            return null;
+        
+        //get the value of the required attribute, and return that
+        return requiredNode.getNodeValue();
     }
     
         /**

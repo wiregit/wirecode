@@ -133,6 +133,21 @@ public class LimeXMLProperties
     private static final String DATABASE_MAPPING_FILE_DEF =  "etc"
         + File.separator + "databasemapping.xml";
     
+    /**
+     * The property that denotes the
+     * name of the file that contains configuration information
+     * for various feeds from providers (like news feed etc)
+     */
+    private static final String FEED_PROPS_FILE = "FEED_PROPS_FILE";
+    
+    /**
+     * The default
+     * name of the file that contains configuration information
+     * for various feeds from providers (like news feed etc)
+     */
+    private static final String FEED_PROPS_FILE_DEF =  "etc"
+        + File.separator + "feedreceiverprops.xml";
+    
      /**
      * The property that denotes the 
      * name of the file that contains schema => QueryHandler mappings for 
@@ -277,6 +292,19 @@ public class LimeXMLProperties
             DATABASE_MAPPING_FILE_DEF);
 
         return getPath() + databaseMappingFile;   
+    }
+    
+    /**
+     * Returns the name of the file that contains configuration information
+     * for various feeds from providers (like news feed etc)
+     */
+    public String getFeedPropsFile()
+    {
+        String feedPropsFile = _properties.getProperty(
+            FEED_PROPS_FILE, 
+            FEED_PROPS_FILE_DEF);
+
+        return getPath() + feedPropsFile; 
     }
     
     /**
