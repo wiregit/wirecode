@@ -1489,6 +1489,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 sendRequery();
             // also retry any hosts that we have leftover.
             initializeFiles();
+            
+            // if any guys were busy, reduce their retry time to 0,
+            // since the user really wants to resume right now.
+            for(Iterator i = files.iterator(); i.hasNext(); )
+                ((RemoteFileDesc)i.next()).setRetryAfter(0);
         }
         
         // Notify the manager that we want to resume.

@@ -38,6 +38,12 @@ public interface Downloader extends BandwidthTracker {
      *     @modifies this
      */
     public void stop();
+    
+    /**
+     * Determines if this downloader is in an inactive state that can be resumed
+     * from.
+     */
+    public boolean isInactive();
 
     /**
      * Resumes this.  If the download is GAVE_UP, tries all locations again and
