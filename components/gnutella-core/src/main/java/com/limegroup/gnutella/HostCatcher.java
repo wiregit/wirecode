@@ -942,22 +942,6 @@ public class HostCatcher {
         }       
     }
 
-    /**
-     * Adds the specified host to the group of hosts to try.
-     * 
-     * @param host the <tt>IpPort</tt> for the new host
-     * @throws NullPointerException if the <tt>host</tt> argument is 
-     *  <tt>null</tt>
-     */
-    public void addHost(IpPort host) {
-        if(host == null) {
-            throw new NullPointerException("null host");
-        }
-        if(host instanceof PingReply) {
-            add((PingReply)host);
-        }
-    }
-    
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
     //           

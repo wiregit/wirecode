@@ -589,7 +589,7 @@ public final class UDPService implements Runnable {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 
-    private class MLImpl implements MessageListener {
+    private static class MLImpl implements MessageListener {
         public boolean _gotIncoming = false;
         private final GUID _guid;
         public MLImpl(GUID guid) {
