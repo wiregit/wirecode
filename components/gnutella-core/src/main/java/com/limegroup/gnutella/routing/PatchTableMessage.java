@@ -34,7 +34,9 @@ public class PatchTableMessage extends RouteTableMessage {
      * Creates a new PATCH variant from scratch, with TTL 1.  The patch data is
      * copied from dataSrc[datSrcStart...dataSrcStop-1], inclusive.  
      * 
-     * @requires sequenceNumber and sequenceSize can fit in one unsigned byte
+     * @requires sequenceNumber and sequenceSize can fit in one unsigned byte,
+     *              sequenceNumber and sequenceSize >= 1,
+     *              sequenceNumber<=sequenceSize
      *           compressor one of COMPRESSOR_NONE or COMPRESSOR_DEFLATE
      *           entryBits less than 1
      *           dataSrcStart>dataSrcStop
@@ -80,7 +82,8 @@ public class PatchTableMessage extends RouteTableMessage {
      * The first byte is guaranteed to be PATCH_VARIANT.
      * 
      * @exception BadPacketException the remaining values in payload are not
-     *  well-formed, e.g., because it's the wrong length.  
+     *  well-formed, e.g., because it's the wrong length, the sequence size
+     *  is less than the sequence number, etc.
      */
     protected PatchTableMessage(byte[] guid, 
                                 byte ttl, 
@@ -94,6 +97,9 @@ public class PatchTableMessage extends RouteTableMessage {
         Assert.that(payload[0]==PATCH_VARIANT);
         this.sequenceNumber=(short)ByteOrder.ubyte2int(payload[1]);
         this.sequenceSize=(short)ByteOrder.ubyte2int(payload[2]);
+        if (sequenceNumber<1 || sequenceSize<1 || sequenceNumber>sequenceSize) 
+            throw new BadPacketException(
+                "Bad sequence/size: "+sequenceNumber+"/"+sequenceSize);
         this.compressor=payload[3];
         if (! (compressor==COMPRESSOR_NONE || compressor==COMPRESSOR_DEFLATE))
             throw new BadPacketException("Bad compressor: "+compressor);
