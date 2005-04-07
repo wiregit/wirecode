@@ -1295,7 +1295,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (cache) 
             cache = !allFiles.contains(rfd);
         
-        boolean added = false;
+        
 		
         // Add to the list of RFDs to connect to.
 		ranker.addToPool(rfd);
@@ -1310,7 +1310,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //(push or otherwise).  So instead we target the two cases we're
         //interested: waiting for downloaders to complete (by waiting on
         //this) or waiting for retry (handled by DownloadManager).
-        if ( added ) {
+        if ( ranker.hasMore() ) {
             if(LOG.isTraceEnabled())
                 LOG.trace("added rfd: " + rfd);
             if(isInactive() || dloaderManagerThread == null)
@@ -2323,7 +2323,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ( rfds.size() > 0 && calculateWaitTime() > 0) {
                     LOG.trace("MANAGER: terminating with busy");
                     return WAITING_FOR_RETRY;
-                } else if( allFiles.size() == 0 ) {
+                } else if( !ranker.hasMore() ) {
                     LOG.trace("MANAGER: terminating w/o hope");
                     return GAVE_UP;
                 }

@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
@@ -79,7 +80,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * whether the ranker has been stopped.
      */
-    private volatile boolean stopped;
+    private boolean running;
     
     private static final Comparator RFD_COMPARATOR = new RFDComparator();
     
@@ -119,6 +120,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (myGUID == null) {
             myGUID = new GUID(GUID.makeGuid());
             RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
+            running = true;
         }
         
         // if the host is from an altloc make sure its not duplicate
@@ -166,7 +168,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             r.addToPool(newHosts);
             ret = r.getBest();
             newHosts.remove(ret);
-            while(pingedHosts.values().remove(ret));
+            for (Iterator iter = pingedHosts.entrySet().iterator(); iter.hasNext();) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                if (entry.getValue().equals(ret))
+                    iter.remove();
+            }
         }
         
         pingIfNeeded();
@@ -223,7 +229,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * @return the appropriate ping flags based on current conditions
      */
-    private int getPingFlags() {
+    private static int getPingFlags() {
         int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
         if (RouterService.acceptedIncomingConnection() ||
                 RouterService.getUdpService().canDoFWT())
@@ -246,7 +252,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                 pingedHosts.put(iter.next(),rfd);
             
             if (LOG.isDebugEnabled())
-                LOG.debug("pinging push locatioin "+rfd.getPushAddr());
+                LOG.debug("pinging push location "+rfd.getPushAddr());
             
             pinger.rank(rfd.getPushProxies(),null,this,pushPing);
         }
@@ -258,7 +264,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized void processMessage(Message m, ReplyHandler handler) {
-        if (stopped)
+        if (!running)
             return;
         
         if (! (m instanceof HeadPong))
@@ -301,22 +307,30 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
 
 
     public void registered(byte[] guid) {
-        if (LOG.isInfoEnabled())
-            LOG.info("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
+        if (LOG.isDebugEnabled())
+            LOG.debug("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
     }
 
     public void unregistered(byte[] guid) {
-        if (LOG.isInfoEnabled())
-            LOG.info("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
+        if (LOG.isDebugEnabled())
+            LOG.debug("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
     }
     
     public synchronized boolean isCancelled(){
-        return stopped || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
+        return !running || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
     }
     
-    public void stop() {
-        stopped = true;
-        RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
+    public synchronized void stop() {
+        running = false;
+        verifiedHosts.clear();
+        pingedHosts.clear();
+        newHosts.clear();
+        everybody.clear();
+        everybodyPush.clear();
+        if (myGUID != null) {
+            RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
+            myGUID = null;
+        }
     }
     
     protected synchronized Collection getShareableHosts(){
