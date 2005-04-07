@@ -2749,7 +2749,7 @@ public abstract class MessageRouter {
          
         // if this pong is for me, process it as usual (not implemented yet)
         if (forwardTo != null && !(forwardTo instanceof ForMeReplyHandler)) { 
-            forwardTo.reply(new HeadPong(pong)); 
+            forwardTo.reply(pong); 
             _headPongRouteTable.removeReplyHandler(forwardTo); 
         } 
     } 

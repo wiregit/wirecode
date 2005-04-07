@@ -11,6 +11,7 @@ import java.util.Iterator;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -330,15 +331,9 @@ public abstract class Message implements Serializable, Comparable {
                 //the right constructor.
                 return RouteTableMessage.read(guid, ttl, hops, payload);
             case F_VENDOR_MESSAGE:
-                if ((ttl != 1) || (hops != 0))
-                    throw new BadPacketException("VM with bad ttl/hops: " +
-                                                 ttl + "/" + hops);
-                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
-                                                         payload, network);
+                return  VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+                        payload, network);
             case F_VENDOR_MESSAGE_STABLE:
-                if ((ttl != 1) || (hops != 0))
-                    throw new BadPacketException("VM with bad ttl/hops: " +
-                                                 ttl + "/" + hops);
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                          payload, network);
             case F_UDP_CONNECTION:

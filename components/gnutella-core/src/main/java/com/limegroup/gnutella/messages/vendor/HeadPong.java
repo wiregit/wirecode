@@ -225,11 +225,6 @@ public class HeadPong extends VendorMessage {
 		setGUID(new GUID(ping.getGUID()));
 	}
 	
-    public HeadPong(HeadPong pong) {
-        super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, VERSION, pong.getPayload());
-        setGUID(new GUID(pong.getGUID()));
-    }
-	
 	/**
 	 * packs information about the shared file, queue status and altlocs into the body
 	 * of the message.
