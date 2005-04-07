@@ -2501,6 +2501,9 @@ public abstract class MessageRouter {
 		QueryRouteTable table = null;
 		List /* of RouteTableMessage */ patches = null;
 		QueryRouteTable lastSent = null;
+		
+		boolean busyLeaf=_manager.isAnyBusyLeafTriggeringQRTUpdate();
+		
 		for(int i=0; i<list.size(); i++) {                        
 			ManagedConnection c=(ManagedConnection)list.get(i);
 			
@@ -2523,32 +2526,22 @@ public abstract class MessageRouter {
 				continue;
 			}
 			
+			//	If a busy leaf was noticed, then reduce the time to send a QRT update
+			//	to last hop peers
+			if( busyLeaf )
+				c.busyLeafNoticed(time);
+			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime() && 
-                    ( (!_manager.isAnyLeafNewlyBusy() && !c.isDelayedLeafBusyQRT()) 
-                            || time<c.getNextBusyLeafQRPForwardTime()) ) {
-                
-                if( _manager.isAnyLeafNewlyBusy() ){
-                    //  If we are skipping this host because of time limitations, and
-                    //      if we would have updated him otherwise, then flag the host 
-                    //      so we don't skip him again once his delay timer expires
-                    c.setDelayedLeafBusyQRT(true);                
-                }
+			if (time<c.getNextQRPForwardTime() ) {
 				continue;
             }
 
-            //  If we get here, then the peer is going to get an updated QRT, so we no
-            //      longer need to keep his "delayed BusyLeafQRT flag", since this update
-            //      will exclude the busy leaf's QRT
-            c.setDelayedLeafBusyQRT(false);
-            
 			c.incrementNextQRPForwardTime(time);
-            c.incrementNextBusyLeafQRPForwardTime(time);    
 				
 			// Create a new query route table if we need to
 			if (table == null) {
-				table = createRouteTable();
+				table = createRouteTable();     //  Ignores busy leaves
                 _lastQueryRouteTable = table;
 			} 
 
@@ -2585,12 +2578,6 @@ public abstract class MessageRouter {
     	    
             c.setQueryRouteTableSent(table);
 		}
-        
-        //  At this point, if there WAS a busy leaf for whom we were updating QRTs, 
-        //      we have either updated all peers with our last-hop QRT, or we have 
-        //      flagged all peers we have skipped (because of timing reasons) so that
-        //      we know to update them in the future, as soon as time limits permit.  
-        _manager.setAnyLeafHasBecomeBusy(false);
     }
 
     /**
@@ -2838,7 +2825,7 @@ public abstract class MessageRouter {
         private static final byte BUSY_HOPS_FLOW = 0;
 
     	/* in case we want to reenable queries */
-    	private static final byte FREE_HOPS_FLOW = 5;
+    	private static final byte FREE_HOPS_FLOW = 3;
 
         /* small optimization:
            send only HopsFlowVendorMessages if the busy state changed */

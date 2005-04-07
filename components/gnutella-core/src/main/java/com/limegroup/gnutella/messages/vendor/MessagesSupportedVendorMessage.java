@@ -215,14 +215,6 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     
     /**
      * @return -1 if the message isn't supported, else it returns the version 
-     * of the message supported. 
-     */
-    public int supportsBusyLeaf() {
-        return supportsMessage(F_LIME_VENDOR_ID, F_BUSY_LEAF); 
-    }
-
-    /**
-     * @return -1 if the message isn't supported, else it returns the version 
      * of the message supported.
      */
     public int supportsPushProxy() {

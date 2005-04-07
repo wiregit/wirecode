@@ -90,10 +90,10 @@ public class ManagedConnection extends Connection
     private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
     
     /**
-     * The time to wait between last-hop QRT table updates between Ultrapeers,
-     * when a leaf becomes busy and signals this to us
+     * The time to reduce the last-hop QRP update time by, when a leaf goes
+     * busy
      */
-    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*2; //2 minutes
+    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*90; //1.5 minutes
 
     /** 
      * The time to wait between route table updates for Ultrapeers, 
@@ -273,13 +273,6 @@ public class ManagedConnection extends Connection
     private boolean _isKillable=true;
    
     /**
-     * True iff this connection should be updated because a leaf became busy and we
-     * have not yet updated this host's QRT table because his previous update was too
-     * recent.   
-     */
-    private boolean _delayedLeafBusyFlag=false;
-    
-    /**
      * The domain to which this connection is authenticated
      */
     private Set _domains = null;
@@ -288,6 +281,51 @@ public class ManagedConnection extends Connection
      *  this certain hops value....
      */
     private volatile int softMaxHops = -1;
+
+    /**
+     * This member contains the time beyond which, if this host is still busy (hpos flow==0),
+     * that we should consider him as "truly idle" and should then remove his contributions
+     * last-hop QRTs.  A value of -1 means that either the leaf isn't busy, or he is busy,
+     * and his busy-ness was already noticed by the MessageRouter, so we shouldn't 're-notice'
+     * him on the next QRT update iteration.
+     */
+    private volatile long _busyTime = -1;
+    
+    /**
+     * Set's a leaf's busy timer to now, if bSet is true, else clears the flag
+     *
+     *  @param bSet Whether to SET or CLEAR the busy timer for this host
+     */
+    public void setBusyTime( boolean bSet ){
+        if( bSet ){            
+            if( _busyTime==-1 )
+                _busyTime=System.currentTimeMillis();
+        }
+        else
+            _busyTime=-1;
+    }
+    
+    /**
+     * Determine whether or not the leaf has been busy long enough to remove his QRT tables
+     * from the combined last-hop QRTs, and should trigger an earlier update
+     * 
+     * @return true iff this leaf is busy and should trigger an update to the last-hop QRTs 
+     */
+    public boolean isBusyEnoughToTriggerQRTRemoval(){
+        if( _busyTime == -1 )
+            return false;
+        
+        if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
+            return true;
+        
+        return false;
+    }
+    
+    /**
+     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
+     * busy" for the purposes of QRT updates.
+     */
+    private static final long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
@@ -1316,15 +1354,19 @@ public class ManagedConnection extends Connection
         if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
-            softMaxHops = hops.getHopValue();
-            
             if( isSupernodeClientConnection() ){
-                //	If the connection is to a leaf, and the leaf supports
-                //	the busy leaf QRT scheme, then set the global busy 
-                //	leaf flag appropriately
-                if( softMaxHops==0 )
-                    _manager.setAnyLeafHasBecomeBusy(true);
+                
+                System.out.println( "Received a hops flow (" + hops.getHopValue() + ") from leaf: " + getAddress() + ":" + getPort() );
+
+                //	If the connection is to a leaf, and it is busy (HF == 0)
+                //	then set the global busy leaf flag appropriately
+                if( softMaxHops!=0 && hops.getHopValue()==0 )
+                    setBusyTime(true);
+                else if( hops.getHopValue()!=0 )
+                    setBusyTime(false);
+                    
             }
+            softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof PushProxyAcknowledgement) {
             // this connection can serve as a PushProxy, so note this....
@@ -1540,27 +1582,6 @@ public class ManagedConnection extends Connection
     // End statistics accessors
     //
 
-    /**
-     * Getter for the "This host needs to have a QRT update sent because of a leaf having
-     * become busy in the past" flag
-     * 
-     * @return true iff this host still has not been updated in response to the last leaf
-     * having become busy
-     */
-    public boolean isDelayedLeafBusyQRT() {
-        return _delayedLeafBusyFlag;
-    }
-    
-    /**
-     * Setter for the "This host needs to have a QRT update sent because of a leaf having
-     * become busy in the past" flag
-     * 
-     * @param bSet - Set or Clear the flag
-     */
-    public void setDelayedLeafBusyQRT(boolean bSet) {
-        _delayedLeafBusyFlag=bSet;
-    }
-
     /** Returns the system time that we should next forward a query route table
      *  along this connection.  Only valid if isClientSupernodeConnection() is
      *  true. */
@@ -1568,11 +1589,26 @@ public class ManagedConnection extends Connection
         return _nextQRPForwardTime;
     }
 
-    /** Returns the system time that we should next forward a query route table
-     *  along this connection.  Only valid if isClientSupernodeConnection() is
-     *  true. */
-    public long getNextBusyLeafQRPForwardTime() {
-        return _nextBusyLeafQRPForwardTime;
+    /** 
+     * Adjusts the "next QRP update timer", reducing it by the appropriate amount if applicable 
+     * @param curTime the current time in millis
+     */
+    public void busyLeafNoticed(long curTime) {
+      	System.out.println( 
+      	        "Reached busyLeafNoticed(), curTime=" +curTime+ 
+      	        ", _nextQRPForwardTime=" + _nextQRPForwardTime + 
+      	        ", diff=" + (_nextQRPForwardTime-curTime) );
+        
+        if( _nextQRPForwardTime-curTime > BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME ){
+        	_nextQRPForwardTime=BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME;
+        	
+        	System.out.println("Advancing the Last Hop QRT timer for peer: " + getAddress() + ":" + getPort() );
+        	
+        	int seconds=(int)_nextQRPForwardTime/1000;
+        	int mins=seconds/60;
+        	
+        	System.out.println("Sending another QRT update in " + mins + ":" + ((seconds%60>10)?"":"0") + seconds%60 + "\n"); 
+        }
     }
 
 	/**
@@ -1592,17 +1628,6 @@ public class ManagedConnection extends Connection
 		}
 	} 
     
-    /**
-     * Increments the next time we should forward a QRT update for this connection, because
-     * of 
-     * @param curTime the current time in ms, used to calculate the next update time used if
-     * a leaf has become busy.
-     */
-    public void incrementNextBusyLeafQRPForwardTime(long curTime) {
-        if( isUltrapeerQueryRoutingConnection() )
-            _nextBusyLeafQRPForwardTime = curTime + BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME;        
-    }
-
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
      * e.g., because this is a connection to a Clip2 reflector. Default value:
