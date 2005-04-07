@@ -30,6 +30,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -72,6 +73,7 @@ public class PingRankerTest extends BaseTestCase {
         pinger.hosts.clear();
         ranker = new PingRanker();
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
+        PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
     }

@@ -127,8 +127,7 @@ public class PushEndpointTest extends BaseTestCase {
     	
     	Set sent = new TreeSet(IpPort.COMPARATOR);
         sent.addAll(set6);
-    	sent.retainAll(four.getProxies());
-    	assertEquals(four.getProxies().size(),sent.size());
+    	assertTrue(set6.containsAll(four.getProxies()));
     	
     	// test a PE that carries its external address
     	m.clear();
