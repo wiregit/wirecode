@@ -2731,7 +2731,7 @@ public abstract class MessageRouter {
             _headPongRouteTable.routeReply(ping.getGUID(), handler); 
             
             //and send off the routed ping 
-            pingee.reply(ping); 
+            pingee.reply(new HeadPing(ping)); 
         }
    } 
     

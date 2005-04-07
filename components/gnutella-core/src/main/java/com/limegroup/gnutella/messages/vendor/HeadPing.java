@@ -157,6 +157,17 @@ public class HeadPing extends VendorMessage {
 	}
 	
 
+    /**
+     * creates a duplicate ping with ttl and hops appropriate for a new
+     * vendor message
+     */
+    public HeadPing (HeadPing original) {
+        super(F_LIME_VENDOR_ID,F_UDP_HEAD_PING,VERSION,original.getPayload());
+        _features = original.getFeatures();
+        _urn = original.getUrn();
+        _clientGUID = original.getClientGuid();
+        setGUID(new GUID(original.getGUID()));
+    }
 	
 	private static byte [] derivePayload(URN urn, GUID clientGUID, int features) {
 
