@@ -62,4 +62,10 @@ public final class UISettings extends LimeProps {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return screenSize.width <= 800 || screenSize.height <= 600;
     }
+
+    /**
+     * Setting to persist monitor check box state.
+     */
+    public static final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
+        FACTORY.createBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
 }

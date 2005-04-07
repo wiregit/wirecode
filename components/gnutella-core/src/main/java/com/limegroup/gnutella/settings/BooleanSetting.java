@@ -12,7 +12,7 @@ public final class BooleanSetting extends Setting {
 
 	/**
 	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
-	 * key and defualt value.
+	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
 	 * @param defaultBool the default value to use for the setting
