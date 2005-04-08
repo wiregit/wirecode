@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -35,8 +36,8 @@ public class ServerSideHeadTest extends BaseTestCase {
     
     static DatagramSocket socket1, socket2;
     static int port1, port2;
-    static DatagramPacket datagram1,datagram2,datagram3,datagram4;
-    static HeadPing ping1, ping2,ping3,ping4,pingTcp;
+    static InetSocketAddress addr1, addr2;
+    static HeadPing ping1, ping2;
 
     
     public static void globalSetUp() throws Exception {
@@ -63,10 +64,8 @@ public class ServerSideHeadTest extends BaseTestCase {
     	ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
     	ping2.write(baos2);
     	
-    	datagram1 = new DatagramPacket(baos1.toByteArray(),baos1.toByteArray().length,
-    			InetAddress.getLocalHost(),port1);
-    	datagram2 = new DatagramPacket(baos2.toByteArray(),baos2.toByteArray().length,
-    			InetAddress.getLocalHost(),port2);
+    	addr1 = new InetSocketAddress(InetAddress.getLocalHost(), port1);
+    	addr2 = new InetSocketAddress(InetAddress.getLocalHost(), port2);
 
 
 
@@ -91,7 +90,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     public void testGeneralBehavior() throws Exception{
     	
     	MessageRouter router = RouterService.getMessageRouter();
-    	router.handleUDPMessage(ping1,datagram1);
+    	router.handleUDPMessage(ping1,addr1);
     	Thread.sleep(100);
     	
     	DatagramPacket received = new DatagramPacket(new byte[1024],1024);
@@ -102,7 +101,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     	
-		router.handleUDPMessage(ping2,datagram2);
+		router.handleUDPMessage(ping2,addr2);
 		Thread.sleep(100);
 
     	received = new DatagramPacket(new byte[1024],1024);
@@ -115,7 +114,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     	//and if we sleep some time, we can send from the first host again
     	Thread.sleep(ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue());
     	
-    	router.handleUDPMessage(ping1,datagram1);
+    	router.handleUDPMessage(ping1,addr1);
     	Thread.sleep(100);
     	received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);

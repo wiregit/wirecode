@@ -1024,7 +1024,7 @@ public class ManagedConnection extends Connection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
-		MessageRouter router = RouterService.getMessageRouter();
+        MessageDispatcher dispatcher = MessageDispatcher.instance();
         final boolean isSupernodeClientConnection=isSupernodeClientConnection();
         while (true) {
             Message m=null;
@@ -1053,8 +1053,8 @@ public class ManagedConnection extends Connection
             if (isSupernodeClientConnection &&
                 (m instanceof QueryStatusResponse)) 
                 m = morphToStopQuery((QueryStatusResponse) m);
-            //call MessageRouter to handle and process the message
-            router.handleMessage(m, this);            
+            
+            dispatcher.dispatchTCP(m, this);
         }
     }
     

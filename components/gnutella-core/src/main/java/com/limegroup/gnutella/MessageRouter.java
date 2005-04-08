@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -495,15 +495,15 @@ public abstract class MessageRouter {
      * message type.
 	 *
 	 * @param msg the <tt>Message</tt> received
-	 * @param datagram the <tt>DatagramPacket</tt> containing the IP and 
+	 * @param addr the <tt>InetSocketAddress</tt> containing the IP and 
 	 *  port of the client node
      */	
-	public void handleUDPMessage(Message msg, DatagramPacket datagram) {
+	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
         // Increment hops and decrement TTL.
         msg.hop();
 
-		InetAddress address = datagram.getAddress();
-		int port = datagram.getPort();
+		InetAddress address = addr.getAddress();
+		int port = addr.getPort();
 		// Verify that the address and port are valid.
 		// If they are not, we cannot send any replies to them.
 		if(!RouterService.isIpPortValid()) return;
@@ -522,7 +522,7 @@ public abstract class MessageRouter {
             //TODO: compare QueryKey with old generation params.  if it matches
             //send a new one generated with current params 
             if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
-                sendAcknowledgement(datagram, msg.getGUID());
+                sendAcknowledgement(addr, msg.getGUID());
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
@@ -546,7 +546,7 @@ public abstract class MessageRouter {
 		} else if(msg instanceof PingRequest) {
 			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, datagram);
+												  handler, addr);
 		} else if(msg instanceof PingReply) {
 			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
@@ -555,10 +555,10 @@ public abstract class MessageRouter {
 			handlePushRequest((PushRequest)msg, handler);
 		} else if(msg instanceof LimeACKVendorMessage) {
 			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
-            handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
+            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
         else if(msg instanceof ReplyNumberVendorMessage) {
-            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
+            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
         }
         else if(msg instanceof GiveStatsVendorMessage) {
             handleGiveStats((GiveStatsVendorMessage) msg, handler);
@@ -582,10 +582,10 @@ public abstract class MessageRouter {
      * message type.
      *
      * @param msg the <tt>Message</tt> recieved.
-     * @param datagram the <tt>DatagramPacket</tt> containing the IP and
+     * @param addr the <tt>InetSocketAddress</tt> containing the IP and
      *  port of the client node.
      */
-	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
+	public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
     
         // Use this assert for testing only -- it is a dangerous assert
         // to have in the field, as not all messages currently set the
@@ -603,8 +603,8 @@ public abstract class MessageRouter {
         // Increment hops and decrement TTL.
         msg.hop();
 
-		InetAddress address = datagram.getAddress();
-		int port = datagram.getPort();
+		InetAddress address = addr.getAddress();
+		int port = addr.getPort();
 		
         if (NetworkUtils.isLocalAddress(address) &&
           !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
@@ -624,7 +624,7 @@ public abstract class MessageRouter {
 		} else if(msg instanceof PingRequest) {
 			ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, datagram);
+												  handler, addr);
 	//	} else if(msg instanceof PingReply) {
 	//	      ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
     //        handleUDPPingReply((PingReply)msg, handler, address, port);
@@ -651,7 +651,7 @@ public abstract class MessageRouter {
 	/**
 	 * Sends an ack back to the GUESS client node.  
 	 */
-	protected void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
+	protected void sendAcknowledgement(InetSocketAddress addr, byte[] guid) {
 		ConnectionManager manager = RouterService.getConnectionManager();
 		Endpoint host = manager.getConnectedGUESSUltrapeer();
 		PingReply reply;
@@ -670,8 +670,7 @@ public abstract class MessageRouter {
 		if( reply == null )
 		    return;
 
-        UDPService.instance().send(reply, datagram.getAddress(), 
-                                   datagram.getPort());
+        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
@@ -714,9 +713,9 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handleUDPPingRequestPossibleDuplicate(													 
-        PingRequest request, ReplyHandler handler, DatagramPacket datagram) {
+        PingRequest request, ReplyHandler handler, InetSocketAddress  addr) {
 		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
-            handleUDPPingRequest(request, handler, datagram);
+            handleUDPPingRequest(request, handler, addr);
     }
 
     /**
@@ -851,34 +850,33 @@ public abstract class MessageRouter {
      */
     protected void handleUDPPingRequest(PingRequest pingRequest,
 										ReplyHandler handler, 
-										DatagramPacket datagram) {
+										InetSocketAddress addr) {
         if (pingRequest.isQueryKeyRequest())
-            sendQueryKeyPong(pingRequest, datagram);
+            sendQueryKeyPong(pingRequest, addr);
         else
-            respondToUDPPingRequest(pingRequest, datagram, handler);
+            respondToUDPPingRequest(pingRequest, addr, handler);
     }
     
 
     /**
-     * Generates a QueryKey for the source (described by datagram) and sends the
+     * Generates a QueryKey for the source (described by addr) and sends the
      * QueryKey to it via a QueryKey pong....
      */
-    protected void sendQueryKeyPong(PingRequest pr, DatagramPacket datagram) {
+    protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
 
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
 
         // generate a QueryKey (quite quick - current impl. (DES) is super
         // fast!
-        InetAddress address = datagram.getAddress();
-        int port = datagram.getPort();
+        InetAddress address = addr.getAddress();
+        int port = addr.getPort();
         QueryKey key = QueryKey.getQueryKey(address, port);
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
             PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-        UDPService.instance().send(reply, datagram.getAddress(),
-                                   datagram.getPort());
+        UDPService.instance().send(reply, addr.getAddress(), addr.getPort());
     }
 
 
@@ -1012,7 +1010,7 @@ public abstract class MessageRouter {
      *  band.
      */
     protected void handleLimeACKMessage(LimeACKVendorMessage ack,
-                                        DatagramPacket datagram) {
+                                        InetSocketAddress addr) {
 
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
@@ -1020,8 +1018,8 @@ public abstract class MessageRouter {
             (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
 
         if ((bundle != null) && (ack.getNumResults() > 0)) {
-            InetAddress addr = datagram.getAddress();
-            int port = datagram.getPort();
+            InetAddress iaddr = addr.getAddress();
+            int port = addr.getPort();
 
             //convert responses to QueryReplies, but only send as many as the
             //node wants
@@ -1038,7 +1036,7 @@ public abstract class MessageRouter {
             //send the query replies
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
-                UDPService.instance().send(queryReply, addr, port);
+                UDPService.instance().send(queryReply, iaddr, port);
             }
         }
         // else some sort of routing error or attack?
@@ -1050,7 +1048,7 @@ public abstract class MessageRouter {
      *  use.
      */
     protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
-                                            DatagramPacket datagram) {
+                                            InetSocketAddress addr) {
         GUID qGUID = new GUID(reply.getGUID());
         int numResults = 
         RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
@@ -1075,8 +1073,8 @@ public abstract class MessageRouter {
                 !dManager.isGuidForQueryDownloading(qGUID))
                 return;
 
-            GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
-                                                 datagram.getPort());
+            GUESSEndpoint ep = new GUESSEndpoint(addr.getAddress(),
+                                                 addr.getPort());
             synchronized (_bypassedResults) {
                 // this is a quick critical section for _bypassedResults
                 // AND the set within it
@@ -1094,8 +1092,7 @@ public abstract class MessageRouter {
         
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(qGUID, reply.getNumResults());
-        UDPService.instance().send(ack, datagram.getAddress(),
-                                   datagram.getPort());
+        UDPService.instance().send(ack, addr.getAddress(), addr.getPort());
         OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
@@ -1151,8 +1148,7 @@ public abstract class MessageRouter {
 
 
     /**
-     * Basically, just get the correct parameters, create a temporary 
-     * DatagramSocket, and send a Ping.
+     * Sends a ping to the person requesting the connectback request.
      */
     protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
                                                Connection source) {
@@ -1811,12 +1807,12 @@ public abstract class MessageRouter {
 	 * that also support UDP messaging.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
-     * @param datagram the <tt>DatagramPacket</tt> containing the ping
+     * @param addr the <tt>InetSocketAddress</tt> containing the ping
      * @param handler the <tt>ReplyHandler</tt> instance from which the
      *  ping was received and to which pongs should be sent
 	 */
     protected abstract void respondToUDPPingRequest(PingRequest request, 
-													DatagramPacket datagram,
+													InetSocketAddress addr,
                                                     ReplyHandler handler);
 
 

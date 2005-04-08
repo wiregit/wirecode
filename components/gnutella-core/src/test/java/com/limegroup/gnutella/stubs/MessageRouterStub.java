@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
-import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class MessageRouterStub extends MessageRouter {
 	}
 
     protected void respondToUDPPingRequest(PingRequest request, 
-                                           DatagramPacket datagram,
+                                           InetSocketAddress addr,
                                            ReplyHandler handler) {}
 
     protected List createQueryReply(byte[] guid, byte ttl,

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import junit.framework.Test;
 
@@ -47,8 +48,6 @@ public class UDPHostCacheTest extends BaseTestCase {
                                              new StandardMessageRouter());
         RouterService.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
-        UDPService.instance().start();
-        
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(
                 UDPService.instance(),
                 "newListeningSocket",
@@ -58,7 +57,8 @@ public class UDPHostCacheTest extends BaseTestCase {
         PrivilegedAccessor.invokeMethod(
                 UDPService.instance(),
                 "setListeningSocket",
-                ds);
+                new Object[] { ds } ,
+                new Class[] { DatagramSocket.class });
                 
         RouterService.getMessageRouter().initialize();
     }
@@ -442,11 +442,9 @@ public class UDPHostCacheTest extends BaseTestCase {
     
     private void routeFor(String host, byte[] guid) throws Exception {
         PingReply pr = PingReply.create(guid, (byte)1);
-        DatagramPacket dp = new DatagramPacket(new byte[0], 0);
-        dp.setAddress(InetAddress.getByName(host));
-        dp.setPort(6346);
+        InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName(host), 6346);
         
-        RouterService.getMessageRouter().handleUDPMessage(pr, dp);
+        RouterService.getMessageRouter().handleUDPMessage(pr, addr);
     }    
     
     private ExtendedEndpoint create(String host) {

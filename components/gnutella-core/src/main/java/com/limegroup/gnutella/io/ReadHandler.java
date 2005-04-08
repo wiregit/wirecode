@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.io;
 
-interface ReadHandler extends NIOHandler {
+public interface ReadHandler extends NIOHandler {
     /**
      * Notification that a read can be performed.
      * If further reads are not wanted, this should unset the interest in reading

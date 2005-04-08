@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.net.InetAddress;
-import java.net.DatagramPacket;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -529,11 +529,9 @@ public final class MessageRouterTest extends BaseTestCase {
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
         
-        DatagramPacket dp = new DatagramPacket(new byte[0], 0);
-        dp.setAddress(InetAddress.getLocalHost());
-        dp.setPort(1);
+        InetSocketAddress addr = new InetSocketAddress(InetAddress.getLocalHost(), 1);
         
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         PingReply reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -552,7 +550,7 @@ public final class MessageRouterTest extends BaseTestCase {
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
         assertTrue(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -567,7 +565,7 @@ public final class MessageRouterTest extends BaseTestCase {
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -581,7 +579,7 @@ public final class MessageRouterTest extends BaseTestCase {
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -602,7 +600,7 @@ public final class MessageRouterTest extends BaseTestCase {
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -618,7 +616,7 @@ public final class MessageRouterTest extends BaseTestCase {
         pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -629,7 +627,7 @@ public final class MessageRouterTest extends BaseTestCase {
         pr = new PingRequest((byte)1);
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, dp, null);
+        stub.respondToUDPPingRequest(pr, addr, null);
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
@@ -652,8 +650,7 @@ public final class MessageRouterTest extends BaseTestCase {
     	URN urn = FileDescStub.DEFAULT_SHA1;
     	HeadPing ping = new HeadPing(urn, clientGUID, 0xFF);
     	
-    	DatagramPacket pack = new DatagramPacket(new byte[0],0, InetAddress.getLocalHost(),10);
-    	ROUTER.handleUDPMessage(ping,pack);
+    	ROUTER.handleUDPMessage(ping, new InetSocketAddress(InetAddress.getLocalHost(), 10));
     	
     	// the pingee should have received it
     	assertNotNull(pingee._lastSent);
@@ -746,9 +743,9 @@ public final class MessageRouterTest extends BaseTestCase {
         
         // upp access.
         public void respondToUDPPingRequest(PingRequest req, 
-                                            DatagramPacket pk,
+                                            InetSocketAddress addr,
                                             ReplyHandler handler) {
-            super.respondToUDPPingRequest(req, pk, handler);
+            super.respondToUDPPingRequest(req, addr, handler);
         }
         
         protected void sendPingReply(PingReply pong, ReplyHandler handler) {

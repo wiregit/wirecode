@@ -277,7 +277,6 @@ public class Acceptor implements Runnable {
      */
 	public void start() {
 	    MulticastService.instance().start();
-	    UDPService.instance().start();
 	    
 		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);

@@ -12,7 +12,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
+import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.nio.channels.DatagramChannel;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +38,9 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.io.ReadHandler;
+import com.limegroup.gnutella.io.WriteHandler;
+import com.limegroup.gnutella.io.NIODispatcher;
 
 /**
  * This class handles UDP messaging services.  It both sends and
@@ -42,7 +54,7 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * @see QueryUnicaster
  *
  */
-public class UDPService implements Runnable {
+public class UDPService implements ReadHandler, WriteHandler {
 
     private static final Log LOG = LogFactory.getLog(UDPService.class);
     
@@ -50,35 +62,26 @@ public class UDPService implements Runnable {
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private final static UDPService INSTANCE = new UDPService();
-    
-	/** 
-     * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
-     * before sending.  Moreover, only one thread should be wait()ing on one of
-     * these locks at a time or results cannot be predicted.
-	 * This is the socket that handles sending and receiving messages over 
-	 * UDP.
-	 */
-	private volatile DatagramSocket _socket;
 	
-    /**
-     * Used for synchronized RECEIVE access to the UDP socket.  Should only be
-     * used by the UDP_THREAD.
-     */
-    private final Object _receiveLock = new Object();
-    
-    /**
-     * Used for synchronized SEND access to the UDP socket.  Should only be used
-     * in the send method.
-     */
-    private final Object _sendLock = new Object();
-    
-    /**
-     * Used for case where _socket is null on startup and the send thread
-     * is trying to send but encounters null socket.  It should only report
-     * if the socket has been set before (cuz then the socket will never be
-     * null)
-     */
-    private boolean _socketSetOnce = false;
+	/**
+	 * The DatagramChannel we're reading from & writing to.
+	 */
+	private DatagramChannel _channel;
+	
+	/**
+	 * The list of messages to be sent, as SendBundles.
+	 */
+	private final List OUTGOING_MSGS;
+	
+	/**
+	 * The ProcessingQueue that dispatches incoming UDP messages.
+	 */
+	private final ProcessingQueue DISPATCHER;
+	
+	/**
+	 * The buffer that's re-used for reading incoming messages.
+	 */
+	private final ByteBuffer BUFFER;
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -124,16 +127,6 @@ public class UDPService implements Runnable {
      */
     private int _numReceivedIPPongs;
 
-	/**
-	 * The thread for listening of incoming messages.
-	 */
-	private final Thread UDP_RECEIVE_THREAD;
-	
-	/**
-	 * The queue that processes packets to send.
-	 */
-	private final ProcessingQueue SEND_QUEUE;
-
     /**
      * The GUID that we advertise out for UDPConnectBack requests.
      */
@@ -171,10 +164,11 @@ public class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	protected UDPService() {	    
-        UDP_RECEIVE_THREAD = new ManagedThread(this, "UDPService-Receiver");
-        UDP_RECEIVE_THREAD.setDaemon(true);
-        SEND_QUEUE = new ProcessingQueue("UDPService-Sender");
+	protected UDPService() {	   
+	    DISPATCHER = new ProcessingQueue("UDPDispatch");
+	    OUTGOING_MSGS = new LinkedList();
+	    byte[] backing = new byte[BUFFER_SIZE];
+	    BUFFER = ByteBuffer.wrap(backing);
         scheduleServices();
     }
     
@@ -186,13 +180,6 @@ public class UDPService implements Runnable {
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
         RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
-    }
-	
-	/**
-	 * Starts the UDP Service.
-	 */
-	public void start() {
-        UDP_RECEIVE_THREAD.start();
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -218,9 +205,12 @@ public class UDPService implements Runnable {
      */
     DatagramSocket newListeningSocket(int port) throws IOException {
         try {
-        	DatagramSocket s = new DatagramSocket(port);
+            DatagramChannel channel = DatagramChannel.open();
+            channel.configureBlocking(false);
+        	DatagramSocket s = channel.socket();
         	if (CommonUtils.isWindows2000orXP())
         		s.setReceiveBufferSize(64*1024);
+            s.bind(new InetSocketAddress(port));
             return s;
         }
         catch (SocketException se) {
@@ -240,127 +230,100 @@ public class UDPService implements Runnable {
      *  UDP sending and receiving.
 	 */
 	void setListeningSocket(DatagramSocket datagramSocket) {
-        // we used to check if we were GUESS capable according to the
-        // SettingsManager.  but in general we want to have the SERVER side of
-        // GUESS active always.  the client side should be shut off from 
-		// MessageRouter.
-
-        //a) Close old socket (if non-null) to alert lock holders...
-        if (_socket != null) 
-            _socket.close();
-        
-        
-        //b) Replace with new sock.  Notify the udpThread.
-        synchronized (_receiveLock) {
-            synchronized (_sendLock) {
-                // if we are being turned on
-                if ((_socket == null) && (datagramSocket != null))
-                    _socketSetOnce = true;
-                // if we are being shut off
-                if (_socketSetOnce && (datagramSocket == null))
-                    _socketSetOnce = false;
-                // if the input is null, then the service will shut off ;) .
-                _socket = (DatagramSocket) datagramSocket;
-                
-                // set the port in the FWT records
-                if (_socket!=null)
-                    synchronized(this) {
-                        _lastReportedPort=_socket.getLocalPort();
-                        _portStable=true;
-                    }
-                _receiveLock.notify();
-                _sendLock.notify();
+	    if(_channel != null) {
+	        try {
+	            _channel.close();
+	        } catch(IOException ignored) {}
+	    }
+	    
+	    if(datagramSocket != null) {
+    	    _channel = datagramSocket.getChannel();
+    	    if(_channel == null)
+    	        throw new IllegalArgumentException("No channel!");
+    	        
+            NIODispatcher.instance().registerReadWrite(_channel, this);
+    	        
+            // set the port in the FWT records
+            synchronized(this) {
+                _lastReportedPort=_channel.socket().getLocalPort();
+                _portStable=true;
             }
         }
 	}
-
-
+	
 	/**
-	 * Busy loop that accepts incoming messages sent over UDP and 
-	 * dispatches them to their appropriate handlers.
+	 * Notification that a read can happen.
 	 */
-	public void run() {
-        try {
-            byte[] datagramBytes = new byte[BUFFER_SIZE];
-            MessageRouter router = RouterService.getMessageRouter();
-            while (true) {
-                // prepare to receive
-                DatagramPacket datagram = new DatagramPacket(datagramBytes, 
-                                                             BUFFER_SIZE);
-                
-                // when you first can, try to recieve a packet....
-                // *----------------------------
-                synchronized (_receiveLock) {
-                    while (_socket == null) {
-                        try {
-                            _receiveLock.wait();
-                        }
-                        catch (InterruptedException ignored) {
-                            continue;
-                        }
-                    }
-                    try {
-                        _socket.receive(datagram);
-                    } 
-                    catch(InterruptedIOException e) {
-                        continue;
-                    } 
-                    catch(IOException e) {
-                        continue;
-                    } 
-                }
-                // ----------------------------*                
-                // process packet....
-                // *----------------------------
-                if(!NetworkUtils.isValidAddress(datagram.getAddress()))
-                    continue;
-                if(!NetworkUtils.isValidPort(datagram.getPort()))
-                    continue;
-                
-                byte[] data = datagram.getData();
-                try {
-                    // we do things the old way temporarily
-                    InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
-                    if(message == null)
-                        continue;
-                        
-                    processMessage(message, datagram, router);
-                }
-                catch (IOException e) {
-                    continue;
-                }
-                catch (BadPacketException e) {
-                    continue;
-                }
-                // ----------------------------*
+	public void handleRead(SelectionKey key) throws IOException {
+        while(true) {
+            BUFFER.clear();
+            
+            SocketAddress from;
+            try {
+                from = _channel.receive(BUFFER);
+            } catch(IOException iox) {
+                break;
             }
-        } catch(Throwable t) {
-            ErrorService.error(t);
+            
+            // no packet.
+            if(from == null)
+                break;
+            
+            if(!(from instanceof InetSocketAddress)) {
+                Assert.silent(false, "non-inet SocketAddress: " + from);
+                continue;
+            }
+            
+            InetSocketAddress addr = (InetSocketAddress)from;
+                
+            if(!NetworkUtils.isValidAddress(addr.getAddress()))
+                continue;
+            if(!NetworkUtils.isValidPort(addr.getPort()))
+                continue;
+                
+            byte[] data = BUFFER.array();
+            int length = BUFFER.position();
+            try {
+                // we do things the old way temporarily
+                InputStream in = new ByteArrayInputStream(data, 0, length);
+                Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
+                if(message == null)
+                    continue;
+
+                processMessage(message, addr);
+            } catch (IOException ignored) {
+            } catch (BadPacketException ignored) {
+            }
         }
+	}
+	
+	/**
+	 * Notification that an IOException occurred while reading/writing.
+	 */
+	public void handleIOException(IOException iox) {
+	    ErrorService.error(iox);
 	}
 	
 	/**
 	 * Processes a single message.
 	 */
-    protected void processMessage(Message message, DatagramPacket datagram, MessageRouter router) {
-        updateState(message,datagram);
-        router.handleUDPMessage(message, datagram);
+    protected void processMessage(Message message, InetSocketAddress addr) {
+        updateState(message, addr);
+        MessageDispatcher.instance().dispatchUDP(message, addr);
     }
 	
-	private void updateState(Message message,DatagramPacket datagram) {
+	/** Updates internal state of the UDP Service. */
+	private void updateState(Message message, InetSocketAddress addr) {
 	    if (!isGUESSCapable()) {
             if (message instanceof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
-                if(isValidForIncoming(CONNECT_BACK_GUID, guid,
-                                      datagram))
+                if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr))
                     _acceptedUnsolicitedIncoming = true;
-                _lastUnsolicitedIncomingTime =
-                    System.currentTimeMillis();
+                _lastUnsolicitedIncomingTime = System.currentTimeMillis();
             }
             else if (message instanceof PingReply) {
                 GUID guid = new GUID(message.getGUID());
-                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, datagram ))
+                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, addr ))
                     return;
                 
                 _acceptedSolicitedIncoming = true;
@@ -385,20 +348,18 @@ public class UDPService implements Runnable {
         // so we can use this fact to keep the last unsolicited up
         // to date
         if (message instanceof ReplyNumberVendorMessage)
-            _lastUnsolicitedIncomingTime = 
-                System.currentTimeMillis();
+            _lastUnsolicitedIncomingTime = System.currentTimeMillis();
 	}
 	
 	/**
 	 * Determines whether or not the specified message is valid for setting
 	 * LimeWire as accepting UDP messages (solicited or unsolicited).
 	 */
-	private boolean isValidForIncoming(GUID match, GUID guidReceived,
-	                                   DatagramPacket d) {
+	private boolean isValidForIncoming(GUID match, GUID guidReceived, InetSocketAddress addr) {
         if(!match.equals(guidReceived))
             return false;
             
-	    String host = d.getAddress().getHostAddress();
+	    String host = addr.getAddress().getHostAddress();
 
         return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()  ||
                !RouterService.getConnectionManager().isConnectedTo(host);
@@ -468,178 +429,46 @@ public class UDPService implements Runnable {
         }
 
         byte[] data = baos.toByteArray();
-        DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        SEND_QUEUE.add(new Sender(dg, err));
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        synchronized(OUTGOING_MSGS) {
+            OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, err));
+            if(_channel != null)
+                NIODispatcher.instance().interestWrite(_channel);
+        }
 	}
-    
-    // the runnable that actually sends the UDP packets.  didn't wany any
-    // potential blocking in send to slow down the receive thread.  also allows
-    // received packets to be handled much more quickly
-    private class Sender implements Runnable {
-        private final DatagramPacket _dp;
-        private final ErrorCallback _err;
-        
-        Sender(DatagramPacket dp, ErrorCallback err) {
-            _dp = dp;
-            _err = err;
-        }
-        
-        public void run() {
-            // send away
-            // ------
-            synchronized (_sendLock) {
-                // we could be changing ports, just drop the message, 
-                // tough luck
-                if (_socket == null) {
-                    if (_socketSetOnce) {
-                        Exception npe = 
-                            new NullPointerException("Null UDP Socket!!");
-                        ErrorService.error(npe);
-                    }
-                    return;
+	
+	/**
+	 * Notification that a write can happen.
+	 */
+	public void handleWrite(SelectionKey key) throws IOException {
+	    synchronized(OUTGOING_MSGS) {
+	        while(!OUTGOING_MSGS.isEmpty()) {
+	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
+	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
+	                // we removed the bundle from the list but couldn't send it,
+	                // so we have to put it back in.
+	                OUTGOING_MSGS.add(0, bundle);
+	                return; // no room left to send.
                 }
-                try {
-                    _socket.send(_dp);
-                } catch(ConnectException ce) {
-                    // oh well, can't connect, ignore it...
-                } catch(BindException be) {
-                    // oh well, if we can't bind our socket, ignore it.. 
-                } catch(NoRouteToHostException nrthe) {
-                    // oh well, if we can't find that host, ignore it ...
-                } catch(IOException ioe) {
-                    if(isIgnoreable(ioe, ioe.getMessage()))
-                        return;
-                        
-                    String errString = "ip/port: " + 
-                                       _dp.getAddress() + ":" + 
-                                       _dp.getPort();
-                    _err.error(ioe, errString);
-                }
-            }
-        }
-        
-        /**
-         * Determines whether or not the given IOException can
-         * can be ignored.
-         *
-         * Visit http://www.dte.net/winsock_error.htm for explanations
-         * of each code/message.
-         *
-         * Most of these have no meaning when applied to UDP, but
-         * it doesn't hurt to check for ones that aren't harmful.
-         * Depending on the version of Java or the OS, the error may
-         * either be "Datagram send failed (code=<code>)"
-         * or simply the text of the error.
-         */
-        private boolean isIgnoreable(Throwable ex, final String message) {
-            // PortUnreachableException was added in Java 1.4 --
-            // check for it with a class name comparison.
-            if("java.net.PortUnreachableException".equals(
-                                            ex.getClass().getName()))
-                return true;
-            
-            if(message == null)
-                return false;
-
-            // For easier comparison, make everything lowercase
-            final String msg = message.toLowerCase();
-
-            if(scan(msg, 1784, "the supplied user buffer is not valid for the requested operation"))
-                return true;
-            if(scan(msg, 10004, "interrupted function call"))
-                return true;            
-            if(scan(msg, 10013, "permission denied"))
-                return true;
-            // propogate 10014 / Bad address
-            if(scan(msg, 10022, "invalid argument"))
-                return true;
-            // propogate 10024 / Too many open files
-            if(scan(msg, 10035, "resource temporarily unavailable"))
-                return true;
-            // propogate 10036 / Operation now in progress
-            // propogate 10037 / Operation already in progress
-            if(scan(msg, 10038, "socket operation on nonsocket"))
-                return true;
-            // propogate 10039 / Destination address required
-            // propogate 10040 / Message too long
-            // propogate 10041 / Protocol wrong type for socket
-            // propogate 10042 / Bad protocol option
-            // propogate 10043 / Protocol not supported
-            // propogate 10044 / Socket type not supported
-            // propogate 10045 / Operation not supported
-            // propogate 10046 / Protocl family not supported
-            // propogate 10047 / Address family not supported by protocol family
-            // propogate 10048 / Address already in use
-            if(scan(msg, 10049, "cannot assign requested address"))
-                return true;
-            if(scan(msg, 10050, "network is down"))
-                return true;
-            if(scan(msg, 10051, "network is unreachable"))
-                return true;
-            if(scan(msg, 10052, "network dropped connection on reset"))
-                return true;
-            if(scan(msg, 10053, "software caused connection abort"))
-                return true;
-            if(scan(msg, 10054, "connection reset by peer"))
-                return true;
-            if(scan(msg, 10055, "no buffer space available"))
-                return true;
-            // propogate 10056 / Socket is already connected
-            // propogate 10057 / Socket is not connected
-            // propogate 10058 / Cannot send after socket shutdown
-            if(scan(msg, 10060, "connection timed out"))
-                return true;
-            if(scan(msg, 10061, "connection refused"))
-                return true;
-            if(scan(msg, 10064, "host is down"))
-                return true;
-            if(scan(msg, 10065, "no route to host"))
-                return true;
-            // propogate 10067 / Too many processes
-            if(scan(msg, 10091, "network subsystem is unavailable"))
-                return true;
-            if(scan(msg, 10107, null))
-                return true;
-            if(scan(msg, 11001, "host not found"))
-                return true;
-
-            // unknown codes.
-            if(scan(msg, -1,  "option unsupported by protocol"))
-                return true;
-            if(scan(msg, -1, "descriptor not a socket"))
-                return true;
-            if(scan(msg, -1, "icmp port unreachable"))
-                return true;
-            if(scan(msg, -1, "network subsystem has failed"))
-                return true;
-            if(scan(msg, -1, "already connected"))
-                return true;
-            if(scan(msg, -1, "already connected"))
-                return true;
-            if(scan(msg, -1, "socket is closed"))
-                return true;
-                
-            // General invalid error on Linux
-            if(msg.indexOf("operation not permitted") > -1)
-                return true;
-                
-            return false;
-        }
-        
-        /**
-         * Scans the error message for either the code or the name of
-         * of the message, returning true if either was found.
-         */
-        private boolean scan(final String msg, int code, final String name) {
-            if(code != -1 && msg.indexOf("code="+code) > -1)
-                return true;
-            if(code != -1 && msg.indexOf("error: "+code) > -1)
-                return true;
-            if(name != null && msg.indexOf(name) > -1)
-                return true;
-            return false;
-        }
+	        }
+	        // if there's no data left to send, we don't wanna be notified of write events.
+	        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+	    }
     }
+	        
+	
+	/** Wrapper for outgoing data */
+	private static class SendBundle {
+	    private final ByteBuffer buffer;
+	    private final SocketAddress addr;
+	    private final ErrorCallback callback;
+	    
+	    SendBundle(ByteBuffer b, InetAddress addr, int port, ErrorCallback c) {
+	        buffer = b;
+	        this.addr = new InetSocketAddress(addr, port);
+	        callback = c;
+	    }
+	}
 
 
 	/**
@@ -782,8 +611,10 @@ public class UDPService implements Runnable {
 	 *  UDP messages, <tt>false</tt> otherwise
 	 */
 	public boolean isListening() {
-		if(_socket == null) return false;
-		return (_socket.getLocalPort() != -1);
+		if(_channel == null)
+		    return false;
+		    
+		return (_channel.socket().getLocalPort() != -1);
 	}
 
 	/** 
@@ -793,7 +624,7 @@ public class UDPService implements Runnable {
 	 * @return the <tt>DatagramSocket</tt> data
 	 */
 	public String toString() {
-		return "UDPAcceptor\r\nsocket: "+_socket;
+		return "UDPAcceptor\r\nchannel: " + _channel;
 	}
 
     private static class MLImpl implements MessageListener {

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.io;
 
-interface WriteHandler extends NIOHandler {
+public interface WriteHandler extends NIOHandler {
     /**
      * Notification that a write can be performed.
      * If further writes are not wanted, this should unset the interest in writing

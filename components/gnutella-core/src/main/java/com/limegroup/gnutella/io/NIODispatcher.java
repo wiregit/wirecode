@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 /**
  * Dispatcher for NIO.
  */
-class NIODispatcher implements Runnable {
+public class NIODispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(NIODispatcher.class);
     
@@ -50,27 +50,27 @@ class NIODispatcher implements Runnable {
     private final List PENDING = new LinkedList();
     
     /** Register interest in accepting */
-    void registerAccept(SelectableChannel channel, NIOHandler attachment) {
+    public void registerAccept(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_ACCEPT);
     }
     
     /** Register interest in connecting */
-    void registerConnect(SelectableChannel channel, NIOHandler attachment) {
+    public void registerConnect(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_CONNECT);
     }
     
     /** Register interest in reading */
-    void registerRead(SelectableChannel channel, NIOHandler attachment) {
+    public void registerRead(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_READ);
     }
     
     /** Register interest in writing */
-    void registerWrite(SelectableChannel channel, NIOHandler attachment) {
+    public void registerWrite(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_WRITE);
     }
     
     /** Register interest in both reading & writing */
-    void registerReadWrite(SelectableChannel channel, NIOHandler attachment) {
+    public void registerReadWrite(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
     
@@ -87,12 +87,12 @@ class NIODispatcher implements Runnable {
     }
     
     /** Registers a SelectableChannel as being interested in a write again. */
-    void interestWrite(SelectableChannel channel) {
+    public void interestWrite(SelectableChannel channel) {
         interest(channel, SelectionKey.OP_WRITE);
     }
     
     /** Registers a SelectableChannel as being interested in a read again. */
-    void interestRead(SelectableChannel channel) {
+    public void interestRead(SelectableChannel channel) {
         interest(channel, SelectionKey.OP_READ);
     }    
     
@@ -100,11 +100,8 @@ class NIODispatcher implements Runnable {
     private void interest(SelectableChannel channel, int op) {
         try {
             SelectionKey sk = channel.keyFor(selector);
-            if(sk != null && sk.isValid()) {
-                synchronized(channel.blockingLock()) {
-                    sk.interestOps(sk.interestOps() | op);
-                }
-            }
+            if(sk != null && sk.isValid())
+                sk.interestOps(sk.interestOps() | op);
         } catch(CancelledKeyException cke) {
             // It is possible to register interest on any thread, which means
             // that the key could have been cancelled at any time.

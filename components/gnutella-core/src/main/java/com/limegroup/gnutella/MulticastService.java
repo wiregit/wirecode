@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.net.InetSocketAddress;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -169,7 +170,6 @@ public final class MulticastService implements Runnable {
 	public void run() {
         try {
             byte[] datagramBytes = new byte[BUFFER_SIZE];
-            MessageRouter router = RouterService.getMessageRouter();                                
             while (true) {
                 // prepare to receive
                 DatagramPacket datagram = new DatagramPacket(datagramBytes, 
@@ -209,8 +209,9 @@ public final class MulticastService implements Runnable {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
-                    if(message == null) continue;
-                    router.handleMulticastMessage(message, datagram);
+                    if(message == null)
+                        continue;
+                    MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
                 catch (IOException e) {
                     continue;

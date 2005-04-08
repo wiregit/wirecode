@@ -175,11 +175,6 @@ public class HostCatcher {
     /** The UDPHostCache bootstrap system. */
     private UDPHostCache udpHostCache =
         new UDPHostCache();
-    
-	/**
-	 * Constant for the host file to read from and write to.
-	 */
-	private final File HOST_FILE;
 
     /**
      * Count for the number of hosts that we have not been able to connect to.
@@ -257,12 +252,9 @@ public class HostCatcher {
     private static final int MAX_CONNECTIONS = 5;
     
 	/**
-	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
-	 * for the host file location.
+	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
 	public HostCatcher() {
-		HOST_FILE = 
-			new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
 	}
 
     /**
@@ -433,7 +425,7 @@ public class HostCatcher {
 	 * @throws <tt>IOException</tt> if the file cannot be written
 	 */
 	synchronized void write() throws IOException {
-		write(HOST_FILE);
+		write(getHostsFile());
 	}
 
     /**
@@ -1148,15 +1140,22 @@ public class HostCatcher {
     }
     
     /**
+     * The hosts file this uses. 
+     */
+    private File getHostsFile() {
+        return new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
+    }
+    
+    /**
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
         LOG.trace("Reading Hosts File");
         // Just gnutella.net
         try {
-            read(HOST_FILE);
+            read(getHostsFile());
         } catch (IOException e) {
-            LOG.debug(HOST_FILE, e);
+            LOG.debug(getHostsFile(), e);
         }
     }
 

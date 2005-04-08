@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -331,17 +332,17 @@ public class MulticastTest extends BaseTestCase {
         List multicasted = new LinkedList();
         List unicasted = new LinkedList();
     
-        public void handleMulticastMessage(Message msg, DatagramPacket dp) {
+        public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
             multicasted.add(msg);
             // change the guid so we can pretend we've never seen it before
             if( msg instanceof QueryRequest )
                 setGUID( msg, new GUID(RouterService.newQueryGUID()) );
-            super.handleMulticastMessage(msg, dp);
+            super.handleMulticastMessage(msg, addr);
         }
         
-        public void handleUDPMessage(Message msg, DatagramPacket dp) {
+        public void handleUDPMessage(Message msg, InetSocketAddress addr) {
             unicasted.add(msg);
-            super.handleUDPMessage(msg, dp);
+            super.handleUDPMessage(msg, addr);
         }
 	}
         

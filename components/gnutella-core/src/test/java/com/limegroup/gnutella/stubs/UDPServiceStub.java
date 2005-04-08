@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -183,7 +184,7 @@ public final class UDPServiceStub extends UDPService {
 				InputStream in = new ByteArrayInputStream(data);
 				Message message = Message.read(in, Message.N_UDP);
 				if(message == null) return;                    
-				_router.handleUDPMessage(message, datagram);
+				_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
 			} catch (IOException e) {
 				return;
 			} catch (BadPacketException e) {

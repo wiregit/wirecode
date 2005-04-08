@@ -50,6 +50,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -2365,18 +2366,9 @@ public class UploadTest extends BaseTestCase {
 	 * Creates an Ultrapeer connection.
 	 */
 	private static Connection createConnection() {
-		return new Connection("localhost", PORT, new UltrapeerProperties(),
+		return new Connection("localhost", PORT, new UltrapeerHeaders(null),
 							  new EmptyResponder());
 	}
-
-    private static class UltrapeerProperties extends Properties {
-        public UltrapeerProperties() {
-            put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
-            put(HeaderNames.X_QUERY_ROUTING, "0.1");
-            put(HeaderNames.X_ULTRAPEER, "true");
-            put(HeaderNames.GGEP, "1.0");  //just for fun
-        }
-    }
     
 
     private static class EmptyResponder implements HandshakeResponder {

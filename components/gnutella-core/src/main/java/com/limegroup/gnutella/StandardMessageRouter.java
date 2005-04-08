@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -107,13 +107,13 @@ public class StandardMessageRouter extends MessageRouter {
 	 * responding with cached pongs, we respond with a pong from our node.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
-     * @param datagram the <tt>DatagramPacket</tt> containing the IP
+     * @param addr the <tt>InetSocketAddress</tt> containing the IP
      *  and port of the client node
      * @param handler the <tt>ReplyHandler</tt> that should handle any
      *  replies
 	 */
 	protected void respondToUDPPingRequest(PingRequest request, 
-										   DatagramPacket datagram,
+										   InetSocketAddress addr,
                                            ReplyHandler handler) {
         if(!RouterService.isIpPortValid())
             return;
@@ -122,8 +122,8 @@ public class StandardMessageRouter extends MessageRouter {
         if (request.requestsIP()) {
             try {
                 ipport = new QueryReply.IPPortCombo(
-                            datagram.getAddress().getHostAddress(),
-                            datagram.getPort());
+                            addr.getAddress().getHostAddress(),
+                            addr.getPort());
             } catch(IOException tooBad) { }
         }
         
