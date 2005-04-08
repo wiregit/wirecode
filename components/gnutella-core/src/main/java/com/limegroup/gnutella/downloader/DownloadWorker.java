@@ -377,11 +377,21 @@ public class DownloadWorker implements Runnable {
         HashTree ourTree = _commonOutFile.getHashTree();
         
         ConnectionStatus status = null;
-        // request THEX from te _downloader if the tree we have
-        // isn't good enough (or we don't have a tree)
+        // request THEX from te _downloader if (the tree we have
+        // isn't good enough or we don't have a tree) and another
+        // worker isn't currently requesting one
         if (_downloader.hasHashTree() &&
                 (ourTree == null || !ourTree.isDepthGoodEnough())) {
+            
+            
+            synchronized(_commonOutFile) {
+                if (_commonOutFile.isHashTreeRequested())
+                    return status;
+                _commonOutFile.setHashTreeRequested(true);
+            }
+            
             status = _downloader.requestHashTree();
+            _commonOutFile.setHashTreeRequested(false);
             if(status.isThexResponse()) {
                 HashTree temp = status.getHashTree();
                 if (temp.isBetterTree(ourTree)) {

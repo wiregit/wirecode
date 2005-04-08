@@ -112,6 +112,11 @@ public class VerifyingFile {
     private HashTree hashTree;
     
     /**
+     * Whether someone is currently requesting the hash tree
+     */
+    private boolean hashTreeRequested;
+    
+    /**
      * Whether we are actually verifying chunks
      */
     private boolean discardBad = true;
@@ -490,6 +495,17 @@ public class VerifyingFile {
      */
     public synchronized void setHashTree(HashTree tree) {
         hashTree = tree;
+    }
+    
+    /**
+     * flags that someone is currently requesting the tree
+     */
+    public synchronized void setHashTreeRequested(boolean yes) {
+        hashTreeRequested = yes;
+    }
+    
+    public synchronized boolean isHashTreeRequested() {
+        return hashTreeRequested;
     }
     
     public synchronized void setDiscardUnverified(boolean yes) {
