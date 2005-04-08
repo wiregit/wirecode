@@ -341,6 +341,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         return ret;
     }
     
+    public synchronized int getKnownHosts() {
+        return verifiedHosts.size()+newHosts.size()+pingedHosts.size();
+    }
+    
     /**
      * class that actually does the preferencing of RFDs
      * 

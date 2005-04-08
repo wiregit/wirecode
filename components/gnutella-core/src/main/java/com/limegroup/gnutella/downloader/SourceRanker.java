@@ -43,6 +43,11 @@ public abstract class SourceRanker {
     protected abstract Collection getShareableHosts();
     
     /**
+     * @return the number of hosts this ranker knows about
+     */
+    public abstract int getKnownHosts();
+    
+    /**
      * stops the ranker.
      */
     public abstract void stop();

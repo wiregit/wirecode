@@ -2413,7 +2413,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
-        return (rfds == null ? 0 : rfds.size());
+        return (ranker == null ? 0 : ranker.getKnownHosts());
     }
     
     public synchronized int getBusyHostCount() {

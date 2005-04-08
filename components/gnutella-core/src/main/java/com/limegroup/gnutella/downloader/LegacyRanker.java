@@ -89,5 +89,9 @@ public class LegacyRanker extends SourceRanker {
         return rfds;
     }
     
+    public int getKnownHosts() {
+        return rfds.size();
+    }
+    
     public void stop(){}
 }
