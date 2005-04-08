@@ -282,7 +282,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * Notification that an IOException occurred while reading/writing.
 	 */
 	public void handleIOException(IOException iox) {
-	    ErrorService.error(iox);
+	    ErrorService.error(iox, "UDP Error.");
 	}
 	
 	/**
@@ -389,6 +389,8 @@ public class UDPService implements ReadHandler, WriteHandler {
             throw new IllegalArgumentException("Null InetAddress");
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Invalid Port: " + port);
+        if(_channel == null || _channel.socket().isClosed())
+            return; // ignore if not open.
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(msg.getTotalLength());
         try {

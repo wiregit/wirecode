@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.SocketAddress;
 import java.net.ServerSocket;
 
@@ -89,13 +90,19 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
      */
     public Socket accept() throws IOException {
         synchronized(LOCK){
+            boolean looped = false;
+            int timeout = getSoTimeout();
             while(!isClosed() && isBound() && storedException == null && pendingSockets.isEmpty()) {
+                if(looped && timeout != 0)
+                    throw new SocketTimeoutException("accept timed out: " + timeout);
+                    
                 LOG.debug("Waiting for incoming socket...");
                 try {
-                    LOCK.wait();
+                    LOCK.wait(timeout);
                 } catch(InterruptedException ix) {
                     throw new InterruptedIOException(ix);
                 }
+                looped = true;
             }
                 
             IOException x = storedException;

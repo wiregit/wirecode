@@ -486,6 +486,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * message/stacktrace.
      */
     public void error(Throwable ex, String detail) {
+        ex = new UnexpectedExceptionError(detail, ex); // remember the detail & stack trace of the ErrorService.
         if ( _testThread != Thread.currentThread() ) {
             _testResult.addError(this, ex);
             _testThread.interrupt();
