@@ -56,7 +56,7 @@ import org.apache.commons.logging.Log;
             buffer.put((byte)(x & 0xFF));
             
             // there's data in the buffer now, the channel can write it.
-            NIODispatcher.instance().interestWrite(channel);
+            NIODispatcher.instance().interestWrite(channel, true);
         }
     }
     
@@ -72,7 +72,7 @@ import org.apache.commons.logging.Log;
                 len -= available;
             
                 // now that there's data in the buffer, write with the channel
-                NIODispatcher.instance().interestWrite(channel);
+                NIODispatcher.instance().interestWrite(channel, true);
             }
         }
     }

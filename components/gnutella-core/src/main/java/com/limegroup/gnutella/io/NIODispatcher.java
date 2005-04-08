@@ -87,21 +87,27 @@ public class NIODispatcher implements Runnable {
     }
     
     /** Registers a SelectableChannel as being interested in a write again. */
-    public void interestWrite(SelectableChannel channel) {
-        interest(channel, SelectionKey.OP_WRITE);
+    public void interestWrite(SelectableChannel channel, boolean on) {
+        interest(channel, SelectionKey.OP_WRITE, on);
     }
     
     /** Registers a SelectableChannel as being interested in a read again. */
-    public void interestRead(SelectableChannel channel) {
-        interest(channel, SelectionKey.OP_READ);
+    public void interestRead(SelectableChannel channel, boolean on) {
+        interest(channel, SelectionKey.OP_READ, on);
     }    
     
     /** Registers interest on the channel for the given op */
-    private void interest(SelectableChannel channel, int op) {
+    private void interest(SelectableChannel channel, int op, boolean on) {
         try {
             SelectionKey sk = channel.keyFor(selector);
-            if(sk != null && sk.isValid())
-                sk.interestOps(sk.interestOps() | op);
+            if(sk != null && sk.isValid()) {
+                synchronized(channel.blockingLock()) {
+                    if(on)
+                        sk.interestOps(sk.interestOps() | op);
+                    else
+                        sk.interestOps(sk.interestOps() & ~op);
+                }
+            }
         } catch(CancelledKeyException cke) {
             // It is possible to register interest on any thread, which means
             // that the key could have been cancelled at any time.
@@ -187,7 +193,7 @@ public class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        handler.handleRead(sk);
+        handler.handleRead();
     }
     
     /**
@@ -202,7 +208,7 @@ public class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        handler.handleWrite(sk);
+        handler.handleWrite();
     }
     
     /**

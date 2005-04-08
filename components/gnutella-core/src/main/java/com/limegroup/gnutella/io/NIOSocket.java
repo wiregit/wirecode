@@ -114,8 +114,8 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      *
      * This passes it off to the NIOInputStream.
      */
-    public void handleRead(SelectionKey sk) throws IOException {
-        reader.readChannel(sk);
+    public void handleRead() throws IOException {
+        reader.readChannel();
     }
     
     /**
@@ -123,8 +123,8 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      *
      * This passes it off to the NIOOutputStream.
      */
-    public void handleWrite(SelectionKey sk) throws IOException {
-        writer.writeChannel(sk);
+    public void handleWrite() throws IOException {
+        writer.writeChannel();
     }
     
     /**

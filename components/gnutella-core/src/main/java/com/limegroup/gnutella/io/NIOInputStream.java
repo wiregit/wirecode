@@ -50,7 +50,7 @@ class NIOInputStream {
         source = new BufferInputStream(buffer, handler, channel);
         bufferLock = source.getBufferLock();
         
-        NIODispatcher.instance().interestRead(channel);
+        NIODispatcher.instance().interestRead(channel, true);
     }
     
     /**
@@ -66,7 +66,7 @@ class NIOInputStream {
     /**
      * Notification that a read can happen on the SocketChannel.
      */
-    void readChannel(SelectionKey sk) throws IOException {
+    void readChannel() throws IOException {
         synchronized(bufferLock) {
             int read = 0;
             
@@ -81,11 +81,8 @@ class NIOInputStream {
     
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
-            if(!buffer.hasRemaining()) {
-                synchronized(channel.blockingLock()) {
-                    sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
-                }
-            }
+            if(!buffer.hasRemaining())
+                NIODispatcher.instance().interestRead(channel, false);
         }
     }
     

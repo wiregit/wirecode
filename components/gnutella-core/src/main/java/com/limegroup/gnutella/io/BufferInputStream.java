@@ -59,7 +59,7 @@ import org.apache.commons.logging.Log;
             buffer.compact();
             
             // there's room in the buffer now, the channel needs some data.
-            NIODispatcher.instance().interestRead(channel);
+            NIODispatcher.instance().interestRead(channel, true);
             
             // must &, otherwise implicit cast can change value.
             // (for example, reading the byte -1 is very different than
@@ -79,7 +79,7 @@ import org.apache.commons.logging.Log;
             buffer.compact();
             
             // now that there's room in the buffer, fill up the channel
-            NIODispatcher.instance().interestRead(channel);
+            NIODispatcher.instance().interestRead(channel, true);
             
             return available; // the amount we read.
         }

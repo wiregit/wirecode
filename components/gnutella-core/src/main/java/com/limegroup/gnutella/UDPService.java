@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.nio.channels.DatagramChannel;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -236,7 +235,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	/**
 	 * Notification that a read can happen.
 	 */
-	public void handleRead(SelectionKey key) throws IOException {
+	public void handleRead() throws IOException {
         while(true) {
             BUFFER.clear();
             
@@ -407,14 +406,14 @@ public class UDPService implements ReadHandler, WriteHandler {
         synchronized(OUTGOING_MSGS) {
             OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, err));
             if(_channel != null)
-                NIODispatcher.instance().interestWrite(_channel);
+                NIODispatcher.instance().interestWrite(_channel, true);
         }
 	}
 	
 	/**
 	 * Notification that a write can happen.
 	 */
-	public void handleWrite(SelectionKey key) throws IOException {
+	public void handleWrite() throws IOException {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
 	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
@@ -426,7 +425,7 @@ public class UDPService implements ReadHandler, WriteHandler {
                 }
 	        }
 	        // if there's no data left to send, we don't wanna be notified of write events.
-	        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+	        NIODispatcher.instance().interestWrite(_channel, false);
 	    }
     }
 	        
