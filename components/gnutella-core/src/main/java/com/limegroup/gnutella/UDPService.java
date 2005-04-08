@@ -4,14 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.NoRouteToHostException;
-import java.net.SocketException;
 import java.net.SocketAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -35,9 +29,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.io.ReadHandler;
 import com.limegroup.gnutella.io.WriteHandler;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -72,11 +64,6 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * The list of messages to be sent, as SendBundles.
 	 */
 	private final List OUTGOING_MSGS;
-	
-	/**
-	 * The ProcessingQueue that dispatches incoming UDP messages.
-	 */
-	private final ProcessingQueue DISPATCHER;
 	
 	/**
 	 * The buffer that's re-used for reading incoming messages.
@@ -165,7 +152,6 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	protected UDPService() {	   
-	    DISPATCHER = new ProcessingQueue("UDPDispatch");
 	    OUTGOING_MSGS = new LinkedList();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
@@ -208,15 +194,11 @@ public class UDPService implements ReadHandler, WriteHandler {
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
         	DatagramSocket s = channel.socket();
-        	if (CommonUtils.isWindows2000orXP())
-        		s.setReceiveBufferSize(64*1024);
+        	s.setReceiveBufferSize(64*1024);
+        	s.setSendBufferSize(64*1024);
             s.bind(new InetSocketAddress(port));
             return s;
-        }
-        catch (SocketException se) {
-            throw new IOException("socket could not be set on port: "+port);
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             throw new IOException("security exception on port: "+port);
         }
     }
@@ -379,10 +361,6 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
      * This method should not be called if the client is not GUESS enabled.
      *
-     * If sending fails for reasons such as a BindException,
-     * NoRouteToHostException or specific IOExceptions such as
-     * "No buffer space available", this message is silently dropped.
-     *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
@@ -395,10 +373,6 @@ public class UDPService implements ReadHandler, WriteHandler {
 	/**
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
      * This method should not be called if the client is not GUESS enabled.
-     *
-     * If sending fails for reasons such as a BindException,
-     * NoRouteToHostException or specific IOExceptions such as
-     * "No buffer space available", this message is silently dropped.
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
