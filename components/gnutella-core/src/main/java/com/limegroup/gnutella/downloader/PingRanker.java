@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -118,9 +117,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
-        List l = new ArrayList(1);
-        l.add(host);
-        addInternal(l);
+        addInternal(host);
+        pingIfNeeded();
     }
     
     private void addInternal(RemoteFileDesc host) {
@@ -140,13 +138,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             running = true;
         }
         
-        if (host.isFromAlternateLocation()) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("potentially adding host from altloc "+host+" "+host.getPushAddr());
-            
-            if (knowsAboutHost(host))
+        // do not allow duplicate hosts from alternate locations
+        if (host.isFromAlternateLocation() && knowsAboutHost(host))
                 return;
-        }
         
         if (host.needsPush()) 
             everybodyPush.add(host.getPushAddr());
@@ -218,23 +212,17 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // create a ping for the non-firewalled hosts
         HeadPing ping = new HeadPing(myGUID,sha1,getPingFlags());
         
-        // iterate through the list and select some hosts to ping
         List toSend = new ArrayList();
         for (Iterator iter = newHosts.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             iter.remove();
             
             if (rfd.needsPush())
-                schedulePushPings(rfd);
-            else
+                pingProxies(rfd);
+            else {
+                pingedHosts.put(rfd,rfd);
                 toSend.add(rfd);
-        }
-        
-        // put the rfds in the pingedMap.  For direct hosts, they map
-        // to themselves 
-        for (Iterator iter = toSend.iterator(); iter.hasNext();) {
-            Object o = iter.next();
-            pingedHosts.put(o,o);
+            }
         }
         
         if (LOG.isDebugEnabled())
@@ -244,21 +232,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     /**
-     * @return the appropriate ping flags based on current conditions
-     */
-    private static int getPingFlags() {
-        int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
-        if (RouterService.acceptedIncomingConnection() ||
-                RouterService.getUdpService().canDoFWT())
-            flags |= HeadPing.PUSH_ALTLOCS;
-        
-        return flags;
-    }
-    
-    /**
      * schedules a push ping to each proxy of the given host
      */
-    private void schedulePushPings(RemoteFileDesc rfd) {
+    private void pingProxies(RemoteFileDesc rfd) {
         if (RouterService.acceptedIncomingConnection() || 
                 (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
@@ -276,10 +252,25 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
     }
     
+    /**
+     * @return the appropriate ping flags based on current conditions
+     */
+    private static int getPingFlags() {
+        int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
+        if (RouterService.acceptedIncomingConnection() ||
+                RouterService.getUdpService().canDoFWT())
+            flags |= HeadPing.PUSH_ALTLOCS;
+        
+        return flags;
+    }
+    
     public synchronized boolean hasMore() {
         return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && pingedHosts.isEmpty());
     }
     
+    /**
+     * Informs the Ranker that a host has replied with a HeadPing
+     */
     public synchronized void processMessage(Message m, ReplyHandler handler) {
         if (!running)
             return;
@@ -295,7 +286,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
         
         if (LOG.isDebugEnabled())
-            LOG.debug("received a pong "+ pong+ " from "+handler +" for rfd "+rfd+" with PE "+rfd.getPushAddr());
+            LOG.debug("received a pong "+ pong+ " from "+handler +
+                    " for rfd "+rfd+" with PE "+rfd.getPushAddr());
         
         // if the pong is firewalled, remove the other proxies from the 
         // pinged set
@@ -311,10 +303,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // update the rfd with information from the pong
         pong.updateRFD(rfd);
         
-        // extract any altlocs the pong had and filter ones we know about
+        // add any altlocs the pong had to our known hosts 
         addInternal(pong.getAllLocsRFD(rfd));
         
-        // and sort the host.
+        // and rank the host.
         verifiedHosts.add(rfd);
         
     }
@@ -361,21 +353,19 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     /**
      * class that actually does the preferencing of RFDs
-     * 
-     * HeadPongs with highest number of free slots get the highest priority
-     * Within the same queue rank, firewalled hosts get priority
-     * Within the same queue/fwall, partial hosts get priority
      */
     private static final class RFDComparator implements Comparator {
         public int compare(Object a, Object b) {
             RemoteFileDesc pongA = (RemoteFileDesc)a;
             RemoteFileDesc pongB = (RemoteFileDesc)b;
-            
+       
+            // HeadPongs with highest number of free slots get the highest priority
             if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;
             else if (pongA.getQueueStatus() < pongB.getQueueStatus())
                 return -1;
-            
+       
+            // Within the same queue rank, firewalled hosts get priority
             if (pongA.needsPush() != pongB.needsPush()) {
                 if (pongA.needsPush())
                     return -1;
@@ -383,6 +373,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     return 1;
             }
             
+            // Within the same queue/fwall, partial hosts get priority
             if (pongA.isPartialSource() != pongB.isPartialSource()) {
                 if (pongA.isPartialSource())
                     return -1;
@@ -396,7 +387,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     /**
-     * a quick-and-dirty ranker that deprioritizes RFDs from altlocs.
+     * a ranker that deprioritizes RFDs from altlocs, used to make sure
+     * we ping the hosts that actually returned results first
      */
     private static final class RFDAltDeprioritizer implements Comparator {
         public int compare(Object a, Object b) {
