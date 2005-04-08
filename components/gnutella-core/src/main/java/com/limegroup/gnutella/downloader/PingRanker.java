@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -103,10 +104,26 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             l = new ArrayList(c);
         
         Collections.sort(l,ALT_DEPRIORITIZER);
-        super.addToPool(l);
+        addInternal(l);
+    }
+    
+    /**
+     * adds the collection of hosts to to the internal structures
+     */
+    private void addInternal(Collection c) {
+        for (Iterator iter = c.iterator(); iter.hasNext();) 
+            addInternal((RemoteFileDesc)iter.next());
+        
+        pingIfNeeded();
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
+        List l = new ArrayList(1);
+        l.add(host);
+        addInternal(l);
+    }
+    
+    private void addInternal(RemoteFileDesc host) {
         
         // initialize the sha1 if we don't have one
         if (sha1 == null) {
@@ -123,22 +140,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             running = true;
         }
         
-        // if the host is from an altloc make sure its not duplicate
         if (host.isFromAlternateLocation()) {
             if (LOG.isDebugEnabled())
                 LOG.debug("potentially adding host from altloc "+host+" "+host.getPushAddr());
             
-            if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
-                return;
-            else if (everybody.contains(host))
+            if (knowsAboutHost(host))
                 return;
         }
         
-        addInternal(host);
-        pingIfNeeded();
-    }
-    
-    private void addInternal(RemoteFileDesc host) {
         if (host.needsPush()) 
             everybodyPush.add(host.getPushAddr());
         else
@@ -150,7 +159,15 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         newHosts.add(host);
     }
     
-    public synchronized RemoteFileDesc getBest() throws NoSuchElementException{
+    private boolean knowsAboutHost(RemoteFileDesc host) {
+        if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
+            return true;
+        else if (everybody.contains(host))
+            return true;
+        return false;
+    }
+    
+    public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
         LOG.debug("trying to get best host...");
         RemoteFileDesc ret;
         
@@ -295,10 +312,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         pong.updateRFD(rfd);
         
         // extract any altlocs the pong had and filter ones we know about
-        for (Iterator iter = pong.getAllLocsRFD(rfd).iterator(); iter.hasNext();) {
-            RemoteFileDesc current = (RemoteFileDesc) iter.next();
-            addToPool(current);
-        }
+        addInternal(pong.getAllLocsRFD(rfd));
         
         // and sort the host.
         verifiedHosts.add(rfd);
