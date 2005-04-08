@@ -521,11 +521,8 @@ public class DownloadManager implements BandwidthTracker {
 
         initializeDownload(downloader);
         
-        //Now that the download is started, add the alts without caching.
-        for(Iterator iter = alts.iterator(); iter.hasNext(); ) {
-            RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-            downloader.addDownload(rfd, false);
-        }
+        //Now that the download is started, add the sources w/o caching
+        downloader.addDownload(alts,false);
         
         return downloader;
     }   

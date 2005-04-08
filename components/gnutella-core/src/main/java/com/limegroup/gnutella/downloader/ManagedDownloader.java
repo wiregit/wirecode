@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1263,6 +1264,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         return addDownloadForced(rfd, cache);
     }
+    
+    public synchronized boolean addDownload(Collection c, boolean cache) {
+        List l = new ArrayList(c.size());
+        for (Iterator iter = c.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (hostIsAllowed(rfd) && allowAddition(rfd))
+                l.add(rfd);
+        }
+        return addDownloadForced(l,cache);
+    }
 
     /**
      * Like addDownload, but doesn't call allowAddition(..).
@@ -1280,30 +1291,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected synchronized final boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
-        rfd.setDownloading(true);
-        if(downloadSHA1 == null)
-            downloadSHA1 = rfd.getSHA1Urn();
-            
+
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( rfd.isMe() )
             return true;
-        // If this already exists in allFiles, DO NOT ADD IT AGAIN.
-        // However, we must still add it to files if it didn't already exist
-        // there.
-
-        // If cache is already false, there is no need to look in allFiles.
-        if (cache) 
-            cache = !allFiles.contains(rfd);
         
+        prepareRFD(rfd,cache);
         
-		
-        // Add to the list of RFDs to connect to.
-		ranker.addToPool(rfd);
-
-        //Append to allFiles for resume purposes if caching...
-        if(cache) 
-            allFiles.add(rfd);
-
         //...and notify manager to look for new workers.  You might be
         //tempted to just call dloaderManagerThread.interrupt(), but that
         //causes spurious interrupts to happen when establishing connections
@@ -1319,7 +1313,50 @@ public class ManagedDownloader implements Downloader, Serializable {
                 this.notify();                      //see fireDownloadWorkers
         }
 
+        // Add to the list of RFDs to connect to.
+        ranker.addToPool(rfd);
         return true;
+    }
+    
+    protected synchronized final boolean addDownloadForced(Collection c, boolean cache) {
+        for (Iterator iter = c.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd.isMe()) {
+                iter.remove();
+                continue;
+            }
+            prepareRFD(rfd,cache);
+            if(LOG.isTraceEnabled())
+                LOG.trace("added rfd: " + rfd);
+        }
+        
+        if ( ranker.hasMore() ) {
+            if(isInactive() || dloaderManagerThread == null)
+                receivedNewSources = true;
+            else
+                this.notify();                      //see fireDownloadWorkers
+        }
+        
+        ranker.addToPool(c);
+        return true;
+    }
+    
+    private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
+        rfd.setDownloading(true);
+        if(downloadSHA1 == null)
+            downloadSHA1 = rfd.getSHA1Urn();
+            
+        // If this already exists in allFiles, DO NOT ADD IT AGAIN.
+        // However, we must still add it to files if it didn't already exist
+        // there.
+
+        // If cache is already false, there is no need to look in allFiles.
+        if (cache) 
+            cache = !allFiles.contains(rfd);
+        
+        //Append to allFiles for resume purposes if caching...
+        if(cache) 
+            allFiles.add(rfd);        
     }
     
     /**
@@ -1516,7 +1553,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             Assert.that(!ploc.isDemoted());
         }
         
-        for(Iterator iter=_activeWorkers.iterator(); iter.hasNext();) {
+        for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
             
@@ -2341,7 +2378,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
             if (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen()) {
-                while (_workers.size() < getSwarmCapacity() && ranker.hasMore()){
+                while ((_workers.size()-queuedWorkers.size()) 
+                        < getSwarmCapacity() && ranker.hasMore()){
                     
                     // see if we need to update our ranker
                     ranker = SourceRanker.getAppropriateRanker(ranker);
@@ -2782,8 +2820,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getVendor() {
-        if ( _activeWorkers.size() > 0 ) {
-            HTTPDownloader dl = ((DownloadWorker)_activeWorkers.get(0)).getDownloader();
+        List active = getActiveWorkers();
+        if ( active.size() > 0 ) {
+            HTTPDownloader dl = ((DownloadWorker)active.get(0)).getDownloader();
             return dl.getVendor();
         } else if (getState() == REMOTE_QUEUED) {
             return queuedVendor;
@@ -2795,7 +2834,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
-        Iterator iter = _activeWorkers.iterator();
+        Iterator iter = getActiveWorkers().iterator();
         while(iter.hasNext()) {
             c = true;
             BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
