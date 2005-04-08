@@ -48,7 +48,7 @@ public abstract class DefaultHeaders extends Properties {
 				  CommonUtils.getHttpServer());       
         props.put(HeaderNames.GGEP, "0.5");
 		props.put(HeaderNames.X_GUESS, "0.1");
-        props.put(HeaderNames.X_VENDOR_MESSAGE, "0.1");
+        props.put(HeaderNames.X_VENDOR_MESSAGE, "0.2");
         props.put(HeaderNames.X_REQUERIES, "false");
 
         // even though these are only really used by Ultrapeers, we

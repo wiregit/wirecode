@@ -363,7 +363,7 @@ public class Connection implements IpPort {
      */
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
-			if(_headers.supportsVendorMessages()) {
+			if(_headers.supportsVendorMessages() > 0) {
                 send(MessagesSupportedVendorMessage.instance());
                 send(CapabilitiesVM.instance());
 			}
@@ -377,7 +377,7 @@ public class Connection implements IpPort {
      */
     protected void sendUpdatedCapabilities() {
         try {
-            if(_headers.supportsVendorMessages())
+            if(_headers.supportsVendorMessages() > 0)
                 send(CapabilitiesVM.instance());
         } catch (IOException iox) { }
     }
@@ -1378,6 +1378,16 @@ public class Connection implements IpPort {
         if (_messagesSupported != null)
             return _messagesSupported.supportsMessage(vendorID, selector);
         return -1;
+    }
+    
+    /**
+     * @return whether this connection supports routing of vendor messages
+     * (i.e. will not drop a VM that has ttl <> 1 and hops <> 0)
+     */
+    public boolean supportsVMRouting() {
+        if (_headers != null)
+            return _headers.supportsVendorMessages() >= 0.2;
+        return false;
     }
     
     /** @return -1 if the message isn't supported, else the version number 

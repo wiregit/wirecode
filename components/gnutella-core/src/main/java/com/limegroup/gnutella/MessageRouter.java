@@ -574,7 +574,7 @@ public abstract class MessageRouter {
         else if (msg instanceof HeadPing) {
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, handler);
-        }
+        } 
         notifyMessageListener(msg, handler);
     }
     
@@ -2724,14 +2724,18 @@ public abstract class MessageRouter {
             handler.reply(pong); // 
         } else {
             // Otherwise, remember who sent it and forward it on.
-                
+             Connection con = (Connection)pingee;
+             
             //remember where to send the pong to. 
             //the pong will have the same GUID as the ping. 
             // Note that this uses the messageGUID, not the clientGUID
             _headPongRouteTable.routeReply(ping.getGUID(), handler); 
             
             //and send off the routed ping 
-            pingee.reply(new HeadPing(ping)); 
+            if (con.supportsVMRouting())
+                pingee.reply(ping);
+            else
+                pingee.reply(new HeadPing(ping)); 
         }
    } 
     
