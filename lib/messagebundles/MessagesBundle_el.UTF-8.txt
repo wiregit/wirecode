@@ -1049,10 +1049,8 @@ UPLOAD_QUEUED=στην ουρά
 ###################################################################
 # Key/value pairs for MonitorView
 ###################################################################
-#### MONITOR_VIEW_INCOMING_SEARCHES=Incoming Searches
+#### MONITOR_VIEW_INCOMING_SEARCHES=Show incoming searches
 MONITOR_VIEW_INCOMING_SEARCHES=Εισερχόμενες έρευνες
-#### MONITOR_VIEW_ENABLE=Show
-MONITOR_VIEW_ENABLE=Εμφάνιση
 #### MONITOR_VIEW_SHOW_LAST=Show last
 MONITOR_VIEW_SHOW_LAST=Εμφάνιση τελευταίου
 #### MONITOR_VIEW_SEARCHES=searches
@@ -1939,6 +1937,8 @@ OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Χαραμάδες
 OPTIONS_CONNECTIONS_MAIN_TITLE=Συνδέσεις
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
 OPTIONS_SHUTDOWN_MAIN_TITLE=Παύση λειτουργίας
+#### OPTIONS_UPDATE_MAIN_TITLE=Updates
+#? OPTIONS_UPDATE_MAIN_TITLE=
 #### OPTIONS_CHAT_MAIN_TITLE=Chat
 OPTIONS_CHAT_MAIN_TITLE=Συνομιλία
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
@@ -2218,6 +2218,20 @@ OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Παύση λειτουργίας αμέσω�
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Παύση λειτουργίας μετά τις μεταφορές.
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to SystemTray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Ελαχιστοποίηση στη γραμμή εργασιών
+
+################################################################################
+# Key/Value pairs for update options
+################################################################################
+#### OPTIONS_UPDATE_TITLE=Update Options
+#? OPTIONS_UPDATE_TITLE=
+#### OPTIONS_UPDATE_LABEL=You can choose when you want to be notified of new LimeWire releases.
+#? OPTIONS_UPDATE_LABEL=
+#### OPTIONS_UPDATE_BETA=Beta Releases
+#? OPTIONS_UPDATE_BETA=
+#### OPTIONS_UPDATE_SERVICE=Service Releases
+#? OPTIONS_UPDATE_SERVICE=
+#### OPTIONS_UPDATE_MAJOR=Major Releases
+#? OPTIONS_UPDATE_MAJOR=
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window
