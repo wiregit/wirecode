@@ -82,6 +82,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private boolean running;
     
+    /**
+     * The last time we sent a bunch of hosts for pinging.
+     */
+    private long lastPingTime;
+    
     private static final Comparator RFD_COMPARATOR = new RFDComparator();
     
     private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
@@ -113,12 +118,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         for (Iterator iter = c.iterator(); iter.hasNext();) 
             addInternal((RemoteFileDesc)iter.next());
         
-        pingIfNeeded();
+        pingNewHosts();
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
         addInternal(host);
-        pingIfNeeded();
+        pingNewHosts();
     }
     
     private void addInternal(RemoteFileDesc host) {
@@ -162,7 +167,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
-        LOG.debug("trying to get best host...");
         RemoteFileDesc ret;
         
         // try a verified host
@@ -186,7 +190,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             }
         }
         
-        pingIfNeeded();
+        pingNewHosts();
         
         if (LOG.isDebugEnabled())
             LOG.debug("the best host we came up with is "+ret+" "+ret.getPushAddr());
@@ -196,7 +200,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * pings a bunch of hosts if necessary
      */
-    private void pingIfNeeded() {
+    private void pingNewHosts() {
         // if we have reached our desired # of altlocs, don't ping
         if (isCancelled())
             return;
@@ -209,11 +213,19 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (sha1 == null)
             return;
         
+        // if its not time to ping yet, don't ping
+        long now = System.currentTimeMillis();
+        if (now - lastPingTime < DownloadSettings.BATCH_INTERVAL.getValue())
+            return;
+        
         // create a ping for the non-firewalled hosts
         HeadPing ping = new HeadPing(myGUID,sha1,getPingFlags());
         
-        List toSend = new ArrayList();
-        for (Iterator iter = newHosts.iterator(); iter.hasNext();) {
+        // prepare a batch of hosts to ping
+        int batch = DownloadSettings.PING_BATCH.getValue();
+        List toSend = new ArrayList(batch);
+        int sent = 0;
+        for (Iterator iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             iter.remove();
             
@@ -223,12 +235,18 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                 pingedHosts.put(rfd,rfd);
                 toSend.add(rfd);
             }
+            sent++;
         }
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("pinging hosts: "+toSend);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("\nverified hosts " +verifiedHosts.size()+
+                    "\npingedHosts "+pingedHosts.values().size()+
+                    "\nnewHosts "+newHosts.size()+
+                    "\npinging hosts: "+sent);
+        }
         
         pinger.rank(toSend,null,this,ping);
+        lastPingTime = now;
     }
     
     /**

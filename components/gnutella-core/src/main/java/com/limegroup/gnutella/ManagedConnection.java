@@ -1049,7 +1049,7 @@ public class ManagedConnection extends Connection
                 (m instanceof QueryStatusResponse)) 
                 m = morphToStopQuery((QueryStatusResponse) m);
             //call MessageRouter to handle and process the message
-            router.handleMessage(m, this);            
+            router.handleMessage(m, this);        
         }
     }
     
