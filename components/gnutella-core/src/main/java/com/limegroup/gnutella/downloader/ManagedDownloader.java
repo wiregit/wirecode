@@ -1309,8 +1309,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.trace("added rfd: " + rfd);
             if(isInactive() || dloaderManagerThread == null)
                 receivedNewSources = true;
-            else
-                this.notify();                      //see fireDownloadWorkers
         }
 
         // Add to the list of RFDs to connect to.
@@ -1333,8 +1331,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( ranker.hasMore() ) {
             if(isInactive() || dloaderManagerThread == null)
                 receivedNewSources = true;
-            else
-                this.notify();                      //see fireDownloadWorkers
         }
         
         ranker.addToPool(c);
@@ -2378,7 +2374,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
             if (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen()) {
-                while ((_workers.size()-queuedWorkers.size()) 
+                if ((_workers.size()-queuedWorkers.size()) 
                         < getSwarmCapacity() && ranker.hasMore()){
                     
                     // see if we need to update our ranker
@@ -2405,9 +2401,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //if no workers notify in 4 secs, iterate. This is a problem
                 //for stalled downloaders which will never notify. So if we
                 //wait without a timeout, we could wait forever.
-                this.wait(4000); // note that this relinquishes the lock
+                this.wait(2000); // note that this relinquishes the lock
             } catch (InterruptedException ignored) {}
         }//end of while
+	return 0; // compilation requires??
     }
     
     /**
