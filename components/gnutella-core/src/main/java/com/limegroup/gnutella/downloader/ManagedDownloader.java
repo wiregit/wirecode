@@ -347,11 +347,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
 
-    /** List of RemoteFileDesc to which we actively connect and request parts
-     * of the file.
+    /** 
+     * List of RemoteFileDesc where we store rfds that we are actively
+     * connecting to
      * LOCKING: this
      */
     private Set /*of RemoteFileDesc */ rfds;
+    
+    /** 
+     * Set of RemoteFileDesc that stores the busy rfds we wait to retry on   
+     * LOCKING: this
+     */
+    private Set busyRFDs;
     
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
@@ -599,6 +606,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         this.callback=callback;
         rfds = new TreeSet(IpPort.COMPARATOR);
+        busyRFDs = new TreeSet(IpPort.COMPARATOR);
         _activeWorkers=new LinkedList();
         _workers=new ArrayList();
         queuedWorkers = new HashMap();
@@ -1852,14 +1860,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * the first try.
      */
     private synchronized long calculateWaitTime() {
-        if (rfds == null || rfds.size()==0)
+        if ((busyRFDs == null || busyRFDs.size()==0) && !ranker.hasMore())
             return 0;
+        
         // waitTime is in seconds
         int waitTime = Integer.MAX_VALUE;
-        for (Iterator iter = rfds.iterator(); iter.hasNext();) {
+        for (Iterator iter = busyRFDs.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
 			waitTime = Math.min(waitTime, rfd.getWaitTime());
 		}
+        
         // waitTime was in seconds
         return (waitTime*1000);
     }
@@ -2351,17 +2361,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return COMPLETE;
             } 
     
-            if (_workers.size() == 0) {                        
+            if (_workers.size() == 0 && !ranker.hasMore()) {                        
                 //No downloaders worth living for.
-                if ( rfds.size() > 0 && calculateWaitTime() > 0) {
+                if ( calculateWaitTime() > 0) {
                     LOG.trace("MANAGER: terminating with busy");
                     return WAITING_FOR_RETRY;
-                } else if( !ranker.hasMore() ) {
+                } else if( busyRFDs == null || busyRFDs.isEmpty() ) {
                     LOG.trace("MANAGER: terminating w/o hope");
                     return GAVE_UP;
                 }
-                // else (files.size() > 0 && calculateWaitTime() == 0)
-                // fallthrough ...
             }
 
             if(LOG.isDebugEnabled())
@@ -2373,38 +2381,64 @@ public class ManagedDownloader implements Downloader, Serializable {
             //limit, which if successfully starts downloading or gets a better
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
-            if (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen()) {
-                if ((_workers.size()-queuedWorkers.size()) 
-                        < getSwarmCapacity() && ranker.hasMore()){
-                    
+            if (shouldStartWorker()){
                     // see if we need to update our ranker
                     ranker = SourceRanker.getAppropriateRanker(ranker);
+                    
+                    // if the ranker has become empty, reset it and 
+                    // give it the previously busy rfds to try again
+                    if (!ranker.hasMore()) 
+                        reloadBusyHosts();
                     
                     // get the best host
                     RemoteFileDesc rfd = ranker.getBest();
                     
                     // If the rfd was busy, that means all possible RFDs
-                    // are busy
-                    if( rfd.isBusy() ) {
-						addRFD(rfd);
-                        break;
-                    }
-					
-                    // else...
-                    startWorker(rfd);
-                }//end of for 
+                    // are busy - store for later
+                    if( rfd.isBusy() ) 
+						busyRFDs.add(rfd);
+                    else
+                        startWorker(rfd);
+                    
             } else if (LOG.isDebugEnabled())
                 LOG.debug("no blocks but can't steal - sleeping");
             
             //wait for a notification before we continue.
             try {
-                //if no workers notify in 4 secs, iterate. This is a problem
+                //if no workers notify in a while, iterate. This is a problem
                 //for stalled downloaders which will never notify. So if we
                 //wait without a timeout, we could wait forever.
-                this.wait(2000); // note that this relinquishes the lock
+                this.wait(DownloadSettings.WORKER_INTERVAL.getValue()); // note that this relinquishes the lock
             } catch (InterruptedException ignored) {}
         }//end of while
-	return 0; // compilation requires??
+    }
+    
+    /**
+     * adds any hosts that were previously busy but whose wait time is now
+     * expired to the ranker (resetting it first)
+     */
+    private void reloadBusyHosts() {
+        ranker.stop();
+        List l = new ArrayList(busyRFDs.size());
+        for (Iterator iter = busyRFDs.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd.isBusy())
+                continue;
+            iter.remove();
+            l.add(rfd);
+        }
+        ranker.addToPool(l);
+    }
+    
+    /**
+     * @return if we should start another worker - means we have more to download,
+     * have not reached our swarm capacity and the ranker has something to offer
+     * or we have some rfds to re-try
+     */
+    private boolean shouldStartWorker() {
+        return (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen() ) &&
+             ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
+             (ranker.hasMore() || !busyRFDs.isEmpty());
     }
     
     /**
@@ -2420,7 +2454,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {
-		ranker.addToPool(rfd);
+        if (rfd.isBusy())
+            busyRFDs.add(rfd);
+        else
+            ranker.addToPool(rfd);
 	}
     
 	/**
@@ -2452,15 +2489,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized int getBusyHostCount() {
-        if (rfds == null) 
-            return 0;
-
-        int busy = 0;
-        for (Iterator iter = rfds.iterator();iter.hasNext();) {
-            if ( ((RemoteFileDesc)iter.next()).isBusy() )
-                busy++;
-        }
-        return busy;
+        return busyRFDs.size();
     }
 
     public synchronized int getQueuedHostCount() {

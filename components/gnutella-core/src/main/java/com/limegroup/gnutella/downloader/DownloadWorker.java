@@ -127,7 +127,7 @@ public class DownloadWorker implements Runnable {
      * an acceptable issue, given the complexity of implementing
      * a method that will work under the circumstances.
      */
-    private static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
+    public static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
     
     /**
      * The minimum number of seconds to wait for a busy host if we do

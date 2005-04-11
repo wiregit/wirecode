@@ -127,7 +127,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     private void addInternal(RemoteFileDesc host) {
-        
         // initialize the sha1 if we don't have one
         if (sha1 == null) {
             if( host.getSHA1Urn() != null)
@@ -213,9 +212,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (sha1 == null)
             return;
         
-        // if its not time to ping yet, don't ping
+        // if its not time to ping yet, don't ping 
+        // use the same interval as workers for now
         long now = System.currentTimeMillis();
-        if (now - lastPingTime < DownloadSettings.BATCH_INTERVAL.getValue())
+        if (now - lastPingTime < DownloadSettings.WORKER_INTERVAL.getValue())
             return;
         
         // create a ping for the non-firewalled hosts

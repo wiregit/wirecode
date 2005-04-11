@@ -24,6 +24,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
@@ -408,6 +409,11 @@ public class HeadPong extends VendorMessage {
      * updates the rfd with information in this pong
      */
     public void updateRFD(RemoteFileDesc rfd) {
+        // if the rfd claims its busy, ping it again in a minute
+        // (we're obviously using HeadPings, so its cheap to ping it sooner 
+        // rather than later)
+        if (isBusy())
+            rfd.setRetryAfter(DownloadWorker.RETRY_AFTER_NONE_ACTIVE);
         rfd.setQueueStatus(getQueueStatus());
         rfd.setAvailableRanges(getRanges());
     }
