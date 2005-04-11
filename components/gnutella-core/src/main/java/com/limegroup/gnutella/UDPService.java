@@ -70,10 +70,9 @@ public class UDPService implements ReadHandler, WriteHandler {
 	private final ByteBuffer BUFFER;
 
 	/**
-	 * Constant for the size of UDP messages to accept -- dependent upon
-	 * IP-layer fragmentation.
+	 * The maximum size of a UDP message we'll accept.
 	 */
-	private final int BUFFER_SIZE = 1024 * 32;
+	private final int BUFFER_SIZE = 1024 * 2;
     
     /** True if the UDPService has ever received a solicited incoming UDP
      *  packet.
@@ -393,14 +392,16 @@ public class UDPService implements ReadHandler, WriteHandler {
             return; // ignore if not open.
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(msg.getTotalLength());
-        try {
-            msg.write(baos, OUT_HEADER_BUF);
-        } catch(IOException e) {
-            // this should not happen -- we should always be able to write
-            // to this output stream in memory
-            ErrorService.error(e);
-            // can't send the hit, so return
-            return;
+        synchronized(OUT_HEADER_BUF) {
+            try {
+                msg.write(baos, OUT_HEADER_BUF);
+            } catch(IOException e) {
+                // this should not happen -- we should always be able to write
+                // to this output stream in memory
+                ErrorService.error(e);
+                // can't send the hit, so return
+                return;
+            }
         }
 
         byte[] data = baos.toByteArray();
