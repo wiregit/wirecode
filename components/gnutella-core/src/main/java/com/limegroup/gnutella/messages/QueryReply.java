@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -1298,7 +1299,7 @@ public class QueryReply extends Message implements Serializable{
                         if (bais.read(combo, 0, combo.length) == combo.length) {
                             try {
                                 if(proxies == null)
-                                    proxies = new HashSet(3);
+                                    proxies = new TreeSet(IpPort.COMPARATOR);
                                 proxies.add(new IPPortCombo(combo));
                             } catch (BadPacketException malformedPair) {}
                         }                        
