@@ -2395,10 +2395,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                     
                     // If the rfd was busy, that means all possible RFDs
                     // are busy - store for later
-                    if( rfd.isBusy() ) 
+                    if( rfd.isBusy() ) {
 						busyRFDs.add(rfd);
-                    else
+                        continue; // see if we need to be waiting for busy
+                    } else {
                         startWorker(rfd);
+                        allFiles.add(rfd);
+                    }
                     
             } else if (LOG.isDebugEnabled())
                 LOG.debug("no blocks but can't steal - sleeping");
