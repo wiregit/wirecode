@@ -296,6 +296,11 @@ public class ManagedConnection extends Connection
      *
      *  @param bSet Whether to SET or CLEAR the busy timer for this host
      */
+    public void testHopsFlowZero( ){
+        softMaxHops=0;
+        setBusyTime(true);
+    }
+    
     public void setBusyTime( boolean bSet ){
         if( bSet ){            
             if( _busyTime==-1 )

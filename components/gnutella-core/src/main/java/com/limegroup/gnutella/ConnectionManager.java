@@ -399,6 +399,7 @@ public class ConnectionManager {
      * 
      * @return true iff the last-hop QRT tables should be updated early.
      */
+    int nTries=0;
     public boolean isAnyBusyLeafTriggeringQRTUpdate(){
         boolean busyLeaf=false;
         List list=getConnections();
@@ -408,8 +409,16 @@ public class ConnectionManager {
             ManagedConnection mc = (ManagedConnection)it.next();
             if( !mc.isSupernodeClientConnection() )
                 continue;
-            busyLeaf|=mc.isBusyEnoughToTriggerQRTRemoval();
-            mc.setBusyTime( false );    //  Clear the flag on this leaf
+            if( mc.isBusyEnoughToTriggerQRTRemoval() ){
+                busyLeaf=true;
+                mc.setBusyTime( false );    //  Clear the flag on this leaf
+            }
+    
+nTries++;            
+if( nTries>50 && nTries<150 ){
+    mc.testHopsFlowZero();
+    nTries=150;
+}
         }
         
         return busyLeaf;
