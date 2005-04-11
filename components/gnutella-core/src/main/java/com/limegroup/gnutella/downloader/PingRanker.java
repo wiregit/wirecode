@@ -306,6 +306,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (LOG.isDebugEnabled())
             LOG.debug("received a pong "+ pong+ " from "+handler +
                     " for rfd "+rfd+" with PE "+rfd.getPushAddr());
+        // if the pong didn't have the file, drop it
+        
+        if (!pong.hasFile())
+            return;
         
         // if the pong is firewalled, remove the other proxies from the 
         // pinged set
@@ -313,10 +317,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
                 pingedHosts.remove(iter.next());
         }
-        
-        // if the pong didn't have the file, drop it
-        if (!pong.hasFile())
-            return;
 
         // update the rfd with information from the pong
         pong.updateRFD(rfd);
