@@ -11,6 +11,9 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -108,10 +111,10 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 	 */
 	public void testIsAltlocPushCapable() throws Exception {
 		
-		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
-		PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.4",6346);
-		Set proxies = new HashSet();
-		Set proxies2 = new HashSet();
+		IpPort ppi = new IpPortImpl("1.2.3.4",6346);
+		IpPort ppi2 = new IpPortImpl("1.2.3.4",6346);
+		Set proxies = new IpPortSet();
+		Set proxies2 = new IpPortSet();
 		proxies.add(ppi);
 		proxies2.add(ppi);
 		proxies2.add(ppi2);

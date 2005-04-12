@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -27,6 +28,8 @@ import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -109,9 +112,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         Set proxies = reply.getPushProxies();
         assertEquals(1, proxies.size());
         Iterator iter = proxies.iterator();
-        PushProxyInterface ppi = (PushProxyInterface)iter.next();
-        assertEquals(ppi.getPushProxyPort(), 6355);
-        assertTrue(ppi.getPushProxyAddress().equals(InetAddress.getLocalHost()));
+        IpPort ppi = (IpPortImpl)iter.next();
+        assertEquals(ppi.getPort(), 6355);
+        assertTrue(ppi.getInetAddress().equals(InetAddress.getLocalHost()));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
@@ -173,8 +176,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         ss.setSoTimeout(25*TIMEOUT);
 
         // send a reply with some PushProxy info
-        Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
+        proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
@@ -327,9 +330,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // send a reply with some BAD PushProxy info
         //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
-        Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 8000));
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
+        proxies.add(new IpPortImpl("127.0.0.1", 7000));
+        proxies.add(new IpPortImpl("127.0.0.1", 8000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "berkeley.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 

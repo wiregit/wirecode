@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -42,6 +43,8 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -472,10 +475,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     private static RemoteFileDesc newPushRFD(String name,String hash,byte [] guid) 
     	throws Exception {
     	
-		QueryReply.PushProxyContainer ppi = 
-			new QueryReply.PushProxyContainer("1.2.3.10",2000);
+		IpPort ppi = 
+			new IpPortImpl("1.2.3.10",2000);
 		
-		Set ppis = new HashSet();ppis.add(ppi);
+		Set ppis = new TreeSet(IpPort.COMPARATOR);ppis.add(ppi);
 		
     	PushEndpoint pe = new PushEndpoint(guid,ppis);
     	pe.updateProxies(true);

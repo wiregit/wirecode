@@ -606,7 +606,7 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(new Interval(0, 100), getIntervalAt(0));
     }
         
-    public void testToBytes() {
+    public void testToBytes() throws Exception {
     	IntervalSet set = new IntervalSet();
     	Random r = new Random();
     	

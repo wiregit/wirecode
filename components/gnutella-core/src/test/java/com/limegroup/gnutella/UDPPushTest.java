@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -20,6 +21,8 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -85,8 +88,12 @@ public class UDPPushTest extends BaseTestCase {
 		
 		long now = System.currentTimeMillis();
 		
-		Set proxies = new HashSet();
-		proxies.add(new PPI());
+		Set proxies = new TreeSet(IpPort.COMPARATOR);
+        try {
+            proxies.add(new IpPortImpl(InetAddress.getLocalHost().getHostAddress(),10000));
+        } catch (UnknownHostException bad) {
+            ErrorService.error(bad);
+        }
 		LimeXMLDocument doc = null;
 		Set urns = null;
 		
@@ -351,19 +358,4 @@ public class UDPPushTest extends BaseTestCase {
 		};
 		t.start();
 	}
-	
-	static class PPI implements PushProxyInterface {
-		public int getPushProxyPort() {
-			return 10000;
-		}
-		
-		public InetAddress getPushProxyAddress() {
-			try{
-				return InetAddress.getLocalHost();
-			}catch(UnknownHostException uhe) {
-				return null;
-			}
-		}
-	}
-
 }

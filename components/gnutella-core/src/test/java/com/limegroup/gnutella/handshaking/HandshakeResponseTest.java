@@ -696,7 +696,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should be GUESS capable", hr.isGUESSCapable());
         assertTrue("should support GGEP", hr.supportsGGEP());
         assertTrue("should support vendor messages", 
-            hr.supportsVendorMessages());
+            hr.supportsVendorMessages() > 0);
         assertTrue("should use dynamic querying", hr.isDynamicQueryConnection());
 
         //if we added the value, make sure its there.

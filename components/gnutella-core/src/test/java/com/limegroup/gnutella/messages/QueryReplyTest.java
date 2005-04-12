@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -30,6 +30,8 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -512,9 +514,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // first take input of proxies
         String[] hosts = {"www.limewire.com", "www.limewire.org",
                           "www.susheeldaswani.com"};
-        Set proxies = new HashSet();
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
-            proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
+            proxies.add(new IpPortImpl(hosts[i], 6346));
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid, new byte[0],
@@ -682,9 +684,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // first take input of proxies
         String[] hosts = {"www.limewire.com", "www.limewire.org",
                           "www.susheeldaswani.com", "www.stanford.edu"};
-        Set proxies = new HashSet();
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
-            proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
+            proxies.add(new IpPortImpl(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
                                                      fwTransfer, proxies), 
                                  0, null);
@@ -705,10 +707,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         Set retProxies = _ggepUtil.getPushProxies(testGGEP);
         assertEquals(4, retProxies.size());
 
-        PushProxyInterface[] array1 = 
-            (PushProxyInterface[])retProxies.toArray(new QueryReply.PushProxyContainer[0]);
-        PushProxyInterface[] array2 = 
-            (PushProxyInterface[])proxies.toArray(new QueryReply.PushProxyContainer[0]);
+        IpPort[] array1 = 
+            (IpPort[])retProxies.toArray(new IpPortImpl[0]);
+        IpPort[] array2 = 
+            (IpPort[])proxies.toArray(new IpPortImpl[0]);
 
         assertEquals(retProxies, proxies);
         //for(int i=0; i<array1.length; i++) {
@@ -732,8 +734,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // trying to input
         try {
-            PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 6346);
+            IpPort proxy = 
+                new IpPortImpl("0.0.0.0", 6346);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -752,8 +754,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // trying to input is the only case
         try {
-            PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 634600);
+            IpPort proxy = 
+                new IpPortImpl("0.0.0.0", 634600);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -824,8 +826,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             int j = 0;
             while(iter.hasNext()) {
                 final int inIndex = 6*j;
-                PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                InetAddress addr = ppi.getPushProxyAddress();
+                IpPort ppi = (IpPortImpl)iter.next();
+                InetAddress addr = ppi.getInetAddress();
                 byte[] tempAddr = new byte[4];
                 System.arraycopy(bytes, inIndex, tempAddr, 0, 4);
 
@@ -833,8 +835,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                 String address = addr2.getHostAddress();
                 
                 int curPort = ByteOrder.leb2int(bytes, inIndex+4, 2);
-                PushProxyInterface ppi2 = 
-                    new QueryReply.PushProxyContainer(address, curPort);
+                IpPort ppi2 = 
+                    new IpPortImpl(address, curPort);
 
                 assertTrue(proxies.contains(ppi2));
                 //assertEquals(addr, addr2);
@@ -865,10 +867,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         for (int outer = 0; outer < hosts.length; outer++) {
             //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
-            Set proxies = new HashSet();
+            Set proxies = new TreeSet(IpPort.COMPARATOR);
             for (int i = 0; i < hosts.length; i++)
                 proxies.add(
-                    new QueryReply.PushProxyContainer(hosts[i], 6346));
+                    new IpPortImpl(hosts[i], 6346));
             
             QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
                                            6346, IP, 0, new Response[0],

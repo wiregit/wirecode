@@ -16,12 +16,13 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -183,7 +184,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
             // this is expected
         }
         
-        PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+        IpPort ppi = new IpPortImpl("1.2.3.4",6346);
 		Set proxies = new HashSet();
 		proxies.add(ppi);
 		
@@ -220,7 +221,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 					rfd.getPort());
 		}
 		
-		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		IpPort ppi = new IpPortImpl("1.2.3.4",6346);
 		Set proxies = new HashSet();
 		proxies.add(ppi);
 		
@@ -244,7 +245,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
     }
 	
 	public void testCloningPushLocs() throws Exception {
-	    PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+	    IpPort ppi = new IpPortImpl("1.2.3.4",6346);
 		Set proxies = new HashSet();
 		proxies.add(ppi);
 		

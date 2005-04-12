@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import junit.framework.Test;
@@ -15,12 +16,12 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -383,12 +384,12 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
     public void testToBytesPush() throws Exception {
     	
     	//add some firewalled altlocs
-    	PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
-    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",6346);
-    	PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",6346);
-    	PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.7",6346);
-		Set proxies = new HashSet();
-		Set proxies2 = new HashSet();
+    	IpPort ppi = new IpPortImpl("1.2.3.4",6346);
+    	IpPort ppi2 = new IpPortImpl("1.2.3.5",6346);
+    	IpPort ppi3 = new IpPortImpl("1.2.3.6",6346);
+    	IpPort ppi4 = new IpPortImpl("1.2.3.7",6346);
+		Set proxies = new TreeSet(IpPort.COMPARATOR);
+		Set proxies2 = new TreeSet(IpPort.COMPARATOR);
 		proxies.add(ppi);
 		proxies2.add(ppi2);proxies2.add(ppi3);proxies2.add(ppi4);
 		

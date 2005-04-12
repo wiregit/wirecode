@@ -35,6 +35,9 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.udpconnect.SynMessage;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -169,9 +172,9 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Set proxies = reply.getPushProxies();
         assertEquals(1, proxies.size());
         Iterator iter = proxies.iterator();
-        PushProxyInterface ppi = (PushProxyInterface)iter.next();
-        assertEquals(ppi.getPushProxyPort(), 6355);
-        assertTrue(ppi.getPushProxyAddress().equals(InetAddress.getLocalHost()));
+        IpPort ppi = (IpPort)iter.next();
+        assertEquals(ppi.getPort(), 6355);
+        assertTrue(ppi.getInetAddress().equals(InetAddress.getLocalHost()));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
@@ -236,8 +239,8 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         ss.setSoTimeout(15*TIMEOUT);
 
         // send a reply with some PushProxy info
-        Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        Set proxies = new IpPortSet();
+        proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 9000, myIP(), 0, res, 

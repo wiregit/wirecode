@@ -75,6 +75,7 @@ public class PingRankerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
+        DownloadSettings.WORKER_INTERVAL.setValue(1);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
     }
     
