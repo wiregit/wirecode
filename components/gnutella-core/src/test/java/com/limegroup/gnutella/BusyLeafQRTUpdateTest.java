@@ -12,21 +12,10 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
      * The local stub for testing busy leaf QRT updating functionality
      */
     static class ConnectionManagerStubOvr extends ConnectionManagerStub {
-        
-        private boolean _isBusy=false;
-        
-        public boolean isAnyBusyLeafTriggeringQRTUpdate(){
-            //  TODO: finish this
-            //return _isBusy;
-            return super.isAnyBusyLeafTriggeringQRTUpdate();
-        }
-        
-        public void setIsAnyBusyLeafTriggeringQRTUpdate( boolean busy ){
-            _isBusy = busy;
-        }
-        
+       
         public void addStubOvrConnection( ManagedConnectionStubOvr mcso ){
-            //  TODO: finish this
+            mcso._managerStub=this;
+            getConnections().add(mcso);
         }
     }
     
@@ -35,15 +24,32 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
      */
     static class ManagedConnectionStubOvr extends ManagedConnectionStub {      
         
-        private boolean _isBusy=false;
+//        private boolean _isBusy=false;
         private boolean _isPeer=false;
+        private volatile int softMaxHops = -1;
         
+        public ConnectionManagerStubOvr _managerStub=null;
+        
+        public boolean isSupernodeClientConnection() {
+            return !_isPeer;
+        }
+        
+        public boolean isClientSupernodeConnection() {
+            return _isPeer;
+        }
+
+/*        
         public boolean isBusyEnoughToTriggerQRTRemoval(){
             return _isBusy;
         }
-        
+*/
         public void setBusyEnoughToTriggerQRTRemoval( boolean busy ){
-            _isBusy = busy;
+//            _isBusy = busy;
+            softMaxHops=0;            
+            
+            setBusyTime(busy);
+            if( _managerStub!=null && busy )
+                _managerStub.setAnyLeafHasBecomeBusy(busy);
         }
         
         public void setPeerConnection( boolean peer ){
@@ -70,7 +76,6 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
 	public void testSomething() throws Exception {
         
         ConnectionManagerStubOvr cm=new ConnectionManagerStubOvr();
-        cm.setIsAnyBusyLeafTriggeringQRTUpdate(false);
         
         ManagedConnectionStubOvr peer=new ManagedConnectionStubOvr(); 
         ManagedConnectionStubOvr leaf=new ManagedConnectionStubOvr();
@@ -80,10 +85,28 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
         
         cm.addStubOvrConnection(peer);
         cm.addStubOvrConnection(leaf);
-                        
         
+        leaf.setBusyEnoughToTriggerQRTRemoval(true);
         
-        assertTrue(true);
+        //  Should't work for >20 seconds
+        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
+
+        int sleepSecs=25;
+        
+        System.out.println("Starting to sleep for " + sleepSecs + " seconds...");
+        
+        for (int i = 0; i < sleepSecs; i++) {
+            Thread.sleep(1000);
+            if( (sleepSecs<=5) || (i%5)==0 )
+                System.out.println( (sleepSecs-i) + " secs..." );
+        }
+        System.out.print("Done sleeping...");
+        
+        //  Should work, since >20 seconds have elapsed
+        assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
+        
+        //  Shouldn't work, prior one should have cleared the busy flag.
+        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() );
     }
 
 }
