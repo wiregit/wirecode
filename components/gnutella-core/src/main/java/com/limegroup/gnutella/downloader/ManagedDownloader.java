@@ -18,9 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +69,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
@@ -605,8 +604,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        rfds = new TreeSet(IpPort.COMPARATOR);
-        busyRFDs = new TreeSet(IpPort.COMPARATOR);
+        rfds = new IpPortSet();
+        busyRFDs = new IpPortSet();
         _activeWorkers=new LinkedList();
         _workers=new ArrayList();
         queuedWorkers = new HashMap();

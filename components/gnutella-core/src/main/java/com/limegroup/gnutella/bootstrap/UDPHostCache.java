@@ -9,18 +9,16 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.util.IpPort;
 
 import java.io.Writer;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.LinkedList;
 import java.util.Collection;
 import java.util.List;
@@ -289,11 +287,9 @@ public class UDPHostCache {
      * removed as potential hostcaches.
      */
     private class HostExpirer implements MessageListener {
-        // note that this MUST use IpPort.COMPARATOR to efficiently
-        // look up ReplyHandlers vs ExtendedEndpoints
-        // this is emptied as messages are processed from hosts,
-        // to allow us to record failures as time passes.
-        private final Set hosts = new TreeSet(IpPort.COMPARATOR);
+
+        private final Set hosts = new IpPortSet();
+        
         // allHosts contains all the hosts, so that we can
         // iterate over successful caches too.
         private final Set allHosts;

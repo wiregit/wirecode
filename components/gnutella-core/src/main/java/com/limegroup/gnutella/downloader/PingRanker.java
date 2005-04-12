@@ -29,6 +29,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortSet;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
@@ -96,7 +97,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
-        everybody = new TreeSet(IpPort.COMPARATOR);
+        everybody = new IpPortSet();
         everybodyPush = new HashSet();
     }
     

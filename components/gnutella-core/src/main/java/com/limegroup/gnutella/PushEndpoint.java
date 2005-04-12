@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 import java.util.WeakHashMap;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -21,6 +20,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 
@@ -165,7 +165,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
-        _proxies = new TreeSet(IpPort.COMPARATOR);
+        _proxies = new IpPortSet();
 		if (proxies!=null)
 		    _proxies.addAll(proxies);
 		_externalAddr = addr;
@@ -206,7 +206,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
-		Set proxies = new TreeSet(IpPort.COMPARATOR);
+		Set proxies = new IpPortSet();
 		
 		int fwtVersion =0;
 		
@@ -346,7 +346,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		throws BadPacketException {
 		byte [] tmp = new byte[6];
 		byte [] guid =new byte[16];
-		Set proxies = new TreeSet(IpPort.COMPARATOR); 
+		Set proxies = new IpPortSet(); 
 		IpPort addr = null;
 		boolean hasAddr=false;
 		

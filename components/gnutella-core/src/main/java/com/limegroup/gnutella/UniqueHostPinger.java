@@ -1,17 +1,17 @@
 package com.limegroup.gnutella;
 
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortSet;
 
 public class UniqueHostPinger extends UDPPinger {
 
     /**
      * set of endpoints we pinged since last expiration
      */
-    private final Set _recent = new TreeSet(IpPort.COMPARATOR);
+    private final Set _recent = new IpPortSet();
     
     public UniqueHostPinger() {
         super();
