@@ -103,7 +103,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
-      example, one might simultaneously download the first half of book from
+      example, one might simultaneously download the first half of a file from
       server A and the second half from server B.  This increases throughput if
       the downstream capacity of the downloader is greater than the upstream
       capacity of the fastest uploader.

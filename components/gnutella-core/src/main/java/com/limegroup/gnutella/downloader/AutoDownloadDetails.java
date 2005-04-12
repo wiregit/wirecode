@@ -20,7 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 /** 
- * Encapsulates important details about a auto download.  Serializable for 
+ * Encapsulates important details about an auto download.  Serializable for 
  * downloads.dat file; be careful when modifying!
  */
 public class AutoDownloadDetails implements Serializable {

@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**
- * A ManagedDownloader that tries to resume to a specific incomplete file.  The
+ * A ManagedDownloader that tries to resume a specific incomplete file.  The
  * ResumeDownloader initially has no locations to download from.  Instead it
  * immediately requeries--by hash if possible--and only accepts results that
  * would result in resumes from the specified incomplete file.  Do not be
@@ -34,7 +34,7 @@ public class ResumeDownloader extends ManagedDownloader
     /**
      * The hash of the completed file.  This field was not included in the LW
      * 2.7.0/2.7.1 beta, so it may be null when reading downloads.dat files
-     * from these rare versions.  That's no big deal; its like not having the
+     * from these rare versions.  That's no big deal; it is like not having the
      * hash in the first place. 
      *
      * This is not used as much anymore, since ManagedDownloader stores the

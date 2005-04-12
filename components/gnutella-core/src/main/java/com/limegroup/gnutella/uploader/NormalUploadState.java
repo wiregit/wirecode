@@ -212,7 +212,7 @@ public final class NormalUploadState extends UploadState {
             // request the bytes from the throttle
             // BLOCKING (only if we need to throttle)
             int allowed = BLOCK_SIZE;
-            if(!UPLOADER.isNetworkShare())
+            if(!UPLOADER.isForcedShare())
                 allowed = throttle.request(BLOCK_SIZE);
             int burstSent=0;
             try {

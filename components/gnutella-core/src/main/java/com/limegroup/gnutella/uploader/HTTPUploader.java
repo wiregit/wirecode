@@ -99,7 +99,7 @@ public final class HTTPUploader implements Uploader {
     /**
      * True if this is a forcibly shared network file.
      */
-    private boolean _isNetworkShare = false;
+    private boolean _isForcedShare = false;
     
     /**
      * whether the remote side indicated they want to receive
@@ -273,7 +273,7 @@ public final class HTTPUploader implements Uploader {
         
         File parent = _fileDesc.getFile().getParentFile();
         if(parent != null)
-            _isNetworkShare = parent.equals(FileManager.SUBDIR_SHARE);
+            _isForcedShare = parent.equals(FileManager.FORCED_SHARE);
 	}
 
 	/**
@@ -567,8 +567,8 @@ public final class HTTPUploader implements Uploader {
 	//implements the Uploader interface
 	public boolean isHeaderParsed() { return _headersParsed; }
 	
-	// is a network share?
-	public boolean isNetworkShare() { return _isNetworkShare; }
+	// is a forced network share?
+	public boolean isForcedShare() { return _isForcedShare; }
 
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();

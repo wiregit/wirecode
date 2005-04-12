@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.Trie;
  *  So when a search comes in, we only have to look at the set of replies
  *  that correspond to the schema of the query.
  * 
- *  Locking: Never obtain a this' monitor PRIOR to obtaining that of the
+ *  Locking: Never obtain a this's monitor PRIOR to obtaining that of the
  *  FileManager.
  * @author Sumeet Thadani
  */
@@ -727,7 +727,7 @@ public class LimeXMLReplyCollection {
         // We do not remove the hash from the hashMap because
         // MetaFileManager needs to look it up to get the doc.
         
-        //Since the hash of the file has changed, the metadata pertaiing 
+        //Since the hash of the file has changed, the metadata pertaining 
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
