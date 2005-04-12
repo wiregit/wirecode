@@ -216,15 +216,23 @@ public abstract class FileManager {
     private boolean _loadFinished = false;
     
     /**
-     * The only ShareableFileFilter object that should be used.
+     * The filter object to use to discern shareable files.
      */
-    public static final FileFilter SHAREABLE_FILE_FILTER =
-        new ShareableFileFilter();
+    private static final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return isFileShareable(f, f.length());
+        }
+    };    
         
     /**
-     * The only DirectoryFilter object that should be used.
+     * The filter object to use to determine directories.
      */
-    public static final FileFilter DIRECTORY_FILTER = new DirectoryFilter();
+    private static final FileFilter DIRECTORY_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return f.isDirectory();
+        }        
+    };
+ 
         
     /**
      * The QueryRouteTable kept by this.  The QueryRouteTable will be 
@@ -1708,24 +1716,6 @@ public abstract class FileManager {
             }
         }
         return ret;
-    }
-    
-    /**
-     * A filter for listing all shared files.
-     */
-    private static class ShareableFileFilter implements FileFilter {
-        public boolean accept(File f) {
-            return isFileShareable(f, f.length());
-        }
-    }
-    
-    /**
-     * A filter for listing subdirectory only.
-     */
-    private static class DirectoryFilter implements FileFilter {
-        public boolean accept(File f) {
-            return f.isDirectory();
-        }
     }
     
     /**
