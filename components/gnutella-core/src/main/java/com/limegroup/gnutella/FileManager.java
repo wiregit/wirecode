@@ -232,8 +232,7 @@ public abstract class FileManager {
             return f.isDirectory();
         }        
     };
- 
-        
+         
     /**
      * The QueryRouteTable kept by this.  The QueryRouteTable will be 
      * lazily rebuilt when necessary.
@@ -727,7 +726,7 @@ public abstract class FileManager {
         }
         
         // Tell the download manager to notify us of incomplete files.
-		if (! loadThreadInterrupted())
+		if (!loadThreadInterrupted())
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
 
@@ -1416,6 +1415,75 @@ public abstract class FileManager {
         	return false;
         }        
         return true;
+    }
+    
+    /**
+     * Returns true iff this file is a sensitive directory.
+     */
+    public static boolean isFileSensitiveDirectory(File file) {
+        if (file == null) return false;
+        if (!file.isDirectory()) return false;
+        
+        //  check for system roots
+        File[] faRoots = File.listRoots();
+        
+        //  check for user home directory
+        String userHome = System.getProperty("user.dir");
+        
+        //  check for OS-specific directories:
+        if(CommonUtils.isWindows()) {
+            //  check for "Documents and Settings"
+            
+            //  check for "My Documents"
+            
+            //  check for "Desktop"
+            
+            //  check for "Program Files"
+            
+            //  check for "Windows"
+            
+            //  check for "WINNT"
+            
+            //  ### TODO            
+        }
+        
+        if(CommonUtils.isMacOSX()) {
+            //  check for /Users
+            
+            //  check for /System
+            
+            //  check for /System Folder
+            
+            //  check for /Previous Systems
+            
+            //  check for /private
+            
+            //  check for /Volumes
+            
+            //  ### TODO
+            
+            //  ### Linux stuff??
+        }
+        
+        if(CommonUtils.isLinux()) {
+            //  check for /home
+            
+            //  check for /etc
+            
+            //  check for /mnt
+            
+            //  check for /proc
+            
+            //  check for /boot
+            
+            //  check for /usr
+            
+            //  check for /sbin
+            
+            //  check for /bin
+            
+            //  ### TODO
+        }
     }
 
     /**
