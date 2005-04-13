@@ -24,6 +24,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
@@ -1418,86 +1419,178 @@ public abstract class FileManager {
     }
     
     /**
-     * Returns true iff this file is a sensitive directory.
+     * Returns true iff <tt>file</tt> is a sensitive directory.
      */
-    public static boolean isFileSensitiveDirectory(File file) {
-        if (file == null) return false;
-        if (!file.isDirectory()) return false;
+    public static boolean isSensitiveDirectory(File file) {
+        if (file == null)
+            return false;
+        if (!file.isDirectory())
+            return false;
         
         //  check for system roots
         File[] faRoots = File.listRoots();
+        if (faRoots != null && faRoots.length > 0) {
+            for (int i = 0; i < faRoots.length; i++) {
+                if (file.equals(faRoots[i]))
+                    return true;
+            }
+        }
         
         //  check for user home directory
         String userHome = System.getProperty("user.dir");
+        if (file.equals(new File(userHome)))
+            return true;
         
         //  check for OS-specific directories:
-        if(CommonUtils.isWindows()) {
+        if (CommonUtils.isWindows()) {
             //  check for "Documents and Settings"
+            if (isLastDirectory(file, "Documents and Settings"))
+                return true;
             
             //  check for "My Documents"
+            if (isLastDirectory(file, "My Documents"))
+                return true;
             
             //  check for "Desktop"
+            if (isLastDirectory(file, "Desktop"))
+                return true;
             
             //  check for "Program Files"
+            if (isLastDirectory(file, "Program Files"))
+                return true;
             
             //  check for "Windows"
+            if (isLastDirectory(file, "Windows"))
+                return true;
             
             //  check for "WINNT"
-            
-            //  ### TODO            
+            if (isLastDirectory(file, "WINNT"))
+                return true;
         }
         
-        if(CommonUtils.isMacOSX()) {
+        if (CommonUtils.isMacOSX()) {
             //  check for /Users
+            if (isTopLevelDirectory(file, "Users"))
+                return true;
             
             //  check for /System
+            if (isTopLevelDirectory(file, "System"))
+                return true;
             
             //  check for /System Folder
+            if (isTopLevelDirectory(file, "System Folder"))
+                return true;
             
             //  check for /Previous Systems
+            if (isTopLevelDirectory(file, "Previous Systems"))
+                return true;
             
             //  check for /private
+            if (isTopLevelDirectory(file, "private"))
+                return true;
             
             //  check for /Volumes
+            if (isTopLevelDirectory(file, "Volumes"))
+                return true;
             
             //  check for /Desktop
+            if (isTopLevelDirectory(file, "Desktop"))
+                return true;
             
             //  check for /Applications
+            if (isTopLevelDirectory(file, "Applications"))
+                return true;
             
             //  check for /Applications (Mac OS 9)
+            if (isTopLevelDirectory(file, "Applications (Mac OS 9)"))
+                return true;
             
             //  check for /Network            
-            
-            //  ### TODO
+            if (isTopLevelDirectory(file, "Network"))
+                return true;
         }
         
-        if(CommonUtils.isPOSIX()) {
+        if (CommonUtils.isPOSIX()) {
             //  check for /bin
+            if (isTopLevelDirectory(file, "bin"))
+                return true;
             
             //  check for /boot
+            if (isTopLevelDirectory(file, "boot"))
+                return true;
             
             //  check for /dev
+            if (isTopLevelDirectory(file, "dev"))
+                return true;
             
             //  check for /etc
+            if (isTopLevelDirectory(file, "etc"))
+                return true;
             
             //  check for /home
+            if (isTopLevelDirectory(file, "home"))
+                return true;
             
             //  check for /mnt
+            if (isTopLevelDirectory(file, "mnt"))
+                return true;
             
             //  check for /opt
+            if (isTopLevelDirectory(file, "opt"))
+                return true;
             
             //  check for /proc
+            if (isTopLevelDirectory(file, "proc"))
+                return true;
             
             //  check for /root
+            if (isTopLevelDirectory(file, "root"))
+                return true;
             
             //  check for /sbin
+            if (isTopLevelDirectory(file, "sbin"))
+                return true;
             
             //  check for /usr
+            if (isTopLevelDirectory(file, "usr"))
+                return true;
             
             //  check for /var
-            
-            //  ### TODO
+            if (isTopLevelDirectory(file, "var"))
+                return true;
         }
+        
+        return false;
+    }
+    
+    /**
+     * Returns true if the give <tt>file</tt> represents a directory whose
+     * last element corresponds to the given <tt>dirName</tt>.
+     */
+    private static boolean isLastDirectory(File file, String dirName) {
+        if (file == null || dirName == null)
+            return false;
+        if (!file.isDirectory())
+            return false;
+        
+        //  ###
+        
+        return true;
+    }
+    
+    /**
+     * Returns true if the given <tt>file</tt> represents a top-level directory
+     * (child of a root directory) with the given <tt>dirName</tt>.
+     */
+    private static boolean isTopLevelDirectory(File file, String dirName) {
+        if (file == null || dirName == null)
+            return false;
+        if (!file.isDirectory())
+            return false;
+        
+        //  ###
+        
+        return true;
     }
 
     /**
