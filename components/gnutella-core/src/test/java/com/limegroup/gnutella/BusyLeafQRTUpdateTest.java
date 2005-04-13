@@ -73,7 +73,7 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
      * 
      * @throws Exception
      */
-	public void testSomething() throws Exception {
+	public void testBusyLeafNoticed() throws Exception {
         
         ConnectionManagerStubOvr cm=new ConnectionManagerStubOvr();
         
@@ -91,14 +91,14 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
         //  Should't work for >20 seconds
         assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
 
-        int sleepSecs=25;
+        int sleepSecs=(int)(ManagedConnection.MIN_BUSY_LEAF_TIME/1000) + 5;
         
         System.out.println("Starting to sleep for " + sleepSecs + " seconds...");
         
         for (int i = 0; i < sleepSecs; i++) {
-            Thread.sleep(1000);
             if( (sleepSecs<=5) || (i%5)==0 )
                 System.out.println( (sleepSecs-i) + " secs..." );
+            Thread.sleep(1000);
         }
         System.out.print("Done sleeping...");
         
@@ -108,5 +108,63 @@ public class BusyLeafQRTUpdateTest extends com.limegroup.gnutella.util.BaseTestC
         //  Shouldn't work, prior one should have cleared the busy flag.
         assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() );
     }
+    
+    public void testBusyPeerNotNoticed() throws Exception {
+        
+        ConnectionManagerStubOvr cm=new ConnectionManagerStubOvr();
+        
+        ManagedConnectionStubOvr peer=new ManagedConnectionStubOvr(); 
+        ManagedConnectionStubOvr leaf=new ManagedConnectionStubOvr();
+        
+        peer.setPeerConnection(true);
+        leaf.setPeerConnection(false);
+        
+        cm.addStubOvrConnection(peer);
+        cm.addStubOvrConnection(leaf);
+        
+        peer.setBusyEnoughToTriggerQRTRemoval(true);
+        
+        //  Should't work at all...
+        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
 
+        int sleepSecs=(int)(ManagedConnection.MIN_BUSY_LEAF_TIME/1000) + 5;
+        
+        System.out.println("Starting to sleep for " + sleepSecs + " seconds...");
+        
+        for (int i = 0; i < sleepSecs; i++) {
+            if( (sleepSecs<=5) || (i%5)==0 )
+                System.out.println( (sleepSecs-i) + " secs..." );
+            Thread.sleep(1000);
+        }
+        System.out.print("Done sleeping...");
+        
+        //  Shouldn't work still
+        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() );
+    }
+    
+    public void testNonBusyLastHop() throws Exception {
+        
+        ConnectionManagerStubOvr cm=new ConnectionManagerStubOvr();
+        
+        ManagedConnectionStubOvr peer=new ManagedConnectionStubOvr(); 
+        ManagedConnectionStubOvr leaf=new ManagedConnectionStubOvr();
+        
+        peer.setPeerConnection(true);
+        leaf.setPeerConnection(false);
+        
+        cm.addStubOvrConnection(peer);
+        cm.addStubOvrConnection(leaf);
+        
+        
+    }
+    
+    public void testBusyLastHop() throws Exception {
+        
+    }
+    
+    
+    
 }
+
+
+

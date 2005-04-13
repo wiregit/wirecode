@@ -330,7 +330,7 @@ public class ManagedConnection extends Connection
      * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
      * busy" for the purposes of QRT updates.
      */
-    private static final long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
+    public static final long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
