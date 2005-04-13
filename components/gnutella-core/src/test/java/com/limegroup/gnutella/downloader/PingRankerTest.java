@@ -74,19 +74,20 @@ public class PingRankerTest extends BaseTestCase {
         ranker = new PingRanker();
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
-        DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
-        DownloadSettings.WORKER_INTERVAL.setValue(1);
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
+        DownloadSettings.WORKER_INTERVAL.setValue(1);
+        DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
     }
     
     /**
      * Tests that the ranker sends out a HeadPing requesting ranges and alts to given hosts.
      */
     public void testPingsNewHosts() throws Exception {
+        
         for (int i =1;i <= 10;i++) 
             ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
         
-        
+        Thread.sleep(20);
         assertEquals(10,pinger.hosts.size());
         assertEquals(10,pinger.messages.size());
         
@@ -104,7 +105,6 @@ public class PingRankerTest extends BaseTestCase {
     public void testStopsPinging() throws Exception {
         DownloadSettings.MAX_VERIFIED_HOSTS.setValue(1);
         ranker.addToPool(newRFDWithURN("1.2.3.4",3));
-        Thread.sleep(100);
         assertEquals(1,pinger.hosts.size());
         
         // get a reply from that host
@@ -173,7 +173,9 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(GUID.makeGuid());
         RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
         ranker.addToPool(original);
+        Thread.sleep(10);
         ranker.addToPool(original2);
+        
         assertEquals(3,pinger.hosts.size());
         pinger.hosts.clear();
 
