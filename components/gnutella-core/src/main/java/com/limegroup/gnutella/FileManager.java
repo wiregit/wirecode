@@ -1460,27 +1460,41 @@ public abstract class FileManager {
             
             //  check for /Volumes
             
-            //  ### TODO
+            //  check for /Desktop
             
-            //  ### Linux stuff??
+            //  check for /Applications
+            
+            //  check for /Applications (Mac OS 9)
+            
+            //  check for /Network            
+            
+            //  ### TODO
         }
         
-        if(CommonUtils.isLinux()) {
-            //  check for /home
-            
-            //  check for /etc
-            
-            //  check for /mnt
-            
-            //  check for /proc
+        if(CommonUtils.isPOSIX()) {
+            //  check for /bin
             
             //  check for /boot
             
-            //  check for /usr
+            //  check for /dev
+            
+            //  check for /etc
+            
+            //  check for /home
+            
+            //  check for /mnt
+            
+            //  check for /opt
+            
+            //  check for /proc
+            
+            //  check for /root
             
             //  check for /sbin
             
-            //  check for /bin
+            //  check for /usr
+            
+            //  check for /var
             
             //  ### TODO
         }

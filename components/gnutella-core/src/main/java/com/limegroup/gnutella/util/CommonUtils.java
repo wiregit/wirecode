@@ -448,7 +448,7 @@ public final class CommonUtils {
 	 * Returns whether or not this operating system is considered
 	 * capable of meeting the requirements of a ultrapeer.
 	 *
-	 * @return <tt>true</tt> if this os meets ultrapeer requirements,
+	 * @return <tt>true</tt> if this OS meets ultrapeer requirements,
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isUltrapeerOS() {
@@ -456,7 +456,7 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the os is some version of Windows.
+	 * Returns whether or not the OS is some version of Windows.
 	 *
 	 * @return <tt>true</tt> if the application is running on some Windows 
 	 *         version, <tt>false</tt> otherwise
@@ -466,7 +466,7 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the os is Windows NT, 2000, or XP.
+	 * Returns whether or not the OS is Windows NT, 2000, or XP.
 	 *
 	 * @return <tt>true</tt> if the application is running on Windows NT,
 	 *  2000, or XP <tt>false</tt> otherwise
@@ -476,7 +476,7 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the os is 2000 or XP.
+	 * Returns whether or not the OS is 2000 or XP.
 	 *
 	 * @return <tt>true</tt> if the application is running on 2000 or XP,
 	 *  <tt>false</tt> otherwise
@@ -487,7 +487,7 @@ public final class CommonUtils {
 
 
 	/**
-	 * Returns whether or not the os is WinXP.
+	 * Returns whether or not the OS is WinXP.
 	 *
 	 * @return <tt>true</tt> if the application is running on WinXP,
 	 *  <tt>false</tt> otherwise
@@ -497,7 +497,7 @@ public final class CommonUtils {
 	}
 
     /**
-     * Returns whether or not the os is OS/2.
+     * Returns whether or not the OS is OS/2.
      *
      * @return <tt>true</tt> if the application is running on OS/2,
      *         <tt>false</tt> otherwise
@@ -507,7 +507,7 @@ public final class CommonUtils {
     }
      
 	/** 
-	 * Returns whether or not the os is Mac OSX.
+	 * Returns whether or not the OS is Mac OSX.
 	 *
 	 * @return <tt>true</tt> if the application is running on Mac OSX, 
 	 *         <tt>false</tt> otherwise
@@ -517,7 +517,7 @@ public final class CommonUtils {
 	}
 	
 	/** 
-	 * Returns whether or not the os is Mac OSX 10.2 or above.
+	 * Returns whether or not the OS is Mac OSX 10.2 or above.
 	 *
 	 * @return <tt>true</tt> if the application is running on Mac OSX, 
 	 *  10.2 or above, <tt>false</tt> otherwise
@@ -528,7 +528,7 @@ public final class CommonUtils {
 	}
 	
 	/**
-	 * Returns whether or not the os is Mac OSX 10.3 or above.
+	 * Returns whether or not the OS is Mac OSX 10.3 or above.
 	 *
 	 * @return <tt>true</tt> if the application is running on Mac OSX, 
 	 *  10.3 or above, <tt>false</tt> otherwise
@@ -560,7 +560,7 @@ public final class CommonUtils {
     }
 
 	/** 
-	 * Returns whether or not the os is any Mac os.
+	 * Returns whether or not the OS is any Mac OS.
 	 *
 	 * @return <tt>true</tt> if the application is running on Mac OSX
 	 *  or any previous mac version, <tt>false</tt> otherwise
@@ -570,7 +570,7 @@ public final class CommonUtils {
 	}
 
 	/** 
-	 * Returns whether or not the os is Solaris.
+	 * Returns whether or not the OS is Solaris.
 	 *
 	 * @return <tt>true</tt> if the application is running on Solaris, 
 	 *         <tt>false</tt> otherwise
@@ -580,7 +580,7 @@ public final class CommonUtils {
 	}
 
 	/** 
-	 * Returns whether or not the os is Linux.
+	 * Returns whether or not the OS is Linux.
 	 *
 	 * @return <tt>true</tt> if the application is running on Linux, 
 	 *         <tt>false</tt> otherwise
@@ -590,11 +590,18 @@ public final class CommonUtils {
 	}
 
 	/** 
-	 * Returns whether or not the os is some version of
+	 * Returns whether or not the OS is some version of
 	 * Unix, defined here as only Solaris or Linux.
 	 */
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
+	}
+	
+	/**
+	 * Returns whether the OS is POSIX-like. 
+	 */
+	public static boolean isPOSIX() {
+	    return _isLinux || _isSolaris || _isMacOSX;
 	}
 
 	/**
