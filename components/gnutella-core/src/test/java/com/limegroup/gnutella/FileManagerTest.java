@@ -775,9 +775,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         
         //  check that the user's home dir is a sensitive directory
+        String userHome = System.getProperty("user.dir");
         assertTrue("user's home directory should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome)));
         
         //  check for OS-specific directories:
+        setOSName("Windows");
         if(CommonUtils.isWindows()) {
             //  check for "Documents and Settings"
             assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\Documents and Settings\\")));
@@ -798,6 +800,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\WINNT\\")));
         }
         
+        setOSName("Mac OS X");
         if(CommonUtils.isMacOSX()) {
             //  check for /Users
             assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File("/Users")));
@@ -830,6 +833,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("Network should be a sensitive directory", FileManager.isSensitiveDirectory(new File("/Network")));
         }
         
+        setOSName("Linux");
         if(CommonUtils.isPOSIX()) {
             //  check for /bin
             assertTrue("bin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("/bin")));
@@ -868,6 +872,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File("/var")));
         }
         
+    }
+    
+    /**
+     * Helper function to set the operating system so that multiple OSs can be partially-checked
+     * by testing on one platform.
+     */
+    private static void setOSName(String name) throws Exception {
+        System.setProperty("os.name", name);
+        PrivilegedAccessor.invokeMethod(CommonUtils.class, "setOperatingSystems", null);
     }
     
     //helper function to create queryrequest with I18N
