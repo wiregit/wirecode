@@ -18,19 +18,19 @@ LOCALE_ENGLISH_LANGUAGE_NAME=Irish
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).
 ################################################################################
-#? DISABLE_BOLD_CHARACTERS=false
+DISABLE_BOLD_CHARACTERS=false
 
 ################################################################################
 # Key/value pair for whether or not the layout should be adapted for right-to-
 # left scripts. Must be "true" or "false" (true only for semitic scripts).
 ################################################################################
-#? LAYOUT_RIGHT_TO_LEFT=false
+LAYOUT_RIGHT_TO_LEFT=false
 
 ################################################################################
 # Key/value pair for whether or not the tips of the day should be displayed.
 # The default is false (set to true if TOTDs exist).
 ################################################################################
-#? HAS_TIPS_OF_THE_DAY=false
+HAS_TIPS_OF_THE_DAY=false
 
 ################################################################################
 ################################################################################
