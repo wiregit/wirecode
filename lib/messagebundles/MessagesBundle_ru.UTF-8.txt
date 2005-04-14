@@ -1,7 +1,7 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire
+# Messages Bundle for LimeWire 4.8.2
 # Specialization for: Russian - Russia
-# Translated by Eugene Romanenko <eros2@os2.ru>
+# Thanks to Eugene Romanenko (eros2 AT os2.ru)
 ################################################################################
 LOCALE_LANGUAGE_CODE=ru
 LOCALE_LANGUAGE_NAME=Русский
@@ -1749,6 +1749,8 @@ ERROR_INVALID_NAME_GENERIC=LimeWire не может открыть необхо�
 ERROR_INTERNAL_TITLE=Внутренняя ошибка
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=Произошла внутренняя ошибка. LimeWire может продолжить нормальную работу. Вы можете проинформировать разработчиков об ошибке, это поможет им в отладке программы. Нажмите "Отправить" для отправки информации об ошибке. Вы можете нажать кнопку "Просмотреть" чтобы просмотреть отправляемую информацию. Благодарим вас.
+#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
+#? ERROR_INTERNAL_OLD=
 #### ERROR_INTERNAL_SEND=Send
 ERROR_INTERNAL_SEND=Отправить
 #### ERROR_INTERNAL_REVIEW=Review
@@ -1763,7 +1765,7 @@ ERROR_INTERNAL_OK=OK
 ERROR_INTERNAL_ALWAYS_SEND=Всегда отправлять немедленно
 #### ERROR_INTERNAL_ALWAYS_REVIEW=Always Ask For Review
 ERROR_INTERNAL_ALWAYS_REVIEW=Всегда предлагать просмотреть
-#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard Bugs
+#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=Всегда игнорировать ошибки
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire не может подключиться к серверу для отправки отчёта об ошибке. Вы можете проинформировать разработчиков об ошибке, скопировав нижеследующий текст и отправив его на email bugs@limewire.com. Благодарим вас.

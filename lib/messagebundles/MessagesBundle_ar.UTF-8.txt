@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 4.1.6
+# Messages Bundle for LimeWire 4.8.2
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=مصر
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=دولي
 LOCALE_SCRIPT_CODE=Arab
-LOCALE_SCRIPT_NAME=Arabic
+LOCALE_SCRIPT_NAME=Semitic (Arabic)
 LOCALE_ENGLISH_LANGUAGE_NAME=Arabic
 LOCALE_NSIS_NAME=Arabic
 
@@ -1749,6 +1749,8 @@ ERROR_ACCESS_DENIED_GENERIC=لم يتمكن LimeWire من كتابة أحد ال
 ERROR_INTERNAL_TITLE=خطأ داخلي
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=صادف LimeWire خطأ داخليا. من الممكن أن يقوم LimeWire بإصلاح الخطأ واستكمال العمل بشكل طبيعي. لكي تساعد في تصليح الأخطاء، من فضلك اضغط على "إرسال" لإعلام LimeWire بالمشكلة.كما يمكنك أن تضغط على "تقرير" لقراءة المعلومات التي سيتم إرسالها ، ‘ن كنت ترغب في ذلك. شكرا لك.
+#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
+#? ERROR_INTERNAL_OLD=
 #### ERROR_INTERNAL_SEND=Send
 ERROR_INTERNAL_SEND=إرسال
 #### ERROR_INTERNAL_REVIEW=Review
@@ -1763,7 +1765,7 @@ ERROR_INTERNAL_OK=موافق
 ERROR_INTERNAL_ALWAYS_SEND=دائما أرسل في الحال
 #### ERROR_INTERNAL_ALWAYS_REVIEW=Always Ask For Review
 ERROR_INTERNAL_ALWAYS_REVIEW=السؤال دائما عن التقرير
-#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard Bugs
+#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=تجاهل الأخطاء دائما
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بملقم الخطأ وذلك بهدف إرسال تقرير الخطأ المبين بأسفل.لتساعد في إصلاح الأخطاء، قم بنسخ النص التالي وأرسله إلى bugs@limiWire.com. شكرا
