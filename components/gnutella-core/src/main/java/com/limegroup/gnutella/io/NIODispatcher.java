@@ -248,7 +248,6 @@ public class NIODispatcher implements Runnable {
             
             addPendingItems();
 
-            LOG.debug("Selecting");
             try {
                 // see register(...) for why this has a timeout
                 selector.select(100);
@@ -263,6 +262,9 @@ public class NIODispatcher implements Runnable {
             }
             
             Collection keys = selector.selectedKeys();
+            if(keys.size() == 0)
+                continue;
+            
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + keys.size() + ") keys.");
             
