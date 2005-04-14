@@ -167,8 +167,6 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
-        // cleanup leased blocks
-        leasedBlocks = new IntervalSet();
         isOpen = true;
     }
 
