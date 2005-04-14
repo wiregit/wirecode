@@ -82,7 +82,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
      */
     private void init() throws IOException {
         channel.configureBlocking(false);
-        socket.setReuseAddress(false);
+       //socket.setReuseAddress(false);
     }
 
     /**
