@@ -178,8 +178,7 @@ public class HostCatcher {
     private UniqueHostPinger pinger;
         
     /** The UDPHostCache bootstrap system. */
-    private UDPHostCache udpHostCache =
-        new UDPHostCache(pinger);
+    private UDPHostCache udpHostCache;
     
 	/**
 	 * Constant for the host file to read from and write to.
@@ -282,7 +281,7 @@ public class HostCatcher {
         LOG.trace("START scheduling");
         
         pinger = new UniqueHostPinger();
-        
+        udpHostCache = new UDPHostCache(pinger);
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
         //only do this if we also have incoming slots, but John Marshall from
