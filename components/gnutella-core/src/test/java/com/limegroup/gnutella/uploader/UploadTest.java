@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -1858,7 +1859,7 @@ public class UploadTest extends BaseTestCase {
      throws IOException {
         int length = readToContent(requestMethod, file, header,
                         new OutputStreamWriter(out),
-                        new InputStreamReader(in),
+                        in,
                         requiredHeader, http11, require11Response, null);
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         
@@ -1905,7 +1906,7 @@ public class UploadTest extends BaseTestCase {
                                             String file,
                                             String header,
                                             Writer out,
-                                            Reader in,
+                                            Object in,
                                             String requiredHeader,
                                             boolean http11,
                                             boolean require11Response,
@@ -1931,7 +1932,12 @@ public class UploadTest extends BaseTestCase {
 
         boolean firstLine = true;
         while (true) { 
-            String line = readLine(in);
+            String line;
+            if(in instanceof Reader)
+                line = readLine((Reader)in);
+            else
+                line = readLine((InputStream)in);
+
             if(require11Response && firstLine && (line == null || !line.startsWith("HTTP/1.1")))
                 fail("bad first response line: " + line);
             firstLine = false;
@@ -2447,5 +2453,9 @@ public class UploadTest extends BaseTestCase {
 
 		// return the string we have read.
 		return sBuffer.toString();
+    } 
+   
+    public static String readLine(InputStream in) throws IOException {
+        return new ByteReader(in).readLine();
     }    
 }
