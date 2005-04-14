@@ -446,15 +446,23 @@ public class HeadPong extends VendorMessage {
 		return _isDownloading;
 	}
     
+    /**
+     * @return whether the host that returned this pong supports ggep
+     */
+    public boolean isGGEPPong() {
+        return (_features & HeadPing.GGEP_PING) != 0;
+    }
+    
     public String toString() {
-        return "HeadPong: hasFile"+hasFile()+
+        return "HeadPong: isGGEP "+ isGGEPPong()+
+            " hasFile "+hasFile()+
             " hasCompleteFile "+hasCompleteFile()+
             " isDownloading "+isDownloading()+
             " isFirewalled "+isFirewalled()+
             " queue rank "+getQueueStatus()+
-            " ranges "+getRanges()+
-            " alts "+getAltLocs()+
-            " pushalts "+getPushLocs();
+            " \nranges "+getRanges()+
+            " \nalts "+getAltLocs()+
+            " \npushalts "+getPushLocs();
     }
 	
 	//*************************************

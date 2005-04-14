@@ -62,13 +62,13 @@ public class DownloadSettings extends LimeProps {
      * We should stop issuing HeadPings when we have this many verified sources
      */
     public static final IntSetting MAX_VERIFIED_HOSTS = 
-        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",5,"max_verified_hosts",20,0);
+        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",5,0);
     
     /**
      * We should not schedule more than this many head pings at once
      */
     public static final IntSetting PING_BATCH =
-        FACTORY.createSettableIntSetting("PING_BATCH",20,"PingRanker.pingBatch",500,1);
+        FACTORY.createSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",50,1);
     
     /**
      * Do not start new workers more than this often

@@ -2385,9 +2385,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                     ranker = SourceRanker.getAppropriateRanker(ranker);
                     
                     // if the ranker has become empty, reset it and 
-                    // give it the previously busy rfds to try again
-                    if (!ranker.hasMore()) 
+                    // give it any previously busy rfds to try again
+                    if (!ranker.hasMore()) { 
                         reloadBusyHosts();
+                        if (!ranker.hasMore())
+                            continue;
+                    }
                     
                     // get the best host
                     RemoteFileDesc rfd = ranker.getBest();
