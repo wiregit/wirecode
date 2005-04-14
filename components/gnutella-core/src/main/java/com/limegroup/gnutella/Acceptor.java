@@ -187,6 +187,8 @@ public class Acceptor implements Runnable {
 			setListeningPort(tempPort);
 			_port = tempPort;
         } catch (IOException e) {
+            LOG.warn("can't set initial port", e);
+        
             // 2. Try 20 different ports. The first 10 tries increment
             // sequentially from 6346. The next 10 tries are random ports between
             // 2000 and 52000
@@ -211,6 +213,7 @@ public class Acceptor implements Runnable {
 					_port = tempPort;
                     break;
                 } catch (IOException e2) { 
+                    LOG.warn("can't set port", e2);
                 }
             }
 
@@ -355,7 +358,6 @@ public class Acceptor implements Runnable {
      *  called even while run() is being called.  
      */
     public void setListeningPort(int port) throws IOException {
-        LOG.trace("Acceptor.setListeningPort(): entered.");
         //1. Special case: if unchanged, do nothing.
         if (_socket!=null && _port==port)
             return;
@@ -366,7 +368,7 @@ public class Acceptor implements Runnable {
         //while holding the lock.  Also note that port
         //will not have changed before we grab the lock.
         else if (port==0) {
-            LOG.trace("Acceptor.setListeningPort(): shutting off service.");
+            LOG.trace("shutting off service.");
             //Close old socket (if non-null)
             if (_socket!=null) {
                 try {
@@ -384,7 +386,7 @@ public class Acceptor implements Runnable {
             //Shut off MulticastServier too!
             MulticastService.instance().setListeningSocket(null);            
 
-            LOG.trace("Acceptor.setListeningPort(): service OFF.");
+            LOG.trace("service OFF.");
             return;
         }
         //3. Normal case.  See note about locking above.
@@ -402,13 +404,11 @@ public class Acceptor implements Runnable {
         else {
             
             if(LOG.isDebugEnabled())
-                LOG.debug("Acceptor.setListeningPort(): changing port to " +
-                          port);
+                LOG.debug("changing port to " + port);
 
-            DatagramSocket udpServiceSocket = 
-                UDPService.instance().newListeningSocket(port);
+            DatagramSocket udpServiceSocket = UDPService.instance().newListeningSocket(port);
 
-            LOG.trace("Acceptor.setListeningPort(): UDP Service is ready.");
+            LOG.trace("UDP Service is ready.");
             
             MulticastSocket mcastServiceSocket = null;
             try {
@@ -419,11 +419,10 @@ public class Acceptor implements Runnable {
                     MulticastService.instance().newListeningSocket(
                         ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
-                LOG.trace("Acceptor.setListeningPort(): Multicast Service is ready.");
+                LOG.trace("multicast service setup");
             } catch(IOException e) {
+                LOG.warn("can't create multicast socket", e);
                 mcastServiceSocket = null;
-                LOG.debug("Acceptor.setListeningPort(): Unable to start multicast service.",
-                          e);
             }
             
         
@@ -432,9 +431,11 @@ public class Acceptor implements Runnable {
             try {
                 newSocket=new com.limegroup.gnutella.io.NIOServerSocket(port);
             } catch (IOException e) {
+                LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
                 throw e;
             } catch (IllegalArgumentException e) {
+                LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
                 throw new IOException("could not create a listening socket");
             }
@@ -451,7 +452,7 @@ public class Acceptor implements Runnable {
                 SOCKET_LOCK.notify();
             }
 
-            LOG.trace("Acceptor.setListeningPort(): I am ready.");
+            LOG.trace("Acceptor ready..");
 
             // Commit UDPService's new socket
             UDPService.instance().setListeningSocket(udpServiceSocket);
@@ -464,8 +465,7 @@ public class Acceptor implements Runnable {
             }
 
             if(LOG.isDebugEnabled())
-                LOG.debug("Acceptor.setListeningPort(): listening UDP/TCP on " + 
-                          _port);
+                LOG.debug("listening UDP/TCP on " + _port);
         }
     }
 
@@ -550,6 +550,7 @@ public class Acceptor implements Runnable {
                 // then getInetAddress will return null.
 				InetAddress address = client.getInetAddress();
 				if(address == null) {
+				    LOG.warn("connection closed while accepting");
 				    try {
 				        client.close();
 				    } catch(IOException ignored) {}
