@@ -52,4 +52,10 @@ public class BugSettings extends LimeProps {
     public static final FileSetting BUG_INFO_FILE =
         FACTORY.createFileSetting("BUG_INFO_FILE",
             new File(CommonUtils.getUserSettingsDir(), "bugs.data"));
+            
+    /**
+     * Setting for the last version that should send bugs.
+     */
+    public static final StringSetting LAST_ACCEPTABLE_VERSION =
+        FACTORY.createSettableStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
 }
