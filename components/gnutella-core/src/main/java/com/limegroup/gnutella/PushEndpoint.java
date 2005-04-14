@@ -351,7 +351,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		boolean hasAddr=false;
 		
 		//get the number of push proxies
-		int number = data[offset] & SIZE_MASK;
+		int number = data[offset] & SIZE_MASK; 
 		int features = data[offset] & FEATURES_MASK;
 		int version = (data[offset] & FWT_VERSION_MASK) >> 3;
 		
@@ -738,7 +738,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	    }
 	    
 	    synchronized void updateProxies(Set s, boolean add){
-	        Set existing = new HashSet();
+	        Set existing = new IpPortSet();
 	        
 	        if (_proxies!=null)
 	            existing.addAll(_proxies);

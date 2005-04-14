@@ -309,6 +309,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     " for rfd "+rfd+" with PE "+rfd.getPushAddr());
         }
         
+        // update the rfd with information from the pong
+        pong.updateRFD(rfd);
+        
         // older push proxies do not route but respond directly, we want to get responses
         // from other push proxies
         if (!pong.hasFile() && !pong.isGGEPPong())
@@ -325,9 +328,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (!pong.hasFile())
             return;
 
-        // update the rfd with information from the pong
-        pong.updateRFD(rfd);
-        
         // add any altlocs the pong had to our known hosts 
         addInternal(pong.getAllLocsRFD(rfd));
         
