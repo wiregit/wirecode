@@ -3,6 +3,7 @@ package com.limegroup.gnutella.i18n;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -68,7 +69,7 @@ class HTMLOutput {
         List langsMidway = new LinkedList();
         List langsStarted = new LinkedList();
         List langsEmbryonic = new LinkedList();
-        Map charsets = new TreeMap();
+        Map charsets = new TreeMap(new CharsetNameComparator());
         
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
@@ -331,10 +332,10 @@ class HTMLOutput {
 "     <br />\n" +
 "     <b><big>Which Tool or Editor Is Needed to Work on Translations?</big></b><br />\n" + 
 "     <br />\n" + 
-"     For <b>Western European Latin-based languages</b>, which can use the US-ASCII\n" +
-"     or ISO-8859-1 character set, any text editor (such as Notepad on Windows) can\n" +
-"     be used on Windows and Linux.&nbsp; Once a file is completed, it can be sent as a\n" +
-"     simple text file to\n" +
+"     For <b>Basic Latin or Western European Latin-based languages</b>, which can\n" +
+"     use the US-ASCII or ISO-8859-1 character set, any text editor (such as\n" +
+"     Notepad on Windows) can be used on Windows and Linux.&nbsp; Once a file is\n" +
+"     completed, it can be sent as a simple text file to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
 "     For <b>Central European languages</b>, the preferred format is a simple text\n" +
@@ -344,10 +345,11 @@ class HTMLOutput {
 "     <br />\n" +
 "     For <b>other European languages</b>, the preferred format is a plain-text\n" +
 "     file, encoded preferably with UTF-8 or a ISO-8859-* character set that\n" +
-"     you must explicitly specify to us, or a correctly marked-up HTML document,\n" +
-"     or a Word document.&nbsp; Please specify your working operating system and editor\n" +
-"     you used to create plain-text files (we may support Windows codepages or Mac\n" +
-"     charsets, but we will convert them to Unicode UTF-8 in our repository).<br />\n" +
+"     you should explicitly specify, or a correctly marked-up HTML document,\n" +
+"     or a Word document.&nbsp; Please specify your working operating system and\n" +
+"     editor you used to create plain-text files (we may support incoming Windows\n" +
+"     codepages or Mac charsets, but we will convert them to Unicode UTF-8 in our\n" +
+"     repository).<br />\n" +
 "     <br />\n" +
 "     For <b>Semitic languages</b> (Arabic, Hebrew...), the preferred format is a\n" +
 "     plain-text file edited with a editor that supports the right-to-left layout,\n" +
@@ -465,7 +467,7 @@ class HTMLOutput {
 "       <tr>\n" +
 "        <td colspan=\"3\" valign=\"top\">" +
 "         <hr noshade size=\"1\">\n" +
-"         Languages written with Latin (Western European) characters:</td>\n" +
+"         Languages written with Latin (Basic) characters:</td>\n" +
 "       </tr>\n" +
 "       <tr>\n" +
 "        <td valign=\"top\"><a href=\"" + DEFAULT_LINK + "\" target=\"_blank\"><b>English</b> (US)</a></td>\n" +
@@ -518,4 +520,64 @@ class HTMLOutput {
 "   </table>\n" + /* End of the 3 columns table below the title */
 "  </div>\n"); /* (div id="bod1") */
     }
+
+    /**
+     * This Comparator sorts charset names in a prefered order.
+     * It is consistent with equals, so can be used to sort keys in a Map.
+     */
+    private static class CharsetNameComparator implements Comparator {
+        /**
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        public int compare(Object arg0, Object arg1) {
+            if (arg0 == arg1 || arg0.equals(arg1))
+                return 0;
+            final String charsetName0 = (String)arg0;
+            final String charsetName1 = (String)arg1;
+            // Make Latin charsets sorted before others.
+            boolean has0 = charsetName0.contains("Latin");
+            boolean has1 = charsetName1.contains("Latin");
+            if (has0 && !has1) return -1;
+            if (!has0 && has1) return 1;
+            if (has0 && has1) {
+                has0 = charsetName0.contains("Basic");
+                has1 = charsetName1.contains("Basic");
+                if (has0 && !has1) return -1;
+                if (!has0 && has1) return 1;
+                has0 = charsetName0.contains("Western");
+                has1 = charsetName1.contains("Western");
+                if (has0 && !has1) return -1;
+                if (!has0 && has1) return 1;
+            }
+            // Then sort alphabetic charsets.
+            has0 = charsetName0.contains("European");
+            has1 = charsetName1.contains("European");
+            if (has0 && !has1) return -1;
+            if (!has0 && has1) return 1;
+            if (has0 & has1)
+                return charsetName0.compareTo(charsetName1);
+            has0 = charsetName0.contains("Cyrillic");
+            has1 = charsetName1.contains("Cyrillic");
+            if (has0 && !has1) return -1;
+            if (!has0 && has1) return 1;
+            if (has0 & has1)
+                return charsetName0.compareTo(charsetName1);
+            // Then sort abjads charsets.
+            has0 = charsetName0.contains("Semitic");
+            has1 = charsetName1.contains("Semitic");
+            if (has0 && !has1) return -1;
+            if (!has0 && has1) return 1;
+            if (has0 & has1)
+                return charsetName0.compareTo(charsetName1);
+            has0 = charsetName0.contains("Brahmic");
+            has1 = charsetName1.contains("Brahmic");
+            if (has0 && !has1) return -1;
+            if (!has0 && has1) return 1;
+            if (has0 & has1)
+                return charsetName0.compareTo(charsetName1);
+            // Sort the remaining complex charsets.
+            return charsetName0.compareTo(charsetName1);
+        }
+    }
+    
 }
