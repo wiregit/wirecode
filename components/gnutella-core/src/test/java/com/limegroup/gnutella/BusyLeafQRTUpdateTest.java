@@ -23,6 +23,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     static class FileManagerStubOvr extends FileManagerStub{
         public synchronized QueryRouteTable getQRT() {
             QueryRouteTable qrt = new QueryRouteTable(2);
+            System.out.println("Got to getQRT()");
             return qrt;
         }
 
@@ -49,6 +50,8 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
                 ErrorService.error(e);
             }
         }
+        
+        
     }        
     
     /**
@@ -59,6 +62,9 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public void addStubOvrConnection( ManagedConnectionStubOvr mcso ){
             mcso._managerStub=this;
             getConnections().add(mcso);
+            
+            if( mcso.isClientSupernodeConnection() )
+                getInitializedClientConnections().add(mcso);
         }
         
         public List getInitializedConnections() {
@@ -69,6 +75,11 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             Iterator it=getConnections().iterator();
             while( it.hasNext() ) 
                 ((ManagedConnectionStubOvr)it.next())._qrpIncluded=false;
+        }
+        
+        public List getInitializedClientConnections() {
+            System.out.println("Got here...");
+            return getConnections();
         }
     }
     
@@ -92,6 +103,17 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         
         public ConnectionManagerStubOvr _managerStub=null;
         
+        public long getNextQRPForwardTime() {
+            System.out.println("getNextQRPForwardTime() returning 0");
+            return 0l;
+        }
+        
+        
+        public void incrementNextQRPForwardTime(long curTime) {
+            System.out.println("incrementNextQRPForwardTime() called");
+        }
+
+
         public boolean isSupernodeClientConnection() {
             return !_isPeer;
         }
@@ -121,6 +143,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public boolean _qrpIncluded=false;
         public QueryRouteTable getQueryRouteTableReceived() {
             _qrpIncluded = true;
+            System.out.println("Setting _qrpIncluded=true");
             return super.getQueryRouteTableReceived();
         }
     }

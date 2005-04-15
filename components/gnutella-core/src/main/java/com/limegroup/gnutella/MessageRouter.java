@@ -2601,6 +2601,7 @@ public abstract class MessageRouter {
         
         // Add leaves' files if we're an Ultrapeer.
         if(RouterService.isSupernode()) {
+System.out.println("isSupernode() true");
             addQueryRoutingEntriesForLeaves(ret);
         }
         return ret;
