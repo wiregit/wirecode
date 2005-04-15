@@ -2504,9 +2504,6 @@ public abstract class MessageRouter {
 		
 		boolean busyLeaf=_manager.isAnyBusyLeafTriggeringQRTUpdate();
         
-        if( busyLeaf )
-            System.out.println( "Just completed isAnyBusyLeafTriggeringQRTUpdate(), returned true" );
-		
 		for(int i=0; i<list.size(); i++) {                        
 			ManagedConnection c=(ManagedConnection)list.get(i);
 			

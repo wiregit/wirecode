@@ -281,6 +281,10 @@ public class ManagedConnection extends Connection
      *  this certain hops value....
      */
     private volatile int softMaxHops = -1;
+    public byte getSoftMax() {
+        return (byte)softMaxHops;
+    }
+
 
     /**
      * This member contains the time beyond which, if this host is still busy (hpos flow==0),
@@ -330,7 +334,7 @@ public class ManagedConnection extends Connection
      * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
      * busy" for the purposes of QRT updates.
      */
-    public static final long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
+    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
