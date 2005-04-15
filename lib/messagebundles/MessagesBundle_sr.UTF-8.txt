@@ -1,7 +1,7 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Serbian (Cyrillic) - Serbia-Montenegro
-# Тhanks to Borislav Tadic, Nikola Milosavljevic
+# Thanks to Borislav Tadic, Nikola Milosavljevic
 ################################################################################
 LOCALE_LANGUAGE_CODE=sr
 LOCALE_LANGUAGE_NAME=Српски
