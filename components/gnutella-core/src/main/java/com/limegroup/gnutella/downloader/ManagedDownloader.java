@@ -507,6 +507,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private long lastQuerySent;
     
     /**
+     * The first descriptor we get passed - used for requeries, getting length, etc.
+     */
+    private RemoteFileDesc firstDesc;
+    
+    /**
      * The current priority of this download -- only valid if inactive.
      * Has no bearing on the download itself, and is used only so that the
      * download doesn't have to be indexed in DownloadManager's inactive list
@@ -535,8 +540,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
         //this.allFiles = new TreeSet(IpPort.COMPARATOR);
         this.allFiles = new HashSet();
-		if (files != null)
+		if (files != null) {
 			allFiles.addAll(Arrays.asList(files));
+            if (files.length > 0)
+                this.firstDesc = files[0];
+        }
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
@@ -552,7 +560,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
 		RemoteFileDesc []rfds = new RemoteFileDesc[allFiles.size()];
-		int i = 0;
+        int i;
+        if (firstDesc != null && rfds.length > 0) {
+            rfds[0] = firstDesc;
+            allFiles.remove(firstDesc);
+            i =1;
+        } else
+            i = 0;
+        
 		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
 			rfds[i++]=rfd;
@@ -580,6 +595,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 		//allFiles = new TreeSet(IpPort.COMPARATOR);
         allFiles = new HashSet();
         RemoteFileDesc [] rfds=(RemoteFileDesc[])stream.readObject();
+        if (rfds != null && rfds.length > 0)
+            firstDesc = rfds[0];
 		allFiles.addAll(Arrays.asList(rfds));
 		
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
@@ -963,8 +980,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (incompleteFile == null) {
             if (allFiles == null || allFiles.isEmpty())
                 return;
-            incompleteFile = incompleteFileManager.getFile(
-					(RemoteFileDesc)allFiles.iterator().next());
+            incompleteFile = incompleteFileManager.getFile(firstDesc);
         }
     }
     
@@ -1114,7 +1130,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       throws CantResumeException {
         Assert.that(!allFiles.isEmpty(), "precondition violated");
 		    
-		String name = ((RemoteFileDesc)allFiles.iterator().next()).getFileName();
+		String name = firstDesc.getFileName();
 		    
         String queryString = StringUtils.createQueryString(name);
         if(queryString == null || queryString.equals(""))
@@ -1869,6 +1885,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 			waitTime = Math.min(waitTime, rfd.getWaitTime());
 		}
         
+        if (LOG.isDebugEnabled())
+            LOG.debug("calculated wait time "+waitTime+ " seconds from rfds "+busyRFDs.size());
+        
         // waitTime was in seconds
         return (waitTime*1000);
     }
@@ -2432,6 +2451,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             iter.remove();
             l.add(rfd);
         }
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("going to re-rank previously busy hosts: "+l);
+        
         ranker.addToPool(l);
     }
     
@@ -2641,7 +2664,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
-            return (int)Math.max(remaining, 0)/1000;
+            int ret = (int)Math.max(remaining, 0)/1000;
+            if (remaining % 1000 != 0)
+                ret++;
+            return ret;
         case QUEUED:
             return 0;
         default:
@@ -2657,10 +2683,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         String ret = null;
         //a) Return name of the file the user clicked on same as rfd[0]
         //This solves core bug 122, as well as makes sure we display a filename
-        if (!allFiles.isEmpty()) {
-			RemoteFileDesc rfd = (RemoteFileDesc)(allFiles.iterator().next());
-            ret = rfd.getFileName();
-        }
+        if (firstDesc != null) 
+            ret = firstDesc.getFileName();
         else
             Assert.that(false,"allFiles size 0, cannot give name, "+
                         "subclass may have not overridden getFileName");
@@ -2682,10 +2706,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //TODO: this can also mean we've FINISHED the download.  Luckily it
         //doesn't really matter.
         if (_activeWorkers.size()==0) {
-			if (!allFiles.isEmpty()) {
-				RemoteFileDesc rfd = (RemoteFileDesc)(allFiles.iterator().next());
-                return rfd.getSize();
-			}
+			if (firstDesc != null) 
+                return firstDesc.getSize();
 			else 
 				return -1;
         } else 
