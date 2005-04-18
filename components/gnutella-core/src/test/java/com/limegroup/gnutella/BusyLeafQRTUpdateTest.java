@@ -15,11 +15,13 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class BusyLeafQRTUpdateTest extends BaseTestCase {
-
+    
     /**
      * The local stub for testing busy leaf QRT updating functionality
+     * 
+     * Produces an empty QRT table when asked
      */
-    static class FileManagerStubOvr extends FileManagerStub{
+    static class FileManagerEmptyQRTProducer extends FileManagerStub{
         public synchronized QueryRouteTable getQRT() {
             QueryRouteTable qrt = new QueryRouteTable(2);
             return qrt;
@@ -29,18 +31,24 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     
     /**
      * The local stub for testing busy leaf QRT updating functionality
+     * 
+     * Replaces the standard MessageRouter's FileManager with one which produces an empty QRT 
      */
-    static class MessageRouterStubOvr extends MessageRouterStub {
-        public MessageRouterStubOvr( ConnectionManagerStubOvr cm )throws Exception {
+    static class MessageRouterEmptyQRT extends MessageRouterStub {
+        public MessageRouterEmptyQRT( ConnectionManagerCountQRT cm )throws Exception {
             _manager=cm;
             try {
-                PrivilegedAccessor.setValue( MessageRouter.class, "_fileManager", new FileManagerStubOvr() );
+                PrivilegedAccessor.setValue( MessageRouter.class, "_fileManager", new FileManagerEmptyQRTProducer() );
             } catch (Exception e){
                 ErrorService.error(e);
             }
         }
         
-        public void forwardQueryRouteTablesStub() throws Exception {
+        /**
+         * Calls the private method forwardQueryRouteTables() in super
+         * @throws Exception
+         */
+        public void forwardQueryRouteTablesCaller() throws Exception {
             try {
                 PrivilegedAccessor.invokeMethod(this, "forwardQueryRouteTables", null );
             }catch(Exception e){
@@ -54,10 +62,17 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     
     /**
      * The local stub for testing busy leaf QRT updating functionality
+     * 
+     * Attaches ManagedConnectionStubs to this, and performs superclass related 
+     * functionality on them
+     * 
+     * Also, adds method clearConnectionQRTStatus(), which loops through connections 
+     * and clears the per-connection flag which is used to indicate whether or not a 
+     * connection's QRT table was included in the LastHop QRT.
      */
-    static class ConnectionManagerStubOvr extends ConnectionManagerStub {
+    static class ConnectionManagerCountQRT extends ConnectionManagerStub {
        
-        public void addStubOvrConnection( ManagedConnectionStubOvr mcso ){
+        public void addStubOvrConnection( ManagedConnectionCountQRT mcso ){
             mcso._managerStub=this;
             getConnections().add(mcso);
             
@@ -69,10 +84,13 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             return getConnections();
         }
 
+        /**
+         * Loop through connections and clear each one's "QRT Included" flag 
+         */
         public void clearConnectionQRTStatus() {
             Iterator it=getConnections().iterator();
             while( it.hasNext() ) {
-                ManagedConnectionStubOvr mc=((ManagedConnectionStubOvr)it.next());
+                ManagedConnectionCountQRT mc=((ManagedConnectionCountQRT)it.next());
                 if( mc._qrtIncluded ) {
                     mc._qrtIncluded=false;
                 }
@@ -92,10 +110,10 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     /**
      * The local stub for testing busy leaf connections
      */
-    static class ManagedConnectionStubOvr extends ManagedConnectionStub {      
+    static class ManagedConnectionCountQRT extends ManagedConnectionStub {      
         
         private static final long TEST_MIN_BUSY_LEAF_TIME=1000*5;
-        public ManagedConnectionStubOvr() {
+        public ManagedConnectionCountQRT() {
             try {
                 PrivilegedAccessor.setValue(ManagedConnection.class, "MIN_BUSY_LEAF_TIME", new Long(TEST_MIN_BUSY_LEAF_TIME));                
                 PrivilegedAccessor.setValue(this, "softMaxHops", new Integer(-1));
@@ -107,7 +125,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
 //        private boolean _isBusy=false;
         private boolean _isPeer=false;
         
-        public ConnectionManagerStubOvr _managerStub=null;
+        public ConnectionManagerCountQRT _managerStub=null;
         
         public long getNextQRPForwardTime() {
             return 0l;
@@ -165,16 +183,16 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     }
     
     
-    private ManagedConnectionStubOvr peer; 
-    private ManagedConnectionStubOvr leaf;
-    private ConnectionManagerStubOvr cm;
-    private MessageRouterStubOvr mr;
+    private ManagedConnectionCountQRT peer; 
+    private ManagedConnectionCountQRT leaf;
+    private ConnectionManagerCountQRT cm;
+    private MessageRouterEmptyQRT mr;
     
     public void setUp() throws Exception {
-        cm=new ConnectionManagerStubOvr();
+        cm=new ConnectionManagerCountQRT();
         
-        peer=new ManagedConnectionStubOvr();
-        leaf=new ManagedConnectionStubOvr();
+        peer=new ManagedConnectionCountQRT();
+        leaf=new ManagedConnectionCountQRT();
         
         peer.setPeerConnection(true);
         leaf.setPeerConnection(false);
@@ -183,7 +201,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         cm.addStubOvrConnection(leaf);
         
         try {
-            mr=new MessageRouterStubOvr(cm);
+            mr=new MessageRouterEmptyQRT(cm);
             PrivilegedAccessor.setValue( RouterService.class, "manager", cm);
         } catch (Exception e) {
             ErrorService.error(e);
@@ -199,12 +217,12 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
 	public void testBusyLeafNoticed() throws Exception {
         leaf.setBusyEnoughToTriggerQRTRemoval(true);
         
-        //  Should't work for >20 seconds
+        //  Should't work for >TEST_MIN_BUSY_LEAF_TIME seconds
         assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
 
         waitForSeconds();
         
-        //  Should work, since >20 seconds have elapsed
+        //  Should work, since >TEST_MIN_BUSY_LEAF_TIME seconds have elapsed
         assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
         
         //  Shouldn't work, prior one should have cleared the busy flag.
@@ -225,19 +243,19 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     
     public void testNonBusyLastHop() throws Exception {
         //  No busy leaves
-        mr.forwardQueryRouteTablesStub();
+        mr.forwardQueryRouteTablesCaller();
         assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
         cm.clearConnectionQRTStatus();
         waitForSeconds();
         
         //  Still no busy leaves
-        mr.forwardQueryRouteTablesStub();
+        mr.forwardQueryRouteTablesCaller();
         assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
     }
     
     public void testBusyLastHop() throws Exception {
         //  No busy leaves
-        mr.forwardQueryRouteTablesStub();
+        mr.forwardQueryRouteTablesCaller();
         assertTrue( 1==getTotalNumberOfLeavesQRTsIncluded() );
         cm.clearConnectionQRTStatus();
         
@@ -245,7 +263,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         waitForSeconds();
         
         //  A busy leaf should have been noticed
-        mr.forwardQueryRouteTablesStub();
+        mr.forwardQueryRouteTablesCaller();
         assertTrue( 0==getTotalNumberOfLeavesQRTsIncluded() );
     }
     
@@ -254,7 +272,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
      *
      */
     public void waitForSeconds() throws Exception {
-        waitForSeconds( (int)(ManagedConnectionStubOvr.TEST_MIN_BUSY_LEAF_TIME/1000) + 5, true );
+        waitForSeconds( (int)(ManagedConnectionCountQRT.TEST_MIN_BUSY_LEAF_TIME/1000) + 5, true );
     }
     public void waitForSeconds( int seconds, boolean print ) throws Exception {
         if( print )
@@ -279,25 +297,12 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         Iterator it=cm.getConnections().iterator();
         
         while( it.hasNext() ){
-            if( ((ManagedConnectionStubOvr)it.next())._qrtIncluded )
+            if( ((ManagedConnectionCountQRT)it.next())._qrtIncluded )
                 leaves++;
         }
         
         return leaves;
     }
-    
-    /**
-     * Check to see how many leaves are currently in a busy-signalling state, and
-     * would cause peers' LastHop QRT tables to be updated early...
-     * 
-     * @return number of signalling busy leaves
-     */
-    private int getTotalNumberOfBusySignallingLeaves() {
-        int leaves=0;
-        //  TODO: finish this...
-        return leaves;
-    }
-    
 }
 
 
