@@ -764,7 +764,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         File file = null;
         assertFalse("null directory should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
         file = new File("lksfjlsakjfsldfjak.slfkjs");
-        assertFalse("non-directory should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
+        assertFalse("random file should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
         
         //  check that system roots are sensitive directories
         File[] faRoots = File.listRoots();
@@ -779,16 +779,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("user's home directory should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome)));
         
         //  check for OS-specific directories:
+        String realOS = System.getProperty("os.name");
         setOSName("Windows");
         if(CommonUtils.isWindows()) {
             //  check for "Documents and Settings"
             assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\Documents and Settings\\")));
             
             //  check for "My Documents"
-            assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\Documents and Settings\\J\\My Documents\\")));
+            assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "My Documents")));
             
             //  check for "Desktop"
-            assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\Documents and Settings\\J\\Desktop\\")));
+            assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "Desktop")));
             
             //  check for "Program Files"
             assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File("C:\\Program Files\\")));
@@ -872,6 +873,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File("/var")));
         }
         
+        //  revert the os.name system property back to normal 
+        setOSName(realOS);
     }
     
     /**

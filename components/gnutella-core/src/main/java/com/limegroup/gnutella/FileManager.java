@@ -1424,8 +1424,6 @@ public abstract class FileManager {
     public static boolean isSensitiveDirectory(File file) {
         if (file == null)
             return false;
-        if (!file.isDirectory())
-            return false;
         
         //  check for system roots
         File[] faRoots = File.listRoots();
@@ -1444,155 +1442,127 @@ public abstract class FileManager {
         //  check for OS-specific directories:
         if (CommonUtils.isWindows()) {
             //  check for "Documents and Settings"
-            if (isLastDirectory(file, "Documents and Settings"))
+            if (file.getName().equals("Documents and Settings"))
                 return true;
+            else 
+                System.out.println("FileManager.isSensitiveDirectory: "+file.getName());
             
             //  check for "My Documents"
-            if (isLastDirectory(file, "My Documents"))
+            if (file.getName().equals("My Documents"))
                 return true;
             
             //  check for "Desktop"
-            if (isLastDirectory(file, "Desktop"))
+            if (file.getName().equals("Desktop"))
                 return true;
             
             //  check for "Program Files"
-            if (isLastDirectory(file, "Program Files"))
+            if (file.getAbsolutePath().equals("C:\\Program Files"))
                 return true;
             
             //  check for "Windows"
-            if (isLastDirectory(file, "Windows"))
+            if (file.getAbsolutePath().equals("C:\\Windows"))
                 return true;
             
             //  check for "WINNT"
-            if (isLastDirectory(file, "WINNT"))
+            if (file.getAbsolutePath().equals("C:\\WINNT"))
                 return true;
         }
         
         if (CommonUtils.isMacOSX()) {
             //  check for /Users
-            if (isTopLevelDirectory(file, "Users"))
+            if (file.getAbsolutePath().equals("/Users"))
                 return true;
             
             //  check for /System
-            if (isTopLevelDirectory(file, "System"))
+            if (file.getAbsolutePath().equals("/System"))
                 return true;
             
             //  check for /System Folder
-            if (isTopLevelDirectory(file, "System Folder"))
+            if (file.getAbsolutePath().equals("/System Folder"))
                 return true;
             
             //  check for /Previous Systems
-            if (isTopLevelDirectory(file, "Previous Systems"))
+            if (file.getAbsolutePath().equals("/Previous Systems"))
                 return true;
             
             //  check for /private
-            if (isTopLevelDirectory(file, "private"))
+            if (file.getAbsolutePath().equals("/private"))
                 return true;
             
             //  check for /Volumes
-            if (isTopLevelDirectory(file, "Volumes"))
+            if (file.getAbsolutePath().equals("/Volumes"))
                 return true;
             
             //  check for /Desktop
-            if (isTopLevelDirectory(file, "Desktop"))
+            if (file.getAbsolutePath().equals("/Desktop"))
                 return true;
             
             //  check for /Applications
-            if (isTopLevelDirectory(file, "Applications"))
+            if (file.getAbsolutePath().equals("/Applications"))
                 return true;
             
             //  check for /Applications (Mac OS 9)
-            if (isTopLevelDirectory(file, "Applications (Mac OS 9)"))
+            if (file.getAbsolutePath().equals("/Applications (Mac OS 9)"))
                 return true;
             
             //  check for /Network            
-            if (isTopLevelDirectory(file, "Network"))
+            if (file.getAbsolutePath().equals("/Network"))
                 return true;
         }
         
         if (CommonUtils.isPOSIX()) {
             //  check for /bin
-            if (isTopLevelDirectory(file, "bin"))
+            if (file.getAbsolutePath().equals("/bin"))
                 return true;
             
             //  check for /boot
-            if (isTopLevelDirectory(file, "boot"))
+            if (file.getAbsolutePath().equals("/boot"))
                 return true;
             
             //  check for /dev
-            if (isTopLevelDirectory(file, "dev"))
+            if (file.getAbsolutePath().equals("/dev"))
                 return true;
             
             //  check for /etc
-            if (isTopLevelDirectory(file, "etc"))
+            if (file.getAbsolutePath().equals("/etc"))
                 return true;
             
             //  check for /home
-            if (isTopLevelDirectory(file, "home"))
+            if (file.getAbsolutePath().equals("/home"))
                 return true;
             
             //  check for /mnt
-            if (isTopLevelDirectory(file, "mnt"))
+            if (file.getAbsolutePath().equals("/mnt"))
                 return true;
             
             //  check for /opt
-            if (isTopLevelDirectory(file, "opt"))
+            if (file.getAbsolutePath().equals("/opt"))
                 return true;
             
             //  check for /proc
-            if (isTopLevelDirectory(file, "proc"))
+            if (file.getAbsolutePath().equals("/proc"))
                 return true;
             
             //  check for /root
-            if (isTopLevelDirectory(file, "root"))
+            if (file.getAbsolutePath().equals("/root"))
                 return true;
             
             //  check for /sbin
-            if (isTopLevelDirectory(file, "sbin"))
+            if (file.getAbsolutePath().equals("/sbin"))
                 return true;
             
             //  check for /usr
-            if (isTopLevelDirectory(file, "usr"))
+            if (file.getAbsolutePath().equals("/usr"))
                 return true;
             
             //  check for /var
-            if (isTopLevelDirectory(file, "var"))
+            if (file.getAbsolutePath().equals("/var"))
                 return true;
         }
         
         return false;
     }
     
-    /**
-     * Returns true if the give <tt>file</tt> represents a directory whose
-     * last element corresponds to the given <tt>dirName</tt>.
-     */
-    private static boolean isLastDirectory(File file, String dirName) {
-        if (file == null || dirName == null)
-            return false;
-        if (!file.isDirectory())
-            return false;
-        
-        //  ###
-        
-        return true;
-    }
-    
-    /**
-     * Returns true if the given <tt>file</tt> represents a top-level directory
-     * (child of a root directory) with the given <tt>dirName</tt>.
-     */
-    private static boolean isTopLevelDirectory(File file, String dirName) {
-        if (file == null || dirName == null)
-            return false;
-        if (!file.isDirectory())
-            return false;
-        
-        //  ###
-        
-        return true;
-    }
-
     /**
      * Returns the QRTable.
      * If the shared files had changed, then it will rebuilt the QRT.
