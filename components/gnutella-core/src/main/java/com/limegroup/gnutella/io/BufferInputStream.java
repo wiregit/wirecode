@@ -34,6 +34,9 @@ import org.apache.commons.logging.Log;
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
     
+    /** whether or not there's no data left to read on this stream. */
+    private boolean finished = false;
+    
     /**
      * Constructs a new BufferInputStream that reads from the given buffer,
      * using the given socket to retrieve the soTimeouts.
@@ -49,10 +52,18 @@ import org.apache.commons.logging.Log;
         return LOCK;
     }
     
+    /** Marks this stream as finished -- having no data left to read. */
+    void finished() {
+        finished = true;
+    }
+    
     /** Reads a single byte from the buffer. */
     public int read() throws IOException {
         synchronized(LOCK) {
             waitImpl();
+            
+            if(finished && buffer.position() == 0)
+                return -1;
          
             buffer.flip();
             byte read = buffer.get();
@@ -72,6 +83,9 @@ import org.apache.commons.logging.Log;
     public int read(byte[] buf, int off, int len) throws IOException {
         synchronized(LOCK) {
             waitImpl();
+            
+            if(finished && buffer.position() == 0)
+                return -1;
                 
             buffer.flip();
             int available = Math.min(buffer.remaining(), len);
@@ -96,7 +110,7 @@ import org.apache.commons.logging.Log;
     private void waitImpl() throws IOException {
         int timeout = handler.getSoTimeout();
         boolean looped = false;
-        while(buffer.position() == 0) {
+        while(buffer.position() == 0 && !finished) {
             if(shutdown)
                 throw new IOException("socket closed");
                 

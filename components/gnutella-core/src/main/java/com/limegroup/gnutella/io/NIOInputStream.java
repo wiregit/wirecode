@@ -73,15 +73,15 @@ class NIOInputStream {
             // read everything we can.
             while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
             if(read == -1)
-                throw new IOException("channel closed.");
+                source.finished();
             
             // If there's data in the buffer, we're interested in writing.
-            if(buffer.position() > 0)
+            if(buffer.position() > 0 || read == -1)
                 bufferLock.notify();
     
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
-            if(!buffer.hasRemaining())
+            if(!buffer.hasRemaining() || read == -1)
                 NIODispatcher.instance().interestRead(channel, false);
         }
     }
