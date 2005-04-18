@@ -835,24 +835,6 @@ public class UploadManager implements BandwidthTracker {
         
     }
 
-    /**
-     * Returns whether or not the upload queue is full.
-     *
-     * @return <tt>true</tt> if the upload queue is full, otherwise
-     *  <tt>false</tt>
-     */
-    public synchronized boolean isQueueFull() {
-		// return true if Limewire is shutting down
-		if (RouterService.getIsShuttingDown())
-		    return true;
-		
-		// testTotalUploadLimit returns true is there are
-		// slots available, false otherwise.
-		return 
-            (_queuedUploads.size() >=
-             UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-    }
-
 	public synchronized int uploadsInProgress() {
 		return _activeUploadList.size();
 	}

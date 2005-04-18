@@ -258,7 +258,7 @@ public final class AlternateLocationCollection
 		// This is arguably quicker than rechecking hasNext on the iterator.
 		if ( wrote )
 		    writeBuffer.setLength(writeBuffer.length()-2);
-		    
+        
 		return writeBuffer.toString();
 	}
 	

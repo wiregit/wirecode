@@ -36,6 +36,7 @@ import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.StatisticsSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -275,6 +276,11 @@ public abstract class MessageRouter {
 	private final UDPMultiplexor _udpConnectionMultiplexor =
 	    UDPMultiplexor.instance(); 
 
+    /**
+     * The time we last received a request for a query key.
+     */
+    private long _lastQueryKeyTime;
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -866,6 +872,13 @@ public abstract class MessageRouter {
      */
     protected void sendQueryKeyPong(PingRequest pr, DatagramPacket datagram) {
 
+        // check if we're getting bombarded
+        long now = System.currentTimeMillis();
+        if (now - _lastQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue())
+            return;
+        
+        _lastQueryKeyTime = now;
+        
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
 
