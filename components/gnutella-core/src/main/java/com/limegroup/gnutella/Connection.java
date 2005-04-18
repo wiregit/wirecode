@@ -1839,7 +1839,9 @@ public class Connection implements IpPort {
      * @return true iff this connection is a busy leaf (don't include his QRT table)
      */
     public boolean isBusyLeaf(){
-        return isSupernodeClientConnection() && getSoftMax()==0;
+        boolean busy=isSupernodeClientConnection() && (getSoftMax()==0);
+        
+        return busy;
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,

@@ -2601,7 +2601,6 @@ public abstract class MessageRouter {
         
         // Add leaves' files if we're an Ultrapeer.
         if(RouterService.isSupernode()) {
-System.out.println("isSupernode() true");
             addQueryRoutingEntriesForLeaves(ret);
         }
         return ret;
@@ -2625,8 +2624,7 @@ System.out.println("isSupernode() true");
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
         	synchronized (mc.getQRPLock()) {
         	    //	Don't include busy leaves
-        	    if( !mc.isBusyLeaf() )
-        	    {
+        	    if( !mc.isBusyLeaf() ){
                 	QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
 					if(qrtr != null) {
 						qrt.addAll(qrtr);

@@ -16,14 +16,12 @@ import com.limegroup.gnutella.util.BaseTestCase;
 
 public class BusyLeafQRTUpdateTest extends BaseTestCase {
 
-    
     /**
      * The local stub for testing busy leaf QRT updating functionality
      */
     static class FileManagerStubOvr extends FileManagerStub{
         public synchronized QueryRouteTable getQRT() {
             QueryRouteTable qrt = new QueryRouteTable(2);
-            System.out.println("Got to getQRT()");
             return qrt;
         }
 
@@ -63,8 +61,8 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             mcso._managerStub=this;
             getConnections().add(mcso);
             
-            if( mcso.isClientSupernodeConnection() )
-                getInitializedClientConnections().add(mcso);
+            if( !mcso.isClientSupernodeConnection() )
+                super.getInitializedClientConnections().add(mcso);
         }
         
         public List getInitializedConnections() {
@@ -73,14 +71,22 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
 
         public void clearConnectionQRTStatus() {
             Iterator it=getConnections().iterator();
-            while( it.hasNext() ) 
-                ((ManagedConnectionStubOvr)it.next())._qrpIncluded=false;
+            while( it.hasNext() ) {
+                ManagedConnectionStubOvr mc=((ManagedConnectionStubOvr)it.next());
+                if( mc._qrtIncluded ) {
+                    mc._qrtIncluded=false;
+                }
+            }
         }
         
         public List getInitializedClientConnections() {
-            System.out.println("Got here...");
-            return getConnections();
+            return super.getInitializedClientConnections();
         }
+        
+        public boolean isSupernode() {
+            return true;    //  All tests in BusyLeafQRTTest class assume this...
+        }
+        
     }
     
     /**
@@ -104,16 +110,16 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public ConnectionManagerStubOvr _managerStub=null;
         
         public long getNextQRPForwardTime() {
-            System.out.println("getNextQRPForwardTime() returning 0");
             return 0l;
-        }
-        
+        }        
         
         public void incrementNextQRPForwardTime(long curTime) {
-            System.out.println("incrementNextQRPForwardTime() called");
         }
 
-
+        public boolean isUltrapeerQueryRoutingConnection() {
+            return _isPeer;
+        }
+        
         public boolean isSupernodeClientConnection() {
             return !_isPeer;
         }
@@ -140,10 +146,9 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             _isPeer = peer;
         }
 
-        public boolean _qrpIncluded=false;
+        public boolean _qrtIncluded=false;
         public QueryRouteTable getQueryRouteTableReceived() {
-            _qrpIncluded = true;
-            System.out.println("Setting _qrpIncluded=true");
+            _qrtIncluded = true;
             return super.getQueryRouteTableReceived();
         }
     }
@@ -160,10 +165,10 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     }
     
     
-    ManagedConnectionStubOvr peer; 
-    ManagedConnectionStubOvr leaf;
-    ConnectionManagerStubOvr cm;
-    MessageRouterStubOvr mr;
+    private ManagedConnectionStubOvr peer; 
+    private ManagedConnectionStubOvr leaf;
+    private ConnectionManagerStubOvr cm;
+    private MessageRouterStubOvr mr;
     
     public void setUp() throws Exception {
         cm=new ConnectionManagerStubOvr();
@@ -179,6 +184,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         
         try {
             mr=new MessageRouterStubOvr(cm);
+            PrivilegedAccessor.setValue( RouterService.class, "manager", cm);
         } catch (Exception e) {
             ErrorService.error(e);
         }
@@ -273,78 +279,24 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         Iterator it=cm.getConnections().iterator();
         
         while( it.hasNext() ){
-            if( ((ManagedConnectionStubOvr)it.next())._qrpIncluded )
+            if( ((ManagedConnectionStubOvr)it.next())._qrtIncluded )
                 leaves++;
         }
         
         return leaves;
     }
     
+    /**
+     * Check to see how many leaves are currently in a busy-signalling state, and
+     * would cause peers' LastHop QRT tables to be updated early...
+     * 
+     * @return number of signalling busy leaves
+     */
     private int getTotalNumberOfBusySignallingLeaves() {
         int leaves=0;
         //  TODO: finish this...
         return leaves;
     }
-    
-/*
-    private int forwardQueryRouteTablesPseudo( ConnectionManagerStubOvr cmso ) {
-        //Check the time to decide if it needs an update.
-        long time = System.currentTimeMillis();
-        int numLeaves=0;
-
-        //For all connections to new hosts c needing an update...
-        List list=cmso.getInitializedConnections();
-        boolean busyLeaf=cmso.isAnyBusyLeafTriggeringQRTUpdate();
-        
-        for(int i=0; i<list.size(); i++) {                        
-            ManagedConnection c=(ManagedConnection)list.get(i);
-            
-            if( c.isSupernodeClientConnection() && c.getSoftMax()!=0 ) 
-                numLeaves++;
-            
-            // continue if I'm an Ultrapeer and the node on the
-            // other end doesn't support Ultrapeer-level query
-            // routing
-            if(RouterService.isSupernode()) { 
-                // only skip it if it's not an Ultrapeer query routing
-                // connection
-                if(!c.isUltrapeerQueryRoutingConnection()) {
-                    continue;
-                }
-            }               
-            
-            // otherwise, I'm a leaf, and don't send routing
-            // tables if it's not a connection to an Ultrapeer
-            // or if query routing is not enabled on the connection
-            else if (!(c.isClientSupernodeConnection() && 
-                       c.isQueryRoutingEnabled())) {
-                continue;
-            }
-            
-            //  If a busy leaf was noticed, then reduce the time to send a QRT update
-            //  to last hop peers
-            if( busyLeaf )
-                c.busyLeafNoticed(time);
-            
-            
-            // See if it is time for this connections QRP update
-            // This call is safe since only this thread updates time
-            if (time<c.getNextQRPForwardTime() ) {
-                continue;
-            }
-
-            //  a leaf wasn't busy, update count and reset that leaf's timer
-            c.incrementNextQRPForwardTime(time);
-
-            // If sending QRP tables is turned off, don't send them.  
-            if(!ConnectionSettings.SEND_QRP.getValue()) {
-                return 0;
-            }
-        }
-        
-        return numLeaves;
-    }
-*/    
     
 }
 

@@ -285,7 +285,6 @@ public class ManagedConnection extends Connection
         return (byte)softMaxHops;
     }
 
-
     /**
      * This member contains the time beyond which, if this host is still busy (hpos flow==0),
      * that we should consider him as "truly idle" and should then remove his contributions
@@ -1603,21 +1602,8 @@ public class ManagedConnection extends Connection
      * @param curTime the current time in millis
      */
     public void busyLeafNoticed(long curTime) {
-      	System.out.println( 
-      	        "Reached busyLeafNoticed(), curTime=" +curTime+ 
-      	        ", _nextQRPForwardTime=" + _nextQRPForwardTime + 
-      	        ", diff=" + (_nextQRPForwardTime-curTime) );
-        
-        if( _nextQRPForwardTime-curTime > BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME ){
+        if( _nextQRPForwardTime-curTime > BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME )
         	_nextQRPForwardTime=BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME;
-        	
-        	System.out.println("Advancing the Last Hop QRT timer for peer: " + getAddress() + ":" + getPort() );
-        	
-        	int seconds=(int)_nextQRPForwardTime/1000;
-        	int mins=seconds/60;
-        	
-        	System.out.println("Sending another QRT update in " + mins + ":" + ((seconds%60>10)?"":"0") + seconds%60 + "\n"); 
-        }
     }
 
 	/**
