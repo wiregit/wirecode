@@ -1444,8 +1444,6 @@ public abstract class FileManager {
             //  check for "Documents and Settings"
             if (file.getName().equals("Documents and Settings"))
                 return true;
-            else 
-                System.out.println("FileManager.isSensitiveDirectory: "+file.getName());
             
             //  check for "My Documents"
             if (file.getName().equals("My Documents"))
@@ -1456,107 +1454,107 @@ public abstract class FileManager {
                 return true;
             
             //  check for "Program Files"
-            if (file.getAbsolutePath().equals("C:\\Program Files"))
+            if (file.getName().equals("Program Files"))
                 return true;
             
             //  check for "Windows"
-            if (file.getAbsolutePath().equals("C:\\Windows"))
+            if (file.getName().equals("Windows"))
                 return true;
             
             //  check for "WINNT"
-            if (file.getAbsolutePath().equals("C:\\WINNT"))
+            if (file.getName().equals("WINNT"))
                 return true;
         }
         
         if (CommonUtils.isMacOSX()) {
             //  check for /Users
-            if (file.getAbsolutePath().equals("/Users"))
+            if (file.getName().equals("Users"))
                 return true;
             
             //  check for /System
-            if (file.getAbsolutePath().equals("/System"))
+            if (file.getName().equals("System"))
                 return true;
             
             //  check for /System Folder
-            if (file.getAbsolutePath().equals("/System Folder"))
+            if (file.getName().equals("System Folder"))
                 return true;
             
             //  check for /Previous Systems
-            if (file.getAbsolutePath().equals("/Previous Systems"))
+            if (file.getName().equals("Previous Systems"))
                 return true;
             
             //  check for /private
-            if (file.getAbsolutePath().equals("/private"))
+            if (file.getName().equals("private"))
                 return true;
             
             //  check for /Volumes
-            if (file.getAbsolutePath().equals("/Volumes"))
+            if (file.getName().equals("Volumes"))
                 return true;
             
             //  check for /Desktop
-            if (file.getAbsolutePath().equals("/Desktop"))
+            if (file.getName().equals("Desktop"))
                 return true;
             
             //  check for /Applications
-            if (file.getAbsolutePath().equals("/Applications"))
+            if (file.getName().equals("Applications"))
                 return true;
             
             //  check for /Applications (Mac OS 9)
-            if (file.getAbsolutePath().equals("/Applications (Mac OS 9)"))
+            if (file.getName().equals("Applications (Mac OS 9)"))
                 return true;
             
             //  check for /Network            
-            if (file.getAbsolutePath().equals("/Network"))
+            if (file.getName().equals("Network"))
                 return true;
         }
         
         if (CommonUtils.isPOSIX()) {
             //  check for /bin
-            if (file.getAbsolutePath().equals("/bin"))
+            if (file.getName().equals("bin"))
                 return true;
             
             //  check for /boot
-            if (file.getAbsolutePath().equals("/boot"))
+            if (file.getName().equals("boot"))
                 return true;
             
             //  check for /dev
-            if (file.getAbsolutePath().equals("/dev"))
+            if (file.getName().equals("dev"))
                 return true;
             
             //  check for /etc
-            if (file.getAbsolutePath().equals("/etc"))
+            if (file.getName().equals("etc"))
                 return true;
             
             //  check for /home
-            if (file.getAbsolutePath().equals("/home"))
+            if (file.getName().equals("home"))
                 return true;
             
             //  check for /mnt
-            if (file.getAbsolutePath().equals("/mnt"))
+            if (file.getName().equals("mnt"))
                 return true;
             
             //  check for /opt
-            if (file.getAbsolutePath().equals("/opt"))
+            if (file.getName().equals("opt"))
                 return true;
             
             //  check for /proc
-            if (file.getAbsolutePath().equals("/proc"))
+            if (file.getName().equals("proc"))
                 return true;
             
             //  check for /root
-            if (file.getAbsolutePath().equals("/root"))
+            if (file.getName().equals("root"))
                 return true;
             
             //  check for /sbin
-            if (file.getAbsolutePath().equals("/sbin"))
+            if (file.getName().equals("sbin"))
                 return true;
             
             //  check for /usr
-            if (file.getAbsolutePath().equals("/usr"))
+            if (file.getName().equals("usr"))
                 return true;
             
             //  check for /var
-            if (file.getAbsolutePath().equals("/var"))
+            if (file.getName().equals("var"))
                 return true;
         }
         
