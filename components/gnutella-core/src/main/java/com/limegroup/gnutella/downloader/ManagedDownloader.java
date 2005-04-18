@@ -1327,13 +1327,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         //(push or otherwise).  So instead we target the two cases we're
         //interested: waiting for downloaders to complete (by waiting on
         //this) or waiting for retry (handled by DownloadManager).
-        if ( ranker.hasMore() ) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
-            if(isInactive() || dloaderManagerThread == null)
-                receivedNewSources = true;
-        }
-
+        
+        if(LOG.isTraceEnabled())
+            LOG.trace("added rfd: " + rfd);
+        if(isInactive() || dloaderManagerThread == null)
+            receivedNewSources = true;
+        
         // Add to the list of RFDs to connect to.
         ranker.addToPool(rfd);
         return true;
