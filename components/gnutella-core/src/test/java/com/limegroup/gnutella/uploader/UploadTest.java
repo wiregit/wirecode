@@ -1697,6 +1697,7 @@ public class UploadTest extends BaseTestCase {
         in.close();
         out.close();
         s.close();
+        try {Thread.sleep(100); }catch(InterruptedException e){}
         return ret.equals(expResp);
     }
 
@@ -2139,7 +2140,7 @@ public class UploadTest extends BaseTestCase {
         String firstLine = in.readLine();
         if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
             fail("bad first response line: " + firstLine);
-                    
+                   
         while(!in.readLine().equals("")){ }
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();

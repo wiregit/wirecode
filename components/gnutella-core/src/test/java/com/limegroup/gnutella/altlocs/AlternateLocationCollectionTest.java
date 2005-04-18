@@ -23,6 +23,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -393,8 +394,6 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		proxies.add(ppi);
 		proxies2.add(ppi2);proxies2.add(ppi3);proxies2.add(ppi4);
 		
-		Map m= (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
-		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
         PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2,0,1,
                 new IpPortImpl("1.2.3.4",5));
@@ -421,6 +420,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		RemoteFileDesc fwalled3 = new RemoteFileDesc(fwalled,pe3);
 
 		assertEquals(proxies.size(),fwalled.getPushProxies().size());
+        assertEquals(1,proxies.size());
 		
 		AlternateLocationCollection alc = AlternateLocationCollection.create(HugeTestUtils.URNS[0]);
 		
@@ -443,7 +443,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		PushEndpoint received = (PushEndpoint)v.get(0);
 		assertEquals(pe,received);
-		
+        assertEquals(1,received.getProxies().size());
 		// add a second pushLoc - one that should have IpPort info
 		alc.add(firewalled2);
 		
