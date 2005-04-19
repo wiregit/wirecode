@@ -1,15 +1,11 @@
 package com.limegroup.gnutella;
 
 import java.util.Iterator;
-import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -156,7 +152,6 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     static class ConnectionManagerCountQRT extends ConnectionManagerStub {
        
         public void addStubOvrConnection( ManagedConnectionCountQRT mcso ) throws Exception {
-            mcso._managerStub=this;
             PrivilegedAccessor.invokeMethod( 
                     this, "connectionInitializing",  
                     new Object[] { mcso }, new Class[] { Connection.class } );
@@ -203,8 +198,6 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
 //        private boolean _isBusy=false;
         private boolean _isPeer=false;
         
-        public ConnectionManagerCountQRT _managerStub=null;
-        
         public long getNextQRPForwardTime() {
             return 0l;
         }        
@@ -234,9 +227,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             PrivilegedAccessor.setValue(this, "softMaxHops", new Integer( ((busy)?(0):(-1)) ) );
             
             setBusyTime(busy);
-            if( _managerStub!=null && busy )
-                _managerStub.setAnyLeafHasBecomeBusy(busy);
-        }
+         }
         
         public void setPeerConnection( boolean peer ){
             _isPeer = peer;

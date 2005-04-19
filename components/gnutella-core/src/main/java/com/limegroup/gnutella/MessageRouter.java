@@ -2526,14 +2526,10 @@ public abstract class MessageRouter {
 				continue;
 			}
 			
-			//	If a busy leaf was noticed, then reduce the time to send a QRT update
-			//	to last hop peers
-			if( busyLeaf )
-				c.busyLeafNoticed(time);
-			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime() ) {
+            // Don't skip this peer if we are responding to a busy leaf.
+			if (!busyLeaf && time<c.getNextQRPForwardTime() ) {
 				continue;
             }
 

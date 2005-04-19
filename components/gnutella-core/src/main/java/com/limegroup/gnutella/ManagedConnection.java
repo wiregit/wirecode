@@ -89,12 +89,6 @@ public class ManagedConnection extends Connection
      */
     private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
     
-    /**
-     * The time to reduce the last-hop QRP update time by, when a leaf goes
-     * busy
-     */
-    private long BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*90; //1.5 minutes
-
     /** 
      * The time to wait between route table updates for Ultrapeers, 
 	 * in milliseconds. 
@@ -253,12 +247,6 @@ public class ManagedConnection extends Connection
 	 */
     private long _nextQRPForwardTime;
     
-    /**
-     * The next time to send a QRT update to this peer because of BusyLeaf updates
-     */
-    private long _nextBusyLeafQRPForwardTime=0;
-
-
     /** 
      * The bandwidth trackers for the up/downstream.
      * These are not synchronized and not guaranteed to be 100% accurate.
@@ -299,11 +287,6 @@ public class ManagedConnection extends Connection
      *
      *  @param bSet Whether to SET or CLEAR the busy timer for this host
      */
-    public void testHopsFlowZero( ){
-        softMaxHops=0;
-        setBusyTime(true);
-    }
-    
     public void setBusyTime( boolean bSet ){
         if( bSet ){            
             if( _busyTime==-1 )
@@ -1363,9 +1346,6 @@ public class ManagedConnection extends Connection
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             if( isSupernodeClientConnection() ){
-                
-                System.out.println( "Received a hops flow (" + hops.getHopValue() + ") from leaf: " + getAddress() + ":" + getPort() );
-
                 //	If the connection is to a leaf, and it is busy (HF == 0)
                 //	then set the global busy leaf flag appropriately
                 if( softMaxHops!=0 && hops.getHopValue()==0 )
@@ -1595,15 +1575,6 @@ public class ManagedConnection extends Connection
      *  true. */
     public long getNextQRPForwardTime() {
         return _nextQRPForwardTime;
-    }
-
-    /** 
-     * Adjusts the "next QRP update timer", reducing it by the appropriate amount if applicable 
-     * @param curTime the current time in millis
-     */
-    public void busyLeafNoticed(long curTime) {
-        if( _nextQRPForwardTime-curTime > BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME )
-        	_nextQRPForwardTime=BUSY_LEAF_QUERY_ROUTE_UPDATE_TIME;
     }
 
 	/**
