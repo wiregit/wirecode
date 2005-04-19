@@ -668,7 +668,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             initializeFilesAndFolders();
             initializeIncompleteFile();
             initializeVerifyingFile();
-        }catch(IOException bad) {bad.printStackTrace();
+        }catch(IOException bad) {
             setState(DISK_PROBLEM);
             return;
         }
