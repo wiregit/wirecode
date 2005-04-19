@@ -1,9 +1,14 @@
-
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Class for an Array of Files setting.
@@ -49,7 +54,37 @@ public class FileArraySetting extends Setting {
 	public void setValue(File[] value) {
 		super.setValue(decode(value));
 	}
+
+	/**
+	 * Mutator for this setting.
+	 *
+	 * @param Adds file to the array.
+	 */
+	public void add(File file) {
+        File[] newValue = new File[value.length+1];
+		System.arraycopy(value, 0, newValue, 0, value.length);
+		newValue[value.length] = file;
+		setValue(newValue);
+	}
     
+	/**
+	 * Returns true if the given file is contained in this array.
+	 */
+	public boolean contains(File file) {
+	    if(file == null) return false;
+        List list = Arrays.asList(value);
+        for(Iterator it = list.iterator(); it.hasNext(); ) {
+            try {
+                if(file.equals(FileUtils.getCanonicalFile((File)it.next()))) {
+                    return true;
+                }
+            } catch(IOException ioe) {
+                continue;
+            }
+        }
+	    return false;
+	}
+	
     /** Load value from property string value
      * @param sValue property string value
      *

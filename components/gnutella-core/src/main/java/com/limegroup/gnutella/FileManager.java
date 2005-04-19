@@ -770,38 +770,23 @@ public abstract class FileManager {
         
         // STEP 0:
         // Do not share sensitive directories
-        if(isSensitiveDirectory(directory)) {
-            // go through directories that explicitly should not be shared 
-            List sensitive = Arrays.asList(SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.getValue());
-            for(Iterator it = sensitive.iterator(); it.hasNext(); ) {
-                try {
-                    if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
-                        return Collections.EMPTY_SET;
-                    }
-                } catch(IOException ioe) {
-                    continue;
+        if (isSensitiveDirectory(directory)) {
+            //  go through directories that explicitly should not be shared
+            if (SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
+                return Collections.EMPTY_SET;
+            
+            //  go through directories that explicitly should be shared
+            if (!SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.contains(directory)) {
+                //  ask the user whether the sensitive directory should be shared
+                if (RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory)) {
+                    //  add to SENSITIVE_DIRECTORIES_TO_SHARE and keep going
+                    SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.add(directory);
+                } else {
+                    //  add to SENSITIVE_DIRECTORIES_NOT_TO_SHARE and abort
+                    SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(directory);
+                    return Collections.EMPTY_SET;
                 }
             }
-            
-            // go through directories that explicitly should be shared
-            sensitive = Arrays.asList(SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.getValue());
-            boolean found = false;
-            for(Iterator it = sensitive.iterator(); it.hasNext(); ) {
-                try {
-                    if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
-                        found = true;
-                        break;
-                    }
-                } catch(IOException ioe) {
-                    continue;
-                }
-            }
-            
-            // ask the user whether the sensitive directory should be shared
-            if(!found)
-                RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory);
-            else
-                System.out.println("FileManager.updateDirectories: don't warn: "+directory);
         }
         
         // STEP 1:
@@ -840,16 +825,9 @@ public abstract class FileManager {
         // is closer to correct number.
         // Do not share subdirectories if this directory is on the
         // directories-to-share-non-recursively list.
-        List noShare = Arrays.asList(SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.getValue());
-        for(Iterator it = noShare.iterator(); it.hasNext(); ) {
-            try {
-                if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
-                    return added;
-                }
-            } catch(IOException ioe) {
-                continue;
-            }
-        }
+        if (SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.contains(directory)) 
+            return added;
+        
         // Do not share subdirectories of the forcibly shared dir.
         if(!isForcedShare) { 
             for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {

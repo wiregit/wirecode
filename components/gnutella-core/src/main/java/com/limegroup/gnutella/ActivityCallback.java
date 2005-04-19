@@ -120,9 +120,9 @@ public interface ActivityCallback
     
     /**
      * Notifies the GUI that the user is attempting to share a sensitive
-     * directory. 
+     * directory.  Returns true if the sensitive directory should be shared. 
      */
-    public void warnAboutSharingSensitiveDirectory(final File dir);
+    public boolean warnAboutSharingSensitiveDirectory(final File dir);
     
     /**
      * Notifies the GUI when a FileDesc was either added, removed, 
