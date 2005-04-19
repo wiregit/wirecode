@@ -668,7 +668,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             initializeFilesAndFolders();
             initializeIncompleteFile();
             initializeVerifyingFile();
-        }catch(IOException bad) {
+        }catch(IOException bad) {bad.printStackTrace();
             setState(DISK_PROBLEM);
             return;
         }
@@ -1492,7 +1492,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Kills all workers.
      */    
-    private void killAllWorkers() {
+    private synchronized void killAllWorkers() {
         for (Iterator iter = _workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
             doomed.interrupt();
@@ -2078,8 +2078,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean success = FileUtils.forceRename(incompleteFile,completeFile);
             
         // If that didn't work, we're out of luck.
-        if (!success)
-            return DISK_PROBLEM;
+        if (!success){System.out.println("COULDN'T SAVE");
+            return DISK_PROBLEM;}
             
         incompleteFileManager.removeEntry(incompleteFile);
         
@@ -2343,7 +2343,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  a corruption was detected and they chose to kill and discard the
      *  download.  Calls to resume() do not result in InterruptedException.
      */
-    private synchronized int fireDownloadWorkers() throws InterruptedException {
+    private int fireDownloadWorkers() throws InterruptedException {
         LOG.trace("MANAGER: entered fireDownloadWorkers");
 
         int size = -1;
@@ -2364,41 +2364,47 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {            
                 commonOutFile.waitForPendingIfNeeded();
             } catch(DiskException dio) {
+                if (stopped || paused) {
+                    LOG.warn("MANAGER: terminating because of stop|pause");
+                    throw new InterruptedException();
+                }
                 stop();
                 return DISK_PROBLEM;
             }
             
             LOG.debug("Finished waiting for pending");
             
+            
             // Finished.
             if (commonOutFile.isComplete()) {
                 killAllWorkers();
-            
+                
                 LOG.trace("MANAGER: terminating because of completion");
                 return COMPLETE;
-            } 
-    
-            if (_workers.size() == 0 && !ranker.hasMore()) {                        
-                //No downloaders worth living for.
-                if ( calculateWaitTime() > 0) {
-                    LOG.trace("MANAGER: terminating with busy");
-                    return WAITING_FOR_RETRY;
-                } else if( busyRFDs == null || busyRFDs.isEmpty() ) {
-                    LOG.trace("MANAGER: terminating w/o hope");
-                    return GAVE_UP;
-                }
             }
-
-            if(LOG.isDebugEnabled())
-                LOG.debug("MANAGER: kicking off workers, dloadsCount: " + 
-                          _activeWorkers.size() + ", threads: " + _workers.size());
+            
+            synchronized(this) {    
+                if (_workers.size() == 0 && !ranker.hasMore()) {                        
+                    //No downloaders worth living for.
+                    if ( calculateWaitTime() > 0) {
+                        LOG.trace("MANAGER: terminating with busy");
+                        return WAITING_FOR_RETRY;
+                    } else if( busyRFDs == null || busyRFDs.isEmpty() ) {
+                        LOG.trace("MANAGER: terminating w/o hope");
+                        return GAVE_UP;
+                    }
+                }
                 
-            //OK. We are going to create a thread for each RFD. The policy for
-            //the worker threads is to have one more thread than the max swarm
-            //limit, which if successfully starts downloading or gets a better
-            //queued slot than some other worker kills the lowest worker in some
-            //remote queue.
-            if (shouldStartWorker()){
+                if(LOG.isDebugEnabled())
+                    LOG.debug("MANAGER: kicking off workers, dloadsCount: " + 
+                            _activeWorkers.size() + ", threads: " + _workers.size());
+                
+                //OK. We are going to create a thread for each RFD. The policy for
+                //the worker threads is to have one more thread than the max swarm
+                //limit, which if successfully starts downloading or gets a better
+                //queued slot than some other worker kills the lowest worker in some
+                //remote queue.
+                if (shouldStartWorker()){
                     // see if we need to update our ranker
                     ranker = SourceRanker.getAppropriateRanker(ranker);
                     
@@ -2416,23 +2422,24 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // If the rfd was busy, that means all possible RFDs
                     // are busy - store for later
                     if( rfd.isBusy() ) {
-						busyRFDs.add(rfd);
+                        busyRFDs.add(rfd);
                         continue; // see if we need to be waiting for busy
                     } else {
                         startWorker(rfd);
                         allFiles.add(rfd);
                     }
                     
-            } else if (LOG.isDebugEnabled())
-                LOG.debug("no blocks but can't steal - sleeping");
-            
-            //wait for a notification before we continue.
-            try {
-                //if no workers notify in a while, iterate. This is a problem
-                //for stalled downloaders which will never notify. So if we
-                //wait without a timeout, we could wait forever.
-                this.wait(DownloadSettings.WORKER_INTERVAL.getValue()); // note that this relinquishes the lock
-            } catch (InterruptedException ignored) {}
+                } else if (LOG.isDebugEnabled())
+                    LOG.debug("no blocks but can't steal - sleeping");
+                
+                //wait for a notification before we continue.
+                try {
+                    //if no workers notify in a while, iterate. This is a problem
+                    //for stalled downloaders which will never notify. So if we
+                    //wait without a timeout, we could wait forever.
+                    this.wait(DownloadSettings.WORKER_INTERVAL.getValue()); // note that this relinquishes the lock
+                } catch (InterruptedException ignored) {}
+            }
         }//end of while
     }
     
@@ -2663,10 +2670,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
-            int ret = (int)Math.max(remaining, 0)/1000;
-            if (Math.max(0,remaining) % 1000 != 0)
-                ret++;
-            return ret;
+            return  (int)Math.ceil(Math.max(remaining, 0)/1000f);
         case QUEUED:
             return 0;
         default:

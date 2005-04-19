@@ -56,9 +56,8 @@ public class VerifyingFile {
     
     /**
      * The file we're writing to / reading from.
-     * LOCKING: itself. this->fos is ok
      */
-    private RandomAccessFile fos;
+    private volatile RandomAccessFile fos;
     
     /**
      * Whether this file is open for writing
@@ -146,7 +145,6 @@ public class VerifyingFile {
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
         discardedBlocks = new IntervalSet();
-        storedException = null;
     }
     
     /**
@@ -167,6 +165,7 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
+        storedException = null;
         isOpen = true;
     }
 
