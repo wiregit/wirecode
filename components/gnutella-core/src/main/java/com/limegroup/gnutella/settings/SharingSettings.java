@@ -171,6 +171,12 @@ public class SharingSettings extends LimeProps {
         FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_TO_SHARE", new File[0]);
     
     /**
+     * Sensitive directories that are explicitly not allowed to be shared.
+     * */
+    public static final FileArraySetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
+        FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
+    
+    /**
      * Individual files that should be shared despite being located outside
      * of any shared directory, and despite any extension limitations.
      * */

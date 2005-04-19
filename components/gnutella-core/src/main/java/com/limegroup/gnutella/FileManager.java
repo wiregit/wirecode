@@ -768,7 +768,43 @@ public abstract class FileManager {
 
         boolean isForcedShare = directory.equals(FORCED_SHARE);
         
-        //STEP 1:
+        // STEP 0:
+        // Do not share sensitive directories
+        if(isSensitiveDirectory(directory)) {
+            // go through directories that explicitly should not be shared 
+            List sensitive = Arrays.asList(SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.getValue());
+            for(Iterator it = sensitive.iterator(); it.hasNext(); ) {
+                try {
+                    if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
+                        return Collections.EMPTY_SET;
+                    }
+                } catch(IOException ioe) {
+                    continue;
+                }
+            }
+            
+            // go through directories that explicitly should be shared
+            sensitive = Arrays.asList(SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.getValue());
+            boolean found = false;
+            for(Iterator it = sensitive.iterator(); it.hasNext(); ) {
+                try {
+                    if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
+                        found = true;
+                        break;
+                    }
+                } catch(IOException ioe) {
+                    continue;
+                }
+            }
+            
+            // ask the user whether the sensitive directory should be shared
+            if(!found)
+                RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory);
+            else
+                System.out.println("FileManager.updateDirectories: don't warn: "+directory);
+        }
+        
+        // STEP 1:
         // Scan subdirectory for the amount of shared files.
         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
         File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
@@ -780,7 +816,7 @@ public abstract class FileManager {
         int numShareable = file_list.length;
         int numSubDirs = dir_list.length;
             
-        //STEP 2:
+        // STEP 2:
         // Tell the GUI that this file is being shared and update
         // the amount of pending shared files.
         synchronized (this) {
@@ -798,7 +834,7 @@ public abstract class FileManager {
         Set added = new LinkedHashSet();
         added.addAll(Arrays.asList(file_list));
         
-        //STEP 3:
+        // STEP 3:
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.
@@ -1563,7 +1599,7 @@ public abstract class FileManager {
     
     /**
      * Returns the QRTable.
-     * If the shared files had changed, then it will rebuilt the QRT.
+     * If the shared files have changed, then it will rebuild the QRT.
      * A copy is returned so that FileManager does not expose
      * its internal data structure.
      */
