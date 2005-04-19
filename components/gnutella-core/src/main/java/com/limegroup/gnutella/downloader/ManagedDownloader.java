@@ -563,13 +563,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         int i;
         if (firstDesc != null && rfds.length > 0) {
             rfds[0] = firstDesc;
-            allFiles.remove(firstDesc);
             i =1;
         } else
             i = 0;
         
 		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd == firstDesc)
+                continue;
 			rfds[i++]=rfd;
 		}
         stream.writeObject(rfds);
@@ -690,7 +691,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
 		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-			if (!rfd.getSHA1Urn().equals(downloadSHA1))
+			if (!downloadSHA1.equals(rfd.getSHA1Urn()))
 				iter.remove();
 		}
     }
@@ -1900,7 +1901,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected int initializeDownload() {
         
         synchronized (this) {
-            if (allFiles.size()==0)
+            if (allFiles.size()==0) 
                 return GAVE_UP;
         }
         
