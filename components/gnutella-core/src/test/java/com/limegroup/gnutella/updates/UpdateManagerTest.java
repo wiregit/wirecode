@@ -62,7 +62,8 @@ public class UpdateManagerTest extends BaseTestCase {
 
     private static final long DELAY = 60l*1000;//1 min
     
-
+    private static final String defaultVersion = "0.0.0";
+    
 	public UpdateManagerTest(String name) {
 		super(name);
 	}
@@ -79,9 +80,8 @@ public class UpdateManagerTest extends BaseTestCase {
         setSettings();
         RouterService rs = new RouterService(new MyActivityCallbackStub());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
-
+        RouterService.clearHostCatcher();
+        RouterService.connect();
     }
     
     private static void setSettings() throws Exception {
@@ -113,9 +113,9 @@ public class UpdateManagerTest extends BaseTestCase {
         CommonUtils.copy(pub, pub2);
         assertTrue("test could not be set up", pub2.exists());
         updateXMLFile = new File(_settingsDir,"update.xml");
+        
         //set the version file to be the old one. 
-        updateVersion = OLD;
-        changeUpdateFile();
+        changeUpdateFile(OLD_VERSION_FILE);
 
         updateXMLFile = new File(_settingsDir,"update.xml");
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -137,7 +137,22 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        Thread.sleep(3000);
+        /*
+        // Sleep for 3.0 seconds, regardless of exceptions
+        long stopTime = 3*1000 + System.currentTimeMillis();
+        long sleepLength = 3*1000;
+        while (sleepLength > 0) {
+            try {
+                Thread.sleep(sleepLength);
+            } catch (Exception ignoreMe){
+                //Minimize busy waiting in the face of exceptions. 
+                Thread.yield();
+            }
+            sleepLength = stopTime - System.currentTimeMillis();
+        }
+        */
+        // Sleep for 3.0 seconds, unless interrupted
+        Thread.sleep(3*1000);
         setSettings();
     }
 
@@ -146,50 +161,49 @@ public class UpdateManagerTest extends BaseTestCase {
      * Tests that UpdateManager thinks the version it knows about is the one on
      * disk so long as it is verified correctly
      */
-    public void testSimpleVersionCheck() {
+    public void testSimpleVersionCheck() throws Exception {
         UpdateManager man = UpdateManager.instance();
         assertEquals("Problem with old update file", "2.9.3", man.getVersion());
     }
 
     
-    public void testNewerVersionAccepted() {
+    public void testNewerVersionAccepted() throws Exception {
         updateVersion = NEW;
         changeUpdateFile();
         UpdateManager man = UpdateManager.instance();
         assertEquals("Problem with new update file", "3.6.3", man.getVersion());
     }
     
-    public void testBadSignatureFails() {
-        //First test bad signaute with the file.
-        updateVersion = DEF_SIGNATURE;
-        changeUpdateFile();
+    public void testBadSignatureFails() throws Exception {
+        //Attempt to change the version to 3.6.3 using a bad signature
+        changeUpdateFile(DEF_SIG_FILE);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Accepted defective signature", "3.2.2", man.getVersion());
+        assertEquals("Accepted defective signature", defaultVersion, man.getVersion());
     }
 
 
-    public void testBadMessageFails() {
-        updateVersion = DEF_MESSAGE;
-        changeUpdateFile();
+    public void testBadMessageFails() throws Exception {
+        //Attempt to change the version to 3.6.3 using a defective message
+        changeUpdateFile(DEF_MESSAGE_FILE);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
+        assertEquals("Problem with new update file", defaultVersion, man.getVersion());
     }
 
-    public void testBadXMLFileFails() {
-        updateVersion = BAD_XML;
-        changeUpdateFile();
+    public void testBadXMLFileFails() throws Exception {
+        //Attempt to change verision to 2.9.3 using a bad XML file
+        changeUpdateFile(BAD_XML_FILE);
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
+        assertEquals("Problem with new update file", defaultVersion, man.getVersion());
     }
 
-    public void testGarbageFileFails() {
+    public void testGarbageFileFails() throws Exception {
         updateVersion = RANDOM_BYTES;
         changeUpdateFile();
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
+        assertEquals("Problem with new update file", defaultVersion, man.getVersion());
     }
 
-    public void testOldVersionNotAcceptedFromNetwork() {
+    public void testOldVersionNotAcceptedFromNetwork() throws Exception {
         updateVersion = MIDDLE;
         changeUpdateFile();
         TestConnection conn = null;
@@ -211,7 +225,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
 
-    public void testIOXLeavesVersionIntact() {
+    public void testIOXLeavesVersionIntact() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -234,7 +248,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
 
-    public void testBadSignatureFailsOnNetwork() {
+    public void testBadSignatureFailsOnNetwork() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -255,7 +269,7 @@ public class UpdateManagerTest extends BaseTestCase {
         conn.killThread();
     }
 
-    public void testEqualVersionNotRequested() {
+    public void testEqualVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -277,7 +291,7 @@ public class UpdateManagerTest extends BaseTestCase {
         //conn.killThread();
     }
 
-    public void testLowerMajorVersionNotRequested() {
+    public void testLowerMajorVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -299,7 +313,7 @@ public class UpdateManagerTest extends BaseTestCase {
         //conn.killThread();
     }
 
-    public void testDifferentMinorVersionNotRequested() {
+    public void testDifferentMinorVersionNotRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -321,7 +335,7 @@ public class UpdateManagerTest extends BaseTestCase {
         //conn.killThread();
     }
 
-   public void testNewerVersionAcceptedOnNetwork() {
+   public void testNewerVersionAcceptedOnNetwork() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -348,7 +362,7 @@ public class UpdateManagerTest extends BaseTestCase {
      * as the version advertised, but our version file is older than the version
      * file advertised by the other guy
      */
-    public void testNewerVersionFileWithSameVersionRequested() {
+    public void testNewerVersionFileWithSameVersionRequested() throws Exception {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
@@ -368,7 +382,7 @@ public class UpdateManagerTest extends BaseTestCase {
 
 
 
-    public void testBadMessageFailsOnNetwork() {
+    public void testBadMessageFailsOnNetwork() throws Exception {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
@@ -387,7 +401,7 @@ public class UpdateManagerTest extends BaseTestCase {
                                                     "2.9.3", man.getVersion());
     }
 
-    public void testBadXMLFailsOnNetwork() {
+    public void testBadXMLFailsOnNetwork() throws Exception {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
@@ -406,7 +420,7 @@ public class UpdateManagerTest extends BaseTestCase {
                                                     "2.9.3", man.getVersion());
     }
 
-    public void testGarbageDataFailsOnNetwork() {
+    public void testGarbageDataFailsOnNetwork() throws Exception {
     	removeConnections();
         updateVersion = OLD;
         changeUpdateFile();
@@ -425,7 +439,7 @@ public class UpdateManagerTest extends BaseTestCase {
                                                     "2.9.3", man.getVersion());
     }
 
-   public void testUpdateNotRequesteFromSpecial() {
+   public void testUpdateNotRequesteFromSpecial() throws Exception {
    		removeConnections();
        updateVersion = OLD;
        changeUpdateFile();
@@ -446,7 +460,7 @@ public class UpdateManagerTest extends BaseTestCase {
    }
     
     
-    public void testUpdateMessageDelayed() {
+    public void testUpdateMessageDelayed() throws Exception {
     	removeConnections();
         //Note:If the update file does not contain the timestamp attibute, the
         //UpdateManager assumes it is the current time. We can use this to test
@@ -475,11 +489,24 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     /**
+    * puts an update file in the user pref dir based on updateVersion and set
+    * the UpdateManager.INSTANCE to null so the new file is parsed everytime we
+    * call UpdateManager.instance()
+    *
+    * @param updateFile the File that is to be coppied over the update XML file
+    */
+    private static void changeUpdateFile(File updateFile) throws Exception {
+        CommonUtils.copy(updateFile, updateXMLFile);
+        //Set UpdateManager.INSTANCE to null
+        PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
+    }
+    
+    /**
      * puts an update file in the user pref dir based on updateVersion and set
      * the UpdateManager.INSTANCE to null so the new file is parsed everytime we
      * call UpdateManager.instance() 
      */
-    private static void changeUpdateFile() {        
+    private static void changeUpdateFile() throws Exception {        
         if(updateVersion == OLD) 
             CommonUtils.copy(OLD_VERSION_FILE, updateXMLFile);
         else if(updateVersion == MIDDLE)
@@ -498,15 +525,7 @@ public class UpdateManagerTest extends BaseTestCase {
             fail("updateVersion set to wrong value");
         
         //Set UpdateManager.INSTANCE to null
-        try {
-            PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
-            PrivilegedAccessor.setValue(UpdateManager.class, "DELAY", 
-                                        new Long(DELAY));
-        } catch(IllegalAccessException eax) {
-            fail("unable to nullify UpdateManager.INSTANCE");
-        } catch(NoSuchFieldException nsfx) {
-            fail("unable to nullify UpdateManager.INSTANCE");
-        }
+        PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
     }
     
     private static class MyActivityCallbackStub extends ActivityCallbackStub {
