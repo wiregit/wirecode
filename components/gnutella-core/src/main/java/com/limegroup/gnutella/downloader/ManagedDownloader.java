@@ -2664,7 +2664,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
             int ret = (int)Math.max(remaining, 0)/1000;
-            if (remaining % 1000 != 0)
+            if (Math.max(0,remaining) % 1000 != 0)
                 ret++;
             return ret;
         case QUEUED:
