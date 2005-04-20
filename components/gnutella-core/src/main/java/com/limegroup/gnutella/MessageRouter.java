@@ -2526,9 +2526,8 @@ public abstract class MessageRouter {
 			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime() ) {
+			if (time<c.getNextQRPForwardTime())
 				continue;
-            }
 
 			c.incrementNextQRPForwardTime(time);
 				
@@ -2817,7 +2816,6 @@ public abstract class MessageRouter {
         private static final byte BUSY_HOPS_FLOW = 0;
 
     	/* in case we want to reenable queries */
-        //  Per Zlatin, this should be kept at (softMax+2)
     	private static final byte FREE_HOPS_FLOW = 5;
 
         /* small optimization:

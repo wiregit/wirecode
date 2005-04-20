@@ -194,11 +194,6 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
                 }
             }
         }
-
-//        public boolean isSupernode() {
-//            return true;    //  All tests in BusyLeafQRTTest class assume this...
-//        }
-        
     }
     
     /**
@@ -216,7 +211,6 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
             }
         }
         
-//        private boolean _isBusy=false;
         private boolean _isPeer=false;
         
         public long getNextQRPForwardTime() {
