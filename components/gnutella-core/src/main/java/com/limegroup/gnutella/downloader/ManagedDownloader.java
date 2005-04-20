@@ -347,8 +347,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
 
     /** 
-     * List of RemoteFileDesc where we store rfds that we are actively
-     * connecting to
+     * Setof RemoteFileDesc where we store rfds that we have tried to
+     * connect this session
      * LOCKING: this
      */
     private Set /*of RemoteFileDesc */ rfds;
@@ -2243,7 +2243,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         synchronized(this) {
             _workers.add(worker);
-            rfds.add(rfd);
         }
 
         connectCreator.start();
@@ -2253,7 +2252,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Callback that the specified worker has finished.
      */
     synchronized void workerFinished(DownloadWorker finished) {
-            rfds.remove(finished.getRFD());
             removeWorker(finished); 
             notify();
     }
@@ -2264,6 +2262,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         addActiveWorker(worker);
         chatList.addHost(worker.getDownloader());
         browseList.addHost(worker.getDownloader());
+        rfds.add(worker.getRFD());
 
     }
     
@@ -2276,7 +2275,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( position < queuePosition ) {
             queuePosition = position;
             queuedVendor = failed.getDownloader().getVendor();
-        }                    
+        }
+        rfds.add(failed.getRFD());
     }
     
     synchronized void removeWorker(DownloadWorker worker) {
