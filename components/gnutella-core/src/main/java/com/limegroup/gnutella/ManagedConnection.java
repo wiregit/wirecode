@@ -446,7 +446,7 @@ public class ManagedConnection extends Connection
      *
      *  @param bSet Whether to SET or CLEAR the busy timer for this host
      */
-    public void setBusyTime( boolean bSet ){
+    public void setBusy( boolean bSet ){
         if( bSet ){            
             if( _busyTime==-1 )
                 _busyTime=System.currentTimeMillis();
@@ -1348,7 +1348,7 @@ public class ManagedConnection extends Connection
             if( isSupernodeClientConnection() )
                 //	If the connection is to a leaf, and it is busy (HF == 0)
                 //	then set the global busy leaf flag appropriately
-                setBusyTime( hops.getHopValue()==0 );
+                setBusy( hops.getHopValue()==0 );
             
             softMaxHops = hops.getHopValue();
         }

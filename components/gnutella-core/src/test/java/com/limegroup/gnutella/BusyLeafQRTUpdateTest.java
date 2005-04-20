@@ -247,7 +247,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public void setBusyEnoughToTriggerQRTRemoval( boolean busy ) throws Exception{
             PrivilegedAccessor.setValue(this, "softMaxHops", new Integer( ((busy)?(0):(-1)) ) );
             
-            setBusyTime(busy);
+            setBusy(busy);
          }
         
         public void setPeerConnection( boolean peer ){
