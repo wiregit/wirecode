@@ -48,6 +48,7 @@ public class ActivityCallbackStub implements ActivityCallback {
 	public void chatErrorMessage(Chatter chatter, String str) { }
     public void addSharedDirectory(final File directory, final File parent) { }
     public void addSharedFile(final FileDesc file, final File parent) { }
+    public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
 	public void clearSharedFiles() { }           
     public void downloadsComplete() { }
     public void uploadsComplete() { }

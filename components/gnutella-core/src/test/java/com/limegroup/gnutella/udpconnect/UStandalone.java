@@ -455,6 +455,8 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 
 	public void addSharedFile(FileDesc file, File parent) {}
 	
+	public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
+		
 	public void handleSharedFileUpdate(File file) {}
 
 	public void clearSharedFiles() {}

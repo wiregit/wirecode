@@ -61,6 +61,9 @@ public class FileArraySetting extends Setting {
 	 * @param Adds file to the array.
 	 */
 	public void add(File file) {
+	    if (file == null)
+	        return;
+	    
         File[] newValue = new File[value.length+1];
 		System.arraycopy(value, 0, newValue, 0, value.length);
 		newValue[value.length] = file;
@@ -73,6 +76,8 @@ public class FileArraySetting extends Setting {
 	 * @param Remove file from the array, if it exists.
 	 */
 	public void remove(File file) {
+	    if (file == null)
+	        return;
 	    if (!contains(file))
 	        return;
 	    
@@ -97,17 +102,20 @@ public class FileArraySetting extends Setting {
 	 * Returns the index of the given file in this array, -1 if file is not found.
 	 */
 	public int indexOf(File file) {
+	    if (file == null)
+	        return -1;
+	    
         List list = Arrays.asList(value);
         Iterator it = list.iterator();
         for (int i = 0; it.hasNext(); i++) {
             try {
-                if((FileUtils.getCanonicalFile((File)it.next())).equals(file)) {
+                if ((FileUtils.getCanonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
                     return i;
-                }
             } catch(IOException ioe) {
                 continue;
             }
         }
+
 	    return -1;
 	}
 	
@@ -157,7 +165,8 @@ public class FileArraySetting extends Setting {
         
         for(int i = 0; i < src.length; i++) {
             buffer.append(src[i].getAbsolutePath());
-            if (i < src.length-1) { buffer.append(';'); }
+            if (i < src.length-1)
+                buffer.append(';');
         }
             
         return buffer.toString();
