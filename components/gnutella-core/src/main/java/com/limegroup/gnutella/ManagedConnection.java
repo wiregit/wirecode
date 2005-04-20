@@ -280,7 +280,7 @@ public class ManagedConnection extends Connection
     }
 
     /**
-     * This member contains the time beyond which, if this host is still busy (hpos flow==0),
+     * This member contains the time beyond which, if this host is still busy (hops flow==0),
      * that we should consider him as "truly idle" and should then remove his contributions
      * last-hop QRTs.  A value of -1 means that either the leaf isn't busy, or he is busy,
      * and his busy-ness was already noticed by the MessageRouter, so we shouldn't 're-notice'
