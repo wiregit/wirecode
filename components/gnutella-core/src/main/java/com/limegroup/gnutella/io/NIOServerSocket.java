@@ -140,6 +140,15 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         }
     }
     
+    /**
+     * Closes this socket. 
+     */
+    public void shutdown() {
+        try {
+            close();
+        } catch(IOException ignored) {}
+    }
+    
     /** Binds the socket to the endpoint & starts listening for incoming connections */
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);

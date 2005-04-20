@@ -22,8 +22,8 @@ import org.apache.commons.logging.Log;
     /** the lock that reading waits on. */
     private final Object LOCK = new Object();
     
-    /** the socket to get for shutdown on close */
-    private final NIOSocket handler;
+    /** the handler to get for shutdown on close */
+    private final NIOHandler handler;
     
     /** the buffer that has data for writing */
     private final ByteBuffer buffer;
@@ -37,7 +37,7 @@ import org.apache.commons.logging.Log;
     /**
      * Constructs a new BufferOutputStream that writes data to the given buffer.
      */
-    BufferOutputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
+    BufferOutputStream(ByteBuffer buffer, NIOHandler handler, SelectableChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
         this.channel = channel;

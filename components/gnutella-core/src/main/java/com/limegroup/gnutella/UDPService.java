@@ -232,6 +232,13 @@ public class UDPService implements ReadHandler, WriteHandler {
 	}
 	
 	/**
+	 * Shuts down this service.
+	 */
+	public void shutdown() {
+	    setListeningSocket(null);
+	}
+	
+	/**
 	 * Notification that a read can happen.
 	 */
 	public void handleRead() throws IOException {

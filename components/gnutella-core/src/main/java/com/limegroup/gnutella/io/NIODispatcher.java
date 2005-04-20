@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.HashSet;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -39,15 +40,21 @@ public class NIODispatcher implements Runnable {
             throw new RuntimeException(iox);
         }
         
-        Thread t = new ManagedThread(this, "NIODispatcher");
-        t.start();
+        dispatchThread = new ManagedThread(this, "NIODispatcher");
+        dispatchThread.start();
     }
+    
+    /** The thread this is being run on. */
+    private final Thread dispatchThread;
     
     /** The selector this uses. */
     private Selector selector = null;
     
     /** Pending queue. */
-    private final List PENDING = new LinkedList();
+    private final Collection PENDING = new LinkedList();
+    
+    /** Closing queue. */
+    private final Collection CLOSING = new HashSet();
     
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, NIOHandler attachment) {
@@ -115,6 +122,17 @@ public class NIODispatcher implements Runnable {
             // It's a harmless exception, so ignore it.
        }
     }
+    
+    /** Shuts down the NIOHandler, possibly scheduling it for shutdown in the NIODispatch thread. */
+    public void shutdown(NIOHandler handler) {
+        if(Thread.currentThread() == dispatchThread) {
+            handler.shutdown();
+        } else {
+            synchronized(CLOSING) {
+                CLOSING.add(handler);
+            }
+        }
+    }       
     
     /**
      * Cancel SelectionKey, close Channel and "free" the attachment
@@ -216,15 +234,28 @@ public class NIODispatcher implements Runnable {
      */
     private void addPendingItems() {
         synchronized(PENDING) {
-            for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
-                PendingOp next = (PendingOp)i.next();
-                try {
-                    next.channel.register(selector, next.op, next.handler);
-                } catch(IOException iox) {
-                    next.handler.handleIOException(iox);
+            if(!PENDING.isEmpty()) {
+                for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
+                    PendingOp next = (PendingOp)i.next();
+                    try {
+                        next.channel.register(selector, next.op, next.handler);
+                    } catch(IOException iox) {
+                        next.handler.handleIOException(iox);
+                    }
                 }
+                PENDING.clear();
             }
-            PENDING.clear();
+        }
+        
+        synchronized(CLOSING) {
+            if(!CLOSING.isEmpty()) {
+                for(Iterator i = CLOSING.iterator(); i.hasNext(); ) {
+                    NIOHandler next = (NIOHandler)i.next();
+                    next.shutdown();
+                }
+                
+                CLOSING.clear();
+            }
         }
     }
     

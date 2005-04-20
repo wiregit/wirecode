@@ -145,7 +145,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     /**
      * Shuts down this socket & all its streams.
      */
-    void shutdown() {
+    public void shutdown() {
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
         
@@ -167,6 +167,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         try {
             channel.close();
         } catch(IOException ignored) {}
+
+        synchronized(LOCK) {
+            LOCK.notify();
+        }
     }
     
     /** Binds the socket to the SocketAddress */
@@ -176,11 +180,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     
     /** Closes the socket & all streams, waking up any waiting locks.  */
     public void close() throws IOException {
-        shutdown();
-        
-        synchronized(LOCK) {
-            LOCK.notify();
-        }
+        NIODispatcher.instance().shutdown(this);
     }
     
     /** Connects to addr with no timeout */
