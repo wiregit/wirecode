@@ -29,6 +29,22 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    public void setUp() {
+        // runs before every testX method
+    }
+    
+    public void tearDown() {
+        // runs after every testX method
+    }
+    
+    public static void globalSetUp() {
+        // runs before the first testX
+    }
+    
+    public static void globalTearDown() {
+        // runs after the last textX
+    }
 
 
     //TODO: test other parts of ping!

@@ -212,7 +212,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     public int supportsHopsFlow() {
         return supportsMessage(F_BEAR_VENDOR_ID, F_HOPS_FLOW);
     }
-
+    
     /**
      * @return -1 if the message isn't supported, else it returns the version 
      * of the message supported.

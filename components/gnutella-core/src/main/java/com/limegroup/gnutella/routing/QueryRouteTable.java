@@ -611,7 +611,7 @@ public class QueryRouteTable {
         //2. Try compression.
         //TODO: Should this not be done if compression isn't allowed?
         byte bits=8;
-        // Only halve if our values require 4 signed bytes at most.
+        // Only halve if our values require 4 signed bits at most.
         // keywordPresent will always be negative and
         // keywordAbsent will always be positive.
         if( keywordPresent >= -8 && keywordAbsent <= 7 ) {
@@ -680,7 +680,7 @@ public class QueryRouteTable {
     /** Returns an array R of length array.length/2, where R[i] consists of the
      *  low nibble of array[2i] concatentated with the low nibble of array[2i+1].
      *  Note that unhalve(halve(array))=array if all elements of array fit can 
-     *  fit in four signed bytes.
+     *  fit in four signed bits.
      *      @requires array.length is a multiple of two */
     static byte[] halve(byte[] array) {
         byte[] ret=new byte[array.length/2];

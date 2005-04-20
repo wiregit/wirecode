@@ -107,7 +107,6 @@ public class ConnectionManager {
      */
     private volatile static int _connectionAttempts;
 
-
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
 	/**
@@ -219,11 +218,11 @@ public class ConnectionManager {
      */
     //TODO:: why not use sets here??
     private volatile List /* of ManagedConnection */
-        _connections = new ArrayList();
+        _connections = Collections.EMPTY_LIST;
     private volatile List /* of ManagedConnection */
-        _initializedConnections = new ArrayList();
+        _initializedConnections = Collections.EMPTY_LIST;
     private volatile List /* of ManagedConnection */
-        _initializedClientConnections = new ArrayList();
+        _initializedClientConnections = Collections.EMPTY_LIST;
 
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;

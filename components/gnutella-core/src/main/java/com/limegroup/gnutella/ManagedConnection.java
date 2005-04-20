@@ -88,7 +88,7 @@ public class ManagedConnection extends Connection
 	 * in milliseconds. 
      */
     private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
-
+    
     /** 
      * The time to wait between route table updates for Ultrapeers, 
 	 * in milliseconds. 
@@ -229,6 +229,12 @@ public class ManagedConnection extends Connection
      * No synchronization is necessary.
      */
     private int _numSentMessagesDropped;
+    
+    /**
+     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
+     * busy" for the purposes of QRT updates.
+     */
+    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
 
     /**
@@ -246,8 +252,7 @@ public class ManagedConnection extends Connection
     /** The next time I should send a query route table to this connection.
 	 */
     private long _nextQRPForwardTime;
-
-
+    
     /** 
      * The bandwidth trackers for the up/downstream.
      * These are not synchronized and not guaranteed to be 100% accurate.
@@ -270,6 +275,18 @@ public class ManagedConnection extends Connection
      *  this certain hops value....
      */
     private volatile int softMaxHops = -1;
+    public byte getSoftMax() {
+        return (byte)softMaxHops;
+    }
+
+    /**
+     * This member contains the time beyond which, if this host is still busy (hops flow==0),
+     * that we should consider him as "truly idle" and should then remove his contributions
+     * last-hop QRTs.  A value of -1 means that either the leaf isn't busy, or he is busy,
+     * and his busy-ness was already noticed by the MessageRouter, so we shouldn't 're-notice'
+     * him on the next QRT update iteration.
+     */
+    private volatile long _busyTime = -1;
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
@@ -424,7 +441,36 @@ public class ManagedConnection extends Connection
         }                    
     }
 
-
+    /**
+     * Set's a leaf's busy timer to now, if bSet is true, else clears the flag
+     *
+     *  @param bSet Whether to SET or CLEAR the busy timer for this host
+     */
+    public void setBusy( boolean bSet ){
+        if( bSet ){            
+            if( _busyTime==-1 )
+                _busyTime=System.currentTimeMillis();
+        }
+        else
+            _busyTime=-1;
+    }
+    
+    /**
+     * Determine whether or not the leaf has been busy long enough to remove his QRT tables
+     * from the combined last-hop QRTs, and should trigger an earlier update
+     * 
+     * @return true iff this leaf is busy and should trigger an update to the last-hop QRTs 
+     */
+    public boolean isBusyEnoughToTriggerQRTRemoval(){
+        if( _busyTime == -1 )
+            return false;
+        
+        if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
+            return true;
+        
+        return false;
+    }
+    
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
      * instance should be sent to the connection.  The method takes a couple
@@ -1298,6 +1344,12 @@ public class ManagedConnection extends Connection
         if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
+            
+            if( isSupernodeClientConnection() )
+                //	If the connection is to a leaf, and it is busy (HF == 0)
+                //	then set the global busy leaf flag appropriately
+                setBusy( hops.getHopValue()==0 );
+            
             softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof PushProxyAcknowledgement) {
@@ -1514,7 +1566,6 @@ public class ManagedConnection extends Connection
     // End statistics accessors
     //
 
-
     /** Returns the system time that we should next forward a query route table
      *  along this connection.  Only valid if isClientSupernodeConnection() is
      *  true. */
@@ -1537,8 +1588,8 @@ public class ManagedConnection extends Connection
 			// otherwise, it's an Ultrapeer
 			_nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
 		}
-	}
-
+	} 
+    
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
      * e.g., because this is a connection to a Clip2 reflector. Default value:
