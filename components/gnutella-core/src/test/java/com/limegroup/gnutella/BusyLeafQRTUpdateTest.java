@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -48,27 +49,27 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         leaf.setBusyEnoughToTriggerQRTRemoval(true);
         
         //  Should't work for >TEST_MIN_BUSY_LEAF_TIME seconds
-        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
+        assertFalse( isAnyBusyLeafTriggeringQRTUpdate() ); 
 
         waitForSeconds();
         
         //  Should work, since >TEST_MIN_BUSY_LEAF_TIME seconds have elapsed
-        assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
+        assertTrue( isAnyBusyLeafTriggeringQRTUpdate() ); 
         
         //  UPDATE: Should still work, prior one should NOT have cleared the busy flag.
-        assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() );
+        assertTrue( isAnyBusyLeafTriggeringQRTUpdate() );
     }
     
     public void testBusyPeerNotNoticed() throws Exception {
          peer.setBusyEnoughToTriggerQRTRemoval(true);
         
         //  Should't work at all...
-        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
+        assertFalse( isAnyBusyLeafTriggeringQRTUpdate() ); 
 
         waitForSeconds();
          
         //  Shouldn't work still
-        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() );
+        assertFalse( isAnyBusyLeafTriggeringQRTUpdate() );
     }
     
     public void testNonBusyLastHop() throws Exception {
@@ -137,6 +138,26 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         }
         
         return leaves;
+    }
+    
+    /**
+     * Loops through all managed connections and checks them for whether they have 
+     * been a busy leaf long enough to trigger a last-hop QRT update.
+     * 
+     * @return true iff the last-hop QRT tables should be updated early.
+     */
+     public boolean isAnyBusyLeafTriggeringQRTUpdate(){
+        boolean busyLeaf=false;
+        List list=cm.getInitializedClientConnections();
+        Iterator it=list.iterator();
+        
+        while( !busyLeaf && it.hasNext() )
+            //  NOTE: don't remove the leaf's BUSY flag, since some peers may not have
+            //  been updated yet due to timing quirks.
+            if( ((ManagedConnection)it.next()).isBusyEnoughToTriggerQRTRemoval() )
+                busyLeaf=true;
+        
+        return busyLeaf;
     }
     
     /**

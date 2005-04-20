@@ -2502,8 +2502,6 @@ public abstract class MessageRouter {
 		List /* of RouteTableMessage */ patches = null;
 		QueryRouteTable lastSent = null;
 		
-		boolean busyLeaf=_manager.isAnyBusyLeafTriggeringQRTUpdate();
-        
 		for(int i=0; i<list.size(); i++) {                        
 			ManagedConnection c=(ManagedConnection)list.get(i);
 			
