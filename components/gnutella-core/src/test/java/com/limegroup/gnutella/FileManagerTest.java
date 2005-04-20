@@ -179,8 +179,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", files[0].getFile(), f1);
     }
     
-    //  ###
-    public void XXXtestAddAnotherSharedFileDifferentIndex() throws Exception {
+    public void testAddAnotherSharedFileDifferentIndex() throws Exception {
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
