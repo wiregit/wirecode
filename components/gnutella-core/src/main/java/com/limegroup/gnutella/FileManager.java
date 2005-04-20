@@ -657,7 +657,7 @@ public abstract class FileManager {
      *  thread (the GUI).
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
-        final File[] directories = new File[SharingSettings.DIRECTORIES_TO_SHARE.length()];
+        final File[] directories = new File[SharingSettings.DIRECTORIES_TO_SHARE.length() + 1];
         synchronized (this) {
             // Reset the file list info
             resetVariables();
