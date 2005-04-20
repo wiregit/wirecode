@@ -143,17 +143,6 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     }
     
     /**
-     * Schedules this to be shutdown if not called from the dispatch thread,
-     * otherwise shuts down immediately.
-     */
-    void streamDied() {
-        if(!NIODispatcher.instance().isDispatchThread())
-            NIODispatcher.instance().shutdown(this);
-        else
-            shutdown();
-    }
-    
-    /**
      * Shuts down this socket & all its streams.
      */
     public void shutdown() {

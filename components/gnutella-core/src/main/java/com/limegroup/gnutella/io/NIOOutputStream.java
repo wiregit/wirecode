@@ -85,8 +85,7 @@ class NIOOutputStream {
      * Notification that an IOException has occurred on one of these channels.
      */
     public void handleIOException(IOException iox) {
-        // Inform the NIOSocket that things are dead.  That will shut us down.
-        handler.streamDied();
+        handler.shutdown();
     }
     
     /**
