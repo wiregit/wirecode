@@ -49,13 +49,19 @@ public class NIODispatcher implements Runnable {
     
     /** The selector this uses. */
     private Selector selector = null;
+	
+	/** Queue lock. */
+	private final Object Q_LOCK = new Object();
     
     /** Pending queue. */
     private final Collection PENDING = new LinkedList();
     
     /** Closing queue. */
     private final Collection CLOSING = new HashSet();
-    
+	
+	/** Interest queue. */
+	private final Collection INTEREST = new LinkedList();
+	    
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_ACCEPT);
@@ -82,15 +88,18 @@ public class NIODispatcher implements Runnable {
     }
     
     /** Register interest */
-    private void register(SelectableChannel channel, NIOHandler attachment, int op) {
-        synchronized(PENDING) {
-            PENDING.add(new PendingOp(channel, attachment, op));
+    private void register(SelectableChannel channel, NIOHandler handler, int op) {
+		if(Thread.currentThread() == dispatchThread) {
+			try {
+				channel.register(selector, op, handler);
+			} catch(IOException iox) {
+                handler.handleIOException(iox);
+            }
+		} else {
+	        synchronized(Q_LOCK) {
+				PENDING.add(new PendingOp(channel, handler, op));
+			}
         }
-        
-        // Technically, it is possible (and recommended) to do a selector.wakeup() here,
-        // and have selector.select() without a timeout.  Unfortunately, due to bugs
-        // with Selector on various OS's, specifically bugs with wakeup() causing 
-        // select() to always return immediately forever, this isn't possible.
     }
     
     /** Registers a SelectableChannel as being interested in a write again. */
@@ -105,22 +114,19 @@ public class NIODispatcher implements Runnable {
     
     /** Registers interest on the channel for the given op */
     private void interest(SelectableChannel channel, int op, boolean on) {
-        try {
-            SelectionKey sk = channel.keyFor(selector);
-            if(sk != null && sk.isValid()) {
-                synchronized(channel.blockingLock()) {
-                    if(on)
-                        sk.interestOps(sk.interestOps() | op);
-                    else
-                        sk.interestOps(sk.interestOps() & ~op);
-                }
-            }
-        } catch(CancelledKeyException cke) {
-            // It is possible to register interest on any thread, which means
-            // that the key could have been cancelled at any time.
-            // Despite checking for isValid above, it may become invalid.
-            // It's a harmless exception, so ignore it.
-       }
+		if(Thread.currentThread() == dispatchThread) {		
+			SelectionKey sk = channel.keyFor(selector);
+			if(sk != null && sk.isValid()) {
+				if(on)
+					sk.interestOps(sk.interestOps() | op);
+				else
+					sk.interestOps(sk.interestOps() & ~op);
+			}
+		} else {
+			synchronized(Q_LOCK) {
+				INTEREST.add(new InterestOp(channel, op, on));
+			}
+		}
     }
     
     /** Shuts down the NIOHandler, possibly scheduling it for shutdown in the NIODispatch thread. */
@@ -128,7 +134,7 @@ public class NIODispatcher implements Runnable {
         if(Thread.currentThread() == dispatchThread) {
             handler.shutdown();
         } else {
-            synchronized(CLOSING) {
+            synchronized(Q_LOCK) {
                 CLOSING.add(handler);
             }
         }
@@ -158,9 +164,6 @@ public class NIODispatcher implements Runnable {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
-        if (!sk.isValid())
-            return;
-        
         ServerSocketChannel ssc = (ServerSocketChannel)sk.channel();
         SocketChannel channel = ssc.accept();
         
@@ -185,9 +188,6 @@ public class NIODispatcher implements Runnable {
     private void processConnect(SelectionKey sk, ConnectHandler handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);        
-        
-        if(!sk.isValid())
-            return;
             
         SocketChannel channel = (SocketChannel)sk.channel();
         
@@ -208,9 +208,6 @@ public class NIODispatcher implements Runnable {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling read: " + handler);
         
-        if (!sk.isValid())
-            return;
-        
         handler.handleRead();
     }
     
@@ -222,9 +219,6 @@ public class NIODispatcher implements Runnable {
     private void processWrite(SelectionKey sk, WriteHandler handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling write: " + handler);
-            
-        if (!sk.isValid())
-            return;
         
         handler.handleWrite();
     }
@@ -233,7 +227,7 @@ public class NIODispatcher implements Runnable {
      * Adds any pending registrations.
      */
     private void addPendingItems() {
-        synchronized(PENDING) {
+        synchronized(Q_LOCK) {
             if(!PENDING.isEmpty()) {
                 for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
                     PendingOp next = (PendingOp)i.next();
@@ -245,17 +239,29 @@ public class NIODispatcher implements Runnable {
                 }
                 PENDING.clear();
             }
-        }
-        
-        synchronized(CLOSING) {
+			
+			if(!INTEREST.isEmpty()) {
+				for(Iterator i = INTEREST.iterator(); i.hasNext(); ) {
+					InterestOp next = (InterestOp)i.next();
+					SelectionKey sk = next.channel.keyFor(selector);
+					if(sk != null && sk.isValid()) {
+						if(next.on)
+							sk.interestOps(sk.interestOps() | next.op);
+						else
+							sk.interestOps(sk.interestOps() & ~next.op);
+					}
+				}
+				INTEREST.clear();
+			}
+			
             if(!CLOSING.isEmpty()) {
                 for(Iterator i = CLOSING.iterator(); i.hasNext(); ) {
                     NIOHandler next = (NIOHandler)i.next();
                     next.shutdown();
-                }
-                
+                }                
                 CLOSING.clear();
             }
+			
         }
     }
     
@@ -301,6 +307,9 @@ public class NIODispatcher implements Runnable {
             
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
+				if(!sk.isValid())
+					continue;
+				
                 NIOHandler handler = (NIOHandler)sk.attachment();
                 try {
                     if (sk.isAcceptable())
@@ -355,6 +364,18 @@ public class NIODispatcher implements Runnable {
             this.op = op;
         }
     }
+	
+	/** Encapsulate an interest op. */
+	private static class InterestOp {
+		private final SelectableChannel channel;
+		private final int op;
+		private final boolean on;
+		InterestOp(SelectableChannel channel, int op, boolean on) {
+			this.channel = channel;
+			this.op = op;
+			this.on = on;
+		}
+	}
     
 }
 
