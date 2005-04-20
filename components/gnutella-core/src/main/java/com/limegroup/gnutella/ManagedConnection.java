@@ -229,6 +229,12 @@ public class ManagedConnection extends Connection
      * No synchronization is necessary.
      */
     private int _numSentMessagesDropped;
+    
+    /**
+     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
+     * busy" for the purposes of QRT updates.
+     */
+    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
 
     /**
@@ -281,42 +287,6 @@ public class ManagedConnection extends Connection
      * him on the next QRT update iteration.
      */
     private volatile long _busyTime = -1;
-    
-    /**
-     * Set's a leaf's busy timer to now, if bSet is true, else clears the flag
-     *
-     *  @param bSet Whether to SET or CLEAR the busy timer for this host
-     */
-    public void setBusyTime( boolean bSet ){
-        if( bSet ){            
-            if( _busyTime==-1 )
-                _busyTime=System.currentTimeMillis();
-        }
-        else
-            _busyTime=-1;
-    }
-    
-    /**
-     * Determine whether or not the leaf has been busy long enough to remove his QRT tables
-     * from the combined last-hop QRTs, and should trigger an earlier update
-     * 
-     * @return true iff this leaf is busy and should trigger an update to the last-hop QRTs 
-     */
-    public boolean isBusyEnoughToTriggerQRTRemoval(){
-        if( _busyTime == -1 )
-            return false;
-        
-        if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
-            return true;
-        
-        return false;
-    }
-    
-    /**
-     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
-     * busy" for the purposes of QRT updates.
-     */
-    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
@@ -471,7 +441,36 @@ public class ManagedConnection extends Connection
         }                    
     }
 
-
+    /**
+     * Set's a leaf's busy timer to now, if bSet is true, else clears the flag
+     *
+     *  @param bSet Whether to SET or CLEAR the busy timer for this host
+     */
+    public void setBusyTime( boolean bSet ){
+        if( bSet ){            
+            if( _busyTime==-1 )
+                _busyTime=System.currentTimeMillis();
+        }
+        else
+            _busyTime=-1;
+    }
+    
+    /**
+     * Determine whether or not the leaf has been busy long enough to remove his QRT tables
+     * from the combined last-hop QRTs, and should trigger an earlier update
+     * 
+     * @return true iff this leaf is busy and should trigger an update to the last-hop QRTs 
+     */
+    public boolean isBusyEnoughToTriggerQRTRemoval(){
+        if( _busyTime == -1 )
+            return false;
+        
+        if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
+            return true;
+        
+        return false;
+    }
+    
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
      * instance should be sent to the connection.  The method takes a couple
@@ -1345,15 +1344,12 @@ public class ManagedConnection extends Connection
         if (vm instanceof HopsFlowVendorMessage) {
             // update the softMaxHops value so it can take effect....
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
-            if( isSupernodeClientConnection() ){
+            
+            if( isSupernodeClientConnection() )
                 //	If the connection is to a leaf, and it is busy (HF == 0)
                 //	then set the global busy leaf flag appropriately
-                if( softMaxHops!=0 && hops.getHopValue()==0 )
-                    setBusyTime(true);
-                else if( hops.getHopValue()!=0 )
-                    setBusyTime(false);
-                    
-            }
+                setBusyTime( hops.getHopValue()==0 );
+            
             softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof PushProxyAcknowledgement) {

@@ -55,8 +55,8 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         //  Should work, since >TEST_MIN_BUSY_LEAF_TIME seconds have elapsed
         assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() ); 
         
-        //  Shouldn't work, prior one should have cleared the busy flag.
-        assertFalse( cm.isAnyBusyLeafTriggeringQRTUpdate() );
+        //  UPDATE: Should still work, prior one should NOT have cleared the busy flag.
+        assertTrue( cm.isAnyBusyLeafTriggeringQRTUpdate() );
     }
     
     public void testBusyPeerNotNoticed() throws Exception {

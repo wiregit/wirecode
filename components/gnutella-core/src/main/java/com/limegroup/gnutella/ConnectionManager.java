@@ -370,26 +370,21 @@ public class ConnectionManager {
     }
 
     /**
-     * Loops through all managed connections and checks them each for whether they have 
-     * been a busy leaf long enough to trigger an early last-hop QRT update.
+     * Loops through all managed connections and checks them for whether they have 
+     * been a busy leaf long enough to trigger a last-hop QRT update.
      * 
      * @return true iff the last-hop QRT tables should be updated early.
      */
      public boolean isAnyBusyLeafTriggeringQRTUpdate(){
         boolean busyLeaf=false;
-        List list=getConnections();
+        List list=getInitializedClientConnections();
         Iterator it=list.iterator();
         
-        while( it.hasNext() ){
-            ManagedConnection mc = (ManagedConnection)it.next();
-            if( !mc.isSupernodeClientConnection() )
-                continue;
-            
-            if( mc.isBusyEnoughToTriggerQRTRemoval() ){
+        while( !busyLeaf && it.hasNext() )
+            //  NOTE: don't remove the leaf's BUSY flag, since some peers may not have
+            //  been updated yet due to timing quirks.
+            if( ((ManagedConnection)it.next()).isBusyEnoughToTriggerQRTRemoval() )
                 busyLeaf=true;
-                mc.setBusyTime( false );    //  Clear the flag on this leaf
-            }
-        }
         
         return busyLeaf;
     }
