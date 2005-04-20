@@ -1411,7 +1411,7 @@ public abstract class FileManager {
             return false;
         
         //  Short-circuit if file is specially shared 
-        if (Arrays.asList(SharingSettings.SPECIAL_FILES_TO_SHARE.getValue()).contains(file))
+        if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
             return true;
             
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 

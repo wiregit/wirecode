@@ -623,11 +623,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
 
         //  Add "shared" to special shared files
-        File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-        File[] newSpecialFiles = new File[specialFiles.length + 1];
-        System.arraycopy(specialFiles, 0, newSpecialFiles, 0, specialFiles.length);
-        newSpecialFiles[specialFiles.length] = shared;
-        SharingSettings.SPECIAL_FILES_TO_SHARE.setValue(newSpecialFiles);
+        SharingSettings.SPECIAL_FILES_TO_SHARE.add(shared);
         waitForLoad();
 
         //  assert that "shared" and "notShared" are not in shared directories
@@ -667,14 +663,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //  create "shared" file out of shared directory
         File tmp = createNewNamedTestFile(10, "tmp", _sharedDir.getParentFile());
         File shared = new File(tmp.getParentFile(), "shared.badextension");
-        boolean success = tmp.renameTo(shared);
+        tmp.renameTo(shared);
                 
         //  Add "shared" to special shared files
-        File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-        File[] newSpecialFiles = new File[specialFiles.length + 1];
-        System.arraycopy(specialFiles, 0, newSpecialFiles, 0, specialFiles.length);
-        newSpecialFiles[specialFiles.length] = shared;
-        SharingSettings.SPECIAL_FILES_TO_SHARE.setValue(newSpecialFiles);
+        SharingSettings.SPECIAL_FILES_TO_SHARE.add(shared);
         waitForLoad();
 
         //  assert that "shared" file does not have a shareable extension
@@ -734,11 +726,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("subdirectory \"noShare\" could not be created", subDir.mkdirs());
         
         //  mark shared directory so that it's shared non-recursively
-        File[] directories = SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.getValue();
-        File[] newDirectories = new File[directories.length + 1];
-        System.arraycopy(directories, 0, newDirectories, 0, directories.length);
-        newDirectories[directories.length] = subDir;
-        SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.setValue(newDirectories);
+        SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.add(subDir);
 
         //  add "notShared" to subdirectory
         File notShared = createNewNamedTestFile(10, "notShared", subDir);
