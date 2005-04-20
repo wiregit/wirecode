@@ -68,21 +68,47 @@ public class FileArraySetting extends Setting {
 	}
     
 	/**
+	 * Mutator for this setting.
+	 *
+	 * @param Remove file from the array, if it exists.
+	 */
+	public void remove(File file) {
+	    if (!contains(file))
+	        return;
+	    
+        File[] newValue = new File[value.length-1];
+        int index = indexOf(file);
+        //  copy first half, up to first occurrence's index
+        System.arraycopy(value, 0, newValue, 0, index);
+        //  copy second half, for the length of the rest of the array
+		System.arraycopy(value, index+1, newValue, index, value.length - index - 1);
+		
+		setValue(newValue);
+	}
+    
+	/**
 	 * Returns true if the given file is contained in this array.
 	 */
 	public boolean contains(File file) {
-	    if(file == null) return false;
+	    return indexOf(file) >= 0;
+	}
+	
+	/**
+	 * Returns the index of the given file in this array, -1 if file is not found.
+	 */
+	public int indexOf(File file) {
         List list = Arrays.asList(value);
-        for(Iterator it = list.iterator(); it.hasNext(); ) {
+        Iterator it = list.iterator();
+        for (int i = 0; it.hasNext(); i++) {
             try {
-                if(file.equals(FileUtils.getCanonicalFile((File)it.next()))) {
-                    return true;
+                if((FileUtils.getCanonicalFile((File)it.next())).equals(file)) {
+                    return i;
                 }
             } catch(IOException ioe) {
                 continue;
             }
         }
-	    return false;
+	    return -1;
 	}
 	
 	/**

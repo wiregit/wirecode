@@ -775,14 +775,8 @@ public abstract class FileManager {
             //  go through directories that explicitly should be shared
             if (!SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
-                if (RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory)) {
-                    //  add to SENSITIVE_DIRECTORIES_TO_SHARE and keep going
-                    SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.add(directory);
-                } else {
-                    //  add to SENSITIVE_DIRECTORIES_NOT_TO_SHARE and abort
-                    SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(directory);
+                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
                     return Collections.EMPTY_SET;
-                }
             }
         }
         
