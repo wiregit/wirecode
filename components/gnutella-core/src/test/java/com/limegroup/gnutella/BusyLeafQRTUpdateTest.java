@@ -108,19 +108,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
      *
      */
     public void waitForSeconds() throws Exception {
-        waitForSeconds( (int)(ManagedConnectionCountQRT.TEST_MIN_BUSY_LEAF_TIME/1000) + 5, true );
-    }
-    public void waitForSeconds( int seconds, boolean print ) throws Exception {
-        if( print )
-            System.out.println("Starting to sleep for " + seconds + " seconds...");
-        
-        for (int i = 0; i < seconds; i++) {
-            if( print && ((seconds<=5) || (i%5)==0) )
-                System.out.println( (seconds-i) + " secs..." );
-            Thread.sleep(1000);
-        }
-        if( print )
-            System.out.print("Done sleeping...");
+            Thread.sleep(1000 * ((ManagedConnectionCountQRT.TEST_MIN_BUSY_LEAF_TIME+5)));
     }
     
     /**
