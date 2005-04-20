@@ -235,6 +235,9 @@ public class DownloadTest extends BaseTestCase {
         }catch(Exception e){
             ErrorService.error(e);
         }
+        // get rid of any pushlocs in the map
+        System.runFinalization();
+        System.gc();
     }
     
     private static void deleteAllFiles() {
@@ -387,104 +390,6 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
-/*    public void testTHEXDownloadSwarm() throws Exception {
-    	LOG.debug("-Testing the grey area allocation during swarm downloads");
-    	
-    	final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
-    	final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        final IncompleteFileManager ifm=dm.getIncompleteFileManager();
-        RemoteFileDesc[] rfds = {rfd,rfd2};
-        
-        HTTP11Listener grayVerifier = new HTTP11Listener() {
-        	private int requestNo;
-        	private int thexStatus;
-            private int thexRequestIndex = -1 ;
-        	private Interval lastInterval;
-        	public synchronized void requestHandled(){
-        	    LOG.debug("handled request");
-        	}
-            
-            public synchronized void thexRequestHandled() {
-                assertGreaterThan(0,thexStatus);
-                if (thexStatus == 1) {
-                    thexStatus = 2;
-                    thexRequestIndex = requestNo+1;
-                    LOG.debug("ending thex request at request no "+requestNo);
-                }
-            }
-            
-        	public synchronized void thexRequestStarted() {
-        	    LOG.debug("starting thex request at request no "+requestNo);
-        	    thexStatus=1;
-        	}
-        	
-        	// checks whether we request chunks at the proper offset, etc.
-        	public synchronized void requestStarted(TestUploader uploader) {
-        	    LOG.debug("started request "+uploader.start+"-"+uploader.stop);
-        		
-        		Interval i = new Interval (uploader.start,uploader.stop-1);
-                if (requestNo == 0) {
-                    assertEquals(0,thexStatus);
-                    // first request, we should have requested 0-99999 or 100000-199999 
-                    assertEquals(0,i.low);
-                    assertEquals(99999,i.high);
-                    LOG.debug("request 0 pass");
-                }
-                else if (requestNo == 1) {
-                    
-                    // if no thex yet, so 100K-200K        				
-                    if (thexStatus == 0)  
-                        assertEquals(199999,i.high);
-                    
-                    // else 100K-256K        				
-                    if (thexStatus == 2 && thexRequestIndex == 1)
-                        assertEquals(256*1024 -1,i.high);
-                }
-                else if (requestNo < 5){
-                    assertEquals(lastInterval.high+1,i.low);
-                    
-                    if (thexStatus != 2) 
-                        assertEquals(100000,i.high - i.low +1);
-                     else if (thexRequestIndex >= requestNo) 
-                        assertTrue((0 == (i.high+1) % (256*1024)) ||
-                                i.high+1==TestFile.length());
-                     
-                }
-                lastInterval = i;
-        		requestNo++;
-        		
-        	}
-        };
-        
-        uploader1.setHTTPListener(grayVerifier);
-        uploader1.setSendThexTreeHeader(true);
-        uploader1.setSendThexTree(true);
-        uploader2.setHTTPListener(grayVerifier);
-        uploader2.setSendThexTreeHeader(true);
-        uploader2.setSendThexTree(true);
-        
-        Downloader download=null;
-
-        download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
-
-        waitForComplete(false);
-        //assertEquals(6,uploader1.getRequestsReceived());
-        System.out.println("u1: "+uploader1.getRequestsReceived());
-        System.out.println("u2: "+uploader2.getRequestsReceived());
-        if (isComplete())
-            LOG.debug("pass"+"\n");
-        else
-            fail("FAILED: complete corrupt");
-
-        
-        for (int i=0; i<rfds.length; i++) {
-            File incomplete=ifm.getFile(rfds[i]);
-            VerifyingFile vf=ifm.getEntry(incomplete);
-            assertNull("verifying file should be null", vf);
-        }
-        
-    }*/
-    
     public void testSimplePushDownload() throws Exception {
         LOG.debug("-Testing non-swarmed push download");
         
@@ -544,9 +449,10 @@ public class DownloadTest extends BaseTestCase {
        ((PushAltLoc)pushLoc).updateProxies(true);
         RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
         
-        uploader1.setRate(500);
+        
         TestUploader uploader = new TestUploader("push uploader");
-        final int FUDGE_FACTOR=500*1024;
+        uploader.setRate(100);
+        uploader1.setRate(100);
         
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
@@ -555,7 +461,7 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds);
         
-        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
+        assertLessThan("u1 did all the work", TestFile.length(), 
                 uploader1.fullRequestsUploaded());
         
         assertGreaterThan("pusher did all the work ",0,uploader1.fullRequestsUploaded());
@@ -614,8 +520,8 @@ public class DownloadTest extends BaseTestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertLessThan("u1 did all the work", TestFile.length()-STOP_AFTER+FUDGE_FACTOR, u1);
-        assertEquals("u2 did all the work", STOP_AFTER, u2);
+        assertLessThanOrEquals("u2 did too much work", STOP_AFTER, u2);
+        assertGreaterThan(0,u2);
     }
     
     /**
@@ -697,9 +603,10 @@ public class DownloadTest extends BaseTestCase {
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        RemoteFileDesc[] rfds = {rfd1};
+        RemoteFileDesc[] rfds2 ={rfd2};
 
-        tGeneric(rfds);
+        tGeneric(rfds,rfds2);
 
 
         //Make sure there weren't too many overlapping regions.
@@ -710,7 +617,7 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
 
         //Note: The amount downloaded from each uploader will not 
-
+        
         LOG.debug("passed"+"\n");//file downloaded? passed
     }
     
@@ -1063,6 +970,9 @@ public class DownloadTest extends BaseTestCase {
 
         tGeneric(rfds);
 
+        // give some time for the head thread to pass around the altlocs
+        Thread.sleep(1000);
+        
         //Prepare to check the alternate locations
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocation dAlt = AlternateLocation.create(rfd1);
@@ -1258,7 +1168,6 @@ public class DownloadTest extends BaseTestCase {
     public void testPusherBecomesPushLocAndSentToInterested() throws Exception {
         LOG.debug("-Testing push download creating a push location...");
         final int RATE=200;
-        final int FUDGE_FACTOR=RATE*1536;
         uploader1.setRate(RATE);
         uploader1.setInterestedInFalts(true);
         uploader1.stopAfter(600000);
@@ -1280,28 +1189,32 @@ public class DownloadTest extends BaseTestCase {
         assertFalse(pushRFD.supportsFWTransfer());
         assertTrue(pushRFD.needsPush());
 
-        
-
-        
         RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         
         RemoteFileDesc []now={pushRFD};
-        RemoteFileDesc []later={openRFD1,openRFD2};
+        HashSet later=new HashSet();
+        later.add(openRFD1);
+        later.add(openRFD2);
         
         PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),pusher,guid);
 
         
-        tGeneric(now,later);
+        ManagedDownloader download=
+            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, false, null);
+        Thread.sleep(1000);
+        download.addDownload(later,false);
+
+        waitForComplete(false);
         
 
-        assertGreaterThan("u1 did no work",100*1024,uploader1.fullRequestsUploaded());
+        assertGreaterThan("u1 did no work",100000,uploader1.getAmountUploaded());
 
-        assertGreaterThan("u2 did no work",100*1024,uploader2.fullRequestsUploaded());
-        assertLessThan("u2 did too much work",550*1024,uploader2.fullRequestsUploaded());
+        assertGreaterThan("u2 did no work",100000,uploader2.getAmountUploaded());
+        assertLessThan("u2 did too much work",550*1024,uploader2.getAmountUploaded());
 
-        assertGreaterThan("pusher did no work",100*1024,pusher.fullRequestsUploaded());
+        assertGreaterThan("pusher did no work",100*1024,pusher.getAmountUploaded());
         
         
         AlternateLocationCollection alc = uploader1.getAlternateLocations();
