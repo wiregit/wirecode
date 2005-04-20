@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.util.IpPort;
@@ -16,6 +19,8 @@ import com.limegroup.gnutella.util.IpPort;
  * sources.
  */
 public class LegacyRanker extends SourceRanker {
+    
+    private static final Log LOG = LogFactory.getLog(LegacyRanker.class);
 
 	private final Set rfds;  
 	
@@ -24,6 +29,8 @@ public class LegacyRanker extends SourceRanker {
 	}
 	
 	public synchronized void addToPool(RemoteFileDesc host) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("adding host "+host+" to be ranked",new Exception());
 		rfds.add(host);
 	}
 
@@ -78,6 +85,10 @@ public class LegacyRanker extends SourceRanker {
             
         boolean removed = rfds.remove(ret);
         Assert.that(removed == true, "unable to remove RFD.");
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("the best we came with is "+ret);
+        
         return ret;
 	}
 	

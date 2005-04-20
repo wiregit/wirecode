@@ -623,7 +623,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         this.callback=callback;
         rfds = new IpPortSet();
-        busyRFDs = new IpPortSet();
+        busyRFDs = new HashSet();
         _activeWorkers=new LinkedList();
         _workers=new ArrayList();
         queuedWorkers = new HashMap();
@@ -945,6 +945,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         return false;
     }   
+    
+    /**
+     * reloads any previously busy hosts in the ranker, as well as other
+     * hosts that we know about 
+     */
+    private synchronized void initializeRanker() {
+        reloadBusyHosts();
+        ranker.addToPool(allFiles);
+    }
     
     /**
      * assumes incompleteFile is initialized
@@ -1921,7 +1930,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         // load up the ranker with the hosts we know about
-        ranker.addToPool(allFiles);
+        initializeRanker();
         
         return CONNECTING;
     }
@@ -2209,7 +2218,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initializes the verifiying file.
      */
-    private synchronized void openVerifyingFile() throws IOException {
+    private void openVerifyingFile() throws IOException {
 
         //need to get the VerifyingFile ready to write
         try {
