@@ -108,7 +108,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
      *
      */
     public void waitForSeconds() throws Exception {
-            Thread.sleep(1000 * ((ManagedConnectionCountQRT.TEST_MIN_BUSY_LEAF_TIME+5)));
+            Thread.sleep(5000 + (ManagedConnectionCountQRT.TEST_MIN_BUSY_LEAF_TIME+5));
     }
     
     /**
