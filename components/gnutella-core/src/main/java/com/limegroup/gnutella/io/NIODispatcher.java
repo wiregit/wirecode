@@ -61,6 +61,11 @@ public class NIODispatcher implements Runnable {
 	
 	/** Interest queue. */
 	private final Collection INTEREST = new LinkedList();
+	
+	/** Determine if this is the dispatch thread. */
+	public boolean isDispatchThread() {
+	    return Thread.currentThread() == dispatchThread;
+	}
 	    
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, NIOHandler attachment) {

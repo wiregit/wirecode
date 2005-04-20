@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
     private final Object LOCK = new Object();
     
     /** the handler to get for shutdown on close */
-    private final NIOHandler handler;
+    private final NIOSocket handler;
     
     /** the buffer that has data for writing */
     private final ByteBuffer buffer;
@@ -37,7 +37,7 @@ import org.apache.commons.logging.Log;
     /**
      * Constructs a new BufferOutputStream that writes data to the given buffer.
      */
-    BufferOutputStream(ByteBuffer buffer, NIOHandler handler, SelectableChannel channel) {
+    BufferOutputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
         this.channel = channel;
@@ -116,7 +116,7 @@ import org.apache.commons.logging.Log;
     
     /** Closes this InputStream & the Socket that it's associated with */
     public void close() throws IOException  {
-        handler.shutdown();
+        handler.streamDied();
     }
     
     /** Shuts down this socket */

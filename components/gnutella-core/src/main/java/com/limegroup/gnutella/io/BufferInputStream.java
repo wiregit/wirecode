@@ -132,7 +132,7 @@ import org.apache.commons.logging.Log;
     
     /** Closes this InputStream & the Socket that it's associated with */
     public void close() throws IOException  {
-        handler.shutdown();
+        handler.streamDied();
     }
     
     /** Shuts down this socket */
