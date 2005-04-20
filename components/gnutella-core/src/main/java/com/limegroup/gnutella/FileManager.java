@@ -657,7 +657,7 @@ public abstract class FileManager {
      *  thread (the GUI).
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
-        File[] tempDirVar;
+        final File[] directories = new File[SharingSettings.DIRECTORIES_TO_SHARE.length()];
         synchronized (this) {
             // Reset the file list info
             resetVariables();
@@ -680,12 +680,10 @@ public abstract class FileManager {
             
             // add 'NetworkShare' as an always shared subdirectory.
             File[] tmpDirs = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
-            tempDirVar = new File[tmpDirs.length + 1];
-            for(int i = 0; i < tmpDirs.length; i++)
-                tempDirVar[i] = tmpDirs[i];
-            tempDirVar[tmpDirs.length] = FORCED_SHARE;
+            System.arraycopy(tmpDirs, 0, directories, 0, tmpDirs.length);
+            directories[tmpDirs.length] = FORCED_SHARE;
 
-            Arrays.sort(tempDirVar, new Comparator() {
+            Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
                     return (a.toString()).length()-(b.toString()).length();
                 }
@@ -693,7 +691,6 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        final File[] directories = tempDirVar;
         if (notifyOnClear) 
             RouterService.getCallback().clearSharedFiles();
         
@@ -991,15 +988,7 @@ public abstract class FileManager {
 
             // Check if file is a specially shared file.  If not, ensure that
             // it is located in a shared directory.
-            boolean special = false;
-            File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-            for(int i = 0; i < specialFiles.length; i++) {
-                if(specialFiles[i].equals(file)) {
-                    special = true;
-                    break;
-                }
-            }
-            if(!special) {
+            if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
                 IntSet siblings = (IntSet)_sharedDirectories.get(parent);
                 Assert.that(siblings != null, "Add directory \""+parent+"\" not in "+_sharedDirectories);
                 boolean added = siblings.add(fileIndex);
@@ -1008,7 +997,7 @@ public abstract class FileManager {
             
             // files that are forcibly shared over the network
             // aren't counted or shown.
-            if(!parent.equals(FORCED_SHARE))
+            if (!parent.equals(FORCED_SHARE))
                 RouterService.getCallback().addSharedFile(fileDesc, parent);
             else
                 _numForcedFiles++;

@@ -85,6 +85,13 @@ public class FileArraySetting extends Setting {
 	    return false;
 	}
 	
+	/**
+	 * Returns the length of the array.
+	 */
+	public int length() {
+	    return value.length;
+	}
+	
     /** Load value from property string value
      * @param sValue property string value
      *
