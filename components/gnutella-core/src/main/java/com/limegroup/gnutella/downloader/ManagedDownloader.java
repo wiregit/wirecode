@@ -691,7 +691,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
 		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-			if (!downloadSHA1.equals(rfd.getSHA1Urn()))
+			if (!downloadSHA1.equals(rfd.getSHA1Urn()) && rfd.getSHA1Urn() != null)
 				iter.remove();
 		}
     }
@@ -2079,8 +2079,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean success = FileUtils.forceRename(incompleteFile,completeFile);
             
         // If that didn't work, we're out of luck.
-        if (!success){System.out.println("COULDN'T SAVE");
-            return DISK_PROBLEM;}
+        if (!success)
+            return DISK_PROBLEM;
             
         incompleteFileManager.removeEntry(incompleteFile);
         
