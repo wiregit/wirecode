@@ -1051,15 +1051,11 @@ public class DownloadWorker implements Runnable {
         float slowestSpeed = ourSpeed;
         
         // are we too slow to steal?
-        if (ourSpeed == -1)
+        if (ourSpeed == -1) 
             return null;
         
         for (Iterator iter=_manager.getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
-            
-            // If this guy isn't downloading, don't steal from him.
-            if(!h.isActive())
-                continue;
             
             // see if he is the slowest one
             float hisSpeed = 0;
@@ -1067,7 +1063,9 @@ public class DownloadWorker implements Runnable {
                 h.getMeasuredBandwidth();
                 hisSpeed = h.getAverageBandwidth(); 
             } catch (InsufficientDataException ide) {
-                continue;
+                // we assume these guys would go almost as fast as we do, so we do not steal
+                // from them unless they are the last ones remaining
+                hisSpeed = ourSpeed - Float.MIN_VALUE;
             }
             
             if (hisSpeed < slowestSpeed) {

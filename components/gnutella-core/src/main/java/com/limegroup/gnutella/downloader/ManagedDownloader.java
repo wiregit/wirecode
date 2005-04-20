@@ -2420,23 +2420,23 @@ public class ManagedDownloader implements Downloader, Serializable {
                     
                     // if the ranker has become empty, reset it and 
                     // give it any previously busy rfds to try again
-                    if (!ranker.hasMore()) { 
+                    if (!ranker.hasMore())  
                         reloadBusyHosts();
-                        if (!ranker.hasMore())
-                            continue;
-                    }
                     
-                    // get the best host
-                    RemoteFileDesc rfd = ranker.getBest();
-                    
-                    // If the rfd was busy, that means all possible RFDs
-                    // are busy - store for later
-                    if( rfd.isBusy() ) {
-                        busyRFDs.add(rfd);
-                        continue; // see if we need to be waiting for busy
-                    } else {
-                        startWorker(rfd);
-                        allFiles.add(rfd);
+                    if (ranker.hasMore()) {
+                        
+                        // get the best host
+                        RemoteFileDesc rfd = ranker.getBest();
+                        
+                        // If the rfd was busy, that means all possible RFDs
+                        // are busy - store for later
+                        if( rfd.isBusy() ) {
+                            busyRFDs.add(rfd);
+                            continue; // see if we need to be waiting for busy
+                        } else {
+                            startWorker(rfd);
+                            allFiles.add(rfd);
+                        }
                     }
                     
                 } else if (LOG.isDebugEnabled())
