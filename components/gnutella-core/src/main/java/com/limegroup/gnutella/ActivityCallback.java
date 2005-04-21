@@ -119,6 +119,12 @@ public interface ActivityCallback
     public void addSharedFile(final FileDesc file, final File parent);
     
     /**
+     * Notifies the GUI that the user is attempting to share a sensitive
+     * directory.  Returns true if the sensitive directory should be shared. 
+     */
+    public boolean warnAboutSharingSensitiveDirectory(final File dir);
+    
+    /**
      * Notifies the GUI when a FileDesc was either added, removed, 
      * changed or renamed. This event is triggered by FileManager
      * or MetaFileManager.

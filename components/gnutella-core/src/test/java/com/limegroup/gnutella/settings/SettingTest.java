@@ -276,4 +276,46 @@ public class SettingTest extends BaseTestCase {
         assertEquals("Expiring Boolean default", false, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
         assertEquals("Expiring Boolean default", true, settings2.EXPIRABLE_BOOLEAN_SETTING.isDefault());
     }
+
+    /**
+     * Tests the methods of FileArraySetting.
+     */
+    public void testFileArraySetting() throws Exception {
+        SettingsFactory factory = new SettingsFactory(new File(getSaveDirectory(), "testSettings.props"));
+        FileArraySetting setting = factory.createFileArraySetting("FILE_ARRAY_SETTING", files);
+        
+        //  test add, remove, contains, indexOf, length
+        setting.setValue(new File[0]);
+        
+        assertEquals("Empty FileArraySetting", setting.length(), 0);
+        
+        File fileNew = new File("new");
+        File fileOld = new File("old");
+        setting.add(fileNew);
+        
+        assertEquals("Expected non-empty FileArraySetting 1", setting.length(), 1);
+        assertEquals("Expected index of 0", setting.indexOf(fileNew), 0);
+        assertTrue("Expected FileArraySetting to contain new file", setting.contains(fileNew));
+        assertFalse("Expected FileArraySetting not to contain old file", setting.contains(fileOld));
+
+        setting.add(fileOld);
+        setting.remove(fileNew);
+        
+        assertEquals("Expected non-empty FileArraySetting 2", setting.length(), 1);
+        assertTrue("Expected FileArraySetting to contain old file", setting.contains(fileOld));
+        assertFalse("Expected FileArraySetting not to contain new file", setting.contains(fileNew));
+        
+        assertEquals("Expected index of 0", setting.indexOf(fileOld), 0);
+        assertEquals("Expected index of -1", setting.indexOf(fileNew), -1);
+        
+        //  test adding null
+        setting.add(null);
+        assertEquals("adding null should not work", setting.length(), 1);
+        assertFalse("containing null should be ok", setting.contains(null));
+        assertEquals("Expected index of -1", setting.indexOf(null), -1);
+        setting.remove(null);
+        assertEquals("removing null should be ok", setting.length(), 1);
+        assertFalse("containing null should be ok", setting.contains(null));
+        assertEquals("Expected index of -1", setting.indexOf(null), -1);
+    }
 }

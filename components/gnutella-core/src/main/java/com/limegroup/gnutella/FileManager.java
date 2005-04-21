@@ -24,6 +24,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
@@ -216,16 +217,23 @@ public abstract class FileManager {
     private boolean _loadFinished = false;
     
     /**
-     * The only ShareableFileFilter object that should be used.
+     * The filter object to use to discern shareable files.
      */
-    public static final FileFilter SHAREABLE_FILE_FILTER =
-        new ShareableFileFilter();
+    private static final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return isFileShareable(f, f.length());
+        }
+    };    
         
     /**
-     * The only DirectoryFilter object that should be used.
+     * The filter object to use to determine directories.
      */
-    public static final FileFilter DIRECTORY_FILTER = new DirectoryFilter();
-        
+    private static final FileFilter DIRECTORY_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return f.isDirectory();
+        }        
+    };
+         
     /**
      * The QueryRouteTable kept by this.  The QueryRouteTable will be 
      * lazily rebuilt when necessary.
@@ -649,7 +657,7 @@ public abstract class FileManager {
      *  thread (the GUI).
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
-        File[] tempDirVar;
+        final File[] directories = new File[SharingSettings.DIRECTORIES_TO_SHARE.length() + 1];
         synchronized (this) {
             // Reset the file list info
             resetVariables();
@@ -672,12 +680,10 @@ public abstract class FileManager {
             
             // add 'NetworkShare' as an always shared subdirectory.
             File[] tmpDirs = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
-            tempDirVar = new File[tmpDirs.length + 1];
-            for(int i = 0; i < tmpDirs.length; i++)
-                tempDirVar[i] = tmpDirs[i];
-            tempDirVar[tmpDirs.length] = FORCED_SHARE;
+            System.arraycopy(tmpDirs, 0, directories, 0, tmpDirs.length);
+            directories[tmpDirs.length] = FORCED_SHARE;
 
-            Arrays.sort(tempDirVar, new Comparator() {
+            Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
                     return (a.toString()).length()-(b.toString()).length();
                 }
@@ -685,7 +691,6 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        final File[] directories = tempDirVar;
         if (notifyOnClear) 
             RouterService.getCallback().clearSharedFiles();
         
@@ -719,7 +724,7 @@ public abstract class FileManager {
         }
         
         // Tell the download manager to notify us of incomplete files.
-		if (! loadThreadInterrupted())
+		if (!loadThreadInterrupted())
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
 
@@ -760,7 +765,22 @@ public abstract class FileManager {
 
         boolean isForcedShare = directory.equals(FORCED_SHARE);
         
-        //STEP 1:
+        // STEP 0:
+        // Do not share sensitive directories
+        if (isSensitiveDirectory(directory)) {
+            //  go through directories that explicitly should not be shared
+            if (SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
+                return Collections.EMPTY_SET;
+            
+            //  go through directories that explicitly should be shared
+            if (!SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.contains(directory)) {
+                //  ask the user whether the sensitive directory should be shared
+                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
+                    return Collections.EMPTY_SET;
+            }
+        }
+        
+        // STEP 1:
         // Scan subdirectory for the amount of shared files.
         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
         File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
@@ -772,7 +792,7 @@ public abstract class FileManager {
         int numShareable = file_list.length;
         int numSubDirs = dir_list.length;
             
-        //STEP 2:
+        // STEP 2:
         // Tell the GUI that this file is being shared and update
         // the amount of pending shared files.
         synchronized (this) {
@@ -790,22 +810,15 @@ public abstract class FileManager {
         Set added = new LinkedHashSet();
         added.addAll(Arrays.asList(file_list));
         
-        //STEP 3:
+        // STEP 3:
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.
         // Do not share subdirectories if this directory is on the
         // directories-to-share-non-recursively list.
-        List noShare = Arrays.asList(SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.getValue());
-        for(Iterator it = noShare.iterator(); it.hasNext(); ) {
-            try {
-                if(directory.equals(FileUtils.getCanonicalFile((File)it.next()))) {
-                    return added;
-                }
-            } catch(IOException ioe) {
-                continue;
-            }
-        }
+        if (SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.contains(directory)) 
+            return added;
+        
         // Do not share subdirectories of the forcibly shared dir.
         if(!isForcedShare) { 
             for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
@@ -969,15 +982,7 @@ public abstract class FileManager {
 
             // Check if file is a specially shared file.  If not, ensure that
             // it is located in a shared directory.
-            boolean special = false;
-            File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-            for(int i = 0; i < specialFiles.length; i++) {
-                if(specialFiles[i].equals(file)) {
-                    special = true;
-                    break;
-                }
-            }
-            if(!special) {
+            if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
                 IntSet siblings = (IntSet)_sharedDirectories.get(parent);
                 Assert.that(siblings != null, "Add directory \""+parent+"\" not in "+_sharedDirectories);
                 boolean added = siblings.add(fileIndex);
@@ -986,7 +991,7 @@ public abstract class FileManager {
             
             // files that are forcibly shared over the network
             // aren't counted or shown.
-            if(!parent.equals(FORCED_SHARE))
+            if (!parent.equals(FORCED_SHARE))
                 RouterService.getCallback().addSharedFile(fileDesc, parent);
             else
                 _numForcedFiles++;
@@ -1400,7 +1405,7 @@ public abstract class FileManager {
             return false;
         
         //  Short-circuit if file is specially shared 
-        if (Arrays.asList(SharingSettings.SPECIAL_FILES_TO_SHARE.getValue()).contains(file))
+        if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
             return true;
             
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
@@ -1409,10 +1414,153 @@ public abstract class FileManager {
         }        
         return true;
     }
-
+    
+    /**
+     * Returns true iff <tt>file</tt> is a sensitive directory.
+     */
+    public static boolean isSensitiveDirectory(File file) {
+        if (file == null)
+            return false;
+        
+        //  check for system roots
+        File[] faRoots = File.listRoots();
+        if (faRoots != null && faRoots.length > 0) {
+            for (int i = 0; i < faRoots.length; i++) {
+                if (file.equals(faRoots[i]))
+                    return true;
+            }
+        }
+        
+        //  check for user home directory
+        String userHome = System.getProperty("user.dir");
+        if (file.equals(new File(userHome)))
+            return true;
+        
+        //  check for OS-specific directories:
+        if (CommonUtils.isWindows()) {
+            //  check for "Documents and Settings"
+            if (file.getName().equals("Documents and Settings"))
+                return true;
+            
+            //  check for "My Documents"
+            if (file.getName().equals("My Documents"))
+                return true;
+            
+            //  check for "Desktop"
+            if (file.getName().equals("Desktop"))
+                return true;
+            
+            //  check for "Program Files"
+            if (file.getName().equals("Program Files"))
+                return true;
+            
+            //  check for "Windows"
+            if (file.getName().equals("Windows"))
+                return true;
+            
+            //  check for "WINNT"
+            if (file.getName().equals("WINNT"))
+                return true;
+        }
+        
+        if (CommonUtils.isMacOSX()) {
+            //  check for /Users
+            if (file.getName().equals("Users"))
+                return true;
+            
+            //  check for /System
+            if (file.getName().equals("System"))
+                return true;
+            
+            //  check for /System Folder
+            if (file.getName().equals("System Folder"))
+                return true;
+            
+            //  check for /Previous Systems
+            if (file.getName().equals("Previous Systems"))
+                return true;
+            
+            //  check for /private
+            if (file.getName().equals("private"))
+                return true;
+            
+            //  check for /Volumes
+            if (file.getName().equals("Volumes"))
+                return true;
+            
+            //  check for /Desktop
+            if (file.getName().equals("Desktop"))
+                return true;
+            
+            //  check for /Applications
+            if (file.getName().equals("Applications"))
+                return true;
+            
+            //  check for /Applications (Mac OS 9)
+            if (file.getName().equals("Applications (Mac OS 9)"))
+                return true;
+            
+            //  check for /Network            
+            if (file.getName().equals("Network"))
+                return true;
+        }
+        
+        if (CommonUtils.isPOSIX()) {
+            //  check for /bin
+            if (file.getName().equals("bin"))
+                return true;
+            
+            //  check for /boot
+            if (file.getName().equals("boot"))
+                return true;
+            
+            //  check for /dev
+            if (file.getName().equals("dev"))
+                return true;
+            
+            //  check for /etc
+            if (file.getName().equals("etc"))
+                return true;
+            
+            //  check for /home
+            if (file.getName().equals("home"))
+                return true;
+            
+            //  check for /mnt
+            if (file.getName().equals("mnt"))
+                return true;
+            
+            //  check for /opt
+            if (file.getName().equals("opt"))
+                return true;
+            
+            //  check for /proc
+            if (file.getName().equals("proc"))
+                return true;
+            
+            //  check for /root
+            if (file.getName().equals("root"))
+                return true;
+            
+            //  check for /sbin
+            if (file.getName().equals("sbin"))
+                return true;
+            
+            //  check for /usr
+            if (file.getName().equals("usr"))
+                return true;
+            
+            //  check for /var
+            if (file.getName().equals("var"))
+                return true;
+        }
+        
+        return false;
+    }
+    
     /**
      * Returns the QRTable.
-     * If the shared files had changed, then it will rebuilt the QRT.
+     * If the shared files have changed, then it will rebuild the QRT.
      * A copy is returned so that FileManager does not expose
      * its internal data structure.
      */
@@ -1708,24 +1856,6 @@ public abstract class FileManager {
             }
         }
         return ret;
-    }
-    
-    /**
-     * A filter for listing all shared files.
-     */
-    private static class ShareableFileFilter implements FileFilter {
-        public boolean accept(File f) {
-            return isFileShareable(f, f.length());
-        }
-    }
-    
-    /**
-     * A filter for listing subdirectory only.
-     */
-    private static class DirectoryFilter implements FileFilter {
-        public boolean accept(File f) {
-            return f.isDirectory();
-        }
     }
     
     /**

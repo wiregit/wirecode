@@ -1,9 +1,14 @@
-
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Class for an Array of Files setting.
@@ -49,7 +54,78 @@ public class FileArraySetting extends Setting {
 	public void setValue(File[] value) {
 		super.setValue(decode(value));
 	}
+
+	/**
+	 * Mutator for this setting.
+	 *
+	 * @param Adds file to the array.
+	 */
+	public void add(File file) {
+	    if (file == null)
+	        return;
+	    
+        File[] newValue = new File[value.length+1];
+		System.arraycopy(value, 0, newValue, 0, value.length);
+		newValue[value.length] = file;
+		setValue(newValue);
+	}
     
+	/**
+	 * Mutator for this setting.
+	 *
+	 * @param Remove file from the array, if it exists.
+	 */
+	public void remove(File file) {
+	    if (file == null)
+	        return;
+	    if (!contains(file))
+	        return;
+	    
+        File[] newValue = new File[value.length-1];
+        int index = indexOf(file);
+        //  copy first half, up to first occurrence's index
+        System.arraycopy(value, 0, newValue, 0, index);
+        //  copy second half, for the length of the rest of the array
+		System.arraycopy(value, index+1, newValue, index, value.length - index - 1);
+		
+		setValue(newValue);
+	}
+    
+	/**
+	 * Returns true if the given file is contained in this array.
+	 */
+	public boolean contains(File file) {
+	    return indexOf(file) >= 0;
+	}
+	
+	/**
+	 * Returns the index of the given file in this array, -1 if file is not found.
+	 */
+	public int indexOf(File file) {
+	    if (file == null)
+	        return -1;
+	    
+        List list = Arrays.asList(value);
+        Iterator it = list.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            try {
+                if ((FileUtils.getCanonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
+                    return i;
+            } catch(IOException ioe) {
+                continue;
+            }
+        }
+
+	    return -1;
+	}
+	
+	/**
+	 * Returns the length of the array.
+	 */
+	public int length() {
+	    return value.length;
+	}
+	
     /** Load value from property string value
      * @param sValue property string value
      *
@@ -89,7 +165,8 @@ public class FileArraySetting extends Setting {
         
         for(int i = 0; i < src.length; i++) {
             buffer.append(src[i].getAbsolutePath());
-            if (i < src.length-1) { buffer.append(';'); }
+            if (i < src.length-1)
+                buffer.append(';');
         }
             
         return buffer.toString();
