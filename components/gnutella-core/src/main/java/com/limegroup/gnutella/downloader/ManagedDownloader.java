@@ -1528,6 +1528,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      */
     synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("informing mesh that "+rfd+" is "+good);
+        
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -2489,12 +2492,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return true if we have more than one worker or the last one is slow
      */
     private boolean stealingCanHappen() {
-        List active = getActiveWorkers();
-        if (active.size() != 1)
+        if (_workers.size() < 1)
             return false;
+        else if (_workers.size() > 1)
+            return true;
             
-        DownloadWorker lastOne = (DownloadWorker)active.get(0);
-        return lastOne.isSlow();
+        DownloadWorker lastOne = (DownloadWorker)_workers.get(0);
+        // with larger chunk sizes we may end up with slower last downloader
+        return lastOne.isSlow(); 
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {
@@ -2789,6 +2794,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     List getActiveWorkers() {
         return _activeWorkers;
+    }
+    
+    synchronized List getAllWorkers() {
+        //CoR because it will be used only while stealing
+        return new ArrayList(_workers);
     }
     
     void removeQueuedWorker(DownloadWorker unQueued) {

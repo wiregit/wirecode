@@ -677,10 +677,9 @@ public class DownloadWorker implements Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: about to start downloading "+_downloader);
         boolean problem = false;
-        RemoteFileDesc rfd = _downloader.getRemoteFileDesc();            
         try {
             _downloader.doDownload();
-            rfd.resetFailedCount();
+            _rfd.resetFailedCount();
             if(http11)
                 DownloadStat.SUCCESFULL_HTTP11.incrementStat();
             else
@@ -710,11 +709,11 @@ public class DownloadWorker implements Runnable {
             synchronized (_manager) {
                 if (problem) {
                     _downloader.stop();
-                    rfd.incrementFailedCount();
+                    _rfd.incrementFailedCount();
                     // if we failed less than twice in succession,
                     // try to use the file again much later.
-                    if( rfd.getFailedCount() < 2 ) {
-                        rfd.setRetryAfter(FAILED_RETRY_AFTER);
+                    if( _rfd.getFailedCount() < 2 ) {
+                        _rfd.setRetryAfter(FAILED_RETRY_AFTER);
                         _manager.addRFD(_rfd);
                     } else
                         _manager.informMesh(_rfd, false);
@@ -1054,18 +1053,21 @@ public class DownloadWorker implements Runnable {
         if (ourSpeed == -1) 
             return null;
         
-        for (Iterator iter=_manager.getActiveWorkers().iterator(); iter.hasNext();) {
+        for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
+            
+            if (h == null || h == _downloader)
+                continue;
             
             // see if he is the slowest one
             float hisSpeed = 0;
             try {
                 h.getMeasuredBandwidth();
-                hisSpeed = h.getAverageBandwidth(); 
+                hisSpeed = h.getAverageBandwidth();
             } catch (InsufficientDataException ide) {
                 // we assume these guys would go almost as fast as we do, so we do not steal
                 // from them unless they are the last ones remaining
-                hisSpeed = ourSpeed - Float.MIN_VALUE;
+                hisSpeed = Math.max(0f,ourSpeed - 0.1f);
             }
             
             if (hisSpeed < slowestSpeed) {
@@ -1078,6 +1080,8 @@ public class DownloadWorker implements Runnable {
     }
     
     private float getOurSpeed() {
+        if (_downloader == null)
+            return -1;
         try {
             _downloader.getMeasuredBandwidth();
             return _downloader.getAverageBandwidth();
@@ -1088,7 +1092,7 @@ public class DownloadWorker implements Runnable {
     
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
-        return ourSpeed != -1 && ourSpeed < MIN_ACCEPTABLE_SPEED;
+        return ourSpeed < MIN_ACCEPTABLE_SPEED;
     }
     
     ////// various handlers for failure states of the assign process /////
@@ -1097,8 +1101,6 @@ public class DownloadWorker implements Runnable {
      * no more ranges to download or no more people to steal from - finish download 
      */
     private ConnectionStatus handleNoMoreDownloaders() {
-        _manager.addRFD(_rfd);
-        
         return ConnectionStatus.getNoData();
     }
     
