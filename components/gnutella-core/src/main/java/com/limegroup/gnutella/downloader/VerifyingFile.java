@@ -126,12 +126,6 @@ public class VerifyingFile {
     private IOException storedException;
     
     /**
-     * Whether a completion is pending
-     * LOCKING: this
-     */
-    private boolean completionPending;
-    
-    /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
      * Useful for tests.
@@ -394,11 +388,11 @@ public class VerifyingFile {
         if(storedException != null)
             throw new DiskException(storedException);
         
-        while (completionPending) {
+        while (!isComplete() && getBlockSize() == completedSize) {
             if(storedException != null)
                 throw new DiskException(storedException);
             if (LOG.isDebugEnabled())
-                LOG.debug("waiting for a pending chunk to verify or write..\n"+ dumpState());
+                LOG.debug("waiting for a pending chunk to verify or write..");
             wait();
         }
     }
@@ -539,9 +533,6 @@ public class VerifyingFile {
                     else {
                         if(!discardBad)
                             discardedBlocks.add(i);
-                        else
-                            completionPending = false;
-                        
                         lostSize += (i.high - i.low + 1);
                     }
                 }
@@ -631,10 +622,7 @@ public class VerifyingFile {
            this.buf = new byte[buf.length];
            System.arraycopy(buf, 0, this.buf, 0, buf.length);
            this.intvl = intvl;
-           synchronized(VerifyingFile.this) {
-               completionPending = pendingBlocks.getSize() + partialBlocks.getSize() + 
-                       verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
-           }
+
         }
         
         public void run() {
@@ -650,18 +638,15 @@ public class VerifyingFile {
     			synchronized(VerifyingFile.this) {
     			    pendingBlocks.delete(intvl);
     			    partialBlocks.add(intvl);
-                    
     			}
     			
-                verifyChunks();
+    			verifyChunks();
             } catch(IOException diskIO) {
                 synchronized(VerifyingFile.this) {
                     storedException = diskIO;
                 }
             } finally {
                 synchronized(VerifyingFile.this) {
-                    if (isComplete())
-                        completionPending = false;
                     VerifyingFile.this.notify();
                 }
             }
