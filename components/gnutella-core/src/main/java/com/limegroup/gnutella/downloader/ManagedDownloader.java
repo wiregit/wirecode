@@ -1913,7 +1913,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected int initializeDownload() {
         
         synchronized (this) {
-            if (allFiles.size()==0) 
+            if (allFiles.size()==0 && !ranker.hasMore()) 
                 return GAVE_UP;
         }
         
