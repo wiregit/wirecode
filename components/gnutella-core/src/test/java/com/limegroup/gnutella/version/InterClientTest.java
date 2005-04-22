@@ -11,6 +11,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.UpdateSettings;
 
 /**
  * Tests to make sure updates are sent, requested, etc...
@@ -222,6 +223,8 @@ public class InterClientTest extends ClientSideTestCase {
         assertEquals(-11, UpdateHandler.instance().getLatestId());
         setVersion("3.0.0");
 
+        // Set the update style to zero to ensure the message is not ignored
+        UpdateSettings.UPDATE_STYLE.setValue(0);
         
         // Get the -8 file.
         b = readFile(-8);
