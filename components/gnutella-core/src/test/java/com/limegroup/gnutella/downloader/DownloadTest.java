@@ -45,6 +45,7 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -56,6 +57,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -729,7 +731,7 @@ public class DownloadTest extends BaseTestCase {
             RouterService.download(rfds,true,null);
         
         Thread.sleep(5000);
-        // at this point we should stall since we'll never get our 50 bytes
+        // at this point we should stall since we'll never get our 10 bytes
         md.addDownloadForced(rfd5,false);
         
         waitForComplete(false);
@@ -1083,7 +1085,6 @@ public class DownloadTest extends BaseTestCase {
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
-        ((PushAltLoc)pushLoc).updateProxies(true);
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1108,27 +1109,25 @@ public class DownloadTest extends BaseTestCase {
      * the first uploader as an altloc.
      */
     public void testPushUploaderPassesPushLoc() throws Exception {
-        
+        LOG.debug("start");
         final int RATE=500;
         
         TestUploader first = new TestUploader("first pusher");
-        first.setRate(RATE/2);
+        first.setRate(RATE/3);
         first.stopAfter(700000);
         
         TestUploader second = new TestUploader("second pusher");
         second.setRate(RATE);
-        second.stopAfter(500000);
+        second.stopAfter(700000);
         second.setInterestedInFalts(true);
         
         GUID guid2 = new GUID(GUID.makeGuid());
         
         AlternateLocation firstLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
-        ((PushAltLoc)firstLoc).updateProxies(true);
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid2.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
-        ((PushAltLoc)pushLoc).updateProxies(true);
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
@@ -1182,7 +1181,6 @@ public class DownloadTest extends BaseTestCase {
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
-        ((PushAltLoc)pushLoc).updateProxies(true);
         
         RemoteFileDesc pushRFD = newRFDPush(PPORT_1,2);
         
@@ -1255,7 +1253,8 @@ public class DownloadTest extends BaseTestCase {
         // create a set of the expected proxies and keep a ref to it
         PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
         
-        Set expectedProxies = new HashSet(pe.getProxies());
+        Set expectedProxies = new IpPortSet();
+        expectedProxies.addAll(pe.getProxies());
         
         PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
                 guid.toHexString()+";5:4.3.2.1;127.0.0.1:"+PPORT_2,TestFile.hash());
@@ -1289,9 +1288,7 @@ public class DownloadTest extends BaseTestCase {
         
         assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
         
-        expectedProxies.retainAll(readRFD.getPushProxies());
-        
-        assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
+        assertTrue(expectedProxies.containsAll(readRFD.getPushProxies()));
         
     }
     
@@ -1361,7 +1358,7 @@ public class DownloadTest extends BaseTestCase {
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=50;
-        final int STOP_AFTER = 1*TestFile.length()/10 - 1;          
+        final int STOP_AFTER = TestFile.length()/10 - 2;          
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
@@ -1391,14 +1388,7 @@ public class DownloadTest extends BaseTestCase {
 
         tGeneric(rfds);
 
-        //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();        
-        LOG.debug("\tu1: "+u1+"\n");
-        LOG.debug("\tu2: "+u2+"\n");
-        LOG.debug("\tu3: "+u3+"\n");        
-        LOG.debug("\tTotal: "+(u1+u2+u3)+"\n");
+
         //Now let's check that the uploaders got the correct AltLocs.
         //Uploader 1: Must have al3. al2 may either be demoted or removed
         //Uploader 1 got correct Alts?
@@ -1411,11 +1401,7 @@ public class DownloadTest extends BaseTestCase {
             if(loc.equals(al2))
                 assertTrue("failed loc not demoted",loc.isDemoted());
         }
-        //uploader 2 dies after it uploades 1 bytes less than a chunk, so it
-        //does only one round of http handshakes. so it never receives alternate
-        //locations, even though u1 and u3 are good locations
-        alts = uploader2.getAlternateLocations();
-        assertEquals("u2 did more than 1 handshake",0,alts.getAltLocsSize());
+
         alts = uploader3.getAlternateLocations();
         assertTrue(alts.contains(al1));
         iter = alts.iterator();
@@ -1472,7 +1458,8 @@ public class DownloadTest extends BaseTestCase {
         assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
     }
 
-    public void testStealerInterruptedWithAlternate() throws Exception {
+    public void testAddAltlocToSwarm() throws Exception {
+        // this test is totally redundant - see testUploaderAlternateLocations
         LOG.debug("-Testing swarming of rfds ignoring alt ...");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -1481,7 +1468,6 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=200;
         //second half of file + 1/8 of the file
         final int STOP_AFTER = 1*TestFile.length()/10;
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
@@ -1773,32 +1759,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     } 
 
-    public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
-        LOG.debug("-Testing corruption of needed. \n");
-        
-        final int RATE=500;
-        //The first uploader got a range of 0-100%. It will return busy, the
-        //needed could get corrupted becasue of this. The second downloader
-        //takes over, and it should get the whole file. If needed was corrupted
-        //the file will not go into complete state rather it will go to corrupt
-        //state
-        final int FUDGE_FACTOR=RATE*1024;  
-        uploader1.setRate(RATE);
-        uploader1.setBusy(true);
-        uploader2.setRate(RATE/4);//slower downloader - guarantee second spot
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
-        tGeneric(rfds);        
-
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        LOG.debug("\tu1: "+u1+"\n");
-        LOG.debug("\tu2: "+u2+"\n");
-        LOG.debug("\tTotal: "+(u1+u2)+"\n");
-        LOG.debug("passed \n");
-    }
-
     public void testQueuedDownloader() throws Exception {
         LOG.debug("-Testing queued downloader. \n");
         
@@ -2006,7 +1966,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
         final int RATE = 100;
-        final int FUDGE_FACTOR = RATE*1024;
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
@@ -2534,9 +2493,15 @@ public class DownloadTest extends BaseTestCase {
             Message m = null;
             try {
                 LOG.debug("listening for push request on "+sock.getLocalPort());
-                sock.receive(p);
-                ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
-                m = Message.read(bais);
+                while(true) {
+                    sock.receive(p);
+                    ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
+                    m = Message.read(bais);
+                    if (m instanceof HeadPing)
+                        continue;
+                    else
+                        break;
+                }
                 
                 assertTrue(m instanceof PushRequest);
                 
