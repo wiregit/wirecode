@@ -2423,8 +2423,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     
                     // if the ranker has become empty, reset it and 
                     // give it any previously busy rfds to try again
-                    if (!ranker.hasMore())  
+                    if (!ranker.hasMore())  {
+                        ranker.stop();
                         reloadBusyHosts();
+                    }
                     
                     if (ranker.hasMore()) {
                         
@@ -2461,7 +2463,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * expired to the ranker (resetting it first)
      */
     private void reloadBusyHosts() {
-        ranker.stop();
         List l = new ArrayList(busyRFDs.size());
         for (Iterator iter = busyRFDs.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
