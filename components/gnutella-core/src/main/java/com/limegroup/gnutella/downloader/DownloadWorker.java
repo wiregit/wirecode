@@ -316,7 +316,7 @@ public class DownloadWorker implements Runnable {
                 // must be queued or connected.
                 Assert.that(status.isQueued() || status.isConnected());
                 boolean addQueued = _manager.killQueuedIfNecessary(this, 
-                        status == null || !status.isQueued()? -1 : status.getQueuePosition());
+                        !status.isQueued()  ? -1 : status.getQueuePosition());
                 
                 // we should have been told to stay alive if we're connected
                 // but it's possible that we are above our swarm capacity
@@ -1053,8 +1053,14 @@ public class DownloadWorker implements Runnable {
         if (ourSpeed == -1) 
             return null;
         
+        Set queuedWorkers = _manager.getQueuedWorkers().keySet();
         for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
-            HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
+            
+            DownloadWorker worker = (DownloadWorker) iter.next();
+            if (queuedWorkers.contains(worker))
+                continue;
+            
+            HTTPDownloader h = worker.getDownloader();
             
             if (h == null || h == _downloader)
                 continue;
@@ -1213,6 +1219,11 @@ public class DownloadWorker implements Runnable {
     
     HTTPDownloader getDownloader() {
         return _downloader;
+    }
+    
+    public String toString() {
+        String ret = _myThread != null ? _myThread.getName() : "new";
+        return ret + " -> "+_rfd;  
     }
 
 }

@@ -2255,12 +2255,15 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Callback that the specified worker has finished.
      */
     synchronized void workerFinished(DownloadWorker finished) {
-            removeWorker(finished); 
-            notify();
+        if (LOG.isDebugEnabled())
+            LOG.debug("worker "+finished+" finished.");
+        removeWorker(finished); 
+        notify();
     }
     
     synchronized void workerStarted(DownloadWorker worker) {
-        
+        if (LOG.isDebugEnabled())
+            LOG.debug("worker "+worker + " started.");
         setState(ManagedDownloader.DOWNLOADING);
         addActiveWorker(worker);
         chatList.addHost(worker.getDownloader());
@@ -2805,6 +2808,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("adding queued worker " + queued +" at position "+position+
+                    " current queued workers:\n"+queuedWorkers);
+        
         if ( position < queuePosition ) {
             queuePosition = position;
             queuedVendor = queued.getDownloader().getVendor();
@@ -2836,41 +2843,46 @@ public class ManagedDownloader implements Downloader, Serializable {
      * this thread.  
      */
     synchronized boolean killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("deciding whether to queue worker "+worker+ " at position "+queuePos);
+        
         //Either I am queued or downloading, find the highest queued thread
         DownloadWorker doomed = null;
         
         // No replacement required?...
-        if(getNumDownloaders() <= getSwarmCapacity()) {
-            if(queuePos > -1)
-                addQueuedWorker(worker, queuePos);
+        if(getNumDownloaders() <= getSwarmCapacity() && queuePos == -1) {
             return true;
-        }
+        } 
 
         // Already Queued?...
         if(queuedWorkers.containsKey(worker) && queuePos > -1) {
             // update position
-            if(queuePos > -1)
-                addQueuedWorker(worker,queuePos);
+            addQueuedWorker(worker,queuePos);
             return true;
         }
-            
-        // Search for the queued thread with a slot worse than ours.
-        int highest = queuePos; // -1 if we aren't queued.            
-        for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry current = (Map.Entry)i.next();
-            int currQueue = ((Integer)current.getValue()).intValue();
-            if(currQueue > highest) {
-                doomed = (DownloadWorker)current.getKey();
-                highest = currQueue;
-            }
-        }
 
-        // No one worse than us?... kill us.
-        if(doomed == null)
-            return false;
-        
-        //OK. let's kill this guy 
-        doomed.interrupt();
+        if (getNumDownloaders() >= getSwarmCapacity()) {
+            // Search for the queued thread with a slot worse than ours.
+            int highest = queuePos; // -1 if we aren't queued.            
+            for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry current = (Map.Entry)i.next();
+                int currQueue = ((Integer)current.getValue()).intValue();
+                if(currQueue > highest) {
+                    doomed = (DownloadWorker)current.getKey();
+                    highest = currQueue;
+                }
+            }
+            
+            // No one worse than us?... kill us.
+            if(doomed == null) {
+                LOG.debug("not queueing myself");
+                return false;
+            } else if (LOG.isDebugEnabled())
+                LOG.debug(" will replace "+doomed);
+            
+            //OK. let's kill this guy 
+            doomed.interrupt();
+        }
         
         //OK. I should add myself to queuedWorkers if I am queued
         if(queuePos > -1)
