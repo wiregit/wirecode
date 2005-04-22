@@ -17,6 +17,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
+import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -239,9 +240,6 @@ public abstract class Message implements Serializable, Comparable {
         }
 
         //2. Unpack.
-        byte func=buf[16];
-        byte ttl=buf[17];
-        byte hops=buf[18];
         int length=ByteOrder.leb2int(buf,19);
         //2.5 If the length is hopelessly off (this includes lengths >
         //    than 2^31 bytes, throw an irrecoverable exception to
@@ -266,11 +264,30 @@ public abstract class Message implements Serializable, Comparable {
             }
         }
         else
-            payload = new byte[0];
-
+            payload = DataUtils.EMPTY_BYTE_ARRAY;
+            
+        return createMessage(buf, 0, payload, softMax, network);
+    }
+    
+    /**
+     * Creates a message based on the header & payload.
+     * The header, starting at headerOffset, MUST be >= 19 bytes.
+     * Additional headers bytes will be ignored and the byte[] will be discarded.
+     * (Note that the header is normally 23 bytes, but we don't need the last 4 here.)
+     * The payload MUST be a unique byte[] of that payload.  Nothing can write into or change the byte[].
+     */
+    public static Message createMessage(byte[] header, int headerOffset, byte[] payload, byte softMax, int network)
+      throws BadPacketException, IOException {
+        if(headerOffset + 19 > header.length)
+            throw new IllegalArgumentException("header must be >= 19 bytes.");
+        
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
+        byte func=header[headerOffset + 16];
+        byte ttl=header[headerOffset + 17];
+        byte hops=header[headerOffset + 18];
+
         byte hardMax = (byte)14;
         if (hops<0) {
             ReceivedErrorStat.INVALID_HOPS.incrementStat();
@@ -282,7 +299,7 @@ public abstract class Message implements Serializable, Comparable {
                  (func != F_QUERY_REPLY) &&
                  (func != F_PING_REPLY)) {
             ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
-            throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
+            throw new BadPacketException("func: " + func + ", ttl: " + ttl + ", hops: " + hops);
         }
         else if (ttl+hops > hardMax) {
             ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
@@ -299,9 +316,10 @@ public abstract class Message implements Serializable, Comparable {
 		// Delayed GUID allocation
         byte[] guid=new byte[16];
         for (int i=0; i<16; i++) //TODO3: can optimize
-            guid[i]=buf[i];
+            guid[i]=header[headerOffset + i];
 
         //Dispatch based on opcode.
+        int length = payload.length;
         switch (func) {
             //TODO: all the length checks should be encapsulated in the various
             //constructors; Message shouldn't know anything about the various

@@ -13,19 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.nio.channels.*;
 
-import com.limegroup.gnutella.connection.MessageQueue;
-import com.limegroup.gnutella.connection.PriorityMessageQueue;
-import com.limegroup.gnutella.connection.SimpleMessageQueue;
+import com.limegroup.gnutella.io.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.PatchTableMessage;
@@ -81,7 +74,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, PushProxyInterface {
+	implements ReplyHandler, PushProxyInterface, MessageReceiver {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -1088,38 +1081,55 @@ public class ManagedConnection extends Connection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
-        MessageDispatcher dispatcher = MessageDispatcher.instance();
-        final boolean isSupernodeClientConnection=isSupernodeClientConnection();
-        while (true) {
-            Message m=null;
-            try {
-                m = receive();
-                if (m==null)
-                    continue;
-            } catch (BadPacketException e) {
-                // Don't increment any message counters here.  It's as if
-                // the packet never existed
-                continue;
+        if(!isAsynchronous()) {
+            while (true) {
+                Message m=null;
+                try {
+                    m = receive();
+                    if (m==null)
+                        continue;
+                    handleMessageInternal(m);
+                } catch (BadPacketException ignored) {}
             }
-
-            // Run through the route spam filter and drop accordingly.
-            if (isSpam(m)) {
-				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
-                addReceivedDropped();
-                continue;
-            }
-
+        } else {
+            WritableByteChannel channel;
+            channel = new MessageReader(this);
+            if(isReadDeflated())
+                channel = new InflaterReader(_inflater, channel);
+            ReadHandler reader = new SocketReader(_socket, channel);
+            ((NIOMultiplexor)_socket).setReadHandler(reader);
+        }
+    }
+    
+    public void processMessage(Message m) {
+        System.out.println("processed message: " + m);
+        updateStatistics(m);
+        addReceived();
+        handleMessageInternal(m);
+    }
+    
+    private void handleMessageInternal(Message m) {
+        // Run through the route spam filter and drop accordingly.
+        if (isSpam(m)) {
+			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
+            addReceivedDropped();
+        } else {
             //special handling for proxying - note that for
             //non-SupernodeClientConnections a good compiler will ignore this
             //code
-            if (isSupernodeClientConnection && 
-                (m instanceof QueryRequest)) m = tryToProxy((QueryRequest) m);
-            if (isSupernodeClientConnection &&
-                (m instanceof QueryStatusResponse)) 
+            if (isSupernodeClientConnection() && (m instanceof QueryRequest))
+                m = tryToProxy((QueryRequest) m);
+            if (isSupernodeClientConnection() && (m instanceof QueryStatusResponse)) 
                 m = morphToStopQuery((QueryStatusResponse) m);
-            
-            dispatcher.dispatchTCP(m, this);
+        
+            MessageDispatcher.instance().dispatchTCP(m, this);
         }
+    }
+    
+    public void readerClosed() {}
+    
+    public int getNetwork() {
+        return Message.N_TCP;
     }
     
     private QueryRequest tryToProxy(QueryRequest query) {

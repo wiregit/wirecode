@@ -17,11 +17,8 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.io.*;
+import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -110,7 +107,7 @@ public class Connection implements IpPort {
      */
     private final String _host;
     private int _port;
-    private Socket _socket;
+    protected Socket _socket;
     private InputStream _in;
     private OutputStream _out;
     private final boolean OUTGOING;
@@ -123,7 +120,7 @@ public class Connection implements IpPort {
      *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
      *   Inflater.getTotalIn  -- The number of COMPRESSED bytes
      */
-    private Inflater _inflater;
+    protected Inflater _inflater;
     
     /**
      * The Deflater to use for deflating written streams, initialized
@@ -136,7 +133,7 @@ public class Connection implements IpPort {
      *   Deflater.getTotalOut -- The number of COMPRESSED bytes
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
-    private Deflater _deflater;
+    protected Deflater _deflater;
     
     /**
      * The number of bytes sent to the output stream.
@@ -502,11 +499,13 @@ public class Connection implements IpPort {
             // releases these buffers.
             if(isWriteDeflated()) {
                 _deflater = new Deflater();
-                _out = new CompressingOutputStream(_out, _deflater);
+                //if(!isAsynchronous()) // not handled for write yet.
+                    _out = new CompressingOutputStream(_out, _deflater);
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
-                _in = new UncompressingInputStream(_in, _inflater);
+                if(!(isAsynchronous()))
+                    _in = new UncompressingInputStream(_in, _inflater);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -522,6 +521,10 @@ public class Connection implements IpPort {
             close();
             throw new BadHandshakeException(e);
         }
+    }
+    
+    protected boolean isAsynchronous() {
+        return (_socket instanceof NIOSocket);
     }
 
     /**
@@ -1076,7 +1079,6 @@ public class Connection implements IpPort {
      */
     private Message readAndUpdateStatistics()
       throws IOException, BadPacketException {
-        int pCompressed = 0, pUncompressed = 0;
         
         // The try/catch block is necessary for two reasons...
         // See the notes in Connection.close above the calls
@@ -1084,37 +1086,36 @@ public class Connection implements IpPort {
         // on the Input/OutputStreams for the details.
         Message msg = null;
         try {
-            if(isReadDeflated()) {
-                pCompressed = _inflater.getTotalIn();
-                pUncompressed = _inflater.getTotalOut();
-            }
-            
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            if(LOG.isTraceEnabled())
-                LOG.trace("Connection (" + toString() +
-                          ") read message: " + msg);
             
-            // _bytesReceived must be set differently
-            // when compressed because the inflater will
-            // read more input than a single message,
-            // making it appear as if the deflated input
-            // was actually larger.
-            if( isReadDeflated() ) {
-                _compressedBytesReceived = _inflater.getTotalIn();
-                _bytesReceived = _inflater.getTotalOut();
-                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalOut() - pUncompressed));
-                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalIn() - pCompressed));
-            } else if(msg != null) {
-                _bytesReceived += msg.getTotalLength();
-            }
+            updateStatistics(msg);
         } catch(NullPointerException npe) {
             LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
             throw CONNECTION_CLOSED;
         }
         return msg;
+    }
+    
+    /**
+     * Updates the statistics.
+     */
+    protected void updateStatistics(Message msg) {
+        // _bytesReceived must be set differently
+        // when compressed because the inflater will
+        // read more input than a single message,
+        // making it appear as if the deflated input
+        // was actually larger.
+        if( isReadDeflated() ) {
+            long newIn  = _inflater.getTotalIn();
+            long newOut = _inflater.getTotalOut();
+            CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData((int)(newOut - _bytesReceived));
+            CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData((int)(newIn - _compressedBytesReceived));
+            _compressedBytesReceived = newIn;
+            _bytesReceived = newOut;
+        } else if(msg != null) {
+            _bytesReceived += msg.getTotalLength();
+        }
     }
     
     /**
@@ -1771,8 +1772,7 @@ public class Connection implements IpPort {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value=getPropertyWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1793,8 +1793,7 @@ public class Connection implements IpPort {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value=getPropertyWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 

@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -21,14 +23,14 @@ import org.apache.commons.logging.Log;
  *
  * Phase-1 in converting to NIO.
  */
-public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, WriteHandler {
+public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
     private final SocketChannel channel;
     private final Socket socket;
-    private final NIOOutputStream writer;
-    private final NIOInputStream reader;
+    private volatile WriteHandler writer;
+    private volatile ReadHandler reader;
     private IOException storedException = null;
     private InetAddress connectedTo;
     
@@ -44,8 +46,8 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         socket = s;
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        writer.init();
-        reader.init();
+        ((NIOOutputStream)writer).init();
+        ((NIOInputStream)reader).init();
         NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
     }
@@ -98,6 +100,26 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         channel.configureBlocking(false);
     }
     
+    public ReadHandler getReadHandler() {
+        return reader;
+    }
+    
+    public WriteHandler getWriteHandler() {
+        return writer;
+    }
+    
+    public void setReadHandler(ReadHandler newReader) throws IOException {
+        if(newReader instanceof WritableByteChannel && reader instanceof TransferableHandler)
+            ((TransferableHandler)reader).transfer((WritableByteChannel)newReader);
+        reader = newReader;
+    }
+    
+    public void setWriteHandler(WriteHandler newWriter) throws IOException {
+        if(newWriter instanceof WritableByteChannel && writer instanceof TransferableHandler)
+            ((TransferableHandler)writer).transfer((WritableByteChannel)newWriter);
+        writer = newWriter;
+    }   
+    
     /**
      * Notification that a connect can occur.
      *
@@ -115,7 +137,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      * This passes it off to the NIOInputStream.
      */
     public void handleRead() throws IOException {
-        reader.readChannel();
+        reader.handleRead();
     }
     
     /**
@@ -124,7 +146,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      * This passes it off to the NIOOutputStream.
      */
     public void handleWrite() throws IOException {
-        writer.writeChannel();
+        writer.handleWrite();
     }
     
     /**
@@ -213,8 +235,11 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         
         if(LOG.isTraceEnabled())
             LOG.trace("Connected to: " + addr);
-        writer.init();
-        reader.init();
+            
+        if(writer instanceof NIOOutputStream)
+            ((NIOOutputStream)writer).init();
+        if(reader instanceof NIOInputStream)
+            ((NIOInputStream)reader).init();
     }
     
      /**
@@ -235,7 +260,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         if(isClosed())
             throw new IOException("Socket closed.");
         
-        return reader.getInputStream();
+        if(reader instanceof NIOInputStream)
+            return ((NIOInputStream)reader).getInputStream();
+        else
+            throw new IllegalStateException("reader not NIOInputStream!");
     }
     
     /**
@@ -247,7 +275,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         if(isClosed())
             throw new IOException("Socket closed.");
         
-        return writer.getOutputStream();
+        if(writer instanceof NIOOutputStream)
+            return ((NIOOutputStream)writer).getOutputStream();
+        else
+            throw new IllegalStateException("writer not NIOOutputStream!");
     }
     
     

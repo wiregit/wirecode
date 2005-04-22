@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -16,7 +17,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream {
+class NIOOutputStream implements WriteHandler, TransferableHandler {
     
     private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
     
@@ -52,6 +53,15 @@ class NIOOutputStream {
     }
     
     /**
+     * Transfers the data to the given channel & shuts down.
+     */
+    public void transfer(WritableByteChannel channel) throws IOException {
+        buffer.flip();
+        channel.write(buffer);
+        shutdown();
+    }   
+    
+    /**
      * Retrieves the OutputStream to write to.
      */
     synchronized OutputStream getOutputStream() throws IOException {
@@ -64,7 +74,7 @@ class NIOOutputStream {
     /**
      * Notification that a write can happen on the SocketChannel.
      */
-    void writeChannel() throws IOException {// write everything we can.
+    public void handleWrite() throws IOException {// write everything we can.
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
@@ -92,7 +102,7 @@ class NIOOutputStream {
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    synchronized void shutdown() {
+    public synchronized void shutdown() {
         if(shutdown)
             return;
 

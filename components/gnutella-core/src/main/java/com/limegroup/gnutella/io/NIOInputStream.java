@@ -2,9 +2,11 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -16,7 +18,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
  */
-class NIOInputStream {
+class NIOInputStream implements ReadHandler, TransferableHandler {
     
     private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
     
@@ -54,6 +56,16 @@ class NIOInputStream {
     }
     
     /**
+     * Transfers the data to the given channel & shuts down.
+     */
+    public void transfer(WritableByteChannel channel) throws IOException {
+        buffer.flip();
+        channel.write(buffer);
+        buffer.compact();
+        shutdown();
+    }   
+    
+    /**
      * Retrieves the InputStream to read from.
      */
     synchronized InputStream getInputStream() throws IOException {
@@ -66,7 +78,7 @@ class NIOInputStream {
     /**
      * Notification that a read can happen on the SocketChannel.
      */
-    void readChannel() throws IOException {
+    public void handleRead() throws IOException {
         synchronized(bufferLock) {
             int read = 0;
             
@@ -97,7 +109,7 @@ class NIOInputStream {
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    synchronized void shutdown() {
+    public synchronized void shutdown() {
         if(shutdown)
             return;
          
