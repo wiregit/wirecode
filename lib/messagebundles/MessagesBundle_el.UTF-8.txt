@@ -1,7 +1,7 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Greek - Greece & Cyprus (Modern)
-# Thanks to Damianos, Ilias Aronidis & Andreas Fournaris
+# Thanks to Damianos Aronidis & Andreas Fournaris
 ################################################################################
 LOCALE_LANGUAGE_CODE=el
 LOCALE_LANGUAGE_NAME=Ελληνικά
