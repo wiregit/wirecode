@@ -274,10 +274,7 @@ public class ManagedConnection extends Connection
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
      */
-    private volatile int softMaxHops = -1;
-    public byte getSoftMax() {
-        return (byte)softMaxHops;
-    }
+    private volatile int hopsFlowMax = -1;
 
     /**
      * This member contains the time beyond which, if this host is still busy (hops flow==0),
@@ -453,6 +450,27 @@ public class ManagedConnection extends Connection
         }
         else
             _busyTime=-1;
+    }
+
+    /**
+     * 
+     * @return the current Hops Flow limit value for this connection, or -1 if we haven't
+     * yet received a HF message
+     */
+    public byte getHopsFlowMax() {
+        return (byte)hopsFlowMax;
+    }
+    
+    /** Returns true iff this connection is a shielded leaf connection, and has 
+     * signalled that he is currently busy (full on upload slots).  If so, we will 
+     * not include his QRT table in last hop QRT tables we send out (if we are an 
+     * Ultrapeer) 
+     * @return true iff this connection is a busy leaf (don't include his QRT table)
+     */
+    public boolean isBusyLeaf(){
+        boolean busy=isSupernodeClientConnection() && (getHopsFlowMax()==0);
+        
+        return busy;
     }
     
     /**
@@ -647,7 +665,7 @@ public class ManagedConnection extends Connection
 
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
-    	int smh = softMaxHops;
+    	int smh = hopsFlowMax;
         if ((smh > -1) &&
             (m instanceof QueryRequest) &&
             (m.getHops() >= smh))
@@ -1350,7 +1368,7 @@ public class ManagedConnection extends Connection
                 //	then set the global busy leaf flag appropriately
                 setBusy( hops.getHopValue()==0 );
             
-            softMaxHops = hops.getHopValue();
+            hopsFlowMax = hops.getHopValue();
         }
         else if (vm instanceof PushProxyAcknowledgement) {
             // this connection can serve as a PushProxy, so note this....

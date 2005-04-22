@@ -118,10 +118,12 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
     private int getTotalNumberOfLeavesQRTsIncluded() {
         int leaves=0;
         
-        Iterator it=cm.getConnections().iterator();
+        Iterator it=cm.getInitializedClientConnections().iterator();
         
         while( it.hasNext() ){
-            if( ((ManagedConnectionCountQRT)it.next())._qrtIncluded )
+            ManagedConnectionCountQRT mc=((ManagedConnectionCountQRT)it.next());
+            
+            if( mc._qrtIncluded )
                 leaves++;
         }
         
