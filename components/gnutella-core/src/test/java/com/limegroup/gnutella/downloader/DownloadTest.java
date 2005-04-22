@@ -285,7 +285,7 @@ public class DownloadTest extends BaseTestCase {
      * Tests a basic download that does not swarm.
      */
     public void testSimpleDownload10() throws Exception {
-        LOG.debug("-Testing non-swarmed download...");
+        LOG.info("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
@@ -293,7 +293,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testSimpleDownload11() throws Exception {
-        LOG.debug("-Testing non-swarmed download...");
+        LOG.info("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
@@ -304,7 +304,7 @@ public class DownloadTest extends BaseTestCase {
      * tests http11 downloads and the gray area allocation.
      */
     public void testTHEXDownload11() throws Exception {
-        LOG.debug("-Testing chunk allocation in a thex download...");
+        LOG.info("-Testing chunk allocation in a thex download...");
         
         
         final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
@@ -393,7 +393,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testSimplePushDownload() throws Exception {
-        LOG.debug("-Testing non-swarmed push download");
+        LOG.info("-Testing non-swarmed push download");
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
@@ -412,7 +412,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testSimpleSwarm() throws Exception {
-        LOG.debug("-Testing swarming from two sources...");
+        LOG.info("-Testing swarming from two sources...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -443,7 +443,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testSimpleSwarmPush() throws Exception {
-        LOG.debug("-Testing swarming from two sources, one push...");  
+        LOG.info("-Testing swarming from two sources, one push...");  
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         AlternateLocation pushLoc = AlternateLocation.create(
@@ -470,7 +470,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testUnbalancedSwarm() throws Exception  {
-        LOG.debug("-Testing swarming from two unbalanced sources...");
+        LOG.info("-Testing swarming from two unbalanced sources...");
         
         final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;  
@@ -497,7 +497,7 @@ public class DownloadTest extends BaseTestCase {
 
 
     public void testSwarmWithInterrupt() throws Exception {
-        LOG.debug("-Testing swarming from two sources (one broken)...");
+        LOG.info("-Testing swarming from two sources (one broken)...");
         
         final int RATE=100;
         final int STOP_AFTER = TestFile.length()/4;       
@@ -530,7 +530,7 @@ public class DownloadTest extends BaseTestCase {
      * tests a swarm from a 1.0 and 1.1 source - designed to test stealing.
      */
     public void testSwarmWithTheft() throws Exception {
-        LOG.debug("-Testing swarming from two sources, one 1.0 and one 1.1");
+        LOG.info("-Testing swarming from two sources, one 1.0 and one 1.1");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -561,7 +561,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testAddDownload() throws Exception {
-        LOG.debug("-Testing addDownload (increases swarming)...");
+        LOG.info("-Testing addDownload (increases swarming)...");
         
         final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;  
@@ -597,7 +597,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testStallingUploaderReplaced() throws Exception  {
-        LOG.debug("-Testing download completion with stalling downloader...");
+        LOG.info("-Testing download completion with stalling downloader...");
         
         //Throttle rate at 500KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -624,7 +624,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testAcceptableSpeedStallIsReplaced() throws Exception {
-        LOG.debug("-Testing a download that is an acceptable speed but slower" +
+        LOG.info("-Testing a download that is an acceptable speed but slower" +
                   " is replaced by another download that is faster");
         
         final int SLOW_RATE = 5;
@@ -654,7 +654,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testUploaderLowHigherRange()  throws Exception {
-        LOG.debug("-Testing that a download can handle an uploader giving low+higher ranges");
+        LOG.info("-Testing that a download can handle an uploader giving low+higher ranges");
         uploader1.setRate(25);
         uploader1.setLowChunkOffset(50);
         uploader5.setRate(100); // control, to finish the test.
@@ -675,7 +675,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testUploaderLowLowerRange() throws Exception {
-        LOG.debug("-Testing that a download can handle an uploader giving low+lower ranges");
+        LOG.info("-Testing that a download can handle an uploader giving low+lower ranges");
         uploader1.setRate(25);
         uploader1.setLowChunkOffset(-10);
         uploader5.setRate(100); // control, to finish the test.
@@ -697,7 +697,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testUploaderHighHigherRange() throws Exception {
-        LOG.debug("-Testing that a download can handle an uploader giving high+higher ranges");
+        LOG.info("-Testing that a download can handle an uploader giving high+higher ranges");
         uploader1.setRate(25);
         uploader1.setHighChunkOffset(50);
         uploader5.setRate(100); // control, to finish the test.
@@ -719,7 +719,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testUploaderHighLowerRange() throws Exception {
-        LOG.debug("-Testing that a download can handle an uploader giving high+lower ranges");
+        LOG.info("-Testing that a download can handle an uploader giving high+lower ranges");
         uploader1.setRate(25);
         uploader1.setHighChunkOffset(-10);
         uploader5.setRate(100); // control, to finish the test.
@@ -740,6 +740,7 @@ public class DownloadTest extends BaseTestCase {
     }
        
     public void testReuseHostWithBadTree() throws Exception {
+        LOG.info("-Testing that a host with a bad tree will be used");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
@@ -759,6 +760,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testReuseHostWithBadTreeAndNoContentLength() throws Exception {
+        LOG.info("-Testing that a host with a bad tree will be used");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
@@ -779,6 +781,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testGetsThex() throws Exception {
+        LOG.info("test that a host gets thex");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
@@ -799,6 +802,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testQueuedOnThexContinues() throws Exception {
+        LOG.info("test that queued on thex continues");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
@@ -817,6 +821,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testBadHeaderOnThexContinues() throws Exception {
+        LOG.info("test bad header on thex continues");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader1.setSendThexTreeHeader(true);
@@ -836,7 +841,7 @@ public class DownloadTest extends BaseTestCase {
     }    
     
     public void testKeepCorrupt() throws Exception {
-        LOG.debug("-Testing that if the user chooses to keep a corrupt download the download" +
+        LOG.info("-Testing that if the user chooses to keep a corrupt download the download" +
                 "will eventually finish");
         final int RATE = 100;
         uploader1.setCorruption(true);
@@ -868,7 +873,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testDiscardCorrupt() throws Exception {
-        LOG.debug("-Testing that if the user chooses to discard a corrupt download it will terminate" +
+        LOG.info("-Testing that if the user chooses to discard a corrupt download it will terminate" +
                 "immediately");
         
         final int RATE = 100;
@@ -924,7 +929,7 @@ public class DownloadTest extends BaseTestCase {
     // when reading the header. 
     private void tMismatchedVerifyHash(boolean deleteCorrupt, boolean getThex )
       throws Exception {
-        LOG.debug("-Testing file declared corrupt, when hash of "+
+        LOG.info("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
         String badSha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
@@ -954,7 +959,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testDownloaderAddsSmallFilesWithHead() throws Exception {  
-        LOG.debug("-Testing AlternateLocation write...");
+        LOG.info("-Testing AlternateLocation write...");
         Object[] params = new Object[2];
         params[0] = saveDir;
         params[1] = new File(".");
@@ -995,7 +1000,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public void testTwoAlternateLocations() throws Exception {  
-        LOG.debug("-Testing Two AlternateLocations...");
+        LOG.info("-Testing Two AlternateLocations...");
         
         final int RATE = 50;
         uploader1.setRate(RATE);
@@ -1028,7 +1033,7 @@ public class DownloadTest extends BaseTestCase {
     public void testUploaderAlternateLocations() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        LOG.debug("-Testing swarming from two sources one based on alt...");
+        LOG.info("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -1074,7 +1079,7 @@ public class DownloadTest extends BaseTestCase {
      * tests that an uploader will pass a push loc which will be included in the swarm
      */
     public void testUploaderPassesPushLoc() throws Exception {
-        LOG.debug("-Testing swarming from two sources one based on a push alt...");
+        LOG.info("-Testing swarming from two sources one based on a push alt...");
         final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;
         uploader1.setRate(RATE);
@@ -1109,7 +1114,7 @@ public class DownloadTest extends BaseTestCase {
      * the first uploader as an altloc.
      */
     public void testPushUploaderPassesPushLoc() throws Exception {
-        LOG.debug("start");
+        LOG.info("Test push uploader passes push loc");
         final int RATE=500;
         
         TestUploader first = new TestUploader("first pusher");
@@ -1165,7 +1170,7 @@ public class DownloadTest extends BaseTestCase {
      * receive the push loc, the other one should not.
      */
     public void testPusherBecomesPushLocAndSentToInterested() throws Exception {
-        LOG.debug("-Testing push download creating a push location...");
+        LOG.info("-Testing push download creating a push location...");
         final int RATE=200;
         uploader1.setRate(RATE);
         uploader1.setInterestedInFalts(true);
@@ -1235,7 +1240,7 @@ public class DownloadTest extends BaseTestCase {
      * as well as that the set of push proxies is getting updated.
      */
     public void testPushLocUpdatesStatus() throws Exception {
-        
+        LOG.info("testing that a push loc updates its status");
         final int RATE=100;
         
         UDPService.instance().setReceiveSolicited(true);
@@ -1296,7 +1301,7 @@ public class DownloadTest extends BaseTestCase {
      * tests that bad push locs get removed
      */
     public void testBadPushLocGetsDemotedNotAdvertised() throws Exception {
-        
+        LOG.info("test that bad push loc gets demoted and not advertised");
         // this test needs to go slowly so that the push attempt may time out
         final int RATE=15;
         
@@ -1354,7 +1359,7 @@ public class DownloadTest extends BaseTestCase {
     public void testAlternateLocationsAreRemoved() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
-        LOG.debug("-Testing swarming from two sources one based on alt...");
+        LOG.info("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=50;
@@ -1425,7 +1430,7 @@ public class DownloadTest extends BaseTestCase {
     }    
 
     public void testWeirdAlternateLocations() throws Exception {  
-        LOG.debug("-Testing AlternateLocation write...");
+        LOG.info("-Testing AlternateLocation weird...");
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
@@ -1460,7 +1465,7 @@ public class DownloadTest extends BaseTestCase {
 
     public void testAddAltlocToSwarm() throws Exception {
         // this test is totally redundant - see testUploaderAlternateLocations
-        LOG.debug("-Testing swarming of rfds ignoring alt ...");
+        LOG.info("-Testing swarming of rfds ignoring alt ...");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1518,7 +1523,7 @@ public class DownloadTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
-        LOG.debug("-Testing that downloader adds itself to the mesh if it has a tree");
+        LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1579,7 +1584,7 @@ public class DownloadTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
-        LOG.debug("-Testing that downloader adds itself to the mesh if it has a tree");
+        LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1632,7 +1637,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
-        LOG.debug("-Testing a shared partial funnels alt locs to downloader");
+        LOG.info("-Testing a shared partial funnels alt locs to downloader");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1698,7 +1703,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testResumeFromPartialWithAlternateLocations() throws Exception {
-        LOG.debug("-Testing alt locs from partial bootstrap resumed download");
+        LOG.info("-Testing alt locs from partial bootstrap resumed download");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1760,7 +1765,7 @@ public class DownloadTest extends BaseTestCase {
     } 
 
     public void testQueuedDownloader() throws Exception {
-        LOG.debug("-Testing queued downloader. \n");
+        LOG.info("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
@@ -1772,7 +1777,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testBusyHostIsUsed() throws Exception {
-        LOG.debug("-Testing a once-busy host is reused.");
+        LOG.info("-Testing a once-busy host is reused.");
         
         //Throttle rate to give opportunities for swarming.
         final int SLOW_RATE=5;
@@ -1824,7 +1829,7 @@ public class DownloadTest extends BaseTestCase {
     public void testAlternateLocationsExchangedWithBusy() throws Exception {
         //tests that a downloader reads alternate locations from the
         //uploader even if it receives a 503 from the uploader.
-        LOG.debug("-Testing dloader gets alt from 503 uploader...");
+        LOG.info("-Testing dloader gets alt from 503 uploader...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -1865,7 +1870,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testSimpleDownloadWithInitialAlts() throws Exception {
-        LOG.debug("-Testing download with initial alts");
+        LOG.info("-Testing download with initial alts");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -1902,12 +1907,12 @@ public class DownloadTest extends BaseTestCase {
      * downloaders
      */
     public void testFullSwarmDownloadsNotDropped() throws Exception {
-        LOG.debug("-testing that a good source does not dislodge other good ones"+
+        LOG.info("-testing that a good source does not dislodge other good ones"+
               " when swarming at capacity");
        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
-        final int RATE = 200;
+        final int RATE = 30;
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
@@ -1919,7 +1924,7 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;        
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(2500);
+        Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getActiveWorkers().size();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
@@ -1927,7 +1932,7 @@ public class DownloadTest extends BaseTestCase {
 
         //try to add a third
         downloader.addDownloadForced(rfd3, true);
-        Thread.sleep(100);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         
         //make sure we did not kill anybody
         swarm = downloader.getActiveWorkers().size();
@@ -1960,12 +1965,12 @@ public class DownloadTest extends BaseTestCase {
      * when even at swarm capacity
      */
     public void testDownloadAtCapacityReplaceQueued() throws Exception {
-        LOG.debug("-testing that if max threads are queued or downloading, and a "+
+        LOG.info("-testing that if max threads are queued or downloading, and a "+
               "good location comes along, the queued downloader is dislodged");
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
-        final int RATE = 100;
+        final int RATE = 30;
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
@@ -1982,7 +1987,7 @@ public class DownloadTest extends BaseTestCase {
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
         //Thread.sleep(1000);
         //downloader.addDownloadForced(rfd2,false);
-        Thread.sleep(2500);
+        Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         LOG.debug("about to check swarming");
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
@@ -1990,7 +1995,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("uploader 2 not queued ",1, queued);
 
         downloader.addDownload(rfd3, true);
-        Thread.sleep(400);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         
         //make sure we killed the queued
         swarm = downloader.getNumDownloaders();
@@ -2021,7 +2026,7 @@ public class DownloadTest extends BaseTestCase {
      * better position
      */
     public void testDownloadAtCapacityGetsBetterQueued() throws Exception {
-        LOG.debug("-testing that if max threads are queued or downloading, and a "+
+        LOG.info("-testing that if max threads are queued or downloading, and a "+
               "queued downloader gets by a queued downloader only if the new "+
               "one has a better queue position");
         
@@ -2029,7 +2034,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
         final int RATE = 50;
-        final int FUDGE_FACTOR = RATE*1024;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.setQueue(true);
@@ -2054,7 +2058,7 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;
         downloader = (ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(2000);
+        Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         int qPos=downloader.getQueuePosition();
@@ -2065,18 +2069,18 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 3 which is worse, nothing should change
         downloader.addDownload(rfd3,true);
-        Thread.sleep(2000);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = downloader.getQueuePosition();
         
-        assertEquals("incorrect swarming",2,swarm);
-        assertEquals("uploader 2 not queued ",1,queued);
+        assertEquals("incorrect swarming",3,swarm);
+        assertEquals("uploader 2 not queued ",2,queued);
         assertEquals("incorrect queue pos ",3,qPos);
 
         //now try adding uploader 4 which is better, we should drop uploader2
         downloader.addDownload(rfd4,true);
-        Thread.sleep(2000);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = downloader.getQueuePosition();
@@ -2100,7 +2104,7 @@ public class DownloadTest extends BaseTestCase {
      *  off when a good uploader shows up
      */
     public void testQueueAdvancementWorks() throws Exception {
-        LOG.debug("-testing that if queued downloaders advance we downloaders "+
+        LOG.info("-testing that if queued downloaders advance we downloaders "+
               "register that they did, so that the choice of which downloader"+
               " to replace is made correctly");
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -2169,7 +2173,7 @@ public class DownloadTest extends BaseTestCase {
      * Easier to make it last.
      */
     public void testPartialDownloads() throws IOException {
-        LOG.debug("-Testing partial downloads...");
+        LOG.info("-Testing partial downloads...");
         uploader1.setPartial(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd1};

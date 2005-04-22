@@ -1166,7 +1166,6 @@ public class DownloadWorker implements Runnable {
                 return ConnectionStatus.getNoData(); // we were signalled to stop.
             _manager.setState(ManagedDownloader.REMOTE_QUEUED);
         }
-        _manager.workerQueued(this,position);
         _rfd.resetFailedCount();                
         return ConnectionStatus.getQueued(position, pollTime);
     }

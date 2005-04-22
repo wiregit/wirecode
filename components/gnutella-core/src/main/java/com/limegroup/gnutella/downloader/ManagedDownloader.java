@@ -2274,14 +2274,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         browseList.removeHost(failed.getDownloader());
     }
     
-    synchronized void workerQueued(DownloadWorker failed, int position) {
-        if ( position < queuePosition ) {
-            queuePosition = position;
-            queuedVendor = failed.getDownloader().getVendor();
-        }
-        rfds.add(failed.getRFD());
-    }
-    
     synchronized void removeWorker(DownloadWorker worker) {
         removeActiveWorker(worker);
         _workers.remove(worker);
@@ -2813,6 +2805,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
+        if ( position < queuePosition ) {
+            queuePosition = position;
+            queuedVendor = queued.getDownloader().getVendor();
+        }
         Map m = new HashMap(getQueuedWorkers());
         m.put(queued,new Integer(position));
         queuedWorkers = Collections.unmodifiableMap(m);
