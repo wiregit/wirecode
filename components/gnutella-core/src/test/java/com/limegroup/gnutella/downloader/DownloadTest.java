@@ -2069,18 +2069,19 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 3 which is worse, nothing should change
         downloader.addDownload(rfd3,true);
-        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1500);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = downloader.getQueuePosition();
-        
-        assertEquals("incorrect swarming",3,swarm);
-        assertEquals("uploader 2 not queued ",2,queued);
+        LOG.debug("queued workers: "+downloader.getQueuedWorkers());
+        LOG.debug("active workers: "+downloader.getActiveWorkers());
+        assertEquals("incorrect swarming",2,swarm);
+        assertEquals("uploader 2 not queued ",1,queued);
         assertEquals("incorrect queue pos ",3,qPos);
 
         //now try adding uploader 4 which is better, we should drop uploader2
         downloader.addDownload(rfd4,true);
-        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1500);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = downloader.getQueuePosition();
