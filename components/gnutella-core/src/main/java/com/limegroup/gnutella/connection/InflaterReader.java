@@ -42,12 +42,34 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
         int written = 0;
         int read = 0;
         
-        // First gobble up any data from the channel we're dependent on.
-        while((read = channel.read(buf)) > 0) {
+        // first try to inflate any prior input from the inflater.
+        if(buffer.hasRemaining())
+            written += inflate(buffer);
+            
+        // if we couldn't inflate anything, add input to the inflater
+        // & inflate it.
+        if(written == 0) {
+            // First gobble up any data from the channel we're dependent on.
+            while(buffer.hasRemaining() && (read = channel.read(buf)) > 0);
+            
             // Then put that data into the inflater.
             inflater.setInput(buf.array(), 0, buf.position());
             buf.clear();
+            
+            written += inflate(buffer);
         }
+        
+        if(written > 0)
+            return written;
+        else if(read == -1)
+            return read;
+        else
+            return 0;
+    }
+    
+    /** Inflates data to this buffer. */
+    private int inflate(ByteBuffer buffer) throws IOException {
+        int written = 0;
         
         // Then, while there's room in the output buffer & there's inflatable data,
         // write to it from the inflater
@@ -74,12 +96,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
             buffer.position(position + inflated);
         }
         
-        if(written > 0)
-            return written;
-        else if(read == -1)
-            return read;
-        else
-            return 0;
+        return written;
     }
     
     /**
