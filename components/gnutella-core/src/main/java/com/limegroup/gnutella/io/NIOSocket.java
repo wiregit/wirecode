@@ -108,15 +108,20 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
         return writer;
     }
     
+    public ReadableByteChannel getReadChannel() {
+        if(reader instanceof ReadableByteChannel)
+            return (ReadableByteChannel)reader;
+        else
+            return null;
+    }
+    
     public void setReadHandler(ReadHandler newReader) throws IOException {
-        if(newReader instanceof WritableByteChannel && reader instanceof TransferableHandler)
-            ((TransferableHandler)reader).transfer((WritableByteChannel)newReader);
+        reader.shutdown();
         reader = newReader;
     }
     
     public void setWriteHandler(WriteHandler newWriter) throws IOException {
-        if(newWriter instanceof WritableByteChannel && writer instanceof TransferableHandler)
-            ((TransferableHandler)writer).transfer((WritableByteChannel)newWriter);
+        writer.shutdown();
         writer = newWriter;
     }   
     

@@ -17,7 +17,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream implements WriteHandler, TransferableHandler {
+class NIOOutputStream implements WriteHandler {
     
     private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
     
@@ -51,15 +51,6 @@ class NIOOutputStream implements WriteHandler, TransferableHandler {
         sink = new BufferOutputStream(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
     }
-    
-    /**
-     * Transfers the data to the given channel & shuts down.
-     */
-    public void transfer(WritableByteChannel channel) throws IOException {
-        buffer.flip();
-        channel.write(buffer);
-        shutdown();
-    }   
     
     /**
      * Retrieves the OutputStream to write to.

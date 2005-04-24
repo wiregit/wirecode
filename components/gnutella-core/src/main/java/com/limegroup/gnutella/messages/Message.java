@@ -266,7 +266,7 @@ public abstract class Message implements Serializable, Comparable {
         else
             payload = DataUtils.EMPTY_BYTE_ARRAY;
             
-        return createMessage(buf, 0, payload, softMax, network);
+        return createMessage(buf, payload, softMax, network);
     }
     
     /**
@@ -276,17 +276,17 @@ public abstract class Message implements Serializable, Comparable {
      * (Note that the header is normally 23 bytes, but we don't need the last 4 here.)
      * The payload MUST be a unique byte[] of that payload.  Nothing can write into or change the byte[].
      */
-    public static Message createMessage(byte[] header, int headerOffset, byte[] payload, byte softMax, int network)
+    public static Message createMessage(byte[] header, byte[] payload, byte softMax, int network)
       throws BadPacketException, IOException {
-        if(headerOffset + 19 > header.length)
+        if(header.length < 19)
             throw new IllegalArgumentException("header must be >= 19 bytes.");
         
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
-        byte func=header[headerOffset + 16];
-        byte ttl=header[headerOffset + 17];
-        byte hops=header[headerOffset + 18];
+        byte func=header[16];
+        byte ttl=header[17];
+        byte hops=header[18];
 
         byte hardMax = (byte)14;
         if (hops<0) {
@@ -316,7 +316,7 @@ public abstract class Message implements Serializable, Comparable {
 		// Delayed GUID allocation
         byte[] guid=new byte[16];
         for (int i=0; i<16; i++) //TODO3: can optimize
-            guid[i]=header[headerOffset + i];
+            guid[i]=header[i];
 
         //Dispatch based on opcode.
         int length = payload.length;

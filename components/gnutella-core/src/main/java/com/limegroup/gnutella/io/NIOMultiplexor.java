@@ -7,6 +7,13 @@ package com.limegroup.gnutella.io;
  */
 public interface NIOMultiplexor extends ReadHandler, WriteHandler {
     
+    /**
+     * Retrieves the channel that can be used to read any data that was
+     * temporarily stored by a ReadHandler.
+     */
+    public java.nio.channels.ReadableByteChannel getReadChannel();
+    
+    
     /** Retrieves the current ReadHandler */
     public ReadHandler getReadHandler();
     

@@ -10,67 +10,90 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 
-public class InflaterReader implements WritableByteChannel {
+public class InflaterReader implements ChannelReader, ReadableByteChannel {
     
-    private ByteBuffer buffer;
-    private WritableByteChannel chain;
     private Inflater inflater;
+    private ReadableByteChannel channel;
+    private ByteBuffer buf;
     
-    public InflaterReader(Inflater inflater, WritableByteChannel channel) {
-        this.chain = channel;
+    public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {
+        if(channel == null)
+            throw new NullPointerException("null channel!");
+        
+        this.channel = channel;
         this.inflater = inflater;
-        buffer = ByteBuffer.wrap(new byte[512]);
+        this.buf = ByteBuffer.allocate(512);
     }
     
     /**
-     * Writes data into this' internal buffer, attempting to inflate it and pass it on.
+     * Sets the new channel.
      */
-    public int write(ByteBuffer inBuffer) throws IOException {
+    public void setReadChannel(ReadableByteChannel channel) {
+        if(channel == null)
+            throw new NullPointerException("cannot set null channel!");
+
+        this.channel = channel;
+    }
+    
+    /**
+     * Reads from this' inflater into the given ByteBuffer.
+     */
+    public int read(ByteBuffer buffer) throws IOException {
+        int written = 0;
+        int read = 0;
         
-        byte[] data = inBuffer.array();
-        int off = inBuffer.position();
-        int limit = inBuffer.limit();
-        int len = limit - off;
-        inflater.setInput(data, off, len);
-        inBuffer.position(limit); // we used the buffer in that setInput operation.
+        // First gobble up any data from the channel we're dependent on.
+        while((read = channel.read(buf)) > 0) {
+            // Then put that data into the inflater.
+            inflater.setInput(buf.array(), 0, buf.position());
+            buf.clear();
+        }
         
-        // now try to inflate & pass it on to the chain.
-        byte[] inflated = buffer.array();
-        while(true) {
-            int read;
+        // Then, while there's room in the output buffer & there's inflatable data,
+        // write to it from the inflater
+        while(buffer.hasRemaining()) {
+            int inflated;
+            int position = buffer.position();
             try {
-                read = inflater.inflate(inflated);
+                inflated = inflater.inflate(buffer.array(), position, buffer.remaining());
             } catch(DataFormatException dfe) {
                 IOException x = new IOException();
                 x.initCause(dfe);
                 throw x;
+            } catch(NullPointerException npe) {
+                // possible if the inflater was closed on a separate thread.
+                IOException x = new IOException();
+                x.initCause(npe);
+                throw x;
             }
             
-            if(read == 0)
+            if(inflated == 0)
                 break;
                 
-            buffer.position(0);
-            buffer.limit(read);
-            int wrote = chain.write(buffer);
-            if(wrote != read)
-                throw new IllegalStateException("expected chain to gobble all data.");
+            written += inflated;
+            buffer.position(position + inflated);
         }
         
-        return len;
+        if(written > 0)
+            return written;
+        else if(read == -1)
+            return read;
+        else
+            return 0;
     }
     
     /**
      * Determines if this reader is open.
      */
     public boolean isOpen() {
-        return chain.isOpen();
+        return channel.isOpen();
     }
     
     /**
      * Closes this channel.
      */
     public void close() throws IOException {
-        chain.close();
+        channel.close();
     }
 }
     

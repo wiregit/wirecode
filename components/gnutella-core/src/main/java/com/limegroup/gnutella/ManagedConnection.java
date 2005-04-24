@@ -1092,12 +1092,32 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
-            WritableByteChannel channel;
-            channel = new MessageReader(this);
-            if(isReadDeflated())
-                channel = new InflaterReader(_inflater, channel);
-            ReadHandler reader = new SocketReader(_socket, channel);
-            ((NIOMultiplexor)_socket).setReadHandler(reader);
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        NIOMultiplexor plexor = (NIOMultiplexor)_socket;
+                        ChannelReader channelReader = null;
+                        ReadableByteChannel source = plexor.getReadChannel();
+                        
+                        if(isReadDeflated()) {
+                            InflaterReader reader = new InflaterReader(source, _inflater);
+                            source = reader;
+                            channelReader = reader;
+                        }
+                        
+                        MessageReader messager = new MessageReader(source, ManagedConnection.this);
+                        if(channelReader == null)
+                            channelReader = messager;
+                            
+                        messager.handleRead(); // gobble up any data from the initial readChannel.
+                        channelReader.setReadChannel(_socket.getChannel());
+                        plexor.setReadHandler(messager);
+                        NIODispatcher.instance().interestRead(_socket.getChannel(), true);
+                    } catch(IOException iox) {
+                        close();
+                    }
+                } 
+            });
         }
     }
     
@@ -1126,7 +1146,7 @@ public class ManagedConnection extends Connection
         }
     }
     
-    public void readerClosed() {}
+    public void readerClosed() { close(); }
     
     public int getNetwork() {
         return Message.N_TCP;

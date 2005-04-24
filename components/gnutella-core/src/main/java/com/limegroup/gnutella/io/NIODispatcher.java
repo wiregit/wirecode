@@ -62,6 +62,9 @@ public class NIODispatcher implements Runnable {
 	/** Interest queue. */
 	private final Collection INTEREST = new LinkedList();
 	
+	/** The invokeLater queue. */
+    private final Collection LATER = new LinkedList();
+	
 	/** Determine if this is the dispatch thread. */
 	public boolean isDispatchThread() {
 	    return Thread.currentThread() == dispatchThread;
@@ -143,7 +146,18 @@ public class NIODispatcher implements Runnable {
                 CLOSING.add(handler);
             }
         }
-    }       
+    }    
+    
+    /** Invokes the method in the NIODispatch thread. */
+   public void invokeLater(Runnable runner) {
+        if(Thread.currentThread() == dispatchThread) {
+            runner.run();
+        } else {
+            synchronized(Q_LOCK) {
+                LATER.add(runner);
+            }
+        }
+    }
     
     /**
      * Cancel SelectionKey, close Channel and "free" the attachment
@@ -265,6 +279,15 @@ public class NIODispatcher implements Runnable {
                     next.shutdown();
                 }                
                 CLOSING.clear();
+            }
+            
+            if(!LATER.isEmpty()) {
+                for(Iterator i = LATER.iterator(); i.hasNext(); ) {
+                    Runnable next = (Runnable)i.next();
+                    next.run();
+                }
+                
+                LATER.clear();
             }
 			
         }

@@ -6,6 +6,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.LogFactory;
@@ -18,7 +19,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
  */
-class NIOInputStream implements ReadHandler, TransferableHandler {
+class NIOInputStream implements ReadHandler, ReadableByteChannel {
     
     private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
     
@@ -56,14 +57,33 @@ class NIOInputStream implements ReadHandler, TransferableHandler {
     }
     
     /**
-     * Transfers the data to the given channel & shuts down.
+     * Reads from this' channel (which is the temporary ByteBuffer,
+     * not the SocketChannel) into the given buffer.
      */
-    public void transfer(WritableByteChannel channel) throws IOException {
-        buffer.flip();
-        channel.write(buffer);
-        buffer.compact();
-        shutdown();
-    }   
+    public int read(ByteBuffer toBuffer) {
+        int read = 0;
+
+        if(buffer.position() > 0) {
+            buffer.flip();
+            int remaining = buffer.remaining();
+            int toRemaining = toBuffer.remaining();
+            if(toRemaining >= remaining) {
+                toBuffer.put(buffer);
+                read += remaining;
+            } else {
+                int limit = buffer.limit();
+                int position = buffer.position();
+                buffer.limit(position + toRemaining);
+                toBuffer.put(buffer);
+                read += toRemaining;
+                buffer.limit(limit);
+            }
+            buffer.compact();
+        }
+        
+        return read;
+    }
+                
     
     /**
      * Retrieves the InputStream to read from.
@@ -117,6 +137,20 @@ class NIOInputStream implements ReadHandler, TransferableHandler {
             source.shutdown();
         
         shutdown = true;
+    }
+    
+    /**
+     * Closes the channel.
+     */
+    public void close() throws IOException {
+        ;
+    }
+    
+    /**
+     * Determines if this is open.
+     */
+    public boolean isOpen() {
+        return true;
     }
 }
                 
