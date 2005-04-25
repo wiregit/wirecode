@@ -21,5 +21,10 @@ public interface MessageReceiver {
      * The network this message-receiver uses for creating messages.
      */
     public int getNetwork();
+    
+    /**
+     * Notification that the stream is closed.
+     */
+    public void messagingClosed();
 }
         

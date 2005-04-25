@@ -927,142 +927,6 @@ public class ManagedConnection extends Connection
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Implements the reject connection mechanism.  Loops until receiving a
-     * handshake ping, responds with the best N pongs, and closes the
-     * connection.  Closes the connection if no ping is received within a
-     * reasonable amount of time.  Does NOT clean up route tables in the case
-     * of an IOException.
-     */
-    void loopToReject() {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-
-        try {
-			//The first message we get from the remote host should be its 
-            //initial ping.  However, some clients may start forwarding packets 
-            //on the connection before they send the ping.  Hence the following 
-            //loop.  The limit of 10 iterations guarantees that this method 
-            //will not run for more than TIMEOUT*10=80 seconds.  Thankfully 
-            //this happens rarely.
-			for (int i=0; i<10; i++) {
-				Message m=null;
-				try {                
-					m=super.receive(REJECT_TIMEOUT);
-					if (m==null)
-						return; //Timeout has occured and we havent received the ping,
-					//so just return
-				}// end of try for BadPacketEception from socket
-				catch (BadPacketException e) {
-					return; //Its a bad packet, just return
-				}
-				if((m instanceof PingRequest) && (m.getHops()==0)) {
-					// this is the only kind of message we will deal with
-					// in Reject Connection
-					// If any other kind of message comes in we drop
-					
-					//SPECIAL CASE: for crawler ping
-					if(m.getTTL() == 2) {
-						handleCrawlerPing((PingRequest)m);
-						return;
-					}
-				}// end of (if m is PingRequest)
-			} // End of while(true)
-        } catch (IOException e) {
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its neighbors
-     * @param m The ping request received
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
-     */
-    private void handleCrawlerPing(PingRequest m) throws IOException {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-
-        //send the pongs for the Ultrapeer & 0.4 connections
-        List /*<ManagedConnection>*/ nonLeafConnections 
-            = _manager.getInitializedConnections();
-        
-        supersendNeighborPongs(m, nonLeafConnections);
-        
-        //send the pongs for leaves
-        List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections();
-        supersendNeighborPongs(m, leafConnections);
-        
-        //Note that sending its own pong is not necessary, as the crawler has
-        //already connected to this node, and is not sent therefore. 
-        //May be sent for completeness though
-    }
-    
-    /**
-     * Uses the super class's send message to send the pongs corresponding 
-     * to the list of connections passed.
-     * This prevents calling RouteTable.removeReplyHandler when 
-     * the connection is closed.
-     * @param m Th epingrequest received that needs Pongs
-     * @param neigbors List (of ManagedConnection) of  neighboring connections
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
-     */
-    private void supersendNeighborPongs(PingRequest m, List neighbors) 
-        throws IOException {
-        for(Iterator iterator = neighbors.iterator();
-            iterator.hasNext();) {
-            //get the next connection
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            
-            //create the pong for this connection
-            //mark the pong if supernode
-            PingReply pr;
-            if(connection.isSupernodeConnection()) {
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 
-                                   connection.getPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   true);
-            } else if(connection.isLeafConnection() 
-                || connection.isOutgoing()){
-                //we know the listening port of the host in this case
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 
-                                   connection.getPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   false);
-            }
-            else{
-                //Use the port '0' in this case, as we dont know the listening
-                //port of the host
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 0,
-                                   connection.getInetAddress().getAddress(), 
-                                   false);
-            }
-            
-            //hop the message, as it is ideally coming from the connected host
-            pr.hop();
-
-            //send the message
-            //This is called only during a Reject connection, and thus
-            //it is impossible for the stream to be compressed.
-            //That is a Good Thing (tm) because we're sending such little
-            //data, that the compression may actually hurt.
-            super.send(pr);
-        }
-        
-        //Because we are guaranteed that the stream is not compressed,
-        //this call will not block.
-        super.flush();
-    }
     
     /**
      * Handles core Gnutella request/reply protocol.  This call
@@ -1097,6 +961,14 @@ public class ManagedConnection extends Connection
                 
             ((NIOMultiplexor)_socket).setReadObserver(reader);
         }
+    }
+    
+    /**
+     * Notification that messaging has closed.
+     */
+    public void messagingClosed() {
+        if( _manager != null )
+            _manager.remove(this);   
     }
     
     /**

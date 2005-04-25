@@ -40,6 +40,8 @@ public class MessageReader implements ChannelReadObserver {
     private ReadableByteChannel channel;
     /** the constant buffer to use for emtpy payloads. */
     private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
+    /** whether or not this reader has been shut down yet. */
+    private boolean shutdown = false;
     
     /**
      * Constructs a new MessageReader without an underlying source.
@@ -153,8 +155,16 @@ public class MessageReader implements ChannelReadObserver {
         channel.close();
     }
     
-    /** Does nothing (no resources to release) */
-    public void shutdown() {}
+    /** 
+     * Informs the receiver that the message is shutdown.
+     */
+    public synchronized void shutdown() {
+        if(shutdown)
+            return;
+            
+        shutdown = true;
+        receiver.messagingClosed();
+    }
 }
     
     
