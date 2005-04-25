@@ -17,7 +17,6 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -523,8 +522,11 @@ public class Connection implements IpPort {
         }
     }
     
-    protected boolean isAsynchronous() {
-        return (_socket instanceof NIOSocket);
+    /**
+     * Determines whether this connection is capable of asynchronous messaging.
+     */
+    public boolean isAsynchronous() {
+        return _socket.getChannel() != null;
     }
 
     /**

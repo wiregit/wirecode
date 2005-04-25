@@ -262,9 +262,9 @@ public abstract class Message implements Serializable, Comparable {
                 }
                 i+=got;
             }
-        }
-        else
+        } else {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
+        }
             
         return createMessage(buf, payload, softMax, network);
     }

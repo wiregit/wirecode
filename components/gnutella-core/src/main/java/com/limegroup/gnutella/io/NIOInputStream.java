@@ -7,10 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
@@ -19,9 +15,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
  */
-class NIOInputStream implements ReadHandler, ReadableByteChannel {
-    
-    private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
+class NIOInputStream implements ReadObserver, ReadableByteChannel {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
@@ -119,13 +113,6 @@ class NIOInputStream implements ReadHandler, ReadableByteChannel {
     }
     
     /**
-     * Notification that an IOException has occurred on one of these channels.
-     */
-    public void handleIOException(IOException iox) {
-        handler.shutdown();
-    }
-    
-    /**
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
@@ -140,14 +127,16 @@ class NIOInputStream implements ReadHandler, ReadableByteChannel {
     }
     
     /**
-     * Closes the channel.
+     * Does nothing, since this is implemented for ReadableByteChannel,
+     * and that is used for reading from the temporary buffer --
+     * there is no buffer to close in this case.
      */
     public void close() throws IOException {
-        ;
     }
     
     /**
-     * Determines if this is open.
+     * Always returns true, since this is implemented for ReadableByteChannel,
+     * and the Buffer is always available for reading.
      */
     public boolean isOpen() {
         return true;

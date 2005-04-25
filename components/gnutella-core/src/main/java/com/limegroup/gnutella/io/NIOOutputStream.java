@@ -5,10 +5,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Manages writing data to the network from a piped blocking OutputStream.
@@ -18,8 +14,6 @@ import org.apache.commons.logging.Log;
  * to be written.
  */
 class NIOOutputStream implements WriteHandler {
-    
-    private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
     
     private final NIOSocket handler;
     private final SocketChannel channel;

@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.nio.channels.*;
 
-import com.limegroup.gnutella.io.*;
+import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
@@ -1100,13 +1099,18 @@ public class ManagedConnection extends Connection
         }
     }
     
+    /**
+     * Notification that a message is available to be processed (via asynch-processing).
+     */
     public void processMessage(Message m) {
-        System.out.println("processed message: " + m);
         updateStatistics(m);
         addReceived();
         handleMessageInternal(m);
     }
     
+    /**
+     * Handles a message without updating appropriate statistics.
+     */
     private void handleMessageInternal(Message m) {
         // Run through the route spam filter and drop accordingly.
         if (isSpam(m)) {
@@ -1125,12 +1129,14 @@ public class ManagedConnection extends Connection
         }
     }
     
-    public void readerClosed() { close(); }
-    
+    /**
+     * Returns the network that the MessageReceiver uses -- Message.N_TCP.
+     */
     public int getNetwork() {
         return Message.N_TCP;
     }
     
+
     private QueryRequest tryToProxy(QueryRequest query) {
         // we must have the following qualifications:
         // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
