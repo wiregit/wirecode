@@ -498,13 +498,14 @@ public class Connection implements IpPort {
             // releases these buffers.
             if(isWriteDeflated()) {
                 _deflater = new Deflater();
-                //if(!isAsynchronous()) // not handled for write yet.
-                    _out = new CompressingOutputStream(_out, _deflater);
+                _out = new CompressingOutputStream(_out, _deflater);
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
                 if(!(isAsynchronous()))
                     _in = new UncompressingInputStream(_in, _inflater);
+                // else (isAsynchronous())
+                //      the stream is not really set up yet.  it'll be set up in loopForMessages.
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -999,11 +1000,20 @@ public class Connection implements IpPort {
 
     /**
      * Returns the stream to use for reading from s.
-     * By default this is a BufferedInputStream.
+     * If this supports asynchronous messaging, the stream itself is returned,
+     * because the underlying stream is already buffered.  This is also done
+     * to ensure that when we switch to using asynch message processing, no
+     * bytes are left within the BufferedInputStream's buffer.
+     *
+     * Otherwise (it isn't asynchronous-capable), we enforce a buffer around the stream.
+     *
      * Subclasses may override to decorate the stream.
      */
     protected InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(_socket.getInputStream());
+        if(isAsynchronous())
+            return _socket.getInputStream();
+        else
+            return new BufferedInputStream(_socket.getInputStream());
     }    
     
     
@@ -1024,12 +1034,18 @@ public class Connection implements IpPort {
      * undefined if two threads are in a receive call at the same time for a
      * given connection.
      *
+     * This does NOT work if the connection supports asynchronous messages
+     * and the reading is deflated.  (Use loopForMessages & some custom receiver.)
+     *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but blocks until a
      *  message is available.  A half-completed message
      *  results in InterruptedIOException.
      */
     protected Message receive() throws IOException, BadPacketException {
+        if(isAsynchronous() && isReadDeflated())
+            throw new IllegalStateException("asynchronous & deflated, can't get single msgs!");
+        
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
@@ -1050,6 +1066,9 @@ public class Connection implements IpPort {
      * Behavior is undefined if two threads are in a receive call at the same
      * time for a given connection.
      *
+     * This does NOT work if the connection supports asynchronous messages
+     * and the reading is deflated.  (Use loopForMessages & some custom receiver.)
+     *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but throws InterruptedIOException
      *  if timeout!=0 and no message is read after "timeout" milliseconds.  In
@@ -1058,6 +1077,9 @@ public class Connection implements IpPort {
      */
     public Message receive(int timeout)
 		throws IOException, BadPacketException, InterruptedIOException {
+        if(isAsynchronous() && isReadDeflated())
+            throw new IllegalStateException("asynchronous & deflated, can't get single msgs!");
+		    
         //See note in receive().
         if (_closed)
             throw CONNECTION_CLOSED;
