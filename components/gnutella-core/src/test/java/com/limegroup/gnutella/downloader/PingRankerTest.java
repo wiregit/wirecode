@@ -77,6 +77,7 @@ public class PingRankerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
         DownloadSettings.WORKER_INTERVAL.setValue(1);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
+        DownloadSettings.PING_BATCH.revertToDefault();
     }
     
     /**
@@ -84,10 +85,12 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testPingsNewHosts() throws Exception {
         
-        for (int i =1;i <= 10;i++) 
+        for (int i =1;i <= 10;i++) {
             ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
+            Thread.sleep(20);
+        }
         
-        Thread.sleep(20);
+        
         assertEquals(10,pinger.hosts.size());
         assertEquals(10,pinger.messages.size());
         
@@ -276,9 +279,10 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testPrefersPongedHost() throws Exception {
         assertFalse(ranker.hasMore());
-        
+        List l = new ArrayList(10);
         for (int i =0;i < 10;i++) 
-            ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
+            l.add(newRFDWithURN("1.2.3."+i,3));
+        ranker.addToPool(l);
         
         assertTrue(ranker.hasMore());
         
@@ -316,8 +320,11 @@ public class PingRankerTest extends BaseTestCase {
      * Tests that the ranker offers hosts that indicated they were busy last
      */
     public void testBusyOfferedLast() throws Exception {
-        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
-        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
+        List l = new ArrayList();
+        l.add(newRFDWithURN("1.2.3.4",3));
+        l.add(newRFDWithURN("1.2.3.5",3));
+        ranker.addToPool(l);
+        
         MockPong busy = new MockPong(true,true,20,true,true,true,null,null,null);
         MockPong notBusy = new MockPong(true,true,0,true,false,true,null,null,null);
         
@@ -334,9 +341,12 @@ public class PingRankerTest extends BaseTestCase {
      * Tests that the ranker offers hosts that have more free slots first 
      */
     public void testSortedByQueueRank() throws Exception {
-        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
-        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
-        ranker.addToPool(newRFDWithURN("1.2.3.6",3));
+        List l = new ArrayList();
+        
+        l.add(newRFDWithURN("1.2.3.4",3));
+        l.add(newRFDWithURN("1.2.3.5",3));
+        l.add(newRFDWithURN("1.2.3.6",3));
+        ranker.addToPool(l);
         
         MockPong oneFree = new MockPong(true,true,-1,true,false,true,null,null,null);
         MockPong noFree = new MockPong(true,true,0,true,false,true,null,null,null);
@@ -366,9 +376,9 @@ public class PingRankerTest extends BaseTestCase {
         RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
         RemoteFileDesc openMoreSlots = newRFDWithURN("1.2.3.5",3);
         RemoteFileDesc push = newPushRFD(GUID.makeGuid(),"1.2.3.6:6",null);
-        ranker.addToPool(open);
-        ranker.addToPool(openMoreSlots);
-        ranker.addToPool(push);
+        List l = new ArrayList();
+        l.add(open);l.add(openMoreSlots);l.add(push);
+        ranker.addToPool(l);
         
         MockPong openPong = new MockPong(true,true,-1,false,false,true,null,null,null);
         MockPong pushPong = new MockPong(true,true,-1,true,false,true,null,null,null);
@@ -392,10 +402,12 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testPartialPreferred() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
-        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
-        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
-        ranker.addToPool(newRFDWithURN("1.2.3.6",3));
-        ranker.addToPool(newPushRFD(GUID.makeGuid(),"1.2.3.7:7",null));
+        List l = new ArrayList();
+        l.add(newRFDWithURN("1.2.3.4",3));
+        l.add(newRFDWithURN("1.2.3.5",3));
+        l.add(newRFDWithURN("1.2.3.6",3));
+        l.add(newPushRFD(GUID.makeGuid(),"1.2.3.7:7",null));
+        ranker.addToPool(l);
         
         MockPong oneFree = new MockPong(true,true,-1,true,false,true,null,null,null);
         MockPong oneFreePartial = new MockPong(true,false,-1,true,false,true,new IntervalSet(),null,null);
