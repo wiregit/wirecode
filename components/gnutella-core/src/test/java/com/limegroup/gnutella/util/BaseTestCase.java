@@ -122,6 +122,10 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 suite.addTest((Test) iter.next());
         }
         
+        // add a warning if we are running individual tests
+        if (!System.getProperty("junit.test.method","${method}").equals("${method}"))
+            suite.addTest(warning("Warning - Full test suite has not been run."));
+        
         return suite;
     }
     
@@ -150,7 +154,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         for (int ii = 0; ii < tests.length; ii++) {
             suite.addTest(TestSuite.createTest(cls, tests[ii]));
         }
-        suite.addTest(warning("Warning - Full test suite has not been run."));
         return suite;
     }
     
