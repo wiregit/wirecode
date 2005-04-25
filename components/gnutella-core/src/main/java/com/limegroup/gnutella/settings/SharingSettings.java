@@ -4,8 +4,10 @@ package com.limegroup.gnutella.settings;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
+import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 
@@ -15,6 +17,14 @@ import com.limegroup.gnutella.util.FileUtils;
 public class SharingSettings extends LimeProps {
     
     private SharingSettings() {}
+
+	/**
+	 * Stores the download directory file settings for each media type by its
+	 * description key {@link MediaType#getDescriptionKey()}. The settings
+	 * are loaded lazily during the first request.
+	 */
+	private static final Hashtable downloadDirsByDescription = new Hashtable();
+	
     
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
@@ -288,4 +298,29 @@ public class SharingSettings extends LimeProps {
         
         DIRECTORIES_TO_SHARE.setValue((File[])set.toArray(new File[0]));
     }
+	
+	
+	/**
+	 * Returns the download directory file setting for a mediatype. The
+	 * settings are created lazily when they are requested for the first time.
+	 * The default download directory is a file called "invalidfile" the file
+	 * setting should not be used when its {@link Setting#isDefault()} returns
+	 * true.  Use {@link #DIRECTORY_FOR_SAVING_FILES} instead then.
+	 * @param type the mediatype for which to look up the file setting
+	 * @return the filesetting for the media type
+	 */
+	public static final FileSetting getFileSettingForMediaType
+		(MediaType type)
+	{
+		FileSetting setting = (FileSetting)downloadDirsByDescription.get
+			(type.getDescriptionKey());
+		if (setting == null) {
+			setting = FACTORY.createProxyFileSetting
+			("DIRECTORY_FOR_SAVING_" 
+			 + type.getDescriptionKey() + "_FILES", DIRECTORY_FOR_SAVING_FILES);
+			downloadDirsByDescription.put(type.getDescriptionKey(), setting);
+		}
+		return setting;
+	}
+	
 }

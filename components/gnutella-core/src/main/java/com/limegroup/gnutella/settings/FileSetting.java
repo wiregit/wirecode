@@ -6,7 +6,7 @@ import java.util.Properties;
 /**
  * This class handles settings for <tt>File</tt>s.
  */
-public final class FileSetting extends Setting {
+public class FileSetting extends Setting {
     
     private File value;
     private String absolutePath;

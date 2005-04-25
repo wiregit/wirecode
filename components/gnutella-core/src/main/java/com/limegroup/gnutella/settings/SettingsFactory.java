@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -428,6 +427,14 @@ public final class SettingsFactory {
         handleSettingInternal(result, simppKey);
         return result;
     }
+	
+	public synchronized ProxyFileSetting createProxyFileSetting(String key,
+			FileSetting defaultSetting) {
+		ProxyFileSetting result = 
+			new ProxyFileSetting(DEFAULT_PROPS, PROPS, key, defaultSetting);
+		handleSettingInternal(result, null);
+		return result;
+	}
 
     /**
      * Creates a new <tt>ColorSetting</tt> instance with the specified
