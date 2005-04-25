@@ -195,7 +195,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public ManagedConnectionCountQRT() {
             try {
                 PrivilegedAccessor.setValue(ManagedConnection.class, "MIN_BUSY_LEAF_TIME", new Long(TEST_MIN_BUSY_LEAF_TIME));                
-                PrivilegedAccessor.setValue(this, "softMaxHops", new Integer(-1));
+                PrivilegedAccessor.setValue(this, "hopsFlowMax", new Integer(-1));
             } catch (Exception e) {
                 ErrorService.error( e );
             }
@@ -229,7 +229,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public void send(Message m) {}
 
         public void setBusyEnoughToTriggerQRTRemoval( boolean busy ) throws Exception{
-            PrivilegedAccessor.setValue(this, "softMaxHops", new Integer( ((busy)?(0):(-1)) ) );
+            PrivilegedAccessor.setValue(this, "hopsFlowMax", new Integer( ((busy)?(0):(-1)) ) );
             
             setBusy(busy);
          }
