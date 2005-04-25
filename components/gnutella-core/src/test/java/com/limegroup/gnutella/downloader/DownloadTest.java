@@ -599,8 +599,8 @@ public class DownloadTest extends BaseTestCase {
     public void testStallingUploaderReplaced() throws Exception  {
         LOG.info("-Testing download completion with stalling downloader...");
         
-        //Throttle rate at 500KB/s to give opportunities for swarming.
-        final int RATE=500;
+        //Throttle rate at 100KB/s to give opportunities for swarming.
+        final int RATE=100;
         uploader1.setRate(0.1f);//stalling uploader
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
@@ -608,8 +608,14 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds = {rfd1};
         RemoteFileDesc[] rfds2 ={rfd2};
 
-        tGeneric(rfds,rfds2);
+        ManagedDownloader downloader = (ManagedDownloader) 
+            RouterService.download(rfds,Collections.EMPTY_LIST,false,null);
+        
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
+        
+        downloader.addDownload(rfd2,false);
 
+        waitForComplete(false);
 
         //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.fullRequestsUploaded();
