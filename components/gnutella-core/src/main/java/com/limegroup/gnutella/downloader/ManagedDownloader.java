@@ -174,7 +174,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       The download can finish in one of the following states:
           h) COMPLETE (download completed just fine)
           i) ABORTED  (user pressed stopped at some point)
-          j) DISK_PROBLEM (limewire couldn't the file)
+          j) DISK_PROBLEM (limewire couldn't manipulate the file)
           k) CORRUPT_FILE (the file was corrupt)
 
      There are a few intermediary states:
