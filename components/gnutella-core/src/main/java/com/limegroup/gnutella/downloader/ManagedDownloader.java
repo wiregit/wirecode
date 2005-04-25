@@ -2468,7 +2468,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         if (LOG.isDebugEnabled())
-            LOG.debug("going to re-rank previously busy hosts: "+l);
+            LOG.debug("going to re-rank previously busy hosts: "+l+" not yet "+busyRFDs);
         
         ranker.addToPool(l);
     }

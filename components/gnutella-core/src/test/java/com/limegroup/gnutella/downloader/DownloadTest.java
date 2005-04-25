@@ -1801,8 +1801,11 @@ public class DownloadTest extends BaseTestCase {
         // we must ensure that RFD1 is tried first, so the wait
         // is only set to 1 minute.
         
-        tGeneric(rfds, later);
+        ManagedDownloader download= (ManagedDownloader) RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
+        download.addDownload(rfd2,true);
         
+        waitForComplete(false);
         int u1 = uploader1.getAmountUploaded();
         int u2 = uploader2.getAmountUploaded();
         
@@ -2112,7 +2115,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
         final int RATE = 50;
-        final int FUDGE_FACTOR = RATE*1024;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader3.setRate(RATE);
@@ -2132,7 +2134,7 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;
         downloader = (ManagedDownloader)RouterService.download(rfds,false,null);
-        Thread.sleep(1500);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()*2 + 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         
@@ -2149,7 +2151,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("both uploaders should still be queued",2,queued);
         
         downloader.addDownload(rfd3,true);
-        Thread.sleep(1000);
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         //now uploader 2 should have been removed.
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();

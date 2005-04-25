@@ -97,7 +97,7 @@ public class TestUploader extends AssertComparisons {
     private Long creationTime = null;
     
     boolean unqueue = true;
-    int queuePos = 1;
+    volatile int queuePos = 1;
 
     boolean killedByDownloader = false;
     
