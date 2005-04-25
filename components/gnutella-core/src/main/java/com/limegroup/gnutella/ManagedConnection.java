@@ -1092,32 +1092,11 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
-            NIODispatcher.instance().invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        NIOMultiplexor plexor = (NIOMultiplexor)_socket;
-                        ChannelReader channelReader = null;
-                        ReadableByteChannel source = plexor.getReadChannel();
-                        
-                        if(isReadDeflated()) {
-                            InflaterReader reader = new InflaterReader(source, _inflater);
-                            source = reader;
-                            channelReader = reader;
-                        }
-                        
-                        MessageReader messager = new MessageReader(source, ManagedConnection.this);
-                        if(channelReader == null)
-                            channelReader = messager;
-                            
-                        messager.handleRead(); // gobble up any data from the initial readChannel.
-                        channelReader.setReadChannel(_socket.getChannel());
-                        plexor.setReadHandler(messager);
-                        NIODispatcher.instance().interestRead(_socket.getChannel(), true);
-                    } catch(IOException iox) {
-                        close();
-                    }
-                } 
-            });
+            MessageReader reader = new MessageReader(ManagedConnection.this);
+            if(isReadDeflated())
+                reader.setReadChannel(new InflaterReader(_inflater));
+                
+            ((NIOMultiplexor)_socket).setReadObserver(reader);
         }
     }
     

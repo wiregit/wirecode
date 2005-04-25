@@ -1,32 +1,59 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.io.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.ReadableByteChannel;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.util.DataUtils;
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.util.zip.*;
+import com.limegroup.gnutella.io.ChannelReadObserver;
 
-public class MessageReader implements ChannelReader, ReadHandler {
+/**
+ * Reads messages from a channel.  This class is notified when more of a message
+ * can potentially be read by its handleRead() method being called.  To change
+ * the channel this reads from, use setReaderChannel(ReadableByteChannel).
+ *
+ * It is possible to construct this class without an initial source channel.
+ * However, before handleRead is called, the channel must be set.
+ *
+ * The first time the channel returns -1 this will throw an IOException, as it
+ * never expects the channel to run out of data.  Upon each read notification,
+ * as much data as possible will be read from the source channel.
+ */
+public class MessageReader implements ChannelReadObserver {
     
+    /** the maximum size of a message payload that we'll accept */
     private static final long MAX_MESSAGE_SIZE = 64 * 1024;
+    /** the size of the header */
     private static final int HEADER_SIZE = 23;
+    /** where in the header the payload is */
     private static final int PAYLOAD_LENGTH_OFFSET = 19;
     
-    private ByteBuffer header;
+    /** the sole buffer for parsing msg headers */
+    private final ByteBuffer header;
+    /** the buffer used for parsing the payload -- recreated for each message */
     private ByteBuffer payload;
-    private MessageReceiver receiver;
+    /** the sole receiver of messages */
+    private final MessageReceiver receiver;
+    /** the source channel */
     private ReadableByteChannel channel;
+    /** the constant buffer to use for emtpy payloads. */
     private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
     
+    /**
+     * Constructs a new MessageReader without an underlying source.
+     * Prior to handleRead() being called, setReadChannel(ReadableByteChannel)
+     * MUST be called.
+     */    
+    public MessageReader(MessageReceiver receiver) {
+        this(null, receiver);
+    }
+    
+    /**
+     * Constructs a new MessageReader with the given source channel & receiver.
+     */
     public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
-        if(channel == null)
-            throw new NullPointerException("null channel!");
-
         this.channel = channel;
         this.receiver = receiver;
         this.header = ByteBuffer.allocate(HEADER_SIZE);
@@ -38,7 +65,17 @@ public class MessageReader implements ChannelReader, ReadHandler {
      * Sets the new channel to be reading from.
      */
     public void setReadChannel(ReadableByteChannel channel) {
+        if(channel == null)
+            throw new NullPointerException("cannot set null channel!");
+        
         this.channel = channel;
+    }
+    
+    /**
+     * Gets the channel that is used for reading.
+     */
+    public ReadableByteChannel getReadChannel() {
+        return channel;
     }
     
     /**
@@ -116,19 +153,8 @@ public class MessageReader implements ChannelReader, ReadHandler {
         channel.close();
     }
     
-    /**
-     * Shuts down this ReadHandler.
-     */
-    public void shutdown() {
-        ;
-    }
-    
-    /**
-     * Notification that an IOException occurred while reading/writing.
-     */
-    public void handleIOException(IOException iox) {
-        receiver.readerClosed();
-    }
+    /** Does nothing (no resources to release) */
+    public void shutdown() {}
 }
     
     

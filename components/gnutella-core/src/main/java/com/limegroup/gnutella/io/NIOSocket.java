@@ -29,8 +29,8 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
     
     private final SocketChannel channel;
     private final Socket socket;
-    private volatile WriteHandler writer;
-    private volatile ReadHandler reader;
+    private NIOOutputStream writer;
+    private ReadObserver reader;
     private IOException storedException = null;
     private InetAddress connectedTo;
     
@@ -46,7 +46,7 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
         socket = s;
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        ((NIOOutputStream)writer).init();
+        writer.init();
         ((NIOInputStream)reader).init();
         NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
@@ -100,30 +100,38 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
         channel.configureBlocking(false);
     }
     
-    public ReadHandler getReadHandler() {
-        return reader;
+    /**
+     * Sets the new ReadObserver.
+     * See NIOMultiplexor.setReadObserver.
+     */
+    public void setReadObserver(final ChannelReadObserver newReader) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                ReadObserver oldReader = reader;
+                try {
+                    reader = newReader;
+                    
+                    if(oldReader instanceof ReadableByteChannel) {
+                        // go down the chain of ChannelReaders and find the last one to set our source
+                        ChannelReader lastChannel = newReader; //newReader == (ChannelReader)reader
+                        while(lastChannel.getReadChannel() instanceof ChannelReader)
+                            lastChannel = (ChannelReader)lastChannel.getReadChannel();
+                        lastChannel.setReadChannel((ReadableByteChannel)oldReader);
+                        reader.handleRead(); // read up any buffered data.
+                        oldReader.shutdown(); // shutdown the now unused reader.
+                        lastChannel.setReadChannel(channel);
+                    } else {
+                        newReader.setReadChannel(channel);
+                    }
+                    
+                    NIODispatcher.instance().interestRead(channel, true);
+                } catch(IOException iox) {
+                    shutdown();
+                    oldReader.shutdown(); // in case we lost it.
+                }
+            }
+        });
     }
-    
-    public WriteHandler getWriteHandler() {
-        return writer;
-    }
-    
-    public ReadableByteChannel getReadChannel() {
-        if(reader instanceof ReadableByteChannel)
-            return (ReadableByteChannel)reader;
-        else
-            return null;
-    }
-    
-    public void setReadHandler(ReadHandler newReader) throws IOException {
-        reader.shutdown();
-        reader = newReader;
-    }
-    
-    public void setWriteHandler(WriteHandler newWriter) throws IOException {
-        writer.shutdown();
-        writer = newWriter;
-    }   
     
     /**
      * Notification that a connect can occur.
@@ -241,8 +249,8 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
         if(LOG.isTraceEnabled())
             LOG.trace("Connected to: " + addr);
             
-        if(writer instanceof NIOOutputStream)
-            ((NIOOutputStream)writer).init();
+        writer.init();
+        
         if(reader instanceof NIOInputStream)
             ((NIOInputStream)reader).init();
     }
@@ -280,10 +288,7 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
         if(isClosed())
             throw new IOException("Socket closed.");
         
-        if(writer instanceof NIOOutputStream)
-            return ((NIOOutputStream)writer).getOutputStream();
-        else
-            throw new IllegalStateException("writer not NIOOutputStream!");
+        return writer.getOutputStream();
     }
     
     

@@ -1,39 +1,45 @@
 package com.limegroup.gnutella.io;
 
-
 /**
- * Denotes the class can handle both reading and writing, doling out the
- * the reading/writing to specific delegate classes.
+ * Denotes the class can handle delegating ReadObserver events to
+ * other ReadObservers.
  */
 public interface NIOMultiplexor extends ReadHandler, WriteHandler {
     
     /**
-     * Retrieves the channel that can be used to read any data that was
-     * temporarily stored by a ReadHandler.
+     * Sets the new ReadObserver.
+     *
+     * This requires a ChannelReadObserver, so that any data that was buffered
+     * by the existing ReadObserver can be written to the new ReadObserver.
+     * After buffered data is read, the ChannelReader's reading channel is set
+     * to the socket's channel.
+     * After the reader's channel is set to the SocketChannel, the interest in
+     * reading from that channel is turned on.
+     *
+     * It is important that the reader be able to read all data from the underlying
+     * channel upon its handleRead calls.
+     *
+     * This is performed with code similar to:
+     *      public void setReadObserver(ChannelReadObserver reader) {
+     *          NIODispatcher.instance().invokeLater(new Runnable() {
+     *              public void run() {
+     *                   try {
+     *                       myReader = reader;
+     *
+     *                       ChannelReader channel = reader;
+     *                       while(channel.getReadChannel() instanceof ChannelReader)
+     *                           channel = (ChannelReader)channel.getReadChannel();
+     *                       channel.setReadChannel(existingChannelWithBufferedData);
+     *                       reader.handleRead();
+     *                       existingChannelWithBufferedData.shutdown();
+     *                       channel.setReadChannel(socket.getChannel());
+     *                       NIODispatcher.instance().interestRead(socket.getChannel());
+     *                   } catch(IOException iox) {
+     *                       shutdown();
+     *                   }
+     *              }     
+     *          });
+     *      }
      */
-    public java.nio.channels.ReadableByteChannel getReadChannel();
-    
-    
-    /** Retrieves the current ReadHandler */
-    public ReadHandler getReadHandler();
-    
-    /** Retrieves the current WriteHandler */
-    public WriteHandler getWriteHandler();
-    
-    /**
-     * Sets the new ReadHandler.
-     * If there is data left in an earlier read's buffer, it is immediately
-     * written to the new ReadHandler if that handler implements the WritableByteChannel
-     * interface.
-     */
-    public void setReadHandler(ReadHandler reader) throws java.io.IOException;
-    
-    /** 
-     * Sets the new WriteHandler.
-     * If there is data left in the earlier write's buffer, it is immediately
-     * passed to the new WriteHandler if that handler implements the ReadableByteChannel
-     * interface.
-     */
-    public void setWriteHandler(WriteHandler writer) throws java.io.IOException;
-    
+    public void setReadObserver(ChannelReadObserver reader);
 }

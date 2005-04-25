@@ -1,9 +1,15 @@
 package com.limegroup.gnutella.io;
 
+import java.nio.channels.ReadableByteChannel;
 /**
- * Marks the class as using a channel and allowing that channel
- * to change at some point in time.
+ * Allows arbitrary ReadableByteChannels to be set as the source
+ * for reading from this object.
  */
 public interface ChannelReader {
-    public void setReadChannel(java.nio.channels.ReadableByteChannel newChannel);
+    
+    /** Set the new source channel */
+    void setReadChannel(ReadableByteChannel newChannel);
+    
+    /** Gets the existing source channel. */
+    ReadableByteChannel getReadChannel();
 }

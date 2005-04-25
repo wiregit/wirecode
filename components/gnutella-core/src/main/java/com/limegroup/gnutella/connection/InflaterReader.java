@@ -1,13 +1,29 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.util.zip.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.util.zip.Inflater;
+import java.util.zip.DataFormatException;
 
+import com.limegroup.gnutella.io.ChannelReader;
+
+/**
+ * Reads data from a source channel and offers the inflated version for reading.
+ *
+ * Each invocation of read(ByteBuffer) will attempt to return any inflated data.
+ * If no data is available for inflation, data will be read from the source channel
+ * and inflation will be attempted.  The ByteBuffer will be filled as much as possible
+ * without blocking.
+ *
+ * The source channel may not be entirely emptied out in a single call to read(ByteBuffer),
+ * because the supplied ByteBuffer may not be large enough to accept all inflated data.
+ * If this is the case, the data will remain in the source channel until further calls to
+ * read(ByteBuffer).
+ *
+ * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
+ * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
+ */
 public class InflaterReader implements ChannelReader, ReadableByteChannel {
     
     /** the inflater that will do the decompressing for us */
@@ -19,10 +35,19 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
     /** the temporary buffer that data from the channel goes to prior to inflating */
     private ByteBuffer data;
     
-    public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {
-        if(channel == null)
-            throw new NullPointerException("null channel!");
-        
+    /**
+     * Constructs a new InflaterReader without an underlying source.
+     * Prior to read(ByteBuffer) being called, setReadChannel(ReadableByteChannel)
+     * MUST be called.
+     */
+    public InflaterReader(Inflater inflater) {
+        this(null, inflater);
+    }
+    
+    /**
+     * Constructs a new InflaterReader with the given source channel & inflater.
+     */
+    public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {        
         this.channel = channel;
         this.inflater = inflater;
         this.data = ByteBuffer.allocate(512);
@@ -36,6 +61,11 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
             throw new NullPointerException("cannot set null channel!");
 
         this.channel = channel;
+    }
+    
+    /** Gets the read channel */
+    public ReadableByteChannel getReadChannel() {
+        return channel;
     }
     
     /**
