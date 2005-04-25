@@ -450,7 +450,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	/** Wrapper for outgoing data */
 	private static class SendBundle {
 	    private final ByteBuffer buffer;
-	    private /*final*/ SocketAddress addr;
+	    private final SocketAddress addr;
 	    private final ErrorCallback callback;
 	    
 	    SendBundle(ByteBuffer b, InetAddress addr, int port, ErrorCallback c) {
