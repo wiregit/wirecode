@@ -607,7 +607,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * @return the <tt>DatagramSocket</tt> data
 	 */
 	public String toString() {
-		return "UDPAcceptor\r\nchannel: " + _channel;
+		return "UDPService::channel: " + _channel;
 	}
 
     private static class MLImpl implements MessageListener {
