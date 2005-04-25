@@ -8,6 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.nio.channels.DatagramChannel;
 import java.nio.ByteBuffer;
@@ -372,7 +373,12 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 */
     public void send(Message msg, InetAddress ip, int port) 
         throws IllegalArgumentException {
-        send(msg, ip, port, ErrorService.getErrorCallback());
+        try {
+            send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorService.getErrorCallback());
+        }
+        catch(UnknownHostException uhe)
+        {
+        }
     }
 
 	/**
@@ -427,6 +433,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
 	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
+
 	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
 	                // we removed the bundle from the list but couldn't send it,
 	                // so we have to put it back in.
@@ -443,7 +450,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	/** Wrapper for outgoing data */
 	private static class SendBundle {
 	    private final ByteBuffer buffer;
-	    private final SocketAddress addr;
+	    private /*final*/ SocketAddress addr;
 	    private final ErrorCallback callback;
 	    
 	    SendBundle(ByteBuffer b, InetAddress addr, int port, ErrorCallback c) {

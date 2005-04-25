@@ -126,7 +126,7 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 		ROUTER_SERVICE.preGuiInit();
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		ROUTER_SERVICE.connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
         // set up ultrapeer stuff

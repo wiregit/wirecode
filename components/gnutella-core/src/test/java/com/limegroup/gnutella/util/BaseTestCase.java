@@ -670,11 +670,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
             try {
                 Message m = c.receive(timeout);
                 //System.out.println("m: " + m + ", class: " + m.getClass());
-                if (m instanceof RouteTableMessage)
-                    ;
-                else if (m instanceof PingRequest)
-                    ;
-                else if (type.isInstance(m))
+                if (type.isInstance(m))
                     return m;
                 i = 0;
             } catch (InterruptedIOException ie) {
@@ -704,8 +700,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 Message m=Message.read(socket.getInputStream(), Message.N_TCP);
                 if(type.isInstance(m))
                     return m;
-                else if(m instanceof PingRequest)
-                    ;//continue
                 else if(m == null) //interruptedIOException thrown
                     return null;                    
                 i=0;
