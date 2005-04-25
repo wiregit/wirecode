@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.connection;
 
-
-
 import com.limegroup.gnutella.io.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -12,9 +10,14 @@ import java.util.zip.*;
 
 public class InflaterReader implements ChannelReader, ReadableByteChannel {
     
+    /** the inflater that will do the decompressing for us */
     private Inflater inflater;
+    
+    /** the channel this reads from */
     private ReadableByteChannel channel;
-    private ByteBuffer buf;
+    
+    /** the temporary buffer that data from the channel goes to prior to inflating */
+    private ByteBuffer data;
     
     public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {
         if(channel == null)
@@ -22,7 +25,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
         
         this.channel = channel;
         this.inflater = inflater;
-        this.buf = ByteBuffer.allocate(512);
+        this.data = ByteBuffer.allocate(512);
     }
     
     /**
@@ -42,27 +45,51 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
         int written = 0;
         int read = 0;
         
-        // first try to inflate any prior input from the inflater.
-        if(buffer.hasRemaining())
-            written += inflate(buffer);
+        // inflate loop... inflate -> read -> rinse -> lather -> repeat as necessary.
+        // only break out of this loop if 
+        // a) output buffer gets full
+        // b) inflater finishes or needs a dictionary
+        // c) no data can be inflated & no data can be read off the channel
+        while(buffer.hasRemaining()) { // (case a above)
+            // first try to inflate any prior input from the inflater.
+            int inflated = inflate(buffer);
+            written += inflated;
             
-        // if we couldn't inflate anything, add input to the inflater
-        // & inflate it.
-        if(written == 0) {
-            // First gobble up any data from the channel we're dependent on.
-            while(buffer.hasRemaining() && (read = channel.read(buf)) > 0);
+            // if we couldn't inflate anything...
+            if(inflated == 0) {
+                // if this inflater is done or needs a dictionary, we're screwed. (case b above)
+        		if (inflater.finished() || inflater.needsDictionary()) {
+                    read = -1;
+                    break;
+        		}
             
-            // Then put that data into the inflater.
-            inflater.setInput(buf.array(), 0, buf.position());
-            buf.clear();
+                // if the buffer needs input, add it.
+                if(inflater.needsInput()) {
+                    // First gobble up any data from the channel we're dependent on.
+                    while(data.hasRemaining() && (read = channel.read(data)) > 0);
+                    // if we couldn't read any data, we suck. (case c above)
+                    if(data.position() == 0)
+                        break;
+                    
+                    // Then put that data into the inflater.
+                    inflater.setInput(data.array(), 0, data.position());
+                    data.clear();
+                }
+            }
             
-            written += inflate(buffer);
+            // if we're here, we either:
+            // a) inflated some data
+            // b) didn't inflate, but read some data that we input'd to the inflater
+            
+            // if a), we'll continue trying to inflate so long as the output buffer
+            // has space left.
+            // if b), we try to inflate and ultimately end up at a).
         }
         
         if(written > 0)
             return written;
         else if(read == -1)
-            return read;
+            return -1;
         else
             return 0;
     }
@@ -71,30 +98,21 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
     private int inflate(ByteBuffer buffer) throws IOException {
         int written = 0;
         
-        // Then, while there's room in the output buffer & there's inflatable data,
-        // write to it from the inflater
-        while(buffer.hasRemaining()) {
-            int inflated;
-            int position = buffer.position();
-            try {
-                inflated = inflater.inflate(buffer.array(), position, buffer.remaining());
-            } catch(DataFormatException dfe) {
-                IOException x = new IOException();
-                x.initCause(dfe);
-                throw x;
-            } catch(NullPointerException npe) {
-                // possible if the inflater was closed on a separate thread.
-                IOException x = new IOException();
-                x.initCause(npe);
-                throw x;
-            }
-            
-            if(inflated == 0)
-                break;
-                
-            written += inflated;
-            buffer.position(position + inflated);
+        int position = buffer.position();
+        try {
+            written = inflater.inflate(buffer.array(), position, buffer.remaining());
+        } catch(DataFormatException dfe) {
+            IOException x = new IOException();
+            x.initCause(dfe);
+            throw x;
+        } catch(NullPointerException npe) {
+            // possible if the inflater was closed on a separate thread.
+            IOException x = new IOException();
+            x.initCause(npe);
+            throw x;
         }
+            
+        buffer.position(position + written);
         
         return written;
     }

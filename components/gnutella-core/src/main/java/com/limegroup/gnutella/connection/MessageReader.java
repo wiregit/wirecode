@@ -13,7 +13,7 @@ import java.util.zip.*;
 
 public class MessageReader implements ChannelReader, ReadHandler {
     
-    private static final long MAX_MESSAGE_SIZE = 4 * 1024;
+    private static final long MAX_MESSAGE_SIZE = 64 * 1024;
     private static final int HEADER_SIZE = 23;
     private static final int PAYLOAD_LENGTH_OFFSET = 19;
     
@@ -45,6 +45,7 @@ public class MessageReader implements ChannelReader, ReadHandler {
      * Notification that a read can be performed from the given channel.
      */
     public void handleRead() throws IOException {
+        // Continue reading until we can't fill up the header or payload.
         while(true) {
             int read = 0;
             
@@ -61,15 +62,19 @@ public class MessageReader implements ChannelReader, ReadHandler {
             // if we haven't set up a payload yet, set one up (if necessary).
             if(payload == null) {
                 int payloadLength = header.getInt(PAYLOAD_LENGTH_OFFSET);
-                System.out.println("pl: " + payloadLength);
                 
                 if(payloadLength < 0 || payloadLength > MAX_MESSAGE_SIZE)
                     throw new IOException("should i implement skipping?");
                 
-                if(payloadLength == 0)
+                if(payloadLength == 0) {
                     payload = EMPTY_PAYLOAD;
-                else
-                    payload = ByteBuffer.allocate(payloadLength);
+                } else {
+                    try {
+                        payload = ByteBuffer.allocate(payloadLength);
+                    } catch(OutOfMemoryError oome) {
+                        throw new IOException("message too large.");
+                    }
+                }
             }
             
             // Okay, a payload is set up, let's read into it.
@@ -87,9 +92,7 @@ public class MessageReader implements ChannelReader, ReadHandler {
                 Message m = Message.createMessage(header.array(), payload.array(), 
                                                   receiver.getSoftMax(), receiver.getNetwork());
                 receiver.processMessage(m);
-            } catch(BadPacketException ignored) {
-                ignored.printStackTrace();
-            }
+            } catch(BadPacketException ignored) {}
             
             if(read == -1)
                 throw new IOException("eof");
