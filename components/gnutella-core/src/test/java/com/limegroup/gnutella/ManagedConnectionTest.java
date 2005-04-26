@@ -344,9 +344,9 @@ public class ManagedConnectionTest extends BaseTestCase {
         Message m = new PingRequest((byte)4);
         m.hop();
         out.send(m);   
-        sleep(200);
+        sleep(500);
         out.send(new PingRequest((byte)4));
-        sleep(200);
+        sleep(500);
 
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());

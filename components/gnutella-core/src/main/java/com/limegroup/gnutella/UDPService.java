@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.SocketAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -372,7 +373,9 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 */
     public void send(Message msg, InetAddress ip, int port) 
         throws IllegalArgumentException {
-        send(msg, ip, port, ErrorService.getErrorCallback());
+        try {
+            send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorService.getErrorCallback());
+        } catch(UnknownHostException ignored) {}
     }
 
 	/**

@@ -505,7 +505,10 @@ public class Connection implements IpPort {
                 if(!(isAsynchronous()))
                     _in = new UncompressingInputStream(_in, _inflater);
                 // else (isAsynchronous())
-                //      the stream is not really set up yet.  it'll be set up in loopForMessages.
+                //      lazily construct the UncompressingInputStream
+                //      (done so that if loopForMessages is used from ManagedConnection,
+                //       then asynchronous messaging can be installed.  tests use
+                //       receive [not loopForMessages].)
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -1029,13 +1032,14 @@ public class Connection implements IpPort {
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
     private final byte[] HEADER_BUF=new byte[23];
+
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
      * undefined if two threads are in a receive call at the same time for a
      * given connection.
      *
-     * This does NOT work if the connection supports asynchronous messages
-     * and the reading is deflated.  (Use loopForMessages & some custom receiver.)
+     * If this is an asynchronous read-deflated connection, this will set up
+     * the UncompressingInputStream the first time this is called.
      *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but blocks until a
@@ -1043,8 +1047,8 @@ public class Connection implements IpPort {
      *  results in InterruptedIOException.
      */
     protected Message receive() throws IOException, BadPacketException {
-        if(isAsynchronous() && isReadDeflated())
-            throw new IllegalStateException("asynchronous & deflated, can't get single msgs!");
+        if(isAsynchronous() && isReadDeflated() && !(_in instanceof UncompressingInputStream))
+            _in = new UncompressingInputStream(_in, _inflater);
         
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
@@ -1066,8 +1070,8 @@ public class Connection implements IpPort {
      * Behavior is undefined if two threads are in a receive call at the same
      * time for a given connection.
      *
-     * This does NOT work if the connection supports asynchronous messages
-     * and the reading is deflated.  (Use loopForMessages & some custom receiver.)
+     * If this is an asynchronous read-deflated connection, this will set up
+     * the UncompressingInputStream the first time this is called.
      *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but throws InterruptedIOException
@@ -1077,8 +1081,8 @@ public class Connection implements IpPort {
      */
     public Message receive(int timeout)
 		throws IOException, BadPacketException, InterruptedIOException {
-        if(isAsynchronous() && isReadDeflated())
-            throw new IllegalStateException("asynchronous & deflated, can't get single msgs!");
+        if(isAsynchronous() && isReadDeflated() && !(_in instanceof UncompressingInputStream))
+            _in = new UncompressingInputStream(_in, _inflater);
 		    
         //See note in receive().
         if (_closed)
