@@ -19,21 +19,40 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
- * A Socket that does all of its connecting/reading/writing using NIO, but psuedo-blocks.
+ * A Socket that does all of its connecting/reading/writing using NIO.
  *
- * Phase-1 in converting to NIO.
+ * Input/OutputStreams are provided to be used for blocking I/O (although internally
+ * non-blocking I/O is used).  To switch to using event-based reads, setReadObserver
+ * can be used, and read-events will be passed to the ReadObserver.
+ * A ChannelReadObserver must be used so that the Socket can set the appropriate
+ * underlying channel.
  */
 public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
+    /** The underlying channel the socket is using */
     private final SocketChannel channel;
+    
+    /** The Socket that this delegates to */
     private final Socket socket;
+    
+    /** The NIOOutputStream used for blocking writes */
     private NIOOutputStream writer;
+    
+    /** The ReadObserver this is notifying about read events */
     private ReadObserver reader;
+    
+    /** Any exception that occurred while trying to connect */
     private IOException storedException = null;
+    
+    /**
+     * The host we're connected to.
+     * (Necessary because Sockets retrieved from channels null out the host when disconnected)
+     */
     private InetAddress connectedTo;
     
+    /** Lock used to signal/wait for connecting */
     private final Object LOCK = new Object();
     
     
@@ -102,7 +121,12 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
     
     /**
      * Sets the new ReadObserver.
-     * See NIOMultiplexor.setReadObserver.
+     *
+     * The deepest ChannelReader in the chain first has its source
+     * set to the prior reader (assuming it implemented ReadableByteChannel)
+     * and a read is notified, in order to read any buffered data.
+     * The source is then set to the Socket's channel and interest
+     * in reading is turned on.
      */
     public void setReadObserver(final ChannelReadObserver newReader) {
         NIODispatcher.instance().invokeLater(new Runnable() {
@@ -110,20 +134,18 @@ public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor 
                 ReadObserver oldReader = reader;
                 try {
                     reader = newReader;
+                    ChannelReader lastChannel = newReader;
                     
                     if(oldReader instanceof ReadableByteChannel) {
                         // go down the chain of ChannelReaders and find the last one to set our source
-                        ChannelReader lastChannel = newReader; //newReader == (ChannelReader)reader
                         while(lastChannel.getReadChannel() instanceof ChannelReader)
                             lastChannel = (ChannelReader)lastChannel.getReadChannel();
                         lastChannel.setReadChannel((ReadableByteChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.
-                        lastChannel.setReadChannel(channel);
-                    } else {
-                        newReader.setReadChannel(channel);
                     }
                     
+                    lastChannel.setReadChannel(channel);
                     NIODispatcher.instance().interestRead(channel, true);
                 } catch(IOException iox) {
                     shutdown();

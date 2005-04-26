@@ -30,16 +30,19 @@ public class MessageReader implements ChannelReadObserver {
     /** where in the header the payload is */
     private static final int PAYLOAD_LENGTH_OFFSET = 19;
     
+    /** the constant buffer to use for emtpy payloads. */
+    private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
+    
     /** the sole buffer for parsing msg headers */
     private final ByteBuffer header;
     /** the buffer used for parsing the payload -- recreated for each message */
     private ByteBuffer payload;
+    
     /** the sole receiver of messages */
     private final MessageReceiver receiver;
     /** the source channel */
     private ReadableByteChannel channel;
-    /** the constant buffer to use for emtpy payloads. */
-    private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.allocate(0);
+    
     /** whether or not this reader has been shut down yet. */
     private boolean shutdown = false;
     
@@ -82,6 +85,7 @@ public class MessageReader implements ChannelReadObserver {
     
     /**
      * Notification that a read can be performed from the given channel.
+     * All messages that can be read without blocking are read & dispatched.
      */
     public void handleRead() throws IOException {
         // Continue reading until we can't fill up the header or payload.

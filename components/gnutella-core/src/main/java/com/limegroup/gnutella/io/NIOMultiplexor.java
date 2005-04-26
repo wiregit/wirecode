@@ -7,39 +7,23 @@ package com.limegroup.gnutella.io;
 public interface NIOMultiplexor extends ReadHandler, WriteHandler {
     
     /**
-     * Sets the new ReadObserver.
+     * Sets the new ReadObserver.  A ChannelReadObserver is required
+     * so that the multiplexor can set the appropriate source channel
+     * for reading.  The source channel is set on the deepest ChannelReader
+     * in the chain.  For example, given the chain:
+     *      ChannelReadObserver a = new ProtocolReader();
+     *      ChannelReader b = new DeObfuscator();
+     *      ChannelReader c = new DataInflater();
+     *      a.setReadChannel(b);
+     *      b.setReadChannel(c);
+     *      setReadObserver(a);
+     * the deepest ChannelReader is 'c', so the muliplexor would call
+     *      c.setReadChannel(ultimateSource);
      *
-     * This requires a ChannelReadObserver, so that any data that was buffered
-     * by the existing ReadObserver can be written to the new ReadObserver.
-     * After buffered data is read, the ChannelReader's reading channel is set
-     * to the socket's channel.
-     * After the reader's channel is set to the SocketChannel, the interest in
-     * reading from that channel is turned on.
-     *
-     * It is important that the reader be able to read all data from the underlying
-     * channel upon its handleRead calls.
-     *
-     * This is performed with code similar to:
-     *      public void setReadObserver(ChannelReadObserver reader) {
-     *          NIODispatcher.instance().invokeLater(new Runnable() {
-     *              public void run() {
-     *                   try {
-     *                       myReader = reader;
-     *
-     *                       ChannelReader channel = reader;
-     *                       while(channel.getReadChannel() instanceof ChannelReader)
-     *                           channel = (ChannelReader)channel.getReadChannel();
-     *                       channel.setReadChannel(existingChannelWithBufferedData);
-     *                       reader.handleRead();
-     *                       existingChannelWithBufferedData.shutdown();
-     *                       channel.setReadChannel(socket.getChannel());
-     *                       NIODispatcher.instance().interestRead(socket.getChannel());
-     *                   } catch(IOException iox) {
-     *                       shutdown();
-     *                   }
-     *              }     
-     *          });
-     *      }
+     * The deepest ChannelReader is found with code equivilant to:
+     *      ChannelReader deepest = initial;
+     *      while(deepest.getReadChannel() instanceof ChannelReader)
+     *          deepest = (ChannelReader)deepest.getReadChannel();
      */
     public void setReadObserver(ChannelReadObserver reader);
 }

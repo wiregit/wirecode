@@ -929,11 +929,11 @@ public class ManagedConnection extends Connection
     //////////////////////////////////////////////////////////////////////////
     
     /**
-     * Handles core Gnutella request/reply protocol.  This call
-     * will run until the connection is closed.  Note that this is called
-     * from the run methods of several different thread implementations
-     * that are inner classes of ConnectionManager.  This allows a single
-     * thread to be used for initialization and for the request/reply loop.
+     * Handles core Gnutella request/reply protocol.
+     * If asynchronous messaging is supported, this immediately
+     * returns and messages are processed asynchronously via processMessage
+     * calls.  Otherwise, if reading blocks, this  will run until the connection
+     * is closed.
      *
      * @requires this is initialized
      * @modifies the network underlying this, manager

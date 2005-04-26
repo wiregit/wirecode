@@ -14,6 +14,10 @@ import java.nio.channels.ReadableByteChannel;
  * This uses a BufferInputStream that waits on a lock when no data is available.
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
+ *
+ * ReadableByteChannel is implemented so that future ReadObservers can take over
+ * reading and use this NIOInputStream as a source channel to read any buffered
+ * data.
  */
 class NIOInputStream implements ReadObserver, ReadableByteChannel {
     

@@ -75,7 +75,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
         int written = 0;
         int read = 0;
         
-        // inflate loop... inflate -> read -> rinse -> lather -> repeat as necessary.
+        // inflate loop... inflate -> read -> lather -> rinse -> repeat as necessary.
         // only break out of this loop if 
         // a) output buffer gets full
         // b) inflater finishes or needs a dictionary
