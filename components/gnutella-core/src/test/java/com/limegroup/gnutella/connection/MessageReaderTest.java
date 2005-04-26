@@ -186,10 +186,151 @@ public final class MessageReaderTest extends BaseTestCase {
 	    //assertTrue(STUB.isClosed());
     }
     
+    public void testReadInPasses() throws Exception {
+        Message out = QueryRequest.createQuery("this is a really long query");
+        ByteBuffer b1 = buffer(out);
+        ByteBuffer b2 = b1.duplicate();
+        ByteBuffer b3 = b1.duplicate();
+        ByteBuffer b4 = b1.duplicate();
+        b1.limit(8);
+        b2.position(8);
+        b2.limit(23);
+        b3.position(23);
+        b3.limit(30);
+        b4.position(30);
+        
+        READER.setReadChannel(channel(b1));
+        assertEquals(0, STUB.size());
+        assertTrue(b1.hasRemaining());
+        READER.handleRead();
+        assertEquals(0, STUB.size());
+        assertFalse(b1.hasRemaining());
     
+        READER.setReadChannel(channel(b2));
+        assertEquals(0, STUB.size());
+        assertTrue(b2.hasRemaining());
+        READER.handleRead();
+        assertEquals(0, STUB.size());
+        assertFalse(b2.hasRemaining());
+        
+        READER.setReadChannel(channel(b3));
+        assertEquals(0, STUB.size());
+        assertTrue(b3.hasRemaining());
+        READER.handleRead();
+        assertEquals(0, STUB.size());
+        assertFalse(b3.hasRemaining());
+        
+        READER.setReadChannel(channel(b4));
+        assertEquals(0, STUB.size());
+        assertTrue(b4.hasRemaining());
+        READER.handleRead();
+        assertEquals(1, STUB.size());
+        assertFalse(b4.hasRemaining());
+        
+        Message in = STUB.getMessage();
+        assertEquals(buffer(out),  buffer(in));
+    }
+    
+    public void testEOFInHeaderThrows() throws Exception {
+        Message out = QueryRequest.createQuery("test");
+        ByteBuffer b = buffer(out);
+        b.limit(20);
+        
+        READER.setReadChannel(eof(b));
+        assertTrue(b.hasRemaining());
+        assertEquals(0, STUB.size());
+        try {
+            READER.handleRead();
+            fail("expected IOX");
+        } catch(IOException expected) {}
+        assertEquals(0, STUB.size());
+        assertFalse(b.hasRemaining());
+    }
+    
+    public void testIOXAfterHeaderThrows() throws Exception {
+        Message out = QueryRequest.createQuery("test");
+        ByteBuffer b = buffer(out);
+        b.limit(23);
+        
+        READER.setReadChannel(eof(b));
+        assertTrue(b.hasRemaining());
+        assertEquals(0, STUB.size());
+        try {
+            READER.handleRead();
+            fail("expected IOX");
+        } catch(IOException expected) {}
+        assertEquals(0, STUB.size());
+        assertFalse(b.hasRemaining());
+    }
+    
+    public void testIOXInPayloadThrows() throws Exception {
+        Message out = QueryRequest.createQuery("test");
+        ByteBuffer b = buffer(out);
+        b.limit(30);
+        
+        READER.setReadChannel(eof(b));
+        assertTrue(b.hasRemaining());
+        assertEquals(0, STUB.size());
+        try {
+            READER.handleRead();
+            fail("expected IOX");
+        } catch(IOException expected) {}
+        assertEquals(0, STUB.size());
+        assertFalse(b.hasRemaining());
+    }
+
+    public void testAfterPayloadThrowsButMessageIsRead() throws Exception {
+        Message out = QueryRequest.createQuery("test");
+        ByteBuffer b = buffer(out);
+        
+        READER.setReadChannel(eof(b));
+        assertTrue(b.hasRemaining());
+        assertEquals(0, STUB.size());
+        try {
+            READER.handleRead();
+            fail("expected IOX");
+        } catch(IOException expected) {}
+        assertEquals(1, STUB.size());
+        assertFalse(b.hasRemaining());
+        
+        Message in = STUB.getMessage();
+        assertEquals(buffer(out), buffer(in));
+    }
+    
+    public void testShutdown() throws Exception {
+        assertFalse(STUB.isClosed());
+        READER.shutdown();
+        assertTrue(STUB.isClosed());
+    }
+    
+    public void testChannelMethods() throws Exception {
+        try {
+            READER.setReadChannel(null);
+            fail("expected NPE");
+        } catch(NullPointerException expected) {}
+        
+        ReadableByteChannel channel = new ReadBufferChannel(new byte[0]);
+        READER.setReadChannel(channel);
+        assertSame(channel, READER.getReadChannel());
+        
+        try {
+            new MessageReader(null);
+            fail("expected NPE");
+        } catch(NullPointerException expected) {}
+            
+        READER = new MessageReader(channel, STUB);
+        assertSame(channel, READER.getReadChannel());
+        
+        READER = new MessageReader(null, STUB);
+        assertNull(READER.getReadChannel());
+    }
     
     private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
+    }
+    
+    private ReadableByteChannel eof(ByteBuffer buffer) throws Exception {
+        return new ReadBufferChannel(buffer, true);
     }
     
     private ByteBuffer buffer(Message m) throws Exception {

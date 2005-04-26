@@ -7,9 +7,15 @@ import java.nio.channels.ReadableByteChannel;
 
 class ReadBufferChannel implements ReadableByteChannel {
     private ByteBuffer buffer;
+    private boolean useEOF;
+    
+    public ReadBufferChannel(ByteBuffer source, boolean useEOF) {
+        this.buffer = source;
+        this.useEOF = useEOF;
+    }
     
     public ReadBufferChannel(ByteBuffer source) {
-        buffer = source;
+        this(source, false);
     }
     
     public ReadBufferChannel(byte[] source) {
@@ -37,7 +43,10 @@ class ReadBufferChannel implements ReadableByteChannel {
             buffer.limit(limit);
         }
         
-        return read;
+        if(read == 0 && useEOF)
+            return -1;
+        else
+            return read;
     }
     
     public boolean isOpen() {
