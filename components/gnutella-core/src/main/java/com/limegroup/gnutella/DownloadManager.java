@@ -681,7 +681,7 @@ public class DownloadManager implements BandwidthTracker {
 			md.setSaveLocation(saveLocation);
 		}
 		// TODO catch it properly or rethrow
-		catch (IOException ie) {}
+		catch (Exception ie) {}
         waiting.add(md);
         callback.addDownload(md);
         writeSnapshot(); // Save state for crash recovery.

@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.FileExistsException;
+import com.limegroup.gnutella.downloader.IllegalDownloaderStateException;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -108,7 +109,7 @@ public interface Downloader extends BandwidthTracker {
      * @throws FileExistsException 
      */
     public void setSaveLocation(File saveLocation) throws FileExistsException,
-    	FileNotFoundException;
+    	FileNotFoundException, IllegalDownloaderStateException;
     
     /** 
      * This method is used to determine where the file will be saved once downloaded.

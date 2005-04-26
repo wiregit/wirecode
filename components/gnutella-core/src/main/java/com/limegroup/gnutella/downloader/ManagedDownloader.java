@@ -1778,7 +1778,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return true iff. this.saveLocation has been set to saveLocation
      */
     public void setSaveLocation(File saveLocation) throws FileExistsException,
-    	FileNotFoundException 
+    	FileNotFoundException, IllegalDownloaderStateException 
 	{
         // This method could be synchronized, but it is equally effective 
         // to make local copies of saveLocation in other methods that use
