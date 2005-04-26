@@ -83,7 +83,6 @@ public class BandwidthTrackerImpl implements Serializable {
         if(cachedBandwidth != 0)
             return cachedBandwidth;
 
-        //TODO - make it throw and exception if not enough data
         int size = snapShots.getSize();
         if (size  < 3 )
             throw new InsufficientDataException();

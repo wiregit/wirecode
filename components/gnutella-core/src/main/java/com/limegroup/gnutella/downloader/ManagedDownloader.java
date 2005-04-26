@@ -509,7 +509,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * The first descriptor we get passed - used for requeries, getting length, etc.
      */
-    private RemoteFileDesc firstDesc;
+    protected RemoteFileDesc firstDesc;
     
     /**
      * The current priority of this download -- only valid if inactive.
@@ -667,8 +667,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         try {
             initializeFilesAndFolders();
-            initializeIncompleteFile();
-            initializeVerifyingFile();
         }catch(IOException bad) {
             setState(DISK_PROBLEM);
             return;
@@ -846,6 +844,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
+        case DISK_PROBLEM:
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -987,11 +986,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (downloadSHA1 != null)
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
-        if (incompleteFile == null) {
-            if (allFiles == null || allFiles.isEmpty())
-                return;
+        if (incompleteFile == null) 
             incompleteFile = incompleteFileManager.getFile(firstDesc);
-        }
     }
     
     /**
@@ -2971,7 +2967,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}
     
     public int getChunkSize() {
-        return commonOutFile.getChunkSize();
+        VerifyingFile ourFile;
+        synchronized(this) {
+            ourFile = commonOutFile;
+        }
+        return ourFile != null ? ourFile.getChunkSize() : 100000;
     }
 	
     /**

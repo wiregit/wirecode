@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -48,6 +51,9 @@ import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);
+    
     final static int PORT=6666;
     private DownloadManagerStub manager;
     private FileManager fileman;
@@ -100,7 +106,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
      * but not sent to uploaders.  (i.e. the informMesh method)
      */
     public void testFirewalledLocs() throws Exception {
-    	
+    	LOG.info("testing firewalled locations");
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
         assertTrue(RouterService.acceptedIncomingConnection());
@@ -209,6 +215,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     // requeries are gone now - now we only have user-driven queries (sort of
     // like requeries but not automatic.
     public void testNewRequery() throws Exception {
+        LOG.info("testing new requery");
         RemoteFileDesc[] rfds={
             newRFD("Susheel_Daswani_Neil_Daswani.txt",
                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"),
@@ -249,6 +256,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
     /** Catches a bug with earlier keyword intersection code. */
     public void testNewRequery2() throws Exception {
+        LOG.info("testing new requery 2");
         RemoteFileDesc[] rfds={ newRFD("LimeWire again LimeWire the 34") };
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         QueryRequest qr=downloader.newRequery2();
@@ -257,7 +265,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     /** Tests that the progress is retained for deserialized downloaders. */
-    public void testSerializedProgress() throws Exception {        
+    public void testSerializedProgress() throws Exception {     
+        LOG.info("test serialized progress");
         IncompleteFileManager ifm=new IncompleteFileManager();
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
@@ -308,6 +317,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
      *  Changed after requeries have been shut off (requery-expunge-branch).
      */
     public void testRequeryProgress() throws Exception {
+        LOG.info("test requery progress");
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
         try {
