@@ -12,7 +12,7 @@ class StubMessageReceiver implements MessageReceiver {
     private boolean closed = false;
     
     public StubMessageReceiver() {
-        this((byte)5, Message.N_TCP);
+        this((byte)10, Message.N_TCP); // default softMax high so we don't change ttl in reading.
     }
     
     public StubMessageReceiver(byte softMax, int network) {
