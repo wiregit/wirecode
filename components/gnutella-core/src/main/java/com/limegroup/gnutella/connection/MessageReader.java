@@ -59,6 +59,9 @@ public class MessageReader implements ChannelReadObserver {
      * Constructs a new MessageReader with the given source channel & receiver.
      */
     public MessageReader(ReadableByteChannel channel, MessageReceiver receiver) {
+        if(receiver == null)
+            throw new NullPointerException("null receiver");
+            
         this.channel = channel;
         this.receiver = receiver;
         this.header = ByteBuffer.allocate(HEADER_SIZE);
@@ -143,20 +146,6 @@ public class MessageReader implements ChannelReadObserver {
             payload = null;
             header.clear();
         }
-    }
-    
-    /**
-     * Determines if this reader is open.
-     */
-    public boolean isOpen() {
-        return channel.isOpen();
-    }
-    
-    /**
-     * Closes this channel.
-     */
-    public void close() throws IOException {
-        channel.close();
     }
     
     /** 
