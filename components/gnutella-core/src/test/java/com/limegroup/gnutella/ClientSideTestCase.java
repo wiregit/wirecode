@@ -117,7 +117,7 @@ public abstract class ClientSideTestCase
         testUP = new Connection[numUPs.intValue()];
         for (int i = 0; i < testUP.length; i++) {
             try {
-                testUP[i] = connect(6355+i, true);
+                testUP[i] = connect(6355+i, true, callingClass);
             } catch(NoGnutellaOkException ngoke) {
                 fail("couldn't connect ultrapeer: " + (i+1) +
                      ", preferred is: " + 
@@ -146,7 +146,8 @@ public abstract class ClientSideTestCase
      }
      
      private static Connection connect(int port, 
-                                       boolean ultrapeer) 
+                                       boolean ultrapeer,
+                                       Class callingClass) 
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
          RouterService.connectToHostAsynchronously("127.0.0.1", port);
@@ -167,7 +168,14 @@ public abstract class ClientSideTestCase
          }
          Connection con = new Connection(socket, responder);
          con.initialize();
-         replyToPing(con, ultrapeer);
+         Boolean shouldReply = Boolean.TRUE;
+         try {
+             shouldReply = (Boolean)PrivilegedAccessor.invokeMethod(callingClass,
+                                     "shouldRespondToPing", null);
+         } catch(NoSuchMethodException ignored) {}
+         
+         if(shouldReply.booleanValue())
+             replyToPing(con, ultrapeer);
          return con;
      }
      

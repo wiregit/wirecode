@@ -31,6 +31,10 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
         return new Integer(1);
     }
     
+    public static Boolean shouldRespondToPing() {
+        return Boolean.FALSE;
+    }
+    
     public static ActivityCallback getActivityCallback() {
         return new ActivityCallbackStub();
     }
@@ -46,19 +50,25 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
     public void testInitialUpMessages() throws Exception {
         Connection up=testUP[0];
         
-        Thread.sleep( 15*1000 );
+        Thread.sleep( 10*1000 );
         parseWaitingMessages( up );
         
-        // Check that initial messages are setn & received correctly
-        Message mqeReset=getFirstMessageOfTypeFromQueue( ResetTableMessage.class );
-        Message mqePatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
-        //  Host supports Pong Caching, so an initial Ping isn't sent
-//    Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
+        // Check that initial messages are sent & received correctly
+        Message mCapVM=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
+        Message mReset=getFirstMessageOfTypeFromQueue( ResetTableMessage.class );
+        Message mPatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
+        Message mMsgVM=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
+        // Leaf supports PONG CACHING so we don't send it an initial ping.
+//      Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
-        assertTrue( mqeReset!=null );
-        assertTrue( mqePatch!=null );
-        //  See Above
-//    assertTrue( mqePingR!=null );
+        assertTrue( mCapVM!=null );
+        assertTrue( mReset!=null );
+        assertTrue( mPatch!=null );
+        assertTrue( mMsgVM!=null );
+        // See above - NOTE that ClientSideTestCase was responding to a non-existing ping
+        //      Request with a PingReply, so the other side USED to get a PingREPLY anyway,
+        //      despite supporting PONG CACHING.
+//      assertTrue( mqePingR!=null );
         
         assertEquals( "UP messages queue not empty" + _queue, 0, _queue.size() );
     }

@@ -52,18 +52,18 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Thread.sleep( 5*1000 );
         parseWaitingMessages( up );
 
-        // Check that initial messages are setn & received correctly
-        Message mqeCapvm=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
-        Message mqeVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
-        Message mqeReset=getFirstMessageOfTypeFromQueue( ResetTableMessage.class );
-        Message mqePatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
-        Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
+        // Check that initial messages are sent & received correctly
+        Message mCapVM=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
+        Message mVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
+        Message mReset=getFirstMessageOfTypeFromQueue( ResetTableMessage.class );
+        Message mPatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
+        Message mPingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
-        assertTrue( mqeCapvm!=null );
-        assertTrue( mqeVendS!=null );
-        assertTrue( mqeReset!=null );
-        assertTrue( mqePatch!=null );
-        assertTrue( mqePingR!=null );
+        assertTrue( mCapVM!=null );
+        assertTrue( mVendS!=null );
+        assertTrue( mReset!=null );
+        assertTrue( mPatch!=null );
+        assertTrue( mPingR!=null );
         
         assertEquals( "Peer messages queue not empty" + _queue, 0, _queue.size() );
     }
@@ -74,14 +74,14 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Thread.sleep( 5*1000 );
         parseWaitingMessages( leaf );
 
-        // Check that initial messages are setn & received correctly
-        Message mqeCapvm=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
-        Message mqeVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
+        // Check that initial messages are sent & received correctly
+        Message mCapvm=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
+        Message mVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
         //  Leaf supports PONG CACHING so we don't send it an initial ping.
 //        Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
-        assertTrue( mqeCapvm!=null );
-        assertTrue( mqeVendS!=null );
+        assertTrue( mCapvm!=null );
+        assertTrue( mVendS!=null );
         //  See above
 //        assertTrue( mqePingR!=null );
         
