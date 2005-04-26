@@ -116,8 +116,7 @@ public class FileUtils
                 throw ioe;
         }
     }
-            
-
+    
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
         try {
@@ -133,6 +132,32 @@ public class FileUtils
         }
     }
 
+    /** 
+     * Detects attempts at directory traversal by testing if testDirectory 
+     * really is the parent of testPath.  This method should be used to make
+     * sure directory traversal tricks aren't being used to trick
+     * LimeWire into reading or writing to unexpected places.
+     * 
+     * Directory traversal security problems occur when software doesn't 
+     * check if input paths contain characters (such as "../") that cause the
+     * OS to go up a directory.  This function will ignore benign cases where
+     * the path goes up one directory and then back down into the original directory.
+     * 
+     * @return false if testDirectory is not the parent of testPath.
+     */
+    public static final boolean isReallyParent(File testDirectory, File testPath) throws IOException {
+        if (! testDirectory.isDirectory())
+            return false;
+        
+        String testDirectoryName = getCanonicalPath(testDirectory);
+        String testPathParentName = getCanonicalPath(testPath.getAbsoluteFile().getParentFile());
+        if (! testDirectoryName.equals(testPathParentName))
+            return false;
+        
+        return true;
+    }
+    
+    
     /**
      * Utility method that returns the file extension of the given file.
      * 
