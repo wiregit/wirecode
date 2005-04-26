@@ -7,7 +7,8 @@
   <property name="libdir"          value="../lib"/>
   <property name="jars"            value="${libdir}/jars"/>
   <property name="messagebundles"  value="${libdir}/messagebundles"/>
-  <property name="native"          value="${libdir}/native"/>  
+  <property name="nativeDir"       value="${libdir}/native"/> 
+  <property name="native"          value="${nativeDir}/windows;${nativeDir}/osx;${nativeDir}"/> 
   <property name="testslib"        value="lib"/>
   <property name="reports"         value="reports"/>
   <property name="datadir"         value="${basedir}"/>
