@@ -258,8 +258,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
     private RemoteFileDesc[] allFiles;
 
+    ///////////////// Serialization Attribute Map Keys //////////////////
+    /** The key under which the "save location" File is stored in the attribute map used 
+     *  in serializing and deserializing ManagedDownloaders. */
+    private static final String saveLocationAttrName = "save location";
+    
     /**
-     * The maximum amount of times we'll try to recover.
+     * The maximum number of times we'll try to recover.
      */
     private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
 
@@ -402,6 +407,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The fully-qualified name of the downloaded file when this completes, or
      *  null if we haven't started downloading. Used for previewing purposes. */
     private File completeFile;
+    /** The location at which to save a file.  If it is a directory, the file
+     *  will be saved in that directory.  If it is a regular file, then
+     *  completeFile will later be set to equal saveLocation.  If saveLocation
+     *  is null, the default save location will be used. */
+    private File saveLocation;
     /**
      * The position of the downloader in the uploadQueue */
     private int queuePosition;
@@ -548,9 +558,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-        //We used to write BandwidthTrackerImpl here. For backwards compatibility,
-        //we write one as a place-holder.  It is ignored when reading.
-		stream.writeObject(BANDWIDTH_TRACKER_IMPL);
+     
+        // A Map /* String -> Serializable */ for holding attributes in a forward-compatible way
+        HashMap savedAttributesMap = new HashMap();
+            
+        // If apprapriate, save "File Save Location"
+        if (saveLocation != null) {
+            savedAttributesMap.put(saveLocationAttrName, saveLocation);
+        }
+        
+        // At a future date, other attrubutes can be added here
+        
+        // If there are any extra saved attributes in the HashMap, we have to break backwards compatibility
+        if(savedAttributesMap.size() > 0) {
+            stream.writeObject(savedAttributesMap);
+        } else {
+            //Maintain backwards compatibility:
+            //We used to write BandwidthTrackerImpl here. For backwards compatibility,
+            //we write one as a place-holder.  It is ignored when reading.
+            stream.writeObject(BANDWIDTH_TRACKER_IMPL);
+        }
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -565,8 +592,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
 		//Old versions used to read BandwidthTrackerImpl here.  Now we just use
-		//one as a place holder.
-        stream.readObject();
+        //one as a place holder, unless it happens to be a Map, in which case
+        //we check to see if the Map contains data we're interested in.
+        Object legacyObject = stream.readObject();
+        if (legacyObject instanceof Map) {
+            Map savedAttributesMap = (Map) legacyObject;
+            if (savedAttributesMap.containsKey(saveLocationAttrName)) {
+                saveLocation = (File) savedAttributesMap.get(saveLocationAttrName);
+            }
+        }
     }
 
     /** 
@@ -1732,6 +1766,42 @@ public class ManagedDownloader implements Downloader, Serializable {
         return 0;//Nothing to preview!
     }
 
+    /**
+     * Sets the location where the file will be saved.  If saveLocation is 
+     * a directory, then the file will be saved in that directory.  If 
+     * saveLocation is a regular file, then the file will be saved as the
+     * saveLocation file. If saveLocation is null, the default saveLocation
+     * will be used.
+     *
+     * @parm saveLocation the location where the file should be saved
+     * @return true iff. this.saveLocation has been set to saveLocation
+     */
+    public boolean setSaveLocation(File saveLocation) {
+        // This method could be synchronized, but it is equally effective 
+        // to make local copies of saveLocation in other methods that use
+        // this.saveLocation.
+        
+        // Check to make sure it's not too late to change the saveLocation
+        // ### not done
+            
+        // Set this.saveLocation only if saveLocation is null, a regular file, or directory
+        if (! (saveLocation == null || saveLocation.isFile() || saveLocation.isDirectory())) {
+            return false;
+        }
+    
+        // Sanity tests passed,  so change saveLocation and return true.
+        this.saveLocation = saveLocation;
+        return true;
+    }
+    
+    /** 
+     * This method is used to determine where the file will be saved once downloaded.
+     *
+     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
+     */
+    public File getSaveLocation() {
+        return saveLocation;
+    }
 
     //////////////////////////// Core Downloading Logic /////////////////////
 
@@ -1994,20 +2064,36 @@ public class ManagedDownloader implements Downloader, Serializable {
         //IncompleteFileManager guarantees that any "same" files will get the
         //same temporary file.
         
-        File saveDir;
-        String fileName = getFileName();
+        // We could avoid race conditions by using synchronized blocks.
+        // However, making a local copy of saveLocation acheives the same effect
+        // more simply and with lower overhead.
+        File saveLocationCopy = saveLocation;
         
-        try {
-            saveDir = SharingSettings.getSaveDirectory();
-            completeFile = new File(saveDir, fileName);
-            String savePath = FileUtils.getCanonicalPath(saveDir);
-            String completeFileParentPath = 
-                FileUtils.getCanonicalPath(completeFile.getAbsoluteFile().getParentFile());
-            if (!savePath.equals(completeFileParentPath))
-                throw new IOException();
-        } catch (IOException e) {
-            ErrorService.error(e);
-            throw e;
+        if (saveLocationCopy != null && saveLocationCopy.isFile()) {
+            // If saveLocation is a regular file, assume the save location is safe.
+            // Save the file at saveLocation
+            completeFile = saveLocationCopy;
+        } else {
+            File saveDir;
+            String fileName = getFileName();
+            try {
+                // Seting saveDir and then overwriting it makes the code a little more readable
+                // and helps the compiler reason that saveDir is always initialized
+                saveDir = SharingSettings.getSaveDirectory();
+                if (saveLocationCopy != null && saveLocationCopy.isDirectory()) {
+                    // saveLocationCopy is a directory, so save the file there.
+                    // Do this by changing saveDir.
+                    saveDir = saveLocationCopy;
+                }
+                completeFile = new File(saveDir, fileName);
+                // Perform safety/sanity checks on completeFile location
+                // ### Check the security of this
+                if (! FileUtils.isReallyParent(saveDir, completeFile)) {
+                    throw new IOException("Directory traversal safety check failed " + completeFile);
+                }
+            } catch (IOException e) {
+                ErrorService.error(e, "incomplete: " + incompleteFile);
+            }
         }
     }
     

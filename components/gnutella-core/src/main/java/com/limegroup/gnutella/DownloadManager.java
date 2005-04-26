@@ -663,8 +663,21 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private synchronized void initializeDownload(ManagedDownloader md) {
+    private void initializeDownload(ManagedDownloader md) {
+        initializeDownload(md, null);
+    }
+        
+    /**
+     * Performs common tasks for initializing the download.
+     * 1) Initializes the downloader.
+     * 2) Sets the save location of the downoaded file.
+     * 3) Adds the download to the waiting list.
+     * 4) Notifies the callback about the new downloader.
+     * 5) Writes the new snapshot out to disk.
+     */
+    private synchronized void initializeDownload(ManagedDownloader md, File saveLocation) {
         md.initialize(this, fileManager, callback);
+        md.setSaveLocation(saveLocation);
         waiting.add(md);
         callback.addDownload(md);
         writeSnapshot(); // Save state for crash recovery.
