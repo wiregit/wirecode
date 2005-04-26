@@ -1,9 +1,11 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
+import com.limegroup.gnutella.downloader.FileExistsException;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -102,8 +104,11 @@ public interface Downloader extends BandwidthTracker {
      *
      * @parm saveLocation the location where the file should be saved
      * @return true iff. this.saveLocation has been set to saveLocation
+     * @throws FileNotFoundException 
+     * @throws FileExistsException 
      */
-    public boolean setSaveLocation(File saveLocation);
+    public void setSaveLocation(File saveLocation) throws FileExistsException,
+    	FileNotFoundException;
     
     /** 
      * This method is used to determine where the file will be saved once downloaded.

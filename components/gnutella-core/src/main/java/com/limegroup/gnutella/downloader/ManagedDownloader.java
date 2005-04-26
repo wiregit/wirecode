@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -1776,7 +1777,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @parm saveLocation the location where the file should be saved
      * @return true iff. this.saveLocation has been set to saveLocation
      */
-    public boolean setSaveLocation(File saveLocation) {
+    public void setSaveLocation(File saveLocation) throws FileExistsException,
+    	FileNotFoundException 
+	{
         // This method could be synchronized, but it is equally effective 
         // to make local copies of saveLocation in other methods that use
         // this.saveLocation.
@@ -1784,14 +1787,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
             
-        // Set this.saveLocation only if saveLocation is null, a regular file, or directory
-        if (! (saveLocation == null || saveLocation.isFile() || saveLocation.isDirectory())) {
-            return false;
-        }
+		// null file is ok, use settings then		
+		if (saveLocation == null) {
+			this.saveLocation = null;
+			return;
+		}
+		
+		// location is file and not a directory
+		if (saveLocation.exists() && !saveLocation.isDirectory()) {
+			throw new FileExistsException("There already extists a file with that name");
+		}
+		
+		// location is a directory and exists isDirectory() ==> exists()
+		if (saveLocation.isDirectory()) {
+			this.saveLocation = saveLocation;
+			return;
+		}
+		
+		// check if direct parent exists for final file
+		File parent = saveLocation.getParentFile();
+		if (!parent.exists()) {
+			throw new FileNotFoundException("Parent directory does not exist");
+		}
     
         // Sanity tests passed,  so change saveLocation and return true.
         this.saveLocation = saveLocation;
-        return true;
+        return;
     }
     
     /** 
