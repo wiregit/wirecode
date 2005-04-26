@@ -112,6 +112,27 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     }
     
     /**
+     * overrides ManagedDownloader to ensure that we issue requests to the known
+     * locations until we find out enough information to start the download 
+     */
+    protected int initializeDownload() {
+        
+        Assert.that(_defaultURLs != null &&  _defaultURLs.length > 0);
+        
+        for (int i = 0; i < _defaultURLs.length && firstDesc == null; i++) {
+            try {
+                firstDesc = createRemoteFileDesc(_defaultURLs[i],_filename,_urn);
+            } catch (IOException badRFD) {}
+        }
+        
+        // if all locations included in the magnet URI fail we can't do much
+        if (firstDesc == null)
+            return GAVE_UP;
+        
+        return super.initializeDownload();
+    }
+    
+    /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
     protected void performDownload() {     
@@ -341,15 +362,5 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             return _defaultURLs[0];
 		else
 			return "";
-    }
-    
-    protected void initializeIncompleteFile() throws IOException {
-        // we shouldn't have created this downloader if we didn't have an
-        // URL - check is done in gui module
-        Assert.that(_defaultURLs != null && _defaultURLs.length > 0);
-        firstDesc = 
-            createRemoteFileDesc(_defaultURLs[0], _filename, _urn);
-        
-        super.initializeIncompleteFile();
     }
 }
