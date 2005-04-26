@@ -94,6 +94,25 @@ public interface Downloader extends BandwidthTracker {
     public File getDownloadFragment();
 
     /**
+     * Sets the location where the file will be saved.  If saveLocation is 
+     * a directory, then the file will be saved in that directory.  If 
+     * saveLocation is a regular file, then the file will be saved as the
+     * saveLocation file. If saveLocation is null, the default saveLocation
+     * will be used.
+     *
+     * @parm saveLocation the location where the file should be saved
+     * @return true iff. this.saveLocation has been set to saveLocation
+     */
+    public boolean setSaveLocation(File saveLocation);
+    
+    /** 
+     * This method is used to determine where the file will be saved once downloaded.
+     *
+     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
+     */
+    public File getSaveLocation();
+    
+    /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
      * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP, COULDNT_MOVE_TO_LIBRARY,
      * WAITING_FOR_RESULTS, or CORRUPT_FILE
