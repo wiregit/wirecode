@@ -71,6 +71,11 @@ public interface Downloader extends BandwidthTracker {
      * from.
      */
     public boolean isInactive();
+	
+	/**
+     * Determines if this can have its saveLocation changed.
+     */
+    public boolean isRelocatable();
     
     /**
      * Returns the inactive priority of this download.
