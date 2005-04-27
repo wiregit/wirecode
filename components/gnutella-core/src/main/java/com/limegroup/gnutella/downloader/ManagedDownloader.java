@@ -306,16 +306,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  one. */
     private static ApproximateMatcher matcher = 
         new ApproximateMatcher(MATCHER_BUF_SIZE);    
-
-    //////////////////// Enumerated Return Codes //////////////////////////
-    /** setSaveLocation succeeded */
-    public static final int SAVE_LOCATION_OK = 0;
-    /** setSaveLocation was passed a directory File where files cannot be created */
-    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 1;
-    /** setSaveLocation was passed a File with a non-existant parent */
-    public static final int SAVE_LOCATION_HAS_NO_PARENT = 2; 
-    /** setSaveLocation was passed a File that already exists */
-    public static final int SAVE_LOCATION_ALREADY_EXISTS = 3;
     
     ////////////////////////// Core Variables /////////////////////////////
     /**
@@ -1785,24 +1775,23 @@ public class ManagedDownloader implements Downloader, Serializable {
      * will be used.
      *
      * @parm saveLocation the location where the file should be saved
-     * @return true iff. this.saveLocation has been set to saveLocation
-     * @throws FileExistsException if saving to saveLocation would overwrite an existing file
-     * @throws FileNotFoundException if the parent directory of saveLocation does not exist
+     * @return Downloader.SAVE_LOCATION_OK upon sucess, another Downloader.SAVE_LOCATION_* return code upon failure.
      */
-    public void setSaveLocation(File saveLocation) throws FileExistsException,
-    	FileNotFoundException, IllegalDownloaderStateException 
-	{
+    public int setSaveLocation(File saveLocation) {
         // This method could be synchronized, but it is equally effective 
         // to make local copies of saveLocation in other methods that use
         // this.saveLocation.
         
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
+        if (!isActive()) {
+            return Downloader.SAVE_LOCATION_ALREADY_SAVED;
+        }
         
         // null file is ok, use settings then      
         if (saveLocation == null) {
             this.saveLocation = null;
-            return;
+            return Downloader.SAVE_LOCATION_OK;
         }
         
         // isDirectory will return true only if the file exists
@@ -1810,33 +1799,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (saveLocation.isDirectory()) {
             // FileUtils.setWriteable will return false if we can't create files there
             if (!FileUtils.setWriteable(saveLocation)) {
-                throw new SecurityException("Cannot create files in directory " + saveLocation);
+                return Downloader.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE;
             }
             this.saveLocation = saveLocation;
-            return;
+            return Downloader.SAVE_LOCATION_OK;
         }
         
         // Check that the parent directory exists, otherwise refuse to set the directory
         if (! saveLocation.getParentFile().exists())
-            throw new FileNotFoundException("No parent directory for file "+saveLocation);
-        
+            return Downloader.SAVE_LOCATION_HAS_NO_PARENT;
 		
 		// If we've gotten this far, saveLocation is not a directory.
         // Therefore, if it exists, it must be a regular file or a special file,
         // neither of which we wish to overwrite.
 		if (saveLocation.exists()) {
-			throw new FileExistsException("There already extists a file with that name");
+			return Downloader.SAVE_LOCATION_ALREADY_EXISTS;
 		}
 		
 		// check if direct parent exists for final file
 		File parent = saveLocation.getParentFile();
 		if (!parent.exists()) {
-			throw new FileNotFoundException("Parent directory does not exist");
+			return Downloader.SAVE_LOCATION_HAS_NO_PARENT;
 		}
     
         // Sanity tests passed,  so change saveLocation
         this.saveLocation = saveLocation;
-        return;
+        return Downloader.SAVE_LOCATION_OK;
     }
     
     /** 

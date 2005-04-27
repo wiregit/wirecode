@@ -41,12 +41,14 @@ public interface Downloader extends BandwidthTracker {
     /////////////// Enumerated Return Codes for setSaveLocation ///////////////////
     /** setSaveLocation succeeded */
     public static final int SAVE_LOCATION_OK = 0;
+    /** setSaveLocation was called too late to save file in new place */
+    public static final int SAVE_LOCATION_ALREADY_SAVED = 1;
     /** setSaveLocation was passed a directory File where files cannot be created */
-    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 1;
+    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 2;
     /** setSaveLocation was passed a File with a non-existant parent */
-    public static final int SAVE_LOCATION_HAS_NO_PARENT = 2; 
+    public static final int SAVE_LOCATION_HAS_NO_PARENT = 3; 
     /** setSaveLocation was passed a File that already exists */
-    public static final int SAVE_LOCATION_ALREADY_EXISTS = 3;
+    public static final int SAVE_LOCATION_ALREADY_EXISTS = 4;
     
     /**
      * Stops this.  If the download is already stopped, does nothing.
