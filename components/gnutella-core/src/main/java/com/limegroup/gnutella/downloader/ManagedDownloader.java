@@ -921,6 +921,22 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
+     * Determines if this can have its saveLocation changed.
+     */
+    public boolean isRelocatable() {
+        if (isInactive())
+            return true;
+        switch (getState()) {
+        case CONNECTING:
+        case DOWNLOADING:
+        case REMOTE_QUEUED:
+            return true;
+        default:
+            return false;
+        }
+    }
+    
+    /**
      * Determines if this is in an 'active' downloading state.
      */
     public boolean isActive() {
@@ -1784,7 +1800,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
-        if (!isActive()) {
+        if (!isRelocatable()) {
             return Downloader.SAVE_LOCATION_ALREADY_SAVED;
         }
         
