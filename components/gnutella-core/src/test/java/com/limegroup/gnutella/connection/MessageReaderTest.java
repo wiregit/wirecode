@@ -247,7 +247,7 @@ public final class MessageReaderTest extends BaseTestCase {
         assertFalse(b.hasRemaining());
     }
     
-    public void testIOXAfterHeaderThrows() throws Exception {
+    public void testEOFAfterHeaderThrows() throws Exception {
         Message out = QueryRequest.createQuery("test");
         ByteBuffer b = buffer(out);
         b.limit(23);
@@ -263,7 +263,7 @@ public final class MessageReaderTest extends BaseTestCase {
         assertFalse(b.hasRemaining());
     }
     
-    public void testIOXInPayloadThrows() throws Exception {
+    public void testEOFInPayloadThrows() throws Exception {
         Message out = QueryRequest.createQuery("test");
         ByteBuffer b = buffer(out);
         b.limit(30);
@@ -279,7 +279,7 @@ public final class MessageReaderTest extends BaseTestCase {
         assertFalse(b.hasRemaining());
     }
 
-    public void testAfterPayloadThrowsButMessageIsRead() throws Exception {
+    public void testEOFAfterPayloadThrowsButMessageIsRead() throws Exception {
         Message out = QueryRequest.createQuery("test");
         ByteBuffer b = buffer(out);
         
@@ -309,7 +309,7 @@ public final class MessageReaderTest extends BaseTestCase {
             fail("expected NPE");
         } catch(NullPointerException expected) {}
         
-        ReadableByteChannel channel = new ReadBufferChannel(new byte[0]);
+        ReadableByteChannel channel = new ReadBufferChannel();
         READER.setReadChannel(channel);
         assertSame(channel, READER.getReadChannel());
         

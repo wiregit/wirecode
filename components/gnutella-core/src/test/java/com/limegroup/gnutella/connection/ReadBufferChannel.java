@@ -8,6 +8,11 @@ import java.nio.channels.ReadableByteChannel;
 class ReadBufferChannel implements ReadableByteChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
+    private boolean closed = false;
+    
+    public ReadBufferChannel() {
+        this(new byte[0]);
+    }
     
     public ReadBufferChannel(ByteBuffer source, boolean useEOF) {
         this.buffer = source;
@@ -50,8 +55,14 @@ class ReadBufferChannel implements ReadableByteChannel {
     }
     
     public boolean isOpen() {
-        return true;
+        return !closed;
     }
     
-    public void close() throws IOException { }
+    public void close() throws IOException {
+        closed = true;
+    }
+    
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+    }
 }
