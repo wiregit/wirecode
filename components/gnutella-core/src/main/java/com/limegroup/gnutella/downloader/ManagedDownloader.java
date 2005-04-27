@@ -307,6 +307,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static ApproximateMatcher matcher = 
         new ApproximateMatcher(MATCHER_BUF_SIZE);    
 
+    //////////////////// Enumerated Return Codes //////////////////////////
+    /** setSaveLocation succeeded */
+    public static final int SAVE_LOCATION_OK = 0;
+    /** setSaveLocation was passed a directory File where files cannot be created */
+    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 1;
+    /** setSaveLocation was passed a File with a non-existant parent */
+    public static final int SAVE_LOCATION_HAS_NO_PARENT = 2; 
+    /** setSaveLocation was passed a File that already exists */
+    public static final int SAVE_LOCATION_ALREADY_EXISTS = 3;
+    
     ////////////////////////// Core Variables /////////////////////////////
     /**
      * The current RFDs that this ManagedDownloader is connecting to.
@@ -1776,6 +1786,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *
      * @parm saveLocation the location where the file should be saved
      * @return true iff. this.saveLocation has been set to saveLocation
+     * @throws FileExistsException if saving to saveLocation would overwrite an existing file
+     * @throws FileNotFoundException if the parent directory of saveLocation does not exist
      */
     public void setSaveLocation(File saveLocation) throws FileExistsException,
     	FileNotFoundException, IllegalDownloaderStateException 
@@ -1786,22 +1798,34 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
-            
-		// null file is ok, use settings then		
-		if (saveLocation == null) {
-			this.saveLocation = null;
-			return;
-		}
+        
+        // null file is ok, use settings then      
+        if (saveLocation == null) {
+            this.saveLocation = null;
+            return;
+        }
+        
+        // isDirectory will return true only if the file exists
+        // and is a directory, no no need to check if its parent exists
+        if (saveLocation.isDirectory()) {
+            // FileUtils.setWriteable will return false if we can't create files there
+            if (!FileUtils.setWriteable(saveLocation)) {
+                throw new SecurityException("Cannot create files in directory " + saveLocation);
+            }
+            this.saveLocation = saveLocation;
+            return;
+        }
+        
+        // Check that the parent directory exists, otherwise refuse to set the directory
+        if (! saveLocation.getParentFile().exists())
+            throw new FileNotFoundException("No parent directory for file "+saveLocation);
+        
 		
-		// location is file and not a directory
-		if (saveLocation.exists() && !saveLocation.isDirectory()) {
+		// If we've gotten this far, saveLocation is not a directory.
+        // Therefore, if it exists, it must be a regular file or a special file,
+        // neither of which we wish to overwrite.
+		if (saveLocation.exists()) {
 			throw new FileExistsException("There already extists a file with that name");
-		}
-		
-		// location is a directory and exists isDirectory() ==> exists()
-		if (saveLocation.isDirectory()) {
-			this.saveLocation = saveLocation;
-			return;
 		}
 		
 		// check if direct parent exists for final file
@@ -1810,7 +1834,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			throw new FileNotFoundException("Parent directory does not exist");
 		}
     
-        // Sanity tests passed,  so change saveLocation and return true.
+        // Sanity tests passed,  so change saveLocation
         this.saveLocation = saveLocation;
         return;
     }
