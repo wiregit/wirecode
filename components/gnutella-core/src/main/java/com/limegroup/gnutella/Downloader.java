@@ -38,6 +38,16 @@ public interface Downloader extends BandwidthTracker {
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
 
+    /////////////// Enumerated Return Codes for setSaveLocation ///////////////////
+    /** setSaveLocation succeeded */
+    public static final int SAVE_LOCATION_OK = 0;
+    /** setSaveLocation was passed a directory File where files cannot be created */
+    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 1;
+    /** setSaveLocation was passed a File with a non-existant parent */
+    public static final int SAVE_LOCATION_HAS_NO_PARENT = 2; 
+    /** setSaveLocation was passed a File that already exists */
+    public static final int SAVE_LOCATION_ALREADY_EXISTS = 3;
+    
     /**
      * Stops this.  If the download is already stopped, does nothing.
      *     @modifies this
@@ -104,14 +114,10 @@ public interface Downloader extends BandwidthTracker {
      * will be used.
      *
      * @parm saveLocation the location where the file should be saved
-     * @return true iff. this.saveLocation has been set to saveLocation
-     * @throws FileNotFoundException 
-     * @throws FileExistsException 
-     * @throws FileExistsException 
-     * @throws IllegalDownloaderStateException 
+     * @return Downloader.SAVE_LOCATION_SUCCESS upon success, another return code from Downloader.SAVE_LOCATION_* upon failure.
      */
-    public void setSaveLocation(File saveLocation) throws FileExistsException,
-    	IllegalDownloaderStateException, FileNotFoundException;
+    public int setSaveLocation(File saveLocation);
+
     
     /** 
      * This method is used to determine where the file will be saved once downloaded.
