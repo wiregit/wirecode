@@ -107,9 +107,11 @@ public interface Downloader extends BandwidthTracker {
      * @return true iff. this.saveLocation has been set to saveLocation
      * @throws FileNotFoundException 
      * @throws FileExistsException 
+     * @throws FileExistsException 
+     * @throws IllegalDownloaderStateException 
      */
     public void setSaveLocation(File saveLocation) throws FileExistsException,
-    	FileNotFoundException, IllegalDownloaderStateException;
+    	IllegalDownloaderStateException, FileNotFoundException;
     
     /** 
      * This method is used to determine where the file will be saved once downloaded.
