@@ -1396,26 +1396,44 @@ public class RouterService {
      * @exception AlreadyDownloadingException the file is already being 
      *  downloaded.
      * @exception FileExistsException the file already exists in the library
+     * @throws SaveLocationException 
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
 	                                  List alts,
 	                                  boolean overwrite,
-                                      GUID queryGUID)
-		throws FileExistsException, AlreadyDownloadingException, 
-  			   java.io.FileNotFoundException {
-		return downloader.download(files, alts, overwrite, queryGUID);
+                                      GUID queryGUID,
+                                      File saveLocation)
+		throws AlreadyDownloadingException, SaveLocationException {
+		return downloader.download(files, alts, overwrite, queryGUID, saveLocation);
 	}
+	
+	public static Downloader download(RemoteFileDesc[] files, 
+									  List alts,
+									  boolean overwrite,
+									  GUID queryGUID)
+		throws AlreadyDownloadingException, SaveLocationException {
+		return download(files, alts, overwrite, queryGUID, null);
+	}	
 	
 	/**
 	 * Stub for calling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
+	 * @throws SaveLocationException 
 	 */
 	public static Downloader download(RemoteFileDesc[] files,
-                                      boolean overwrite, GUID queryGUID)
-		throws FileExistsException, AlreadyDownloadingException, 
-  			   java.io.FileNotFoundException {
-		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID);
+                                      boolean overwrite, GUID queryGUID, 
+                                      File saveLocation)
+		throws AlreadyDownloadingException, SaveLocationException {
+		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID,
+				saveLocation);
 	}
+	
+	public static Downloader download(RemoteFileDesc[] files,
+									  boolean overwrite, GUID queryGUID) 
+		throws FileExistsException, AlreadyDownloadingException, 
+			   SaveLocationException {
+		return download(files, overwrite, queryGUID, null);
+	}	
         
 
     /*
@@ -1437,12 +1455,23 @@ public class RouterService {
      *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
-    public static synchronized Downloader download(URN urn, String textQuery,
+	public static synchronized Downloader download(URN urn, String textQuery,
+            String filename, String [] defaultURL, boolean overwrite,
+            File saveLocation)
+			throws IllegalArgumentException, AlreadyDownloadingException, 
+			SaveLocationException {
+		return downloader.download(urn, textQuery, filename, defaultURL, overwrite, 
+				saveLocation);
+	}
+	
+	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite) 
             throws IllegalArgumentException, AlreadyDownloadingException, 
-                                                          FileExistsException { 
-        return downloader.download(urn,textQuery,filename,defaultURL,overwrite);
+                   SaveLocationException { 
+        return download(urn,textQuery,filename,defaultURL, overwrite, null);
     }
+	
+	
 
    /**
      * Starts a resume download for the given incomplete file.

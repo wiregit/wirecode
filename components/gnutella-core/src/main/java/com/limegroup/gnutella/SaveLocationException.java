@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -22,9 +23,14 @@ public class SaveLocationException extends IOException {
 	 * The error code of this exception.
 	 */
 	private int errorCode;
+	/**
+	 * Handle to the file that caused the exception.
+	 */
+	private File file;
 	
-	public SaveLocationException(int errorCode) {
+	public SaveLocationException(int errorCode, File file) {
 		this.errorCode = errorCode;
+		this.file = file;
 	}
 	
 	/**
@@ -32,9 +38,10 @@ public class SaveLocationException extends IOException {
 	 * @param errorCode
 	 * @param message optional more detail message for debugging purposes
 	 */
-	public SaveLocationException(int errorCode, String message) {
+	public SaveLocationException(int errorCode, File file, String message) {
 		super(message);
 		this.errorCode = errorCode;
+		this.file = file;
 	}
 	
 	/**
@@ -43,5 +50,9 @@ public class SaveLocationException extends IOException {
 	 */
 	public int getErrorCode() {
 		return errorCode;
+	}
+	
+	public File getFile() {
+		return file;
 	}
 }

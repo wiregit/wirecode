@@ -24,6 +24,7 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.FileExistsException;
@@ -199,10 +200,12 @@ public class ExternalControl {
                     "ERROR_ALREADY_DOWNLOADING", a.getFilename());
 			} catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
-			} catch (FileExistsException fex) {
+			} catch (SaveLocationException sle) {
+				if (sle.getErrorCode() == SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS) {
                 MessageService.showError(
-                    "ERROR_ALREADY_EXISTS", fex.getFileName());
-            }
+                    "ERROR_ALREADY_EXISTS", sle.getFile().getName());
+				}
+			}
 		}
 	}
 	

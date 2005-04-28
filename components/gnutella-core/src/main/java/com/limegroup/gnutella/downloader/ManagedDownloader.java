@@ -524,9 +524,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param ifc the repository of incomplete files for resuming
      * @param originalQueryGUID the guid of the original query.  sometimes
      * useful for WAITING_FOR_USER state.  can be null.
+     * @throws SaveLocationException 
      */
     public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-                             GUID originalQueryGUID) {
+                             GUID originalQueryGUID, File saveLocation) 
+		throws SaveLocationException {
+		this(files, ifc, originalQueryGUID);
+		// overwrite file to be consistent to older versions
+		setSaveLocation(saveLocation, true);
+    }
+	
+	public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+            GUID originalQueryGUID) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -537,7 +546,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
-    }
+	}
 
     /** 
      * See note on serialization at top of file 
@@ -1797,7 +1806,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
         if (!isRelocatable()) {
-            throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_ALREADY_SAVED);
+            throw new SaveLocationException
+            	(SaveLocationException.SAVE_LOCATION_ALREADY_SAVED, saveLocation);
         }
         
         // null file is ok, use settings then      
@@ -1822,7 +1832,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (saveLocation.isDirectory()) {
             // FileUtils.setWriteable will return false if we can't create files there
             if (!FileUtils.setWriteable(saveLocation)) {
-				throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE);
+				throw new SaveLocationException
+				(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE,
+						saveLocation);
             }
             synchronized (this) {
                 this.saveLocation = saveLocation;
@@ -1835,19 +1847,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // Check that the parent directory exists, otherwise refuse to set the directory
         if (! saveLocation.getParentFile().exists())
-            throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT);
+            throw new SaveLocationException
+            	(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT, saveLocation);
 		
 		// If we've gotten this far, saveLocation is not a directory.
         // Therefore, if it exists, it must be a regular file or a special file,
         // neither of which we wish to overwrite.
 		if (saveLocation.exists()) {
-			throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS);
+			throw new SaveLocationException
+				(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS, saveLocation);
 		}
 		
 		// check if direct parent exists for final file
 		File parent = saveLocation.getParentFile();
 		if (!parent.exists()) {
-			throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT);
+			throw new SaveLocationException
+				(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT, saveLocation);
 		}
     
         // Sanity tests passed,  so change saveLocation

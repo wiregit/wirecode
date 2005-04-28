@@ -13,7 +13,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.FileExistsException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -478,15 +476,17 @@ public class DownloadManager implements BandwidthTracker {
      *
      * @param queryGUID the guid of the query that resulted in the RFDs being
      * downloaded.
+     * @param saveLocation can be null, then the default save directory is used
+     * @throws SaveLocationException when there was an error setting the
+     * location of the final download destination.
      *
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
                                             List alts, 
                                             boolean overwrite,
-                                            GUID queryGUID) 
-            throws FileExistsException, AlreadyDownloadingException, 
-                   java.io.FileNotFoundException {
+                                            GUID queryGUID, File saveLocation) 
+            throws AlreadyDownloadingException, SaveLocationException {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.
@@ -494,15 +494,24 @@ public class DownloadManager implements BandwidthTracker {
         if (conflict!=null)
             throw new AlreadyDownloadingException(conflict);
 
-
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
-            File downloadDir = SharingSettings.getSaveDirectory();
-            String filename=files[0].getFileName();
-            File completeFile = new File(downloadDir, filename);  
+			// check in default download directory for existing file if no
+			// save location is provided
+			File completeFile = null;
+			if (saveLocation == null) {
+				File downloadDir = SharingSettings.getSaveDirectory();
+				String filename=files[0].getFileName();
+				completeFile = new File(downloadDir, filename);
+			}
+			else {
+				completeFile = saveLocation;
+			}
+              
             if ( completeFile.exists() ) 
-                throw new FileExistsException(filename);            
+                throw new SaveLocationException
+                	(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS, saveLocation);
         }
 
         //Purge entries from incompleteFileManager that have no corresponding
@@ -516,7 +525,8 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-            new ManagedDownloader(files, incompleteFileManager, queryGUID);
+            new ManagedDownloader(files, incompleteFileManager, queryGUID, 
+					saveLocation);
 
         initializeDownload(downloader);
         
@@ -541,28 +551,43 @@ public class DownloadManager implements BandwidthTracker {
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
      * @param filename the final file name, or null if unknown
+     * @param saveLocation can be null, then the default save location is used
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
      * @exception AlreadyDownloadingException couldn't download because the
      *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
+     * @throws SaveLocationException 
+     * @throws SaveLocationException 
      */
     public synchronized Downloader download(URN urn, String textQuery, 
-            String filename, String [] defaultURL, boolean overwrite) 
-            throws IllegalArgumentException, AlreadyDownloadingException,
-                                                       FileExistsException {
+            String filename, String [] defaultURL, boolean overwrite, 
+            File saveLocation) 
+            throws IllegalArgumentException, AlreadyDownloadingException, 
+            	   SaveLocationException {
         if (textQuery==null && urn==null && filename==null && 
             (defaultURL == null || defaultURL.length == 0) )
             throw new IllegalArgumentException("Need something for requeries");
         
+		// TODO remove code duplication, possibly move it all to ManagedDownloader.setSaveLocation 
         //if we have a valid filename to check against, and we are not supposed
         //to overwrite, thrown an exception if the file already exists
-        if(!overwrite && (filename!=null && !filename.equals(""))) {
-            File downloadDir = SharingSettings.getSaveDirectory();
-            File completeFile = new File(downloadDir,filename);
-            if(completeFile.exists()) 
-                throw new FileExistsException(filename);
+		if (!overwrite) {
+			File completeFile = null;
+			if (saveLocation == null) {
+				if (filename != null && !filename.equals("")) {
+					File downloadDir = SharingSettings.getSaveDirectory();
+					completeFile = new File(downloadDir,filename);
+				}
+			}
+			else {
+				completeFile = saveLocation;
+			}
+            if(completeFile != null && completeFile.exists()) 
+                throw new SaveLocationException
+                	(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS,
+							completeFile);
         }
         
         //remove entry from IFM if the incomplete file was deleted.
@@ -586,7 +611,7 @@ public class DownloadManager implements BandwidthTracker {
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
             new MagnetDownloader(incompleteFileManager, urn, textQuery,
-                filename, defaultURL);
+                filename, defaultURL, saveLocation);
         initializeDownload(downloader);
         return downloader;
     }
@@ -1453,4 +1478,5 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
+	
 }
