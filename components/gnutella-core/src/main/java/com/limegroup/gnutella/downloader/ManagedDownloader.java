@@ -402,7 +402,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected File incompleteFile;
     /** The fully-qualified name of the downloaded file when this completes, or
      *  null if we haven't started downloading. Used for previewing purposes. */
-    private File completeFile;
+    private volatile File completeFile;
     /** The location at which to save a file.  If it is a directory, the file
      *  will be saved in that directory.  If it is a regular file, then
      *  completeFile will later be set to equal saveLocation.  If saveLocation
@@ -1801,7 +1801,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // null file is ok, use settings then      
         if (saveLocation == null) {
-            this.saveLocation = null;
+            synchronized (this) {
+                this.saveLocation = null;
+                if (completeFile != null ) {
+                    // ### fix completeFile
+                }
+            }
             return;
         }
         
@@ -1812,7 +1817,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (!FileUtils.setWriteable(saveLocation)) {
 				throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE);
             }
-            this.saveLocation = saveLocation;
+            synchronized (this) {
+                this.saveLocation = saveLocation;
+                if (completeFile != null ) {
+                    // ### fix completeFile
+                }
+            }
             return;
         }
         
@@ -1834,7 +1844,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
     
         // Sanity tests passed,  so change saveLocation
-        this.saveLocation = saveLocation;
+        synchronized (this) {
+            this.saveLocation = saveLocation;
+            if (completeFile != null) {
+                // ### fix completeFile
+            }
+        }
     }
     
     /** 
@@ -2096,6 +2111,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * initialize the directory where the file is to be saved.
      */
+    // ### Make sure this is only called before the gui gets a chance to call setSaveLocation
+    // otherwise there is a race condition with keeping saveLocation and completeFile in sync
     private void initializeFilesAndFolders() throws IOException{
         
         //1. Verify it's safe to download.  Filename must not have "..", "/",
@@ -2107,36 +2124,43 @@ public class ManagedDownloader implements Downloader, Serializable {
         //IncompleteFileManager guarantees that any "same" files will get the
         //same temporary file.
         
-        // We could avoid race conditions by using synchronized blocks.
-        // However, making a local copy of saveLocation acheives the same effect
-        // more simply and with lower overhead.
-        File saveLocationCopy = saveLocation;
+        // We could avoid race conditions by making a local copy of saveLocation.
+        // However, keeping completeFile and saveLocation in sync requires a lock.
+        // Current usage cases prevent race conditions between this method and
+        // setSaveLocation.
         
-        if (saveLocationCopy != null && saveLocationCopy.isFile()) {
-            // If saveLocation is a regular file, assume the save location is safe.
-            // Save the file at saveLocation
-            completeFile = saveLocationCopy;
-        } else {
-            File saveDir;
-            String fileName = getFileName();
-            try {
-                // Seting saveDir and then overwriting it makes the code a little more readable
-                // and helps the compiler reason that saveDir is always initialized
-                saveDir = SharingSettings.getSaveDirectory();
-                if (saveLocationCopy != null && saveLocationCopy.isDirectory()) {
-                    // saveLocationCopy is a directory, so save the file there.
-                    // Do this by changing saveDir.
-                    saveDir = saveLocationCopy;
-                }
-                completeFile = new File(saveDir, fileName);
-                // Perform safety/sanity checks on completeFile location
-                // ### Check the security of this
-                if (! FileUtils.isReallyParent(saveDir, completeFile)) {
-                    throw new IOException("Directory traversal safety check failed " + completeFile);
-                }
-            } catch (IOException e) {
-                ErrorService.error(e, "incomplete: " + incompleteFile);
+        if (saveLocation != null && !saveLocation.exists() && saveLocation.getParentFile().exists()) {
+            // If saveLocation does not exist, then it is not a directory, and is not
+            // a pre-existing regular or special file.  Security checks are performed
+            // in setSaveLocation.
+            // Save the file at saveLocation, watching for race condidions
+            completeFile = saveLocation;
+            return;
+        }
+        
+        
+        File saveDir;   
+        String fileName = getFileName();
+        try {
+            // Seting saveDir and then overwriting it makes the code a little more readable
+            // and helps the compiler reason that saveDir is always initialized
+            saveDir = SharingSettings.getSaveDirectory();
+            if (saveLocation != null && saveLocation.isDirectory()) {
+                // If saveLocation is a directory, then it exists and its parent exists,
+                // so isDirectory is a sufficient test.
+                // saveLocationCopy is a directory, so save the file there.
+                // Do this by changing saveDir.
+                saveDir = saveLocation;
             }
+            completeFile = new File(saveDir, fileName);
+            // Perform safety/sanity checks on completeFile location
+            // ### Check the security of this
+            if (! FileUtils.isReallyParent(saveDir, completeFile)) {
+                throw new IOException("Directory traversal safety check failed " + completeFile);
+            }
+            
+        } catch (IOException e) {
+            ErrorService.error(e, "incomplete: " + incompleteFile);
         }
     }
     
