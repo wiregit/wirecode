@@ -1858,11 +1858,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 				(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS, saveLocation);
 		}
 		
-		// check if direct parent exists for final file
+		// check if parent is writable
 		File parent = saveLocation.getParentFile();
-		if (!parent.exists()) {
+		if (!FileUtils.setWriteable(parent)) {
 			throw new SaveLocationException
-				(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT, saveLocation);
+				(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE, saveLocation);
 		}
     
         // Sanity tests passed,  so change saveLocation
