@@ -959,7 +959,7 @@ public class DownloadWorker implements Runnable {
         if( _downloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
 
-        HTTPDownloader slowest = findSlowestDownloader();
+        DownloadWorker slowest = findSlowestDownloader();
                         
         if (slowest==null) {//Not using this downloader...but RFD maybe useful
             if (LOG.isDebugEnabled())
@@ -968,84 +968,91 @@ public class DownloadWorker implements Runnable {
         }
 		
         // see what ranges is the victim requesting
-        int start,stop;
-        synchronized(slowest) {
-            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
-                    slowest.getInitialWritingPoint());
-            
-            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
-        }
+        Interval slowestRange = slowest.getDownloadInterval();
         
-        if (start == stop)
+        if (slowestRange.low == slowestRange.high)
             throw new NoSuchElementException();
         
         _shouldRelease=false;
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
-        _downloader.connectHTTP(start, stop, false,_commonOutFile.getBlockSize());
+        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
         
-        synchronized(slowest) {
-            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
-                    slowest.getInitialWritingPoint());
+        Interval newSlowestRange;
+        int newStart;
+        synchronized(slowest.getDownloader()) {
+            // if the victim died or was stopped while the thief was connecting, we can't steal
+            if (!slowest.getDownloader().isActive())
+                throw new NoSuchElementException();
             
-            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
-        }
-        
-        int myLow = _downloader.getInitialReadingPoint();
-        int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
-        
-        // If the stealer isn't going to give us everything we need,
-        // there's no point in stealing, so throw an exception and
-        // don't steal.
-        if( myHigh < stop ) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("WORKER: not stealing because stealer " +
-                        "gave a subrange.  Expected low: " + start +
-                        ", high: " + stop + ".  Was low: " + myLow +
-                        ", high: " + myHigh);
+            // see how much did the victim download while we were exchanging headers.
+            // it is possible that in that time some other worker died and freed his ranges, and
+            // the victim has already been assigned some new ranges.  If that happened we don't steal.
+            newSlowestRange = slowest.getDownloadInterval();
+            if (newSlowestRange.high != slowestRange.high) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("victim is now downloading something else "+
+                            newSlowestRange+" vs. "+slowestRange);
+                throw new NoSuchElementException();
             }
             
-            throw new IOException("bad stealer.");
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("WORKER:"+
-                    " picking stolen grey "
-                    +start+"-"+stop+" from "+slowest+" to "+_downloader);
-        }
-        
-        // stop the victim
-        int newStart;
-        synchronized(slowest) {
-            // free up whatever the victim wrote while we were connecting
-            // unless that data is already verified or pending verification
-            newStart = slowest.getInitialReadingPoint() + slowest.getAmountRead();
-			
-			// the victim may have even completed their download while we were
-	        // connecting
-	        if (stop <= newStart)
-	            throw new NoSuchElementException();
-			
+            if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
+                LOG.debug("victim managed to download "+(newSlowestRange.low - slowestRange.low)
+                        +" bytes while stealer was connecting");
+            }
+            
+            int myLow = _downloader.getInitialReadingPoint();
+            int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
+            
+            // If the stealer isn't going to give us everything we need,
+            // there's no point in stealing, so throw an exception and
+            // don't steal.
+            if( myHigh < slowestRange.high ) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("WORKER: not stealing because stealer " +
+                            "gave a subrange.  Expected low: " + slowestRange.low +
+                            ", high: " + slowestRange.high + ".  Was low: " + myLow +
+                            ", high: " + myHigh);
+                }
+                
+                throw new IOException("bad stealer.");
+            }
+            
+            newStart = Math.max(newSlowestRange.low,myLow);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("WORKER:"+
+                        " picking stolen grey "
+                        +newStart + "-"+slowestRange.high+" from "+slowest+" to "+_downloader);
+            }
+            
+            
             // tell the victim to stop downloading at the point the thief 
             // can start downloading
-			slowest.stopAt(Math.max(newStart,myLow));
+            slowest.getDownloader().stopAt(newStart);
         }
         
-        if (newStart > start && LOG.isDebugEnabled()) {
-            LOG.debug("victim managed to download "+(newStart - start)
-                    +" bytes while stealer was connecting");
-        }
-        
-		// once we've told the victim where to stop, make our ranges release-able
-        _downloader.startAt(Math.max(newStart,myLow));
+        // once we've told the victim where to stop, make our ranges release-able
+        _downloader.startAt(newStart);
         _shouldRelease = true;
-	}
+    }
+    
+    Interval getDownloadInterval() {
+        synchronized(_downloader) {
+            
+            int start = Math.max(_downloader.getInitialReadingPoint() + _downloader.getAmountRead(),
+                    _downloader.getInitialWritingPoint());
+            
+            int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountToRead();
+            
+            return new Interval(start,stop);
+        }
+    }
     
     /**
      * @return the httpdownloader that is going slowest.
      */
-    private HTTPDownloader findSlowestDownloader() {
-        HTTPDownloader slowest = null;
+    private DownloadWorker findSlowestDownloader() {
+        DownloadWorker slowest = null;
         final float ourSpeed = getOurSpeed();
         float slowestSpeed = ourSpeed;
         
@@ -1078,7 +1085,7 @@ public class DownloadWorker implements Runnable {
             
             if (hisSpeed < slowestSpeed) {
                 slowestSpeed = hisSpeed;
-                slowest = h;
+                slowest = worker;
             }
             
         }

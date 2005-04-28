@@ -255,11 +255,8 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * Whether or not this HTTPDownloader is currently attempting to read
      * information from the network.
-     *
-     * Volatile because it is read from multiple threads, although it
-     * it set in only one thread.
      */
-    private volatile boolean _isActive = false;
+    private boolean _isActive = false;
 
 
     private Interval _requestedInterval = null;
@@ -1568,10 +1565,16 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public void doDownload() 
         throws DiskException, IOException {
-        _socket.setSoTimeout(10*60*1000);//downloading, can stall upto 10 mins
+        
+        _socket.setSoTimeout(1*60*1000);//downloading, can stall upto 1 mins
+        
         long currPos = _initialReadingPoint;
         try {
-            _isActive = true;
+            
+            synchronized(this) {
+                _isActive = true;
+            }
+            
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
             
@@ -1658,7 +1661,9 @@ public class HTTPDownloader implements BandwidthTracker {
             
         } finally {
             _bodyConsumed = true;
-            _isActive = false;
+            synchronized(this) {
+                _isActive = false;
+            }
             if(!isHTTP11() || _disconnect) 
                 throw new IOException("stolen from");
         }
@@ -1702,12 +1707,10 @@ public class HTTPDownloader implements BandwidthTracker {
         _amountToRead = Math.min(_amountToRead,stop-_initialReadingPoint);
     }
     
-    public void startAt(int start) {
+    public synchronized void startAt(int start) {
         if (_isActive)
             throw new IllegalStateException("downloader already running");
-        synchronized(this) {
-            _initialWritingPoint = start;
-        }
+        _initialWritingPoint = start;
     }
     
     ///////////////////////////// Accessors ///////////////////////////////////
@@ -1717,7 +1720,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getAmountRead() {return _amountRead;}
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}
-	public boolean isActive() { return _isActive; }
+	public synchronized boolean isActive() { return _isActive; }
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not

@@ -559,6 +559,60 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
+    
+    /**
+     * tests a generic swarm from a lot of sources with thex.  Meant to be run repetitevely
+     * to find weird scheduling issues
+     */
+    public void testBigSwarm() throws Exception {
+        LOG.info(" Testing swarming from many sources");
+        
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
+                                            SpeedConstants.T3_SPEED_INT);
+        final int RATE = 20; // slow to allow swarming
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3,100);
+        RemoteFileDesc rfd4 = newRFDWithURN(PORT_4,100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5,100);
+        RemoteFileDesc pushRFD1 = newRFDPush(PPORT_1,1);
+        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2,2);
+        RemoteFileDesc pushRFD3 = newRFDPush(PPORT_3,3);
+        
+        TestUploader first = new TestUploader("first pusher");
+        TestUploader second = new TestUploader("second pusher");
+        TestUploader third = new TestUploader("third pusher");
+        
+        PushAcceptor pa1 = 
+            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
+        PushAcceptor pa2 = 
+            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),second,guid);
+        PushAcceptor pa3 = 
+            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),third,guid);
+        
+        
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader3.setRate(RATE);
+        uploader4.setRate(RATE);
+        uploader5.setRate(RATE);
+        first.setRate(RATE);
+        second.setRate(RATE);
+        third.setRate(RATE);
+        
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        
+        RemoteFileDesc []rfds = new RemoteFileDesc[] {rfd1,rfd2,rfd3,rfd4,rfd5,pushRFD1,pushRFD2,pushRFD3};
+        
+        tGeneric(rfds);
+        
+        // no assesrtions really - just test completion and observe behavior in logs
+        
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
+        
+    }
 
     public void testAddDownload() throws Exception {
         LOG.info("-Testing addDownload (increases swarming)...");
