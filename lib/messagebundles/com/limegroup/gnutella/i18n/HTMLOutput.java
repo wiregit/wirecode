@@ -168,7 +168,7 @@ class HTMLOutput {
 "     href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n" +
 "     target=\"_blank\">LimeWire screen-shot</a>.&nbsp; Notice how the tabs\n" +
 "     (<b>Search</b>, <b>Monitor</b>, <b>Library</b>, etc.) and the\n" +
-"     buttons (<b>Download</b>, <b>Kill Download</b>, etc.) have text\n" +
+"     buttons (<b>Download</b>, <b>Cancel</b>, etc.) have text\n" +
 "     on them.&nbsp; All elements of the LimeWire interface can be\n" +
 "     translated to any language very easily.<br />\n" +
 "     <br />\n" +
@@ -259,7 +259,7 @@ class HTMLOutput {
 "       are only embryonic and need a complete translation.&nbsp; \n" +
 "       The current files are largely untranslated.");
         newpage.append(
-"     </ol>\n");
+"     </ol><br />\n");
     }
     
     /**
