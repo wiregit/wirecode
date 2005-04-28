@@ -119,6 +119,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
             // if b), we try to inflate and ultimately end up at a).
         }
         
+        
         if(written > 0)
             return written;
         else if(read == -1)

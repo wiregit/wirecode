@@ -71,8 +71,8 @@ public final class InflaterReaderTest extends BaseTestCase {
         assertFalse(source.isOpen());
     }
     
-    public void testSimpleInflation() throws Exception {
-        byte[] out = new byte[] { 1, (byte)2, (byte)3, (byte)-127, (byte)8, (byte)6 };
+    public void testFinishedInflation() throws Exception {
+        byte[] out = new byte[] { 1, (byte)2, (byte)3, (byte)-127, (byte)7, (byte)6 };
         ByteBuffer b = deflate(out);
         
         READER.setReadChannel(channel(b));
@@ -83,8 +83,41 @@ public final class InflaterReaderTest extends BaseTestCase {
         
         // Since the deflater finished the stream, the next read should return -1.
         in.limit(out.length + 1);
-        assertEquals(-1, READER.read(in));
-    }   
+        assertEquals("should have seen finished stream", -1, READER.read(in));
+    }
+    
+    public void testStreamedInflation() throws Exception {
+        byte[] out = new byte[] { 1, (byte)2, (byte)3, (byte)-127, (byte)7, (byte)6 };
+        ByteBuffer b = stream(out);
+        
+        READER.setReadChannel(channel(b));
+        ByteBuffer in = ByteBuffer.allocate(out.length + 1);
+        assertEquals(out.length, READER.read(in));
+        assertEquals(out.length, in.position());
+        assertEquals(buffer(out), in.flip());
+        
+        // Since the deflater didn't finish the stream, the next read should return 0.
+        in.limit(out.length + 1);
+        assertEquals("stream shouldn't have ended", 0, READER.read(in));
+    }
+    
+    public void testLargeInput() throws Exception {
+        byte[] out = new byte[128 * 1024];
+        new Random().nextBytes(out);
+        ByteBuffer b = stream(out);
+        assertGreaterThan("deflated data too small", 20 * 1024, b.remaining());
+        
+        READER.setReadChannel(channel(b));
+        ByteBuffer in = ByteBuffer.allocate(out.length + 1);
+        assertEquals("input buffer: " + b, out.length, READER.read(in));
+        assertEquals(out.length, in.position());
+        assertEquals(buffer(out), in.flip());
+        
+        // Since the deflater didn't finish the stream, the next read should return 0.
+        in.limit(out.length + 1);
+        assertEquals("stream shouldn't have ended", 0, READER.read(in));
+    }
+    
     
     private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
@@ -105,6 +138,25 @@ public final class InflaterReaderTest extends BaseTestCase {
         } finally {
             if(dos != null)
                 try { dos.close(); } catch(IOException x) {}
+        }
+    }
+    
+    private ByteBuffer stream(byte[] data) throws Exception {
+        OutputStream dos = null;
+        Deflater def = new Deflater();
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            dos = new CompressingOutputStream(baos, def);
+            dos.write(data, 0, data.length);
+            dos.flush();
+            dos.flush();
+            dos.flush();
+            dos.flush();
+            return buffer(baos.toByteArray());
+        } finally {
+            if(dos != null)
+                try { dos.close(); } catch(IOException x) {}
+            def.end();
         }
     }
 

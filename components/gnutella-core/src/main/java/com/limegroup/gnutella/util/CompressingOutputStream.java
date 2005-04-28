@@ -45,7 +45,14 @@ public final class CompressingOutputStream extends DeflaterOutputStream {
     
     protected void deflate() throws IOException {
         try {
-            super.deflate();
+            // DO NOT CALL super.deflate(), it is wrong.
+            // It incorrectly assumes that its buffer will be large enough
+            // to hold all data from a single deflate call.  That is wrong.
+            // We need to loop until deflate returns <= 0, saying it couldn't
+            // deflate.
+            int deflated;
+            while( (deflated = def.deflate(buf, 0, buf.length)) > 0)
+                out.write(buf, 0, deflated);
         } catch(NullPointerException e) {
             //This will happen if 'end' was called on the deflater
             //while we were deflating.
