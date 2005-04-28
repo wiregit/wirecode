@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,7 +23,6 @@ import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.FileExistsException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -52,10 +51,10 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -1395,8 +1394,8 @@ public class RouterService {
      * @return the download object you can use to start and resume the download
      * @exception AlreadyDownloadingException the file is already being 
      *  downloaded.
-     * @exception FileExistsException the file already exists in the library
-     * @throws SaveLocationException 
+     * @throws SaveLocationException if there is an error when setting the final
+     * file location of the download 
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
@@ -1430,8 +1429,7 @@ public class RouterService {
 	
 	public static Downloader download(RemoteFileDesc[] files,
 									  boolean overwrite, GUID queryGUID) 
-		throws FileExistsException, AlreadyDownloadingException, 
-			   SaveLocationException {
+		throws AlreadyDownloadingException, SaveLocationException {
 		return download(files, overwrite, queryGUID, null);
 	}	
         
