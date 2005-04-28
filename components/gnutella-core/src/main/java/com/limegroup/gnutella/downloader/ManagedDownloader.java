@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +37,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.UDPService;
@@ -52,10 +51,8 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -67,9 +64,7 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -1793,7 +1788,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @parm saveLocation the location where the file should be saved
      * @return Downloader.SAVE_LOCATION_OK upon sucess, another Downloader.SAVE_LOCATION_* return code upon failure.
      */
-    public int setSaveLocation(File saveLocation) {
+    public void setSaveLocation(File saveLocation) throws SaveLocationException {
         // This method could be synchronized, but it is equally effective 
         // to make local copies of saveLocation in other methods that use
         // this.saveLocation.
@@ -1801,13 +1796,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Check to make sure it's not too late to change the saveLocation
         // ### not done
         if (!isRelocatable()) {
-            return Downloader.SAVE_LOCATION_ALREADY_SAVED;
+            throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_ALREADY_SAVED);
         }
         
         // null file is ok, use settings then      
         if (saveLocation == null) {
             this.saveLocation = null;
-            return Downloader.SAVE_LOCATION_OK;
+            return;
         }
         
         // isDirectory will return true only if the file exists
@@ -1815,32 +1810,31 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (saveLocation.isDirectory()) {
             // FileUtils.setWriteable will return false if we can't create files there
             if (!FileUtils.setWriteable(saveLocation)) {
-                return Downloader.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE;
+				throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE);
             }
             this.saveLocation = saveLocation;
-            return Downloader.SAVE_LOCATION_OK;
+            return;
         }
         
         // Check that the parent directory exists, otherwise refuse to set the directory
         if (! saveLocation.getParentFile().exists())
-            return Downloader.SAVE_LOCATION_HAS_NO_PARENT;
+            throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT);
 		
 		// If we've gotten this far, saveLocation is not a directory.
         // Therefore, if it exists, it must be a regular file or a special file,
         // neither of which we wish to overwrite.
 		if (saveLocation.exists()) {
-			return Downloader.SAVE_LOCATION_ALREADY_EXISTS;
+			throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS);
 		}
 		
 		// check if direct parent exists for final file
 		File parent = saveLocation.getParentFile();
 		if (!parent.exists()) {
-			return Downloader.SAVE_LOCATION_HAS_NO_PARENT;
+			throw new SaveLocationException(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT);
 		}
     
         // Sanity tests passed,  so change saveLocation
         this.saveLocation = saveLocation;
-        return Downloader.SAVE_LOCATION_OK;
     }
     
     /** 

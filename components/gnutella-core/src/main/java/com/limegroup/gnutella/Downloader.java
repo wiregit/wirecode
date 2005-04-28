@@ -1,12 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
-import com.limegroup.gnutella.downloader.FileExistsException;
-import com.limegroup.gnutella.downloader.IllegalDownloaderStateException;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -38,17 +35,6 @@ public interface Downloader extends BandwidthTracker {
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
 
-    /////////////// Enumerated Return Codes for setSaveLocation ///////////////////
-    /** setSaveLocation succeeded */
-    public static final int SAVE_LOCATION_OK = 0;
-    /** setSaveLocation was called too late to save file in new place */
-    public static final int SAVE_LOCATION_ALREADY_SAVED = 1;
-    /** setSaveLocation was passed a directory File where files cannot be created */
-    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 2;
-    /** setSaveLocation was passed a File with a non-existant parent */
-    public static final int SAVE_LOCATION_HAS_NO_PARENT = 3; 
-    /** setSaveLocation was passed a File that already exists */
-    public static final int SAVE_LOCATION_ALREADY_EXISTS = 4;
     
     /**
      * Stops this.  If the download is already stopped, does nothing.
@@ -121,9 +107,9 @@ public interface Downloader extends BandwidthTracker {
      * will be used.
      *
      * @parm saveLocation the location where the file should be saved
-     * @return Downloader.SAVE_LOCATION_SUCCESS upon success, another return code from Downloader.SAVE_LOCATION_* upon failure.
+     * @throws SaveLocationException when the new file location could not be set
      */
-    public int setSaveLocation(File saveLocation);
+    public void setSaveLocation(File saveLocation) throws SaveLocationException;
 
     
     /** 
