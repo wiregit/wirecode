@@ -162,7 +162,7 @@ class HTMLOutput {
 "     requires no programming knowledge and little computer savviness\n" +
 "     beyond using a word processor.<br />\n" +
 "     <br />\n"+
-"     <b><big>How LimeWire Supports Multiple Languages</big></b><br />\n" + 
+"     <b>HOW LIMEWIRE SUPPORTS MULTIPLE LANGUAGES</b><br />\n" + 
 "     <br />\n" +
 "     First, view this <a\n" +
 "     href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n" +
@@ -236,7 +236,7 @@ class HTMLOutput {
                              List langsStarted,
                              List langsEmbryonic) {
         newpage.append(
-"     <b><big>Translation Status</big></b>\n" +
+"     <b>TRANSLATION STATUS</b>\n" +
 "     <br />\n" +
 "     <ol>\n");
 
@@ -290,7 +290,7 @@ class HTMLOutput {
      */
     private void buildAfterStatus(StringBuffer newpage) {
         newpage.append(
-"     <b><big>General Considerations for Translators</big></b><br />\n" +
+"     <b>GENERAL CONSIDERATIONS FOR TRANSLATORS</b><br />\n" +
 "     <br />\n" +
 "     Do not start with the existing message bundle installed with your current\n" +
 "     version of LimeWire.&nbsp; Make sure you <b>work on the latest version of a message bundle</b>.&nbsp; \n" +
@@ -315,7 +315,7 @@ class HTMLOutput {
 "     href=\"http://www.limewire.org/mailinglist.shtml\">subscribe to the translate mailing list</a>\n" +
 "     where you may benefit from other translators' questions and knowledge as well as receive assistance in English or French.<br />\n" + 
 "     <br />\n" + 
-"     <b><big>How to Submit Corrections or Enhancements for Your Language</big></b><br />\n" +
+"     <b>HOW TO SUBMIT CORRECTIONS OR ENHANCEMENTS FOR YOUR LANGUAGE</b><br />\n" +
 "     <br />\n" +
 "     If your corrections are significant, you may send your complete\n" +
 "     message bundle to " + HTML_TRANSLATE_EMAIL_ADDRESS + ".&nbsp; Please be sure to include all resource strings defined in the\n" +
@@ -330,7 +330,7 @@ class HTMLOutput {
 "     <i>We will review submitted translations and integrate all\n" +
 "     valuable contributions as quickly as possible.</i><br />\n" +
 "     <br />\n" +
-"     <b><big>Which Tool or Editor Is Needed to Work on Translations?</big></b><br />\n" + 
+"     <b>WHICH TOOL OR EDITOR TO USE FOR TRANSLATIONS</b><br />\n" + 
 "     <br />\n" + 
 "     For <b>Basic Latin or Western European Latin-based languages</b>, which can\n" +
 "     use the US-ASCII or ISO-8859-1 character set, any text editor (such as\n" +
@@ -404,7 +404,7 @@ class HTMLOutput {
 "     Users that do not have the correct tools to edit a message bundle can send us\n" +
 "     an email in English or in French that explains their needs.<br />\n" +
 "     <br />\n" +
-"     <b><big>How to Test a New Translation</big></b><br />\n" +
+"     <b>HOW TO TEST A NEW TRANSLATION</b><br />\n" +
 "     <br />\n" +
 "     Only Windows and Unix simple text editors can create a plain-text file which\n" +
 "     will work in LimeWire, and only for languages using the Western European\n" +
@@ -422,7 +422,7 @@ class HTMLOutput {
 "     can help you to find the correct language code to use.<br />\n" +
 "     <br />\n" +
 "     Bundles are stored in a single compressed archive\n" +
-"     named &quot;MessagesBundles.jar&quot; installed with LimeWire.&nbsp; All bundles\n" +
+"     named &quot;<code>MessagesBundles.jar</code>&quot; installed with LimeWire.&nbsp; All bundles\n" +
 "     are named &quot;MessagesBundle_xx.properties&quot;, where &quot;xx&quot; is replaced by\n" +
 "     the language code.&nbsp; \n" +
 "     Note that bundles for languages using non-Western European Latin characters\n" +
@@ -433,7 +433,7 @@ class HTMLOutput {
 "     ask us for assistance at\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
-"     <b><big>How to Create a New Translation</big></b><br />\n" +
+"     <b>HOW TO CREATE A NEW TRANSLATION</b><br />\n" +
 "     <br />\n" +
 "     Users that wish to contribute with a new translation must be fluent in the\n" +
 "     target language, preferably native of a country where this language is\n" +
