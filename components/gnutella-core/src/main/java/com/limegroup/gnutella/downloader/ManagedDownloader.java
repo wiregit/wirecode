@@ -1786,9 +1786,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * will be used.
      *
      * @parm saveLocation the location where the file should be saved
+     * @param overwrite is true if saving should be allowed to overwrite existing files
      * @return Downloader.SAVE_LOCATION_OK upon sucess, another Downloader.SAVE_LOCATION_* return code upon failure.
      */
-    public void setSaveLocation(File saveLocation) throws SaveLocationException {
+    public void setSaveLocation(File saveLocation, boolean overwrite) throws SaveLocationException {
         // This method could be synchronized, but it is equally effective 
         // to make local copies of saveLocation in other methods that use
         // this.saveLocation.
@@ -1803,9 +1804,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (saveLocation == null) {
             synchronized (this) {
                 this.saveLocation = null;
+                /*
                 if (completeFile != null ) {
-                    // ### fix completeFile
+                    try {
+                     initializeFilesAndFolders();
+                    } catch (IOException e) {
+                        
+                    }
                 }
+                */
             }
             return;
         }
@@ -2137,8 +2144,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             completeFile = saveLocation;
             return;
         }
-        
-        
+       
         File saveDir;   
         String fileName = getFileName();
         try {
@@ -2158,7 +2164,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (! FileUtils.isReallyParent(saveDir, completeFile)) {
                 throw new IOException("Directory traversal safety check failed " + completeFile);
             }
-            
         } catch (IOException e) {
             ErrorService.error(e, "incomplete: " + incompleteFile);
         }

@@ -678,7 +678,7 @@ public class DownloadManager implements BandwidthTracker {
     private synchronized void initializeDownload(ManagedDownloader md, File saveLocation) {
         md.initialize(this, fileManager, callback);
 		try {
-			md.setSaveLocation(saveLocation);
+			md.setSaveLocation(saveLocation, false);
 		}
 		// TODO catch it properly or rethrow
 		catch (Exception ie) {}

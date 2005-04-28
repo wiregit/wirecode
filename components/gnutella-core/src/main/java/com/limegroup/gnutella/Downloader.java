@@ -107,9 +107,10 @@ public interface Downloader extends BandwidthTracker {
      * will be used.
      *
      * @parm saveLocation the location where the file should be saved
+     * @param overwrite is true if saving should be allowed to overwrite existing files
      * @throws SaveLocationException when the new file location could not be set
      */
-    public void setSaveLocation(File saveLocation) throws SaveLocationException;
+    public void setSaveLocation(File saveLocation, boolean overwrite) throws SaveLocationException;
 
     
     /** 
