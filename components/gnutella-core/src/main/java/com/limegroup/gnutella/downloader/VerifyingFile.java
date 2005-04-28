@@ -202,14 +202,14 @@ public class VerifyingFile {
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
-			Assert.silent(false, "trying to write an interval "+intvl+
+			Assert.that(false, "trying to write an interval "+intvl+
                     " that wasn't leased "+dumpState());
         }
 		
 		
 		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
             discardedBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-            Assert.silent(false,"trying to write an interval "+intvl+
+            Assert.that(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
 		
