@@ -30,8 +30,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.io.ReadHandler;
-import com.limegroup.gnutella.io.WriteHandler;
+import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 
 /**
@@ -46,7 +45,7 @@ import com.limegroup.gnutella.io.NIODispatcher;
  * @see QueryUnicaster
  *
  */
-public class UDPService implements ReadHandler, WriteHandler {
+public class UDPService implements ReadWriteObserver {
 
     private static final Log LOG = LogFactory.getLog(UDPService.class);
     

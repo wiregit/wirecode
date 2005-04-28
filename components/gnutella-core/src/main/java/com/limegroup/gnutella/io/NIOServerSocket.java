@@ -20,10 +20,8 @@ import org.apache.commons.logging.Log;
 
 /**
  * A ServerSocket that does all of its accepting using NIO, but psuedo-blocks.
- *
- * Phase-1 in converting to NIO.
  */
-public class NIOServerSocket extends ServerSocket implements AcceptHandler {
+public class NIOServerSocket extends ServerSocket implements AcceptObserver {
     
     private static final Log LOG = LogFactory.getLog(NIOServerSocket.class);
     

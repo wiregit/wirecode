@@ -13,7 +13,7 @@ import java.nio.channels.SocketChannel;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream implements WriteHandler {
+class NIOOutputStream implements WriteObserver {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
@@ -77,13 +77,6 @@ class NIOOutputStream implements WriteHandler {
     }
     
     /**
-     * Notification that an IOException has occurred on one of these channels.
-     */
-    public void handleIOException(IOException iox) {
-        handler.shutdown();
-    }
-    
-    /**
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
@@ -96,4 +89,10 @@ class NIOOutputStream implements WriteHandler {
             
         shutdown = true;
     }
+    
+    /** Unused */
+    public void handleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
+    }
+    
 }

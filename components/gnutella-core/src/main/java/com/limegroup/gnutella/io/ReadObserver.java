@@ -3,17 +3,16 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 
 /**
- * Observer interface for objects wishing to receive notification
- * when a read is allowed.
+ * Allows read events to be received.
+ *
+ * If the events are being received because of a SelectableChannel,
+ * interest in events can be turned off by using:
+ *  NIODispatcher.instance().interestRead(channel, false);
  */
-public interface ReadObserver {
+public interface ReadObserver extends IOErrorObserver {
     
     /** Notification that a read can be performed */
-    void handleRead() throws IOException;
-    
-    /** Informs the observer that it can release any internal resources. */
-    void shutdown();
-    
+    void handleRead() throws IOException;    
 }
     
     

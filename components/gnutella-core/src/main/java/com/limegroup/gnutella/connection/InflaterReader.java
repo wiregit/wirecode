@@ -48,6 +48,9 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
      * Constructs a new InflaterReader with the given source channel & inflater.
      */
     public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {        
+        if(inflater == null)
+            throw new NullPointerException("null inflater!");
+
         this.channel = channel;
         this.inflater = inflater;
         this.data = ByteBuffer.allocate(512);

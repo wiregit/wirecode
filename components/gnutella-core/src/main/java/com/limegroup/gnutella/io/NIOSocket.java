@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
  * A ChannelReadObserver must be used so that the Socket can set the appropriate
  * underlying channel.
  */
-public class NIOSocket extends Socket implements ConnectHandler, NIOMultiplexor {
+public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     

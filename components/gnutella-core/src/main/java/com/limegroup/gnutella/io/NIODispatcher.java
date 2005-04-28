@@ -22,6 +22,28 @@ import org.apache.commons.logging.Log;
 
 /**
  * Dispatcher for NIO.
+ *
+ * To register interest initially in either reading, writing, accepting, or connecting,
+ * use registerRead, registerWrite, registerReadWrite, registerAccept, or registerConnect.
+ *
+ * When handling events, interest is done different ways.  A channel registered for accepting
+ * will remain registered for accepting until that channel is closed.  There is no way to 
+ * turn off interest in accepting.  A channel registered for connecting will turn off all
+ * interest (for any operation) once the connect event has been handled.  Channels registered
+ * for reading or writing must manually change their interest when they no longer want to
+ * receive events (and must turn it back on when events are wanted).
+ *
+ * To change interest in reading or writing, use interestRead(SelectableChannel, boolean) or
+ * interestWrite(SelectableChannel, boolean) with the appropriate boolean parameter.  The
+ * channel must have already been registered with the dispatcher.  If it was not registered,
+ * changing interest is a no-op.  The attachment the channel was registered with must also
+ * implement the appropriate Observer to handle read or write events.  If interest in an event
+ * is turned on but the attachment does not implement that Observer, a ClassCastException will
+ * be thrown while attempting to handle that event.
+ *
+ * If any unhandled events occur while processing an event for a specific Observer, that Observer
+ * will be shutdown and will no longer receive events.  If any IOExceptions occur while handling
+ * events for an Observer, handleIOException is called on that Observer.
  */
 public class NIODispatcher implements Runnable {
     
@@ -54,16 +76,16 @@ public class NIODispatcher implements Runnable {
 	private final Object Q_LOCK = new Object();
     
     /** Pending queue. */
-    private final Collection PENDING = new LinkedList();
+    private final Collection /* of PendingOp */ PENDING = new LinkedList();
     
     /** Closing queue. */
-    private final Collection CLOSING = new HashSet();
+    private final Collection /* of Shutdownable */ CLOSING = new HashSet();
 	
 	/** Interest queue. */
-	private final Collection INTEREST = new LinkedList();
+	private final Collection /* of InterestOp */ INTEREST = new LinkedList();
 	
 	/** The invokeLater queue. */
-    private final Collection LATER = new LinkedList();
+    private final Collection /* of Runnable */ LATER = new LinkedList();
 	
 	/** Determine if this is the dispatch thread. */
 	public boolean isDispatchThread() {
@@ -71,32 +93,32 @@ public class NIODispatcher implements Runnable {
 	}
 	    
     /** Register interest in accepting */
-    public void registerAccept(SelectableChannel channel, NIOHandler attachment) {
+    public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
         register(channel, attachment, SelectionKey.OP_ACCEPT);
     }
     
     /** Register interest in connecting */
-    public void registerConnect(SelectableChannel channel, NIOHandler attachment) {
+    public void registerConnect(SelectableChannel channel, ConnectObserver attachment) {
         register(channel, attachment, SelectionKey.OP_CONNECT);
     }
     
     /** Register interest in reading */
-    public void registerRead(SelectableChannel channel, NIOHandler attachment) {
+    public void registerRead(SelectableChannel channel, ReadObserver attachment) {
         register(channel, attachment, SelectionKey.OP_READ);
     }
     
     /** Register interest in writing */
-    public void registerWrite(SelectableChannel channel, NIOHandler attachment) {
+    public void registerWrite(SelectableChannel channel, WriteObserver attachment) {
         register(channel, attachment, SelectionKey.OP_WRITE);
     }
     
     /** Register interest in both reading & writing */
-    public void registerReadWrite(SelectableChannel channel, NIOHandler attachment) {
+    public void registerReadWrite(SelectableChannel channel, ReadWriteObserver attachment) {
         register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
     
     /** Register interest */
-    private void register(SelectableChannel channel, NIOHandler handler, int op) {
+    private void register(SelectableChannel channel, IOErrorObserver handler, int op) {
 		if(Thread.currentThread() == dispatchThread) {
 			try {
 				channel.register(selector, op, handler);
@@ -110,12 +132,24 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Registers a SelectableChannel as being interested in a write again. */
+    /**
+     * Registers a SelectableChannel as being interested in a write again.
+     *
+     * You must ensure that the attachment that handles events for this channel
+     * implements WriteObserver.  If not, a ClassCastException will be thrown
+     * while handling write events.
+     */
     public void interestWrite(SelectableChannel channel, boolean on) {
         interest(channel, SelectionKey.OP_WRITE, on);
     }
     
-    /** Registers a SelectableChannel as being interested in a read again. */
+    /**
+     * Registers a SelectableChannel as being interested in a read again.
+     *
+     * You must ensure that the attachment that handles events for this channel
+     * implements ReadObserver.  If not, a ClassCastException will be thrown
+     * while handling read events.
+     */
     public void interestRead(SelectableChannel channel, boolean on) {
         interest(channel, SelectionKey.OP_READ, on);
     }    
@@ -137,8 +171,8 @@ public class NIODispatcher implements Runnable {
 		}
     }
     
-    /** Shuts down the NIOHandler, possibly scheduling it for shutdown in the NIODispatch thread. */
-    public void shutdown(NIOHandler handler) {
+    /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
+    public void shutdown(Shutdownable handler) {
         if(Thread.currentThread() == dispatchThread) {
             handler.shutdown();
         } else {
@@ -160,17 +194,12 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Cancel SelectionKey, close Channel and "free" the attachment
+     * Cancel SelectionKey & shuts down the handler.
      */
-    private void cancel(SelectionKey sk, NIOHandler handler) {
+    private void cancel(SelectionKey sk, Shutdownable handler) {
         sk.cancel();
-        SelectableChannel channel = (SelectableChannel)sk.channel();
-        try {
-            channel.close();
-        } catch (IOException err) {
-            LOG.error("Channel.close()", err);
-            handler.handleIOException(err);
-        }
+        if(handler != null)
+            handler.shutdown();
     }
     
         
@@ -179,7 +208,7 @@ public class NIODispatcher implements Runnable {
      * 
      * @throws IOException
      */
-    private void processAccept(SelectionKey sk, AcceptHandler handler) throws IOException {
+    private void processAccept(SelectionKey sk, AcceptObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
@@ -204,7 +233,7 @@ public class NIODispatcher implements Runnable {
     /**
      * Process a connected channel.
      */
-    private void processConnect(SelectionKey sk, ConnectHandler handler) throws IOException {
+    private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);        
             
@@ -214,32 +243,9 @@ public class NIODispatcher implements Runnable {
         if(finished) {
             sk.interestOps(0); // interested in nothing just yet.
             handler.handleConnect();
-        } else
+        } else {
             cancel(sk, handler);
-    }
-    
-    /**
-     * Read data
-     * 
-     * @throws IOException
-     */
-    private void processRead(SelectionKey sk, ReadHandler handler) throws IOException {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Handling read: " + handler);
-        
-        handler.handleRead();
-    }
-    
-    /**
-     * Write data
-     * 
-     * @throws IOException
-     */
-    private void processWrite(SelectionKey sk, WriteHandler handler) throws IOException {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Handling write: " + handler);
-        
-        handler.handleWrite();
+        }
     }
     
     /**
@@ -274,19 +280,14 @@ public class NIODispatcher implements Runnable {
 			}
 			
             if(!CLOSING.isEmpty()) {
-                for(Iterator i = CLOSING.iterator(); i.hasNext(); ) {
-                    NIOHandler next = (NIOHandler)i.next();
-                    next.shutdown();
-                }                
+                for(Iterator i = CLOSING.iterator(); i.hasNext(); )
+                    ((Shutdownable)i.next()).shutdown();
                 CLOSING.clear();
             }
             
             if(!LATER.isEmpty()) {
-                for(Iterator i = LATER.iterator(); i.hasNext(); ) {
-                    Runnable next = (Runnable)i.next();
-                    next.run();
-                }
-                
+                for(Iterator i = LATER.iterator(); i.hasNext(); )
+                    ((Runnable)i.next()).run();
                 LATER.clear();
             }
 			
@@ -338,24 +339,32 @@ public class NIODispatcher implements Runnable {
 				if(!sk.isValid())
 					continue;
 				
-                NIOHandler handler = (NIOHandler)sk.attachment();
-                try {
-                    if (sk.isAcceptable())
-                        processAccept(sk, (AcceptHandler)handler);
-                    else if(sk.isConnectable())
-                        processConnect(sk, (ConnectHandler)handler);
-                    else {
-                        if (sk.isReadable())
-                            processRead(sk, (ReadHandler)handler);
-                        if (sk.isWritable())
-                            processWrite(sk, (WriteHandler)handler);
+                Object attachment = sk.attachment();
+				try {
+                    try {
+                        if (sk.isAcceptable())
+                            processAccept(sk, (AcceptObserver)attachment);
+                        else if(sk.isConnectable())
+                            processConnect(sk, (ConnectObserver)attachment);
+                        else {
+                            if (sk.isReadable())
+                                ((ReadObserver)attachment).handleRead();
+                            if (sk.isWritable())
+                                ((WriteObserver)attachment).handleWrite();
+                        }
+                    } catch (CancelledKeyException err) {
+                        LOG.warn("Ignoring cancelled key", err);
+                    } catch(IOException iox) {
+                        LOG.warn("IOX processing", iox);
+                        ((IOErrorObserver)attachment).handleIOException(iox);
                     }
-                } catch (CancelledKeyException err) {
-                    LOG.warn("Ignoring cancelled key", err);
-                } catch(IOException iox) {
-                    LOG.warn("IOX processing", iox);
-                    cancel(sk, handler);
-                    handler.handleIOException(iox);
+                } catch(Throwable t) {
+                    ErrorService.error(t, "Unhandled exception while dispatching");
+
+                    if(attachment instanceof Shutdownable)
+                        cancel(sk, (Shutdownable)attachment);
+                    else
+                        cancel(sk, null);
                 }
             }
             
@@ -383,10 +392,10 @@ public class NIODispatcher implements Runnable {
     /** Encapsulates a pending op. */
     private static class PendingOp {
         private final SelectableChannel channel;
-        private final NIOHandler handler;
+        private final IOErrorObserver handler;
         private final int op;
     
-        PendingOp(SelectableChannel channel, NIOHandler handler, int op) {
+        PendingOp(SelectableChannel channel, IOErrorObserver handler, int op) {
             this.channel = channel;
             this.handler = handler;
             this.op = op;

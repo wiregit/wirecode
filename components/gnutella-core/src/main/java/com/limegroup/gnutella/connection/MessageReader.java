@@ -158,6 +158,12 @@ public class MessageReader implements ChannelReadObserver {
         shutdown = true;
         receiver.messagingClosed();
     }
+    
+    /** Unused */
+    public void handleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
+    }
+    
 }
     
     

@@ -14,7 +14,7 @@ import org.apache.commons.logging.Log;
  * The stream must be notified when data is available in the buffer
  * to be read.
  */
- class BufferInputStream extends InputStream {
+ class BufferInputStream extends InputStream implements Shutdownable {
     
     private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
     
@@ -136,7 +136,7 @@ import org.apache.commons.logging.Log;
     }
     
     /** Shuts down this socket */
-    void shutdown() {
+    public void shutdown() {
         synchronized(LOCK) {
             shutdown = true;
             LOCK.notify();

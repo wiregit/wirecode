@@ -4,7 +4,7 @@ package com.limegroup.gnutella.io;
  * Denotes the class can handle delegating ReadObserver events to
  * other ReadObservers.
  */
-public interface NIOMultiplexor extends ReadHandler, WriteHandler {
+public interface NIOMultiplexor extends ReadWriteObserver {
     
     /**
      * Sets the new ReadObserver.  A ChannelReadObserver is required
@@ -26,4 +26,6 @@ public interface NIOMultiplexor extends ReadHandler, WriteHandler {
      *          deepest = (ChannelReader)deepest.getReadChannel();
      */
     public void setReadObserver(ChannelReadObserver reader);
+    
+    // TODO: add setWriteObserver(ChannelWriteObserver writer);
 }

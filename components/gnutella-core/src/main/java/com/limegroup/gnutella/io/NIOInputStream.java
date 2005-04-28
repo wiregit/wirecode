@@ -130,6 +130,11 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         shutdown = true;
     }
     
+    /** Unused */
+    public void handleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
+    }    
+    
     /**
      * Does nothing, since this is implemented for ReadableByteChannel,
      * and that is used for reading from the temporary buffer --
