@@ -259,7 +259,11 @@ public class NIODispatcher implements Runnable {
                     try {
                         next.channel.register(selector, next.op, next.handler);
                     } catch(IOException iox) {
-                        next.handler.handleIOException(iox);
+                        try {
+                            next.handler.handleIOException(iox);
+                        } catch(Throwable t) {
+                            ErrorService.error(t);
+                        }
                     }
                 }
                 PENDING.clear();
@@ -280,14 +284,24 @@ public class NIODispatcher implements Runnable {
 			}
 			
             if(!CLOSING.isEmpty()) {
-                for(Iterator i = CLOSING.iterator(); i.hasNext(); )
-                    ((Shutdownable)i.next()).shutdown();
+                for(Iterator i = CLOSING.iterator(); i.hasNext(); ) {
+                    try {
+                        ((Shutdownable)i.next()).shutdown();
+                    } catch(Throwable t) {
+                        ErrorService.error(t);
+                    }
+                }
                 CLOSING.clear();
             }
             
             if(!LATER.isEmpty()) {
-                for(Iterator i = LATER.iterator(); i.hasNext(); )
-                    ((Runnable)i.next()).run();
+                for(Iterator i = LATER.iterator(); i.hasNext(); ) {
+                    try {
+                        ((Runnable)i.next()).run();
+                    } catch(Throwable t) {
+                        ErrorService.error(t);
+                    }
+                }
                 LATER.clear();
             }
 			
@@ -361,10 +375,12 @@ public class NIODispatcher implements Runnable {
                 } catch(Throwable t) {
                     ErrorService.error(t, "Unhandled exception while dispatching");
 
-                    if(attachment instanceof Shutdownable)
-                        cancel(sk, (Shutdownable)attachment);
-                    else
-                        cancel(sk, null);
+                    try {
+                        if(attachment instanceof Shutdownable)
+                            cancel(sk, (Shutdownable)attachment);
+                        else
+                            cancel(sk, null);
+                    } catch(Throwable ignored) {}
                 }
             }
             
