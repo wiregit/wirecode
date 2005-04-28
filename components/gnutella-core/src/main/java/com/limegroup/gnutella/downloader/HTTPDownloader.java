@@ -1705,8 +1705,6 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     public synchronized void startAt(int start) {
-        if (_isActive)
-            throw new IllegalStateException("downloader already running");
         _initialWritingPoint = start;
     }
     

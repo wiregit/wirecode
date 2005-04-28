@@ -163,6 +163,11 @@ public class TestUploader extends AssertComparisons {
     private boolean isFirewalled = false;
     
     /**
+     * whether we stall while writing headers
+     */
+    private boolean stallHeaders = false;
+    
+    /**
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
@@ -486,7 +491,11 @@ public class TestUploader extends AssertComparisons {
      */
     public void setUseBadThexResponseHeader(boolean yes ) {
         useBadThexResponseHeader = yes;
-    }   
+    }
+    
+    public void setStallHeaders(boolean yes) {
+        stallHeaders = yes;
+    }
     
     /** 
      * Get the alternate locations that this uploader has read from headers
@@ -831,6 +840,18 @@ public class TestUploader extends AssertComparisons {
         if (isFirewalled && _proxiesString!=null) {
             HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
         }
+        
+        
+        out.flush();
+        if (stallHeaders) {
+            LOG.debug("stalling as requested");
+            try {
+                Thread.sleep(100000000);
+            } catch (InterruptedException end) {
+                return;
+            }
+        }
+        
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();

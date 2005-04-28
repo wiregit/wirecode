@@ -587,9 +587,9 @@ public class DownloadTest extends BaseTestCase {
         PushAcceptor pa1 = 
             new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
         PushAcceptor pa2 = 
-            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),second,guid);
+            new PushAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
         PushAcceptor pa3 = 
-            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),third,guid);
+            new PushAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
         
         
         uploader1.setRate(RATE);
@@ -679,6 +679,35 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
 
         //Note: The amount downloaded from each uploader will not 
+        
+        LOG.debug("passed"+"\n");//file downloaded? passed
+    }
+    
+    
+    public void testStallingHeaderUploader() throws Exception  {
+        LOG.info("-Testing download completion with stalling downloader...");
+        
+        //Throttle rate at 100KB/s to give opportunities for swarming.
+        final int RATE=300;
+        uploader1.setStallHeaders(true); //stalling uploader
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        RemoteFileDesc[] rfds2 ={rfd2};
+
+        ManagedDownloader downloader = (ManagedDownloader) 
+            RouterService.download(rfds,Collections.EMPTY_LIST,false,null);
+        
+        Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()/2);
+        
+        downloader.addDownload(rfd2,false);
+
+        waitForComplete(false);
+
+         
+        // the stalled uploader should not have uploaded anything
+        assertEquals(0,uploader1.getAmountUploaded());
         
         LOG.debug("passed"+"\n");//file downloaded? passed
     }
