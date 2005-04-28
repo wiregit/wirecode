@@ -59,6 +59,9 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * not the SocketChannel) into the given buffer.
      */
     public int read(ByteBuffer toBuffer) {
+        if(buffer == null)
+            return 0;
+        
         int read = 0;
 
         if(buffer.position() > 0) {

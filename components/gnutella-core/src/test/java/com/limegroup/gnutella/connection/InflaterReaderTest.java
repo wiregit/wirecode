@@ -183,7 +183,7 @@ public final class InflaterReaderTest extends BaseTestCase {
         
         // Still another chunk that may come...
         in.limit(out.length + 1);
-        assertEquals("stream should have EOF'd", 0, READER.read(in));
+        assertEquals("stream shouldn't have ended.", 0, READER.read(in));
     }
     
     private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {

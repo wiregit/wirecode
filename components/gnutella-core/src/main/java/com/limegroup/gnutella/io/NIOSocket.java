@@ -135,11 +135,11 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
                 try {
                     reader = newReader;
                     ChannelReader lastChannel = newReader;
+                    // go down the chain of ChannelReaders and find the last one to set our source
+                    while(lastChannel.getReadChannel() instanceof ChannelReader)
+                        lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(oldReader instanceof ReadableByteChannel) {
-                        // go down the chain of ChannelReaders and find the last one to set our source
-                        while(lastChannel.getReadChannel() instanceof ChannelReader)
-                            lastChannel = (ChannelReader)lastChannel.getReadChannel();
+                    if(oldReader instanceof ReadableByteChannel && oldReader != newReader) {
                         lastChannel.setReadChannel((ReadableByteChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.
