@@ -503,6 +503,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                                ") <= start(" + start +")");
 
         synchronized(this) {
+            _isActive = true;
             _amountToRead = stop-start;
             _totalAmountRead += _amountRead;
             _amountRead = 0;
@@ -1570,10 +1571,6 @@ public class HTTPDownloader implements BandwidthTracker {
         
         long currPos = _initialReadingPoint;
         try {
-            
-            synchronized(this) {
-                _isActive = true;
-            }
             
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
