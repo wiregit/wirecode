@@ -118,6 +118,73 @@ public final class InflaterReaderTest extends BaseTestCase {
         assertEquals("stream shouldn't have ended", 0, READER.read(in));
     }
     
+    public void testEOFWithStream() throws Exception {
+        byte[] out = new byte[1024];
+        new Random().nextBytes(out);
+        ByteBuffer b = stream(out);
+        
+        READER.setReadChannel(eof(b));
+        ByteBuffer in = ByteBuffer.allocate(out.length + 1);
+        assertEquals("input buffer: " + b, out.length, READER.read(in));
+        assertEquals(out.length, in.position());
+        assertEquals(buffer(out), in.flip());
+        
+        // Even though there's data the deflater is waiting on, the stream EOF'd.
+        in.limit(out.length + 1);
+        assertEquals("stream should have EOF'd", -1, READER.read(in));
+    }
+    
+    public void testPartialReads() throws Exception {
+        byte[] out = new byte[64 * 1024];
+        new Random().nextBytes(out);
+        ByteBuffer b1 = stream(out);
+        ByteBuffer b2 = b1.duplicate();
+        ByteBuffer b3 = b2.duplicate();
+        ByteBuffer b4 = b3.duplicate();
+        
+        b1.limit(500);
+        b2.position(500).limit(2000);
+        b3.position(2000).limit(8000);
+        b4.position(8000);
+        
+        ByteBuffer in = ByteBuffer.allocate(out.length + 1);
+        
+        // The data is going to be deflated randomly,
+        // according to what sections are decompressable and what aren't.
+        
+        int read = 0;
+        
+        READER.setReadChannel(channel(b1));
+        assertTrue(b1.hasRemaining());
+        read += READER.read(in);
+        assertEquals(read, in.position());
+        assertFalse(b1.hasRemaining());
+        
+        READER.setReadChannel(channel(b2));
+        assertTrue(b2.hasRemaining());
+        read += READER.read(in);
+        assertEquals(read, in.position());
+        assertFalse(b2.hasRemaining());
+
+        READER.setReadChannel(channel(b3));
+        assertTrue(b3.hasRemaining());
+        read += READER.read(in);
+        assertEquals(read, in.position());
+        assertFalse(b3.hasRemaining());
+        
+        READER.setReadChannel(channel(b4));
+        assertTrue(b4.hasRemaining());
+        read += READER.read(in);
+        assertEquals(out.length, in.position());
+        assertEquals(out.length, read);
+        assertFalse(b4.hasRemaining());
+        
+        assertEquals(buffer(out), in.flip());
+        
+        // Still another chunk that may come...
+        in.limit(out.length + 1);
+        assertEquals("stream should have EOF'd", 0, READER.read(in));
+    }
     
     private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
@@ -149,9 +216,6 @@ public final class InflaterReaderTest extends BaseTestCase {
             dos = new CompressingOutputStream(baos, def);
             dos.write(data, 0, data.length);
             dos.flush();
-            dos.flush();
-            dos.flush();
-            dos.flush();
             return buffer(baos.toByteArray());
         } finally {
             if(dos != null)
@@ -160,19 +224,7 @@ public final class InflaterReaderTest extends BaseTestCase {
         }
     }
 
-    
     private ByteBuffer buffer(byte[] b) throws Exception {
         return ByteBuffer.wrap(b);
-    }
-    
-    private ByteBuffer buffer(ByteBuffer[] bufs) throws Exception {
-        int length = 0;
-        for(int i = 0; i < bufs.length; i++)
-            length += bufs[i].limit();
-        ByteBuffer combined = ByteBuffer.allocate(length);
-        for(int i = 0; i < bufs.length; i++)
-            combined.put(bufs[i]);
-        combined.flip();
-        return combined;
     }
 }
