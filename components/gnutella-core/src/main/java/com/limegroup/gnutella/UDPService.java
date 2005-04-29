@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.SocketAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -30,8 +31,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.io.ReadHandler;
-import com.limegroup.gnutella.io.WriteHandler;
+import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 
 /**
@@ -46,7 +46,7 @@ import com.limegroup.gnutella.io.NIODispatcher;
  * @see QueryUnicaster
  *
  */
-public class UDPService implements ReadHandler, WriteHandler {
+public class UDPService implements ReadWriteObserver {
 
     private static final Log LOG = LogFactory.getLog(UDPService.class);
     
@@ -375,10 +375,7 @@ public class UDPService implements ReadHandler, WriteHandler {
         throws IllegalArgumentException {
         try {
             send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorService.getErrorCallback());
-        }
-        catch(UnknownHostException uhe)
-        {
-        }
+        } catch(UnknownHostException ignored) {}
     }
 
 	/**
@@ -614,7 +611,7 @@ public class UDPService implements ReadHandler, WriteHandler {
 	 * @return the <tt>DatagramSocket</tt> data
 	 */
 	public String toString() {
-		return "UDPAcceptor\r\nchannel: " + _channel;
+		return "UDPService::channel: " + _channel;
 	}
 
     private static class MLImpl implements MessageListener {

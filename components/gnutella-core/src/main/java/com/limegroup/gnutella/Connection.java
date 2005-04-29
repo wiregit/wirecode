@@ -17,11 +17,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -110,7 +106,7 @@ public class Connection implements IpPort {
      */
     private final String _host;
     private int _port;
-    private Socket _socket;
+    protected Socket _socket;
     private InputStream _in;
     private OutputStream _out;
     private final boolean OUTGOING;
@@ -123,7 +119,7 @@ public class Connection implements IpPort {
      *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
      *   Inflater.getTotalIn  -- The number of COMPRESSED bytes
      */
-    private Inflater _inflater;
+    protected Inflater _inflater;
     
     /**
      * The Deflater to use for deflating written streams, initialized
@@ -136,7 +132,7 @@ public class Connection implements IpPort {
      *   Deflater.getTotalOut -- The number of COMPRESSED bytes
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
-    private Deflater _deflater;
+    protected Deflater _deflater;
     
     /**
      * The number of bytes sent to the output stream.
@@ -506,7 +502,13 @@ public class Connection implements IpPort {
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
-                _in = new UncompressingInputStream(_in, _inflater);
+                if(!(isAsynchronous()))
+                    _in = new UncompressingInputStream(_in, _inflater);
+                // else (isAsynchronous())
+                //      lazily construct the UncompressingInputStream
+                //      (done so that if loopForMessages is used from ManagedConnection,
+                //       then asynchronous messaging can be installed.  tests use
+                //       receive [not loopForMessages].)
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -522,6 +524,13 @@ public class Connection implements IpPort {
             close();
             throw new BadHandshakeException(e);
         }
+    }
+    
+    /**
+     * Determines whether this connection is capable of asynchronous messaging.
+     */
+    public boolean isAsynchronous() {
+        return _socket.getChannel() != null;
     }
 
     /**
@@ -994,11 +1003,20 @@ public class Connection implements IpPort {
 
     /**
      * Returns the stream to use for reading from s.
-     * By default this is a BufferedInputStream.
+     * If this supports asynchronous messaging, the stream itself is returned,
+     * because the underlying stream is already buffered.  This is also done
+     * to ensure that when we switch to using asynch message processing, no
+     * bytes are left within the BufferedInputStream's buffer.
+     *
+     * Otherwise (it isn't asynchronous-capable), we enforce a buffer around the stream.
+     *
      * Subclasses may override to decorate the stream.
      */
     protected InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(_socket.getInputStream());
+        if(isAsynchronous())
+            return _socket.getInputStream();
+        else
+            return new BufferedInputStream(_socket.getInputStream());
     }    
     
     
@@ -1014,10 +1032,14 @@ public class Connection implements IpPort {
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
     private final byte[] HEADER_BUF=new byte[23];
+
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
      * undefined if two threads are in a receive call at the same time for a
      * given connection.
+     *
+     * If this is an asynchronous read-deflated connection, this will set up
+     * the UncompressingInputStream the first time this is called.
      *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but blocks until a
@@ -1025,6 +1047,9 @@ public class Connection implements IpPort {
      *  results in InterruptedIOException.
      */
     protected Message receive() throws IOException, BadPacketException {
+        if(isAsynchronous() && isReadDeflated() && !(_in instanceof UncompressingInputStream))
+            _in = new UncompressingInputStream(_in, _inflater);
+        
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
@@ -1045,6 +1070,9 @@ public class Connection implements IpPort {
      * Behavior is undefined if two threads are in a receive call at the same
      * time for a given connection.
      *
+     * If this is an asynchronous read-deflated connection, this will set up
+     * the UncompressingInputStream the first time this is called.
+     *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but throws InterruptedIOException
      *  if timeout!=0 and no message is read after "timeout" milliseconds.  In
@@ -1053,6 +1081,9 @@ public class Connection implements IpPort {
      */
     public Message receive(int timeout)
 		throws IOException, BadPacketException, InterruptedIOException {
+        if(isAsynchronous() && isReadDeflated() && !(_in instanceof UncompressingInputStream))
+            _in = new UncompressingInputStream(_in, _inflater);
+		    
         //See note in receive().
         if (_closed)
             throw CONNECTION_CLOSED;
@@ -1076,7 +1107,6 @@ public class Connection implements IpPort {
      */
     private Message readAndUpdateStatistics()
       throws IOException, BadPacketException {
-        int pCompressed = 0, pUncompressed = 0;
         
         // The try/catch block is necessary for two reasons...
         // See the notes in Connection.close above the calls
@@ -1084,37 +1114,36 @@ public class Connection implements IpPort {
         // on the Input/OutputStreams for the details.
         Message msg = null;
         try {
-            if(isReadDeflated()) {
-                pCompressed = _inflater.getTotalIn();
-                pUncompressed = _inflater.getTotalOut();
-            }
-            
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            if(LOG.isTraceEnabled())
-                LOG.trace("Connection (" + toString() +
-                          ") read message: " + msg);
             
-            // _bytesReceived must be set differently
-            // when compressed because the inflater will
-            // read more input than a single message,
-            // making it appear as if the deflated input
-            // was actually larger.
-            if( isReadDeflated() ) {
-                _compressedBytesReceived = _inflater.getTotalIn();
-                _bytesReceived = _inflater.getTotalOut();
-                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalOut() - pUncompressed));
-                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                    (int)(_inflater.getTotalIn() - pCompressed));
-            } else if(msg != null) {
-                _bytesReceived += msg.getTotalLength();
-            }
+            updateStatistics(msg);
         } catch(NullPointerException npe) {
             LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
             throw CONNECTION_CLOSED;
         }
         return msg;
+    }
+    
+    /**
+     * Updates the statistics.
+     */
+    protected void updateStatistics(Message msg) {
+        // _bytesReceived must be set differently
+        // when compressed because the inflater will
+        // read more input than a single message,
+        // making it appear as if the deflated input
+        // was actually larger.
+        if( isReadDeflated() ) {
+            long newIn  = _inflater.getTotalIn();
+            long newOut = _inflater.getTotalOut();
+            CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData((int)(newOut - _bytesReceived));
+            CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData((int)(newIn - _compressedBytesReceived));
+            _compressedBytesReceived = newIn;
+            _bytesReceived = newOut;
+        } else if(msg != null) {
+            _bytesReceived += msg.getTotalLength();
+        }
     }
     
     /**
@@ -1771,8 +1800,7 @@ public class Connection implements IpPort {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value=getPropertyWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1793,8 +1821,7 @@ public class Connection implements IpPort {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value=getPropertyWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 

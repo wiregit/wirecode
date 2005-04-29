@@ -2,12 +2,11 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import java.nio.channels.ReadableByteChannel;
 
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
@@ -15,10 +14,12 @@ import org.apache.commons.logging.Log;
  * This uses a BufferInputStream that waits on a lock when no data is available.
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
+ *
+ * ReadableByteChannel is implemented so that future ReadObservers can take over
+ * reading and use this NIOInputStream as a source channel to read any buffered
+ * data.
  */
-class NIOInputStream {
-    
-    private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
+class NIOInputStream implements ReadObserver, ReadableByteChannel {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
@@ -54,6 +55,38 @@ class NIOInputStream {
     }
     
     /**
+     * Reads from this' channel (which is the temporary ByteBuffer,
+     * not the SocketChannel) into the given buffer.
+     */
+    public int read(ByteBuffer toBuffer) {
+        if(buffer == null)
+            return 0;
+        
+        int read = 0;
+
+        if(buffer.position() > 0) {
+            buffer.flip();
+            int remaining = buffer.remaining();
+            int toRemaining = toBuffer.remaining();
+            if(toRemaining >= remaining) {
+                toBuffer.put(buffer);
+                read += remaining;
+            } else {
+                int limit = buffer.limit();
+                int position = buffer.position();
+                buffer.limit(position + toRemaining);
+                toBuffer.put(buffer);
+                read += toRemaining;
+                buffer.limit(limit);
+            }
+            buffer.compact();
+        }
+        
+        return read;
+    }
+                
+    
+    /**
      * Retrieves the InputStream to read from.
      */
     synchronized InputStream getInputStream() throws IOException {
@@ -66,7 +99,7 @@ class NIOInputStream {
     /**
      * Notification that a read can happen on the SocketChannel.
      */
-    void readChannel() throws IOException {
+    public void handleRead() throws IOException {
         synchronized(bufferLock) {
             int read = 0;
             
@@ -87,17 +120,10 @@ class NIOInputStream {
     }
     
     /**
-     * Notification that an IOException has occurred on one of these channels.
-     */
-    public void handleIOException(IOException iox) {
-        handler.shutdown();
-    }
-    
-    /**
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    synchronized void shutdown() {
+    public synchronized void shutdown() {
         if(shutdown)
             return;
          
@@ -105,6 +131,27 @@ class NIOInputStream {
             source.shutdown();
         
         shutdown = true;
+    }
+    
+    /** Unused */
+    public void handleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
+    }    
+    
+    /**
+     * Does nothing, since this is implemented for ReadableByteChannel,
+     * and that is used for reading from the temporary buffer --
+     * there is no buffer to close in this case.
+     */
+    public void close() throws IOException {
+    }
+    
+    /**
+     * Always returns true, since this is implemented for ReadableByteChannel,
+     * and the Buffer is always available for reading.
+     */
+    public boolean isOpen() {
+        return true;
     }
 }
                 

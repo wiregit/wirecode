@@ -6,9 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
 /**
  * Manages writing data to the network from a piped blocking OutputStream.
  *
@@ -16,9 +13,7 @@ import org.apache.commons.logging.Log;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream {
-    
-    private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
+class NIOOutputStream implements WriteObserver {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
@@ -64,7 +59,7 @@ class NIOOutputStream {
     /**
      * Notification that a write can happen on the SocketChannel.
      */
-    void writeChannel() throws IOException {// write everything we can.
+    public void handleWrite() throws IOException {// write everything we can.
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
@@ -82,17 +77,10 @@ class NIOOutputStream {
     }
     
     /**
-     * Notification that an IOException has occurred on one of these channels.
-     */
-    public void handleIOException(IOException iox) {
-        handler.shutdown();
-    }
-    
-    /**
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    synchronized void shutdown() {
+    public synchronized void shutdown() {
         if(shutdown)
             return;
 
@@ -101,4 +89,10 @@ class NIOOutputStream {
             
         shutdown = true;
     }
+    
+    /** Unused */
+    public void handleIOException(IOException iox) {
+        throw new RuntimeException("unsupported operation", iox);
+    }
+    
 }

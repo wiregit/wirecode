@@ -97,7 +97,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		assertTrue("out.read should be deflated", out.isReadDeflated());
 		assertTrue("in.write should be deflated", in.isWriteDeflated());
 		assertTrue("in.read should be deflated", in.isReadDeflated());
-		checkStreams();
+		//checkStreams();
     }
     
     /**
@@ -114,44 +114,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		assertTrue("out.read should be !deflated", !out.isReadDeflated());
 		assertTrue("in.write should be !deflated", !in.isWriteDeflated());
 		assertTrue("in.read should be !deflated", !in.isReadDeflated());
-		checkStreams();
+		//checkStreams();
     }
-    
-    /**
-     * Checks the streams (in/out) of the connection to make sure they're
-     * using the correct streams.  If compressed, they will all be
-     * UncompressingOutputStream / CompressingInputStream.  If not,
-     * outOut will be ThrottledOutputStream, out's in will be
-     * BufferedInputStream, and in's will be BufferedXStreams.
-     */
-    private void checkStreams() throws Exception {
-        InputStream outIn, inIn;
-        OutputStream outOut, inOut;
-        outIn = (InputStream)PrivilegedAccessor.getValue(out, "_in");
-        outOut = (OutputStream)PrivilegedAccessor.getValue(out, "_out");
-        inIn = (InputStream)PrivilegedAccessor.getValue(in, "_in");
-        inOut = (OutputStream)PrivilegedAccessor.getValue(in, "_out");
-        
-        if( out.isReadDeflated() )
-            assertInstanceof(UncompressingInputStream.class, outIn);
-        else
-            assertInstanceof(BufferedInputStream.class, outIn);
-        
-        if( out.isWriteDeflated() )
-            assertInstanceof(CompressingOutputStream.class, outOut);
-        else
-            assertInstanceof(ThrottledOutputStream.class, outOut);
-        
-        if( in.isReadDeflated() )
-            assertInstanceof(UncompressingInputStream.class, inIn);
-        else
-            assertInstanceof(BufferedInputStream.class, inIn);
-        
-        if( in.isWriteDeflated() )
-            assertInstanceof(CompressingOutputStream.class, inOut);
-        else
-            assertInstanceof(BufferedOutputStream.class, inOut);
-    }        
     
     /**
      * Tests that flushing works correctly while compressed.

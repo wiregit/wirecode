@@ -330,6 +330,10 @@ public class ManagedConnectionTest extends BaseTestCase {
         //3. Remote close: discovered on write.  Because of TCP's half-close
         //semantics, we need TWO writes to discover this.  (See unit tests
         //for Connection.)
+        // Three writes are actually done because internally, the close is
+        // discovered on the second write, but at that point the Socket
+        // is closed.  The Connection object discovers the close on the next
+        // read/write.
         acceptor = new com.limegroup.gnutella.MiniAcceptor(SERVER_PORT);
         out = ManagedConnection.createTestConnection("localhost", SERVER_PORT,
                 new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
@@ -344,9 +348,11 @@ public class ManagedConnectionTest extends BaseTestCase {
         Message m = new PingRequest((byte)4);
         m.hop();
         out.send(m);   
-        sleep(200);
+        sleep(500);
         out.send(new PingRequest((byte)4));
-        sleep(200);
+        sleep(500);
+        out.send(new PingRequest((byte)4));
+        sleep(500);
 
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());

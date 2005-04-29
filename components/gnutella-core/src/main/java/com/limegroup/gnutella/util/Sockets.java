@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -108,15 +110,10 @@ public class Sockets {
         waitForSocket();
 		    
         try {
-            if (CommonUtils.isJava14OrLater())
-                //a) 1.4-style sockets
-                return Sockets14.getSocket(host, port, timeout);
-            else if (timeout!=0)
-                //b) Emulation using threads
-                return (new SocketOpener(host, port)).connect(timeout);
-            else
-                //c) No timeouts
-                return new Socket(host, port);
+            SocketAddress addr = new InetSocketAddress(host, port);
+            Socket ret = new com.limegroup.gnutella.io.NIOSocket();
+            ret.connect(addr, timeout);
+            return ret;
         } finally {
             releaseSocket();
         }
@@ -402,134 +399,6 @@ public class Sockets {
 	        _socketsConnecting--;
 	        Sockets.class.notifyAll();
 	    }
-	}   
-	
-	/** 
-	 * Opens Java sockets with a bounded timeout using threads.  Typical use:
-	 *
-	 * <pre>
-	 *    try {
-	 *        Socket socket=(new SocketOpener(host, port)).connect(timeout);
-	 *    } catch (IOException e) {
-	 *        System.out.println("Couldn't connect in time.");
-	 *    }
-	 * </pre>
-	 *
-	 * This is basically just a hack to work around JDK bug 4110694.  It is
-	 * implemented in a similar way as Wayne Conrad's SocketOpener class, using
-	 * Thread.stop().  This is necessary because of bugs in earlier Java 
-	 * implementations, where certain sockets fail to die.
-	 * It is imperitive that interrupt is used instead of stop, or a thread
-	 * in the middle of loading the native socket library could be killed,
-	 * causing NoClassDefFoundErrors to pop up in every thread attempting
-	 * to create a Socket.
-	 *
-	 * For an outrageous listing of large amounts of SocketOpener threads
-	 * left open, see the following bug reports:
-	 *
-	 * at http://www9.limewire.com:82/dev/exceptions/3.3.5/
-	 *          java.lang.OutOfMemoryError/start4794.txt    (1407 threads)
-	 *          java.io.FileNotFoundException/open24829.txt (177 threads)
-     *          java.io.FileNotFoundException/open24960.txt (168 threads)
-	 *          java.lang.OutOfMemoryError/start3462.txt    (45 threads)
-	 *          java.lang.OutOfMemoryError/err32041.txt     (56 threads)
-	 *          java.lang.OutOfMemoryError/err3183.txt      (29 threads)
-	 * etc..
-	 *
-	 * This class is currently NOT thread safe.  Currently connect() can only be 
-	 * called once.
-	 */
-	private static class SocketOpener {
-		private String host;
-		private int port;
-		/** The established socket, or null if not established OR couldn't be
-		 *  established.. Notify this when socket becomes non-null. */
-		private Socket socket=null;
-		/** True iff the connecting thread should close the socket if/when it
-		 *  is established. */
-		private boolean timedOut=false;
-		private boolean completed=false;
-		
-		public SocketOpener(String host, int port) {
-			if((port & 0xFFFF0000) != 0) {
-				throw new IllegalArgumentException("port out of range: "+port);
-			} 
-			this.host=host;
-			this.port=port;
-		}
-		
-		/** 
-		 * Returns a new socket to the given host/port.  If the socket couldn't be
-		 * established withing timeout milliseconds, throws IOException.  If
-		 * timeout==0, no timeout occurs.  If this thread is interrupted while
-		 * making connection, throws IOException.
-		 *
-		 * @requires connect has only been called once, no other thread calling
-		 *  connect.  Timeout must be non-negative.  
-		 */
-		public synchronized Socket connect(int timeout) 
-            throws IOException {
-			//Asynchronously establish socket.
-			Thread t = new ManagedThread(new SocketOpenerThread(), "SocketOpener");
-			t.setDaemon(true);
-			t.start();
-			
-			//Wait for socket to be established, or for timeout.
-			try {
-				this.wait(timeout);
-			} catch (InterruptedException e) {
-				if (socket==null)
-					timedOut=true;
-				else
-					try { socket.close(); } catch (IOException e2) { }
-				throw new IOException();
-			}
-			// Ensure that the SocketOpener is killed.
-            if( !completed )
-			    t.interrupt();
-			
-			//a) Normal case
-			if (socket!=null) {
-				return socket;
-			} 
-			//b) Timeout case
-			else {            
-				timedOut=true;
-				throw new IOException();
-			}            
-		}
-		
-		private class SocketOpenerThread implements Runnable {
-			public void run() {
-			    Socket sock = null;
-				try {
-					try {
-						sock=new Socket(host, port);
-					} catch (IOException e) { }                
-					
-					synchronized (SocketOpener.this) {
-					    completed = true;
-						if (timedOut && sock!=null)
-							try { sock.close(); } catch (IOException e) { }
-						else {
-							socket=sock;   //may be null
-							SocketOpener.this.notify();
-						}
-					}
-                } catch(Throwable t) {
-                    //We actively call Thread.interrupt() on this thread,
-                    //and we've received reports of the Socket constructor
-                    //throwing InterruptedException.
-                    //(See: http://www9.limewire.com:82/dev/exceptions/3.4.4/
-                    //         java.lang.InterruptedException/Socket.19534.txt)
-                    //However, nothing declares it to be thrown, so we can't
-                    //catch and discard seperately.
-                    //As a workaround, we only error if t is not an
-                    //instanceof InterruptedException.
-                    if(!(t instanceof InterruptedException))
-                        ErrorService.error(t);
-				}
-			}
-		}
 	}
+	
 }

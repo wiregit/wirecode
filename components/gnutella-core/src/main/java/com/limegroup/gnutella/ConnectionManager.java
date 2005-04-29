@@ -1812,12 +1812,9 @@ public class ConnectionManager {
             processConnectionHeaders(c);
         }
 
-        //If there's not space for the connection, reject it.  This mechanism
-        //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
-        //connections.  Sometimes ManagedConnections are handled by headers
-        //directly.
+        //If there's not space for the connection, destroy it.
+        //It really should have been destroyed earlier, but this is just in case.
         if (!c.isOutgoing() && !allowConnection(c)) {
-            c.loopToReject();
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }

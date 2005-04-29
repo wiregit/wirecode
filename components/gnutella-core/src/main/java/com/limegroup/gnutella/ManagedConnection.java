@@ -14,18 +14,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.limegroup.gnutella.connection.MessageQueue;
-import com.limegroup.gnutella.connection.PriorityMessageQueue;
-import com.limegroup.gnutella.connection.SimpleMessageQueue;
+import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.handshaking.BadHandshakeException;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.PatchTableMessage;
@@ -81,7 +73,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, PushProxyInterface {
+	implements ReplyHandler, PushProxyInterface, MessageReceiver {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -334,6 +326,12 @@ public class ManagedConnection extends Connection
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
+    
+    /**
+     * Whether or not this was a supernode <-> client connection when message
+     * looping started.
+     */
+    private boolean supernodeClientAtLooping = false;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -935,149 +933,13 @@ public class ManagedConnection extends Connection
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Implements the reject connection mechanism.  Loops until receiving a
-     * handshake ping, responds with the best N pongs, and closes the
-     * connection.  Closes the connection if no ping is received within a
-     * reasonable amount of time.  Does NOT clean up route tables in the case
-     * of an IOException.
-     */
-    void loopToReject() {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-
-        try {
-			//The first message we get from the remote host should be its 
-            //initial ping.  However, some clients may start forwarding packets 
-            //on the connection before they send the ping.  Hence the following 
-            //loop.  The limit of 10 iterations guarantees that this method 
-            //will not run for more than TIMEOUT*10=80 seconds.  Thankfully 
-            //this happens rarely.
-			for (int i=0; i<10; i++) {
-				Message m=null;
-				try {                
-					m=super.receive(REJECT_TIMEOUT);
-					if (m==null)
-						return; //Timeout has occured and we havent received the ping,
-					//so just return
-				}// end of try for BadPacketEception from socket
-				catch (BadPacketException e) {
-					return; //Its a bad packet, just return
-				}
-				if((m instanceof PingRequest) && (m.getHops()==0)) {
-					// this is the only kind of message we will deal with
-					// in Reject Connection
-					// If any other kind of message comes in we drop
-					
-					//SPECIAL CASE: for crawler ping
-					if(m.getTTL() == 2) {
-						handleCrawlerPing((PingRequest)m);
-						return;
-					}
-				}// end of (if m is PingRequest)
-			} // End of while(true)
-        } catch (IOException e) {
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its neighbors
-     * @param m The ping request received
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
-     */
-    private void handleCrawlerPing(PingRequest m) throws IOException {
-        //IMPORTANT: note that we do not use this' send or receive methods.
-        //This is an important optimization to prevent calling
-        //RouteTable.removeReplyHandler when the connection is closed.
-
-        //send the pongs for the Ultrapeer & 0.4 connections
-        List /*<ManagedConnection>*/ nonLeafConnections 
-            = _manager.getInitializedConnections();
-        
-        supersendNeighborPongs(m, nonLeafConnections);
-        
-        //send the pongs for leaves
-        List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections();
-        supersendNeighborPongs(m, leafConnections);
-        
-        //Note that sending its own pong is not necessary, as the crawler has
-        //already connected to this node, and is not sent therefore. 
-        //May be sent for completeness though
-    }
     
     /**
-     * Uses the super class's send message to send the pongs corresponding 
-     * to the list of connections passed.
-     * This prevents calling RouteTable.removeReplyHandler when 
-     * the connection is closed.
-     * @param m Th epingrequest received that needs Pongs
-     * @param neigbors List (of ManagedConnection) of  neighboring connections
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
-     */
-    private void supersendNeighborPongs(PingRequest m, List neighbors) 
-        throws IOException {
-        for(Iterator iterator = neighbors.iterator();
-            iterator.hasNext();) {
-            //get the next connection
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            
-            //create the pong for this connection
-            //mark the pong if supernode
-            PingReply pr;
-            if(connection.isSupernodeConnection()) {
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 
-                                   connection.getPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   true);
-            } else if(connection.isLeafConnection() 
-                || connection.isOutgoing()){
-                //we know the listening port of the host in this case
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 
-                                   connection.getPort(),
-                                   connection.getInetAddress().getAddress(), 
-                                   false);
-            }
-            else{
-                //Use the port '0' in this case, as we dont know the listening
-                //port of the host
-                pr = PingReply.
-                    createExternal(m.getGUID(), (byte)2, 0,
-                                   connection.getInetAddress().getAddress(), 
-                                   false);
-            }
-            
-            //hop the message, as it is ideally coming from the connected host
-            pr.hop();
-
-            //send the message
-            //This is called only during a Reject connection, and thus
-            //it is impossible for the stream to be compressed.
-            //That is a Good Thing (tm) because we're sending such little
-            //data, that the compression may actually hurt.
-            super.send(pr);
-        }
-        
-        //Because we are guaranteed that the stream is not compressed,
-        //this call will not block.
-        super.flush();
-    }
-    
-    /**
-     * Handles core Gnutella request/reply protocol.  This call
-     * will run until the connection is closed.  Note that this is called
-     * from the run methods of several different thread implementations
-     * that are inner classes of ConnectionManager.  This allows a single
-     * thread to be used for initialization and for the request/reply loop.
+     * Handles core Gnutella request/reply protocol.
+     * If asynchronous messaging is supported, this immediately
+     * returns and messages are processed asynchronously via processMessage
+     * calls.  Otherwise, if reading blocks, this  will run until the connection
+     * is closed.
      *
      * @requires this is initialized
      * @modifies the network underlying this, manager
@@ -1088,40 +950,74 @@ public class ManagedConnection extends Connection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
-        MessageDispatcher dispatcher = MessageDispatcher.instance();
-        final boolean isSupernodeClientConnection=isSupernodeClientConnection();
-        while (true) {
-            Message m=null;
-            try {
-                m = receive();
-                if (m==null)
-                    continue;
-            } catch (BadPacketException e) {
-                // Don't increment any message counters here.  It's as if
-                // the packet never existed
-                continue;
+        supernodeClientAtLooping = isSupernodeClientConnection();
+        
+        if(!isAsynchronous()) {
+            while (true) {
+                Message m=null;
+                try {
+                    m = receive();
+                    if (m==null)
+                        continue;
+                    handleMessageInternal(m);
+                } catch (BadPacketException ignored) {}
             }
-
-            // Run through the route spam filter and drop accordingly.
-            if (isSpam(m)) {
-				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
-                addReceivedDropped();
-                continue;
-            }
-
-            //special handling for proxying - note that for
-            //non-SupernodeClientConnections a good compiler will ignore this
-            //code
-            if (isSupernodeClientConnection && 
-                (m instanceof QueryRequest)) m = tryToProxy((QueryRequest) m);
-            if (isSupernodeClientConnection &&
-                (m instanceof QueryStatusResponse)) 
-                m = morphToStopQuery((QueryStatusResponse) m);
-            
-            dispatcher.dispatchTCP(m, this);
+        } else {
+            MessageReader reader = new MessageReader(ManagedConnection.this);
+            if(isReadDeflated())
+                reader.setReadChannel(new InflaterReader(_inflater));
+                
+            ((NIOMultiplexor)_socket).setReadObserver(reader);
         }
     }
     
+    /**
+     * Notification that messaging has closed.
+     */
+    public void messagingClosed() {
+        if( _manager != null )
+            _manager.remove(this);   
+    }
+    
+    /**
+     * Notification that a message is available to be processed (via asynch-processing).
+     */
+    public void processMessage(Message m) {
+        updateStatistics(m);
+        addReceived();
+        handleMessageInternal(m);
+    }
+    
+    /**
+     * Handles a message without updating appropriate statistics.
+     */
+    private void handleMessageInternal(Message m) {
+        // Run through the route spam filter and drop accordingly.
+        if (isSpam(m)) {
+			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
+            addReceivedDropped();
+        } else {
+        
+            //special handling for proxying.
+            if(supernodeClientAtLooping) {
+                if(m instanceof QueryRequest)
+                    m = tryToProxy((QueryRequest) m);
+                else if (m instanceof QueryStatusResponse)
+                    m = morphToStopQuery((QueryStatusResponse) m);
+            }
+            
+            MessageDispatcher.instance().dispatchTCP(m, this);
+        }
+    }
+    
+    /**
+     * Returns the network that the MessageReceiver uses -- Message.N_TCP.
+     */
+    public int getNetwork() {
+        return Message.N_TCP;
+    }
+    
+
     private QueryRequest tryToProxy(QueryRequest query) {
         // we must have the following qualifications:
         // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)

@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -17,21 +19,40 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
- * A Socket that does all of its connecting/reading/writing using NIO, but psuedo-blocks.
+ * A Socket that does all of its connecting/reading/writing using NIO.
  *
- * Phase-1 in converting to NIO.
+ * Input/OutputStreams are provided to be used for blocking I/O (although internally
+ * non-blocking I/O is used).  To switch to using event-based reads, setReadObserver
+ * can be used, and read-events will be passed to the ReadObserver.
+ * A ChannelReadObserver must be used so that the Socket can set the appropriate
+ * underlying channel.
  */
-public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, WriteHandler {
+public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
+    /** The underlying channel the socket is using */
     private final SocketChannel channel;
+    
+    /** The Socket that this delegates to */
     private final Socket socket;
-    private final NIOOutputStream writer;
-    private final NIOInputStream reader;
+    
+    /** The NIOOutputStream used for blocking writes */
+    private NIOOutputStream writer;
+    
+    /** The ReadObserver this is notifying about read events */
+    private ReadObserver reader;
+    
+    /** Any exception that occurred while trying to connect */
     private IOException storedException = null;
+    
+    /**
+     * The host we're connected to.
+     * (Necessary because Sockets retrieved from channels null out the host when disconnected)
+     */
     private InetAddress connectedTo;
     
+    /** Lock used to signal/wait for connecting */
     private final Object LOCK = new Object();
     
     
@@ -45,7 +66,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
         writer.init();
-        reader.init();
+        ((NIOInputStream)reader).init();
         NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
     }
@@ -99,6 +120,42 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     }
     
     /**
+     * Sets the new ReadObserver.
+     *
+     * The deepest ChannelReader in the chain first has its source
+     * set to the prior reader (assuming it implemented ReadableByteChannel)
+     * and a read is notified, in order to read any buffered data.
+     * The source is then set to the Socket's channel and interest
+     * in reading is turned on.
+     */
+    public void setReadObserver(final ChannelReadObserver newReader) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                ReadObserver oldReader = reader;
+                try {
+                    reader = newReader;
+                    ChannelReader lastChannel = newReader;
+                    // go down the chain of ChannelReaders and find the last one to set our source
+                    while(lastChannel.getReadChannel() instanceof ChannelReader)
+                        lastChannel = (ChannelReader)lastChannel.getReadChannel();
+                    
+                    if(oldReader instanceof ReadableByteChannel && oldReader != newReader) {
+                        lastChannel.setReadChannel((ReadableByteChannel)oldReader);
+                        reader.handleRead(); // read up any buffered data.
+                        oldReader.shutdown(); // shutdown the now unused reader.
+                    }
+                    
+                    lastChannel.setReadChannel(channel);
+                    NIODispatcher.instance().interestRead(channel, true);
+                } catch(IOException iox) {
+                    shutdown();
+                    oldReader.shutdown(); // in case we lost it.
+                }
+            }
+        });
+    }
+    
+    /**
      * Notification that a connect can occur.
      *
      * This notifies the waiting lock so that connect can continue.
@@ -115,7 +172,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      * This passes it off to the NIOInputStream.
      */
     public void handleRead() throws IOException {
-        reader.readChannel();
+        reader.handleRead();
     }
     
     /**
@@ -124,7 +181,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      * This passes it off to the NIOOutputStream.
      */
     public void handleWrite() throws IOException {
-        writer.writeChannel();
+        writer.handleWrite();
     }
     
     /**
@@ -213,8 +270,11 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         
         if(LOG.isTraceEnabled())
             LOG.trace("Connected to: " + addr);
+            
         writer.init();
-        reader.init();
+        
+        if(reader instanceof NIOInputStream)
+            ((NIOInputStream)reader).init();
     }
     
      /**
@@ -235,7 +295,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         if(isClosed())
             throw new IOException("Socket closed.");
         
-        return reader.getInputStream();
+        if(reader instanceof NIOInputStream)
+            return ((NIOInputStream)reader).getInputStream();
+        else
+            throw new IllegalStateException("reader not NIOInputStream!");
     }
     
     /**
