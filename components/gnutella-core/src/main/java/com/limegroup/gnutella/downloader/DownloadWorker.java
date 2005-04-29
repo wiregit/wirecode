@@ -856,36 +856,39 @@ public class DownloadWorker implements Runnable {
         
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
-        //note the confusion caused by downloading overlap
-        //regions.  We only want to release a range if the reported subrange
+        //We only want to release a range if the reported subrange
         //was different, and was HIGHER than the low point.
+        //in case this worker became a victim during the header exchange, we do not
+        //clip any ranges.
         synchronized(_downloader) {
             int newLow = _downloader.getInitialReadingPoint();
             int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
-            
-            if(newLow > low) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER:"+
-                            " Host gave subrange, different low.  Was: " +
-                            low + ", is now: " + newLow);
+            if (newHigh-newLow >= 0) {
+                if(newLow > low) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("WORKER:"+
+                                " Host gave subrange, different low.  Was: " +
+                                low + ", is now: " + newLow);
+                    
+                    _commonOutFile.releaseBlock(new Interval(low, newLow-1));
+                }
                 
-                _commonOutFile.releaseBlock(new Interval(low, newLow-1));
-            }
-            
-            if(newHigh < high) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER:"+
-                            " Host gave subrange, different high.  Was: " +
-                            high + ", is now: " + newHigh);
+                if(newHigh < high) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("WORKER:"+
+                                " Host gave subrange, different high.  Was: " +
+                                high + ", is now: " + newHigh);
+                    
+                    _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
+                }
                 
-                _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
-            }
-            
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("WORKER:"+
-                        " assigning white " + newLow + "-" + newHigh +
-                          " to " + _downloader);
-            }
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("WORKER:"+
+                            " assigning white " + newLow + "-" + newHigh +
+                            " to " + _downloader);
+                }
+            } else 
+                LOG.debug("debouched at birth");
         }
     }
     
