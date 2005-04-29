@@ -326,6 +326,12 @@ public class ManagedConnection extends Connection
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
+    
+    /**
+     * Whether or not this was a supernode <-> client connection when message
+     * looping started.
+     */
+    private boolean supernodeClientAtLooping = false;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -944,6 +950,8 @@ public class ManagedConnection extends Connection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
+        supernodeClientAtLooping = isSupernodeClientConnection();
+        
         if(!isAsynchronous()) {
             while (true) {
                 Message m=null;
@@ -989,14 +997,15 @@ public class ManagedConnection extends Connection
 			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             addReceivedDropped();
         } else {
-            //special handling for proxying - note that for
-            //non-SupernodeClientConnections a good compiler will ignore this
-            //code
-            if (isSupernodeClientConnection() && (m instanceof QueryRequest))
-                m = tryToProxy((QueryRequest) m);
-            if (isSupernodeClientConnection() && (m instanceof QueryStatusResponse)) 
-                m = morphToStopQuery((QueryStatusResponse) m);
         
+            //special handling for proxying.
+            if(supernodeClientAtLooping) {
+                if(m instanceof QueryRequest)
+                    m = tryToProxy((QueryRequest) m);
+                else if (m instanceof QueryStatusResponse)
+                    m = morphToStopQuery((QueryStatusResponse) m);
+            }
+            
             MessageDispatcher.instance().dispatchTCP(m, this);
         }
     }
