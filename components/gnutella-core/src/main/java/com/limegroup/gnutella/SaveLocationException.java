@@ -18,8 +18,10 @@ public class SaveLocationException extends IOException {
     public static final int DIRECTORY_DOES_NOT_EXIST = 4; 
     /** setSaveLocation was passed a File that already exists */
     public static final int FILE_ALREADY_EXISTS = 5;
+    /** Attempt to change save location to a "directory" that exists, but is not a directory */
+    public static final int NOT_A_DIRECTORY = 6;
     /** Attempt to change save location to a directory with a non-existant parent */
-    public static final int LOCATION_HAS_NO_PARENT = 6;
+    public static final int LOCATION_HAS_NO_PARENT = 7;
     
 	/**
 	 * The error code of this exception.
