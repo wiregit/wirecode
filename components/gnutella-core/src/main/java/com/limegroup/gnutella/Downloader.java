@@ -100,25 +100,31 @@ public interface Downloader extends BandwidthTracker {
     public File getDownloadFragment();
 
     /**
-     * Sets the location where the file will be saved.  If saveLocation is 
-     * a directory, then the file will be saved in that directory.  If 
-     * saveLocation is a regular file, then the file will be saved as the
-     * saveLocation file. If saveLocation is null, the default saveLocation
-     * will be used.
+     * Sets the directory where the file will be saved. If saveLocation is null, 
+     * the default save directory will be used.
      *
      * @parm saveLocation the location where the file should be saved
      * @param overwrite is true if saving should be allowed to overwrite existing files
      * @throws SaveLocationException when the new file location could not be set
      */
-    public void setSaveLocation(File saveLocation, boolean overwrite) throws SaveLocationException;
+    public void setSaveDirectory(File directory, boolean overwrite) throws SaveLocationException;
 
+    /** Sets the name under which the completed file will be saved in the save directory. */
+    public void setFileName(String name, boolean overwrite) throws SaveLocationException;
+    
+    /** A combination of setSaveDirectory and setFileName, for use in avoiding intermediate overwiret conditions*/
+    public void setSaveFile(File directory, String name, boolean overwrite) throws SaveLocationException;
+    
     
     /** 
      * This method is used to determine where the file will be saved once downloaded.
      *
      * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
      */
-    public File getSaveLocation();
+    public File getSaveDirectory();
+    
+    /** Counterpart to setSaveFile */
+    public File getSaveFile();
     
     /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,

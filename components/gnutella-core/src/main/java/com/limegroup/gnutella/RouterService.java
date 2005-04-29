@@ -1399,12 +1399,10 @@ public class RouterService {
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
-	                                  List alts,
-	                                  boolean overwrite,
-                                      GUID queryGUID,
-                                      File saveLocation)
+	                                  List alts, GUID queryGUID,
+                                      boolean overwrite, File saveDir, String fileName)
 		throws AlreadyDownloadingException, SaveLocationException {
-		return downloader.download(files, alts, overwrite, queryGUID, saveLocation);
+		return downloader.download(files, alts, queryGUID, overwrite, saveDir, fileName);
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files, 
@@ -1412,7 +1410,7 @@ public class RouterService {
 									  boolean overwrite,
 									  GUID queryGUID)
 		throws AlreadyDownloadingException, SaveLocationException {
-		return download(files, alts, overwrite, queryGUID, null);
+		return download(files, alts, queryGUID, overwrite, null, null);
 	}	
 	
 	/**
@@ -1420,17 +1418,17 @@ public class RouterService {
 	 * @throws SaveLocationException 
 	 */
 	public static Downloader download(RemoteFileDesc[] files,
-                                      boolean overwrite, GUID queryGUID, 
-                                      File saveLocation)
+                                      GUID queryGUID, 
+                                      boolean overwrite, File saveDir, String fileName)
 		throws AlreadyDownloadingException, SaveLocationException {
-		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID,
-				saveLocation);
+		return download(files, Collections.EMPTY_LIST, queryGUID,
+				overwrite, saveDir, fileName);
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files,
 									  boolean overwrite, GUID queryGUID) 
 		throws AlreadyDownloadingException, SaveLocationException {
-		return download(files, overwrite, queryGUID, null);
+		return download(files, queryGUID, overwrite, null, null);
 	}	
         
 

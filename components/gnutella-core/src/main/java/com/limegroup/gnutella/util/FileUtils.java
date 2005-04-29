@@ -143,16 +143,21 @@ public class FileUtils
      * OS to go up a directory.  This function will ignore benign cases where
      * the path goes up one directory and then back down into the original directory.
      * 
-     * @return false if testDirectory is not the parent of testPath.
+     * @return false if testParent is not the parent of testChild.
      */
-    public static final boolean isReallyParent(File testDirectory, File testPath) throws IOException {
-        if (! testDirectory.isDirectory())
-            return false;
+    public static final boolean isReallyParent(File testParent, File testChild) {
+        // Don't check testDirectory.isDirectory... 
+        // If it's not a directory, it won't be the parent anyway.
+        // This makes the tests more simple.
         
-        String testDirectoryName = getCanonicalPath(testDirectory);
-        String testPathParentName = getCanonicalPath(testPath.getAbsoluteFile().getParentFile());
-        if (! testDirectoryName.equals(testPathParentName))
+        try {
+            String testParentName = getCanonicalPath(testParent);
+            String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
+            if (! testParentName.equals(testChildParentName))
+                return false;
+        } catch (IOException e){
             return false;
+        }
         
         return true;
     }

@@ -255,9 +255,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     private RemoteFileDesc[] allFiles;
 
     ///////////////// Serialization Attribute Map Keys //////////////////
-    /** The key under which the "save location" File is stored in the attribute map used 
+    /** The key under which the saveDirectory File is stored in the attribute map used 
      *  in serializing and deserializing ManagedDownloaders. */
-    private static final String saveLocationAttrName = "save location";
+    private static final String saveDirectoryAttrName = "save directory";
+    
+    /** The key under which the fileName String is stored in the attribute map used 
+     *  in serializing and deserializing ManagedDownloaders. */
+    private static final String fileNameAttrName = "file name";
     
     /**
      * The maximum number of times we'll try to recover.
@@ -400,14 +404,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
     protected File incompleteFile;
-    /** The fully-qualified name of the downloaded file when this completes, or
-     *  null if we haven't started downloading. Used for previewing purposes. */
-    private volatile File completeFile;
-    /** The location at which to save a file.  If it is a directory, the file
-     *  will be saved in that directory.  If it is a regular file, then
-     *  completeFile will later be set to equal saveLocation.  If saveLocation
-     *  is null, the default save location will be used. */
-    private File saveLocation;
+    /** The fully-qualified directory where the file will be stored when downloaded. Null indicates the default save location.*/
+    private volatile File saveDirectory;
+    /** Name under which the downloaded file will be saved in saveDirectory. */
+    private volatile String fileName;
     /**
      * The position of the downloader in the uploadQueue */
     private int queuePosition;
@@ -527,11 +527,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @throws SaveLocationException 
      */
     public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-                             GUID originalQueryGUID, File saveLocation) 
+                             GUID originalQueryGUID, File saveDirectory, String fileName, boolean overwrite) 
 		throws SaveLocationException {
 		this(files, ifc, originalQueryGUID);
 		// overwrite file to be consistent to older versions
-		setSaveLocation(saveLocation, true);
+		setSaveFile(saveDirectory, fileName, overwrite);
     }
 	
 	public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
@@ -567,9 +567,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         // A Map /* String -> Serializable */ for holding attributes in a forward-compatible way
         HashMap savedAttributesMap = new HashMap();
             
-        // If apprapriate, save "File Save Location"
-        if (saveLocation != null) {
-            savedAttributesMap.put(saveLocationAttrName, saveLocation);
+        // If apprapriate, serialize saveDirectory
+        if (saveDirectory != null) {
+            savedAttributesMap.put(saveDirectoryAttrName, saveDirectory);
+        }
+        
+        // If apprapriate, serialize fileName
+        if (fileName != null) {
+            String fileNameCopy = fileName;
+            fileName = null;
+            if (!fileNameCopy.equals(getFileName())) {
+                savedAttributesMap.put(fileNameAttrName, fileNameCopy);
+            }
+            fileName = fileNameCopy;
         }
         
         // At a future date, other attrubutes can be added here
@@ -602,8 +612,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         Object legacyObject = stream.readObject();
         if (legacyObject instanceof Map) {
             Map savedAttributesMap = (Map) legacyObject;
-            if (savedAttributesMap.containsKey(saveLocationAttrName)) {
-                saveLocation = (File) savedAttributesMap.get(saveLocationAttrName);
+            // Check if there is a saved saveDirectory
+            if (savedAttributesMap.containsKey(saveDirectoryAttrName)) {
+                Object saveDirObject = savedAttributesMap.get(saveDirectoryAttrName);
+                // It's not a big deal if a file gets saved to the default location
+                // this is much better than refusing to deserialize... so fail gracefully
+                if (saveDirObject instanceof File)
+                    saveDirectory = (File) saveDirObject;
+            }
+            // Check if there is a saved fileName
+            if (savedAttributesMap.containsKey(fileNameAttrName)) {
+                Object fileNameObject = savedAttributesMap.get(fileNameAttrName);
+                // It's much better to save a file under the default name than to 
+                // refuse to deserialize, so fail gracefully
+                if (fileNameObject instanceof String)
+                    fileName = (String) fileNameObject;
             }
         }
     }
@@ -662,7 +685,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         try {
-            initializeFilesAndFolders();
+            //initializeFilesAndFolders();
             initializeIncompleteFile();
             initializeVerifyingFile();
         }catch(IOException bad) {
@@ -1717,7 +1740,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null;
             
         if(state == COMPLETE)
-            return completeFile;
+            return getSaveFile();
         else
             return incompleteFile;
     }
@@ -1761,7 +1784,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         //b) Otherwise, choose completed file.
         else {
-            return completeFile;
+            return new File(getSaveDirectory(), getFileName());
         }
     }
 
@@ -1787,91 +1810,75 @@ public class ManagedDownloader implements Downloader, Serializable {
         return 0;//Nothing to preview!
     }
 
+    public synchronized void setSaveFile(File directory, String name, boolean overwrite) throws SaveLocationException {
+        // Save original and restore in case of exception
+        File originalSaveDirectory = saveDirectory;
+        try {
+            setSaveDirectory(directory, true); // Allow over-writing when changing directory
+            setFileName(name, overwrite);      // Possibly check for overwrite when changnig name
+        } catch (SaveLocationException e) {
+            // Set things back the way they were
+            saveDirectory = originalSaveDirectory;
+            throw e;
+        }
+    }
+    
+    public synchronized void setFileName(String name, boolean overwrite) throws SaveLocationException {
+        // TODO write this!!!
+    }
+    
     /**
-     * Sets the location where the file will be saved.  If saveLocation is 
-     * a directory, then the file will be saved in that directory.  If 
-     * saveLocation is a regular file, then the file will be saved as the
-     * saveLocation file. If saveLocation is null, the default saveLocation
-     * will be used.
+     * Sets the directory where the file will be saved. If directory is null, 
+     * the default directory will be used.
      *
-     * @parm saveLocation the location where the file should be saved
+     * @parm directory the directory where the file should be saved
      * @param overwrite is true if saving should be allowed to overwrite existing files
-     * @return Downloader.SAVE_LOCATION_OK upon sucess, another Downloader.SAVE_LOCATION_* return code upon failure.
+     * @throws SaveLocationException if the requested change is not allowed
      */
-    public void setSaveLocation(File saveLocation, boolean overwrite) throws SaveLocationException {
-        // This method could be synchronized, but it is equally effective 
-        // to make local copies of saveLocation in other methods that use
-        // this.saveLocation.
-        
-        // Check to make sure it's not too late to change the saveLocation
-        // ### not done
+    public void setSaveDirectory(File directory, boolean overwrite) throws SaveLocationException {
+        // Check to make sure it's not too late to change the save location
         if (!isRelocatable()) {
             throw new SaveLocationException
-            	(SaveLocationException.SAVE_LOCATION_ALREADY_SAVED, saveLocation);
+            	(SaveLocationException.FILE_ALREADY_SAVED, directory);
         }
         
-        // null file is ok, use settings then      
-        if (saveLocation == null) {
+        // null file is ok     
+        if (directory == null && saveDirectory != null) {
             synchronized (this) {
-                this.saveLocation = null;
-                /*
-                if (completeFile != null ) {
-                    try {
-                     initializeFilesAndFolders();
-                    } catch (IOException e) {
-                        
-                    }
-                }
-                */
+                // Check for over-writing and security check
+                File defaultDirectory = SharingSettings.getSaveDirectory();
+                File saveLocation = new File(defaultDirectory, getFileName());
+                if (!overwrite && saveLocation.exists())
+                    throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, saveLocation);
+                if (! FileUtils.isReallyParent(defaultDirectory, getSaveFile()))
+                    throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, saveLocation);
+                this.saveDirectory = null;
             }
             return;
         }
         
-        // isDirectory will return true only if the file exists
-        // and is a directory, no no need to check if its parent exists
-        if (saveLocation.isDirectory()) {
-            // FileUtils.setWriteable will return false if we can't create files there
-            if (!FileUtils.setWriteable(saveLocation)) {
-				throw new SaveLocationException
-				(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE,
-						saveLocation);
-            }
-            synchronized (this) {
-                this.saveLocation = saveLocation;
-                if (completeFile != null ) {
-                    // ### fix completeFile
-                }
-            }
-            return;
-        }
+        // if it's not null, it must be a vaild directory in order to be the parent of the saved file
+        if (!directory.isDirectory())
+            throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, directory);
         
-        // Check that the parent directory exists, otherwise refuse to set the directory
-        if (! saveLocation.getParentFile().exists())
-            throw new SaveLocationException
-            	(SaveLocationException.SAVE_LOCATION_HAS_NO_PARENT, saveLocation);
-		
-		// If we've gotten this far, saveLocation is not a directory.
-        // Therefore, if it exists, it must be a regular file or a special file,
-        // neither of which we wish to overwrite.
-		if (saveLocation.exists()) {
-			throw new SaveLocationException
-				(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS, saveLocation);
-		}
-		
-		// check if parent is writable
-		File parent = saveLocation.getParentFile();
-		if (!FileUtils.setWriteable(parent)) {
-			throw new SaveLocationException
-				(SaveLocationException.SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE, saveLocation);
-		}
-    
         // Sanity tests passed,  so change saveLocation
         synchronized (this) {
-            this.saveLocation = saveLocation;
-            if (completeFile != null) {
-                // ### fix completeFile
-            }
+            // Check writeablity of directory
+            if (! FileUtils.setWriteable(directory))
+                throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE, directory);
+            // Check for over-writing and security check
+            File saveLocation = new File(directory, getFileName());
+            if (!overwrite && saveLocation.exists())
+                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, saveLocation);
+            if (! FileUtils.isReallyParent(directory, saveLocation))
+                throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, saveLocation);
+            saveDirectory = directory;
         }
+    }
+    
+    /** Returns the directory in which the complete file will be saved */
+    public File getSaveDirectory() {
+        return saveDirectory;
     }
     
     /** 
@@ -1879,10 +1886,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      *
      * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
      */
-    public File getSaveLocation() {
-        return saveLocation;
+    public File getSaveFile() {
+        return new File(getSaveDirectory(), getFileName());
     }
 
+    
+    
     //////////////////////////// Core Downloading Logic /////////////////////
 
     /**
@@ -1937,7 +1946,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
                 // if we were stopped due to corrupt download, cleanup
                 if (corruptState == CORRUPT_STOP_STATE) {
-                    cleanupCorrupt(incompleteFile, completeFile.getName());
+                    // TODO is this really what cleanupCorrupt expects?
+                    cleanupCorrupt(incompleteFile, getFileName());
                     status = CORRUPT_FILE;
                 }
             }
@@ -2059,7 +2069,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // as our hash.
         URN fileHash = scanForCorruption();
         if (corruptState == CORRUPT_STOP_STATE) {
-            cleanupCorrupt(incompleteFile, completeFile.getName());
+            // TODO is this what cleanup Corrupt expects?
+            cleanupCorrupt(incompleteFile, getFileName());
             return CORRUPT_FILE;
         }
         
@@ -2135,7 +2146,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     // ### Make sure this is only called before the gui gets a chance to call setSaveLocation
     // otherwise there is a race condition with keeping saveLocation and completeFile in sync
-    private void initializeFilesAndFolders() throws IOException{
+    /*private void initializeFilesAndFolders() throws IOException{
         
         //1. Verify it's safe to download.  Filename must not have "..", "/",
         //etc.  We check this by looking where the downloaded file will end up.
@@ -2151,7 +2162,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Current usage cases prevent race conditions between this method and
         // setSaveLocation.
         
-        if (saveLocation != null && !saveLocation.exists() && saveLocation.getParentFile().exists()) {
+        if (saveLocation != null && saveLocation.getParentFile().exists()) {
+            if (saveLocation.exists() && ! overwrite)
             // If saveLocation does not exist, then it is not a directory, and is not
             // a pre-existing regular or special file.  Security checks are performed
             // in setSaveLocation.
@@ -2183,6 +2195,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             ErrorService.error(e, "incomplete: " + incompleteFile);
         }
     }
+    */
     
     /**
      * checks the TT cache and if a good tree is present loads it 
@@ -2199,17 +2212,17 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Saves the file to disk.
      */
-    private int saveFile(URN fileHash) {
+    private int saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( SAVING );
         
         //4. Move to library.
         // Make sure we can write into the complete file's directory.
-        File completeFileDir = FileUtils.getParentFile(completeFile);
-        FileUtils.setWriteable(completeFileDir);
-        FileUtils.setWriteable(completeFile);
+        if (!FileUtils.setWriteable(saveDirectory))
+            return DISK_PROBLEM;
+        File saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
-        completeFile.delete();
+        saveFile.delete();
 
         //Try moving file.  If we couldn't move the file, i.e., because
         //someone is previewing it or it's on a different volume, try copy
@@ -2219,7 +2232,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //because IFM.purge() is called frequently in DownloadManager.
         
         // First attempt to rename it.
-        boolean success = FileUtils.forceRename(incompleteFile,completeFile);
+        boolean success = FileUtils.forceRename(incompleteFile,saveFile);
             
         // If that didn't work, we're out of luck.
         if (!success)
@@ -2229,8 +2242,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         //Add file to library.
         // first check if it conflicts with the saved dir....
-        if (fileExists(completeFile))
-            fileManager.removeFileIfShared(completeFile);
+        if (fileExists(saveFile))
+            fileManager.removeFileIfShared(saveFile);
 
         //Add the URN of this file to the cache so that it won't
         //be hashed again when added to the library -- reduces
@@ -2238,9 +2251,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(fileHash != null) {
             Set urns = new HashSet(1);
             urns.add(fileHash);
-            File file = completeFile;
+            File file = saveFile;
             try {
-                file = FileUtils.getCanonicalFile(completeFile);
+                file = FileUtils.getCanonicalFile(saveFile);
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
@@ -2257,7 +2270,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         FileDesc fileDesc = 
-		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
 		if(validAlts != null && fileDesc != null)
@@ -2278,7 +2291,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// in their original headers
             addLocationsToFile(validAlts, fileDesc);
 			//tell the library we have alternate locations
-			callback.handleSharedFileUpdate(completeFile);
+			callback.handleSharedFileUpdate(getSaveFile());
             HashSet set = null;
             synchronized(this) {
                 set = new HashSet(rfds);
@@ -2853,20 +2866,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
     
-    public synchronized String getFileName() {       
-        //Return the most specific information possible.  Case (b) is critical
-        //for picking the downloaded file name; see tryAllDownloads2.  See also
-        //http://core.limewire.org/issues/show_bug.cgi?id=122.
-
-        String ret = null;
-        //a) Return name of the file the user clicked on same as rfd[0]
-        //This solves core bug 122, as well as makes sure we display a filename
-        if (allFiles.length > 0)
-            ret = allFiles[0].getFileName();
-        else
-            Assert.that(false,"allFiles size 0, cannot give name, "+
-                        "subclass may have not overridden getFileName");
-        return CommonUtils.convertFileName(ret);
+    public synchronized String getFileName() {
+        if (fileName != null)
+            return fileName;
+        
+        Assert.that(allFiles.length > 0,"allFiles size 0, cannot give name, "+
+            "subclass may have not overridden getFileName");
+        fileName = allFiles[0].getFileName();
+        return fileName;
     }
 
 

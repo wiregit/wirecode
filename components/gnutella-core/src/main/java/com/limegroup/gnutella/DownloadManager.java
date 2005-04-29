@@ -483,9 +483,8 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
-                                            List alts, 
-                                            boolean overwrite,
-                                            GUID queryGUID, File saveLocation) 
+                                            List alts, GUID queryGUID, 
+                                            boolean overwrite, File saveDir, String fileName) 
             throws AlreadyDownloadingException, SaveLocationException {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
@@ -494,7 +493,7 @@ public class DownloadManager implements BandwidthTracker {
         if (conflict!=null)
             throw new AlreadyDownloadingException(conflict);
 
-        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
+        /* //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
 			// check in default download directory for existing file if no
@@ -511,8 +510,8 @@ public class DownloadManager implements BandwidthTracker {
               
             if ( completeFile.exists() ) 
                 throw new SaveLocationException
-                	(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS, saveLocation);
-        }
+                	(SaveLocationException.FILE_ALREADY_EXISTS, saveLocation);
+        } */
 
         //Purge entries from incompleteFileManager that have no corresponding
         //file on disk.  This protects against stupid users who delete their
@@ -526,7 +525,7 @@ public class DownloadManager implements BandwidthTracker {
         //active if it can.
         ManagedDownloader downloader =
             new ManagedDownloader(files, incompleteFileManager, queryGUID, 
-					saveLocation);
+					saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
         
@@ -586,7 +585,7 @@ public class DownloadManager implements BandwidthTracker {
 			}
             if(completeFile != null && completeFile.exists()) 
                 throw new SaveLocationException
-                	(SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS,
+                	(SaveLocationException.FILE_ALREADY_EXISTS,
 							completeFile);
         }
         
@@ -689,7 +688,7 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(ManagedDownloader md) {
-        initializeDownload(md, null);
+        initializeDownload(md, null, null);
     }
         
     /**
@@ -700,13 +699,13 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Notifies the callback about the new downloader.
      * 5) Writes the new snapshot out to disk.
      */
-    private synchronized void initializeDownload(ManagedDownloader md, File saveLocation) {
+    private synchronized void initializeDownload(ManagedDownloader md, File saveDir, String fileName) {
         md.initialize(this, fileManager, callback);
 		try {
-			md.setSaveLocation(saveLocation, false);
+			md.setSaveFile(saveDir, fileName, false);
 		}
 		// TODO catch it properly or rethrow
-		catch (Exception ie) {}
+		catch (SaveLocationException e) {}
         waiting.add(md);
         callback.addDownload(md);
         writeSnapshot(); // Save state for crash recovery.

@@ -200,7 +200,7 @@ public class ExternalControl {
 			} catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
 			} catch (SaveLocationException sle) {
-				if (sle.getErrorCode() == SaveLocationException.SAVE_LOCATION_ALREADY_EXISTS) {
+				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
                 MessageService.showError(
                     "ERROR_ALREADY_EXISTS", sle.getFile().getName());
 				}

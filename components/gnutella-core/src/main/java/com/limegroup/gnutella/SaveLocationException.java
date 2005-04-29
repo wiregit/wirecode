@@ -8,14 +8,18 @@ import java.io.IOException;
  */
 public class SaveLocationException extends IOException {
 
-	/** setSaveLocation was called too late to save file in new place */
-    public static final int SAVE_LOCATION_ALREADY_SAVED = 1;
-    /** setSaveLocation was passed a directory File where files cannot be created */
-    public static final int SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE = 2;
-    /** setSaveLocation was passed a File with a non-existant parent */
-    public static final int SAVE_LOCATION_HAS_NO_PARENT = 3; 
+    /** Attempt to change save location that violates security rules, such as attempting directory traversal .*/
+    public static final int SECURITY_VIOLATION = 1;
+	/** Attempt to change save location too late to save file in new place */
+    public static final int FILE_ALREADY_SAVED = 2;
+    /** Attempt to change save location to a directory where files cannot be created */
+    public static final int DIRECTORY_NOT_WRITEABLE = 3;
+    /** Attempt to change save location to a non-existant directory */
+    public static final int DIRECTORY_DOES_NOT_EXIST = 4; 
     /** setSaveLocation was passed a File that already exists */
-    public static final int SAVE_LOCATION_ALREADY_EXISTS = 4;
+    public static final int FILE_ALREADY_EXISTS = 5;
+    /** Attempt to change save location to a directory with a non-existant parent */
+    public static final int LOCATION_HAS_NO_PARENT = 6;
     
 	/**
 	 * The error code of this exception.

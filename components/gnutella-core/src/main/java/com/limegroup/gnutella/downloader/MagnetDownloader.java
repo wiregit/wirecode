@@ -103,7 +103,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             File saveLocation) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveLocation);
+        // TODO Do we want overwriting?
+        super(new RemoteFileDesc[0], ifm, null, null, null, true);
 
         this._textQuery=textQuery;
         this._urn=urn;
