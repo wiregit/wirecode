@@ -858,32 +858,34 @@ public class DownloadWorker implements Runnable {
         //we expect to read.  We must release the not downloading leased intervals
         //note the confusion caused by downloading overlap
         //regions.  We only want to release a range if the reported subrange
-        //was different, and was HIGHER than the low point.        
-        int newLow = _downloader.getInitialReadingPoint();
-        int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
-        
-        if(newLow > low) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+
-                        " Host gave subrange, different low.  Was: " +
-                          low + ", is now: " + newLow);
+        //was different, and was HIGHER than the low point.
+        synchronized(_downloader) {
+            int newLow = _downloader.getInitialReadingPoint();
+            int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
             
-            _commonOutFile.releaseBlock(new Interval(low, newLow-1));
-        }
-        
-        if(newHigh < high) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+
-                        " Host gave subrange, different high.  Was: " +
-                          high + ", is now: " + newHigh);
+            if(newLow > low) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("WORKER:"+
+                            " Host gave subrange, different low.  Was: " +
+                            low + ", is now: " + newLow);
+                
+                _commonOutFile.releaseBlock(new Interval(low, newLow-1));
+            }
             
-            _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("WORKER:"+
-                    " assigning white " + newLow + "-" + newHigh +
-                      " to " + _downloader);
+            if(newHigh < high) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("WORKER:"+
+                            " Host gave subrange, different high.  Was: " +
+                            high + ", is now: " + newHigh);
+                
+                _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
+            }
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("WORKER:"+
+                        " assigning white " + newLow + "-" + newHigh +
+                          " to " + _downloader);
+            }
         }
     }
     
@@ -982,8 +984,11 @@ public class DownloadWorker implements Runnable {
         int newStart;
         synchronized(slowest.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
-            if (!slowest.getDownloader().isActive())
+            if (!slowest.getDownloader().isActive()) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("victim is no longer active");
                 throw new NoSuchElementException();
+            }
             
             // see how much did the victim download while we were exchanging headers.
             // it is possible that in that time some other worker died and freed his ranges, and
