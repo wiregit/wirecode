@@ -5,8 +5,6 @@ import java.io.IOException;
 
 /**
  * IOException which can be thrown from {@link Downloader#setSaveLocation(File)}.
- * @author fberger
- *
  */
 public class SaveLocationException extends IOException {
 
