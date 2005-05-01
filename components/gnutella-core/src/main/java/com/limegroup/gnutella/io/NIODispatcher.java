@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.limegroup.gnutella.ErrorService;
@@ -75,17 +76,23 @@ public class NIODispatcher implements Runnable {
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
     
-    /** Pending queue. */
-    private final Collection /* of PendingOp */ PENDING = new LinkedList();
-    
-    /** Closing queue. */
-    private final Collection /* of Shutdownable */ CLOSING = new HashSet();
-	
-	/** Interest queue. */
-	private final Collection /* of InterestOp */ INTEREST = new LinkedList();
+    /** Register queue. */
+    private final Collection /* of RegisterOp */ REGISTER = new LinkedList();
 	
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
+    
+    /**
+     * Temporary list used where REGISTER & LATER are combined, so that
+     * handling IOException or running arbitrary code can't deadlock.
+     * Otherwise, it could be possible that one thread locked some arbitrary
+     * Object and then tried to acquire Q_LOCK by registering or invokeLatering.
+     * Meanwhile, the NIODispatch thread may be running pending items and holding
+     * Q_LOCK.  If while running those items it tries to lock that arbitrary
+     * Object, deadlock would occur.
+     */
+    private final ArrayList UNLOCKED = new ArrayList();
+     
 	
 	/** Determine if this is the dispatch thread. */
 	public boolean isDispatchThread() {
@@ -127,7 +134,7 @@ public class NIODispatcher implements Runnable {
             }
 		} else {
 	        synchronized(Q_LOCK) {
-				PENDING.add(new PendingOp(channel, handler, op));
+				REGISTER.add(new RegisterOp(channel, handler, op));
 			}
         }
     }
@@ -156,30 +163,31 @@ public class NIODispatcher implements Runnable {
     
     /** Registers interest on the channel for the given op */
     private void interest(SelectableChannel channel, int op, boolean on) {
-		if(Thread.currentThread() == dispatchThread) {		
+        try {
 			SelectionKey sk = channel.keyFor(selector);
 			if(sk != null && sk.isValid()) {
-				if(on)
-					sk.interestOps(sk.interestOps() | op);
-				else
-					sk.interestOps(sk.interestOps() & ~op);
+			    // We must synchronize on something unique to each key,
+			    // (but not the key itself, 'cause that'll interfere with Selector.select)
+                // so that multiple threads calling interest(..) will be atomic with
+                // respect to each other.  Otherwise, one thread can preempt another's
+                // interest setting, and one of the interested ops may be lost.
+			    synchronized(channel.blockingLock()) {
+    				if(on)
+    					sk.interestOps(sk.interestOps() | op);
+    				else
+    					sk.interestOps(sk.interestOps() & ~op);
+                }
 			}
-		} else {
-			synchronized(Q_LOCK) {
-				INTEREST.add(new InterestOp(channel, op, on));
-			}
-		}
+        } catch(CancelledKeyException ignored) {
+            // Because closing can happen in any thread, the key may be cancelled
+            // between the time we check isValid & the time that interestOps are
+            // set or gotten.
+        }
     }
     
     /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
     public void shutdown(Shutdownable handler) {
-        if(Thread.currentThread() == dispatchThread) {
-            handler.shutdown();
-        } else {
-            synchronized(Q_LOCK) {
-                CLOSING.add(handler);
-            }
-        }
+        handler.shutdown();
     }    
     
     /** Invokes the method in the NIODispatch thread. */
@@ -249,62 +257,42 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Adds any pending registrations.
+     * Adds any pending actions.
+     *
+     * This works by adding any pending actions into a temporary list so that actions
+     * to the outside world don't need to hold Q_LOCK.
+     *
+     * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
+     * in the NIODispatch thread.
      */
     private void addPendingItems() {
         synchronized(Q_LOCK) {
-            if(!PENDING.isEmpty()) {
-                for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
-                    PendingOp next = (PendingOp)i.next();
-                    try {
-                        next.channel.register(selector, next.op, next.handler);
-                    } catch(IOException iox) {
+            UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
+            UNLOCKED.addAll(REGISTER);
+            UNLOCKED.addAll(LATER);
+            REGISTER.clear();
+            LATER.clear();
+        }
+        
+        if(!UNLOCKED.isEmpty()) {
+            for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
+                Object item = i.next();
+                try {
+                    if(item instanceof RegisterOp) {
+                        RegisterOp next = (RegisterOp)item;
                         try {
+                            next.channel.register(selector, next.op, next.handler);
+                        } catch(IOException iox) {
                             next.handler.handleIOException(iox);
-                        } catch(Throwable t) {
-                            ErrorService.error(t);
                         }
+                    } else if(item instanceof Runnable) {
+                        ((Runnable)item).run();
                     }
+                } catch(Throwable t) {
+                    ErrorService.error(t);
                 }
-                PENDING.clear();
             }
-			
-			if(!INTEREST.isEmpty()) {
-				for(Iterator i = INTEREST.iterator(); i.hasNext(); ) {
-					InterestOp next = (InterestOp)i.next();
-					SelectionKey sk = next.channel.keyFor(selector);
-					if(sk != null && sk.isValid()) {
-						if(next.on)
-							sk.interestOps(sk.interestOps() | next.op);
-						else
-							sk.interestOps(sk.interestOps() & ~next.op);
-					}
-				}
-				INTEREST.clear();
-			}
-			
-            if(!CLOSING.isEmpty()) {
-                for(Iterator i = CLOSING.iterator(); i.hasNext(); ) {
-                    try {
-                        ((Shutdownable)i.next()).shutdown();
-                    } catch(Throwable t) {
-                        ErrorService.error(t);
-                    }
-                }
-                CLOSING.clear();
-            }
-            
-            if(!LATER.isEmpty()) {
-                for(Iterator i = LATER.iterator(); i.hasNext(); ) {
-                    try {
-                        ((Runnable)i.next()).run();
-                    } catch(Throwable t) {
-                        ErrorService.error(t);
-                    }
-                }
-                LATER.clear();
-            }
-			
+            UNLOCKED.clear();
         }
     }
     
@@ -405,30 +393,18 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Encapsulates a pending op. */
-    private static class PendingOp {
+    /** Encapsulates a register op. */
+    private static class RegisterOp {
         private final SelectableChannel channel;
         private final IOErrorObserver handler;
         private final int op;
     
-        PendingOp(SelectableChannel channel, IOErrorObserver handler, int op) {
+        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op) {
             this.channel = channel;
             this.handler = handler;
             this.op = op;
         }
     }
-	
-	/** Encapsulate an interest op. */
-	private static class InterestOp {
-		private final SelectableChannel channel;
-		private final int op;
-		private final boolean on;
-		InterestOp(SelectableChannel channel, int op, boolean on) {
-			this.channel = channel;
-			this.op = op;
-			this.on = on;
-		}
-	}
     
 }
 
