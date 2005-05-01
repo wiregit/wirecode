@@ -59,7 +59,7 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Notification that a write can happen on the SocketChannel.
      */
-    public void handleWrite() throws IOException {// write everything we can.
+    public boolean handleWrite() throws IOException {// write everything we can.
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
@@ -71,8 +71,12 @@ class NIOOutputStream implements WriteObserver {
                 
             // if we were able to write everything, we're not interested in more writing.
             // otherwise, we are interested.
-            if(buffer.position() == 0)
+            if(buffer.position() == 0) {
                 NIODispatcher.instance().interestWrite(channel, false);
+                return false;
+            } else {
+                return true;
+            }
         }
     }
     

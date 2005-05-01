@@ -426,7 +426,7 @@ public class UDPService implements ReadWriteObserver {
 	/**
 	 * Notification that a write can happen.
 	 */
-	public void handleWrite() throws IOException {
+	public boolean handleWrite() throws IOException {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
 	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
@@ -435,11 +435,13 @@ public class UDPService implements ReadWriteObserver {
 	                // we removed the bundle from the list but couldn't send it,
 	                // so we have to put it back in.
 	                OUTGOING_MSGS.add(0, bundle);
-	                return; // no room left to send.
+	                return true; // no room left to send.
                 }
 	        }
+	        
 	        // if there's no data left to send, we don't wanna be notified of write events.
 	        NIODispatcher.instance().interestWrite(_channel, false);
+	        return false;
 	    }
     }
 	        
