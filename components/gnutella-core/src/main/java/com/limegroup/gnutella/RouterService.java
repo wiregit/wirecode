@@ -1407,8 +1407,8 @@ public class RouterService {
 	
 	public static Downloader download(RemoteFileDesc[] files, 
 									  List alts,
-									  boolean overwrite,
-									  GUID queryGUID)
+									  GUID queryGUID,
+									  boolean overwrite)
 		throws AlreadyDownloadingException, SaveLocationException {
 		return download(files, alts, queryGUID, overwrite, null, null);
 	}	

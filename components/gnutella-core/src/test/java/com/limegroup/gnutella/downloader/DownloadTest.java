@@ -370,7 +370,7 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTree(true);
         
         TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
-        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete(false);
         assertEquals(6,uploader1.getRequestsReceived());
@@ -943,7 +943,7 @@ public class DownloadTest extends BaseTestCase {
         
         
         Downloader download=
-            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, false, null);
+            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete(false);
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -2374,7 +2374,7 @@ public class DownloadTest extends BaseTestCase {
       List alts) throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, alts, false, null);
+        download=RouterService.download(rfds, alts, null, false);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
