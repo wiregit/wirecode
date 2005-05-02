@@ -144,20 +144,17 @@ public class FileUtils
      * the path goes up one directory and then back down into the original directory.
      * 
      * @return false if testParent is not the parent of testChild.
+     * @throws IOException if getCanonicalPath throws IOException for either input file
      */
-    public static final boolean isReallyParent(File testParent, File testChild) {
+    public static final boolean isReallyParent(File testParent, File testChild) throws IOException {
         // Don't check testDirectory.isDirectory... 
         // If it's not a directory, it won't be the parent anyway.
         // This makes the tests more simple.
         
-        try {
-            String testParentName = getCanonicalPath(testParent);
-            String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
-            if (! testParentName.equals(testChildParentName))
-                return false;
-        } catch (IOException e){
+        String testParentName = getCanonicalPath(testParent);
+        String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
+        if (! testParentName.equals(testChildParentName))
             return false;
-        }
         
         return true;
     }

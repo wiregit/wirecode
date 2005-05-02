@@ -16,12 +16,14 @@ public class SaveLocationException extends IOException {
     public static final int DIRECTORY_NOT_WRITEABLE = 3;
     /** Attempt to change save location to a non-existant directory */
     public static final int DIRECTORY_DOES_NOT_EXIST = 4; 
-    /** setSaveLocation was passed a File that already exists */
+    /** Attempt to change save location to a File that already exists */
     public static final int FILE_ALREADY_EXISTS = 5;
-    /** Attempt to change save location to a "directory" that exists, but is not a directory */
-    public static final int NOT_A_DIRECTORY = 6;
-    /** Attempt to change save location to a directory with a non-existant parent */
-    public static final int LOCATION_HAS_NO_PARENT = 7;
+    /** Attempt to change save location to a pre-existing file that isn't a regular file (such as a directory or device file) */
+    public static final int FILE_NOT_REGULAR = 6;
+    /** Attempt to change save directory to a "directory" that exists, but is not a directory */
+    public static final int NOT_A_DIRECTORY = 7;
+    /** IOException or other filesystem error while setting save location. */
+    public static final int FILESYSTEM_ERROR = 8;
     
 	/**
 	 * The error code of this exception.

@@ -628,12 +628,12 @@ public class DownloadManager implements BandwidthTracker {
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
             ManagedDownloader md=(ManagedDownloader)iter.next();
             if (md.conflicts(incompleteFile))                   
-                throw new AlreadyDownloadingException(md.getFileName());
+                throw new AlreadyDownloadingException(md.getSaveFile().getName());
         }
         for (Iterator iter=waiting.iterator(); iter.hasNext(); ) { //queued
             ManagedDownloader md=(ManagedDownloader)iter.next();
             if (md.conflicts(incompleteFile))                   
-                throw new AlreadyDownloadingException(md.getFileName());
+                throw new AlreadyDownloadingException(md.getSaveFile().getName());
         }
 
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files

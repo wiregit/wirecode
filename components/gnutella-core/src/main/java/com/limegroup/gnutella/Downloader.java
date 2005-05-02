@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
@@ -103,27 +104,14 @@ public interface Downloader extends BandwidthTracker {
      * Sets the directory where the file will be saved. If saveLocation is null, 
      * the default save directory will be used.
      *
-     * @parm saveLocation the location where the file should be saved
+     * @param saveDirectory the directory where the file should be saved. null indicates the default.
+     * @param fileName the name of the file to be saved in saveDirectory. null indicates the default.
      * @param overwrite is true if saving should be allowed to overwrite existing files
      * @throws SaveLocationException when the new file location could not be set
      */
-    public void setSaveDirectory(File directory, boolean overwrite) throws SaveLocationException;
-
-    /** Sets the name under which the completed file will be saved in the save directory. */
-    public void setFileName(String name, boolean overwrite) throws SaveLocationException;
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
     
-    /** A combination of setSaveDirectory and setFileName, for use in avoiding intermediate overwiret conditions*/
-    public void setSaveFile(File directory, String name, boolean overwrite) throws SaveLocationException;
-    
-    
-    /** 
-     * This method is used to determine where the file will be saved once downloaded.
-     *
-     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
-     */
-    public File getSaveDirectory();
-    
-    /** Counterpart to setSaveFile */
+    /** Returns the file under which the download will be saved when complete.  Counterpart to setSaveFile. */
     public File getSaveFile();
     
     /**
@@ -138,13 +126,6 @@ public interface Downloader extends BandwidthTracker {
      * state, in seconds.  Returns Integer.MAX_VALUE if unknown.
      */
     public int getRemainingStateTime();
-
-    /** 
-     * Returns the name of the current or last file this is downloading, or null
-     * in the rare case that this has no more files to download.  (This might
-     * happen if this has been stopped.)
-     */
-    public String getFileName();
 
     /**
      * Returns the size of this file in bytes, i.e., the total amount to
@@ -256,7 +237,5 @@ public interface Downloader extends BandwidthTracker {
 	 * @return the amount of data lost due to corruption
 	 */
 	public int getAmountLost();
-
-
 }
 

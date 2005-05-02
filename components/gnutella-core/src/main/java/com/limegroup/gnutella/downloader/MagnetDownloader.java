@@ -325,14 +325,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * Overrides ManagedDownloader to display a reasonable file name even
      * when no locations have been found.
      */
-    public synchronized String getFileName() {        
+    protected synchronized String getDefaultFileName() {        
         if (_filename!=null)
             return _filename;
         else {
             String fname = null;
 			// Check the super name if I have an RFD
 			if ( hasRFD() )   
-                fname = super.getFileName();
+                fname = super.getDefaultFileName();
 
 			// If I still don't have a good name, resort to whatever I have.
             if ( fname == null || fname.equals(UNKNOWN_FILENAME) )
