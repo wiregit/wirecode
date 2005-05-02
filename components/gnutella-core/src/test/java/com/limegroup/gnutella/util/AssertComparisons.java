@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -378,7 +379,136 @@ public class AssertComparisons extends TestCase {
      */    
     static public void assertNotEquals(String msg, byte expected, byte actual) {
         assertNotEquals( msg, new Byte(expected), new Byte(actual) );
-    }    
+    }
+
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(boolean[] expected, boolean[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, boolean[] expected, boolean[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(byte[] expected, byte[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, byte[] expected, byte[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(char[] expected, char[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, char[] expected, char[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(double[] expected, double[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, double[] expected, double[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(int[] expected, int[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, int[] expected, int[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(long[] expected, long[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, long[] expected, long[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(Object[] expected, Object[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, Object[] expected, Object[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, Arrays.asList(expected), Arrays.asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(short[] expected, short[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, short[] expected, short[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
     
     /**
      * Asserts that the actual is compareTo == 0 to another value.
@@ -956,7 +1086,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Byte(data[i]));
         return list;
@@ -966,7 +1096,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Character(data[i]));
         return list;
@@ -976,7 +1106,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Double(data[i]));
         return list;
@@ -986,7 +1116,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Float(data[i]));
         return list;
@@ -996,7 +1126,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Integer(data[i]));
         return list;
@@ -1006,7 +1136,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Long(data[i]));
         return list;
@@ -1016,7 +1146,7 @@ public class AssertComparisons extends TestCase {
         if(data == null)
             return new LinkedList();
             
-        List list = new LinkedList();
+        List list = new ArrayList(data.length);
         for(int i = 0; i < data.length; i++)
             list.add(new Short(data[i]));
         return list;

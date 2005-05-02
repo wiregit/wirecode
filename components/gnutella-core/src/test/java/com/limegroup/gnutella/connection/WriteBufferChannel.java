@@ -83,6 +83,14 @@ class WriteBufferChannel implements InterestWriteChannel {
         this.buffer = buffer;
     }
     
+    public void resize(int size) {
+        buffer = ByteBuffer.allocate(size);
+    }
+    
+    public void clear() {
+        buffer.clear();
+    }
+    
     public void interest(WriteObserver observer, boolean status) {
         this.observer = observer;
         this.status = status;

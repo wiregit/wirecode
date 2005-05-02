@@ -107,12 +107,11 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
             while(outgoing.hasRemaining() && source.write(outgoing) > 0);
             if(outgoing.hasRemaining())
                 break; // there is still deflated data that is pending a write.
-            outgoing.position(0).limit(0); // Outgoing is now free for reuse.
             
             // Step 2: Try and deflate the existing data.
             int deflated = deflater.deflate(outgoing.array());
-            outgoing.limit(deflated);
             if(deflated > 0) {
+                outgoing.position(0).limit(deflated);
                 continue; // we managed to deflate some data!
             }
                 
