@@ -1831,7 +1831,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Sets the directory where the file will be saved. If directory is null, 
      * the default directory will be used.
      *
-     * @parm directory the directory where the file should be saved
+     * @param directory the directory where the file should be saved
      * @param overwrite is true if saving should be allowed to overwrite existing files
      * @throws SaveLocationException if the requested change is not allowed
      */
