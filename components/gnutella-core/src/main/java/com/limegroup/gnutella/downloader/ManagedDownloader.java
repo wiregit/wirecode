@@ -1836,7 +1836,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *
      * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
      */
-    public File getSaveFile() {
+    public synchronized File getSaveFile() {
         if (saveFile != null)
             return saveFile;
         
@@ -2171,7 +2171,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Make sure we can write into the complete file's directory.
         if (!FileUtils.setWriteable(getSaveFile().getParentFile()))
             return DISK_PROBLEM;
-        File saveFile = getSaveFile();
+        saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
 
