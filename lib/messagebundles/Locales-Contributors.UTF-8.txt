@@ -132,7 +132,7 @@ pt_BR   Português/Brasileiro    Download page mail: wdiniz AT giovannifcb DOT c
 pt_PT   Portuguese/Portugal     Messages      Revision needed ?
         Português/Standart                    mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
-sq      Alabanese/Albania       Messages      Translator needed
+sq      Alabanese/Albania       Messages      New translator needed !
 sq_SE   Sqipe/Sqipëria          Download page mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
 sv      Swedish/Sweden          Messages      "Fredrik Olsson"
@@ -147,8 +147,13 @@ tl_PH   Filipino/Pilipinas                    mail: tjalmzr AT nyc DOT rr DOT co
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Latin (Central European) characters ******************
 ------- ----------------------- ------------- -------------------------------
+bs      Bosnian/Bosnia-Herzegovina Messages   "Enver Julardžija" (ORBUS)
+bs_BH   Bosanski/Bosna i Hercegovina          mail: orbus AT skynet DOT be
+                                Download page "Ing. Salih Čavkić"
+                                              cavkic AT skynet DOT be
+------- ----------------------- ------------- -------------------------------
 cs      Czech/Czech Rep.        Messages      New translator needed !
-cs_CZ   Čeština (Česká republika)             mail: ? AT ? DOT ?
+cs_CZ   Čeština/Česká republika               mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
 hr      Croatian/Croatia        Messages      "Dan Bernardic"
 hr_HR   Hrvatsky/Hrvatska                     mail: dan DOT bernardic AT gmail DOT com
@@ -158,6 +163,9 @@ hu_HU   Magyar/Magyarorszag                   mail: thlacus AT freemail DOT hu
 ------- ----------------------- ------------- -------------------------------
 pl      Polish/Poland           Messages      "Gregory Javorek"
 pl_PL   Polski                  About         mail: g.javorek AT hoga DOT pl
+------- ----------------------- ------------- -------------------------------
+sk      Slovak/Slovakia         Messages      New translator needed !
+sk_SK   Slovensky/Slovenskej republiky        mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
 sl      Slovenian/Slovenia      Messages      "Aleks Reinhardt"
 sl_SI   Slovenski/Slovenija                   mail: aleks.reinhardt AT pivot DOT si
