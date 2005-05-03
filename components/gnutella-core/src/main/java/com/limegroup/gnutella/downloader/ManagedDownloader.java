@@ -523,7 +523,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @throws SaveLocationException 
      */
     public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-                             GUID originalQueryGUID, File saveDirectory, String fileName, boolean overwrite) 
+                             GUID originalQueryGUID, File saveDirectory, 
+                             String fileName, boolean overwrite) 
 		throws SaveLocationException {
 		this(files, ifc, originalQueryGUID);
 		// overwrite file to be consistent to older versions
