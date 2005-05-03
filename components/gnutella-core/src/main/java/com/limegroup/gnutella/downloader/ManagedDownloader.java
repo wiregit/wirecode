@@ -2343,15 +2343,23 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return COMPLETE;
             }
             
-            synchronized(this) {    
-                if (_workers.size() == 0 && !ranker.hasMore()) {                        
-                    //No downloaders worth living for.
-                    if ( ranker.calculateWaitTime() > 0) {
-                        LOG.trace("MANAGER: terminating with busy");
-                        return WAITING_FOR_RETRY;
-                    } else {
-                        LOG.trace("MANAGER: terminating w/o hope");
-                        return GAVE_UP;
+            synchronized(this) { 
+                // if everybody we know about is busy (or we don't know about anybody)
+                // and we're not downloading from anybody - terminate the download.
+                if (_workers.size() == 0){
+                    boolean allKnownBusy = false;
+                    synchronized(ranker) {
+                        allKnownBusy = ranker.getNumKnownHosts() == ranker.getNumBusyHosts(); 
+                    }
+                
+                    if (allKnownBusy)   {                        
+                        if ( ranker.calculateWaitTime() > 0) {
+                            LOG.trace("MANAGER: terminating with busy");
+                            return WAITING_FOR_RETRY;
+                        } else {
+                            LOG.trace("MANAGER: terminating w/o hope");
+                            return GAVE_UP;
+                        }
                     }
                 }
                 
