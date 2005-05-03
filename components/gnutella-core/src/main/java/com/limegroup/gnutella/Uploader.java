@@ -25,7 +25,6 @@ public interface Uploader extends BandwidthTracker {
     public static final int UNAVAILABLE_RANGE = 13;
     public static final int BANNED_GREEDY  	  = 14;
     public static final int THEX_REQUEST      = 15;
-	public static final int RSS_REQUEST		  = 16;
 
     /**
 	 * Stops this upload.  If the download is already 

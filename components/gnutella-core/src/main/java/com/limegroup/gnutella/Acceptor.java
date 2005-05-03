@@ -658,7 +658,11 @@ public class Acceptor implements Runnable {
                 boolean localHost = NetworkUtils.isLocalHost(_socket);
 				// Only selectively allow localhost connections
 				if ( !word.equals("MAGNET") ) {
-					
+					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
+					    LOG.trace("Killing localhost connection with non-magnet.");
+						_socket.close();
+						return;
+					}
 				} else if(!localHost) { // && word.equals(MAGNET)
 				    LOG.trace("Killing non-local ExternalControl request.");
 				    _socket.close();
@@ -682,7 +686,7 @@ public class Acceptor implements Runnable {
                     HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
                     cm.acceptConnection(_socket);
                 }
-                else if (word.equals("GET")) {LOG.debug("got a get");
+                else if (word.equals("GET")) {
 					HTTPStat.GET_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
                 }
