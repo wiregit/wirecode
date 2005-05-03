@@ -582,7 +582,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // old format
         if (next instanceof RemoteFileDesc[]) {
-            RemoteFileDesc [] rfds=(RemoteFileDesc[])stream.readObject();
+            RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
             if (rfds != null && rfds.length > 0) {
                 fileName = rfds[0].getFileName();
                 fileSize = rfds[0].getSize();
