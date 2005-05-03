@@ -27,6 +27,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
@@ -437,6 +438,83 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
 
+	public void testSetSaveFileExceptions() throws Exception {
+		RemoteFileDesc[] rfds = new RemoteFileDesc[] { newRFD("download") };
+		
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					new File("/"), "does not matter", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Should have no write permissions",
+						 SaveLocationException.DIRECTORY_NOT_WRITEABLE,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					new File("/non existent directory"), null, false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: directory does not exist",
+						 SaveLocationException.DIRECTORY_DOES_NOT_EXIST,
+						 sle.getErrorCode());
+		}
+		try {
+			File file = File.createTempFile("existing", "file");
+			file.deleteOnExit();
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					file.getParentFile(), file.getName(), false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file exists",
+						 SaveLocationException.FILE_ALREADY_EXISTS,
+						 sle.getErrorCode());
+		}
+		try {
+			File file = File.createTempFile("notadirectory", "file");
+			file.deleteOnExit();
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					file, null, false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file not a directory", 
+						 SaveLocationException.NOT_A_DIRECTORY,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					null, "./", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file not regular",
+						 SaveLocationException.FILE_NOT_REGULAR,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					null, "../myfile.txt", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: security violation", 
+						 SaveLocationException.SECURITY_VIOLATION,
+						 sle.getErrorCode());
+		}
+		// TODO SaveLocationException.FILE_ALREADY_SAVED
+		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
+	}
+	
     
     private static RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
