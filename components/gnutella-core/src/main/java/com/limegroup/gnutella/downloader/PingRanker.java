@@ -136,8 +136,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             running = true;
         }
         
-        // do not allow duplicate hosts from alternate locations
-        if (host.isFromAlternateLocation() && knowsAboutHost(host))
+        // do not allow duplicate hosts 
+        if (knowsAboutHost(host))
                 return false;
         
         if(LOG.isDebugEnabled())
@@ -214,7 +214,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         int sent = 0;
         for (Iterator iter = free.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            iter.remove();
+            newHosts.remove(rfd);
             
             if (rfd.needsPush())
                 pingProxies(rfd);
@@ -228,7 +228,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (LOG.isDebugEnabled()) {
             LOG.debug("\nverified hosts " +verifiedHosts.size()+
                     "\npingedHosts "+pingedHosts.values().size()+
-                    "\nnewHosts "+free.size()+
+                    "\nnewHosts "+newHosts.size()+
                     "\npinging hosts: "+sent);
         }
         
@@ -333,12 +333,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (!pong.hasFile())
             return;
 
-        // add any altlocs the pong had to our known hosts 
-        addInternal(pong.getAllLocsRFD(rfd));
-        
         // and rank the host.
         verifiedHosts.add(rfd);
         
+        // add any altlocs the pong had to our known hosts 
+        addInternal(pong.getAllLocsRFD(rfd));
     }
 
 
