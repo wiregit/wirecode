@@ -7,7 +7,7 @@ import com.limegroup.gnutella.util.Buffer;
 /**
  * Simple LIFO or FIFO message queue.
  */
-public class SimpleMessageQueue extends MessageQueue {
+public class SimpleMessageQueue extends AbstractMessageQueue {
     private Buffer _buf;
     private boolean _lifo;
     

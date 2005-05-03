@@ -143,7 +143,7 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
         buffer.flip();
         buffer.get(out, off, len);
         buffer.compact();
-    }        
+    }
     
     /**
      * Converts the buffer's contents into a string, translating bytes into

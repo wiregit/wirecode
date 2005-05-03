@@ -48,7 +48,7 @@ class StubMessageReceiver implements MessageReceiver {
         this.softMax = softMax;
     }
     
-    public void processMessage(Message m) {
+    public void processReadMessage(Message m) {
         LIST.add(m);
     }
     

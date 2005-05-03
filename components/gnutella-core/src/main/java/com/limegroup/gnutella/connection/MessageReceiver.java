@@ -10,7 +10,7 @@ public interface MessageReceiver {
     /**
      * Notification that a message is available for processing.
      */
-    public void processMessage(Message m);
+    public void processReadMessage(Message m);
     
     /**
      * The soft-max this message-receiver uses for creating messages.
