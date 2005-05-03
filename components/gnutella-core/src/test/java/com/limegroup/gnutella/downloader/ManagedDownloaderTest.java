@@ -439,7 +439,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
 
 	public void testSetSaveFileExceptions() throws Exception {
+		
 		RemoteFileDesc[] rfds = new RemoteFileDesc[] { newRFD("download") };
+		File file = File.createTempFile("existing", "file");
+		file.deleteOnExit();
 		
 		try {
 			ManagedDownloader dl = new ManagedDownloader(rfds,
@@ -464,8 +467,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 sle.getErrorCode());
 		}
 		try {
-			File file = File.createTempFile("existing", "file");
-			file.deleteOnExit();
 			ManagedDownloader dl = new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					file.getParentFile(), file.getName(), false);
@@ -476,12 +477,17 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 SaveLocationException.FILE_ALREADY_EXISTS,
 						 sle.getErrorCode());
 		}
+		// should not throw an exception because of overwrite 
+		new ManagedDownloader(rfds,	new IncompleteFileManager(), 
+				new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(),
+				true); 
+		
 		try {
-			File file = File.createTempFile("notadirectory", "file");
-			file.deleteOnExit();
+			File f = File.createTempFile("notadirectory", "file");
+			f.deleteOnExit();
 			ManagedDownloader dl = new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					file, null, false);
+					f, null, false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -511,6 +517,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 SaveLocationException.SECURITY_VIOLATION,
 						 sle.getErrorCode());
 		}
+		// should not throw an exception
+		new ManagedDownloader(rfds, new IncompleteFileManager(), 
+				new GUID(GUID.makeGuid()), null, null, false);
+		
+				
 		// TODO SaveLocationException.FILE_ALREADY_SAVED
 		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
 	}
