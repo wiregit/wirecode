@@ -1688,6 +1688,10 @@ MESSAGE_FILE_CORRUPT=ファイル内に破損を発見しました。
 MESSAGE_CONTINUE_DOWNLOAD=ダウンロードを続けますか。
 #### MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 MESSAGE_LANG_CHANGE=言語を変更するには LimeWire を再起動する必要があります。 選択した言語に必要なフォントがあることを確認して下さい。
+#### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
+#? MESSAGE_SENSITIVE_SHARE_TOP=
+#### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
+#? MESSAGE_SENSITIVE_SHARE_BOTTOM=
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
