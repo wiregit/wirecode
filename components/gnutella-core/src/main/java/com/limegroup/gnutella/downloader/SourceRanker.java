@@ -15,17 +15,25 @@ import com.limegroup.gnutella.settings.DownloadSettings;
  */
 public abstract class SourceRanker {
 
-    public void addToPool(Collection hosts) {
+    /**
+     * @param hosts a collection of remote hosts to rank
+     * @return if we didn't know about at least one of the hosts
+     */
+    public boolean addToPool(Collection hosts) {
+        boolean ret = false;
         for (Iterator iter = hosts.iterator(); iter.hasNext();) {
             RemoteFileDesc host = (RemoteFileDesc) iter.next();
-            addToPool(host);
+            if (addToPool(host))
+                ret = true;
         }
+        return ret;
     }
     
     /**
      * @param host the host that the ranker should consider
+     * @return if we did not already know about this host
      */
-    public abstract void addToPool(RemoteFileDesc host);
+    public abstract boolean addToPool(RemoteFileDesc host);
 	
     /**
      * @return whether the ranker has any more potential sources
@@ -45,8 +53,33 @@ public abstract class SourceRanker {
     /**
      * @return the number of hosts this ranker knows about
      */
-    public abstract int getKnownHosts();
+    public abstract int getNumKnownHosts();
     
+    /**
+     * @return the number of busy hosts the ranker knows about
+     */
+    public abstract int getNumBusyHosts();
+    
+    /**
+     * @return how much time we should wait before at least one host
+     * will become non-busy
+     */
+    public int calculateWaitTime() {
+        if (!hasMore())
+            return 0;
+        
+        // waitTime is in seconds
+        int waitTime = Integer.MAX_VALUE;
+        for (Iterator iter = getBusyHosts().iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            waitTime = Math.min(waitTime, rfd.getWaitTime());
+        }
+        
+        // waitTime was in seconds
+        return (waitTime*1000);
+    }
+    
+    protected abstract Collection getBusyHosts();
     /**
      * stops the ranker.
      */

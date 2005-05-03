@@ -1382,7 +1382,7 @@ public class Connection implements IpPort {
     
     /**
      * @return whether this connection supports routing of vendor messages
-     * (i.e. will not drop a VM that has ttl <> 1 and hops <> 0)
+     * (i.e. will not drop a VM that has ttl <> 1 and hops > 0)
      */
     public boolean supportsVMRouting() {
         if (_headers != null)

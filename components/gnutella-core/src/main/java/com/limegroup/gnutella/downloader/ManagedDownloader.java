@@ -259,7 +259,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
-    private Set allFiles;
+    private Set cachedRFDs;
 	
 	/**
 	 * The ranker used to select the next host we should connect to
@@ -329,14 +329,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /**
      * A List of worker threads in progress.  Used to make sure that we do
-     * not terminate (in fireDownloadWorkers) without hope if threads are
-     * connecting to hosts (i.e., removed from files) but not have not yet been
-     * added to _activeWorkers.
+     * not terminate in fireDownloadWorkers without hope if threads are
+     * connecting to hosts but not have not yet been added to _activeWorkers.
+     * 
      * Also, if the download completes and any of the threads are sleeping 
      * because it has been queued by the uploader, those threads need to be 
      * killed.
      * LOCKING: synchronize on this
-     * INVARIANT: _activeWorkers.size<=threads 
      */
     private List /*of DownloadWorker*/ _workers;
 
@@ -346,18 +345,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
 
-    /** 
-     * Setof RemoteFileDesc where we store rfds that we have tried to
-     * connect this session
-     * LOCKING: this
+    /**
+     * Set of RFDs where we store rfds we are currently connected to or
+     * trying to connect to.
      */
-    private Set /*of RemoteFileDesc */ rfds;
-    
-    /** 
-     * Set of RemoteFileDesc that stores the busy rfds we wait to retry on   
-     * LOCKING: this
-     */
-    private Set busyRFDs;
+    private Set /*of RemoteFileDesc */ currentRFDs;
     
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
@@ -506,10 +498,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private long lastQuerySent;
     
-    /**
-     * The first descriptor we get passed - used for requeries, getting length, etc.
-     */
-    protected RemoteFileDesc firstDesc;
+    /** the name of the file we're downloading */
+    protected String fileName;
+    
+    /** the size of the completed file we're downloading */
+    protected int fileSize;
     
     /**
      * The current priority of this download -- only valid if inactive.
@@ -538,12 +531,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(ifc == null) {
 			throw new NullPointerException("null incomplete file manager");
 		}
-        //this.allFiles = new TreeSet(IpPort.COMPARATOR);
-        this.allFiles = new HashSet();
+        this.cachedRFDs = new HashSet();
 		if (files != null) {
-			allFiles.addAll(Arrays.asList(files));
-            if (files.length > 0)
-                this.firstDesc = files[0];
+			cachedRFDs.addAll(Arrays.asList(files));
+            if (files.length > 0) {
+                this.fileName = files[0].getFileName();
+                this.fileSize = files[0].getSize();
+            }
         }
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
@@ -559,21 +553,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
-		RemoteFileDesc []rfds = new RemoteFileDesc[allFiles.size()];
-        int i;
-        if (firstDesc != null && rfds.length > 0) {
-            rfds[0] = firstDesc;
-            i =1;
-        } else
-            i = 0;
+		RemoteFileDesc []rfds = new RemoteFileDesc[cachedRFDs.size()];
         
-		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd == firstDesc)
-                continue;
-			rfds[i++]=rfd;
-		}
-        stream.writeObject(rfds);
+        stream.writeObject(cachedRFDs);
+        stream.writeObject(fileName); // npe?
+        stream.writeObject(new Integer(fileSize));
+        
         //Blocks can be written to incompleteFileManager from other threads
         //while this downloader is being serialized, so lock is needed.
         synchronized (incompleteFileManager) {
@@ -593,12 +578,22 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {
         deserializedFromDisk = true;
 		
-		//allFiles = new TreeSet(IpPort.COMPARATOR);
-        allFiles = new HashSet();
-        RemoteFileDesc [] rfds=(RemoteFileDesc[])stream.readObject();
-        if (rfds != null && rfds.length > 0)
-            firstDesc = rfds[0];
-		allFiles.addAll(Arrays.asList(rfds));
+        Object next = stream.readObject();
+        
+        // old format
+        if (next instanceof RemoteFileDesc[]) {
+            RemoteFileDesc [] rfds=(RemoteFileDesc[])stream.readObject();
+            if (rfds != null && rfds.length > 0) {
+                fileName = rfds[0].getFileName();
+                fileSize = rfds[0].getSize();
+            }
+            cachedRFDs = new HashSet(Arrays.asList(rfds));
+        } else {
+            // new format
+            cachedRFDs = (Set) next;
+            fileName = (String)stream.readObject();
+            fileSize = ((Integer)stream.readObject()).intValue();
+        }
 		
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
 		//Old versions used to read BandwidthTrackerImpl here.  Now we just use
@@ -622,8 +617,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        rfds = new IpPortSet();
-        busyRFDs = new HashSet();
+        currentRFDs = new HashSet();
         _activeWorkers=new LinkedList();
         _workers=new ArrayList();
         queuedWorkers = new HashMap();
@@ -644,8 +638,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         triedLocatingSources = false;
 		ranker = SourceRanker.getAppropriateRanker();
         // get the SHA1 if we can.
-        if(allFiles.size() > 0 && downloadSHA1 == null) {
-            for(Iterator iter = allFiles.iterator();
+        if(cachedRFDs.size() > 0 && downloadSHA1 == null) {
+            for(Iterator iter = cachedRFDs.iterator();
 			iter.hasNext() && downloadSHA1 == null;) {
 				RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
 				downloadSHA1 = rfd.getSHA1Urn();
@@ -689,7 +683,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(downloadSHA1 == null)
             return ;
         
-		for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
+		for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
 			if (!downloadSHA1.equals(rfd.getSHA1Urn()) && rfd.getSHA1Urn() != null)
 				iter.remove();
@@ -763,7 +757,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
        // If busy, try waiting for that busy host.
         else if (getState() == WAITING_FOR_RETRY)
-            setState(WAITING_FOR_RETRY, calculateWaitTime());
+            setState(WAITING_FOR_RETRY, ranker.calculateWaitTime());
         
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
@@ -846,7 +840,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
-        case DISK_PROBLEM:
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -952,8 +945,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * hosts that we know about 
      */
     private synchronized void initializeRanker() {
-        reloadBusyHosts();
-        ranker.addToPool(allFiles);
+        ranker.addToPool(cachedRFDs);
     }
     
     /**
@@ -985,14 +977,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     protected void initializeIncompleteFile() throws IOException {
-        if (incompleteFile != null || firstDesc == null)
+        if (incompleteFile != null || cachedRFDs == null || cachedRFDs.isEmpty())
             return;
         
         if (downloadSHA1 != null)
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
-        if (incompleteFile == null) 
+        if (incompleteFile == null) {
+            RemoteFileDesc firstDesc = (RemoteFileDesc) cachedRFDs.iterator().next();
             incompleteFile = incompleteFileManager.getFile(firstDesc);
+        }
     }
     
     /**
@@ -1097,7 +1091,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //TODO3: this is stricter than necessary.  What if a location has
             //been removed?  Tricky without global variables.  At the least we
             //should return false if in COULDNT_DOWNLOAD state.
-            for (Iterator iter = allFiles.iterator();iter.hasNext();) {
+            for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
                 RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
                 try {
                     File thisFile=incompleteFileManager.getFile(rfd);
@@ -1139,13 +1133,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected synchronized QueryRequest newRequery(int numRequeries)
       throws CantResumeException {
-        Assert.that(!allFiles.isEmpty(), "precondition violated");
+        Assert.that(!cachedRFDs.isEmpty(), "precondition violated");
 		    
-		String name = firstDesc.getFileName();
-		    
-        String queryString = StringUtils.createQueryString(name);
+        String queryString = StringUtils.createQueryString(fileName);
         if(queryString == null || queryString.equals(""))
-            throw new CantResumeException(name);
+            throw new CantResumeException(fileName);
         else
             return QueryRequest.createQuery(queryString);
             
@@ -1227,8 +1219,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(otherUrn != null && downloadSHA1 != null)
                 return otherUrn.equals(downloadSHA1);
             
-            // compare to allFiles....
-            for (Iterator iter = allFiles.iterator();iter.hasNext();) {
+            // compare to previously cached rfds
+            for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
                 // get current info....
                 RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
                 final String thisName = rfd.getFileName();
@@ -1300,12 +1292,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized boolean addDownload(Collection c, boolean cache) {
+        if (stopped)
+            return false;
+        
         List l = new ArrayList(c.size());
         for (Iterator iter = c.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             if (hostIsAllowed(rfd) && allowAddition(rfd))
                 l.add(rfd);
         }
+        
         return addDownloadForced(l,cache);
     }
 
@@ -1330,26 +1326,30 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( rfd.isMe() )
             return true;
         
+        // already downloading from the host
+        if (currentRFDs.contains(rfd))
+            return true;
+        
         prepareRFD(rfd,cache);
         
-        //...and notify manager to look for new workers.  You might be
-        //tempted to just call dloaderManagerThread.interrupt(), but that
-        //causes spurious interrupts to happen when establishing connections
-        //(push or otherwise).  So instead we target the two cases we're
+        //...and notify manager to look for new workers.  The two cases we're
         //interested: waiting for downloaders to complete (by waiting on
         //this) or waiting for retry (handled by DownloadManager).
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("added rfd: " + rfd);
-        if(isInactive() || dloaderManagerThread == null)
-            receivedNewSources = true;
+        if (ranker.addToPool(rfd)){
+            if(LOG.isTraceEnabled())
+                LOG.trace("added rfd: " + rfd);
+            if(isInactive() || dloaderManagerThread == null)
+                receivedNewSources = true;
+        }
         
-        // Add to the list of RFDs to connect to.
-        ranker.addToPool(rfd);
         return true;
     }
     
     protected synchronized final boolean addDownloadForced(Collection c, boolean cache) {
+        // remove any rfds we're currently downloading from 
+        c.removeAll(currentRFDs);
+        
         for (Iterator iter = c.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             if (rfd.isMe()) {
@@ -1361,12 +1361,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.trace("added rfd: " + rfd);
         }
         
-        if ( ranker.hasMore() ) {
+        if ( ranker.addToPool(c) ) {
             if(isInactive() || dloaderManagerThread == null)
                 receivedNewSources = true;
         }
         
-        ranker.addToPool(c);
         return true;
     }
     
@@ -1374,18 +1373,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         rfd.setDownloading(true);
         if(downloadSHA1 == null)
             downloadSHA1 = rfd.getSHA1Urn();
-            
-        // If this already exists in allFiles, DO NOT ADD IT AGAIN.
-        // However, we must still add it to files if it didn't already exist
-        // there.
 
-        // If cache is already false, there is no need to look in allFiles.
-        if (cache) 
-            cache = !allFiles.contains(rfd);
-        
-        //Append to allFiles for resume purposes if caching...
+        //add to allFiles for resume purposes if caching...
         if(cache) 
-            allFiles.add(rfd);        
+            cachedRFDs.add(rfd);        
     }
     
     /**
@@ -1527,10 +1518,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and invalidAlts is updated if good is false.
      * The IncompleteFileDesc is also notified of new locations for this
      * file.
+     * If we successfully downloaded from this host, cache it for future resume.
      */
     synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if (LOG.isDebugEnabled())
             LOG.debug("informing mesh that "+rfd+" is "+good);
+        
+        if (good)
+            cachedRFDs.add(rfd);
         
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
@@ -1673,9 +1668,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
-        for(Iterator i = allFiles.iterator(); i.hasNext(); )
+        for(Iterator i = cachedRFDs.iterator(); i.hasNext(); )
             ((RemoteFileDesc)i.next()).setRetryAfter(0);
-		ranker.addToPool(allFiles);
+		ranker.addToPool(cachedRFDs);
 
         if(paused) {
             paused = false;
@@ -1773,8 +1768,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Cleans up information before this downloader is removed from memory.
      */
     public synchronized void finish() {
-        if(allFiles != null) {
-            for (Iterator iter = allFiles.iterator(); iter.hasNext();) {
+        if(cachedRFDs != null) {
+            for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
 				RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
 				rfd.setDownloading(false);
 			}
@@ -1880,32 +1875,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
-
-    /**
-     * Returns the amount of time to wait in milliseconds before retrying,
-     * based on tries.  This is also the time to wait for * incoming pushes to
-     * arrive, so it must not be too small.  A value of * tries==0 represents
-     * the first try.
-     */
-    private synchronized long calculateWaitTime() {
-        if ((busyRFDs == null || busyRFDs.size()==0) && !ranker.hasMore())
-            return 0;
-        
-        // waitTime is in seconds
-        int waitTime = Integer.MAX_VALUE;
-        for (Iterator iter = busyRFDs.iterator(); iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-			waitTime = Math.min(waitTime, rfd.getWaitTime());
-		}
-        
-        if (LOG.isDebugEnabled())
-            LOG.debug("calculated wait time "+waitTime+ " seconds from rfds "+busyRFDs.size());
-        
-        // waitTime was in seconds
-        return (waitTime*1000);
-    }
-
-
     /**
      * Tries to initialize the download location and the verifying file. 
      * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
@@ -1914,7 +1883,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected int initializeDownload() {
         
         synchronized (this) {
-            if (allFiles.size()==0 && !ranker.hasMore()) 
+            if (cachedRFDs.size()==0 && !ranker.hasMore()) 
                 return GAVE_UP;
         }
         
@@ -2131,15 +2100,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 		// Add the alternate locations to the newly saved local file
 		if(validAlts != null && fileDesc != null)
-		    sendAlternateLocations(fileDesc);
+		    storeAlternateLocations(fileDesc);
 
 		return COMPLETE;
     }
     
     /**
-     * Notifies hosts about alternate locations, if necessary.
+     * Saves the alternate locations in a file and notifies the gui
      */
-    private void sendAlternateLocations(FileDesc fileDesc) {
+    private void storeAlternateLocations(FileDesc fileDesc) {
         URN fileHash = fileDesc.getSHA1Urn();
 		if(fileHash.equals(validAlts.getSHA1Urn())) {
 		    LOG.trace("MANAGER: adding valid alts to FileDesc");
@@ -2149,24 +2118,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             addLocationsToFile(validAlts, fileDesc);
 			//tell the library we have alternate locations
 			callback.handleSharedFileUpdate(completeFile);
-            HashSet set = null;
-            synchronized(this) {
-                set = new HashSet(rfds);
-            }
-            //If file is too small or partial sharing is off, send head request
-            if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES ||
-               !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
-                LOG.trace("MANAGER: starting HEAD request");
-                //for small files which never add themselves to the mesh
-                //while downloading, we need to send head requests, so we
-                //get added to the mesh
-                HeadRequester requester = new HeadRequester(set, fileHash, 
-                       fileDesc, fileDesc.getAlternateLocationCollection());
-                Thread headThread = 
-                               new ManagedThread(requester, "HEAD Request Thread");
-                headThread.setDaemon(true);
-                headThread.start();
-            }
         }
     }
     
@@ -2247,6 +2198,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         synchronized(this) {
             _workers.add(worker);
+            currentRFDs.add(rfd);
         }
 
         connectCreator.start();
@@ -2269,8 +2221,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         addActiveWorker(worker);
         chatList.addHost(worker.getDownloader());
         browseList.addHost(worker.getDownloader());
-        rfds.add(worker.getRFD());
-
     }
     
     void workerFailed(DownloadWorker failed) {
@@ -2284,6 +2234,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     synchronized void removeActiveWorker(DownloadWorker worker) {
+        currentRFDs.remove(worker.getRFD());
         List l = new ArrayList(getActiveWorkers());
         l.remove(worker);
         _activeWorkers = Collections.unmodifiableList(l);
@@ -2395,10 +2346,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized(this) {    
                 if (_workers.size() == 0 && !ranker.hasMore()) {                        
                     //No downloaders worth living for.
-                    if ( calculateWaitTime() > 0) {
+                    if ( ranker.calculateWaitTime() > 0) {
                         LOG.trace("MANAGER: terminating with busy");
                         return WAITING_FOR_RETRY;
-                    } else if( busyRFDs == null || busyRFDs.isEmpty() ) {
+                    } else {
                         LOG.trace("MANAGER: terminating w/o hope");
                         return GAVE_UP;
                     }
@@ -2417,13 +2368,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // see if we need to update our ranker
                     ranker = SourceRanker.getAppropriateRanker(ranker);
                     
-                    // if the ranker has become empty, reset it and 
-                    // give it any previously busy rfds to try again
-                    if (!ranker.hasMore())  {
-                        ranker.stop();
-                        reloadBusyHosts();
-                    }
-                    
                     if (ranker.hasMore()) {
                         
                         // get the best host
@@ -2432,12 +2376,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
                         if( rfd.isBusy() ) {
-                            busyRFDs.add(rfd);
+                            addRFD(rfd);
                             continue; // see if we need to be waiting for busy
-                        } else {
+                        } else 
                             startWorker(rfd);
-                            allFiles.add(rfd);
-                        }
                     }
                     
                 } else if (LOG.isDebugEnabled())
@@ -2455,26 +2397,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
-     * adds any hosts that were previously busy but whose wait time is now
-     * expired to the ranker (resetting it first)
-     */
-    private void reloadBusyHosts() {
-        List l = new ArrayList(busyRFDs.size());
-        for (Iterator iter = busyRFDs.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd.isBusy())
-                continue;
-            iter.remove();
-            l.add(rfd);
-        }
-        
-        if (LOG.isDebugEnabled())
-            LOG.debug("going to re-rank previously busy hosts: "+l+" not yet "+busyRFDs);
-        
-        ranker.addToPool(l);
-    }
-    
-    /**
      * @return if we should start another worker - means we have more to download,
      * have not reached our swarm capacity and the ranker has something to offer
      * or we have some rfds to re-try
@@ -2482,7 +2404,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private boolean shouldStartWorker() {
         return (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen() ) &&
              ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
-             (ranker.hasMore() || !busyRFDs.isEmpty());
+             ranker.hasMore();
     }
     
     /**
@@ -2500,10 +2422,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {
-        if (rfd.isBusy())
-            busyRFDs.add(rfd);
-        else
-            ranker.addToPool(rfd);
+        ranker.addToPool(rfd);
 	}
     
 	/**
@@ -2531,11 +2450,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
-        return (ranker == null ? 0 : ranker.getKnownHosts());
+        return (ranker == null ? 0 : ranker.getNumKnownHosts());
     }
     
     public synchronized int getBusyHostCount() {
-        return busyRFDs.size();
+        return ranker.getNumBusyHosts();
     }
 
     public synchronized int getQueuedHostCount() {
@@ -2612,7 +2531,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         List allDocs = new ArrayList();
 
         // get all docs possible
-        for (Iterator iter = allFiles.iterator();iter.hasNext();) {
+        for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
 			LimeXMLDocument doc = rfd.getXMLDoc();
 			if(doc != null) {
@@ -2695,15 +2614,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
-        String ret = null;
-        //a) Return name of the file the user clicked on same as rfd[0]
-        //This solves core bug 122, as well as makes sure we display a filename
-        if (firstDesc != null) 
-            ret = firstDesc.getFileName();
-        else
+        if (fileName == null) {
             Assert.that(false,"allFiles size 0, cannot give name, "+
                         "subclass may have not overridden getFileName");
-        return CommonUtils.convertFileName(ret);
+        }
+        return CommonUtils.convertFileName(fileName);
     }
 
 
@@ -2712,7 +2627,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 *  RFD.
      */
 	protected synchronized boolean hasRFD() {
-        return ( allFiles != null && !allFiles.isEmpty());
+        return ( cachedRFDs != null && !cachedRFDs.isEmpty());
 	}
 	
 
@@ -2721,10 +2636,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //TODO: this can also mean we've FINISHED the download.  Luckily it
         //doesn't really matter.
         if (_activeWorkers.size()==0) {
-			if (firstDesc != null) 
-                return firstDesc.getSize();
-			else 
-				return -1;
+			return fileSize;
         } else 
             //Could also use currentFileSize, but this works.
             return ((DownloadWorker)_activeWorkers.get(0)).getDownloader()

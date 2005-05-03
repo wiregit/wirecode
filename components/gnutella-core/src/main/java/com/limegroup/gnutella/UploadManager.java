@@ -26,6 +26,7 @@ import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -203,6 +204,9 @@ public class UploadManager implements BandwidthTracker {
      * The file index used in this structure to indicate a HTTP Resource Get.
      */
     public static final int RESOURCE_INDEX = -7;
+	
+	public static final int RSS_INDEX = -8;
+	public static final int FAVICON_INDEX = -9;
     
     /**
      * Constant for HttpRequestLine parameter
@@ -218,6 +222,9 @@ public class UploadManager implements BandwidthTracker {
      * Constant for file-view gif get.
      */
     public static final String RESOURCE_GET = "/gnutella/res/";
+	
+	public static final String RSS_GET = "/rss";
+	public static final String FAVICON_GET = "/favicon.ico";
 
 	/**
      * Remembers uploaders to disadvantage uploaders that
@@ -266,7 +273,7 @@ public class UploadManager implements BandwidthTracker {
                 
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
-                
+
                 String fileName = line._fileName;
                 
                 // Determine if this is a new file ...
@@ -444,7 +451,7 @@ public class UploadManager implements BandwidthTracker {
             close(socket);
         }
     }
-    
+	
     /**
      * Determines whether or no this Uploader should be shown
      * in the GUI.
@@ -457,6 +464,8 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getIndex() != RESOURCE_INDEX &&
+               uploader.getIndex() != RSS_INDEX &&
+               uploader.getIndex() != FAVICON_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD &&
                !uploader.isNetworkShare();
 	}
@@ -556,6 +565,13 @@ public class UploadManager implements BandwidthTracker {
         case MALFORMED_REQUEST_INDEX:
             uploader.setState(Uploader.MALFORMED_REQUEST);
             return;
+        case RSS_INDEX :
+			uploader.setState(Uploader.RSS_REQUEST);
+			return;
+        case FAVICON_INDEX :
+			uploader.setState(Uploader.FILE_NOT_FOUND);
+			return;
+			//alternatively set a singleton favicon FileDesc
         default:
         
             // This is the normal case ...
@@ -1291,15 +1307,17 @@ public class UploadManager implements BandwidthTracker {
             //and the http information part
             StringTokenizer st = new StringTokenizer(requestLine);
 
-            if(st.countTokens() < 2) {
-                throw new IOException("invalid request: "+requestLine);
-            }
+            if(st.countTokens() < 2) 
+				throw new IOException("invalid request: "+requestLine);
+            
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
 			Map parameters = null;
             boolean hadPassword = false;
-			
+
+			if (LOG.isDebugEnabled())
+				LOG.debug("first word is "+fileInfoPart);
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
@@ -1317,6 +1335,12 @@ public class UploadManager implements BandwidthTracker {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
                 UploadStat.UPDATE_FILE.incrementStat();
+            } else if (fileInfoPart.equals(RSS_GET)) {
+				index = RSS_INDEX;
+				fileName = RSS_GET;
+            } else if (fileInfoPart.equals(FAVICON_GET)) {
+				index = FAVICON_INDEX;
+				fileName = FAVICON_GET;
             } else if (fileInfoPart.startsWith("/gnutella/push-proxy") ||
                        fileInfoPart.startsWith("/gnet/push-proxy")) {
                 // start after the '?'
@@ -1496,7 +1520,7 @@ public class UploadManager implements BandwidthTracker {
          * Guaranteed to be non null.
          */
         final Map _params;
-
+		
         public String toString() {
             return "Index = " + _index + ", FileName = " + _fileName +
             ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
@@ -1561,6 +1585,10 @@ public class UploadManager implements BandwidthTracker {
         boolean hadPassword() {
             return _hadPass;
         }
+		
+		boolean isRSS() {
+			return _fileName.equals(RSS_GET);
+		}
   	}
 
     /** Calls measureBandwidth on each uploader. */

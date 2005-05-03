@@ -119,9 +119,13 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         
         Assert.that(_defaultURLs != null &&  _defaultURLs.length > 0);
         
+        RemoteFileDesc firstDesc = null;
+        
         for (int i = 0; i < _defaultURLs.length && firstDesc == null; i++) {
             try {
                 firstDesc = createRemoteFileDesc(_defaultURLs[i],_filename,_urn);
+                fileName = firstDesc.getFileName();
+                fileSize = firstDesc.getSize();
             } catch (IOException badRFD) {}
         }
         

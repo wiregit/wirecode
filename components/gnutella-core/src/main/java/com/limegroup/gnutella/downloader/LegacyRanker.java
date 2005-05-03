@@ -1,9 +1,11 @@
 
 package com.limegroup.gnutella.downloader;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -28,10 +30,10 @@ public class LegacyRanker extends SourceRanker {
 		rfds = new HashSet();
 	}
 	
-	public synchronized void addToPool(RemoteFileDesc host) {
+	public synchronized boolean addToPool(RemoteFileDesc host) {
         if (LOG.isDebugEnabled())
             LOG.debug("adding host "+host+" to be ranked",new Exception());
-		rfds.add(host);
+		return rfds.add(host);
 	}
 
     /** 
@@ -100,8 +102,28 @@ public class LegacyRanker extends SourceRanker {
         return rfds;
     }
     
-    public int getKnownHosts() {
+    protected Collection getBusyHosts() {
+        List ret = new ArrayList(rfds);
+        for (Iterator iter = ret.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (!rfd.isBusy())
+                iter.remove();
+        }
+        return ret;
+    }
+    
+    public int getNumKnownHosts() {
         return rfds.size();
+    }
+    
+    public int getNumBusyHosts() {
+        int busy = 0;
+        for (Iterator iter = rfds.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd.isBusy())
+                busy++;
+        }
+        return busy;
     }
     
     public void stop(){}

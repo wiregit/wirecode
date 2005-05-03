@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,7 +15,12 @@ import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 
 public final class LimeXMLDocumentHelper{
@@ -136,4 +143,39 @@ public final class LimeXMLDocumentHelper{
         buffer.append(schema.getRootXMLName());
         buffer.append(">");
     }
+
+	public static String getRSSItem(FileDesc f) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<item>");
+		buf.append("<title>").append(f.getName()).append("</title>");
+		
+		// put all xml documents in the item as well
+		for (Iterator iter = f.getLimeXMLDocuments().iterator(); iter.hasNext();) {
+			LimeXMLDocument doc = (LimeXMLDocument) iter.next();
+			buf.append("<limedoc><![CDATA[").append(doc.getXMLString()).append("]]></limedoc>");	
+		}
+		
+		// add a magnet - if we couldn't accept incoming tcp we wouldn't be
+		// servicing this request anyway
+		try {
+			IpPort me = 
+				new IpPortImpl(NetworkUtils.ip2string(RouterService.getExternalAddress()),
+						RouterService.getPort());
+			buf.append("<description><![CDATA[<html>To download this file, click <a href=\"").
+				append("magnet:?xt=urn:sha1:").append("&amp;dn=").
+				append(f.getName()).append("&amp;xs=http://").append(me.getAddress()).
+				append(":").append(me.getPort()).
+				append("/uri-res/N2R?").append(f.getSHA1Urn()).append("\">here</a>").
+				append("\n\nSome info about the file: ").append(f).append("</html>").
+				append("]]></description>");
+		} catch (UnknownHostException ignored){}
+		
+		// the date
+		buf.append("<pubDate>").append(new Date(f.lastModified())).append("</pubDate>");
+		
+		// the guid is the sha1
+		buf.append("<guid>").append(f.getSHA1Urn().httpStringValue()).append("</guid>");
+		buf.append("</item>");
+		return buf.toString();
+	}
 }

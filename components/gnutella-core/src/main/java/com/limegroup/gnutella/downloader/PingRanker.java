@@ -62,11 +62,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private TreeSet verifiedHosts;
     
-    /**
-     * IpPorts/PEs of people that we have ever known about - used to filter
-     * incoming altlocs (and eventually to prepare bloom filters) 
-     */
-    private Set everybody,everybodyPush;
     
     /**
      * The urn to use to create pings
@@ -97,43 +92,41 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
-        everybody = new IpPortSet();
-        everybodyPush = new HashSet();
     }
     
-    public synchronized void addToPool(Collection c)  {
-        List l;
-        if (c instanceof List)
-            l = (List)c;
-        else
-            l = new ArrayList(c);
-        
+    public synchronized boolean addToPool(Collection c)  {
+        List l = Collections.list(Collections.enumeration(c));
         Collections.sort(l,ALT_DEPRIORITIZER);
-        addInternal(l);
+        return addInternal(l);
     }
     
     /**
      * adds the collection of hosts to to the internal structures
      */
-    private void addInternal(Collection c) {
-        for (Iterator iter = c.iterator(); iter.hasNext();) 
-            addInternal((RemoteFileDesc)iter.next());
+    private boolean addInternal(Collection c) {
+        boolean ret = false;
+        for (Iterator iter = c.iterator(); iter.hasNext();) { 
+            if (addInternal((RemoteFileDesc)iter.next()))
+                ret = true;
+        }
         
         pingNewHosts();
+        return ret;
     }
     
-    public synchronized void addToPool(RemoteFileDesc host){
-        addInternal(host);
+    public synchronized boolean addToPool(RemoteFileDesc host){
+        boolean ret = addInternal(host);
         pingNewHosts();
+        return ret;
     }
     
-    private void addInternal(RemoteFileDesc host) {
+    private boolean addInternal(RemoteFileDesc host) {
         // initialize the sha1 if we don't have one
         if (sha1 == null) {
             if( host.getSHA1Urn() != null)
                 sha1 = host.getSHA1Urn();
             else
-                return; // we can't do anything yet
+                return false; // we can't do anything yet
         }
         
         // initialize the guid if we don't have one
@@ -145,25 +138,16 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
         // do not allow duplicate hosts from alternate locations
         if (host.isFromAlternateLocation() && knowsAboutHost(host))
-                return;
-        
-        if (host.needsPush()) 
-            everybodyPush.add(host.getPushAddr());
-        else
-            everybody.add(host);
+                return false;
         
         if(LOG.isDebugEnabled())
             LOG.debug("adding new host "+host+" "+host.getPushAddr());
         
-        newHosts.add(host);
+        return newHosts.add(host);
     }
     
     private boolean knowsAboutHost(RemoteFileDesc host) {
-        if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
-            return true;
-        else if (everybody.contains(host))
-            return true;
-        return false;
+        return pingedHosts.values().contains(host) || verifiedHosts.contains(host);
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
@@ -183,6 +167,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             r.addToPool(newHosts);
             ret = r.getBest();
             newHosts.remove(ret);
+            pingedHosts.remove(ret);
             for (Iterator iter = pingedHosts.entrySet().iterator(); iter.hasNext();) {
                 Map.Entry entry = (Map.Entry) iter.next();
                 if (entry.getValue().equals(ret))
@@ -206,7 +191,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             return;
         
         // if we don't have anybody to ping, don't ping
-        if (newHosts.isEmpty())
+        Collection free = filterBusy(true);
+        if (free.isEmpty())
             return;
         
         // if we haven't found a single RFD with URN, don't ping anybody
@@ -226,7 +212,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         int batch = DownloadSettings.PING_BATCH.getValue();
         List toSend = new ArrayList(batch);
         int sent = 0;
-        for (Iterator iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
+        for (Iterator iter = free.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
             iter.remove();
             
@@ -242,12 +228,31 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (LOG.isDebugEnabled()) {
             LOG.debug("\nverified hosts " +verifiedHosts.size()+
                     "\npingedHosts "+pingedHosts.values().size()+
-                    "\nnewHosts "+newHosts.size()+
+                    "\nnewHosts "+free.size()+
                     "\npinging hosts: "+sent);
         }
         
         pinger.rank(toSend,null,this,ping);
         lastPingTime = now;
+    }
+    
+    /**
+     * @param busy whether we want to filter busy or non-busy hosts
+     * @return subsets of new hosts that satisfy the above criteria
+     */
+    private Collection filterBusy(boolean busy) {
+        List filtered = new ArrayList(newHosts);
+        for (Iterator iter = filtered.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if ((rfd.isBusy() && busy) ||
+                (!rfd.isBusy() && !busy)) 
+                    iter.remove();
+        }
+        return filtered;
+    }
+    
+    protected Collection getBusyHosts() {
+        return filterBusy(false);
     }
     
     /**
@@ -356,8 +361,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         verifiedHosts.clear();
         pingedHosts.clear();
         newHosts.clear();
-        everybody.clear();
-        everybodyPush.clear();
         if (myGUID != null) {
             RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
@@ -372,8 +375,26 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         return ret;
     }
     
-    public synchronized int getKnownHosts() {
+    public synchronized int getNumKnownHosts() {
         return verifiedHosts.size()+newHosts.size()+pingedHosts.size();
+    }
+    
+    public  int getNumBusyHosts() {
+        
+        List both;
+        synchronized(this) {
+            both = new ArrayList(verifiedHosts.size() + newHosts.size());
+            both.addAll(verifiedHosts);
+            both.addAll(newHosts);
+        }
+        
+        int busy = 0;
+        for (Iterator iter = both.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd.isBusy())
+                busy++;
+        }
+        return busy;
     }
     
     /**

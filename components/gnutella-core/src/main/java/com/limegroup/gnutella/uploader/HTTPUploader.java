@@ -391,6 +391,9 @@ public final class HTTPUploader implements Uploader {
         case THEX_REQUEST:
         	_state = new THEXUploadState(this, STALLED_WATCHDOG);
         	break;
+        case RSS_REQUEST:
+			_state = new RSSUploadState();
+			break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -975,6 +978,7 @@ public final class HTTPUploader implements Uploader {
 		if (SharingSettings.ALLOW_BROWSER.getValue() == false
             && !(_stateNum == BROWSE_HOST)  
             && !(_stateNum == PUSH_PROXY)  
+            && !(_stateNum == RSS_REQUEST)
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
 			// if we are not supposed to read from them
 			// throw an exception
