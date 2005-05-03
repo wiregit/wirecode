@@ -499,7 +499,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private long lastQuerySent;
     
     /** the name of the file we're downloading */
-    protected String fileName;
+    protected String defaultFileName;
     
     /** the size of the completed file we're downloading */
     protected int fileSize;
@@ -535,7 +535,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if (files != null) {
 			cachedRFDs.addAll(Arrays.asList(files));
             if (files.length > 0) {
-                this.fileName = files[0].getFileName();
+                this.defaultFileName = files[0].getFileName();
                 this.fileSize = files[0].getSize();
             }
         }
@@ -556,17 +556,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 		RemoteFileDesc []rfds = new RemoteFileDesc[cachedRFDs.size()];
         
         stream.writeObject(cachedRFDs);
-        stream.writeObject(fileName); // npe?
-        stream.writeObject(new Integer(fileSize));
         
         //Blocks can be written to incompleteFileManager from other threads
         //while this downloader is being serialized, so lock is needed.
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-        //We used to write BandwidthTrackerImpl here. For backwards compatibility,
-        //we write one as a place-holder.  It is ignored when reading.
-		stream.writeObject(BANDWIDTH_TRACKER_IMPL);
+        Map karlsMap = new HashMap();
+        karlsMap.put("defaultFileName",defaultFileName);
+        stream.writeObject(karlsMap);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -584,21 +582,23 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (next instanceof RemoteFileDesc[]) {
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
             if (rfds != null && rfds.length > 0) {
-                fileName = rfds[0].getFileName();
+                defaultFileName = rfds[0].getFileName();
                 fileSize = rfds[0].getSize();
             }
             cachedRFDs = new HashSet(Arrays.asList(rfds));
         } else {
             // new format
             cachedRFDs = (Set) next;
-            fileName = (String)stream.readObject();
-            fileSize = ((Integer)stream.readObject()).intValue();
+            if (cachedRFDs.size() > 0) {
+                RemoteFileDesc any = (RemoteFileDesc)cachedRFDs.iterator().next();
+                fileSize = any.getSize();
+            }
         }
 		
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
-		//Old versions used to read BandwidthTrackerImpl here.  Now we just use
-		//one as a place holder.
-        stream.readObject();
+        
+        Map karlsMap = (Map)stream.readObject();
+        defaultFileName = (String) karlsMap.get("defaultFileName");
     }
 
     /** 
@@ -1135,9 +1135,9 @@ public class ManagedDownloader implements Downloader, Serializable {
       throws CantResumeException {
         Assert.that(!cachedRFDs.isEmpty(), "precondition violated");
 		    
-        String queryString = StringUtils.createQueryString(fileName);
+        String queryString = StringUtils.createQueryString(defaultFileName);
         if(queryString == null || queryString.equals(""))
-            throw new CantResumeException(fileName);
+            throw new CantResumeException(defaultFileName);
         else
             return QueryRequest.createQuery(queryString);
             
@@ -2622,11 +2622,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
-        if (fileName == null) {
+        if (defaultFileName == null) {
             Assert.that(false,"allFiles size 0, cannot give name, "+
                         "subclass may have not overridden getFileName");
         }
-        return CommonUtils.convertFileName(fileName);
+        return CommonUtils.convertFileName(defaultFileName);
     }
 
 
