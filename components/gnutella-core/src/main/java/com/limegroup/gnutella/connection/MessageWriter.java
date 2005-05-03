@@ -70,7 +70,6 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
                 stats.addSentDropped(dropped);
                 if(m == null)
                     break;
-                    
                 m.write(out);
                 sendHandler.processSentMessage(m);
                 if(writeRemaining(source))

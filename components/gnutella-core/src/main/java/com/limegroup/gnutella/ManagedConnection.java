@@ -320,7 +320,7 @@ public class ManagedConnection extends Connection
 		    queue = new CompositeQueue();
 		else
 		    queue = new BasicQueue();
-		    
+
 		if(isAsynchronous()) {
 		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
 		    _outputRunner = messager;

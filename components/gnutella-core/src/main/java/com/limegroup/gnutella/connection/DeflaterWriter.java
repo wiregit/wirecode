@@ -22,8 +22,8 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     private ByteBuffer incoming;
     /** The deflater to use */
     private Deflater deflater;
-    /** If we've done a synch on the current set of input */
-    private boolean synched = false;
+    /** The sync level we're on.  0: not sync, 1: NO_COMPRESSION, 2: DEFAULT */
+    private int sync = 0;
     /** An empty byte array to reuse. */
     private static final byte[] EMPTY = new byte[0];
     
@@ -98,7 +98,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
      *      
      */
     public boolean handleWrite() throws IOException {
-        WritableByteChannel source = channel;
+        InterestWriteChannel source = channel;
         if(source == null)
             throw new IllegalStateException("writing with no source.");
             
@@ -118,12 +118,17 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
             // Step 3: Normal deflate didn't work, try to simulate a SYNCH_FLUSH
             // Note that this requires we tried deflating until deflate returned 0
             // above.  Otherwise, this setInput call would erase prior input.
-            if(!synched) {
+            // We must use different levels of syncing because we have to make sure
+            // that we write everything out of deflate after each level is set.
+            // Otherwise compression doesn't work.
+            if(sync == 0) {
                 deflater.setInput(EMPTY);
                 deflater.setLevel(Deflater.NO_COMPRESSION);
-                deflater.deflate(EMPTY);
+                sync = 1;
+                continue;
+            } else if(sync == 1) {
                 deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
-                synched = true;
+                sync = 2;
                 continue;
             }
             
@@ -141,10 +146,15 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
             //Step 5: We've got new data to deflate.
             deflater.setInput(incoming.array(), 0, incoming.position());
             incoming.clear();
-            synched = false;
+            sync = 0;
         }
         
-        return outgoing.hasRemaining(); // return true iff there is still data to write.
+        if(outgoing.hasRemaining()) {
+            return true;
+        } else {
+            source.interest(this, false); // we've written everything.
+            return false;
+        }
     }
     
     /** Shuts down the last observer. */
