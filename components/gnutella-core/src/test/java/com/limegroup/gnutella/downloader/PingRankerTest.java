@@ -176,7 +176,7 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(GUID.makeGuid());
         RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
         ranker.addToPool(original);
-        Thread.sleep(10);
+        Thread.sleep(30);
         ranker.addToPool(original2);
         
         assertEquals(3,pinger.hosts.size());
@@ -507,7 +507,7 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(guid);
         String s = g.toHexString();
         if (host != null)
-            s = s+";fwt/1.0;" +host.substring(host.indexOf(":")+1)+host.substring(0,host.indexOf(":"));
+            s = s+";fwt/1.0;" +host.substring(host.indexOf(":")+1)+":"+host.substring(0,host.indexOf(":"));
         else 
             host = "1.1.1.1";
          s =s+ ";"+proxy;

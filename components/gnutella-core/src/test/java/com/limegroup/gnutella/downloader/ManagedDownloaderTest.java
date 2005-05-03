@@ -335,7 +335,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   callback);
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
-            Thread.sleep(75000);
+            Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
             // input from the user
             assertEquals("should have read 100 bytes", 100, 
