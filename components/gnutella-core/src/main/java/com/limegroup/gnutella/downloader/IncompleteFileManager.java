@@ -202,6 +202,10 @@ public class IncompleteFileManager implements Serializable {
             return f.getCanonicalFile();
     }       
 
+    public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
+        return getFile(rfd.getFileName(),rfd.getSHA1Urn(),rfd.getSize());
+    }
+    
     /** 
      * Returns the fully-qualified temporary download file for the given
      * file/location pair.  The location of the file is determined by the
@@ -225,7 +229,7 @@ public class IncompleteFileManager implements Serializable {
      * @throws IOException if there was an IOError while determining the
      * file's name.
      */
-    public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
+    public synchronized File getFile(String name, URN sha1, int size) throws IOException {
         boolean dirsMade = false;
         File baseFile = null;
         File canonFile = null;
@@ -235,11 +239,10 @@ public class IncompleteFileManager implements Serializable {
 		//make sure its created.. (the user might have deleted it)
 		dirsMade = incDir.mkdirs();
 		
-		String convertedName = CommonUtils.convertFileName(rfd.getFileName());
+		String convertedName = CommonUtils.convertFileName(name);
 
         try {
 
-        URN sha1=rfd.getSHA1Urn();
         if (sha1!=null) {
             File file=(File)hashes.get(sha1);
             if (file!=null) {
@@ -250,7 +253,7 @@ public class IncompleteFileManager implements Serializable {
                 //the value set of HASHES.  Because we allow risky resumes,
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
-                    file = new File(incDir, tempName(convertedName, rfd.getSize(), i));
+                    file = new File(incDir, tempName(convertedName, size, i));
                     baseFile = file;
                     file = canonicalize(file);
                     canonFile = file;
@@ -274,7 +277,7 @@ public class IncompleteFileManager implements Serializable {
         } else {
             //No hash.
             File f = new File(incDir, 
-                        tempName(convertedName, rfd.getSize(), 0));
+                        tempName(convertedName, size, 0));
             baseFile = f;
             f = canonicalize(f);
             canonFile = f;

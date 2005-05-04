@@ -61,6 +61,14 @@ public abstract class SourceRanker {
     public abstract int getNumBusyHosts();
     
     /**
+     * @return the ranker knows about at least one potential source that is
+     * not currently busy
+     */
+    public synchronized boolean hasNonBusy() {
+        return getNumKnownHosts() > getNumBusyHosts();
+    }
+    
+    /**
      * @return how much time we should wait before at least one host
      * will become non-busy
      */

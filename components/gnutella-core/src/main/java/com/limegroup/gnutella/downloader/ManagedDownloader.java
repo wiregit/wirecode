@@ -498,12 +498,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private long lastQuerySent;
     
-    /** the name of the file we're downloading */
-    protected String defaultFileName;
-    
-    /** the size of the completed file we're downloading */
-    protected int fileSize;
-    
     /**
      * The current priority of this download -- only valid if inactive.
      * Has no bearing on the download itself, and is used only so that the
@@ -511,6 +505,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * every second, for GUI updates.
      */
     private volatile int inactivePriority;
+    
+    protected Map propertiesMap;
+    
+    protected static final String DEFAULT_FILENAME = "defaultFileName";
+    protected static final String FILE_SIZE = "fileSize";
 
 
     /**
@@ -534,16 +533,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.cachedRFDs = new HashSet();
 		if (files != null) {
 			cachedRFDs.addAll(Arrays.asList(files));
-            if (files.length > 0) {
-                this.defaultFileName = files[0].getFileName();
-                this.fileSize = files[0].getSize();
-            }
+            if (files.length > 0) 
+                initPropertiesMap(files[0]);
         }
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
     }
 
+    protected void initPropertiesMap(RemoteFileDesc rfd) {
+        propertiesMap = new HashMap();
+        propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
+        propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
+        propertiesMap = Collections.unmodifiableMap(propertiesMap);
+    }
+    
     /** 
      * See note on serialization at top of file 
      * <p>
@@ -553,7 +557,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
-		RemoteFileDesc []rfds = new RemoteFileDesc[cachedRFDs.size()];
         
         stream.writeObject(cachedRFDs);
         
@@ -562,9 +565,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-        Map karlsMap = new HashMap();
-        karlsMap.put("defaultFileName",defaultFileName);
-        stream.writeObject(karlsMap);
+        
+        stream.writeObject(propertiesMap);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -581,24 +583,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         // old format
         if (next instanceof RemoteFileDesc[]) {
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
-            if (rfds != null && rfds.length > 0) {
-                defaultFileName = rfds[0].getFileName();
-                fileSize = rfds[0].getSize();
-            }
+            if (rfds != null && rfds.length > 0) 
+                initPropertiesMap(rfds[0]);
             cachedRFDs = new HashSet(Arrays.asList(rfds));
         } else {
             // new format
             cachedRFDs = (Set) next;
             if (cachedRFDs.size() > 0) {
                 RemoteFileDesc any = (RemoteFileDesc)cachedRFDs.iterator().next();
-                fileSize = any.getSize();
+                initPropertiesMap(any); // in case the map isn't serialized
             }
         }
 		
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
         
-        Map karlsMap = (Map)stream.readObject();
-        defaultFileName = (String) karlsMap.get("defaultFileName");
+        Object map = stream.readObject();
+        if (map instanceof Map) 
+            propertiesMap = (Map)map;
+        else if (propertiesMap == null)
+            propertiesMap = Collections.EMPTY_MAP; 
     }
 
     /** 
@@ -685,7 +688,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
 		for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-			if (!downloadSHA1.equals(rfd.getSHA1Urn()) && rfd.getSHA1Urn() != null)
+			if (rfd.getSHA1Urn() != null && !downloadSHA1.equals(rfd.getSHA1Urn()))
 				iter.remove();
 		}
     }
@@ -983,9 +986,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (downloadSHA1 != null)
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
-        if (incompleteFile == null) {
-            RemoteFileDesc firstDesc = (RemoteFileDesc) cachedRFDs.iterator().next();
-            incompleteFile = incompleteFileManager.getFile(firstDesc);
+        if (incompleteFile == null) { 
+            incompleteFile = 
+                incompleteFileManager.getFile(getFileName(),downloadSHA1,getContentLength());
         }
     }
     
@@ -1133,15 +1136,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected synchronized QueryRequest newRequery(int numRequeries)
       throws CantResumeException {
-        Assert.that(!cachedRFDs.isEmpty(), "precondition violated");
 		    
-        String queryString = StringUtils.createQueryString(defaultFileName);
+        String queryString = StringUtils.createQueryString(getFileName());
         if(queryString == null || queryString.equals(""))
-            throw new CantResumeException(defaultFileName);
+            throw new CantResumeException(getFileName());
         else
             return QueryRequest.createQuery(queryString);
             
-        // if desired, we can create a SHA1 query also
     }
 
 
@@ -2346,20 +2347,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized(this) { 
                 // if everybody we know about is busy (or we don't know about anybody)
                 // and we're not downloading from anybody - terminate the download.
-                if (_workers.size() == 0){
-                    boolean allKnownBusy = false;
-                    synchronized(ranker) {
-                        allKnownBusy = ranker.getNumKnownHosts() == ranker.getNumBusyHosts(); 
-                    }
-                
-                    if (allKnownBusy)   {                        
-                        if ( ranker.calculateWaitTime() > 0) {
-                            LOG.trace("MANAGER: terminating with busy");
-                            return WAITING_FOR_RETRY;
-                        } else {
-                            LOG.trace("MANAGER: terminating w/o hope");
-                            return GAVE_UP;
-                        }
+                if (_workers.size() == 0 && !ranker.hasNonBusy())   {                        
+                    if ( ranker.calculateWaitTime() > 0) {
+                        LOG.trace("MANAGER: terminating with busy");
+                        return WAITING_FOR_RETRY;
+                    } else {
+                        LOG.trace("MANAGER: terminating w/o hope");
+                        return GAVE_UP;
                     }
                 }
                 
@@ -2621,11 +2615,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
-        if (defaultFileName == null) {
-            Assert.that(false,"allFiles size 0, cannot give name, "+
+        String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
+        if ( fileName == null) {
+            Assert.that(false,"defaultFileName is null, "+
                         "subclass may have not overridden getFileName");
         }
-        return CommonUtils.convertFileName(defaultFileName);
+        return CommonUtils.convertFileName(fileName);
     }
 
 
@@ -2639,15 +2634,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	
 
     public synchronized int getContentLength() {
-        //If we're not actually downloading, we just pick some random value.
-        //TODO: this can also mean we've FINISHED the download.  Luckily it
-        //doesn't really matter.
-        if (_activeWorkers.size()==0) {
-			return fileSize;
-        } else 
-            //Could also use currentFileSize, but this works.
-            return ((DownloadWorker)_activeWorkers.get(0)).getDownloader()
-                      .getRemoteFileDesc().getSize();
+        return ((Integer)propertiesMap.get(FILE_SIZE)).intValue();
     }
 
     /**
@@ -2895,7 +2882,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {
             ourFile = commonOutFile;
         }
-        return ourFile != null ? ourFile.getChunkSize() : 100000;
+        return ourFile != null ? ourFile.getChunkSize() : VerifyingFile.DEFAULT_CHUNK_SIZE;
     }
 	
     /**
