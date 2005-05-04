@@ -106,10 +106,10 @@ public class NIOServerSocket extends ServerSocket implements AcceptObserver {
             IOException x = storedException;
             storedException = null;
             
-            if(x != null)
-                throw x;
-            else if(isClosed())
+            if(isClosed())
                 throw new SocketException("Socket Closed");
+            else if(x != null)
+                throw x;
             else if(!isBound())
                 throw new SocketException("Not Bound!");
             else {

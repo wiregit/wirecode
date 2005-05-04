@@ -289,7 +289,10 @@ public class UDPService implements ReadWriteObserver {
 	 * Notification that an IOException occurred while reading/writing.
 	 */
 	public void handleIOException(IOException iox) {
-	    ErrorService.error(iox, "UDP Error.");
+        if( !(iox instanceof java.nio.channels.ClosedChannelException ) )
+            ErrorService.error(iox, "UDP Error.");
+        else
+            LOG.trace("Swallowing a UDPService ClosedChannelException");
 	}
 	
 	/**
