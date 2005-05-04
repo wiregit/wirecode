@@ -46,6 +46,8 @@ public class SettingTest extends BaseTestCase {
         IntSetting EXPIRABLE_INT_SETTING;
         BooleanSetting EXPIRABLE_BOOLEAN_SETTING;
         
+		ProxyFileSetting PROXY_FILE_SETTING;
+        
         TestSettings(File file) throws IOException {
             FACTORY = new SettingsFactory(file);
             
@@ -73,6 +75,9 @@ public class SettingTest extends BaseTestCase {
                 
             EXPIRABLE_BOOLEAN_SETTING =
                 FACTORY.createExpirableBooleanSetting("EXPIRABLE_BOOLEAN_SETTING", false);
+                
+			PROXY_FILE_SETTING = FACTORY.createProxyFileSetting
+			("PROXY_FILE_SETTING", FILE_SETTING);
                 
             FACTORY.getProperties().setProperty(LAST_EXPIRE_TIME, String.valueOf(System.currentTimeMillis()));
         }
@@ -257,6 +262,23 @@ public class SettingTest extends BaseTestCase {
                    Arrays.equals(testFileArray, 
                                  settings2.FILE_ARRAY_SETTING.getValue()));
                                  
+		// proxy file settings
+		// proxy is still unset so it should return the default setting's file
+		assertEquals("Proxy default comparison", 
+				settings2.PROXY_FILE_SETTING.getValue(),
+				settings2.FILE_SETTING.getValue());
+		// set new value
+		File proxyFile = new File("proxy-file-test");
+		settings2.PROXY_FILE_SETTING.setValue(proxyFile);
+		assertNotEquals("Proxy set value comparison",
+				settings2.PROXY_FILE_SETTING.getValue(),
+				settings2.FILE_SETTING.getValue());
+		// revert to default
+		settings2.PROXY_FILE_SETTING.revertToDefault();
+		assertEquals("Proxy default comparison after revert", 
+				settings2.PROXY_FILE_SETTING.getValue(),
+				settings2.FILE_SETTING.getValue());
+		
         assertEquals("Expiring Int set", 0xFFFF, settings2.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean set", true, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
         

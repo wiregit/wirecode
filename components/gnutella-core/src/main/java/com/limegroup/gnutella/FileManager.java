@@ -508,14 +508,13 @@ public abstract class FileManager {
      * @return An array of Files recursively obtained from the directory,
      * according to the filter.
      * 
-     * TODO:: add test!
      */
     public static File[] getFilesRecursive(File directory,
                                            String[] filter) {
         ArrayList dirs = new ArrayList();
         // the return array of files...
         ArrayList retFileArray = new ArrayList();
-        File[] retArray = null;
+        File[] retArray = new File[0];
 
         // bootstrap the process
         if (directory.exists() && directory.isDirectory())

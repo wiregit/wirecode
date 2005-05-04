@@ -43,6 +43,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -445,9 +446,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		file.deleteOnExit();
 		
 		try {
+			File noWritePermissionDir = CommonUtils.isWindows() ? 
+					new File ("C:\\WINNT\\SYSTEM32\\") : new File("/");
 			ManagedDownloader dl = new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					new File("/"), "does not matter", false);
+					noWritePermissionDir, "does not matter", false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {

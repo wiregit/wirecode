@@ -45,6 +45,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private Response[] responses;
     private FileDesc[] files;
 
+	private File emptyDir = null;
+	private File emptyNameDir;
+	private File emptyExtensionDir;
+	private File recursiveDir;
+
     public FileManagerTest(String name) {
         super(name);
     }
@@ -70,6 +75,46 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    fman = new SimpleFileManager();
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	    
+		File tmpFile = File.createTempFile("tmp", "file");
+		File tmpDir = tmpFile.getParentFile();
+		tmpFile.delete();
+		
+		emptyDir = new File(tmpDir, "emptydir");
+		emptyDir.mkdir();
+		emptyDir.deleteOnExit();
+		
+		File subDir = new File(emptyDir, "subdir");
+		subDir.mkdir();
+		subDir.deleteOnExit();
+		
+		emptyNameDir = new File(tmpDir, "emptyname");
+		emptyNameDir.mkdir();
+		emptyNameDir.deleteOnExit();
+		
+		File f = new File(emptyNameDir, ".emptyname");
+		f.createNewFile();
+		f.deleteOnExit();
+		
+		emptyExtensionDir = new File(tmpDir, "emptyextension");
+		emptyExtensionDir.mkdir();
+		emptyExtensionDir.deleteOnExit();
+		
+		f = new File(emptyExtensionDir, "emptyextesion.");
+		f.createNewFile();
+		f.deleteOnExit();
+		
+		recursiveDir = new File(tmpDir, "recursivedir");
+		recursiveDir.mkdir();
+		recursiveDir.deleteOnExit();
+		f = new File(recursiveDir, "afile.txt");
+		f.createNewFile();
+		f.deleteOnExit();
+		f = new File(recursiveDir, "subdir");
+		f.mkdir();
+		f.deleteOnExit();
+		f = new File(f, "subfile.txt");
+		f.createNewFile();
+		f.deleteOnExit();
 	}
 	
 	public void tearDown() {
@@ -695,6 +740,37 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("specially shared file not found in list of shared files", found);
     }
 
+	public void testGetFilesRecursive() throws Exception {
+	
+		File[] files = FileManager.getFilesRecursive(emptyDir, null);
+		assertEquals("directory should have no files, only a subdir", 0, files.length);
+		
+		files = FileManager.getFilesRecursive(emptyNameDir, null);
+		assertEquals("directory should have 1 hidden file", 1, files.length);
+		
+		files = FileManager.getFilesRecursive(emptyNameDir, new String[] {
+				"emptyname"});
+		assertEquals("directory should have no file matching extension \"emptyname\"",
+				0, files.length);
+		
+		files = FileManager.getFilesRecursive(emptyExtensionDir, null);
+		assertEquals("directory should have one file", 1, files.length);
+		
+		files = FileManager.getFilesRecursive(emptyExtensionDir, 
+				new String[] { "" });
+		assertEquals("directory should have no file matching empty extension", 
+				0, files.length);
+		
+		// test if files in subdirectories are found too
+		files = FileManager.getFilesRecursive(recursiveDir, null);
+		assertEquals("wrong number of files found", 2, files.length);
+		
+		// test if files in subdirectories are found with filter
+		files = FileManager.getFilesRecursive(recursiveDir, new String[] {
+				"unmatchedextension", "", "txt"});
+		assertEquals("wrong number of matching files found", 2, files.length);
+	}
+	
     /**
      * Tests whether a directory placed on the non-recursive share list
      * successfully does not share files in its subdirectories. 
