@@ -163,16 +163,6 @@ public interface ActivityCallback
      */  
     public void uploadsComplete();
 
-
-    //authentication callbacks
-    /**
-     * Asks user to authenticate, and returns the information received from
-     * user
-     * @param host The host who is requesting authentication
-     * @return The authentication information input by user
-     */
-    public User getUserAuthenticationInfo(String host);
-    
     /**
      * Shows the user a message informing her that a file being downloaded 
      * is corrupt.

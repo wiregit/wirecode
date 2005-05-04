@@ -55,9 +55,6 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void error(int errorCode) { }
     public void error(int errorCode, Throwable t) { }
     public void error(Throwable t) { }
-    public User getUserAuthenticationInfo(String host) { 
-        return null;
-    }    
     public void promptAboutCorruptDownload(Downloader dloader) {
         corruptChecked = true;
         dloader.discardCorruptDownload(delCorrupt);

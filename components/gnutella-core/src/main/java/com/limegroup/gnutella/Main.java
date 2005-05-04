@@ -251,10 +251,6 @@ public class Main implements ActivityCallback, ErrorCallback {
     
     public void fileManagerLoaded() {}    
     
-    public User getUserAuthenticationInfo(String host){
-        return null;
-    }
-
     public void uploadsComplete() {}
 
     public void promptAboutCorruptDownload(Downloader dloader) {
