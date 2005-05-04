@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -500,6 +501,36 @@ public class ManagedConnection extends Connection
     public int getQueryRouteTableUnitsInUse() {
         return _lastQRPTableReceived == null ?
             -1 : _lastQRPTableReceived.getUnitsInUse();
+    }
+    
+    /**
+     * Creates a deflated output stream.
+     *
+     * If the connection supports asynchronous messaging, this does nothing,
+     * because we already installed an asynchronous writer that doesn't
+     * use streams.
+     */
+    protected OutputStream createDeflatedOutputStream(OutputStream out) {
+        if(isAsynchronous())
+            return out;
+        else
+            return super.createDeflatedOutputStream(out);
+    }
+    
+    /**
+     * Creates the deflated input stream.
+     *
+     * If the connection supports asynchronous messaging, this does nothing,
+     * because we're going to install a reader when we start looping for
+     * messages.  Note, however, that if we use the 'receive' calls
+     * instead of loopForMessages, an UncompressingInputStream is going to
+     * be set up automatically.
+     */
+    protected InputStream createInflatedInputStream(InputStream in) {
+        if(isAsynchronous())
+            return in;
+        else
+            return super.createInflatedInputStream(in);
     }
 
     /**

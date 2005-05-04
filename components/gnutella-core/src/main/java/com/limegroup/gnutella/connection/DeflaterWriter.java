@@ -7,8 +7,8 @@ import java.io.*;
 import java.util.zip.*;
 
 /**
- * Buffers data until it reaches a certain size (or enough time passes that
- * we definitely want to deflate).
+ * A channel that deflates data written to it & writes the deflated
+ * data to another sink.
  */
 public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     
@@ -27,10 +27,17 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     /** An empty byte array to reuse. */
     private static final byte[] EMPTY = new byte[0];
     
+    /**
+     * Constructs a new DeflaterWriter with the given deflater.
+     * You MUST call setWriteChannel prior to handleWrite.
+     */
     public DeflaterWriter(Deflater deflater) {
         this(deflater, null);
     }
     
+    /**
+     * Constructs a new DeflaterWriter with the given deflater & channel.
+     */
     public DeflaterWriter(Deflater deflater, InterestWriteChannel channel) {
         this.deflater = deflater;
         this.incoming = ByteBuffer.allocate(4 * 1024);
@@ -39,20 +46,37 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
         this.channel = channel;
     }
     
+    /** Retreives the sink. */
     public InterestWriteChannel getWriteChannel() {
         return channel;
     }
     
+    /** Sets the sink. */
     public void setWriteChannel(InterestWriteChannel channel) {
         this.channel = channel;
         channel.interest(this, true);
     }
     
-    public void interest(WriteObserver observer, boolean status) {
+    /**
+     * Used by an observer to interest themselves in when something can
+     * write to this.
+     *
+     * We must synchronize interest setting so that in the writing loop
+     * we can ensure that interest isn't turned on between the time we
+     * get the interested party, check for null, and turn off interest
+     * (if it was null).
+     */
+    public synchronized void interest(WriteObserver observer, boolean status) {
         this.observer = status ? observer : null;
         InterestWriteChannel source = channel;
+        // just always set interest on.  it's easiest & it'll be turned off
+        // immediately once we're notified if we don't wanna do anything.
+        // note that if we did want to do it correctly, we'd have to check
+        // incoming.hasRemaining() || outgoing.hasRemaining(), but since
+        // interest can be called in any thread, we'd have to introduce
+        // locking around incoming & outgoing, which just isn't worth it.
         if(source != null)
-            source.interest(this, true);
+            source.interest(this, true); 
     }
     
     /**
@@ -94,8 +118,11 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     }
     
     /**
-     * Attempts to write deflated data to the underlying source.
-     *      
+     * Writes as much data as possible to the underlying source.
+     * This tries to write any previously unwritten data, then tries
+     * to deflate any new data, then tries to get more data by telling
+     * its interested-observer to write to it.  This continues until
+     * there is no more data to be written or the sink is full.
      */
     public boolean handleWrite() throws IOException {
         InterestWriteChannel source = channel;
@@ -115,7 +142,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
                 continue; // we managed to deflate some data!
             }
                 
-            // Step 3: Normal deflate didn't work, try to simulate a SYNCH_FLUSH
+            // Step 3: Normal deflate didn't work, try to simulate a Z_SYNC_FLUSH
             // Note that this requires we tried deflating until deflate returned 0
             // above.  Otherwise, this setInput call would erase prior input.
             // We must use different levels of syncing because we have to make sure
@@ -152,7 +179,14 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
         if(outgoing.hasRemaining()) {
             return true;
         } else {
-            source.interest(this, false); // we've written everything.
+            // We technically have nothing left to write, however, it is possible
+            // that between the above check for interested.handleWrite & here,
+            // we got pre-empted and another thread turned on interest.
+            synchronized(this) {
+                if(observer == null) // no observer? good, we can turn interest off
+                    source.interest(this, false);
+                // else, we've got nothing to write, but our observer might.
+            }
             return false;
         }
     }

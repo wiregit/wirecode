@@ -498,17 +498,11 @@ public class Connection implements IpPort {
             // releases these buffers.
             if(isWriteDeflated()) {
                 _deflater = new Deflater();
-                _out = new CompressingOutputStream(_out, _deflater);
+                _out = createDeflatedOutputStream(_out);
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
-                if(!(isAsynchronous()))
-                    _in = new UncompressingInputStream(_in, _inflater);
-                // else (isAsynchronous())
-                //      lazily construct the UncompressingInputStream
-                //      (done so that if loopForMessages is used from ManagedConnection,
-                //       then asynchronous messaging can be installed.  tests use
-                //       receive [not loopForMessages].)
+                _in = createInflatedInputStream(_in);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -524,6 +518,16 @@ public class Connection implements IpPort {
             close();
             throw new BadHandshakeException(e);
         }
+    }
+    
+    /** Creates the output stream for deflating */
+    protected OutputStream createDeflatedOutputStream(OutputStream out) {
+        return new CompressingOutputStream(out, _deflater);
+    }
+    
+    /** Creates the input stream for inflating */
+    protected InputStream createInflatedInputStream(InputStream in) {
+        return new UncompressingInputStream(in, _inflater);
     }
     
     /**
@@ -994,11 +998,16 @@ public class Connection implements IpPort {
 
     /**
      * Returns the stream to use for writing to s.
-     * By default this is a BufferedOutputStream.
-     * Subclasses may override to decorate the stream.
+     * If the message supports asynchronous messaging, we don't need
+     * to buffer it, because it's already buffered internally.  Note, however,
+     * that buffering it would not be wrong, because we can always flush
+     * the buffered data.
      */
-    protected OutputStream getOutputStream()  throws IOException {
-        return new BufferedOutputStream(_socket.getOutputStream());
+    protected OutputStream getOutputStream() throws IOException {
+        if(isAsynchronous())
+            return _socket.getOutputStream();
+        else
+            return new BufferedOutputStream(_socket.getOutputStream());
     }
 
     /**
