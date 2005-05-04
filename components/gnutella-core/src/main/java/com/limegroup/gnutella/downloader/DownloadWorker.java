@@ -1125,6 +1125,7 @@ public class DownloadWorker implements Runnable {
      * no more ranges to download or no more people to steal from - finish download 
      */
     private ConnectionStatus handleNoMoreDownloaders() {
+        _manager.addRFD(_rfd);
         return ConnectionStatus.getNoData();
     }
     
