@@ -535,13 +535,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 			cachedRFDs.addAll(Arrays.asList(files));
             if (files.length > 0) 
                 initPropertiesMap(files[0]);
+            else
+                propertiesMap = Collections.EMPTY_MAP;
         }
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
     }
 
-    protected void initPropertiesMap(RemoteFileDesc rfd) {
+    protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
         propertiesMap = new HashMap();
         propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
         propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
@@ -2634,7 +2636,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 	
 
     public synchronized int getContentLength() {
-        return ((Integer)propertiesMap.get(FILE_SIZE)).intValue();
+        Integer i = (Integer)propertiesMap.get(FILE_SIZE);
+        return i != null ? i.intValue() : 0;
     }
 
     /**
