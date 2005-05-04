@@ -740,13 +740,20 @@ public class DownloadWorker implements Runnable {
             LOG.trace("assignAndRequest for: " + _rfd);
         
         try {
-            if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
-                assignWhite(http11);
-            } else {
-                synchronized(_stealLock) {
-                    assignGrey(); 
-                }
+            Interval interval = null;
+            synchronized(_commonOutFile) {
+                if (_commonOutFile.hasFreeBlocksToAssign() > 0)
+                    interval = pickAvailableInterval(http11);
             }
+            
+            // it is still possible that a worker has died and released their ranges
+            // just before we try to steal
+            if (interval == null) {
+                synchronized(_stealLock) {
+                    assignGrey();
+                }
+            } else
+                assignWhite(interval);
             
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -839,13 +846,9 @@ public class DownloadWorker implements Runnable {
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
-    private void assignWhite(boolean http11) throws 
+    private void assignWhite(Interval interval) throws 
     IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException, NoSuchRangeException,
-    NoSuchElementException {
-        //Assign "white" (unclaimed) interval to new downloader.
-        Interval interval = pickAvailableInterval(http11);
-
+    NotSharingException , QueuedException {
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.

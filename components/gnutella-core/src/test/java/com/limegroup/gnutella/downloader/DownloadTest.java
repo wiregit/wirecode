@@ -1047,47 +1047,6 @@ public class DownloadTest extends BaseTestCase {
         assertEquals(1, uploader1.getConnections());
     }
 
-    public void testDownloaderAddsSmallFilesWithHead() throws Exception {  
-        LOG.info("-Testing AlternateLocation write...");
-        Object[] params = new Object[2];
-        params[0] = saveDir;
-        params[1] = new File(".");
-        //add current dir as a save directory so MD sends head request
-        PrivilegedAccessor.invokeMethod
-        (RouterService.getFileManager(),"updateDirectories",params);
-        //make the .out extension shared so FM thinks its shared
-        FileManager man = RouterService.getFileManager();
-        Set exts = (Set) PrivilegedAccessor.getValue(man,"_extensions");
-        exts.add("out");
-        
-        RemoteFileDesc rfd1=
-                           newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc[] rfds = {rfd1};
-
-        tGeneric(rfds);
-
-        // give some time for the head thread to pass around the altlocs
-        Thread.sleep(1000);
-        
-        //Prepare to check the alternate locations
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocation dAlt = AlternateLocation.create(rfd1);
-           
-        URN sha1 = rfd1.getSHA1Urn();
-        URN uSHA1 = uploader1.getReportedSHA1();
-        
-        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
-        assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
-        //in the head requester case the uploader will be sent all the locations
-        //including itself. The download has no way of knowing it is sending the
-        //uploader the same uploaders location
-        assertEquals("wrong number of locs ",2, alt1.getAltLocsSize());
-        assertNotNull("rfd1 sha1", sha1);
-        assertNotNull("uploader1 sha1", uSHA1);
-        assertEquals("SHA1 test failed", sha1, uSHA1);
-        exts.remove("out");
-    }
-
     public void testTwoAlternateLocations() throws Exception {  
         LOG.info("-Testing Two AlternateLocations...");
         
