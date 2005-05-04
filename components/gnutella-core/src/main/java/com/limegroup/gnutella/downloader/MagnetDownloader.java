@@ -125,6 +125,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             try {
                 firstDesc = createRemoteFileDesc(_defaultURLs[i],_filename,_urn);
                 initPropertiesMap(firstDesc);
+                addDownloadForced(firstDesc,true);
             } catch (IOException badRFD) {}
         }
         
