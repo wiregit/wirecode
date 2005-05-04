@@ -2383,10 +2383,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                         
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
-                        if( rfd.isBusy() ) {
+                        if( rfd.isBusy() ) 
                             addRFD(rfd);
-                            continue; // see if we need to be waiting for busy
-                        } else 
+                         else 
                             startWorker(rfd);
                     }
                     
