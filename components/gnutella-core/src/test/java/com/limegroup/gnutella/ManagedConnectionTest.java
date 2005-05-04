@@ -81,6 +81,29 @@ public class ManagedConnectionTest extends BaseTestCase {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
     
+
+/*
+    private void tSendFlush() 
+		throws IOException, BadPacketException {
+        PingRequest pr=null;
+        long start=0;
+        long elapsed=0;
+
+        assertEquals("unexpected # sent messages", 0, out.getNumMessagesSent()); 
+        assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
+        pr=new PingRequest((byte)3);
+        out.send(pr);
+        start=System.currentTimeMillis();        
+        pr=(PingRequest)in.receive();
+        elapsed=System.currentTimeMillis()-start;
+        assertEquals("unexpected number of sent messages", 1, out.getNumMessagesSent());
+        assertEquals( pr.getTotalLength(), in.getUncompressedBytesReceived() );
+        assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
+        assertLessThan("Unreasonably long send time", 500, elapsed);
+        assertEquals("hopped something other than 0", 0, pr.getHops());
+        assertEquals("unexpected ttl", 3, pr.getTTL());
+    } */
+    
     /**
      * Tests the method for checking whether or not a connection is stable.
      */
@@ -120,19 +143,17 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ManagedConnection out = 
             new ManagedConnection("localhost", Backend.BACKEND_PORT);
         out.initialize();
-        out.buildAndStartQueues();        
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
 		// receive initial pings
-		out.receive();
-		out.receive();
-        out.receive();
+		drain(out);
 
         //assertTrue("connection should support GGEP", out.supportsGGEP());
 		out.send(new PingRequest((byte)3));
 		
-		Message m = out.receive();
+		Message m = getFirstInstanceOfMessageType(out, PingReply.class, 30000);
+		assertNotNull(m);
 		assertInstanceof("should be a pong", PingReply.class, m);
 		PingReply pr = (PingReply)m;
 
@@ -254,16 +275,14 @@ public class ManagedConnectionTest extends BaseTestCase {
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
         out.initialize();
-        out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
 		// receive all initial messages.
 		drain(out);
-        Thread.sleep(2000);
-        drain(out);
 		out.send(new PingRequest((byte)3));
 		
-		Message m = out.receive();
+		Message m = getFirstInstanceOfMessageType(out, PingReply.class, 10000);
+		assertNotNull(m);
 		assertInstanceof("should be a pong", PingReply.class, m);
 		PingReply pr = (PingReply)m;
 
@@ -284,15 +303,12 @@ public class ManagedConnectionTest extends BaseTestCase {
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
 		out = new ManagedConnection("localhost", Backend.BACKEND_PORT);
         out.initialize();            
-        out.buildAndStartQueues();
 
         //in=acceptor.accept(); 
 		assertTrue("connection should be open", out.isOpen());
-		assertTrue("runner should not be dead", !out.runnerDied());
         out.close();
         sleep(100);
         assertTrue("connection should not be open", !out.isOpen());
-        assertTrue("runner should have died", out.runnerDied());
 
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
         //in.close(); //needed to ensure connect below works
@@ -309,10 +325,8 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ManagedConnection out = ManagedConnection.createTestConnection("localhost", SERVER_PORT,
                 new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
 		out.initialize();            
-		out.buildAndStartQueues();
         Connection in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
-        assertTrue("runner should not be dead", !out.runnerDied());
 
 
         in.close();
@@ -325,7 +339,6 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         sleep(100);
         assertTrue("connection should not be open", !out.isOpen());
-        assertTrue("runner should be dead", out.runnerDied());
 
         //3. Remote close: discovered on write.  Because of TCP's half-close
         //semantics, we need TWO writes to discover this.  (See unit tests
@@ -338,11 +351,9 @@ public class ManagedConnectionTest extends BaseTestCase {
         out = ManagedConnection.createTestConnection("localhost", SERVER_PORT,
                 new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
         out.initialize();            
-        out.buildAndStartQueues();
         
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
-        assertTrue("runner should not be dead", !out.runnerDied());
         
         in.close();
         Message m = new PingRequest((byte)4);
@@ -355,7 +366,6 @@ public class ManagedConnectionTest extends BaseTestCase {
         sleep(500);
 
         assertTrue("connection should not be open", !out.isOpen());
-        assertTrue("runner should be dead", out.runnerDied());
 		sleep(2000);
     }
     
@@ -373,8 +383,6 @@ public class ManagedConnectionTest extends BaseTestCase {
 
 		out = new ManagedConnection("localhost", Backend.BACKEND_PORT);
         out.initialize();            
-        out.buildAndStartQueues();
-        
         
         // default should be no filtering
         assertFalse(out.isSpam(urnFile));

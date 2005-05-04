@@ -46,6 +46,20 @@ public class CompositeQueue implements MessageQueue {
     private int _priority = 0;
     
     /**
+     * The priority of the last message that was added.  If removeNext detects
+     * that it has gone through a cycle (and everything returned null), it marks
+     * the next removeNext to use the priorityHint to jump-start on the last
+     * added message.
+     */
+    private int _priorityHint = 0;
+    
+    /**
+     * The status of removeNext.  True if the last call was a complete cycle
+     * through all potential fields.
+     */
+    private boolean _cycled = true;
+    
+    /**
      * The number of messages we've dropped while adding or retrieving messages.
      */
     private int _dropped = 0;
@@ -84,29 +98,25 @@ public class CompositeQueue implements MessageQueue {
     private static final int PRIORITY_OTHER=6;    
     private static final int PRIORITY_OUR_QUERY=7; // seperate for re-originated leaf-queries.
     
-
-    /** 
-     * Constructs a new queue with the default message buffers. 
+    /**
+     * Constructs a new queue with the default sizes.
      */
     public CompositeQueue() {
-        _queues[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                true);
-        _queues[PRIORITY_PUSH]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_PING_REPLY] 
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _queues[PRIORITY_PING]       
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _queues[PRIORITY_OUR_QUERY]
-            = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _queues[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                false);
+        this(BIG_QUEUE_TIME, BIG_QUEUE_SIZE, QUEUE_TIME, QUEUE_SIZE);
+    }
+
+    /** 
+     * Constructs a new queue with the given message buffer sizes. 
+     */
+    public CompositeQueue(int largeTime, int largeSize, int normalTime, int normalSize) {
+        _queues[PRIORITY_WATCHDOG]    = new SimpleMessageQueue(1, Integer.MAX_VALUE, largeSize, true); // LIFO
+        _queues[PRIORITY_PUSH]        = new PriorityMessageQueue(6, largeTime, largeSize);
+        _queues[PRIORITY_QUERY_REPLY] = new PriorityMessageQueue(6, largeTime, largeSize);
+        _queues[PRIORITY_QUERY]       = new PriorityMessageQueue(3, normalTime, largeSize);
+        _queues[PRIORITY_PING_REPLY]  = new PriorityMessageQueue(1, normalTime, normalSize);
+        _queues[PRIORITY_PING]        = new PriorityMessageQueue(1, normalTime, normalSize);
+        _queues[PRIORITY_OUR_QUERY]   = new PriorityMessageQueue(10, largeTime, largeSize);
+        _queues[PRIORITY_OTHER]       = new SimpleMessageQueue(1, Integer.MAX_VALUE, largeSize, false); // FIFO
     }                                                             
 
     /** 
@@ -117,17 +127,16 @@ public class CompositeQueue implements MessageQueue {
     public void add(Message m) {
         //Add m to appropriate buffer
         int priority = calculatePriority(m);
-        _queues[priority].add(m);
+        MessageQueue queue = _queues[priority];
+        queue.add(m);
 
         //Update statistics
-        int dropped = _queues[priority].resetDropped();
+        int dropped = queue.resetDropped();
         _dropped += dropped;
         _queued += 1-dropped;
         
-        //An optimization to make removeNext faster in the common case that this
-        //only has a single element m.
-        if (size() == 1)
-            _priority=priority;
+        // Remember the priority so we can set it if we detect we cycled.
+        _priorityHint = priority;
     }
 
     /** 
@@ -166,6 +175,12 @@ public class CompositeQueue implements MessageQueue {
      * @see resetDropped
      */
     public Message removeNext() {
+        if(_cycled) {
+            _cycled = false;
+            _priority = _priorityHint;
+            _queues[_priority].resetCycle();
+        }
+        
         //Try all priorities in a round-robin fashion until we find a
         //non-empty buffer.  This degenerates in performance if the queue
         //contains only a single type of message.
@@ -184,6 +199,8 @@ public class CompositeQueue implements MessageQueue {
             _queues[_priority].resetCycle();
         }
 
+        _cycled = true;
+        
         //Nothing to send.
         return null;
     }
@@ -209,7 +226,7 @@ public class CompositeQueue implements MessageQueue {
     /** Determines if this is empty. */
     public boolean isEmpty() { return _queued == 0; }
     
-    /** Does nothing */
+    /** Does nothing. */
     public void resetCycle() {}
 }
 
