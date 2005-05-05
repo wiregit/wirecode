@@ -35,7 +35,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -850,8 +849,6 @@ public class RouterService {
             cleanupPreviewFiles();
             
             downloader.writeSnapshot();
-            
-            Cookies.instance().save();
             
             UrnCache.instance().persistCache();
 

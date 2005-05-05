@@ -87,7 +87,6 @@ public class SimppDataVerifier {
     private PublicKey getPublicKey() {
         //1. Get the file that has the public key 
         //File pubKeyFile =
-        //SecuritySettings.SIMPP_PUBLIC_KEY_FILE.getValue();
         File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
         //TODO: work this out with the setting telling us which public key to
         //use
