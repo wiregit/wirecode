@@ -125,10 +125,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 
 	public void countDroppedMessage() {}
 
-	public Set getDomains() {
-		return EMPTY_SET;
-	}
-
 	public boolean isPersonalSpam(Message m) {
         return !_personalFilter.allow(m);
 	}

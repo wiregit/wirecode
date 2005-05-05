@@ -24,7 +24,6 @@ import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -1146,59 +1145,6 @@ public class ManagedConnection extends Connection
      */
     public void setPersonalFilter(SpamFilter filter) {
         _personalFilter = filter;
-    }
-    
-    /**
-     * Returns the domain to which this connection is authenticated
-     * @return the set (of String) of domains to which this connection 
-     * is authenticated. Returns
-     * null, in case of unauthenticated connection
-     */
-    public Set getDomains(){
-        //Note that this method is not synchronized, and so _domains may 
-        //get initialized multiple times (in case multiple threads invoke this
-        //method, before domains is initialized). But thats not a problem as
-        //all the instances will have same values, and all but 1 of them 
-        //will get garbage collected
-        
-        if(_domains == null){
-            //initialize domains
-            _domains = createDomainSet();
-        }
-        //return the initialized domains
-        return _domains;
-//        return (String[])_domains.toArray(new String[0]);
-    }
-
-    /**
-     * creates the set (of String) of domains from the properties sent/received
-     * @return the set (of String) of domains
-     */
-    private Set createDomainSet(){
-        Set domainSet;
-        //get the domain property
-        //In case of outgoing connection, we received the domains from the
-        //remote host to whom we authenticated, viceversa for incoming
-        //connection
-        String domainsAuthenticated;
-        if(this.isOutgoing())
-			domainsAuthenticated = getDomainsAuthenticated();
-				//domainsAuthenticated = getProperty(
-                //HeaderNames.X_DOMAINS_AUTHENTICATED);
-        else
-            domainsAuthenticated = getPropertyWritten(
-                HeaderNames.X_DOMAINS_AUTHENTICATED);
-
-        //for unauthenticated connections
-        if(domainsAuthenticated == null){
-            //if no authentication done, initialize to a default domain set
-            domainSet = User.createDefaultDomainSet();
-        }else{
-            domainSet = StringUtils.getSetofValues(domainsAuthenticated);
-        }
-        
-        //return the domain set
-        return domainSet;
     }
     
     /**

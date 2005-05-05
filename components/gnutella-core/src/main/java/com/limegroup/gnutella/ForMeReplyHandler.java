@@ -259,10 +259,6 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		return false;
 	}
 	
-	public Set getDomains() {
-		return Collections.EMPTY_SET;
-	}
-	
 	public boolean isPersonalSpam(Message m) {
 		return false;
 	}
