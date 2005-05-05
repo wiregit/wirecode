@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.LeafConnectionManager;
@@ -40,8 +39,7 @@ public final class PingerTest extends BaseTestCase {
      */
     public void testPeriodicUltrapeerPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
-        ConnectionManager cm = 
-            new UltrapeerConnectionManager(new ServerAuthenticator());
+        ConnectionManager cm = new UltrapeerConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "router", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = Pinger.instance();
@@ -65,8 +63,7 @@ public final class PingerTest extends BaseTestCase {
      */
     public void testPeriodicLeafPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
-        ConnectionManager cm = 
-            new LeafConnectionManager(new ServerAuthenticator());
+        ConnectionManager cm = new LeafConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "router", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = Pinger.instance();

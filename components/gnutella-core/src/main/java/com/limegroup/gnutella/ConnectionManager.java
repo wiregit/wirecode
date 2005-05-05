@@ -26,7 +26,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.QuestionsHandler;
@@ -230,11 +229,6 @@ public class ConnectionManager {
     /** number of peers that matches the local locale pref. */
     private volatile int _localeMatchingPeers = 0;
 
-    /**
-     * For authenticating users
-     */
-    private final Authenticator _authenticator;
-
 	/**
 	 * Variable for the number of times since we attempted to force ourselves
 	 * to become an Ultrapeer that we were told to become leaves.  If this
@@ -260,12 +254,10 @@ public class ConnectionManager {
     private volatile float _measuredDownstreamBandwidth = 0.f;
 
     /**
-     * Constructs a ConnectionManager.  Must call initialize before using.
-     * @param authenticator Authenticator instance for authenticating users
+     * Constructs a ConnectionManager.  Must call initialize before using
+     * other methods of this class.
      */
-    public ConnectionManager(Authenticator authenticator) {
-        _authenticator = authenticator;
-    }
+    public ConnectionManager() { }
 
     /**
      * Links the ConnectionManager up with the other back end pieces and
@@ -998,15 +990,6 @@ public class ConnectionManager {
             return false;
         }
     }
-
-    /**
-     * Provides handle to the authenticator instance
-     * @return Handle to the authenticator
-     */
-    public Authenticator getAuthenticator(){
-        return _authenticator;
-    }
-
 
     /**
      * @requires returned value not modified

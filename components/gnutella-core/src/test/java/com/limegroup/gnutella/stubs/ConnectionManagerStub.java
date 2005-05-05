@@ -16,7 +16,6 @@ public class ConnectionManagerStub extends ConnectionManager {
     /** @param enableRemove true if remove(c) should do work
      *  @see remove */
     public ConnectionManagerStub(boolean enableRemove) {
-        super(null);
         this.enableRemove=enableRemove;
     }
 

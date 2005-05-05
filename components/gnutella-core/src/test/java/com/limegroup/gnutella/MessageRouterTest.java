@@ -519,7 +519,7 @@ public final class MessageRouterTest extends BaseTestCase {
     }
     
     public void testUDPPingReplies() throws Exception {
-        ConnectionManager cm = new ConnectionManager(null);
+        ConnectionManager cm = new ConnectionManager();
         cm.initialize();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         

@@ -35,9 +35,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
-import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -103,12 +101,6 @@ public class RouterService {
 	 */
     private static FileManager fileManager = new MetaFileManager();
 
-    /**
-     * For authenticating users.
-     */
-    private static final Authenticator authenticator = 
-		new ServerAuthenticator();
-
 	/**
 	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
 	 */
@@ -128,8 +120,7 @@ public class RouterService {
 	/**
 	 * Initialize the class that manages all TCP connections.
 	 */
-    private static ConnectionManager manager =
-		new ConnectionManager(authenticator);
+    private static ConnectionManager manager = new ConnectionManager();
 
 	/**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
