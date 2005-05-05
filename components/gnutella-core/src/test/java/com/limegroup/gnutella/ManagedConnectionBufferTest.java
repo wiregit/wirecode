@@ -10,7 +10,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.AuthenticationHandshakeResponder;
+import com.limegroup.gnutella.handshaking.DefaultHandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -650,23 +650,27 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("drop + read == total", total, dropped+read);
     }
 
-	private static class DummyResponder
-	  extends AuthenticationHandshakeResponder {
+	private static class DummyResponder extends DefaultHandshakeResponder {
 		DummyResponder(String host) {
-			super(null, host);
+			super(host);
 		}
 
-		protected HandshakeResponse 
-			respondUnauthenticated(HandshakeResponse response,
-			                       boolean outgoing) 
-			throws IOException {
-			    Properties props = new Properties();
-			    props.put("X-Ultrapeer", "True");
-			    if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
-			        props.put("Accept-Encoding", "deflate");
-                if(response.isDeflateAccepted())
-                    props.put("Content-Encoding", "deflate");
+		public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException {
+			Properties props = new Properties();
+			props.put("X-Ultrapeer", "True");
+			if (ConnectionSettings.ACCEPT_DEFLATE.getValue())
+				props.put("Accept-Encoding", "deflate");
+			if (response.isDeflateAccepted())
+				props.put("Content-Encoding", "deflate");
 			return HandshakeResponse.createResponse(props);
+		}
+		
+		protected HandshakeResponse respondToIncoming(HandshakeResponse response) {
+			return null;
+		}
+
+		protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
+			return null;
 		}
 	}
 

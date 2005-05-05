@@ -63,8 +63,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         Properties props = new UltrapeerHeaders("40.0.9.8");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
         
-        HandshakeResponse hr = 
-            responder.respondUnauthenticated(headers, true);
+        HandshakeResponse hr = responder.respond(headers, true);
 
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
@@ -81,7 +80,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
         headers = HandshakeResponse.createResponse(props);
         
-        hr = responder.respondUnauthenticated(headers, true);
+        hr = responder.respond(headers, true);
 
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
@@ -94,7 +93,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         
         headers = HandshakeResponse.createResponse(props);        
-        hr = responder.respondUnauthenticated(headers, true);
+        hr = responder.respond(headers, true);
         assertTrue("should not be an Ultrapeer", !hr.isUltrapeer());
         assertTrue("should be becoming an leaf", hr.isLeaf());
         assertTrue("should be accepted", hr.isAccepted());
@@ -122,7 +121,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         // Leaf-Ultrapeer  --> leaf slots available
         Properties props = new LeafHeaders("78.9.3.0");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);  
-        HandshakeResponse hr = responder.respondUnauthenticated(headers, true);
+        HandshakeResponse hr = responder.respond(headers, true);
 
         assertTrue("should have returned that we accepted the connection", 
                    hr.isAccepted());
@@ -132,7 +131,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         
         UltrapeerSettings.MAX_LEAVES.setValue(0);
-        hr = responder.respondUnauthenticated(headers, true);
+        hr = responder.respond(headers, true);
         assertTrue("should not have accepted the connection", 
                    !hr.isAccepted());
         assertEquals("should not have any headers", 0, hr.props().size());
@@ -159,8 +158,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         HandshakeResponse up = 
             HandshakeResponse.createResponse(new UltrapeerHeaders("80.45.0.1"));
         
-        HandshakeResponse hr = 
-            responder.respondUnauthenticated(up, false);
+        HandshakeResponse hr = responder.respond(up, false);
 
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());
         assertTrue("should tell the connecting Ultrapeer to become a leaf", 
@@ -172,7 +170,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //     artifially by setting the MAX_LEAVES to zero
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         UltrapeerSettings.MAX_LEAVES.setValue(0);        
-        hr = responder.respondUnauthenticated(up, false);        
+        hr = responder.respond(up, false);        
         assertTrue("should tell the Ultrapeer to stay an Ultrapeer", 
                    !hr.hasLeafGuidance());
         assertTrue("should still be accepted as an Ultrapeer",
@@ -205,7 +203,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //     leaves
         HandshakeResponse leaf = 
             HandshakeResponse.createResponse(new LeafHeaders("80.45.0.1"));
-        HandshakeResponse hr = responder.respondUnauthenticated(leaf, false);
+        HandshakeResponse hr = responder.respond(leaf, false);
         
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());
         assertTrue("should be high degree connection", hr.isHighDegreeConnection());
@@ -217,7 +215,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //     headers when we alread have enough leaves -- create this 
         //     situation artificially by setting the MAX_LEAVES to zero
         UltrapeerSettings.MAX_LEAVES.setValue(0);        
-        hr = responder.respondUnauthenticated(leaf, false);        
+        hr = responder.respond(leaf, false);        
         assertTrue("should have rejected the leaf: status code was: "+
                    hr.getStatusLine(), 
                    !hr.isAccepted());

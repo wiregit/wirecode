@@ -11,9 +11,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * A very simple responder to be used by ultrapeers during the
  * connection handshake while accepting incoming connections
  */
-public class UltrapeerHandshakeResponder 
-    extends AuthenticationHandshakeResponder {
-    /**
+public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
+
+	/**
      * Creates a new instance of ClientHandshakeResponder
      * @param manager Instance of connection manager, managing this
      * connection
@@ -22,28 +22,20 @@ public class UltrapeerHandshakeResponder
      * @param host The host with whom we are handshaking
      */
     public UltrapeerHandshakeResponder(String host) {
-        super(RouterService.getConnectionManager(), host);
+        super(host);
     }
     
-    //inherit doc comment
-    protected HandshakeResponse respondUnauthenticated(
-        HandshakeResponse response, boolean outgoing) throws IOException {
-        
-		if(outgoing) return respondToOutgoing(response);
-		return respondToIncoming(response);				
-	}
-
 	/**
 	 * Respond to an outgoing connection request.
 	 *
 	 * @param response the headers read from the connection
 	 */
-	private HandshakeResponse respondToOutgoing(HandshakeResponse response) {
+	protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 	    
 		//Outgoing connection.
 		
 		//If our slots are full, reject it.
-		if(!_manager.allowConnection(response)) {
+		if (!_manager.allowConnection(response)) {
 		    HandshakingStat.UP_OUTGOING_REJECT_FULL.incrementStat();
             return HandshakeResponse.createRejectOutgoingResponse();
         }
@@ -51,9 +43,9 @@ public class UltrapeerHandshakeResponder
 		Properties ret = new Properties();
 		// They might be giving us guidance
 		// (We don't give them guidance for outgoing)
-        if(response.hasLeafGuidance()) {
+        if (response.hasLeafGuidance()) {
             // Become a leaf if its a good ultrapeer & we can do it.
-            if(_manager.allowLeafDemotion() && response.isGoodUltrapeer()) {
+            if (_manager.allowLeafDemotion() && response.isGoodUltrapeer()) {
                 HandshakingStat.UP_OUTGOING_GUIDANCE_FOLLOWED.incrementStat();
                 ret.put(HeaderNames.X_ULTRAPEER, "False");
             } else { //Had guidance, but we aren't going to be a leaf.
@@ -64,7 +56,7 @@ public class UltrapeerHandshakeResponder
 		    HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
 
 		// deflate if we can ...
-		if(response.isDeflateAccepted()) {
+		if (response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 
@@ -77,11 +69,11 @@ public class UltrapeerHandshakeResponder
 	 *
 	 * @param response the headers read from the connection
 	 */
-	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
+	protected HandshakeResponse respondToIncoming(HandshakeResponse response) {
  		
 		// if this is a connections from the crawler, return the special crawler 
         // response
-		if(response.isCrawler()) {
+		if (response.isCrawler()) {
 		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
 			return HandshakeResponse.createCrawlerResponse();
 		}
@@ -105,7 +97,7 @@ public class UltrapeerHandshakeResponder
 		
 		//We do this last, to prevent reject connections from being deflated,
 		//which may actually increase the amount of bandwidth needed.
-		if(response.isDeflateAccepted()) {
+		if (response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}		
 		
@@ -126,8 +118,8 @@ public class UltrapeerHandshakeResponder
         // based on whether or not it was allowed.
         // This is because leaf connections cannot upgrade to ultrapeers,
         // so the allowAsLeaf was the final check.
-        if( response.isLeaf() ) {
-            if(!allowedAsLeaf)
+        if (response.isLeaf() ) {
+            if (!allowedAsLeaf)
                 HandshakingStat.UP_INCOMING_REJECT_LEAF.incrementStat();
             else
                 HandshakingStat.UP_INCOMING_ACCEPT_LEAF.incrementStat();
@@ -139,7 +131,7 @@ public class UltrapeerHandshakeResponder
         
         // If we can accept them and we don't need more supernodes,
         // guide them to become a leaf
-        if( allowedAsLeaf && !supernodeNeeded) {
+        if (allowedAsLeaf && !supernodeNeeded) {
             HandshakingStat.UP_INCOMING_GUIDED.incrementStat();
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.FALSE.toString());
             return false;
@@ -149,7 +141,7 @@ public class UltrapeerHandshakeResponder
         
         // If supernode is needed or we can't accept them as a leaf,
         // see if we can accept them as a supernode.
-        if( allowedAsUltrapeer ) {
+        if (allowedAsUltrapeer) {
             HandshakingStat.UP_INCOMING_ACCEPT_UP.incrementStat();
             // not strictly necessary ...
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.TRUE.toString());
@@ -170,7 +162,7 @@ public class UltrapeerHandshakeResponder
         // This means that the last 10% of leaf slots will always be reserved
         // for connections that are unable to be ultrapeers.
         
-        if(!allowedAsLeaf)
+        if (!allowedAsLeaf)
            HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_LEAF.incrementStat();
         else
            HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_UP.incrementStat();
@@ -178,4 +170,3 @@ public class UltrapeerHandshakeResponder
         return true;
     }
 }
-

@@ -1604,7 +1604,4 @@ public class ManagedConnection extends Connection
             }
         }
     }
-    
-	
-
 }
