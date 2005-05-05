@@ -54,14 +54,16 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * Mapping IpPort -> RFD to which we have sent pings.
      * Whenever we send pings to push proxies, each proxy points to the same
-     * RFD.
+     * RFD.  Used to check whether we receive a pong from someone we have sent
+     * a ping to.
      */
     private TreeMap pingedHosts;
     
     /**
-     * A set containing the unique remote file locations that we have pinged.
+     * A set containing the unique remote file locations that we have pinged.  It
+     * differs from pingedHosts because it contains only RemoteFileDesc objects 
      */
-    private Set pingedLocations;
+    private Set testedLocations;
     
     /**
      * RFDs that have responded to our pings.
@@ -96,7 +98,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public PingRanker() {
         pinger = new UDPPinger();
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
-        pingedLocations = new HashSet();
+        testedLocations = new HashSet();
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
     }
@@ -160,7 +162,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private boolean knowsAboutHost(RemoteFileDesc host) {
         return newHosts.contains(host) || 
             verifiedHosts.contains(host) || 
-            pingedLocations.contains(host);
+            testedLocations.contains(host);
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
@@ -175,10 +177,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         else {
             LOG.debug("getting a non-verified host");
             // use the legacy ranking logic to select a non-verified host
-            Iterator dual = new DualIterator(pingedLocations.iterator(),newHosts.iterator());
+            Iterator dual = new DualIterator(testedLocations.iterator(),newHosts.iterator());
             ret = LegacyRanker.getBest(dual);
             newHosts.remove(ret);
-            pingedLocations.remove(ret);
+            testedLocations.remove(ret);
             if (ret.needsPush()) {
                 for (Iterator iter = ret.getPushProxies().iterator(); iter.hasNext();) 
                     pingedHosts.remove(iter.next());
@@ -234,7 +236,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                 pingedHosts.put(rfd,rfd);
                 toSend.add(rfd);
             }
-            pingedLocations.add(rfd);
+            testedLocations.add(rfd);
             sent++;
         }
         
@@ -288,7 +290,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized boolean hasMore() {
-        return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && pingedLocations.isEmpty());
+        return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && testedLocations.isEmpty());
     }
     
     /**
@@ -307,7 +309,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             return;
         
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
-        pingedLocations.remove(rfd);
+        testedLocations.remove(rfd);
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("received a pong "+ pong+ " from "+handler +
@@ -362,7 +364,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         running = false;
         verifiedHosts.clear();
         pingedHosts.clear();
-        pingedLocations.clear();
+        testedLocations.clear();
         newHosts.clear();
         if (myGUID != null) {
             RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
@@ -371,15 +373,15 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     protected synchronized Collection getShareableHosts(){
-        List ret = new ArrayList(verifiedHosts.size()+newHosts.size()+pingedLocations.size());
+        List ret = new ArrayList(verifiedHosts.size()+newHosts.size()+testedLocations.size());
         ret.addAll(verifiedHosts);
         ret.addAll(newHosts);
-        ret.addAll(pingedLocations);
+        ret.addAll(testedLocations);
         return ret;
     }
     
     public synchronized int getNumKnownHosts() {
-        return verifiedHosts.size()+newHosts.size()+pingedLocations.size();
+        return verifiedHosts.size()+newHosts.size()+testedLocations.size();
     }
     
     /**
