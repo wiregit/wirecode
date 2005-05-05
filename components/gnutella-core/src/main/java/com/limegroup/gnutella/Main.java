@@ -9,7 +9,6 @@ import java.util.Vector;
 
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
