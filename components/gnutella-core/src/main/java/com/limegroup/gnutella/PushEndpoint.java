@@ -20,6 +20,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 
@@ -164,10 +165,9 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
+        _proxies = new IpPortSet();
 		if (proxies!=null)
-		    _proxies = proxies;
-		else 
-		    _proxies = new HashSet();
+		    _proxies.addAll(proxies);
 		_externalAddr = addr;
 	}
 	
@@ -206,7 +206,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
-		Set proxies = new HashSet();
+		Set proxies = new IpPortSet();
 		
 		int fwtVersion =0;
 		
@@ -305,10 +305,10 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		//store the push proxies
 		int i=0;
 		for (Iterator iter = proxies.iterator();iter.hasNext() && i < 4;) {
-			PushProxyInterface ppi = (PushProxyInterface) iter.next();
+			IpPort ppi = (IpPort) iter.next();
 			
-			byte [] addr = ppi.getPushProxyAddress().getAddress();
-			short port = (short)ppi.getPushProxyPort();
+			byte [] addr = ppi.getInetAddress().getAddress();
+			short port = (short)ppi.getPort();
 			
 			System.arraycopy(addr,0,where,offset,4);
 			offset+=4;
@@ -346,12 +346,12 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		throws BadPacketException {
 		byte [] tmp = new byte[6];
 		byte [] guid =new byte[16];
-		Set proxies = new HashSet(); //PushProxyContainers are good with HashSets
+		Set proxies = new IpPortSet(); 
 		IpPort addr = null;
 		boolean hasAddr=false;
 		
 		//get the number of push proxies
-		int number = data[offset] & SIZE_MASK;
+		int number = data[offset] & SIZE_MASK; 
 		int features = data[offset] & FEATURES_MASK;
 		int version = (data[offset] & FWT_VERSION_MASK) >> 3;
 		
@@ -370,7 +370,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		if (hasAddr){
 		    String address = NetworkUtils.ip2string(data,offset);
 		    offset+=4;
-		    int port = ByteOrder.leb2short(data,offset);
+		    int port = ByteOrder.ubytes2int(ByteOrder.leb2short(data,offset));
 		    offset+=2;
 		    try{
 		        addr = new IpPortImpl(address,port);
@@ -382,7 +382,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		for (int i=0;i<number;i++) {
 			System.arraycopy(data, offset,tmp,0,6);
 			offset+=6;
-			proxies.add(new QueryReply.PushProxyContainer(tmp));
+			proxies.add(QueryReply.IPPortCombo.getCombo(tmp));
 		}
 		
 		/** this adds the read set to the existing proxies */
@@ -467,10 +467,11 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	
 	public String toString() {
 		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
-			", GUID:"+_guid+", proxies:{ "; 
+			", GUID:"+_guid+", address: "+
+            getAddress()+":"+getPort()+", proxies:{ "; 
 		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
-			PushProxyInterface ppi = (PushProxyInterface)iter.next();
-			ret = ret+ppi.getPushProxyAddress()+":"+ppi.getPushProxyPort()+" ";
+			IpPort ppi = (IpPort)iter.next();
+			ret = ret+ppi.getInetAddress()+":"+ppi.getPort()+" ";
 		}
 		ret = ret+ "}]";
 		return ret;
@@ -507,11 +508,11 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		int proxiesWritten=0;
 		for (Iterator iter = getProxies().iterator();
 			iter.hasNext() && proxiesWritten <4;) {
-			PushProxyInterface cur = (PushProxyInterface)iter.next();
+            IpPort cur = (IpPort)iter.next();
 			
 			httpString.append(NetworkUtils.ip2string(
-				        cur.getPushProxyAddress().getAddress()));
-			httpString.append(":").append(cur.getPushProxyPort()).append(";");
+				        cur.getInetAddress().getAddress()));
+			httpString.append(":").append(cur.getPort()).append(";");
 			proxiesWritten++;
 		}
 		
@@ -658,7 +659,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	 * @return an object implementing PushProxyInterface 
 	 * @throws IOException parsing failed.
 	 */
-	private static PushProxyInterface parseIpPort(String http)
+	private static IpPort parseIpPort(String http)
 		throws IOException{
 	    int separator = http.indexOf(":");
 		
@@ -680,8 +681,8 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 			if(!NetworkUtils.isValidPort(port))
 			    throw new IOException();
 			
-			QueryReply.PushProxyContainer ppc = 
-				new QueryReply.PushProxyContainer(host, port);
+			IpPort ppc = 
+				new IpPortImpl(host, port);
 			
 			return ppc;
 		}catch(NumberFormatException notBad) {
@@ -737,7 +738,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	    }
 	    
 	    synchronized void updateProxies(Set s, boolean add){
-	        Set existing = new HashSet();
+	        Set existing = new IpPortSet();
 	        
 	        if (_proxies!=null)
 	            existing.addAll(_proxies);

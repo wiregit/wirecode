@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -71,6 +72,8 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -1507,9 +1510,9 @@ public class UploadTest extends BaseTestCase {
         // now try with some proxies
         ConnectionManager original = RouterService.getConnectionManager();
         
-        final Set proxies = new HashSet();
-        QueryReply.PushProxyContainer ppi = 
-            new QueryReply.PushProxyContainer("1.2.3.4",5);
+        final Set proxies = new TreeSet(IpPort.COMPARATOR);
+        IpPort ppi = 
+            new IpPortImpl("1.2.3.4",5);
         proxies.add(ppi);
         
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
@@ -1696,6 +1699,7 @@ public class UploadTest extends BaseTestCase {
         in.close();
         out.close();
         s.close();
+        try {Thread.sleep(100); }catch(InterruptedException e){}
         return ret.equals(expResp);
     }
 
@@ -2143,7 +2147,7 @@ public class UploadTest extends BaseTestCase {
         String firstLine = in.readLine();
         if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
             fail("bad first response line: " + firstLine);
-                    
+                   
         while(!in.readLine().equals("")){ }
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();

@@ -56,9 +56,8 @@ public class VerifyingFile {
     
     /**
      * The file we're writing to / reading from.
-     * LOCKING: itself. this->fos is ok
      */
-    private RandomAccessFile fos;
+    private volatile RandomAccessFile fos;
     
     /**
      * Whether this file is open for writing
@@ -112,6 +111,11 @@ public class VerifyingFile {
     private HashTree hashTree;
     
     /**
+     * Whether someone is currently requesting the hash tree
+     */
+    private boolean hashTreeRequested;
+    
+    /**
      * Whether we are actually verifying chunks
      */
     private boolean discardBad = true;
@@ -141,7 +145,6 @@ public class VerifyingFile {
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
         discardedBlocks = new IntervalSet();
-        storedException = null;
     }
     
     /**
@@ -162,8 +165,7 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
-        // cleanup leased blocks
-        leasedBlocks = new IntervalSet();
+        storedException = null;
         isOpen = true;
     }
 
@@ -200,14 +202,14 @@ public class VerifyingFile {
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
-			Assert.silent(false, "trying to write an interval "+intvl+
+			Assert.that(false, "trying to write an interval "+intvl+
                     " that wasn't leased "+dumpState());
         }
 		
 		
 		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
             discardedBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-            Assert.silent(false,"trying to write an interval "+intvl+
+            Assert.that(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
 		
@@ -386,8 +388,7 @@ public class VerifyingFile {
         if(storedException != null)
             throw new DiskException(storedException);
         
-        while (!isComplete() &&
-                verifiedBlocks.getSize() + discardedBlocks.getSize() + pendingBlocks.getSize()  == completedSize) {
+        while (!isComplete() && getBlockSize() == completedSize) {
             if(storedException != null)
                 throw new DiskException(storedException);
             if (LOG.isDebugEnabled())
@@ -490,6 +491,17 @@ public class VerifyingFile {
      */
     public synchronized void setHashTree(HashTree tree) {
         hashTree = tree;
+    }
+    
+    /**
+     * flags that someone is currently requesting the tree
+     */
+    public synchronized void setHashTreeRequested(boolean yes) {
+        hashTreeRequested = yes;
+    }
+    
+    public synchronized boolean isHashTreeRequested() {
+        return hashTreeRequested;
     }
     
     public synchronized void setDiscardUnverified(boolean yes) {
@@ -610,6 +622,7 @@ public class VerifyingFile {
            this.buf = new byte[buf.length];
            System.arraycopy(buf, 0, this.buf, 0, buf.length);
            this.intvl = intvl;
+
         }
         
         public void run() {

@@ -127,7 +127,7 @@ public class DownloadWorker implements Runnable {
      * an acceptable issue, given the complexity of implementing
      * a method that will work under the circumstances.
      */
-    private static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
+    public static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
     
     /**
      * The minimum number of seconds to wait for a busy host if we do
@@ -316,7 +316,7 @@ public class DownloadWorker implements Runnable {
                 // must be queued or connected.
                 Assert.that(status.isQueued() || status.isConnected());
                 boolean addQueued = _manager.killQueuedIfNecessary(this, 
-                        status == null || !status.isQueued()? -1 : status.getQueuePosition());
+                        !status.isQueued()  ? -1 : status.getQueuePosition());
                 
                 // we should have been told to stay alive if we're connected
                 // but it's possible that we are above our swarm capacity
@@ -377,11 +377,21 @@ public class DownloadWorker implements Runnable {
         HashTree ourTree = _commonOutFile.getHashTree();
         
         ConnectionStatus status = null;
-        // request THEX from te _downloader if the tree we have
-        // isn't good enough (or we don't have a tree)
+        // request THEX from te _downloader if (the tree we have
+        // isn't good enough or we don't have a tree) and another
+        // worker isn't currently requesting one
         if (_downloader.hasHashTree() &&
                 (ourTree == null || !ourTree.isDepthGoodEnough())) {
+            
+            
+            synchronized(_commonOutFile) {
+                if (_commonOutFile.isHashTreeRequested())
+                    return status;
+                _commonOutFile.setHashTreeRequested(true);
+            }
+            
             status = _downloader.requestHashTree();
+            _commonOutFile.setHashTreeRequested(false);
             if(status.isThexResponse()) {
                 HashTree temp = status.getHashTree();
                 if (temp.isBetterTree(ourTree)) {
@@ -667,10 +677,9 @@ public class DownloadWorker implements Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: about to start downloading "+_downloader);
         boolean problem = false;
-        RemoteFileDesc rfd = _downloader.getRemoteFileDesc();            
         try {
             _downloader.doDownload();
-            rfd.resetFailedCount();
+            _rfd.resetFailedCount();
             if(http11)
                 DownloadStat.SUCCESFULL_HTTP11.incrementStat();
             else
@@ -700,11 +709,11 @@ public class DownloadWorker implements Runnable {
             synchronized (_manager) {
                 if (problem) {
                     _downloader.stop();
-                    rfd.incrementFailedCount();
+                    _rfd.incrementFailedCount();
                     // if we failed less than twice in succession,
                     // try to use the file again much later.
-                    if( rfd.getFailedCount() < 2 ) {
-                        rfd.setRetryAfter(FAILED_RETRY_AFTER);
+                    if( _rfd.getFailedCount() < 2 ) {
+                        _rfd.setRetryAfter(FAILED_RETRY_AFTER);
                         _manager.addRFD(_rfd);
                     } else
                         _manager.informMesh(_rfd, false);
@@ -731,13 +740,20 @@ public class DownloadWorker implements Runnable {
             LOG.trace("assignAndRequest for: " + _rfd);
         
         try {
-            if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
-                assignWhite(http11);
-            } else {
-                synchronized(_stealLock) {
-                    assignGrey(); 
-                }
+            Interval interval = null;
+            synchronized(_commonOutFile) {
+                if (_commonOutFile.hasFreeBlocksToAssign() > 0)
+                    interval = pickAvailableInterval(http11);
             }
+            
+            // it is still possible that a worker has died and released their ranges
+            // just before we try to steal
+            if (interval == null) {
+                synchronized(_stealLock) {
+                    assignGrey();
+                }
+            } else
+                assignWhite(interval);
             
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -830,13 +846,9 @@ public class DownloadWorker implements Runnable {
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
-    private void assignWhite(boolean http11) throws 
+    private void assignWhite(Interval interval) throws 
     IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException, NoSuchRangeException,
-    NoSuchElementException {
-        //Assign "white" (unclaimed) interval to new downloader.
-        Interval interval = pickAvailableInterval(http11);
-
+    NotSharingException , QueuedException {
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.
@@ -847,34 +859,39 @@ public class DownloadWorker implements Runnable {
         
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
-        //note the confusion caused by downloading overlap
-        //regions.  We only want to release a range if the reported subrange
-        //was different, and was HIGHER than the low point.        
-        int newLow = _downloader.getInitialReadingPoint();
-        int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
-        
-        if(newLow > low) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+
-                        " Host gave subrange, different low.  Was: " +
-                          low + ", is now: " + newLow);
-            
-            _commonOutFile.releaseBlock(new Interval(low, newLow-1));
-        }
-        
-        if(newHigh < high) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+
-                        " Host gave subrange, different high.  Was: " +
-                          high + ", is now: " + newHigh);
-            
-            _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("WORKER:"+
-                    " assigning white " + newLow + "-" + newHigh +
-                      " to " + _downloader);
+        //We only want to release a range if the reported subrange
+        //was different, and was HIGHER than the low point.
+        //in case this worker became a victim during the header exchange, we do not
+        //clip any ranges.
+        synchronized(_downloader) {
+            int newLow = _downloader.getInitialReadingPoint();
+            int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+            if (newHigh-newLow >= 0) {
+                if(newLow > low) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("WORKER:"+
+                                " Host gave subrange, different low.  Was: " +
+                                low + ", is now: " + newLow);
+                    
+                    _commonOutFile.releaseBlock(new Interval(low, newLow-1));
+                }
+                
+                if(newHigh < high) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("WORKER:"+
+                                " Host gave subrange, different high.  Was: " +
+                                high + ", is now: " + newHigh);
+                    
+                    _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
+                }
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("WORKER:"+
+                            " assigning white " + newLow + "-" + newHigh +
+                            " to " + _downloader);
+                }
+            } else 
+                LOG.debug("debouched at birth");
         }
     }
     
@@ -950,7 +967,7 @@ public class DownloadWorker implements Runnable {
         if( _downloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
 
-        HTTPDownloader slowest = findSlowestDownloader();
+        DownloadWorker slowest = findSlowestDownloader();
                         
         if (slowest==null) {//Not using this downloader...but RFD maybe useful
             if (LOG.isDebugEnabled())
@@ -959,110 +976,127 @@ public class DownloadWorker implements Runnable {
         }
 		
         // see what ranges is the victim requesting
-        int start,stop;
-        synchronized(slowest) {
-            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
-                    slowest.getInitialWritingPoint());
-            
-            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
-        }
+        Interval slowestRange = slowest.getDownloadInterval();
         
-        if (start == stop)
+        if (slowestRange.low == slowestRange.high)
             throw new NoSuchElementException();
         
         _shouldRelease=false;
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
-        _downloader.connectHTTP(start, stop, false,_commonOutFile.getBlockSize());
+        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
         
-        synchronized(slowest) {
-            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
-                    slowest.getInitialWritingPoint());
-            
-            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
-        }
-        
-        int myLow = _downloader.getInitialReadingPoint();
-        int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
-        
-        // If the stealer isn't going to give us everything we need,
-        // there's no point in stealing, so throw an exception and
-        // don't steal.
-        if( myHigh < stop ) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("WORKER: not stealing because stealer " +
-                        "gave a subrange.  Expected low: " + start +
-                        ", high: " + stop + ".  Was low: " + myLow +
-                        ", high: " + myHigh);
+        Interval newSlowestRange;
+        int newStart;
+        synchronized(slowest.getDownloader()) {
+            // if the victim died or was stopped while the thief was connecting, we can't steal
+            if (!slowest.getDownloader().isActive()) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("victim is no longer active");
+                throw new NoSuchElementException();
             }
             
-            throw new IOException("bad stealer.");
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("WORKER:"+
-                    " picking stolen grey "
-                    +start+"-"+stop+" from "+slowest+" to "+_downloader);
-        }
-        
-        // stop the victim
-        int newStart;
-        synchronized(slowest) {
-            // free up whatever the victim wrote while we were connecting
-            // unless that data is already verified or pending verification
-            newStart = slowest.getInitialReadingPoint() + slowest.getAmountRead();
-			
-			// the victim may have even completed their download while we were
-	        // connecting
-	        if (stop <= newStart)
-	            throw new NoSuchElementException();
-			
+            // see how much did the victim download while we were exchanging headers.
+            // it is possible that in that time some other worker died and freed his ranges, and
+            // the victim has already been assigned some new ranges.  If that happened we don't steal.
+            newSlowestRange = slowest.getDownloadInterval();
+            if (newSlowestRange.high != slowestRange.high) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("victim is now downloading something else "+
+                            newSlowestRange+" vs. "+slowestRange);
+                throw new NoSuchElementException();
+            }
+            
+            if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
+                LOG.debug("victim managed to download "+(newSlowestRange.low - slowestRange.low)
+                        +" bytes while stealer was connecting");
+            }
+            
+            int myLow = _downloader.getInitialReadingPoint();
+            int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
+            
+            // If the stealer isn't going to give us everything we need,
+            // there's no point in stealing, so throw an exception and
+            // don't steal.
+            if( myHigh < slowestRange.high ) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("WORKER: not stealing because stealer " +
+                            "gave a subrange.  Expected low: " + slowestRange.low +
+                            ", high: " + slowestRange.high + ".  Was low: " + myLow +
+                            ", high: " + myHigh);
+                }
+                
+                throw new IOException("bad stealer.");
+            }
+            
+            newStart = Math.max(newSlowestRange.low,myLow);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("WORKER:"+
+                        " picking stolen grey "
+                        +newStart + "-"+slowestRange.high+" from "+slowest+" to "+_downloader);
+            }
+            
+            
             // tell the victim to stop downloading at the point the thief 
             // can start downloading
-			slowest.stopAt(Math.max(newStart,myLow));
+            slowest.getDownloader().stopAt(newStart);
         }
         
-        if (newStart > start && LOG.isDebugEnabled()) {
-            LOG.debug("victim managed to download "+(newStart - start)
-                    +" bytes while stealer was connecting");
-        }
-        
-		// once we've told the victim where to stop, make our ranges release-able
-        _downloader.startAt(Math.max(newStart,myLow));
+        // once we've told the victim where to stop, make our ranges release-able
+        _downloader.startAt(newStart);
         _shouldRelease = true;
-	}
+    }
+    
+    Interval getDownloadInterval() {
+        synchronized(_downloader) {
+            
+            int start = Math.max(_downloader.getInitialReadingPoint() + _downloader.getAmountRead(),
+                    _downloader.getInitialWritingPoint());
+            
+            int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountToRead();
+            
+            return new Interval(start,stop);
+        }
+    }
     
     /**
      * @return the httpdownloader that is going slowest.
      */
-    private HTTPDownloader findSlowestDownloader() {
-        HTTPDownloader slowest = null;
+    private DownloadWorker findSlowestDownloader() {
+        DownloadWorker slowest = null;
         final float ourSpeed = getOurSpeed();
         float slowestSpeed = ourSpeed;
         
         // are we too slow to steal?
-        if (ourSpeed == -1)
+        if (ourSpeed == -1) 
             return null;
         
-        for (Iterator iter=_manager.getActiveWorkers().iterator(); iter.hasNext();) {
-            HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
+        Set queuedWorkers = _manager.getQueuedWorkers().keySet();
+        for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
             
-            // If this guy isn't downloading, don't steal from him.
-            if(!h.isActive())
+            DownloadWorker worker = (DownloadWorker) iter.next();
+            if (queuedWorkers.contains(worker))
+                continue;
+            
+            HTTPDownloader h = worker.getDownloader();
+            
+            if (h == null || h == _downloader)
                 continue;
             
             // see if he is the slowest one
             float hisSpeed = 0;
             try {
                 h.getMeasuredBandwidth();
-                hisSpeed = h.getAverageBandwidth(); 
+                hisSpeed = h.getAverageBandwidth();
             } catch (InsufficientDataException ide) {
-                continue;
+                // we assume these guys would go almost as fast as we do, so we do not steal
+                // from them unless they are the last ones remaining
+                hisSpeed = Math.max(0f,ourSpeed - 0.1f);
             }
             
             if (hisSpeed < slowestSpeed) {
                 slowestSpeed = hisSpeed;
-                slowest = h;
+                slowest = worker;
             }
             
         }
@@ -1070,6 +1104,8 @@ public class DownloadWorker implements Runnable {
     }
     
     private float getOurSpeed() {
+        if (_downloader == null)
+            return -1;
         try {
             _downloader.getMeasuredBandwidth();
             return _downloader.getAverageBandwidth();
@@ -1080,7 +1116,7 @@ public class DownloadWorker implements Runnable {
     
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
-        return ourSpeed != -1 && ourSpeed < MIN_ACCEPTABLE_SPEED;
+        return ourSpeed < MIN_ACCEPTABLE_SPEED;
     }
     
     ////// various handlers for failure states of the assign process /////
@@ -1090,7 +1126,6 @@ public class DownloadWorker implements Runnable {
      */
     private ConnectionStatus handleNoMoreDownloaders() {
         _manager.addRFD(_rfd);
-        
         return ConnectionStatus.getNoData();
     }
     
@@ -1156,7 +1191,6 @@ public class DownloadWorker implements Runnable {
                 return ConnectionStatus.getNoData(); // we were signalled to stop.
             _manager.setState(ManagedDownloader.REMOTE_QUEUED);
         }
-        _manager.workerQueued(this,position);
         _rfd.resetFailedCount();                
         return ConnectionStatus.getQueued(position, pollTime);
     }
@@ -1204,6 +1238,11 @@ public class DownloadWorker implements Runnable {
     
     HTTPDownloader getDownloader() {
         return _downloader;
+    }
+    
+    public String toString() {
+        String ret = _myThread != null ? _myThread.getName() : "new";
+        return ret + " -> "+_rfd;  
     }
 
 }

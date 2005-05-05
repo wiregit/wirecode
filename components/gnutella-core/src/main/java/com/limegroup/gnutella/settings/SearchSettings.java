@@ -75,4 +75,10 @@ public final class SearchSettings extends LimeProps {
 	 */    
     public static final IntSetting PARALLEL_SEARCH =
         FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+    
+    /**
+     * Do not issue query keys more than this often
+     */
+    public static final IntSetting QUERY_KEY_DELAY = 
+        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,"MessageRouter.QueryKeyDelay",10000,10);
 }

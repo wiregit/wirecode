@@ -53,6 +53,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -520,11 +521,8 @@ public class DownloadManager implements BandwidthTracker {
 
         initializeDownload(downloader);
         
-        //Now that the download is started, add the alts without caching.
-        for(Iterator iter = alts.iterator(); iter.hasNext(); ) {
-            RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-            downloader.addDownload(rfd, false);
-        }
+        //Now that the download is started, add the sources w/o caching
+        downloader.addDownload(alts,false);
         
         return downloader;
     }   
@@ -1040,9 +1038,9 @@ public class DownloadManager implements BandwidthTracker {
             //make sure we send it to the proxies, if any
             Set proxies = file.getPushProxies();
             for (Iterator iter = proxies.iterator();iter.hasNext();) {
-                PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                if (filter.allow(ppi.getPushProxyAddress().getAddress()))
-                    udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
+                IpPort ppi = (IpPort)iter.next();
+                if (filter.allow(ppi.getAddress()))
+                    udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
             }
         }
         return true;
@@ -1136,11 +1134,11 @@ public class DownloadManager implements BandwidthTracker {
         IPFilter filter = IPFilter.instance();
         // try to contact each proxy
         for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
-            PushProxyInterface ppi = (PushProxyInterface)iter.next();
-            if (!filter.allow(ppi.getPushProxyAddress().getAddress()))
+            IpPort ppi = (IpPort)iter.next();
+            if (!filter.allow(ppi.getAddress()))
                 continue;
-            final String ppIp = ppi.getPushProxyAddress().getHostAddress();
-            final int ppPort = ppi.getPushProxyPort();
+            final String ppIp = ppi.getAddress();
+            final int ppPort = ppi.getPort();
             String connectTo =  "http://" + ppIp + ":" + ppPort + request;
             HeadMethod head = new HeadMethod(connectTo);
             head.addRequestHeader(nodeString, nodeValue);

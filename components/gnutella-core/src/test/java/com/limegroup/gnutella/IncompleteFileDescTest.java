@@ -75,7 +75,9 @@ public class IncompleteFileDescTest extends BaseTestCase {
         
         
         
-        
+
+
+
            assertFalse( ifd.isRangeSatisfiable(0, 0) );   
         assertFalse( ifd.isRangeSatisfiable(0, 150) );
         

@@ -20,9 +20,10 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.UDPHostRanker;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -307,7 +308,7 @@ public class UDPHostCacheTest extends BaseTestCase {
     
     public void testRecordingFailuresAndSuccesses() throws Exception {
         assertEquals(0, cache.getSize());
-        UDPHostRanker.LISTEN_EXPIRE_TIME = 3 * 1000;
+        UDPPinger.LISTEN_EXPIRE_TIME = 3 * 1000;
         cache.doRealFetch = true;
         
         ExtendedEndpoint e1 = create("1.2.3.4");
@@ -467,7 +468,7 @@ public class UDPHostCacheTest extends BaseTestCase {
         private boolean doRealDecrement = false;
         
         public StubCache() {
-            super(EXPIRY_TIME);
+            super(EXPIRY_TIME,new UniqueHostPinger());
         }
         
         protected boolean fetch(Collection hosts) {

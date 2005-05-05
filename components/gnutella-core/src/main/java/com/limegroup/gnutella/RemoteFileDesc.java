@@ -3,8 +3,10 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +39,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements Serializable {
+public class RemoteFileDesc implements IpPort, Serializable {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
@@ -111,6 +113,12 @@ public class RemoteFileDesc implements Serializable {
     private transient IntervalSet _availableRanges = null;
     
     /**
+     * The last known queue status of the remote host
+     * negative values mean free slots
+     */
+    private transient int _queueStatus = Integer.MAX_VALUE;
+    
+    /**
      * The number of times this download has failed while attempting
      * to transfer data.
      */
@@ -181,8 +189,8 @@ public class RemoteFileDesc implements Serializable {
      * head pongs.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
-    	this( rfd.getHost(),              // host - ignored
-                rfd.getPort(),                 // port -ignored
+    	this( pe.getAddress(),              // host - ignored
+                pe.getPort(),                 // port -ignored
                 COPY_INDEX,                   // index (unknown)
                 rfd.getFileName(),            // filename
                 rfd.getSize(),                // filesize
@@ -855,7 +863,7 @@ public class RemoteFileDesc implements Serializable {
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
-                result = (37* result)+_clientGUID.hashCode();
+                result = (37* result)+(new GUID(_clientGUID)).hashCode();
             _hashCode = result;
         }
 		return _hashCode;
@@ -864,5 +872,24 @@ public class RemoteFileDesc implements Serializable {
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName().toLowerCase()+">");
+    }
+
+    public String getAddress() {
+        return getHost();
+    }
+
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName(getAddress());
+        }catch(UnknownHostException bad){}
+        return null;
+    }
+    
+    public void setQueueStatus(int status) {
+        _queueStatus = status;
+    }
+    
+    public int getQueueStatus() {
+        return _queueStatus;
     }
 }

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -336,22 +337,25 @@ public class IntervalSet {
     	int pos = 0;
     	for (Iterator iter = intervals.iterator();iter.hasNext();) {
     		Interval current = (Interval) iter.next();
-    		System.arraycopy(current.toBytes(),0,ret,pos,8);
+    		current.toBytes(ret,pos);
     		pos+=8;
     	}
     	return ret;
     }
     
     /**
-     * parses an IntervalSet from a byte array.  Each interval is 8 bytes; so if
-     * the size of the array is not divisible by 8 the last remaining bytes are discarded.
-     * @return
+     * parses an IntervalSet from a byte array.  
      */
-    public static IntervalSet parseBytes(byte [] data) {
+    public static IntervalSet parseBytes(byte [] data) throws IOException {
+        if (data.length % 8 != 0) 
+            throw new IOException();
+        
     	IntervalSet ret = new IntervalSet();
     	for (int i =0; i< data.length/8;i++) {
-    		int low = ByteOrder.beb2int(data,i*8);
-    		int high = ByteOrder.beb2int(data,i*8+4);
+    		int low = (int)ByteOrder.ubytes2long(ByteOrder.beb2int(data,i*8));
+    		int high = (int)ByteOrder.ubytes2long(ByteOrder.beb2int(data,i*8+4));
+            if (high < low)
+                throw new IOException();
     		ret.add(new Interval(low,high));
     	}
     	return ret;

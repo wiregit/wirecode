@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +51,7 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
@@ -1210,10 +1210,7 @@ public class RouterService {
      */
     public static Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
         
-        // note that we need to use a TreeSet because the objects returned
-        // from the various adding calls below will be different types,
-        // and hashCode & equals won't be respected.
-        Set hosts = new TreeSet(IpPort.COMPARATOR);
+        Set hosts = new IpPortSet();
         
         if(isUltrapeer)
             hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));

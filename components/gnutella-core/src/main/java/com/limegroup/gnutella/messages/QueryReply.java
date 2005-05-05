@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -21,18 +20,17 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -1237,10 +1235,10 @@ public class QueryReply extends Message implements Serializable{
                 int numWritten = 0;
                 Iterator iter = proxies.iterator();
                 while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
-                    PushProxyInterface ppi = (PushProxyInterface)iter.next();
+                    IpPort ppi = (IpPort)iter.next();
                     String host = 
-                        ppi.getPushProxyAddress().getHostAddress();
-                    int port = ppi.getPushProxyPort();
+                        ppi.getAddress();
+                    int port = ppi.getPort();
                     try {
                         IPPortCombo combo = new IPPortCombo(host, port);
                         baos.write(combo.toBytes());
@@ -1280,7 +1278,7 @@ public class QueryReply extends Message implements Serializable{
             return retGGEPBlock;
         }
         
-        /** @return a <tt>Set</tt> of <tt>PushProxyContainer</tt> instances,
+        /** @return a <tt>Set</tt> of <tt>IpPortCombo</tt> instances,
          *  which can be empty but is guaranteed not to be <tt>null</tt>, as 
          *  described by the GGEP blocks.
          *
@@ -1299,8 +1297,8 @@ public class QueryReply extends Message implements Serializable{
                         if (bais.read(combo, 0, combo.length) == combo.length) {
                             try {
                                 if(proxies == null)
-                                    proxies = new HashSet(3);
-                                proxies.add(new PushProxyContainer(combo));
+                                    proxies = new IpPortSet();
+                                proxies.add(new IPPortCombo(combo));
                             } catch (BadPacketException malformedPair) {}
                         }                        
                     }
@@ -1311,48 +1309,6 @@ public class QueryReply extends Message implements Serializable{
                 return Collections.EMPTY_SET;
             else
                 return proxies;
-        }
-    }
-
-    /** A simple utility class for doling out PushProxy information.
-     */
-    public static class PushProxyContainer implements PushProxyInterface {
-        IPPortCombo _combo;
-
-        public PushProxyContainer(String hostAddress, int port) 
-            throws UnknownHostException {
-            _combo = new IPPortCombo(hostAddress, port);
-        }
-
-        public PushProxyContainer(byte[] fromNetwork)
-            throws BadPacketException {
-            _combo = IPPortCombo.getCombo(fromNetwork);
-        }
-
-        public int getPushProxyPort() {
-            return _combo.getPort();
-        }
-        public InetAddress getPushProxyAddress() {
-            return _combo.getInetAddress();
-        }
-
-        public boolean equals(Object other) {
-            if(this == other) return true;
-            if (other instanceof PushProxyContainer) {
-                PushProxyContainer iface = (PushProxyContainer) other;
-                return _combo.equals(iface._combo);
-            }
-            return false;
-        }
-
-        // overridden to fulfill contract with equals for hash-based
-        // collections
-        public int hashCode() {
-            return _combo.hashCode() * 17;
-        }
-        
-        public String toString() {
-            return _combo.toString();
         }
     }
 

@@ -13,6 +13,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import junit.framework.Test;
 
@@ -42,9 +46,14 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);
+    
     final static int PORT=6666;
     private DownloadManagerStub manager;
     private FileManager fileman;
@@ -85,6 +94,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         manager.initialize(callback, router, fileman);
         try {
             PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+            PrivilegedAccessor.setValue(RouterService.class,"router",router);
         }catch(Exception e) {
             ErrorService.error(e);
         }
@@ -96,7 +106,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
      * but not sent to uploaders.  (i.e. the informMesh method)
      */
     public void testFirewalledLocs() throws Exception {
-    	
+    	LOG.info("testing firewalled locations");
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
         assertTrue(RouterService.acceptedIncomingConnection());
@@ -202,101 +212,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	
     }
     
-    public void testLegacy() throws Exception {
-        //Test removeBest
-        Set urns1 = new HashSet();
-        Set urns2 = new HashSet();
-        try {
-            urns1.add(URN.createSHA1Urn(
-                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
-            urns2.add(URN.createSHA1Urn(
-                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
-        } catch (IOException e) { 
-			fail(e);
-        }
-
-        RemoteFileDesc rf1=new RemoteFileDesc("1.2.3.4", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T1_SPEED_INT, 
-                                              false, 3, false, null, null,
-                                              false, false,"",0,null, -1);
-        RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T3_SPEED_INT, 
-                                              false, 0, false, null, null,
-                                              false, false,"",0,null, -1);
-        RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T3_SPEED_INT+1, 
-                                              false, 0, false, null, null,
-                                              false, false,"",0,null, -1);
-        RemoteFileDesc rf6=new RemoteFileDesc("1.2.3.7", 6346, 0,
-                                              "some file.txt", 1010,
-                                              new byte[16],
-                                              SpeedConstants.MODEM_SPEED_INT,
-                                              false, 0, false, null, urns1,
-                                              false, false,"",0,null, -1);
-        RemoteFileDesc rf7=new RemoteFileDesc("1.2.3.7", 6346, 0,
-                                              "some file.txt", 1010,
-                                              new byte[16],
-                                              SpeedConstants.MODEM_SPEED_INT+1,
-                                              false, 0, false, null, urns2,
-                                              false, false,"",0,null, -1);
-
-        List list = new LinkedList();
-        list.add(rf4);
-        list.add(rf6);
-        list.add(rf1);
-        list.add(rf5);
-        list.add(rf7);
-		RemoteFileDesc testRFD = null;
-		
-		Class[] args = new Class[1];
-		args[0] = List.class;
-
-		ManagedDownloader md = 
-			new ManagedDownloader(new RemoteFileDesc[]{rf1}, 
-								  new IncompleteFileManager(), null);
-        PrivilegedAccessor.setValue(md, "rfds",
-                                    list);
-        
-		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
-												new Class[]{});
-        Object[] nothing = new Object[0];
-		m.setAccessible(true);
-		testRFD = (RemoteFileDesc)m.invoke(md, nothing);
-		assertEquals("rfds should be equal", testRFD, rf7);
-
-		testRFD = (RemoteFileDesc)m.invoke(md, nothing);
-		assertEquals("rfds should be equal", testRFD, rf6);
-
-		testRFD = (RemoteFileDesc)m.invoke(md, nothing);
-		assertEquals("rfds should be equal", testRFD, rf1);
-
-		assertEquals("unexpected size", 2, list.size());
-
-		assertTrue("should contain rfd", list.contains(rf4));
-		assertTrue("should contain rfd", list.contains(rf5));
-
-		testRFD = (RemoteFileDesc)m.invoke(md, nothing);
-		assertEquals("rfds should be equal", testRFD, rf5);
-
-		assertEquals("unexpected size", 1, list.size());
-
-		assertTrue("should contain rfd", list.contains(rf4));
-
-		testRFD = (RemoteFileDesc)m.invoke(md, nothing);
-		assertEquals("rfds should be equal", testRFD, rf4);
-
-		assertEquals("unexpected size", 0, list.size());
-    }
-
     // requeries are gone now - now we only have user-driven queries (sort of
     // like requeries but not automatic.
     public void testNewRequery() throws Exception {
+        LOG.info("testing new requery");
         RemoteFileDesc[] rfds={
             newRFD("Susheel_Daswani_Neil_Daswani.txt",
                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"),
@@ -309,6 +228,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         QueryRequest qr=downloader.newRequery2();
         assertNotNull("Couldn't make query", qr);
+        
         assertTrue(qr.getQuery().equals("neil daswani susheel") ||
                    qr.getQuery().equals("neil susheel daswani") ||
                    qr.getQuery().equals("daswani neil susheel") ||
@@ -318,6 +238,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         // minspeed mask | firewalled | xml = 224
         assertEquals(224, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
+        
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
         assertTrue((qr.getRichQuery() == null) || 
@@ -335,6 +256,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
     /** Catches a bug with earlier keyword intersection code. */
     public void testNewRequery2() throws Exception {
+        LOG.info("testing new requery 2");
         RemoteFileDesc[] rfds={ newRFD("LimeWire again LimeWire the 34") };
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         QueryRequest qr=downloader.newRequery2();
@@ -343,7 +265,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     /** Tests that the progress is retained for deserialized downloaders. */
-    public void testSerializedProgress() throws Exception {        
+    public void testSerializedProgress() throws Exception {     
+        LOG.info("test serialized progress");
         IncompleteFileManager ifm=new IncompleteFileManager();
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
@@ -394,6 +317,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
      *  Changed after requeries have been shut off (requery-expunge-branch).
      */
     public void testRequeryProgress() throws Exception {
+        LOG.info("test requery progress");
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
         try {
@@ -411,7 +335,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   callback);
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
-            Thread.sleep(40000);
+            Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
             // input from the user
             assertEquals("should have read 100 bytes", 100, 
@@ -472,10 +396,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     private static RemoteFileDesc newPushRFD(String name,String hash,byte [] guid) 
     	throws Exception {
     	
-		QueryReply.PushProxyContainer ppi = 
-			new QueryReply.PushProxyContainer("1.2.3.10",2000);
+		IpPort ppi = 
+			new IpPortImpl("1.2.3.10",2000);
 		
-		Set ppis = new HashSet();ppis.add(ppi);
+		Set ppis = new TreeSet(IpPort.COMPARATOR);ppis.add(ppi);
 		
     	PushEndpoint pe = new PushEndpoint(guid,ppis);
     	pe.updateProxies(true);

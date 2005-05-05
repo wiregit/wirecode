@@ -4,6 +4,7 @@ package com.limegroup.gnutella;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -39,8 +40,8 @@ public class PushEndpointTest extends BaseTestCase {
     	GUID guid2 = new GUID(GUID.makeGuid());
     	GUID guid3 = new GUID(GUID.makeGuid());
     	
-    	PushProxyInterface ppi1 = new QueryReply.PushProxyContainer("1.2.3.4",1234);
-    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",1235);
+    	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
+    	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
 		
     	Set set1 = new HashSet();
     	Set set2 = new HashSet();
@@ -84,15 +85,15 @@ public class PushEndpointTest extends BaseTestCase {
     	GUID guid1 = new GUID(GUID.makeGuid());
     	GUID guid2 = new GUID(GUID.makeGuid());
     	
-    	PushProxyInterface ppi1 = new QueryReply.PushProxyContainer("1.2.3.4",1234);
-    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",1235);
-    	PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",1235);
-    	PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.7",1235);
-    	PushProxyInterface ppi5 = new QueryReply.PushProxyContainer("1.2.3.8",1235);
-    	PushProxyInterface ppi6 = new QueryReply.PushProxyContainer("1.2.3.9",1235);
+    	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
+    	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
+    	IpPort ppi3 = new IpPortImpl("1.2.3.6",1235);
+    	IpPort ppi4 = new IpPortImpl("1.2.3.7",1235);
+    	IpPort ppi5 = new IpPortImpl("1.2.3.8",1235);
+    	IpPort ppi6 = new IpPortImpl("1.2.3.9",1235);
 		
-    	Set set1 = new HashSet();
-    	Set set6 = new HashSet();
+    	Set set1 = new TreeSet(IpPort.COMPARATOR);
+    	Set set6 = new TreeSet(IpPort.COMPARATOR);
     	
     	set1.add(ppi1); 
     	set6.add(ppi1);set6.add(ppi2);set6.add(ppi3);set6.add(ppi4);
@@ -124,9 +125,9 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(2,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
     	
-    	Set sent = new HashSet(set6);
-    	sent.retainAll(four.getProxies());
-    	assertEquals(four.getProxies().size(),sent.size());
+    	Set sent = new TreeSet(IpPort.COMPARATOR);
+        sent.addAll(set6);
+    	assertTrue(set6.containsAll(four.getProxies()));
     	
     	// test a PE that carries its external address
     	m.clear();
@@ -168,15 +169,15 @@ public class PushEndpointTest extends BaseTestCase {
     	GUID guid1 = new GUID(GUID.makeGuid());
     	GUID guid2 = new GUID(GUID.makeGuid());
     	
-    	PushProxyInterface ppi1 = new QueryReply.PushProxyContainer("1.2.3.4",1234);
-    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",1235);
-    	PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",1235);
-    	PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.7",1235);
-    	PushProxyInterface ppi5 = new QueryReply.PushProxyContainer("1.2.3.8",1235);
-    	PushProxyInterface ppi6 = new QueryReply.PushProxyContainer("1.2.3.9",1235);
+    	IpPort ppi1 = new IpPortImpl("1.2.3.4",1234);
+    	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
+    	IpPort ppi3 = new IpPortImpl("1.2.3.6",1235);
+    	IpPort ppi4 = new IpPortImpl("1.2.3.7",1235);
+    	IpPort ppi5 = new IpPortImpl("1.2.3.8",1235);
+    	IpPort ppi6 = new IpPortImpl("1.2.3.9",1235);
 		
-    	Set set1 = new HashSet();
-    	Set set6 = new HashSet();
+    	Set set1 = new TreeSet(IpPort.COMPARATOR);
+    	Set set6 = new TreeSet(IpPort.COMPARATOR);
     	
     	set1.add(ppi1); 
     	set6.add(ppi1);set6.add(ppi2);set6.add(ppi3);set6.add(ppi4);
@@ -205,7 +206,8 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals("1.2.3.4",four.getAddress());
     	assertEquals(5,four.getPort());
     	
-    	Set sent = new HashSet(set6);
+    	Set sent = new TreeSet(IpPort.COMPARATOR);
+        sent.addAll(set6);
     	sent.retainAll(four.getProxies());
     	assertEquals(four.getProxies().size(),sent.size());
     	

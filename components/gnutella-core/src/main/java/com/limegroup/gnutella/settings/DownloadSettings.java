@@ -46,4 +46,34 @@ public class DownloadSettings extends LimeProps {
     public static final IntSetting HISTORY_SIZE=
         FACTORY.createSettableIntSetting("HISTORY_SIZE",10,"history_size",50,2);
     
+    /**
+     * Whether the client should use HeadPings when ranking sources
+     */
+    public static final BooleanSetting USE_HEADPINGS =
+        FACTORY.createSettableBooleanSetting("USE_HEADPINGS",true,"use_headpings");
+    
+    /**
+     * Whether the client should drop incoming HeadPings.
+     */
+    public static final BooleanSetting DROP_HEADPINGS =
+        FACTORY.createSettableBooleanSetting("DROP_HEADPINGS",false,"drop_headpings");
+    
+    /**
+     * We should stop issuing HeadPings when we have this many verified sources
+     */
+    public static final IntSetting MAX_VERIFIED_HOSTS = 
+        FACTORY.createSettableIntSetting("MAX_VERIFIED_HOSTS",1,"max_verified_hosts",5,0);
+    
+    /**
+     * We should not schedule more than this many head pings at once
+     */
+    public static final IntSetting PING_BATCH =
+        FACTORY.createSettableIntSetting("PING_BATCH",10,"PingRanker.pingBatch",50,1);
+    
+    /**
+     * Do not start new workers more than this often
+     */
+    public static final IntSetting WORKER_INTERVAL =
+        FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
+    
 }

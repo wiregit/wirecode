@@ -171,10 +171,19 @@ public class HostCatcher {
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache = 
         BootstrapServerManager.instance();
+    
+    /**
+     * The pinger that will send the messages
+     */
+    private UniqueHostPinger pinger;
         
     /** The UDPHostCache bootstrap system. */
-    private UDPHostCache udpHostCache =
-        new UDPHostCache();
+    private UDPHostCache udpHostCache;
+    
+	/**
+	 * Constant for the host file to read from and write to.
+	 */
+	private final File HOST_FILE;
 
     /**
      * Count for the number of hosts that we have not been able to connect to.
@@ -255,6 +264,8 @@ public class HostCatcher {
 	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
 	public HostCatcher() {
+	   HOST_FILE = 
+	      new File(CommonUtils.getUserSettingsDir(), "gnutella.net"); 
 	}
 
     /**
@@ -267,6 +278,9 @@ public class HostCatcher {
      */
     public void initialize() {
         LOG.trace("START scheduling");
+        
+        pinger = new UniqueHostPinger();
+        udpHostCache = new UDPHostCache(pinger);
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
         //only do this if we also have incoming slots, but John Marshall from
@@ -333,7 +347,7 @@ public class HostCatcher {
      */
     private void rank(Collection hosts) {
         if(needsPongRanking()) {
-            UDPHostRanker.rank(
+            pinger.rank(
                 hosts,
                 // cancel when connected -- don't send out any more pings
                 new Cancellable() {
@@ -425,7 +439,7 @@ public class HostCatcher {
 	 * @throws <tt>IOException</tt> if the file cannot be written
 	 */
 	synchronized void write() throws IOException {
-		write(getHostsFile());
+		write(HOST_FILE);
 	}
 
     /**
@@ -1072,7 +1086,7 @@ public class HostCatcher {
         RouterService.schedule(
                 new Runnable() {
                     public void run() {
-                        UDPHostRanker.resetData();
+                        pinger.resetData();
                     }
                 },
                 PONG_RANKING_EXPIRE_TIME,0);
@@ -1087,6 +1101,10 @@ public class HostCatcher {
         FREE_ULTRAPEER_SLOTS_SET.clear();
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
+    }
+    
+    public UDPPinger getPinger() {
+        return pinger;
     }
 
     public String toString() {
@@ -1140,22 +1158,15 @@ public class HostCatcher {
     }
     
     /**
-     * The hosts file this uses. 
-     */
-    private File getHostsFile() {
-        return new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
-    }
-    
-    /**
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
         LOG.trace("Reading Hosts File");
         // Just gnutella.net
         try {
-            read(getHostsFile());
+            read(HOST_FILE);
         } catch (IOException e) {
-            LOG.debug(getHostsFile(), e);
+            LOG.debug(HOST_FILE, e);
         }
     }
 
@@ -1173,7 +1184,7 @@ public class HostCatcher {
         gWebCache.resetData();
         udpHostCache.resetData();
         
-        UDPHostRanker.resetData();
+        pinger.resetData();
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.

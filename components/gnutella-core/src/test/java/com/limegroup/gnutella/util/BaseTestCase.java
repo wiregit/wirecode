@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.Socket;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -83,23 +85,48 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * @param cls The test class (must be subclassed from TestCase)
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
-    public static TestSuite buildTestSuite(Class cls) {
+    public static TestSuite buildSingleTestSuite(Class cls) {
         _testClass = cls;
         
         String method = System.getProperty("junit.test.method");
         if(method != null) {
             method = method.trim();
             if(!"".equals(method) && !"${method}".equals(method)) {
+                
                 StringTokenizer st = new StringTokenizer(method, ",");
                 List l = new LinkedList();
                 while(st.hasMoreTokens())
                     l.add(st.nextToken());
+                
                 String[] tests = (String[])l.toArray(new String[l.size()]);
                 return buildTestSuite(cls, tests);
             }
         }
-
         return new LimeTestSuite(cls);
+    }
+    
+    public static TestSuite buildTestSuite(Class cls) {
+        TestSuite suite = buildSingleTestSuite(cls);
+        String timesP = System.getProperty("junit.test.times","1");
+        int times = 1 ;
+        try {
+            times = Integer.parseInt(timesP);
+        } catch (NumberFormatException ignored ){}
+        
+        List tests = new LinkedList();
+        for (Enumeration e = suite.tests();e.hasMoreElements();) 
+            tests.add(e.nextElement());
+        
+        while (times-- > 1) {
+            for (Iterator iter = tests.iterator(); iter.hasNext();) 
+                suite.addTest((Test) iter.next());
+        }
+        
+        // add a warning if we are running individual tests
+        if (!System.getProperty("junit.test.method","${method}").equals("${method}"))
+            suite.addTest(warning("Warning - Full test suite has not been run."));
+        
+        return suite;
     }
     
     /**
@@ -127,7 +154,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         for (int ii = 0; ii < tests.length; ii++) {
             suite.addTest(TestSuite.createTest(cls, tests[ii]));
         }
-        suite.addTest(warning("Warning - Full test suite has not been run."));
         return suite;
     }
     

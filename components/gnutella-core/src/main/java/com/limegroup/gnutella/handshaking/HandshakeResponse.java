@@ -879,13 +879,17 @@ public final class HandshakeResponse {
 	 * @return <tt>true</tt> if this node supports vendor messages, otherwise
 	 *  <tt>false</tt>
 	 */
-	public boolean supportsVendorMessages() {
+	public float supportsVendorMessages() {
 		String value = 
 			HEADERS.getProperty(HeaderNames.X_VENDOR_MESSAGE);
-		if ((value != null) && !value.equals("")) {		
-			return true;
+		if ((value != null) && !value.equals("")) {
+            try {
+                return Float.parseFloat(value);
+            }catch(NumberFormatException nfe) {
+                return 0;
+            }
 		}
-		return false;
+		return 0;
 	}
 
     /**

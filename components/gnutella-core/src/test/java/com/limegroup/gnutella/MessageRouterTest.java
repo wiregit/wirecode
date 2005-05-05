@@ -648,7 +648,7 @@ public final class MessageRouterTest extends BaseTestCase {
     	
     	// try a HeadPing 
     	URN urn = FileDescStub.DEFAULT_SHA1;
-    	HeadPing ping = new HeadPing(urn, clientGUID, 0xFF);
+    	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, clientGUID, 0xFF);
     	
     	ROUTER.handleUDPMessage(ping, new InetSocketAddress(InetAddress.getLocalHost(), 10));
     	
@@ -675,7 +675,7 @@ public final class MessageRouterTest extends BaseTestCase {
     	
     	//try a headpong
     	URN urn = FileDescStub.DEFAULT_SHA1;
-    	HeadPing ping = new HeadPing(urn, 0xFF);
+    	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, 0xFF);
     	headRt.routeReply(ping.getGUID(),pinger);
     	HeadPong pong = new HeadPong(ping);
     	

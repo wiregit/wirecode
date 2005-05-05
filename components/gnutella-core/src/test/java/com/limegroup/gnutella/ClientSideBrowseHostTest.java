@@ -22,6 +22,9 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -79,8 +82,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         ss.setSoTimeout(TIMEOUT);
 
         // send a reply with some PushProxy info
-        PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
-        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        IpPort[] proxies = new IpPortImpl[1];
+        proxies[0] = new IpPortImpl("127.0.0.1", 7000);
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
@@ -178,8 +181,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // send a reply with some PushProxy info
         //final PushProxyInterface[] proxies = 
         //  new QueryReply.PushProxyContainer[1];
-        final Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        final Set proxies = new IpPortSet();
+        proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "nyu.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
@@ -312,8 +315,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // send a reply with some BAD PushProxy info
         //final PushProxyInterface[] proxies = 
         //  new QueryReply.PushProxyContainer[1];
-        final Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7001));
+        final Set proxies = new IpPortSet();
+        proxies.add(new IpPortImpl("127.0.0.1", 7001));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "anita");
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 

@@ -284,8 +284,8 @@ public class HeadTest extends BaseTestCase {
 	 */
 	public void testRanges() throws Exception {
 		
-		HeadPing ping = new HeadPing(_haveFull,HeadPing.INTERVALS);
-		HeadPing pingi = new HeadPing(_havePartial,HeadPing.INTERVALS);
+		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.INTERVALS);
+		HeadPing pingi = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.INTERVALS);
 		
 		HeadPong pong = reparse(new HeadPong(ping));
 		HeadPong pongi = reparse(new HeadPong(pingi));
@@ -302,7 +302,7 @@ public class HeadTest extends BaseTestCase {
 		//fit in a packet
 		_partial.setRangesByte(_rangesTooBig.toBytes());
 		
-		pingi = new HeadPing(_havePartial,HeadPing.INTERVALS);
+		pingi = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.INTERVALS);
 		pongi = reparse(new HeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
@@ -352,8 +352,8 @@ public class HeadTest extends BaseTestCase {
 		//ping 1 should contain alternate locations. 
 		
 		//the second ping should be too big to contain all altlocs.
-		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.ALT_LOCS);
-		HeadPing ping2 = new HeadPing(_havePartial,
+		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.ALT_LOCS);
+		HeadPing ping2 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
 		
 		HeadPong pong1 = reparse (new HeadPong(ping1));
@@ -369,7 +369,7 @@ public class HeadTest extends BaseTestCase {
 		
 		//now test if no locs will fit because of too many ranges
 		_partial.setRangesByte(_rangesJustFit.toBytes());
-		ping2 = new HeadPing(_havePartial,
+		ping2 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
 		pong2 = reparse (new HeadPong(ping2));
 		
@@ -383,12 +383,12 @@ public class HeadTest extends BaseTestCase {
 	public void testFirewalledAltlocs() throws Exception {
 		
 		//try with a file that doesn't have push locs
-		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS);
+		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
 		HeadPong pong1 = reparse (new HeadPong(ping1));
 		assertNull(pong1.getPushLocs());
 		
-		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
 		pong1 = reparse (new HeadPong(ping1));
 
@@ -413,14 +413,14 @@ public class HeadTest extends BaseTestCase {
 		assertEquals(pe.getProxies().size(),parsedProxies.size());
 		
 		//now ask only for fwt push locs - nothing returned
-		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
+		ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
 		assertTrue(ping1.requestsFWTPushLocs());
 		pong1 = reparse(new HeadPong(ping1));
 		assertNull(pong1.getPushLocs());
 	}
 	
 	public void testMixedLocs() throws Exception {
-		HeadPing ping = new HeadPing(_havePartial,
+		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);
 		
 		HeadPong pong = reparse(new HeadPong(ping));

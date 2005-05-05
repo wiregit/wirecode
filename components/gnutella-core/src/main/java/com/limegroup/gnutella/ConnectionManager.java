@@ -1088,7 +1088,7 @@ public class ConnectionManager {
             Set proxies = new HashSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
-                if (currMC.getPushProxyPort() >= 0)
+                if (currMC.isPushProxy())
                     proxies.add(currMC);
             }
             return proxies;

@@ -112,6 +112,31 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     }
     
     /**
+     * overrides ManagedDownloader to ensure that we issue requests to the known
+     * locations until we find out enough information to start the download 
+     */
+    protected int initializeDownload() {
+        
+        Assert.that(_defaultURLs != null &&  _defaultURLs.length > 0);
+        
+        RemoteFileDesc firstDesc = null;
+        
+        for (int i = 0; i < _defaultURLs.length && firstDesc == null; i++) {
+            try {
+                firstDesc = createRemoteFileDesc(_defaultURLs[i],_filename,_urn);
+                initPropertiesMap(firstDesc);
+                addDownloadForced(firstDesc,true);
+            } catch (IOException badRFD) {}
+        }
+        
+        // if all locations included in the magnet URI fail we can't do much
+        if (firstDesc == null)
+            return GAVE_UP;
+        
+        return super.initializeDownload();
+    }
+    
+    /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
     protected void performDownload() {     
@@ -120,16 +145,17 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			//Send HEAD request to default location (if present)to get its size.
 			//This can block, so it must be done here instead of in constructor.
 			//See class overview and ManagedDownloader.tryAllDownloads.
-			RemoteFileDesc defaultRFD = 
-                createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
-			if (defaultRFD!=null) {
-				//Add the faked up location before starting download. Note that 
-				//we must force ManagedDownloader to accept this RFD in case 
-				//it has no hash and a name that doesn't match the search 
-				//keywords.
-				boolean added=super.addDownloadForced(defaultRFD,true);
-				Assert.that(added, "Download rfd not accepted "+defaultRFD);
-			} else {
+            try {
+                RemoteFileDesc defaultRFD = 
+                    createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
+                
+                //Add the faked up location before starting download. Note that 
+                //we must force ManagedDownloader to accept this RFD in case 
+                //it has no hash and a name that doesn't match the search 
+                //keywords.
+                super.addDownloadForced(defaultRFD,true);
+                
+            }catch(IOException badRFD) {
                 if(LOG.isWarnEnabled())
                     LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
             }
@@ -146,25 +172,24 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * returns null.  Package-access and static for easy testing.
      */
     private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn) {
+        String filename, URN urn) throws IOException{
         if (defaultURL==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
             return null;
         }
 
         URL url = null;
-        try {
-            // Use the URL class to do a little parsing for us.
-            url = new URL(defaultURL);
-            int port = url.getPort();
-            if (port<0)
-                port=80;      //assume default for HTTP (not 6346)
-
-            Set urns=new HashSet(1);
-            if (urn!=null)
-                urns.add(urn);
-            
-            return new URLRemoteFileDesc(
+        // Use the URL class to do a little parsing for us.
+        url = new URL(defaultURL);
+        int port = url.getPort();
+        if (port<0)
+            port=80;      //assume default for HTTP (not 6346)
+        
+        Set urns=new HashSet(1);
+        if (urn!=null)
+            urns.add(urn);
+        
+        return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
@@ -182,12 +207,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 url,            //url for GET request
                 null,           //no push proxies
                 0);         //assume no firewall transfer
-        } catch (IOException e) {
-            if(LOG.isWarnEnabled())
-                LOG.warn("IOException while processing magnet URL: " + url, e);
-            return null;
-        }
-
     } 
 
     /** Returns the filename to use for the download, guessed if necessary. 

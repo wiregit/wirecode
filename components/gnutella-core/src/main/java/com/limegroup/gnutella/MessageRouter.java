@@ -35,6 +35,8 @@ import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.StatisticsSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -274,6 +276,11 @@ public abstract class MessageRouter {
 	private final UDPMultiplexor _udpConnectionMultiplexor =
 	    UDPMultiplexor.instance(); 
 
+    /**
+     * The time we last received a request for a query key.
+     */
+    private long _lastQueryKeyTime;
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -573,7 +580,7 @@ public abstract class MessageRouter {
         else if (msg instanceof HeadPing) {
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, handler);
-        }
+        } 
         notifyMessageListener(msg, handler);
     }
     
@@ -864,6 +871,13 @@ public abstract class MessageRouter {
      */
     protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
 
+        // check if we're getting bombarded
+        long now = System.currentTimeMillis();
+        if (now - _lastQueryKeyTime < SearchSettings.QUERY_KEY_DELAY.getValue())
+            return;
+        
+        _lastQueryKeyTime = now;
+        
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
 
@@ -2700,6 +2714,9 @@ public abstract class MessageRouter {
      * Replies to a head ping sent from the given ReplyHandler.
      */
     private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
+        if (DownloadSettings.DROP_HEADPINGS.getValue())
+            return;
+        
         GUID clientGUID = ping.getClientGuid();
         ReplyHandler pingee;
         
@@ -2723,14 +2740,17 @@ public abstract class MessageRouter {
             handler.reply(pong); // 
         } else {
             // Otherwise, remember who sent it and forward it on.
-                
             //remember where to send the pong to. 
             //the pong will have the same GUID as the ping. 
             // Note that this uses the messageGUID, not the clientGUID
             _headPongRouteTable.routeReply(ping.getGUID(), handler); 
             
             //and send off the routed ping 
-            pingee.reply(ping); 
+            if ( !(handler instanceof Connection) ||
+                    ((Connection)handler).supportsVMRouting())
+                pingee.reply(ping);
+            else
+                pingee.reply(new HeadPing(ping)); 
         }
    } 
     
