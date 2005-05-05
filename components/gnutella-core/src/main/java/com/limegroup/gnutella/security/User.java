@@ -1,4 +1,5 @@
 package com.limegroup.gnutella.security;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;

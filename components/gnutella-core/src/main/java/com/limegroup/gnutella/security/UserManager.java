@@ -1,10 +1,5 @@
-/*
- * UserManager.java
- *
- * Created on October 22, 2001, 11:45 AM
- */
-
 package com.limegroup.gnutella.security;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
