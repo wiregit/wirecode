@@ -79,16 +79,6 @@ public final class HandshakeResponse {
         = "Service Not Available";
     
     /**
-     * status code for unauthorized attempt
-     */
-    public static final int UNAUTHORIZED_CODE = 401;
-    
-    /**
-     * status message for unauthorized attempt
-     */
-    public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
-    
-    /**
      * ??? TODO: check about this error code...
      */
     public static final int LOCALE_NO_MATCH = 577;
