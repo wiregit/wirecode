@@ -259,15 +259,6 @@ public class ManagedConnection extends Connection
     }
 
 	/**
-	 * More customizable constructor used for testing.
-	 */
-	static ManagedConnection 
-        createTestConnection(String host, int port, 
-		  Properties props, HandshakeResponder responder) {	
-		return new ManagedConnection(host, port, props, responder);
-	}
-
-	/**
 	 * Creates a new <tt>ManagedConnection</tt> with the specified 
 	 * handshake classes and the specified host and port.
 	 */

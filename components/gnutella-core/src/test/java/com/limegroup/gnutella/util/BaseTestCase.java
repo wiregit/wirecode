@@ -663,13 +663,13 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                Class type, int timeout) throws BadPacketException {
         for(int i = 0; i < 200; i++) {
             if(!c.isOpen()){
-                System.out.println(c + " is not open");
+                //System.out.println(c + " is not open");
                 return null;
             }
 
             try {
                 Message m = c.receive(timeout);
-                System.out.println("m: " + m + ", class: " + m.getClass());
+                //System.out.println("m: " + m + ", class: " + m.getClass());
                 if (type.isInstance(m))
                     return m;
                 i = 0;
