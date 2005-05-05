@@ -1706,8 +1706,8 @@ public abstract class MessageRouter {
     
     /**
      * Sends the passed query request, received on handler, 
-     * to the passed sendConnection, only if the handler and
-     * the sendConnection are authenticated to a common domain
+     * to the passed sendConnection, only if the request originated
+     * from our node.
      *
      * To only send it the route table has a hit, use
      * sendRoutedQueryToHost.
@@ -2027,7 +2027,7 @@ public abstract class MessageRouter {
     
 
     /**
-     * Passes on the SimppVM to the SimppManager which will authenticate it and
+     * Passes on the SimppVM to the SimppManager which will verify it and
      * make sure we it's newer than the one we know about, and then make changes
      * to the settings as necessary, and cause new CapabilityVMs to be sent down
      * all connections.

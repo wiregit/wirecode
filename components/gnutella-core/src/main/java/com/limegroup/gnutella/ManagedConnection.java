@@ -257,11 +257,6 @@ public class ManagedConnection extends Connection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
    
-    /**
-     * The domain to which this connection is authenticated
-     */
-    private Set _domains = null;
-
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
      */

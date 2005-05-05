@@ -7,7 +7,7 @@ import com.limegroup.gnutella.GUID;
 
 /** 
  * A file that we requested via a push message.  Used for "authenticating"
- * fincoming push connections.  This is similar to a RemoteFileDesc, but it has
+ * incoming push connections.  This is similar to a RemoteFileDesc, but it has
  * a time stamp and some fields are removed, e.g., file length.
  */
 class PushRequestedFile {

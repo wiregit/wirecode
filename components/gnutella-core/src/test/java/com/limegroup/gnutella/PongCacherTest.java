@@ -277,9 +277,7 @@ public final class PongCacherTest extends BaseTestCase {
 
     
     private static class TestManager extends ConnectionManager {
-        /**
-         * @param authenticator
-         */
+
         public TestManager() {
             super();
         }

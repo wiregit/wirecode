@@ -35,13 +35,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	private final int PORT;
 
 	/**
-	 * Constant for the empty set of security domains that this 
-	 * <tt>ReplyHandler</tt> belongs to.
-	 */
-	private static final Set EMPTY_SET = 
-		Collections.unmodifiableSet(new HashSet());
-
-	/**
 	 * Constant for the <tt>UDPService</tt>.
 	 */
 	private static final UDPService UDP_SERVICE = UDPService.instance();

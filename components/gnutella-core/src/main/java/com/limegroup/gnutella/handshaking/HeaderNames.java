@@ -30,10 +30,6 @@ public final class HeaderNames {
     public static final String X_PONG_CACHING       = "Pong-Caching";
     public static final String X_ULTRAPEER_NEEDED   = "X-Ultrapeer-Needed";
     public static final String USER_AGENT           = "User-Agent";
-    public static final String X_USERNAME         = "X-Username";
-    public static final String X_PASSWORD         = "X-Password";
-    public static final String X_DOMAINS_AUTHENTICATED = 
-        "X-Domains-Authenticated";
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
     public static final String REMOTE_IP            = "Remote-IP";
 

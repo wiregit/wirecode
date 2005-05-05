@@ -8,8 +8,8 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
 
 /**
- * An authentication-capable responder to be used during handshake.
- * This is an abstract class and does not provide methods for 
+ * This is an abstract class that provides a default implementation of
+ * HandshakeResponder. 
  */
 public abstract class DefaultHandshakeResponder implements HandshakeResponder {
 

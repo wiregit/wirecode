@@ -1736,16 +1736,6 @@ public class Connection implements IpPort {
         return _headers.supportsProbeQueries();
     }
 
-	/**
-	 * Returns the authenticated domains listed in the connection headers
-	 * for this connection.
-	 *
-	 * @return the string of authenticated domains for this connection
-	 */
-	public String getDomainsAuthenticated() {
-		return _headers.getDomainsAuthenticated();
-	}
-
     /**
      * Accessor for whether or not this connection has received any
      * headers.

@@ -89,17 +89,6 @@ public final class HandshakeResponse {
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
     
     /**
-     * Message indicating that we are unable to authenticate
-     */
-    public static final String UNABLE_TO_AUTHENTICATE 
-        = "Unable To Authenticate";
-    
-    /**
-     * Message indicating that we are trying to authenticate
-     */
-    public static final String AUTHENTICATING = "AUTHENTICATING";
-
-    /**
      * ??? TODO: check about this error code...
      */
     public static final int LOCALE_NO_MATCH = 577;
@@ -897,18 +886,6 @@ public final class HandshakeResponse {
     public boolean supportsPongCaching() {
         return PONG_CACHING;
     }
-
-	/**
-	 * Returns the authenticated domains listed in the connection headers
-	 * for this connection.
-	 *
-	 * @return the string of authenticated domains for this connection
-	 */
-	public String getDomainsAuthenticated() {
-		return HEADERS.getProperty(
-		    HeaderNames.X_DOMAINS_AUTHENTICATED);
-		
-	}
 
 	public String getVersion() {
 		return HEADERS.getProperty(HeaderNames.X_VERSION);
