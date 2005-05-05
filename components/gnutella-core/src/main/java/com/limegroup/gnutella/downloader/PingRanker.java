@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.Cancellable;
+import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 
@@ -95,7 +96,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized boolean addToPool(Collection c)  {
-        List l = Collections.list(Collections.enumeration(c));
+        List l;
+        if (c instanceof List)
+            l = (List)c;
+        else
+            l = new ArrayList(c);
         Collections.sort(l,ALT_DEPRIORITIZER);
         return addInternal(l);
     }
@@ -147,7 +152,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     private boolean knowsAboutHost(RemoteFileDesc host) {
-        return pingedHosts.values().contains(host) || verifiedHosts.contains(host);
+        return newHosts.contains(host) || 
+            verifiedHosts.contains(host) || 
+            pingedHosts.values().contains(host);
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
@@ -162,12 +169,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         else {
             LOG.debug("getting a non-verified host");
             // use the legacy ranking logic to select a non-verified host
-            LegacyRanker r = new LegacyRanker();
-            r.addToPool(pingedHosts.values());
-            r.addToPool(newHosts);
-            ret = r.getBest();
+            Iterator dual = new DualIterator(pingedHosts.values().iterator(),newHosts.iterator());
+            ret = LegacyRanker.getBest(dual);
             newHosts.remove(ret);
-            pingedHosts.remove(ret);
             for (Iterator iter = pingedHosts.entrySet().iterator(); iter.hasNext();) {
                 Map.Entry entry = (Map.Entry) iter.next();
                 if (entry.getValue().equals(ret))
@@ -191,8 +195,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             return;
         
         // if we don't have anybody to ping, don't ping
-        Collection free = filterBusy(true);
-        if (free.isEmpty())
+        if (!hasNonBusy())
             return;
         
         // if we haven't found a single RFD with URN, don't ping anybody
@@ -212,9 +215,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         int batch = DownloadSettings.PING_BATCH.getValue();
         List toSend = new ArrayList(batch);
         int sent = 0;
-        for (Iterator iter = free.iterator(); iter.hasNext() && sent < batch;) {
+        for (Iterator iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            newHosts.remove(rfd);
+            if (rfd.isBusy())
+                continue;
+            iter.remove();
             
             if (rfd.needsPush())
                 pingProxies(rfd);
@@ -236,23 +241,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         lastPingTime = now;
     }
     
-    /**
-     * @param busy whether we want to filter busy or non-busy hosts
-     * @return subsets of new hosts that satisfy the above criteria
-     */
-    private Collection filterBusy(boolean busy) {
-        List filtered = new ArrayList(newHosts);
-        for (Iterator iter = filtered.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if ((rfd.isBusy() && busy) ||
-                (!rfd.isBusy() && !busy)) 
-                    iter.remove();
-        }
-        return filtered;
-    }
     
-    protected Collection getBusyHosts() {
-        return filterBusy(false);
+    protected Collection getPotentiallyBusyHosts() {
+        return newHosts;
     }
     
     /**
@@ -304,7 +295,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
         HeadPong pong = (HeadPong)m;
         
-        if (!pingedHosts.containsKey(handler))
+        if (!pingedHosts.containsKey(handler)) 
             return;
         
         RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
@@ -313,9 +304,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             LOG.debug("received a pong "+ pong+ " from "+handler +
                     " for rfd "+rfd+" with PE "+rfd.getPushAddr());
         }
-        
-        // update the rfd with information from the pong
-        pong.updateRFD(rfd);
         
         // older push proxies do not route but respond directly, we want to get responses
         // from other push proxies
@@ -333,8 +321,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (!pong.hasFile())
             return;
 
-        // and rank the host.
-        verifiedHosts.add(rfd);
+        // update the rfd with information from the pong
+        pong.updateRFD(rfd);
+        
+        // if the remote host is busy, re-add him for later ranking
+        if (rfd.isBusy()) 
+            newHosts.add(rfd);
+        else     
+            verifiedHosts.add(rfd);
         
         // add any altlocs the pong had to our known hosts 
         addInternal(pong.getAllLocsRFD(rfd));
@@ -376,24 +370,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     public synchronized int getNumKnownHosts() {
         return verifiedHosts.size()+newHosts.size()+pingedHosts.size();
-    }
-    
-    public  int getNumBusyHosts() {
-        
-        List both;
-        synchronized(this) {
-            both = new ArrayList(verifiedHosts.size() + newHosts.size());
-            both.addAll(verifiedHosts);
-            both.addAll(newHosts);
-        }
-        
-        int busy = 0;
-        for (Iterator iter = both.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd.isBusy())
-                busy++;
-        }
-        return busy;
     }
     
     /**

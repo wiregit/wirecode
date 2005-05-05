@@ -56,16 +56,24 @@ public abstract class SourceRanker {
     public abstract int getNumKnownHosts();
     
     /**
-     * @return the number of busy hosts the ranker knows about
-     */
-    public abstract int getNumBusyHosts();
-    
-    /**
      * @return the ranker knows about at least one potential source that is
      * not currently busy
      */
     public synchronized boolean hasNonBusy() {
         return getNumKnownHosts() > getNumBusyHosts();
+    }
+
+    /**
+     * @return the number of busy hosts the ranker knows about
+     */
+    public synchronized int getNumBusyHosts() {
+        int ret = 0;
+        for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (rfd.isBusy())
+                ret++;
+        }
+        return ret;
     }
     
     /**
@@ -78,8 +86,10 @@ public abstract class SourceRanker {
         
         // waitTime is in seconds
         int waitTime = Integer.MAX_VALUE;
-        for (Iterator iter = getBusyHosts().iterator(); iter.hasNext();) {
+        for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            if (!rfd.isBusy())
+                continue;
             waitTime = Math.min(waitTime, rfd.getWaitTime());
         }
         
@@ -87,7 +97,7 @@ public abstract class SourceRanker {
         return (waitTime*1000);
     }
     
-    protected abstract Collection getBusyHosts();
+    protected abstract Collection getPotentiallyBusyHosts();
     /**
      * stops the ranker.
      */

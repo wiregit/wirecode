@@ -48,8 +48,19 @@ public class LegacyRanker extends SourceRanker {
      * @return the best file/endpoint location 
      */
 	public synchronized RemoteFileDesc getBest() {
-		Iterator iter=rfds.iterator();
+		
+        RemoteFileDesc ret = getBest(rfds.iterator());
         //The best rfd found so far
+        boolean removed = rfds.remove(ret);
+        Assert.that(removed == true, "unable to remove RFD.");
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("the best we came with is "+ret);
+        
+        return ret;
+    }
+    
+    static RemoteFileDesc getBest(Iterator iter) {
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
 
         //Find max of each (remaining) element, storing in max.
@@ -63,7 +74,7 @@ public class LegacyRanker extends SourceRanker {
             
             // 1.            
             if (rfd.isBusy())
-            	continue;
+                continue;
 
             if (ret.isBusy())
                 ret=rfd;
@@ -84,15 +95,9 @@ public class LegacyRanker extends SourceRanker {
                 }            
             }
         }
-            
-        boolean removed = rfds.remove(ret);
-        Assert.that(removed == true, "unable to remove RFD.");
-        
-        if (LOG.isDebugEnabled())
-            LOG.debug("the best we came with is "+ret);
         
         return ret;
-	}
+    }
 	
 	public boolean hasMore() {
 		return !rfds.isEmpty();
@@ -102,28 +107,12 @@ public class LegacyRanker extends SourceRanker {
         return rfds;
     }
     
-    protected Collection getBusyHosts() {
-        List ret = new ArrayList(rfds);
-        for (Iterator iter = ret.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (!rfd.isBusy())
-                iter.remove();
-        }
-        return ret;
+    protected Collection getPotentiallyBusyHosts() {
+        return rfds;
     }
     
     public int getNumKnownHosts() {
         return rfds.size();
-    }
-    
-    public int getNumBusyHosts() {
-        int busy = 0;
-        for (Iterator iter = rfds.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd.isBusy())
-                busy++;
-        }
-        return busy;
     }
     
     public void stop(){}
