@@ -16,6 +16,8 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
     private volatile WriteObserver interested;
     /** the SocketChannel this is proxying. */
     private SocketChannel channel;
+    /** whether or not we're shutdown. */
+    private boolean shutdown = false;
     
     /** Constructs a new SocketInterestWriteAdapater */
     SocketInterestWriteAdapater(SocketChannel channel) {
@@ -41,13 +43,11 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
      * Marks the given observer as either interested or not interested in receiving
      * write events from the socket.
      */
-    public void interest(WriteObserver observer, boolean on) {
-        if(on)
-            interested = observer;
-        else if(interested == observer)
-            interested = null;
-
-        NIODispatcher.instance().interestWrite(channel, on);
+    public synchronized void interest(WriteObserver observer, boolean on) {
+        if(!shutdown) {
+            interested = on ? observer : null;
+            NIODispatcher.instance().interestWrite(channel, on);
+        }
     }
     
     /**
@@ -65,9 +65,16 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
      * Shuts down the next link if the chain, if there is any.
      */
     public void shutdown() {
-        WriteObserver chain = interested;
+        synchronized(this) {
+            if(shutdown)
+                return;
+            shutdown = true;
+        }
+
+        Shutdownable chain = interested;
         if(chain != null)
             chain.shutdown();
+        interested = null;
     }
     
     /** Unused, Unsupported. */

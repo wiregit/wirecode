@@ -133,61 +133,58 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
             // Step 1: See if there is any pending deflated data to be written.
             while(outgoing.hasRemaining() && source.write(outgoing) > 0);
             if(outgoing.hasRemaining())
-                break; // there is still deflated data that is pending a write.
-            
-            // Step 2: Try and deflate the existing data.
-            int deflated = deflater.deflate(outgoing.array());
-            if(deflated > 0) {
-                outgoing.position(0).limit(deflated);
-                continue; // we managed to deflate some data!
-            }
+                return true; // there is still deflated data that is pending a write.
+
+            while(true) {
+                // Step 2: Try and deflate the existing data.
+                int deflated = deflater.deflate(outgoing.array());
+                if(deflated > 0) {
+                    outgoing.position(0).limit(deflated);
+                    break; // we managed to deflate some data, try to write it...
+                }
+                    
+                // Step 3: Normal deflate didn't work, try to simulate a Z_SYNC_FLUSH
+                // Note that this requires we tried deflating until deflate returned 0
+                // above.  Otherwise, this setInput call would erase prior input.
+                // We must use different levels of syncing because we have to make sure
+                // that we write everything out of deflate after each level is set.
+                // Otherwise compression doesn't work.
+                if(sync == 0) {
+                    deflater.setInput(EMPTY);
+                    deflater.setLevel(Deflater.NO_COMPRESSION);
+                    sync = 1;
+                    continue;
+                } else if(sync == 1) {
+                    deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
+                    sync = 2;
+                    continue;
+                }
                 
-            // Step 3: Normal deflate didn't work, try to simulate a Z_SYNC_FLUSH
-            // Note that this requires we tried deflating until deflate returned 0
-            // above.  Otherwise, this setInput call would erase prior input.
-            // We must use different levels of syncing because we have to make sure
-            // that we write everything out of deflate after each level is set.
-            // Otherwise compression doesn't work.
-            if(sync == 0) {
-                deflater.setInput(EMPTY);
-                deflater.setLevel(Deflater.NO_COMPRESSION);
-                sync = 1;
-                continue;
-            } else if(sync == 1) {
-                deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
-                sync = 2;
-                continue;
-            }
-            
-            // Step 4: If we have no data, tell any interested parties to add some.
-            if(incoming.position() == 0) {
-                WriteObserver interested = observer;
-                if(interested != null)
-                    interested.handleWrite();
+                // Step 4: If we have no data, tell any interested parties to add some.
+                if(incoming.position() == 0) {
+                    WriteObserver interested = observer;
+                    if(interested != null)
+                        interested.handleWrite();
+                    
+                    // If still no data after that, we've written everything we want -- exit.
+                    if(incoming.position() == 0){
+                        // We have nothing left to write, however, it is possible
+                        // that between the above check for interested.handleWrite & here,
+                        // we got pre-empted and another thread turned on interest.
+                        synchronized(this) {
+                            if(observer == null) // no observer? good, we can turn interest off
+                                source.interest(this, false);
+                            // else, we've got nothing to write, but our observer might.
+                        }
+                        return false;
+                    }
+                }
                 
-                // If still no data after that, we've written everything we want -- exit.
-                if(incoming.position() == 0)
-                    break;
+                //Step 5: We've got new data to deflate.
+                deflater.setInput(incoming.array(), 0, incoming.position());
+                incoming.clear();
+                sync = 0;
             }
-            
-            //Step 5: We've got new data to deflate.
-            deflater.setInput(incoming.array(), 0, incoming.position());
-            incoming.clear();
-            sync = 0;
-        }
-        
-        if(outgoing.hasRemaining()) {
-            return true;
-        } else {
-            // We technically have nothing left to write, however, it is possible
-            // that between the above check for interested.handleWrite & here,
-            // we got pre-empted and another thread turned on interest.
-            synchronized(this) {
-                if(observer == null) // no observer? good, we can turn interest off
-                    source.interest(this, false);
-                // else, we've got nothing to write, but our observer might.
-            }
-            return false;
         }
     }
     

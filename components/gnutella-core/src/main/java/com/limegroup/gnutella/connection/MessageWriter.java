@@ -45,13 +45,19 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     /**
      * The sink channel we write to & interest ourselves on.
      */
-    private volatile InterestWriteChannel channel;
+    private InterestWriteChannel channel;
     
     /**
      * Whether or not we've flipped the data.  This is an optimization so
      * we don't have to compact (which does array copies) as much.
      */
     private boolean flipped = false;
+    
+    /**
+     * Whether or not we've shut down.  If we have, stop accepting incoming
+     * messages & stop writing them.
+     */
+    private boolean shutdown = false;
     
     /**
      * Constructs a new MessageWriter with the given stats, queue & sendHandler.
@@ -65,12 +71,12 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     }
     
     /** The channel we're writing to. */
-    public InterestWriteChannel getWriteChannel() {
+    public synchronized InterestWriteChannel getWriteChannel() {
         return channel;
     }
     
     /** The channel we're writing to. */
-    public void setWriteChannel(InterestWriteChannel channel) {
+    public synchronized void setWriteChannel(InterestWriteChannel channel) {
         this.channel = channel;
         channel.interest(this, true);
     }
@@ -83,49 +89,45 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      * interested in writing.
      */
     public synchronized void send(Message m) {
+        if(shutdown)
+            return;
+        
         stats.addSent();
         queue.add(m);
         int dropped = queue.resetDropped();
         stats.addSentDropped(dropped);
             
-        InterestWriteChannel source = channel;
-        if(source != null)
-            source.interest(this, true);
+        if(channel != null)
+            channel.interest(this, true);
     }
         
     /**
      * Writes as many messages as possible to the sink.
      */
-    public boolean handleWrite() throws IOException {
-        InterestWriteChannel source = channel;
-        if(source == null)
+    public synchronized boolean handleWrite() throws IOException {
+        if(channel == null)
             throw new IllegalStateException("writing with no source.");
             
-        // first try to write any leftover data without grabbing a lock.
-        if(writeRemaining(source))
+        // first try to write any leftover data.
+        if(writeRemaining()) //still have data to send.
             return true;
             
         // then loop through and write to the channel till we can't anymore.
-        synchronized(this) {
-            while(true) {
-                Message m = queue.removeNext();
-                int dropped = queue.resetDropped();
-                stats.addSentDropped(dropped);
-                if(m == null)
-                    break;
-                m.writeQuickly(out);
-                sendHandler.processSentMessage(m);
-                if(writeRemaining(source))
-                    break;
+        while(true) {
+            Message m = queue.removeNext();
+            int dropped = queue.resetDropped();
+            stats.addSentDropped(dropped);
+            
+            // no more messages to send.
+            if(m == null) {
+                channel.interest(this, false);
+                return false;
             }
-        }
-        
-        boolean remaining = flipped || !queue.isEmpty();
-        if(!remaining) {
-            source.interest(this, false);
-            return false;
-        } else {
-            return true;
+            
+            m.writeQuickly(out);
+            sendHandler.processSentMessage(m);
+            if(writeRemaining()) // still have data to send.
+                return true;
         }
     }
     
@@ -135,7 +137,10 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      * we just wait till we can completely write the buffer & then clear it
      * entirely.  This prevents the need to compact the buffer.
      */
-    private boolean writeRemaining(WritableByteChannel source) throws IOException {
+    private boolean writeRemaining() throws IOException {
+        if(shutdown)
+            throw new IOException("connection shut down.");
+        
         // if there was data left in the stream, try writing it.
         ByteBuffer buffer = out.buffer();
         
@@ -148,7 +153,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             }
 
             // write.
-            while(buffer.hasRemaining() && source.write(buffer) > 0);
+            while(buffer.hasRemaining() && channel.write(buffer) > 0);
             
             // if we couldn't write everything, exit.
             if(buffer.hasRemaining())
@@ -165,7 +170,9 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      *
      * THIS MUST NOT CLOSE THE CONNECTION.  (Connection.close calls this.)
      */
-    public void shutdown() {}
+    public synchronized void shutdown() {
+        shutdown = true;
+    }
     
     /** Unused, Unsupported */
     public void handleIOException(IOException x) {

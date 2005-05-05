@@ -309,35 +309,6 @@ public class ManagedConnection extends Connection
         UpdateManager updater = UpdateManager.instance();
         updater.checkAndUpdate(this);
     }
-    
-    /**
-     * Starts an OutputRunner.  If the Connection supports asynchronous writing,
-     * this does not use an extra thread.  Otherwise, a thread is started up
-     * to write.
-     */
-    private void startOutput() {
-        MessageQueue queue;
-		if(isSupernodeSupernodeConnection())
-		    queue = new CompositeQueue();
-		else
-		    queue = new BasicQueue();
-
-		if(isAsynchronous()) {
-		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
-		    _outputRunner = messager;
-		    
-		    if(isWriteDeflated())
-		        messager.setWriteChannel(new DeflaterWriter(_deflater));
-
-		    // TODO: add ThrottledWriter
-		    // lastChannel.setWriteChannel(new ThrottledWriter(_throttle));
-		    
-		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
-		} else {
-		    _outputRunner = new BlockingRunner(queue);
-        }
-    }
-
 
     /**
      * Resets the query route table for this connection.  The new table
@@ -589,6 +560,34 @@ public class ManagedConnection extends Connection
 
 
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
+    
+    /**
+     * Starts an OutputRunner.  If the Connection supports asynchronous writing,
+     * this does not use an extra thread.  Otherwise, a thread is started up
+     * to write.
+     */
+    private void startOutput() {
+        MessageQueue queue;
+		if(isSupernodeSupernodeConnection())
+		    queue = new CompositeQueue();
+		else
+		    queue = new BasicQueue();
+
+		if(isAsynchronous()) {
+		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
+		    _outputRunner = messager;
+		    
+		    if(isWriteDeflated())
+		        messager.setWriteChannel(new DeflaterWriter(_deflater));
+
+		    // TODO: add ThrottledWriter
+		    // lastChannel.setWriteChannel(new ThrottledWriter(_throttle));
+		    
+		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
+		} else {
+		    _outputRunner = new BlockingRunner(queue);
+        }
+    }
 
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
