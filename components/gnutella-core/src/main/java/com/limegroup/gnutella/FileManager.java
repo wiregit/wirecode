@@ -482,14 +482,30 @@ public abstract class FileManager {
         try {
             directory = FileUtils.getCanonicalFile(directory);
         } catch (IOException e) { // invalid directory ?
-            return null;
+            return new FileDesc[0];
         }
         
         //Lookup indices of files in the given directory...
         IntSet indices=(IntSet)_sharedDirectories.get(directory);
-        if (indices==null) // directory not shared.
-            return null;
+        if (indices==null) { // directory not shared.
+			
+			File[] files = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
+			ArrayList list = new ArrayList();
+			for (int i = 0; i < files.length; i++) {
+				if (directory.equals(files[i].getParentFile())) {
+					list.add(files[i]);
+				}
+			}
+			
+			if (list.size() > 0) {
+				return (FileDesc[])list.toArray(new FileDesc[0]);
+			}
+			else {
+				return new FileDesc[0];
+			}
+        }
 
+		
         FileDesc[] fds = new FileDesc[indices.size()];
         IntSet.IntSetIterator iter=indices.iterator();
         for (int i=0; iter.hasNext(); i++) {

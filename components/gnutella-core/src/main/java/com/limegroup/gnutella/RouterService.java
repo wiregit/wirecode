@@ -1362,10 +1362,7 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static FileDesc[] getSharedFileDescriptors(File directory) {
-        if( directory == null )
-            return fileManager.getAllSharedFileDescriptors();
-        else
-            return fileManager.getSharedFileDescriptors(directory);
+		return fileManager.getSharedFileDescriptors(directory);
     }
     
     /** 
