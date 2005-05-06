@@ -91,6 +91,10 @@ class WriteBufferChannel implements InterestWriteChannel {
         buffer.clear();
     }
     
+    public boolean interested() {
+        return status;
+    }
+    
     public void interest(WriteObserver observer, boolean status) {
         this.observer = observer;
         this.status = status;
