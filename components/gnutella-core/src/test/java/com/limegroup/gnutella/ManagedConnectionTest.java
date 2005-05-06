@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -54,30 +55,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public static void setUpQRPTables() {}
-    
 
-/*
-    private void tSendFlush() 
-		throws IOException, BadPacketException {
-        PingRequest pr=null;
-        long start=0;
-        long elapsed=0;
-
-        assertEquals("unexpected # sent messages", 0, out.getNumMessagesSent()); 
-        assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
-        pr=new PingRequest((byte)3);
-        out.send(pr);
-        start=System.currentTimeMillis();        
-        pr=(PingRequest)in.receive();
-        elapsed=System.currentTimeMillis()-start;
-        assertEquals("unexpected number of sent messages", 1, out.getNumMessagesSent());
-        assertEquals( pr.getTotalLength(), in.getUncompressedBytesReceived() );
-        assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
-        assertLessThan("Unreasonably long send time", 500, elapsed);
-        assertEquals("hopped something other than 0", 0, pr.getHops());
-        assertEquals("unexpected ttl", 3, pr.getTTL());
-    } */
-    
     /**
      * Tests the method for checking whether or not a connection is stable.
      */
@@ -87,6 +65,44 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         Thread.sleep(6000);
         assertTrue("connection should be considered stable", conn.isStable());
         conn.close();
+    }
+    
+    public void testConnectionStatsRecorded() throws Exception {
+        ConnectionManager cm = RouterService.getConnectionManager();
+        assertEquals(0, cm.getNumConnections());
+
+        Connection in = createLeafConnection();
+        drain(in);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        ManagedConnection out = (ManagedConnection)cm.getConnections().get(0);
+        
+        PingRequest pr=null;
+        long start=0;
+        long elapsed=0;
+
+        // Record initial msgs.
+        int initialNumSent = out.getNumMessagesSent();
+        long initialBytesSent = out.getUncompressedBytesSent();
+        long initialBytesRecv = in.getUncompressedBytesReceived();
+        
+        pr=new PingRequest((byte)3);
+        out.send(pr);
+        
+        start=System.currentTimeMillis();        
+        pr=(PingRequest)in.receive();
+        elapsed=System.currentTimeMillis()-start;
+        assertEquals("unexpected number of sent messages", initialNumSent + 1, out.getNumMessagesSent());
+        assertEquals( initialBytesRecv + pr.getTotalLength(), in.getUncompressedBytesReceived() );
+        // due to delay in updating, this stat is off always.
+        //assertEquals( initialBytesSent + pr.getTotalLength(), out.getUncompressedBytesSent() );
+        assertLessThan("Unreasonably long send time", 500, elapsed);
+        assertEquals("hopped something other than 0", 0, pr.getHops());
+        assertEquals("unexpected ttl", 3, pr.getTTL());
+        
+        out.close();
+        in.close();
     }
     
     public void testForwardsGGEP() throws Exception {
