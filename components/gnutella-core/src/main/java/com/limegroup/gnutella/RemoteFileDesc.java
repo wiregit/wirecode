@@ -10,8 +10,10 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -159,6 +161,13 @@ public class RemoteFileDesc implements IpPort, Serializable {
      * Whether to serialize the push proxies
      */
     private transient volatile boolean _serializeProxies = false;
+    
+    /**
+     * A map of various properties we want to serialize.  Currently we use
+     * this object only during de/serialization, but we keep it cached if we
+     * ever create one
+     */
+    private Map propertiesMap; 
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -398,10 +407,18 @@ public class RemoteFileDesc implements IpPort, Serializable {
         // field but did have urns.
         _http11 = ( _http11 || !_urns.isEmpty() );
         
-        // did we save any push proxies?
-        try {
-            _pushAddr = new PushEndpoint((String)stream.readObject());
-        } catch(IOException iox) {}
+        // if we saved any properties, read them now
+        if (propertiesMap != null) {
+            String http = (String)propertiesMap.get("_pushAddr");
+            if (http != null) {
+                try {
+                    _pushAddr = new PushEndpoint(http);
+                } catch (IOException iox) {}
+            }
+            // currently, we do not need the map to exist during the life of the object
+            // since we will not serialize pe unless told so this lifetime
+            propertiesMap = null;
+        }
     }
     
     public void setSerializeProxies() {
@@ -409,9 +426,14 @@ public class RemoteFileDesc implements IpPort, Serializable {
     }
     
     private void writeObject(ObjectOutputStream stream) throws IOException {
+        if (_serializeProxies && _pushAddr != null) {
+            if (propertiesMap == null)
+                propertiesMap = new HashMap();
+            
+            // this will also update the PE in case it changed since last serialization
+            propertiesMap.put("_pushAddr",_pushAddr.httpStringValue());
+        }
         stream.defaultWriteObject();
-        if (_serializeProxies && _pushAddr != null)
-            stream.writeObject(_pushAddr.httpStringValue()); // cheat
     }
     
     /** 
