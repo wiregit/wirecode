@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -45,7 +46,7 @@ public class ConnectionManagerTest extends BaseTestCase {
 
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
                                     "_catcher",CATCHER);
-                                    
+             
         ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
     }
@@ -495,7 +496,16 @@ public class ConnectionManagerTest extends BaseTestCase {
         }
         
         // overridden so we ignore gnutella.net for this test
-        public void initialize() {        
+        public void initialize() {
+            //  We still need to have a valid udpHostCache member in HostCatcher, if
+            //      we plan on calling recoverHosts() on it, as well as a valid UniqueHostPinger
+            try {
+                UniqueHostPinger p = new UniqueHostPinger();
+                PrivilegedAccessor.setValue( this, "pinger", p );
+                PrivilegedAccessor.setValue( this, "udpHostCache", new UDPHostCache(p) );
+            } catch (Exception e) {
+                ErrorService.error(e);
+            }
         }
     }
 
