@@ -495,17 +495,10 @@ public class ConnectionManagerTest extends BaseTestCase {
                 connectFailures++;
         }
         
-        // overridden so we ignore gnutella.net for this test
-        public void initialize() {
-            //  We still need to have a valid udpHostCache member in HostCatcher, if
-            //      we plan on calling recoverHosts() on it, as well as a valid UniqueHostPinger
-            try {
-                UniqueHostPinger p = new UniqueHostPinger();
-                PrivilegedAccessor.setValue( this, "pinger", p );
-                PrivilegedAccessor.setValue( this, "udpHostCache", new UDPHostCache(p) );
-            } catch (Exception e) {
-                ErrorService.error(e);
-            }
+        //  Overridden because initialize() was previously overridden, but that missed
+        //  setting up some required members.  Now, the code which was intended to be 
+        //  skipped was moved into this function (on the base class)
+        public void scheduleServices() {            
         }
     }
 
