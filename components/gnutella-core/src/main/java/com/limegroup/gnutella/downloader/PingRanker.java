@@ -156,6 +156,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if(LOG.isDebugEnabled())
             LOG.debug("adding new host "+host+" "+host.getPushAddr());
         
+        // don't bother ranking multicasts
+        if (host.isReplyToMulticast())
+            return verifiedHosts.add(host);
+        
         return newHosts.add(host);
     }
     
@@ -392,6 +396,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             RemoteFileDesc pongA = (RemoteFileDesc)a;
             RemoteFileDesc pongB = (RemoteFileDesc)b;
        
+            // Multicasts are best
+            if (pongA.isReplyToMulticast() != pongB.isReplyToMulticast()) {
+                if (pongA.isReplyToMulticast())
+                    return -1;
+                else
+                    return 1;
+            }
+            
             // HeadPongs with highest number of free slots get the highest priority
             if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;

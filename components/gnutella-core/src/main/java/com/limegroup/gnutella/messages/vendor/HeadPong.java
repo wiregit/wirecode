@@ -416,6 +416,7 @@ public class HeadPong extends VendorMessage {
             rfd.setRetryAfter(DownloadWorker.RETRY_AFTER_NONE_ACTIVE);
         rfd.setQueueStatus(getQueueStatus());
         rfd.setAvailableRanges(getRanges());
+        rfd.setSerializeProxies();
     }
     
 	/**

@@ -74,8 +74,8 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * 
  * <ThisIsTheGUIDasdf23457>
  */
-public class PushEndpoint implements HTTPHeaderValue,IpPort{
-
+public class PushEndpoint implements HTTPHeaderValue, IpPort {
+    
 	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
 	public static final int PROXY_SIZE=6; //ip:port
 	
@@ -165,9 +165,13 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
-        _proxies = new IpPortSet();
-		if (proxies!=null)
-		    _proxies.addAll(proxies);
+		if (proxies != null) {
+            if (proxies instanceof IpPortSet)
+                _proxies = Collections.unmodifiableSet(proxies);
+            else
+                _proxies = Collections.unmodifiableSet(new IpPortSet(proxies));
+        } else
+            _proxies = Collections.EMPTY_SET;
 		_externalAddr = addr;
 	}
 	
@@ -239,7 +243,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 			
 		}
 		
-		_proxies = proxies;
+		_proxies = Collections.unmodifiableSet(proxies);
 		_externalAddr=addr;
 		_fwtVersion=fwtVersion;
 		

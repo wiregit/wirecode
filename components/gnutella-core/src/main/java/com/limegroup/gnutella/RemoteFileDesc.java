@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -153,6 +154,11 @@ public class RemoteFileDesc implements IpPort, Serializable {
      * The creation time of this file.
      */
     private transient long _creationTime;
+    
+    /**
+     * Whether to serialize the push proxies
+     */
+    private transient volatile boolean _serializeProxies = false;
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -391,6 +397,21 @@ public class RemoteFileDesc implements IpPort, Serializable {
         // http11 must be set manually, because older clients did not have this
         // field but did have urns.
         _http11 = ( _http11 || !_urns.isEmpty() );
+        
+        // did we save any push proxies?
+        try {
+            _pushAddr = new PushEndpoint((String)stream.readObject());
+        } catch(IOException iox) {}
+    }
+    
+    public void setSerializeProxies() {
+        _serializeProxies = true;
+    }
+    
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        if (_serializeProxies && _pushAddr != null)
+            stream.writeObject(_pushAddr.httpStringValue()); // cheat
     }
     
     /** 
