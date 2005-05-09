@@ -480,11 +480,15 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 SaveLocationException.FILE_ALREADY_EXISTS,
 						 sle.getErrorCode());
 		}
-		// should not throw an exception because of overwrite 
-		new ManagedDownloader(rfds,	new IncompleteFileManager(), 
-				new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(),
-				true); 
-		
+		try {
+			// should not throw an exception because of overwrite 
+			new ManagedDownloader(rfds,	new IncompleteFileManager(), 
+					new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(),
+					true); 
+		}
+		catch (SaveLocationException sle) {
+			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
+		}
 		try {
 			File f = File.createTempFile("notadirectory", "file");
 			f.deleteOnExit();
@@ -520,9 +524,14 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 //						 SaveLocationException.SECURITY_VIOLATION,
 //						 sle.getErrorCode());
 		}
-		// should not throw an exception
-		new ManagedDownloader(rfds, new IncompleteFileManager(), 
-				new GUID(GUID.makeGuid()), null, null, false);
+		try {
+			// should not throw an exception
+			new ManagedDownloader(rfds, new IncompleteFileManager(), 
+					new GUID(GUID.makeGuid()), null, null, false);
+		}
+		catch (SaveLocationException sle) {
+			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
+		}
 		
 				
 		// TODO SaveLocationException.FILE_ALREADY_SAVED

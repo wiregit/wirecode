@@ -498,7 +498,8 @@ public abstract class FileManager {
 			}
 			
 			if (list.size() > 0) {
-				return (FileDesc[])list.toArray(new FileDesc[0]);
+				//return (FileDesc[])list.toArray(new FileDesc[0]);
+				return new FileDesc[0];
 			}
 			else {
 				return new FileDesc[0];
