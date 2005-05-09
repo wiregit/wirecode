@@ -57,13 +57,16 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Message mVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
         Message mReset=getFirstMessageOfTypeFromQueue( ResetTableMessage.class );
         Message mPatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
+        
+        //  UP may support PONG CACHING so we don't send it an initial ping.
         Message mPingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
         assertTrue( mCapVM!=null );
         assertTrue( mVendS!=null );
         assertTrue( mReset!=null );
         assertTrue( mPatch!=null );
-        assertTrue( mPingR!=null );
+        //  see above
+//        assertTrue( mPingR!=null );
         
         assertEquals( "Peer messages queue not empty" + _queue, 0, _queue.size() );
     }
@@ -77,8 +80,9 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         // Check that initial messages are sent & received correctly
         Message mCapvm=getFirstMessageOfTypeFromQueue( CapabilitiesVM.class );
         Message mVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
-        //  Leaf supports PONG CACHING so we don't send it an initial ping.
-//        Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
+        
+        //  Leaf may support PONG CACHING so we don't send it an initial ping.
+        Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
         
         assertTrue( mCapvm!=null );
         assertTrue( mVendS!=null );
