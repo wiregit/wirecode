@@ -52,6 +52,11 @@ public class ConnectionManagerTest extends BaseTestCase {
 
     public void setUp() throws Exception {
         setSettings();
+        
+        //  Currently, there are no default EVIL_HOSTS useragents.  to test this, we need
+        //      to pick on someone, so it will be Morpheus =)
+        String [] agents = {"morpheus"};
+        ConnectionSettings.EVIL_HOSTS.setValue( agents );
     }
     
     private static void setSettings() throws Exception {

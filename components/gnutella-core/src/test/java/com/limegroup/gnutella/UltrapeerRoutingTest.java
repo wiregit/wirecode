@@ -29,7 +29,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  * ultrapeers handle query routing, normal routing, routing of marked pongs,
  * etc.  The test is structured with one Ultrapeer connected to two other
  * Ultrapeers as well as to a leaf.  The leaves and two Ultrapeers pass
- * varios messages to each other, and the tests verify that the correct messages
+ * various messages to each other, and the tests verify that the correct messages
  * are received by the other nodes.  This is shown in the diagram below:
  *
  *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
