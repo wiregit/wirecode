@@ -1490,7 +1490,6 @@ public abstract class MessageRouter {
 	public final void forwardQueryRequestToLeaves(QueryRequest query,
                                                   ReplyHandler handler) {
 		if(!RouterService.isSupernode()) return;
-        
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
@@ -1503,7 +1502,6 @@ public abstract class MessageRouter {
                 hitConnections.add(mc);
             }
         }
-
         //forward only to a quarter of the leaves in case the query is
         //very popular.
         if(list.size() > 8 && 
@@ -1523,7 +1521,7 @@ public abstract class MessageRouter {
             // sendRoutedQueryToHost is not called because 
             // we have already ensured it hits the routing table
             // by filling up the 'hitsConnection' list.
-            sendQueryRequest(query, mc, handler);
+            mc.send(query);
             RoutedQueryStat.LEAF_SEND.incrementStat();
         }
 	}
@@ -1544,7 +1542,7 @@ public abstract class MessageRouter {
 		if (mc.shouldForwardQuery(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
-			sendQueryRequest(query, mc, handler);
+			mc.send(query);
 			return true;
 		}
 		return false;
@@ -1688,7 +1686,7 @@ public abstract class MessageRouter {
                 RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
         } else {
             // otherwise, just send it out
-            sendQueryRequest(query, ultrapeer, handler);
+            ultrapeer.send(query);
         }
     }
 
@@ -1714,37 +1712,8 @@ public abstract class MessageRouter {
             QueryRequest qrToSend = qr;
             if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
                 qrToSend = QueryRequest.unmarkOOBQuery(qr);
-            sendQueryRequest(qrToSend, mc, FOR_ME_REPLY_HANDLER);
+            mc.send(qrToSend);
         }
-    }
-    
-    /**
-     * Sends the passed query request, received on handler, 
-     * to the passed sendConnection, only if the request originated
-     * from our node.
-     *
-     * To only send it the route table has a hit, use
-     * sendRoutedQueryToHost.
-     *
-     * @param queryRequest Query Request to send
-     * @param sendConnection The connection on which to send out the query
-     * @param handler The connection on which we originally
-     * received the query
-     */
-    public void sendQueryRequest(QueryRequest request, 
-								 ManagedConnection sendConnection, 
-								 ReplyHandler handler) {
-		if (request == null)
-			throw new NullPointerException("null query");
-		if (sendConnection == null)
-			throw new NullPointerException("null send connection");
-		if (handler == null)
-			throw new NullPointerException("null reply handler");
-
-        //  send the query over this connection only if
-		//  the query originated from our node 
-        if (handler == FOR_ME_REPLY_HANDLER)
-            sendConnection.send(request);
     }
     
     /**
