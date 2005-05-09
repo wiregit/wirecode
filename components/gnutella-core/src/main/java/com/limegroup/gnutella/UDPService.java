@@ -1,13 +1,16 @@
 package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.SocketAddress;
+import java.net.BindException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.PortUnreachableException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -31,6 +34,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 
@@ -401,21 +405,18 @@ public class UDPService implements ReadWriteObserver {
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(msg.getTotalLength());
-        synchronized(OUT_HEADER_BUF) {
-            try {
-                msg.write(baos, OUT_HEADER_BUF);
-            } catch(IOException e) {
-                // this should not happen -- we should always be able to write
-                // to this output stream in memory
-                ErrorService.error(e);
-                // can't send the hit, so return
-                return;
-            }
+        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(msg.getTotalLength());
+        try {
+            msg.writeQuickly(baos);
+        } catch(IOException e) {
+            // this should not happen -- we should always be able to write
+            // to this output stream in memory
+            ErrorService.error(e);
+            // can't send the hit, so return
+            return;
         }
 
-        byte[] data = baos.toByteArray();
-        ByteBuffer buffer = ByteBuffer.wrap(data);
+        ByteBuffer buffer = (ByteBuffer)baos.buffer().flip();
         synchronized(OUTGOING_MSGS) {
             OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, err));
             if(_channel != null)
@@ -429,13 +430,19 @@ public class UDPService implements ReadWriteObserver {
 	public boolean handleWrite() throws IOException {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
-	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
-
-	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
-	                // we removed the bundle from the list but couldn't send it,
-	                // so we have to put it back in.
-	                OUTGOING_MSGS.add(0, bundle);
-	                return true; // no room left to send.
+	            try {
+    	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
+    
+    	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
+    	                // we removed the bundle from the list but couldn't send it,
+    	                // so we have to put it back in.
+    	                OUTGOING_MSGS.add(0, bundle);
+    	                return true; // no room left to send.
+                    }
+                } catch(BindException ignored) {
+                } catch(ConnectException ignored) {
+                } catch(NoRouteToHostException ignored) {
+                } catch(PortUnreachableException ignored) {
                 }
 	        }
 	        
