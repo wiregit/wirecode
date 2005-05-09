@@ -112,7 +112,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         Set proxies = reply.getPushProxies();
         assertEquals(1, proxies.size());
         Iterator iter = proxies.iterator();
-        IpPort ppi = (IpPortImpl)iter.next();
+        IpPort ppi = (IpPort)iter.next();
         assertEquals(ppi.getPort(), 6355);
         assertTrue(ppi.getInetAddress().equals(InetAddress.getLocalHost()));
 

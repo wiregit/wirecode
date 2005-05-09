@@ -739,7 +739,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
 
 
-    public void testBadVendorMessage() throws Exception {
+    public void testReadHoppedVendorMessage() throws Exception {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TCPConnectBackVendorMessage tcp = 
@@ -751,12 +751,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        try {
-            vm = (VendorMessage) Message.read(bais);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {
-        }
+        vm = (VendorMessage) Message.read(bais);
+        
     }
 
 

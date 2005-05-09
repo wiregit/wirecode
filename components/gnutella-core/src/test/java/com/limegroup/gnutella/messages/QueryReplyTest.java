@@ -708,9 +708,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(4, retProxies.size());
 
         IpPort[] array1 = 
-            (IpPort[])retProxies.toArray(new IpPortImpl[0]);
+            (IpPort[])retProxies.toArray(new IpPort[0]);
         IpPort[] array2 = 
-            (IpPort[])proxies.toArray(new IpPortImpl[0]);
+            (IpPort[])proxies.toArray(new IpPort[0]);
 
         assertEquals(retProxies, proxies);
         //for(int i=0; i<array1.length; i++) {
@@ -735,7 +735,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input
         try {
             IpPort proxy = 
-                new IpPortImpl("0.0.0.0", 6346);
+                new QueryReply.IPPortCombo("0.0.0.0", 6346);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -755,7 +755,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input is the only case
         try {
             IpPort proxy = 
-                new IpPortImpl("0.0.0.0", 634600);
+                new QueryReply.IPPortCombo("0.0.0.0", 634600);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -826,7 +826,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             int j = 0;
             while(iter.hasNext()) {
                 final int inIndex = 6*j;
-                IpPort ppi = (IpPortImpl)iter.next();
+                IpPort ppi = (IpPort)iter.next();
                 InetAddress addr = ppi.getInetAddress();
                 byte[] tempAddr = new byte[4];
                 System.arraycopy(bytes, inIndex, tempAddr, 0, 4);

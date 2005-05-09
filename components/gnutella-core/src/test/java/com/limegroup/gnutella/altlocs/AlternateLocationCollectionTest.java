@@ -433,7 +433,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		alc.add(firewalled);
 		
-		byte [] data = alc.toBytesPush(3);
+		byte [] data = alc.toBytesPush(3,false);
 		
 		assertLessThanOrEquals(41,data.length);
 		
@@ -447,7 +447,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		// add a second pushLoc - one that should have IpPort info
 		alc.add(firewalled2);
 		
-		data = alc.toBytesPush();
+		data = alc.toBytesPush(false);
 		
 		Set set = new HashSet(NetworkUtils.unpackPushEPs(data));
 		
@@ -460,7 +460,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		// add a third push loc - one that should not have IpPort info
 		alc.add(firewalled3);
 		
-		data = alc.toBytesPush();
+		data = alc.toBytesPush(false);
 		
 		set = new HashSet(NetworkUtils.unpackPushEPs(data));
 		
