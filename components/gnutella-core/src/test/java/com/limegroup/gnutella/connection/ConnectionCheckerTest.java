@@ -82,7 +82,7 @@ public class ConnectionCheckerTest extends BaseTestCase {
         private boolean _receivedCallback;
 
         public TestManager() {
-            super(null);
+            super();
         }
         
         public void noInternetConnection() {

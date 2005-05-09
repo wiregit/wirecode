@@ -14,7 +14,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -55,9 +54,6 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void error(int errorCode) { }
     public void error(int errorCode, Throwable t) { }
     public void error(Throwable t) { }
-    public User getUserAuthenticationInfo(String host) { 
-        return null;
-    }    
     public void promptAboutCorruptDownload(Downloader dloader) {
         corruptChecked = true;
         dloader.discardCorruptDownload(delCorrupt);

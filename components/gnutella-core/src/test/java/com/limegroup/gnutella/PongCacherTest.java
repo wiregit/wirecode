@@ -8,7 +8,6 @@ import java.util.Map;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.BucketQueue;
@@ -104,8 +103,7 @@ public final class PongCacherTest extends BaseTestCase {
      * Tests the method for getting the best set of pongs.
      */
     public void testGetBestPongs() throws Exception {
-        ConnectionManager cm = 
-            new UltrapeerConnectionManager(new ServerAuthenticator());
+        ConnectionManager cm = new UltrapeerConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
         
         List pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
@@ -177,8 +175,7 @@ public final class PongCacherTest extends BaseTestCase {
      * Tests the method for adding a pong to the cacher.
      */
     public void testAddPong() throws Exception {
-        ConnectionManager cm = 
-            new UltrapeerConnectionManager(new ServerAuthenticator());
+        ConnectionManager cm = new UltrapeerConnectionManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
 
         PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
@@ -280,11 +277,9 @@ public final class PongCacherTest extends BaseTestCase {
 
     
     private static class TestManager extends ConnectionManager {
-        /**
-         * @param authenticator
-         */
+
         public TestManager() {
-            super(null);
+            super();
         }
 
         public boolean isSupernode() {

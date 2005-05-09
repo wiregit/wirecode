@@ -602,8 +602,7 @@ public class Connection implements IpPort {
             Assert.that(theirResponse != null, "null theirResponse");
 
             int code = theirResponse.getStatusCode();
-            if (code != HandshakeResponse.OK &&  
-                code != HandshakeResponse.UNAUTHORIZED_CODE) {
+            if (code != HandshakeResponse.OK) {
                 if(code == HandshakeResponse.SLOTS_FULL) {
                     if(theirResponse.isLimeWire()) {
                         if(theirResponse.isUltrapeer()) {
@@ -747,8 +746,7 @@ public class Connection implements IpPort {
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
             int code = ourResponse.getStatusCode();
-            if((code != HandshakeResponse.OK) && 
-               (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
+            if(code != HandshakeResponse.OK) {
                 if(code == HandshakeResponse.SLOTS_FULL) {
                     HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
                     throw NoGnutellaOkException.CLIENT_REJECT;
@@ -760,16 +758,8 @@ public class Connection implements IpPort {
                     
             //3. read the response from the other side.  If we asked the other
             //side to authenticate, give more time so as to receive user input
-            String connectLine;
-            if(ourResponse.getStatusCode() 
-               == HandshakeResponse.UNAUTHORIZED_CODE){
-                connectLine = readLine(USER_INPUT_WAIT_TIME);  
-                readHeaders(USER_INPUT_WAIT_TIME); 
-                _headers = HandshakeResponse.createResponse(HEADERS_READ);
-            } else{
-                connectLine = readLine();  
-                readHeaders();
-            }
+            String connectLine = readLine();  
+            readHeaders();
 			
             if (! connectLine.startsWith(GNUTELLA_06)) {
                 HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
@@ -791,15 +781,9 @@ public class Connection implements IpPort {
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
                 }
-            } else {
-                Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
-                            "Response code: "+code);
-                if(theirResponse.getStatusCode()==HandshakeResponse.OK)
-                    //b) If we wrote 401 and they wrote "200...", keep looping.
-                    continue;
             }
-            
-            HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
+
+			HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
             //c) Terminate abnormally
             throw NoGnutellaOkException.
                 createServerUnknown(theirResponse.getStatusCode());
@@ -1745,16 +1729,6 @@ public class Connection implements IpPort {
     public boolean supportsProbeQueries() {
         return _headers.supportsProbeQueries();
     }
-
-	/**
-	 * Returns the authenticated domains listed in the connection headers
-	 * for this connection.
-	 *
-	 * @return the string of authenticated domains for this connection
-	 */
-	public String getDomainsAuthenticated() {
-		return _headers.getDomainsAuthenticated();
-	}
 
     /**
      * Accessor for whether or not this connection has received any

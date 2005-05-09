@@ -9,7 +9,6 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 /**
@@ -163,7 +162,7 @@ public final class TestConnectionManager extends ConnectionManager {
     public TestConnectionManager(int numNewConnections, boolean ultrapeer,
                                  int numConnections, int numLeafConnections,
                                  String[] myKeywords, boolean useVaried) {
-        super(new DummyAuthenticator());
+        super();
         NUM_CONNECTIONS = numConnections;
         NUM_LEAF_CONNECTIONS = numLeafConnections;
         MY_KEYWORDS = myKeywords;

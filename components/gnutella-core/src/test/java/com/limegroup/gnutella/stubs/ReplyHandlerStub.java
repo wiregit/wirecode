@@ -38,9 +38,6 @@ public class ReplyHandlerStub implements ReplyHandler {
     }
     public void countDroppedMessage() {
     }
-    public Set getDomains() {
-        return null;
-    }
     public boolean isPersonalSpam(Message m) {
         return false;
     }

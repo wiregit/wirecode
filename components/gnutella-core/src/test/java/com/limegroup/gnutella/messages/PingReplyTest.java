@@ -917,7 +917,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         private final int NUM_FREE_LEAF_SLOTS;
 
         TestConnectionManager(int numFreeNonLeafSlots, int numFreeLeafSlots) {
-            super(null);
+            super();
             NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
             NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
         }

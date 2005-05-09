@@ -36,9 +36,7 @@ public interface ReplyHandler extends IpPort {
 	int getNumMessagesReceived();
 
 	void countDroppedMessage();
-
-	Set getDomains();
-
+	
 	boolean isPersonalSpam(Message m);
 
 	boolean isOutgoing();

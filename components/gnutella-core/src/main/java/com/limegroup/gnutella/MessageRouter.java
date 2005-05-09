@@ -33,7 +33,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
-import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -1721,8 +1720,8 @@ public abstract class MessageRouter {
     
     /**
      * Sends the passed query request, received on handler, 
-     * to the passed sendConnection, only if the handler and
-     * the sendConnection are authenticated to a common domain
+     * to the passed sendConnection, only if the request originated
+     * from our node.
      *
      * To only send it the route table has a hit, use
      * sendRoutedQueryToHost.
@@ -1735,30 +1734,17 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
-		if(request == null) {
+		if (request == null)
 			throw new NullPointerException("null query");
-		}
-		if(sendConnection == null) {
+		if (sendConnection == null)
 			throw new NullPointerException("null send connection");
-		}
-		if(handler == null) {
+		if (handler == null)
 			throw new NullPointerException("null reply handler");
-		}
 
-        //send the query over this connection only if any of the following
-        //is true:
-        //1. The query originated from our node 
-        //2. The connection under  consideration is an unauthenticated 
-        //connection (normal gnutella connection)
-        //3. It is an authenticated connection, and the connection on 
-        //which we received query and this connection, are both 
-        //authenticated to a common domain
-        if((handler == FOR_ME_REPLY_HANDLER ||
-            containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
-            || Utilities.hasIntersection(handler.getDomains(), 
-										 sendConnection.getDomains()))) {
+        //  send the query over this connection only if
+		//  the query originated from our node 
+        if (handler == FOR_ME_REPLY_HANDLER)
             sendConnection.send(request);
-		}		
     }
     
     /**
@@ -1785,24 +1771,6 @@ public abstract class MessageRouter {
         
         mc.originateQuery(query);
         return true;
-    }
-    
-
-    /**
-     * Checks if the passed set of domains contains only
-     * default unauthenticated domain 
-     * @param domains Set (of String) of domains to be tested
-     * @return true if the passed set of domains contains only
-     * default unauthenticated domain, false otherwise
-     */
-    private static boolean containsDefaultUnauthenticatedDomainOnly(Set domains) {
-        //check if the set contains only one entry, and that entry is the
-        //default unauthenticated domain 
-        if((domains.size() == 1) && domains.contains(
-            User.DEFAULT_UNAUTHENTICATED_DOMAIN))
-            return true;
-        else
-            return false;
     }
     
     /**
@@ -2073,7 +2041,7 @@ public abstract class MessageRouter {
     
 
     /**
-     * Passes on the SimppVM to the SimppManager which will authenticate it and
+     * Passes on the SimppVM to the SimppManager which will verify it and
      * make sure we it's newer than the one we know about, and then make changes
      * to the settings as necessary, and cause new CapabilityVMs to be sent down
      * all connections.
@@ -2876,5 +2844,4 @@ public abstract class MessageRouter {
             }
         }
     }
-    
 }

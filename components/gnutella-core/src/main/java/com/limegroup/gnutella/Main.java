@@ -9,7 +9,6 @@ import java.util.Vector;
 
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -251,10 +250,6 @@ public class Main implements ActivityCallback, ErrorCallback {
     
     public void fileManagerLoaded() {}    
     
-    public User getUserAuthenticationInfo(String host){
-        return null;
-    }
-
     public void uploadsComplete() {}
 
     public void promptAboutCorruptDownload(Downloader dloader) {

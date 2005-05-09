@@ -68,7 +68,6 @@ public final class NoGnutellaOkException extends IOException {
      */
     public static final NoGnutellaOkException UNRESOLVED_CLIENT =
         new NoGnutellaOkException(true,
-                                  HandshakeResponse.UNAUTHORIZED_CODE,
                                   "Too much handshaking, no conclusion");
 
     /**
@@ -78,7 +77,6 @@ public final class NoGnutellaOkException extends IOException {
      */
     public static final NoGnutellaOkException UNRESOLVED_SERVER =
         new NoGnutellaOkException(false,
-                                  HandshakeResponse.UNAUTHORIZED_CODE,
                                   "Too much handshaking, no conclusion");
 
 
@@ -118,6 +116,13 @@ public final class NoGnutellaOkException extends IOException {
         this.wasMe=wasMe;
         this.code=code;
     }
+	
+	/**
+	 * Constructor for codeless exception.
+	 */
+	private NoGnutellaOkException(boolean wasMe, String message) {
+		this(wasMe, -1, message);
+	}
     
     /** 
      * Returns true if the exception was caused by something this host
