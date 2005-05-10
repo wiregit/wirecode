@@ -154,6 +154,15 @@ public class IntervalSet {
     }
     
     /**
+     * Returns the first element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
+     */
+    public Interval getFirst() throws NoSuchElementException {
+        Interval ret = (Interval)intervals.first();
+        return ret;
+    }
+    
+    /**
      * Removes the first element.  Throws NoSuchElementException
      * if no intervals exist.
      */

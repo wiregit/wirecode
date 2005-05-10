@@ -98,12 +98,17 @@ public class VerifyingFile {
     /**
      * Ranges that are discarded (but verification was attempted)
      */
-    private IntervalSet discardedBlocks;
+    private IntervalSet savedCorruptBlocks;
     
     /**
      * Ranges which are pending writing & verification.
      */
     private IntervalSet pendingBlocks;
+    
+    /**
+     * Decides which blocks to start downloading next.
+     */
+    private SelectionStrategy blockChooser;
     
     /**
      * The hashtree we use to verify chunks, if any
@@ -139,12 +144,13 @@ public class VerifyingFile {
      * If checkOverlap is true, will scan for overlap corruption.
      */
     public VerifyingFile(int completedSize) {
+        blockChooser = RandomDownloadStrategy.create();
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
-        discardedBlocks = new IntervalSet();
+        savedCorruptBlocks = new IntervalSet();
     }
     
     /**
@@ -208,7 +214,7 @@ public class VerifyingFile {
 		
 		
 		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
-            discardedBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+            savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
             Assert.that(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
@@ -229,7 +235,7 @@ public class VerifyingFile {
     
     public String dumpState() {
         return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
-            "\ndiscarded:"+discardedBlocks+
+            "\ndiscarded:"+savedCorruptBlocks+
         	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
     }
     
@@ -310,7 +316,7 @@ public class VerifyingFile {
         List l = new ArrayList();
         l.addAll(verifiedBlocks.getAllIntervalsAsList());
         l.addAll(partialBlocks.getAllIntervalsAsList());
-        l.addAll(discardedBlocks.getAllIntervalsAsList());
+        l.addAll(savedCorruptBlocks.getAllIntervalsAsList());
         l.addAll(pendingBlocks.getAllIntervalsAsList());
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = l.iterator();iter.hasNext();)
@@ -331,7 +337,7 @@ public class VerifyingFile {
     public synchronized int getBlockSize() {
         return verifiedBlocks.getSize() +
         	partialBlocks.getSize() +
-        	discardedBlocks.getSize() +
+        	savedCorruptBlocks.getSize() +
         	pendingBlocks.getSize();
     }
     
@@ -354,9 +360,9 @@ public class VerifyingFile {
      */
     public synchronized boolean isComplete() {
         if (hashTree != null)
-            return verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
+            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() == completedSize;
         else {
-            return verifiedBlocks.getSize() + discardedBlocks.getSize() + 
+            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() + 
             partialBlocks.getSize()== completedSize;
         }
     }
@@ -396,7 +402,7 @@ public class VerifyingFile {
         return  completedSize - (verifiedBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
-                discardedBlocks.getSize() +
+                savedCorruptBlocks.getSize() +
                 pendingBlocks.getSize()); 
     }
     
@@ -430,7 +436,7 @@ public class VerifyingFile {
     private synchronized Interval leaseWhiteHelper(IntervalSet ranges, long chunkSize) throws NoSuchElementException {
         if (LOG.isDebugEnabled())
             LOG.debug("leasing white, state: "+dumpState());
-        
+      
         // If ranges is null, make ranges represent the entire file
         if (ranges == null)
             ranges = IntervalSet.createSingletonSet(0, completedSize-1);
@@ -438,8 +444,9 @@ public class VerifyingFile {
         ranges.delete(verifiedBlocks);
         ranges.delete(leasedBlocks);
         ranges.delete(partialBlocks);
-        ranges.delete(discardedBlocks);
+        ranges.delete(savedCorruptBlocks);
         ranges.delete(pendingBlocks);
+        /*
         Interval ret = ranges.removeFirst();
         if (LOG.isDebugEnabled())
             LOG.debug(" freeblocks: "+ranges+" selected "+ret);
@@ -447,6 +454,13 @@ public class VerifyingFile {
         if (chunkSize < 0)
             return ret;
         return alignInterval(ret, (int) chunkSize);
+        */
+        
+        Interval ret = blockChooser.pickAssignment(ranges, completedSize, chunkSize);
+        ranges.delete(ret);
+        leaseBlock(ret);
+        
+        return ret;
     }
     
     /**
@@ -544,7 +558,7 @@ public class VerifyingFile {
                         verifiedBlocks.add(i);
                     else {
                         if(!discardBad)
-                            discardedBlocks.add(i);
+                            savedCorruptBlocks.add(i);
                         lostSize += (i.high - i.low + 1);
                     }
                 }
