@@ -237,18 +237,7 @@ public class VerifyingFile {
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
-        if (LOG.isDebugEnabled())
-            LOG.debug("leasing white, state: "+dumpState());
-        IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
-        freeBlocks.delete(leasedBlocks);
-        freeBlocks.delete(partialBlocks);
-        freeBlocks.delete(discardedBlocks);
-        freeBlocks.delete(pendingBlocks);
-        Interval ret = freeBlocks.removeFirst();
-        if (LOG.isDebugEnabled())
-            LOG.debug(" freeblocks: "+freeBlocks+" selected "+ret);
-        leaseBlock(ret);
-        return ret;
+        return leaseWhiteHelper(null, -1);
     }
     
     /**
@@ -257,8 +246,7 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(int chunkSize) 
       throws NoSuchElementException {
-        Interval temp = leaseWhite();
-        return allignInterval(temp, chunkSize);
+        return leaseWhiteHelper(null, chunkSize);
     }
     
     /**
@@ -268,13 +256,7 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
-        ranges.delete(verifiedBlocks);
-        ranges.delete(leasedBlocks);
-        ranges.delete(partialBlocks);
-        ranges.delete(pendingBlocks);
-        Interval ret = ranges.removeFirst();
-        leaseBlock(ret);
-        return ret;
+        return leaseWhiteHelper(ranges, -1);
     }
     
     /**
@@ -284,8 +266,7 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize)
       throws NoSuchElementException {
-        Interval temp = leaseWhite(ranges);
-        return allignInterval(temp, chunkSize);
+        return leaseWhiteHelper(ranges, chunkSize);
     }
 
     /**
@@ -436,12 +417,43 @@ public class VerifyingFile {
     }
     
     /////////////////////////private helpers//////////////////////////////
+    /**
+     * Determines which interval should be assigned next, leases that interval,
+     * and returns that interval.
+     * 
+     * @param ranges if ranges is non-null, the return value will be a chosen 
+     *      from within ranges
+     * @param chunkSize if greater than zero, the return value will end one byte before 
+     *      a chunkSize boundary and will be at most chunkSize bytes large.
+     * @return the leased interval
+     */
+    private synchronized Interval leaseWhiteHelper(IntervalSet ranges, long chunkSize) throws NoSuchElementException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing white, state: "+dumpState());
+        
+        // If ranges is null, make ranges represent the entire file
+        if (ranges == null)
+            ranges = IntervalSet.createSingletonSet(0, completedSize-1);
+            
+        ranges.delete(verifiedBlocks);
+        ranges.delete(leasedBlocks);
+        ranges.delete(partialBlocks);
+        ranges.delete(discardedBlocks);
+        ranges.delete(pendingBlocks);
+        Interval ret = ranges.removeFirst();
+        if (LOG.isDebugEnabled())
+            LOG.debug(" freeblocks: "+ranges+" selected "+ret);
+        leaseBlock(ret);
+        if (chunkSize < 0)
+            return ret;
+        return alignInterval(ret, (int) chunkSize);
+    }
     
     /**
      * Fits an interval inside a chunk.  This ensures that the interval is never larger
      * than chunksize and finishes at exact chunk offset.
      */
-    private synchronized Interval allignInterval(Interval temp, int chunkSize) {
+    private synchronized Interval alignInterval(Interval temp, int chunkSize) {
         if (LOG.isDebugEnabled())
             LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
         

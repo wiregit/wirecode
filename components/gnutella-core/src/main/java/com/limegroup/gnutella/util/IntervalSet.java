@@ -33,6 +33,19 @@ public class IntervalSet {
         intervals = new TreeSet(IntervalComparator.INSTANCE);
     }
 
+    /**
+     * Creates an interval set representing a single Interval.
+     * 
+     * @param lowBound the lower bound of the represented Interval
+     * @param highBound the upper bound of the represented Interval
+     * @return an IntervalSet representing the range lowBound to highBound, inclusive.
+     */
+    public static IntervalSet createSingletonSet(long lowBound, long highBound) {
+        IntervalSet ret = new IntervalSet();
+        ret.add(new Interval((int) lowBound, (int) highBound));
+        return ret;
+    }
+    
     public void add(Interval addInterval) {
         int low = addInterval.low;
         int high = addInterval.high;
