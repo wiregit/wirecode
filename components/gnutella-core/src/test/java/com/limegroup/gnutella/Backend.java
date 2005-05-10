@@ -10,8 +10,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -433,8 +435,12 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});        
+        try {
+            FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+                    new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
+        }catch(UnknownHostException bad) {
+            fail(bad);
+        }   
 	}
 
 	/**

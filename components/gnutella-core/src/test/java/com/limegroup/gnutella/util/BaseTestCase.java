@@ -3,7 +3,9 @@ package com.limegroup.gnutella.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -465,8 +467,12 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
+        try {
+            FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+                    new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
+        }catch(UnknownHostException bad) {
+            fail(bad);
+        }
     }
 
     /**
