@@ -31,6 +31,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -1068,7 +1069,7 @@ public class ConnectionManager {
             // connections and the test for proxy support is cached boolean
             // value
             Iterator ultrapeers = getInitializedConnections().iterator();
-            Set proxies = new HashSet();
+            Set proxies = new IpPortSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
                 if (currMC.isPushProxy())
