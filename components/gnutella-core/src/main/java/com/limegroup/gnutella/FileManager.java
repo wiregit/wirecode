@@ -315,13 +315,17 @@ public abstract class FileManager {
      *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
      *  bytes are being shared, returns this value.
      */
-    public int getSize() {return ByteOrder.long2int(_filesSize);}
+    public int getSize() {
+		return ByteOrder.long2int(_filesSize); 
+	}
 
     /**
      * Returns the number of files.
      * This number does NOT include incomplete files or forcibly shared network files.
      */
-    public int getNumFiles() {return _numFiles - _numForcedFiles;}
+    public int getNumFiles() {
+		return _numFiles - _numForcedFiles;
+	}
     
     /**
      * Returns the number of shared incomplete files.
@@ -475,7 +479,7 @@ public abstract class FileManager {
      * any of the directory's children are not returned.
      */    
     public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
-        if( directory == null )
+        if (directory == null)
             throw new NullPointerException("null directory");
         
         // a. Remove case, trailing separators, etc.
@@ -486,8 +490,8 @@ public abstract class FileManager {
         }
         
         //Lookup indices of files in the given directory...
-        IntSet indices=(IntSet)_sharedDirectories.get(directory);
-        if (indices==null) { // directory not shared.
+        IntSet indices = (IntSet)_sharedDirectories.get(directory);
+        if (indices == null) { // directory not shared.
 			
 			File[] files = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
 			ArrayList list = new ArrayList();
@@ -508,10 +512,10 @@ public abstract class FileManager {
 
 		
         FileDesc[] fds = new FileDesc[indices.size()];
-        IntSet.IntSetIterator iter=indices.iterator();
-        for (int i=0; iter.hasNext(); i++) {
-            FileDesc fd=(FileDesc)_files.get(iter.next());
-            Assert.that(fd!=null, "Directory has null entry");
+        IntSet.IntSetIterator iter = indices.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
+            FileDesc fd = (FileDesc)_files.get(iter.next());
+            Assert.that(fd != null, "Directory has null entry");
             fds[i] = fd;
         }
         
@@ -894,14 +898,14 @@ public abstract class FileManager {
 	    }
 
         File dir = FileUtils.getParentFile(f);
-        if (dir==null) 
+        if (dir == null) 
             return null;
 
         //TODO: if overwriting an existing, take special care.
         boolean directoryShared;
         synchronized (this) {
-            directoryShared=_sharedDirectories.containsKey(dir);
-            if(directoryShared)
+            directoryShared = _sharedDirectories.containsKey(dir);
+            if (directoryShared)
                 _numPendingFiles++;
         }
         FileDesc fd;
@@ -950,8 +954,6 @@ public abstract class FileManager {
      * @modifies this
      * @effects adds the given file to this if it is of the proper extension and
      *  not too big (>~2GB).  Returns true iff the file was actually added.
-     *  <b>WARNING: this is a potential security hazard; caller must ensure the
-     *  file is in the shared directory.</b>
      *
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
@@ -993,8 +995,8 @@ public abstract class FileManager {
             _numFiles++;
 		
             //Register this file with its parent directory.
-            File parent=FileUtils.getParentFile(file);
-            Assert.that(parent!=null, "Null parent to \""+file+"\"");
+            File parent = FileUtils.getParentFile(file);
+            Assert.that(parent != null, "Null parent to \""+file+"\"");
 
             // Check if file is a specially shared file.  If not, ensure that
             // it is located in a shared directory.
@@ -1015,12 +1017,12 @@ public abstract class FileManager {
             //Index the filename.  For each keyword...
             String[] keywords = extractKeywords(fileDesc);
             
-            for (int i=0; i<keywords.length; i++) {
-                String keyword=keywords[i];
+            for (int i = 0; i < keywords.length; i++) {
+                String keyword = keywords[i];
                 //Ensure the _keywordTrie has a set of indices associated with keyword.
-                IntSet indices=(IntSet)_keywordTrie.get(keyword);
-                if (indices==null) {
-                    indices=new IntSet();
+                IntSet indices = (IntSet)_keywordTrie.get(keyword);
+                if (indices == null) {
+                    indices = new IntSet();
                     _keywordTrie.add(keyword, indices);
                 }
                 //Add fileIndex to the set.
@@ -1238,14 +1240,14 @@ public abstract class FileManager {
         
         // Look for matching file ...         
         FileDesc fd = (FileDesc)_fileToFileDescMap.get(f);
-        if (fd==null)
+        if (fd == null)
             return null;
         
         int i = fd.getIndex();
         Assert.that(((FileDesc)_files.get(i)).getFile().equals(f),
                     "invariant broken!");
         
-        _files.set(i,null);
+        _files.set(i, null);
         _fileToFileDescMap.remove(f);
         _needRebuild = true;
         
@@ -1264,18 +1266,17 @@ public abstract class FileManager {
         }
 
         _numFiles--;
-        _filesSize-=fd.getSize();
+        _filesSize -= fd.getSize();
 
         //Remove references to this from directory listing
-        File parent=FileUtils.getParentFile(f);
-        IntSet siblings=(IntSet)_sharedDirectories.get(parent);
-        Assert.that(siblings!=null,
-            "Rem directory \""+parent+"\" not in "+_sharedDirectories);
-        boolean removed=siblings.remove(i);
+        File parent = FileUtils.getParentFile(f);
+        IntSet siblings = (IntSet)_sharedDirectories.get(parent);
+        Assert.that(siblings != null,
+            "Removed file's directory \""+parent+"\" not in "+_sharedDirectories);
+        boolean removed = siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        // files that are forcibly shared over the network aren't
-        // counted.        
+        // files that are forcibly shared over the network aren't counted        
         if(parent.equals(FORCED_SHARE)) {
             notify = false;
             _numForcedFiles--;
@@ -1283,10 +1284,10 @@ public abstract class FileManager {
 
         //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
-        for (int j=0; j<keywords.length; j++) {
-            String keyword=keywords[j];
-            IntSet indices=(IntSet)_keywordTrie.get(keyword);
-            if (indices!=null) {
+        for (int j = 0; j < keywords.length; j++) {
+            String keyword = keywords[j];
+            IntSet indices = (IntSet)_keywordTrie.get(keyword);
+            if (indices != null) {
                 indices.remove(i);
                 //TODO2: prune tree if possible.  call
                 //_keywordTrie.remove(keyword) if indices.size()==0.
@@ -1315,7 +1316,7 @@ public abstract class FileManager {
     
     /**
      * Utility method to perform standardized keyword extraction for the given
-     * <tt>FileDesc</tt>.  This handles extracting keyword according to 
+     * <tt>FileDesc</tt>.  This handles extracting keywords according to 
      * locale-specific rules.
      * 
      * @param fd the <tt>FileDesc</tt> containing a file system path with 
@@ -1402,12 +1403,14 @@ public abstract class FileManager {
     /**
      * Returns true if this file is in a shared directory.
      */
-    public synchronized boolean isFileInSharedDirectories(File f) {
+    public boolean isFileInSharedDirectories(File f) {
         File dir = FileUtils.getParentFile(f);
         if (dir == null) 
             return false;
 
-        return _sharedDirectories.containsKey(dir);
+		synchronized (this) {
+			return _sharedDirectories.containsKey(dir);
+		}
 	}    
     
     /**
@@ -1893,69 +1896,68 @@ public abstract class FileManager {
     ///////////////////////////////////// Testing //////////////////////////////
 
     /** Checks this' rep. invariants.  VERY expensive. */
-    private boolean DEBUG=false;
+    private boolean DEBUG = false;
     protected synchronized void repOk() {
         if (!DEBUG)
             return;
         System.err.println("WARNING: running repOk()");
 
         //Verify index.  Get the set of indices in the _keywordTrie....
-        IntSet indices=new IntSet();
-        for (Iterator iter=_keywordTrie.getPrefixedBy(""); iter.hasNext(); ) {
-            IntSet set=(IntSet)iter.next();
+        IntSet indices = new IntSet();
+        for (Iterator iter = _keywordTrie.getPrefixedBy(""); iter.hasNext(); ) {
+            IntSet set = (IntSet)iter.next();
             indices.addAll(set);
         }
         //...and make sure all indices are in _files. 
         //(Note that we don't check filenames; I'm lazy)
-        for (IntSet.IntSetIterator iter=indices.iterator(); iter.hasNext(); ) {
-            int i=iter.next();
-            FileDesc desc=(FileDesc)_files.get(i);
-            Assert.that(desc!=null,
+        for (IntSet.IntSetIterator iter = indices.iterator(); iter.hasNext(); ) {
+            int i = iter.next();
+            FileDesc desc = (FileDesc)_files.get(i);
+            Assert.that(desc != null,
                         "Null entry for index value "+i);
         }
 
         //Make sure all FileDesc named in _urnMap exist.
-        for (Iterator iter=_urnMap.keySet().iterator(); iter.hasNext(); ) {
-            URN urn=(URN)iter.next();
-            IntSet indices2=(IntSet)_urnMap.get(urn);
-            for (IntSet.IntSetIterator iter2=indices2.iterator(); 
-                     iter2.hasNext(); ) {
-                int i=iter2.next();
-                FileDesc fd=(FileDesc)_files.get(i);
-                Assert.that(fd!=null, "Missing file for urn");
+        for (Iterator iter = _urnMap.keySet().iterator(); iter.hasNext(); ) {
+            URN urn = (URN)iter.next();
+            IntSet indices2 = (IntSet)_urnMap.get(urn);
+            for (IntSet.IntSetIterator iter2 = indices2.iterator(); iter2.hasNext(); ) {
+                int i = iter2.next();
+                FileDesc fd = (FileDesc)_files.get(i);
+                Assert.that(fd != null, "Missing file for urn");
                 Assert.that(fd.containsUrn(urn), "URN mismatch");
             }
         }
 
         //Verify directory listing.  Make sure directory only contains 
         //legal values.
-        Iterator iter=_sharedDirectories.keySet().iterator();
+        Iterator iter = _sharedDirectories.keySet().iterator();
         while (iter.hasNext()) {
-            File directory=(File)iter.next();
-            IntSet children=(IntSet)_sharedDirectories.get(directory);
+            File directory = (File)iter.next();
+            IntSet children = (IntSet)_sharedDirectories.get(directory);
             
-            IntSet.IntSetIterator iter2=children.iterator();
+            IntSet.IntSetIterator iter2 = children.iterator();
             while (iter2.hasNext()) {
-                int i=iter2.next();
-                Assert.that(i>=0 && i<_files.size(),
+                int i = iter2.next();
+                Assert.that(i >= 0 && i < _files.size(),
                             "Bad index "+i+" in directory");
-                FileDesc fd=(FileDesc)_files.get(i);
-                Assert.that(fd!=null, "Directory listing points to empty file");
+                FileDesc fd = (FileDesc)_files.get(i);
+                Assert.that(fd != null, "Directory listing points to empty file");
             }
         }
 
         //For all files...
-        int numFilesCount=0;
-        int sizeFilesCount=0;
-        for (int i=0; i<_files.size(); i++) {
-            if (_files.get(i)==null)
+        int numFilesCount = 0;
+        int sizeFilesCount = 0;
+        for (int i = 0; i < _files.size(); i++) {
+            if (_files.get(i) == null)
                 continue;
-            FileDesc desc=(FileDesc)_files.get(i);
+            FileDesc desc = (FileDesc)_files.get(i);
             numFilesCount++;
-            sizeFilesCount+=desc.getSize();
+            sizeFilesCount += desc.getSize();
 
             //a) Ensure is has the right index.
-            Assert.that(desc.getIndex()==i,
+            Assert.that(desc.getIndex() == i,
                         "Bad index value.  Got "+desc.getIndex()+" not "+i);
             //b) Ensured name indexed indexed. 
             //   (Note we don't check filenames; I'm lazy.)
@@ -1963,10 +1965,10 @@ public abstract class FileManager {
                         "Index does not contain entry for "+i);
             //c) Ensure properly listed in directory
             try {
-                IntSet siblings=(IntSet)_sharedDirectories.get(
+                IntSet siblings = (IntSet)_sharedDirectories.get(
                     FileUtils.getCanonicalFile(
                         FileUtils.getParentFile(desc.getFile())));
-                Assert.that(siblings!=null, 
+                Assert.that(siblings != null, 
                     "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),
                     "Index "+i+" not in directory");
@@ -1974,17 +1976,15 @@ public abstract class FileManager {
                 Assert.that(false);
             }
             //d) Ensure URNs listed.
-            for (iter=desc.getUrns().iterator(); iter.hasNext(); ) {
-                URN urn=(URN)iter.next();
-                IntSet indices2=(IntSet)_urnMap.get(urn);
-                Assert.that(indices2!=null, "Urn not found");
+            for (iter = desc.getUrns().iterator(); iter.hasNext(); ) {
+                URN urn = (URN)iter.next();
+                IntSet indices2 = (IntSet)_urnMap.get(urn);
+                Assert.that(indices2 != null, "Urn not found");
                 Assert.that(indices2.contains(desc.getIndex()));
             }
         }   
-        Assert.that(_numFiles==numFilesCount,
-                    _numFiles+" should be "+numFilesCount);
-        Assert.that(_filesSize==sizeFilesCount,
-                    _filesSize+" should be "+sizeFilesCount);
+        Assert.that(_numFiles == numFilesCount, _numFiles+" should be "+numFilesCount);
+        Assert.that(_filesSize == sizeFilesCount, _filesSize+" should be "+sizeFilesCount);
     }
 
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java
