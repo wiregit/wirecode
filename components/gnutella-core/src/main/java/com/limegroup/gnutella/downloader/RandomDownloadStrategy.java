@@ -65,10 +65,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     }
     
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long fileSize, long blockSize) throws java.util.NoSuchElementException {
-        // First, find the number of bytes the user can currently preview
-        long previewLength = availableIntervals.getFirst().low;
-        
+            long previewLength, long lastNeededByte, long fileSize, long blockSize) throws java.util.NoSuchElementException {
+      
         // The lowest start location of an ideally matched interval.
         // We could re-use previewLength, but the code is easier to read this way.
         long lowerBound = previewLength;
@@ -80,12 +78,14 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 || pseudoRandom.nextFloat() > getBiasProbability(previewLength, fileSize)) {
             randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             // Lazy update of the random location
-            if (randomLocations[randomIndex] <= previewLength) {
-                // If the "random" location has never been initialized, try to lign it up with the Nth available fragment
+            if (randomLocations[randomIndex] <= previewLength || randomLocations[randomIndex] > lastNeededByte) {
+                // If the "random" location is zero, it has never been initialized,
+                // and we should try to align it to with the Nth available fragment
                 if (randomLocations[randomIndex] == 0 && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
                     randomLocations[randomIndex] = ((Interval)availableIntervals.getAllIntervalsAsList().get(randomIndex)).low; 
                 } else {
-                    randomLocations[randomIndex] = getRandomLocation(previewLength, fileSize, blockSize);
+                    // Make the random location somewhere between the first and last bytes we still need to assign
+                    randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
                 }
             }
             lowerBound = randomLocations[randomIndex];
@@ -170,7 +170,9 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         
         // The only way to get here is if we have selected a random lowerBound,
         // and there are no suitible Intervals at or after lowerBound.
-        // Time to lazily update that random location.
+        // Note that this may only be the case for this particular server,
+        // so it's not necessarily the case that lowerBound > lastNeededByte.
+        // Therefore, do not lazily update the random location here.
         
         // Log it
         if (LOG.isDebugEnabled()) {
@@ -179,11 +181,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                         ", range="+ backupInterval +
                         " out of choices "+availableIntervals);
         }
-        
-        // Lazy update
-        // If the randomIndex is still -1 at this point, it means we hit this point with
-        // lowerBound > previewLength, which is logically impossible unless somehow ranges was modified
-        randomLocations[randomIndex] = getRandomLocation(previewLength, fileSize, blockSize);
         
         return backupInterval;
     }

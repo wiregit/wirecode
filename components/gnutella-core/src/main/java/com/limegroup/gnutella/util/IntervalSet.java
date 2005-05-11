@@ -145,7 +145,7 @@ public class IntervalSet {
     }
     
     /**
-     * Deletes the specified all intervals in the specified set
+     * Deletes all intervals in the specified set
      * from this set.
      */
     public void delete(IntervalSet set) {

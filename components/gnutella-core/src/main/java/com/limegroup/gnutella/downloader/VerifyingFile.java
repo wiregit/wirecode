@@ -427,25 +427,27 @@ public class VerifyingFile {
      * Determines which interval should be assigned next, leases that interval,
      * and returns that interval.
      * 
-     * @param ranges if ranges is non-null, the return value will be a chosen 
-     *      from within ranges
+     * @param availableRanges if ranges is non-null, the return value will be a chosen 
+     *      from within availableRanges
      * @param chunkSize if greater than zero, the return value will end one byte before 
      *      a chunkSize boundary and will be at most chunkSize bytes large.
      * @return the leased interval
      */
-    private synchronized Interval leaseWhiteHelper(IntervalSet ranges, long chunkSize) throws NoSuchElementException {
+    private synchronized Interval leaseWhiteHelper(IntervalSet availableRanges, long chunkSize) throws NoSuchElementException {
         if (LOG.isDebugEnabled())
             LOG.debug("leasing white, state: "+dumpState());
       
         // If ranges is null, make ranges represent the entire file
-        if (ranges == null)
-            ranges = IntervalSet.createSingletonSet(0, completedSize-1);
-            
-        ranges.delete(verifiedBlocks);
-        ranges.delete(leasedBlocks);
-        ranges.delete(partialBlocks);
-        ranges.delete(savedCorruptBlocks);
-        ranges.delete(pendingBlocks);
+        if (availableRanges == null)
+            availableRanges = IntervalSet.createSingletonSet(0, completedSize-1);
+        
+        // Figure out which blocks we still need to assign
+        IntervalSet neededBlocks = IntervalSet.createSingletonSet(0, completedSize-1);
+        neededBlocks.delete(verifiedBlocks);
+        neededBlocks.delete(leasedBlocks);
+        neededBlocks.delete(partialBlocks);
+        neededBlocks.delete(savedCorruptBlocks);
+        neededBlocks.delete(pendingBlocks);
         /*
         Interval ret = ranges.removeFirst();
         if (LOG.isDebugEnabled())
@@ -456,8 +458,21 @@ public class VerifyingFile {
         return alignInterval(ret, (int) chunkSize);
         */
         
-        Interval ret = blockChooser.pickAssignment(ranges, completedSize, chunkSize);
-        ranges.delete(ret);
+        
+        // Calculate previewLength and lastNeededBlock
+        List neededBlockList = neededBlocks.getAllIntervalsAsList();
+        int neededIntervalCount = neededBlockList.size();
+        if (neededIntervalCount < 1)
+            throw new NoSuchElementException();
+        
+        long previewLength = ((Interval)neededBlockList.get(0)).low;
+        long lastNeededBlock = ((Interval)neededBlockList.get(neededIntervalCount-1)).high;
+        
+        // Calculate the union of neededBlocks and availableBlocks
+        availableRanges.delete(neededBlocks.invert(completedSize-1));
+        
+        Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, lastNeededBlock, completedSize, chunkSize);
+        availableRanges.delete(ret);
         leaseBlock(ret);
         
         return ret;
