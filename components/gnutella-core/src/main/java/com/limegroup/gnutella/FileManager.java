@@ -1897,6 +1897,8 @@ public abstract class FileManager {
 	 * Removes the given <tt>file</tt> as a specially shared file.
 	 */
 	public void removeSpeciallySharedFile(File file) {
+		if (file == null)
+			return;
 		SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file);
 		loadSettings(true);
 	}
