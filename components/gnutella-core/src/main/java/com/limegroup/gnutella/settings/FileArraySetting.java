@@ -74,21 +74,27 @@ public class FileArraySetting extends Setting {
 	 * Mutator for this setting.
 	 *
 	 * @param Remove file from the array, if it exists.
+	 * @return false when the the array does not contain the file or when the
+	 * file is <code>null</code> 
 	 */
-	public void remove(File file) {
+	public boolean remove(File file) {
 	    if (file == null)
-	        return;
-	    if (!contains(file))
-	        return;
+	        return false;
+	    
+		int index = indexOf(file);
+		if (index == -1) {
+			return false;
+		}
 	    
         File[] newValue = new File[value.length-1];
-        int index = indexOf(file);
+        
         //  copy first half, up to first occurrence's index
         System.arraycopy(value, 0, newValue, 0, index);
         //  copy second half, for the length of the rest of the array
 		System.arraycopy(value, index+1, newValue, index, value.length - index - 1);
 		
 		setValue(newValue);
+		return true;
 	}
     
 	/**

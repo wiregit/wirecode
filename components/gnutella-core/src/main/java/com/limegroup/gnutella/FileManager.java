@@ -1899,8 +1899,9 @@ public abstract class FileManager {
 	public void removeSpeciallySharedFile(File file) {
 		if (file == null)
 			return;
-		SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file);
-		loadSettings(true);
+		if (SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file)) {
+			loadSettings(true);
+		}
 	}
 	
 	/**
@@ -1909,9 +1910,10 @@ public abstract class FileManager {
 	public void addSpeciallySharedFile(File file) {
 		if (file == null)
 			return;
-		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
+		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
-		loadSettings(true);
+			loadSettings(true);
+		}
 	}
 
     ///////////////////////////////////// Testing //////////////////////////////

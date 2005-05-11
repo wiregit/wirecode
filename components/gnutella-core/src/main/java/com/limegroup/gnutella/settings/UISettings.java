@@ -68,4 +68,10 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting UI_MONITOR_SHOW_INCOMING_SEARCHES =
         FACTORY.createBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
+	
+	/**
+	 * Setting for the divider location in the library panel
+	 */
+	public static final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
+		FACTORY.createIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", 170);
 }
