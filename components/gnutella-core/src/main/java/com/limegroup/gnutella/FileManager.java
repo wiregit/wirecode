@@ -817,7 +817,7 @@ public abstract class FileManager {
         // the amount of pending shared files.
         synchronized (this) {
             // if it was already added, ignore.
-            if ( _sharedDirectories.get(directory) != null)
+            if (_sharedDirectories.get(directory) != null)
                 return Collections.EMPTY_SET;
                 
             _sharedDirectories.put(directory, new IntSet());
@@ -1401,9 +1401,10 @@ public abstract class FileManager {
     }
     
     /**
-     * Returns true if this file is in a shared directory.
+     * Returns true if this file is in a directory that is completely shared.
      */
     public boolean isFileInSharedDirectories(File f) {
+		//  ### j: Coming back to this in a second.
         File dir = FileUtils.getParentFile(f);
         if (dir == null) 
             return false;
@@ -1892,6 +1893,24 @@ public abstract class FileManager {
         return parent != null && parent.equals(FORCED_SHARE);
     }
 
+	/**
+	 * Removes the given <tt>file</tt> as a specially shared file.
+	 */
+	public void removeSpeciallySharedFile(File file) {
+		SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file);
+		loadSettings(true);
+	}
+	
+	/**
+	 * Adds the given <tt>file</tt> as a specially shared file.
+	 */
+	public void addSpeciallySharedFile(File file) {
+		if (file == null)
+			return;
+		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
+			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
+		loadSettings(true);
+	}
 
     ///////////////////////////////////// Testing //////////////////////////////
 

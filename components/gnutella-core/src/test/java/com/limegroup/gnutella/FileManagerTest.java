@@ -670,7 +670,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         SharingSettings.SPECIAL_FILES_TO_SHARE.add(shared);
         waitForLoad();
 
-        //  assert that "shared" and "notShared" are not in shared directories
+        //  assert that "shared" and "notShared" are not in a shared directory
         assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
         assertFalse("notShared should not be shared in a shared directory", fman.isFileInSharedDirectories(notShared));
         
