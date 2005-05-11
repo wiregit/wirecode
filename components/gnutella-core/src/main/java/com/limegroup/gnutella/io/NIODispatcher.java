@@ -82,6 +82,9 @@ public class NIODispatcher implements Runnable {
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
+    /** The throttle queue. */
+    private final List /* of Throttle */ THROTTLE = new ArrayList();
+    
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
      * handling IOException or running arbitrary code can't deadlock.
@@ -98,6 +101,13 @@ public class NIODispatcher implements Runnable {
 	public boolean isDispatchThread() {
 	    return Thread.currentThread() == dispatchThread;
 	}
+	
+	/** Adds a Throttle into the throttle requesting loop. */
+	public void addThrottle(Throttle t) {
+        synchronized(Q_LOCK) {
+            THROTTLE.add(t);
+        }
+    }
 	    
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
@@ -270,15 +280,19 @@ public class NIODispatcher implements Runnable {
             UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
             UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
+            UNLOCKED.addAll(THROTTLE);
             REGISTER.clear();
             LATER.clear();
         }
         
         if(!UNLOCKED.isEmpty()) {
+            long now = System.currentTimeMillis();
             for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
                 Object item = i.next();
                 try {
-                    if(item instanceof RegisterOp) {
+                    if(item instanceof Throttle) {
+                        ((Throttle)item).tick(now);
+                    } else if(item instanceof RegisterOp) {
                         RegisterOp next = (RegisterOp)item;
                         try {
                             next.channel.register(selector, next.op, next.handler);
@@ -287,12 +301,23 @@ public class NIODispatcher implements Runnable {
                         }
                     } else if(item instanceof Runnable) {
                         ((Runnable)item).run();
-                    }
+                    } 
                 } catch(Throwable t) {
+                    LOG.error(t);
                     ErrorService.error(t);
                 }
             }
             UNLOCKED.clear();
+        }
+    }
+    
+    /**
+     * Loops through all Throttles and gives them the ready keys.
+     */
+    private void readyThrottles(Collection keys) {
+        synchronized(Q_LOCK) {
+            for(int i = 0; i < THROTTLE.size(); i++)
+                ((Throttle)THROTTLE.get(i)).selectableKeys(keys);
         }
     }
     
@@ -335,6 +360,8 @@ public class NIODispatcher implements Runnable {
             
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + keys.size() + ") keys.");
+            
+            readyThrottles(keys);
             
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();

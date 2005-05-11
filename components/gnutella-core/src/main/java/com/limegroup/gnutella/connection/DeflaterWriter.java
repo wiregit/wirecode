@@ -68,13 +68,14 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
      */
     public synchronized void interest(WriteObserver observer, boolean status) {
         this.observer = status ? observer : null;
-        InterestWriteChannel source = channel;
+        
         // just always set interest on.  it's easiest & it'll be turned off
         // immediately once we're notified if we don't wanna do anything.
         // note that if we did want to do it correctly, we'd have to check
         // incoming.hasRemaining() || outgoing.hasRemaining(), but since
         // interest can be called in any thread, we'd have to introduce
         // locking around incoming & outgoing, which just isn't worth it.
+        InterestWriteChannel source = channel;
         if(source != null)
             source.interest(this, true); 
     }

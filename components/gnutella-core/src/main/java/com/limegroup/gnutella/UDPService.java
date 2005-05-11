@@ -138,11 +138,6 @@ public class UDPService implements ReadWriteObserver {
      * A buffer used for reading the header of incoming messages.
      */
     private static final byte[] IN_HEADER_BUF = new byte[23];
-    
-    /**
-     * A buffer used for reading the header of outgoing messages.
-     */
-    private static final byte[] OUT_HEADER_BUF = new byte[23];
 
 	/**
 	 * Instance accessor.

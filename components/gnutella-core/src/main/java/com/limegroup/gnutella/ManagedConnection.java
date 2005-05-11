@@ -16,6 +16,9 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.Throttle;
+import com.limegroup.gnutella.io.ThrottleWriter;
+import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
@@ -131,6 +134,9 @@ public class ManagedConnection extends Connection
 
     /** A lock for QRP activity on this connection */
     private final Object QRP_LOCK=new Object();
+    
+    /** The Throttle that's used for writing over all connections. */
+    private final static Throttle _nbThrottle = new Throttle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
                                                             
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
@@ -567,12 +573,15 @@ public class ManagedConnection extends Connection
 		if(isAsynchronous()) {
 		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
 		    _outputRunner = messager;
+		    ChannelWriter writer = messager;
 		    
-		    if(isWriteDeflated())
-		        messager.setWriteChannel(new DeflaterWriter(_deflater));
-
-		    // TODO: add ThrottledWriter
-		    // lastChannel.setWriteChannel(new ThrottledWriter(_throttle));
+		    if(isWriteDeflated()) {
+		        DeflaterWriter deflater = new DeflaterWriter(_deflater);
+		        writer = deflater;
+		        messager.setWriteChannel(deflater);
+            }
+            
+            writer.setWriteChannel(new ThrottleWriter(_nbThrottle));
 		    
 		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
 		} else {

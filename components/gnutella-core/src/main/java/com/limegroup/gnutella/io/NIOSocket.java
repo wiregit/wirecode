@@ -174,8 +174,11 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
                     writer.shutdown();
 
                     ChannelWriter lastChannel = newWriter;
-                    while(lastChannel.getWriteChannel() instanceof ChannelWriter)
+                    while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
                         lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(NIOSocket.this);
+                    }
 
                     InterestWriteChannel source = new SocketInterestWriteAdapater(channel);
                     writer = source;

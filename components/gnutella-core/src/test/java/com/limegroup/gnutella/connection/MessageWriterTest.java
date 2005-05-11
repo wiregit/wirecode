@@ -202,7 +202,6 @@ public final class MessageWriterTest extends BaseTestCase {
         assertEquals(buffer(m[8]), buffer(in[4]));
         assertEquals(buffer(m[9]), buffer(in[5]));
     }
-        
 	
 	private Message read(InputStream in) throws Exception {
 	    return Message.read(in, (byte)100);

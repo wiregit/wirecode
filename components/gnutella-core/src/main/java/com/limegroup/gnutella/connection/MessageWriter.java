@@ -59,14 +59,24 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      */
     private boolean shutdown = false;
     
+    
     /**
      * Constructs a new MessageWriter with the given stats, queue & sendHandler.
      * You MUST call setWriteChannel prior to handleWrite.
      */
     public MessageWriter(ConnectionStats stats, MessageQueue queue, SentMessageHandler sendHandler) {
+        this(stats, queue, sendHandler, null);
+    }
+    
+    /**
+     * Constructs a new MessageWriter that writes to the given sink.
+     */
+    public MessageWriter(ConnectionStats stats, MessageQueue queue,
+                         SentMessageHandler sendHandler, InterestWriteChannel sink) {
         this.stats = stats;
         this.queue = queue;
         this.sendHandler = sendHandler;
+        this.channel = sink;
         out = new BufferByteArrayOutputStream();
     }
     

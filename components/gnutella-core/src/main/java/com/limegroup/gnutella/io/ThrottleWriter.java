@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.io;
 
-import com.limegroup.gnutella.io.*;
-import java.nio.*;
-import java.io.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 
 /**
  * A writer that throttles data according to a throttle.
@@ -19,6 +19,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
     private Object attachment;
+    /** Whether or not the last call to write(ByteBuffer) was able to write everything. */
+    private boolean wroteAll;
     
     /**
      * Constructs a ThrottleWriter with the given Throttle.
@@ -45,7 +47,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     /** Sets the sink. */
     public void setWriteChannel(InterestWriteChannel channel) {
         this.channel = channel;
-        throttle.interest(this);
+        throttle.interest(this, attachment);
     }
     
     /** Sets the attachment that the Throttle will recognize for this Writer. */
@@ -53,16 +55,22 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         attachment = att;
     }
     
+    /** Gets the attachment. */
+    public Object getAttachment() {
+        return attachment;
+    }
+    
     /**
      * Tells the Throttle that we're interested in receiving bandwidthAvailable
      * events at some point in time.
      */
     public void interest(WriteObserver observer, boolean status) {
-        this.observer = status ? observer : null;
-        
-        // it's much easier to just always set interest on & not have to deal with
-        // bothersome synchronization.
-        throttle.interest(this);
+        if(status) {
+            this.observer = observer;
+            throttle.interest(this, attachment);
+        } else {
+            this.observer = null;
+        }
     }
     
     /**
@@ -86,19 +94,29 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         InterestWriteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
-            
 
         int priorLimit = buffer.limit();
-        if(buffer.remaining() > available)
+        if(buffer.remaining() > available) {
+            System.out.println("had more data than can write: " + buffer.remaining() + ", av: " + available);
             buffer.limit(buffer.position() + available);
+        }
             
         int wrote = 0;
         int totalWrote = 0;
-        while(buffer.remaining() <= available && (wrote = channel.write(buffer)) > 0)
+        
+        System.out.println("remaining: " + buffer.remaining());
+        while(buffer.remaining() <= available && (wrote = channel.write(buffer)) > 0) {
+            System.out.println("wrote: " + wrote);
             totalWrote += wrote;
+        }
+        System.out.println("now remaining " + buffer.remaining());
                     
         available -= totalWrote;
         buffer.limit(priorLimit);
+
+        wroteAll = !buffer.hasRemaining();
+
+        System.out.println("av: " + available + ", buffer: " + buffer);
         
         return totalWrote;
     }
@@ -131,21 +149,23 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
             
         WriteObserver interested = observer;
             
-        available = throttle.request(this);
+        available = throttle.request(this, attachment);
+        wroteAll = true;
         try {
             chain.interest(this, false);
             if(available > 0 && interested != null)
                 interested.handleWrite();
         } finally {
-            if(available > 0)
-                throttle.release(available, this);
+            throttle.release(available, wroteAll, this, attachment);
         }
         
         interested = observer; // re-get it, since observer may have changed interest.
-        if(interested != null)
-            throttle.interest(this);
-        else
-            throttle.finished(this);
+        if(interested != null) {
+            throttle.interest(this, attachment);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /** Shuts down the last observer. */
