@@ -114,7 +114,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         Iterator iter = proxies.iterator();
         IpPort ppi = (IpPort)iter.next();
         assertEquals(ppi.getPort(), 6355);
-        assertTrue(ppi.getInetAddress().equals(InetAddress.getLocalHost()));
+        assertTrue(ppi.getInetAddress().equals(testUP[0].getInetAddress()));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
