@@ -76,6 +76,7 @@ public class VerifyingFileTest extends BaseTestCase {
      */
     public void testLease() throws Exception {
         int chunkSize = (int)completeFile.length()/5;
+        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
         for (long i = 0;i < 5 ;i++) {
             Interval leased = vf.leaseWhite(chunkSize);
             assertEquals(i * chunkSize,leased.low);
@@ -118,6 +119,7 @@ public class VerifyingFileTest extends BaseTestCase {
      */
     public void testRelease() throws Exception {
         // lease two chunks and create a hole in between them
+        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
         Interval leased = vf.leaseWhite(512*1024);
         vf.releaseBlock(new Interval (128*1024, 3*128*1024-1));
         
