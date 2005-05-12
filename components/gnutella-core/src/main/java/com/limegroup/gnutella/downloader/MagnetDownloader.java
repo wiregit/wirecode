@@ -91,7 +91,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param filename the final file name, or null if unknown
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
-     * @param saveLocation can be null, then the default save directory is used
+     * @param saveDir can be null, then the default save directory is used
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
@@ -100,11 +100,11 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             String textQuery,
                             String filename,
                             String [] defaultURLs,
-                            File saveLocation) throws SaveLocationException {
+                            File saveDir,
+                            boolean overwrite) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        // TODO Do we want overwriting?
-        super(new RemoteFileDesc[0], ifm, null, null, null, true);
+        super(new RemoteFileDesc[0], ifm, null, saveDir, filename, overwrite);
 
         this._textQuery=textQuery;
         this._urn=urn;

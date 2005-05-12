@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -172,9 +173,8 @@ public class ExternalControl {
 
             // Validate that we have something to go with from magnet
             // If not, report an error.
-            if ( !( urls.size() > 0  || 
-                    urn != null || 
-                    (curOpt.getKT() != null && !"".equals(curOpt.getKT())) ) ) {
+            if ( urls.size() == 0  && urn == null 
+					&& (curOpt.getKT() == null || curOpt.getKT().length() == 0)) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet. urls.size == " + urls.size() +
                              "curOpt.kt == " + curOpt.getKT());
@@ -184,7 +184,7 @@ public class ExternalControl {
                 else
                     errorMsg = curOpt.toString();
                 MessageService.showError("ERROR_BAD_MAGNET_LINK", errorMsg);
-                return;
+                return;	
             }
             
             // Warn the user that the link was slightly invalid

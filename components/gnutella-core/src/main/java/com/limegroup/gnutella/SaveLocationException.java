@@ -42,7 +42,7 @@ public class SaveLocationException extends IOException {
 	/**
 	 * Constructs a SaveLocationException for the specified error code.
 	 * @param errorCode
-	 * @param message optional more detail message for debugging purposes
+	 * @param message optional more detailed message for debugging purposes
 	 */
 	public SaveLocationException(int errorCode, File file, String message) {
 		super(message);

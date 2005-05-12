@@ -1900,7 +1900,7 @@ public abstract class FileManager {
 		if (file == null)
 			return;
 		if (SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file)) {
-			loadSettings(true);
+			loadSettings(false);
 		}
 	}
 	
@@ -1912,7 +1912,7 @@ public abstract class FileManager {
 			return;
 		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
-			loadSettings(true);
+			loadSettings(false);
 		}
 	}
 

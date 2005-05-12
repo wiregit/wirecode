@@ -1385,9 +1385,13 @@ public class RouterService {
      *
      * @param files a group of "similar" files to smart download
      * @param alts a List of secondary RFDs to use for other sources
-     * @param overwrite true iff the download should proceded without
+     * @param queryGUID guid of the query that returned the results (i.e. files)
+	 * @param overwrite true iff the download should proceedewithout
      *  checking if it's on disk
-     * @param the guid of the query that returned the results (i.e. files)
+	 * @param saveDir can be null, then the download directory from the settings
+	 * is used
+	 * @param fileName can be null, then one of the filenames of the <code>files</code>
+	 * array is used
      * @return the download object you can use to start and resume the download
      * @exception AlreadyDownloadingException the file is already being 
      *  downloaded.
@@ -1450,11 +1454,11 @@ public class RouterService {
      */
 	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite,
-            File saveLocation)
+            File saveDir)
 			throws IllegalArgumentException, AlreadyDownloadingException, 
 			SaveLocationException {
 		return downloader.download(urn, textQuery, filename, defaultURL, overwrite, 
-				saveLocation);
+				saveDir);
 	}
 	
 	public static synchronized Downloader download(URN urn, String textQuery,

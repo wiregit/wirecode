@@ -527,7 +527,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                              String fileName, boolean overwrite) 
 		throws SaveLocationException {
 		this(files, ifc, originalQueryGUID);
-		// overwrite file to be consistent to older versions
 		setSaveFile(saveDirectory, fileName, overwrite);
     }
 	

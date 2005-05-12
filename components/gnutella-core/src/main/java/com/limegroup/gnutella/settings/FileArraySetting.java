@@ -74,7 +74,7 @@ public class FileArraySetting extends Setting {
 	 * Mutator for this setting.
 	 *
 	 * @param Remove file from the array, if it exists.
-	 * @return false when the the array does not contain the file or when the
+	 * @return false when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
 	public boolean remove(File file) {
