@@ -70,8 +70,25 @@ public final class UISettings extends LimeProps {
         FACTORY.createBooleanSetting("UI_MONITOR_SHOW_INCOMING_SEARCHES", false);
 	
 	/**
-	 * Setting for the divider location in the library panel
+	 * Setting for the divider location between library tree and table.
 	 */
 	public static final IntSetting UI_LIBRARY_TREE_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", 170);
+		FACTORY.createIntSetting("UI_LIBRARY_TREE_DIVIDER_LOCATION", -1);
+	
+	/**
+	 * Setting for the divider location between library and playlist.
+	 */
+	public static final IntSetting UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION =
+		FACTORY.createIntSetting("UI_LIBRARY_PLAY_LIST_TAB_DIVIDER_LOCATION",
+				300);
+	
+	/**
+	 * Setting for the divider location between incoming query monitors and
+	 * upload panel.
+	 */
+	public static final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
+		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
+	
+	public static final IntSetting UI_SEARCH_DOWNLOAD_TAB_HORIZONTAL_DIVIDER_LOCATION =
+		FACTORY.createIntSetting("UI_SEARCH_DOWNLOAD_TAB_HORIZONTAL_DIVIDER_LOCATION", -1);
 }
