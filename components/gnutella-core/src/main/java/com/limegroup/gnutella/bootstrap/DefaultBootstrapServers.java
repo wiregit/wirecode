@@ -27,17 +27,19 @@ public class DefaultBootstrapServers {
 
     //These should NOT be URL encoded.
     static String[] urls=new String[] {
-	"http://crab.bishopston.net:3558/",
-        "http://g1.blacknex.net/cgi-bin/perlgcache.cgi",
         "http://cache.kicks-ass.net:8000/",
-        "http://g2cache.theg2.net/gwcache/lynnx.asp",
-        "http://galvatron.dyndns.org:59009/gwcache",
-        "http://gcache.cloppy.net/",
-        "http://gwc1.mager.org:8081/GWebCache/req",
-        "http://gwebcache.daems.org/GWebCache/req",
-        "http://gwebcache2.limewire.com:9000/gwc",
-        "http://www.goeg.dk/Gnutella/gcache.php",
-        "http://goeg.dk/Gnutella/gcache.php",
-        "http://gwc.lame.net/gwcii.php"
+        "http://crab2.dyndns.org:30002/gwc/",
+        "http://gwc.jooz.net:8010/gwc/",
+        "http://gwc.nonamer.ath.cx:8080/",
+        "http://gwc1.nouiz.org/servlet/GWebCache/req",
+        "http://gwcrab.sarcastro.com:8001/",
+        "http://gwebcache.linuxonly.nl/",
+        "http://kisama.ath.cx:8080/",
+        "http://krill.shacknet.nu:20095/gwc",
+        "http://loot.alumnigroup.org/",
+        "http://node02.hewson.cns.ufl.edu:8080/pwc.cgi",
+        "http://overbeer.ghostwhitecrab.de/",
+        "http://starscream.dynalias.com/",
+        "http://toadface.bishopston.net:3558/"
     };
 }

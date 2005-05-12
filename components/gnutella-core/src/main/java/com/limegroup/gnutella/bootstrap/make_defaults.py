@@ -19,7 +19,7 @@ import sys
 #The latest complete GWebCache scan.  This is a mirror of
 #http://zero-g.net/gwc/GWebCache.net, which is currently out.
 #start_url="http://www.gnucleus.net/gwebcache/GWebCache.net"
-start_url="http://www.rodage.net/gnetcache/gcache.php?urlfile=400"
+start_url="http://loot.alumnigroup.org/?urlfile=400&client=TEST"
 #Where to write the output.  Default: console
 out=sys.stdout
 #Write bad hosts as comments?
@@ -45,7 +45,7 @@ def make_defaults():
 
 #Fills up CANDIDATES with the entries of START_URL, without verifying.
 def get_new_candidates():
-    f=open("urls.txt")
+    f=urlopen(start_url) 
     while 1:
         line=strip(f.readline())
         if line=="":
@@ -75,7 +75,7 @@ def get_old_candidates():
 #Returns true if list contains some url "similar" to url
 def contains(list, url):
     def strip(url):
-        i=rindex(url, "/")
+        i=rfind(url, "/")
         if (i<0):
             i=0    
         return url[:i]
@@ -98,7 +98,7 @@ assert contains(test_list, "http://b.com/path/index.php")
 
 #Prints the valid URLs of candidates, along with Java formatting.    
 def print_valid_candidates():
-    timeoutsocket.setDefaultSocketTimeout(10)
+    timeoutsocket.setDefaultSocketTimeout(60)
     first_line=1     #Used to keep track of commas
     for url in candidates:
         wrote=0
