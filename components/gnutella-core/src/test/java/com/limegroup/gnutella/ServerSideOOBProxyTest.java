@@ -12,6 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -47,6 +50,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
 
+    private static final Log LOG = LogFactory.getLog(ServerSideOOBProxyTest.class);
+    
     /**
      * Ultrapeer 1 UDP connection.
      */
@@ -82,6 +87,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                     "TIMED_GUID_LIFETIME",
                                     new Long(EXPIRE_TIME));
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
+        UDP_ACCESS = new DatagramSocket();
+        UDP_ACCESS.setSoTimeout(500);
     }
 
     public static void setUpQRPTables() throws Exception {
@@ -150,83 +157,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         //------------------------------
 
-
-        // need to set up GUESS
-        DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket();
-        // set up solicited UDP support
-        {
-            drainAll();
-            PingReply pong = 
-                PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS.getLocalPort(), 
-                                 InetAddress.getLocalHost().getAddress(), 
-                                 10, 10, true, 900, true);
-            ULTRAPEER[0].send(pong);
-            ULTRAPEER[0].flush();
-
-            // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(500);
-            pack = new DatagramPacket(new byte[1000], 1000);
-            try {
-                UDP_ACCESS.receive(pack);
-            }
-            catch (IOException bad) {
-               fail("Did not get ping", bad);
-            }
-            InputStream in = new ByteArrayInputStream(pack.getData());
-            // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
-            
-            // send the pong in response to the ping
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS.getLocalPort(), 
-                                    InetAddress.getLocalHost().getAddress(), 
-                                    10, 10, true, 900, true);
-            pong.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      pack.getAddress(), pack.getPort());
-            UDP_ACCESS.send(pack);
-        }
-
-        // set up unsolicited UDP support
-        {
-            // tell the UP i can support UDP connect back
-            MessagesSupportedVendorMessage support = 
-                MessagesSupportedVendorMessage.instance();
-            ULTRAPEER[0].send(support);
-            ULTRAPEER[0].flush();
-
-            byte[] cbGuid = null;
-            int cbPort = -1;
-            while (cbGuid == null) {
-                try {
-                    Message m = ULTRAPEER[0].receive(TIMEOUT);
-                    if (m instanceof UDPConnectBackVendorMessage) {
-                        UDPConnectBackVendorMessage udp = 
-                            (UDPConnectBackVendorMessage) m;
-                        cbGuid = udp.getConnectBackGUID().bytes();
-                        cbPort = udp.getConnectBackPort();
-                    }
-                }
-                catch (Exception ie) {
-                    fail("did not get the UDP CB message!", ie);
-                }
-            }
-
-            // ok, now just do a connect back to the up so unsolicited support
-            // is all set up
-            PingRequest pr = new PingRequest(cbGuid, (byte) 1, (byte) 0);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pr.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      ULTRAPEER[0].getInetAddress(), cbPort);
-            UDP_ACCESS.send(pack);
-        }
-        
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
         Thread.sleep(500);
         assertTrue(ROUTER_SERVICE.isGUESSCapable());
         assertTrue(ROUTER_SERVICE.isOOBCapable());
@@ -391,7 +323,6 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         GUID.addressEncodeGuid(proxiedGuid, ROUTER_SERVICE.getAddress(),
                                ROUTER_SERVICE.getPort());
         assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
-
         // 1) route some TCP results back and make sure they are mapped back to
         // the leaf
         {
@@ -417,7 +348,6 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             assertEquals(2, queryRep.getTTL());
             assertEquals(1, queryRep.getHops());
         }
-
         // 2) participate in a OOB exchange and make sure results are mapped
         // back to the leaf
         {
@@ -479,7 +409,6 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             assertEquals(2, queryRep.getTTL());
             assertEquals(1, queryRep.getHops());
         }
-
         // 3) shut off the query, make sure the OOB is bypassed but TCP is still
         // sent
         {
