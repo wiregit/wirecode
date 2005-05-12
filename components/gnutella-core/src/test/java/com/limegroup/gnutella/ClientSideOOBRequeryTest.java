@@ -17,6 +17,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -93,99 +94,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             testUP[i].flush();
         }
 
-        // first we need to set up GUESS capability
-        // ----------------------------------------
-        // set up solicited UDP support
-        {
-            drainAll();
-            PingReply pong = 
-                PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS[0].getLocalPort(), 
-                                 InetAddress.getLocalHost().getAddress(), 
-                                 10, 10, true, 900, true);
-            testUP[0].send(pong);
-            testUP[0].flush();
-
-            // wait for the ping request from the test UP
-            UDP_ACCESS[0].setSoTimeout(10000);
-            pack = new DatagramPacket(new byte[1000], 1000);
-            try {
-                UDP_ACCESS[0].receive(pack);
-            }
-            catch (IOException bad) {
-               fail("Did not get ping", bad);
-            }
-            InputStream in = new ByteArrayInputStream(pack.getData());
-            // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
-            
-            // send the pong in response to the ping
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS[0].getLocalPort(), 
-                                    InetAddress.getLocalHost().getAddress(), 
-                                    10, 10, true, 900, true);
-            pong.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      pack.getAddress(), pack.getPort());
-            UDP_ACCESS[0].send(pack);
-        }
-
-        // set up unsolicited UDP support
-        {
-            // resend this to start exchange
-            testUP[0].send(MessagesSupportedVendorMessage.instance());
-            testUP[0].flush();
-
-            byte[] cbGuid = null;
-            int cbPort = -1;
-            while (cbGuid == null) {
-                try {
-                    Message m = testUP[0].receive(TIMEOUT);
-                    if (m instanceof UDPConnectBackVendorMessage) {
-                        UDPConnectBackVendorMessage udp = 
-                            (UDPConnectBackVendorMessage) m;
-                        cbGuid = udp.getConnectBackGUID().bytes();
-                        cbPort = udp.getConnectBackPort();
-                    }
-                }
-                catch (Exception ie) {
-                    fail("did not get the UDP CB message!", ie);
-                }
-            }
-
-            // ok, now just do a connect back to the up so unsolicited support
-            // is all set up
-            PingRequest pr = new PingRequest(cbGuid, (byte) 1, (byte) 0);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pr.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      testUP[0].getInetAddress(), cbPort);
-            UDP_ACCESS[0].send(pack);
-        }
-
-        // you also have to set up TCP incoming....
-        {
-            Socket sock = null;
-            OutputStream os = null;
-            try {
-                sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(), 
-                                       SERVER_PORT, 12);
-                os = sock.getOutputStream();
-                os.write("\n\n".getBytes());
-            } catch (IOException ignored) {
-            } catch (SecurityException ignored) {
-            } catch (Throwable t) {
-                ErrorService.error(t);
-            } finally {
-                if(sock != null)
-                    try { sock.close(); } catch(IOException ignored) {}
-                if(os != null)
-                    try { os.close(); } catch(IOException ignored) {}
-            }
-        }        
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
 
         // ----------------------------------------
 
@@ -822,8 +733,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         //Thread.sleep((UDP_ACCESS.length * 1000) - 
                      //(System.currentTimeMillis() - currTime));
-
-        Thread.sleep(5000);
+        int guessWaitTime = ((Integer)PrivilegedAccessor.getValue(ManagedDownloader.class,"GUESS_WAIT_TIME")).intValue();
+        Thread.sleep(guessWaitTime+2000);
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
