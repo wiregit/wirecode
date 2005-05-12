@@ -17,8 +17,48 @@ import com.limegroup.gnutella.util.IntWrapper;
 /**
  * A throttle that can be applied to non-blocking reads & writes.
  *
- * The Throttle is NOT THREAD SAFE.  All calls should be done on the
- * NIODispatch thread.
+ * NIODispatcher maintains a list of all active Throttles.  As part
+ * of every pending operation, NIODispatcher will 'tick' a Throttle.
+ * This will potentially increase the amount of available bytes that the
+ * Throttle can give to requestors.  If bytes suddenly become available,
+ * the Throttle will inform each ThrottleListener (that previously registered
+ * interest) that bandwidth is now available, and record the fact that the listener
+ * is now interested.  The listener must then register interest on its ChannelWriter,
+ * which will ultimately register interest on the SocketChannel.
+ * 
+ * NIODispatcher will then perform its select call & inform each Throttle of the
+ * available selected keys so that the Throttles can keep track of what interested
+ * parties are now ready for writing.  As the Throttle learns of a new ready listener,
+ * it increments a counter for that listener.  The listener will then request some
+ * bytes to write, try writing, and release the bytes.  If, while releasing, the listener
+ * said that it was able to write everything, the ready counter is erased.  However,
+ * if there was still more to write, the ready counter is kept around and incremented
+ * the next time it becomes ready.
+ *
+ * In order to determine how much data can be given to a specific listener when it requests,
+ * the available bytes are divided by a specific divisor (calculated by the total amount of
+ * counts for each ready listener divided by the counts for this listener).  The end result
+ * is that those listeners who previously requested data but couldn't write it all are
+ * given increasing priority to write more & more.  The idea behind this is to prevent fast
+ * connections from hogging all the bandwidth (which would prevent slower connections from
+ * writing out any data).
+ *
+ * A chain of events goes something like this
+ *
+ *      Throttle                            ThrottleListener                   NIODispatcher
+ * 1)                                       Throttle.interest               
+ * 2)   <adds to request list>
+ * 3)                                                                         Throttle.tick
+ * 4)   ThrottleListener.bandwidthAvailable
+ * 5)                                       SocketChannel.interest
+ * 6)   <moves from request to interest list>
+ * 7)                                                                         Selector.select
+ * 8)                                                                         Throttle.selectedKeys 
+ * 9)   <moves from interest list to ready list>
+ * 10)                                                                        NIOSocket.handleWrite
+ * 11)                                      Throttle.request
+ * 12)                                      SocketChannel.write
+ * 13)                                      Throttle.release
  */
 public class Throttle {
     

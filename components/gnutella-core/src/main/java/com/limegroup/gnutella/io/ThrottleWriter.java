@@ -105,7 +105,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         int totalWrote = 0;
         
         System.out.println("remaining: " + buffer.remaining());
-        while(buffer.remaining() <= available && (wrote = channel.write(buffer)) > 0) {
+        while(buffer.hasRemaining() && (wrote = channel.write(buffer)) > 0) {
             System.out.println("wrote: " + wrote);
             totalWrote += wrote;
         }
@@ -114,7 +114,9 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         available -= totalWrote;
         buffer.limit(priorLimit);
 
-        wroteAll = !buffer.hasRemaining();
+        // we wrote everything we could to this if the buffer is empty
+        // or if the channel wouldn't accept any more data.
+        wroteAll = !buffer.hasRemaining() || wrote == 0;
 
         System.out.println("av: " + available + ", buffer: " + buffer);
         
