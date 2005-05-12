@@ -98,17 +98,12 @@ public class VerifyingFile {
     /**
      * Ranges that are discarded (but verification was attempted)
      */
-    private IntervalSet savedCorruptBlocks;
+    private IntervalSet discardedBlocks;
     
     /**
      * Ranges which are pending writing & verification.
      */
     private IntervalSet pendingBlocks;
-    
-    /**
-     * Decides which blocks to start downloading next.
-     */
-    private SelectionStrategy blockChooser;
     
     /**
      * The hashtree we use to verify chunks, if any
@@ -144,13 +139,12 @@ public class VerifyingFile {
      * If checkOverlap is true, will scan for overlap corruption.
      */
     public VerifyingFile(int completedSize) {
-        blockChooser = SelectionStrategyFactory.getStrategyFor("", completedSize);
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
-        savedCorruptBlocks = new IntervalSet();
+        discardedBlocks = new IntervalSet();
     }
     
     /**
@@ -204,7 +198,7 @@ public class VerifyingFile {
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval(currPos,currPos+length-1);
+		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
@@ -214,7 +208,7 @@ public class VerifyingFile {
 		
 		
 		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
-            savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+            discardedBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
             Assert.that(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
@@ -235,7 +229,7 @@ public class VerifyingFile {
     
     public String dumpState() {
         return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
-            "\ndiscarded:"+savedCorruptBlocks+
+            "\ndiscarded:"+discardedBlocks+
         	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
     }
     
@@ -243,7 +237,18 @@ public class VerifyingFile {
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
-        return leaseWhiteHelper(null, DEFAULT_CHUNK_SIZE);
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing white, state: "+dumpState());
+        IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
+        freeBlocks.delete(leasedBlocks);
+        freeBlocks.delete(partialBlocks);
+        freeBlocks.delete(discardedBlocks);
+        freeBlocks.delete(pendingBlocks);
+        Interval ret = freeBlocks.removeFirst();
+        if (LOG.isDebugEnabled())
+            LOG.debug(" freeblocks: "+freeBlocks+" selected "+ret);
+        leaseBlock(ret);
+        return ret;
     }
     
     /**
@@ -252,7 +257,8 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(int chunkSize) 
       throws NoSuchElementException {
-        return leaseWhiteHelper(null, chunkSize);
+        Interval temp = leaseWhite();
+        return allignInterval(temp, chunkSize);
     }
     
     /**
@@ -262,7 +268,13 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
-        return leaseWhiteHelper(ranges, DEFAULT_CHUNK_SIZE);
+        ranges.delete(verifiedBlocks);
+        ranges.delete(leasedBlocks);
+        ranges.delete(partialBlocks);
+        ranges.delete(pendingBlocks);
+        Interval ret = ranges.removeFirst();
+        leaseBlock(ret);
+        return ret;
     }
     
     /**
@@ -272,7 +284,8 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize)
       throws NoSuchElementException {
-        return leaseWhiteHelper(ranges, chunkSize);
+        Interval temp = leaseWhite(ranges);
+        return allignInterval(temp, chunkSize);
     }
 
     /**
@@ -316,7 +329,7 @@ public class VerifyingFile {
         List l = new ArrayList();
         l.addAll(verifiedBlocks.getAllIntervalsAsList());
         l.addAll(partialBlocks.getAllIntervalsAsList());
-        l.addAll(savedCorruptBlocks.getAllIntervalsAsList());
+        l.addAll(discardedBlocks.getAllIntervalsAsList());
         l.addAll(pendingBlocks.getAllIntervalsAsList());
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = l.iterator();iter.hasNext();)
@@ -337,7 +350,7 @@ public class VerifyingFile {
     public synchronized int getBlockSize() {
         return verifiedBlocks.getSize() +
         	partialBlocks.getSize() +
-        	savedCorruptBlocks.getSize() +
+        	discardedBlocks.getSize() +
         	pendingBlocks.getSize();
     }
     
@@ -360,9 +373,9 @@ public class VerifyingFile {
      */
     public synchronized boolean isComplete() {
         if (hashTree != null)
-            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() == completedSize;
+            return verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
         else {
-            return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() + 
+            return verifiedBlocks.getSize() + discardedBlocks.getSize() + 
             partialBlocks.getSize()== completedSize;
         }
     }
@@ -402,7 +415,7 @@ public class VerifyingFile {
         return  completedSize - (verifiedBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
-                savedCorruptBlocks.getSize() +
+                discardedBlocks.getSize() +
                 pendingBlocks.getSize()); 
     }
     
@@ -423,66 +436,12 @@ public class VerifyingFile {
     }
     
     /////////////////////////private helpers//////////////////////////////
-    /**
-     * Determines which interval should be assigned next, leases that interval,
-     * and returns that interval.
-     * 
-     * @param availableRanges if ranges is non-null, the return value will be a chosen 
-     *      from within availableRanges
-     * @param chunkSize if greater than zero, the return value will end one byte before 
-     *      a chunkSize boundary and will be at most chunkSize bytes large.
-     * @return the leased interval
-     */
-    private synchronized Interval leaseWhiteHelper(IntervalSet availableRanges, long chunkSize) throws NoSuchElementException {
-        if (LOG.isDebugEnabled())
-            LOG.debug("leasing white, state: "+dumpState());
-      
-        // If ranges is null, make ranges represent the entire file
-        if (availableRanges == null)
-            availableRanges = IntervalSet.createSingletonSet(0, completedSize-1);
-        
-        // Figure out which blocks we still need to assign
-        IntervalSet neededBlocks = IntervalSet.createSingletonSet(0, completedSize-1);
-        neededBlocks.delete(verifiedBlocks);
-        neededBlocks.delete(leasedBlocks);
-        neededBlocks.delete(partialBlocks);
-        neededBlocks.delete(savedCorruptBlocks);
-        neededBlocks.delete(pendingBlocks);
-        /*
-        Interval ret = ranges.removeFirst();
-        if (LOG.isDebugEnabled())
-            LOG.debug(" freeblocks: "+ranges+" selected "+ret);
-        leaseBlock(ret);
-        if (chunkSize < 0)
-            return ret;
-        return alignInterval(ret, chunkSize);
-        */
-        
-        // Calculate previewLength and lastNeededByte
-        List neededBlockList = neededBlocks.getAllIntervalsAsList();
-        int neededIntervalCount = neededBlockList.size();
-        if (neededIntervalCount < 1)
-            throw new NoSuchElementException();
-        
-        long previewLength = ((Interval)neededBlockList.get(0)).low;
-        long lastNeededByte = ((Interval)neededBlockList.get(neededIntervalCount-1)).high;
-        
-        // Calculate the union of neededBlocks and availableBlocks
-        availableRanges.delete(neededBlocks.invert(completedSize-1));
-        
-        Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, 
-                lastNeededByte, chunkSize);
-        availableRanges.delete(ret);
-        leaseBlock(ret);
-        
-        return ret;
-    }
     
     /**
      * Fits an interval inside a chunk.  This ensures that the interval is never larger
      * than chunksize and finishes at exact chunk offset.
      */
-    private synchronized Interval alignInterval(Interval temp, int chunkSize) {
+    private synchronized Interval allignInterval(Interval temp, int chunkSize) {
         if (LOG.isDebugEnabled())
             LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
         
@@ -573,7 +532,7 @@ public class VerifyingFile {
                         verifiedBlocks.add(i);
                     else {
                         if(!discardBad)
-                            savedCorruptBlocks.add(i);
+                            discardedBlocks.add(i);
                         lostSize += (i.high - i.low + 1);
                     }
                 }

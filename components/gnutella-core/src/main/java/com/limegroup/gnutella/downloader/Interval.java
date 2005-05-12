@@ -14,16 +14,13 @@ public class Interval implements Serializable{
     public final int low;
     public final int high;
 
-    /** @requires low<=high 
-     * 
-     * Stub for making code 64-bit clean.
-     */
-    public Interval(long low, long high) {
+    /** @requires low<=high */
+    public Interval(int low, int high) {
         if(high < low)
             throw new IllegalArgumentException("low: " + low +
                                             ", high: " + high);
-        this.low=(int)low;
-        this.high=(int)high;
+        this.low=low;
+        this.high=high;
     }
     
     public Interval(int singleton) {
