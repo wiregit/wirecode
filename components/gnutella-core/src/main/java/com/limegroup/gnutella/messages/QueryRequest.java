@@ -1072,11 +1072,6 @@ public class QueryRequest extends Message implements Serializable{
 			throw new IllegalArgumentException("cannot create empty query");
 		}		
 
-		if((query == null || query.length() == 0) &&
-		   (richQuery == null || richQuery.length() == 0) &&
-		   (queryUrns == null || queryUrns.size() == 0)) {
-			throw new IllegalArgumentException("empty query");
-		}       
         if(query != null && query.length() > MAX_QUERY_LENGTH) {
             throw new IllegalArgumentException("query too big: " + query);
         }        
