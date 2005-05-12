@@ -8,35 +8,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.SystemUtils;
 
+/** 
+ * This SelectionStrategy uses 16 uniformly distributed download points in order to
+ * balance the need to minimize the number of Intervals in VerifyingFile (for a 
+ * small download.dat file) against the need for a uniform distribution of downloaded
+ * chunks over all hosts (to increase the availability of the rarest chunk).
+ */
 public class RandomDownloadStrategy implements SelectionStrategy {
     
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
-    
-    /**
-     *  The minimum number of bytes for a reasonable preview.
-     *  This is used as a goal for the random downloader code.
-     */
-    private static final int MIN_PREVIEW_BYTES = 1024 * 1024; //1 MB
-    
-    /**
-     *  The minimum fraction of bytes for a reasonable preview.
-     *  This is used as a goal for the random downloader code.
-     */
-    private static final float MIN_PREVIEW_FRACTION = 0.1f; // 10 percent of the file
-    
-    /**
-     *  Once this fraction of the file is previewable, we switch to a fully
-     *  random download strategy.
-     */
-    private static final float MAX_PREVIEW_FRACTION = 0.5f; // 50 percent of the file
-    
-    /**
-     * Number of milliseconds the user has to be idle before being considered idle.
-     * This factors into the download order strategy.
-     */
-    private static final int MIN_IDLE_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
     
     /**
      * A global pseudorandom number generator.  At least according to the Java 1.4.2 spec,
@@ -45,7 +26,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * We don't really care about values duplicated across threads, so don't bother
      * serializing access.
      */
-    private static final Random pseudoRandom = new Random();
+    protected static final Random pseudoRandom = new Random();
 
     /**
      * A list of the 16 "random" locations in the file from which the random downloader chooses.
@@ -56,116 +37,109 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      */
     private final long[] randomLocations = new long[16];
     
-    private RandomDownloadStrategy() {
-        super();
-    }
+    protected long completedSize;
     
-    public static SelectionStrategy create() {
-        return new RandomDownloadStrategy();
+    public RandomDownloadStrategy(long completedSize) {
+        super();
+        this.completedSize = completedSize;
     }
     
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long previewLength, long lastNeededByte, long fileSize, long blockSize) throws java.util.NoSuchElementException {
-      
-        // The lowest start location of an ideally matched interval.
-        // We could re-use previewLength, but the code is easier to read this way.
-        long lowerBound = previewLength;
+            long previewLength,
+            long lastNeededByte,
+            long blockSize) throws java.util.NoSuchElementException {
+        if (blockSize < 1)
+            throw new IllegalArgumentException("Block size cannot be "+blockSize);
         
-        // Perhaps the lower range should be random
-        int randomIndex = -1;
-        
-        if (SystemUtils.getIdleTime() > MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
-                || pseudoRandom.nextFloat() > getBiasProbability(previewLength, fileSize)) {
-            randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
-            // Lazy update of the random location
-            if (randomLocations[randomIndex] <= previewLength || randomLocations[randomIndex] > lastNeededByte) {
-                // If the "random" location is zero, it has never been initialized,
-                // and we should try to align it to with the Nth available fragment
-                if (randomLocations[randomIndex] == 0 && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
-                    randomLocations[randomIndex] = ((Interval)availableIntervals.getAllIntervalsAsList().get(randomIndex)).low; 
-                } else {
-                    // Make the random location somewhere between the first and last bytes we still need to assign
-                    randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
-                }
+        // Which random range should be extended?
+        int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
+            
+        // Lazy update of the random location
+        if (randomLocations[randomIndex] <= previewLength || randomLocations[randomIndex] > lastNeededByte) {
+            // If the "random" location is zero, it has never been initialized,
+            // and we should try to align it to with the Nth available fragment
+            if (randomLocations[randomIndex] == 0 && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
+                randomLocations[randomIndex] = ((Interval)availableIntervals.getAllIntervalsAsList().get(randomIndex)).low; 
+            } else {
+                // Make the random location somewhere between the first and last bytes we still need to assign
+                randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
             }
-            lowerBound = randomLocations[randomIndex];
         }
+        
+        // The lowest start location of an ideally matched interval.
+        long randomPoint = randomLocations[randomIndex];
        
         // The first properly aligned interval, returned in the case that
         // there are no aligned intervals available after lowerBound
-        Interval backupInterval = null;
+        Interval lastSuitableInterval = null;
         
         Iterator intervalIterator = availableIntervals.getAllIntervals();
-        // Get all of the ranges after a random place in the file
-        if (blockSize <= 0) {
-            // We're not picky about the block size or alignment.  This is the easy case
-            while (intervalIterator.hasNext()) {
-                Interval candidate = (Interval) intervalIterator.next();
-                if (candidate.low <= lowerBound)
-                    return candidate;
-                if (candidate.high <= lowerBound)
-                    return new Interval((int)lowerBound, candidate.high);
-                if (backupInterval == null)
-                    backupInterval = candidate;
+        // Get the first alligned range after a random place in the file
+    
+        while (intervalIterator.hasNext()) {
+            Interval candidate = (Interval) intervalIterator.next();
+            // Calculate the most useful low index for this range,
+            // where the primary criterion is bestLow >= randomPoint
+            // and lower bestLows are preferable (as a second criterion).
+            long bestLow = candidate.low;
+            if (bestLow > randomPoint && candidate.high <= randomPoint) {
+                bestLow = randomPoint;
             }
-        } else {
-            // We care about alignment and block size... this is a bit more complicated
-            while (intervalIterator.hasNext()) {
-                Interval candidate = (Interval) intervalIterator.next();
-                // Calculate the most useful low index for this range,
-                // where the primary criterion is bestLow >= lowerBound
-                // and lower bestLows are preferable.
-                long bestLow = candidate.low;
-                if (bestLow > lowerBound && candidate.high <= lowerBound) {
-                    // bestLow can be moved up
-                    bestLow = lowerBound;
+                
+            // Calculate what the high byte offset should be.
+            // This will be at most blockSize-1 bytes greater than bestLow
+            // Skip ahead one block
+            long bestHigh = bestLow+blockSize;
+            // Cut back to the aligned boundary
+            bestHigh -= bestHigh % blockSize;
+            // Step back one byte from the boundary
+            bestHigh -= 1;
+
+            // Is it after our random lower bound ?
+            if (bestLow >= randomPoint) {
+                // We've found our ideal location.  Log it and return
+                
+                // Log it
+                if (LOG.isDebugEnabled()) { 
+                    LOG.debug("Random download, index="+randomIndex+
+                            ", random location="+randomLocations[randomIndex]+
+                            ", range=["+bestLow+","+bestHigh+
+                            "] out of choices "+availableIntervals); 
                 }
                 
-                // Calculate what the high byte offset should be.
-                // This will be at most blockSize-1 bytes greater than bestLow
-                // Skip ahead one block
-                long alignedHigh = bestLow+blockSize;
-                // Cut back to the aligned boundary
-                alignedHigh -= alignedHigh % blockSize;
-                // Step back one byte from the boundary
-                alignedHigh -= 1;
-
-                // Is it after lowerBound ?
-                if (bestLow >= lowerBound) {
-                    // We've found our ideal location.  Log it and return
-                        
-                    // Log it
-                    if (LOG.isDebugEnabled()) {
-                        if (lowerBound > previewLength) {
-                            LOG.debug("Random download, index="+randomIndex+
-                                    ", random location="+randomLocations[randomIndex]+
-                                    ", range=["+bestLow+","+alignedHigh+
-                                    "] out of choices "+availableIntervals);
-                        } else {
-                            LOG.debug("Non-random download, range=["+bestLow+","+
-                                    alignedHigh+"] out of choices "+availableIntervals);
-                        }
-                    }
+                // return
+                if (candidate.high == bestHigh && candidate.low == bestLow) {
+                    return candidate;
+                }
+                if (bestHigh < candidate.high)
+                    return new Interval(bestLow, bestHigh);
+                return new Interval(bestLow,candidate.high);
+            } else {
+                // End as high as possible
+                bestHigh = randomPoint;
+                // Adjust bestHigh to be within the interval
+                if (bestHigh > candidate.high)
+                    bestHigh = candidate.high;
                 
-                    // return
-                    if (candidate.high == alignedHigh && candidate.low == bestLow)
-                        return candidate;
-                    return new Interval((int)bestLow, (int)(alignedHigh));
-                } else if (backupInterval == null){
-                    // Store the first backup 
-                    if (candidate.high == alignedHigh && candidate.low == bestLow) {
-                        backupInterval = candidate;
-                    } else {
-                            backupInterval = new Interval((int)bestLow, (int)alignedHigh);
-                    }
-                } // close of lowerBound check if-else code block
-            } // close of Iterator loop
-        }  // close of blockSize <= 0 if-else code block
+                // step the low point backward to the block boundary
+                bestLow = bestHigh-(bestHigh % blockSize);
+                // Adjust bestLow to be within the interval
+                // We already know bestLow <= bestHigh <= candidate.high
+                if (bestLow < candidate.low)
+                    bestLow = candidate.low;
+                
+                if (bestLow == candidate.low && bestHigh == candidate.high) {
+                    lastSuitableInterval = candidate;
+                } else {
+                    lastSuitableInterval = new Interval(bestLow, bestHigh);
+                }
+            } // close of lowerBound check if-else code block
+        } // close of Iterator loop
         
         // If we had found the ideal block, we would have returned from within one
         // of the Iterator loops.
         
-        if (backupInterval == null)
+        if (lastSuitableInterval == null)
             throw new NoSuchElementException();
         
         // The only way to get here is if we have selected a random lowerBound,
@@ -175,39 +149,17 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // Therefore, do not lazily update the random location here.
         
         // Log it
-        if (LOG.isDebugEnabled()) {
-                LOG.debug("Wrapping random download to beginning, index="+randomIndex+
-                        ", random location="+randomLocations[randomIndex]+
-                        ", range="+ backupInterval +
-                        " out of choices "+availableIntervals);
-        }
-        
-        return backupInterval;
+        LOG.debug("Picking last block before random download point, index="+
+                randomIndex+", random location="+
+                randomLocations[randomIndex]+
+                ", range="+ lastSuitableInterval +
+                " out of choices "+availableIntervals);
+        // return
+        return lastSuitableInterval;
     }
 
     
-    /**
-     * Calculates the probability that the next block assigned should be guaranteed to be from the beginning of the file.
-     * 
-     * This is calculated as a step function that is at 100% until max(MIN_PREVIEW_BYTES, MIN_PREVIEW_FRACTION * completedSize), 
-     * then drops down to 50% until MAX_PREVIEW_FRACTION of the file is downloaded.  
-     * Above MAX_PREVIEW_FRACTION, the function returns 0%, indicating
-     * that a fully random downloading strategy should be used.
-     * 
-     * @return the probability that the next chunk should be forced to be downloaded from the beginning of the file.
-     */
-    private float getBiasProbability(long previewBytesDownloaded, long fileSize) {
-        long goal = Math.max((long)MIN_PREVIEW_BYTES, (long)(MIN_PREVIEW_FRACTION * fileSize));
-        // If we don't have our goal yet, devote 100% of resources to extending the previewable length
-        if (previewBytesDownloaded < goal) 
-            return 1.0f;
-        
-        // If we have less than the cutoff (currently 50% of the file) 
-        if (previewBytesDownloaded < MAX_PREVIEW_FRACTION * fileSize)
-            return 0.5f;
-        
-        return 0.0f;
-    }
+    ///////////////////// Private Helper Methods /////////////////////////////////
     
     /**
      * Calculates a random block-aligned byte offset into the file, 
@@ -226,8 +178,11 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             throw new IndexOutOfBoundsException();
         if (minIndex < 0)
             throw new IndexOutOfBoundsException();
+        
         long minBlock = (minIndex+blockSize-1) / blockSize;
-        long maxBlock = (maxIndex) / blockSize;
+        // Block number maxIndex/blockSize will always result in the random
+        // selection wrapping, so maxBlock is one less than this value.
+        long maxBlock = (maxIndex / blockSize) - 1;
         
         // This will happen if the last block to assign is the 
         // last block of the file and the file is not an exact multiple of
@@ -240,5 +195,4 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // (nextLong() >>> 1) is a 63-bit pseudorandom positive long
         return blockSize * (minBlock + ((pseudoRandom.nextLong() >>> 1) % (maxBlock-minBlock+1)));
     }
-    
 }

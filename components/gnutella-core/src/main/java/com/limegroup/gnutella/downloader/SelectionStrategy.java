@@ -19,10 +19,14 @@ public interface SelectionStrategy {
      *      from availableIntervals, since availableIntervals may contain server-specific
      *      information.
      * @param fileSize the total length of the file being downloaded
-     * @param blockSize the maximum size of the returned Interval. The high end of
-     *      the returned interval will be one less than a multiple of blockSize.  Any 
-     *      values less than 1 will be ignored.
+     * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
+     *      be ignared.  An attempt will be made to make the high end of the interval one less
+     *      than a multiple of blockSize.  Any values less than 1 will generate IllegalArgumentExceptions.
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
+     * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public Interval pickAssignment(IntervalSet availableIntervals, long previewLength, long lastNeededByte, long fileSize, long blockSize) throws java.util.NoSuchElementException;
+    public Interval pickAssignment(IntervalSet availableIntervals, 
+            long previewLength,
+            long lastNeededBlock,
+            long blockSize) throws java.util.NoSuchElementException;
 }

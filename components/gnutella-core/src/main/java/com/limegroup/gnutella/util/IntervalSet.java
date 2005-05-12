@@ -42,7 +42,7 @@ public class IntervalSet {
      */
     public static IntervalSet createSingletonSet(long lowBound, long highBound) {
         IntervalSet ret = new IntervalSet();
-        ret.add(new Interval((int) lowBound, (int) highBound));
+        ret.add(new Interval(lowBound, highBound));
         return ret;
     }
     
@@ -213,13 +213,13 @@ public class IntervalSet {
             }
             //case b:
             if(low<=interval.high && interval.low < low) {
-                overlapBlocks.add(new Interval((int)low,
-                                           Math.min((int)high,interval.high)));
+                overlapBlocks.add(new Interval(low,
+                                           Math.min(high,interval.high)));
             }
             //case c:
             if(interval.low <= high && interval.high > high) {
-                overlapBlocks.add(new Interval(Math.max(interval.low,(int)low),
-                                               (int)high));
+                overlapBlocks.add(new Interval(Math.max(interval.low,low),
+                                               high));
             }
             //Note: There is one condition under which case b and c are both
             //true. In this case the same interval will be added twice. The

@@ -144,7 +144,7 @@ public class VerifyingFile {
      * If checkOverlap is true, will scan for overlap corruption.
      */
     public VerifyingFile(int completedSize) {
-        blockChooser = RandomDownloadStrategy.create();
+        blockChooser = SelectionStrategyFactory.getStrategyFor("", completedSize);
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
@@ -204,7 +204,7 @@ public class VerifyingFile {
         if (!isOpen())
             return;
 		
-		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
+		Interval intvl = new Interval(currPos,currPos+length-1);
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
@@ -243,7 +243,7 @@ public class VerifyingFile {
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
-        return leaseWhiteHelper(null, -1);
+        return leaseWhiteHelper(null, DEFAULT_CHUNK_SIZE);
     }
     
     /**
@@ -262,7 +262,7 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
-        return leaseWhiteHelper(ranges, -1);
+        return leaseWhiteHelper(ranges, DEFAULT_CHUNK_SIZE);
     }
     
     /**
@@ -455,23 +455,23 @@ public class VerifyingFile {
         leaseBlock(ret);
         if (chunkSize < 0)
             return ret;
-        return alignInterval(ret, (int) chunkSize);
+        return alignInterval(ret, chunkSize);
         */
         
-        
-        // Calculate previewLength and lastNeededBlock
+        // Calculate previewLength and lastNeededByte
         List neededBlockList = neededBlocks.getAllIntervalsAsList();
         int neededIntervalCount = neededBlockList.size();
         if (neededIntervalCount < 1)
             throw new NoSuchElementException();
         
         long previewLength = ((Interval)neededBlockList.get(0)).low;
-        long lastNeededBlock = ((Interval)neededBlockList.get(neededIntervalCount-1)).high;
+        long lastNeededByte = ((Interval)neededBlockList.get(neededIntervalCount-1)).high;
         
         // Calculate the union of neededBlocks and availableBlocks
         availableRanges.delete(neededBlocks.invert(completedSize-1));
         
-        Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, lastNeededBlock, completedSize, chunkSize);
+        Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, 
+                lastNeededByte, chunkSize);
         availableRanges.delete(ret);
         leaseBlock(ret);
         
