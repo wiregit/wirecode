@@ -88,11 +88,4 @@ public final class UISettings extends LimeProps {
 	 */
 	public static final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
 		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
-
-	/**
-	 * Setting for the horizontal divider location between the search input 
-	 * panel and the result/download tables.
-	 */
-	public static final IntSetting UI_SEARCH_DOWNLOAD_TAB_HORIZONTAL_DIVIDER_LOCATION =
-		FACTORY.createIntSetting("UI_SEARCH_DOWNLOAD_TAB_HORIZONTAL_DIVIDER_LOCATION", -1);
 }
