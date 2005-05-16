@@ -308,8 +308,9 @@ public class UDPService implements ReadWriteObserver {
 	    if (!isGUESSCapable()) {
             if (message instanceof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
-                if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr))
+                if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr)) {
                     _acceptedUnsolicitedIncoming = true;
+                }
                 _lastUnsolicitedIncomingTime = System.currentTimeMillis();
             }
             else if (message instanceof PingReply) {
@@ -351,9 +352,16 @@ public class UDPService implements ReadWriteObserver {
             return false;
             
 	    String host = addr.getAddress().getHostAddress();
-
-        return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()  ||
-               !RouterService.getConnectionManager().isConnectedTo(host);
+        
+        //  If addr is connected to us, then return false.  Otherwise (not connected), only return true if either:
+        //      1) the non-connected party is NOT private
+        //  OR
+        //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to true
+        
+        return  !RouterService.getConnectionManager().isConnectedTo(host)
+            && (!NetworkUtils.isPrivateAddress(addr.getAddress())
+            ||  !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
+             ;
     }
     
     /**
@@ -660,10 +668,11 @@ public class UDPService implements ReadWriteObserver {
                             public void run() {
                                 if ((_acceptedUnsolicitedIncoming && 
                                      (_lastUnsolicitedIncomingTime < currTime))
-                                    || (!_acceptedUnsolicitedIncoming))
+                                    || (!_acceptedUnsolicitedIncoming)) {
                                     // we set according to the message listener
                                     _acceptedUnsolicitedIncoming = 
                                         ml._gotIncoming;
+                                }
                                 mr.unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
