@@ -82,7 +82,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             // where the primary criterion is bestLow >= randomPoint
             // and lower bestLows are preferable (as a second criterion).
             long bestLow = candidate.low;
-            if (bestLow > randomPoint && candidate.high <= randomPoint) {
+            if (bestLow < randomPoint && candidate.high >= randomPoint) {
                 bestLow = randomPoint;
             }
                 
