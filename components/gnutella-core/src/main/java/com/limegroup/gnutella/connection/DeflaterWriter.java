@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-import java.util.zip.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.io.IOException;
+import java.util.zip.Deflater;
+
+import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.InterestWriteChannel;
+import com.limegroup.gnutella.io.WriteObserver;
 
 /**
  * A channel that deflates data written to it & writes the deflated

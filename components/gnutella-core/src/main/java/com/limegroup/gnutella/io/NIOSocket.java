@@ -158,6 +158,9 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /**
      * Sets the new WriteObserver.
      *
+     * If a ThrottleWriter is one of the ChannelWriters, the attachment
+     * of the ThrottleWriter is set to be this.
+     *
      * The deepest ChannelWriter in the chain has its source set to be
      * a new InterestWriteChannel, which will be used as the hub to receive
      * and forward interest events from/to the channel.

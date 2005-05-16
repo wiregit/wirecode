@@ -274,25 +274,29 @@ public class NIODispatcher implements Runnable {
      *
      * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
      * in the NIODispatch thread.
+     *
+     * Throttle is not moved to UNLOCKED because it is not cleared, and because the
+     * actions are all within this package, so we can guarantee that it doesn't
+     * deadlock.
      */
     private void addPendingItems() {
         synchronized(Q_LOCK) {
+            long now = System.currentTimeMillis();
+            for(int i = 0; i < THROTTLE.size(); i++)
+                ((Throttle)THROTTLE.get(i)).tick(now);
+
             UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
             UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
-            UNLOCKED.addAll(THROTTLE);
             REGISTER.clear();
             LATER.clear();
         }
         
         if(!UNLOCKED.isEmpty()) {
-            long now = System.currentTimeMillis();
             for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
                 Object item = i.next();
                 try {
-                    if(item instanceof Throttle) {
-                        ((Throttle)item).tick(now);
-                    } else if(item instanceof RegisterOp) {
+                    if(item instanceof RegisterOp) {
                         RegisterOp next = (RegisterOp)item;
                         try {
                             next.channel.register(selector, next.op, next.handler);

@@ -9,6 +9,9 @@ import org.apache.commons.logging.Log;
 
 /**
  * A writer that throttles data according to a throttle.
+ *
+ * To work with the Throttle, this uses an attachment (which must be the same as the
+ * attachment of the SelectionKey associated with the socket this is using).
  */
 public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
     
