@@ -7,7 +7,7 @@ import java.nio.channels.WritableByteChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.WriteObserver;
 
-class WriteBufferChannel implements InterestWriteChannel {
+public class WriteBufferChannel implements InterestWriteChannel {
     private ByteBuffer buffer;
     private boolean closed = false;
     private InterestWriteChannel channel;
@@ -75,6 +75,14 @@ class WriteBufferChannel implements InterestWriteChannel {
         this.closed = closed;
     }
     
+    public int written() {
+        return buffer.position();
+    }
+    
+    public int remaining() {
+        return buffer.remaining();
+    }
+    
     public ByteBuffer getBuffer() {
         return (ByteBuffer)buffer.flip();
     }
@@ -102,6 +110,8 @@ class WriteBufferChannel implements InterestWriteChannel {
     
     public boolean handleWrite() throws IOException {
         while(buffer.hasRemaining() && channel.write(buffer) > 0);
+        if(!buffer.hasRemaining())
+            channel.interest(this, false);
         return buffer.hasRemaining();
     }
     

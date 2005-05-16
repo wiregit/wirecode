@@ -17,6 +17,7 @@ import java.util.Set;
 
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
+import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.connection.*;
@@ -137,7 +138,7 @@ public class ManagedConnection extends Connection
     
     /** Non-blocking throttle for outgoing messages. */
     private final static Throttle _nbThrottle =
-        new Throttle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
+        new NBThrottle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
                                                             
     /** Blocking throttle for outgoing messages. */
     private final static BandwidthThrottle _throttle=

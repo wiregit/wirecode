@@ -83,7 +83,7 @@ public class NIODispatcher implements Runnable {
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
-    private final List /* of Throttle */ THROTTLE = new ArrayList();
+    private final List /* of NBThrottle */ THROTTLE = new ArrayList();
     
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
@@ -103,7 +103,8 @@ public class NIODispatcher implements Runnable {
 	}
 	
 	/** Adds a Throttle into the throttle requesting loop. */
-	public void addThrottle(Throttle t) {
+	// TODO: have some way to remove Throttles, or make these use WeakReferences
+	public void addThrottle(NBThrottle t) {
         synchronized(Q_LOCK) {
             THROTTLE.add(t);
         }
@@ -283,7 +284,7 @@ public class NIODispatcher implements Runnable {
         synchronized(Q_LOCK) {
             long now = System.currentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
-                ((Throttle)THROTTLE.get(i)).tick(now);
+                ((NBThrottle)THROTTLE.get(i)).tick(now);
 
             UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
             UNLOCKED.addAll(REGISTER);
@@ -321,7 +322,7 @@ public class NIODispatcher implements Runnable {
     private void readyThrottles(Collection keys) {
         synchronized(Q_LOCK) {
             for(int i = 0; i < THROTTLE.size(); i++)
-                ((Throttle)THROTTLE.get(i)).selectableKeys(keys);
+                ((NBThrottle)THROTTLE.get(i)).selectableKeys(keys);
         }
     }
     

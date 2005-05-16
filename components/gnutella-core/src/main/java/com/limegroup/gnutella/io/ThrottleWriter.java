@@ -98,6 +98,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     
     /**
      * Writes data to the chain.
+     *
+     * Only writes up to 'available' amount of data.
      */
     public int write(ByteBuffer buffer) throws IOException {
         InterestWriteChannel chain = channel;
