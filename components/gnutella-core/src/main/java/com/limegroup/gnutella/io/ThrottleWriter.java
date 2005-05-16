@@ -4,10 +4,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A writer that throttles data according to a throttle.
  */
 public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
+    
+    private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
+    
     
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel channel;
@@ -94,22 +100,23 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         InterestWriteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
+            
+        if(available == 0) {
+            if(buffer.hasRemaining())
+                wroteAll = false;
+            return 0;
+        }
 
         int priorLimit = buffer.limit();
         if(buffer.remaining() > available) {
-            System.out.println("had more data than can write: " + buffer.remaining() + ", av: " + available);
             buffer.limit(buffer.position() + available);
         }
             
         int wrote = 0;
         int totalWrote = 0;
         
-        System.out.println("remaining: " + buffer.remaining());
-        while(buffer.hasRemaining() && (wrote = channel.write(buffer)) > 0) {
-            System.out.println("wrote: " + wrote);
+        while(buffer.hasRemaining() && (wrote = channel.write(buffer)) > 0)
             totalWrote += wrote;
-        }
-        System.out.println("now remaining " + buffer.remaining());
                     
         available -= totalWrote;
         buffer.limit(priorLimit);
@@ -117,8 +124,6 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         // we wrote everything we could to this if the buffer is empty
         // or if the channel wouldn't accept any more data.
         wroteAll = !buffer.hasRemaining() || wrote == 0;
-
-        System.out.println("av: " + available + ", buffer: " + buffer);
         
         return totalWrote;
     }
@@ -152,7 +157,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         WriteObserver interested = observer;
             
         available = throttle.request(this, attachment);
-        wroteAll = true;
+        wroteAll = available != 0;
         try {
             chain.interest(this, false);
             if(available > 0 && interested != null)

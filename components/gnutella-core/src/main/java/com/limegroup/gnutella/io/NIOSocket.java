@@ -296,11 +296,13 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
                 
                 IOException x = storedException;
                 storedException = null;
-                if(x != null)
+                if(x != null) {
+                    shutdown();
                     throw x;
-                if(!isConnected())
+                } if(!isConnected()) {
+                    shutdown();
                     throw new SocketTimeoutException("couldn't connect in " + timeout + " milliseconds");
-                    
+                }   
             }
         }
         

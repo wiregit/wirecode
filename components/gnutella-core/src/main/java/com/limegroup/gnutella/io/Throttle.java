@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.io;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,10 +10,12 @@ import java.util.Iterator;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.CancelledKeyException;
 
-import com.limegroup.gnutella.util.IntWrapper;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * A throttle that can be applied to non-blocking reads & writes.
+ * This does not work correctly if the throttle is below 2KB/s.
  *
  * NIODispatcher maintains a list of all active Throttles.  As part
  * of every pending operation, NIODispatcher will 'tick' a Throttle.
@@ -62,13 +62,25 @@ import com.limegroup.gnutella.util.IntWrapper;
  */
 public class Throttle {
     
+    private static final Log LOG = LogFactory.getLog(Throttle.class);
+    
     /** The number of windows per second. */
     private static final int TICKS_PER_SECOND = 10;
     /** The number of milliseconds in each tick. */
     private static final int MILLIS_PER_TICK = 1000 / TICKS_PER_SECOND;
+    /** The minimum amount to allow a starved attachment. */
+    private static final int MINIMUM_FOR_STARVED = 150;
+    /** The minimum amount to allow for a hungry attachment. */
+    private static final int MINIMUM_FOR_HUNGRY = 50;
     
     /** Whether or not this throttle is for writing. (If false, it's for reading.) */
     private final boolean _write;
+    
+    /**
+     * Whether or not this is the first bandwidth spread after a tick.
+     * If it isn't, we don't give extra data to the hungry & starved fellows.
+     */
+    private boolean _initial;
     
     /** The amount that is available every tick. */
     private int _bytesPerTick;
@@ -81,7 +93,6 @@ public class Throttle {
     
     /** A lock for protecting requests/interested. */
     private final Object LOCK = new Object();
-    
     
     /**
      * A list of ThrottleListeners that are interested in bandwidthAvailable events.
@@ -113,11 +124,17 @@ public class Throttle {
      */
     private Map /* of Object (ThrottleListener.getAttachment()) */ ready = new HashMap();
     
+    /** The attachment that has the most ready ops. */
+    private Object starvedAttachment;
+    
+    /** The attachment that has the second most ready ops. */
+    private Object hungryAttachment;
+    
     /**
      * The total sum of interested parties values.
      * MUST BE EQUAL TO ready.values()'s getInt()'s summed.
      */
-    private int totalReadies = 0;
+    private double totalReadies = 0;
     
     /**
      * Constructs a new Throttle that is either for writing or reading.
@@ -133,29 +150,41 @@ public class Throttle {
      * Notification from the NIODispatcher that a bunch of keys are now selectable.
      */
     void selectableKeys(Collection /* of SelectionKey */ keys) {
-        System.out.println("Getting selectable keys");
-        synchronized(LOCK) {
-            if(!interested.isEmpty()) {
-                for(Iterator i = keys.iterator(); i.hasNext(); ) {
-                    SelectionKey key = (SelectionKey)i.next();
-                    try {
-                        if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
-                            Object att = key.attachment();
-                            if(interested.contains(att)) {
-                                IntWrapper value = (IntWrapper)ready.get(att);
-                                if(value == null) {
-                                    System.out.println("New interested ready: " + att);
-                                    value = new IntWrapper(1);
-                                    ready.put(att, value);
-                                } else {
-                                    System.out.println("Existing interested ready: " + att + ", at: " + value);
-                                    value.addInt(1);
+        // We do not need to lock interested because it is only modified on this thread.
+        if(!interested.isEmpty()) {
+            starvedAttachment = null;
+            hungryAttachment = null;
+            int starvedVal = -1;
+            int hungryVal = -1;
+            totalReadies = 0;
+            
+            for(Iterator i = keys.iterator(); i.hasNext(); ) {
+                SelectionKey key = (SelectionKey)i.next();
+                try {
+                    if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
+                        Object att = key.attachment();
+                        if(interested.contains(att)) {
+                            MutableInt value = (MutableInt)ready.get(att);
+                            if(value == null) {
+                                value = new MutableInt(1);
+                                ready.put(att, value);
+                            } else {
+                                value.x += 1;
+                            }
+                            totalReadies += value.x;
+                            
+                            if(_initial) {
+                                if(value.x > starvedVal) {
+                                    starvedAttachment = att;
+                                    starvedVal = value.x;
+                                } else if( value.x > hungryVal) {
+                                    hungryAttachment = att;
+                                    hungryVal = value.x;
                                 }
-                                totalReadies++;
                             }
                         }
-                    } catch(CancelledKeyException ignored) {}
-                }
+                    }
+                } catch(CancelledKeyException ignored) {}
             }
         }
     }
@@ -164,8 +193,7 @@ public class Throttle {
      * Interests this ThrottleListener in being notified when bandwidth is available.
      */
     void interest(ThrottleListener writer, Object attachment) {
-        System.out.println("Marking interest: " + attachment);
-        synchronized(LOCK) {
+        synchronized(LOCK) { // need to lock because interested is mutated elsewhere
             if(!interested.contains(attachment))
                 requests.add(writer);
         }
@@ -175,18 +203,23 @@ public class Throttle {
      * Requests some bytes to write.
      */
     int request(ThrottleListener writer, Object attachment) {
-        IntWrapper value = (IntWrapper)ready.get(attachment);
+        MutableInt value = (MutableInt)ready.get(attachment);
         if(value == null)
             throw new IllegalStateException("requesting without being ready.  attachment: " + attachment);
-            
-        int divisor = totalReadies / value.getInt();
+
         int ret = 0;
-        if(divisor != 0) {
-            ret = _available / divisor;
-            _available -= ret;
-        }
+
+        if(attachment == starvedAttachment) 
+            ret = Math.min(_available, MINIMUM_FOR_STARVED);
+        else if(attachment == hungryAttachment)
+            ret = Math.min(_available, MINIMUM_FOR_HUNGRY);
+            
+        double divisor = totalReadies / value.x;
+        if(divisor != 0)
+            ret = Math.max(ret, (int)Math.floor(_available / divisor));
         
-        System.out.println("allowing: " + attachment + " to have: " + ret + " .. tr: " + totalReadies + ", div: " + divisor + ", left: " + _available);
+        _available -= ret;
+        
         return ret; 
     }
     
@@ -196,17 +229,14 @@ public class Throttle {
      * If 'wroteAll' is true, the throttle wrote all the data it wanted to.
      */
     void release(int amount, boolean wroteAll, ThrottleListener writer, Object attachment) {
-        IntWrapper value = (IntWrapper)ready.get(attachment);
+        MutableInt value = (MutableInt)ready.get(attachment);
         if(value == null)
             throw new IllegalStateException("requesting without being ready.  attachment: " + attachment);
             
-        int val = value.getInt();
-        if(wroteAll) {
-            totalReadies -= val;
+        totalReadies -= value.x;
+        
+        if(wroteAll)
             ready.remove(attachment);
-        }
-
-        System.out.println("releasing " + attachment + ". am: " + amount + " wa: " + wroteAll + " total readies now: " + totalReadies);
         
         _available += amount;
         
@@ -221,22 +251,22 @@ public class Throttle {
      * Returns true if all requests were satisifed.  Returns false if there are
      * still some requests that require further tick notifications.
      */
-    public boolean tick(long currentTime) {
-        if(currentTime >= _nextTickTime && !requests.isEmpty())
-            spreadBandwidth(currentTime);
-        else
-            System.out.println("ignoring tick: " + currentTime);
-        return requests.isEmpty();
+    public void tick(long currentTime) {
+        if(currentTime >= _nextTickTime && !requests.isEmpty()) {
+            _available = _bytesPerTick;
+            _nextTickTime = currentTime + MILLIS_PER_TICK;
+            _initial = true;
+            spreadBandwidth();
+        } else if(_available > 0) {
+            _initial = false;
+            spreadBandwidth();
+        }
     }
     
     /**
      * Notifies all requestors that bandwidth is available.
      */
-    private void spreadBandwidth(long now) {
-        System.out.println("ticked: " + now + ", prior avail: " + _available + ", setting to: " + _bytesPerTick);
-        _available = _bytesPerTick;
-        _nextTickTime = now + MILLIS_PER_TICK;
-        
+    private void spreadBandwidth() {
         synchronized(LOCK) {
             for(Iterator i = requests.iterator(); i.hasNext(); ) {
                 ThrottleListener req = (ThrottleListener)i.next();
@@ -244,17 +274,22 @@ public class Throttle {
                 if(!req.bandwidthAvailable()) {
                     // make sure we clean up the readyset if it was there.
                     Object attachment = req.getAttachment();
-                    IntWrapper value = (IntWrapper)ready.remove(attachment);
+                    MutableInt value = (MutableInt)ready.remove(attachment);
                     if(value != null)
-                        totalReadies -= value.getInt();
+                        totalReadies -= value.x;
                     interested.remove(attachment);
-                    System.out.println("channel (" + attachment + ") closed, cleaning up.");
                 } else {
-                    System.out.println("Setting interest: " + req.getAttachment());
                     interested.add(req.getAttachment());
                 }
             }
             requests.clear();
+        }
+    }
+    
+    private static final class MutableInt {
+        private int x;
+        MutableInt(int x) {
+            this.x = x;
         }
     }
 }

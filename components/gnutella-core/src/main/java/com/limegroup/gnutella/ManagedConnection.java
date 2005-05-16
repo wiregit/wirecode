@@ -135,10 +135,11 @@ public class ManagedConnection extends Connection
     /** A lock for QRP activity on this connection */
     private final Object QRP_LOCK=new Object();
     
-    /** The Throttle that's used for writing over all connections. */
-    private final static Throttle _nbThrottle = new Throttle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
+    /** Non-blocking throttle for outgoing messages. */
+    private final static Throttle _nbThrottle =
+        new Throttle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
                                                             
-    /** Limits outgoing bandwidth for ALL connections. */
+    /** Blocking throttle for outgoing messages. */
     private final static BandwidthThrottle _throttle=
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
         
