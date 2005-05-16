@@ -89,6 +89,9 @@ public class ServerSideWhatIsNewTest
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        
+        //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
+        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SWARM);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
         SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
