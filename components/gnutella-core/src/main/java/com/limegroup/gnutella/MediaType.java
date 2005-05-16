@@ -62,11 +62,15 @@ public class MediaType implements Serializable {
             new String[] {
                 "html", "htm", "xhtml", "mht", "mhtml", "xml",
                 "txt", "ans", "asc", "diz", "eml",
-                "pdf", "ps", "eps", "epsf",
+                "pdf", "ps", "eps", "epsf", "dvi", 
                 "rtf", "wri", "doc", "mcw", "wps",
-                "xls", "wk1", "dif", "csv", "ppt",
+                "xls", "wk1", "dif", "csv", "ppt", "tsv",
                 "hlp", "chm", "lit", 
-                "tex", "texi", "latex", "info", "man"
+                "tex", "texi", "latex", "info", "man",
+                "wp", "wpd", "wp5", "wk3", "wk4", "shw", 
+                "sdd", "sdw", "sdp", "sdc",
+                "sxd", "sxw", "sxp", "sxc",
+                "abw", "kwd"
             });
             
     /**
@@ -78,7 +82,7 @@ public class MediaType implements Serializable {
                 "bin", "mdb", "sh", "csh", "awk", "pl",
                 "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
                 "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
-                "cue"
+                "cue", "iso", "jnlp", "rar", "sh"
             });
 
     /**
@@ -88,7 +92,8 @@ public class MediaType implements Serializable {
         new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
             new String[] {
                 "exe", "zip", "jar", "cab", "msi", "msp",
-                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue"
+                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", 
+                "iso", "jnlp"
             });            
         
     /**
@@ -106,13 +111,15 @@ public class MediaType implements Serializable {
     private static final MediaType TYPE_AUDIO =
         new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
-                "mp3", "mpa", "mp1", "mpga",
+                "mp3", "mpa", "mp1", "mpga", "mp2", 
                 "ra", "rm", "ram", "rmj",
                 "wma", "wav", "m4a", "m4p","mp4",
                 "lqt", "ogg", "med",
                 "aif", "aiff", "aifc",
-                "au", "snd", "s3m",
-                "mid", "midi", "rmi", "mod"
+                "au", "snd", "s3m", "aud", 
+                "mid", "midi", "rmi", "mod", "kar",
+                "ac3", "shn", "fla", "flac", "cda", 
+                "mka"
             });
         
     /**
@@ -122,12 +129,14 @@ public class MediaType implements Serializable {
         new MediaType(SCHEMA_VIDEO, VIDEO,
             new String[] {
                 "mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
-                "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v",
+                "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v", "mpgv", 
                 "vcd", "mp4", "dv", "dvd", "div", "divx", "dvx",
-                "smi", "smil", "rm", "ram", "rv",
+                "smi", "smil", "rm", "ram", "rv", "rmm", "rmvb", 
                 "avi", "asf", "asx", "wmv", "qt", "mov",
-                "fli", "flc", "flx",
-                "wml", "vrml", "swf", "dcr", "jve", "nsv"
+                "fli", "flc", "flx", "flv", 
+                "wml", "vrml", "swf", "dcr", "jve", "nsv", 
+                "mkv", "ogm", 
+                "cdg", "srt", "sub", "idx"
             });
         
     /**

@@ -19,6 +19,8 @@ public abstract class MetaData {
 	public static MetaData parse(File f) throws IOException {
 		if (LimeXMLUtils.isSupportedAudioFormat(f))
 			return AudioMetaData.parseAudioFile(f);
+		else if (LimeXMLUtils.isSupportedVideoFormat(f))
+			return VideoMetaData.parseVideoMetaData(f);
 		//TODO: add other media formats here
 		return null;
 	}

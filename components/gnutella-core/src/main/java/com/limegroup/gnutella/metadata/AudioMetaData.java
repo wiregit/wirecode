@@ -78,7 +78,9 @@ public abstract class AudioMetaData extends MetaData {
     	if (LimeXMLUtils.isMP3File(f))
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))
-    		return new OGGMetaData(f);
+			return new OGGMetaData(f);
+		if (LimeXMLUtils.isFLACFile(f))
+    		return new FLACMetaData(f);
     	if (LimeXMLUtils.isM4AFile(f))
     		return new M4AMetaData(f);
         if (LimeXMLUtils.isWMAFile(f))

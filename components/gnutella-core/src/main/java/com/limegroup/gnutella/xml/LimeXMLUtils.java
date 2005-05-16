@@ -299,7 +299,14 @@ public class LimeXMLUtils
         
         return retVal;
     }
-
+	
+	public static boolean isRIFFFile(File f) {
+		return f.getName().toLowerCase(Locale.US).endsWith(".avi");
+	}
+	
+	public static boolean isOGMFile(File f) {
+		return f.getName().toLowerCase(Locale.US).endsWith(".ogm");
+	}
 
     public static boolean isMP3File(File in) {
         boolean retVal = isMP3File(in.getName());        
@@ -321,7 +328,22 @@ public class LimeXMLUtils
         boolean retVal = isOGGFile(in.getName());        
         return retVal;
     }
-    
+
+    public static boolean isFLACFile(String in) {
+        boolean retVal = false;
+
+        in = in.toLowerCase(Locale.US);
+        if (in.endsWith(".flac") || in.endsWith(".fla"))
+            retVal = true;
+        
+        return retVal;
+    }
+
+	public static boolean isFLACFile(File in) {
+        boolean retVal = isFLACFile(in.getName());        
+        return retVal;
+    }
+	
     public static boolean isM4AFile(String in) {
         boolean retVal = false;
 
@@ -354,16 +376,16 @@ public class LimeXMLUtils
     
     
     public static boolean isSupportedAudioFormat(File file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file);
+    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
 
     public static boolean isSupportedAudioFormat(String file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file);
+    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
     
     //stub
     public static boolean isSupportedVideoFormat(File file) {
-    	return false;
+    	return isRIFFFile(file) || isOGMFile(file);
     }
     
     //stub

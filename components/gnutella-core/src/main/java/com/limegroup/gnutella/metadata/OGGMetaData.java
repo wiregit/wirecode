@@ -79,7 +79,7 @@ public class OGGMetaData extends AudioMetaData{
 			//oggs store the year in yyyy-mm-dd format
 			String year = safeQuery(DATE_TAG,comments[0]);
 			if (year.length()>4)
-				year = year.substring(4);
+				year = year.substring(0,4);
 			setYear(year);
 			
 			try {
