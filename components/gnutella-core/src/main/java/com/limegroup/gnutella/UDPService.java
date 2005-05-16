@@ -356,7 +356,7 @@ public class UDPService implements ReadWriteObserver {
         //  If addr is connected to us, then return false.  Otherwise (not connected), only return true if either:
         //      1) the non-connected party is NOT private
         //  OR
-        //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to true
+        //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         
         return  !RouterService.getConnectionManager().isConnectedTo(host)
             && (!NetworkUtils.isPrivateAddress(addr.getAddress())
