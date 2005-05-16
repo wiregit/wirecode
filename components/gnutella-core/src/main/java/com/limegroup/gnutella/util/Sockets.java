@@ -160,7 +160,7 @@ public class Sockets {
 		// version should be 0 but some socks proxys answer 4
 		int version = in.read();
 		if (version != 0x00 && version != 0x04) {
-			proxySocket.close();
+			IOUtils.close(proxySocket);
 			throw new IOException(
 				"Invalid version from socks proxy: "
 					+ version
@@ -170,7 +170,7 @@ public class Sockets {
 		// read the status, 0x5A is success
 		int status = in.read();
 		if (status != 0x5A) {
-			proxySocket.close();
+			IOUtils.close(proxySocket);
 			throw new IOException("Request rejected with status: " + status);
 		}
 
@@ -180,7 +180,7 @@ public class Sockets {
 		byte[] connectedHostAddress = new byte[4];
 		if (in.read(connectedHostPort) == -1
 			|| in.read(connectedHostAddress) == -1) {
-			proxySocket.close();
+            IOUtils.close(proxySocket);
 			throw new IOException("Connection failed");
 		}
 		proxySocket.setSoTimeout(0);
@@ -228,7 +228,7 @@ public class Sockets {
 
 		int version = in.read();
 		if (version != 0x05) {
-			proxySocket.close();
+            IOUtils.close(proxySocket);
 			throw new IOException(
 				"Invalid version from socks proxy: " + version + " expected 5");
 		}
@@ -251,7 +251,7 @@ public class Sockets {
 			// read version for auth protocol from proxy, expects 1
 			version = in.read();
 			if (version != 0x01) {
-				proxySocket.close();
+                IOUtils.close(proxySocket);
 				throw new IOException(
 					"Invalid version for authentication: "
 						+ version
@@ -261,7 +261,7 @@ public class Sockets {
 			// read status, 0 is success
 			int status = in.read();
 			if (status != 0x00) {
-				proxySocket.close();
+                IOUtils.close(proxySocket);
 				throw new IOException(
 					"Authentication failed with status: " + status);
 			}
@@ -281,14 +281,14 @@ public class Sockets {
 		// version should be 0x05
 		version = in.read();
 		if (version != 0x05) {
-			proxySocket.close();
+            IOUtils.close(proxySocket);
 			throw new IOException(
 				"Invalid version from socks proxy: " + version + " expected 5");
 		}
 		// read the status, 0x00 is success
 		int status = in.read();
 		if (status != 0x00) {
-			proxySocket.close();
+            IOUtils.close(proxySocket);
 			throw new IOException("Request rejected with status: " + status);
 		}
 
@@ -347,14 +347,18 @@ public class Sockets {
 		String line = reader.readLine();
         
 		// look for code 200
-		if (line==null || line.indexOf("200") == -1)
+		if (line==null || line.indexOf("200") == -1) {
+            IOUtils.close(proxySocket);
 			throw new IOException("HTTP connection failed");
+        }
 
 		// skip the rest of the response
 		while (!line.equals("")) {
 			line = reader.readLine();
-            if(line == null)
+            if(line == null) {
+                IOUtils.close(proxySocket);
                 throw new IOException("end of stream");
+            }
 		}
 
 		// we should be connected now
