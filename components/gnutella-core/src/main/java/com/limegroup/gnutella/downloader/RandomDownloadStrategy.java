@@ -40,6 +40,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      */
     private final long[] randomLocations = new long[16];
     
+    /** The size the download will be once completed. */
     protected long completedSize;
     
     public RandomDownloadStrategy(long completedSize) {
@@ -47,6 +48,28 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         this.completedSize = completedSize;
     }
     
+    /**
+     * Encapsulates an algorithm for deciding which block of a file to download next.  
+     * 
+     * For efficiency reasons attempts will be made to align the start and end of intervals
+     * to block boundaries.  However, there are no guarantees on alignment.
+     * 
+     * @param availableIntervals a representation of the set of 
+     *      bytes available for download from a given server
+     * @param previewLength the number of contiguous bytes from the 
+     *      beginning of the file that have already been assigned 
+     *      (and will presumably soon be available for preview)
+     * @param lastNeededByte all bytes after lastNeededByte have been assigned for
+     *      download.  Note that this information may not be availbable
+     *      from availableIntervals, since availableIntervals may contain server-specific
+     *      information.
+     * @param fileSize the total length of the file being downloaded
+     * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
+     *      be ignared.  An attempt will be made to make the high end of the interval one less
+     *      than a multiple of blockSize.  Any values less than 1 will generate IllegalArgumentExceptions.
+     * @return the Interval that should be assigned next, with a size of at most blockSize bytes
+     * @throws NoSuchElementException if passed an empty IntervalSet
+     */
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
             long previewLength,
             long lastNeededByte,
@@ -201,14 +224,16 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // partial block in our range
         long maxBlock = maxIndex / blockSize;
         
-        // This will happen if the last block to assign is the 
-        // last block of the file and the file is not an exact multiple of
-        // the block size ... just give back the minIndex
+        // This may happen if there is only one block available to be assigned. 
+        // ... just give back the minIndex
         if (minBlock >= maxBlock)
             return minIndex;
         
         // Generate a random blockNumber on the range [minBlock, maxBlock]
         // return blockSize * blockNumber
+        //
+        // Note that pseudoRandom.nextLong() & (-1L >>> 1) is a uniform distribution
+        // over all non-negative longs.
         return blockSize * (minBlock + ((pseudoRandom.nextLong() & (-1L >>> 1)) % (maxBlock-minBlock+1)));
     }
 }
