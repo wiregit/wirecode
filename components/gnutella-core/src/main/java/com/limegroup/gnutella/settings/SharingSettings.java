@@ -163,10 +163,16 @@ public class SharingSettings extends LimeProps {
 		"bz;tbz;mime;taz;ua;toast;lit;rpm;sxw;l6t";
     
     /**
-	 * The shared directories (an array of Files!).
+	 * The shared directories.
 	 */
     public static final FileArraySetting DIRECTORIES_TO_SHARE =
         FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+    
+    /**
+	 * The directories not to share.
+	 */
+    public static final FileArraySetting DIRECTORIES_NOT_TO_SHARE =
+        FACTORY.createFileArraySetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
     
     /**
      * Shared directories that should not be shared recursively.
@@ -192,6 +198,13 @@ public class SharingSettings extends LimeProps {
      * */
     public static final FileArraySetting SPECIAL_FILES_TO_SHARE =
         FACTORY.createFileArraySetting("SPECIAL_FILES_TO_SHARE", new File[0]);
+    
+    /**
+     * Individual files that should be not shared despite being located inside
+     * a shared directory.
+     * */
+    public static final FileArraySetting SPECIAL_FILES_NOT_TO_SHARE =
+        FACTORY.createFileArraySetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
     
     /**
 	 * File extensions that are shared.

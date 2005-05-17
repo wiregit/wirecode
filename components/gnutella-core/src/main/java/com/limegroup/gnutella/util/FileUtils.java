@@ -13,11 +13,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream; 
 import java.io.RandomAccessFile;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Arrays;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -25,29 +26,24 @@ import com.limegroup.gnutella.UploadManager;
 
 
 /**
- *  This class provides static functions to load/store the files.
+ * This class provides static functions to load/store the files.
  * @author Anurag Singla
  */
-public class FileUtils
-{
+public class FileUtils {
     /**
      * Writes the passed map to corresponding file
      * @param filename The name of the file to which to write the passed map
      * @param map The map to be stored
      */
     public static void writeMap(String filename, Map map)
-        throws IOException, ClassNotFoundException
-    {
+        throws IOException, ClassNotFoundException {
         ObjectOutputStream out = null;
-        try
-        {
+        try {
             //open the file
             out = new ObjectOutputStream(new FileOutputStream(filename));
             //write to the file
             out.writeObject(map);	
-        }
-        finally
-        {
+        } finally {
             //close the stream
             if(out != null)
                 out.close();
@@ -61,18 +57,14 @@ public class FileUtils
      * @return The map that was read
      */
     public static Map readMap(String filename)
-        throws IOException, ClassNotFoundException
-    {
+        throws IOException, ClassNotFoundException {
         ObjectInputStream in = null;
-        try
-        {
+        try {
             //open the file
             in = new ObjectInputStream(new FileInputStream(filename));
             //read and return the object
             return (Map)in.readObject();	
-        }
-        finally
-        {
+        } finally {
             //close the file
             if(in != null)
                 in.close();
@@ -358,4 +350,61 @@ public class FileUtils
         return data;
     }
 
+    /**
+     * @param directory Gets all files under this directory RECURSIVELY.
+     * @param filter If null, then returns all files.  Else, only returns files
+     * extensions in the filter array.
+     * @return An array of Files recursively obtained from the directory,
+     * according to the filter.
+     * 
+     */
+    public static File[] getFilesRecursive(File directory,
+                                           String[] filter) {
+        ArrayList dirs = new ArrayList();
+        // the return array of files...
+        ArrayList retFileArray = new ArrayList();
+        File[] retArray = new File[0];
+
+        // bootstrap the process
+        if (directory.exists() && directory.isDirectory())
+            dirs.add(directory);
+
+        // while i have dirs to process
+        while (dirs.size() > 0) {
+            File currDir = (File) dirs.remove(0);
+            String[] listedFiles = currDir.list();
+            for (int i = 0; (listedFiles != null) && (i < listedFiles.length); i++) {
+                File currFile = new File(currDir,listedFiles[i]);
+                if (currFile.isDirectory()) // to be dealt with later
+                    dirs.add(currFile);
+                else if (currFile.isFile()) { // we have a 'file'....
+                    boolean shouldAdd = false;
+                    if (filter == null)
+                        shouldAdd = true;
+                    else {
+                        String ext = FileUtils.getFileExtension(currFile);
+                        for (int j = 0; (j < filter.length) && (ext != null); j++) {
+                            if (ext.equalsIgnoreCase(filter[j]))  {
+                                shouldAdd = true;
+                                
+                                // don't keep looping through all filters --
+                                // one match is good enough
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldAdd)
+                        retFileArray.add(currFile);
+                }
+            }
+        }        
+
+        if (!retFileArray.isEmpty()) {
+            retArray = new File[retFileArray.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (File) retFileArray.get(i);
+        }
+
+        return retArray;
+    }
 }

@@ -671,8 +671,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
 
         //  assert that "shared" and "notShared" are not in a shared directory
-        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
-        assertFalse("notShared should not be shared in a shared directory", fman.isFileInSharedDirectories(notShared));
+        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
+        assertFalse("notShared should not be shared in a shared directory", fman.isFileInCompletelySharedDirectory(notShared));
         
         //  assert that "shared" is shared
         FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
@@ -724,7 +724,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertFalse("shared file should not have a shareable extension", valid);
         
         //  assert that "shared" is not in shared directories
-        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
+        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
         
         //  assert that "shared" is shared
         FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
@@ -742,31 +742,31 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	public void testGetFilesRecursive() throws Exception {
 	
-		File[] files = FileManager.getFilesRecursive(emptyDir, null);
+		File[] files = FileUtils.getFilesRecursive(emptyDir, null);
 		assertEquals("directory should have no files, only a subdir", 0, files.length);
 		
-		files = FileManager.getFilesRecursive(emptyNameDir, null);
+		files = FileUtils.getFilesRecursive(emptyNameDir, null);
 		assertEquals("directory should have 1 hidden file", 1, files.length);
 		
-		files = FileManager.getFilesRecursive(emptyNameDir, new String[] {
+		files = FileUtils.getFilesRecursive(emptyNameDir, new String[] {
 				"emptyname"});
 		assertEquals("directory should have no file matching extension \"emptyname\"",
 				0, files.length);
 		
-		files = FileManager.getFilesRecursive(emptyExtensionDir, null);
+		files = FileUtils.getFilesRecursive(emptyExtensionDir, null);
 		assertEquals("directory should have one file", 1, files.length);
 		
-		files = FileManager.getFilesRecursive(emptyExtensionDir, 
+		files = FileUtils.getFilesRecursive(emptyExtensionDir, 
 				new String[] { "" });
 		assertEquals("directory should have no file matching empty extension", 
 				0, files.length);
 		
 		// test if files in subdirectories are found too
-		files = FileManager.getFilesRecursive(recursiveDir, null);
+		files = FileUtils.getFilesRecursive(recursiveDir, null);
 		assertEquals("wrong number of files found", 2, files.length);
 		
 		// test if files in subdirectories are found with filter
-		files = FileManager.getFilesRecursive(recursiveDir, new String[] {
+		files = FileUtils.getFilesRecursive(recursiveDir, new String[] {
 				"unmatchedextension", "", "txt"});
 		assertEquals("wrong number of matching files found", 2, files.length);
 	}
@@ -781,7 +781,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
         
         //  assert that "shared" is in a shared directory
-        assertTrue("shared should be in a shared directory", fman.isFileInSharedDirectories(shared));
+        assertTrue("shared should be in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
 
         //  make sure "shared" is shared
         FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
