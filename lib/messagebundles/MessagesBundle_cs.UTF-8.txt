@@ -1,7 +1,7 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Czech - Czech Republik
-# Dummy resources bundle for missing translation.
+# Robert Stodůlka (http://linux-expert.net)
 ################################################################################
 LOCALE_LANGUAGE_CODE=cs
 LOCALE_LANGUAGE_NAME=Čeština
@@ -42,175 +42,175 @@ HAS_TIPS_OF_THE_DAY=false
 # Keys/value pairs for general strings that can be used in any components
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
-#? GENERAL_OK_BUTTON_LABEL=
+GENERAL_OK_BUTTON_LABEL=Ano
 #### GENERAL_OK_BUTTON_TIP=Apply Operation.
-#? GENERAL_OK_BUTTON_TIP=
+GENERAL_OK_BUTTON_TIP=Potvrdit změny.
 #### GENERAL_CANCEL_BUTTON_LABEL=Cancel
-#? GENERAL_CANCEL_BUTTON_LABEL=
+GENERAL_CANCEL_BUTTON_LABEL=Zrušit
 #### GENERAL_CANCEL_BUTTON_TIP=Cancel Operation.
-#? GENERAL_CANCEL_BUTTON_TIP=
+GENERAL_CANCEL_BUTTON_TIP=Zrušit operaci.
 #### GENERAL_APPLY_BUTTON_LABEL=Apply
-#? GENERAL_APPLY_BUTTON_LABEL=
+GENERAL_APPLY_BUTTON_LABEL=Použít
 #### GENERAL_APPLY_BUTTON_TIP=Apply Operation.
-#? GENERAL_APPLY_BUTTON_TIP=
+GENERAL_APPLY_BUTTON_TIP=Použít změnu.
 #### GENERAL_CLOSE_BUTTON_LABEL=Close
-#? GENERAL_CLOSE_BUTTON_LABEL=
+GENERAL_CLOSE_BUTTON_LABEL=Zavřít
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window.
-#? GENERAL_CLOSE_BUTTON_TIP=
+GENERAL_CLOSE_BUTTON_TIP=Zavřít okno.
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
-#? GENERAL_BACK_BUTTON_LABEL=
+GENERAL_BACK_BUTTON_LABEL=<< Zpět
 #### GENERAL_NEXT_BUTTON_LABEL=Next >>
-#? GENERAL_NEXT_BUTTON_LABEL=
+GENERAL_NEXT_BUTTON_LABEL=Další >>
 #### GENERAL_FINISH_BUTTON_LABEL=Finish
-#? GENERAL_FINISH_BUTTON_LABEL=
+GENERAL_FINISH_BUTTON_LABEL=Ukončit
 #### GENERAL_DEFAULT_BUTTON_LABEL=Use Default
-#? GENERAL_DEFAULT_BUTTON_LABEL=
+GENERAL_DEFAULT_BUTTON_LABEL=Přednadstavené hodnoty
 #### GENERAL_BROWSE_BUTTON_LABEL=Browse...
-#? GENERAL_BROWSE_BUTTON_LABEL=
+GENERAL_BROWSE_BUTTON_LABEL=Procházet...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
-#? GENERAL_BROWSE_HOST_LABEL=
+GENERAL_BROWSE_HOST_LABEL=Prohlížet hosta
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
-#? GENERAL_BROWSE_HOST_TIP=
+GENERAL_BROWSE_HOST_TIP=Nakouknout do všech souborů na vybraném počítači.
 
 ################################################################################
 # Keys/value pairs for right-click context menus.
 ################################################################################
 #### CONTEXT_MENU_UNDO=Undo
-#? CONTEXT_MENU_UNDO=
+CONTEXT_MENU_UNDO=Zpět
 #### CONTEXT_MENU_CUT=Cut
-#? CONTEXT_MENU_CUT=
+CONTEXT_MENU_CUT=Vystřihnout
 #### CONTEXT_MENU_COPY=Copy
-#? CONTEXT_MENU_COPY=
+CONTEXT_MENU_COPY=Kopírovat
 #### CONTEXT_MENU_PASTE=Paste
-#? CONTEXT_MENU_PASTE=
+CONTEXT_MENU_PASTE=Vložit
 #### CONTEXT_MENU_DELETE=Delete
-#? CONTEXT_MENU_DELETE=
+CONTEXT_MENU_DELETE=Vymazat
 #### CONTEXT_MENU_SELECT_ALL=Select All
-#? CONTEXT_MENU_SELECT_ALL=
+CONTEXT_MENU_SELECT_ALL=Vybrat vše
 
 #Options
 #### OPTIONS_BUTTONS_OK_LABEL=OK
-#? OPTIONS_BUTTONS_OK_LABEL=
+OPTIONS_BUTTONS_OK_LABEL=Ano
 #### OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
-#? OPTIONS_BUTTONS_OK_TIP=
+OPTIONS_BUTTONS_OK_TIP=Potvrdit změny a zavřít okno.
 #### OPTIONS_BUTTONS_CANCEL_LABEL=Cancel
-#? OPTIONS_BUTTONS_CANCEL_LABEL=
+OPTIONS_BUTTONS_CANCEL_LABEL=Zrušit
 #### OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-#? OPTIONS_BUTTONS_CANCEL_TIP=
+OPTIONS_BUTTONS_CANCEL_TIP=Zrušit změny a zavřít okno.
 #### OPTIONS_BUTTONS_APPLY_LABEL=Apply
-#? OPTIONS_BUTTONS_APPLY_LABEL=
+OPTIONS_BUTTONS_APPLY_LABEL=Použít
 #### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
-#? OPTIONS_BUTTONS_APPLY_TIP=
+OPTIONS_BUTTONS_APPLY_TIP=Použít změny.
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
-#? OPTIONS_RESTART_REQUIRED=
+OPTIONS_RESTART_REQUIRED=Změna se projeví po restartu LimeWire
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT=
+OPTIONS_BUTTON_REVERT_TO_DEFAULT=Obnovit původní nastavení
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=
+OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Vrátit všechna nastavení do původního.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
 ################################################################################
 #### YES=Yes
-#? YES=
+YES=Ano
 #### NO=No
-#? NO=
+NO=Ne
 
 ################################################################################
 # Key/value pairs for general informative terms
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
-#? GENERAL_AVERAGE_BANDWIDTH=
+GENERAL_AVERAGE_BANDWIDTH=Propustnost
 #### GENERAL_ALTERNATE_LOCATIONS=Valid Alternate Locations
-#? GENERAL_ALTERNATE_LOCATIONS=
+GENERAL_ALTERNATE_LOCATIONS=Platné další umístění
 #### GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid Alternate Locations
-#? GENERAL_INVALID_ALTERNATE_LOCATIONS=
+GENERAL_INVALID_ALTERNATE_LOCATIONS=Neplatné další umístění
 #### GENERAL_STARTED_ON=Started On
-#? GENERAL_STARTED_ON=
+GENERAL_STARTED_ON=Začalo
 #### GENERAL_FINISHED_ON=Finished On
-#? GENERAL_FINISHED_ON=
+GENERAL_FINISHED_ON=Ukončeno
 #### GENERAL_TIME_SPENT=Time Spent
-#? GENERAL_TIME_SPENT=
+GENERAL_TIME_SPENT=Konec časového limitu
 #### GENERAL_REVERT_TO_DEFAULT=Revert To Default
-#? GENERAL_REVERT_TO_DEFAULT=
+GENERAL_REVERT_TO_DEFAULT=Vráátit původní hodnoty
 #### GENERAL_MORE_OPTIONS=More Options
-#? GENERAL_MORE_OPTIONS=
+GENERAL_MORE_OPTIONS=Více možností
 
 # StatusLine, Statistics and GUIUtils
 #### GENERAL_UNIT_TERABYTES=TB
-#? GENERAL_UNIT_TERABYTES=
+GENERAL_UNIT_TERABYTES=TB
 #### GENERAL_UNIT_GIGABYTES=GB
-#? GENERAL_UNIT_GIGABYTES=
+GENERAL_UNIT_GIGABYTES=GB
 #### GENERAL_UNIT_MEGABYTES=MB
-#? GENERAL_UNIT_MEGABYTES=
+GENERAL_UNIT_MEGABYTES=MB
 #### GENERAL_UNIT_KILOBYTES=KB
-#? GENERAL_UNIT_KILOBYTES=
+GENERAL_UNIT_KILOBYTES=KB
 #### GENERAL_UNIT_KBPSEC=KB/s
-#? GENERAL_UNIT_KBPSEC=
+GENERAL_UNIT_KBPSEC=KB/s
 
 ################################################################################
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-#? APP_TITLE=
+APP_TITLE=Informace o sdílení
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
-#? ABOUT_TITLE=
+ABOUT_TITLE=O LimeWire
 #### ABOUT_LABEL_START=LimeWire
-#? ABOUT_LABEL_START=
+ABOUT_LABEL_START=LimeWire
 #### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
-#? ABOUT_LABEL_END=
+ABOUT_LABEL_END=Autorská práva (c)2000-2005 Lime Wire LLC
 #### ABOUT_LABEL_TITLE=About LimeWire
-#? ABOUT_LABEL_TITLE=
+ABOUT_LABEL_TITLE=O Limewire
 #### ABOUT_CREDITS_LABEL=Credits
-#? ABOUT_CREDITS_LABEL=
+ABOUT_CREDITS_LABEL=Kredity
 #### ABOUT_CREDITS_TIP=Display credits information about LimeWire.
-#? ABOUT_CREDITS_TIP=
+ABOUT_CREDITS_TIP=Ukázat kredit o LimeWire.
 #### ABOUT_NOTICE_LABEL=Notice
-#? ABOUT_NOTICE_LABEL=
+ABOUT_NOTICE_LABEL=Poznámka
 #### ABOUT_NOTICE_TIP=Display distribution and contact information.
-#? ABOUT_NOTICE_TIP=
+ABOUT_NOTICE_TIP=Ukázat distributora a kontaktní informace.
 #### ABOUT_LICENSE_LABEL=License
-#? ABOUT_LICENSE_LABEL=
+ABOUT_LICENSE_LABEL=Smlouva
 #### ABOUT_LICENSE_TIP=Display the license agreement about this software.
-#? ABOUT_LICENSE_TIP=
+ABOUT_LICENSE_TIP=Ukázát licenční podmínky o tomto softvéru.
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
-#? ABOUT_SCROLL_CHECK_BOX_LABEL=
+ABOUT_SCROLL_CHECK_BOX_LABEL=Automaticky posouvat
 #### ABOUT_BUTTON_TIP=Close the About Window
-#? ABOUT_BUTTON_TIP=
+ABOUT_BUTTON_TIP=Zavřít okno.
 
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
-#? TOTD_TITLE=
+TOTD_TITLE=Tip dne
 #### TOTD_INTRODUCTION=Did You Know...
-#? TOTD_INTRODUCTION=
+TOTD_INTRODUCTION=Víte, že...
 #### TOTD_SHOW_AT_STARTUP=Show Tips At Startup
-#? TOTD_SHOW_AT_STARTUP=
+TOTD_SHOW_AT_STARTUP=Ukazovat tipy při startu
 #### TOTD_NEXT=Next Tip
-#? TOTD_NEXT=
+TOTD_NEXT=Další tip
 #### TOTD_PREVIOUS=Previous Tip
-#? TOTD_PREVIOUS=
+TOTD_PREVIOUS=Předchozí tip
 #### TOTD_CLOSE=Close
-#? TOTD_CLOSE=
+TOTD_CLOSE=Zavřít
 
 ###################################################################
 # Key/value pairs for the Getting Started image
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
-#? GETTING_STARTED_TITLE=
+GETTING_STARTED_TITLE=Začít
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
-#? GETTING_STARTED_CONTENTS=
+GETTING_STARTED_CONTENTS=Když spustíte LimeWire, najděte textové pole nalevo, napište, co hledáte a klikněte na tlačítko "Hledej Šmudlo". Jestiže hledáte pouze jeden typ souborů z více (hudba, video, atd...), můžete nasměrovat vaše hledání použítí tlačítek dole pod txtovým polem.
 
 ###################################################################
 # Key/value pairs for the Going Pro image.
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
-#? GOING_PRO_TITLE=
+GOING_PRO_TITLE=Nejrošířenější sdílení soubourů na Yemi!
 #### GOING_PRO_DESCRIPTION=Better search results\nTurbo charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 #? GOING_PRO_DESCRIPTION=
 
@@ -218,101 +218,101 @@ HAS_TIPS_OF_THE_DAY=false
 # Key/value pairs for the Windows system tray
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
-#? TRAY_TOOLTIP=
+TRAY_TOOLTIP=LimeWire: Síť Gnutella
 #### TRAY_RESTORE_LABEL=Restore
-#? TRAY_RESTORE_LABEL=
+TRAY_RESTORE_LABEL=Vrátit
 #### TRAY_ABOUT_LABEL=About
-#? TRAY_ABOUT_LABEL=
+TRAY_ABOUT_LABEL=O nás
 #### TRAY_EXIT_LATER_LABEL=Exit after Transfers
-#? TRAY_EXIT_LATER_LABEL=
+TRAY_EXIT_LATER_LABEL=Ukončit po stažení
 #### TRAY_EXIT_LABEL=Exit
-#? TRAY_EXIT_LABEL=
+TRAY_EXIT_LABEL=Ukončit
 
 ################################################################################
 # Key/value pairs for the titles of the main windows
 ################################################################################
 #### SEARCH_TITLE=Search
-#? SEARCH_TITLE=
+SEARCH_TITLE=Hledej Šmudlo
 #### MONITOR_TITLE=Monitor
-#? MONITOR_TITLE=
+MONITOR_TITLE=Sledovat
 #### CONNECTIONS_TITLE=Connections
-#? CONNECTIONS_TITLE=
+CONNECTIONS_TITLE=Spojení
 #### LIBRARY_TITLE=Library
-#? LIBRARY_TITLE=
+LIBRARY_TITLE=Knihovna
 #### OPTIONS_TITLE=Options
-#? OPTIONS_TITLE=
+OPTIONS_TITLE=Možnosti
 #### STATS_TITLE=Statistics
-#? STATS_TITLE=
+STATS_TITLE=Statistiky
 #### DOWNLOAD_TITLE=Downloads
-#? DOWNLOAD_TITLE=
+DOWNLOAD_TITLE=Stahování
 #### UPLOAD_TITLE=Uploads
-#? UPLOAD_TITLE=
+UPLOAD_TITLE=Stahující ode mne
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
-#? SEARCH_TIP=
+SEARCH_TIP=Hledej a stahuj.
 #### MONITOR_TIP=View Searches and Uploads
-#? MONITOR_TIP=
+MONITOR_TIP=Ukázat Hledané a stahující.
 #### CONNECTIONS_TIP=Show Connections to Other Clients
-#? CONNECTIONS_TIP=
+CONNECTIONS_TIP=Ukazázat spojení ostatním klientům.
 #### LIBRARY_TIP=View Repository of Saved Files
-#? LIBRARY_TIP=
+LIBRARY_TIP=Ukázat umístění uložených souborů.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
 ################################################################################
 #### MENU_FILE_TITLE=File
-#? MENU_FILE_TITLE=
+MENU_FILE_TITLE=Soubor
 #### MENU_FILE_TITLE_MNEMONIC=F
-#? MENU_FILE_TITLE_MNEMONIC=
+MENU_FILE_TITLE_MNEMONIC=S
 #### MENU_FILE_CLOSE=Close
-#? MENU_FILE_CLOSE=
+MENU_FILE_CLOSE=Zavřít
 #### MENU_FILE_CLOSE_MNEMONIC=C
-#? MENU_FILE_CLOSE_MNEMONIC=
+MENU_FILE_CLOSE_MNEMONIC=Z
 #### MENU_FILE_CLOSE_ACCESSIBLE=Close the Program
-#? MENU_FILE_CLOSE_ACCESSIBLE=
+MENU_FILE_CLOSE_ACCESSIBLE=Ukončit program.
 #### MENU_FILE_QUIT=Quit
-#? MENU_FILE_QUIT=
+MENU_FILE_QUIT=Konec
 #### MENU_FILE_QUIT_MNEMONIC=Q
-#? MENU_FILE_QUIT_MNEMONIC=
+MENU_FILE_QUIT_MNEMONIC=K
 #### MENU_FILE_CONNECT=Connect
-#? MENU_FILE_CONNECT=
+MENU_FILE_CONNECT=Spojení
 #### MENU_FILE_CONNECT_MNEMONIC=O
-#? MENU_FILE_CONNECT_MNEMONIC=
+MENU_FILE_CONNECT_MNEMONIC=S
 #### MENU_FILE_CONNECT_ACCESSIBLE=Connect to the Network
-#? MENU_FILE_CONNECT_ACCESSIBLE=
+MENU_FILE_CONNECT_ACCESSIBLE=Připojit k síti.
 #### MENU_FILE_DISCONNECT=Disconnect
-#? MENU_FILE_DISCONNECT=
+MENU_FILE_DISCONNECT=Odpojit
 #### MENU_FILE_DISCONNECT_MNEMONIC=I
-#? MENU_FILE_DISCONNECT_MNEMONIC=
+MENU_FILE_DISCONNECT_MNEMONIC=D
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
-#? MENU_FILE_DISCONNECT_ACCESSIBLE=
+MENU_FILE_DISCONNECT_ACCESSIBLE=Odpojit od sítě.
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=Add Folder to Share
-#? MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=Přidat cestu ke sdílení
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
-#? MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Add a Folder that You Would Like to Share
-#? MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Přidat složku, kterou chcete sdílet.
 #### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
-#? MENU_FILE_LIBRARY_NEW_FOLDER=
+MENU_FILE_LIBRARY_NEW_FOLDER=Nová složka
 #### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-#? MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
 #### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
-#? MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Přidat složku do vybrané knihovny.
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER=Zastavit sdílení složky
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
-#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Zastavit sdilení ve vybrané složce knihovny.
 #### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
-#? MENU_FILE_LIBRARY_RENAME_FOLDER=
+MENU_FILE_LIBRARY_RENAME_FOLDER=Přejmenovat složku
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-#? MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=
+MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
-#? MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Přejmenovat složku ve vybrané knihovně.
 #### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
 #? MENU_FILE_LIBRARY_LAUNCH_FILES=
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
@@ -465,9 +465,9 @@ HAS_TIPS_OF_THE_DAY=false
 #### MENU_RESOURCES_TITLE_MNEMONIC=R
 #? MENU_RESOURCES_TITLE_MNEMONIC=
 #### MENU_RESOURCES_PRO=LimeWire PRO
-#? MENU_RESOURCES_PRO=
+MENU_RESOURCES_PRO=LimeWire PRO
 #### MENU_RESOURCES_PRO_MNEMONIC=P
-#? MENU_RESOURCES_PRO_MNEMONIC=
+MENU_RESOURCES_PRO_MNEMONIC=P
 #### MENU_RESOURCES_PRO_ACCESSIBLE=Display the LimeWire PRO Website
 #? MENU_RESOURCES_PRO_ACCESSIBLE=
 
