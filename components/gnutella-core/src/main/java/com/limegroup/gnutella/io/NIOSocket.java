@@ -331,6 +331,10 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         return socket.getLocalSocketAddress();
     }
     
+    public InetAddress getLocalAddress() {
+        return socket.getLocalAddress();
+    }
+    
     public boolean getOOBInline() throws SocketException {
         return socket.getOOBInline();
     }
