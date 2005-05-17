@@ -135,7 +135,7 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
      */
     public void testRandomNumberWraps() throws Exception {
         // corner case of first block
-        testRandomNumberWraps(0, 0, blockSize*107+4, 0);
+        testRandomNumberWraps(0, 0, blockSize*107+4, 972);
         // corner case of last block
         testRandomNumberWraps(fileSize/blockSize, 2000, fileSize, 123);
         // And some arbitrary tests, keeping in mind availableBlocks
