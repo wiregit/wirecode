@@ -97,13 +97,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             
         // Lazy update of the random location
-        if (randomLocations[randomIndex] < previewLength || 
-                randomLocations[randomIndex] > lastNeededByte ||
-                randomLocations[randomIndex] == 0) {
-            // If the "random" location is zero, it has never been initialized,
-            // and we should try to align it to with the Nth available fragment
-            if (randomLocations[randomIndex] == 0
-                    && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
+        if (randomLocations[randomIndex] == 0) {
+            // If the "random" location is zero, it has never been initialized
+            // or will point to the first block and then be randomly updated
+            // next time around, after the first block has been assigned.
+            // We should try to align it to with the Nth available fragment
+            if (availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
                 randomLocations[randomIndex] = ((Interval) availableIntervals
                         .getAllIntervalsAsList().get(randomIndex)).low;
 
@@ -112,13 +111,18 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 // Note that if completedSize <= blockSize, it's a moot point as
                 // there's only one block to pick.
                 if (randomLocations[randomIndex] == 0
-                        && pseudoRandom.nextFloat() > ((float) blockSize)/ completedSize)
-                    randomLocations[randomIndex] = getRandomLocation(previewLength, 
+                        && pseudoRandom.nextFloat() > ((float) blockSize)/completedSize)
+                    randomLocations[randomIndex] = getRandomLocation(previewLength,
                             lastNeededByte, blockSize);
             } else {
-                // Make the random location somewhere between the first and last bytes we still need to assign
-                randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
+                // Definitely uninitialized, so initialize
+                randomLocations[randomIndex] = getRandomLocation(previewLength,
+                        lastNeededByte, blockSize);
             }
+        } else if (randomLocations[randomIndex] < previewLength || 
+                randomLocations[randomIndex] > lastNeededByte) {
+            // Make the random location somewhere between the first and last bytes we still need to assign
+            randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
         }
         
         // The lowest start location of an ideally matched interval.
