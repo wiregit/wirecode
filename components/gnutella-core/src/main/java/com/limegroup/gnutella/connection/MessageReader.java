@@ -151,11 +151,13 @@ public class MessageReader implements ChannelReadObserver {
     /** 
      * Informs the receiver that the message is shutdown.
      */
-    public synchronized void shutdown() {
-        if(shutdown)
-            return;
-            
-        shutdown = true;
+    public void shutdown() {
+        synchronized(this) {
+            if(shutdown)
+                return;
+                
+            shutdown = true;
+        }
         receiver.messagingClosed();
     }
     

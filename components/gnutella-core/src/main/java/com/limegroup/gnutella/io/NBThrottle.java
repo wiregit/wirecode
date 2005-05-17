@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
  */
 public class NBThrottle implements Throttle {
     
-    private static final Log LOG = LogFactory.getLog(Throttle.class);
+    private static final Log LOG = LogFactory.getLog(NBThrottle.class);
     
     /** The number of windows per second. */
     private static final int TICKS_PER_SECOND = 10;
@@ -113,7 +113,7 @@ public class NBThrottle implements Throttle {
      * in the ready set iff the attachment was in this interested set.  Objects
      * are removed from the set after requesting some space.
      */
-    private Set /* of Object (ThrottleListener.getAttachment()) */ interested = new HashSet();
+    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ interested = new HashMap();
     
     /**
      * Attachments that are ready-op'd.
@@ -151,40 +151,62 @@ public class NBThrottle implements Throttle {
      */
     void selectableKeys(Collection /* of SelectionKey */ keys) {
         // We do not need to lock interested because it is only modified on this thread.
-        if(!interested.isEmpty()) {
-            starvedAttachment = null;
-            hungryAttachment = null;
-            int starvedVal = -1;
-            int hungryVal = -1;
-            totalReadies = 0;
-            
-            for(Iterator i = keys.iterator(); i.hasNext(); ) {
-                SelectionKey key = (SelectionKey)i.next();
-                try {
-                    if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
-                        Object att = key.attachment();
-                        if(interested.contains(att)) {
-                            MutableInt value = (MutableInt)ready.get(att);
-                            if(value == null) {
-                                value = new MutableInt(1);
-                                ready.put(att, value);
-                            } else {
-                                value.x += 1;
-                            }
-                            totalReadies += value.x;
-                            
-                            if(_initial) {
-                                if(value.x > starvedVal) {
-                                    starvedAttachment = att;
-                                    starvedVal = value.x;
-                                } else if( value.x > hungryVal) {
-                                    hungryAttachment = att;
-                                    hungryVal = value.x;
+        synchronized(LOCK) {
+            if(!interested.isEmpty()) {
+                starvedAttachment = null;
+                hungryAttachment = null;
+                int starvedVal = -1;
+                int hungryVal = -1;
+                totalReadies = 0;
+                Set currentReady = new HashSet();
+                
+                for(Iterator i = keys.iterator(); i.hasNext(); ) {
+                    SelectionKey key = (SelectionKey)i.next();
+                    try {
+                        if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
+                            Object att = key.attachment();
+                            currentReady.add(att);
+                            if(interested.remove(att) != null) {
+                                MutableInt value = (MutableInt)ready.get(att);
+                                if(value == null) {
+                                    value = new MutableInt(1);
+                                    ready.put(att, value);
+                                } else {
+                                    value.x += 1;
+                                }
+                                totalReadies += value.x;
+                                LOG.trace("Ready (" + value.x + "): " + att);
+                                
+                                if(_initial) {
+                                    if(value.x > starvedVal) {
+                                        starvedAttachment = att;
+                                        starvedVal = value.x;
+                                    } else if( value.x > hungryVal) {
+                                        hungryAttachment = att;
+                                        hungryVal = value.x;
+                                    }
                                 }
                             }
                         }
+                    } catch(CancelledKeyException ignored) {}
+                }
+                
+                for(Iterator i = interested.entrySet().iterator(); i.hasNext(); ) {
+                    Map.Entry next = (Map.Entry)i.next();
+                    if(!((ThrottleListener)next.getValue()).isOpen()) {
+                        LOG.trace("Removing closed but interested party: " + next.getKey());
+                        i.remove();
+                    } else {
+                        LOG.trace("Interested but not ready: " + next.getKey());
                     }
-                } catch(CancelledKeyException ignored) {}
+                }
+                
+                Set oldReady = new HashSet(ready.keySet());
+                oldReady.removeAll(currentReady);
+                LOG.trace("Was ready, but not ready now (" + oldReady.size() + "): " + oldReady);
+                    
+                
+                LOG.trace("Starting new cycle.  Ready: " + ready.size());
             }
         }
     }
@@ -194,7 +216,7 @@ public class NBThrottle implements Throttle {
      */
     public void interest(ThrottleListener writer, Object attachment) {
         synchronized(LOCK) { // need to lock because interested is mutated elsewhere
-            if(!interested.contains(attachment))
+            if(!interested.containsKey(attachment))
                 requests.add(writer);
         }
     }
@@ -220,6 +242,8 @@ public class NBThrottle implements Throttle {
         
         _available -= ret;
         
+        LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
+        
         return ret; 
     }
     
@@ -239,10 +263,8 @@ public class NBThrottle implements Throttle {
             ready.remove(attachment);
         
         _available += amount;
-        
-        synchronized(LOCK) {
-            interested.remove(attachment);
-        }
+
+        LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
     /**
@@ -274,12 +296,10 @@ public class NBThrottle implements Throttle {
                 if(!req.bandwidthAvailable()) {
                     // make sure we clean up the readyset if it was there.
                     Object attachment = req.getAttachment();
-                    MutableInt value = (MutableInt)ready.remove(attachment);
-                    if(value != null)
-                        totalReadies -= value.x;
+                    ready.remove(attachment);
                     interested.remove(attachment);
                 } else {
-                    interested.add(req.getAttachment());
+                    interested.put(req.getAttachment(), req);
                 }
             }
             requests.clear();

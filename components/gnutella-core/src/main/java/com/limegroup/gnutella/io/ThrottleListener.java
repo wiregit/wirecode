@@ -13,4 +13,7 @@ interface ThrottleListener {
     
     /** Notifies the listener that bandwidth is available & interest should be registered */
     public boolean bandwidthAvailable();
+    
+    /** Determines if the listener is still open. */
+    public boolean isOpen();
 }

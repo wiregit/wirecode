@@ -76,7 +76,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     public void interest(WriteObserver observer, boolean status) {
         if(status) {
             this.observer = observer;
-            throttle.interest(this, attachment);
+            if(channel != null)
+                throttle.interest(this, attachment);
         } else {
             this.observer = null;
         }
