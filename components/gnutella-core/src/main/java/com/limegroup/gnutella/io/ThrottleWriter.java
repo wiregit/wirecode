@@ -163,21 +163,29 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         WriteObserver interested = observer;
             
         available = throttle.request(this, attachment);
-        wroteAll = available != 0;
-        try {
-            chain.interest(this, false);
-            if(available > 0 && interested != null)
-                interested.handleWrite();
-        } finally {
-            throttle.release(available, wroteAll, this, attachment);
-        }
-        
-        interested = observer; // re-get it, since observer may have changed interest.
-        if(interested != null) {
-            throttle.interest(this, attachment);
-            return true;
+        // If nothing is available, DO NOT CHANGE INTEREST WITHOUT
+        // TRYING TO WRITE.  Otherwise, because of a bug(?) in selecting,
+        // we will not be immediately notified again that data can be
+        // written.  If we leave the interest alone then we will be
+        // notified again.
+        if(available != 0) {
+            wroteAll = true;
+            try {
+                chain.interest(this, false);
+                if(interested != null)
+                    interested.handleWrite();
+            } finally {
+                throttle.release(available, wroteAll, this, attachment);
+            }
+            interested = observer; // re-get it, since observer may have changed interest.
+            if(interested != null) {
+                throttle.interest(this, attachment);
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            return true;
         }
     }
     

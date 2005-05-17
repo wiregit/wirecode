@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -113,7 +114,7 @@ public class NBThrottle implements Throttle {
      * in the ready set iff the attachment was in this interested set.  Objects
      * are removed from the set after requesting some space.
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ interested = new HashMap();
+    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ interested = new WeakHashMap();
     
     /**
      * Attachments that are ready-op'd.
@@ -122,7 +123,7 @@ public class NBThrottle implements Throttle {
      * When someone requests available data for writing, we see how many
      * ops are ready & divide the bandwidth among them all.
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) */ ready = new HashMap();
+    private Map /* of Object (ThrottleListener.getAttachment()) */ ready = new WeakHashMap();
     
     /** The attachment that has the most ready ops. */
     private Object starvedAttachment;
@@ -243,6 +244,15 @@ public class NBThrottle implements Throttle {
         _available -= ret;
         
         LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
+        
+        // if this can't write anything this time, leave its interest for the future.
+        // This is required because of a bug(?) that does not notify us about the same
+        // write availability if we do not act upon it the first time.
+        if(ret == 0) {
+            synchronized(LOCK) {
+                interested.put(attachment, writer);
+            }
+        }
         
         return ret; 
     }
