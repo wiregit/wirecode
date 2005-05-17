@@ -10,10 +10,19 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.util.IntervalSet;
 
 /** 
- * This SelectionStrategy uses 16 uniformly distributed download points in order to
- * balance the need to minimize the number of Intervals in VerifyingFile (for a 
- * small download.dat file) against the need for a uniform distribution of downloaded
- * chunks over all hosts (to increase the availability of the rarest chunk).
+ * This SelectionStrategy uses 16 pseudorandom locations (offsets into the file), 
+ * pseudorandomly selects one of the 16 offsets, and downloads the first available 
+ * aligned chunk after the offset.  This balances the need to minimize the number 
+ * of Intervals in VerifyingFile (for a small download.dat file) against the need
+ * for a uniform distribution of downloaded chunks over all hosts (to increase the 
+ * availability of the rarest chunk).
+ * 
+ * For efficiency, the random offsets are aligned to chunk boundaries.  Changing
+ * the chunk size does not, however, cause any random locations to be re-calculated.
+ * 
+ * Random locations are replaced with new random locations only when they cease to 
+ * fall between previewLength and lastNeededByte.
+ * 
  */
 public class RandomDownloadStrategy implements SelectionStrategy {
     
@@ -49,10 +58,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     }
     
     /**
-     * Encapsulates an algorithm for deciding which block of a file to download next.  
+     * Encapsulates a pseudorandom uniformly distributed algorithm for deciding which block of 
+     * a file to download next.
      * 
      * For efficiency reasons attempts will be made to align the start and end of intervals
      * to block boundaries.  However, there are no guarantees on alignment.
+     * 
      * 
      * @param availableIntervals a representation of the set of 
      *      bytes available for download from a given server
@@ -76,13 +87,19 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             long blockSize) throws java.util.NoSuchElementException {
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
-        
+        if (previewLength < 0)
+            throw new IllegalArgumentException("Preview length must be >= 0, "+previewLength+"<0");
+        if (previewLength > lastNeededByte)
+            throw new IllegalArgumentException("Preview length greater than last needed byte "+
+                    previewLength+">"+lastNeededByte);
+            
         // Which random range should be extended?
         int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             
         // Lazy update of the random location
-        if (randomLocations[randomIndex] <= previewLength || 
-                randomLocations[randomIndex] > lastNeededByte) {
+        if (randomLocations[randomIndex] < previewLength || 
+                randomLocations[randomIndex] > lastNeededByte ||
+                randomLocations[randomIndex] == 0) {
             // If the "random" location is zero, it has never been initialized,
             // and we should try to align it to with the Nth available fragment
             if (randomLocations[randomIndex] == 0
@@ -153,23 +170,22 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                     return new Interval(bestLow, bestHigh);
                 return new Interval(bestLow,candidate.high);
             } else {
-                // End as high as possible
-                bestHigh = randomPoint;
-                // Adjust bestHigh to be within the interval
-                if (bestHigh > candidate.high)
-                    bestHigh = candidate.high;
+                // If randomPoint < candidate.high, then earlier code would
+                // have stepped bestLow >= randomPoint, and we would have
+                // returned.  Therefore, candidate.high is now our best
+                // high point.
                 
                 // step the low point backward to the block boundary
-                bestLow = bestHigh-(bestHigh % blockSize);
+                bestLow = candidate.high-(candidate.high % blockSize);
                 // Adjust bestLow to be within the interval
                 // We already know bestLow <= bestHigh <= candidate.high
                 if (bestLow < candidate.low)
                     bestLow = candidate.low;
                 
-                if (bestLow == candidate.low && bestHigh == candidate.high) {
+                if (bestLow == candidate.low) {
                     lastSuitableInterval = candidate;
                 } else {
-                    lastSuitableInterval = new Interval(bestLow, bestHigh);
+                    lastSuitableInterval = new Interval(bestLow, candidate.high);
                 }
             } // close of lowerBound check if-else code block
         } // close of Iterator loop
@@ -212,11 +228,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * even for several terabyte files with chunk sizes of 1024 bytes.
      */
     private long getRandomLocation(long minIndex, long maxIndex, long blockSize) {
-        if (minIndex > maxIndex)
-            throw new IndexOutOfBoundsException();
-        if (minIndex < 0)
-            throw new IndexOutOfBoundsException();
-        
         // If minIndex is in the middle of a block, include the
         // beginning of that block.
         long minBlock = minIndex / blockSize;
@@ -227,7 +238,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // This may happen if there is only one block available to be assigned. 
         // ... just give back the minIndex
         if (minBlock >= maxBlock)
-            return minIndex;
+            return minIndex;  //No need to align the last partial block
         
         // Generate a random blockNumber on the range [minBlock, maxBlock]
         // return blockSize * blockNumber
