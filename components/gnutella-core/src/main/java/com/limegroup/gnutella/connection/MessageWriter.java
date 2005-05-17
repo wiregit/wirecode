@@ -164,7 +164,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             }
 
             // write.
-            while(buffer.hasRemaining() && channel.write(buffer) > 0);
+            channel.write(buffer);
             
             // if we couldn't write everything, exit.
             if(buffer.hasRemaining())

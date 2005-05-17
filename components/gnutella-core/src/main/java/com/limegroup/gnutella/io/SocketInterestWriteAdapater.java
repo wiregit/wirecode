@@ -55,7 +55,7 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
      */
     public boolean handleWrite() throws IOException {
         WriteObserver chain = interested;
-        if(chain != null)
+        if(chain != null) 
             return chain.handleWrite();
         else
             return false;

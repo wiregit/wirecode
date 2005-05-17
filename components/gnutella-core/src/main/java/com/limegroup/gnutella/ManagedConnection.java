@@ -579,10 +579,12 @@ public class ManagedConnection extends Connection
 		    
 		    if(isWriteDeflated()) {
 		        DeflaterWriter deflater = new DeflaterWriter(_deflater);
-		        writer = deflater;
 		        messager.setWriteChannel(deflater);
+                writer = deflater;
             }
-            
+            DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
+            writer.setWriteChannel(delayer);
+            writer = delayer;
             writer.setWriteChannel(new ThrottleWriter(_nbThrottle));
 		    
 		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
