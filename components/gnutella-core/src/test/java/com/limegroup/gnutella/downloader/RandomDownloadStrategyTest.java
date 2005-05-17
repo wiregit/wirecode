@@ -111,6 +111,31 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
                 expectation);
     }
     
+    /** Tests lazy updating of randomLocations */
+    public void testLazyLocationUpdates() {
+        // Randomly select the last block, and then the 7th
+        long[] randomLocations = {fileSize/blockSize, 7};
+        prng.setLongs(randomLocations);
+        int[] randomIndexes = {11,11};
+        prng.setInts(randomIndexes);
+        
+        // First download sets the random location
+        Interval assignment = strategy.pickAssignment(availableBytes, 0, 
+                fileSize-1, blockSize);
+        availableBytes.delete(assignment);
+        assertEquals("Downloaded wrong block", 
+                new Interval(blockSize*(fileSize/blockSize), fileSize-1),
+                assignment);
+        
+        // Now download a second block, remembering to indicate that
+        // the last block is no longer available
+        assignment = strategy.pickAssignment(availableBytes, 0, 
+                availableBytes.getFirst().high, blockSize);
+        assertEquals("Downloaded wrong block", 
+                new Interval(7*blockSize,8*blockSize-1),
+                assignment);
+    }
+    
     public void testWrappingAssignment() {
         // Set up available bytes to be typical
         // situation where wrapping occurs.
@@ -163,8 +188,20 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(1);
         prng.setLong(0);
         
-        Interval assignment = strategy.pickAssignment(availableBytes, 0, fileSize, blockSize);
+        Interval assignment = strategy.pickAssignment(availableBytes, 0, fileSize-1, blockSize);
         assertTrue("Return optimization not working", availableBytes.getFirst() == assignment);
+    }
+    
+    /** Test the case where the download is almost finished.
+     *  There's only a sliver left.
+     */
+    public void testSliverDownload() {
+        availableBytes = IntervalSet.createSingletonSet(2475,2483);
+        prng.setInt(12);
+        prng.setLong(17);
+        Interval assignment = strategy.pickAssignment(availableBytes, 2475, 2483, blockSize);
+        assertEquals("Only a sliver of the file left, and something other than the sliver"+
+                "was returned", availableBytes.getFirst(), assignment);
     }
     
     public void testInvalidBlockSize() {
