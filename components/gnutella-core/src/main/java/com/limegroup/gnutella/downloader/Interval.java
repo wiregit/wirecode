@@ -26,9 +26,9 @@ public class Interval implements Serializable{
         this.high=(int)high;
     }
     
-    public Interval(int singleton) {
-        this.low=singleton;
-        this.high=singleton;
+    public Interval(long singleton) {
+        this.low=(int)singleton;
+        this.high=(int)singleton;
     }
 
     /**

@@ -25,8 +25,11 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 
      * We don't really care about values duplicated across threads, so don't bother
      * serializing access.
+     * 
+     * This really should be final, except that making it non-final makes tests
+     * much more simple.
      */
-    protected static final Random pseudoRandom = new Random();
+    protected static Random pseudoRandom = new Random();
 
     /**
      * A list of the 16 "random" locations in the file from which the random downloader chooses.
@@ -55,11 +58,23 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             
         // Lazy update of the random location
-        if (randomLocations[randomIndex] <= previewLength || randomLocations[randomIndex] > lastNeededByte) {
+        if (randomLocations[randomIndex] <= previewLength || 
+                randomLocations[randomIndex] > lastNeededByte) {
             // If the "random" location is zero, it has never been initialized,
             // and we should try to align it to with the Nth available fragment
-            if (randomLocations[randomIndex] == 0 && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
-                randomLocations[randomIndex] = ((Interval)availableIntervals.getAllIntervalsAsList().get(randomIndex)).low; 
+            if (randomLocations[randomIndex] == 0
+                    && availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
+                randomLocations[randomIndex] = ((Interval) availableIntervals
+                        .getAllIntervalsAsList().get(randomIndex)).low;
+
+                // Undo the heavy bias this creates towards the first block of
+                // the file in freshly started downloads.
+                // Note that if completedSize <= blockSize, it's a moot point as
+                // there's only one block to pick.
+                if (randomLocations[randomIndex] == 0
+                        && pseudoRandom.nextFloat() > ((float) blockSize)/ completedSize)
+                    randomLocations[randomIndex] = getRandomLocation(previewLength, 
+                            lastNeededByte, blockSize);
             } else {
                 // Make the random location somewhere between the first and last bytes we still need to assign
                 randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
@@ -179,10 +194,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         if (minIndex < 0)
             throw new IndexOutOfBoundsException();
         
-        long minBlock = (minIndex+blockSize-1) / blockSize;
-        // Block number maxIndex/blockSize will always result in the random
-        // selection wrapping, so maxBlock is one less than this value.
-        long maxBlock = (maxIndex / blockSize) - 1;
+        // If minIndex is in the middle of a block, include the
+        // beginning of that block.
+        long minBlock = minIndex / blockSize;
+        // If maxIndex is in the middle of a block, include that
+        // partial block in our range
+        long maxBlock = maxIndex / blockSize;
         
         // This will happen if the last block to assign is the 
         // last block of the file and the file is not an exact multiple of
@@ -192,7 +209,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         
         // Generate a random blockNumber on the range [minBlock, maxBlock]
         // return blockSize * blockNumber
-        // (nextLong() >>> 1) is a 63-bit pseudorandom positive long
-        return blockSize * (minBlock + ((pseudoRandom.nextLong() >>> 1) % (maxBlock-minBlock+1)));
+        return blockSize * (minBlock + ((pseudoRandom.nextLong() & (-1L >>> 1)) % (maxBlock-minBlock+1)));
     }
 }
