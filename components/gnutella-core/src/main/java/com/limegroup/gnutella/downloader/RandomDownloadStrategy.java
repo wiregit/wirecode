@@ -23,6 +23,8 @@ import com.limegroup.gnutella.util.IntervalSet;
  * Random locations are replaced with new random locations only when they cease to 
  * fall between previewLength and lastNeededByte.
  * 
+ * If a particular source cannot provide bytes after the selected random location,
+ * the block closest before the random location is selected instead.
  */
 public class RandomDownloadStrategy implements SelectionStrategy {
     
