@@ -51,8 +51,13 @@ public class VerifyingFile {
      */
     private static final float MAX_CORRUPTION = 0.1f;
     
-    /** The default chunk size - if we don't have a tree we request chunks this big */
-    static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
+    /** The default chunk size - if we don't have a tree we request chunks this big.
+     * 
+     *  This is a power of two in order to minimize the number of small partial chunk
+     *  downloads that will be required after we learn the chunk size from the TigerTree,
+     *  since the chunk size will always be a power of two.
+     */
+    static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
     /**
      * The file we're writing to / reading from.
