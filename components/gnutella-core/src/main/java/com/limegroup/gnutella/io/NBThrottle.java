@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.WeakHashMap;
+import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -69,19 +69,13 @@ public class NBThrottle implements Throttle {
     private static final int TICKS_PER_SECOND = 10;
     /** The number of milliseconds in each tick. */
     private static final int MILLIS_PER_TICK = 1000 / TICKS_PER_SECOND;
-    /** The minimum amount to allow a starved attachment. */
-    private static final int MINIMUM_FOR_STARVED = 150;
-    /** The minimum amount to allow for a hungry attachment. */
-    private static final int MINIMUM_FOR_HUNGRY = 50;
+    /** The maximum amount to ever give anyone. */
+    private static final int MAXIMUM_TO_GIVE = 1400;
+    /** The minimum amount to ever give anyone. */
+    private static final int MINIMUM_TO_GIVE = 30;
     
     /** Whether or not this throttle is for writing. (If false, it's for reading.) */
     private final boolean _write;
-    
-    /**
-     * Whether or not this is the first bandwidth spread after a tick.
-     * If it isn't, we don't give extra data to the hungry & starved fellows.
-     */
-    private boolean _initial;
     
     /** The amount that is available every tick. */
     private int _bytesPerTick;
@@ -92,9 +86,6 @@ public class NBThrottle implements Throttle {
     /** The next time a tick should occur. */
     private long _nextTickTime = -1;
     
-    /** A lock for protecting requests/interested. */
-    private final Object LOCK = new Object();
-    
     /**
      * A list of ThrottleListeners that are interested in bandwidthAvailable events.
      *
@@ -104,38 +95,27 @@ public class NBThrottle implements Throttle {
      * is available.  New ThrottleListeners should not be added to this if they are
      * already in interested.
      */
-    private Set /* of ThrottleListener */ requests = new HashSet();
+    private Set /* of ThrottleListener */ _requests = new HashSet();
     
     /**
-     * Set of interested attachments.  
+     * Attachments that are interested -> ThrottleListener that owns the attachment.
      *
-     * After a ThrottleListener is informed that bandwidth is available, its attachment
-     * is added to this Set.  When SelectionKeys are ready for writing, they are placed
-     * in the ready set iff the attachment was in this interested set.  Objects
-     * are removed from the set after requesting some space.
+     * As new items become interested, they are added to the bottom of the set.
+     * When something is written, so long as it writes > 0, it is removed from the
+     * list (and put back at the bottom).
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ interested = new WeakHashMap();
+    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ _interested = new LinkedHashMap();
     
     /**
      * Attachments that are ready-op'd.
      *
-     * As they become ready, we add them with an Integer of (1).
-     * When someone requests available data for writing, we see how many
-     * ops are ready & divide the bandwidth among them all.
+     * This is temporary per each selectableKeys call, but is cached to avoid regenerating
+     * each time.
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) */ ready = new WeakHashMap();
+    private Map /* of Object (ThrottleListener.getAttachment()) */ _ready = new HashMap();
     
-    /** The attachment that has the most ready ops. */
-    private Object starvedAttachment;
-    
-    /** The attachment that has the second most ready ops. */
-    private Object hungryAttachment;
-    
-    /**
-     * The total sum of interested parties values.
-     * MUST BE EQUAL TO ready.values()'s getInt()'s summed.
-     */
-    private double totalReadies = 0;
+    /** Whether or not we're currently active in the selectableKeys portion. */
+    private boolean _active = false;
     
     /**
      * Constructs a new Throttle that is either for writing or reading.
@@ -151,64 +131,43 @@ public class NBThrottle implements Throttle {
      * Notification from the NIODispatcher that a bunch of keys are now selectable.
      */
     void selectableKeys(Collection /* of SelectionKey */ keys) {
-        // We do not need to lock interested because it is only modified on this thread.
-        synchronized(LOCK) {
-            if(!interested.isEmpty()) {
-                starvedAttachment = null;
-                hungryAttachment = null;
-                int starvedVal = -1;
-                int hungryVal = -1;
-                totalReadies = 0;
-                Set currentReady = new HashSet();
-                
-                for(Iterator i = keys.iterator(); i.hasNext(); ) {
-                    SelectionKey key = (SelectionKey)i.next();
-                    try {
-                        if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
-                            Object att = key.attachment();
-                            currentReady.add(att);
-                            if(interested.remove(att) != null) {
-                                MutableInt value = (MutableInt)ready.get(att);
-                                if(value == null) {
-                                    value = new MutableInt(1);
-                                    ready.put(att, value);
-                                } else {
-                                    value.x += 1;
-                                }
-                                totalReadies += value.x;
-                                LOG.trace("Ready (" + value.x + "): " + att);
-                                
-                                if(_initial) {
-                                    if(value.x > starvedVal) {
-                                        starvedAttachment = att;
-                                        starvedVal = value.x;
-                                    } else if( value.x > hungryVal) {
-                                        hungryAttachment = att;
-                                        hungryVal = value.x;
-                                    }
-                                }
-                            }
-                        }
-                    } catch(CancelledKeyException ignored) {}
-                }
-                
-                for(Iterator i = interested.entrySet().iterator(); i.hasNext(); ) {
-                    Map.Entry next = (Map.Entry)i.next();
-                    if(!((ThrottleListener)next.getValue()).isOpen()) {
-                        LOG.trace("Removing closed but interested party: " + next.getKey());
-                        i.remove();
-                    } else {
-                        LOG.trace("Interested but not ready: " + next.getKey());
+        if(_available >= MINIMUM_TO_GIVE && !_interested.isEmpty()) {
+            for(Iterator i = keys.iterator(); i.hasNext(); ) {
+                SelectionKey key = (SelectionKey)i.next();
+                try {
+                    if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
+                        Object attachment = key.attachment();
+                        if(_interested.containsKey(attachment))
+                            _ready.put(attachment, key);
                     }
+                } catch(CancelledKeyException ignored) {
+                    i.remove(); // it's cancelled, we can ignore it now & forever.
                 }
-                
-                Set oldReady = new HashSet(ready.keySet());
-                oldReady.removeAll(currentReady);
-                LOG.trace("Was ready, but not ready now (" + oldReady.size() + "): " + oldReady);
-                    
-                
-                LOG.trace("Starting new cycle.  Ready: " + ready.size());
             }
+            
+            if(LOG.isTraceEnabled())
+                LOG.trace("Interested: " + _interested.size() + ", ready: " + _ready.size());
+            
+            _active = true;
+            for(Iterator i = _interested.entrySet().iterator(); !_ready.isEmpty() && i.hasNext(); ) {
+                Map.Entry next = (Map.Entry)i.next();
+                ThrottleListener listener = (ThrottleListener)next.getValue();
+                Object attachment = next.getKey();
+                SelectionKey key = (SelectionKey)_ready.remove(attachment);
+                if(!listener.isOpen()) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Removing closed but interested party: " + next.getKey());
+                    i.remove();
+                } else if(key != null) {
+                    NIODispatcher.instance().process(key, attachment, _write ? SelectionKey.OP_WRITE : SelectionKey.OP_READ);
+                    i.remove();
+                    if(_available < MINIMUM_TO_GIVE)
+                        break;
+                } else if(LOG.isTraceEnabled()) {
+                    LOG.trace("Interested but not ready: " + attachment);
+                }
+            }
+            _active = false;
         }
     }
     
@@ -216,9 +175,8 @@ public class NBThrottle implements Throttle {
      * Interests this ThrottleListener in being notified when bandwidth is available.
      */
     public void interest(ThrottleListener writer, Object attachment) {
-        synchronized(LOCK) { // need to lock because interested is mutated elsewhere
-            if(!interested.containsKey(attachment))
-                requests.add(writer);
+        synchronized(_requests) {
+            _requests.add(writer);
         }
     }
     
@@ -226,34 +184,12 @@ public class NBThrottle implements Throttle {
      * Requests some bytes to write.
      */
     public int request(ThrottleListener writer, Object attachment) {
-        MutableInt value = (MutableInt)ready.get(attachment);
-        if(value == null)
-            throw new IllegalStateException("requesting without being ready.  attachment: " + attachment);
-
-        int ret = 0;
-
-        if(attachment == starvedAttachment) 
-            ret = Math.min(_available, MINIMUM_FOR_STARVED);
-        else if(attachment == hungryAttachment)
-            ret = Math.min(_available, MINIMUM_FOR_HUNGRY);
-            
-        double divisor = totalReadies / value.x;
-        if(divisor != 0)
-            ret = Math.max(ret, (int)Math.floor(_available / divisor));
+        if(!_active) // this is gonna happen from NIODispatcher's processing
+            return 0;
         
+        int ret = Math.min(_available, MAXIMUM_TO_GIVE);
         _available -= ret;
-        
         LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
-        
-        // if this can't write anything this time, leave its interest for the future.
-        // This is required because of a bug(?) that does not notify us about the same
-        // write availability if we do not act upon it the first time.
-        if(ret == 0) {
-            synchronized(LOCK) {
-                interested.put(attachment, writer);
-            }
-        }
-        
         return ret; 
     }
     
@@ -263,17 +199,7 @@ public class NBThrottle implements Throttle {
      * If 'wroteAll' is true, the throttle wrote all the data it wanted to.
      */
     public void release(int amount, boolean wroteAll, ThrottleListener writer, Object attachment) {
-        MutableInt value = (MutableInt)ready.get(attachment);
-        if(value == null)
-            throw new IllegalStateException("requesting without being ready.  attachment: " + attachment);
-            
-        totalReadies -= value.x;
-        
-        if(wroteAll)
-            ready.remove(attachment);
-        
         _available += amount;
-
         LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
@@ -284,13 +210,11 @@ public class NBThrottle implements Throttle {
      * still some requests that require further tick notifications.
      */
     void tick(long currentTime) {
-        if(currentTime >= _nextTickTime && !requests.isEmpty()) {
+        if(currentTime >= _nextTickTime) {
             _available = _bytesPerTick;
             _nextTickTime = currentTime + MILLIS_PER_TICK;
-            _initial = true;
             spreadBandwidth();
-        } else if(_available > 0) {
-            _initial = false;
+        } else if(_available > MINIMUM_TO_GIVE) {
             spreadBandwidth();
         }
     }
@@ -299,27 +223,19 @@ public class NBThrottle implements Throttle {
      * Notifies all requestors that bandwidth is available.
      */
     private void spreadBandwidth() {
-        synchronized(LOCK) {
-            for(Iterator i = requests.iterator(); i.hasNext(); ) {
-                ThrottleListener req = (ThrottleListener)i.next();
-                // channel became closed.
-                if(!req.bandwidthAvailable()) {
-                    // make sure we clean up the readyset if it was there.
+        synchronized(_requests) {
+            if(!_requests.isEmpty()) {
+                for(Iterator i = _requests.iterator(); i.hasNext(); ) {
+                    ThrottleListener req = (ThrottleListener)i.next();
                     Object attachment = req.getAttachment();
-                    ready.remove(attachment);
-                    interested.remove(attachment);
-                } else {
-                    interested.put(req.getAttachment(), req);
+                    if(!_interested.containsKey(attachment)) {
+                        if(req.bandwidthAvailable())
+                            _interested.put(attachment, req);
+                        // else it'll be cleared when we loop later on.
+                    }
                 }
+                _requests.clear();
             }
-            requests.clear();
-        }
-    }
-    
-    private static final class MutableInt {
-        private int x;
-        MutableInt(int x) {
-            this.x = x;
         }
     }
 }

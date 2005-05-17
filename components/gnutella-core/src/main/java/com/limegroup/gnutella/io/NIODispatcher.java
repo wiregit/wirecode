@@ -370,41 +370,46 @@ public class NIODispatcher implements Runnable {
             
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
-				if(!sk.isValid())
-					continue;
-				
-                Object attachment = sk.attachment();
-				try {
-                    try {
-                        if (sk.isAcceptable())
-                            processAccept(sk, (AcceptObserver)attachment);
-                        else if(sk.isConnectable())
-                            processConnect(sk, (ConnectObserver)attachment);
-                        else {
-                            if (sk.isReadable())
-                                ((ReadObserver)attachment).handleRead();
-                            if (sk.isWritable())
-                                ((WriteObserver)attachment).handleWrite();
-                        }
-                    } catch (CancelledKeyException err) {
-                        LOG.warn("Ignoring cancelled key", err);
-                    } catch(IOException iox) {
-                        LOG.warn("IOX processing", iox);
-                        ((IOErrorObserver)attachment).handleIOException(iox);
-                    }
-                } catch(Throwable t) {
-                    ErrorService.error(t, "Unhandled exception while dispatching");
-
-                    try {
-                        if(attachment instanceof Shutdownable)
-                            cancel(sk, (Shutdownable)attachment);
-                        else
-                            cancel(sk, null);
-                    } catch(Throwable ignored) {}
-                }
+				if(sk.isValid())
+                    process(sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
+        }
+    }
+    
+    /**
+     * Processes a single SelectionKey & attachment, processing only
+     * ops that are in allowedOps.
+     */
+    void process(SelectionKey sk, Object attachment, int allowedOps) {
+		try {
+            try {
+                if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                    processAccept(sk, (AcceptObserver)attachment);
+                else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                    processConnect(sk, (ConnectObserver)attachment);
+                else {
+                    if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                        ((ReadObserver)attachment).handleRead();
+                    if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                        ((WriteObserver)attachment).handleWrite();
+                }
+            } catch (CancelledKeyException err) {
+                LOG.warn("Ignoring cancelled key", err);
+            } catch(IOException iox) {
+                LOG.warn("IOX processing", iox);
+                ((IOErrorObserver)attachment).handleIOException(iox);
+            }
+        } catch(Throwable t) {
+            ErrorService.error(t, "Unhandled exception while dispatching");
+
+            try {
+                if(attachment instanceof Shutdownable)
+                    cancel(sk, (Shutdownable)attachment);
+                else
+                    cancel(sk, null);
+            } catch(Throwable ignored) {}
         }
     }
     
