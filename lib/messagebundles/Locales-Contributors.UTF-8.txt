@@ -152,8 +152,8 @@ bs_BH   Bosanski/Bosna i Hercegovina          mail: orbus AT skynet DOT be
                                 Download page "Ing. Salih Čavkić"
                                               cavkic AT skynet DOT be
 ------- ----------------------- ------------- -------------------------------
-cs      Czech/Czech Rep.        Messages      New translator needed !
-cs_CZ   Čeština/Česká republika               mail: ? AT ? DOT ?
+cs      Czech/Czech Rep.        Messages      "Robert Stodůlka"
+cs_CZ   Čeština/Česká republika               mail: robert.stodulka AT seznam DOT cz
 ------- ----------------------- ------------- -------------------------------
 hr      Croatian/Croatia        Messages      "Dan Bernardic"
 hr_HR   Hrvatsky/Hrvatska                     mail: dan DOT bernardic AT gmail DOT com
