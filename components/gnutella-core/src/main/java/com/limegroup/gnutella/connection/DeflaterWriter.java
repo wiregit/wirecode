@@ -11,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.io.WriteObserver;
 
 /**
@@ -19,6 +18,8 @@ import com.limegroup.gnutella.io.WriteObserver;
  * data to another sink.
  */
 public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
+    
+    private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
     
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel channel;
@@ -34,9 +35,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     private int sync = 0;
     /** An empty byte array to reuse. */
     private static final byte[] EMPTY = new byte[0];
-    
-    private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
-    
+        
     /**
      * Constructs a new DeflaterWriter with the given deflater.
      * You MUST call setWriteChannel prior to handleWrite.
@@ -143,7 +142,6 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
         while(true) {
             // Step 1: See if there is any pending deflated data to be written.
             int totalWrote = channel.write(outgoing);
-            LOG.info("deflater wrote "+totalWrote+" remaining "+outgoing.remaining());
             if(outgoing.hasRemaining())
                 return true; // there is still deflated data that is pending a write.
 

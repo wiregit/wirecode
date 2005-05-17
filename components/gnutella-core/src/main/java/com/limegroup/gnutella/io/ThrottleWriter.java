@@ -106,7 +106,6 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         InterestWriteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
-         LOG.info("available at write entry "+available);   
         if(available == 0) {
             if(buffer.hasRemaining())
                 wroteAll = false;
@@ -121,7 +120,6 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         int wrote = 0;
         int totalWrote = channel.write(buffer);
         
-        LOG.info("wrote "+totalWrote+ " remaining "+buffer.remaining());            
         available -= totalWrote;
         buffer.limit(priorLimit);
 
@@ -166,13 +164,12 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         // we will not be immediately notified again that data can be
         // written.  If we leave the interest alone then we will be
         // notified again.
-        if(available != 0) {LOG.info("throttle writer has available: "+available);
+        if(available != 0) {
             wroteAll = true;
             try {
                 chain.interest(this, false);
                 if(interested != null)
                     interested.handleWrite();
-                else LOG.info("not interested");
             } finally {
                 throttle.release(available, wroteAll, this, attachment);
             }

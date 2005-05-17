@@ -19,6 +19,7 @@ import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.ThrottleWriter;
+import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
