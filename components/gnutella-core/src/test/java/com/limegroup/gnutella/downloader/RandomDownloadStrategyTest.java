@@ -68,9 +68,11 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
     }
 
     public void testFragmentationAvoidance() {
-        // Set up a couple of holes in our download
-        availableBytes.delete(new Interval(blockSize + 1));
-        availableBytes.delete(new Interval(3 * blockSize + 4));
+        // Set up a couple of gaps in our available bytes
+        long gap1 = blockSize + 1;
+        long gap2 = 3 * blockSize + 4;
+        availableBytes.delete(new Interval(gap1));
+        availableBytes.delete(new Interval(gap2));
 
         // Ensure that randomLocations[0] will be 0
         prng.setFloat(0.0f);
@@ -88,8 +90,26 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
 
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectation);
+        
+        // Run the above test, but use setFloat to ensure
+        // randomLocations[0] is random rather than aligned
+        // with the beginning of the file
+        prng.setFloat(1.0f);
+        availableBytes = IntervalSet.createSingletonSet(0,fileSize-1);
+        availableBytes.delete(new Interval(gap1));
+        availableBytes.delete(new Interval(gap2));
+       
+        // Expected assignments are the same, except for the
+        // assignment corresponding to randomLocations index 0
+        prng.setInts(testInts);
+        long randomBlock = 7;
+        prng.setLong(randomBlock); // Random index zero will consume one random long
+        expectation[0] = new Interval(randomBlock*blockSize, (randomBlock+1)*blockSize-1);
+        
+        testAssignments(strategy, availableBytes, fileSize, blockSize,
+                expectation);
     }
-
+    
     public void testWrappingAssignment() {
         // Set up available bytes to be typical
         // situation where wrapping occurs
@@ -110,6 +130,50 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
                 expectations);
     }
 
+    /** White-box test to make sure the random block number gets properly 
+     * wrapped inside pickAssignment.
+     */
+    public void testRandomNumberWraps() throws Exception {
+        // corner case of first block
+        testRandomNumberWraps(0, 0, blockSize*107+4, 0);
+        // corner case of last block
+        testRandomNumberWraps(fileSize/blockSize, 2000, fileSize, 123);
+        // And some arbitrary tests, keeping in mind availableBlocks
+        // only represents blocks 0-10
+        testRandomNumberWraps(10, 2000, blockSize*107+4, 412);
+        testRandomNumberWraps(6, blockSize*4, blockSize*11+19, 8437);
+        testRandomNumberWraps(3, 7, blockSize*4193+8, 82);
+    }
+    
+    public void testRandomNumberWraps(long targetBlockNumber, 
+            long previewLength, long lastNeededByte, 
+            long arbitraryWrapCount) throws Exception{
+        // Reset all of strategy's state
+        strategy = createRandomStrategy(fileSize, prng);
+        // Give the strategy an arbitrary index of 3 into 
+        // the random locations table
+        prng.setInt(3);
+        
+        long previewBlockNumber = previewLength/blockSize;
+        long lastBlockNumber    = lastNeededByte/blockSize; 
+        
+        // Wrap an arbitrary numbe of times, remembering
+        // that RandomDownloadStrategy intentionally never starts
+        // on the partial block at the end of the file
+       
+        // This next part relies on knowledge of how the random long is converted
+        // into a block number inside RandomDownloadStrategy
+        prng.setLong(arbitraryWrapCount*(lastBlockNumber-previewBlockNumber+1)+
+                targetBlockNumber-previewBlockNumber);
+     
+        
+        Interval assignment = strategy.pickAssignment(availableBytes, previewLength,
+                lastNeededByte, blockSize);
+        
+        assertEquals("Internal wrapping of random longs not working as expected",
+                targetBlockNumber*blockSize, assignment.low);
+    }
+    
     // ///////////// helper methods ////////////////
 
     /**

@@ -118,7 +118,9 @@ public class VerifyingFileTest extends BaseTestCase {
      * tests that once a chunk is released, the white spot is leased next
      */
     public void testRelease() throws Exception {
-        // lease two chunks and create a hole in between them
+        // Lease two chunks and create a hole in between them.
+
+        // This test assumes a sequential download strategy.
         PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
         Interval leased = vf.leaseWhite(512*1024);
         vf.releaseBlock(new Interval (128*1024, 3*128*1024-1));
