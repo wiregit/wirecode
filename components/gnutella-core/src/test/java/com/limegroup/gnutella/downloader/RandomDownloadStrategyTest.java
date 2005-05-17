@@ -6,6 +6,7 @@ import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 import java.util.Random;
+import java.util.NoSuchElementException;
 
 public class RandomDownloadStrategyTest extends BaseTestCase {
 
@@ -112,20 +113,29 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
     
     public void testWrappingAssignment() {
         // Set up available bytes to be typical
-        // situation where wrapping occurs
-        availableBytes = IntervalSet.createSingletonSet(blockSize,
+        // situation where wrapping occurs.
+        // We need only the first half block and the second
+        // to fourth blocks.
+        availableBytes = IntervalSet.createSingletonSet(5,
                 4 * blockSize - 1);
-
+        availableBytes.delete(new Interval(blockSize/2, blockSize-1));
+        // The following line increases test coverage by triggering
+        // an optimization that prevents unneccessary Interval creation
+        availableBytes.delete(new Interval(2*blockSize-1));
+        
         prng.setLong(3);
         // Identical indexes into the random locations array
-        int[] testInts = { 7, 7 };
+        int[] testInts = { 7, 7, 7, 7};
         prng.setInts(testInts);
 
-        // We expect to be assigned blocks #3 and #2
-        Interval[] expectations = new Interval[2];
+        // We expect to be assigned blocks #3,most of #2, #1, 
+        // and the final part of #0
+        Interval[] expectations = new Interval[4];
         expectations[0] = new Interval(3 * blockSize, 4 * blockSize - 1);
         expectations[1] = new Interval(2 * blockSize, 3 * blockSize - 1);
-
+        expectations[2] = new Interval(    blockSize, 2 * blockSize - 2);
+        expectations[3] = new Interval(5            ,   blockSize/2 - 1);
+        
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectations);
     }
@@ -145,7 +155,77 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         testRandomNumberWraps(3, 7, blockSize*4193+8, 82);
     }
     
-    public void testRandomNumberWraps(long targetBlockNumber, 
+    /** Test the case where the availableBytes
+     * contains the Interval we return.
+     */
+    public void testReturnOptimization() {
+        availableBytes = IntervalSet.createSingletonSet(blockSize,2*blockSize-1);
+        prng.setInt(1);
+        prng.setLong(0);
+        
+        Interval assignment = strategy.pickAssignment(availableBytes, 0, fileSize, blockSize);
+        assertTrue("Return optimization not working", availableBytes.getFirst() == assignment);
+    }
+    
+    public void testInvalidBlockSize() {
+        // Try an invalid block size and see if it throws
+        // an InvalidInputException
+        try {
+            strategy.pickAssignment(availableBytes, 0, 
+                    fileSize-1, 0);
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed
+            return;
+        }
+        assertTrue("Failed to complain about invalid block size", false);
+    }
+    
+    public void testInvalidPreviewLength() {
+        // Try an invalid preview length and see if it throws
+        // an InvalidInputException
+        try {
+            strategy.pickAssignment(availableBytes, -1, 
+                    fileSize-1, blockSize);
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed
+            return;
+        }
+        assertTrue("Failed to complain about invalid preview length", false);
+    }
+    
+    public void testInvalidLastNeededByte() {
+        // Try calling with lastNeededByte > previewLength
+        // and see if it throws an exception
+        try {
+            strategy.pickAssignment(availableBytes, 2001, 
+                    2000, blockSize);
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed
+            return;
+        }
+        assertTrue("Failed to complain about invalid preview length", false);
+    }
+    
+    /** Make sure we throw NoSuchElement exception if there is nothing to
+     * download.
+     */
+    public void testNoAvailableBytes() {
+        availableBytes = new IntervalSet();
+        prng.setInt(15);
+        prng.setLong(2);
+        try {
+            strategy.pickAssignment(availableBytes, 0, 
+                    fileSize, blockSize);
+        } catch (NoSuchElementException e) {
+            // Wohoo!  Exception thrown... test passed
+            return;
+        }
+        assertTrue("Failed to complain about no available bytes", false);
+    }
+    
+    /////////////// helper methods ////////////////
+    /** Helper for testRandomNumberWraps(void) */ 
+    private void testRandomNumberWraps(long targetBlockNumber, 
             long previewLength, long lastNeededByte, 
             long arbitraryWrapCount) throws Exception{
         // Reset all of strategy's state
@@ -165,7 +245,6 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         // into a block number inside RandomDownloadStrategy
         prng.setLong(arbitraryWrapCount*(lastBlockNumber-previewBlockNumber+1)+
                 targetBlockNumber-previewBlockNumber);
-     
         
         Interval assignment = strategy.pickAssignment(availableBytes, previewLength,
                 lastNeededByte, blockSize);
@@ -174,8 +253,6 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
                 targetBlockNumber*blockSize, assignment.low);
     }
     
-    // ///////////// helper methods ////////////////
-
     /**
      * A helper method that simulates chosing blocks to download and removes
      * them from availableBytes.
