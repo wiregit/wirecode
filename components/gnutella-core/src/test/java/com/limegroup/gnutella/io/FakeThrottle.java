@@ -5,32 +5,33 @@ import java.nio.channels.CancelledKeyException;
 
 /** A fake throttle, for testing ThrottleWriter. */
 public class FakeThrottle implements Throttle {
-    private int _available;
-    private ThrottleListener _listener;
-    private boolean _wroteAll;
+    private int available;
+    private int interests = 0;
+    private boolean didRequest;
+    private boolean didRelease;
     
-    public void interest(ThrottleListener writer, Object attachment) {
-        _listener = writer;
+    public void interest(ThrottleListener writer) {
+        interests++;
     }
     
-    public int request(ThrottleListener writer, Object attachment) {
-        int av = _available;
-        _available = 0;
+    public int request() {
+        didRequest = true;
+        int av = available;
+        available = 0;
         return av;
     }
     
-    public void release(int amount, boolean wroteAll, ThrottleListener writer, Object attachment) {
-        _available += amount;
-        _wroteAll = wroteAll;
-        _listener = null;
+    public void release(int amount) {
+        didRelease = true;
+        available += amount;
     }
     
-    void setAvailable(int av) { _available = av; }
-    int getAvailable() { return _available; }
-    boolean isInterested() { return _listener != null; }
-    boolean isAllWrote() { return _wroteAll; }
-    void interestOff() { _listener = null; }
-    void clear() { _available = 0; _listener = null; _wroteAll = false; }
+    void setAvailable(int av) { available = av; }
+    int getAvailable() { return available; }
+    int interests() { return interests; }
+    public boolean didRequest() { return didRequest; }
+    public boolean didRelease() { return didRelease; }
+    void clear() { available = 0; interests = 0; didRequest = false; didRelease = false; }
 }
     
     

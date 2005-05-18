@@ -10,6 +10,7 @@ class StubThrottleListener implements ThrottleListener {
     public void setAttachment(Object attachment) { this.attach = attachment; }
     public Object getAttachment() { return attach; }
     public boolean bandwidthAvailable() { available = true; return !closed; }
+    public boolean isOpen() { return !closed; }
     
     void close() { closed = true; }
     void setClosed(boolean closed) { this.closed = closed; }

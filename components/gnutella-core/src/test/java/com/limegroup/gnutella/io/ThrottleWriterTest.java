@@ -36,27 +36,27 @@ public final class ThrottleWriterTest extends BaseTestCase {
 	}
 	
 	public void setUp() {
-	    THROTTLE.interestOff();
+	    THROTTLE.clear();
 	}
 	
 	public void testInterestAndBandwidthAvailable() throws Exception {
 	    assertFalse(SINK.interested());
-	    assertFalse(THROTTLE.isInterested());
+	    assertEquals(0, THROTTLE.interests());
 	    WRITER.interest(SOURCE, false);
 	    assertFalse(SINK.interested());
-	    assertFalse(THROTTLE.isInterested());
+	    assertEquals(0, THROTTLE.interests());
 	    WRITER.interest(SOURCE, true);
-	    assertTrue(THROTTLE.isInterested());
+        assertEquals(1, THROTTLE.interests());
 	    assertFalse(SINK.interested());
 	    
 	    WRITER.bandwidthAvailable();
 	    assertTrue(SINK.interested());
     }
     
-    public void testHandleWriteAndStuff() throws Exception {
-        assertFalse(THROTTLE.isInterested());
+    public void testeHandleWriteDataLeft() throws Exception {
+        assertEquals(0, THROTTLE.interests());
         WRITER.interest(SOURCE, true);
-        assertTrue(THROTTLE.isInterested());
+        assertEquals(1, THROTTLE.interests());
         
         // Test when data is still left after available.
 
@@ -69,47 +69,56 @@ public final class ThrottleWriterTest extends BaseTestCase {
         SOURCE.setBuffer(buffer(data(750)));
         THROTTLE.setAvailable(250);
         
+        assertFalse(THROTTLE.didRequest());
+        assertFalse(THROTTLE.didRelease());
         assertTrue(WRITER.handleWrite()); // still data left to write.
+        assertTrue(THROTTLE.didRequest());
+        assertTrue(THROTTLE.didRelease());
+        
         assertEquals(250, SINK.written()); // only wrote 250
         assertEquals(0, THROTTLE.getAvailable()); // all throttle used up.
         assertEquals(500, SOURCE.remaining()); // data still in source
-        assertTrue(THROTTLE.isInterested()); // throttle should give events still
+        assertEquals(2, THROTTLE.interests()); // is interested in more events.
         assertFalse(SINK.interested()); // sink should not give events.
-        assertFalse(THROTTLE.isAllWrote()); // not everything written.
+    }
+    
+    public void testHandleWriteSourceEmptiesWithLeftover() throws Exception {
+        assertEquals(0, THROTTLE.interests());
+        WRITER.interest(SOURCE, true);
+        assertEquals(1, THROTTLE.interests());
         
+        SOURCE.setBuffer(buffer(data(500)));
+        THROTTLE.setAvailable(550);        
+
         WRITER.bandwidthAvailable();
         assertTrue(SINK.interested());
-        SINK.clear();
         
-        // Test when available has more than we need.
-        THROTTLE.setAvailable(550);
         assertFalse(WRITER.handleWrite()); // all data written
         assertEquals(500, SINK.written()); // only wrote that we had.
         assertEquals(50, THROTTLE.getAvailable()); // throttle still has data
-        assertFalse(THROTTLE.isInterested()); // no more requests from throttle
+        assertEquals(1, THROTTLE.interests()); // didn't request interest again.
         assertFalse(SINK.interested()); // sink off.
-        assertTrue(THROTTLE.isAllWrote()); // everything written.
+    }
         
-        // Test when available is exactly what we need.
-        THROTTLE.clear();
-        SINK.clear();
+    public void testHandleWriteSourceEmptiesExactly() throws Exception {
+        assertEquals(0, THROTTLE.interests());
         WRITER.interest(SOURCE, true);
+        assertEquals(1, THROTTLE.interests());
+        
         SOURCE.setBuffer(buffer(data(200)));
         THROTTLE.setAvailable(200);
         WRITER.bandwidthAvailable();
-        assertFalse(THROTTLE.isAllWrote());
         assertEquals(0, SINK.written());
         assertTrue(SINK.interested());
         assertFalse(WRITER.handleWrite());
+        assertEquals(1, THROTTLE.interests());
         assertEquals(200, SINK.written());
         assertEquals(0, THROTTLE.getAvailable());
         assertEquals(0, SOURCE.remaining());
-        assertFalse(THROTTLE.isInterested());
         assertFalse(SINK.interested());
-        assertTrue(THROTTLE.isAllWrote());
     }
     
-    public void testReleasesAndWritesAllWhenWriteBlocks() throws Exception {
+    public void testHandleWriteSinkFills() throws Exception {
         // test to make sure if sink can't take data that we release &
         // say we wrote it all, even if we still had stuff to write.
         SINK.resize(100);
@@ -117,25 +126,25 @@ public final class ThrottleWriterTest extends BaseTestCase {
         THROTTLE.setAvailable(300);
         WRITER.bandwidthAvailable();
         WRITER.interest(SOURCE, true);
+        assertEquals(1, THROTTLE.interests());
         
         assertTrue(WRITER.handleWrite()); // data still leftover.
         assertEquals(100, SINK.written());
         assertEquals(150, SOURCE.remaining());
         assertEquals(200, THROTTLE.getAvailable());
-        assertTrue(THROTTLE.isInterested()); // need to wait for sink.
+        assertEquals(2, THROTTLE.interests());
         assertFalse(SINK.interested());
-        assertTrue(THROTTLE.isAllWrote()); // 'cause sink blocked.
         
         SINK.resize(150);
         THROTTLE.clear();
         THROTTLE.setAvailable(200);
         WRITER.bandwidthAvailable();
+        assertEquals(0, THROTTLE.interests());
         assertFalse(WRITER.handleWrite());
         assertEquals(150, SINK.written());
         assertEquals(50, THROTTLE.getAvailable());
-        assertFalse(THROTTLE.isInterested());
+        assertEquals(0, THROTTLE.interests());
         assertFalse(SINK.interested());
-        assertTrue(THROTTLE.isAllWrote());
     }
     
     public void testBandwidthAvailableWhenClosed() throws Exception {
