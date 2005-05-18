@@ -8,14 +8,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -300,9 +299,9 @@ public abstract class FileManager {
         _files = new ArrayList();
         _keywordTrie = new Trie(true);  //ignore case
         _urnMap = new HashMap();
-        _extensions = new TreeSet(Comparators.stringComparator());
-        _sharedDirectories = new TreeMap(Comparators.fileComparator());
-		_completelySharedDirectories = new LinkedHashSet();
+        _extensions = new HashSet();
+        _sharedDirectories = new HashMap();
+		_completelySharedDirectories = new HashSet();
         _incompletesShared = new IntSet();
         _fileToFileDescMap = new HashMap();
     }
