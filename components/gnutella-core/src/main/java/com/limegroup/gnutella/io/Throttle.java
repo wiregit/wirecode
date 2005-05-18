@@ -6,20 +6,18 @@ package com.limegroup.gnutella.io;
 public interface Throttle {
     
     /**
-     * Interests this listener in receiving Throttle events.
+     * Interests this listener in receiving a bandwidthAvailable callback.
      */
-    public void interest(ThrottleListener writer, Object attachment);
+    public void interest(ThrottleListener writer);
     
     /**
      * Requests some data for writing from this Throttle.
      */
-    public int request(ThrottleListener writer, Object attachment);
+    public int request();
     
     /**
      * Releases some unwritten requested data back to the throttle.
-     *
-     * If everything was written, wroteAll is true.
      */
-    public void release(int amount, boolean wroteAll, ThrottleListener writer, Object attachment);
+    public void release(int amount);
 }
     

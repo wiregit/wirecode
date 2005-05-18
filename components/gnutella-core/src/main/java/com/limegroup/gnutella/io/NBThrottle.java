@@ -16,36 +16,34 @@ import org.apache.commons.logging.Log;
 
 /**
  * A throttle that can be applied to non-blocking reads & writes.
- * This does not work correctly if the throttle is below 2KB/s.
  *
- * NIODispatcher maintains a list of all active Throttles.  As part
- * of every pending operation, NIODispatcher will 'tick' a Throttle.
- * This will potentially increase the amount of available bytes that the
- * Throttle can give to requestors.  If bytes suddenly become available,
- * the Throttle will inform each ThrottleListener (that previously registered
- * interest) that bandwidth is now available, and record the fact that the listener
- * is now interested.  The listener must then register interest on its ChannelWriter,
- * which will ultimately register interest on the SocketChannel.
- * 
- * NIODispatcher will then perform its select call & inform each Throttle of the
- * available selected keys so that the Throttles can keep track of what interested
- * parties are now ready for writing.  As the Throttle learns of a new ready listener,
- * it increments a counter for that listener.  The listener will then request some
- * bytes to write, try writing, and release the bytes.  If, while releasing, the listener
- * said that it was able to write everything, the ready counter is erased.  However,
- * if there was still more to write, the ready counter is kept around and incremented
- * the next time it becomes ready.
+ * Throttles work by giving amounts to interested parties in a FIFO
+ * queue, ensuring that no one party uses all of the available bandwidth
+ * on every tick.
  *
- * In order to determine how much data can be given to a specific listener when it requests,
- * the available bytes are divided by a specific divisor (calculated by the total amount of
- * counts for each ready listener divided by the counts for this listener).  The end result
- * is that those listeners who previously requested data but couldn't write it all are
- * given increasing priority to write more & more.  The idea behind this is to prevent fast
- * connections from hogging all the bandwidth (which would prevent slower connections from
- * writing out any data).
+ * Listeners must adhere to the following contract in order for the Throttle to be effective.
+ 
+ * In order:
+ * 1) When a listener wants to write, it must interest ONLY the Throttle.
+ *    Call: Throttle.interest(listener)
  *
- * A chain of events goes something like this
+ * 2) When the throttle informs the listener that bandwidth is available, it must interest
+ *    the next party in the chain (ultimately the Socket).
+ *    Callback: ThrottleListener.bandwidthAvailable()
  *
+ * 3) The listener must request data prior to writing, and write out only the amount
+ *    that it requested.
+ *    Call: Throttle.request()
+ *
+ * 4) The listener must release data that it was given from a request but did not write.
+ *    Call: Throttle.release(amount)
+ *
+ * Extraneous: The ThrottleListener must have an 'attachment' set that is the same attachment
+ *             as the one used on the SelectionKey for the SelectableChannel.  This is
+ *             necessary so that Throttle can match up SelectionKey ready events
+ *             with ThrottleListener interest.
+ *
+ * The flow of a Throttle works like:
  *      Throttle                            ThrottleListener                   NIODispatcher
  * 1)                                       Throttle.interest               
  * 2)   <adds to request list>
@@ -54,12 +52,20 @@ import org.apache.commons.logging.Log;
  * 5)                                       SocketChannel.interest
  * 6)   <moves from request to interest list>
  * 7)                                                                         Selector.select
- * 8)                                                                         Throttle.selectedKeys 
- * 9)   <moves from interest list to ready list>
- * 10)                                                                        NIOSocket.handleWrite
- * 11)                                      Throttle.request
- * 12)                                      SocketChannel.write
- * 13)                                      Throttle.release
+ * 8)                                                                         Throttle.selectableKeys 
+ * 9)                                       Throttle.request
+ * 10)                                      SocketChannel.write
+ * 11)                                      Throttle.release
+ * 12)  <remove from interest>
+ *
+ * If there are multiple listeners, steps 4 & 5 are repeated for each request, and steps 9 through 12
+ * are performed on interested parties until there is no bandwidth available.  Another tick will
+ * generate more bandwidth, which will allow previously interested parties to request/write/release.
+ * Because interested parties are processed in FIFO order, all parties will receive equal access to
+ * the bandwidth.
+ *
+ * Note that due to the nature of Throttle & NIODispatcher, ready parties may be told to handleWrite
+ * twice during each selection event.  The latter will always return 0 to a request.
  */
 public class NBThrottle implements Throttle {
     
@@ -76,6 +82,9 @@ public class NBThrottle implements Throttle {
     
     /** Whether or not this throttle is for writing. (If false, it's for reading.) */
     private final boolean _write;
+    
+    /** The op that this uses when processing. */
+    private final int _processOp;
     
     /** The amount that is available every tick. */
     private int _bytesPerTick;
@@ -123,6 +132,7 @@ public class NBThrottle implements Throttle {
      */
     public NBThrottle(boolean forWriting, float bytesPerSecond) {
         _write = forWriting;
+        _processOp = forWriting ? SelectionKey.OP_WRITE : SelectionKey.OP_READ;
         _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);
         NIODispatcher.instance().addThrottle(this);
     }
@@ -145,8 +155,7 @@ public class NBThrottle implements Throttle {
                 }
             }
             
-            if(LOG.isTraceEnabled())
-                LOG.trace("Interested: " + _interested.size() + ", ready: " + _ready.size());
+            //LOG.trace("Interested: " + _interested.size() + ", ready: " + _ready.size());
             
             _active = true;
             for(Iterator i = _interested.entrySet().iterator(); !_ready.isEmpty() && i.hasNext(); ) {
@@ -155,16 +164,13 @@ public class NBThrottle implements Throttle {
                 Object attachment = next.getKey();
                 SelectionKey key = (SelectionKey)_ready.remove(attachment);
                 if(!listener.isOpen()) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Removing closed but interested party: " + next.getKey());
+                    //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
-                    NIODispatcher.instance().process(key, attachment, _write ? SelectionKey.OP_WRITE : SelectionKey.OP_READ);
+                    NIODispatcher.instance().process(key, attachment, _processOp);
                     i.remove();
                     if(_available < MINIMUM_TO_GIVE)
                         break;
-                } else if(LOG.isTraceEnabled()) {
-                    LOG.trace("Interested but not ready: " + attachment);
                 }
             }
             _active = false;
@@ -174,7 +180,7 @@ public class NBThrottle implements Throttle {
     /**
      * Interests this ThrottleListener in being notified when bandwidth is available.
      */
-    public void interest(ThrottleListener writer, Object attachment) {
+    public void interest(ThrottleListener writer) {
         synchronized(_requests) {
             _requests.add(writer);
         }
@@ -183,24 +189,22 @@ public class NBThrottle implements Throttle {
     /**
      * Requests some bytes to write.
      */
-    public int request(ThrottleListener writer, Object attachment) {
+    public int request() {
         if(!_active) // this is gonna happen from NIODispatcher's processing
             return 0;
         
         int ret = Math.min(_available, MAXIMUM_TO_GIVE);
         _available -= ret;
-        LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
+        //LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
         return ret; 
     }
     
     /**
-     * Marks the ThrottleListener as having finished its request/write cycle.
-     * 'amount' bytes are released back (they were unwritten).
-     * If 'wroteAll' is true, the throttle wrote all the data it wanted to.
+     * Releases some unwritten bytes back to the available pool.
      */
-    public void release(int amount, boolean wroteAll, ThrottleListener writer, Object attachment) {
+    public void release(int amount) {
         _available += amount;
-        LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
+        //LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
     /**
@@ -210,6 +214,7 @@ public class NBThrottle implements Throttle {
      * still some requests that require further tick notifications.
      */
     void tick(long currentTime) {
+        System.out.println("tick: " + currentTime + ", next: " + _nextTickTime);
         if(currentTime >= _nextTickTime) {
             _available = _bytesPerTick;
             _nextTickTime = currentTime + MILLIS_PER_TICK;

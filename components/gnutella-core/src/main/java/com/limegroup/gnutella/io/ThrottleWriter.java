@@ -17,7 +17,6 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     
     private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
-    
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel channel;
     /** The last observer. */
@@ -28,8 +27,6 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
     private Object attachment;
-    /** Whether or not the last call to write(ByteBuffer) was able to write everything. */
-    private boolean wroteAll;
     
     /**
      * Constructs a ThrottleWriter with the given Throttle.
@@ -56,7 +53,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     /** Sets the sink. */
     public void setWriteChannel(InterestWriteChannel channel) {
         this.channel = channel;
-        throttle.interest(this, attachment);
+        throttle.interest(this);
     }
     
     /** Sets the attachment that the Throttle will recognize for this Writer. */
@@ -77,7 +74,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         if(status) {
             this.observer = observer;
             if(channel != null)
-                throttle.interest(this, attachment);
+                throttle.interest(this);
         } else {
             this.observer = null;
         }
@@ -106,26 +103,18 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         InterestWriteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
-        if(available == 0) {
-            if(buffer.hasRemaining())
-                wroteAll = false;
+            
+        if(available == 0)
             return 0;
-        }
 
         int priorLimit = buffer.limit();
-        if(buffer.remaining() > available) {
+        if(buffer.remaining() > available)
             buffer.limit(buffer.position() + available);
-        }
             
-        int wrote = 0;
         int totalWrote = channel.write(buffer);
         
         available -= totalWrote;
         buffer.limit(priorLimit);
-
-        // we wrote everything we could to this if the buffer is empty
-        // or if the channel wouldn't accept any more data.
-        wroteAll = !buffer.hasRemaining() || wrote == 0;
         
         return totalWrote;
     }
@@ -158,24 +147,23 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
             
         WriteObserver interested = observer;
             
-        available = throttle.request(this, attachment);
+        available = throttle.request();
         // If nothing is available, DO NOT CHANGE INTEREST WITHOUT
         // TRYING TO WRITE.  Otherwise, because of a bug(?) in selecting,
         // we will not be immediately notified again that data can be
         // written.  If we leave the interest alone then we will be
         // notified again.
         if(available != 0) {
-            wroteAll = true;
             try {
                 chain.interest(this, false);
                 if(interested != null)
                     interested.handleWrite();
             } finally {
-                throttle.release(available, wroteAll, this, attachment);
+                throttle.release(available);
             }
             interested = observer; // re-get it, since observer may have changed interest.
             if(interested != null) {
-                throttle.interest(this, attachment);
+                throttle.interest(this);
                 return true;
             } else {
                 return false;
