@@ -37,10 +37,6 @@ public class UDPStatusTest extends ClientSideTestCase {
         return new Integer(1);
     }
     
-    public void setUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
-    }
-    
     public void testSolicited() throws Exception {
         drainAll();
         assertFalse(RouterService.canReceiveSolicited());

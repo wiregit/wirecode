@@ -357,11 +357,11 @@ public class UDPService implements ReadWriteObserver {
         //      1) the non-connected party is NOT private
         //  OR
         //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
-        
-        return  !RouterService.getConnectionManager().isConnectedTo(host)
-            && (!NetworkUtils.isPrivateAddress(addr.getAddress())
-            ||  !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
+        return
+                !RouterService.getConnectionManager().isConnectedTo(host)
+            &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
              ;
+
     }
     
     /**
