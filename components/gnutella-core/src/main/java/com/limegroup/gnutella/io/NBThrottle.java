@@ -127,14 +127,30 @@ public class NBThrottle implements Throttle {
     private boolean _active = false;
     
     /**
-     * Constructs a new Throttle that is either for writing or reading.
+     * Constructs a new Throttle that is either for writing or reading, allowing
+     * the given bytesPerSecond.
+     *
      * Use 'true' for writing, 'false' for reading.
      */
     public NBThrottle(boolean forWriting, float bytesPerSecond) {
+        this(forWriting, bytesPerSecond, true);
+    }
+    
+    /**
+     * Constructs a new Throttle that is either for writing or reading, allowing
+     * the given bytesPerSecond.
+     *
+     * Use 'true' for writing, 'false' for reading.
+     *
+     * If addToDispatcher is false, NIODispatcher is not notified about the Throttle,
+     * so it will not be automatically ticked or told of selectable keys.
+     */
+    protected NBThrottle(boolean forWriting, float bytesPerSecond, boolean addToDispatcher) {
         _write = forWriting;
         _processOp = forWriting ? SelectionKey.OP_WRITE : SelectionKey.OP_READ;
         _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);
-        NIODispatcher.instance().addThrottle(this);
+        if(addToDispatcher)
+            NIODispatcher.instance().addThrottle(this);
     }
     
     /**
@@ -214,7 +230,6 @@ public class NBThrottle implements Throttle {
      * still some requests that require further tick notifications.
      */
     void tick(long currentTime) {
-        System.out.println("tick: " + currentTime + ", next: " + _nextTickTime);
         if(currentTime >= _nextTickTime) {
             _available = _bytesPerTick;
             _nextTickTime = currentTime + MILLIS_PER_TICK;

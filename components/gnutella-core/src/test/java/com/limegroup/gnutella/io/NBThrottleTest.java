@@ -22,7 +22,7 @@ public final class NBThrottleTest extends BaseTestCase {
     private final int MILLIS_PER_TICK = 1000 / TICKS_PER_SECOND;
     
     private Data[] DATA = new Data[50];
-    private NBThrottle THROTTLE = new NBThrottle(true, RATE);
+    private NBThrottle THROTTLE;
 
 	public NBThrottleTest(String name) {
 		super(name);
@@ -36,7 +36,9 @@ public final class NBThrottleTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void setUp() {
+	public void setUp() throws Exception {
+	    THROTTLE = newNBThrottle(true, RATE);
+	    
 	    for(int i = 0; i < DATA.length; i++)
 	        DATA[i] = new Data(THROTTLE);
 
@@ -148,12 +150,13 @@ public final class NBThrottleTest extends BaseTestCase {
 	    assertEquals(0, DATA[0].STUB.available());
 	    assertEquals(0, DATA[1].STUB.available());
 	    
-	    System.out.println("ABOUT TO TICK");
 	    THROTTLE.tick(1000 + MILLIS_PER_TICK + 1);
 	    assertEquals(1, DATA[1].STUB.available());
 	    THROTTLE.selectableKeys(set(DATA[1].KEY));
         assertEquals(BYTES_PER_TICK, DATA[1].ATTACHMENT.given());
     }
+    
+    // make sure 
     
     private Set set(Object o) {
         Set set = new HashSet();
@@ -169,4 +172,13 @@ public final class NBThrottleTest extends BaseTestCase {
             ATTACHMENT.setThrottle(throttle);
         }
     }
+    
+    private NBThrottle newNBThrottle(boolean write, float bps) throws Exception {
+        return (NBThrottle)PrivilegedAccessor.invokeConstructor(
+            NBThrottle.class,
+            new Object[] { new Boolean(write), new Float(bps), Boolean.FALSE  },
+            new Class[] { Boolean.TYPE, Float.TYPE, Boolean.TYPE }
+       );
+    }
+                                
 }

@@ -37,6 +37,7 @@ class StubReadWriteObserver implements ReadWriteObserver {
         shutdown = true;
     }
     
+    void setAmountToUse(int toUse) { amtToUse = toUse; }
     int read() { return read; }
     int wrote() { return wrote; }
     int given() { return amountGiven; }
