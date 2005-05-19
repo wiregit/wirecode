@@ -171,7 +171,10 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         // if we wrote anything, consider this flushed
         if (buf.position() > 0) {
             lastFlushTime = now;
-            buf.compact();
+            if (buf.hasRemaining())
+                buf.compact();
+            else
+                buf.clear();
         } else  {
             buf.position(buf.limit()).limit(buf.capacity());
         }

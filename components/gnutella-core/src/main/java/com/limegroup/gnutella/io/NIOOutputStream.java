@@ -63,7 +63,13 @@ class NIOOutputStream implements WriteObserver {
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
-            buffer.compact();
+            if (buffer.position() > 0) {
+                if (buffer.hasRemaining()) 
+                    buffer.compact();
+                else 
+                    buffer.clear();
+            } else 
+                buffer.position(buffer.limit()).limit(buffer.capacity());
             
             // If there's room in the buffer, we're interested in reading.
             if(buffer.hasRemaining())
