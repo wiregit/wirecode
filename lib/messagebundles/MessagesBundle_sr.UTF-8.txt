@@ -675,6 +675,11 @@ SEARCH_BACK_TO_SEARCH=Натраг на претрагу
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 SEARCH_BLOCK_HOST=Да ли желите да блокирате резултате претраге који потичу са рачунара на адреси
 
+#### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_LABEL=
+#### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
+
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
 MEDIA_ANY_TYPE=Било који
@@ -4035,8 +4040,3 @@ UPLOAD_STAT_QUEUED=У реду за чекање
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
-#### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_LABEL=
-#### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=

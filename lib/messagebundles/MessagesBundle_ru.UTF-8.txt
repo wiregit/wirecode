@@ -675,6 +675,11 @@ SEARCH_BACK_TO_SEARCH=Вернуться к поиску
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 SEARCH_BLOCK_HOST=Блокировать результаты поиска от хоста
 
+#### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_LABEL=
+#### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
+
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
 MEDIA_ANY_TYPE=Все типы
@@ -4035,8 +4040,3 @@ STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Информация об входяще�
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
-#### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_LABEL=
-#### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
