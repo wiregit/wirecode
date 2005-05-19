@@ -1,6 +1,6 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Belarussian - Belarus
+# Specialization for: Belarusian - Belarus
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=be
@@ -11,8 +11,8 @@ LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Cyrl
 LOCALE_SCRIPT_NAME=Cyrillic
-LOCALE_ENGLISH_LANGUAGE_NAME=Belarussian
-#? LOCALE_NSIS_NAME=
+LOCALE_ENGLISH_LANGUAGE_NAME=Belarusian
+LOCALE_NSIS_NAME=Belarusian
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this

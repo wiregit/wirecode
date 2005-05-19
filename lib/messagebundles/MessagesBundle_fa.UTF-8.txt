@@ -12,7 +12,7 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Arab
 LOCALE_SCRIPT_NAME=Semitic (Arabic)
 LOCALE_ENGLISH_LANGUAGE_NAME=Persian (Farsi)
-#? LOCALE_NSIS_NAME=
+LOCALE_NSIS_NAME=Farsi
 
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
