@@ -4,15 +4,17 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+
+import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.WriteObserver;
 
-public class WriteBufferChannel implements InterestWriteChannel {
+public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
     private ByteBuffer buffer;
     private boolean closed = false;
-    private InterestWriteChannel channel;
-    private WriteObserver observer;
-    private boolean status;
+    public InterestWriteChannel channel;
+    public WriteObserver observer;
+    public boolean status;
     private boolean shutdown;
     
     public WriteBufferChannel(int size) {
@@ -104,6 +106,14 @@ public class WriteBufferChannel implements InterestWriteChannel {
         return status;
     }
     
+    public void setWriteChannel(InterestWriteChannel chan) {
+        channel = chan;
+    }
+    
+    public InterestWriteChannel getWriteChannel() {
+        return channel;
+    }
+    
     public void interest(WriteObserver observer, boolean status) {
         this.observer = observer;
         this.status = status;
@@ -122,5 +132,13 @@ public class WriteBufferChannel implements InterestWriteChannel {
     
     public void handleIOException(IOException iox) {
         throw (RuntimeException)new UnsupportedOperationException("not implemented").initCause(iox);
+    }
+    
+    public int position() {
+        return buffer.position();
+    }
+    
+    public int limit() {
+        return buffer.limit();
     }
 }
