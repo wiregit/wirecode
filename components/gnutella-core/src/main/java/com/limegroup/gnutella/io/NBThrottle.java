@@ -71,14 +71,17 @@ public class NBThrottle implements Throttle {
     
     private static final Log LOG = LogFactory.getLog(NBThrottle.class);
     
-    /** The number of windows per second. */
-    private static final int TICKS_PER_SECOND = 10;
-    /** The number of milliseconds in each tick. */
-    private static final int MILLIS_PER_TICK = 1000 / TICKS_PER_SECOND;
     /** The maximum amount to ever give anyone. */
     private static final int MAXIMUM_TO_GIVE = 1400;
     /** The minimum amount to ever give anyone. */
     private static final int MINIMUM_TO_GIVE = 30;
+
+    private static final int DEFAULT_TICK_TIME = 100;
+    
+    /** The number of windows per second. */
+    private final int TICKS_PER_SECOND;
+    /** The number of milliseconds in each tick. */
+    private final int MILLIS_PER_TICK;
     
     /** Whether or not this throttle is for writing. (If false, it's for reading.) */
     private final boolean _write;
@@ -132,10 +135,13 @@ public class NBThrottle implements Throttle {
      *
      * Use 'true' for writing, 'false' for reading.
      */
-    public NBThrottle(boolean forWriting, float bytesPerSecond) {
-        this(forWriting, bytesPerSecond, true);
+    public NBThrottle(boolean forWriting, float bytesPerSecond, int millisPerTick) {
+        this(forWriting, bytesPerSecond, true, millisPerTick);
     }
     
+    public NBThrottle(boolean forWriting, float bytesPerSecond) {
+        this(forWriting, bytesPerSecond, DEFAULT_TICK_TIME);
+    }
     /**
      * Constructs a new Throttle that is either for writing or reading, allowing
      * the given bytesPerSecond.
@@ -145,7 +151,10 @@ public class NBThrottle implements Throttle {
      * If addToDispatcher is false, NIODispatcher is not notified about the Throttle,
      * so it will not be automatically ticked or told of selectable keys.
      */
-    protected NBThrottle(boolean forWriting, float bytesPerSecond, boolean addToDispatcher) {
+    protected NBThrottle(boolean forWriting, float bytesPerSecond, 
+            boolean addToDispatcher, int millisPerTick) {
+        MILLIS_PER_TICK = Math.max(50,millisPerTick);
+        TICKS_PER_SECOND = 1000 / millisPerTick;
         _write = forWriting;
         _processOp = forWriting ? SelectionKey.OP_WRITE : SelectionKey.OP_READ;
         _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);

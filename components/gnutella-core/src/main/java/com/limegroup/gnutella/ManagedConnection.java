@@ -139,7 +139,8 @@ public class ManagedConnection extends Connection
     
     /** Non-blocking throttle for outgoing messages. */
     private final static Throttle _nbThrottle =
-        new NBThrottle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
+        new NBThrottle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH, 
+                CompositeQueue.QUEUE_TIME / ConnectionSettings.NUM_CONNECTIONS.getValue());
                                                             
     /** Blocking throttle for outgoing messages. */
     private final static BandwidthThrottle _throttle=

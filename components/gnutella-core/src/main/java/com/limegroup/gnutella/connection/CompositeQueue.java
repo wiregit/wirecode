@@ -79,7 +79,7 @@ public class CompositeQueue implements MessageQueue {
     private static final int BIG_QUEUE_TIME=10*1000;
     
     /** The max time to keep queries, pings, and pongs in the queues, in milliseconds */
-    private static final int QUEUE_TIME=5*1000;
+    public static final int QUEUE_TIME=5*1000;
     
     /** The number of different priority levels. */
     private static final int PRIORITIES = 8;
