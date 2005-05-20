@@ -904,6 +904,10 @@ public class HTTPDownloader implements BandwidthTracker {
                 int low = responseRange.low;
                 int high = responseRange.high + 1;
                 synchronized(this) {
+                    // were we stolen from in the meantime?
+                    if (_disconnect)
+                        throw new IOException("stolen from");
+                    
                     // Make sure that the range they gave us is a subrange
                     // of what we wanted in the first place.
                     if(low < _initialReadingPoint ||
