@@ -36,9 +36,3 @@ public class Assert {
         Assert.that(ok,"");
     }
 }
-    
-class AssertFailure extends RuntimeException {
-    AssertFailure(String msg) {
-        super(msg);
-    }
-}
