@@ -237,16 +237,16 @@ public class VerifyingFile {
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
-        if (LOG.isDebugEnabled())
-            LOG.debug("leasing white, state: "+dumpState());
+        if (LOG.isInfoEnabled())
+            LOG.info("leasing white, state: "+dumpState());
         IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
         freeBlocks.delete(partialBlocks);
         freeBlocks.delete(discardedBlocks);
         freeBlocks.delete(pendingBlocks);
         Interval ret = freeBlocks.removeFirst();
-        if (LOG.isDebugEnabled())
-            LOG.debug(" freeblocks: "+freeBlocks+" selected "+ret);
+        if (LOG.isInfoEnabled())
+            LOG.info(" freeblocks: "+freeBlocks+" selected "+ret);
         leaseBlock(ret);
         return ret;
     }
@@ -292,8 +292,8 @@ public class VerifyingFile {
      * Removes the specified internal from the set of leased intervals.
      */
     public synchronized void releaseBlock(Interval in) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Releasing interval: " + in+" state "+dumpState());
+        if(LOG.isInfoEnabled())
+            LOG.info("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);
     }
 	
@@ -391,8 +391,8 @@ public class VerifyingFile {
         while (!isComplete() && getBlockSize() == completedSize) {
             if(storedException != null)
                 throw new DiskException(storedException);
-            if (LOG.isDebugEnabled())
-                LOG.debug("waiting for a pending chunk to verify or write..");
+            if (LOG.isInfoEnabled())
+                LOG.info("waiting for a pending chunk to verify or write..");
             wait();
         }
     }
@@ -442,8 +442,8 @@ public class VerifyingFile {
      * than chunksize and finishes at exact chunk offset.
      */
     private synchronized Interval allignInterval(Interval temp, int chunkSize) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
+        if (LOG.isInfoEnabled())
+            LOG.info("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
         
         Interval interval;
         
@@ -454,7 +454,7 @@ public class VerifyingFile {
         
         // if we're already covering an exact chunk, return 
         if (chunkStart == temp.high+1 && intervalSize == chunkSize) {
-            LOG.debug("already at exact chunk");
+            LOG.info("already at exact chunk");
             return temp;
         }
         
@@ -466,8 +466,8 @@ public class VerifyingFile {
         } else
             interval = temp;
 
-        if (LOG.isDebugEnabled())
-            LOG.debug("aligned to interval: "+interval+" state is: "+dumpState());
+        if (LOG.isInfoEnabled())
+            LOG.info("aligned to interval: "+interval+" state is: "+dumpState());
         
         return interval;
     }
@@ -575,8 +575,8 @@ public class VerifyingFile {
      * per method call unless the downloader is being deserialized from disk
      */
     private synchronized List findVerifyableBlocks() {
-        if (LOG.isDebugEnabled())
-            LOG.debug("trying to find verifyable blocks out of "+partialBlocks);
+        if (LOG.isTraceEnabled())
+            LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
         
         List verifyable = new ArrayList(2);
         List partial = partialBlocks.getAllIntervalsAsList();
@@ -627,8 +627,8 @@ public class VerifyingFile {
         
         public void run() {
     		try {
-    		    if(LOG.isDebugEnabled())
-    		        LOG.debug("Writing intvl: " + intvl);
+    		    if(LOG.isTraceEnabled())
+    		        LOG.trace("Writing intvl: " + intvl);
     		        
     			synchronized(fos) {
     				fos.seek(intvl.low);

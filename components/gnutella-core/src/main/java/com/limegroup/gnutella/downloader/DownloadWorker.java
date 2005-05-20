@@ -195,8 +195,11 @@ public class DownloadWorker implements Runnable {
         _myThread = Thread.currentThread();
         
         // if we'll be debugging, we want to distinguish the different workers
-        _myThread.setName("DownloadWorker "+(LOG.isDebugEnabled() ? 
-                _myThread.hashCode() +"" : ""));
+        if (LOG.isDebugEnabled()) {
+            _myThread.setName("DownloadWorker for "+_manager.getFileName()+
+                    " #"+ _myThread.hashCode() );
+        }
+        
         try {
             // if I was interrupted before being started, don't do anything.
             if (_interrupted)

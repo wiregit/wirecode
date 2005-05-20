@@ -2195,6 +2195,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
         Thread connectCreator = new ManagedThread(worker);
         
+        connectCreator.setName("DownloadWorker");
+        
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
