@@ -603,7 +603,7 @@ public abstract class FileManager {
      *  thread (the GUI).
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
-        final File[] directories = new File[SharingSettings.DIRECTORIES_TO_SHARE.length() + 1];
+        final File[] directories = new File[SharingSettings.getSharedDirectoriesCount() + 1];
         synchronized (this) {
             // Reset the file list info
             resetVariables();
@@ -625,7 +625,7 @@ public abstract class FileManager {
             //"C:\dir\..\dir\..\dir", this will do the right thing.
             
             // add 'NetworkShare' as an always shared subdirectory.
-            File[] tmpDirs = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+            File[] tmpDirs = SharingSettings.getSharedDirectories();
             System.arraycopy(tmpDirs, 0, directories, 0, tmpDirs.length);
             directories[tmpDirs.length] = FORCED_SHARE;
 

@@ -342,7 +342,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         SharingSettings.setSaveDirectory(_savedDir);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-        SharingSettings.setDirectories( new File[] { _sharedDir } );
+        SharingSettings.setSharedDirectories( new File[] { _sharedDir } );
     }
     
     /**
