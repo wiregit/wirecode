@@ -187,8 +187,8 @@ public class VerifyingFile {
      */
     public synchronized void writeBlock(long currPos, int length, byte[] buf) {
         
-        if (LOG.isDebugEnabled())
-            LOG.debug(" trying to write block at offset "+currPos+" with size "+length);
+        if (LOG.isTraceEnabled())
+            LOG.trace(" trying to write block at offset "+currPos+" with size "+length);
         
         if(buf.length==0) //nothing to write? return
             return;

@@ -2195,10 +2195,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
         Thread connectCreator = new ManagedThread(worker);
         
-        // if we'll be debugging, we want to distinguish the different workers
-        connectCreator.setName("DownloadWorker "+(LOG.isDebugEnabled() ? 
-                connectCreator.hashCode() +"" : ""));
-        
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
