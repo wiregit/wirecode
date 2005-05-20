@@ -78,8 +78,6 @@ public class NBThrottle implements Throttle {
 
     private static final int DEFAULT_TICK_TIME = 100;
     
-    /** The number of windows per second. */
-    private final int TICKS_PER_SECOND;
     /** The number of milliseconds in each tick. */
     private final int MILLIS_PER_TICK;
     
@@ -130,18 +128,25 @@ public class NBThrottle implements Throttle {
     private boolean _active = false;
     
     /**
-     * Constructs a new Throttle that is either for writing or reading, allowing
-     * the given bytesPerSecond.
-     *
-     * Use 'true' for writing, 'false' for reading.
+     * Constructs a throttle using the default values for latency & availability.
      */
-    public NBThrottle(boolean forWriting, float bytesPerSecond, int millisPerTick) {
-        this(forWriting, bytesPerSecond, true, millisPerTick);
+    public NBThrottle(boolean forWriting, float bytesPerSecond) {
+        this(forWriting, bytesPerSecond, true, DEFAULT_TICK_TIME);
+    }
+
+    /**
+     * Constructs a throttle that is either for reading or reading with the maximum bytesPerSecond.
+     *
+     * The Throttle is tuned to expect 'maxRequestors' requesting data, allowing only the 'maxLatency'
+     * delay between serviced requests for any given requestor.
+     *
+     * The values are only recommendations and may be ignored (within limits) by the Throttle
+     * in order to ensure that the Throttle behaves correctly.
+     */
+    public NBThrottle(boolean forWriting, float bytesPerSecond, int maxRequestors, int maxLatency) {
+        this(forWriting, bytesPerSecond, true,  maxLatency / maxRequestors);
     }
     
-    public NBThrottle(boolean forWriting, float bytesPerSecond) {
-        this(forWriting, bytesPerSecond, DEFAULT_TICK_TIME);
-    }
     /**
      * Constructs a new Throttle that is either for writing or reading, allowing
      * the given bytesPerSecond.
@@ -150,14 +155,17 @@ public class NBThrottle implements Throttle {
      *
      * If addToDispatcher is false, NIODispatcher is not notified about the Throttle,
      * so it will not be automatically ticked or told of selectable keys.
+     *
+     * The throttle will allow bandwidth spreading every millisPerTick, after
+     * enforcing it's between 50 & 100.
      */
     protected NBThrottle(boolean forWriting, float bytesPerSecond, 
-            boolean addToDispatcher, int millisPerTick) {
-        MILLIS_PER_TICK = Math.max(50,millisPerTick);
-        TICKS_PER_SECOND = 1000 / millisPerTick;
+                         boolean addToDispatcher, int millisPerTick) {
+        MILLIS_PER_TICK = Math.min(100, Math.max(50,millisPerTick));
+        int ticksPerSecond = 1000 / millisPerTick;
         _write = forWriting;
         _processOp = forWriting ? SelectionKey.OP_WRITE : SelectionKey.OP_READ;
-        _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);
+        _bytesPerTick = (int)((float)bytesPerSecond / ticksPerSecond);
         if(addToDispatcher)
             NIODispatcher.instance().addThrottle(this);
     }

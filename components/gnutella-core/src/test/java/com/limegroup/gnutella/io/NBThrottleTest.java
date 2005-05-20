@@ -37,7 +37,7 @@ public final class NBThrottleTest extends BaseTestCase {
 	}
 	
 	public void setUp() throws Exception {
-	    THROTTLE = newNBThrottle(true, RATE);
+	    THROTTLE = newNBThrottle(true, RATE, MILLIS_PER_TICK);
 	    
 	    for(int i = 0; i < DATA.length; i++)
 	        DATA[i] = new Data(THROTTLE);
@@ -48,14 +48,14 @@ public final class NBThrottleTest extends BaseTestCase {
 	}
 	
 	// nothing should have bandwidth if nothing was interested
-	public void testNoBandwidthIfNothingInterested() {
+	public void testNoBandwidthIfNothingInterested() throws Exception {
         THROTTLE.tick(0);
 	    for(int i = 0; i < DATA.length; i++)
 	        assertEquals(0, DATA[i].STUB.available());
     }   
 	
 	// only those that were interested should be given bandwidth.
-	public void testBandwidthOnTickWithInterest() {
+	public void testBandwidthOnTickWithInterest() throws Exception {
         // Set interest on some things, tick & check.
 	    for(int i = 0; i < DATA.length; i+=3)
 	        THROTTLE.interest(DATA[i].STUB);
@@ -67,7 +67,7 @@ public final class NBThrottleTest extends BaseTestCase {
     
     // only those that were NEWLY interested should be given bandwidth
     // on the second tick.
-    public void testBandwidthOnTickToNewInterestOnly() {
+    public void testBandwidthOnTickToNewInterestOnly() throws Exception {
 	    for(int i = 0; i < DATA.length; i+=3)
 	        THROTTLE.interest(DATA[i].STUB);
 	    THROTTLE.tick(1000);
@@ -85,7 +85,7 @@ public final class NBThrottleTest extends BaseTestCase {
     
     // make sure that if bandwidth is still available, ticks within the tick interval
     // will spread bandwidth also.
-    public void testBandwidthWithinTickIntervalSpreadsAvailable() {
+    public void testBandwidthWithinTickIntervalSpreadsAvailable() throws Exception {
 	    for(int i = 0; i < DATA.length; i+=3)
 	        THROTTLE.interest(DATA[i].STUB);
 	    THROTTLE.tick(1000);
@@ -100,7 +100,7 @@ public final class NBThrottleTest extends BaseTestCase {
     }
     
     // make sure it gives no bandwidth if it isn't active (within a selectableKeys call)
-    public void testNoRequestIfNotActive() {
+    public void testNoRequestIfNotActive() throws Exception {
         THROTTLE.tick(1000);
         assertEquals(0, THROTTLE.request());
     }
@@ -114,7 +114,7 @@ public final class NBThrottleTest extends BaseTestCase {
     }
     
     // make sure we give bandwidth within a selectableKeys after it was active.
-    public void testRequestWithinSelectable() {
+    public void testRequestWithinSelectable() throws Exception {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
         THROTTLE.selectableKeys(set(DATA[0].KEY));
@@ -122,7 +122,7 @@ public final class NBThrottleTest extends BaseTestCase {
     } 
     
     // make sure that no bandwidth is given if we're ticked and bandwidth is used up.
-    public void testNoBandwidthIfEmptyWithinTickInterval() {
+    public void testNoBandwidthIfEmptyWithinTickInterval() throws Exception {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
         assertEquals(1, DATA[0].STUB.available());
@@ -137,7 +137,7 @@ public final class NBThrottleTest extends BaseTestCase {
     }
     
     // make sure bandwidth fills back up after tick interval
-    public void testBandwidthFillsAfterTickInterval() {
+    public void testBandwidthFillsAfterTickInterval() throws Exception {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
         assertEquals(1, DATA[0].STUB.available());
@@ -156,12 +156,103 @@ public final class NBThrottleTest extends BaseTestCase {
         assertEquals(BYTES_PER_TICK, DATA[1].ATTACHMENT.given());
     }
     
-    // make sure 
+    // make sure that if the first interested ready host used up all the bandwidth,
+    // the next one won't be told to write.
+    public void testStopsReadiesWhenNoneLeft() throws Exception {
+        // interest in two different ticks to ensure that 0 is in line before 1.
+        THROTTLE.interest(DATA[0].STUB);
+        THROTTLE.tick(1000);
+        THROTTLE.interest(DATA[1].STUB);
+        THROTTLE.tick(2000); 
+        
+        THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
+        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(0, DATA[1].ATTACHMENT.given());
+        assertEquals(1, DATA[0].ATTACHMENT.wrote());
+        assertEquals(0, DATA[1].ATTACHMENT.wrote());
+    }
+
+    // make sure that releases are added back into the pool & given to future folks.
+    public void testReleaseGivesToReadies() throws Exception {
+        // interest in two different ticks to ensure that 0 is in line before 1.
+        THROTTLE.interest(DATA[0].STUB);
+        THROTTLE.tick(1000);
+        THROTTLE.interest(DATA[1].STUB);
+        THROTTLE.tick(2000); 
+        
+        DATA[0].ATTACHMENT.setAmountToUse(BYTES_PER_TICK - 100);
+        THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
+        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(100, DATA[1].ATTACHMENT.given());
+        assertEquals(1, DATA[0].ATTACHMENT.wrote());
+        assertEquals(1, DATA[1].ATTACHMENT.wrote());
+    }
+    
+    // make sure that if someone didn't get to write on this turn, they'll be told to write
+    // before others on the next turn.
+    public void testInterestGivenReadiesInOrderThroughSuccessiveCalls() throws Exception {
+        THROTTLE.interest(DATA[0].STUB);
+        THROTTLE.tick(1000);
+        THROTTLE.interest(DATA[1].STUB);
+        THROTTLE.tick(2000); 
+        
+        THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
+        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(0, DATA[1].ATTACHMENT.given());
+        assertEquals(1, DATA[0].ATTACHMENT.wrote());
+        assertEquals(0, DATA[1].ATTACHMENT.wrote());
+        
+        //[1] didn't get used, so it's still in line.
+        THROTTLE.interest(DATA[0].STUB);
+        THROTTLE.tick(3000);
+        DATA[1].ATTACHMENT.setAmountToUse(BYTES_PER_TICK - 50);
+        THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
+        assertEquals(BYTES_PER_TICK, DATA[1].ATTACHMENT.given());
+        assertEquals(50, DATA[0].ATTACHMENT.given());
+        assertEquals(1, DATA[1].ATTACHMENT.wrote());
+        assertEquals(2, DATA[0].ATTACHMENT.wrote());
+    }
+    
+    // make sure that uninterested parties aren't given any data to write.
+    public void testUniterestedNotUsed() throws Exception {
+        THROTTLE.tick(1000);
+        THROTTLE.selectableKeys(set(DATA[0].KEY));
+        assertEquals(0, DATA[0].ATTACHMENT.given());
+        assertEquals(0, DATA[0].ATTACHMENT.wrote());
+    }
+
+    // tests that the tick interval is dependent on the millis per tick.
+    public void testTickFollowsGivenMillis() throws Exception {
+        THROTTLE = newNBThrottle(true, 5000, 77);
+        fixDataThrottles();
+        
+        THROTTLE.interest(DATA[0].STUB);
+        THROTTLE.tick(1000);
+        assertEquals(1, DATA[0].STUB.available());
+        THROTTLE.selectableKeys(set(DATA[0].KEY));
+                
+        THROTTLE.interest(DATA[1].STUB);
+        assertEquals(0, DATA[1].STUB.available());
+        THROTTLE.tick(1076);
+        assertEquals(0, DATA[1].STUB.available());
+        THROTTLE.tick(1077);
+        assertEquals(1, DATA[1].STUB.available());
+    }
     
     private Set set(Object o) {
         Set set = new HashSet();
         set.add(o);
         return set;
+    }
+    
+    private Set set(Object[] os) {
+        Set set = new HashSet(Arrays.asList(os));
+        return set;
+    }
+    
+    private void fixDataThrottles() {
+        for(int i = 0; i < DATA.length; i++)
+            DATA[i].ATTACHMENT.setThrottle(THROTTLE);
     }
 	
 	private static class Data {
@@ -173,11 +264,11 @@ public final class NBThrottleTest extends BaseTestCase {
         }
     }
     
-    private NBThrottle newNBThrottle(boolean write, float bps) throws Exception {
+    private NBThrottle newNBThrottle(boolean write, float bps, int millisPerTick) throws Exception {
         return (NBThrottle)PrivilegedAccessor.invokeConstructor(
             NBThrottle.class,
-            new Object[] { new Boolean(write), new Float(bps), Boolean.FALSE  },
-            new Class[] { Boolean.TYPE, Float.TYPE, Boolean.TYPE }
+            new Object[] { new Boolean(write), new Float(bps), Boolean.FALSE, new Integer(millisPerTick)  },
+            new Class[] { Boolean.TYPE, Float.TYPE, Boolean.TYPE, Integer.TYPE }
        );
     }
                                 

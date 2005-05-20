@@ -138,9 +138,10 @@ public class ManagedConnection extends Connection
     private final Object QRP_LOCK=new Object();
     
     /** Non-blocking throttle for outgoing messages. */
-    private final static Throttle _nbThrottle =
-        new NBThrottle(true, TOTAL_OUTGOING_MESSAGING_BANDWIDTH, 
-                CompositeQueue.QUEUE_TIME / ConnectionSettings.NUM_CONNECTIONS.getValue());
+    private final static Throttle _nbThrottle = new NBThrottle(true,
+                                                       TOTAL_OUTGOING_MESSAGING_BANDWIDTH,
+                                                       ConnectionSettings.NUM_CONNECTIONS.getValue(),
+                                                       CompositeQueue.QUEUE_TIME);
                                                             
     /** Blocking throttle for outgoing messages. */
     private final static BandwidthThrottle _throttle=
