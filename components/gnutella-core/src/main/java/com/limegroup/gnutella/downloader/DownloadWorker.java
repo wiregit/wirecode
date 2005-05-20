@@ -176,8 +176,9 @@ public class DownloadWorker implements Runnable {
     
     /**
      * Whether I should release the ranges that I have leased for download
+     * TODO: un-volatilize after fixing the assertion failures
      */
-    private boolean _shouldRelease;
+    private volatile boolean _shouldRelease;
     
     DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, 
             VerifyingFile vf, Object lock){
@@ -739,13 +740,15 @@ public class DownloadWorker implements Runnable {
     }
     
     String getInfo() {
-        return this + "hashcode " + hashCode() + " will release? "
-                + _shouldRelease + " interrupted? " + _interrupted
-                + " active? " + _downloader.isActive() 
-                + " initial reading " + _downloader.getInitialReadingPoint()
-                + " initial writing " + _downloader.getInitialWritingPoint()
-                + " amount to read " + _downloader.getAmountToRead()
-                + " amount read " + _downloader.getAmountRead();
+        synchronized(_downloader) {
+            return this + "hashcode " + hashCode() + " will release? "
+            + _shouldRelease + " interrupted? " + _interrupted
+            + " active? " + _downloader.isActive() 
+            + " initial reading " + _downloader.getInitialReadingPoint()
+            + " initial writing " + _downloader.getInitialWritingPoint()
+            + " amount to read " + _downloader.getAmountToRead()
+            + " amount read " + _downloader.getAmountRead();
+        }
     }
     
     /** 
