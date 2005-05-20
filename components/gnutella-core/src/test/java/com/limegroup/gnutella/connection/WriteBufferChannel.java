@@ -89,6 +89,7 @@ public class WriteBufferChannel implements InterestWriteChannel {
     
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
+        channel.interest(this, true);
     }
     
     public void resize(int size) {

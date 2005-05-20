@@ -141,6 +141,8 @@ public final class DeflaterWriterTest extends BaseTestCase {
 	
 	private byte[] data(int size) {
 	    byte[] data = new byte[size];
+	   // for(int i = 0; i < size; i++)
+	     //   data[i] = (byte)(i % 10);
 	    RND.nextBytes(data);
 	    return data;
 	}
