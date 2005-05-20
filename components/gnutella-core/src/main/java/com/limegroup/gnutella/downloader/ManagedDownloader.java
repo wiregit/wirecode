@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.DownloadManager;
@@ -2250,6 +2251,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+    synchronized String getWorkersInfo() {
+        String workerState = "";
+        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
+            DownloadWorker worker = (DownloadWorker) iter.next();
+            workerState+=worker.getInfo();
+        }
+        return workerState;
+    }
     /**
      * @return The alternate locations we have successfully downloaded from
      */

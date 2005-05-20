@@ -18,10 +18,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import junit.framework.AssertionFailedError;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.ByteReader;

@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -701,6 +702,9 @@ public class DownloadWorker implements Runnable {
                 DownloadStat.FAILED_HTTP10.incrementStat();
             problem = true;
 			_manager.workerFailed(this);
+        } catch (AssertFailure bad) {
+            throw new AssertFailure("worker failed "+getInfo()+
+                    " all workers: "+_manager.getWorkersInfo(),bad);
         } finally {
             // if we got too corrupted, notify the user
             if (_commonOutFile.isHopeless())
@@ -732,6 +736,16 @@ public class DownloadWorker implements Runnable {
         }
         
         return !problem;
+    }
+    
+    String getInfo() {
+        return this + "hashcode " + hashCode() + " will release? "
+                + _shouldRelease + " interrupted? " + _interrupted
+                + " active? " + _downloader.isActive() 
+                + " initial reading " + _downloader.getInitialReadingPoint()
+                + " initial writing " + _downloader.getInitialWritingPoint()
+                + " amount to read " + _downloader.getAmountToRead()
+                + " amount read " + _downloader.getAmountRead();
     }
     
     /** 
