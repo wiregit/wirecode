@@ -138,6 +138,8 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
             upper.handleWrite();
         
         long now = System.currentTimeMillis();
+        if (lastFlushTime == 0)
+            lastFlushTime = now;
         if (now - lastFlushTime > MAX_TIME)
             flush(now);
                  
