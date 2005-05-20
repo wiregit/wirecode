@@ -306,6 +306,11 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("5 jpg", query);
         qr = QueryRequest.createQuery(query);
         QueryRequest.createMulticastQuery(qr);
+		
+		// test with allow numbers switched on
+		assertEquals("500 jpg", StringUtils.createQueryString("500 jpg", true));
+		assertEquals("file 42 name minus numbers",
+				StringUtils.createQueryString("file and 42-name_minus #numbers", true));
     }
     
     private void containsAll(String match, String query) {
@@ -353,6 +358,16 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         valid.clear();
         valid.add("file");
         assertEquals(valid, StringUtils.keywords("a file.extension"));
+
+		// test for allowNumers == true
+		valid.clear();
+		valid.add("11");
+		valid.add("test");
+		valid.add("13");
+		valid.add("pg");
+		// everything behind the last dot is removed by rip extension
+		valid.add("3");
+		assertEquals(valid, StringUtils.keywords("11 test pg-13 3.1415947", true));
     }
     
     public void testRipExtension() {

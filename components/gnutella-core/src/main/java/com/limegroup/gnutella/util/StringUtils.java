@@ -557,7 +557,7 @@ public class StringUtils {
     public static final Set keywords(String fileName, boolean allowNumbers) {
         //Remove extension
         fileName = ripExtension(fileName);
-        
+		
         //Separate by whitespace and _, etc.
         Set ret=new LinkedHashSet();
         String delim = FileManager.DELIMITERS;
