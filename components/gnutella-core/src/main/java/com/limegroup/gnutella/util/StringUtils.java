@@ -571,7 +571,7 @@ public class StringUtils {
             try {                
                 //Ignore if a number
                 //(will trigger NumberFormatException if not)
-                new Double(currToken);
+                Double.valueOf(currToken);
 				if (!allowNumbers) {
 					continue;
 				}
