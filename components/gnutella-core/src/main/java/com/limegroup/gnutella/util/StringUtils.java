@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -442,10 +443,26 @@ public class StringUtils {
     	return str.toLowerCase().indexOf(substring.toLowerCase());
     }
 
+	/**
+	 * Convenience wrapper for 
+	 * {@link #createQueryString(String, boolean) createQueryString(String, false)}.
+	 * @param name
+	 * @return
+	 */
+	public static String createQueryString(String name) {
+		return createQueryString(name, false);
+	}
+	
     /**
+     * 
      * Returns a string to be used for querying from the given name.
+     *
+     * @param name
+     * @param allowNumbers whether numbers in the argument should be kept in
+     * the result
+     * @return
      */
-    public static String createQueryString(String name) {
+    public static String createQueryString(String name, boolean allowNumbers) {
         if(name == null)
             throw new NullPointerException("null name");
         
@@ -457,7 +474,7 @@ public class StringUtils {
         final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
 
         //Get the set of keywords within the name.
-        Set intersection = keywords(name);
+        Set intersection = keywords(name, allowNumbers);
 
         if (intersection.size() < 1) { // nothing to extract!
             retString = StringUtils.removeIllegalChars(name);
@@ -518,16 +535,31 @@ public class StringUtils {
         return ret.trim();
     }   
 
+	/**
+	 * Convenience wrapper for 
+	 * {@link #keywords(String, boolean) keywords(String, false)}.
+	 * @param fileName
+	 * @return
+	 */
+	public static final Set keywords(String fileName) {
+		return keywords(fileName, false);
+	}
+	
     /**
      * Gets the keywords in this filename, seperated by delimiters & illegal
      * characters.
+     *
+     * @param fileName
+     * @param allowNumbers whether number keywords are retained and returned
+     * in the result set
+     * @return
      */
-    public static final Set keywords(String fileName) {
+    public static final Set keywords(String fileName, boolean allowNumbers) {
         //Remove extension
         fileName = ripExtension(fileName);
         
         //Separate by whitespace and _, etc.
-        Set ret=new HashSet();
+        Set ret=new LinkedHashSet();
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
@@ -540,12 +572,13 @@ public class StringUtils {
                 //Ignore if a number
                 //(will trigger NumberFormatException if not)
                 new Double(currToken);
-                continue;
+				if (!allowNumbers) {
+					continue;
+				}
             } catch (NumberFormatException normalWord) {
-                //Add non-numeric words that are not an (in)definite article.
-                if (!TRIVIAL_WORDS.contains(currToken))
-                    ret.add(currToken);
             }
+			if (!TRIVIAL_WORDS.contains(currToken))
+                ret.add(currToken);
         }
         return ret;
     }
