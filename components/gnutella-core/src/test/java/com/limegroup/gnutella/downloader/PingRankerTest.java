@@ -305,15 +305,22 @@ public class PingRankerTest extends BaseTestCase {
     
     /**
      * Tests that the ranker discards sources that claim they do not have the file.
+     * and informs the mesh handler if such exists
      */
     public void testDiscardsNoFile() throws Exception {
-        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        RemoteFileDesc noFile = newRFDWithURN("1.2.3.4",3); 
+        ranker.addToPool(noFile);
+        MockMesh handler = new MockMesh();
+        ranker.setMeshHandler(handler);
         assertTrue(ranker.hasMore());
         MockPong pong = new MockPong(false,true,0,true,false,true,null,null,null);
         assertFalse(pong.hasFile());
         
         ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
         assertFalse(ranker.hasMore());
+        assertEquals(noFile,handler.rfd);
+        assertFalse(handler.good);
+        ranker.setMeshHandler(null);
     }
     
     /**
@@ -624,10 +631,22 @@ public class PingRankerTest extends BaseTestCase {
             return firewalled;
         }
         
+        public boolean isGGEPPong() {
+            return true;
+        }
         
     }
 
     private static void assertIpPortEquals(IpPort a, Object b) {
         assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
+    }
+    
+    static class MockMesh implements MeshHandler {
+        public boolean good;
+        public RemoteFileDesc rfd;
+        public void informMesh(RemoteFileDesc rfd, boolean good) {
+            this.rfd = rfd;
+            this.good = good;
+        }
     }
 }
