@@ -102,81 +102,11 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
     public void testBasicOutOfBandRequest() throws Exception {
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true));
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
+        
         DatagramPacket pack = null;
         UDP_ACCESS = new DatagramSocket();
-        // set up solicited UDP support
-        {
-            drainAll();
-            PingReply pong = 
-                PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS.getLocalPort(), 
-                                 InetAddress.getLocalHost().getAddress(), 
-                                 10, 10, true, 900, true);
-            ULTRAPEER[0].send(pong);
-            ULTRAPEER[0].flush();
-
-            // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(500);
-            pack = new DatagramPacket(new byte[1000], 1000);
-            try {
-                UDP_ACCESS.receive(pack);
-            }
-            catch (IOException bad) {
-               fail("Did not get ping", bad);
-            }
-            InputStream in = new ByteArrayInputStream(pack.getData());
-            // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
-            
-            // send the pong in response to the ping
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS.getLocalPort(), 
-                                    InetAddress.getLocalHost().getAddress(), 
-                                    10, 10, true, 900, true);
-            pong.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      pack.getAddress(), pack.getPort());
-            UDP_ACCESS.send(pack);
-        }
-
-        // set up unsolicited UDP support
-        {
-            // tell the UP i can support UDP connect back
-            MessagesSupportedVendorMessage support = 
-                MessagesSupportedVendorMessage.instance();
-            ULTRAPEER[0].send(support);
-            ULTRAPEER[0].flush();
-
-            byte[] cbGuid = null;
-            int cbPort = -1;
-            while (cbGuid == null) {
-                try {
-                    Message m = ULTRAPEER[0].receive(TIMEOUT);
-                    if (m instanceof UDPConnectBackVendorMessage) {
-                        UDPConnectBackVendorMessage udp = 
-                            (UDPConnectBackVendorMessage) m;
-                        cbGuid = udp.getConnectBackGUID().bytes();
-                        cbPort = udp.getConnectBackPort();
-                    }
-                }
-                catch (Exception ie) {
-                    fail("did not get the UDP CB message!", ie);
-                }
-            }
-
-            // ok, now just do a connect back to the up so unsolicited support
-            // is all set up
-            PingRequest pr = new PingRequest(cbGuid, (byte) 1, (byte) 0);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pr.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      ULTRAPEER[0].getInetAddress(), cbPort);
-            UDP_ACCESS.send(pack);
-        }
-
         drainAll();
 
         QueryRequest query = 
@@ -192,8 +122,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
-PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true));
-PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
         Message message = null;
         while (!(message instanceof ReplyNumberVendorMessage)) {
             UDP_ACCESS.setSoTimeout(500);

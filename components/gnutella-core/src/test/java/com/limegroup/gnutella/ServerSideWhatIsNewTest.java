@@ -762,7 +762,6 @@ System.out.println("\n...Connecting...\n");
         for (int i = 0; i < uploader.length; i++) {
             uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
             uploader[i].setRate(50);
-//uploader[i].setRate(10);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
             Set urns = new HashSet();
