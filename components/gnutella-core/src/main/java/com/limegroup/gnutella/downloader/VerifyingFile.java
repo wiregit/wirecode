@@ -141,15 +141,15 @@ public class VerifyingFile {
      * Useful for tests.
      */
     public VerifyingFile() {
-        this(-1);
+        this("",-1);
     }
     
     /**
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    public VerifyingFile(int completedSize) {
-        blockChooser = SelectionStrategyFactory.getStrategyFor("", completedSize);
+    public VerifyingFile(String extension, int completedSize) {
+        blockChooser = SelectionStrategyFactory.getStrategyFor(extension, completedSize);
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();

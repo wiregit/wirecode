@@ -164,7 +164,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 if (LOG.isDebugEnabled()) { 
                     LOG.debug("Random download, index="+randomIndex+
                             ", random location="+randomLocations[randomIndex]+
-                            ", range=["+bestLow+","+bestHigh+
+                            ", range=["+bestLow+"-"+bestHigh+
                             "] out of choices "+availableIntervals); 
                 }
                 
