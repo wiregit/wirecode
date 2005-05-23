@@ -192,8 +192,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
-PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true));
-PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
         Message message = null;
         while (!(message instanceof ReplyNumberVendorMessage)) {
             UDP_ACCESS.setSoTimeout(500);
