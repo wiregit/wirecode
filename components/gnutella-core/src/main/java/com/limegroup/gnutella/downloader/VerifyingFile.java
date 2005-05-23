@@ -113,7 +113,7 @@ public class VerifyingFile {
     /**
      * Decides which blocks to start downloading next.
      */
-    private SelectionStrategy blockChooser;
+    private SelectionStrategy blockChooser = null;
     
     /**
      * The hashtree we use to verify chunks, if any
@@ -141,15 +141,14 @@ public class VerifyingFile {
      * Useful for tests.
      */
     public VerifyingFile() {
-        this("",-1);
+        this(-1);
     }
     
     /**
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    public VerifyingFile(String extension, int completedSize) {
-        blockChooser = SelectionStrategyFactory.getStrategyFor(extension, completedSize);
+    public VerifyingFile(int completedSize) {
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
@@ -178,6 +177,10 @@ public class VerifyingFile {
         this.fos =  new RandomAccessFile(file,"rw");
         storedException = null;
         isOpen = true;
+        
+        // Figure out which SelectionStrategy to use
+        blockChooser = SelectionStrategyFactory.getStrategyFor(
+                FileUtils.getFileExtension(file), completedSize);
     }
 
     /**

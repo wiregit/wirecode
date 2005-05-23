@@ -969,9 +969,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             int completedSize = 
                 (int)IncompleteFileManager.getCompletedSize(incompleteFile);
             
-            String fileExtension = FileUtils.getFileExtension(getFileName());
-            
-            commonOutFile = new VerifyingFile(fileExtension, completedSize);
+            commonOutFile = new VerifyingFile(completedSize);
             try {
                 //we must add an entry in IncompleteFileManager
                 incompleteFileManager.

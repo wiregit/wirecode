@@ -426,8 +426,7 @@ public class IncompleteFileManager implements Serializable {
                 Iterator iter = ((List)o).iterator();
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile(FileUtils.getFileExtension(f),
-                            (int) getCompletedSize(f));
+                    vf = new VerifyingFile((int) getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                     vf = new VerifyingFile();
                 }
