@@ -1183,6 +1183,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             return false;            
 
         if (RouterService.acceptedIncomingConnection() ||
+                !other.isFirewalled() ||
                 (other.supportsFWTransfer() && RouterService.canDoFWT())) {
             // See if we have already tried and failed with this location
             // This is only done if the location we're trying is an alternate..

@@ -413,6 +413,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
             if (http != null) {
                 try {
                     _pushAddr = new PushEndpoint(http);
+                    if (!_firewalled)
+                        Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this);
                 } catch (IOException iox) {}
             }
             // currently, we do not need the map to exist during the life of the object
@@ -736,6 +738,10 @@ public class RemoteFileDesc implements IpPort, Serializable {
 	public final boolean isPrivate() {
         return NetworkUtils.isPrivateAddress(_host);
 	}
+    
+    public boolean isFirewalled() {
+        return _firewalled;
+    }
 
     /**
      * Accessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
