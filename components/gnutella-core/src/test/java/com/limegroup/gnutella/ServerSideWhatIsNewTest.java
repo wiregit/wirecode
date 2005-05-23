@@ -84,6 +84,7 @@ public class ServerSideWhatIsNewTest
         //the interactive prompts below.
         ConnectionSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
@@ -91,7 +92,7 @@ public class ServerSideWhatIsNewTest
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
-        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SWARM);
+        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
         SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
@@ -228,7 +229,7 @@ public class ServerSideWhatIsNewTest
     // THIS TEST SHOULD BE RUN FIRST!!
     // just test that What Is New support is advertised
     public void testSendsCapabilitiesMessage() throws Exception {
-
+System.out.println("\n...Connecting...\n");
         testUP = connect(rs, 6355, true);
 
         // send a MessagesSupportedMessage and capabilities VM
@@ -514,7 +515,7 @@ public class ServerSideWhatIsNewTest
                      cTime);
 
         // now just send another What Is New query and make sure everything
-        // is kosher - probbably overkill but whatever....
+        // is kosher - probably overkill but whatever....
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -742,6 +743,7 @@ public class ServerSideWhatIsNewTest
 
     // download a file and make sure the creation time given back is stored...
     public void testSwarmDownloadCapturesOlderCreationTime() throws Exception {
+        
         FileManager fm = rs.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
 
@@ -760,6 +762,7 @@ public class ServerSideWhatIsNewTest
         for (int i = 0; i < uploader.length; i++) {
             uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i);
             uploader[i].setRate(50);
+//uploader[i].setRate(10);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
             Set urns = new HashSet();
