@@ -141,7 +141,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
             
         while(true) {
             // Step 1: See if there is any pending deflated data to be written.
-            int totalWrote = channel.write(outgoing);
+            channel.write(outgoing);
             if(outgoing.hasRemaining())
                 return true; // there is still deflated data that is pending a write.
 
