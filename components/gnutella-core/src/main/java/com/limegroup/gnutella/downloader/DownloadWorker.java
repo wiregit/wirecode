@@ -417,6 +417,7 @@ public class DownloadWorker implements Runnable {
         
         if (!_shouldRelease)
             return;
+        _shouldRelease = false;
         
         int high, low;
         synchronized(_downloader) {
@@ -984,7 +985,6 @@ public class DownloadWorker implements Runnable {
     NoSuchElementException,  IOException, TryAgainLaterException, 
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
-        _shouldRelease=false;
         
         //If this _downloader is a partial source, don't attempt to steal...
         //too confusing, too many problems, etc...
