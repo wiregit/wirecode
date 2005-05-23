@@ -75,6 +75,7 @@ public class PingRankerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
+        ranker.setMeshHandler(new MockMesh(ranker));
         DownloadSettings.WORKER_INTERVAL.setValue(1);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
         DownloadSettings.PING_BATCH.revertToDefault();
@@ -151,7 +152,7 @@ public class PingRankerTest extends BaseTestCase {
         push.add(pe);
         
         MockPong pong = new MockPong(true,true,1,false,false,false,null,alts,push);
-        MockMesh mesh = new MockMesh();
+        MockMesh mesh = new MockMesh(ranker);
         ranker.setMeshHandler(mesh);
         ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
         assertNotNull(mesh.sources);
@@ -314,7 +315,7 @@ public class PingRankerTest extends BaseTestCase {
     public void testDiscardsNoFile() throws Exception {
         RemoteFileDesc noFile = newRFDWithURN("1.2.3.4",3); 
         ranker.addToPool(noFile);
-        MockMesh handler = new MockMesh();
+        MockMesh handler = new MockMesh(ranker);
         ranker.setMeshHandler(handler);
         assertTrue(ranker.hasMore());
         MockPong pong = new MockPong(false,true,0,true,false,true,null,null,null);
@@ -646,6 +647,10 @@ public class PingRankerTest extends BaseTestCase {
     }
     
     static class MockMesh implements MeshHandler {
+        private final SourceRanker ranker;
+        public MockMesh(SourceRanker ranker) {
+            this.ranker = ranker;
+        }
         public boolean good;
         public RemoteFileDesc rfd;
         public Collection sources;
@@ -656,6 +661,7 @@ public class PingRankerTest extends BaseTestCase {
         
         public void addPossibleSources(Collection c) {
             sources = c;
+            ranker.addToPool(c);
         }
     }
 }

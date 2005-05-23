@@ -189,7 +189,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private HashSet _altLocsReceived;
+	private HashSet _locationsReceived;
 
     /**
      *  The good locations to send the uploaders as in the alts list
@@ -320,10 +320,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
         URN urn = rfd.getSHA1Urn();
-        if (urn!=null) 
-        	_altLocsReceived = new HashSet();
-        else
-        	_altLocsReceived = null;
+        _locationsReceived = new HashSet();
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
         _goodPushLocs = new HashSet();
@@ -347,8 +344,8 @@ public class HTTPDownloader implements BandwidthTracker {
      *  received locations, can be <tt>null</tt> if we could not create
      *  a collection, or could be empty
      */
-    Collection getAltLocsReceived() { 
-	    return _altLocsReceived;
+    Collection getLocationsReceived() { 
+	    return _locationsReceived;
     }
     
     void addSuccessfulAltLoc(AlternateLocation loc) {
@@ -1072,14 +1069,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 
                 RemoteFileDesc rfd = al.createRemoteFileDesc(_rfd.getSize());
                 
-                // filter banned hosts.
-                if(!IPFilter.instance().allow(rfd.getHost()))
-                    continue;
-                
-                if(_altLocsReceived == null)
-                    _altLocsReceived = new HashSet();
-                
-                if(_altLocsReceived.add(rfd)) {
+                if(_locationsReceived.add(rfd)) {
                     if (al instanceof DirectAltLoc)
                         DownloadStat.ALTERNATE_COLLECTED.incrementStat();
                     else
@@ -1820,7 +1810,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private HTTPDownloader(String str) {
 		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 		_byteReader = new ByteReader(stream);
-		_altLocsReceived = null;
+		_locationsReceived = null;
         _goodLocs = null;
         _badLocs = null;
         _writtenGoodLocs = null;

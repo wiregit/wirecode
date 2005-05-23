@@ -92,7 +92,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     private static final Comparator ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
-    public PingRanker() {
+    protected PingRanker() {
         pinger = new UDPPinger();
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         testedLocations = new HashSet();
@@ -300,9 +300,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public void processMessage(Message m, ReplyHandler handler) {
         
         MeshHandler mesh;
-        boolean drop = false;
         RemoteFileDesc rfd;
-        Collection alts = Collections.EMPTY_LIST;
+        Collection alts = null;
         // this -> meshHandler NOT ok
         synchronized(this) {
             if (!running)
@@ -348,23 +347,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     verifiedHosts.add(rfd);
 
                 alts = pong.getAllLocsRFD(rfd);
-                
-                if (meshHandler == null)
-                    addInternal(alts);
-                
-            } else 
-                drop = true;
+            }
         }
         
         // if the pong didn't have the file, drop it
-        if (drop) {
-            if (mesh != null)
-                mesh.informMesh(rfd,false);
-            return;
-        }
-            
-        // add any altlocs the pong had to our known hosts
-        if (mesh!= null)
+        // otherwise add any altlocs the pong had to our known hosts
+        if (alts == null) 
+            mesh.informMesh(rfd,false);
+        else
             mesh.addPossibleSources(alts);
     }
 

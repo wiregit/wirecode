@@ -1062,19 +1062,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         //If I'm firewalled, only those that support FWT are added.
         //this assumes that FWT will always be backwards compatible
         if(push != null) {
-            boolean open = RouterService.acceptedIncomingConnection();
-            boolean fwt = UDPService.instance().canDoFWT();
             synchronized(push) {
             	Iterator iter = push.iterator();
             	while(iter.hasNext()) {
             		PushAltLoc loc = (PushAltLoc)iter.next();
-            		if (open || (fwt && loc.supportsFWTVersion() > 0))
                         locs.add(loc.createRemoteFileDesc(size));
             	}
             }
         }
         
-        addDownload(locs,false);
+        addPossibleSources(locs);
     }
 
     /**
@@ -1184,17 +1181,21 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
          // If this host is banned, don't add.
         if ( !IPFilter.instance().allow(other.getHost()) )
             return false;            
-            
-        // See if we have already tried and failed with this location
-        // This is only done if the location we're trying is an alternate..
-        synchronized(altLock) {
-            if (other.isFromAlternateLocation() && 
-                invalidAlts.contains(other.getRemoteHostData())) {
-                return false;
+
+        if (RouterService.acceptedIncomingConnection() ||
+                (other.supportsFWTransfer() && RouterService.canDoFWT())) {
+            // See if we have already tried and failed with this location
+            // This is only done if the location we're trying is an alternate..
+            synchronized(altLock) {
+                if (other.isFromAlternateLocation() && 
+                        invalidAlts.contains(other.getRemoteHostData())) {
+                    return false;
+                }
             }
+            
+            return true;
         }
-        
-        return true;
+        return false;
     }
               
 
