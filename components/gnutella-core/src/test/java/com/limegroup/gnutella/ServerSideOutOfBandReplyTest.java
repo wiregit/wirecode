@@ -79,7 +79,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        qrt.add("txt");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
@@ -90,7 +89,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         qrt = new QueryRouteTable();
         qrt.add("leehsus");
         qrt.add("berkeley");
-        qrt.add("txt");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             ULTRAPEER[0].send((RouteTableMessage)iter.next());
 			ULTRAPEER[0].flush();
