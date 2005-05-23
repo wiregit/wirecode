@@ -99,6 +99,11 @@ public class LegacyRanker extends SourceRanker {
         return ret;
     }
 	
+    public synchronized void stop() {
+        super.stop();
+        rfds.clear();
+    }
+    
 	public boolean hasMore() {
 		return !rfds.isEmpty();
 	}
@@ -114,6 +119,4 @@ public class LegacyRanker extends SourceRanker {
     public int getNumKnownHosts() {
         return rfds.size();
     }
-    
-    public void stop(){}
 }

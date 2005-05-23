@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
@@ -30,7 +29,6 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
@@ -70,6 +68,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private TreeSet verifiedHosts;
     
+    /**
+     * RFDs that have responded they do not have the file.
+     */
+    private Set failedRFDs;
     
     /**
      * The urn to use to create pings
@@ -156,6 +158,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if(LOG.isDebugEnabled())
             LOG.debug("adding new host "+host+" "+host.getPushAddr());
         
+        // remove from the failed locations - this will happen only if from a search result
+        failedRFDs.remove(host);
+        
         // don't bother ranking multicasts
         if (host.isReplyToMulticast())
             return verifiedHosts.add(host);
@@ -166,7 +171,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private boolean knowsAboutHost(RemoteFileDesc host) {
         return newHosts.contains(host) || 
             verifiedHosts.contains(host) || 
-            testedLocations.contains(host);
+            testedLocations.contains(host) ||
+            (host.isFromAlternateLocation() && failedRFDs.contains(host));
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
@@ -333,8 +339,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         }
         
         // if the pong didn't have the file, drop it
-        if (!pong.hasFile())
+        if (!pong.hasFile()) {
+            failedRFDs.add(rfd);
+            if (meshHandler != null)
+                meshHandler.informMesh(rfd,false);
             return;
+        }
 
         // update the rfd with information from the pong
         pong.updateRFD(rfd);
@@ -365,11 +375,13 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized void stop() {
+        super.stop();
         running = false;
         verifiedHosts.clear();
         pingedHosts.clear();
         testedLocations.clear();
         newHosts.clear();
+        failedRFDs.clear();
         if (myGUID != null) {
             RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -14,6 +15,11 @@ import com.limegroup.gnutella.settings.DownloadSettings;
  * conditions.
  */
 public abstract class SourceRanker {
+
+    /**
+     * The mesh handler to inform when altlocs fail
+     */
+    protected MeshHandler meshHandler;
 
     /**
      * @param hosts a collection of remote hosts to rank
@@ -98,10 +104,13 @@ public abstract class SourceRanker {
     }
     
     protected abstract Collection getPotentiallyBusyHosts();
+    
     /**
-     * stops the ranker.
+     * stops the ranker, clearing any state
      */
-    public abstract void stop();
+    public synchronized void stop() {
+        meshHandler = null;
+    }
     
     /**
      * @return a ranker appropriate for our system's capabilities.
@@ -116,7 +125,8 @@ public abstract class SourceRanker {
     
     /**
      * @param original the current ranker that we use
-     * @return the ranker that should be used
+     * @return the ranker that should be used.  If different than the current one,
+     * the current one is stopped.
      */
     public static SourceRanker getAppropriateRanker(SourceRanker original) {
         SourceRanker better;
@@ -133,6 +143,20 @@ public abstract class SourceRanker {
             better.addToPool(original.getShareableHosts());
         }
         
+        better.setMeshHandler(original.getMeshHandler());
+        original.stop();
         return better;
+    }
+
+    /** sets the Mesh handler if any */
+    public synchronized void setMeshHandler(MeshHandler handler) {
+        meshHandler = handler;
+    }
+    
+    /** 
+     * @return the Mesh Handler, if any
+     */
+    public synchronized MeshHandler getMeshHandler() {
+        return meshHandler;
     }
 }

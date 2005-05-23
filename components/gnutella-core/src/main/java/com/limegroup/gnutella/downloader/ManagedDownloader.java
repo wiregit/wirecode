@@ -103,7 +103,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * unconnected. <b>Furthermore, it is necessary to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-public class ManagedDownloader implements Downloader, Serializable {
+public class ManagedDownloader implements Downloader, MeshHandler, Serializable {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
@@ -951,6 +951,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * hosts that we know about 
      */
     private synchronized void initializeRanker() {
+        ranker.setMeshHandler(this);
         ranker.addToPool(cachedRFDs);
     }
     
@@ -1524,7 +1525,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      * If we successfully downloaded from this host, cache it for future resume.
      */
-    synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+    public synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if (LOG.isDebugEnabled())
             LOG.debug("informing mesh that "+rfd+" is "+good);
         
@@ -2913,4 +2914,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             return true;
         return false;
     }
+}
+
+interface MeshHandler {
+    void informMesh(RemoteFileDesc rfd, boolean good);
 }
