@@ -413,8 +413,10 @@ public class RemoteFileDesc implements IpPort, Serializable {
             if (http != null) {
                 try {
                     _pushAddr = new PushEndpoint(http);
-                    if (!_firewalled)
+                    if (!_firewalled) {
                         Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this);
+                        _firewalled = true;
+                    }
                 } catch (IOException iox) {}
             }
             // currently, we do not need the map to exist during the life of the object
@@ -527,16 +529,20 @@ public class RemoteFileDesc implements IpPort, Serializable {
      * @return true if this host is still busy and should not be retried
      */
     public boolean isBusy() {
-        return (System.currentTimeMillis() < _earliestRetryTime);
+        return isBusy(System.currentTimeMillis());
+    }
+    
+    public boolean isBusy(long now) {
+        return now < _earliestRetryTime;
     }
 
     /**
      * @return time to wait until this host will be ready to be retried
      * in seconds
      */
-    public int getWaitTime() {
-        return (isBusy() ? 
-                (int) (_earliestRetryTime - System.currentTimeMillis())/1000 + 1:
+    public int getWaitTime(long now) {
+        return (isBusy(now) ? 
+                (int) (_earliestRetryTime - now)/1000 + 1:
                 0 );
     }
 

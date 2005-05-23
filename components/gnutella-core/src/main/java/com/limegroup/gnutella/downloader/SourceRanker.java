@@ -74,9 +74,10 @@ public abstract class SourceRanker {
      */
     public synchronized int getNumBusyHosts() {
         int ret = 0;
+        long now = System.currentTimeMillis();
         for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd.isBusy())
+            if (rfd.isBusy(now))
                 ret++;
         }
         return ret;
@@ -92,11 +93,12 @@ public abstract class SourceRanker {
         
         // waitTime is in seconds
         int waitTime = Integer.MAX_VALUE;
+        long now = System.currentTimeMillis();
         for (Iterator iter = getPotentiallyBusyHosts().iterator(); iter.hasNext();) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (!rfd.isBusy())
+            if (!rfd.isBusy(now))
                 continue;
-            waitTime = Math.min(waitTime, rfd.getWaitTime());
+            waitTime = Math.min(waitTime, rfd.getWaitTime(now));
         }
         
         // waitTime was in seconds

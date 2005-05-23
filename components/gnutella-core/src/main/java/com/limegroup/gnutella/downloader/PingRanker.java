@@ -227,7 +227,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         int sent = 0;
         for (Iterator iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
             RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
-            if (rfd.isBusy())
+            if (rfd.isBusy(now))
                 continue;
             iter.remove();
             

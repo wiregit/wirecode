@@ -62,7 +62,8 @@ public class LegacyRanker extends SourceRanker {
     
     static RemoteFileDesc getBest(Iterator iter) {
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
-
+        
+        long now = System.currentTimeMillis();
         //Find max of each (remaining) element, storing in max.
         //Follows the following logic:
         //1) Find a non-busy host (make connections)
@@ -73,10 +74,10 @@ public class LegacyRanker extends SourceRanker {
             RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
             
             // 1.            
-            if (rfd.isBusy())
+            if (rfd.isBusy(now))
                 continue;
 
-            if (ret.isBusy())
+            if (ret.isBusy(now))
                 ret=rfd;
             // 2.
             else if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)

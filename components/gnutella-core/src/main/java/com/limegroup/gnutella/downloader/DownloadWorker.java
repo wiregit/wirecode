@@ -1178,7 +1178,7 @@ public class DownloadWorker implements Runnable {
         //if we already have downloads going, then raise the
         //retry-after if it was less than the appropriate amount
         if(!_manager.getActiveWorkers().isEmpty() &&
-                _rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
+                _rfd.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
             _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
         
         _manager.addRFD(_rfd);//try this rfd later
