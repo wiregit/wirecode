@@ -984,6 +984,7 @@ public class DownloadWorker implements Runnable {
     NoSuchElementException,  IOException, TryAgainLaterException, 
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
+        _shouldRelease=false;
         
         //If this _downloader is a partial source, don't attempt to steal...
         //too confusing, too many problems, etc...
@@ -1004,7 +1005,6 @@ public class DownloadWorker implements Runnable {
         if (slowestRange.low == slowestRange.high)
             throw new NoSuchElementException();
         
-        _shouldRelease=false;
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
         _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
