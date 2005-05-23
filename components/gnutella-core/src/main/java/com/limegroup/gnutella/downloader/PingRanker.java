@@ -103,6 +103,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         testedLocations = new HashSet();
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
+        failedRFDs = new HashSet();
     }
     
     public synchronized boolean addToPool(Collection c)  {
