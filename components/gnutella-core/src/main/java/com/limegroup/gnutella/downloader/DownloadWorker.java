@@ -302,9 +302,7 @@ public class DownloadWorker implements Runnable {
                             status = assignAndRequest(http11);
                             
                             // add any locations we may have received
-                            _manager.addLocationsToDownload(_downloader.getAltLocsReceived(),
-                                    _downloader.getPushLocsReceived(),
-                                    _rfd.getSize());
+                            _manager.addPossibleSources(_downloader.getAltLocsReceived());
                         } finally {
                             // clear ranges did not connect
                             if( status == null || !status.isConnected() )

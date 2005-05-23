@@ -151,7 +151,11 @@ public class PingRankerTest extends BaseTestCase {
         push.add(pe);
         
         MockPong pong = new MockPong(true,true,1,false,false,false,null,alts,push);
+        MockMesh mesh = new MockMesh();
+        ranker.setMeshHandler(mesh);
         ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        assertNotNull(mesh.sources);
+        ranker.addToPool(mesh.sources);
         
         // now the ranker should know about more than one host.
         // the best host should be the one that actually replied.
@@ -644,9 +648,14 @@ public class PingRankerTest extends BaseTestCase {
     static class MockMesh implements MeshHandler {
         public boolean good;
         public RemoteFileDesc rfd;
+        public Collection sources;
         public void informMesh(RemoteFileDesc rfd, boolean good) {
             this.rfd = rfd;
             this.good = good;
+        }
+        
+        public void addPossibleSources(Collection c) {
+            sources = c;
         }
     }
 }

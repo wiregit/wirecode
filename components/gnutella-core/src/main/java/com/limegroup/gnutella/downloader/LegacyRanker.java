@@ -99,8 +99,7 @@ public class LegacyRanker extends SourceRanker {
         return ret;
     }
 	
-    public synchronized void stop() {
-        super.stop();
+    protected synchronized void clearState() {
         rfds.clear();
     }
     

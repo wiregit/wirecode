@@ -1043,16 +1043,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * Adds the alternate locations from the collections as possible
      * download sources.
      */
-    void addLocationsToDownload(AlternateLocationCollection direct,
-                                        AlternateLocationCollection push,
+    private void addLocationsToDownload(AlternateLocationCollection direct,
+            AlternateLocationCollection push,
                                         int size) {
+        List locs = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize());
         // always add the direct alt locs.
         if(direct != null) {
             synchronized(direct) {
                 Iterator iter = direct.iterator();
                 while(iter.hasNext()) {
                     AlternateLocation loc = (AlternateLocation)iter.next();
-                    addDownload(loc.createRemoteFileDesc((int)size), false);
+                    locs.add(loc.createRemoteFileDesc(size));
                 }
             }
         }
@@ -1068,10 +1069,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             	while(iter.hasNext()) {
             		PushAltLoc loc = (PushAltLoc)iter.next();
             		if (open || (fwt && loc.supportsFWTVersion() > 0))
-            		    addDownload(loc.createRemoteFileDesc((int)size), false);
+                        locs.add(loc.createRemoteFileDesc(size));
             	}
             }
         }
+        
+        addDownload(locs,false);
     }
 
     /**
@@ -1655,6 +1658,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         } 
     }
 
+    public synchronized void addPossibleSources(Collection c) {
+        addDownload(c,false);
+    }
+    
     /**
      * Requests this download to resume.
      *
@@ -2279,7 +2286,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     }
     
     /**
-     * @return The alternate locations we have successfully downloaded from
+     * @return The alternate locations we have failed to downloaded from
      */
     Set getInvalidAlts() {
         synchronized(altLock) {
@@ -2918,4 +2925,5 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 
 interface MeshHandler {
     void informMesh(RemoteFileDesc rfd, boolean good);
+    void addPossibleSources(Collection hosts);
 }

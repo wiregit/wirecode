@@ -69,11 +69,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private TreeSet verifiedHosts;
     
     /**
-     * RFDs that have responded they do not have the file.
-     */
-    private Set failedRFDs;
-    
-    /**
      * The urn to use to create pings
      */
     private URN sha1;
@@ -103,7 +98,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         testedLocations = new HashSet();
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
-        failedRFDs = new HashSet();
     }
     
     public synchronized boolean addToPool(Collection c)  {
@@ -159,9 +153,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if(LOG.isDebugEnabled())
             LOG.debug("adding new host "+host+" "+host.getPushAddr());
         
-        // remove from the failed locations - this will happen only if from a search result
-        failedRFDs.remove(host);
-        
         // don't bother ranking multicasts
         if (host.isReplyToMulticast())
             return verifiedHosts.add(host);
@@ -172,8 +163,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private boolean knowsAboutHost(RemoteFileDesc host) {
         return newHosts.contains(host) || 
             verifiedHosts.contains(host) || 
-            testedLocations.contains(host) ||
-            (host.isFromAlternateLocation() && failedRFDs.contains(host));
+            testedLocations.contains(host);
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
@@ -307,57 +297,75 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * Informs the Ranker that a host has replied with a HeadPing
      */
-    public synchronized void processMessage(Message m, ReplyHandler handler) {
-        if (!running)
-            return;
+    public void processMessage(Message m, ReplyHandler handler) {
         
-        if (! (m instanceof HeadPong))
-            return;
-        
-        HeadPong pong = (HeadPong)m;
-        
-        if (!pingedHosts.containsKey(handler)) 
-            return;
-        
-        RemoteFileDesc rfd = (RemoteFileDesc)pingedHosts.remove(handler);
-        testedLocations.remove(rfd);
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("received a pong "+ pong+ " from "+handler +
-                    " for rfd "+rfd+" with PE "+rfd.getPushAddr());
-        }
-        
-        // older push proxies do not route but respond directly, we want to get responses
-        // from other push proxies
-        if (!pong.hasFile() && !pong.isGGEPPong())
-            return;
-        
-        // if the pong is firewalled, remove the other proxies from the 
-        // pinged set
-        if (pong.isFirewalled()) {
-            for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
-                pingedHosts.remove(iter.next());
+        MeshHandler mesh;
+        boolean drop = false;
+        RemoteFileDesc rfd;
+        Collection alts = Collections.EMPTY_LIST;
+        // this -> meshHandler NOT ok
+        synchronized(this) {
+            if (!running)
+                return;
+            
+            if (! (m instanceof HeadPong))
+                return;
+            
+            HeadPong pong = (HeadPong)m;
+            
+            if (!pingedHosts.containsKey(handler)) 
+                return;
+            
+            rfd = (RemoteFileDesc)pingedHosts.remove(handler);
+            testedLocations.remove(rfd);
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("received a pong "+ pong+ " from "+handler +
+                        " for rfd "+rfd+" with PE "+rfd.getPushAddr());
+            }
+            
+            // older push proxies do not route but respond directly, we want to get responses
+            // from other push proxies
+            if (!pong.hasFile() && !pong.isGGEPPong())
+                return;
+            
+            // if the pong is firewalled, remove the other proxies from the 
+            // pinged set
+            if (pong.isFirewalled()) {
+                for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
+                    pingedHosts.remove(iter.next());
+            }
+            
+            mesh = meshHandler;
+            if (pong.hasFile()) {
+                //update the rfd with information from the pong
+                pong.updateRFD(rfd);
+                
+                // if the remote host is busy, re-add him for later ranking
+                if (rfd.isBusy()) 
+                    newHosts.add(rfd);
+                else     
+                    verifiedHosts.add(rfd);
+
+                alts = pong.getAllLocsRFD(rfd);
+                
+                if (meshHandler == null)
+                    addInternal(alts);
+                
+            } else 
+                drop = true;
         }
         
         // if the pong didn't have the file, drop it
-        if (!pong.hasFile()) {
-            failedRFDs.add(rfd);
-            if (meshHandler != null)
-                meshHandler.informMesh(rfd,false);
+        if (drop) {
+            if (mesh != null)
+                mesh.informMesh(rfd,false);
             return;
         }
-
-        // update the rfd with information from the pong
-        pong.updateRFD(rfd);
-        
-        // if the remote host is busy, re-add him for later ranking
-        if (rfd.isBusy()) 
-            newHosts.add(rfd);
-        else     
-            verifiedHosts.add(rfd);
-        
-        // add any altlocs the pong had to our known hosts 
-        addInternal(pong.getAllLocsRFD(rfd));
+            
+        // add any altlocs the pong had to our known hosts
+        if (mesh!= null)
+            mesh.addPossibleSources(alts);
     }
 
 
@@ -375,14 +383,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         return !running || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
     }
     
-    public synchronized void stop() {
-        super.stop();
+    protected synchronized void clearState(){
         running = false;
         verifiedHosts.clear();
         pingedHosts.clear();
         testedLocations.clear();
         newHosts.clear();
-        failedRFDs.clear();
         if (myGUID != null) {
             RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;

@@ -110,7 +110,10 @@ public abstract class SourceRanker {
      */
     public synchronized void stop() {
         meshHandler = null;
+        clearState();
     }
+    
+    protected abstract void clearState();
     
     /**
      * @return a ranker appropriate for our system's capabilities.

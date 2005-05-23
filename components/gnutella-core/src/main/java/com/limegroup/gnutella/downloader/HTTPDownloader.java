@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -188,7 +189,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private AlternateLocationCollection _altLocsReceived, _pushAltLocsReceived;
+	private HashSet _altLocsReceived;
 
     /**
      *  The good locations to send the uploaders as in the alts list
@@ -319,13 +320,10 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
         URN urn = rfd.getSHA1Urn();
-        if (urn!=null) {
-        	_altLocsReceived = AlternateLocationCollection.create(urn);
-        	_pushAltLocsReceived = AlternateLocationCollection.create(urn);
-        } else  {
-        	_altLocsReceived=null;
-        	_pushAltLocsReceived=null;
-        }
+        if (urn!=null) 
+        	_altLocsReceived = new HashSet();
+        else
+        	_altLocsReceived = null;
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
         _goodPushLocs = new HashSet();
@@ -349,14 +347,10 @@ public class HTTPDownloader implements BandwidthTracker {
      *  received locations, can be <tt>null</tt> if we could not create
      *  a collection, or could be empty
      */
-    AlternateLocationCollection getAltLocsReceived() { 
+    Collection getAltLocsReceived() { 
 	    return _altLocsReceived;
     }
     
-    AlternateLocationCollection getPushLocsReceived() {
-    	return _pushAltLocsReceived;
-    }
-        
     void addSuccessfulAltLoc(AlternateLocation loc) {
     	if (loc instanceof DirectAltLoc) {
     		synchronized(_badLocs) {
@@ -1076,27 +1070,19 @@ public class HTTPDownloader implements BandwidthTracker {
                 if (al.isMe())
                     continue;
                 
-                //if this is a direct altloc, add it to the appropriate collection
-                if (al instanceof DirectAltLoc) {
-                	DirectAltLoc dal = (DirectAltLoc)al;
-                	// filter banned hosts.
-                	if(!IPFilter.instance().allow(dal.getHost().getHostBytes()))
-                		continue;
+                RemoteFileDesc rfd = al.createRemoteFileDesc(_rfd.getSize());
                 
-                	if(_altLocsReceived == null)
-                		_altLocsReceived = 
-                			AlternateLocationCollection.create(sha1);
+                // filter banned hosts.
+                if(!IPFilter.instance().allow(rfd.getHost()))
+                    continue;
                 
-                	boolean added = _altLocsReceived.add(al);
-                    if(added) 
+                if(_altLocsReceived == null)
+                    _altLocsReceived = new HashSet();
+                
+                if(_altLocsReceived.add(rfd)) {
+                    if (al instanceof DirectAltLoc)
                         DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-                } else { // if(al instanceof PushAltLoc)
-                	if(_pushAltLocsReceived == null)
-                		_pushAltLocsReceived = 
-                			AlternateLocationCollection.create(sha1);
-                
-                	boolean added = _pushAltLocsReceived.add(al);
-                	if(added) 
+                    else
                         DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
                 }
 			} catch(IOException e) {
