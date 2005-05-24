@@ -63,6 +63,16 @@ public class ServerSideWhatIsNewTest
         junit.textui.TestRunner.run(suite());
     }
     
+    public void tearDown() { 
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        try {
+            Thread.sleep(3500);
+        } catch (InterruptedException unused) {}
+    }
+    
     private static void doSettings() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
@@ -219,12 +229,6 @@ public class ServerSideWhatIsNewTest
         assertTrue(currResp.getName().equals("berkeley.txt") ||
                    currResp.getName().equals("susheel.txt"));
         assertFalse(iter.hasNext());
-        
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        Thread.sleep(3500);
     }
 
     // make sure that a what is new query meta query is answered correctly
@@ -280,13 +284,6 @@ public class ServerSideWhatIsNewTest
                    currResp.getName().equals("susheel.txt"));
         assertFalse(iter.hasNext());
         }
-        
-        
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        Thread.sleep(3500);
     }
 
 
@@ -385,12 +382,6 @@ public class ServerSideWhatIsNewTest
         }
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, gotTempFile1 && gotTempFile2);
-        
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        Thread.sleep(3500);
     }
 
     
@@ -450,13 +441,6 @@ public class ServerSideWhatIsNewTest
         }
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, gotTempFile1 && gotTempFile2);
-
-        
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        Thread.sleep(3500);
     }
 
 
@@ -520,13 +504,6 @@ public class ServerSideWhatIsNewTest
         }
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, !gotTempFile1 && gotTempFile2);
-
-        
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        Thread.sleep(3500);
     }
 
     // test that the FileManager.removeFileIfShared method works    
