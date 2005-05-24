@@ -581,7 +581,6 @@ public class VerifyingFile {
         List verifyable = new ArrayList(2);
         List partial = partialBlocks.getAllIntervalsAsList();
         int chunkSize = getChunkSize();
-        int lastChunkOffset = completedSize - (completedSize % chunkSize);
         
         for (int i = 0; i < partial.size() ; i++) {
             Interval current = (Interval)partial.get(i);
@@ -599,6 +598,9 @@ public class VerifyingFile {
         
         // special case for the last chunk
         if (!partial.isEmpty()) {
+            int lastChunkOffset = completedSize - (completedSize % chunkSize);
+            if (lastChunkOffset == completedSize)
+                lastChunkOffset-=chunkSize;
             Interval last = (Interval) partial.get(partial.size() - 1);
             if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())

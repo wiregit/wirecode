@@ -354,4 +354,54 @@ public class VerifyingFileTest extends BaseTestCase {
         assertTrue(vf.isComplete());
         
     }
+    
+    /**
+     * tests that a file whose size is an exact multiple of the chunk size works fine
+     */
+    public void testExactMultiple() throws Exception {
+        File exact = new File("exactSize");
+        RandomAccessFile raf = new RandomAccessFile(exact,"rw");
+        for (int i = 0;i < 1024*1024; i++)
+            raf.write(i);
+        raf.close();
+        
+        HashTree exactTree;
+        try {
+            exactTree = (HashTree) PrivilegedAccessor.invokeMethod(
+                HashTree.class, "createHashTree", 
+                new Object[] { new Long(exact.length()), new FileInputStream(exact),
+                            URN.createSHA1Urn(exact) },
+                new Class[] { long.class, InputStream.class, URN.class }
+            );
+        } catch(InvocationTargetException ite) {
+            throw (Exception)ite.getCause();
+        }
+        
+        assertEquals(0,exact.length() % exactTree.getNodeSize());
+        raf = new RandomAccessFile(exact,"r");
+        
+        vf = new VerifyingFile((int)exact.length());
+        vf.open(new File("outfile"));
+        vf.setHashTree(exactTree);
+        vf.leaseWhite();
+        
+        // now, see if this file downloads correctly if a piece of the last chunk is added
+        byte [] data = new byte[exactTree.getNodeSize()/2];
+        raf.seek(exact.length() - data.length );
+        raf.readFully(data);
+        vf.writeBlock(exact.length() - data.length ,data);
+        
+        // nothing should be verified
+        Thread.sleep(1000);
+        assertEquals(0,vf.getVerifiedBlockSize());
+        
+        // now add the second piece of the last chunk
+        raf.seek(exact.length() - 2*data.length );
+        raf.readFully(data);
+        vf.writeBlock(exact.length() - 2*data.length ,data);
+        
+        // the last chunk should be verified
+        Thread.sleep(1000);
+        assertEquals(exactTree.getNodeSize(),vf.getVerifiedBlockSize());
+    }
 }
