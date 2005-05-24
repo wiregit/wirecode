@@ -1835,8 +1835,32 @@ public abstract class FileManager {
             return;
 	    }
 		if (SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file))
+			//  ### call removeFileIfShared instead   
 			loadSettings(true);
-		    //  ### ^^^ just remove file
+	}
+	
+	/**
+	 * Removes the given <tt>files</tt> as specially shared files.
+	 */
+	public void removeSpeciallySharedFiles(File[] fa) {
+		if (fa == null || fa.length <= 0)
+			return;
+		File file = null;
+		boolean changed = false;
+		for (int i = 0; i < fa.length; i++) {
+			file = fa[i];
+			if (file == null)
+				continue;
+			try {
+				file = FileUtils.getCanonicalFile(file);
+			} catch (IOException e) {
+				continue;
+			}
+			if (SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file))
+				changed = true;
+		}
+		if (changed)
+			loadSettings(true);
 	}
 	
 	/**
@@ -1851,10 +1875,34 @@ public abstract class FileManager {
             return;
 	    }
 		
-		LOG.trace("Adding special file2: "+file, new Exception());
 		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
 			addFile(file);
+		}
+	}
+
+	/**
+	 * Adds the given <tt>files</tt> as specially shared files.
+	 */
+	public void addSpeciallySharedFiles(File[] fa) {
+		if (fa == null || fa.length <= 0)
+			return;
+		File file = null;
+		for (int i = 0; i < fa.length; i++) {
+			file = fa[i];
+			if (file == null)
+				continue;
+			
+			try {
+				file = FileUtils.getCanonicalFile(file);
+			} catch (IOException e) { 
+				continue;
+			}
+			
+			if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file)) {
+				SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
+				addFile(file);
+			}
 		}
 	}
 
