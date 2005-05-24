@@ -135,8 +135,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (sha1 == null) {
             if( host.getSHA1Urn() != null)
                 sha1 = host.getSHA1Urn();
-            else
-                return false; // we can't do anything yet
+            else    //  BUGFIX:  We can't discard sources w/out a SHA1 when we dont' have  
+                    //  a SHA1 for the download, or else it won't be possible to download a
+                    //  file from a query hit without a SHA1, if we can received UDP pings
+                return testedLocations.add(host); // we can't do anything yet
         }
         
         // initialize the guid if we don't have one

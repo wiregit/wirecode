@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +13,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -23,8 +21,6 @@ import junit.framework.Test;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -32,6 +28,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.udpconnect.SynMessage;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
@@ -42,8 +39,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.  The test includes a leaf attached to 3 
- * Ultrapeers.
+ * redirects properly, etc.  The test includes a leaf attached to 1 Ultrapeer.
  */
 public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     protected static final int PORT=6669;
@@ -66,12 +62,32 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    public static void doSettings() {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+    }
+
+    public static void globalSetUp() throws Exception {
+        UDP_ACCESS = new DatagramSocket(9000);
+        UDP_ACCESS.setSoTimeout(TIMEOUT*2);
+    }
+    
+    public void setUp() throws Exception {
+        //  NOTE: UDPService will not change state when a UDP ping or pong is received 
+        //      from a conneected host.  Therefore, since UDPServiceTest should be testing
+        //      that UDPService functions properly, we will assume that it does and simply
+        //      set the flag saying we can support solicited and unsolicited UDP.  This way,
+        //      testing can procede as normal...
+        doSettings();
+        
+        PrivilegedAccessor.setValue( UDPService.instance(), "_acceptedSolicitedIncoming", new Boolean(true) );
+        PrivilegedAccessor.setValue( UDPService.instance(), "_acceptedUnsolicitedIncoming", new Boolean(true) );
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testPushProxySetup() throws Exception {
         DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket(9000);
 
         // send a MessagesSupportedMessage
         testUP[0].send(MessagesSupportedVendorMessage.instance());
@@ -91,42 +107,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // client side seems to follow the setup process A-OK
-        // set up solicted support
-        {
-            drainAll();
-            PingReply pong = 
-                PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS.getLocalPort(), 
-                                 InetAddress.getLocalHost().getAddress(), 
-                                 10, 10, true, 900, true);
-            testUP[0].send(pong);
-            testUP[0].flush();
-
-            // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(2000);
-            pack = new DatagramPacket(new byte[1000], 1000);
-            try {
-                UDP_ACCESS.receive(pack);
-            }
-            catch (IOException bad) {
-               fail("Did not get ping", bad);
-            }
-            InputStream in = new ByteArrayInputStream(pack.getData());
-            // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
-            
-            // send the pong in response to the ping
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS.getLocalPort(), 
-                                    InetAddress.getLocalHost().getAddress(), 
-                                    10, 10, true, 900, true);
-            pong.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      pack.getAddress(), pack.getPort());
-            UDP_ACCESS.send(pack);
-        }
+        // set up solicted support (see note in setUp())
         Thread.sleep(1000);
         assertTrue(UDPService.instance().canReceiveSolicited());
     }
@@ -174,7 +155,10 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Iterator iter = proxies.iterator();
         IpPort ppi = (IpPort)iter.next();
         assertEquals(ppi.getPort(), 6355);
-        assertTrue(ppi.getInetAddress().equals(InetAddress.getLocalHost()));
+        
+        assertTrue(ppi.getInetAddress().equals( 
+                ((Connection)rs.getConnectionManager().getConnections().get(0)).getInetAddress() 
+                ));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
