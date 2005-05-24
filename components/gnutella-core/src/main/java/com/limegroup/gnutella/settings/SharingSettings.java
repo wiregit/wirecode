@@ -274,7 +274,8 @@ public class SharingSettings extends LimeProps {
 		if (dir == null || !dir.isDirectory() || !dir.exists())
             throw new IOException();
 
-		DIRECTORIES_TO_SHARE.add(dir);
+		if (!DIRECTORIES_TO_SHARE.contains(dir))
+			DIRECTORIES_TO_SHARE.add(dir);
     }
 	
 	/**
