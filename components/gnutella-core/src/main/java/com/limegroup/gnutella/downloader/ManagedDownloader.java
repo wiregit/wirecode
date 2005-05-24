@@ -643,6 +643,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         queuedVendor = "";
         triedLocatingSources = false;
 		ranker = SourceRanker.getAppropriateRanker();
+        ranker.setMeshHandler(this);
         // get the SHA1 if we can.
         if(cachedRFDs.size() > 0 && downloadSHA1 == null) {
             for(Iterator iter = cachedRFDs.iterator();
@@ -1684,7 +1685,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // since the user really wants to resume right now.
         for(Iterator i = cachedRFDs.iterator(); i.hasNext(); )
             ((RemoteFileDesc)i.next()).setRetryAfter(0);
-		ranker.addToPool(cachedRFDs);
 
         if(paused) {
             paused = false;
