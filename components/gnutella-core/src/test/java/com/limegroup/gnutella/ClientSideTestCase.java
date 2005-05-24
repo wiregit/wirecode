@@ -202,6 +202,9 @@ public abstract class ClientSideTestCase
          throw new IOException();
      }
 
+     /**
+      * Note that this function will _EAT_ messages until it finds a ping to respond to.
+      */  
     private static void replyToPing(Connection c, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.

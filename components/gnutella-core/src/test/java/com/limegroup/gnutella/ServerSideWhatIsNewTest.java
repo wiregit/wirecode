@@ -3,38 +3,24 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -42,20 +28,12 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
  * assume that an Ultrapeer will be equally functional.
+ * 
  */
 public class ServerSideWhatIsNewTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends ClientSideTestCase {
     private static final int PORT=6669;
     private static final int TIMEOUT=1000;
-    private static final byte[] ultrapeerIP=
-        new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-    private static final byte[] oldIP=
-        new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
-
-    private static Connection testUP;
-    private static RouterService rs;
-
-    private static MyActivityCallback callback;
 
     private static File berkeley = null;
     private static File susheel = null;
@@ -69,6 +47,14 @@ public class ServerSideWhatIsNewTest
         super(name);
     }
     
+    public static ActivityCallback getActivityCallback() {
+        return new ActivityCallbackStub();
+    }
+    
+    public static Integer numUPs() {
+        return new Integer(1);
+    }
+
     public static Test suite() {
         return buildTestSuite(ServerSideWhatIsNewTest.class);
     }    
@@ -83,12 +69,7 @@ public class ServerSideWhatIsNewTest
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
         ConnectionSettings.PORT.setValue(PORT);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
@@ -113,131 +94,31 @@ public class ServerSideWhatIsNewTest
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
     
-    public static void globalSetUp() throws Exception {
-        doSettings();
-
-        callback=new MyActivityCallback();
-        rs=new RouterService(callback);
-        assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
-        Thread.sleep(1000);
-        assertEquals("unexpected port",
-            PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
-    }        
-    
     public void setUp() throws Exception  {
         doSettings();
     }
     
-    public static void globalTearDown() throws Exception {
-        shutdown();
+    public static boolean shouldRespondToPing() {
+        return false;
     }
 
-     ////////////////////////// Initialization ////////////////////////
-
-     private static void connect(RouterService rs) 
-     throws IOException, BadPacketException {
-         debug("-Establish connections");
-         //Ugh, there is a race condition here from the old days when this was
-         //an interactive test.  If rs connects before the listening socket is
-         //created, the test will fail.
-
-         //System.out.println("Please establish a connection to localhost:6350\n");
-     }
-     
-     private static Connection connect(RouterService rs, int port, 
-                                       boolean ultrapeer) 
-         throws Exception {
-         ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
-         Socket socket = ss.accept();
-         ss.close();
-         
-         socket.setSoTimeout(3000);
-         InputStream in=socket.getInputStream();
-         String word=readWord(in);
-         if (! word.equals("GNUTELLA"))
-             throw new IOException("Bad word: "+word);
-         
-         HandshakeResponder responder;
-         if (ultrapeer) {
-             responder = new UltrapeerResponder();
-         } else {
-             responder = new OldResponder();
-         }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
-         //         replyToPing(con, ultrapeer);
-         return con;
-     }
-     
-     /**
-      * Acceptor.readWord
-      *
-      * @modifies sock
-      * @effects Returns the first word (i.e., no whitespace) of less
-      *  than 8 characters read from sock, or throws IOException if none
-      *  found.
-      */
-     private static String readWord(InputStream sock) throws IOException {
-         final int N=9;  //number of characters to look at
-         char[] buf=new char[N];
-         for (int i=0 ; i<N ; i++) {
-             int got=sock.read();
-             if (got==-1)  //EOF
-                 throw new IOException();
-             if ((char)got==' ') { //got word.  Exclude space.
-                 return new String(buf,0,i);
-             }
-             buf[i]=(char)got;
-         }
-         throw new IOException();
-     }
-
-     private static void replyToPing(Connection c, boolean ultrapeer) 
-             throws Exception {
-        // respond to a ping iff one is given.
-        Message m = null;
-        byte[] guid;
-        try {
-            while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
-            }
-            guid = ((PingRequest)m).getGUID();            
-        } catch(InterruptedIOException iioe) {
-            //nothing's coming, send a fake pong anyway.
-            guid = new GUID().bytes();
-        }
-        
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
-        PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
-                                 socket.getLocalPort(), 
-                                 ultrapeer ? ultrapeerIP : oldIP,
-                                 ultrapeer);
-        reply.hop();
-        c.send(reply);
-        c.flush();
-     }
 
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
     // just test that What Is New support is advertised
     public void testSendsCapabilitiesMessage() throws Exception {
-System.out.println("\n...Connecting...\n");
-        testUP = connect(rs, 6355, true);
+        //testUP = connect(rs, 6355, true);
+        Connection testUP = super.testUP[0];
 
         // send a MessagesSupportedMessage and capabilities VM
         testUP.send(MessagesSupportedVendorMessage.instance());
         testUP.send(CapabilitiesVM.instance());
         testUP.flush();
 
-        // we expect to get 
+        Thread.sleep(100);
+        
+        // we expect to get a CVM back
         Message m = null;
         do {
             m = testUP.receive(TIMEOUT);
@@ -310,6 +191,7 @@ System.out.println("\n...Connecting...\n");
 
     // make sure that a what is new query is answered correctly
     public void testWhatIsNewQueryBasic() throws Exception {
+        Connection testUP = super.testUP[0];
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -337,10 +219,17 @@ System.out.println("\n...Connecting...\n");
         assertTrue(currResp.getName().equals("berkeley.txt") ||
                    currResp.getName().equals("susheel.txt"));
         assertFalse(iter.hasNext());
+        
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        Thread.sleep(3500);
     }
 
     // make sure that a what is new query meta query is answered correctly
     public void testWhatIsNewQueryMeta() throws Exception {
+        Connection testUP = super.testUP[0];
         drain(testUP);
 
         {
@@ -391,6 +280,13 @@ System.out.println("\n...Connecting...\n");
                    currResp.getName().equals("susheel.txt"));
         assertFalse(iter.hasNext());
         }
+        
+        
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        Thread.sleep(3500);
     }
 
 
@@ -455,9 +351,10 @@ System.out.println("\n...Connecting...\n");
         }
     }
 
-    // test that after teh sharing of additional files, the what is new query
+    // test that after the sharing of additional files, the what is new query
     // results in something else
     public void testWhatIsNewQueryNewFiles() throws Exception {
+        Connection testUP = super.testUP[0];
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -488,6 +385,12 @@ System.out.println("\n...Connecting...\n");
         }
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, gotTempFile1 && gotTempFile2);
+        
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        Thread.sleep(3500);
     }
 
     
@@ -516,6 +419,7 @@ System.out.println("\n...Connecting...\n");
 
         // now just send another What Is New query and make sure everything
         // is kosher - probably overkill but whatever....
+        Connection testUP = super.testUP[0];
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -547,6 +451,12 @@ System.out.println("\n...Connecting...\n");
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, gotTempFile1 && gotTempFile2);
 
+        
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        Thread.sleep(3500);
     }
 
 
@@ -556,7 +466,7 @@ System.out.println("\n...Connecting...\n");
         FileManager fm = rs.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
-        URN tempFile2URN = fm.getURNForFile(tempFile2);
+//        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
         // cTime
@@ -579,6 +489,7 @@ System.out.println("\n...Connecting...\n");
 
         // now just send another What Is New query and make sure everything
         // is kosher - probbably overkill but whatever....
+        Connection testUP = super.testUP[0];
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -610,6 +521,12 @@ System.out.println("\n...Connecting...\n");
         assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
                    gotTempFile2, !gotTempFile1 && gotTempFile2);
 
+        
+        //  Now that this class is ClientSideTestCase derived, it reuses connections.
+        //      Therefore, since we are re-sending the same query string repeatedly, 
+        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
+        //      will reject the subsequent queries as duplicates.
+        Thread.sleep(3500);
     }
 
     // test that the FileManager.removeFileIfShared method works    
@@ -876,62 +793,6 @@ System.out.println("\n...Connecting...\n");
         }
 
     }
-        
-
-    private static void shutdown() throws IOException {
-        //System.out.println("\nShutting down.");
-        debug("-Shutting down");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) { }
-    }
-    
-    private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
-    }
-
-    private static final boolean DEBUG = false;
-    
-    static void debug(String message) {
-        if(DEBUG) 
-            System.out.println(message);
-    }
-
-    private static class UltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
-            props.put(HeaderNames.X_DEGREE, "42");           
-            return HandshakeResponse.createResponse(props);
-        }
-        
-        public void setLocalePreferencing(boolean b) {}
-    }
-
-
-    private static class OldResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
-            Properties props=new Properties();
-            return HandshakeResponse.createResponse(props);
-        }
-
-        public void setLocalePreferencing(boolean b) {}
-    }
-
-    public static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc rfd = null;
-        public RemoteFileDesc getRFD() {
-            return rfd;
-        }
-
-        public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
-                                      Set locs) {
-            this.rfd = rfd;
-        }
-    }
-
 
 }
 
