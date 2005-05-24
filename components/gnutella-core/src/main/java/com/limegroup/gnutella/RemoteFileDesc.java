@@ -182,7 +182,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
               COPY_INDEX,                   // index (unknown)
               rfd.getFileName(),            // filename
               rfd.getSize(),                // filesize
-              DataUtils.EMPTY_GUID,         // client GUID
+              rfd.getClientGUID(),          // client GUID
               0,                            // speed
               false,                        // chat capable
               2,                            // quality
@@ -195,7 +195,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
               System.currentTimeMillis(),   // timestamp
               Collections.EMPTY_SET,        // push proxies
               rfd.getCreationTime(),       // creation time
-              0);                       // firewalled transfer
+              0,                            // firewalled transfer
+              null);                       // no PE cause not firewalled
     }
     
     /**
@@ -209,6 +210,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
                 COPY_INDEX,                   // index (unknown)
                 rfd.getFileName(),            // filename
                 rfd.getSize(),                // filesize
+                DataUtils.EMPTY_GUID,         // guid
                 rfd.getSpeed(),                            // speed
                 false,                        // chat capable
                 rfd.getQuality(),                            // quality
@@ -219,8 +221,10 @@ public class RemoteFileDesc implements IpPort, Serializable {
                 true,                        // is firewalled
                 AlternateLocation.ALT_VENDOR, // vendor
                 System.currentTimeMillis(),   // timestamp
+                null,
                 rfd.getCreationTime(),	// creation time
-                pe);
+                0,
+                pe);                // use existing PE
     }
 
 	/** 
@@ -261,7 +265,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
                           Set proxies, long createTime) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, timestamp, proxies, createTime, 0);
+             vendor, timestamp, proxies, createTime, 0, null);
     }
 
 	/** 
@@ -297,11 +301,9 @@ public class RemoteFileDesc implements IpPort, Serializable {
                           String vendor, long timestamp,
                           Set proxies, long createTime, 
                           int FWTVersion) {
-		this(host,port,index,filename,size,speed,chat,quality,browseHost,xmlDoc,
-		        urns,replyToMulticast,firewalled,vendor,timestamp,createTime,
-		        clientGUID == null? null : new PushEndpoint(clientGUID,
-		                proxies,PushEndpoint.PLAIN,FWTVersion));
-        
+		this(host,port,index,filename,size, clientGUID,speed,chat,quality,browseHost,
+                xmlDoc, urns, replyToMulticast, firewalled,vendor,timestamp,proxies,
+                createTime, FWTVersion, null); // create pe if firewalled
 	}
 	
 	public RemoteFileDesc(String host, int port, long index, String filename,
@@ -309,6 +311,19 @@ public class RemoteFileDesc implements IpPort, Serializable {
 	        			LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
 	        			boolean firewalled, String vendor,long timestamp,long createTime,
 	        			PushEndpoint pe) {
+        this(host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
+                replyToMulticast,firewalled,vendor,timestamp,null,createTime,0,pe); // use exising pe
+    }
+    
+    /**
+     * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
+     * no PE object is passed a new one is created. 
+     */
+    private RemoteFileDesc (String host, int port, long index, String filename,
+            int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
+            LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
+            boolean firewalled, String vendor,long timestamp,Set proxies, long createTime,
+            int FWTVersion, PushEndpoint pe) {
 	    
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
@@ -338,18 +353,23 @@ public class RemoteFileDesc implements IpPort, Serializable {
 		_index = index;
 		_filename = filename;
 		_size = size;
+        _firewalled = firewalled;
 		
-		_pushAddr=pe;
-		if (pe!=null)
-		    _clientGUID=pe.getClientGUID();
-		else
-		    _clientGUID=null;
-		
+		if (firewalled) {
+            if (pe != null) 
+                _pushAddr = pe;
+            else 
+                _pushAddr = new PushEndpoint(clientGUID,proxies,PushEndpoint.PLAIN,FWTVersion);
+            
+            _clientGUID = _pushAddr.getClientGUID();
+        } else 
+            _clientGUID = clientGUID;
+        
+        
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
-        _firewalled = firewalled;
         _vendor = vendor;
         _timestamp = timestamp;
         _creationTime = createTime;
@@ -414,7 +434,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
                 try {
                     _pushAddr = new PushEndpoint(http);
                     if (!_firewalled) {
-                        Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this);
+                        Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr);
                         _firewalled = true;
                     }
                 } catch (IOException iox) {}
