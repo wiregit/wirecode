@@ -608,6 +608,8 @@ SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Ponovi iskanje
 SEARCH_PUBLIC_BLOCK_STRING=Blokiraj gostitelja
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Rezultati
+#### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
+#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
 #### SEARCH_SEARCHING_LABEL=Searching...
 SEARCH_SEARCHING_LABEL=Iščem...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
@@ -675,10 +677,27 @@ SEARCH_WHATS_NEW_SMALL=Nov
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 #? SEARCH_BLOCK_HOST=
 
+################################################################################
+# Magnet stuff
+################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_LABEL=
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
+
+################################################################################
+# Search actions
+################################################################################
+# {0} the space separated list of keywords
+#### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
+#? SEARCH_FOR_KEYWORDS_ACTION_NAME=
+# {0} the already translated mediatype
+#### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
+#? SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=
+# {0} the type of the search, e.g. Title, Album, Genre
+# {1} the keywords fo the search, e.g. name of the album
+#### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
+#? SEARCH_XML_FIELD_ACTION_NAME=
 
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
@@ -1203,6 +1222,8 @@ LIBRARY_TABLE_NUMALTLOC=Mest
 #? LIBRARY_TABLE_LICENSE=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=Prenosov drugim
+#### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
+#? LIBRARY_TABLE_SEARCH_POPUP_MENU=
 #### LIBRARY_TABLE_ADVANCED_POPUP_MENU=Advanced
 #? LIBRARY_TABLE_ADVANCED_POPUP_MENU=
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
