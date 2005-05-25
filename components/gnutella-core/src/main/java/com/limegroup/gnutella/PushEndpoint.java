@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
@@ -259,10 +260,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    Set proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies);
 	    IpPort addr = getValidExternalAddress();
-	    if (addr != null && supportsFWTVersion() > 0)
+        int FWTVersion = supportsFWTVersion();
+	    if (addr != null && FWTVersion > 0)
 	        payloadSize+=6;
 		byte [] ret = new byte[payloadSize];
-		toBytes(ret,0,proxies,addr);
+		toBytes(ret,0,proxies,addr,FWTVersion);
 		return ret;
 	}
 	
@@ -272,15 +274,17 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param offset the offset within that byte [] to serialize
 	 */
 	public void toBytes(byte [] where, int offset) {
-		toBytes(where, offset, getProxies(),getValidExternalAddress());
+		toBytes(where, offset, getProxies(), getValidExternalAddress(),supportsFWTVersion());
 	}
 	
-	private void toBytes(byte []where, int offset, Set proxies, IpPort address) {
+	private void toBytes(byte []where, int offset, Set proxies, IpPort address, int FWTVersion) {
 	    
 	    int neededSpace = getSizeBytes(proxies);
-	    int supportsFWT = supportsFWTVersion();
-	    if (address!=null && supportsFWT > 0)
-	        neededSpace+=6;
+	    if (address != null) { 
+            if (FWTVersion > 0)
+                neededSpace+=6;
+        } else 
+            FWTVersion = 0;
 	    
 	    if (where.length-offset < neededSpace)
 			throw new IllegalArgumentException ("target array too small");
@@ -288,7 +292,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		//store the number of proxies
 		where[offset] = (byte)(Math.min(4,proxies.size()) 
 		        | getFeatures() 
-		        | supportsFWT << 3);
+		        | FWTVersion << 3);
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,++offset,16);
@@ -296,7 +300,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		//if we know the external address, store that too
 		//if its valid and not private and port is valid
-		if (address!=null && supportsFWT>0) {
+		if (address != null) {
 		    byte [] addr = address.getInetAddress().getAddress();
 		    int port = address.getPort();
 		    
@@ -333,67 +337,42 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    return _externalAddr;
 	}
 	
-	/**
-	 * 
-	 * @param data data read from network 
-	 */
-	public static PushEndpoint fromBytes(byte [] data) throws BadPacketException{
-		return fromBytes(data, 0);
-	}
-	
-	/**
-	 * 
-	 * @param data data read from network
-	 * @param offset offset within that data
-	 */
-	public static PushEndpoint fromBytes(byte [] data, int offset)
-		throws BadPacketException {
-		byte [] tmp = new byte[6];
-		byte [] guid =new byte[16];
-		Set proxies = new IpPortSet(); 
-		IpPort addr = null;
-		boolean hasAddr=false;
-		
-		//get the number of push proxies
-		int number = data[offset] & SIZE_MASK; 
-		int features = data[offset] & FEATURES_MASK;
-		int version = (data[offset] & FWT_VERSION_MASK) >> 3;
-		
-		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
-			throw new BadPacketException("not a valid PushEndpoint");
-		
-		if (data.length - offset >= HEADER_SIZE+(number+1)*PROXY_SIZE 
-		        && version > 0)
-		    hasAddr=true;
-		
-		//get the guid
-		System.arraycopy(data,++offset,guid,0,16);
-		offset+=16;
-		
-		//get the address if we have one
-		if (hasAddr){
-		    String address = NetworkUtils.ip2string(data,offset);
-		    offset+=4;
-		    int port = ByteOrder.ubytes2int(ByteOrder.leb2short(data,offset));
-		    offset+=2;
-		    try{
-		        addr = new IpPortImpl(address,port);
-		    }catch(UnknownHostException hmm){
-		        throw new BadPacketException(hmm.getMessage());
-		    }
-		}
-		
-		for (int i=0;i<number;i++) {
-			System.arraycopy(data, offset,tmp,0,6);
-			offset+=6;
-			proxies.add(QueryReply.IPPortCombo.getCombo(tmp));
-		}
-		
-		/** this adds the read set to the existing proxies */
-		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version,addr);
-		pe.updateProxies(true);
-		return pe;
-	}
+    /**
+     * Constructs a PushEndpoint from binary representation
+     */
+    public static PushEndpoint fromBytes(DataInputStream dais) 
+    throws BadPacketException, IOException {
+        byte [] guid =new byte[16];
+        Set proxies = new IpPortSet(); 
+        IpPort addr = null;
+        boolean hasAddr=false;
+        
+        int header = dais.read() & 0xFF;
+        
+        // get the number of push proxies
+        int number = header & SIZE_MASK; 
+        int features = header & FEATURES_MASK;
+        int version = (header & FWT_VERSION_MASK) >> 3;
+        
+        dais.readFully(guid);
+        
+        if (version > 0) {
+            byte [] host = new byte[6];
+            dais.readFully(host);
+            addr = QueryReply.IPPortCombo.getCombo(host);
+        }
+        
+        byte [] tmp = new byte[6];
+        for (int i = 0; i < number; i++) {
+            dais.readFully(tmp);
+            proxies.add(QueryReply.IPPortCombo.getCombo(tmp));
+        }
+        
+        /** this adds the read set to the existing proxies */
+        PushEndpoint pe = new PushEndpoint(guid,proxies,features,version,addr);
+        pe.updateProxies(true);
+        return pe;
+    }
 	
 	public byte [] getClientGUID() {
 		return _clientGUID;

@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.util;
 
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -361,27 +364,13 @@ public final class NetworkUtils {
     	return Collections.unmodifiableList(ret);
     }
 
-    /**
-     * 
-     * @return a collection of <tt>PushEndpoint</tt> objects
-     * @throws BadPacketException if parsing failed.
-     */
-    public static List unpackPushEPs(byte [] data) 
-    	throws BadPacketException {
-    	List ret = new LinkedList();
-    	
-    	int i=0;
-    	while (i < data.length ) {
-    		PushEndpoint current = PushEndpoint.fromBytes(data,i);
-    		i+=PushEndpoint.getSizeBytes(current.getProxies());
-    		
-    		if (!current.getAddress().equals(RemoteFileDesc.BOGUS_IP)) 
-    		    i+=6;
-    		
-    		ret.add(current);
-    	}
+    public static List unpackPushEPs(InputStream is) throws BadPacketException,IOException {
+        List ret = new LinkedList();
+        DataInputStream dais = new DataInputStream(is);
+        while (dais.available() > 0) 
+            ret.add(PushEndpoint.fromBytes(dais));
         
-    	return Collections.unmodifiableList(ret);
+        return Collections.unmodifiableList(ret);
     }
     
     /**

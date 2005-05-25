@@ -490,7 +490,7 @@ public class HeadPong extends VendorMessage {
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
 		Set ret = new HashSet();
-		ret.addAll(NetworkUtils.unpackPushEPs(altlocs));
+		ret.addAll(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(altlocs)));
 		return ret;
 	}
 	
