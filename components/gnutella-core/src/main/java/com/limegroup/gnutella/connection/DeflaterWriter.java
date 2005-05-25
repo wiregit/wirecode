@@ -177,7 +177,8 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
                         interested.handleWrite();
                     
                     // If still no data after that, we've written everything we want -- exit.
-                    if(incoming.position() == 0){
+                    if(incoming.position() == 0)
+{
                         // We have nothing left to write, however, it is possible
                         // that between the above check for interested.handleWrite & here,
                         // we got pre-empted and another thread turned on interest.
