@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -59,6 +58,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     public static void globalSetUp() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
     }
+
     public void testHTTPRequest() throws Exception {
         callback = (MyActivityCallback) getCallback();
 
@@ -157,7 +157,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testPushProxyRequest() throws Exception {
-    	Thread.sleep(6000);
+        Thread.sleep(6000);
         callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
