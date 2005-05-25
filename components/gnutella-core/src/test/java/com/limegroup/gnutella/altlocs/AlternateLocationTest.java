@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -185,7 +186,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         }
         
         IpPort ppi = new IpPortImpl("1.2.3.4",6346);
-		Set proxies = new HashSet();
+		Set proxies = new IpPortSet();
 		proxies.add(ppi);
 		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
@@ -201,6 +202,22 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         assertTrue(loc instanceof PushAltLoc);
         PushAltLoc push = (PushAltLoc)loc;
         assertEquals("1.2.3.4",push.getPushAddress().getAddress());
+        assertEquals(0, push.supportsFWTVersion());
+        
+        // test rfd with push proxies, external address that can do FWT
+        RemoteFileDesc FWTed = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0],
+                                   false,true,"",0,proxies,-1,1);
+        
+        loc = AlternateLocation.create(FWTed);
+        
+        assertTrue(loc instanceof PushAltLoc);
+        push = (PushAltLoc)loc;
+        
+        assertEquals("1.2.3.4",push.getPushAddress().getAddress());
+        assertGreaterThan(0, push.supportsFWTVersion());
         assertEquals(5,push.getPushAddress().getPort());
         
         

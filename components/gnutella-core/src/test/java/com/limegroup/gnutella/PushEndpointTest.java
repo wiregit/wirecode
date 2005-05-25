@@ -1,6 +1,8 @@
 	
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -107,13 +109,17 @@ public class PushEndpointTest extends BaseTestCase {
     	one.toBytes(network2,2);
     	
     	assertEquals(PushEndpoint.getSizeBytes(one.getProxies()),network.length);
-    	PushEndpoint one_prim= PushEndpoint.fromBytes(network);
+    	PushEndpoint one_prim= PushEndpoint.fromBytes(
+                new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(one,one_prim);
-    	one_prim = PushEndpoint.fromBytes(network2,2);
+    	one_prim = PushEndpoint.fromBytes(
+                new DataInputStream(new ByteArrayInputStream(network2,2,network2.length-2)));
     	assertEquals(one,one_prim);
     	assertEquals(0,one_prim.supportsFWTVersion());
     	
     	m.clear();
+        // test a PE that claims it supports FWT but doesn't have external address -
+        // its FWT status gets cleared
     	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,
     			0,2);
     	assertEquals(2,six.supportsFWTVersion());
@@ -121,10 +127,11 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(PushEndpoint.getSizeBytes(six.getProxies()),network.length);
     	
     	m.clear();
-    	PushEndpoint four = PushEndpoint.fromBytes(network);
-    	assertEquals(2,four.supportsFWTVersion());
+    	PushEndpoint four = PushEndpoint.fromBytes(
+                new DataInputStream(new ByteArrayInputStream(network)));
+    	assertEquals(0,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
-    	
+        
     	Set sent = new TreeSet(IpPort.COMPARATOR);
         sent.addAll(set6);
     	assertTrue(set6.containsAll(four.getProxies()));
@@ -137,7 +144,8 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(ext.getSizeBytes(set6)+6,network.length);
     	
     	m.clear();
-    	PushEndpoint ext2 = PushEndpoint.fromBytes(network);
+    	PushEndpoint ext2 = PushEndpoint.fromBytes(
+                new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(ext,ext2);
     	assertEquals("1.2.3.4",ext2.getAddress());
     	assertEquals(5,ext2.getPort());
@@ -153,7 +161,8 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(noFWT.getSizeBytes(set6),network.length);
     	
     	m.clear();
-    	PushEndpoint noFWT2 = PushEndpoint.fromBytes(network);
+    	PushEndpoint noFWT2 = PushEndpoint.fromBytes(
+                new DataInputStream(new ByteArrayInputStream(network)));
     	assertEquals(noFWT,noFWT2);
     	assertEquals(RemoteFileDesc.BOGUS_IP,noFWT2.getAddress());
     	assertEquals(4,noFWT2.getProxies().size());

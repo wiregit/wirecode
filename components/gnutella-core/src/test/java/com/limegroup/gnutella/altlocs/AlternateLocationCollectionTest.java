@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.altlocs;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
@@ -437,7 +438,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		assertLessThanOrEquals(41,data.length);
 		
-		Vector v = new Vector(NetworkUtils.unpackPushEPs(data));
+		Vector v = new Vector(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(data)));
 		
 		assertEquals(1,v.size());
 		
@@ -449,7 +450,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		data = alc.toBytesPush();
 		
-		Set set = new HashSet(NetworkUtils.unpackPushEPs(data));
+		Set set = new HashSet(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(data)));
 		
 		assertEquals(2,set.size());
 		assertEquals(3,peSet.size());
@@ -462,7 +463,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		
 		data = alc.toBytesPush();
 		
-		set = new HashSet(NetworkUtils.unpackPushEPs(data));
+		set = new HashSet(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(data)));
 		
 		assertEquals(3,set.size());
 		assertEquals(3,peSet.size());
