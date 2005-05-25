@@ -25,6 +25,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -358,8 +359,15 @@ public class RemoteFileDesc implements IpPort, Serializable {
 		if (firewalled) {
             if (pe != null) 
                 _pushAddr = pe;
-            else 
-                _pushAddr = new PushEndpoint(clientGUID,proxies,PushEndpoint.PLAIN,FWTVersion);
+            else {
+                try {
+                    _pushAddr = new PushEndpoint(clientGUID,proxies,
+                        PushEndpoint.PLAIN, FWTVersion, 
+                        new IpPortImpl(_host,_port));
+                }catch (UnknownHostException uhe) {
+                    throw new IllegalArgumentException("invalid host");
+                }
+            }
             
             _clientGUID = _pushAddr.getClientGUID();
         } else 
