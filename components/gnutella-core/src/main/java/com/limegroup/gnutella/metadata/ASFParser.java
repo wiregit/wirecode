@@ -154,7 +154,7 @@ public class ASFParser {
             parseContentDescription(ds);
         else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_DESCRIPTION_ID))
             parseExtendedContentDescription(ds);
-        else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_ENCYRPTION_ID))
+        else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_ENCRYPTION_ID))
             parseExtendedContentEncryption(ds);
         else {
             LOG.debug("Unknown Object, ignoring.");
@@ -219,11 +219,11 @@ public class ASFParser {
      */
     private void parseExtendedContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content encryption");
-        int size = ByteOrder.leb2int(ds) - 2;
-        IOUtils.ensureSkip(ds, 2); // skip weird data.
+        int size = ByteOrder.leb2int(ds);
+        //IOUtils.ensureSkip(ds, 2); // skip weird data.
         byte[] b = new byte[size];
         ds.readFully(b);
-        String xml = string(b);
+        String xml = new String(b, "UTF-16").trim();
         try {
             _weed = new WeedInfo(xml);
             if(LOG.isDebugEnabled())
@@ -470,7 +470,7 @@ public class ASFParser {
             { (byte)0xFB, (byte)0xB3, (byte)0x11, (byte)0x22, (byte)0x23, (byte)0xBD, (byte)0xD2, (byte)0x11,
               (byte)0xB4, (byte)0xB7, (byte)0x00, (byte)0xA0, (byte)0xC9, (byte)0x55, (byte)0xFC, (byte)0x6E };
             
-        private static final byte EXTENDED_CONTENT_ENCYRPTION_ID[] =
+        private static final byte EXTENDED_CONTENT_ENCRYPTION_ID[] =
             { (byte)0x14, (byte)0xE6, (byte)0x8A, (byte)0x29, (byte)0x22, (byte)0x26, (byte)0x17, (byte)0x4C,
               (byte)0xB9, (byte)0x35, (byte)0xDA, (byte)0xE0, (byte)0x7E, (byte)0xE9, (byte)0x28, (byte)0x9C };
             
