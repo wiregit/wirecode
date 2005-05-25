@@ -22,9 +22,9 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -55,12 +55,18 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    public void setUp() {
+        try {   //  Wait between each test so dup GUIDs don't trigger msg drops
+         Thread.sleep(1000*10);     
+        } catch (Exception ignored) {}
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
 
     // MUST RUN THIS TEST FIRST
     public void testBasicProtocol() throws Exception {
-        DatagramPacket pack = null;
         UDP_ACCESS = new DatagramSocket();
+        UDP_ACCESS.setSoTimeout(1000 * 20);
 
         for (int i = 0; i < testUP.length; i++) {
             drain(testUP[i]);
@@ -72,76 +78,10 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         // first we need to set up GUESS capability
         // ----------------------------------------
         // set up solicited UDP support
-        {
-            drainAll();
-            PingReply pong = 
-                PingReply.create(GUID.makeGuid(), (byte) 4,
-                                 UDP_ACCESS.getLocalPort(), 
-                                 InetAddress.getLocalHost().getAddress(), 
-                                 10, 10, true, 900, true);
-            testUP[0].send(pong);
-            testUP[0].flush();
-
-            // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(2000);
-            pack = new DatagramPacket(new byte[1000], 1000);
-            try {
-                UDP_ACCESS.receive(pack);
-            }
-            catch (IOException bad) {
-               fail("Did not get ping", bad);
-            }
-            InputStream in = new ByteArrayInputStream(pack.getData());
-            // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
-            
-            // send the pong in response to the ping
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pong = PingReply.create(ping.getGUID(), (byte) 4,
-                                    UDP_ACCESS.getLocalPort(), 
-                                    InetAddress.getLocalHost().getAddress(), 
-                                    10, 10, true, 900, true);
-            pong.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      pack.getAddress(), pack.getPort());
-            UDP_ACCESS.send(pack);
-        }
-
+        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
         // set up unsolicited UDP support
-        {
-            // resend this to start exchange
-            testUP[0].send(MessagesSupportedVendorMessage.instance());
-            testUP[0].flush();
-
-            byte[] cbGuid = null;
-            int cbPort = -1;
-            while (cbGuid == null) {
-                try {
-                    Message m = testUP[0].receive(TIMEOUT);
-                    if (m instanceof UDPConnectBackVendorMessage) {
-                        UDPConnectBackVendorMessage udp = 
-                            (UDPConnectBackVendorMessage) m;
-                        cbGuid = udp.getConnectBackGUID().bytes();
-                        cbPort = udp.getConnectBackPort();
-                    }
-                }
-                catch (Exception ie) {
-                    fail("did not get the UDP CB message!", ie);
-                }
-            }
-
-            // ok, now just do a connect back to the up so unsolicited support
-            // is all set up
-            PingRequest pr = new PingRequest(cbGuid, (byte) 1, (byte) 0);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pr.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
-                                      baos.toByteArray().length,
-                                      testUP[0].getInetAddress(), cbPort);
-            UDP_ACCESS.send(pack);
-        }
-
+        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        
         // you also have to set up TCP incoming....
         {
             Socket sock = null;
