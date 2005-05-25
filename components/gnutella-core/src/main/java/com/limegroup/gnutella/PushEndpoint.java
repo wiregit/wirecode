@@ -300,7 +300,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		//if we know the external address, store that too
 		//if its valid and not private and port is valid
-		if (address != null) {
+		if (address != null && FWTVersion > 0) {
 		    byte [] addr = address.getInetAddress().getAddress();
 		    int port = address.getPort();
 		    
