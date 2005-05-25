@@ -292,5 +292,6 @@ zh_SG   /Singapore
 ------- ----------------------- ------------- -------------------------------
 zh_TW   Chinese (Traditional)   Messages      "Zou Ciyouan"
 zh_HK   漢語 (國際)/中國台灣/香港             mail: zouciyouan AT yeah DOT net
-zh_MO   /澳門                                 
+zh_MO   /澳門                                 "Ted-The-Taiwanese"
+                                              mail: doggattack AT yahoo DOT com DOT tw
 ------- ----------------------- ------------- -------------------------------
