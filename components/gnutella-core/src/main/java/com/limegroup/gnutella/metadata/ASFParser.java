@@ -16,6 +16,7 @@ import com.limegroup.gnutella.ByteOrder;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+
 /**
  * A parser for reading ASF files.
  * Everything we understand is stored.
@@ -39,6 +40,7 @@ public class ASFParser {
     private short _track = -1;
     private int _bitrate = -1, _length = -1, _width = -1, _height = -1;
     private boolean _hasAudio, _hasVideo;
+    private WeedInfo _weed;
     
     String getAlbum() { return _album; }
     String getArtist() { return _artist; }
@@ -54,6 +56,7 @@ public class ASFParser {
     int getLength() { return _length; }
     int getWidth() { return _width; }
     int getHeight() { return _height; }
+    WeedInfo getWeedInfo() { return _weed; }
     
     boolean hasAudio() { return _hasAudio; }
     boolean hasVideo() { return _hasVideo; }
@@ -151,6 +154,8 @@ public class ASFParser {
             parseContentDescription(ds);
         else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_DESCRIPTION_ID))
             parseExtendedContentDescription(ds);
+        else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_ENCYRPTION_ID))
+            parseExtendedContentEncryption(ds);
         else {
             LOG.debug("Unknown Object, ignoring.");
             // for debugging.
@@ -205,7 +210,28 @@ public class ASFParser {
             _bitrate = byteRate * 8 / 1000;
         if(LOG.isDebugEnabled())
             LOG.debug("channels: " + channels + ", sampleRate: " + sampleRate + ", byteRate: " + byteRate + ", bitRate: " + _bitrate);
-    }    
+    }
+    
+    /**
+     * Parses the extended content encryption object, looking for encryption's
+     * we know about.
+     * Currently, this is Weed.
+     */
+    private void parseExtendedContentEncryption(DataInputStream ds) throws IOException {
+        LOG.debug("Parsing extended content encryption");
+        int size = ByteOrder.leb2int(ds) - 2;
+        IOUtils.ensureSkip(ds, 2); // skip weird data.
+        byte[] b = new byte[size];
+        ds.readFully(b);
+        String xml = string(b);
+        try {
+            _weed = new WeedInfo(xml);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Parsed weed data: " + _weed);
+        } catch(IllegalArgumentException ignored) {
+            LOG.warn("Invalid encryption info: " + xml, ignored);
+        }
+    }
     
     /**
      * Parses known information out of the Content Description object.
@@ -444,7 +470,7 @@ public class ASFParser {
             { (byte)0xFB, (byte)0xB3, (byte)0x11, (byte)0x22, (byte)0x23, (byte)0xBD, (byte)0xD2, (byte)0x11,
               (byte)0xB4, (byte)0xB7, (byte)0x00, (byte)0xA0, (byte)0xC9, (byte)0x55, (byte)0xFC, (byte)0x6E };
             
-        private static final byte EXTENDED_CONTENT_ENCYRYPTION_ID[] =
+        private static final byte EXTENDED_CONTENT_ENCYRPTION_ID[] =
             { (byte)0x14, (byte)0xE6, (byte)0x8A, (byte)0x29, (byte)0x22, (byte)0x26, (byte)0x17, (byte)0x4C,
               (byte)0xB9, (byte)0x35, (byte)0xDA, (byte)0xE0, (byte)0x7E, (byte)0xE9, (byte)0x28, (byte)0x9C };
             
