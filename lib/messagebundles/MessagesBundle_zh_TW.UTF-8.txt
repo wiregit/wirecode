@@ -1,12 +1,12 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 4.8.2
+# Messages Bundle for LimeWire 4.8.3
 # Specialization for: Traditional Chinese - Taiwan, Hong Kong and Macao
-# Thanks to: Ciyuan Zou
+# Thanks to: Ciyuan Zou (last revision by "Ted")
 ################################################################################
 LOCALE_LANGUAGE_CODE=zh
-LOCALE_LANGUAGE_NAME=漢語
+LOCALE_LANGUAGE_NAME=繁體中文
 LOCALE_COUNTRY_CODE=TW
-LOCALE_COUNTRY_NAME=中國台灣, 香港, 澳門
+LOCALE_COUNTRY_NAME=台灣, 香港, 澳門
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=國際
 LOCALE_SCRIPT_CODE=Hani
@@ -28,7 +28,7 @@ LAYOUT_RIGHT_TO_LEFT=false
 
 ################################################################################
 # Key/value pair for whether or not the tips of the day should be displayed.
-# The default is false (set to true in english resource).
+# The default is false (set to true if TOTDs exist).
 ################################################################################
 HAS_TIPS_OF_THE_DAY=false
 
@@ -44,11 +44,11 @@ HAS_TIPS_OF_THE_DAY=false
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=確定
 #### GENERAL_OK_BUTTON_TIP=Apply Operation.
-GENERAL_OK_BUTTON_TIP=套用新的設置並關閉窗口
+GENERAL_OK_BUTTON_TIP=套用新的設置並關閉窗口.
 #### GENERAL_CANCEL_BUTTON_LABEL=Cancel
 GENERAL_CANCEL_BUTTON_LABEL=取消
 #### GENERAL_CANCEL_BUTTON_TIP=Cancel Operation.
-GENERAL_CANCEL_BUTTON_TIP=取消新的設置
+GENERAL_CANCEL_BUTTON_TIP=取消新的設置.
 #### GENERAL_APPLY_BUTTON_LABEL=Apply
 GENERAL_APPLY_BUTTON_LABEL=應用
 #### GENERAL_APPLY_BUTTON_TIP=Apply Operation.
@@ -70,21 +70,37 @@ GENERAL_BROWSE_BUTTON_LABEL=瀏覽...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
 GENERAL_BROWSE_HOST_LABEL=瀏覽主機
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
-GENERAL_BROWSE_HOST_TIP=瀏覽選中計算機上的所有共用文件
+GENERAL_BROWSE_HOST_TIP=瀏覽選中計算機上的所有共用文件.
+
+################################################################################
+# Keys/value pairs for right-click context menus.
+################################################################################
+#### CONTEXT_MENU_UNDO=Undo
+#? CONTEXT_MENU_UNDO=
+#### CONTEXT_MENU_CUT=Cut
+#? CONTEXT_MENU_CUT=
+#### CONTEXT_MENU_COPY=Copy
+#? CONTEXT_MENU_COPY=
+#### CONTEXT_MENU_PASTE=Paste
+#? CONTEXT_MENU_PASTE=
+#### CONTEXT_MENU_DELETE=Delete
+#? CONTEXT_MENU_DELETE=
+#### CONTEXT_MENU_SELECT_ALL=Select All
+#? CONTEXT_MENU_SELECT_ALL=
 
 #Options
 #### OPTIONS_BUTTONS_OK_LABEL=OK
 OPTIONS_BUTTONS_OK_LABEL=確定
 #### OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
-OPTIONS_BUTTONS_OK_TIP=套用新的設置並關閉窗口
+OPTIONS_BUTTONS_OK_TIP=套用新的設置並關閉窗口.
 #### OPTIONS_BUTTONS_CANCEL_LABEL=Cancel
 OPTIONS_BUTTONS_CANCEL_LABEL=取消
 #### OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-OPTIONS_BUTTONS_CANCEL_TIP=取消新的設置
+OPTIONS_BUTTONS_CANCEL_TIP=取消新的設置.
 #### OPTIONS_BUTTONS_APPLY_LABEL=Apply
 OPTIONS_BUTTONS_APPLY_LABEL=套用
 #### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
-OPTIONS_BUTTONS_APPLY_TIP=套用新的設置
+OPTIONS_BUTTONS_APPLY_TIP=套用新的設置.
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
 #? OPTIONS_RESTART_REQUIRED=
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
@@ -136,17 +152,15 @@ GENERAL_UNIT_KBPSEC=KB/s
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-APP_TITLE=LimeWire: 運行在 Gnutella 網路
+APP_TITLE=LimeWire: 正在 Gnutella 網路中
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=關於 LimeWire
-#### ABOUT_LABEL_START=LimeWire Client
-ABOUT_LABEL_START=LimeWire 客戶端
-#### ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_ADDRESS=http://www.limewire.com
+#### ABOUT_LABEL_START=LimeWire
+ABOUT_LABEL_START=LimeWire 用戶端
 #### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
 ABOUT_LABEL_END=版權所有 (c)2000-2005 Lime Wire LLC.
 #### ABOUT_LABEL_TITLE=About LimeWire
@@ -164,11 +178,9 @@ ABOUT_LABEL_TITLE=關於 LimeWire
 #### ABOUT_LICENSE_TIP=Display the license agreement about this software.
 #? ABOUT_LICENSE_TIP=
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
-ABOUT_SCROLL_CHECK_BOX_LABEL=自動滚動
-#### ABOUT_BUTTON_LABEL=OK
-ABOUT_BUTTON_LABEL=確定
+ABOUT_SCROLL_CHECK_BOX_LABEL=自動滾動
 #### ABOUT_BUTTON_TIP=Close the About Window
-ABOUT_BUTTON_TIP=關閉窗口
+ABOUT_BUTTON_TIP=關閉窗口.
 
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
@@ -206,7 +218,7 @@ TOTD_CLOSE=關閉
 # Key/value pairs for the Windows system tray
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
-TRAY_TOOLTIP=LimeWire: 運行在 Gnutella 網路
+TRAY_TOOLTIP=LimeWire: 正在 Gnutella 網路中.
 #### TRAY_RESTORE_LABEL=Restore
 TRAY_RESTORE_LABEL=恢復
 #### TRAY_ABOUT_LABEL=About
@@ -234,19 +246,19 @@ STATS_TITLE=統計
 #### DOWNLOAD_TITLE=Downloads
 DOWNLOAD_TITLE=下載
 #### UPLOAD_TITLE=Uploads
-UPLOAD_TITLE=上載
+UPLOAD_TITLE=上傳
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
-SEARCH_TIP=搜尋和下載文件
+SEARCH_TIP=搜尋和下載文件.
 #### MONITOR_TIP=View Searches and Uploads
-MONITOR_TIP=顯示搜尋和上載
-#### CONNECTIONS_TIP=Connect to Other Clients
-CONNECTIONS_TIP=連接到其他客戶端
+MONITOR_TIP=顯示搜尋和上傳.
+#### CONNECTIONS_TIP=Show Connections to Other Clients
+CONNECTIONS_TIP=連接到其他客戶端.
 #### LIBRARY_TIP=View Repository of Saved Files
-LIBRARY_TIP=檢視儲存的文件
+LIBRARY_TIP=檢視儲存的文件.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -260,7 +272,7 @@ MENU_FILE_CLOSE=關閉(C)
 #### MENU_FILE_CLOSE_MNEMONIC=C
 MENU_FILE_CLOSE_MNEMONIC=C
 #### MENU_FILE_CLOSE_ACCESSIBLE=Close the Program
-MENU_FILE_CLOSE_ACCESSIBLE=關閉程式
+MENU_FILE_CLOSE_ACCESSIBLE=關閉程式.
 #### MENU_FILE_QUIT=Quit
 MENU_FILE_QUIT=退出(Q)
 #### MENU_FILE_QUIT_MNEMONIC=Q
@@ -270,55 +282,55 @@ MENU_FILE_CONNECT=連線(O)
 #### MENU_FILE_CONNECT_MNEMONIC=O
 MENU_FILE_CONNECT_MNEMONIC=O
 #### MENU_FILE_CONNECT_ACCESSIBLE=Connect to the Network
-MENU_FILE_CONNECT_ACCESSIBLE=連線到網路
+MENU_FILE_CONNECT_ACCESSIBLE=連線到網路.
 #### MENU_FILE_DISCONNECT=Disconnect
-MENU_FILE_DISCONNECT=斷開連線(I)
+MENU_FILE_DISCONNECT=已斷線(I)
 #### MENU_FILE_DISCONNECT_MNEMONIC=I
 MENU_FILE_DISCONNECT_MNEMONIC=I
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
-MENU_FILE_DISCONNECT_ACCESSIBLE=斷開網路連線
+MENU_FILE_DISCONNECT_ACCESSIBLE=斷線.
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=Add Folder to Share
 MENU_FILE_LIBRARY_ADD_SHARED_FOLDER=新增共用資料夾(A)
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
 MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
 #### MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=Add a Folder that You Would Like to Share
-MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=新增你要共用的資料夾
+MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=新增您要共用的資料夾.
 #### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
 MENU_FILE_LIBRARY_NEW_FOLDER=新增資料夾(N)
 #### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
 MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
 #### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
-MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=新增一個資料夾到我的最愛中
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=新增一個資料夾到我的最愛.
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
 MENU_FILE_LIBRARY_UNSHARE_FOLDER=停止共用資料夾(P)
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=停止共用選中的資料夾
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=停止共用已選取資料夾.
 #### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
 MENU_FILE_LIBRARY_RENAME_FOLDER=更名資料夾(R)
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
 MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
-MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=更名選中的資料夾
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=更名選中的資料夾.
 #### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
 MENU_FILE_LIBRARY_LAUNCH_FILES=運行文件(L)
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
 MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
-MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=運行選中的文件
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=運行選中的文件.
 #### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
 MENU_FILE_LIBRARY_DELETE_FILES=删除文件(E)
 #### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
 MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
 #### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
-MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=删除選中的文件
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=删除選中的文件.
 #### MENU_FILE_LIBRARY_REFRESH=Refresh
 MENU_FILE_LIBRARY_REFRESH=重新整理(S)
 #### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 #### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
-MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=重新整理我的最愛
+MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=重新整理我的最愛.
 #### MENU_FILE_LIBRARY_EXPLORE=Explore
 #? MENU_FILE_LIBRARY_EXPLORE=
 #### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
@@ -335,25 +347,25 @@ MENU_NAV_SEARCH=搜尋(S)
 #### MENU_NAV_SEARCH_MNEMONIC=S
 MENU_NAV_SEARCH_MNEMONIC=S
 #### MENU_NAV_SEARCH_ACCESSIBLE=Display the Search Screen
-MENU_NAV_SEARCH_ACCESSIBLE=顯示搜尋窗口
+MENU_NAV_SEARCH_ACCESSIBLE=顯示搜尋窗口.
 #### MENU_NAV_MONITOR=Monitor
 MENU_NAV_MONITOR=監視(M)
 #### MENU_NAV_MONITOR_MNEMONIC=M
 MENU_NAV_MONITOR_MNEMONIC=M
 #### MENU_NAV_MONITOR_ACCESSIBLE=Display the Monitor Screen
-MENU_NAV_MONITOR_ACCESSIBLE=顯示監視窗口
+MENU_NAV_MONITOR_ACCESSIBLE=顯示監視窗口.
 #### MENU_NAV_CONN=Connections
 MENU_NAV_CONN=網路芳鄰(C)
 #### MENU_NAV_CONN_MNEMONIC=C
 MENU_NAV_CONN_MNEMONIC=C
 #### MENU_NAV_CONN_ACCESSIBLE=Display the Connections Screen
-MENU_NAV_CONN_ACCESSIBLE=顯示網路芳鄰窗口
+MENU_NAV_CONN_ACCESSIBLE=顯示網路芳鄰窗口.
 #### MENU_NAV_LIB=Library
 MENU_NAV_LIB=我的最愛(B)
 #### MENU_NAV_LIB_MNEMONIC=L
 MENU_NAV_LIB_MNEMONIC=B
 #### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
-MENU_NAV_LIB_ACCESSIBLE=顯示我的最愛窗口
+MENU_NAV_LIB_ACCESSIBLE=顯示我的最愛窗口.
 
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=檢視(V)
@@ -382,19 +394,19 @@ MENU_VIEW_MONITOR=監視(M)
 #### MENU_VIEW_MONITOR_MNEMONIC=M
 MENU_VIEW_MONITOR_MNEMONIC=M
 #### MENU_VIEW_MONITOR_ACCESSIBLE=Show Monitor Window
-MENU_VIEW_MONITOR_ACCESSIBLE=顯示監視窗口
+MENU_VIEW_MONITOR_ACCESSIBLE=顯示監視窗口.
 #### MENU_VIEW_CONNECTIONS=Connections
 MENU_VIEW_CONNECTIONS=網路芳鄰(C)
 #### MENU_VIEW_CONNECTIONS_MNEMONIC=C
 MENU_VIEW_CONNECTIONS_MNEMONIC=C
 #### MENU_VIEW_CONNECTIONS_ACCESSIBLE=Show Connections Window
-MENU_VIEW_CONNECTIONS_ACCESSIBLE=顯示網路芳鄰窗口
+MENU_VIEW_CONNECTIONS_ACCESSIBLE=顯示網路芳鄰窗口.
 #### MENU_VIEW_LIBRARY=Library
 MENU_VIEW_LIBRARY=我的最愛(B)
 #### MENU_VIEW_LIBRARY_MNEMONIC=L
 MENU_VIEW_LIBRARY_MNEMONIC=B
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
-MENU_VIEW_LIBRARY_ACCESSIBLE=顯示我的最愛窗口
+MENU_VIEW_LIBRARY_ACCESSIBLE=顯示我的最愛窗口.
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 #? MENU_VIEW_THEMES_TITLE=
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -418,7 +430,7 @@ MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
 #### MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin
 #? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=
 #### MENU_VIEW_LANGS_TITLE=Change Language
-MENU_VIEW_LANGS_TITLE=语言(H)
+MENU_VIEW_LANGS_TITLE=語言(H)
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
@@ -457,24 +469,24 @@ MENU_RESOURCES_PRO=LimeWire PRO
 #### MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_MNEMONIC=P
 #### MENU_RESOURCES_PRO_ACCESSIBLE=Display the LimeWire PRO Website
-MENU_RESOURCES_PRO_ACCESSIBLE=顯示 LimeWire PRO 網站
+MENU_RESOURCES_PRO_ACCESSIBLE=顯示 LimeWire PRO 網站.
 
 #### MENU_TOOLS_TITLE=Tools
 MENU_TOOLS_TITLE=工具(T)
 #### MENU_TOOLS_TITLE_MNEMONIC=T
 MENU_TOOLS_TITLE_MNEMONIC=T
-#### MENU_TOOLS_STATISTICS=Statistics...
+#### MENU_TOOLS_STATISTICS=Statistics
 MENU_TOOLS_STATISTICS=統計(S)
 #### MENU_TOOLS_STATISTICS_MNEMONIC=S
 MENU_TOOLS_STATISTICS_MNEMONIC=S
 #### MENU_TOOLS_STATISTICS_ACCESSIBLE=Display the Statistics Screen
-MENU_TOOLS_STATISTICS_ACCESSIBLE=顯示統計窗口
-#### MENU_TOOLS_OPTIONS=Options...
+MENU_TOOLS_STATISTICS_ACCESSIBLE=顯示統計窗口.
+#### MENU_TOOLS_OPTIONS=Options
 MENU_TOOLS_OPTIONS=選項...(O)
 #### MENU_TOOLS_OPTIONS_MNEMONIC=O
 MENU_TOOLS_OPTIONS_MNEMONIC=O
 #### MENU_TOOLS_OPTIONS_ACCESSIBLE=Display the Options Screen
-MENU_TOOLS_OPTIONS_ACCESSIBLE=顯示選項窗口
+MENU_TOOLS_OPTIONS_ACCESSIBLE=顯示選項.
 
 #### MENU_HELP_TITLE=Help
 MENU_HELP_TITLE=說明(H)
@@ -485,7 +497,7 @@ MENU_HELP_USING_LIMEWIRE=使用 LimeWire(U)
 #### MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
 MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
 #### MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Help for Using LimeWire
-MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=使用 LimeWire 的說明
+MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=使用 LimeWire 的說明.
 #### MENU_HELP_TOTD=Tip of the Day
 #? MENU_HELP_TOTD=
 #### MENU_HELP_TOTD_MNEMONIC=D
@@ -497,31 +509,31 @@ MENU_HELP_FAQ=常見疑難排解(F)
 #### MENU_HELP_FAQ_MNEMONIC=F
 MENU_HELP_FAQ_MNEMONIC=F
 #### MENU_HELP_FAQ_ACCESSIBLE=Frequently Asked Questions for LimeWire
-MENU_HELP_FAQ_ACCESSIBLE=LimeWire 常見疑難排解
+MENU_HELP_FAQ_ACCESSIBLE=LimeWire 常見疑難排解.
 #### MENU_HELP_FORUM=Forum
 MENU_HELP_FORUM=論壇(M)
 #### MENU_HELP_FORUM_MNEMONIC=M
 MENU_HELP_FORUM_MNEMONIC=M
 #### MENU_HELP_FORUM_ACCESSIBLE=Access the LimeWire Users' Forum
-MENU_HELP_FORUM_ACCESSIBLE=進入 LimeWire 用戶論壇
+MENU_HELP_FORUM_ACCESSIBLE=進入 LimeWire 用戶論壇.
 #### MENU_HELP_FRIEND=Tell a Friend
-MENU_HELP_FRIEND=告訴你的朋友(T)
+MENU_HELP_FRIEND=告訴您的朋友(T)
 #### MENU_HELP_FRIEND_MNEMONIC=T
 MENU_HELP_FRIEND_MNEMONIC=T
 #### MENU_HELP_FRIEND_ACCESSIBLE=Tell a Friend about LimeWire
-MENU_HELP_FRIEND_ACCESSIBLE=把關於 LimeWire 的一切告訴你的朋友
+MENU_HELP_FRIEND_ACCESSIBLE=把關於 LimeWire 的一切告訴您的朋友.
 #### MENU_HELP_REVIEW=Review LimeWire
 MENU_HELP_REVIEW=評論 LimeWire
 #### MENU_HELP_REVIEW_MNEMONIC=R
 MENU_HELP_REVIEW_MNEMONIC=R
 #### MENU_HELP_REVIEW_ACCESSIBLE=Submit a Review of LimeWire
-MENU_HELP_REVIEW_ACCESSIBLE=提交關於 LimeWire 的評論
-#### MENU_HELP_ABOUT=About...
+MENU_HELP_REVIEW_ACCESSIBLE=提交關於 LimeWire 的評論.
+#### MENU_HELP_ABOUT=About LimeWire
 MENU_HELP_ABOUT=關於...(A)
 #### MENU_HELP_ABOUT_MNEMONIC=A
 MENU_HELP_ABOUT_MNEMONIC=A
 #### MENU_HELP_ABOUT_ACCESSIBLE=Information about LimeWire
-MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息
+MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息.
 #### MENU_HELP_ERROR=Generate Error
 #? MENU_HELP_ERROR=
 #### MENU_HELP_ERROR_MNEMONIC=E
@@ -549,31 +561,31 @@ MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=下載
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
-SEARCH_DOWNLOAD_BUTTON_TIP=下載所有選中的文件
+SEARCH_DOWNLOAD_BUTTON_TIP=下載所有選中的文件.
 #### SEARCH_WISHLIST_BUTTON_LABEL=Add To Wishlist
 SEARCH_WISHLIST_BUTTON_LABEL=新增到希望列表
 #### SEARCH_WISHLIST_BUTTON_TIP=Spawn a "LimeWire Robot" to Look for the Content
-SEARCH_WISHLIST_BUTTON_TIP=產生一個 LimeWire 機器人去尋找需要的內容
+SEARCH_WISHLIST_BUTTON_TIP=產生一個 LimeWire 機器人去尋找需要的內容.
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
 SEARCH_BROWSE_HOST_BUTTON_LABEL=瀏覽主機
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
-SEARCH_BROWSE_HOST_BUTTON_TIP=瀏覽選中計算機上的所有共用文件
+SEARCH_BROWSE_HOST_BUTTON_TIP=瀏覽選中計算機上的所有共用文件.
 #### SEARCH_CHAT_BUTTON_LABEL=Chat...
 SEARCH_CHAT_BUTTON_LABEL=聊天...
 #### SEARCH_CHAT_BUTTON_TIP=Chat with Selected Host
-SEARCH_CHAT_BUTTON_TIP=和選中的用戶聊天
+SEARCH_CHAT_BUTTON_TIP=和選中的用戶聊天.
 #### SEARCH_BUY_CD_LABEL=Buy...
 SEARCH_BUY_CD_LABEL=購買...
 #### SEARCH_BUY_CD_TIP=Buy Selected Item
-SEARCH_BUY_CD_TIP=購買選中的條目
+SEARCH_BUY_CD_TIP=購買選中的項目.
 #### SEARCH_SEARCH_BUTTON_LABEL=Search
 SEARCH_SEARCH_BUTTON_LABEL=搜尋
 #### SEARCH_SEARCH_BUTTON_TIP=Search the Network for the Given Words
-SEARCH_SEARCH_BUTTON_TIP=以選定的文字搜尋網絡
+SEARCH_SEARCH_BUTTON_TIP=以選定的文字搜尋網絡.
 #### SEARCH_STOP_BUTTON_LABEL=Stop
 SEARCH_STOP_BUTTON_LABEL=停止
 #### SEARCH_STOP_BUTTON_TIP=Stop Collecting Search Results for Selected Tab
-SEARCH_STOP_BUTTON_TIP=停止收集檢索結果
+SEARCH_STOP_BUTTON_TIP=停止收集檢索結果.
 #### SEARCH_PUBLIC_KILL_STRING=Close Search
 SEARCH_PUBLIC_KILL_STRING=關閉搜尋
 #### SEARCH_PUBLIC_LAUNCH_STRING=Launch Action
@@ -586,7 +598,7 @@ SEARCH_PUBLIC_BROWSE_STRING=瀏覽對方主機
 SEARCH_PUBLIC_CHAT_STRING=和對方聊天
 #### SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi Web Lookup...
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=到 Bitzi 網搜尋...
-#### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
+#### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet Details for File
 #? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=
 #### SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 #? SEARCH_PUBLIC_HTTP_PAGE_STRING=
@@ -599,9 +611,9 @@ SEARCH_RESULT_TABLE_LABEL=搜尋結果
 #### SEARCH_SEARCHING_LABEL=Searching...
 SEARCH_SEARCHING_LABEL=正在搜尋...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
-SEARCH_VIRUS_MSG_ONE=選中的文件中包含可執行程式
+SEARCH_VIRUS_MSG_ONE=選中的文件中包含可執行
 #### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
-SEARCH_VIRUS_MSG_TWO=程式可能攜帶病毒.
+SEARCH_VIRUS_MSG_TWO=程式可能夾帶病毒.
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=確認要下載嗎?
 #### SEARCH_SHOW_MESSAGE_MSG=Don't show this message again
@@ -615,7 +627,7 @@ SEARCH_DEFAULT_FIELD_TITLE=文件名
 #### AUTO_DL_CHECKBOX_STRING=Automatically Download
 AUTO_DL_CHECKBOX_STRING=自動下載
 #### AUTO_DL_CHECKBOX_TOOLTIP=LimeWire will download your files for you
-AUTO_DL_CHECKBOX_TOOLTIP=LimeWire 將為你下載這些文件
+AUTO_DL_CHECKBOX_TOOLTIP=LimeWire 將為您下載這些文件.
 #### SEARCH_TYPE_KEYWORD=Keyword
 #? SEARCH_TYPE_KEYWORD=
 #### SEARCH_TYPE_WHATSNEW=What's New
@@ -628,6 +640,8 @@ AUTO_DL_CHECKBOX_TOOLTIP=LimeWire 將為你下載這些文件
 #? SEARCH_BROWSEHOST_DESC=
 #### SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
 #? SEARCH_BROWSEHOST_MYIP=
+#### SEARCH_BROWSEHOST_FIREWALLED=Your computer is behind a firewall or router and cannot receive direct connections.
+#? SEARCH_BROWSEHOST_FIREWALLED=
 #### SEARCH_BROWSEHOST_BUTTON=Direct Connect
 #? SEARCH_BROWSEHOST_BUTTON=
 #### SEARCH_WHATSNEW_HIDE_ADULT=Hide Adult Content
@@ -644,12 +658,27 @@ SEARCH_WHATSNEW_HIDE_ADULT=忽略成人內容
 #? SEARCH_WHATS_NEW_SMALL=
 #### SEARCH_SELECT_TYPE=Select Type:
 #? SEARCH_SELECT_TYPE=
+#### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
+#? SEARCH_MEDIA_DOCUMENTS_TOOLTIP=
+#### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
+#? SEARCH_MEDIA_PROGRAMS_TOOLTIP=
+#### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
+#? SEARCH_MEDIA_AUDIO_TOOLTIP=
+#### SEARCH_MEDIA_VIDEO_TOOLTIP=Search For Video Files, Including avi, mpg, wmv, and More
+#? SEARCH_MEDIA_VIDEO_TOOLTIP=
+#### SEARCH_MEDIA_IMAGES_TOOLTIP=Search For Image Files, Including jpg, gif, png and More
+#? SEARCH_MEDIA_IMAGES_TOOLTIP=
 #### SEARCH_FILTER_RESULTS=Filter Results:
 #? SEARCH_FILTER_RESULTS=
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 #? SEARCH_BACK_TO_SEARCH=
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 #? SEARCH_BLOCK_HOST=
+
+#### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_LABEL=
+#### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
+#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
 
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
@@ -659,7 +688,7 @@ MEDIA_DOCUMENTS=文檔
 #### MEDIA_PROGRAMS=Programs
 MEDIA_PROGRAMS=程式
 #### MEDIA_AUDIO=Audio
-MEDIA_AUDIO=音頻
+MEDIA_AUDIO=聲頻
 #### MEDIA_VIDEO=Video
 MEDIA_VIDEO=視頻
 #### MEDIA_IMAGES=Images
@@ -688,6 +717,8 @@ RESULT_PANEL_COUNT=#
 RESULT_PANEL_VENDOR=軟體
 #### RESULT_PANEL_ADDED=Created
 #? RESULT_PANEL_ADDED=
+#### RESULT_PANEL_LICENSE=License
+#? RESULT_PANEL_LICENSE=
 
 #Filter labels.
 #### SEARCH_FILTER_ALL=All
@@ -701,16 +732,16 @@ RESULT_PANEL_VENDOR=軟體
 
 #### DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
 #? DOWNLOAD_LAUNCH_BUTTON_LABEL=
-#### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview The Selected Downloads
+#### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the Selected Downloads
 #? DOWNLOAD_LAUNCH_BUTTON_TIP=
 #### DOWNLOAD_KILL_BUTTON_LABEL=Stop
 DOWNLOAD_KILL_BUTTON_LABEL=取消下載
 #### DOWNLOAD_KILL_BUTTON_TIP=Stop Selected Downloads
-DOWNLOAD_KILL_BUTTON_TIP=取消選中的下載
+DOWNLOAD_KILL_BUTTON_TIP=取消選中的下載.
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=恢復下載
 #### DOWNLOAD_RESUME_BUTTON_TIP=Try to Reattempt a Download
-DOWNLOAD_RESUME_BUTTON_TIP=重新嘗試下載
+DOWNLOAD_RESUME_BUTTON_TIP=重新嘗試下載.
 #### DOWNLOAD_SOURCES_BUTTON_LABEL=Find Sources
 #? DOWNLOAD_SOURCES_BUTTON_LABEL=
 #### DOWNLOAD_SOURCES_BUTTON_TIP=Try to Find Sources for Failed Downloads
@@ -718,7 +749,7 @@ DOWNLOAD_RESUME_BUTTON_TIP=重新嘗試下載
 #### DOWNLOAD_CLEAR_BUTTON_LABEL=Clear Inactive
 DOWNLOAD_CLEAR_BUTTON_LABEL=清除停止的下載
 #### DOWNLOAD_CLEAR_BUTTON_TIP=Remove Inactive Downloads
-DOWNLOAD_CLEAR_BUTTON_TIP=移除不活動的下載
+DOWNLOAD_CLEAR_BUTTON_TIP=移除不活動的下載.
 #### DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
 #? DOWNLOAD_PAUSE_BUTTON_LABEL=
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause the Selected Downloads
@@ -727,45 +758,47 @@ DOWNLOAD_CLEAR_BUTTON_TIP=移除不活動的下載
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=運行
 #### LIBRARY_LAUNCH_BUTTON_TIP=Launch Selected Files
-LIBRARY_LAUNCH_BUTTON_TIP=運行選中的文件
+LIBRARY_LAUNCH_BUTTON_TIP=運行選中的文件.
 #### LIBRARY_DELETE_BUTTON_LABEL=Delete
 LIBRARY_DELETE_BUTTON_LABEL=刪除
 #### LIBRARY_DELETE_BUTTON_TIP=Delete Selected Files
-LIBRARY_DELETE_BUTTON_TIP=删除選中的文件
+LIBRARY_DELETE_BUTTON_TIP=删除選中的文件.
 #### LIBRARY_REFRESH_BUTTON_LABEL=Refresh
 LIBRARY_REFRESH_BUTTON_LABEL=重新整理
 #### LIBRARY_REFRESH_BUTTON_TIP=Reload Shared Directories
-LIBRARY_REFRESH_BUTTON_TIP=重新整理共用資料夾
+LIBRARY_REFRESH_BUTTON_TIP=重新整理共用資料夾.
 #### LIBRARY_EXPLORE_BUTTON_LABEL=Explore
 #? LIBRARY_EXPLORE_BUTTON_LABEL=
 #### LIBRARY_EXPLORE_BUTTON_TIP=Open Library Directory
 #? LIBRARY_EXPLORE_BUTTON_TIP=
-#### LIBRARY_PLAYLIST_BUTTON_LABEL=To PlayList
+#### LIBRARY_PLAYLIST_BUTTON_LABEL=Enqueue
 LIBRARY_PLAYLIST_BUTTON_LABEL=新增到播放列表
-#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the PlayList
-LIBRARY_PLAYLIST_BUTTON_TIP=新增選中的文件到播放列表
+#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Play List
+LIBRARY_PLAYLIST_BUTTON_TIP=新增選中的文件到播放列表.
 #### LIBRARY_ANNOTATE_BUTTON_LABEL=Describe...
 LIBRARY_ANNOTATE_BUTTON_LABEL=注釋...
 #### LIBRARY_ANNOTATE_BUTTON_TIP=Describe Selected File
-LIBRARY_ANNOTATE_BUTTON_TIP=所選文件的注釋
+LIBRARY_ANNOTATE_BUTTON_TIP=所選文件的注釋.
 #### LIBRARY_RESUME_BUTTON_LABEL=Resume
 LIBRARY_RESUME_BUTTON_LABEL=恢復下載
-#### LIBRARY_RESUME_BUTTON_TIP=Continue downloading selected incomplete file
-LIBRARY_RESUME_BUTTON_TIP=重新嘗試下載
+#### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
+LIBRARY_RESUME_BUTTON_TIP=重新嘗試下載.
+#### LIBRARY_RENAME_BUTTON_LABEL=Rename
+#? LIBRARY_RENAME_BUTTON_LABEL=
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=開啟...
-#### PLAYLIST_LOAD_BUTTON_TIP=Open a new or existing PlayList
-PLAYLIST_LOAD_BUTTON_TIP=開啟一個新的或存在的播放列表
-#### PLAYLIST_SAVE_BUTTON_LABEL=Save...
+#### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Play List
+PLAYLIST_LOAD_BUTTON_TIP=開啟一個新的或存在的播放列表.
+#### PLAYLIST_SAVE_BUTTON_LABEL=Save As...
 PLAYLIST_SAVE_BUTTON_LABEL=儲存...
-#### PLAYLIST_SAVE_BUTTON_TIP=Save the current PlayList
-PLAYLIST_SAVE_BUTTON_TIP=儲存 當前的播放列表
+#### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Play List to a File
+PLAYLIST_SAVE_BUTTON_TIP=儲存 當前的播放列表.
 #### PLAYLIST_DELETE_BUTTON_LABEL=Remove
 PLAYLIST_DELETE_BUTTON_LABEL=删除
-#### PLAYLIST_DELETE_BUTTON_TIP=Remove selected file from PlayList
-PLAYLIST_DELETE_BUTTON_TIP=從 播放列表中删除選中的文件
-#### PLAYLIST_FILE_DESCRIPTION=PlayList Files (*.m3u)
+#### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Play List
+PLAYLIST_DELETE_BUTTON_TIP=從 播放列表中删除選中的文件.
+#### PLAYLIST_FILE_DESCRIPTION=Play List Files (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=播放列表的文件 (*.m3u)
 
 ################################################################################
@@ -779,9 +812,9 @@ MEDIA_PLAYER_DEFAULT_STRING=LimeWire 多媒體播放機
 #? MEDIA_PAUSE_BUTTON_TIP=
 #### MEDIA_STOP_BUTTON_TIP=Stop
 MEDIA_STOP_BUTTON_TIP=停止
-#### MEDIA_FORWARD_BUTTON_TIP=Forward
+#### MEDIA_FORWARD_BUTTON_TIP=Next
 MEDIA_FORWARD_BUTTON_TIP=前進
-#### MEDIA_REWIND_BUTTON_TIP=Rewind
+#### MEDIA_REWIND_BUTTON_TIP=Previous
 MEDIA_REWIND_BUTTON_TIP=後退
 
 #anu added
@@ -802,7 +835,7 @@ STATISTICS_DISCONNECTED=離線的/沒有可用的文件
 #### STATISTICS_SHARING=Sharing
 STATISTICS_SHARING=共用
 #### STATISTICS_SHARING_TOOLTIP=The number of files you are sharing.
-STATISTICS_SHARING_TOOLTIP=你正在共用文件的數目.
+STATISTICS_SHARING_TOOLTIP=您正在共用文件的數目.
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
 #? STATISTICS_CONNECTION_DISCONNECTED=
 #### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
@@ -850,7 +883,7 @@ STATISTICS_SHARING_TOOLTIP=你正在共用文件的數目.
 #### DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Kill Download
 DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=取消下載
 #### DOWNLOAD_POPUP_MENU_RESUME=Force Resume
-DOWNLOAD_POPUP_MENU_RESUME=強制恢復下載
+DOWNLOAD_POPUP_MENU_RESUME=繼續下載
 #### DOWNLOAD_POPUP_MENU_LAUNCH=Preview File
 DOWNLOAD_POPUP_MENU_LAUNCH=運行文件
 #### DOWNLOAD_POPUP_MENU_CHAT=Chat with Host
@@ -880,7 +913,7 @@ DOWNLOAD_STATUS_QUEUED=等候
 #### DOWNLOAD_STATUS_CONNECTING=Connecting...
 DOWNLOAD_STATUS_CONNECTING=連接中...
 #### DOWNLOAD_STATUS_WAITING=Waiting For Busy Hosts
-DOWNLOAD_STATUS_WAITING=等待因為繁忙
+DOWNLOAD_STATUS_WAITING=等待中
 #### DOWNLOAD_STATUS_COMPLETE=Complete
 DOWNLOAD_STATUS_COMPLETE=完成
 #### DOWNLOAD_STATUS_ABORTED=Aborted
@@ -889,16 +922,16 @@ DOWNLOAD_STATUS_ABORTED=放棄
 DOWNLOAD_STATUS_FAILED=下載失敗
 #### DOWNLOAD_STATUS_DOWNLOADING=Downloading from
 DOWNLOAD_STATUS_DOWNLOADING=正在下載從
-#### DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Could Not Move to Library
+#### DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Disk Problem
 DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=移動到收藏時失敗
 #### DOWNLOAD_STATUS_CORRUPT_FILE=File Corrupted
-DOWNLOAD_STATUS_CORRUPT_FILE=文件被破壞
+DOWNLOAD_STATUS_CORRUPT_FILE=損毀的文件
 #### DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering Corrupted File
 #? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=
 #### DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery Failed
 #? DOWNLOAD_STATUS_RECOVERY_FAILED=
 #### DOWNLOAD_STATUS_REQUERYING=Querying Network
-DOWNLOAD_STATUS_REQUERYING=正在請求網路
+DOWNLOAD_STATUS_REQUERYING=正在請求連線
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Waiting
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=請求已發出, 等待
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s for Sources
@@ -933,6 +966,10 @@ DOWNLOAD_HOSTS_LABEL=主機
 #? DOWNLOAD_BUSY_HOSTS=
 #### DOWNLOAD_QUEUED_HOSTS=Remotely Queued
 #? DOWNLOAD_QUEUED_HOSTS=
+#### DOWNLOAD_CHUNKS=Chunks
+#? DOWNLOAD_CHUNKS=
+#### DOWNLOAD_LOST=Lost To Corruption
+#? DOWNLOAD_LOST=
 #### DOWNLOAD_SEARCHING=Locating Sources...
 #? DOWNLOAD_SEARCHING=
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
@@ -958,21 +995,21 @@ DOWNLOAD_HOSTS_LABEL=主機
 # Key/value pairs for UploadView
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
-UPLOAD_POPUP_MENU_KILL_UPLOAD=移除上載
+UPLOAD_POPUP_MENU_KILL_UPLOAD=移除上傳
 #### UPLOAD_POPUP_MENU_CHAT=Chat with Host
 UPLOAD_POPUP_MENU_CHAT=和對方聊天
 #### UPLOAD_KILL_BUTTON_LABEL=Kill Upload
-UPLOAD_KILL_BUTTON_LABEL=移除上載
+UPLOAD_KILL_BUTTON_LABEL=移除上傳
 #### UPLOAD_KILL_BUTTON_TIP=Stop Selected Uploads
-UPLOAD_KILL_BUTTON_TIP=停止選中的上載
+UPLOAD_KILL_BUTTON_TIP=停止選中的上傳.
 #### UPLOAD_CLEAR_BUTTON_LABEL=Clear Inactive
 UPLOAD_CLEAR_BUTTON_LABEL=清除不活動
 #### UPLOAD_CLEAR_BUTTON_TIP=Remove Inactive Uploads
-UPLOAD_CLEAR_BUTTON_TIP=清除不活動的上載
+UPLOAD_CLEAR_BUTTON_TIP=清除不活動的上傳.
 #### UPLOAD_CHAT_BUTTON_LABEL=Chat with Host
 UPLOAD_CHAT_BUTTON_LABEL=和對方聊天
 #### UPLOAD_CHAT_BUTTON_TIP=Chat with another user of the selected host
-UPLOAD_CHAT_BUTTON_TIP=和選中的用戶聊天
+UPLOAD_CHAT_BUTTON_TIP=和選中的用戶聊天.
 #### UPLOAD_TABLE_STRING_NAME=Name
 UPLOAD_TABLE_STRING_NAME=名稱
 #### UPLOAD_TABLE_STRING_HOST=Host
@@ -994,11 +1031,11 @@ UPLOAD_TABLE_STRING_USER_AGENT=軟體/version
 #### UPLOAD_TABLE_STRING_CONNECTING=Connecting
 UPLOAD_TABLE_STRING_CONNECTING=正在連線
 #### UPLOAD_TABLE_STRING_UPLOADING=Uploading
-UPLOAD_TABLE_STRING_UPLOADING=正在上載
+UPLOAD_TABLE_STRING_UPLOADING=正在上傳
 #### UPLOAD_TABLE_STRING_LIMITREACHED=Upload Limit Reached
-UPLOAD_TABLE_STRING_LIMITREACHED=達到上載限制
+UPLOAD_TABLE_STRING_LIMITREACHED=達到上傳限制
 #### UPLOAD_TABLE_STRING_FREELOADER=Freeloader Uploading
-UPLOAD_TABLE_STRING_FREELOADER=吃白食者正在上載
+UPLOAD_TABLE_STRING_FREELOADER=吃白食者正在上傳
 #### UPLOAD_TABLE_STRING_PUSHFAILED=Couldn't Connect
 UPLOAD_TABLE_STRING_PUSHFAILED=不能連線
 #### UPLOAD_TABLE_STRING_INTERRUPTED=Transfer Interrupted
@@ -1027,16 +1064,14 @@ UPLOAD_STRING_KBPSEC=KB/s
 ###################################################################
 # Key/value pairs for MonitorView
 ###################################################################
-#### MONITOR_VIEW_INCOMING_SEARCHES=Incoming Searches
+#### MONITOR_VIEW_INCOMING_SEARCHES=Show incoming searches
 MONITOR_VIEW_INCOMING_SEARCHES=進來的搜尋
-#### MONITOR_VIEW_ENABLE=Show
-MONITOR_VIEW_ENABLE=有效
 #### MONITOR_VIEW_SHOW_LAST=Show last
 MONITOR_VIEW_SHOW_LAST=顯示最近
 #### MONITOR_VIEW_SEARCHES=searches
 MONITOR_VIEW_SEARCHES=個搜尋
 #### MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer. Hence you will see few or no searches in the monitor window.
-MONITOR_VIEW_LEAF_MESSAGE=你的客戶是一超級節点保护的一個葉節点. 因此你将在監視窗口中看見很少或者沒有搜尋. 
+MONITOR_VIEW_LEAF_MESSAGE=您的客戶是一超級節点保护的一個葉節点. 因此您将在監視窗口中看見很少或者沒有搜尋.
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
@@ -1066,16 +1101,14 @@ MULTICAST_SPEED=Ethernet
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
-#### CV_PANEL_TITLE=Connected Hosts
-CV_PANEL_TITLE=連線的主機
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=主機
 #### CV_COLUMN_STATUS=Status
 CV_COLUMN_STATUS=狀態
 #### CV_COLUMN_MESSAGE=Messages (I/O)
-CV_COLUMN_MESSAGE=消息 (入/出)
+CV_COLUMN_MESSAGE=信息 (入/出)
 #### CV_COLUMN_BANDWIDTH=Bandwidth (I/O)
-CV_COLUMN_BANDWIDTH=带寬 (入/出)
+CV_COLUMN_BANDWIDTH=頻寬 (入/出)
 #### CV_COLUMN_DROPPED=Dropped (I/O)
 CV_COLUMN_DROPPED=丢棄 (入/出)
 #### CV_COLUMN_HOSTS=Hosts
@@ -1094,12 +1127,12 @@ CV_COLUMN_TIME=時間
 #? CV_COLUMN_QRP_USED=
 #### CV_BUTTON_REMOVE=Remove
 CV_BUTTON_REMOVE=删除
-#### CV_BUTTON_TOOLTIP_REMOVE=Remove the selected connections
-CV_BUTTON_TOOLTIP_REMOVE=删除選中的連線
-#### CV_BUTTON_ADD=Add
+#### CV_BUTTON_TOOLTIP_REMOVE=Remove the Selected Connections
+CV_BUTTON_TOOLTIP_REMOVE=删除選中的連線.
+#### CV_BUTTON_ADD=Add...
 CV_BUTTON_ADD=新增
-#### CV_BUTTON_TOOLTIP_ADD=Create a new outgoing connection
-CV_BUTTON_TOOLTIP_ADD=產生一個新的傳出連線
+#### CV_BUTTON_TOOLTIP_ADD=Create a New Outgoing Connection
+CV_BUTTON_TOOLTIP_ADD=產生一個新的傳出連線.
 #### CV_LABEL_KEEP_BEGIN=Keep approximately
 CV_LABEL_KEEP_BEGIN=大約保持
 #### CV_LABEL_KEEP_END=connections up.
@@ -1111,7 +1144,7 @@ CV_TABLE_STRING_CONNECTINGS=connecting
 #### CV_TABLE_STRING_LEAF=Leaf
 CV_TABLE_STRING_LEAF=葉子節點
 #### CV_TABLE_STRING_LEAVES=Leaves
-#? CV_TABLE_STRING_LEAVES=
+CV_TABLE_STRING_LEAVES=葉子節點
 #### CV_TABLE_STRING_ULTRAPEER=Ultrapeer
 CV_TABLE_STRING_ULTRAPEER=Ultrapeer
 #### CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
@@ -1130,12 +1163,20 @@ CV_TABLE_STRING_INCOMING=傳入
 CV_TABLE_STRING_OUTGOING=傳出
 #### CV_TABLE_STRING_CONNECTED_ON=Connected on
 #? CV_TABLE_STRING_CONNECTED_ON=
-#### CV_STRING_CLIENT=[Leaf]
+#### CV_STRING_CLIENT=Leaf
 CV_STRING_CLIENT=[葉子節點]
-#### CV_STRING_ULTRAPEER=[Ultrapeer]
+#### CV_STRING_ULTRAPEER=Ultrapeer
 CV_STRING_ULTRAPEER=[Ultrapeer]
+#### CV_STRING_STATUS=Connection Status:
+#? CV_STRING_STATUS=
 #### CV_TABLE_STRING_KBPSEC=KB/s
 CV_TABLE_STRING_KBPSEC=KB/s
+#### CV_ADD_HOST_LABEL=Host:
+#? CV_ADD_HOST_LABEL=
+#### CV_ADD_PORT_LABEL=Port:
+#? CV_ADD_PORT_LABEL=
+#### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
+#? CV_ADD_DIALOG_TITLE=
 
 ################################################################################
 # Key/value pairs for strings in the library window
@@ -1158,15 +1199,19 @@ LIBRARY_TABLE_PATH=路徑
 LIBRARY_TABLE_HITCOUNT=命中
 #### LIBRARY_TABLE_NUMALTLOC=Locations
 LIBRARY_TABLE_NUMALTLOC=位置
+#### LIBRARY_TABLE_LICENSE=License
+#? LIBRARY_TABLE_LICENSE=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
-LIBRARY_TABLE_UPLOAD_COUNT=上載
+LIBRARY_TABLE_UPLOAD_COUNT=上傳
+#### LIBRARY_TABLE_ADVANCED_POPUP_MENU=Advanced
+#? LIBRARY_TABLE_ADVANCED_POPUP_MENU=
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
 LIBRARY_TREE_NEW_FOLDER_LABEL=新增資料夾
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=停止共用
 #### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
 LIBRARY_TREE_RENAME_FOLDER_LABEL=更名
-#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=To PlayList
+#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=To Play List
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=新增到播放列表
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
 #? LIBRARY_TREE_SAVED_DIRECTORY=
@@ -1182,12 +1227,12 @@ LIBRARY_BURN_LABEL=刻錄 CD...
 ###################################################################
 # Key/value pairs for PlayListGUI
 ###################################################################
-#### PLAYLIST_TITLE=MP3 PlayList
+#### PLAYLIST_TITLE=MP3 Play List
 PLAYLIST_TITLE=MP3 播放列表
 #### PLAYLIST_TABLE_NAME=Name
 PLAYLIST_TABLE_NAME=名稱
 #### PLAYLIST_TABLE_LENGTH=Length
-PLAYLIST_TABLE_LENGTH=時长
+PLAYLIST_TABLE_LENGTH=時長
 #### PLAYLIST_TABLE_BITRATE=Bitrate
 PLAYLIST_TABLE_BITRATE=比特率
 #### PLAYLIST_OPTIONS_STRING=Play Options:
@@ -1195,14 +1240,14 @@ PLAYLIST_OPTIONS_STRING=播放選項:
 #### PLAYLIST_OPTIONS_CONTINUE=Continuous
 PLAYLIST_OPTIONS_CONTINUE=連續
 #### PLAYLIST_OPTIONS_SHUFFLE=Shuffle
-PLAYLIST_OPTIONS_SHUFFLE=跳跃
-#### PLAYLIST_DIALOG_OPEN_TITLE=Select Playlist (.m3u)
+PLAYLIST_OPTIONS_SHUFFLE=跳曜
+#### PLAYLIST_DIALOG_OPEN_TITLE=Open Play List (.m3u)
 PLAYLIST_DIALOG_OPEN_TITLE=選擇播放列表 (.m3u)
-#### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist as...
+#### PLAYLIST_DIALOG_SAVE_TITLE=Save Play List As
 PLAYLIST_DIALOG_SAVE_TITLE=儲存播放列表到...
 #### PLAYLIST_DIALOG_SAVE_SAVE=Save
 PLAYLIST_DIALOG_SAVE_SAVE=儲存
-#### PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
+#### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
 #? PLAYLIST_CANNOT_PLAY_FILE=
 #### PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
 #? PLAYLIST_FILE_UNSUPPORTED=
@@ -1228,41 +1273,49 @@ PLAYLIST_DIALOG_SAVE_SAVE=儲存
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=歡迎
 #### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
-SETUP_WELCOME_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire 将指導你透過一系列步骤配置 LimeWire, 達到最佳性能.
+SETUP_WELCOME_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire 將指導您透過一系列步骤設訂 LimeWire, 已達最佳效能.
 #### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 #? SETUP_WELCOME_PARTIAL_LABEL=
 #### SETUP_SAVE_TITLE=Save Directory
 SETUP_SAVE_TITLE=儲存資料夾
 #### SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded. This folder will also be shared with other gnutella users by default.
-SETUP_SAVE_LABEL=請選擇你希望儲存下載文件的資料夾. 此資料夾預設與其他 Gnutella 用戶共用.
+SETUP_SAVE_LABEL=請選擇您希望儲存下載文件的資料夾. 此資料夾預設與其他 Gnutella 用戶共享.
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=連線速度
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
-SETUP_SPEED_LABEL=請選擇你的因特網連線速度. 正確的设定此速度對於优化網路非常重要. 如果你不能確認你是何種網路連線類型或者網路類型沒有列出, 隻需简单地選擇看上去最合适的.
+SETUP_SPEED_LABEL=請選擇您的因特網連線速度. 正確的设定此速度對於优化網路非常重要. 如果您不能確認您是何種網路連線類型或者網路類型沒有列出, 只需简单地選擇看上去最合适的.
 #### SETUP_STARTUP_TITLE=System Startup
 #? SETUP_STARTUP_TITLE=
 #### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
 #? SETUP_STARTUP_LABEL=
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
 #? SETUP_STARTUP_CHECKBOX=
+#### SETUP_FIREWALL_TITLE_ONE=Firewall Preparation
+#? SETUP_FIREWALL_TITLE_ONE=
+#### SETUP_FIREWALL_LABEL_ONE=LimeWire needs to receive information from the network in order to function properly. When you click next, some firewalls will ask your permission for LimeWire to use the network. You should allow LimeWire full access. Below is a picture of Windows Firewall asking to unblock LimeWire. Your firewall software may look different.
+#? SETUP_FIREWALL_LABEL_ONE=
+#### SETUP_FIREWALL_TITLE_TWO=Firewall Warning
+#? SETUP_FIREWALL_TITLE_TWO=
+#### SETUP_FIREWALL_LABEL_TWO=LimeWire is now requesting permission to use the network. If nothing appears, LimeWire has succesfully started listening to the network. If your software does pop up a warning, please allow LimeWire full access for best performance. Click 'Next' when finished.
+#? SETUP_FIREWALL_LABEL_TWO=
 #### SETUP_SCAN_TITLE=Scan for Files
-SETUP_SCAN_TITLE=扫描文件
+SETUP_SCAN_TITLE=掃描文件
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which directories you would like to share when the scan is complete.
-SETUP_SCAN_LABEL=你想要 LimeWire 迅速為其他媒介文件扫描你的硬碟吗? 你将有機會確切说明當扫描完成時, 你想分享哪份資料夾.
+SETUP_SCAN_LABEL=您想要 LimeWire 迅速為其他媒介文件掃描您的硬碟嗎? 當掃描完成時您將有機會確切說明, 您想分享哪份資料夾.
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
-SETUP_WAIT_TITLE=正在扫描硬碟
+SETUP_WAIT_TITLE=正在掃描硬碟
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
-SETUP_WAIT_LABEL=LimeWire 正在扫描你的硬碟, 請等待...
+SETUP_WAIT_LABEL=LimeWire 正在掃描您的硬碟, 請等待...
 #### SETUP_CONFIRM_TITLE=Confirm Scan
-SETUP_CONFIRM_TITLE=確認扫描
+SETUP_CONFIRM_TITLE=確認掃描
 #### SETUP_CONFIRM_LABEL=We identified the directories below as ones that you might like to share. If you would like to share one of these directories, simply check its associated checkbox. Subdirectories of shared directories will also be shared.
-SETUP_CONFIRM_LABEL=我們認為這些資料夾下面的文件有共用的可能. 如果你想共用這些資料夾, 仅仅检查它相關的選擇框. 共用的資料夾的的子資料夾也将被共用.
+SETUP_CONFIRM_LABEL=我們認為這些資料夾下面的文件有共用的可能. 如果您想共用這些資料夾, 仅仅檢查它相關的選擇框. 共用的資料夾的的子資料夾也将被共用.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 #? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=
 #### SETUP_FINISH_TITLE=Finish Setup
 SETUP_FINISH_TITLE=安裝完成
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
-SETUP_FINISH_LABEL=LimeWire 安裝成功. 請按“完成”按钮, 開始使用 LimeWire.
+SETUP_FINISH_LABEL=LimeWire 安裝成功. 請按“完成”按鈕, 開始使用 LimeWire.
 
 ################################################################################
 # Key/value pairs for the file chooser
@@ -1284,15 +1337,15 @@ FILE_CHOOSER_DIRECTORY_TITLE=選擇資料夾
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Directory:
-INIT_SAVE_DIRECTORY_FIELD_LABEL=資料夹:
+INIT_SAVE_DIRECTORY_FIELD_LABEL=資料夾:
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
 INIT_SAVE_BROWSE_BUTTON_LABEL=瀏覽...
 #### INIT_SAVE_BROWSE_BUTTON_TIP=Choose another Directory
-INIT_SAVE_BROWSE_BUTTON_TIP=選擇另一個資料夾
+INIT_SAVE_BROWSE_BUTTON_TIP=選擇另一個資料夾.
 #### INIT_SAVE_DEFAULT_BUTTON_LABEL=Use Default
 INIT_SAVE_DEFAULT_BUTTON_LABEL=還原預設值
 #### INIT_SAVE_DEFAULT_BUTTON_TIP=Use the Default Directory
-INIT_SAVE_DEFAULT_BUTTON_TIP=使用預設資料夾
+INIT_SAVE_DEFAULT_BUTTON_TIP=使用預設資料夾.
 
 ################################################################################
 # Key/Value pairs for the pro window on startup
@@ -1300,19 +1353,19 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=使用預設資料夾
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=升級到增強版
 #### PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
-PRO_LABEL_THANKS=LimeWire 軟體是由 7 個程式员全职工作历時两年編寫完成的. 如果你认為 LimeWire 是值得的, 請對 LimeWire 升級. 你的購買将使我們能一直改進 LimeWire.
+PRO_LABEL_THANKS=LimeWire 軟體是由 7 個程式設計師全體工作歷時兩年編寫完成的. 如果您認為 LimeWire 是值得的, 請將 LimeWire 升級. 您的購買使我們能一直創新開發 LimeWire.
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
 PRO_LABEL_QUESTION=升級到 LimeWire 增強版?
 #### GO_PRO_TIP=Get LimeWire PRO Now
-GO_PRO_TIP=现在就要 LimeWire 增強版
+GO_PRO_TIP=現在就要 LimeWire 增強版.
 #### WHYGOPRO=Why
 WHYGOPRO=為何有增強版?
 #### WHYGOPRO_TIP=What does PRO give me?
-WHYGOPRO_TIP=增強版带來什麼?
+WHYGOPRO_TIP=增強版帶來什麼?
 #### GO_PRO_LATER=Later
 GO_PRO_LATER=以後再说
 #### GO_PRO_LATER_TIP=Get LimeWire PRO Later
-GO_PRO_LATER_TIP=以後再要 LimeWire 增強版
+GO_PRO_LATER_TIP=以後再要 LimeWire 增強版.
 
 ################################################################################
 # Key/Value pairs for the upgrade java window.
@@ -1405,6 +1458,8 @@ META_EDITOR_TYPE_LABEL=類型:
 #? META_EDITOR_ACTION_LABEL=
 #### META_EDITOR_STARS_LABEL=Stars:
 #? META_EDITOR_STARS_LABEL=
+#### META_EDITOR_LICENSE_LABEL=License:
+#? META_EDITOR_LICENSE_LABEL=
 
 #### META_EDITOR_SIZE_LABEL=Size:
 META_EDITOR_SIZE_LABEL=大小:
@@ -1431,9 +1486,9 @@ LIST_EDITOR_BROWSE_BUTTON=瀏覽...
 #### LIST_EDITOR_REMOVE_BUTTON=Remove
 LIST_EDITOR_REMOVE_BUTTON=移除
 #### LIST_EDITOR_ADD_BUTTON_TIP=Add New List Item
-LIST_EDITOR_ADD_BUTTON_TIP=新增新的列表條目
+LIST_EDITOR_ADD_BUTTON_TIP=新增新的列表條目.
 #### LIST_EDITOR_REMOVE_BUTTON_TIP=Remove Selected Item
-LIST_EDITOR_REMOVE_BUTTON_TIP=移除選中的條目
+LIST_EDITOR_REMOVE_BUTTON_TIP=移除選中的條目.
 
 ################################################################################
 # Key/value pairs for the InputField reusable component
@@ -1447,11 +1502,13 @@ INPUT_FIELD_GENERIC_CAPTION=輸入
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=聊天...
 #### GENERAL_CHAT_BUTTON_TIP=Chat with Host
-GENERAL_CHAT_BUTTON_TIP=和對方聊天
+GENERAL_CHAT_BUTTON_TIP=和對方聊天.
 #### GENERAL_LAUNCH_BUTTON_LABEL=Launch
 GENERAL_LAUNCH_BUTTON_LABEL=運行
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
-GENERAL_LAUNCH_BUTTON_TIP=運行文件
+GENERAL_LAUNCH_BUTTON_TIP=運行文件.
+#### GENERAL_CLEAR_HISTORY=Clear History
+#? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips
@@ -1463,11 +1520,11 @@ CHAT_SEND_BUTTON_LABEL=發送信息
 #### CHAT_STOP_BUTTON_LABEL=End Chat
 CHAT_STOP_BUTTON_LABEL=結束聊天
 #### CHAT_BLOCK_BUTTON_TIP=Block Current Host
-CHAT_BLOCK_BUTTON_TIP=屏蔽對方
+CHAT_BLOCK_BUTTON_TIP=屏蔽對方.
 #### CHAT_SEND_BUTTON_TIP=Send a Message to a Host
-CHAT_SEND_BUTTON_TIP=給對方發送信息
+CHAT_SEND_BUTTON_TIP=給對方發送信息.
 #### CHAT_STOP_BUTTON_TIP=Stop Chatting with a Host
-CHAT_STOP_BUTTON_TIP=停止和對方談話
+CHAT_STOP_BUTTON_TIP=停止和對方談話.
 
 ################################################################################
 # Key/value pairs for the ChatFrame that is displayed while chatting
@@ -1477,7 +1534,7 @@ CHAT_WITH_LABEL=正在聊天和
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
 CHAT_HOST_UNAVAILABLE=連線不上主機
 #### CHAT_YOU=You
-CHAT_YOU=你
+CHAT_YOU=您
 
 ###################################################################
 # Key/value pairs for splash screen status text
@@ -1497,7 +1554,7 @@ SPLASH_STATUS_SHARED_FILES=加載共用的文件...
 #### SPLASH_STATUS_INTERFACE=Loading user interface...
 SPLASH_STATUS_INTERFACE=加載用戶界面...
 #### SPLASH_STATUS_UPDATES=Checking for updates...
-SPLASH_STATUS_UPDATES=升級检查...
+SPLASH_STATUS_UPDATES=升級檢查...
 #### SPLASH_STATUS_CORE_COMPONENTS=Loading core components...
 SPLASH_STATUS_CORE_COMPONENTS=加載核心組件...
 #### SPLASH_STATUS_DOWNLOAD_WINDOW=Loading download window...
@@ -1505,7 +1562,7 @@ SPLASH_STATUS_DOWNLOAD_WINDOW=加載下載窗口...
 #### SPLASH_STATUS_LIBRARY_WINDOW=Loading library window...
 SPLASH_STATUS_LIBRARY_WINDOW=加載我的最愛窗口...
 #### SPLASH_STATUS_UPLOAD_WINDOW=Loading upload window...
-SPLASH_STATUS_UPLOAD_WINDOW=加載上載窗口...
+SPLASH_STATUS_UPLOAD_WINDOW=加載上傳窗口...
 #### SPLASH_STATUS_MONITOR_WINDOW=Loading monitor window...
 SPLASH_STATUS_MONITOR_WINDOW=加載監視窗口...
 #### SPLASH_STATUS_CONNECTION_WINDOW=Loading connection window...
@@ -1514,12 +1571,12 @@ SPLASH_STATUS_CONNECTION_WINDOW=加載連線窗口...
 SPLASH_STATUS_STATISTICS_WINDOW=加載統計窗口...
 #### SPLASH_STATUS_STATUS_WINDOW=Loading status window...
 SPLASH_STATUS_STATUS_WINDOW=加載狀態窗口...
-#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading playlist window...
+#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading play list window...
 SPLASH_STATUS_PLAYLIST_WINDOW=加載 PlayList 窗口...
 #### SPLASH_STATUS_MENUS=Loading menus...
 SPLASH_STATUS_MENUS=加載菜单...
 #### SPLASH_STATUS_MESSAGE_SERVICE=Loading messages...
-SPLASH_STATUS_MESSAGE_SERVICE=加載消息...
+SPLASH_STATUS_MESSAGE_SERVICE=加載信息...
 #### SPLASH_STATUS_ICONS=Loading icons...
 #? SPLASH_STATUS_ICONS=
 #### SPLASH_STATUS_I18N=Loading internationalization support...
@@ -1554,25 +1611,33 @@ SPLASH_STATUS_MESSAGE_SERVICE=加載消息...
 #? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=
 
 ##################################################################
+# Key/value pairs for the shutdown window
+##################################################################
+#### SHUTDOWN_TITLE=Shutting down LimeWire...
+#? SHUTDOWN_TITLE=
+#### SHUTDOWN_WAIT=Please wait while LimeWire shuts down...
+#? SHUTDOWN_WAIT=
+
+##################################################################
 # Key/value pairs for the message displayed to prompt users to
 # support LimeWire through contributions.
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For TURBO Charged searches get LimeWire Pro.
-SUPPORT_LIMEWIRE_01=支援將來 LimeWire 的開發
+SUPPORT_LIMEWIRE_01=支援將來 LimeWire 的開發.
 #### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
-SUPPORT_LIMEWIRE_02=點擊這裡支援 LimeWire 開放的, 點對點網路的開發
+SUPPORT_LIMEWIRE_02=點擊這裡支援 LimeWire 開放式點對點網路的開發.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire Pro to help us make downloads faster.
-SUPPORT_LIMEWIRE_03=支援 LimeWire 開放網路平台的研究和開發
+SUPPORT_LIMEWIRE_03=支援 LimeWire 開放網路平台的研究和開發.
 #### SUPPORT_LIMEWIRE_04=For TURBO Charged downloads get LimeWire Pro.
-SUPPORT_LIMEWIRE_04=點擊這裡成為研究 LimeWire 的支援者
+SUPPORT_LIMEWIRE_04=點擊這裡成為研究 LimeWire 的支持者.
 #### SUPPORT_LIMEWIRE_05=Support open networks.
-SUPPORT_LIMEWIRE_05=支援開放的網路
+SUPPORT_LIMEWIRE_05=支援開放的網路.
 #### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
-SUPPORT_LIMEWIRE_06=點擊這裡支援開放資源和開放協議
+SUPPORT_LIMEWIRE_06=點擊這裡支援開放資源和開放協議.
 #### SUPPORT_LIMEWIRE_07=For TURBO Charged Performance get LimeWire Pro.
-SUPPORT_LIMEWIRE_07=支援 LimeWire 開放資源的, 基於點對點的架構
+SUPPORT_LIMEWIRE_07=支援 LimeWire 開放資源的, 基於點對點的架構.
 #### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get Pro.
-SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻
+SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻.
 #### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get Pro.
 #? SUPPORT_LIMEWIRE_09=
 #### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
@@ -1582,38 +1647,18 @@ SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=升級 LimeWire
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-#? UPDATE_MESSAGE=
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 #? UPDATE_MESSAGE_SMALL=
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=LimeWire 升級完成. 請重啟 LimeWire, 使用新的版本.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=開啟 LimeWire 主页, 執行升級時出现錯誤. 要完成升級, 請開啟你的瀏覽器瀏覽 http://www.limewire.com.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=你的 LimeWire 升級中遇到下列錯誤:
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=請把這個錯誤 mail 給 LimeWire 的技術支持 "support@limewire.com". 你可以從 www.limewire.com 下載新的版本.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=在伺服器上存取必须的文件時出错.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=伺服器通信出错.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=定位你的配置文件時出错.
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=存取你的文件系統的權限時出錯.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=存取你的文件系統時出錯.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=取消
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=取消升級
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=现在就升級 LimeWire
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=以後再升級 LimeWire
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
@@ -1623,17 +1668,17 @@ MESSAGE_CAPTION=提示信息
 #### MESSAGE_ERROR_CAPTION=Error
 MESSAGE_ERROR_CAPTION=錯誤
 #### MESSAGE_SHARE_SAVE_DIR=Would you like to add the save directory to your list of shared directories? Subdirectories of this directory will also be shared.
-MESSAGE_SHARE_SAVE_DIR=你想新增此儲存資料夾到你的共用資料夾列表中吗? 此資料夾的子資料夾将也將被共用.
+MESSAGE_SHARE_SAVE_DIR=您想新增此儲存資料夾到您的共用資料夾列表中吗? 此資料夾的子資料夾将也將被共用.
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this directory?
-MESSAGE_CONFIRM_UNSHARE_DIRECTORY=你確認要停止共用此資料夾吗?
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=您確認要停止共用此資料夾吗?
 #### MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire cannot stop sharing subdirectories of directories that are shared.
 MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire 不能停止已經共用資料夾的子資料夾.
 #### MESSAGE_OVERWRITE_EXISTING_FILE=Overwrite existing file
-MESSAGE_OVERWRITE_EXISTING_FILE=覆盖已存在的文件
+MESSAGE_OVERWRITE_EXISTING_FILE=覆蓋已存在的文件
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=因為安全的原因, LimeWire 将不會運行指定的文件.
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
-MESSAGE_CONFIRM_FILE_DELETE=你確認要删除選中的文件吗?
+MESSAGE_CONFIRM_FILE_DELETE=確定要删除選中的文件嗎?
 #### MESSAGE_UNABLE_TO_DELETE_FILE_START=Unable to delete the file
 MESSAGE_UNABLE_TO_DELETE_FILE_START=不能删除此文件
 #### MESSAGE_UNABLE_TO_DELETE_FILE_END=. It may be in use by another application.
@@ -1649,7 +1694,7 @@ MESSAGE_UNABLE_TO_RENAME_FILE_START=不能更名此文件
 #### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
 MESSAGE_UNABLE_TO_RENAME_FILE_END=. 它可能正在被别的程式使用.
 #### MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire will not allow you to
-MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire 不允許你
+MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire 不允許您
 #### MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
 MESSAGE_INCOMPLETE_DIRECTORY_END=保留給未完全下載的資料夾.
 #### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified directory for saving files. Please try a different directory.
@@ -1657,9 +1702,13 @@ MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire 不能够使用指定的儲存資料夾.
 #### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
 MESSAGE_FILE_CORRUPT=LimeWire 發現文件毁坏
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
-MESSAGE_CONTINUE_DOWNLOAD=你想繼續下載吗?
+MESSAGE_CONTINUE_DOWNLOAD=您想繼續下載吗?
 #### MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 #? MESSAGE_LANG_CHANGE=
+#### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
+#? MESSAGE_SENSITIVE_SHARE_TOP=
+#### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
+#? MESSAGE_SENSITIVE_SHARE_BOTTOM=
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
@@ -1721,6 +1770,8 @@ INVALID_SAVE_DIR_LABEL=儲存文件的資料夾非法. 請選擇新的資料夾.
 #? ERROR_INTERNAL_TITLE=
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=LimeWire 存在一個內部錯誤. 但是, LimeWire 能從錯誤中恢復並且應該正常執行. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
+#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
+#? ERROR_INTERNAL_OLD=
 #### ERROR_INTERNAL_SEND=Send
 #? ERROR_INTERNAL_SEND=
 #### ERROR_INTERNAL_REVIEW=Review
@@ -1735,7 +1786,7 @@ ERROR_INTERNAL_OK=確定
 #? ERROR_INTERNAL_ALWAYS_SEND=
 #### ERROR_INTERNAL_ALWAYS_REVIEW=Always Ask For Review
 #? ERROR_INTERNAL_ALWAYS_REVIEW=
-#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard Bugs
+#### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 #? ERROR_INTERNAL_ALWAYS_DISCARD=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 #? ERROR_INTERNAL_SERVLET_FAILED=
@@ -1756,39 +1807,39 @@ ERROR_INTERNAL_OK=確定
 #### ERROR_PORT_UNAVAILABLE=Port not available. Please select a different port.
 ERROR_PORT_UNAVAILABLE=連接埠不可提供. 請選擇一個不同的連接埠.
 #### ERROR_KEEP_ALIVE=LimeWire does not allow you to maintain this many connections, as it creates excess traffic that clogs the network.
-ERROR_KEEP_ALIVE=當它造成網路阻塞, LimeWire 不允許你保持那麼多連線.
+ERROR_KEEP_ALIVE=當它造成網路阻塞, LimeWire 不允許您保持那麼多連線.
 #### ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeers with leaf nodes need at least six connections.
 ERROR_TOO_LOW_FOR_ULTRAPEER=有葉節点的超級節点需要至少 6 個連線.
 #### ERROR_TOO_HIGH_FOR_LEAF=Leaves only need one connection, since they are connected to an Ultrapeer.
-ERROR_TOO_HIGH_FOR_LEAF=葉子節点隻需要一個連線, 他們連線一超級節点.
+ERROR_TOO_HIGH_FOR_LEAF=葉子節点只需要一個連線, 他們連線一超級節点.
 #### ERROR_PORT=Could not find a port to use for incoming connections.\nPlease specify a port from the configuration window.
-ERROR_PORT=不能找到一個連接埠為進來的連線使用.\n請從结构窗口指定一個連接埠.
+ERROR_PORT=無法找到一個連接埠為進來的連線使用.\n請從結構窗口指定一個連接埠.
 #### ERROR_INCOMING_CONNECTIONS=Could not listen to socket for incoming connections; aborting.
-ERROR_INCOMING_CONNECTIONS=不能為進來的連線監听 Socket; 終止.
+ERROR_INCOMING_CONNECTIONS=不能為進來的連線監視 Socket; 終止.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
-ERROR_THREE_CHARACTER_SEARCH=你必须鍵入至少 3 個字符, 從而避免阻塞網路.
+ERROR_THREE_CHARACTER_SEARCH=您必须鍵入至少 3 個字符, 從而避免阻塞網路.
 #### ERROR_NETWORK_FLOODING=This search may return lots of results and slow the network. Are you sure you want to continue?
-ERROR_NETWORK_FLOODING=這種搜尋可能會返回許多结果從而使網路變慢. 你想繼續吗?
+ERROR_NETWORK_FLOODING=這種搜尋可能會返回許多結果從而使網路變慢. 您想繼續吗?
 #### ERROR_BROWSE_FAILED=Could not browse files on the requested host. This machine is probably not accepting more incoming connections.
 ERROR_BROWSE_FAILED=不能瀏覽主機文件. 此機器不能接收過多的連線.
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid directory for saving files. Please use another directory or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=錯誤的儲存文件的資料夾. 請用另一個資料夾或者恢復到還原預設值.
 #### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save directory is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different directory.
-ERROR_INVALID_SAVE_DIRECTORY_WINDOW=你的儲存資料夾不正確. 它可能被删除了, 你可能沒有寫的權限或者是其他問題. 請選擇另一個資料夾.
+ERROR_INVALID_SAVE_DIRECTORY_WINDOW=儲存資料夾不正確. 它可能已被删除了, 或可能沒有寫入的權限或者是其他問題. 請選擇另一個資料夾.
 #### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
 #? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=
 #### ERROR_INVALID_SHARED_DIRECTORY=Invalid directory for sharing files. Please use another directory or revert to the default.
 ERROR_INVALID_SHARED_DIRECTORY=錯誤的共用資料夾. 請用另一個資料夾或者恢復到預設值.
-#### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 for forcing your ip address.
-ERROR_FORCE_IP_PORT_RANGE=你必须輸入 1 到 65535 之間的數.
+#### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
+ERROR_FORCE_IP_PORT_RANGE=您必须輸入 1 到 65535 之間的數.
 #### ERROR_CONNECT_STRING=Connect strings must be at least length 1, contain one space, and may not contain 'GIV', 'GET', or any other HTTP keywords.
-ERROR_CONNECT_STRING=連線字符串长度至少為 1, 包含一個空格, 並且不能含有 'GIV', 'GET' 或者其他 HTTP 關鍵詞.
+ERROR_CONNECT_STRING=連線字符串長度至少為 1, 包含一個空格, 並且不能含有 'GIV', 'GET' 或者其他 HTTP 關鍵詞.
 #### ERROR_PORT_RANGE=Please enter a port between 1 and 65535.
 ERROR_PORT_RANGE=請輸入 1 到 65535 的連接埠號.
 #### ERROR_INVALID_GROUP=You need to select a valid group.
-ERROR_INVALID_GROUP=你需要選擇一個正確的小組.
+ERROR_INVALID_GROUP=您需要選擇一個正確的小組.
 #### ERROR_ALREADY_DOWNLOADING=You are already downloading
-ERROR_ALREADY_DOWNLOADING=你已經在下載了
+ERROR_ALREADY_DOWNLOADING=您已在下載中
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=You have already downloaded
 #### NO_PREVIEW_BEGIN=There is nothing to preview for file
@@ -1799,20 +1850,10 @@ ERROR_ALREADY_EXISTS=You have already downloaded
 #? ERROR_CANT_RESUME_START=
 #### ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
 #? ERROR_CANT_RESUME_END=
-#### ERROR_LOCATING_BROWSER_THEMES=LimeWire could not locate your browser. The LimeWire skins address is:\n"http://www.limewire.com/skins".
-ERROR_LOCATING_BROWSER_THEMES=LimeWire 不能定位你的瀏覽器. The LimeWire themes address is:\n"http://www.limewire.com".
-#### ERROR_LOCATING_BROWSER_SUPPORT=LimeWire could not locate your browser. The LimeWire support address is:\n"http://www.limewire.com/support".
-ERROR_LOCATING_BROWSER_SUPPORT=LimeWire 不能定位你的瀏覽器. LimeWire 技術支持地址是:\n"http://www.limewire.com/support".
-#### ERROR_LOCATING_BROWSER_FAQ=LimeWire could not locate your browser. The LimeWire FAQ address is:\n"http://www.limewire.com/support/faq.htm".
-ERROR_LOCATING_BROWSER_FAQ=LimeWire 不能定位你的瀏覽器. LimeWire 常見疑難排解地址是:\n"http://www.limewire.com/support/faq.htm".
-#### ERROR_LOCATING_BROWSER_FORUM=LimeWire could not locate your browser. The LimeWire forum address is:\n"http://www.limewire.com/forum.htm".
-ERROR_LOCATING_BROWSER_FORUM=LimeWire 不能定位你的瀏覽器. LimeWire 論壇 forum 地址是:\n"http://www.limewire.com/forum.htm".
-#### ERROR_LOCATING_BROWSER_FRIEND=LimeWire could not locate your browser. The LimeWire "Tell a friend" form address is:\n"http://www.limewire.com/index.jsp/tell_friend".
-ERROR_LOCATING_BROWSER_FRIEND=LimeWire 不能定位你的瀏覽器. LimeWire "告訴你的朋友", 地址是:\n"http://www.limewire.com/index.jsp/tell_friend".
-#### ERROR_LOCATING_BROWSER_GENERAL=LimeWire could not locate your default browser.
-ERROR_LOCATING_BROWSER_GENERAL=LimeWire 不能定位你預設的瀏覽器.
+#### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
+#? ERROR_OPEN_URL=
 #### ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save directory. Please select a new save directory in the Options menu and try again.
-ERROR_ACCESSING_SAVE_DIRECTORY=不能存取儲存資料夾. 請在選項中選擇一個新的資料夾, 然後再试.
+ERROR_ACCESSING_SAVE_DIRECTORY=無法存取儲存資料夾. 請在選項中選擇一個新的資料夾, 然後再試.
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
 ERROR_DEL_META_USER=不能移除沒有儲存的信息.
 #### ERROR_DEL_META_SYSTEM=Unable to remove data.
@@ -1828,11 +1869,11 @@ ERROR_SAVE_META_RW=讀寫錯誤. 數据不能儲存.
 #### ERROR_SAVE_META_ID3=File Corrupt. Data could not be saved.
 ERROR_SAVE_META_ID3=文件毁坏. 數据不能儲存.
 #### ERROR_SAVE_META_DISK=Internal Error. Data could not be saved.
-ERROR_SAVE_META_DISK=內部錯誤. 數据不能儲存.
+ERROR_SAVE_META_DISK=內部錯誤. 數據不能儲存.
 #### ERROR_SAVE_META_BAD=Incorrect format entered. Changes will not be saved.
 ERROR_SAVE_META_BAD=輸入了不正確的格式. 修改沒有儲存.
 #### ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
-ERROR_REMOVE_LAST_COL=你不能關掉所有列.
+ERROR_REMOVE_LAST_COL=您不能關掉所有列.
 #### ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Could not browse host
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=不能瀏覽主機
 #### ERROR_BROWSE_HOST_FAILED_END_KEY=.
@@ -1867,6 +1908,34 @@ ERROR_BROWSE_HOST_FAILED_END_KEY=.
 #? ERROR_XML_SEARCH_TOO_LARGE=
 
 ################################################################################
+# Messages for Creative Commons Licensing
+################################################################################
+#### LICENSE_CC_VIEW_LICENSE=View License
+#? LICENSE_CC_VIEW_LICENSE=
+#### LICENSE_CC_TITLE=License Details
+#? LICENSE_CC_TITLE=
+#### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
+#? LICENSE_CC_LOCATING=
+#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license. Click 'verify' to locate the details of this Creative Commons license.
+#? LICENSE_CC_UNVERIFIED=
+#### LICENSE_CC_VERIFY=Verify
+#? LICENSE_CC_VERIFY=
+#### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
+#? LICENSE_CC_INVALID=
+#### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
+#? LICENSE_CC_RETRY=
+#### LICENSE_CC_DETAILS=License Details:
+#? LICENSE_CC_DETAILS=
+#### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
+#? LICENSE_CC_CLAIMED_DEED=
+#### LICENSE_CC_DEED=View License Deed
+#? LICENSE_CC_DEED=
+#### LICENSE_CC_VERIFICATION=View Verification Page
+#? LICENSE_CC_VERIFICATION=
+#### LICENSE_CC=Creative Commons
+#? LICENSE_CC=
+
+################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
 # package com.limegroup.gnutella.gui.options
@@ -1882,7 +1951,7 @@ OPTIONS_SPEED_MAIN_TITLE=速度
 #### OPTIONS_DOWNLOAD_MAIN_TITLE=Downloads
 OPTIONS_DOWNLOAD_MAIN_TITLE=下載
 #### OPTIONS_UPLOAD_MAIN_TITLE=Uploads
-OPTIONS_UPLOAD_MAIN_TITLE=上載
+OPTIONS_UPLOAD_MAIN_TITLE=上傳
 #### OPTIONS_UPLOAD_BASIC_MAIN_TITLE=Basic
 OPTIONS_UPLOAD_BASIC_MAIN_TITLE=基本
 #### OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Slots
@@ -1891,6 +1960,8 @@ OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=副檔槽
 OPTIONS_CONNECTIONS_MAIN_TITLE=連線
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
 OPTIONS_SHUTDOWN_MAIN_TITLE=關閉
+#### OPTIONS_UPDATE_MAIN_TITLE=Updates
+#? OPTIONS_UPDATE_MAIN_TITLE=
 #### OPTIONS_CHAT_MAIN_TITLE=Chat
 OPTIONS_CHAT_MAIN_TITLE=聊天
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
@@ -1912,9 +1983,9 @@ OPTIONS_BUGS_MAIN_TITLE=Bug reports
 #### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete Text
 #? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=
 #### OPTIONS_THEME_MAIN_TITLE=Skin
-OPTIONS_THEME_MAIN_TITLE=皮膚
+OPTIONS_THEME_MAIN_TITLE=外殼
 #### OPTIONS_SKIN_MAIN_TITLE=Skin
-OPTIONS_SKIN_MAIN_TITLE=皮膚
+OPTIONS_SKIN_MAIN_TITLE=外殼
 #### OPTIONS_SEARCH_MAIN_TITLE=Searching
 OPTIONS_SEARCH_MAIN_TITLE=搜尋
 #### OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Limit
@@ -1934,10 +2005,8 @@ OPTIONS_ADVANCED_MAIN_TITLE=高級
 #### OPTIONS_COMPRESSION_MAIN_TITLE=Compression
 #? OPTIONS_COMPRESSION_MAIN_TITLE=
 #### OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
-OPTIONS_PREFERENCING_MAIN_TITLE=优先選擇
-#### OPTIONS_PORT_MAIN_TITLE=Port
-OPTIONS_PORT_MAIN_TITLE=連接埠
-#### OPTIONS_FIREWALL_MAIN_TITLE=Firewalls
+OPTIONS_PREFERENCING_MAIN_TITLE=優先選擇
+#### OPTIONS_FIREWALL_MAIN_TITLE=Firewall Config
 OPTIONS_FIREWALL_MAIN_TITLE=防火墙
 #### OPTIONS_PRIVATE_NET_MAIN_TITLE=Private Network
 OPTIONS_PRIVATE_NET_MAIN_TITLE=私有網路
@@ -1955,7 +2024,7 @@ OPTIONS_PRIVATE_NET_MAIN_TITLE=私有網路
 #### OPTIONS_LOCALIZE_TITLE=International Localization
 OPTIONS_LOCALIZE_TITLE=國际化
 #### OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
-OPTIONS_LOCALIZE_LABEL=你可以定制化 LimeWire, 使得它能最好地适合你們國家的的语言和用法. 列出的國家和地區也能在世界范围的網路上定位你自己.
+OPTIONS_LOCALIZE_LABEL=您可以指定 LimeWire 之所在地區, 使其能配合所在國家語言和用法. 列出的國家和地區也能在全世界網路上最佳定位.
 #### OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Language
 OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=语言
 #### OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Country
@@ -1970,7 +2039,7 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=國家
 #### OPTIONS_SAVE_DIR_TITLE=Save Directory
 OPTIONS_SAVE_DIR_TITLE=儲存資料夾
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the directory for saving files.
-OPTIONS_SAVE_DIR_LABEL=你可以選擇儲存文件的資料夾.
+OPTIONS_SAVE_DIR_LABEL=您可以選擇儲存文件的資料夾.
 #### OPTIONS_SAVE_DIR_BOX_LABEL=Directory:
 OPTIONS_SAVE_DIR_BOX_LABEL=資料夾:
 #### OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Browse...
@@ -1978,13 +2047,13 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=瀏覽...
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Use Default
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=還原預設值
 #### OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Choose another Directory
-OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=選擇另一個資料夾
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=選擇另一個資料夾.
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the Default Directory
-OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=使用預設的資料夾
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=使用預設的資料夾.
 #### OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Incomplete Files
 OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=不完全的文件
 #### OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=You can automatically delete old incomplete download files.
-OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=你可以自動删除老的不完全的下載文件.
+OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=您可以自動删除舊的不完全的下載文件.
 #### OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Days to Keep Incomplete Files:
 OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=不完全文件保留天數:
 
@@ -1993,15 +2062,15 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=不完全文件保留天數:
 # in the options window
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Directories
-OPTIONS_SHARED_DIRS_TITLE=共用資料夹
+OPTIONS_SHARED_DIRS_TITLE=共用資料夾
 #### OPTIONS_SHARED_DIRS_LABEL=You can choose the directories for sharing files. Files in these directories are displayed in the library.
-OPTIONS_SHARED_DIRS_LABEL=你可以選擇共用資料夾共用文件. 在這些資料夾中的文件將顯示在我的最愛中.
+OPTIONS_SHARED_DIRS_LABEL=您可以選擇共用資料夾共用文件. 在這些資料夾中的文件將顯示在我的最愛中.
 #### OPTIONS_SHARED_DIRS_BOX_LABEL=Directories:
 OPTIONS_SHARED_DIRS_BOX_LABEL=資料夾:
 #### OPTIONS_SHARED_DIRS_BUTTON_LABEL=Add Directory...
 OPTIONS_SHARED_DIRS_BUTTON_LABEL=新增資料夾...
 #### OPTIONS_SHARED_DIRS_BUTTON_TIP=Add a Directory to Share
-OPTIONS_SHARED_DIRS_BUTTON_TIP=新增一個共用資料夾
+OPTIONS_SHARED_DIRS_BUTTON_TIP=新增一個共用資料夾.
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2010,13 +2079,13 @@ OPTIONS_SHARED_DIRS_BUTTON_TIP=新增一個共用資料夾
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=共用副檔
 #### OPTIONS_SHARED_EXTENSIONS_LABEL=You can choose which file extensions you would like to share.
-OPTIONS_SHARED_EXTENSIONS_LABEL=請選擇你要共用的文件類型.
+OPTIONS_SHARED_EXTENSIONS_LABEL=請選擇您要共用的文件類型.
 #### OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=Extensions:
 OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=副檔名:
 #### OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Use Defaults
 OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=還原預設值
 #### OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Share the Default File Extensions
-OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=設置預設的文件副檔名
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=設置預設的文件副檔名.
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
@@ -2025,7 +2094,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=設置預設的文件副檔名
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=連線速度
 #### OPTIONS_SPEED_LABEL=You can specify your connection speed so that LimeWire can optimize performance.
-OPTIONS_SPEED_LABEL=你可以指定你的連線速度從而進行性能优化.
+OPTIONS_SPEED_LABEL=您可以指定您的連線速度從而進行性能优化.
 #### OPTIONS_SPEED_BOX_LABEL=Speed:
 OPTIONS_SPEED_BOX_LABEL=速度:
 
@@ -2035,9 +2104,9 @@ OPTIONS_SPEED_BOX_LABEL=速度:
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=超級節点的能力
 #### OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users. You can disable this if needed.
-OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=如果你的计算機拥有快速的 Internet 連線, LimeWire 可以认為你是相對较慢的用戶的超級節点. 如果必要, 你可以设為無效.
+OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=如果您的電腦使用快速的 Internet 連線, LimeWire 可以认為您是相對较慢的用戶的超級節点. 如果必要, 您可以設為無效.
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
-OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=設置超級節点為無效:
+OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=設置超級連結點為無效:
 
 ################################################################################
 # Key/Value pairs for disabling OOB support
@@ -2056,7 +2125,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=設置超級節点為無效:
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=最多下載數目
 #### OPTIONS_DOWNLOAD_MAX_LABEL=You can set the maximum number of simultaneous downloads.
-OPTIONS_DOWNLOAD_MAX_LABEL=你可以設置同時下載的最多的數目.
+OPTIONS_DOWNLOAD_MAX_LABEL=您可以設置同時下載的最多的數目.
 #### OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Maximum Downloads:
 OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=最多下載數:
 
@@ -2065,9 +2134,9 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=最多下載數:
 # in the options window
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
-OPTIONS_DOWNLOAD_CLEAR_TITLE=清除下載條目
+OPTIONS_DOWNLOAD_CLEAR_TITLE=清除下載頻寬
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
-OPTIONS_DOWNLOAD_CLEAR_LABEL=你可以選擇是否自動清除已完成的下載條目.
+OPTIONS_DOWNLOAD_CLEAR_LABEL=您可以選擇是否自動清除已完成的下載條目.
 #### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Downloads:
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=自動清除已完成的下載條目:
 
@@ -2076,37 +2145,37 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=自動清除已完成的下載條目:
 # to downloads in the options window
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
-OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=下載條目带寬
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=下載條目頻寬
 #### OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to downloads.
-OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=你可以設置一定比例的下載條目带寬.
+OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=您可以設置一定比例的下載條目頻寬.
 #### OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
 OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=無限的
 #### OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Download Speed:
-OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=下載條目带寬:
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=下載項目頻寬:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
 # in the options window
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
-OPTIONS_UPLOAD_CLEAR_TITLE=清除上載
+OPTIONS_UPLOAD_CLEAR_TITLE=清除上傳
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
-OPTIONS_UPLOAD_CLEAR_LABEL=你可以選擇是否自動清除已完成的上載.
+OPTIONS_UPLOAD_CLEAR_LABEL=您可以選擇是否自動清除已完成的上傳.
 #### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
-OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=自動清楚已完成的上載:
+OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=自動清除已完成的上傳:
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
 # to uploads in the options window
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
-OPTIONS_UPLOAD_BANDWIDTH_TITLE=上載带寬
+OPTIONS_UPLOAD_BANDWIDTH_TITLE=上傳頻寬
 #### OPTIONS_UPLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to uploads. To turn off uploads, reduce your upload slots to zero.
-OPTIONS_UPLOAD_BANDWIDTH_LABEL=你可以設置一定比例的上載带寬. 若要關閉上載, 請設置上載數至 0.
+OPTIONS_UPLOAD_BANDWIDTH_LABEL=您可以設置一定比例的上傳頻寬. 若要關閉上傳, 請設置上傳數至 0.
 #### OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=無限的
 #### OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Upload Speed:
-OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上載带寬:
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上傳頻寬:
 
 ################################################################################
 # Key/Value pairs for the options for automatically sharing partially downloaded
@@ -2123,31 +2192,31 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上載带寬:
 # Key/Value pairs for the options for the hard maximum number of uploads
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
-OPTIONS_UPLOAD_MAX_TITLE=最大上載數
+OPTIONS_UPLOAD_MAX_TITLE=最大上傳數
 #### OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads. This value will only be reached if you have enough bandwidth.
-OPTIONS_UPLOAD_MAX_LABEL=不允許超過此數目上載. 這個值隻有在带寬足够時才能達到.
+OPTIONS_UPLOAD_MAX_LABEL=不允許超過此數目上傳. 這個值只有在頻寬足够時才能達到.
 #### OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max Upload Slots:
-OPTIONS_UPLOAD_MAX_NUMBER_LABEL=最大上載數:
+OPTIONS_UPLOAD_MAX_NUMBER_LABEL=最大上傳數:
 
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_TITLE=Start Upload Slots
-OPTIONS_UPLOAD_SOFT_MAX_TITLE=起始上載數
+OPTIONS_UPLOAD_SOFT_MAX_TITLE=最大上傳數
 #### OPTIONS_UPLOAD_SOFT_MAX_LABEL=Always allow at least this many uploads. Once this limit is reached, allow more uploads only if bandwidth is available. Setting this value too low may prevent you from reaching your upload capacity, hurting other users.
-OPTIONS_UPLOAD_SOFT_MAX_LABEL=至少允許此數目的上載. 一旦達到此限度, 在带寬足够的情况下, 允許更多的上載. 設置此参數過低會阻止你達到你可以提供上載的能力, 将會伤害其他用戶.
+OPTIONS_UPLOAD_SOFT_MAX_LABEL=至少允許此數目的上傳. 一旦達到此限度, 在頻寬足够的情况下, 允許更多的上傳. 設置此参數過低防礙您提供上傳的能力, 將會不利於其他用戶.
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
-OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=起始上載數:
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=起始上傳數:
 
 ################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
-OPTIONS_UPLOAD_PER_PERSON_TITLE=每個人的上載數
+OPTIONS_UPLOAD_PER_PERSON_TITLE=每個人的上傳數
 #### OPTIONS_UPLOAD_PER_PERSON_LABEL=Allow this many uploads per person.
-OPTIONS_UPLOAD_PER_PERSON_LABEL=允許每個人上載文件的數目.
+OPTIONS_UPLOAD_PER_PERSON_LABEL=允許每個人上傳文件的數目.
 #### OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Uploads Per Person:
-OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=每個人的上載數:
+OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=每個人的上傳數:
 
 ################################################################################
 # Key/Value pairs for connecting on startup
@@ -2155,7 +2224,7 @@ OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=每個人的上載數:
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=啟動時連線
 #### OPTIONS_CONNECT_ON_STARTUP_LABEL=You can choose whether or not to automatically connect to the network when the application starts up.
-OPTIONS_CONNECT_ON_STARTUP_LABEL=你可以選擇應用程式啟動時是否自動連線到網路上.
+OPTIONS_CONNECT_ON_STARTUP_LABEL=您可以選擇應用程式啟動時是否自動連線到網路上.
 #### OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Connect on Startup:
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=啟動時連線:
 
@@ -2165,7 +2234,7 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=啟動時連線:
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Options
 OPTIONS_SHUTDOWN_TITLE=關閉選項
 #### OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
-OPTIONS_SHUTDOWN_LABEL=你可以選擇預設的關閉動作.
+OPTIONS_SHUTDOWN_LABEL=您可以選擇預設的關閉動作.
 #### OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Shutdown Immediately
 OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=立即關閉
 #### OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after Transfers
@@ -2174,14 +2243,28 @@ OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=傳輸完後關閉
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=最小化到系統托盘
 
 ################################################################################
+# Key/Value pairs for update options
+################################################################################
+#### OPTIONS_UPDATE_TITLE=Update Options
+#? OPTIONS_UPDATE_TITLE=
+#### OPTIONS_UPDATE_LABEL=You can choose when you want to be notified of new LimeWire releases.
+#? OPTIONS_UPDATE_LABEL=
+#### OPTIONS_UPDATE_BETA=Beta Releases
+#? OPTIONS_UPDATE_BETA=
+#### OPTIONS_UPDATE_SERVICE=Service Releases
+#? OPTIONS_UPDATE_SERVICE=
+#### OPTIONS_UPDATE_MAJOR=Major Releases
+#? OPTIONS_UPDATE_MAJOR=
+
+################################################################################
 # Key/Value pairs for the chat options in the options window
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=啟動聊天功能:
 #### OPTIONS_CHAT_ACTIVE_TITLE=Host Communication
-OPTIONS_CHAT_ACTIVE_TITLE=主機联系
+OPTIONS_CHAT_ACTIVE_TITLE=主機連絡
 #### OPTIONS_CHAT_ACTIVE_LABEL=You can turn chat on or off.
-OPTIONS_CHAT_ACTIVE_LABEL=你可以設置聊天為啟動和關閉狀態.
+OPTIONS_CHAT_ACTIVE_LABEL=您可以設置聊天為啟動和關閉狀態.
 
 ################################################################################
 # Key/Value pairs for the player options in the options window
@@ -2191,7 +2274,7 @@ OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=選用 LimeWire MP3 播放機:
 #### OPTIONS_PLAYER_PREFERENCE_TITLE=Player Options
 OPTIONS_PLAYER_PREFERENCE_TITLE=播放機 選項
 #### OPTIONS_PLAYER_PREFERENCE_LABEL=You can use the internal player or your system default. A restart is required to enable/disable the player controls.
-OPTIONS_PLAYER_PREFERENCE_LABEL=你可以選用內部播放機或者系統預設的播放機.
+OPTIONS_PLAYER_PREFERENCE_LABEL=您可以選用內部播放機或者系統預設的播放機.
 
 ################################################################################
 # Key/Value pairs for the iTunes options in the options window
@@ -2210,11 +2293,11 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=你可以選用內部播放機或者系統預設
 #? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
 #? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=
-#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my Music:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=
-#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability Mode
+#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility mode:
 #? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
@@ -2232,7 +2315,7 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=密碼:
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=瀏覽選項
 #### OPTIONS_BROWSER_PREFERENCE_LABEL=You can choose which browser to use.
-OPTIONS_BROWSER_PREFERENCE_LABEL=你可以選用何種瀏覽器.
+OPTIONS_BROWSER_PREFERENCE_LABEL=您可以選用何種瀏覽器.
 #### OPTIONS_BROWSER_BOX_LABEL=Browser
 OPTIONS_BROWSER_BOX_LABEL=瀏覽器
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image Options
@@ -2244,13 +2327,13 @@ OPTIONS_BROWSER_BOX_LABEL=瀏覽器
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video Options
 OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=視頻 選項
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
-OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=你可以選用何種 視頻 播放機.
+OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=您可以選用何種 視頻 播放機.
 #### OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video Player
 OPTIONS_VIDEO_PLAYER_BOX_LABEL=視頻 播放機
 #### OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio Options
 OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=音頻 選項
 #### OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=You can choose which audio player to use.
-OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=你可以選用何種 音頻 播放機.
+OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=您可以選用何種 音頻 播放機.
 #### OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio Player
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=音頻 播放機
 
@@ -2293,7 +2376,7 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=音頻 播放機
 # Key/Value pairs for theme options
 ################################################################################
 #### OPTIONS_THEME_TITLE=Skin Options
-OPTIONS_THEME_TITLE=皮膚選項
+OPTIONS_THEME_TITLE=外殼選項
 #### OPTIONS_THEME_LABEL=You can select from alternate skins for LimeWire.
 #? OPTIONS_THEME_LABEL=
 #### OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate Skin File
@@ -2309,35 +2392,35 @@ OPTIONS_THEME_BOX_LABEL=文件:
 #### THEME_FILE_DESCRIPTION=LimeWire Skin Files (*.lwtp)
 THEME_FILE_DESCRIPTION=LimeWire Theme 文件 (*.lwtp)
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
-THEME_CHANGED_MESSAGE=下次啟動 LimeWire, 皮膚将會改變.
+THEME_CHANGED_MESSAGE=下次啟動 LimeWire, 外殼將會改變.
 
 ################################################################################
 # Key/Value pairs for skin options
 ################################################################################
 #### OPTIONS_SKIN_TITLE=Skin Options
-OPTIONS_SKIN_TITLE=皮膚選項
+OPTIONS_SKIN_TITLE=外殼選項
 #### OPTIONS_SKIN_LABEL=Choose LimeWire's skin. Using SkinLF developed by L2FProd.com (http://www.L2FProd.com/).
-OPTIONS_SKIN_LABEL=選擇 LimeWire 的皮膚. 使用 SkinLF, 作者 L2FProd.com (http://www.L2FProd.com/).
+OPTIONS_SKIN_LABEL=選擇 LimeWire 的外殼. 使用 SkinLF, 作者 L2FProd.com (http://www.L2FProd.com/).
 #### OPTIONS_SKIN_BROWSE_BOX_LABEL=Skin:
-OPTIONS_SKIN_BROWSE_BOX_LABEL=皮膚:
+OPTIONS_SKIN_BROWSE_BOX_LABEL=外殼:
 #### OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Browse Skins...
-OPTIONS_SKIN_BROWSE_BUTTON_LABEL=瀏覽皮膚...
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=瀏覽外殼...
 #### OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Preview
-OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=预覽
+OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=預覽
 #### OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=No Skin
-OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=無皮膚
+OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=無外殼
 #### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Download...
 OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=正在下載...
 #### OPTIONS_SKIN_BROWSE_BUTTON_TIP=Choose another skin
-OPTIONS_SKIN_BROWSE_BUTTON_TIP=選擇另一個皮膚
+OPTIONS_SKIN_BROWSE_BUTTON_TIP=選擇另一個外殼.
 #### OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Preview selected skin
-OPTIONS_SKIN_PREVIEW_BUTTON_TIP=预覽選中的皮膚
+OPTIONS_SKIN_PREVIEW_BUTTON_TIP=预覽選中的外殼.
 #### OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Don't skin LimeWire
-OPTIONS_SKIN_DEFAULT_BUTTON_TIP=不使用皮膚
+OPTIONS_SKIN_DEFAULT_BUTTON_TIP=不使用外殼.
 #### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Download new skins from www.javootoo.com...
-OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=從 www.javootoo.com 下載新的皮膚...
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=從 www.javootoo.com 下載新的外殼...
 #### SKIN_APPLY_MESSAGE=Skin changes only take effect after restarting LimeWire...
-SKIN_APPLY_MESSAGE=下次啟動 LimeWire, 皮膚将會改變...
+SKIN_APPLY_MESSAGE=下次啟動 LimeWire, 外殼將會改變...
 #### SKIN_RESTART_NEEDED=LimeWire must be restarted for this skin change to take effect.
 #? SKIN_RESTART_NEEDED=
 
@@ -2345,9 +2428,9 @@ SKIN_APPLY_MESSAGE=下次啟動 LimeWire, 皮膚将會改變...
 # Key/Value pairs for browse for new skins option pane
 ################################################################################
 #### OPTIONS_BROWSE_SKIN_TITLE=Browse For New Skins
-OPTIONS_BROWSE_SKIN_TITLE=瀏覽新的皮膚
+OPTIONS_BROWSE_SKIN_TITLE=瀏覽新的外殼
 #### OPTIONS_BROWSE_SKIN_LABEL=Find skins at http://www.javootoo.com
-OPTIONS_BROWSE_SKIN_LABEL=搜尋皮膚, http://www.javootoo.com
+OPTIONS_BROWSE_SKIN_LABEL=搜尋外殼, http://www.javootoo.com
 
 ################################################################################
 # Key/value pairs for the skin options window
@@ -2359,11 +2442,11 @@ SKIN_EDITOR_REMOVE_BUTTON=使用還原預設值
 #### SKIN_EDITOR_BROWSE_BUTTON=Browse...
 SKIN_EDITOR_BROWSE_BUTTON=瀏覽...
 #### SKIN_EDITOR_PREVIEW_BUTTON_TIP=Preview Skin
-SKIN_EDITOR_PREVIEW_BUTTON_TIP=预覽皮膚
+SKIN_EDITOR_PREVIEW_BUTTON_TIP=預覽外殼.
 #### SKIN_EDITOR_REMOVE_BUTTON_TIP=Use the Default Skin
-SKIN_EDITOR_REMOVE_BUTTON_TIP=使用預設皮膚
+SKIN_EDITOR_REMOVE_BUTTON_TIP=使用預設外殼.
 #### SKIN_EDITOR_BROWSE_BUTTON_TIP=Browse for Skins
-SKIN_EDITOR_BROWSE_BUTTON_TIP=瀏覽皮膚
+SKIN_EDITOR_BROWSE_BUTTON_TIP=瀏覽外殼.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
@@ -2372,7 +2455,7 @@ SKIN_EDITOR_BROWSE_BUTTON_TIP=瀏覽皮膚
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=最多搜尋數目
 #### OPTIONS_SEARCH_MAX_LABEL=You can set the maximum number of simultaneous searches you can perform.
-OPTIONS_SEARCH_MAX_LABEL=你可以設置你能同時執行的最多搜尋數目.
+OPTIONS_SEARCH_MAX_LABEL=您可以設置您能同時執行的最多搜尋數目.
 #### OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maximum Searches:
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=最多搜尋數:
 
@@ -2380,33 +2463,33 @@ OPTIONS_SEARCH_MAX_NUMBER_LABEL=最多搜尋數:
 # Key/Value pairs for search quality options in the options window
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
-OPTIONS_SEARCH_QUALITY_TITLE=搜尋结果 等級
+OPTIONS_SEARCH_QUALITY_TITLE=搜尋結果 等級
 #### OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
-OPTIONS_SEARCH_QUALITY_LABEL=你可以選擇搜尋结果中的"等級"進行顯示. 四星指示搜尋返回的结果沒有防火墙並且可以自由下載.
+OPTIONS_SEARCH_QUALITY_LABEL=您可以選擇搜尋結果中的"等級"進行顯示. 四星指示搜尋返回的結果沒有防火墙並且可以自由下載.
 #### OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Show Only Four Star Results
-OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=隻顯示四星級搜尋结果
+OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=只顯示四星級搜尋結果
 #### OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Show Only Three and Four Star Results
-OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=隻顯示三星和四星級搜尋结果
+OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=只顯示三星和四星級搜尋結果
 #### OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Show Only Two, Three, and Four Star Results
-OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=隻顯示两星, 三星和四星級搜尋结果
+OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=只顯示二星, 三星和四星級搜尋結果
 #### OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Show All Qualities
-OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=顯示全部等級的搜尋结果
+OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=顯示全部等級的搜尋結果
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
-OPTIONS_SEARCH_SPEED_TITLE=搜尋结果 速度
+OPTIONS_SEARCH_SPEED_TITLE=搜尋結果 速度
 #### OPTIONS_SEARCH_SPEED_LABEL=You can select the minimum speed of search results to display.
-OPTIONS_SEARCH_SPEED_LABEL=你可以選擇搜尋结果中的最小速度進行顯示.
+OPTIONS_SEARCH_SPEED_LABEL=您可以選擇搜尋結果中的最小速度進行顯示.
 #### OPTIONS_SEARCH_SPEED_T3_LABEL=Show Only Results of T3 Speed or Higher
-OPTIONS_SEARCH_SPEED_T3_LABEL=隻顯示 T3 或更高速度的搜尋结果
+OPTIONS_SEARCH_SPEED_T3_LABEL=只顯示 T3 或更高速度的搜尋結果
 #### OPTIONS_SEARCH_SPEED_T1_LABEL=Show Only Results of T1 Speed or Higher
-OPTIONS_SEARCH_SPEED_T1_LABEL=隻顯示 T1 或更高速度的搜尋结果
+OPTIONS_SEARCH_SPEED_T1_LABEL=只顯示 T1 或更高速度的搜尋結果
 #### OPTIONS_SEARCH_SPEED_CABLE_LABEL=Show Only Results of Cable/DSL Speed or Higher
-OPTIONS_SEARCH_SPEED_CABLE_LABEL=隻顯示 Cable/DSL 或更高速度的搜尋结果
+OPTIONS_SEARCH_SPEED_CABLE_LABEL=只顯示 Cable/DSL 或更高速度的搜尋結果
 #### OPTIONS_SEARCH_SPEED_ALL_LABEL=Show All Speeds
-OPTIONS_SEARCH_SPEED_ALL_LABEL=顯示全部速度的搜尋结果
+OPTIONS_SEARCH_SPEED_ALL_LABEL=顯示全部速度的搜尋結果
 
 ################################################################################
 # Key/Value pairs for result filtering options
@@ -2415,7 +2498,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=顯示全部速度的搜尋结果
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=過濾
 #### OPTIONS_IGNORE_RESULTS_LABEL=You can filter out search results containing specific words.
-OPTIONS_IGNORE_RESULTS_LABEL=你可以過濾掉包含特殊文字的搜尋结果.
+OPTIONS_IGNORE_RESULTS_LABEL=您可以過濾掉包含特殊文字的搜尋結果.
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
@@ -2424,7 +2507,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=你可以過濾掉包含特殊文字的搜尋结果
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=過濾類型
 #### OPTIONS_IGNORE_RESULT_TYPES_LABEL=You can specify general types of search results to filter.
-OPTIONS_IGNORE_RESULT_TYPES_LABEL=你可以設置下列幾種過濾類型.
+OPTIONS_IGNORE_RESULT_TYPES_LABEL=您可以設置下列幾種過濾類型.
 #### OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignore Adult Content
 OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=忽略成人內容
 #### OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignore .htm/.html Files
@@ -2438,11 +2521,11 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=忽略 .vbs 文件
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=過濾主機
 #### OPTIONS_IGNORE_MESSAGES_LABEL=You can disallow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the banned list.
-OPTIONS_IGNORE_MESSAGES_LABEL=透過新增 IP 地址到禁止列表, 你可以不允許接受下列主機傳送的消息 (例如: "18.239.0.1" or "18.*.*.*").
+OPTIONS_IGNORE_MESSAGES_LABEL=透過新增 IP 地址到禁止列表, 您可以不允許接受下列主機傳送的信息 (例如: "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28").
 #### OPTIONS_ALLOW_MESSAGES_TITLE=Allow Hosts
 OPTIONS_ALLOW_MESSAGES_TITLE=允可主機
 #### OPTIONS_ALLOW_MESSAGES_LABEL=You can allow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the allow list. This list is only needed to override the banned list.
-OPTIONS_ALLOW_MESSAGES_LABEL=透過新增 IP 地址到許可列表, 你可以允許接受下列主機傳送的消息 (例如: "18.239.0.1" or "18.*.*.*"). 許可列表可以覆盖禁止列表.
+OPTIONS_ALLOW_MESSAGES_LABEL=透過新增 IP 地址到許可列表, 您可以允許接受下列主機傳送的信息 (例如: "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28"). 許可列表可以覆蓋禁止列表.
 
 ################################################################################
 # Key/Value pairs for disabling compression support
@@ -2463,9 +2546,9 @@ OPTIONS_ALLOW_MESSAGES_LABEL=透過新增 IP 地址到許可列表, 你可以允
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=連線优先選擇
 #### OPTIONS_CONNECT_PREF_LABEL=You can limit who is able to connect to you based on the number of files they share.
-OPTIONS_CONNECT_PREF_LABEL=你可以根据他們共用文件的數目來限制誰能連線你.
+OPTIONS_CONNECT_PREF_LABEL=您可以根據他們共用文件的數目來限制誰能與您連線.
 #### OPTIONS_CONNECT_PREF_BOX_LABEL=Files You Must Share to Not be a Freeloader:
-OPTIONS_CONNECT_PREF_BOX_LABEL=不使你成為白食者而必须共用的文件數:
+OPTIONS_CONNECT_PREF_BOX_LABEL=不使您成為白食者而必需共用的文件數:
 #### OPTIONS_CONNECT_PREF_SLIDER_LABEL=Allow Freeloaders:
 OPTIONS_CONNECT_PREF_SLIDER_LABEL=允許白食者:
 #### OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Rarely
@@ -2489,24 +2572,26 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=始终
 # in the options window
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
-OPTIONS_PORT_TITLE=監听連接埠
+OPTIONS_PORT_TITLE=監視連接埠
 #### OPTIONS_PORT_LABEL=You can set the local network port that listens for incoming connections. This port can be freely changed in case of conflict with another service on your system, or if a specific port number is required by the configuration of your firewall to direct incoming connections to your host.
-OPTIONS_PORT_LABEL=你可以為其他主機設置你的網路監听連接埠號.
+OPTIONS_PORT_LABEL=您可以為其他主機設置您的網路監視連接埠號.
 #### OPTIONS_PORT_BOX_LABEL=Listen on Port:
-OPTIONS_PORT_BOX_LABEL=監听連接埠:
+OPTIONS_PORT_BOX_LABEL=監試連接埠:
 
 ################################################################################
-# Key/Value pairs for the options for forcing your IP address
+# Key/Value pairs for the options for router configuration
 # in the advanced panel in the options window
 ################################################################################
-#### OPTIONS_FORCE_IP_TITLE=Force Local IP
-OPTIONS_FORCE_IP_TITLE=強制本地 IP
-#### OPTIONS_FORCE_IP_LABEL=Allows you to force your IP address if you are behind a firewall and would like other gnutella clients to connect without having to send a push request.
-OPTIONS_FORCE_IP_LABEL=如果你在防火墙的後面而想讓其他 Gnutella 客戶不傳送 “推” 請求的话, 就請你強制設置你的 IP 地址.
-#### OPTIONS_FORCE_IP_CHECK_BOX_LABEL=Force IP
-OPTIONS_FORCE_IP_CHECK_BOX_LABEL=強制 IP
-#### OPTIONS_FORCE_IP_PORT_LABEL=Port:
-OPTIONS_FORCE_IP_PORT_LABEL=連接埠號:
+#### OPTIONS_ROUTER_TITLE=Router Configuration
+#? OPTIONS_ROUTER_TITLE=
+#### OPTIONS_ROUTER_LABEL=LimeWire can configure itself to work from behind a firewall or router. Using Universal Plug 'n Play (UPnP), LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support UPnP, LimeWire can be set to advertise an external port manually. (You must also configure your router if you choose manual configuration.)
+#? OPTIONS_ROUTER_LABEL=
+#### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
+#? OPTIONS_ROUTER_UPNP=
+#### OPTIONS_ROUTER_PORT=Manual Port Forward
+#? OPTIONS_ROUTER_PORT=
+#### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
+#? OPTIONS_ROUTER_NOTHING=
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection strings
@@ -2515,7 +2600,7 @@ OPTIONS_FORCE_IP_PORT_LABEL=連接埠號:
 #### OPTIONS_CONNECT_STRING_TITLE=Private Network
 OPTIONS_CONNECT_STRING_TITLE=私有網路
 #### OPTIONS_CONNECT_STRING_LABEL=You can set the connection handshake for a private Gnutella network. Other Gnutella hosts you connect to will need the same handshake.
-OPTIONS_CONNECT_STRING_LABEL=你可以設置私有 Gnutella 網路的連線握手. 你連線的其他 Gnutella 主機需要同樣的握手.
+OPTIONS_CONNECT_STRING_LABEL=您可以設置私有 Gnutella 網路的連線握手. 您連線的其他 Gnutella 主機需要同樣的握手.
 #### OPTIONS_CONNECT_STRING_STRING_LABEL=Connect String:
 OPTIONS_CONNECT_STRING_STRING_LABEL=連線時字符串:
 #### OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect Ok String:
@@ -2582,7 +2667,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密碼
 # Key/value pairs for top-level stats panels
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
-STATS_BANDWIDTH_PANE_TITLE=带寬
+STATS_BANDWIDTH_PANE_TITLE=頻寬
 #### STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
 #? STATS_BANDWIDTH_PANE_LABEL=
 
@@ -2611,7 +2696,7 @@ STATS_NETWORK_INFO_TITLE=網路信息
 #### STATS_CONNECTION_TITLE=Connections
 STATS_CONNECTION_TITLE=連線
 #### STATS_UPLOADS=Current Uploads:
-STATS_UPLOADS=當前的上載:
+STATS_UPLOADS=目前上傳:
 #### STATS_DOWNLOADS=Current Downloads:
 STATS_DOWNLOADS=當前的下載:
 #### STATS_NET=Current Hosts:
@@ -2626,17 +2711,17 @@ STATS_FILE_SIZE=所有文件 MBs:
 #### STATS_NETWORK_TITLE=Net
 STATS_NETWORK_TITLE=網路
 #### STATS_TOTAL_MESSAGES=Total messages:
-STATS_TOTAL_MESSAGES=全部消息:
+STATS_TOTAL_MESSAGES=全部信息:
 #### STATS_LOCAL_SEARCHES=Local searches:
 STATS_LOCAL_SEARCHES=本地搜尋者:
 #### STATS_ROUTING_ERRORS=Routing errors:
 STATS_ROUTING_ERRORS=路由錯誤:
 #### STATS_DROPPED_MESSAGES=Dropped messages:
-STATS_DROPPED_MESSAGES=丢棄的消息:
+STATS_DROPPED_MESSAGES=丢棄的信息:
 #### STATS_DOWNLOAD_COUNT=Download count:
 STATS_DOWNLOAD_COUNT=下載數:
 #### STATS_UPLOAD_COUNT=Upload count:
-STATS_UPLOAD_COUNT=上載數:
+STATS_UPLOAD_COUNT=上傳數:
 
 #### STATS_BUTTON_LABEL=Update
 STATS_BUTTON_LABEL=重新整理
@@ -2645,13 +2730,13 @@ STATS_BUTTON_LABEL=重新整理
 # Key/value pairs for bandwidth statistics panes
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
-BANDWIDTH_KEY=带寬
+BANDWIDTH_KEY=頻寬
 #### STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=Upstream
-STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=带寬入
+STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=上游頻寬
 #### STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=Total bandwidth used to send outgoing data, either through uploads or Gnutella messages.
 #? STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=
 #### STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=Downstream
-STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=带寬出
+STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=上游頻寬
 #### STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Total bandwidth used to receive incoming data, either through downloads or Gnutella messages.
 #? STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=
 
@@ -2682,7 +2767,7 @@ RECEIVED_MESSAGE_BYTES=KB
 #? RECEIVED_QUERY_REPLIES_BYTES=
 
 #### RECEIVED_LIMEWIRE=LimeWire Messages
-RECEIVED_LIMEWIRE=LimeWire 消息
+RECEIVED_LIMEWIRE=LimeWire 信息
 #### LIME_RECEIVED_MESSAGE_NUMBER=Number
 LIME_RECEIVED_MESSAGE_NUMBER=數
 #### STATS_RECEIVED_TCP=TCP
@@ -3040,7 +3125,7 @@ SENT_MESSAGE_NUMBER=數
 #### SENT_MESSAGE_BYTES=Kilobytes
 SENT_MESSAGE_BYTES=KB
 #### SENT_LIMEWIRE=LimeWire Messages
-SENT_LIMEWIRE=LimeWire 消息
+SENT_LIMEWIRE=LimeWire 信息
 
 #### LIME_SENT_MESSAGES_NUMBER=Number
 LIME_SENT_MESSAGES_NUMBER=數
@@ -3307,11 +3392,11 @@ STATS_HANDSHAKING_INCOMING_TITLE=傳入
 #### COMPRESSABLE_MESSAGES=Compression
 #? COMPRESSABLE_MESSAGES=
 #### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream
-STATS_COMPRESSABLE_UPSTREAM_TITLE=带寬入
+STATS_COMPRESSABLE_UPSTREAM_TITLE=頻寬入
 #### STATS_COMPRESSABLE_UPSTREAM_LABEL=Statistics for compressed upstream traffic in kilobytes.
 #? STATS_COMPRESSABLE_UPSTREAM_LABEL=
 #### STATS_COMPRESSABLE_DOWNSTREAM_TITLE=Downstream
-STATS_COMPRESSABLE_DOWNSTREAM_TITLE=带寬出
+STATS_COMPRESSABLE_DOWNSTREAM_TITLE=頻寬出
 #### STATS_COMPRESSABLE_DOWNSTREAM_LABEL=Statistics for compressed downstream traffic in kilobytes.
 #? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=
 
@@ -3333,7 +3418,7 @@ STATS_FLOW_CONTROL_BYTES_LABEL=Statistics for flow controlled messages in kiloby
 # Key/value pairs for advanced Gnutella message statistics -- route error stats
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
-STATS_ROUTE_ERRORS_TITLE=路由錯誤
+STATS_ROUTE_ERRORS_TITLE=排序錯誤
 #### STATS_ROUTE_ERRORS_LABEL=Total number of errors routing messages to other clients.
 #? STATS_ROUTE_ERRORS_LABEL=
 
@@ -3393,7 +3478,7 @@ STATS_DOWNLOAD_TRANFERS_TITLE=全部下載
 # Key/value pairs for advanced Upload statistics
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
-UPLOAD_STATISTICS=上載
+UPLOAD_STATISTICS=上傳
 #### STATS_UPLOAD_REQUESTS_TITLE=Requests
 #? STATS_UPLOAD_REQUESTS_TITLE=
 #### STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
@@ -3407,7 +3492,7 @@ UPLOAD_STATISTICS=上載
 #### STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
 #? STATS_UPLOAD_METHODS_LABEL=
 #### STATS_UPLOAD_GENERAL_TITLE=General
-STATS_UPLOAD_GENERAL_TITLE=全部上載
+STATS_UPLOAD_GENERAL_TITLE=全部上傳
 #### STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads. These numbers are incremented per connection, not per chunk. (Stalled uploads will also be counted as an interrupted upload.)
 #? STATS_UPLOAD_GENERAL_LABEL=
 
@@ -3418,7 +3503,7 @@ STATS_UPLOAD_GENERAL_TITLE=全部上載
 #### DEFAULT_X_AXIS_LABEL=seconds
 #? DEFAULT_X_AXIS_LABEL=
 #### DEFAULT_Y_AXIS_LABEL=messages
-DEFAULT_Y_AXIS_LABEL=消息
+DEFAULT_Y_AXIS_LABEL=信息
 #### DEFAULT_Y_BYTE_AXIS_LABEL=kilobytes
 DEFAULT_Y_BYTE_AXIS_LABEL=KB
 #### Y_AXIS_BANDWIDTH_LABEL=kilobytes
@@ -3446,9 +3531,9 @@ STATS_LEGEND_NAME=名稱
 
 # Bandwidth
 #### UPSTREAM_BANDWIDTH=Total Upstream
-UPSTREAM_BANDWIDTH=带寬入
+UPSTREAM_BANDWIDTH=上游頻寬
 #### DOWNSTREAM_BANDWIDTH=Total Downstream
-DOWNSTREAM_BANDWIDTH=带寬出
+DOWNSTREAM_BANDWIDTH=下游頻寬
 #### HTTP_BANDWIDTH=HTTP Total
 HTTP_BANDWIDTH=全部 HTTP
 #### HTTP_HEADER_BANDWIDTH=HTTP Headers
@@ -3460,25 +3545,25 @@ GNUTELLA_BANDWIDTH=全部 Gnutella
 #### GNUTELLA_HEADER_BANDWIDTH=Gnutella Headers
 #? GNUTELLA_HEADER_BANDWIDTH=
 #### GNUTELLA_MESSAGE_BANDWIDTH=Gnutella Messages
-GNUTELLA_MESSAGE_BANDWIDTH=Gnutella 消息
+GNUTELLA_MESSAGE_BANDWIDTH=Gnutella 信息
 
 # Compression
 #### UNCOMPRESSED_UPSTREAM=Total Potential Upstream
-UNCOMPRESSED_UPSTREAM=全部 带寬入 (potential)
+UNCOMPRESSED_UPSTREAM=全部 頻寬入 (potential)
 #### COMPRESSED_UPSTREAM=Total Actual Upstream
-COMPRESSED_UPSTREAM=全部 带寬入 (actual)
+COMPRESSED_UPSTREAM=全部 頻寬入 (actual)
 #### UNCOMPRESSED_DOWNSTREAM=Total Potential Downstream
-UNCOMPRESSED_DOWNSTREAM=全部 带寬出 (potential)
+UNCOMPRESSED_DOWNSTREAM=全部 下游頻寬 (potential)
 #### COMPRESSED_DOWNSTREAM=Total Actual Downstream
-COMPRESSED_DOWNSTREAM=全部 带寬出 (actual)
+COMPRESSED_DOWNSTREAM=全部  上游頻寬 (actual)
 #### HTTP_UNCOMPRESSED=HTTP (Potential)
 #? HTTP_UNCOMPRESSED=
 #### HTTP_COMPRESSED=HTTP (Actual)
 #? HTTP_COMPRESSED=
 #### GNUTELLA_UNCOMPRESSED=Gnutella (Potential)
-GNUTELLA_UNCOMPRESSED=Gnutella 消息 (potential)
+GNUTELLA_UNCOMPRESSED=Gnutella 信息 (potential)
 #### GNUTELLA_COMPRESSED=Gnutella (Actual)
-GNUTELLA_COMPRESSED=Gnutella 消息 (actual)
+GNUTELLA_COMPRESSED=Gnutella 信息 (actual)
 
 # Advanced Gnutella All clients messages
 #### STATS_ALL_CLIENTS=All Clients
@@ -3493,11 +3578,11 @@ STATS_LIMEWIRE=LimeWire
 #? ALL_LIME_RECEIVED=
 # Advanced Gnutella Received Messages TCP/UDP/Multicast
 #### RECEIVED_ALL_TCP_MESSAGES=TCP Messages
-RECEIVED_ALL_TCP_MESSAGES=TCP 消息
+RECEIVED_ALL_TCP_MESSAGES=TCP 信息
 #### RECEIVED_ALL_UDP_MESSAGES=UDP Messages
-RECEIVED_ALL_UDP_MESSAGES=UDP 消息
+RECEIVED_ALL_UDP_MESSAGES=UDP 信息
 #### RECEIVED_ALL_MULTICAST_MESSAGES=Multicast Messages
-RECEIVED_ALL_MULTICAST_MESSAGES=Multicast 消息
+RECEIVED_ALL_MULTICAST_MESSAGES=Multicast 信息
 # Advanced Gnutella Received Messages Duplicate queries
 #### RECEIVED_TCP_DUPLICATE_QUERIES=Duplicates TCP
 #? RECEIVED_TCP_DUPLICATE_QUERIES=
@@ -3511,11 +3596,11 @@ RECEIVED_ALL_MULTICAST_MESSAGES=Multicast 消息
 #? ALL_LIME_RECEIVED_BYTES=
 # Advanced Gnutella Received Kilobytes TCP/UDP/Multicast
 #### RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP Messages
-RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP 消息
+RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP 信息
 #### RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP Messages
-RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP 消息
+RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP 信息
 #### RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast Messages
-RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast 消息
+RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast 信息
 # Advanced Gnutella Received Kilobytes Duplicate queries
 #### RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=Duplicates TCP
 #? RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=
@@ -3529,11 +3614,11 @@ RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast 消息
 #? ALL_LIME_SENT=
 # Advanced Gnutella Sent Messages TCP/UDP/Multicast
 #### SENT_ALL_TCP_MESSAGES=TCP Messages
-SENT_ALL_TCP_MESSAGES=TCP 消息
+SENT_ALL_TCP_MESSAGES=TCP 信息
 #### SENT_ALL_UDP_MESSAGES=UDP Messages
-SENT_ALL_UDP_MESSAGES=UDP 消息
+SENT_ALL_UDP_MESSAGES=UDP 信息
 #### SENT_ALL_MULTICAST_MESSAGES=Multicast Messages
-SENT_ALL_MULTICAST_MESSAGES=Multicast 消息
+SENT_ALL_MULTICAST_MESSAGES=Multicast 信息
 
 # Advanced Gnutella Sent Kilobytes Total
 #### ALL_SENT_BYTES=Sent
@@ -3542,11 +3627,11 @@ SENT_ALL_MULTICAST_MESSAGES=Multicast 消息
 #? ALL_LIME_SENT_BYTES=
 # Advanced Gnutella Sent Kilobytes TCP/UDP/Multicast
 #### SENT_ALL_TCP_MESSAGES_BYTES=TCP Messages
-SENT_ALL_TCP_MESSAGES_BYTES=TCP 消息
+SENT_ALL_TCP_MESSAGES_BYTES=TCP 信息
 #### SENT_ALL_UDP_MESSAGES_BYTES=UDP Messages
-SENT_ALL_UDP_MESSAGES_BYTES=UDP 消息
+SENT_ALL_UDP_MESSAGES_BYTES=UDP 信息
 #### SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast Messages
-SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast 消息
+SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast 信息
 
 # Generic Errors
 #### ERROR_ALL_RECEIVED=All Errors
@@ -3622,7 +3707,7 @@ SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast 消息
 # Key/value pairs for general message labels
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
-GENERAL_ALL_MESSAGES_LABEL=全部消息
+GENERAL_ALL_MESSAGES_LABEL=全部信息
 #### GENERAL_PING_REQUEST_LABEL=Pings
 #? GENERAL_PING_REQUEST_LABEL=
 #### GENERAL_PING_REPLY_LABEL=Pongs
