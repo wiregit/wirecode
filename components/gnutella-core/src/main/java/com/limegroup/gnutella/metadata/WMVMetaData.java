@@ -4,17 +4,17 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Sets WMA metadata using the ASF parser.
+ * Sets WMV metadata using the ASF parser.
  */
-public class WMAMetaData extends AudioMetaData {
+public class WMVMetaData extends VideoMetaData {
     
-    /** Sets WMA data. */
-    public WMAMetaData(File f) throws IOException {
+    /** Sets WMV data. */
+    public WMVMetaData(File f) throws IOException {
         super(f);
     }
     
-    /** Constructs a WMAMetadata from a parser. */
-    public WMAMetaData(ASFParser p) throws IOException {
+    /** Constructs a WMVMetadata from a parser. */
+    public WMVMetaData(ASFParser p) throws IOException {
         set(p);
     }
     
@@ -26,20 +26,16 @@ public class WMAMetaData extends AudioMetaData {
     
     /** Sets data based on an ASF Parser. */
     private void set(ASFParser data) throws IOException {
-        if(data.hasVideo())
-            throw new IOException("use WMV instead!");
-        if(!data.hasAudio())
-            throw new IOException("no audio data!");
+        if(!data.hasVideo())
+            throw new IOException("no video data!");
             
         setTitle(data.getTitle());
-        setArtist(data.getArtist());
         setYear(data.getYear());
         setComment(data.getComment());
         if(getComment() == null)
             setComment(data.getDescription());
-        setTrack(data.getTrack());
-        setBitrate(data.getBitrate());
         setLength(data.getLength());
-        setGenre(data.getGenre());
+        setWidth(data.getWidth());
+        setHeight(data.getHeight());
     }
 }

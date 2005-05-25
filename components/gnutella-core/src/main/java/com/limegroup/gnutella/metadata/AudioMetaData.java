@@ -68,6 +68,9 @@ public abstract class AudioMetaData extends MetaData {
         XMLStringUtils.DELIMITER;
     public static final String LICENSE_KEY =  KEY_PREFIX + "license" +
         XMLStringUtils.DELIMITER;
+        
+    protected AudioMetaData() throws IOException {
+    }
 
     public AudioMetaData(File f) throws IOException{
     	parseFile(f);
@@ -92,6 +95,10 @@ public abstract class AudioMetaData extends MetaData {
     	
     }
     
+    public String getSchema() {
+        return schemaURI;
+    }
+    
     public String toString() {
         return "ID3Data: title[" + title + "], artist[" + artist +
                "], album[" + album + "], year[" + year + "], comment["
@@ -114,57 +121,19 @@ public abstract class AudioMetaData extends MetaData {
     public int getLength() { return length; }
     public String getLicense() { return license; }
     
-    void setTitle(String title) {
-        this.title = title;
-    }
-    
-    void setArtist(String artist) {
-        this.artist = artist;
-    }
-    
-    void setAlbum(String album) {
-        this.album = album;
-    }
-    
-    void setYear(String year) {
-        this.year = year;
-    }
-    
-    void setComment(String comment) {
-        this.comment = comment;
-    }
-    
-    void setTrack(short track) {
-        this.track = track;
-    }
-    
-    void setTotalTracks(short total) {
-    	totalTracks = total;
-    }
-    
-    void setDisk(short disk) {
-    	this.disk =disk;
-    }
-    
-    void setTotalDisks(short total) {
-    	totalDisks=total;
-    }
-    
-    void setGenre(String genre) {
-        this.genre = genre;
-    }
-    
-    void setBitrate(int bitrate) {
-        this.bitrate = bitrate;
-    }
-    
-    void setLength(int length) {
-        this.length = length;
-    }
-    
-    void setLicense(String license) {
-        this.license = license;
-    }
+    void setTitle(String title) { this.title = title; }
+    void setArtist(String artist) { this.artist = artist; }    
+    void setAlbum(String album) { this.album = album; }
+    void setYear(String year) { this.year = year; }
+    void setComment(String comment) { this.comment = comment; }    
+    void setTrack(short track) { this.track = track; }    
+    void setTotalTracks(short total) { totalTracks = total; }    
+    void setDisk(short disk) { this.disk =disk; }
+    void setTotalDisks(short total) { totalDisks=total; }
+    void setGenre(String genre) { this.genre = genre; }
+    void setBitrate(int bitrate) { this.bitrate = bitrate; }    
+    void setLength(int length) { this.length = length; }    
+    void setLicense(String license) { this.license = license; }
     
     /**
      * Updates this' information with data's information

@@ -289,115 +289,111 @@ public class LimeXMLUtils
         return false;
     }
 
+    public static boolean isMP3File(File in) {
+        return isMP3File(in.getName());
+    }
 
     public static boolean isMP3File(String in) {
-        boolean retVal = false;
-
-        in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".mp3"))
-            retVal = true;
-        
-        return retVal;
+        return in.toLowerCase(Locale.US).endsWith(".mp3");
     }
 	
 	public static boolean isRIFFFile(File f) {
-		return f.getName().toLowerCase(Locale.US).endsWith(".avi");
+		return isRIFFFile(f.getName());
 	}
 	
+	public static boolean isRIFFFile(String in) {
+		return in.toLowerCase(Locale.US).endsWith(".avi");
+    }	    
+	
 	public static boolean isOGMFile(File f) {
-		return f.getName().toLowerCase(Locale.US).endsWith(".ogm");
+	    return isOGMFile(f.getName());
 	}
-
-    public static boolean isMP3File(File in) {
-        boolean retVal = isMP3File(in.getName());        
-        return retVal;
+	
+	public static boolean isOGMFile(String in) {
+		return in.toLowerCase(Locale.US).endsWith(".ogm");
+	}
+	
+    public static boolean isOGGFile(File in) {
+        return isOGGFile(in.getName());
     }
     
     public static boolean isOGGFile(String in) {
-        boolean retVal = false;
-
-        in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".ogg"))
-            retVal = true;
-        
-        return retVal;
-    }
-
-
-    public static boolean isOGGFile(File in) {
-        boolean retVal = isOGGFile(in.getName());        
-        return retVal;
-    }
-
-    public static boolean isFLACFile(String in) {
-        boolean retVal = false;
-
-        in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".flac") || in.endsWith(".fla"))
-            retVal = true;
-        
-        return retVal;
+        return in.toLowerCase(Locale.US).endsWith(".ogg");
     }
 
 	public static boolean isFLACFile(File in) {
-        boolean retVal = isFLACFile(in.getName());        
-        return retVal;
+	    return isFLACFile(in.getName());
     }
-	
-    public static boolean isM4AFile(String in) {
-        boolean retVal = false;
 
+    public static boolean isFLACFile(String in) {
         in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".m4a")|| in.endsWith(".m4p"))
-            retVal = true;
-        
-        return retVal;
+        return in.endsWith(".flac") || in.endsWith(".fla");
     }
     
     public static boolean isM4AFile(File in) {
-        boolean retVal = isM4AFile(in.getName());        
-        return retVal;
+        return isM4AFile(in.getName());
     }
-    
-    public static boolean isWMAFile(String in) {
-        boolean retVal = false;
-
+	
+    public static boolean isM4AFile(String in) {
         in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".wma"))
-            retVal = true;
-        
-        return retVal;        
+        return in.endsWith(".m4a")|| in.endsWith(".m4p");
     }
 
     public static boolean isWMAFile(File f) {
-        boolean retVal = isWMAFile(f.getName());
-        return retVal;
+        return isWMAFile(f.getName());
     }
     
+    public static boolean isWMAFile(String in) {
+        return in.toLowerCase(Locale.US).endsWith(".wma");
+    }
+    
+    public static boolean isWMVFile(File f) {
+        return isWMVFile(f.getName());
+    }
+    
+    public static boolean isWMVFile(String in) {
+        return in.toLowerCase(Locale.US).endsWith(".wmv");
+    }
+    
+    public static boolean isASFFile(File f) {
+        return isASFFile(f.getName());
+    }
+    
+    public static boolean isASFFile(String in) {
+        in = in.toLowerCase(Locale.US);
+        return in.endsWith(".asf") || in.endsWith(".wm");
+    }
     
     public static boolean isSupportedAudioFormat(File file) {
-    	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
+        return isSupportedAudioFormat(file.getName());
     }
 
     public static boolean isSupportedAudioFormat(String file) {
     	return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
     
-    //stub
     public static boolean isSupportedVideoFormat(File file) {
-    	return isRIFFFile(file) || isOGMFile(file);
+    	return isSupportedVideoFormat(file.getName());
     }
     
-    //stub
     public static boolean isSupportedVideoFormat(String file) {
-    	return false;
+    	return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file);
+    }
+    
+    public static boolean isSupportedMultipleFormat(File file) {
+        return isSupportedMultipleFormat(file.getName());
+    }
+    
+    public static boolean isSupportedMultipleFormat(String file) {
+        return isASFFile(file);
     }
     
     public static boolean isSupportedFormat(File file) {
-    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file);
+    	return isSupportedFormat(file.getName());
     }
+    
     public static boolean isSupportedFormat(String file) {
-    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file);
+    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
     }
     
     /**
@@ -405,28 +401,22 @@ public class LimeXMLUtils
      * (we may be able to parse the metadata, but not annotate it)
      */
     public static boolean isEditableFormat(File file) {
-    	return isMP3File(file) || isOGGFile(file); //add more as they become editable
+    	return isEditableFormat(file.getName());
     }
     
     public static boolean isEditableFormat(String file) {
     	return isMP3File(file) || isOGGFile(file); 
     }
-    /**
-     * 
-     * @param file The file that is about to be parsed for metadata
-     * @return the URI of the schema which should be used to validate the xml.
-     */
-    public static String getSchemaURI(File file) {
-    	if (isSupportedAudioFormat(file))
-			return "http://www.limewire.com/schemas/audio.xsd";
-		else if (isSupportedVideoFormat(file))
-			return "http://www.limewire.com/schemas/video.xsd";
-		else 
-			return "";
-    }
     
     public static boolean isSupportedFormatForSchema(File file, String schemaURI) {
-    	return getSchemaURI(file).equals(schemaURI);
+        if(isSupportedMultipleFormat(file))
+            return true;
+        else if("http://www.limewire.com/schemas/audio.xsd".equals(schemaURI))
+            return isSupportedAudioFormat(file);
+        else if("http://www.limewire.com/schemas/video.xsd".equals(schemaURI))
+            return isSupportedVideoFormat(file);
+        else
+            return false;
     }
     
     /**

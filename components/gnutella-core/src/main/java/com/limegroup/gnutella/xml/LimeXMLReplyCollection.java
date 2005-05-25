@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xml.sax.SAXException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,6 +27,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
@@ -32,6 +35,7 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  *  Stores a schema and a list of replies corresponding to that schema.
@@ -46,8 +50,7 @@ import com.limegroup.gnutella.util.Trie;
 
 public class LimeXMLReplyCollection {
     
-    private static final Log LOG =
-        LogFactory.getLog(LimeXMLReplyCollection.class);
+    private static final Log LOG = LogFactory.getLog(LimeXMLReplyCollection.class);
     
 
     /**
@@ -77,19 +80,9 @@ public class LimeXMLReplyCollection {
     private final Map /* String -> Trie (String -> List) */ trieMap;
     
     /**
-     * Whether or not this LimeXMLReplyCollection is for audio files.
-     */
-    private final boolean audio;
-    
-    /**
      * The location on disk that information is serialized to.
      */
-    private File dataFile = null;
-    
-    /**
-     * Obtain WRITE_LOCK before writing to disk.
-     */
-    private final Object WRITE_LOCK = new Object(); 
+    private final File dataFile;
 
     public static final int NORMAL = 0;
     public static final int FILE_DEFECTIVE = 1;
@@ -111,139 +104,139 @@ public class LimeXMLReplyCollection {
      *
      * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
-     * @param audio Whether this is a collection of audio files.
      */
-    public LimeXMLReplyCollection(FileDesc[] fds, String URI, boolean audio) {
+    public LimeXMLReplyCollection(FileManager fm, String URI) {
         this.schemaURI = URI;
-        this.audio = audio;
-        if(LOG.isTraceEnabled())
-            LOG.trace("LimeXMLReplyCollection(): entered with audio = " +
-                      audio);
-
-        // construct a backing store object (for serialization)
-        mainMap = new HashMap();
-        trieMap = new HashMap();
-        MapSerializer ms = initializeMapSerializer(URI);
-        Map hashToXML;
-
-        //if File is invalid, ms== null
-        if (ms == null) // create a dummy
-            hashToXML = new HashMap();
-        else 
-            hashToXML = ms.getMap();
-            
-        // The serialization of mainMap went through three stages in LimeWire.
-        // Prior to LimeWire 2.5, the map was stored as
-        //      String (xml mini hash) -> String (XML).
-        // After that (before LimeWire 3.4) it was stored as
-        //      String (xml mini hash) -> LimeXMLDocument
-        // From LimeWire 3.4 on, it is stored as
-        //      URN (SHA1 Hash) -> LimeXMLDocument        
-        // Because of the changes, and the need to support reading older
-        // .sxml files (so we don't lose any annotated XML), we need to
-        // ensure that we can handle all cases and update them to the
-        // current format.
-        // From LimeWire 4.0 on, LimeWire began to understand ID3v2 data.
-        // To ensure that the .sxml files kept the most recent data (and
-        // data in sync with the file), LimeXMLDocuments added a 'supportID3v2'
-        // field.  If one is deserialized without it, and it associates
-        // with a file that can have id3v2 (an mp3 file), the file is
-        // re-scanned for newer data.
+        this.trieMap = new HashMap();
+        this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
+                                 LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
+        this.mainMap = new HashMap();
         
-        // This iterates over each shared FileDesc to find the associated entry
-        // in the map read off disk. If no entry is found, it could be for a 
-        // few reasons:
-        // 1) The file has no XML associated with it.
-        // 2) The entry is stored as String -> String or String -> LimeXMLDoc
-        // Because reason one is common, and reason two will only occur during
-        // the first time LimeWire 3.4 is started (and a previous version
-        // of LimeWire had already run once), and we don't want to do the mini
-        // hash to perform a lookup for every file that doesn't have XML,
-        // we glance at the first entry in the deserialized map and see if
-        // the key is a String or a URN.  If it is a String, we'll assume
-        // all missing entries are because of reason 2.  If it is a URN
-        // we'll assume all missing entries are because of 1.
-        // If there are no entries in the serialized map, we'll also assume 1.
-        
-        boolean requiresConversion = false;
-        {
-            Iterator iter = hashToXML.keySet().iterator();
-            if( iter.hasNext() )
-                requiresConversion = ( iter.next() instanceof String );
-            if(LOG.isDebugEnabled())
-                LOG.debug("requiresConversion: " + requiresConversion);
+        if(fm != null) {
+            Map hashToXML = readMapFromDisk();
+            if(hashToXML != null)
+                parseStoredMap(fm, hashToXML);
         }
-        
-        for(int i = 0; i < fds.length; i++) {
-            FileDesc fd = fds[i];
-            if( fd instanceof IncompleteFileDesc ) //ignore incompletes
-                continue;
-
-            File file = fd.getFile();
-            URN hash = fd.getSHA1Urn();
-            Object xml = null;
-            LimeXMLDocument doc = null;
-            
-            //If requiresConversion is true, a lookup of the URN
-            //is pointless because the hashToXML's keys are
-            //a String (mini-hash).
-            if( requiresConversion ) { //Before LimeWire 3.4
-                String miniHash = null;
-                try {
-                    miniHash = new String(LimeXMLUtils.hashFile(file));
-                } catch(IOException e) {
-                    continue; // oh well.
-                }
-                xml = hashToXML.get(miniHash);
-                // If this was between LimeWire 2.5 and LimeWire 3.4...
-                // and it had some XML..
-                if( xml != null && xml instanceof LimeXMLDocument ) {
-                    doc = (LimeXMLDocument)xml;
-                } else { // Pre LimeWire 2.5 or no XML stored.
-                    doc = constructDocument(file);
-                }
-            } else { // After LimeWire 3.4
-                xml = hashToXML.get(hash);
-                if( xml == null ) { // no XML might exist, try and make some
-                    doc = constructDocument(file);
-                } else { //it had a doc already.
-                    doc = (LimeXMLDocument)xml;
-                }
-            }
-            
-            if( doc == null ) // no document, ignore.
-                continue;
-                
-            if(!doc.isCurrent()) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("reconstructing old document: " + file);
-                LimeXMLDocument tempDoc = constructDocument(file);
-                if (tempDoc != null)
-                    doc = tempDoc;
-                else
-                    doc.setCurrent();
-            }
-                
-            // Verify the doc has information in it.
-            if(!doc.isValid()) {
-                //If it is invalid, try and rebuild it.
-                doc = constructDocument(file);
-                if(doc == null || !doc.isValid())
-                    continue;
-            }   
-                
-            // check to see if it's corrupted and if so, fix it.
-            if( AudioMetaData.isCorrupted(doc) ) {
-                doc = AudioMetaData.fixCorruption(doc);
-                addReplyWithCommit(file, fd, doc, false);
-            } else {
-                addReply(fd, doc);
-            }
-        }
+    }
     
-        LOG.trace("LimeXMLReplyCollection(): returning.");
-
-        write();
+    /**
+     * Creates documents for files that may not have docs already.
+     */
+    void initialize(FileDesc[] fds) {
+        synchronized(mainMap) {
+            for(int i = 0; i < fds.length; i++) {
+                FileDesc fd = fds[i];
+                File file = fd.getFile();
+                if(fd instanceof IncompleteFileDesc)
+                    continue;
+                
+                if(mainMap.containsKey(fd.getSHA1Urn())) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Already had doc for: " + file);
+                    continue;
+                }
+                    
+                // If we have no documents for this FD, or the file-format only supports
+                // a single kind of metadata, construct a document.
+                // This is necessary so that we don't keep trying to parse formats that could
+                // be multiple kinds of files every time.   
+                if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
+                    LimeXMLDocument doc = constructDocument(file);
+                    if(doc == null) {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Unable to construct document for: " + file);
+                        continue;
+                    }
+                    
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
+                    addReply(fd, doc);
+                }
+            }
+        }
+        
+        writeMapToDisk();
+    }
+    
+    /**
+     * Reads through an existing map & builds up mainMap.
+     */
+    private void parseStoredMap(FileManager fm, Map hashToXML) {
+        for(Iterator i = hashToXML.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            if(!(next.getKey() instanceof URN) || !(next.getValue() instanceof LimeXMLDocument)) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Invalid entry: " + next);
+                continue;
+            }
+            
+            URN urn = (URN)next.getKey();
+            LimeXMLDocument doc = (LimeXMLDocument)next.getValue();
+            if(urn == null || doc == null) {
+                LOG.debug("Empty entry, ignoring.");
+                continue;
+            } else if(LOG.isDebugEnabled())
+                LOG.debug("Looking for entry with URN: " + urn);
+            
+            FileDesc fd = fm.getFileDescForUrn(urn);
+            if(fd == null) {
+                LOG.debug("Ignoring no longer shared document.");
+                continue;
+            }
+                
+            
+            if(fd instanceof IncompleteFileDesc) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Ignoring doc for IFD.  " + fd.getFile());
+                continue;
+            }
+            
+            doc = validate(doc, fd.getFile(), fd);
+            if(doc == null) {
+                LOG.debug("Unable to validate document, ignoring");
+                continue;
+            }
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("Adding new document for file: " + fd.getFile() + ", doc: " + doc);
+            addReply(fd, doc);
+        }
+    }
+    
+    /**
+     * Validates a LimeXMLDocument.
+     *
+     * This checks:
+     * 1) If it's current (if not, it attempts to reparse.  If it can't, keeps the old one).
+     * 2) If it's valid (if not, attempts to reparse it.  If it can't, drops it).
+     * 3) If it's corrupted (if so, fixes & writes the fixed one to disk).
+     */
+    private LimeXMLDocument validate(LimeXMLDocument doc, File file, FileDesc fd) {
+        if(!doc.isCurrent()) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("reconstructing old document: " + file);
+            LimeXMLDocument tempDoc = constructDocument(file);
+            if (tempDoc != null)
+                doc = tempDoc;
+            else
+                doc.setCurrent();
+        }
+        
+        // Verify the doc has information in it.
+        if(!doc.isValid()) {
+            //If it is invalid, try and rebuild it.
+            doc = constructDocument(file);
+            if(doc == null)
+                return null;
+        }   
+            
+        // check to see if it's corrupted and if so, fix it.
+        if( AudioMetaData.isCorrupted(doc) ) {
+            doc = AudioMetaData.fixCorruption(doc);
+            mediaFileToDisk(fd, file.getPath(), doc, false);
+        }
+        
+        return doc;
     }
     
     /**
@@ -252,16 +245,32 @@ public class LimeXMLReplyCollection {
      *  <tt>LimeXMLDocument</tt> otherwise.
      */
     private LimeXMLDocument constructDocument(File file) {
-        if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
+	    if(LimeXMLUtils.isSupportedFormatForSchema(file, schemaURI)) {
             try {
-            	return MetaDataReader.readDocument(file);
-            } catch (IOException ignored) { 
-            	return null; 
+                // Documents with multiple file formats may be the wrong type.
+                LimeXMLDocument document = MetaDataReader.readDocument(file);
+                if(document.getSchemaURI().equals(schemaURI))
+                    return document;
+            } catch (IOException ignored) {
+                LOG.warn("Error creating document", ignored);
             }
         }
+        
         return null;
     }
     
+    /**
+     * Constructs a LimeXMLDocument from a really old serialized XML doc as a String.
+     */
+    private LimeXMLDocument constructDocument(String string) {
+        try {
+            return new LimeXMLDocument(string);
+        } catch(SAXException ignored) {
+        } catch(SchemaNotFoundException ignored) {
+        } catch(IOException ignored) {
+        }
+        return null;
+    }
 
     /**
      * Gets a list of keywords from all the documents in this collection.
@@ -299,29 +308,6 @@ public class LimeXMLReplyCollection {
         }
         return retList;
     }
-
-    /**
-     * Creates the MapSerializer object that deserializes the .sxml file.
-     * @return the MapSerializer or null if there was an exception
-     *   while creating the MapSerializer
-     */
-    private MapSerializer initializeMapSerializer(String URI){
-        String fname = LimeXMLSchema.getDisplayString(URI)+".sxml";
-        LimeXMLProperties props = LimeXMLProperties.instance();
-        String path = props.getXMLDocsDir();
-        dataFile = new File(path,fname);
-        // invalid if directory.
-        if( dataFile.isDirectory() )
-            return null;
-        try {
-            return new MapSerializer(dataFile);
-        } catch(IOException e) {
-            LOG.debug("exception initializing", e);
-            return null;
-        }
-    }
-
-
     
     /**
      * Returns the schema URI of this collection.
@@ -403,31 +389,6 @@ public class LimeXMLReplyCollection {
         fd.addLimeXMLDocument(replyDoc);
     }
 
-
-    /**
-     * Adds a reply into the mainMap of this collection, associating
-     * the FileDesc with the LimeXMLDocument.
-     * If this collection is an audio collection, this will write out the
-     * file to disk, possibly adding/changing ID3 tags on an MP3 file.
-     * If the file changed because of this operation, the FileManager
-     * is notified of the changed file, redoing its hashes.
-     * Regardless of whether or not this collection is for audio files,
-     * the map of (URN -> LimeXMLDocument) will always be serialized
-     * to disk.
-     */
-    void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc, 
-                                                         boolean checkBetter) {
-        addReply(fd, replyDoc);
-        
-        // commit to disk...
-        if (audio) {
-            try {
-                mediaFileToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
-            } catch(IOException ignored) {}
-        } else
-            write();
-    }
-
     /**
      * Returns the amount of items in this collection.
      */
@@ -435,13 +396,6 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             return mainMap.size();
         }
-    }
-    
-    /**
-     * Returns whether or not this reply collection is for audio files.
-     */
-    public boolean isAudio() {
-        return audio;
     }
     
     /**
@@ -471,7 +425,7 @@ public class LimeXMLReplyCollection {
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
      */    
-    public List getMatchingReplies(LimeXMLDocument query) {
+    List getMatchingReplies(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
         Set matching = null;
@@ -574,7 +528,7 @@ public class LimeXMLReplyCollection {
         boolean written = false;
         
         if(found){
-            written = write();
+            written = writeMapToDisk();
             if( written ) {
                 fd.removeLimeXMLDocument((LimeXMLDocument)val);
                 removeKeywords(val);
@@ -591,37 +545,10 @@ public class LimeXMLReplyCollection {
         return (found && written);
     }
     
-
-    /** 
-     * Simply write() out the mainMap to disk. 
-     */
-    public boolean write(){
-        if(dataFile==null){//calculate it
-            String fname = LimeXMLSchema.getDisplayString(schemaURI)+".sxml";
-            LimeXMLProperties props = LimeXMLProperties.instance();
-            String path = props.getXMLDocsDir();
-            dataFile = new File(path,fname);
-        }
-        // invalid if directory
-        if( dataFile.isDirectory() )
-            return false;
-    
-        try {
-            MapSerializer ms = new MapSerializer(dataFile, mainMap);
-            synchronized (WRITE_LOCK) {
-                ms.commit();
-            }
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
-    }
-    
     /**
      * Writes this media file to disk, using the XML in the doc.
      */
-    public int mediaFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc, 
-                                                          boolean checkBetter) {
+    public int mediaFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc,  boolean checkBetter) {
         boolean wrote=false;
         int mp3WriteState = -1;
         
@@ -648,7 +575,7 @@ public class LimeXMLReplyCollection {
                     "trying to write id3 to non mp3 file");
 
         // write out the mainmap in serial form...
-        wrote = write();
+        wrote = writeMapToDisk();
 
         if(!wrote) //writing serialized map failed
             return RW_ERROR;
@@ -734,104 +661,39 @@ public class LimeXMLReplyCollection {
         RouterService.getFileManager().fileChanged(new File(fileName));
         return retVal;
     }
-
-
-    static class MapSerializer {
-
-        /** Where to serialize/deserialize from.
-         */
-        private File _backingStoreFile;
-        
-        /** underlying map for hashmap access.
-         */
-        private Map _hashMap;
-
-        /** @param whereToStore The name of the file to serialize from / 
-         *  deserialize to.
-         *  @exception IOException if there was a problem deserializing the
-         *    file.
-         */
-        MapSerializer(File whereToStore) throws IOException {
-            _backingStoreFile = whereToStore;
-            if (_backingStoreFile.exists())
-                deserializeFromFile();
-            else
-                _hashMap = new HashMap();
-        }
-
-
-        /** @param whereToStore The name of the file to serialize from / 
-         *  deserialize to.  
-         *  @param storage A HashMap that you want to serialize / deserialize.
-         */
-        MapSerializer(File whereToStore, Map storage) {
-            _backingStoreFile = whereToStore;
-            _hashMap = storage;
-        }
-
-
-        private void deserializeFromFile() throws IOException {
-            ObjectInputStream is = null;
-            try {
-                is = new ConverterObjectInputStream(
-                        new BufferedInputStream(
-                            new FileInputStream(_backingStoreFile)));
-                _hashMap = (Map)is.readObject();
-                if(LOG.isDebugEnabled()) {
-                  for(Iterator it = _hashMap.entrySet().iterator();
-                      it.hasNext();) {
-                      Map.Entry ent = (Map.Entry)it.next();
-                      LOG.debug("read " + ent.getKey() + ", " +ent.getValue());
-                  }
-                }
-            } catch(Throwable t) {
-                LOG.error("Unable to read LimeXMLCollection", t);
-                if(t instanceof IOException)
-                    throw (IOException)t;
-                 else
-                    throw new IOException(t.getMessage());
-            } finally {
-                if( is != null ) {
-                    try {
-                        is.close();
-                    } catch(IOException ignored) {}
-                }
+    
+    /** Serializes the current map to disk. */
+    public boolean writeMapToDisk() {
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
+            synchronized (mainMap) {
+                out.writeObject(mainMap);
             }
+            out.flush();
+            return true;
+        } catch(Throwable ignored) {
+            LOG.trace("Unable to write", ignored);
+        } finally {
+            IOUtils.close(out);
         }
-
-        /** Call this method when you want to force the contents to the HashMap
-         *  to disk.
-         *  @exception IOException Thrown if force to disk failed.
-         */
-        public void commit() throws IOException {
-            serializeToFile();
-        }
-
         
-        private void serializeToFile() throws IOException {
-            ObjectOutputStream objStream = null;
-            try {
-                objStream = new ObjectOutputStream(
-                        new BufferedOutputStream(
-                         new FileOutputStream(_backingStoreFile)));
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Serializing (" + _backingStoreFile + "), map: " + _hashMap);
-                synchronized (_hashMap) {
-                    objStream.writeObject(_hashMap);
-                }
-            } finally {
-                if( objStream != null ) {
-                    try {
-                        objStream.close();
-                    } catch(IOException ignored) {}
-                }
-            }
+        return false;
+    }
+    
+    /** Reads the map off of the disk. */
+    private Map readMapFromDisk() {
+        ObjectInputStream in = null;
+        Map read = null;
+        try {
+            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
+            read = (Map)in.readObject();
+        } catch(Throwable t) {
+            LOG.error("Unable to read LimeXMLCollection", t);
+        } finally {
+            IOUtils.close(in);
         }
-
-        /** @return The Map this class encases.
-         */
-        public Map getMap() {
-            return _hashMap;
-        }
+        
+        return read == null ? new HashMap() : read;
     }
 }

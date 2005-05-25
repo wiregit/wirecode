@@ -284,7 +284,7 @@ public class I18NSendReceiveTest
                     "Cant add doc to nonexistent collection");
 
         collection.addReply(fd, newDoc);
-        assertTrue("error commiting xml", collection.write());
+        assertTrue("error commiting xml", collection.writeMapToDisk());
     }
     
     // build xml string for video

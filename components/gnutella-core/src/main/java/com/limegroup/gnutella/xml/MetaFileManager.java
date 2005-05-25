@@ -289,10 +289,7 @@ public class MetaFileManager extends FileManager {
             // fall through and add it.
         }
 
-        SchemaReplyCollectionMapper mapper =
-            SchemaReplyCollectionMapper.instance();
-        
-
+        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
         // add xml docs as appropriate, one per schema.
         List schemasAddedTo = new LinkedList();
         for(Iterator iter = metadata.iterator(); iter.hasNext(); ) {
@@ -301,21 +298,19 @@ public class MetaFileManager extends FileManager {
             LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
             if (collection != null && !schemasAddedTo.contains(uri)) {
                 schemasAddedTo.add(uri);
-                if( LimeXMLUtils.isMP3File(file) && 
-                		AudioMetaData.isCorrupted(currDoc) )
+                if( LimeXMLUtils.isMP3File(file) && AudioMetaData.isCorrupted(currDoc) )
                     currDoc = AudioMetaData.fixCorruption(currDoc);
-                collection.addReplyWithCommit(file, fd, currDoc, true);
-                
+                collection.mediaFileToDisk(fd, file.getPath(), currDoc, true);
+                collection.addReply(fd, currDoc);
             }
-            
         }
 
         _needRebuild = true;
         
         	// Notify the GUI...
         if (notify && fd != null) {
-            FileManagerEvent evt = new FileManagerEvent(this, 
-                    FileManagerEvent.ADD, new FileDesc[]{fd});
+            FileManagerEvent evt =
+                new FileManagerEvent(this, FileManagerEvent.ADD, new FileDesc[]{fd});
 
             RouterService.getCallback().handleFileManagerEvent(evt);
         }
@@ -335,37 +330,31 @@ public class MetaFileManager extends FileManager {
      */
     protected void loadSettingsBlocking(boolean notifyOnClear){
 		RouterService.getCallback().setAnnotateEnabled(false);
-        // let FileManager do its work....
         super.loadSettingsBlocking(notifyOnClear);
         if (loadThreadInterrupted())
             return;
-        synchronized(META_LOCK){
-            SchemaReplyCollectionMapper mapper = 
-                  SchemaReplyCollectionMapper.instance();
-            //created maper schemaURI --> ReplyCollection
-            LimeXMLSchemaRepository schemaRepository = 
-                  LimeXMLSchemaRepository.instance();
-
+            
+        synchronized(META_LOCK) {
+            LimeXMLSchemaRepository schemaRepository =  LimeXMLSchemaRepository.instance();
             if (loadThreadInterrupted())
                 return;
 
-            //now the schemaRepository contains all the schemas.
+            // Load up the reply collections.
             String[] schemas = schemaRepository.getAvailableSchemaURIs();
-            //we have a list of schemas
-            int len = schemas.length;
-            LimeXMLReplyCollection collection;
-            FileDesc fds[] = super.getAllSharedFileDescriptors();
-            for(int i=0; i < len && !loadThreadInterrupted(); i++) {
-                //One ReplyCollection per schema
-                String s = LimeXMLSchema.getDisplayString(schemas[i]);
-                collection = 
-                    new LimeXMLReplyCollection(fds, schemas[i], 
-                                           s.equalsIgnoreCase("audio"));
-                //Note: the collection may have size==0!
-                mapper.add(schemas[i],collection);
+            SchemaReplyCollectionMapper mapper =  SchemaReplyCollectionMapper.instance();
+            for(int i = 0; i < schemas.length && !loadThreadInterrupted(); i++) {
+                String schema = schemas[i];
+                mapper.add(schema, new LimeXMLReplyCollection(this, schema));
             }
-            //showXMLData();
-        }//end of synchronized block
+            
+            // Then add existing FileDescs to the collections.
+            FileDesc fds[] = super.getAllSharedFileDescriptors();
+            for(int i = 0; i < schemas.length && !loadThreadInterrupted(); i++) {
+                LimeXMLReplyCollection info = mapper.getReplyCollection(schemas[i]);
+                info.initialize(fds);
+            }
+        }
+        
 		RouterService.getCallback().setAnnotateEnabled(true);
     }
 
