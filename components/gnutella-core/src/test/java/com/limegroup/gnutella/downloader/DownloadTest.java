@@ -1581,8 +1581,8 @@ public class DownloadTest extends BaseTestCase {
         List u2Alt = uploader2.incomingGoodAltLocs;
                     
         // neither uploader knows any alt locs.
-        assertNull(u1Alt);
-        assertNull(u2Alt);
+        assertTrue(u1Alt.isEmpty());
+        assertTrue(u2Alt.isEmpty());
 
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
@@ -1610,8 +1610,8 @@ public class DownloadTest extends BaseTestCase {
         //both uploaders should know that this downloader is an alt loc.
         u1Alt = uploader1.incomingGoodAltLocs;
         u2Alt = uploader2.incomingGoodAltLocs;
-        assertNotNull(u1Alt);
-        assertNotNull(u2Alt);
+        assertFalse(u1Alt.isEmpty());
+        assertFalse(u2Alt.isEmpty());
 
         AlternateLocation al = AlternateLocation.create(TestFile.hash());
         assertTrue( u1Alt.contains(al) );
@@ -1669,8 +1669,8 @@ public class DownloadTest extends BaseTestCase {
         //both uploaders should know that this downloader is an alt loc.
         u1Alt = uploader1.incomingGoodAltLocs;
         u2Alt = uploader2.incomingGoodAltLocs;
-        assertNotNull(u1Alt);
-        assertNotNull(u2Alt);
+        assertTrue(u1Alt.isEmpty());
+        assertTrue(u2Alt.isEmpty());
 
         AlternateLocation al = AlternateLocation.create(TestFile.hash());
         assertFalse( u1Alt.contains(al) );

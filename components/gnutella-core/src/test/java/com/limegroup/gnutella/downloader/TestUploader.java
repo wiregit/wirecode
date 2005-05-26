@@ -319,6 +319,8 @@ public class TestUploader extends AssertComparisons {
         queueOnThex = false;
         useBadThexResponseHeader = false;
         _httpListener = null;
+        incomingBadAltLocs = new ArrayList();
+        incomingGoodAltLocs = new ArrayList();
     }
 
     public int fullRequestsUploaded() {
@@ -990,9 +992,9 @@ public class TestUploader extends AssertComparisons {
 				    AlternateLocation.create(st.nextToken().trim(), _sha1);
 				if(al instanceof PushAltLoc)
 				    ((PushAltLoc)al).updateProxies(good);
-                if (good)
+                if (good) 
                     incomingGoodAltLocs.add(al);
-                else
+                else 
                     incomingBadAltLocs.add(al);
 			} catch(IOException e) {
 				// just return without adding it.
