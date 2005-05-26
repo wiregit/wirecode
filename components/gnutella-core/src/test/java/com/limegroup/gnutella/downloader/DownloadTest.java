@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,6 +48,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -405,7 +408,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc [] rfds = {rfd};
         TestUploader uploader = new TestUploader("push uploader");
-        PushAcceptor p = new PushAcceptor(PPORT_1,RouterService.getPort(),
+        UDPAcceptor p = new UDPAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
@@ -458,8 +461,8 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
-        PushAcceptor pa = 
-            new PushAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
+        UDPAcceptor pa = 
+            new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
         
@@ -584,12 +587,12 @@ public class DownloadTest extends BaseTestCase {
         TestUploader second = new TestUploader("second pusher");
         TestUploader third = new TestUploader("third pusher");
         
-        PushAcceptor pa1 = 
-            new PushAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
-        PushAcceptor pa2 = 
-            new PushAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
-        PushAcceptor pa3 = 
-            new PushAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
+        UDPAcceptor pa1 = 
+            new UDPAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
+        UDPAcceptor pa2 = 
+            new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
+        UDPAcceptor pa3 = 
+            new UDPAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
         
         
         uploader1.setRate(RATE);
@@ -1064,18 +1067,18 @@ public class DownloadTest extends BaseTestCase {
 
         //Prepare to check the alternate locations
         //Note: adiff should be blank
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
+        List alt1 = uploader1.incomingGoodAltLocs;
+        List alt2 = uploader2.incomingGoodAltLocs;
 
         AlternateLocation al1 = AlternateLocation.create(rfd1);
         AlternateLocation al2 = AlternateLocation.create(rfd2);
         
-        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
-        assertTrue("uploader didn't recieve alt", alt2.hasAlternateLocations());
+        assertTrue("uploader didn't recieve alt", !alt1.isEmpty());
+        assertTrue("uploader didn't recieve alt", !alt2.isEmpty());
         assertTrue("uploader got wrong alt", !alt1.contains(al1));
-        assertEquals("incorrect number of locs ",1,alt1.getAltLocsSize());
+        assertEquals("incorrect number of locs ",1,alt1.size());
         assertTrue("uploader got wrong alt", !alt2.contains(al2));
-        assertEquals("incorrect number of locs ",1,alt2.getAltLocsSize());
+        assertEquals("incorrect number of locs ",1,alt2.size());
     }
 
     public void testUploaderAlternateLocations() throws Exception {  
@@ -1148,7 +1151,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc []rfds = {rfd};
         
-        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),pusher,guid);
         
         tGeneric(rfds);
@@ -1187,10 +1190,10 @@ public class DownloadTest extends BaseTestCase {
         
         first.setAlternateLocations(alCol);
         
-        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),first,guid);
         
-        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+        UDPAcceptor pa2 = new UDPAcceptor(PPORT_2,RouterService.getPort(),
                 savedFile.getName(),second,guid2);
         
         RemoteFileDesc []rfd ={newRFDPush(PPORT_1,2)};
@@ -1201,10 +1204,10 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("first pusher did no work",100000,first.fullRequestsUploaded());
         assertGreaterThan("second pusher did no work",100000,second.fullRequestsUploaded());
         
-        assertEquals(1,second.getAlternateLocations().getAltLocsSize());
+        assertEquals(1,second.incomingGoodAltLocs.size());
         
         assertTrue("interested uploader didn't get first loc",
-                second.getAlternateLocations().contains(firstLoc));
+                second.incomingGoodAltLocs.contains(firstLoc));
         
         
     }
@@ -1248,7 +1251,7 @@ public class DownloadTest extends BaseTestCase {
         later.add(openRFD1);
         later.add(openRFD2);
         
-        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),pusher,guid);
 
         
@@ -1268,15 +1271,15 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("pusher did no work",100*1024,pusher.getAmountUploaded());
         
         
-        AlternateLocationCollection alc = uploader1.getAlternateLocations();
+        List alc = uploader1.incomingGoodAltLocs;
         assertTrue("interested uploader did not get pushloc",alc.contains(pushLoc));
         
         
-        alc=uploader2.getAlternateLocations();
+        alc=uploader2.incomingGoodAltLocs;
         assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
         
         
-        alc=pusher.getAlternateLocations();
+        alc=pusher.incomingGoodAltLocs;
         assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
         
 
@@ -1321,7 +1324,7 @@ public class DownloadTest extends BaseTestCase {
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
         
-        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+        UDPAcceptor pa2 = new UDPAcceptor(PPORT_2,RouterService.getPort(),
                 savedFile.getName(),pusher2,guid);
         
         RemoteFileDesc [] now = {pushRFD2};
@@ -1329,8 +1332,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(now,later);
         
-        AlternateLocationCollection alc = uploader1.getAlternateLocations();
-        assertEquals(1,alc.getAltLocsSize());
+        List alc = uploader1.incomingGoodAltLocs;
+        assertEquals(1,alc.size());
         
         PushAltLoc pushLoc = (PushAltLoc)alc.iterator().next();
         
@@ -1386,16 +1389,13 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("u2 did no work",100*1024,uploader2.fullRequestsUploaded());
         
         assertFalse("bad pushloc got advertised",
-                uploader2.getAlternateLocations().contains(badPushLoc));
+                uploader2.incomingGoodAltLocs.contains(badPushLoc));
         
-        AlternateLocationCollection newAlc = uploader1.getAlternateLocations();
-        assertEquals(2,newAlc.getAltLocsSize());
+        assertEquals(1,uploader1.incomingGoodAltLocs.size());
+        assertTrue(uploader1.incomingGoodAltLocs.contains(AlternateLocation.create(rfd2)));
         
-        Iterator it = newAlc.iterator();
-        AlternateLocation current = (AlternateLocation) it.next();
-        
-        if(! (current instanceof PushAltLoc))
-            current = (AlternateLocation)it.next();
+        assertEquals(1,uploader1.incomingBadAltLocs.size());
+        AlternateLocation current = (AlternateLocation)uploader1.incomingBadAltLocs.get(0);
         
         assertTrue(current instanceof PushAltLoc);
         PushAltLoc pcurrent = (PushAltLoc)current;
@@ -1445,9 +1445,9 @@ public class DownloadTest extends BaseTestCase {
         //Now let's check that the uploaders got the correct AltLocs.
         //Uploader 1: Must have al3. al2 may either be demoted or removed
         //Uploader 1 got correct Alts?
-        AlternateLocationCollection alts = uploader1.getAlternateLocations();
+        List alts = uploader1.incomingGoodAltLocs;
         assertTrue(alts.contains(al3));
-        assertEquals("Extra alts in u1",1,alts.getAltLocsSize());
+        assertEquals("Extra alts in u1",1,alts.size());
         Iterator iter = alts.iterator();
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
@@ -1455,7 +1455,7 @@ public class DownloadTest extends BaseTestCase {
                 assertTrue("failed loc not demoted",loc.isDemoted());
         }
 
-        alts = uploader3.getAlternateLocations();
+        alts = uploader3.incomingGoodAltLocs;
         assertTrue(alts.contains(al1));
         iter = alts.iterator();
         while(iter.hasNext()) {
@@ -1498,11 +1498,11 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
         
         //Check to check the alternate locations
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+        List alt1 = uploader1.incomingGoodAltLocs;
 
         AlternateLocation agood = AlternateLocation.create(rfd1);
 
-        assertEquals("uploader got bad alt locs",0,alt1.getAltLocsSize());
+        assertEquals("uploader got bad alt locs",0,alt1.size());
         AlternateLocationCollection coll = (AlternateLocationCollection)
         PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
         assertTrue(coll.contains(agood));
@@ -1577,8 +1577,8 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
         
-        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
-        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+        List u1Alt = uploader1.incomingGoodAltLocs;
+        List u2Alt = uploader2.incomingGoodAltLocs;
                     
         // neither uploader knows any alt locs.
         assertNull(u1Alt);
@@ -1608,8 +1608,8 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
         
         //both uploaders should know that this downloader is an alt loc.
-        u1Alt = uploader1.getAlternateLocations();
-        u2Alt = uploader2.getAlternateLocations();
+        u1Alt = uploader1.incomingGoodAltLocs;
+        u2Alt = uploader2.incomingGoodAltLocs;
         assertNotNull(u1Alt);
         assertNotNull(u2Alt);
 
@@ -1638,8 +1638,8 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
         
-        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
-        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+        List u1Alt = uploader1.incomingGoodAltLocs;
+        List u2Alt = uploader2.incomingGoodAltLocs;
                     
         // neither uploader knows any alt locs.
         assertNull(u1Alt);
@@ -1667,8 +1667,8 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
         
         //both uploaders should know that this downloader is an alt loc.
-        u1Alt = uploader1.getAlternateLocations();
-        u2Alt = uploader2.getAlternateLocations();
+        u1Alt = uploader1.incomingGoodAltLocs;
+        u2Alt = uploader2.incomingGoodAltLocs;
         assertNotNull(u1Alt);
         assertNotNull(u2Alt);
 
@@ -2239,7 +2239,35 @@ public class DownloadTest extends BaseTestCase {
                      Downloader.WAITING_FOR_RETRY, downloader.getState());
     }
         
-
+    /**
+     * tests that when we receive a headpong claiming that it doesn't have the file,
+     * we send out an NAlt for that source
+     */
+    public void testHeadPongNAlts() throws Exception {
+        // make sure we can receive solicited
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming", 
+                Boolean.TRUE);
+        assertTrue(RouterService.canReceiveSolicited());
+        assertTrue(SourceRanker.getAppropriateRanker() instanceof PingRanker);
+        
+       // create one source that will actually download and another one to which a headping should be sent 
+       RemoteFileDesc rfd = newRFDWithURN(PORT_1,100);
+       RemoteFileDesc noFile = newRFDWithURN(10000,100);
+       
+       // let the first guy know about the second guy
+       AlternateLocation toBeDemoted = AlternateLocation.create(noFile);
+       AlternateLocationCollection col = AlternateLocationCollection.create(TestFile.hash());
+       col.add(toBeDemoted);
+       uploader1.setAlternateLocations(col);
+       
+       // create a listener for the headping
+       UDPAcceptor l = new UDPAcceptor(10000);
+       
+       tGeneric(new RemoteFileDesc[]{rfd},new RemoteFileDesc[]{noFile});
+       
+       // the first downloader should have received an NAlt
+       assertTrue(uploader1.incomingBadAltLocs.contains(toBeDemoted));
+    }
 
     /*
     private static void tGUI() {
@@ -2518,15 +2546,28 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
-    private static class PushAcceptor extends Thread{
-        private final int _portC;
+    private static class UDPAcceptor extends Thread{
+        private int _portC;
         private DatagramSocket sock;
-        private final String _fileName;
-        private final TestUploader _uploader;
-        private final GUID _g;
+        private String _fileName;
+        private TestUploader _uploader;
+        private GUID _g;
         public boolean sentGIV;
+        private boolean noFile;
         
-        public PushAcceptor(int portL,int portC,String filename,TestUploader uploader,GUID g) {
+        public UDPAcceptor(int port) {
+            noFile = true;
+            try {
+                sock = new DatagramSocket(port);
+                //sock.connect(InetAddress.getLocalHost(),portC);
+                sock.setSoTimeout(15000);
+            }catch(IOException bad) {
+                ErrorService.error(bad);
+            }
+            start();
+        }
+        
+        public UDPAcceptor(int portL,int portC,String filename,TestUploader uploader,GUID g) {
             super("push acceptor "+portL+"->"+portC);
             
             _portC=portC;
@@ -2552,8 +2593,14 @@ public class DownloadTest extends BaseTestCase {
                     sock.receive(p);
                     ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
                     m = Message.read(bais);
-                    if (m instanceof HeadPing)
-                        continue;
+                    if (m instanceof HeadPing) {
+                        if (noFile) {
+                            handleNoFile(p.getSocketAddress());
+                            return;
+                        }
+                        else
+                            continue;
+                    }
                     else
                         break;
                 }
@@ -2582,8 +2629,23 @@ public class DownloadTest extends BaseTestCase {
             }finally {
                 sock.close();
             }
+        }
+        
+        private void handleNoFile(SocketAddress from) {
+            HeadPing ping = new HeadPing(HugeTestUtils.SHA1);
+            HeadPong pong = new HeadPong(ping);
+            assertFalse(pong.hasFile());
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                pong.write(baos);
+                DatagramPacket pack = 
+                    new DatagramPacket(baos.toByteArray(),baos.toByteArray().length,from);
+                sock.send(pack);
+            } catch (Exception e) {
+                fail(e);
+            }
             
-
+            LOG.debug("sent a NoFile headPong to "+from);
         }
     }
 }

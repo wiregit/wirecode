@@ -9,8 +9,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -72,7 +74,7 @@ public class TestUploader extends AssertComparisons {
     private int corruptBoundary;
 
 	private AlternateLocationCollection storedAltLocs;
-	private AlternateLocationCollection incomingAltLocs;
+	public List incomingGoodAltLocs, incomingBadAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
@@ -286,7 +288,7 @@ public class TestUploader extends AssertComparisons {
      */
     public void reset() {
 	    storedAltLocs   = null;//new AlternateLocationCollection();
-	    incomingAltLocs = null;//new AlternateLocationCollection();
+	    incomingGoodAltLocs = null;//new AlternateLocationCollection();
         totalUploaded = 0;
         stopAfter = -1;
         rate = 10000;
@@ -500,13 +502,6 @@ public class TestUploader extends AssertComparisons {
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
-    public AlternateLocationCollection getAlternateLocations() {
-        return incomingAltLocs;
-    }
-    
-    /** 
-     * Get the alternate locations that this uploader has read from headers
-     */
     public URN getReportedSHA1() {
         return _sha1;
     }
@@ -599,9 +594,8 @@ public class TestUploader extends AssertComparisons {
         start = 0;
         stop = TestFile.length();
         boolean firstLine=true;
-        AlternateLocationCollection badLocs = null;
-        AlternateLocationCollection goodLocs = null;
         boolean thexReq = false;
+        
         while (true) {
             String line=input.readLine();LOG.debug("read "+line);
             if (firstLine) {
@@ -622,10 +616,10 @@ public class TestUploader extends AssertComparisons {
             
             if(HTTPHeaderName.NALTS.matchesStartOfString(line) ||
                     HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(line))
-                badLocs=readAlternateLocations(line,false);
+                readAlternateLocations(line,false);
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line) ||
 			        HTTPHeaderName.FALT_LOCATION.matchesStartOfString(line))
-			    goodLocs=readAlternateLocations(line,true);
+			    readAlternateLocations(line,true);
 			    
 
             int i=line.indexOf("Range:");
@@ -650,26 +644,6 @@ public class TestUploader extends AssertComparisons {
                 thexWasRequested |= thexReq;
             }
 		}
-        if(_sha1!=null) {
-            if(incomingAltLocs == null)
-                incomingAltLocs = AlternateLocationCollection.create(_sha1);
-            if(badLocs!=null) {
-                synchronized(badLocs) {
-                    Iterator iter = badLocs.iterator();
-                    while(iter.hasNext()) 
-                        incomingAltLocs.remove((AlternateLocation)iter.next());
-                }
-            }
-            if(goodLocs!=null) {
-                synchronized(goodLocs) {
-                    Iterator iter = goodLocs.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation altloc = (AlternateLocation)iter.next();
-                        incomingAltLocs.add(altloc);
-                    }
-                }        
-            }
-        }
 
         if(thexReq && queueOnThex) {
             queueOnThex = false;
@@ -998,18 +972,15 @@ public class TestUploader extends AssertComparisons {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private AlternateLocationCollection readAlternateLocations
-                                                     (final String altHeader,boolean good) {
-        AlternateLocationCollection alc=null;
+	private void readAlternateLocations (final String altHeader,boolean good) {
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-		
+        
 		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return null;
+		if(alternateLocations == null) 
+            return;
+        
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        if(_sha1!=null)
-            alc = AlternateLocationCollection.create(_sha1);
-        if (alc==null)
-            return null;
+        
 		while(st.hasMoreTokens()) {
 			try {
 				// note that the trim method removes any CRLF character
@@ -1019,14 +990,15 @@ public class TestUploader extends AssertComparisons {
 				    AlternateLocation.create(st.nextToken().trim(), _sha1);
 				if(al instanceof PushAltLoc)
 				    ((PushAltLoc)al).updateProxies(good);
-				if (good)
-				    alc.add(al);
+                if (good)
+                    incomingGoodAltLocs.add(al);
+                else
+                    incomingBadAltLocs.add(al);
 			} catch(IOException e) {
 				// just return without adding it.
 				continue;
 			}
 		}
-        return alc;
 	}
 
 	/**
