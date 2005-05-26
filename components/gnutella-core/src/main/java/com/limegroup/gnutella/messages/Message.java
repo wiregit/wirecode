@@ -364,6 +364,18 @@ public abstract class Message implements Serializable, Comparable {
     }
     
     /**
+     * Writes a message quickly, without using temporary buffers or crap.
+     */
+    public void writeQuickly(OutputStream out) throws IOException {
+        out.write(guid, 0, 16);
+        out.write(func);
+        out.write(ttl);
+        out.write(hops);
+        ByteOrder.int2leb(length, out);
+        writePayload(out);
+    }
+    
+    /**
      * Writes a message out, using the buffer as the temporary header.
      */
     public void write(OutputStream out, byte[] buf) throws IOException {

@@ -1217,7 +1217,6 @@ public class ConnectionManager {
 	        // connection to its list.  otherwise, messages may
 	        // attempt to be sent to the connection before it has
 	        // set up its output queues.
-            c.buildAndStartQueues();
 
             //update the appropriate list of connections
             if(!c.isSupernodeClientConnection()){

@@ -138,6 +138,12 @@ public class QueryRequest extends Message implements Serializable{
      * only certain types.
      */
     private Integer _metaMask = null;
+    
+    /**
+     * If we're re-originated this query for a leaf.  This can be set/read
+     * after creation.
+     */
+    private boolean originated = false;
 
 	/**
 	 * Cached hash code for this instance.
@@ -1677,6 +1683,16 @@ public class QueryRequest extends Message implements Serializable{
     /** Returns this, because it's always safe to send big queries. */
     public Message stripExtendedPayload() {
         return this;
+    }
+    
+    /** Marks this as being an re-originated query. */
+    public void originate() {
+        originated = true;
+    }
+    
+    /** Determines if this is an originated query */
+    public boolean isOriginated() {
+        return originated;
     }
 
 	public int hashCode() {

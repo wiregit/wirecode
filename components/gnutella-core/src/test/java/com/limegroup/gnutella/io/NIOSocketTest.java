@@ -12,6 +12,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.*;
 
 /**
  * Tests that NIOSocket delegates events correctly.
@@ -62,7 +63,7 @@ public final class NIOSocketTest extends BaseTestCase {
 	    // End internal implementation test.
 	    
 	    
-	    Tester reader = new Tester();
+	    ReadTester reader = new ReadTester();
 	    socket.setReadObserver(reader);
 	    Thread.sleep(1000); // let the NIO thread pump since setReadObserver is invokedLater
 	    ByteBuffer remaining = reader.getRead();
@@ -97,9 +98,6 @@ public final class NIOSocketTest extends BaseTestCase {
         assertSame(chain2, chain1.getReadChannel());
         assertSame(chain1, entry.getReadChannel());
     }
-        
-        
-        
     
     private static class Listener {
         
@@ -151,7 +149,49 @@ public final class NIOSocketTest extends BaseTestCase {
         }
     }
     
-    private static class Tester implements ChannelReadObserver {
+    private static class WriteTester implements ChannelWriter {
+        private ByteBuffer buffer;
+        private InterestWriteChannel channel;
+
+        public WriteTester(ByteBuffer buffer, InterestWriteChannel channel) {
+            this.buffer = buffer;
+            this.channel = channel;
+            if(channel != null)
+                channel.interest(this, true);
+        }
+        
+        public WriteTester(byte[] data, InterestWriteChannel channel) {
+            this(ByteBuffer.wrap(data), channel);
+        }
+        
+        public WriteTester(byte[] data, int off, int len, InterestWriteChannel channel) {
+            this(ByteBuffer.wrap(data, off, len), channel);
+        }
+        
+        public WriteTester() {
+            this(ByteBuffer.allocate(0), null);
+        }
+        
+        public synchronized InterestWriteChannel getWriteChannel() { return channel; }
+        
+        public synchronized void setWriteChannel(InterestWriteChannel channel) {
+            this.channel = channel;
+            channel.interest(this, true);
+        }
+            
+        public boolean handleWrite() throws IOException {
+            while(buffer.hasRemaining() && channel.write(buffer) > 0);
+            return buffer.hasRemaining();
+        }
+        
+        public void shutdown() {}
+        
+        public void handleIOException(IOException iox) {
+            throw (RuntimeException)new UnsupportedOperationException("not implemented").initCause(iox);
+        }
+    }
+    
+    private static class ReadTester implements ChannelReadObserver {
         
         private ReadableByteChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);

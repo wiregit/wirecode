@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -15,6 +16,11 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.Throttle;
+import com.limegroup.gnutella.io.NBThrottle;
+import com.limegroup.gnutella.io.ThrottleWriter;
+import com.limegroup.gnutella.io.DelayedBufferWriter;
+import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.*;
@@ -72,7 +78,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver {
+	implements ReplyHandler, MessageReceiver, SentMessageHandler {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -129,116 +135,29 @@ public class ManagedConnection extends Connection
 
     /** A lock for QRP activity on this connection */
     private final Object QRP_LOCK=new Object();
-    /** A lock to protect _outputQueue. */
-    private Object _outputQueueLock=new Object();
-    /** The producer's queues, one priority per mesage type. 
-     *  INVARIANT: _outputQueue.length==PRIORITIES
-     *  LOCKING: obtain _outputQueueLock. */
-    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];
-    /** The number of queued messages.  Maintained for performance.
-     *  INVARIANT: _queued==sum of _outputQueue[i].size() 
-     *  LOCKING: obtain _outputQueueLock */
-    private int _queued=0;
-    /** True if the OutputRunner died.  For testing only. */
-    private boolean _runnerDied=false;
-    /** The priority of the last message added to _outputQueue. This is an
-     *  optimization to keep OutputRunner from iterating through all priorities.
-     *  This value is only a hint and can be legally set to any priority.  Hence
-     *  no locking is necessary.  Package-access for testing purposes only. */
-    int _lastPriority=0;
-    /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. This queue is 
-     *  slightly larger than the standard to accomodate higher priority 
-     *  messages, such as queries and query hits. */
-    private static final int BIG_QUEUE_SIZE = 100;
-
-    /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. This queue is
-     *  slightly smaller so that we don't waste too much memory on lower
-     *  priority messages. */
-    private static final int QUEUE_SIZE = 1;
-    /** The max time to keep reply messages and pushes in the queues, in
-     *  milliseconds. */
-    private static int BIG_QUEUE_TIME=10*1000;
-    /** The max time to keep queries, pings, and pongs in the queues, in
-     *  milliseconds.  Package-access for testing purposes only! */
-    static int QUEUE_TIME=5*1000;
-    /** The number of different priority levels. */
-    private static final int PRIORITIES = 8;
-    /** Names for each priority. "Other" includes QRP messages and is NOT
-     * reordered.  These numbers do NOT translate directly to priorities;
-     * that's determined by the cycle fields passed to MessageQueue. */
-    private static final int PRIORITY_WATCHDOG=0;
-    private static final int PRIORITY_PUSH=1;
-    private static final int PRIORITY_QUERY_REPLY=2;
-    private static final int PRIORITY_QUERY=3; //TODO: add requeries
-    private static final int PRIORITY_PING_REPLY=4;
-    private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;    
     
-    /**
-     * Separate priority for queries that we originate.  These are very
-     * high priority because we don't want to drop queries that are
-     * originating from us -- we want to largely bypass the message
-     * queues when we are first sending a query out on the network.
-     */
-    private static final int PRIORITY_OUR_QUERY=7;
+    /** Non-blocking throttle for outgoing messages. */
+    private final static Throttle _nbThrottle = new NBThrottle(true,
+                                                       TOTAL_OUTGOING_MESSAGING_BANDWIDTH,
+                                                       ConnectionSettings.NUM_CONNECTIONS.getValue(),
+                                                       CompositeQueue.QUEUE_TIME);
                                                             
-    /** Limits outgoing bandwidth for ALL connections. */
+    /** Blocking throttle for outgoing messages. */
     private final static BandwidthThrottle _throttle=
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
-
-
-    /**
-     * The amount of time to wait for a handshake ping in reject connections, in
-     * milliseconds.     
-     */
-    private static final int REJECT_TIMEOUT=500;  //0.5 sec
-
-
-    /**
-     * The number of messages received.  This messages that are eventually
-     * dropped.  This stat is synchronized by _outputQueueLock;
-     */
-    private int _numMessagesSent;
-    /**
-     * The number of messages received.  This includes messages that are
-     * eventually dropped.  This stat is not synchronized because receiving
-     * is not thread-safe; callers are expected to make sure only one thread
-     * at a time is calling receive on a given connection.
-     */
-    private int _numMessagesReceived;
-    /**
-     * The number of messages received on this connection either filtered out
-     * or dropped because we didn't know how to route them.
-     */
-    private int _numReceivedMessagesDropped;
-    /**
-     * The number of messages I dropped because the
-     * output queue overflowed.  This happens when the remote host
-     * cannot receive packets as quickly as I am trying to send them.
-     * No synchronization is necessary.
-     */
-    private int _numSentMessagesDropped;
+        
+    
+    /** The OutputRunner */
+    private OutputRunner _outputRunner;
+    
+    /** Keeps track of sent/received [dropped] & bandwidth. */
+    private final ConnectionStats _connectionStats = new ConnectionStats();
     
     /**
      * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
      * busy" for the purposes of QRT updates.
      */
     private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
-
-
-    /**
-     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
-     * of _numMessagesSent/_numSentMessagesDropped and
-     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
-     * getPercentDropped.  LOCKING: These are synchronized by this;
-     * finer-grained schemes could be used. 
-     */
-    private int _lastReceived;
-    private int _lastRecvDropped;
-    private int _lastSent;
-    private int _lastSentDropped;
 
     /** The next time I should send a query route table to this connection.
 	 */
@@ -340,15 +259,6 @@ public class ManagedConnection extends Connection
     }
 
 	/**
-	 * More customizable constructor used for testing.
-	 */
-	static ManagedConnection 
-        createTestConnection(String host, int port, 
-		  Properties props, HandshakeResponder responder) {	
-		return new ManagedConnection(host, port, props, responder);
-	}
-
-	/**
 	 * Creates a new <tt>ManagedConnection</tt> with the specified 
 	 * handshake classes and the specified host and port.
 	 */
@@ -384,10 +294,12 @@ public class ManagedConnection extends Connection
         //Establish the socket (if needed), handshake.
 		super.initialize(CONNECT_TIMEOUT);
 
+        // Start our OutputRunner.
+        startOutput();
+
         UpdateManager updater = UpdateManager.instance();
         updater.checkAndUpdate(this);
     }
-
 
     /**
      * Resets the query route table for this connection.  The new table
@@ -552,6 +464,36 @@ public class ManagedConnection extends Connection
         return _lastQRPTableReceived == null ?
             -1 : _lastQRPTableReceived.getUnitsInUse();
     }
+    
+    /**
+     * Creates a deflated output stream.
+     *
+     * If the connection supports asynchronous messaging, this does nothing,
+     * because we already installed an asynchronous writer that doesn't
+     * use streams.
+     */
+    protected OutputStream createDeflatedOutputStream(OutputStream out) {
+        if(isAsynchronous())
+            return out;
+        else
+            return super.createDeflatedOutputStream(out);
+    }
+    
+    /**
+     * Creates the deflated input stream.
+     *
+     * If the connection supports asynchronous messaging, this does nothing,
+     * because we're going to install a reader when we start looping for
+     * messages.  Note, however, that if we use the 'receive' calls
+     * instead of loopForMessages, an UncompressingInputStream is going to
+     * be set up automatically.
+     */
+    protected InputStream createInflatedInputStream(InputStream in) {
+        if(isAsynchronous())
+            return in;
+        else
+            return super.createInflatedInputStream(in);
+    }
 
     /**
      * Throttles the super's OutputStream.  This works quite well with
@@ -578,7 +520,7 @@ public class ManagedConnection extends Connection
             throw e;
         }
         // record received message in stats
-        addReceived();
+        _connectionStats.addReceived();
         return m;
     }
 
@@ -603,12 +545,45 @@ public class ManagedConnection extends Connection
         }
         
         // record received message in stats
-        addReceived();
+        _connectionStats.addReceived();
         return m;
     }
 
 
     ////////////////////// Sending, Outgoing Flow Control //////////////////////
+    
+    /**
+     * Starts an OutputRunner.  If the Connection supports asynchronous writing,
+     * this does not use an extra thread.  Otherwise, a thread is started up
+     * to write.
+     */
+    private void startOutput() {
+        MessageQueue queue;
+		if(isSupernodeSupernodeConnection())
+		    queue = new CompositeQueue();
+		else
+		    queue = new BasicQueue();
+
+		if(isAsynchronous()) {
+		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
+		    _outputRunner = messager;
+		    ChannelWriter writer = messager;
+		    
+		    if(isWriteDeflated()) {
+		        DeflaterWriter deflater = new DeflaterWriter(_deflater);
+		        messager.setWriteChannel(deflater);
+                writer = deflater;
+            }
+            DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
+            writer.setWriteChannel(delayer);
+            writer = delayer;
+            writer.setWriteChannel(new ThrottleWriter(_nbThrottle));
+		    
+		    ((NIOMultiplexor)_socket).setWriteObserver(messager);
+		} else {
+		    _outputRunner = new BlockingRunner(queue);
+        }
+    }
 
     /**
      * Sends a message.  This overrides does extra buffering so that Messages
@@ -621,11 +596,18 @@ public class ManagedConnection extends Connection
      *
      * @requires this is fully constructed
      * @modifies the network underlying this
-     * @effects send m on the network.  Throws IOException if the connection
-     *  is already closed.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) {
-        send(m, calculatePriority(m));
+        if (! supportsGGEP())
+            m=m.stripExtendedPayload();
+
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time...
+    	int smh = hopsFlowMax;
+        if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
+            return;
+            
+        _outputRunner.send(m);
     }
 
     /**
@@ -637,89 +619,10 @@ public class ManagedConnection extends Connection
      * @param query the <tt>QueryRequest</tt> to send
      */
     public void originateQuery(QueryRequest query) {
-        send(query, PRIORITY_OUR_QUERY);
-    }
-
-    /**
-     * Sends the message with the specified, pre-calculated priority.
-     *
-     * @param m the <tt>Message</tt> to send
-     * @param priority the priority to send the message with
-     */
-    private void send(Message m, int priority) {
-        if (! supportsGGEP())
-            m=m.stripExtendedPayload();
-
-        // if Hops Flow is in effect, and this is a QueryRequest, and the
-        // hoppage is too biggage, discardage time...
-    	int smh = hopsFlowMax;
-        if ((smh > -1) &&
-            (m instanceof QueryRequest) &&
-            (m.getHops() >= smh))
-            return;
-
-        repOk();
-        Assert.that(_outputQueue!=null, "Connection not initialized");
-        synchronized (_outputQueueLock) {
-            _numMessagesSent++;
-            _outputQueue[priority].add(m);
-            int dropped=_outputQueue[priority].resetDropped();
-            addSentDropped(dropped);
-            _queued+=1-dropped;
-            _lastPriority=priority;
-            _outputQueueLock.notify();
-        }
-        repOk();        
-    }
-
-    /**
-     * Utility method for adding dropped message data.
-     * 
-     * @param dropped the number of dropped messages to add
-     */
-    private void addSentDropped(int dropped) {
-        _numSentMessagesDropped += dropped;
-    }
-    
-    /**
-     * Increments the number of received messages that have been dropped.
-     */
-    public void addReceivedDropped() {
-        _numReceivedMessagesDropped++;   
-    }
-    
-    /**
-     * Increments the stat for the number of messages received.
-     */
-    public void addReceived() {
-        _numMessagesReceived++;
+        query.originate();
+        send(query);
     }
  
-    /** 
-     * Returns the send priority for the given message, with higher number for
-     * higher priorities.  TODO: this method will eventually be moved to
-     * MessageRouter and account for number of reply bytes.
-     */
-    private int calculatePriority(Message m) {
-        byte opcode=m.getFunc();
-        switch (opcode) {
-            case Message.F_QUERY:
-                return PRIORITY_QUERY;
-            case Message.F_QUERY_REPLY: 
-                return PRIORITY_QUERY_REPLY;
-            case Message.F_PING_REPLY: 
-                return (m.getHops()==0 && m.getTTL()<=2) ? 
-                    PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
-            case Message.F_PING: 
-                return (m.getHops()==0 && m.getTTL()==1) ? 
-                    PRIORITY_WATCHDOG : PRIORITY_PING;
-            case Message.F_PUSH: 
-                return PRIORITY_PUSH;                
-            default: 
-                return PRIORITY_OTHER;  //includes QRP Tables
-        }
-    }
-
     /**
      * Does nothing.  Since this automatically takes care of flushing output
      * buffers, there is nothing to do.  Note that flush() does NOT block for
@@ -727,195 +630,12 @@ public class ManagedConnection extends Connection
      */
     public void flush() throws IOException {        
     }
-    
-    /**
-     * Builds queues and starts the OutputRunner.  This is intentionally not
-     * in initialize(), as we do not want to create the queues and start
-     * the OutputRunner for reject connections.
-     */
-    public void buildAndStartQueues() {
-        //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
-        //save a fair bit of memory by not using buffering at all.  But this
-        //requires the CompositeMessageQueue class from nio-branch.
-        _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                true);
-        _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY_REPLY]
-            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_QUERY]      
-            = new PriorityMessageQueue(3, QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING_REPLY] 
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_PING]       
-            = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-        _outputQueue[PRIORITY_OUR_QUERY]
-            = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
-        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
-                false);
-        
-        //Start the thread to empty the output queue
-        startOutputRunner();
-    }
-    
-    /**
-     * Creates and starts an OutputRunner.
-     * Exists as a hook for tests.
-     */
-    protected void startOutputRunner() {
-        new OutputRunner();
-    }    
-
-    /** Repeatedly sends all the queued data. */
-    private class OutputRunner extends ManagedThread {
-        
-        /** how long to wait before forcing a flush */
-        private final long FLUSH_DELAY;
-        /** the next time we def. need to flush */
-        private long _nextFlushTime = -1;
-        
-        public OutputRunner() {
-            long timeToWait = ConnectionSettings.FLUSH_DELAY_TIME.getValue();
-            if(timeToWait > 0 && isSupernodeSupernodeConnection())
-                FLUSH_DELAY = timeToWait;
-            else
-                FLUSH_DELAY = 0;
-
-            setName("OutputRunner");
-            setDaemon(true);
-            start();
-        }
-
-        /** While the connection is not closed, sends all data delay. */
-        public void managedRun() {
-            //Exceptions are only caught to set the _runnerDied variable
-            //to make testing easier.  For non-IOExceptions, Throwable
-            //is caught to notify ErrorService.
-            try {
-                while (true) {
-                    repOk();
-                    waitForQueued();
-                    sendQueued();
-                    repOk();
-                }                
-            } catch (IOException e) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
-                _runnerDied=true;
-            } catch(Throwable t) {
-                if(_manager != null)
-                    _manager.remove(ManagedConnection.this);
-                _runnerDied=true;
-                ErrorService.error(t);
-            }
-        }
-
-        /** 
-         * Wait until the queue is (probably) non-empty or closed. 
-         * @exception IOException this was closed while waiting
-         */
-        private final void waitForQueued() throws IOException {
-            //The synchronized statement is outside the while loop to
-            //protect _queued.
-            synchronized (_outputQueueLock) {
-                while (isOpen() && _queued==0) {           
-                    try {
-                        _outputQueueLock.wait(FLUSH_DELAY); // this works even if FLUSH_DELAY == 0
-                    } catch (InterruptedException e) {
-                        Assert.that(false, "OutputRunner Interrupted");
-                    }
-                }
-            }
-            
-            if (! isOpen())
-                throw CONNECTION_CLOSED;
-        }
-        
-        /** Send several queued message of each type. */
-        private final void sendQueued() throws IOException {  
-            //1. For each priority i send as many messages as desired for that
-            //type.  As an optimization, we start with the buffer of the last
-            //message sent, wrapping around the buffer.  You can also search
-            //from 0 to the end.
-            int start=_lastPriority;
-            int i=start;
-            do {                   
-                //IMPORTANT: we only obtain _outputQueueLock while touching the
-                //queue, not while actually sending (which can block).
-                MessageQueue queue=_outputQueue[i];
-                queue.resetCycle();
-                boolean emptied=false;
-                while (true) {
-                    Message m=null;
-                    synchronized (_outputQueueLock) {
-                        m = queue.removeNext();
-                        int dropped=queue.resetDropped();
-                        addSentDropped(dropped);
-                        _queued-=(m==null?0:1)+dropped;  //maintain invariant
-                        if (_queued==0)
-                            emptied=true;                        
-                        if (m==null)
-                            break;
-                    }
-
-                    //Note that if the ougoing stream is compressed
-                    //(isWriteDeflated()), this call may not actually
-                    //do anything.  This is because the Deflater waits
-                    //until an optimal time to start deflating, buffering
-                    //up incoming data until that time is reached, or the
-                    //data is explicitly flushed.
-                    ManagedConnection.super.send(m);
-                }
-                
-                //Optimization: the if statement below is not needed for
-                //correctness but works nicely with the _priorityHint trick.
-                if (emptied)
-                    break;
-                i=(i+1)%PRIORITIES;
-            } while (i!=start);
-            
-            //2. Now force data from Connection's BufferedOutputStream into the
-            //kernel's TCP send buffer.  It doesn't force TCP to
-            //actually send the data to the network.  That is determined
-            //by the receiver's window size and Nagle's algorithm.
-            //Note that if the outgoing stream is compressed 
-            //(isWriteDeflated()), then this call may block while the
-            //Deflater deflates the data.
-            
-            // if we're not delaying flushes, don't do any currentTimeMillis() calls
-            if(FLUSH_DELAY == 0) {
-                ManagedConnection.super.flush();
-            } else if(System.currentTimeMillis() >= _nextFlushTime) {
-                ManagedConnection.super.flush();
-                _nextFlushTime = System.currentTimeMillis() + FLUSH_DELAY;
-            }
-            
-        }
-    } //end OutputRunner
-
-
-    /** 
-     * For debugging only: prints to stdout the number of queued messages in
-     * this, by type.
-     */
-    private void dumpQueueStats() {
-        synchronized (_outputQueueLock) {
-            for (int i=0; i<PRIORITIES; i++) {
-                System.out.println(i+" "+_outputQueue[i].size());
-            }
-            System.out.println("* "+_queued+"\n");
-        }
-    }
-
 
     public void close() {
-        //Ensure OutputRunner terminates.
-        synchronized (_outputQueueLock) {
-            super.close();
-            _outputQueueLock.notify();
-        }
+        if(_outputRunner != null)
+            _outputRunner.shutdown();
+        super.close();
+        
         // release pointer to our _guidMap so it can be gc()'ed
         if (_guidMap != null)
             GuidMapExpirer.removeMap(_guidMap);
@@ -971,10 +691,17 @@ public class ManagedConnection extends Connection
     /**
      * Notification that a message is available to be processed (via asynch-processing).
      */
-    public void processMessage(Message m) {
-        updateStatistics(m);
-        addReceived();
+    public void processReadMessage(Message m) {
+        updateReadStatistics(m);
+        _connectionStats.addReceived();
         handleMessageInternal(m);
+    }
+    
+    /**
+     * Notification that a message has been sent.  Updates stats.
+     */
+    public void processSentMessage(Message m) {
+        updateWriteStatistics(m);
     }
     
     /**
@@ -984,7 +711,7 @@ public class ManagedConnection extends Connection
         // Run through the route spam filter and drop accordingly.
         if (isSpam(m)) {
 			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
-            addReceivedDropped();
+            _connectionStats.addReceivedDropped();
         } else {
         
             //special handling for proxying.
@@ -1100,7 +827,7 @@ public class ManagedConnection extends Connection
      * connection has no routing path.
      */
     public void countDroppedMessage() {
-		_numReceivedMessagesDropped++;
+        _connectionStats.addReceivedDropped();
     }
 
     /**
@@ -1284,19 +1011,19 @@ public class ManagedConnection extends Connection
 
     /** Returns the number of messages sent on this connection */
     public int getNumMessagesSent() {
-        return _numMessagesSent;
+        return _connectionStats.getSent();
     }
 
     /** Returns the number of messages received on this connection */
     public int getNumMessagesReceived() {
-        return _numMessagesReceived;
+        return _connectionStats.getReceived();
     }
 
     /** Returns the number of messages I dropped while trying to send
      *  on this connection.  This happens when the remote host cannot
      *  keep up with me. */
     public int getNumSentMessagesDropped() {
-        return _numSentMessagesDropped;
+        return _connectionStats.getSentDropped();
     }
 
     /**
@@ -1304,7 +1031,7 @@ public class ManagedConnection extends Connection
      * or dropped because we didn't know how to route them.
      */
     public long getNumReceivedMessagesDropped() {
-        return _numReceivedMessagesDropped;
+        return _connectionStats.getReceivedDropped();
     }
 
     /**
@@ -1313,14 +1040,8 @@ public class ManagedConnection extends Connection
      *  since the last call to getPercentReceivedDropped that were
      *  dropped by this end of the connection.
      */
-    public synchronized float getPercentReceivedDropped() {
-        int rdiff = _numMessagesReceived - _lastReceived;
-        int ddiff = _numReceivedMessagesDropped - _lastRecvDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
-
-        _lastReceived = _numMessagesReceived;
-        _lastRecvDropped = _numReceivedMessagesDropped;
-        return percent;
+    public float getPercentReceivedDropped() {
+        return _connectionStats.getPercentReceivedDropped();
     }
 
     /**
@@ -1331,14 +1052,8 @@ public class ManagedConnection extends Connection
      *  greater than 100%, e.g., if only one message is sent but
      *  four are dropped during a given time period.
      */
-    public synchronized float getPercentSentDropped() {
-        int rdiff = _numMessagesSent - _lastSent;
-        int ddiff = _numSentMessagesDropped - _lastSentDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
-
-        _lastSent = _numMessagesSent;
-        _lastSentDropped = _numSentMessagesDropped;
-        return percent;
+    public float getPercentSentDropped() {
+        return _connectionStats.getPercentSentDropped();
     }
 
     /**
@@ -1474,54 +1189,6 @@ public class ManagedConnection extends Connection
     public boolean isPushProxy() {
         return _pushProxy;
     }
-    
-
-    /** 
-     * Tests representation invariants.  For performance reasons, this is
-     * private and final.  Make protected if ManagedConnection is subclassed.
-     */
-    private final void repOk() {
-        /*
-        //Check _queued invariant.
-        synchronized (_outputQueueLock) {
-            int sum=0;
-            for (int i=0; i<_outputQueue.length; i++) 
-                sum+=_outputQueue[i].size();
-            Assert.that(sum==_queued, "Expected "+sum+", got "+_queued);
-        }
-        */
-    }
-
-//	// overrides Object.toString
-//	public String toString() {
-//		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
-//			" Leaf: "+isLeafConnection();
-//	}
-    
-    /***************************************************************************
-     * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
-     **************************************************************************/
-
-    /** FOR TESTING PURPOSES ONLY! */
-    void stopOutputRunner() {
-        //Ensure OutputRunner terminates.
-        synchronized (_outputQueueLock) {
-            super._closed=true;  //doesn't close socket
-            _outputQueueLock.notify();
-        }
-        //Wait for OutputRunner to terminate
-        while (! _runnerDied) { 
-            Thread.yield();
-        }
-        //Make it alive again (except for runner)
-        _runnerDied=false;
-        super._closed=false;
-    }
-
-    /** FOR TESTING PURPOSES ONLY! */
-    boolean runnerDied() {
-        return _runnerDied;
-    }
 
 	public Object getQRPLock() {
 		return QRP_LOCK;
@@ -1539,6 +1206,105 @@ public class ManagedConnection extends Connection
     public void reply(Message m){
     	send(m);
     }
+    
+
+    /** Repeatedly sends all the queued data using a thread. */
+    private class BlockingRunner implements Runnable, OutputRunner {
+        private final Object LOCK = new Object();
+        private final MessageQueue queue;
+        private boolean shutdown = false;
+        
+        public BlockingRunner(MessageQueue queue) {
+            this.queue = queue;
+            Thread output = new ManagedThread(this, "OutputRunner");
+            output.setDaemon(true);
+            output.start();
+        }
+
+        public void send(Message m) {
+            synchronized (LOCK) {
+                _connectionStats.addSent();
+                queue.add(m);
+                int dropped = queue.resetDropped();
+                _connectionStats.addSentDropped(dropped);
+                LOCK.notify();
+            }
+        }
+        
+        public void shutdown() {
+            synchronized(LOCK) {
+                shutdown = true;
+                LOCK.notify();
+            }
+        }
+
+        /** While the connection is not closed, sends all data delay. */
+        public void run() {
+            //For non-IOExceptions, Throwable is caught to notify ErrorService.
+            try {
+                while (true) {
+                    waitForQueued();
+                    sendQueued();
+                }                
+            } catch (IOException e) {
+                if(_manager != null)
+                    _manager.remove(ManagedConnection.this);
+            } catch(Throwable t) {
+                if(_manager != null)
+                    _manager.remove(ManagedConnection.this);
+                ErrorService.error(t);
+            }
+        }
+
+        /** 
+         * Wait until the queue is (probably) non-empty or closed. 
+         * @exception IOException this was closed while waiting
+         */
+        private final void waitForQueued() throws IOException {
+            // Lock outside of the loop so that the MessageQueue is synchronized.
+            synchronized (LOCK) {
+                while (!shutdown && isOpen() && queue.isEmpty()) {           
+                    try {
+                        LOCK.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            
+            if (! isOpen() || shutdown)
+                throw CONNECTION_CLOSED;
+        }
+        
+        /** Send several queued message of each type. */
+        private final void sendQueued() throws IOException {
+            // Send as many messages as we can, until we run out.
+            while(true) {
+                Message m = null;
+                synchronized(LOCK) {
+                    m = queue.removeNext();
+                    int dropped = queue.resetDropped();
+                    _connectionStats.addSentDropped(dropped);
+                }
+                if(m == null)
+                    break;
+
+                //Note that if the ougoing stream is compressed
+                //(isWriteDeflated()), this call may not actually
+                //do anything.  This is because the Deflater waits
+                //until an optimal time to start deflating, buffering
+                //up incoming data until that time is reached, or the
+                //data is explicitly flushed.
+                ManagedConnection.super.send(m);
+            }
+            
+            //Note that if the outgoing stream is compressed 
+            //(isWriteDeflated()), then this call may block while the
+            //Deflater deflates the data.
+            ManagedConnection.super.flush();
+        }
+    }
+    
 
     /** Class-wide expiration mechanism for all ManagedConnections.
      *  Only expires on-demand.

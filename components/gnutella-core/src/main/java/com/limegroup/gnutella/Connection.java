@@ -498,17 +498,11 @@ public class Connection implements IpPort {
             // releases these buffers.
             if(isWriteDeflated()) {
                 _deflater = new Deflater();
-                _out = new CompressingOutputStream(_out, _deflater);
+                _out = createDeflatedOutputStream(_out);
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
-                if(!(isAsynchronous()))
-                    _in = new UncompressingInputStream(_in, _inflater);
-                // else (isAsynchronous())
-                //      lazily construct the UncompressingInputStream
-                //      (done so that if loopForMessages is used from ManagedConnection,
-                //       then asynchronous messaging can be installed.  tests use
-                //       receive [not loopForMessages].)
+                _in = createInflatedInputStream(_in);
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -524,6 +518,16 @@ public class Connection implements IpPort {
             close();
             throw new BadHandshakeException(e);
         }
+    }
+    
+    /** Creates the output stream for deflating */
+    protected OutputStream createDeflatedOutputStream(OutputStream out) {
+        return new CompressingOutputStream(out, _deflater);
+    }
+    
+    /** Creates the input stream for inflating */
+    protected InputStream createInflatedInputStream(InputStream in) {
+        return new UncompressingInputStream(in, _inflater);
     }
     
     /**
@@ -978,11 +982,16 @@ public class Connection implements IpPort {
 
     /**
      * Returns the stream to use for writing to s.
-     * By default this is a BufferedOutputStream.
-     * Subclasses may override to decorate the stream.
+     * If the message supports asynchronous messaging, we don't need
+     * to buffer it, because it's already buffered internally.  Note, however,
+     * that buffering it would not be wrong, because we can always flush
+     * the buffered data.
      */
-    protected OutputStream getOutputStream()  throws IOException {
-        return new BufferedOutputStream(_socket.getOutputStream());
+    protected OutputStream getOutputStream() throws IOException {
+        if(isAsynchronous())
+            return _socket.getOutputStream();
+        else
+            return new BufferedOutputStream(_socket.getOutputStream());
     }
 
     /**
@@ -1101,7 +1110,7 @@ public class Connection implements IpPort {
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
             
-            updateStatistics(msg);
+            updateReadStatistics(msg);
         } catch(NullPointerException npe) {
             LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
             throw CONNECTION_CLOSED;
@@ -1110,9 +1119,9 @@ public class Connection implements IpPort {
     }
     
     /**
-     * Updates the statistics.
+     * Updates the read statistics.
      */
-    protected void updateStatistics(Message msg) {
+    protected void updateReadStatistics(Message msg) {
         // _bytesReceived must be set differently
         // when compressed because the inflater will
         // read more input than a single message,
@@ -1152,23 +1161,13 @@ public class Connection implements IpPort {
             LOG.trace("Connection (" + toString() + 
                       ") is sending message: " + m);
         
-        // in order to analyze the savings of compression,
-        // we must add the 'new' data to a stat.
-        long priorCompressed = 0, priorUncompressed = 0;
-        
         // The try/catch block is necessary for two reasons...
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.        
         try {
-            if ( isWriteDeflated() ) {
-                priorUncompressed = _deflater.getTotalIn();
-                priorCompressed = _deflater.getTotalOut();
-            }
-            
             m.write(_out, OUT_HEADER_BUF);
-
-            updateWriteStatistics(m, priorUncompressed, priorCompressed);
+            updateWriteStatistics(m);
         } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
         }
@@ -1178,25 +1177,15 @@ public class Connection implements IpPort {
      * Flushes any buffered messages sent through the send method.
      */
     public void flush() throws IOException {
-        // in order to analyze the savings of compression,
-        // we must add the 'new' data to a stat.
-        long priorCompressed = 0, priorUncompressed = 0;
-        
         // The try/catch block is necessary for two reasons...
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        try {            
-            if ( isWriteDeflated() ) {
-                priorUncompressed = _deflater.getTotalIn();
-                priorCompressed = _deflater.getTotalOut();
-            }
-
+        try { 
             _out.flush();
-
             // we must update the write statistics again,
             // because flushing forces the deflater to deflate.
-            updateWriteStatistics(null, priorUncompressed, priorCompressed);
+            updateWriteStatistics(null);
         } catch(NullPointerException npe) {
             throw CONNECTION_CLOSED;
         }
@@ -1205,20 +1194,19 @@ public class Connection implements IpPort {
     /**
      * Updates the write statistics.
      * @param m the possibly null message to add to the bytes sent
-     * @param pUn the prior uncompressed traffic, used for adding to stats
-     * @param pComp the prior compressed traffic, used for adding to stats
      */
-    private void updateWriteStatistics(Message m, long pUn, long pComp) {
-        if( m != null )
+    protected void updateWriteStatistics(Message m) {
+        if( isWriteDeflated() ) {
+            long newIn  = _deflater.getTotalIn();
+            long newOut = _deflater.getTotalOut();
+            CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData((int)(newIn - _bytesSent));
+            CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData((int)(newOut - _compressedBytesSent));
+            _bytesSent = newIn;
+            _compressedBytesSent = newOut;
+        } else if( m != null) {
             _bytesSent += m.getTotalLength();
-        if(isWriteDeflated()) {
-            _compressedBytesSent = _deflater.getTotalOut();
-            CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
-                (int)(_deflater.getTotalIn() - pUn));
-            CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
-                (int)(_deflater.getTotalOut() - pComp));
         }
-    }               
+    }    
     
     /**
      * Returns the number of bytes sent on this connection.

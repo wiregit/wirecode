@@ -27,5 +27,29 @@ public interface NIOMultiplexor extends ReadWriteObserver {
      */
     public void setReadObserver(ChannelReadObserver reader);
     
-    // TODO: add setWriteObserver(ChannelWriteObserver writer);
+    /**
+     * Sets the new ChannelWriter.  A ChannelWriter is necessary (instead of
+     * a WriteObserver) because the actual WriteObserver that listens for write
+     * events from the ultimate source will be installed at the deepest
+     * InterestWriteChannel in the chain.  For example, given the chain:
+     *      ChannelWriter a = new ProtocolWriter();
+     *      ChannelWriter b = new Obfuscator();
+     *      ChannelWriter c = new DataDeflater();
+     *      a.setWriteChannel(b);
+     *      b.setWriteChannel(c);
+     *      setWriteObserver(a);
+     * the deepest ChannelWriter is 'c', so the multiplexor would call
+     *      c.setWriteChannel(ultimateSource);
+     *
+     * The deepest ChannelWriter is found with code equivilant to:
+     *      ChannelWriter deepest = initial;
+     *      while(deepest.getWriteChannel() instanceof ChannelWriter)
+     *          deepest = (ChannelWriter)deepest.getWriteChannel();
+     *
+     * When write events are generated, ultimateSource.handleWrite will
+     * forward the event to the last channel that was interested in it ('c'),
+     * which will cause 'c' to either write data immediately or forward the event
+     * to 'b', etc.
+     */
+    public void setWriteObserver(ChannelWriter writer);
 }

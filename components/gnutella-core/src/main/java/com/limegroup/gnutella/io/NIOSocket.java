@@ -37,10 +37,10 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /** The Socket that this delegates to */
     private final Socket socket;
     
-    /** The NIOOutputStream used for blocking writes */
-    private NIOOutputStream writer;
+    /** The WriteObserver that is being notified about write events */
+    private WriteObserver writer;
     
-    /** The ReadObserver this is notifying about read events */
+    /** The ReadObserver this is being notified about read events */
     private ReadObserver reader;
     
     /** Any exception that occurred while trying to connect */
@@ -65,7 +65,7 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         socket = s;
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        writer.init();
+        ((NIOOutputStream)writer).init();
         ((NIOInputStream)reader).init();
         NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
@@ -156,6 +156,45 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     }
     
     /**
+     * Sets the new WriteObserver.
+     *
+     * If a ThrottleWriter is one of the ChannelWriters, the attachment
+     * of the ThrottleWriter is set to be this.
+     *
+     * The deepest ChannelWriter in the chain has its source set to be
+     * a new InterestWriteChannel, which will be used as the hub to receive
+     * and forward interest events from/to the channel.
+     *
+     * If this is called while the existing WriteObserver still has data left to
+     * write, then an IllegalStateException is thrown.
+     */
+    public void setWriteObserver(final ChannelWriter newWriter) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    if(writer.handleWrite())
+                        throw new IllegalStateException("data still in old writer!");
+                    writer.shutdown();
+
+                    ChannelWriter lastChannel = newWriter;
+                    while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
+                        lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(NIOSocket.this);
+                    }
+
+                    InterestWriteChannel source = new SocketInterestWriteAdapater(channel);
+                    writer = source;
+                    lastChannel.setWriteChannel(source);
+                } catch(IOException iox) {
+                    shutdown();
+                    newWriter.shutdown(); // in case we hadn't set it yet.
+                }
+            }
+       });
+   }
+    
+    /**
      * Notification that a connect can occur.
      *
      * This notifies the waiting lock so that connect can continue.
@@ -180,8 +219,8 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      *
      * This passes it off to the NIOOutputStream.
      */
-    public void handleWrite() throws IOException {
-        writer.handleWrite();
+    public boolean handleWrite() throws IOException {
+        return writer.handleWrite();
     }
     
     /**
@@ -260,18 +299,21 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
                 
                 IOException x = storedException;
                 storedException = null;
-                if(x != null)
+                if(x != null) {
+                    shutdown();
                     throw x;
-                if(!isConnected())
+                } if(!isConnected()) {
+                    shutdown();
                     throw new SocketTimeoutException("couldn't connect in " + timeout + " milliseconds");
-                    
+                }   
             }
         }
         
         if(LOG.isTraceEnabled())
             LOG.trace("Connected to: " + addr);
             
-        writer.init();
+        if(writer instanceof NIOOutputStream)
+            ((NIOOutputStream)writer).init();
         
         if(reader instanceof NIOInputStream)
             ((NIOInputStream)reader).init();
@@ -309,8 +351,11 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     public OutputStream getOutputStream() throws IOException {
         if(isClosed())
             throw new IOException("Socket closed.");
-        
-        return writer.getOutputStream();
+            
+        if(writer instanceof NIOOutputStream)
+            return ((NIOOutputStream)writer).getOutputStream();
+        else
+            throw new IllegalStateException("writer not NIOOutputStream!");
     }
     
     

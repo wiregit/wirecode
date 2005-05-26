@@ -706,7 +706,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                     return m;
                 i = 0;
             } catch (InterruptedIOException ie) {
-                //ie.printStackTrace();
+                ie.printStackTrace();
                 return null;            
             } catch (IOException iox) {
                 //ignore iox

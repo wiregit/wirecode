@@ -82,6 +82,9 @@ public class NIODispatcher implements Runnable {
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
+    /** The throttle queue. */
+    private final List /* of NBThrottle */ THROTTLE = new ArrayList();
+    
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
      * handling IOException or running arbitrary code can't deadlock.
@@ -98,6 +101,14 @@ public class NIODispatcher implements Runnable {
 	public boolean isDispatchThread() {
 	    return Thread.currentThread() == dispatchThread;
 	}
+	
+	/** Adds a Throttle into the throttle requesting loop. */
+	// TODO: have some way to remove Throttles, or make these use WeakReferences
+	public void addThrottle(NBThrottle t) {
+        synchronized(Q_LOCK) {
+            THROTTLE.add(t);
+        }
+    }
 	    
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
@@ -264,9 +275,17 @@ public class NIODispatcher implements Runnable {
      *
      * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
      * in the NIODispatch thread.
+     *
+     * Throttle is not moved to UNLOCKED because it is not cleared, and because the
+     * actions are all within this package, so we can guarantee that it doesn't
+     * deadlock.
      */
     private void addPendingItems() {
         synchronized(Q_LOCK) {
+            long now = System.currentTimeMillis();
+            for(int i = 0; i < THROTTLE.size(); i++)
+                ((NBThrottle)THROTTLE.get(i)).tick(now);
+
             UNLOCKED.ensureCapacity(REGISTER.size() + LATER.size());
             UNLOCKED.addAll(REGISTER);
             UNLOCKED.addAll(LATER);
@@ -287,12 +306,23 @@ public class NIODispatcher implements Runnable {
                         }
                     } else if(item instanceof Runnable) {
                         ((Runnable)item).run();
-                    }
+                    } 
                 } catch(Throwable t) {
+                    LOG.error(t);
                     ErrorService.error(t);
                 }
             }
             UNLOCKED.clear();
+        }
+    }
+    
+    /**
+     * Loops through all Throttles and gives them the ready keys.
+     */
+    private void readyThrottles(Collection keys) {
+        synchronized(Q_LOCK) {
+            for(int i = 0; i < THROTTLE.size(); i++)
+                ((NBThrottle)THROTTLE.get(i)).selectableKeys(keys);
         }
     }
     
@@ -336,43 +366,50 @@ public class NIODispatcher implements Runnable {
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + keys.size() + ") keys.");
             
+            readyThrottles(keys);
+            
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
-				if(!sk.isValid())
-					continue;
-				
-                Object attachment = sk.attachment();
-				try {
-                    try {
-                        if (sk.isAcceptable())
-                            processAccept(sk, (AcceptObserver)attachment);
-                        else if(sk.isConnectable())
-                            processConnect(sk, (ConnectObserver)attachment);
-                        else {
-                            if (sk.isReadable())
-                                ((ReadObserver)attachment).handleRead();
-                            if (sk.isWritable())
-                                ((WriteObserver)attachment).handleWrite();
-                        }
-                    } catch (CancelledKeyException err) {
-                        LOG.warn("Ignoring cancelled key", err);
-                    } catch(IOException iox) {
-                        LOG.warn("IOX processing", iox);
-                        ((IOErrorObserver)attachment).handleIOException(iox);
-                    }
-                } catch(Throwable t) {
-                    ErrorService.error(t, "Unhandled exception while dispatching");
-
-                    try {
-                        if(attachment instanceof Shutdownable)
-                            cancel(sk, (Shutdownable)attachment);
-                        else
-                            cancel(sk, null);
-                    } catch(Throwable ignored) {}
-                }
+				if(sk.isValid())
+                    process(sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
+        }
+    }
+    
+    /**
+     * Processes a single SelectionKey & attachment, processing only
+     * ops that are in allowedOps.
+     */
+    void process(SelectionKey sk, Object attachment, int allowedOps) {
+		try {
+            try {
+                if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                    processAccept(sk, (AcceptObserver)attachment);
+                else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                    processConnect(sk, (ConnectObserver)attachment);
+                else {
+                    if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                        ((ReadObserver)attachment).handleRead();
+                    if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                        ((WriteObserver)attachment).handleWrite();
+                }
+            } catch (CancelledKeyException err) {
+                LOG.warn("Ignoring cancelled key", err);
+            } catch(IOException iox) {
+                LOG.warn("IOX processing", iox);
+                ((IOErrorObserver)attachment).handleIOException(iox);
+            }
+        } catch(Throwable t) {
+            ErrorService.error(t, "Unhandled exception while dispatching");
+
+            try {
+                if(attachment instanceof Shutdownable)
+                    cancel(sk, (Shutdownable)attachment);
+                else
+                    cancel(sk, null);
+            } catch(Throwable ignored) {}
         }
     }
     

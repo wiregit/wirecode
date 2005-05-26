@@ -9,7 +9,12 @@ package com.limegroup.gnutella.io;
  */
 public interface WriteObserver extends IOErrorObserver {
 
-    /** Notification that a write can be performed. */
-    void handleWrite() throws java.io.IOException;
+    /**
+     * Notification that a write can be performed.
+     *
+     * If there is still data to be written, this returns true.
+     * Otherwise this returns false.
+     */
+    boolean handleWrite() throws java.io.IOException;
     
 }

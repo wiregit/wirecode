@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-class ReadBufferChannel implements ReadableByteChannel {
+public class ReadBufferChannel implements ReadableByteChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
     private boolean closed = false;

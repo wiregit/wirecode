@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
@@ -132,14 +133,14 @@ public abstract class ServerSideTestCase extends BaseTestCase {
         // set up ultrapeer stuff
         Integer numUPs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
                                                                  "numUPs", null);
-        if ((numUPs.intValue() < 1) || (numUPs.intValue() > 30))
+        if ((numUPs.intValue() < 0) || (numUPs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numUPs!!!");
         ULTRAPEER = new Connection[numUPs.intValue()];
 
         Integer numLs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
                                                                  "numLeaves", 
                                                                  null);
-        if ((numLs.intValue() < 1) || (numLs.intValue() > 30))
+        if ((numLs.intValue() < 0) || (numLs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numLs!!!");
         LEAF = new Connection[numLs.intValue()];
 
@@ -209,7 +210,23 @@ public abstract class ServerSideTestCase extends BaseTestCase {
         // set up QRP tables for the child
         PrivilegedAccessor.invokeAllStaticMethods(callingClass, "setUpQRPTables",
                                                   null);
-
     }
-
+    
+    /** Builds a conenction with default headers */
+    protected Connection createLeafConnection() throws Exception {
+        return createConnection(new LeafHeaders("localhost"));
+    }
+    
+    /** Builds an ultrapeer connection with default headers */
+    protected Connection createUltrapeerConnection() throws Exception {
+        return createConnection(new UltrapeerHeaders("localhost"));
+    }
+    
+    /** Builds a single connection with the given headers. */
+    protected Connection createConnection(Properties headers) throws Exception {
+        Connection c = new Connection("localhost", PORT, headers, new EmptyResponder());
+        c.initialize();
+        assertTrue(c.isOpen());
+        return c;
+    }
 }

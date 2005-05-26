@@ -81,6 +81,8 @@ import org.apache.commons.logging.Log;
     
     /** Reads a chunk of data from the buffer */
     public int read(byte[] buf, int off, int len) throws IOException {
+        if (len == 0)
+            return 0;
         synchronized(LOCK) {
             waitImpl();
             
@@ -90,7 +92,11 @@ import org.apache.commons.logging.Log;
             buffer.flip();
             int available = Math.min(buffer.remaining(), len);
             buffer.get(buf, off, available);
-            buffer.compact();
+            
+            if (buffer.hasRemaining()) 
+                buffer.compact();
+            else 
+                buffer.clear();
             
             // now that there's room in the buffer, fill up the channel
             NIODispatcher.instance().interestRead(channel, true);

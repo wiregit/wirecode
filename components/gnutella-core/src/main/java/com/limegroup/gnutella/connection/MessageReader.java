@@ -137,7 +137,7 @@ public class MessageReader implements ChannelReadObserver {
             try {
                 Message m = Message.createMessage(header.array(), payload.array(), 
                                                   receiver.getSoftMax(), receiver.getNetwork());
-                receiver.processMessage(m);
+                receiver.processReadMessage(m);
             } catch(BadPacketException ignored) {}
             
             if(read == -1)
@@ -158,7 +158,6 @@ public class MessageReader implements ChannelReadObserver {
                 
             shutdown = true;
         }
-        
         receiver.messagingClosed();
     }
     

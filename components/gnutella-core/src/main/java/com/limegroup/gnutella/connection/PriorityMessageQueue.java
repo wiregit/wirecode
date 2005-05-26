@@ -28,7 +28,7 @@ import com.limegroup.gnutella.util.BucketQueue;
  * QueryReply's, but the replacement policy is undefined if the queue
  * fills up.
  */
-public class PriorityMessageQueue extends MessageQueue {
+public class PriorityMessageQueue extends AbstractMessageQueue {
     /** One priority level for each hop.  For query replies, we break reply
      *  volumes into this many buckets.  You could use different numbers of
      *  priorities according to the type of message, but this is convenient. */
