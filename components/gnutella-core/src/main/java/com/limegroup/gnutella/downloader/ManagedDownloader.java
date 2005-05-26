@@ -1117,7 +1117,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Returns true if this is using (or could use) the given incomplete file.
-     * @param incompleteFile an incomplete file, which SHOULD be the return
+     * @param incFile an incomplete file, which SHOULD be the return
      *  value of IncompleteFileManager.getFile
      */
     public boolean conflicts(File incFile) {
@@ -1146,7 +1146,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             return false;
         return conflicts(otherFile);
     }
-
+	
+	public boolean conflicts(URN urn, String fileName, int fileSize) {
+		if (urn != null && downloadSHA1 != null) {
+			return urn.equals(downloadSHA1);
+		}
+		if (fileSize > 0 && incompleteFile != null) {
+			// TODO fberger this will be there when merging
+//			File file = incompleteFileManager.getFile(fileSize, fileSize);
+//			return file.equals(incompleteFile);
+		}
+		return false;
+	}
+	
     /////////////////////////////// Requery Code ///////////////////////////////
 
     /** 
@@ -1760,7 +1772,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return null;
             return file;
         }
-        //b) Otherwise, choose completed file.
+        //c) Otherwise, choose completed file.
         else {
             return getSaveFile();
         }
@@ -1770,9 +1782,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** 
      * Returns the amount of the file written on disk that can be safely
      * previewed. 
-     * 
-     * @param incompleteFile the file to examine, which MUST correspond to
-     *  the current download.
      */
     private synchronized int amountForPreview() {
         //And find the first block.
@@ -1822,6 +1831,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (!overwrite)
                 throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
         }
+		
+		// check if another existing download is being saved to this download
+		// we ignore the overwrite flag on purpose in this case
+		if (RouterService.getDownloadManager().conflicts(candidateFile)) {
+			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+		}
          
         // Passed sanity checks, so save file
         synchronized (this) {
@@ -3035,4 +3050,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             return true;
         return false;
     }
+
+
 }

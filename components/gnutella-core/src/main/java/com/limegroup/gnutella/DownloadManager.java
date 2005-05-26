@@ -557,11 +557,11 @@ public class DownloadManager implements BandwidthTracker {
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
         
-        if(urn!=null) {
-            if(conflicts(urn)) {
-                String ex = 
-                (filename!=null&&!filename.equals(""))?filename:urn.toString();
-                throw new AlreadyDownloadingException(ex);
+        if (urn != null) {
+			String fileName = (filename!=null && !filename.equals(""))
+				? filename : urn.toString();
+            if (conflicts(urn, fileName, 0)) {
+                throw new AlreadyDownloadingException(fileName);
             }
         }
 
@@ -589,7 +589,8 @@ public class DownloadManager implements BandwidthTracker {
      */ 
     public synchronized Downloader download(File incompleteFile)
             throws AlreadyDownloadingException, CantResumeException { 
-        //Check for conflicts.  TODO: refactor to make less like conflicts().
+     
+		//Check for conflicts.  TODO: refactor to make less like conflicts().
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
             ManagedDownloader md=(ManagedDownloader)iter.next();
             if (md.conflicts(incompleteFile))                   
@@ -665,7 +666,7 @@ public class DownloadManager implements BandwidthTracker {
      * there are no conflicts.  This is used before starting and resuming
      * downloads.  
      */
-    public synchronized String conflicts(RemoteFileDesc[] files,
+    private synchronized String conflicts(RemoteFileDesc[] files,
                                          ManagedDownloader dloader) {
         for (int i=0; i<files.length; i++) {
             //Active downloads...
@@ -689,22 +690,57 @@ public class DownloadManager implements BandwidthTracker {
     }
 
 
-    private synchronized boolean conflicts(URN urn) {
-        Iterator iter = active.iterator();
-        while(iter.hasNext()) {
-            ManagedDownloader md = (ManagedDownloader)iter.next();
-            if(md.conflicts(urn))
-                return true;
-        }
-        iter = waiting.iterator();
-        while(iter.hasNext()) {
-            ManagedDownloader md = (ManagedDownloader)iter.next();
-            if(md.conflicts(urn))
-                return true;
-        }
-        return false;
-    }
+	/**
+	 * Returns <code>true</code> if there already is a download with the same urn. 
+	 * @param urn may be <code>null</code>, then a check based on the fileName
+	 * and the fileSize is performed
+	 * @return
+	 */
+	public boolean conflicts(URN urn, String fileName, int fileSize) {
+		
+		if (urn == null && fileSize == 0) {
+			return false;
+		}
+		
+		synchronized (this) {
+			return conflicts(active.iterator(), urn, fileName, fileSize) 
+				|| conflicts(waiting.iterator(), urn, fileName, fileSize);
+		}
+	}
+	
+	private boolean conflicts(Iterator i, URN urn, String fileName, int fileSize) {
+		while(i.hasNext()) {
+			ManagedDownloader md = (ManagedDownloader)i.next();
+			if (md.conflicts(urn, fileName, fileSize)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns <code>true</code> if there already is a download that is or
+	 * will be saving to this file location.
+	 * @param candidateFile the final file location.
+	 * @return
+	 */
+	public synchronized boolean conflicts(File candidateFile) {
+		return conflicts(active.iterator(), candidateFile)
+			|| conflicts(waiting.iterator(), candidateFile);
+	}
+	
+	private boolean conflicts(Iterator i, File candidateFile) {
+		while(i.hasNext()) {
+			ManagedDownloader md = (ManagedDownloader)i.next();
+			// TODO fberger move it into ManagedDownloader?
+			if (candidateFile.equals(md.getSaveFile())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
+	
     /** 
      * Adds all responses (and alternates) in qr to any downloaders, if
      * appropriate.
@@ -1424,5 +1460,6 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
+	
 	
 }
