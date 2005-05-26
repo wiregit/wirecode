@@ -211,7 +211,7 @@ TOTD_CLOSE=關閉
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
 #? GOING_PRO_TITLE=
-#### GOING_PRO_DESCRIPTION=Better search results\nTURBOCHARGED download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
+#### GOING_PRO_DESCRIPTION=Better search results\nTurbo-Charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 #? GOING_PRO_DESCRIPTION=
 
 ###################################################################
@@ -887,9 +887,9 @@ STATISTICS_SHARING_TOOLTIP=您正在共用文件的數目.
 #? STATISTICS_CONNECTION_EXCELLENT=
 #### STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
 #? STATISTICS_CONNECTION_EXCELLENT_TIP=
-#### STATISTICS_CONNECTION_TURBO_CHARGED=TURBOCHARGED
+#### STATISTICS_CONNECTION_TURBO_CHARGED=Turbo-Charged
 #? STATISTICS_CONNECTION_TURBO_CHARGED=
-#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TURBOCHARGED connections all the time with LimeWire PRO.
+#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience Turbo-Charged connections all the time with LimeWire PRO.
 #? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
 #? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=
@@ -1381,7 +1381,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=使用預設資料夾.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=升級到增強版
-#### PRO_LABEL_THANKS=For TURBOCHARGED downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
+#### PRO_LABEL_THANKS=For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
 PRO_LABEL_THANKS=LimeWire 軟體是由 7 個程式設計師全體工作歷時兩年編寫完成的. 如果您認為 LimeWire 是值得的, 請將 LimeWire 升級. 您的購買使我們能一直創新開發 LimeWire.
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
 PRO_LABEL_QUESTION=升級到 LimeWire 增強版?
@@ -1651,23 +1651,23 @@ SPLASH_STATUS_MESSAGE_SERVICE=加載信息...
 # Key/value pairs for the message displayed to prompt users to
 # support LimeWire through contributions.
 ##################################################################
-#### SUPPORT_LIMEWIRE_01=For TURBOCHARGED searches get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=支援將來 LimeWire 的開發.
 #### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
 SUPPORT_LIMEWIRE_02=點擊這裡支援 LimeWire 開放式點對點網路的開發.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=支援 LimeWire 開放網路平台的研究和開發.
-#### SUPPORT_LIMEWIRE_04=For TURBOCHARGED downloads get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=點擊這裡成為研究 LimeWire 的支持者.
 #### SUPPORT_LIMEWIRE_05=Support open networks.
 SUPPORT_LIMEWIRE_05=支援開放的網路.
 #### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
 SUPPORT_LIMEWIRE_06=點擊這裡支援開放資源和開放協議.
-#### SUPPORT_LIMEWIRE_07=For TURBOCHARGED Performance get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_07=For Turbo-Charged Performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=支援 LimeWire 開放資源的, 基於點對點的架構.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
 #? SUPPORT_LIMEWIRE_09=
 #### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
 #? SUPPORT_LIMEWIRE_11=
@@ -1732,7 +1732,7 @@ MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire 不能够使用指定的儲存資料夾.
 MESSAGE_FILE_CORRUPT=LimeWire 發現文件毁坏
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
 MESSAGE_CONTINUE_DOWNLOAD=您想繼續下載吗?
-#### MESSAGE_LANG_CHANGE=Please note that you must restart LimeWire for the language to change.  Also, make sure that you have the required fonts for the selected language.
+#### MESSAGE_LANG_CHANGE=Please note that you must restart LimeWire for the language to change. Also, make sure that you have the required fonts for the selected language.
 #? MESSAGE_LANG_CHANGE=
 #### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
 #? MESSAGE_SENSITIVE_SHARE_TOP=
