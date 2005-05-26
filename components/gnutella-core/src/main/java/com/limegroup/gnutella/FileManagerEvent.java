@@ -37,7 +37,7 @@ public class FileManagerEvent extends EventObject {
      * two elements. The first element is the previous
      * FileDesc and the second is the new FileDesc.
      */
-    public FileDesc[] getFileDesc() {
+    public FileDesc[] getFileDescs() {
         return files;
     }
     
