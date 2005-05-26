@@ -2,12 +2,10 @@ package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -22,7 +20,6 @@ import com.limegroup.gnutella.tigertree.HashTree;
  * This class extends FileDesc and wraps an incomplete File, 
  * so it can be used for partial file sharing.
  */
-
 public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * Ranges smalles than this will never be offered to other servents
