@@ -1538,6 +1538,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if (good)
             cachedRFDs.add(rfd);
         
+        // it is possible to receive a HeadPong before starting the master thread 
+        if (dloaderManagerThread == null)
+            return;
+        
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
