@@ -32,8 +32,6 @@ public class WMVMetaData extends VideoMetaData {
         setTitle(data.getTitle());
         setYear(data.getYear());
         setComment(data.getComment());
-        if(getComment() == null)
-            setComment(data.getDescription());
         setLength(data.getLength());
         setWidth(data.getWidth());
         setHeight(data.getHeight());

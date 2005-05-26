@@ -35,6 +35,8 @@ public class WeedInfo {
     public static final String LAINFO = "http://www.shmedlic.com/license/3play.aspx";
     public static final String LDIST  = "Shared Media Licensing, Inc.";
     public static final String LURL   = "http://www.shmedlic.com/";
+    public static final String CID = " cid: ";
+    public static final String VID = " vid: ";
     
     private String _versionId, _contentId;
     private String _licenseDate, _licenseDistributor, _licenseDistributorURL;
@@ -89,6 +91,10 @@ public class WeedInfo {
             throw new IllegalArgumentException("Invalid LURL: " + _licenseDistributorURL);
         if(!LDIST.equals(_licenseDistributor))
             throw new IllegalArgumentException("Invalid LDIST: " + _licenseDistributor);
+        if(_contentId == null)
+            throw new IllegalArgumentException("No content Id!");
+        if(_versionId == null)
+            throw new IllegalArgumentException("No version Id!");
     }
     
     public String getVersionId() { return _versionId; }
@@ -107,6 +113,9 @@ public class WeedInfo {
     public String getTitle() { return _title; }
     public String getLAInfo()    { return _lainfo; }
     
+    public String getLicenseInfo() {
+        return _lainfo + CID + _contentId + VID +  _versionId;
+    }
     
     /** Parses the content encryption XML looking for Weed info. */
     private void parse(String xml) {
@@ -140,7 +149,15 @@ public class WeedInfo {
             Node child = (Node)children.item(i);
             String name = child.getNodeName();
             String value = LimeXMLUtils.getTextContent(child);
-            if(name.equals("ContentID"))
+            if(value == null)
+                continue;
+            value = value.trim();
+            if(value.equals(""))
+                continue;
+                
+            if(name.equals("VersionID"))
+                _versionId = value;
+            else if(name.equals("ContentID"))
                 _contentId = value;
             else if(name.equals("License_Date"))
                 _licenseDate = value;

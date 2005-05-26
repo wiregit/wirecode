@@ -21,8 +21,12 @@ import org.apache.commons.logging.Log;
  * A parser for reading ASF files.
  * Everything we understand is stored.
  *
- * This is based off the work of Reed Esau, in his excellent ptarmigan package,
- * from http://ptarmigan.sourceforge.net/ .
+ * This is initially based  off the work of Reed Esau, in his excellent ptarmigan package,
+ * from http://ptarmigan.sourceforge.net/ .  This was also based off of the work
+ * in the XNap project, from
+ *  http://xnap.sourceforge.net/xref/org/xnap/plugin/viewer/videoinfo/VideoFile.html ,
+ * which in turn was based off the work from the avifile project, at 
+ *  http://avifile.sourceforge.net/ .
  */
 public class ASFParser {
     
@@ -36,7 +40,7 @@ public class ASFParser {
     private static final int TYPE_INT = 3;
     private static final int TYPE_LONG = 4;
     
-    private String _album, _artist, _title, _year, _copyright, _description, _rating, _genre, _comment;
+    private String _album, _artist, _title, _year, _copyright, _rating, _genre, _comment, _price;
     private short _track = -1;
     private int _bitrate = -1, _length = -1, _width = -1, _height = -1;
     private boolean _hasAudio, _hasVideo;
@@ -47,15 +51,16 @@ public class ASFParser {
     String getTitle() { return _title; }
     String getYear() { return _year; }
     String getCopyright() { return _copyright; }
-    String getDescription() { return _description; }
     String getRating() { return _rating; }
     String getGenre() { return _genre; }
     String getComment() { return _comment; }
+    String getPrice() { return _price; }
     short getTrack() { return _track; }
     int getBitrate() { return _bitrate; }
     int getLength() { return _length; }
     int getWidth() { return _width; }
     int getHeight() { return _height; }
+    
     WeedInfo getWeedInfo() { return _weed; }
     
     boolean hasAudio() { return _hasAudio; }
@@ -106,8 +111,7 @@ public class ASFParser {
         if(!Arrays.equals(marker, IDs.HEADER_ID))
             throw new IOException("not an ASF file");
        
-        int dataOffset = ByteOrder.leb2int(ds);
-        IOUtils.ensureSkip(ds, 4);
+        long dataOffset = ByteOrder.leb2long(ds);
         int objectCount = ByteOrder.leb2int(ds);
         IOUtils.ensureSkip(ds, 2);
         
@@ -143,7 +147,6 @@ public class ASFParser {
      * The objectID has already been read.  Each object is stored differently.
      */
     private void readObject(DataInputStream ds, byte[] id, long size) throws IOException {
-        
         if(Arrays.equals(id, IDs.FILE_PROPERTIES_ID))
             parseFileProperties(ds);
         else if(Arrays.equals(id, IDs.STREAM_PROPERTIES_ID)) 
@@ -220,14 +223,21 @@ public class ASFParser {
     private void parseExtendedContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content encryption");
         int size = ByteOrder.leb2int(ds);
-        //IOUtils.ensureSkip(ds, 2); // skip weird data.
         byte[] b = new byte[size];
         ds.readFully(b);
         String xml = new String(b, "UTF-16").trim();
         try {
             _weed = new WeedInfo(xml);
-            if(LOG.isDebugEnabled())
-                LOG.debug("Parsed weed data: " + _weed);
+            LOG.debug("Parsed weed data.");
+            if(_weed.getAuthor() != null)
+                _artist = _weed.getAuthor();
+            if(_weed.getTitle() != null)
+                _title = _weed.getTitle();
+            if(_weed.getDescription() != null)
+                _comment = _weed.getDescription();
+            if(_weed.getCollection() != null)
+                _album = _weed.getCollection();
+            _price = _weed.getPrice();
         } catch(IllegalArgumentException ignored) {
             LOG.warn("Invalid encryption info: " + xml, ignored);
         }
@@ -236,7 +246,7 @@ public class ASFParser {
     /**
      * Parses known information out of the Content Description object.
      * The data is stored as:
-     *   4 bytes of unknown data.  10 bytes of sizes (2 bytes for each size).
+     *   10 bytes of sizes (2 bytes for each size).
      *   The data corresponding to each size.  The data is stored in order of:
      *   Title, Author, Copyright, Description, Rating.
      */
@@ -257,12 +267,12 @@ public class ASFParser {
         _title = string(info[0]);
         _artist = string(info[1]);
         _copyright = string(info[2]);
-        _description = string(info[3]);
+        _comment = string(info[3]);
         _rating = string(info[4]);
             
         if(LOG.isDebugEnabled())
             LOG.debug("Standard Tag Values.  Title: " + _title + ", Author: " + _artist + ", Copyright: " + _copyright
-                         + ", Description: " + _description + ", Rating: " + _rating);
+                         + ", Description: " + _comment + ", Rating: " + _rating);
     }
     
     /**

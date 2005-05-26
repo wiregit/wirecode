@@ -3,10 +3,16 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Sets WMA metadata using the ASF parser.
  */
 public class WMAMetaData extends AudioMetaData {
+    
+    private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
+    
     
     /** Sets WMA data. */
     public WMAMetaData(File f) throws IOException {
@@ -32,14 +38,18 @@ public class WMAMetaData extends AudioMetaData {
             throw new IOException("no audio data!");
             
         setTitle(data.getTitle());
+        setAlbum(data.getAlbum());
         setArtist(data.getArtist());
         setYear(data.getYear());
         setComment(data.getComment());
-        if(getComment() == null)
-            setComment(data.getDescription());
         setTrack(data.getTrack());
         setBitrate(data.getBitrate());
         setLength(data.getLength());
         setGenre(data.getGenre());
+        setLicense(data.getCopyright());
+        setPrice(data.getPrice());
+        
+        if(data.getWeedInfo() != null)
+            setLicenseType(data.getWeedInfo().getLicenseInfo());
     }
 }
