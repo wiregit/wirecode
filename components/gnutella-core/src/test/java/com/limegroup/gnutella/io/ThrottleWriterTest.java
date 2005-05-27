@@ -54,10 +54,6 @@ public final class ThrottleWriterTest extends BaseTestCase {
     }
     
     public void testeHandleWriteDataLeft() throws Exception {
-        assertEquals(0, THROTTLE.interests());
-        WRITER.interest(SOURCE, true);
-        assertEquals(1, THROTTLE.interests());
-        
         // Test when data is still left after available.
 
         // set up writer & SINK.
@@ -67,6 +63,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         
         // set up SOURCE & THROTTLE.
         SOURCE.setBuffer(buffer(data(750)));
+        assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(250);
         
         assertFalse(THROTTLE.didRequest());
@@ -83,11 +80,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
     }
     
     public void testHandleWriteSourceEmptiesWithLeftover() throws Exception {
-        assertEquals(0, THROTTLE.interests());
-        WRITER.interest(SOURCE, true);
-        assertEquals(1, THROTTLE.interests());
-        
         SOURCE.setBuffer(buffer(data(500)));
+        assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(550);        
 
         WRITER.bandwidthAvailable();
@@ -101,11 +95,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
     }
         
     public void testHandleWriteSourceEmptiesExactly() throws Exception {
-        assertEquals(0, THROTTLE.interests());
-        WRITER.interest(SOURCE, true);
-        assertEquals(1, THROTTLE.interests());
-        
         SOURCE.setBuffer(buffer(data(200)));
+        assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(200);
         WRITER.bandwidthAvailable();
         assertEquals(0, SINK.written());
@@ -125,7 +116,6 @@ public final class ThrottleWriterTest extends BaseTestCase {
         SOURCE.setBuffer(buffer(data(250)));
         THROTTLE.setAvailable(300);
         WRITER.bandwidthAvailable();
-        WRITER.interest(SOURCE, true);
         assertEquals(1, THROTTLE.interests());
         
         assertTrue(WRITER.handleWrite()); // data still leftover.
