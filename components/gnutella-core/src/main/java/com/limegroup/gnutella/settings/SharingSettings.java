@@ -197,6 +197,13 @@ public class SharingSettings extends LimeProps {
     public static final FileArraySetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
         FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
     
+	/**
+	 * The setting if the files of finished downloads should also be shared when
+	 * they were not saved to a shared directory.
+	 */
+	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
+		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
+	
     /**
      * Individual files that should be shared despite being located outside
      * of any shared directory, and despite any extension limitations.
