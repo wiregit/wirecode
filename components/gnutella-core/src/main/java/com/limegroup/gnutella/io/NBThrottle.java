@@ -144,7 +144,7 @@ public class NBThrottle implements Throttle {
      * in order to ensure that the Throttle behaves correctly.
      */
     public NBThrottle(boolean forWriting, float bytesPerSecond, int maxRequestors, int maxLatency) {
-        this(forWriting, bytesPerSecond, true,  maxLatency / maxRequestors);
+        this(forWriting, bytesPerSecond, true,  maxRequestors == 0 ? DEFAULT_TICK_TIME : maxLatency / maxRequestors);
     }
     
     /**
