@@ -40,7 +40,6 @@ public class QueryDispatcherTest extends BaseTestCase {
     public void testRemoveReplyHandler() throws Exception {
         new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
-        qd.start();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
@@ -100,12 +99,8 @@ public class QueryDispatcherTest extends BaseTestCase {
     public void testRemoveStoppedQuery() throws Exception {
         new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
-        qd.start();
         
-        Set toR = (Set)PrivilegedAccessor.getValue(qd, "TO_REMOVE");
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
-        
-        assertEquals("TO_REMOVE should be empty", 0, toR.size());
         
         QueryRequest qr = QueryRequest.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
@@ -132,9 +127,6 @@ public class QueryDispatcherTest extends BaseTestCase {
         assertEquals("the wrong query got removed", 
                      qhand2.getGUID(),
                      ((QueryHandler)iter.next()).getGUID());
-        //also make sure the removed GUID was deleted from the
-        //TO_REMOVE set
-        assertEquals("TO_REMOVE should be empty", 0, toR.size());
     }
 
     private static final class TestReplyHandler extends ReplyHandlerStub {
