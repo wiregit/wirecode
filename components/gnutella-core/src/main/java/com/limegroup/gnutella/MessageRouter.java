@@ -214,8 +214,7 @@ public abstract class MessageRouter {
 	 * generated queries that adjust to the number of results received, the
 	 * number of connections, etc.
 	 */
-	private final QueryDispatcher DYNAMIC_QUERIER =
-		QueryDispatcher.instance();
+	private final QueryDispatcher DYNAMIC_QUERIER = QueryDispatcher.instance();
 	
 	/**
 	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
@@ -295,7 +294,6 @@ public abstract class MessageRouter {
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
 		_promotionManager = RouterService.getPromotionManager();
-		DYNAMIC_QUERIER.start();
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies

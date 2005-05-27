@@ -13,10 +13,11 @@ import java.util.Set;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * This class handles the thread that dispatches dynamic queries for Ultrapeers.
+ * Manages dynamic querying for Ultrapeers.
+ *
  * This maintains the data for all active queries for this Ultrapeer and any
  * of its leaves, also providing an interface for removing active queries.
  * Queries may be removed, for example, when a leaf node with an active query
@@ -34,26 +35,25 @@ public final class QueryDispatcher implements Runnable {
 	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
 	 * it's ever iterated over.  
 	 */
-	private final List NEW_QUERIES = 
-		Collections.synchronizedList(new LinkedList());
-
-    /**
-     * Variable for whether or not the last call to send out all pending 
-     * queries has finished.
-     */
-    private static volatile boolean _done = true;
+	private final List NEW_QUERIES = Collections.synchronizedList(new LinkedList());
 
 	/**
 	 * <tt>QueryDispatcher</tt> instance following singleton.
 	 */
-	private static final QueryDispatcher INSTANCE = 
-		new QueryDispatcher();
-	
-	/**
-     * Constant <tt>Set</tt> of searches that the user has killed that should 
-     * be removed.
-	 */
-    private final Set TO_REMOVE = Collections.synchronizedSet(new HashSet());
+	private static final QueryDispatcher INSTANCE = new QueryDispatcher();
+    
+    /**
+     * The ProcessingQueue that handles sending queries out.
+     *
+     * Items are added to this only if it's not already processing anything.
+     */
+    private final ProcessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
+    
+    /**
+     * Whether or not processing is already active.  If it is, we don't start it up again
+     * when adding new queries.
+     */
+    private boolean _active;
     
 
 	/**
@@ -64,22 +64,11 @@ public final class QueryDispatcher implements Runnable {
 	public static QueryDispatcher instance() {
 		return INSTANCE;
 	}
-    
 
 	/**
-	 * Creates a new <tt>QueryDispatcher</tt> instance -- private constructor
-	 * ensures that no other classes can create this.
+	 * Creates a new <tt>QueryDispatcher</tt> instance.
 	 */
 	private QueryDispatcher() {}
-
-	/**
-	 * Schudules the processing of queries for execution.
-	 */
-	public void start() {
-        Thread dispatcher = new ManagedThread(this, "QueryDispatcher");
-        dispatcher.setDaemon(true);
-        dispatcher.start();
-	}
 
 	/**
 	 * Adds the specified <tt>QueryHandler</tt> to the list of queries to
@@ -88,8 +77,14 @@ public final class QueryDispatcher implements Runnable {
 	 * @param handler the <tt>QueryHandler</tt> instance to add
 	 */
 	public void addQuery(QueryHandler handler) {
-        handler.sendQuery();  // immediately sent out one query.
-		NEW_QUERIES.add(handler);
+        handler.sendQuery();  // immediately send out one query.
+        synchronized(NEW_QUERIES) {
+		    NEW_QUERIES.add(handler);
+		    if(NEW_QUERIES.size() == 1 && !_active) {
+		        _active = true;
+		        PROCESSOR.add(this);
+            }
+		}
 	}
 
     /**
@@ -100,9 +95,10 @@ public final class QueryDispatcher implements Runnable {
      */
     public void removeReplyHandler(ReplyHandler handler) {
         // if it's not a leaf connection, we don't care that it's closed
-        if(!handler.isSupernodeClientConnection()) return;
-        removeFromCollection(NEW_QUERIES, handler);
-        removeFromMap(QUERIES, handler);
+        if(!handler.isSupernodeClientConnection())
+            return;
+            
+        remove(handler);
     }
 
     /** Updates the relevant QueryHandler with result stats from the leaf.
@@ -121,85 +117,98 @@ public final class QueryDispatcher implements Runnable {
     public int getLeafResultsForQuery(GUID queryGUID) {
         synchronized (QUERIES) {
             QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
-            if (qh == null) return -1;
-            else return qh.getNumResultsReportedByLeaf();
+            if (qh == null)
+                return -1;
+            else
+                return qh.getNumResultsReportedByLeaf();
         }
     }
 
     /**
-     * Removes the specified <tt>ReplyHandler</tt> from the specified
-     * <tt>Collection</tt>.
+     * Removes all queries using the specified <tt>ReplyHandler</tt>
+     * from NEW_QUERIES & QUERIES.
      *
-     * @param coll the <tt>Collection</tt> to remove the <tt>ReplyHandler</tt>
-     *  from
      * @param handler the <tt>ReplyHandler</tt> to remove
      */
-    private static void removeFromCollection(Collection coll, 
-		ReplyHandler handler) {
-        List toRemove = new LinkedList();
-        synchronized(coll) {
-            Iterator iter = coll.iterator();
+    private void remove(ReplyHandler handler) {
+        synchronized(NEW_QUERIES) {
+            Iterator iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
-                ReplyHandler rh = qh.getReplyHandler();
-                if(handler == rh) {
-                    toRemove.add(qh);
-                }
+                if(qh.getReplyHandler() == handler)
+                    iter.remove();
             }
-            coll.removeAll(toRemove);
-        }        
+        }
+        
+        synchronized(QUERIES) {
+            Iterator iter = QUERIES.values().iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getReplyHandler() == handler)
+                    iter.remove();
+            }
+        }
     }
-
+    
     /**
-     * Removes the specified <tt>ReplyHandler</tt> from the specified
-     * <tt>Map</tt>.
+     * Removes the specified <tt>ReplyHandler</tt> from NEW_QUERIES & QUERIES.
      *
-     * @param map the <tt>Map</tt> to remove the <tt>ReplyHandler</tt>
-     *  from
      * @param handler the <tt>ReplyHandler</tt> to remove
      */
-    private static void removeFromMap(Map map, ReplyHandler handler) {
-        List toRemove = new LinkedList();
-        synchronized(map) {
-            Iterator iter = map.entrySet().iterator();
+    private void remove(GUID guid) {
+        synchronized(NEW_QUERIES) {
+            Iterator iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = 
-                    (QueryHandler)((Map.Entry)iter.next()).getValue();
-                if(qh.getReplyHandler() == handler)
-                    toRemove.add(qh.getGUID());
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getGUID().equals(guid))
+                    iter.remove();
             }
-
-
-            iter = toRemove.iterator();
-            while (iter.hasNext()) {
-                map.remove((GUID)iter.next());
+        }
+        
+        synchronized(QUERIES) {
+            Iterator iter = QUERIES.values().iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                if(qh.getGUID().equals(guid))
+                    iter.remove();
             }
-        }     
+        }
     }
 
 	/**
-	 * Starts the thread that processes queries.
+	 * Processes queries until there is nothing left to process,
+	 * or there are no new queries to process.
 	 */
 	public void run() {
-        try {
-            while(true) {
+        while(true) {
+            try {
                 Thread.sleep(400);
-                processQueries();
+            } catch(InterruptedException ignored) {}
+            
+            try {
+                // If there are no more queries to process...
+                if(!processQueries()) {
+                    synchronized(NEW_QUERIES) {
+                        // If there are no new queries to add,
+                        // set active to false & leave.
+                        if(NEW_QUERIES.isEmpty()) {
+                            _active = false;
+                            return;
+                        }
+                        // else, loop.
+                    }
+                }
+                // else, loop.
+            } catch(Throwable t) {
+                ErrorService.error(t);
             }
-        } catch(Throwable t) {
-            ErrorService.error(t);
         }
 	}
 
 	/**
 	 * Processes current queries.
 	 */
-	private void processQueries() {
-        if(!_done) return;
-        _done = false;
-
-		// necessary to obtain the lock because addAll iterates over
-		// NEW_QUERIES
+	private boolean processQueries() {
 		synchronized(NEW_QUERIES) {
             synchronized(QUERIES) {
                 Iterator iter = NEW_QUERIES.iterator();
@@ -211,51 +220,29 @@ public final class QueryDispatcher implements Runnable {
 			NEW_QUERIES.clear();
 		}
 
-        List expiredQueries = new LinkedList();
-
+	    
         synchronized(QUERIES) {
-            Iterator iter = QUERIES.entrySet().iterator();
+            Iterator iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
-                QueryHandler handler = 
-                    (QueryHandler)((Map.Entry)iter.next()).getValue();
-                
-                if(TO_REMOVE.contains(handler.getGUID())) {
-                    TO_REMOVE.remove(handler.getGUID());
-                    expiredQueries.add(handler);
-                }
-                else
-                    handler.sendQuery();
-
-                if(handler.hasEnoughResults()) {
-                    expiredQueries.add(handler);
-                }
+                QueryHandler handler = (QueryHandler)iter.next();
+                handler.sendQuery();
+                if(handler.hasEnoughResults())
+                    iter.remove();
             }
-
-            // remove any expired queries
-            iter = expiredQueries.iterator();
-            while (iter.hasNext()) {
-                QueryHandler qh = (QueryHandler) iter.next();
-                QUERIES.remove(qh.getGUID());
-            }
+            
+            return !QUERIES.isEmpty();
         }
-        _done = true;
 	}
 
     
     /**
-     * Adds the specified <tt>GUID</tt> to the group of searches to remove.  
-     * This MUST only be called to remove searches for this node, such as when
-     * the user cancels a search, and not for searches on behalf of other 
-     * nodes.
+     * Removes all queries that match this GUID.
      * 
      * @param g the <tt>GUID</tt> of the search to remove
      */
     public void addToRemove(GUID g) {
-        TO_REMOVE.add(g);
+        remove(g);
     }
-    
-    
-
 }
 
 
