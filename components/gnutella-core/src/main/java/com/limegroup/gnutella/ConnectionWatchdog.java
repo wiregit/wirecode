@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,11 +15,11 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /*
- * A "watchdog" thread that periodically examines connections and
+ * A "watchdog" that periodically examines connections and
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.
  */
-public final class ConnectionWatchdog implements Runnable {
+public final class ConnectionWatchdog {
     
     private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
 
@@ -26,11 +27,9 @@ public final class ConnectionWatchdog implements Runnable {
      * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
      * following the singleton pattern.
      */
-    private static final ConnectionWatchdog INSTANCE =
-        new ConnectionWatchdog();
+    private static final ConnectionWatchdog INSTANCE = new ConnectionWatchdog();
 
-    /** How long (in msec) a connection can be a dud (see below)
-     *  before being booted. */
+    /** How long (in msec) a connection can be a dud (see below) before being booted. */
     private static final int EVALUATE_TIME=30000;
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=15000;
@@ -52,15 +51,13 @@ public final class ConnectionWatchdog implements Runnable {
     private ConnectionWatchdog() {}
 
     /**
-     * Starts the <tt>ConnectionWatchdog</tt> thread.
+     * Starts the <tt>ConnectionWatchdog</tt>.
      */
     public void start() {
-        Thread watchdog = new ManagedThread(this, "ConnectionWatchdog");
-        watchdog.setDaemon(true);
-  		watchdog.start();        
+        findDuds();
     }
 
-    /** A snapshot of a connection.  Used by run() */
+    /** A snapshot of a connection. */
     private static class ConnectionState {
         final long sentDropped;
         final long sent;
@@ -98,133 +95,120 @@ public final class ConnectionWatchdog implements Runnable {
     }
 
     /**
-     * Returns a list of connections that have not made progress in
-     * the last few seconds.  This method takes several seconds to
-     * work.
+     * Schedules a snapshot of connection progress to be evaluated for duds.
      */
-    private List findDuds() {
-        //Take a snapshot of all connections, including leaves.  Different data
-        //structures could be used here.
-        Map /* ManagedConnection -> ConnectionState */ snapshot=new HashMap();
-        for (Iterator iter=allConnections(); iter.hasNext(); ) {
+    private void findDuds() {
+        //Take a snapshot of all connections, including leaves.
+        Map /* ManagedConnection -> ConnectionState */ snapshot = new HashMap();
+        for (Iterator iter = allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-				continue; //e.g., Clip2 reflector
+            if (!c.isKillable())
+				continue;
             snapshot.put(c, new ConnectionState(c));
         }
-
-        //Wait a bit more.
-        try {
-            Thread.sleep(EVALUATE_TIME);
-        } catch (InterruptedException e) { /* do nothing */ }
-
-        //Loop through all connections, trying to find ones that
-        //have not made sufficient progress. 
-        List ret = new ArrayList();
-        for (Iterator iter=allConnections(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-				continue; //e.g., Clip2 reflector
-            Object state=snapshot.get(c);
-            if (state==null)
-                continue;  //this is a new connection
-
-            ConnectionState currentState=new ConnectionState(c);
-            ConnectionState oldState=(ConnectionState)state;
-            if (currentState.notProgressedSince(oldState)) {
-                ret.add(c);
-            }
-        }
-        return ret;
+        
+        RouterService.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, 0);
     }
 
     /**
+     * Looks at a list of connections & pings them, waiting a certain amount of
+     * time for a response.  If no messages are exchanged on the connection in
+     * that time, the connection is killed.
+     *
+     * This is done by scheduling an event and checking the progress against
+     * a snapshot.
+     
      * @requires connections is a list of ManagedConnection
      * @modifies manager, router
      * @effects removes from manager any ManagedConnection's in "connections"
-     *  that still aren't progressing after being pinged.  This method may
-     *  take several seconds.
+     *  that still aren't progressing after being pinged.
      */
     private void killIfStillDud(List connections) {
-        //Take a snapshot of each connection, then send a ping.  Ideally we'd
-        //use a TTL of 1, but Gnotella doesn't respond with TTL's less than 2.
+        //Take a snapshot of each connection, then send a ping.
         //The horizon statistics for the connection are temporarily disabled
         //during this process.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
-        HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
-        for (Iterator iter=connections.iterator(); iter.hasNext();) {
+        HashMap /* Connection -> ConnectionState */ snapshot = new HashMap();
+        for (Iterator iter = connections.iterator(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-				continue; //e.g., Clip2 reflector
+            if (!c.isKillable())
+				continue;
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
-            RouterService.getMessageRouter().sendPingRequest(
-			    new PingRequest((byte)1), c);
+            RouterService.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
         }
         
-        //Wait a tiny amount of time.
-        try {
-            Thread.sleep(REEVALUATE_TIME);
-        } catch (InterruptedException e) { /* do nothing */ }
-
-        //Loop through all connections again.  This time, any that
-        //haven't made progress are killed.
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-				continue; //e.g., Clip2 reflector
-            c.setHorizonEnabled(true);
-            Object state=snapshot.get(c);
-            if (state==null)
-                continue;  //this is a new connection
-
-            ConnectionState currentState=new ConnectionState(c);
-            ConnectionState oldState=(ConnectionState)state;
-            if (currentState.notProgressedSince(oldState)) {
-                if(LOG.isWarnEnabled())
-                    LOG.warn("Killing connection: " + c);
-                //Got a dud; replace it.  Here we rely on the
-                //ConnectionManager to do the replacement.  A better
-                //policy might be to restart a new connection to c.
-                //TODO2: If replacing connections doesn't work well, we're
-                //probably too slow, so drop the KEEP_ALIVE.
-                RouterService.removeConnection(c);
-            }
-        }
-    }
-
-
-    /** 
-     * Loop forever, replacing old dud connections with new good ones. 
-     */
-    public void run() {
-		if(!ConnectionSettings.WATCHDOG_ACTIVE.getValue()) return;
-        try {
-            while (true) {
-                //We make fresh data structures every time through the loop to
-                //assure that no garbage connnections are retained.  (I'm not sure
-                //you can guarantee that calling clear() actually clears reference.)
-                List duds=findDuds();
-                if (duds.size() > 0) {
-                    killIfStillDud(duds);
-                }
-            }
-        } catch (Throwable t) {
-            ErrorService.error(t);
-        }
+        RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
     }
 
     /** Returns an iterator of all initialized connections in this, including
      *  leaf connecions. */
     private Iterator allConnections() {
-        List normal = 
-            RouterService.getConnectionManager().getInitializedConnections();
-        List leaves = 
-            RouterService.getConnectionManager().getInitializedClientConnections();
+        List normal = RouterService.getConnectionManager().getInitializedConnections();
+        List leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
 
-        List buf=new ArrayList(normal.size()+leaves.size());
+        List buf = new ArrayList(normal.size() + leaves.size());
         buf.addAll(normal);
         buf.addAll(leaves);
         return buf.iterator();
+    }
+    
+
+    
+    /**
+     * Determines if snapshots of connections are duds.
+     * If 'kill' is true, if they're a dud they're immediately clue.
+     * Otherwise, duds are queued up for additional checking.
+     * If no duds exist (or they were killed), findDuds() is started again.
+     */
+    private class DudChecker implements Runnable {
+        private Map snapshots;
+        private boolean kill;
+        
+        /**
+         * Constructs a new DudChecker with the snapshots of ConnectionStates.
+         * The checker may be used to kill the connections (if they haven't progressed)
+         * or to re-evaluate them later.
+         */
+        DudChecker(Map snapshots, boolean kill) {
+            this.snapshots = snapshots;
+            this.kill = kill;
+        }
+        
+        public void run() {
+            //Loop through all connections, trying to find ones that
+            //have not made sufficient progress. 
+            List potentials = kill ? Collections.EMPTY_LIST : new ArrayList();
+            for (Iterator iter=allConnections(); iter.hasNext(); ) {
+                ManagedConnection c = (ManagedConnection)iter.next();
+                if (!c.isKillable())
+    				continue;
+                c.setHorizonEnabled(true);
+                Object state = snapshots.get(c);
+                if (state == null)
+                    continue;  //this is a new connection
+    
+                ConnectionState currentState=new ConnectionState(c);
+                ConnectionState oldState=(ConnectionState)state;
+                if (currentState.notProgressedSince(oldState)) {
+                    if(kill) {
+                        if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {
+                            if(LOG.isWarnEnabled())
+                                LOG.warn("Killing connection: " + c);
+                            RouterService.removeConnection(c);
+                        }
+                    } else {
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Potential dud: " + c);
+                        potentials.add(c);
+                    }
+                }
+            }
+            
+            if(potentials.isEmpty())
+                findDuds();
+            else
+                killIfStillDud(potentials);
+        }
     }
 }
