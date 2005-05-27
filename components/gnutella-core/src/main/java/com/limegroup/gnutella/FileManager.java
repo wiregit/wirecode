@@ -1127,6 +1127,8 @@ public abstract class FileManager {
 	/**
 	 * Adds the given <tt>file</tt> as a file that should be
 	 * shareable once it is created.
+	 * <p>
+	 * Only adds files that are not in a shared directory.
 	 */
 	public void addFutureSharedFile(File file) {
 		if (isFileInCompletelySharedDirectory(file))
