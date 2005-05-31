@@ -1538,10 +1538,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if (good)
             cachedRFDs.add(rfd);
         
-        // it is possible to receive a HeadPong before starting the master thread 
-        if (dloaderManagerThread == null)
-            return;
-        
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -1555,7 +1551,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
         Assert.that(downloadSHA1 != null, "null hash.");
-        
         
         Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
         

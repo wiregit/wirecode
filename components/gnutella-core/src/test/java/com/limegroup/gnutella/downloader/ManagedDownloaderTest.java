@@ -405,11 +405,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
             super(files, new IncompleteFileManager(), null);
-            try {
-                PrivilegedAccessor.setValue(this, "dloaderManagerThread", new Thread());
-            } catch (Exception e) {
-                fail(e);
-            }
         }
 
         public QueryRequest newRequery2() throws CantResumeException {
