@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -27,7 +26,6 @@ import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -194,15 +192,18 @@ public class ExternalControl {
             try {
             	RouterService.download
                    	(urn,curOpt.getKT(),curOpt.getDN(),defaultURLs,false);//!overwrite
-            } catch ( AlreadyDownloadingException a ) {  
-                MessageService.showError(
-                    "ERROR_ALREADY_DOWNLOADING", a.getFilename());
-			} catch ( IllegalArgumentException il ) { 
+            }
+            catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
-			} catch (SaveLocationException sle) {
+			}
+			catch (SaveLocationException sle) {
 				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
                 MessageService.showError(
                     "ERROR_ALREADY_EXISTS", sle.getFile().getName());
+				}
+				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
+					MessageService.showError(
+		                    "ERROR_ALREADY_DOWNLOADING", sle.getFile().getName());	
 				}
 			}
 		}

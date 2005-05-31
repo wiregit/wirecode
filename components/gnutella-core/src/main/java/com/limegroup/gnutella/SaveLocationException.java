@@ -26,6 +26,11 @@ public class SaveLocationException extends IOException {
     public static final int NOT_A_DIRECTORY = 8;
     /** IOException or other filesystem error while setting save location. */
     public static final int FILESYSTEM_ERROR = 9;
+	/** 
+	 * Attempt to download the exact same file (urn, filename, size) while it is
+	 * already being downloaded.
+	 */
+	public static final int FILE_ALREADY_DOWNLOADING = 10;
     
 	/**
 	 * The error code of this exception.

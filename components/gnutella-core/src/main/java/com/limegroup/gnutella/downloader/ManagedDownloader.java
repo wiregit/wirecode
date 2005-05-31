@@ -1108,53 +1108,77 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     public boolean conflicts(RemoteFileDesc other) {
         try {
-            File otherFile=incompleteFileManager.getFile(other);
-            return conflicts(otherFile);
+            File otherFile = incompleteFileManager.getFile(other);
+            return conflictsWithIncompleteFile(otherFile);
         } catch(IOException ioe) {
             return false;
         }
     }
 
     /**
-     * Returns true if this is using (or could use) the given incomplete file.
+     * Returns true if this downloader is using (or could use) the given incomplete file.
      * @param incFile an incomplete file, which SHOULD be the return
-     *  value of IncompleteFileManager.getFile
+     * value of IncompleteFileManager.getFile
+     * <p>
+     * Follows the same order as {@link #initializeIncompleteFile()}.
      */
-    public boolean conflicts(File incFile) {
-        synchronized (this) {
-            //TODO3: this is stricter than necessary.  What if a location has
-            //been removed?  Tricky without global variables.  At the least we
-            //should return false if in COULDNT_DOWNLOAD state.
-            for (int i=0; i<allFiles.length; i++) {
-                RemoteFileDesc rfd=(RemoteFileDesc)allFiles[i];
-                try {
-                    File thisFile=incompleteFileManager.getFile(rfd);
-                    if (thisFile.equals(incFile))
-                        return true;
-                } catch(IOException ioe) {
-                    return false;
-                }
-            }
-        }
-        return false;
+    public boolean conflictsWithIncompleteFile(File incFile) {
+		
+		File iFile = incompleteFile;
+		if (iFile != null) {
+			return iFile.equals(incFile);
+		}
+
+		URN urn = downloadSHA1;
+		if (urn != null) {
+			iFile = incompleteFileManager.getFileForUrn(urn);
+		}
+		if (iFile != null) {
+			return iFile.equals(incFile);
+		}
+	
+		RemoteFileDesc rfd = null;
+		synchronized (this) {
+			if (allFiles != null && allFiles.length > 0) {
+				rfd = (RemoteFileDesc)allFiles[0];
+			}
+		}
+		if (rfd != null) {
+			try {
+				File thisFile = incompleteFileManager.getFile(rfd);
+				return thisFile.equals(incFile);
+			} catch(IOException ioe) {
+				return false;
+			}
+		}
+		return false;
+		
+
+		// old todo entry for this method
+		
+        //TODO3: this is stricter than necessary.  What if a location has
+        //been removed?  Tricky without global variables.  At the least we
+        //should return false if in COULDNT_DOWNLOAD state.
     }
 
-    public boolean conflicts(URN urn) {
-        Assert.that(urn!=null, "attempting to check conflicts with null urn");
-        File otherFile = incompleteFileManager.getFileForUrn(urn);
-        if(otherFile==null)
-            return false;
-        return conflicts(otherFile);
-    }
-	
+	/**
+	 * Returns <code>true</code> this downloader's urn matches the given urn
+	 * or if a downloader started for the triple (urn, fileName, fileSize) would
+	 * write to the same incomplete file as this downloader does.  
+	 * @param urn can be <code>null</code>, then the check is based upon fileName
+	 * and fileSize
+	 * @param fileName
+	 * @param fileSize
+	 * @return
+	 */
 	public boolean conflicts(URN urn, String fileName, int fileSize) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
-		if (fileSize > 0 && incompleteFile != null) {
+		if (fileSize > 0) {
 			// TODO fberger this will be there when merging
-//			File file = incompleteFileManager.getFile(fileSize, fileSize);
-//			return file.equals(incompleteFile);
+//			File file = incompleteFileManager.getFile(fileName, fileSize);
+//			return conflictsWithIncompleteFile(file);
 		}
 		return false;
 	}
@@ -1834,7 +1858,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		
 		// check if another existing download is being saved to this download
 		// we ignore the overwrite flag on purpose in this case
-		if (RouterService.getDownloadManager().conflicts(candidateFile)) {
+		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
 			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
 		}
          

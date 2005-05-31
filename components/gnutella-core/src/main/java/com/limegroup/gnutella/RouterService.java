@@ -21,7 +21,6 @@ import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -1393,8 +1392,6 @@ public class RouterService {
 	 * @param fileName can be null, then one of the filenames of the <code>files</code>
 	 * array is used
      * @return the download object you can use to start and resume the download
-     * @exception AlreadyDownloadingException the file is already being 
-     *  downloaded.
      * @throws SaveLocationException if there is an error when setting the final
      * file location of the download 
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
@@ -1402,7 +1399,7 @@ public class RouterService {
 	public static Downloader download(RemoteFileDesc[] files, 
 	                                  List alts, GUID queryGUID,
                                       boolean overwrite, File saveDir, String fileName)
-		throws AlreadyDownloadingException, SaveLocationException {
+		throws SaveLocationException {
 		return downloader.download(files, alts, queryGUID, overwrite, saveDir, fileName);
 	}
 	
@@ -1410,7 +1407,7 @@ public class RouterService {
 									  List alts,
 									  GUID queryGUID,
 									  boolean overwrite)
-		throws AlreadyDownloadingException, SaveLocationException {
+		throws SaveLocationException {
 		return download(files, alts, queryGUID, overwrite, null, null);
 	}	
 	
@@ -1421,14 +1418,14 @@ public class RouterService {
 	public static Downloader download(RemoteFileDesc[] files,
                                       GUID queryGUID, 
                                       boolean overwrite, File saveDir, String fileName)
-		throws AlreadyDownloadingException, SaveLocationException {
+		throws SaveLocationException {
 		return download(files, Collections.EMPTY_LIST, queryGUID,
 				overwrite, saveDir, fileName);
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files,
 									  boolean overwrite, GUID queryGUID) 
-		throws AlreadyDownloadingException, SaveLocationException {
+		throws SaveLocationException {
 		return download(files, queryGUID, overwrite, null, null);
 	}	
         
@@ -1448,23 +1445,19 @@ public class RouterService {
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
-     * @exception AlreadyDownloadingException couldn't download because the
-     *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
 	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite,
             File saveDir)
-			throws IllegalArgumentException, AlreadyDownloadingException, 
-			SaveLocationException {
+			throws IllegalArgumentException, SaveLocationException {
 		return downloader.download(urn, textQuery, filename, defaultURL, overwrite, 
 				saveDir);
 	}
 	
 	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite) 
-            throws IllegalArgumentException, AlreadyDownloadingException, 
-                   SaveLocationException { 
+            throws IllegalArgumentException, SaveLocationException { 
         return download(urn,textQuery,filename,defaultURL, overwrite, null);
     }
 	
@@ -1472,13 +1465,12 @@ public class RouterService {
 
    /**
      * Starts a resume download for the given incomplete file.
-     * @exception AlreadyDownloadingException couldn't download because the
-     *  another downloader is getting the file
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
+ * @throws SaveLocationException 
      */ 
     public static Downloader download(File incompleteFile)
-            throws AlreadyDownloadingException, CantResumeException {
+            throws CantResumeException, SaveLocationException {
         return downloader.download(incompleteFile);
     }
 

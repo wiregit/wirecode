@@ -1,10 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
-
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -77,7 +74,7 @@ public interface Downloader extends BandwidthTracker {
      * launches another query.  Otherwise does nothing and returns false. 
      *     @modifies this 
      */
-    public boolean resume() throws AlreadyDownloadingException;
+    public boolean resume();
     
     /**
      * Returns the file that this downloader is using.

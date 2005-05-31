@@ -87,7 +87,7 @@ public class ResumeDownloader extends ManagedDownloader
      * That is, any download that would use the same incomplete file is 
      * rejected, even if this is not currently downloading.
      */
-    public boolean conflicts(File incompleteFile) {
+    public boolean conflictsWithIncompleteFile(File incompleteFile) {
         return incompleteFile.equals(_incompleteFile);
     }
 
