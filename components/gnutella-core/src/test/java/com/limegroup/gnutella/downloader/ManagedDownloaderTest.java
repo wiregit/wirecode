@@ -161,9 +161,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	
     	
     	//and see if it behaves correctly
-    	PrivilegedAccessor.invokeMethod(
-    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
-				new Class[]{RemoteFileDesc.class,boolean.class});
+    	md.informMesh(rfd,true);
     	
     	//make sure the downloader did not get notified
     	assertFalse(fakeDownloader._addedFailed);
@@ -177,9 +175,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	fakeDownloader.setWantsFalts(true);
     	
     	//and see if it behaves correctly
-    	PrivilegedAccessor.invokeMethod(
-    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
-				new Class[]{RemoteFileDesc.class,boolean.class});
+    	md.informMesh(rfd,true);
     	
     	//make sure the downloader did get notified
     	assertFalse(fakeDownloader._addedFailed);
@@ -193,9 +189,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	//it should be sent to the other downloaders. 
     	fakeDownloader._addedSuccessfull=false;
     	
-    	PrivilegedAccessor.invokeMethod(
-    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(false)},
-				new Class[]{RemoteFileDesc.class,boolean.class});
+    	md.informMesh(rfd,false);
     	
     	//make sure the downloader did get notified
     	assertTrue(fakeDownloader._addedFailed);
@@ -411,6 +405,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
             super(files, new IncompleteFileManager(), null);
+            try {
+                PrivilegedAccessor.setValue(this, "dloaderManagerThread", new Thread());
+            } catch (Exception e) {
+                fail(e);
+            }
         }
 
         public QueryRequest newRequery2() throws CantResumeException {
