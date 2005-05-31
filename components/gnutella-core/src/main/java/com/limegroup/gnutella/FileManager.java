@@ -820,13 +820,17 @@ public abstract class FileManager {
 	 * Adds the given file to this, even if it exists outside of what is
 	 * currently accepted to be shared.
 	 */
-	public FileDesc addFileAlways(File file) {
+	public FileDesc addFileAlways(File file, List list) {
 		SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
-		return addFileIfShared(file);
+		return addFileIfShared(file, list);
 	}
     
+	public FileDesc addFileAlways(File file) {
+		return addFileAlways(file, Collections.EMPTY_LIST);
+	}
+	
     /**
      * The actual implementation of addFileIfShared(File)
      * @param file the file to add

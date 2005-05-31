@@ -2203,11 +2203,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
 
-        FileDesc fileDesc = 
-		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());  
-		
+        
+		FileDesc fileDesc = null;
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-			fileManager.addFutureSharedFile(getSaveFile());
+			fileDesc = fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+		}
+		else {
+		    fileDesc = fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 		}
 
 		// Add the alternate locations to the newly saved local file
