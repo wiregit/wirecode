@@ -1410,9 +1410,8 @@ public class DownloadTest extends BaseTestCase {
         LOG.info("-Testing swarming from two sources one based on alt...");
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
-        final int RATE=50;
+        final int RATE=5;
         final int STOP_AFTER = TestFile.length()/10 - 2;          
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
