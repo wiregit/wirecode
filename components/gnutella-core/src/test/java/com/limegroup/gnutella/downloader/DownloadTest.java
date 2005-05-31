@@ -1110,7 +1110,7 @@ public class DownloadTest extends BaseTestCase {
 			AlternateLocation.create(rfd2);
         ualt.add(al2);
 
-        uploader1.setAlternateLocations(ualt);
+        uploader1.setGoodAlternateLocations(ualt);
 
         tGeneric(rfds);
 
@@ -1145,7 +1145,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
         
-        uploader1.setAlternateLocations(alCol);
+        uploader1.setGoodAlternateLocations(alCol);
         
         RemoteFileDesc rfd = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         
@@ -1188,7 +1188,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
         
-        first.setAlternateLocations(alCol);
+        first.setGoodAlternateLocations(alCol);
         
         UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),first,guid);
@@ -1372,7 +1372,7 @@ public class DownloadTest extends BaseTestCase {
         
         alc.add(badPushLoc);
         
-        uploader1.setAlternateLocations(alc);
+        uploader1.setGoodAlternateLocations(alc);
         
         //add the push loc directly to the _incomming collection,
         //otherwise it doesn't get demoted
@@ -1437,39 +1437,32 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(al2);
         ualt.add(al3);
 
-        uploader1.setAlternateLocations(ualt);
+        uploader1.setGoodAlternateLocations(ualt);
 
         tGeneric(rfds);
 
 
         //Now let's check that the uploaders got the correct AltLocs.
-        //Uploader 1: Must have al3. al2 may either be demoted or removed
+        //Uploader 1: Must have al3. 
         //Uploader 1 got correct Alts?
         List alts = uploader1.incomingGoodAltLocs;
         assertTrue(alts.contains(al3));
-        assertEquals("Extra alts in u1",1,alts.size());
-        Iterator iter = alts.iterator();
-        while(iter.hasNext()) {
-            AlternateLocation loc = (AlternateLocation)iter.next();
-            if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.isDemoted());
-        }
+        
+        // al2 should have been sent to uploader1 as NAlt header
+        assertTrue(uploader1.incomingBadAltLocs.contains(al2));
 
+        // uploader3 should contain only al1
         alts = uploader3.incomingGoodAltLocs;
         assertTrue(alts.contains(al1));
-        iter = alts.iterator();
-        while(iter.hasNext()) {
-            AlternateLocation loc = (AlternateLocation)iter.next();
-            if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.isDemoted());
-        }
+        assertFalse(alts.contains(al2));
+        
         //Test Downloader has correct alts: the downloader should have
         //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
         AlternateLocationCollection coll = (AlternateLocationCollection)
         PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
         assertTrue(coll.contains(al1));
         assertTrue(coll.contains(al3));
-        iter = coll.iterator();
+        Iterator iter = coll.iterator();
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
@@ -1493,7 +1486,7 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
-        uploader1.setAlternateLocations(ualt);
+        uploader1.setGoodAlternateLocations(ualt);
 
         tGeneric(rfds);
         
@@ -1538,7 +1531,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation al4 = AlternateLocation.create(rfd4);
         ualt.add(al4);
 
-        uploader1.setAlternateLocations(ualt);
+        uploader1.setGoodAlternateLocations(ualt);
 
         tGeneric(rfds);
 
@@ -1903,7 +1896,7 @@ public class DownloadTest extends BaseTestCase {
 			AlternateLocation.create(rfd2);
         ualt.add(al2);
 
-        uploader1.setAlternateLocations(ualt);
+        uploader1.setGoodAlternateLocations(ualt);
 
         tGeneric(rfds);
 
@@ -2258,7 +2251,7 @@ public class DownloadTest extends BaseTestCase {
        AlternateLocation toBeDemoted = AlternateLocation.create(noFile);
        AlternateLocationCollection col = AlternateLocationCollection.create(TestFile.hash());
        col.add(toBeDemoted);
-       uploader1.setAlternateLocations(col);
+       uploader1.setGoodAlternateLocations(col);
        
        // create a listener for the headping
        UDPAcceptor l = new UDPAcceptor(10000);

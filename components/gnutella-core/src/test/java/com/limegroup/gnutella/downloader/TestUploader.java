@@ -73,7 +73,7 @@ public class TestUploader extends AssertComparisons {
     /** the boundary between stop/start to send corrupt bytes */
     private int corruptBoundary;
 
-	private AlternateLocationCollection storedAltLocs;
+	private AlternateLocationCollection storedGoodLocs,storedBadLocs;
 	public List incomingGoodAltLocs, incomingBadAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
@@ -287,7 +287,8 @@ public class TestUploader extends AssertComparisons {
      * Resets the rate, amount uploaded, stop byte, etc.
      */
     public void reset() {
-	    storedAltLocs   = null;//new AlternateLocationCollection();
+	    storedGoodLocs   = null;//new AlternateLocationCollection();
+	    storedBadLocs = null;
 	    incomingGoodAltLocs = null;//new AlternateLocationCollection();
         totalUploaded = 0;
         stopAfter = -1;
@@ -405,10 +406,13 @@ public class TestUploader extends AssertComparisons {
      * Store the alternate locations that this uploader knows about.
      * @param alts the alternate locations
      */
-    public void setAlternateLocations(AlternateLocationCollection alts) {
-        storedAltLocs = alts;
+    public void setGoodAlternateLocations(AlternateLocationCollection alts) {
+        storedGoodLocs = alts;
     }
     
+    public void setBadAlternateLocations(AlternateLocationCollection alts) {
+    	storedBadLocs = alts;
+    }
     /**
      * Sets the offset for the low chunk.
      */
@@ -774,13 +778,21 @@ public class TestUploader extends AssertComparisons {
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
 			out.write(str.getBytes());
 		}
-		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) {
+		if(storedGoodLocs != null && storedGoodLocs.hasAlternateLocations()) {
 
-            LOG.debug("Writing alternate location header:\n"+storedAltLocs+"\n");      
+            LOG.debug("Writing alternate location header:\n"+storedGoodLocs+"\n");      
             HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                  storedAltLocs, out);
+                                  storedGoodLocs, out);
         } else {
-            LOG.debug("Did not write alt locs:\n"+storedAltLocs+"\n");
+            LOG.debug("Did not write alt locs:\n"+storedGoodLocs+"\n");
+        }
+		if(storedBadLocs != null && storedBadLocs.hasAlternateLocations()) {
+
+            LOG.debug("Writing alternate location header:\n"+storedBadLocs+"\n");      
+            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
+                                  storedBadLocs, out);
+        } else {
+            LOG.debug("Did not write alt locs:\n"+storedBadLocs+"\n");
         }
         if(creationTime != null) {
             LOG.debug("Writing out Creation Time.");
