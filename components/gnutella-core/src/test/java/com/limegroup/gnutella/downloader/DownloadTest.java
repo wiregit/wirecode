@@ -35,6 +35,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.UDPService;
@@ -2304,8 +2305,9 @@ public class DownloadTest extends BaseTestCase {
         Downloader downloader = null;
         try {
             downloader = RouterService.download(rfds,false,null);
-        } catch (AlreadyDownloadingException adx) {
-            assertTrue("downloader already downloading??",false);
+        } catch (SaveLocationException sle) {
+            assertTrue("downloader already downloading??, error code: " + sle.getErrorCode(),
+					false);
         }
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
