@@ -1386,7 +1386,6 @@ public class DownloadTest extends BaseTestCase {
         
         assertFalse("bad pushloc got advertised",
                 uploader2.incomingGoodAltLocs.contains(badPushLoc));
-        
         assertEquals(1,uploader1.incomingGoodAltLocs.size());
         assertTrue(uploader1.incomingGoodAltLocs.contains(AlternateLocation.create(rfd2)));
         
@@ -1620,7 +1619,7 @@ public class DownloadTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
-        LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
+        LOG.info("-Testing that downloader does not add itself to the mesh if it has no tree");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1630,8 +1629,8 @@ public class DownloadTest extends BaseTestCase {
         List u2Alt = uploader2.incomingGoodAltLocs;
                     
         // neither uploader knows any alt locs.
-        assertNull(u1Alt);
-        assertNull(u2Alt);
+        assertTrue(u1Alt.isEmpty());
+        assertTrue(u2Alt.isEmpty());
 
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
@@ -1654,12 +1653,15 @@ public class DownloadTest extends BaseTestCase {
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
         
-        //both uploaders should know that this downloader is an alt loc.
+        //both uploaders should know that the other uploader is an alt loc.
         u1Alt = uploader1.incomingGoodAltLocs;
         u2Alt = uploader2.incomingGoodAltLocs;
-        assertTrue(u1Alt.isEmpty());
-        assertTrue(u2Alt.isEmpty());
+        assertEquals(1,u1Alt.size());
+        assertEquals(1,u2Alt.size());
+        assertTrue(u1Alt.contains(AlternateLocation.create(rfd2)));
+        assertTrue(u2Alt.contains(AlternateLocation.create(rfd1)));
 
+        // but should not know about me.
         AlternateLocation al = AlternateLocation.create(TestFile.hash());
         assertFalse( u1Alt.contains(al) );
         assertFalse( u2Alt.contains(al) );        
