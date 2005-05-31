@@ -57,7 +57,7 @@ public class VerifyingFile {
      *  downloads that will be required after we learn the chunk size from the TigerTree,
      *  since the chunk size will always be a power of two.
      */
-    static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
+    /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
     /**
      * The file we're writing to / reading from.
@@ -443,45 +443,43 @@ public class VerifyingFile {
      */
     private synchronized Interval leaseWhiteHelper(IntervalSet availableRanges, long chunkSize) throws NoSuchElementException {
         if (LOG.isDebugEnabled())
-            LOG.debug("leasing white, state: "+dumpState());
+            LOG.debug("leasing white, state:\n"+dumpState());
       
         // If ranges is null, make ranges represent the entire file
         if (availableRanges == null)
             availableRanges = IntervalSet.createSingletonSet(0, completedSize-1);
         
         // Figure out which blocks we still need to assign
-        IntervalSet neededBlocks = IntervalSet.createSingletonSet(0, completedSize-1);
-        neededBlocks.delete(verifiedBlocks);
-        neededBlocks.delete(leasedBlocks);
-        neededBlocks.delete(partialBlocks);
-        neededBlocks.delete(savedCorruptBlocks);
-        neededBlocks.delete(pendingBlocks);
-        /*
-        Interval ret = ranges.removeFirst();
+        IntervalSet neededBytes = IntervalSet.createSingletonSet(0, completedSize-1);
+        neededBytes.delete(verifiedBlocks);
+        neededBytes.delete(leasedBlocks);
+        neededBytes.delete(partialBlocks);
+        neededBytes.delete(savedCorruptBlocks);
+        neededBytes.delete(pendingBlocks);
+        
         if (LOG.isDebugEnabled())
-            LOG.debug(" freeblocks: "+ranges+" selected "+ret);
-        leaseBlock(ret);
-        if (chunkSize < 0)
-            return ret;
-        return alignInterval(ret, chunkSize);
-        */
+            LOG.debug("needed bytes: "+neededBytes);
         
         // Calculate previewLength and lastNeededByte
-        List neededBlockList = neededBlocks.getAllIntervalsAsList();
-        int neededIntervalCount = neededBlockList.size();
+        List neededByteList = neededBytes.getAllIntervalsAsList();
+        int neededIntervalCount = neededByteList.size();
         if (neededIntervalCount < 1)
             throw new NoSuchElementException();
         
-        long previewLength = ((Interval)neededBlockList.get(0)).low;
-        long lastNeededByte = ((Interval)neededBlockList.get(neededIntervalCount-1)).high;
+        long previewLength = ((Interval)neededByteList.get(0)).low;
+        long lastNeededByte = ((Interval)neededByteList.get(neededIntervalCount-1)).high;
         
         // Calculate the union of neededBlocks and availableBlocks
-        availableRanges.delete(neededBlocks.invert(completedSize-1));
+        availableRanges.delete(neededBytes.invert(completedSize));
         
         Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, 
                 lastNeededByte, chunkSize);
-        availableRanges.delete(ret);
+        
         leaseBlock(ret);
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing white interval "+ret+"\nof available intervals "+
+                    neededBytes);
         
         return ret;
     }
