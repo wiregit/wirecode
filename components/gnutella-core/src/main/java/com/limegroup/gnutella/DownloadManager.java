@@ -60,7 +60,6 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
 
 
-
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number 
  * of download slots given by the MAX_SIM_DOWNLOADS property.  It is
@@ -121,7 +120,6 @@ public class DownloadManager implements BandwidthTracker {
      * to connect back to us.
      */
     private static long UDP_PUSH_FAILTIME=5000;
-
 
     /** The global minimum time between any two requeries, in milliseconds.
      *  @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/

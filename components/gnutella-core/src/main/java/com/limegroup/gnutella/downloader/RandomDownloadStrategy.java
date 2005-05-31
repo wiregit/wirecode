@@ -155,6 +155,9 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             bestHigh -= bestHigh % blockSize;
             // Step back one byte from the boundary
             bestHigh -= 1;
+            
+            if (bestHigh > candidate.high)
+                bestHigh = candidate.high;
 
             // Is it after our random lower bound ?
             if (bestLow >= randomPoint) {

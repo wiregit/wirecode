@@ -49,77 +49,79 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
     
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
             long previewLength,
-            long lastNeededBlock,
+            long lastNeededByte,
             long blockSize) throws java.util.NoSuchElementException {
+        // Input validation
+        if (blockSize < 1)
+            throw new IllegalArgumentException("Block size cannot be "+blockSize);
+        if (previewLength < 0)
+            throw new IllegalArgumentException("Preview length must be >= 0, "+previewLength+"<0");
+        if (previewLength > lastNeededByte)
+            throw new IllegalArgumentException("Preview length greater than last needed byte "+
+                    previewLength+">"+lastNeededByte);
         
         // Determine if we should return a uniformly distributed Interval
         // or the first interval.
+        // Note that the specification for java.util.Random.nextFloat() explicitly states that
+        // the returned value will be strictly less than 1.0.  Therefore, if getBiasProbability()
+        // returns 1.0, nextFloat() < getBiasProbability() with probability 100%.  Other behavior
+        // indicates a bug in java.util.Random.
         if (SystemUtils.getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
-                || pseudoRandom.nextFloat() > getBiasProbability(previewLength, completedSize)) {
-            return super.pickAssignment(availableIntervals, previewLength, lastNeededBlock, blockSize);
+                || pseudoRandom.nextFloat() >= getBiasProbability(previewLength, completedSize)) {
+            return super.pickAssignment(availableIntervals, previewLength, lastNeededByte, blockSize);
         }
         
-        Iterator intervalIterator = availableIntervals.getAllIntervals();
-        // Get all of the ranges after a random place in the file
-        if (blockSize <= 0 && intervalIterator.hasNext()) {
-            // We're not picky about the block size or alignment.  This is the easy case
-            Interval ret = (Interval) intervalIterator.next();
-            //updateBounds(ret);
-            return ret;
-        } else {
-            // We care about alignment and block size... this is a bit more complicated
-            while (intervalIterator.hasNext()) {
-                Interval candidate = (Interval) intervalIterator.next();
-                
-                // Calculate what the high byte offset should be.
-                // This will be at most blockSize-1 bytes greater than the low.
-                // Skip ahead one block.
-                long alignedHigh = candidate.low+blockSize;
-                // Cut back to the aligned boundary.
-                alignedHigh -= alignedHigh % blockSize;
-                // Step back one byte from the boundary.
-                alignedHigh -= 1;
+        Interval candidate = availableIntervals.getFirst();
 
-                // Do we have a reasonable interval?
-                if (alignedHigh >= candidate.low) {
-                    // We've found our ideal location.  Log it and return
-                    Interval ret = candidate;
-                    if (ret.high != alignedHigh)
-                        ret = new Interval(candidate.low, alignedHigh);
-                    
-                    // Log it
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Non-random download, range="+ret+
-                                " out of choices "+availableIntervals);
-                    }
-                
-                    // return
-                    return ret;
-                } 
-            } // close of Iterator loop
-        }  // close of blockSize <= 0 if-else code block
+        // Calculate what the high byte offset should be.
+        // This will be at most blockSize-1 bytes greater than the low.
+        // Skip ahead one block.
+        long alignedHigh = candidate.low + blockSize;
+        // Cut back to the aligned boundary.
+        alignedHigh -= alignedHigh % blockSize;
+        // Step back one byte from the boundary.
+        alignedHigh -= 1;
+
+        // n % blockSize < blockSize
+        // Therefore (n % blockSize) + 1 <= blockSize
+        // Therefore n-blockSize-(n % blockSize)-1 >= n
+        // Therefore alignedHigh >= candidate.low, and we
+        // only have to check if alignedHigh > candidate.high.
+        if (alignedHigh > candidate.high) {
+            alignedHigh = candidate.high;
+        }
+
+        // Our ideal interval is [candidate.low, alignedHigh]
         
-        
-        // We've iterated over all available intervals, 
-        // and none are suitable.
-        throw new NoSuchElementException();
+        // Optimize away creation of new objects, if possible
+        Interval ret = candidate;
+        if (ret.high != alignedHigh)
+            ret = new Interval(candidate.low, alignedHigh);
+
+        // Log it
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Non-random download, range=" + ret + " out of choices "
+                    + availableIntervals);
+        }
+
+        // return
+        return ret;
     }
 
     
-    ///////////////////// Private Helper Methods /////////////////////////////////
+    /////////////////// Private Helper Methods /////////////////////////////
     
     /**
-     * Calculates the probability that the next block assigned should be guaranteed 
-     * to be from the beginning of the file.
+     * Calculates the probability that the next block assigned should be
+     * guaranteed to be from the beginning of the file. This is calculated as a
+     * step function that is at 100% until max(MIN_PREVIEW_BYTES,
+     * MIN_PREVIEW_FRACTION * completedSize), then drops down to 50% until
+     * MAX_PREVIEW_FRACTION of the file is downloaded. Above
+     * MAX_PREVIEW_FRACTION, the function returns 0%, indicating that a fully
+     * random downloading strategy should be used.
      * 
-     * This is calculated as a step function that is at 100% until 
-     * max(MIN_PREVIEW_BYTES, MIN_PREVIEW_FRACTION * completedSize), 
-     * then drops down to 50% until MAX_PREVIEW_FRACTION of the file is downloaded.  
-     * Above MAX_PREVIEW_FRACTION, the function returns 0%, indicating
-     * that a fully random downloading strategy should be used.
-     * 
-     * @return the probability that the next chunk should be forced to be downloaded 
-     * from the beginning of the file.
+     * @return the probability that the next chunk should be forced to be
+     *         downloaded from the beginning of the file.
      */
     private float getBiasProbability(long previewBytesDownloaded, long fileSize) {
         long goal = Math.max((long)MIN_PREVIEW_BYTES, (long)(MIN_PREVIEW_FRACTION * fileSize));
