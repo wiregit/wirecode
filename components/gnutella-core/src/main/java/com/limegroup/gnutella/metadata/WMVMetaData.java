@@ -35,5 +35,8 @@ public class WMVMetaData extends VideoMetaData {
         setLength(data.getLength());
         setWidth(data.getWidth());
         setHeight(data.getHeight());
+        
+        if(data.getWeedInfo() != null)
+            setLicenseType(data.getWeedInfo().getLicenseInfo());
     }
 }

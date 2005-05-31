@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.xml.sax.SAXException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,16 +34,10 @@ import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.NameValue;
 
 /**
- *  Stores a schema and a list of replies corresponding to that schema.
- *  <p>
- *  So when a search comes in, we only have to look at the set of replies
- *  that correspond to the schema of the query.
- * 
- *  Locking: Never obtain a this's monitor PRIOR to obtaining that of the
- *  FileManager.
- * @author Sumeet Thadani
+ * Maps LimeXMLDocuments for FileDescs in a specific schema.
  */
 
 public class LimeXMLReplyCollection {
@@ -60,7 +52,6 @@ public class LimeXMLReplyCollection {
     
     /**
      * A map of URN -> LimeXMLDocument for each shared file that contains XML.
-     * Each ReplyCollection is written out to one physical file on shutdown.
      *
      * SYNCHRONIZATION: Synchronize on mainMap when accessing, 
      *  adding or removing.
@@ -130,11 +121,8 @@ public class LimeXMLReplyCollection {
                 if(fd instanceof IncompleteFileDesc)
                     continue;
                 
-                if(mainMap.containsKey(fd.getSHA1Urn())) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Already had doc for: " + file);
+                if(mainMap.containsKey(fd.getSHA1Urn()))
                     continue;
-                }
                     
                 // If we have no documents for this FD, or the file-format only supports
                 // a single kind of metadata, construct a document.
@@ -142,11 +130,8 @@ public class LimeXMLReplyCollection {
                 // be multiple kinds of files every time.   
                 if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
                     LimeXMLDocument doc = constructDocument(file);
-                    if(doc == null) {
-                        if(LOG.isDebugEnabled())
-                            LOG.debug("Unable to construct document for: " + file);
+                    if(doc == null)
                         continue;
-                    }
                     
                     if(LOG.isDebugEnabled())
                         LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
@@ -164,38 +149,21 @@ public class LimeXMLReplyCollection {
     private void parseStoredMap(FileManager fm, Map hashToXML) {
         for(Iterator i = hashToXML.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
-            if(!(next.getKey() instanceof URN) || !(next.getValue() instanceof LimeXMLDocument)) {
-                if(LOG.isWarnEnabled())
-                    LOG.warn("Invalid entry: " + next);
+            if(!(next.getKey() instanceof URN) || !(next.getValue() instanceof LimeXMLDocument))
                 continue;
-            }
             
             URN urn = (URN)next.getKey();
             LimeXMLDocument doc = (LimeXMLDocument)next.getValue();
-            if(urn == null || doc == null) {
-                LOG.debug("Empty entry, ignoring.");
+            if(urn == null || doc == null)
                 continue;
-            } else if(LOG.isDebugEnabled())
-                LOG.debug("Looking for entry with URN: " + urn);
             
             FileDesc fd = fm.getFileDescForUrn(urn);
-            if(fd == null) {
-                LOG.debug("Ignoring no longer shared document.");
+            if(fd == null || fd instanceof IncompleteFileDesc)
                 continue;
-            }
-                
-            
-            if(fd instanceof IncompleteFileDesc) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Ignoring doc for IFD.  " + fd.getFile());
-                continue;
-            }
             
             doc = validate(doc, fd.getFile(), fd);
-            if(doc == null) {
-                LOG.debug("Unable to validate document, ignoring");
+            if(doc == null)
                 continue;
-            }
             
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding new document for file: " + fd.getFile() + ", doc: " + doc);
@@ -217,7 +185,7 @@ public class LimeXMLReplyCollection {
                 LOG.debug("reconstructing old document: " + file);
             LimeXMLDocument tempDoc = constructDocument(file);
             if (tempDoc != null)
-                doc = tempDoc;
+                doc = update(doc, tempDoc);
             else
                 doc.setCurrent();
         }
@@ -240,6 +208,33 @@ public class LimeXMLReplyCollection {
     }
     
     /**
+     * Updates an existing old document to be a newer document, but retains all fields
+     * that may have been in the old one that are not in the newer (for the case of
+     * existing annotations).
+     */
+    private LimeXMLDocument update(LimeXMLDocument older, LimeXMLDocument newer) {
+        Map fields = new HashMap();
+        for(Iterator i = newer.getNameValueSet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            fields.put(next.getKey(), next.getValue());
+        }
+        
+        for(Iterator i = older.getNameValueSet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            if(!fields.containsKey(next.getKey()))
+                fields.put(next.getKey(), next.getValue());
+        }
+
+        List nameValues = new ArrayList(fields.size());
+        for(Iterator i = fields.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            nameValues.add(new NameValue((String)next.getKey(), next.getValue()));
+        }
+        return new LimeXMLDocument(nameValues, newer.getSchemaURI());
+     }
+        
+    
+    /**
      * Creates a LimeXMLDocument from the file.  
      * @return null if the format is not supported or parsing fails,
      *  <tt>LimeXMLDocument</tt> otherwise.
@@ -256,19 +251,6 @@ public class LimeXMLReplyCollection {
             }
         }
         
-        return null;
-    }
-    
-    /**
-     * Constructs a LimeXMLDocument from a really old serialized XML doc as a String.
-     */
-    private LimeXMLDocument constructDocument(String string) {
-        try {
-            return new LimeXMLDocument(string);
-        } catch(SAXException ignored) {
-        } catch(SchemaNotFoundException ignored) {
-        } catch(IOException ignored) {
-        }
         return null;
     }
 

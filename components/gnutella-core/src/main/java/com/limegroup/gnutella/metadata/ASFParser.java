@@ -40,7 +40,7 @@ public class ASFParser {
     private static final int TYPE_INT = 3;
     private static final int TYPE_LONG = 4;
     
-    private String _album, _artist, _title, _year, _copyright, _rating, _genre, _comment, _price;
+    private String _album, _artist, _title, _year, _copyright, _rating, _genre, _comment;
     private short _track = -1;
     private int _bitrate = -1, _length = -1, _width = -1, _height = -1;
     private boolean _hasAudio, _hasVideo;
@@ -54,7 +54,6 @@ public class ASFParser {
     String getRating() { return _rating; }
     String getGenre() { return _genre; }
     String getComment() { return _comment; }
-    String getPrice() { return _price; }
     short getTrack() { return _track; }
     int getBitrate() { return _bitrate; }
     int getLength() { return _length; }
@@ -237,7 +236,6 @@ public class ASFParser {
                 _comment = _weed.getDescription();
             if(_weed.getCollection() != null)
                 _album = _weed.getCollection();
-            _price = _weed.getPrice();
         } catch(IllegalArgumentException ignored) {
             LOG.warn("Invalid encryption info: " + xml, ignored);
         }

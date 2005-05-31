@@ -9,6 +9,9 @@ import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
+/**
+ * Encapsulates video metadata.  Subclasses must implement parseFile.
+ */
 public abstract class VideoMetaData extends MetaData {
     
 	private String title;
@@ -19,47 +22,40 @@ public abstract class VideoMetaData extends MetaData {
 	private String license;
     private int width = -1;
     private int height = -1;
-
-	public static final String ISO_LATIN_1 = "8859_1";
-
-	public static final String UNICODE = "Unicode";
+    private String licensetype;
 
 	public static String schemaURI = "http://www.limewire.com/schemas/video.xsd";
-
-	public static final String KEY_PREFIX = "videos" + XMLStringUtils.DELIMITER
-			+ "video" + XMLStringUtils.DELIMITER;
-
-	public static final String TITLE_KEY = KEY_PREFIX + "title"
-			+ XMLStringUtils.DELIMITER;
-
-	public static final String YEAR_KEY = KEY_PREFIX + "year"
-			+ XMLStringUtils.DELIMITER;
-
-	public static final String LENGTH_KEY = KEY_PREFIX + "length"
-			+ XMLStringUtils.DELIMITER;
-
-	public static final String LANGUAGE_KEY = KEY_PREFIX + "language"
-			+ XMLStringUtils.DELIMITER;
-
-	public static final String COMMENTS_KEY = KEY_PREFIX + "comments"
-			+ XMLStringUtils.DELIMITER;
-
-	public static final String LICENSE_KEY = KEY_PREFIX + "license"
-			+ XMLStringUtils.DELIMITER;
     
-    public static final String HEIGHT_KEY = KEY_PREFIX + "width"
-            + XMLStringUtils.DELIMITER;
-    
-    public static final String WIDTH_KEY = KEY_PREFIX + "height"
-            + XMLStringUtils.DELIMITER;
+    private static final String DLM = XMLStringUtils.DELIMITER;
+    private static final String KPX = "videos" + DLM + "video" + DLM;
 
+	public static final String TITLE_KEY = KPX + "title" + DLM;
+	public static final String YEAR_KEY = KPX + "year" + DLM;
+	public static final String LENGTH_KEY = KPX + "length" + DLM;
+	public static final String LANGUAGE_KEY = KPX + "language" + DLM;
+	public static final String COMMENTS_KEY = KPX + "comments" + DLM;
+	public static final String LICENSE_KEY = KPX + "license" + DLM;
+    public static final String HEIGHT_KEY = KPX + "width" + DLM;
+    public static final String WIDTH_KEY = KPX + "height" + DLM;
+    public static final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
+
+    /**
+     * Constructs a blank VideoMetaData object.
+     */
     protected VideoMetaData() throws IOException {
     }
 
+    /**
+     * Parses the file for data.
+     */
 	public VideoMetaData(File f) throws IOException {
 		parseFile(f);
 	}
 
+    /**
+     * Parses video metadata out of the file if this is a known video file.
+     * Otherwise returns null.
+     */
 	public static VideoMetaData parseVideoMetaData(File file)
 			throws IOException {
 		if (LimeXMLUtils.isRIFFFile(file))
@@ -82,6 +78,7 @@ public abstract class VideoMetaData extends MetaData {
     public String getLicense() { return license; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
+    public String getLicenseType() { return licensetype; }
 
     void setTitle(String title) { this.title = title; }
     void setYear(String year) { this.year = year; }
@@ -91,6 +88,7 @@ public abstract class VideoMetaData extends MetaData {
     void setLicense(String license) { this.license = license; }
     void setWidth(int width) { this.width = width; }
     void setHeight(int height) { this.height = height; }
+    void setLicenseType(String licensetype) { this.licensetype = licensetype; }
 	
     /**
      * Determines if all fields are valid.
@@ -103,7 +101,9 @@ public abstract class VideoMetaData extends MetaData {
             && isValid(language)
             && isValid(license)
             && isValid(width)
-            && isValid(height);
+            && isValid(height)
+            && isValid(licensetype)
+            ;
     }
 	
 	public List toNameValueList() {
@@ -116,6 +116,7 @@ public abstract class VideoMetaData extends MetaData {
         add(list, license, LICENSE_KEY);
         add(list, width, WIDTH_KEY);
         add(list, height, HEIGHT_KEY);
+        add(list, licensetype, LICENSE_TYPE_KEY);
         return list;
 	}
     

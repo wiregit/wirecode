@@ -47,7 +47,6 @@ public class WMAMetaData extends AudioMetaData {
         setLength(data.getLength());
         setGenre(data.getGenre());
         setLicense(data.getCopyright());
-        setPrice(data.getPrice());
         
         if(data.getWeedInfo() != null)
             setLicenseType(data.getWeedInfo().getLicenseInfo());

@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.metadata.WeedInfo;
 
 /**
  * A factory for constructing Licenses based on licenses.
@@ -32,29 +33,38 @@ public final class LicenseFactory {
      * the license, returns null.
      */
     public static License create(String licenseString) {
+        if(licenseString == null)
+            return null;
+        
         if(LOG.isTraceEnabled())
             LOG.trace("Attempting to create license from: " + licenseString);
         
-        URI licenseURI = getLicenseURI(licenseString);
-        // no verification location?  no license.
-        if(licenseURI == null) {
-            LOG.warn("Unable to locate licenseURI, bailing");
-            if(licenseString != null)
-                return new BadLicense(licenseString);
-            else
-                return null;
-        } else if(LOG.isDebugEnabled())
-            LOG.debug("Creating license from URI: " + licenseURI);
+        License license = null;
+        URI uri = getLicenseURI(licenseString);
+        license = LicenseCache.instance().getLicense(licenseString, uri);
+        if(license != null)
+            return license;
         
-        // See if we have a cached license before we create a new one.
-        License license = LicenseCache.instance().getLicense(licenseString, licenseURI);
-        // no cached? create a new one.
-        if(license == null) {
-            LOG.debug("No cached license, creating new.");
-            license = new CCLicense(licenseString, licenseURI);
-        }
+        if(isCCLicense(licenseString))
+            return new CCLicense(licenseString, uri);
+        
+        if(isWeedLicense(licenseString))
+            return new WeedLicense(uri);
+            
+        if(licenseString != null)
+            return new BadLicense(licenseString);
 
-        return license;
+        return null;
+    }
+    
+    /** Determines if the given string can be a CC license. */
+    private static boolean isCCLicense(String s) {
+        return s.indexOf(CCConstants.URL_INDICATOR) != -1;
+    }
+    
+    /** Determines if the given string can be a Weed license. */
+    private static boolean isWeedLicense(String s) {
+        return s.indexOf(WeedInfo.LAINFO) != -1;
     }
     
     /**
@@ -70,7 +80,24 @@ public final class LicenseFactory {
     static URI getLicenseURI(String license) {
         if(license == null)
             return null;
+            
+        // Look for CC first.
+        URI uri = getCCLicenseURI(license);
         
+        // Then Weed.
+        if(uri == null)
+            uri = getWeedLicenseURI(license);
+            
+        // ADD MORE LICENSES IN THE FORM OF
+        // if( uri == null)
+        //      uri = getXXXLicenseURI(license)
+        // AS WE UNDERSTAND MORE...
+        
+        return uri;
+    }
+        
+    /** Gets a CC license URI from the given license string. */
+    private static URI getCCLicenseURI(String license) {
         // find where the URL should begin.
         int verifyAt = license.indexOf(CCConstants.URL_INDICATOR);
         if(verifyAt == -1)
@@ -100,6 +127,40 @@ public final class LicenseFactory {
         }
         
         return uri;
+    }
+    
+    /** Gets a Weed license URI from the given license string. */
+    private static URI getWeedLicenseURI(String license) {
+        int lainfo = license.indexOf(WeedInfo.LAINFO);
+        if(lainfo == -1)
+            return null;
+            
+        int cidx = license.indexOf(WeedInfo.CID);
+        int vidx = license.indexOf(WeedInfo.VID);
+        
+        if(cidx == -1 || vidx == -1)
+            return null;
+        cidx += WeedInfo.CID.length();
+        vidx += WeedInfo.VID.length();
+            
+        int cend = license.indexOf(" ", cidx);
+        int vend = license.indexOf(" ", vidx);
+        if(cend == -1 && vend == -1) // one or the other must be set.
+            return null;
+        if(cend == -1)
+            cend = license.length();
+        if(vend == -1)
+            vend = license.length();
+        
+        String cid = license.substring(cidx, cend).trim();
+        String vid = license.substring(vidx, vend).trim();
+        String location = "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
+        try {
+            return new URI(location.toCharArray());
+        } catch(URIException e) {
+            LOG.error("Unable to create URI", e);
+            return null;
+        }
     }
 }
        

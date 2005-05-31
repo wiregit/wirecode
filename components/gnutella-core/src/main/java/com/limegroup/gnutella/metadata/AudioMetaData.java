@@ -22,8 +22,7 @@ import com.limegroup.gnutella.xml.XMLStringUtils;
 import com.limegroup.gnutella.licenses.CCConstants;
 
 /**
- * Simple class to encapsulate information about ID3 tags.
- * Can write the data to a NameValue list or an XML string.
+ * Encapsulates audio metadata.  Subclasses must implement parseFile.
  */
 public abstract class AudioMetaData extends MetaData {
     private String title ;
@@ -115,7 +114,6 @@ public abstract class AudioMetaData extends MetaData {
     public int getBitrate() { return bitrate; }
     public int getLength() { return length; }
     public String getLicense() { return license; }
-    public String getPrice() { return price; }
     public String getLicenseType() { return licensetype; }
     
     void setPrice(String price)  { this.price = price; }
@@ -135,37 +133,6 @@ public abstract class AudioMetaData extends MetaData {
     void setLicenseType(String licensetype) { this.licensetype = licensetype; }
     
     /**
-     * Updates this' information with data's information
-     * for any fields that are currently unspecified.
-     */
-    void merge(AudioMetaData data) {
-        if(!isValid(title))
-            title = data.title;
-        if(!isValid(artist))
-            artist = data.artist;
-        if(!isValid(album))
-            album = data.album;
-        if(!isValid(year))
-            year = data.year;
-        if(!isValid(comment))
-            comment = data.comment;
-        if(!isValid(track))
-            track = data.track;
-        if(!isValid(genre))
-            genre = data.genre;
-        if(!isValid(bitrate))
-            bitrate = data.bitrate;
-        if(!isValid(length))
-            length = data.length;
-        if(!isValid(license))
-            license = data.license;
-        if(!isValid(price))
-            price = data.price;
-        if(!isValid(licensetype))
-            licensetype = data.licensetype;
-    }
-    
-    /**
      * Determines if all fields are valid.
      */
     public boolean isComplete() {
@@ -179,7 +146,6 @@ public abstract class AudioMetaData extends MetaData {
             && isValid(bitrate)
             && isValid(length)
             && isValid(license)
-            && isValid(price)
             && isValid(licensetype);
     }
 
@@ -198,7 +164,6 @@ public abstract class AudioMetaData extends MetaData {
         add(list, bitrate, BITRATE_KEY);
         add(list, length, SECONDS_KEY);
         add(list, license, LICENSE_KEY);
-        add(list, price, PRICE_KEY);
         add(list, licensetype, LICENSE_TYPE_KEY);
         return list;
     }
