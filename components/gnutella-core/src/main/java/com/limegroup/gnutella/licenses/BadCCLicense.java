@@ -8,14 +8,16 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.ErrorService;
 
 /**
- * A bad license (unverifiable).
+ * A bad Creative Commons license (unverifiable).
  */
-public class BadLicense implements License {
+public class BadCCLicense implements License {
     
     private String license;
+    private String name;
     
-    public BadLicense(String license) {
+    public BadCCLicense(String license, String name) {
         this.license = license;
+        this.name = name;
     }
     
     /**
@@ -34,12 +36,14 @@ public class BadLicense implements License {
     public String getLicense() { return license; }
     public void verify(VerificationListener listener) {}
     public long getLastVerifiedTime() { return 0; }
+    public String getLicenseName() { return name; }
     
-    public License copy(String license, URI licenseURI) {
-        BadLicense newL = null;
+    public License copy(String license, URI licenseURI, String name) {
+        BadCCLicense newL = null;
         try {
-            newL = (BadLicense)clone();
+            newL = (BadCCLicense)clone();
             newL.license = license;
+            newL.name = name;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }

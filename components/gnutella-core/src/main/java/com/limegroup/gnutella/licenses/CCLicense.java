@@ -74,12 +74,16 @@ class CCLicense implements License, Serializable, Cloneable {
      */
     private Map /* URN -> Details */ allWorks;
     
+    /** The license name. */
+    private transient String licenseName;
+    
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri) {
+    CCLicense(String license, URI uri, String name) {
         this.license = license;
         this.licenseLocation = uri;
+        this.licenseName = name;
     }
     
     
@@ -113,6 +117,8 @@ class CCLicense implements License, Serializable, Cloneable {
     public URI getLicenseURI() {
         return licenseLocation;
     }
+    
+    public String getLicenseName() { return licenseName; }
 
     /**
      * Attempts to guess what the license URI is from the license text.
@@ -132,12 +138,13 @@ class CCLicense implements License, Serializable, Cloneable {
      * Returns a CCLicense exactly like this, except
      * with a different license string.
      */
-    public License copy(String license, URI licenseURI) {
+    public License copy(String license, URI licenseURI, String licenseName) {
         CCLicense newL = null;
         try {
             newL = (CCLicense)clone();
             newL.license = license;
             newL.licenseLocation = licenseURI;
+            newL.licenseName = licenseName;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }

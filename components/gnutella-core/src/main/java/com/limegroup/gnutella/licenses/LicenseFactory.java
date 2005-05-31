@@ -16,16 +16,34 @@ public final class LicenseFactory {
     
     private static final Log LOG = LogFactory.getLog(LicenseFactory.class);
     
+    public static final String WEED_NAME = "Weed License";
+    public static final String CC_NAME = "Creative Commons License";
+    
     private LicenseFactory() {}
     
     /**
      * Checks if the specified license-URI is valid for the given URN
      * without doing any expensive lookups.
+     *
+     * The URI must have been retrieved via getLicenseURI.
+     *
      */
     public static boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
         return uri != null && LicenseCache.instance().isVerifiedAndValid(urn, uri);
-    }    
+    }
+    
+    /**
+     * Gets the name associated with this license string.
+     */
+    public static String getLicenseName(String licenseString) {
+        if(isCCLicense(licenseString))
+            return CC_NAME;
+        else if(isWeedLicense(licenseString))
+            return WEED_NAME;
+        else
+            return null;
+    }
     
     /**
      * Returns a License for the given license string, if one
@@ -41,18 +59,21 @@ public final class LicenseFactory {
         
         License license = null;
         URI uri = getLicenseURI(licenseString);
-        license = LicenseCache.instance().getLicense(licenseString, uri);
-        if(license != null)
-            return license;
+        if(uri != null) {
+            license = LicenseCache.instance().getLicense(licenseString, uri, getLicenseName(licenseString));
+            if(license != null)
+                return license;
+        }
         
-        if(isCCLicense(licenseString))
-            return new CCLicense(licenseString, uri);
+        if(isCCLicense(licenseString)) {
+            if(uri != null)
+                return new CCLicense(licenseString, uri, CC_NAME);
+            else
+                return new BadCCLicense(licenseString, CC_NAME);
+        }
         
         if(isWeedLicense(licenseString))
-            return new WeedLicense(uri);
-            
-        if(licenseString != null)
-            return new BadLicense(licenseString);
+            return new WeedLicense(uri, WEED_NAME);
 
         return null;
     }

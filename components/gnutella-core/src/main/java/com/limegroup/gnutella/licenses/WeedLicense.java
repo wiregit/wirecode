@@ -77,11 +77,15 @@ class WeedLicense implements License, Serializable, Cloneable {
     /** Whether or not the license is valid. */
     private boolean valid;
     
+    /** The license name. */
+    private transient String licenseName;
+    
     /**
      * Constructs a new WeedLicense.
      */
-    WeedLicense(URI uri) {
+    WeedLicense(URI uri, String name) {
         this.licenseLocation = uri;
+        this.licenseName = name;
     }
     
     public boolean isVerifying() {
@@ -92,8 +96,10 @@ class WeedLicense implements License, Serializable, Cloneable {
         return verified == VERIFIED;
     }
     
+    public String getLicenseName() { return licenseName; }
+    
     public String getLicense() {
-        return "This is a Weed License.";
+        return "Play, Buy, Share";
     }
     
     /**
@@ -125,11 +131,12 @@ class WeedLicense implements License, Serializable, Cloneable {
     /**
      * Returns a new WeedLicense with a different URI.
      */
-    public License copy(String license, URI licenseURI) {
+    public License copy(String license, URI licenseURI, String name) {
         WeedLicense newL = null;
         try {
             newL = (WeedLicense)clone();
             newL.licenseLocation = licenseURI;
+            newL.licenseName = name;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }
