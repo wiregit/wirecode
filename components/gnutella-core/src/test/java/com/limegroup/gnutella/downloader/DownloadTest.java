@@ -1374,10 +1374,6 @@ public class DownloadTest extends BaseTestCase {
         
         uploader1.setGoodAlternateLocations(alc);
         
-        //add the push loc directly to the _incomming collection,
-        //otherwise it doesn't get demoted
-        PrivilegedAccessor.setValue(uploader1,"incomingAltLocs",alc);
-        
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
         RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
         
