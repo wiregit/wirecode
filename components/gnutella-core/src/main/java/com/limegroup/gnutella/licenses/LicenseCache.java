@@ -74,10 +74,10 @@ class LicenseCache {
      * Retrieves the cached license for the specified URI, substituting
      * the license string for a new one.
      */
-    synchronized License getLicense(String licenseString, URI licenseURI, String name) {
+    synchronized License getLicense(String licenseString, URI licenseURI) {
         License license = (License)licenses.get(licenseURI);
         if(license != null)
-            return license.copy(licenseString, licenseURI, name);
+            return license.copy(licenseString, licenseURI);
         else
              return null;
     }

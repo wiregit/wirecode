@@ -86,7 +86,7 @@ public interface License {
     /**
      * Returns a copy of this license with a new 'license' string and URI.
      */
-    public License copy(String license, URI licenseURI, String licenseName);
+    public License copy(String license, URI licenseURI);
     
     /**
      * Gets the name of this license.

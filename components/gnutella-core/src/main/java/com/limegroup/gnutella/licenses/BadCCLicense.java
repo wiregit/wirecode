@@ -10,19 +10,19 @@ import com.limegroup.gnutella.ErrorService;
 /**
  * A bad Creative Commons license (unverifiable).
  */
-public class BadCCLicense implements License {
+public class BadCCLicense implements NamedLicense {
     
     private String license;
     private String name;
     
-    public BadCCLicense(String license, String name) {
+    public BadCCLicense(String license) {
         this.license = license;
-        this.name = name;
     }
     
-    /**
-     * Attempts to guess what the license URI is from the license text.
-     */    
+    /** Sets the license name. */
+    public void setLicenseName(String name) { this.name = name; }
+    
+    /** Attempts to guess what the license URI is from the license text. */    
     private URL guessLicenseDeed() {
         return CCConstants.guessLicenseDeed(license);
     }    
@@ -38,12 +38,11 @@ public class BadCCLicense implements License {
     public long getLastVerifiedTime() { return 0; }
     public String getLicenseName() { return name; }
     
-    public License copy(String license, URI licenseURI, String name) {
+    public License copy(String license, URI licenseURI) {
         BadCCLicense newL = null;
         try {
             newL = (BadCCLicense)clone();
             newL.license = license;
-            newL.name = name;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }

@@ -29,9 +29,6 @@ public final class CCConstants {
      */
     public static final String URL_INDICATOR = "verify at";
     
-    /** The name to use for the licenses. */
-    static final String LICENSE_NAME = "Creative Commons License";
-    
     /**
      * Guesses a license deed URL from a license string.
      */

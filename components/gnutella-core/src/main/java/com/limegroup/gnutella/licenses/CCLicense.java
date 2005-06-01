@@ -1,12 +1,7 @@
 package com.limegroup.gnutella.licenses;
 
-import java.io.StringReader;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.ObjectInputStream;
-
-import java.net.URL;
-import java.net.MalformedURLException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,20 +10,18 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
 
+import java.net.URL;
+import java.net.MalformedURLException;
+
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
-import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,63 +29,28 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.DOMException;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * A concrete implementation of a License, for Creative Commons licenses.
  */
-class CCLicense implements License, Serializable, Cloneable {
+class CCLicense extends AbstractLicense {
     
     private static final Log LOG = LogFactory.getLog(CCLicense.class);
     
-    private static final ProcessingQueue VQUEUE = new ProcessingQueue("CCLicense");
-    
     private static final long serialVersionUID = 8213994964631107858L;
     
-    /**
-     * Whether or not this license has been verified.
-     */
-    private transient int verified = UNVERIFIED;
-    
-    /**
-     * The URI where verification will be performed.
-     */
-    private transient URI licenseLocation;
-    
-    /**
-     * The license string.
-     */
+    /** The license string. */
     private transient String license;
     
-    /**
-     * The last time this license was verified.
-     */
-    private long lastVerifiedTime;    
-    
-    /**
-     * The license information for each Work.
-     */
+    /** The license information for each Work. */
     private Map /* URN -> Details */ allWorks;
-    
-    /** The license name. */
-    private transient String licenseName;
     
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri, String name) {
+    CCLicense(String license, URI uri) {
+        super(uri);
         this.license = license;
-        this.licenseLocation = uri;
-        this.licenseName = name;
-    }
-    
-    
-    public boolean isVerifying() {
-        return verified == VERIFYING;
-    }
-    
-    public boolean isVerified() {
-        return verified == VERIFIED;
     }
     
     public String getLicense() {
@@ -109,16 +67,6 @@ class CCLicense implements License, Serializable, Cloneable {
         else
             return details.licenseURL;
     }
-    
-    public long getLastVerifiedTime() {
-        return lastVerifiedTime;
-    }
-    
-    public URI getLicenseURI() {
-        return licenseLocation;
-    }
-    
-    public String getLicenseName() { return licenseName; }
 
     /**
      * Attempts to guess what the license URI is from the license text.
@@ -138,26 +86,16 @@ class CCLicense implements License, Serializable, Cloneable {
      * Returns a CCLicense exactly like this, except
      * with a different license string.
      */
-    public License copy(String license, URI licenseURI, String licenseName) {
+    public License copy(String license, URI licenseURI) {
         CCLicense newL = null;
         try {
             newL = (CCLicense)clone();
             newL.license = license;
             newL.licenseLocation = licenseURI;
-            newL.licenseName = licenseName;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }
         return newL;
-    }
-    
-    /**
-     * Assume that all serialized licenses were verified.
-     * (Otherwise they wouldn't have been serialized.
-     */
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
-        verified = VERIFIED;
     }
     
     /**
@@ -214,43 +152,16 @@ class CCLicense implements License, Serializable, Cloneable {
     /**
      * Erases all data associated with a verification.
      */
-    private void clear() {
+    protected void clear() {
         if(allWorks != null)
             allWorks.clear();
     }
-    
-    /**
-     * Starts verification of the license.
-     *
-     * The listener is notified when verification is finished.
-     */
-    public void verify(VerificationListener listener) {
-        verified = VERIFYING;
-        clear();
-        VQUEUE.add(new Verifier(listener));
-    }
 
     /**
-     * Retrieves the body of a URL.
-     *
-     * Returns null if the page could not be found.
+     * Locates the RDF from the body of the URL.
      */
     protected String getBody(String url) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Contacting: " + url);
-        
-        HttpClient client = HttpClientManager.getNewClient();
-        GetMethod get = new GetMethod(url);
-        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
-        try {
-            HttpClientManager.executeMethodRedirecting(client, get);
-            return get.getResponseBodyAsString();
-        } catch(IOException ioe) {
-            LOG.warn("Can't contact license server: " + url, ioe);
-            return null;
-        } finally {
-            get.releaseConnection();
-        }
+        return locateRDF(super.getBody(url));
     }
     
     ///// WORK & DETAILS CODE ///
@@ -387,39 +298,17 @@ class CCLicense implements License, Serializable, Cloneable {
         
         // Alright, we got where the rdf is at!
         return body.substring(startRDF, endRDF + 1);
-    }
-    
-    /**
-     * Verifies the body of the verification page.
-     *
-     * If 'parseWork' is true, this looks for works.  Otherwise
-     * it looks only for Licenses.
-     */
-    protected void doVerification(String body, boolean parseWork) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Attempting to verify: " + body);
-            
-        String rdf = locateRDF(body);
-        if(rdf == null)
-            return;
+    }   
 
-        DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(rdf));
-        try {
-            parser.parse(is);
-        } catch (IOException ioe) {
-            LOG.debug("IOX parsing RDF\n" + rdf, ioe);
-            return;
-        } catch (SAXException saxe) {
-            LOG.debug("SAX parsing RDF\n" + rdf, saxe);
-            return;
-        }
-        
-        Node doc = parser.getDocument().getDocumentElement();
+    /**
+     * Parses through the XML.  If this is live data, we look for works.
+     * Otherwise (it isn't from the verifier), we only look for licenses.
+     */
+    protected void parseDocumentNode(Node doc, boolean liveData) {
         NodeList children = doc.getChildNodes();
         
         // Do a first pass for Work elements.
-        if(parseWork) {
+        if(liveData) {
             for(int i = 0; i < children.getLength(); i++) {
                 Node child = (Node)children.item(i);
                 if(child.getNodeName().equals("Work"))
@@ -433,6 +322,11 @@ class CCLicense implements License, Serializable, Cloneable {
             if(child.getNodeName().equals("License"))
                 parseLicenseItem(child);
         }
+        
+        // If this was from the verifier, see if we need to get any more
+        // license details.
+        if(liveData)
+            updateLicenseDetails();
             
         return;
     }
@@ -581,41 +475,20 @@ class CCLicense implements License, Serializable, Cloneable {
                 if(data != null && data instanceof String) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Using cached data for url: " + url);
-                    body = (String)data;
+                    body = locateRDF((String)data);
                 } else {
-                    body = locateRDF(getBody(url));
+                    body = getBody(url);
                     if(body != null)
                         LicenseCache.instance().addData(url, body);
                     else
                         LOG.debug("Couldn't retrieve license details from url: " + url);
                 }
                 
-                // verification MUST NOT alter allWorks,
+                // parsing MUST NOT alter allWorks,
                 // otherwise a ConcurrentMod will happen
                 if(body != null)
-                    doVerification(body, false);
+                    parseXML(body, false);
              }
-        }
-    }
-    
-    /**
-     * Runnable that actually does the verification.
-     */
-    private class Verifier implements Runnable {
-        private final VerificationListener vc;
-        
-        Verifier(VerificationListener listener) {
-            vc = listener;
-        }
-        
-        public void run() {
-            doVerification(getBody(licenseLocation.toString()), true);
-            lastVerifiedTime = System.currentTimeMillis();
-            updateLicenseDetails();
-            verified = VERIFIED;
-            LicenseCache.instance().addVerifiedLicense(CCLicense.this);
-            if(vc != null)
-                vc.licenseVerified(CCLicense.this);
         }
     }
 }

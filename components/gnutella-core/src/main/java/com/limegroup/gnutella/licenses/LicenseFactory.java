@@ -59,23 +59,28 @@ public final class LicenseFactory {
         
         License license = null;
         URI uri = getLicenseURI(licenseString);
-        if(uri != null) {
-            license = LicenseCache.instance().getLicense(licenseString, uri, getLicenseName(licenseString));
-            if(license != null)
-                return license;
+        
+        // Try to get a cached version, first.
+        if(uri != null)
+            license = LicenseCache.instance().getLicense(licenseString, uri);
+        
+        // If the cached version didn't exist, try to make one.
+        if(license == null) {
+            if(isCCLicense(licenseString)) {
+                if(uri != null)
+                    license = new CCLicense(licenseString, uri);
+                else
+                    license = new BadCCLicense(licenseString);
+            } else if(isWeedLicense(licenseString)) {
+                license = new WeedLicense(uri);
+            }
         }
         
-        if(isCCLicense(licenseString)) {
-            if(uri != null)
-                return new CCLicense(licenseString, uri, CC_NAME);
-            else
-                return new BadCCLicense(licenseString, CC_NAME);
-        }
-        
-        if(isWeedLicense(licenseString))
-            return new WeedLicense(uri, WEED_NAME);
+        // If we managed to get one, and it's a NamedLicense, try and set its name.
+        if(license != null && license instanceof NamedLicense)
+            ((NamedLicense)license).setLicenseName(getLicenseName(licenseString));
 
-        return null;
+        return license;
     }
     
     /** Determines if the given string can be a CC license. */
