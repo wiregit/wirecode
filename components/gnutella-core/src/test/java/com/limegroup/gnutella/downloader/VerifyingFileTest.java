@@ -95,23 +95,50 @@ public class VerifyingFileTest extends BaseTestCase {
      * @throws Exception
      */
     public void testLeaseDifferentSizes() throws Exception {
-        Interval leased = vf.leaseWhite(100000);
-        assertEquals(99999, leased.high);
+        long fileSize = completeFile.length();
+        // KAM -- I think the intetion was to use DEFAULT_CHUNK_SIZE
+        // rather than hard-coding the old 100,000 byte value.
+        // However, running at least one test with a block size that 
+        // isn't a power of two has a certain appeal for testing.
+        Interval firstLease = vf.leaseWhite(100000);
+        if (firstLease.high % 100000 != 99999 &&
+                firstLease.high != fileSize-1) {
+            assertTrue("First chunk is not aligned.", false);
+        }
+        
+        // These tests have been re-arranged to go in order of
+        // decreasing chunk size in order to reduce the number
+        // of cases that need to be checked.
+        
+        // TODO KAM -- not really sure why this is relavant, but I have
+        // modified the test to test what the javadoc claims to test
+        Interval secondLease = vf.leaseWhite(512*1024+1);
+        if (secondLease.high % (512 * 1024 + 1) != 512*1024 &&
+                secondLease.high != firstLease.low-1 &&
+                secondLease.high != fileSize-1) {
+             assertTrue("Failed to assign a 512k+1 aligned chunk.",
+                     false);
+         }
+        
+        // now assume the chunk size is 512K
+        Interval leased = vf.leaseWhite(512*1024);
+        if (leased.high % (512 * 1024) != 512*1024-1 &&
+               leased.high != firstLease.low-1 &&
+               leased.high != secondLease.low-1 &&
+               leased.high != fileSize-1) {
+            assertTrue("Failed to assign a 512k-aligned chunk.",
+                    false);
+        }
         
         // now lease assuming the chunk size is 256K
         leased = vf.leaseWhite(256*1024);
-        assertEquals(100000, leased.low);
-        assertEquals(256*1024-1, leased.high);
-        
-        // now assume the chunk size is 512K
-        leased = vf.leaseWhite(512*1024);
-        assertEquals(256*1024, leased.low);
-        assertEquals(512*1024-1, leased.high);
-        
-        // if we say the chunk size is 512K +1b, the interval will be singular
-        leased = vf.leaseWhite(512*1024+1);
-        assertEquals(512*1024,leased.low);
-        assertEquals(leased.low,leased.high);
+        if (leased.high % (256 * 1024) != 256*1024-1 &&
+               leased.high != firstLease.low-1 &&
+               leased.high != secondLease.low-1 &&
+               leased.high != fileSize-1) {
+            assertTrue("Failed to assign a 256k-aligned chunk.",
+                    false);
+        } 
     }
     
     /**
@@ -238,6 +265,8 @@ public class VerifyingFileTest extends BaseTestCase {
      * tests that corrupt data does not get written to disk
      */
     public void testCorruptChunks() throws Exception {
+        // This test assumes a sequential download strategy
+        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
         vf.leaseWhite((int)completeFile.length());
         byte [] chunk = new byte[hashTree.getNodeSize()];
         

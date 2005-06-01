@@ -57,8 +57,15 @@ public class TestPredeterminedRandom extends Random {
      */
     public synchronized void setFloats(float[] floats) {
         ArrayList /* of Float */floatList = new ArrayList();
-        for (int i = 0; i < floats.length; i++)
+        for (int i = 0; i < floats.length; i++) {
+            // Check for conformity to the Random specification
+            if (floats[i] < 0.0f || floats[i] >= 1.0f) {
+                throw new IllegalArgumentException(
+                        "Attempt to set float outside the legal "+
+                        "range [0.0f 1.0f) :"+floats[i]);
+            }
             floatList.add(new Float(floats[i]));
+        }
         floatIterator = floatList.iterator();
     }
 

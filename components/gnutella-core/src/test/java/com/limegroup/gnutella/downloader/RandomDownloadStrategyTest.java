@@ -10,6 +10,21 @@ import java.util.NoSuchElementException;
 
 public class RandomDownloadStrategyTest extends BaseTestCase {
 
+    /** Smallest number that can be subtracted from 1.0f 
+     * and get something different from 1.0f.  Note that
+     * this differs slightly from the standard IEE 754
+     * definition of EPSILON by using subtraction instead
+     * of addition.
+     */
+    private static float EPSILON;
+    static {
+        float epsilon = 1.0f;
+        while((1.0f-epsilon)!=1.0f) {
+            EPSILON = epsilon;
+            epsilon /= 2.0f;
+        }
+    }
+    
     public RandomDownloadStrategyTest(String s) {
         super(s);
     }
@@ -95,7 +110,7 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         // Run the above test, but use setFloat to ensure
         // randomLocations[0] is random rather than aligned
         // with the beginning of the file
-        prng.setFloat(1.0f);
+        prng.setFloat(1.0f-EPSILON);
         availableBytes = IntervalSet.createSingletonSet(0,fileSize-1);
         availableBytes.delete(new Interval(gap1));
         availableBytes.delete(new Interval(gap2));
