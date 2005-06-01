@@ -1022,7 +1022,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
-			// TODO fberger 
+			// TODO fberger see if this is correct
             incompleteFile = 
                 incompleteFileManager.getFile(getSaveFile().getName(),
 						downloadSHA1,getContentLength());
@@ -1181,9 +1181,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 			return urn.equals(downloadSHA1);
 		}
 		if (fileSize > 0) {
-			// TODO fberger this will be there when merging
-//			File file = incompleteFileManager.getFile(fileName, fileSize);
-//			return conflictsWithIncompleteFile(file);
+			try {
+				File file = incompleteFileManager.getFile(fileName, null, fileSize);
+				return conflictsWithIncompleteFile(file);
+			} catch (IOException e) {
+			}
+
 		}
 		return false;
 	}
