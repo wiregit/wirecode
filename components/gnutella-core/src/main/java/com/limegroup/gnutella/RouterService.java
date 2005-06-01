@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -20,9 +20,7 @@ import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.FileExistsException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -52,7 +50,6 @@ import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -1348,10 +1345,7 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static FileDesc[] getSharedFileDescriptors(File directory) {
-        if( directory == null )
-            return fileManager.getAllSharedFileDescriptors();
-        else
-            return fileManager.getSharedFileDescriptors(directory);
+		return fileManager.getSharedFileDescriptors(directory);
     }
     
     /** 
@@ -1374,33 +1368,50 @@ public class RouterService {
      *
      * @param files a group of "similar" files to smart download
      * @param alts a List of secondary RFDs to use for other sources
-     * @param overwrite true iff the download should proceded without
+     * @param queryGUID guid of the query that returned the results (i.e. files)
+	 * @param overwrite true iff the download should proceedewithout
      *  checking if it's on disk
-     * @param the guid of the query that returned the results (i.e. files)
+	 * @param saveDir can be null, then the download directory from the settings
+	 * is used
+	 * @param fileName can be null, then one of the filenames of the <code>files</code>
+	 * array is used
      * @return the download object you can use to start and resume the download
-     * @exception AlreadyDownloadingException the file is already being 
-     *  downloaded.
-     * @exception FileExistsException the file already exists in the library
+     * @throws SaveLocationException if there is an error when setting the final
+     * file location of the download 
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
-	                                  List alts,
-	                                  boolean overwrite,
-                                      GUID queryGUID)
-		throws FileExistsException, AlreadyDownloadingException, 
-  			   java.io.FileNotFoundException {
-		return downloader.download(files, alts, overwrite, queryGUID);
+	                                  List alts, GUID queryGUID,
+                                      boolean overwrite, File saveDir, String fileName)
+		throws SaveLocationException {
+		return downloader.download(files, alts, queryGUID, overwrite, saveDir, fileName);
 	}
+	
+	public static Downloader download(RemoteFileDesc[] files, 
+									  List alts,
+									  GUID queryGUID,
+									  boolean overwrite)
+		throws SaveLocationException {
+		return download(files, alts, queryGUID, overwrite, null, null);
+	}	
 	
 	/**
 	 * Stub for calling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
+	 * @throws SaveLocationException 
 	 */
 	public static Downloader download(RemoteFileDesc[] files,
-                                      boolean overwrite, GUID queryGUID)
-		throws FileExistsException, AlreadyDownloadingException, 
-  			   java.io.FileNotFoundException {
-		return download(files, Collections.EMPTY_LIST, overwrite, queryGUID);
+                                      GUID queryGUID, 
+                                      boolean overwrite, File saveDir, String fileName)
+		throws SaveLocationException {
+		return download(files, Collections.EMPTY_LIST, queryGUID,
+				overwrite, saveDir, fileName);
 	}
+	
+	public static Downloader download(RemoteFileDesc[] files,
+									  boolean overwrite, GUID queryGUID) 
+		throws SaveLocationException {
+		return download(files, queryGUID, overwrite, null, null);
+	}	
         
 
     /*
@@ -1418,26 +1429,32 @@ public class RouterService {
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      *
-     * @exception AlreadyDownloadingException couldn't download because the
-     *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
-    public static synchronized Downloader download(URN urn, String textQuery,
+	public static synchronized Downloader download(URN urn, String textQuery,
+            String filename, String [] defaultURL, boolean overwrite,
+            File saveDir)
+			throws IllegalArgumentException, SaveLocationException {
+		return downloader.download(urn, textQuery, filename, defaultURL, overwrite, 
+				saveDir);
+	}
+	
+	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite) 
-            throws IllegalArgumentException, AlreadyDownloadingException, 
-                                                          FileExistsException { 
-        return downloader.download(urn,textQuery,filename,defaultURL,overwrite);
+            throws IllegalArgumentException, SaveLocationException { 
+        return download(urn,textQuery,filename,defaultURL, overwrite, null);
     }
+	
+	
 
    /**
      * Starts a resume download for the given incomplete file.
-     * @exception AlreadyDownloadingException couldn't download because the
-     *  another downloader is getting the file
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
+ * @throws SaveLocationException 
      */ 
     public static Downloader download(File incompleteFile)
-            throws AlreadyDownloadingException, CantResumeException {
+            throws CantResumeException, SaveLocationException {
         return downloader.download(incompleteFile);
     }
 

@@ -198,7 +198,7 @@ public class DownloadWorker implements Runnable {
         
         // if we'll be debugging, we want to distinguish the different workers
         if (LOG.isDebugEnabled()) {
-            _myThread.setName("DownloadWorker for "+_manager.getFileName()+
+            _myThread.setName("DownloadWorker for "+_manager.getSaveFile().getName() +
                     " #"+ _myThread.hashCode() );
         }
         

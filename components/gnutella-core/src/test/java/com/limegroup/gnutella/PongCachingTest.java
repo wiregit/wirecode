@@ -135,7 +135,7 @@ public final class PongCachingTest extends BaseTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*", "18.239.0.*"});
         ConnectionSettings.PORT.setValue(SERVER_PORT);
-        SharingSettings.setDirectories(new File[0]);
+        SharingSettings.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);

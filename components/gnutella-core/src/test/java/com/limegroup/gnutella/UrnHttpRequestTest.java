@@ -62,7 +62,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		final File TEMP_DIR = new File("temp");
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
-		SharingSettings.setDirectories(new File[] {TEMP_DIR});
+		SharingSettings.setSharedDirectories(new File[] {TEMP_DIR});
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 		String dirString = "com/limegroup/gnutella";
 		File testDir = CommonUtils.getResourceFile(dirString);

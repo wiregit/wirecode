@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.DownloadManager;
@@ -40,9 +39,9 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -53,12 +52,10 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -68,11 +65,7 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -178,7 +171,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
       The download can finish in one of the following states:
           h) COMPLETE (download completed just fine)
           i) ABORTED  (user pressed stopped at some point)
-          j) DISK_PROBLEM (limewire couldn't the file)
+          j) DISK_PROBLEM (limewire couldn't manipulate the file)
           k) CORRUPT_FILE (the file was corrupt)
 
      There are a few intermediary states:
@@ -261,14 +254,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
     private Set cachedRFDs;
-	
+
 	/**
 	 * The ranker used to select the next host we should connect to
 	 */
 	private SourceRanker ranker;
 
     /**
-     * The maximum amount of times we'll try to recover.
+     * The maximum number of times we'll try to recover.
      */
     private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
 
@@ -398,9 +391,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
     protected File incompleteFile;
-    /** The fully-qualified name of the downloaded file when this completes, or
-     *  null if we haven't started downloading. Used for previewing purposes. */
-    private File completeFile;
+   
+    /** Absolute File where the download will be stored when complete. Null indicates the default name and save location.*/
+    private File saveFile;
+   
     /**
      * The position of the downloader in the uploadQueue */
     private int queuePosition;
@@ -511,6 +505,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     
     protected static final String DEFAULT_FILENAME = "defaultFileName";
     protected static final String FILE_SIZE = "fileSize";
+    /**
+	 * The key under which the saveFile File is stored in the attribute map
+     * used in serializing and deserializing ManagedDownloaders. 
+	 */
+    protected static final String SAVE_FILE = "saveFile";
 
 
     /**
@@ -522,9 +521,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * @param ifc the repository of incomplete files for resuming
      * @param originalQueryGUID the guid of the original query.  sometimes
      * useful for WAITING_FOR_USER state.  can be null.
+	 * @throws SaveLocationException
      */
     public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-                             GUID originalQueryGUID) {
+                             GUID originalQueryGUID, File saveDirectory, 
+                             String fileName, boolean overwrite) 
+		throws SaveLocationException {
+		this(files, ifc, originalQueryGUID);
+		setSaveFile(saveDirectory, fileName, overwrite);
+    }
+	
+	public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+							 GUID originalQueryGUID) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -532,13 +540,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 			throw new NullPointerException("null incomplete file manager");
 		}
         this.cachedRFDs = new HashSet();
-		if (files != null) {
-			cachedRFDs.addAll(Arrays.asList(files));
-            if (files.length > 0) 
-                initPropertiesMap(files[0]);
-            else
-                propertiesMap = Collections.EMPTY_MAP;
-        }
+		cachedRFDs.addAll(Arrays.asList(files));
+		if (files.length > 0) 
+			initPropertiesMap(files[0]);
+		else
+			propertiesMap = Collections.EMPTY_MAP;
+
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
         this.deserializedFromDisk = false;
@@ -548,7 +555,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         propertiesMap = new HashMap();
         propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
         propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
-        propertiesMap = Collections.unmodifiableMap(propertiesMap);
     }
     
     /** 
@@ -568,7 +574,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-        
+
+		// If appropriate, serialize saveFile
+		if (saveFile != null) {
+			propertiesMap.put(SAVE_FILE, saveFile);
+		}
+
         stream.writeObject(propertiesMap);
     }
 
@@ -605,6 +616,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             propertiesMap = (Map)map;
         else if (propertiesMap == null)
             propertiesMap = Collections.EMPTY_MAP; 
+
+		// set saveFile
+		saveFile = (File)propertiesMap.get(SAVE_FILE);
     }
 
     /** 
@@ -667,7 +681,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         }
         
         try {
-            initializeFilesAndFolders();
+            //initializeFilesAndFolders();
             initializeIncompleteFile();
             initializeVerifyingFile();
         }catch(IOException bad) {
@@ -744,7 +758,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         ranker.stop();
         
         if(LOG.isTraceEnabled())
-            LOG.trace("MD completing <" + getFileName() + 
+            LOG.trace("MD completing <" + getSaveFile().getName() + 
                       "> completed download, state: " +
                       getState() + ", numQueries: " + numQueries +
                       ", lastQuerySent: " + lastQuerySent);
@@ -786,7 +800,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             setState(WAITING_FOR_USER);
         
         if(LOG.isTraceEnabled())
-            LOG.trace("MD completed <" + getFileName() +
+            LOG.trace("MD completed <" + getSaveFile().getName() +
                       "> completed download, state: " + 
                       getState() + ", numQueries: " + numQueries);
     }
@@ -914,6 +928,22 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     }
     
     /**
+     * Determines if this can have its saveLocation changed.
+     */
+    public boolean isRelocatable() {
+        if (isInactive())
+            return true;
+        switch (getState()) {
+        case CONNECTING:
+        case DOWNLOADING:
+        case REMOTE_QUEUED:
+            return true;
+        default:
+            return false;
+        }
+    }
+    
+    /**
      * Determines if this is in an 'active' downloading state.
      */
     public boolean isActive() {
@@ -992,8 +1022,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
+			// TODO fberger 
             incompleteFile = 
-                incompleteFileManager.getFile(getFileName(),downloadSHA1,getContentLength());
+                incompleteFileManager.getFile(getSaveFile().getName(),
+						downloadSHA1,getContentLength());
         }
     }
     
@@ -1082,44 +1114,80 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      */
     public boolean conflicts(RemoteFileDesc other) {
         try {
-            File otherFile=incompleteFileManager.getFile(other);
-            return conflicts(otherFile);
+            File otherFile = incompleteFileManager.getFile(other);
+            return conflictsWithIncompleteFile(otherFile);
         } catch(IOException ioe) {
             return false;
         }
     }
 
     /**
-     * Returns true if this is using (or could use) the given incomplete file.
-     * @param incompleteFile an incomplete file, which SHOULD be the return
-     *  value of IncompleteFileManager.getFile
+     * Returns true if this downloader is using (or could use) the given incomplete file.
+     * @param incFile an incomplete file, which SHOULD be the return
+     * value of IncompleteFileManager.getFile
+     * <p>
+     * Follows the same order as {@link #initializeIncompleteFile()}.
      */
-    public boolean conflicts(File incFile) {
-        synchronized (this) {
-            //TODO3: this is stricter than necessary.  What if a location has
-            //been removed?  Tricky without global variables.  At the least we
-            //should return false if in COULDNT_DOWNLOAD state.
-            for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
-                RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
-                try {
-                    File thisFile=incompleteFileManager.getFile(rfd);
-                    if (thisFile.equals(incFile))
-                        return true;
-                } catch(IOException ioe) {
-                    return false;
-                }
-            }
-        }
-        return false;
+    public boolean conflictsWithIncompleteFile(File incFile) {
+		File iFile = incompleteFile;
+		if (iFile != null) {
+			return iFile.equals(incFile);
+		}
+		URN urn = downloadSHA1;
+		if (urn != null) {
+			iFile = incompleteFileManager.getFileForUrn(urn);
+		}
+		if (iFile != null) {
+			return iFile.equals(incFile);
+		}
+	
+		RemoteFileDesc rfd = null;
+		synchronized (this) {
+			if (!hasRFD()) {
+				return false;
+			}
+			rfd = (RemoteFileDesc)cachedRFDs.iterator().next();
+		}
+		if (rfd != null) {
+			try {
+				File thisFile = incompleteFileManager.getFile(rfd);
+				return thisFile.equals(incFile);
+			} catch(IOException ioe) {
+				return false;
+			}
+		}
+		return false;
+		
+
+		// old todo entry for this method
+		
+        //TODO3: this is stricter than necessary.  What if a location has
+        //been removed?  Tricky without global variables.  At the least we
+        //should return false if in COULDNT_DOWNLOAD state.
     }
 
-    public boolean conflicts(URN urn) {
-        Assert.that(urn!=null, "attempting to check conflicts with null urn");
-        File otherFile = incompleteFileManager.getFileForUrn(urn);
-        if(otherFile==null)
-            return false;
-        return conflicts(otherFile);
-    }
+	/**
+	 * Returns <code>true</code> this downloader's urn matches the given urn
+	 * or if a downloader started for the triple (urn, fileName, fileSize) would
+	 * write to the same incomplete file as this downloader does.  
+	 * @param urn can be <code>null</code>, then the check is based upon fileName
+	 * and fileSize
+	 * @param fileName
+	 * @param fileSize
+	 * @return
+	 */
+	public boolean conflicts(URN urn, String fileName, int fileSize) {
+		if (urn != null && downloadSHA1 != null) {
+			return urn.equals(downloadSHA1);
+		}
+		if (fileSize > 0) {
+			// TODO fberger this will be there when merging
+//			File file = incompleteFileManager.getFile(fileName, fileSize);
+//			return conflictsWithIncompleteFile(file);
+		}
+		return false;
+	}
+	
 
     /////////////////////////////// Requery Code ///////////////////////////////
 
@@ -1142,9 +1210,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     protected synchronized QueryRequest newRequery(int numRequeries)
       throws CantResumeException {
 		    
-        String queryString = StringUtils.createQueryString(getFileName());
+        String queryString = StringUtils.createQueryString(getDefaultFileName());
         if(queryString == null || queryString.equals(""))
-            throw new CantResumeException(getFileName());
+            throw new CantResumeException(getSaveFile().getName());
         else
             return QueryRequest.createQuery(queryString);
             
@@ -1704,7 +1772,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             return null;
             
         if(state == COMPLETE)
-            return completeFile;
+            return getSaveFile();
         else
             return incompleteFile;
     }
@@ -1746,9 +1814,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                 return null;
             return file;
         }
-        //b) Otherwise, choose completed file.
+        //c) Otherwise, choose completed file.
         else {
-            return completeFile;
+            return getSaveFile();
         }
     }
 
@@ -1756,9 +1824,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     /** 
      * Returns the amount of the file written on disk that can be safely
      * previewed. 
-     * 
-     * @param incompleteFile the file to examine, which MUST correspond to
-     *  the current download.
      */
     private synchronized int amountForPreview() {
         //And find the first block.
@@ -1774,7 +1839,67 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         return 0;//Nothing to preview!
     }
 
+    /** Sets the file name and directory where the download will be saved once complete 
+     * 
+     * @param overwrite true if overwriting an existing file is allowed
+     * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
+     */
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
+        if (saveDirectory == null)
+            saveDirectory = SharingSettings.getSaveDirectory();
+        if (fileName == null)
+            fileName = getDefaultFileName();
+        
+        if (!saveDirectory.isDirectory()) {
+            if (saveDirectory.exists())
+                throw new SaveLocationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
+            throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
+        }
+        
+        File candidateFile = new File(saveDirectory, fileName);
+        try {
+            if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
+                throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
+        } catch (IOException e) {
+            throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
+        }
 
+        if (! FileUtils.setWriteable(saveDirectory))    
+            throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
+     
+        if (candidateFile.exists()) {
+            if (!candidateFile.isFile())
+                throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
+            if (!overwrite)
+                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
+        }
+		
+		// check if another existing download is being saved to this download
+		// we ignore the overwrite flag on purpose in this case
+		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
+			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+		}
+         
+        // Passed sanity checks, so save file
+        synchronized (this) {
+            if (!isRelocatable())
+                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
+            saveFile = candidateFile;
+        }
+    }
+   
+    /** 
+     * This method is used to determine where the file will be saved once downloaded.
+     *
+     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
+     */
+    public synchronized File getSaveFile() {
+        if (saveFile != null)
+            return saveFile;
+        
+        return new File(SharingSettings.getSaveDirectory(), getDefaultFileName());
+    }  
+    
     //////////////////////////// Core Downloading Logic /////////////////////
 
     /**
@@ -1831,7 +1956,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                 
                 // if we were stopped due to corrupt download, cleanup
                 if (corruptState == CORRUPT_STOP_STATE) {
-                    cleanupCorrupt(incompleteFile, completeFile.getName());
+                    // TODO is this really what cleanupCorrupt expects?
+                    cleanupCorrupt(incompleteFile, getSaveFile().getName());
                     status = CORRUPT_FILE;
                 }
             }
@@ -1934,7 +2060,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // as our hash.
         URN fileHash = scanForCorruption();
         if (corruptState == CORRUPT_STOP_STATE) {
-            cleanupCorrupt(incompleteFile, completeFile.getName());
+            // TODO is this what cleanup Corrupt expects?
+            cleanupCorrupt(incompleteFile, getSaveFile().getName());
             return CORRUPT_FILE;
         }
         
@@ -2006,37 +2133,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     }
 
     /**
-     * initialize the directory where the file is to be saved.
-     */
-    private void initializeFilesAndFolders() throws IOException{
-        
-        //1. Verify it's safe to download.  Filename must not have "..", "/",
-        //etc.  We check this by looking where the downloaded file will end up.
-        //The completed filename is chosen somewhat arbitrarily from the first
-        //file; see case (b) of getFileName() and
-        //MagnetDownloader.getFileName().
-        //    incompleteFile is picked using an arbitrary RFD, since
-        //IncompleteFileManager guarantees that any "same" files will get the
-        //same temporary file.
-        
-        File saveDir;
-        String fileName = getFileName();
-        
-        try {
-            saveDir = SharingSettings.getSaveDirectory();
-            completeFile = new File(saveDir, fileName);
-            String savePath = FileUtils.getCanonicalPath(saveDir);
-            String completeFileParentPath = 
-                FileUtils.getCanonicalPath(completeFile.getAbsoluteFile().getParentFile());
-            if (!savePath.equals(completeFileParentPath))
-                throw new IOException();
-        } catch (IOException e) {
-            ErrorService.error(e);
-            throw e;
-        }
-    }
-    
-    /**
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
@@ -2051,17 +2147,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     /**
      * Saves the file to disk.
      */
-    private int saveFile(URN fileHash) {
+    private int saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( SAVING );
         
         //4. Move to library.
         // Make sure we can write into the complete file's directory.
-        File completeFileDir = FileUtils.getParentFile(completeFile);
-        FileUtils.setWriteable(completeFileDir);
-        FileUtils.setWriteable(completeFile);
+        if (!FileUtils.setWriteable(getSaveFile().getParentFile()))
+            return DISK_PROBLEM;
+        saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
-        completeFile.delete();
+        saveFile.delete();
 
         //Try moving file.  If we couldn't move the file, i.e., because
         //someone is previewing it or it's on a different volume, try copy
@@ -2071,7 +2167,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         //because IFM.purge() is called frequently in DownloadManager.
         
         // First attempt to rename it.
-        boolean success = FileUtils.forceRename(incompleteFile,completeFile);
+        boolean success = FileUtils.forceRename(incompleteFile,saveFile);
             
         // If that didn't work, we're out of luck.
         if (!success)
@@ -2081,8 +2177,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         
         //Add file to library.
         // first check if it conflicts with the saved dir....
-        if (fileExists(completeFile))
-            fileManager.removeFileIfShared(completeFile);
+        if (fileExists(saveFile))
+            fileManager.removeFileIfShared(saveFile);
 
         //Add the URN of this file to the cache so that it won't
         //be hashed again when added to the library -- reduces
@@ -2090,9 +2186,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if(fileHash != null) {
             Set urns = new HashSet(1);
             urns.add(fileHash);
-            File file = completeFile;
+            File file = saveFile;
             try {
-                file = FileUtils.getCanonicalFile(completeFile);
+                file = FileUtils.getCanonicalFile(saveFile);
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
@@ -2108,8 +2204,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             }
         }
 
-        FileDesc fileDesc = 
-		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+        
+		FileDesc fileDesc = null;
+		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
+			fileDesc = fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+		else
+		    fileDesc = fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
 		// Add the alternate locations to the newly saved local file
 		if(validAlts != null && fileDesc != null)
@@ -2130,7 +2230,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 			// in their original headers
             addLocationsToFile(validAlts, fileDesc);
 			//tell the library we have alternate locations
-			callback.handleSharedFileUpdate(completeFile);
+			callback.handleSharedFileUpdate(getSaveFile());
         }
     }
     
@@ -2628,17 +2728,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         }
     }
     
-    public synchronized String getFileName() {       
+    protected synchronized String getDefaultFileName() {       
         //Return the most specific information possible.  Case (b) is critical
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
-        if ( fileName == null) {
-            Assert.that(false,"defaultFileName is null, "+
-                        "subclass may have not overridden getFileName");
-        }
-        return CommonUtils.convertFileName(fileName);
+         if ( fileName == null) {
+             Assert.that(false,"defaultFileName is null, "+
+                         "subclass may have not overridden getFileName");
+         }
+		 return CommonUtils.convertFileName(fileName);
     }
 
 

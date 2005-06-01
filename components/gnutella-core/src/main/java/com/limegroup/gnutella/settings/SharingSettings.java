@@ -1,11 +1,12 @@
-
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
+import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 
@@ -15,6 +16,14 @@ import com.limegroup.gnutella.util.FileUtils;
 public class SharingSettings extends LimeProps {
     
     private SharingSettings() {}
+
+	/**
+	 * Stores the download directory file settings for each media type by its
+	 * description key {@link MediaType#getDescriptionKey()}. The settings
+	 * are loaded lazily during the first request.
+	 */
+	private static final Hashtable downloadDirsByDescription = new Hashtable();
+	
     
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
@@ -154,10 +163,22 @@ public class SharingSettings extends LimeProps {
 		"flac;fla;dvi;rmvp;kar;cdg";
     
     /**
-	 * The shared directories (an array of Files!).
+	 * The shared directories. 
 	 */
-    public static final FileArraySetting DIRECTORIES_TO_SHARE =
+    private static final FileArraySetting DIRECTORIES_TO_SHARE =
         FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+    
+    /**
+	 * The directories not to share.
+	 */
+    public static final FileArraySetting DIRECTORIES_NOT_TO_SHARE =
+        FACTORY.createFileArraySetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
+	
+    /**
+	 * Directories that are shared but not browseable.
+	 */
+    public static final FileArraySetting DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE =
+        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE", new File[0]);
     
     /**
      * Shared directories that should not be shared recursively.
@@ -177,12 +198,26 @@ public class SharingSettings extends LimeProps {
     public static final FileArraySetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
         FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
     
+	/**
+	 * The setting if the files of finished downloads should also be shared when
+	 * they were not saved to a shared directory.
+	 */
+	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
+		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
+	
     /**
      * Individual files that should be shared despite being located outside
      * of any shared directory, and despite any extension limitations.
      * */
     public static final FileArraySetting SPECIAL_FILES_TO_SHARE =
         FACTORY.createFileArraySetting("SPECIAL_FILES_TO_SHARE", new File[0]);
+    
+    /**
+     * Individual files that should be not shared despite being located inside
+     * a shared directory.
+     * */
+    public static final FileArraySetting SPECIAL_FILES_NOT_TO_SHARE =
+        FACTORY.createFileArraySetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
     
     /**
 	 * File extensions that are shared.
@@ -228,8 +263,6 @@ public class SharingSettings extends LimeProps {
         FACTORY.createBooleanSetting("ALLOW_BROWSER", false);
         
     /**
-     * Helper method left from SettingsManager.
-     *
 	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed.
 	 *
@@ -245,26 +278,44 @@ public class SharingSettings extends LimeProps {
 	 *          call and could not be created, or if the canonical
 	 *          path could not be retrieved from the file system
 	 */
-    public static final void addDirectory(File dir) throws IOException {
-    
-        if( dir == null ||
-          !dir.isDirectory() ||
-          !dir.exists() )
+    public static final void addSharedDirectory(File dir) throws IOException {
+		if (dir == null || !dir.isDirectory() || !dir.exists())
             throw new IOException();
-        
-        File[] shared = DIRECTORIES_TO_SHARE.getValue();
-        Set set = new HashSet();
-        for(int i = 0; i < shared.length; i++) {
-            set.add(shared[i]);
-        }
-        
-        set.add(dir);
-        DIRECTORIES_TO_SHARE.setValue((File[])set.toArray(new File[0]));
+
+		if (!DIRECTORIES_TO_SHARE.contains(dir))
+			DIRECTORIES_TO_SHARE.add(dir);
     }
+	
+	/**
+	 * Removes the given dir from the shared directories.
+	 */
+	public static final void removeSharedDirectory(File dir) {
+		DIRECTORIES_TO_SHARE.remove(dir);
+		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.remove(dir);
+	}
+    
+	/**
+	 * Returns whether the given dir is a shared directory.
+	 */
+	public static final boolean isSharedDirectory(File dir) {
+		return DIRECTORIES_TO_SHARE.contains(dir);
+	}
+	
+	/**
+	 * Returns the number of shared directories.
+	 */
+	public static final int getSharedDirectoriesCount() {
+		return DIRECTORIES_TO_SHARE.length();
+	}
+    
+	/**
+	 * Returns a File[] of shared directories.
+	 */
+	public static final File[] getSharedDirectories() {
+		return DIRECTORIES_TO_SHARE.getValue();
+	}
     
     /**
-     * Helper method left from SettingsManager.
-     *
 	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
      * Note, however, that it does not currently filter out
@@ -276,17 +327,36 @@ public class SharingSettings extends LimeProps {
 	 * @param dirs an array of <tt>File</tt> instances denoting
 	 *  the abstract pathnames of the shared directories
 	 */
-    public static final void setDirectories(File[] files) throws IOException {
-    
+    public static final void setSharedDirectories(File[] files) throws IOException {
         Set set = new HashSet();
-        for(int i = 0; i < files.length; i++) {
-            if( files[i] == null ||
-              !files[i].isDirectory() ||
-              !files[i].exists() )
+        for (int i = 0; i < files.length; i++) {
+            if (files[i] == null || !files[i].isDirectory() || !files[i].exists())
                 throw new IOException();            
             set.add(files[i]);
         }
         
         DIRECTORIES_TO_SHARE.setValue((File[])set.toArray(new File[0]));
     }
+	
+	
+	/**
+	 * Returns the download directory file setting for a mediatype. The
+	 * settings are created lazily when they are requested for the first time.
+	 * The default download directory is a file called "invalidfile" the file
+	 * setting should not be used when its {@link Setting#isDefault()} returns
+	 * true.  Use {@link #DIRECTORY_FOR_SAVING_FILES} instead then.
+	 * @param type the mediatype for which to look up the file setting
+	 * @return the filesetting for the media type
+	 */
+	public static final FileSetting getFileSettingForMediaType(MediaType type) {
+		FileSetting setting = (FileSetting)downloadDirsByDescription.get
+			(type.getDescriptionKey());
+		if (setting == null) {
+			setting = FACTORY.createProxyFileSetting
+			("DIRECTORY_FOR_SAVING_" 
+			 + type.getDescriptionKey() + "_FILES", DIRECTORY_FOR_SAVING_FILES);
+			downloadDirsByDescription.put(type.getDescriptionKey(), setting);
+		}
+		return setting;
+	}
 }

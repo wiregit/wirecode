@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ResponseVerifier;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -89,15 +91,20 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param filename the final file name, or null if unknown
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
+     * @param saveDir can be null, then the default save directory is used
+     * @throws SaveLocationException if there was an error setting the downloads
+     * final file location 
      */
     public MagnetDownloader(IncompleteFileManager ifm,
                             URN urn,
                             String textQuery,
                             String filename,
-                            String [] defaultURLs) {
+                            String [] defaultURLs,
+                            File saveDir,
+                            boolean overwrite) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null);
+        super(new RemoteFileDesc[0], ifm, null, saveDir, filename, overwrite);
 
         this._textQuery=textQuery;
         this._urn=urn;
@@ -337,14 +344,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * Overrides ManagedDownloader to display a reasonable file name even
      * when no locations have been found.
      */
-    public synchronized String getFileName() {        
+    protected synchronized String getDefaultFileName() {        
         if (_filename!=null)
             return _filename;
         else {
             String fname = null;
 			// Check the super name if I have an RFD
 			if ( hasRFD() )   
-                fname = super.getFileName();
+                fname = super.getDefaultFileName();
 
 			// If I still don't have a good name, resort to whatever I have.
             if ( fname == null || fname.equals(UNKNOWN_FILENAME) )

@@ -85,7 +85,7 @@ public class ServerSideWhatIsNewTest
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
-        SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
+        SharingSettings.setSharedDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
         berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");

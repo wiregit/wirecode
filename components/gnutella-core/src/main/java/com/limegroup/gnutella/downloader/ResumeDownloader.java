@@ -87,7 +87,7 @@ public class ResumeDownloader extends ManagedDownloader
      * That is, any download that would use the same incomplete file is 
      * rejected, even if this is not currently downloading.
      */
-    public boolean conflicts(File incompleteFile) {
+    public boolean conflictsWithIncompleteFile(File incompleteFile) {
         return incompleteFile.equals(_incompleteFile);
     }
 
@@ -112,11 +112,7 @@ public class ResumeDownloader extends ManagedDownloader
         return _size;
     }
 
-    /**
-     * Overrides ManagedDownloader to display a reasonable file name even
-     * when no locations have been found.
-     */
-    public synchronized String getFileName() {
+    protected synchronized String getDefaultFileName() {
         return _name;
     }
     
@@ -156,7 +152,7 @@ public class ResumeDownloader extends ManagedDownloader
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
         // Extract a query string from our filename.
-        String queryName = StringUtils.createQueryString(getFileName());
+        String queryName = StringUtils.createQueryString(getDefaultFileName());
 
         if (downloadSHA1 != null)
             // TODO: we should be sending the URN with the query, but

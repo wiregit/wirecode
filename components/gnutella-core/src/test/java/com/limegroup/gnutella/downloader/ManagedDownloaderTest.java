@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,10 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Downloader;
@@ -31,12 +30,11 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -46,6 +44,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -355,6 +354,105 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
 
+	public void testSetSaveFileExceptions() throws Exception {
+		
+		RemoteFileDesc[] rfds = new RemoteFileDesc[] { newRFD("download") };
+		File file = File.createTempFile("existing", "file");
+		file.deleteOnExit();
+		
+		try {
+			File noWritePermissionDir = CommonUtils.isWindows() ? 
+					new File ("C:\\WINNT\\SYSTEM32\\") : new File("/");
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					noWritePermissionDir, "does not matter", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Should have no write permissions",
+						 SaveLocationException.DIRECTORY_NOT_WRITEABLE,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					new File("/non existent directory"), null, false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: directory does not exist",
+						 SaveLocationException.DIRECTORY_DOES_NOT_EXIST,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					file.getParentFile(), file.getName(), false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file exists",
+						 SaveLocationException.FILE_ALREADY_EXISTS,
+						 sle.getErrorCode());
+		}
+		try {
+			// should not throw an exception because of overwrite 
+			new ManagedDownloader(rfds,	new IncompleteFileManager(), 
+					new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(),
+					true); 
+		}
+		catch (SaveLocationException sle) {
+			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
+		}
+		try {
+			File f = File.createTempFile("notadirectory", "file");
+			f.deleteOnExit();
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					f, null, false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file not a directory", 
+						 SaveLocationException.NOT_A_DIRECTORY,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					null, "./", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: file not regular",
+						 SaveLocationException.FILE_NOT_REGULAR,
+						 sle.getErrorCode());
+		}
+		try {
+			ManagedDownloader dl = new ManagedDownloader(rfds,
+					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+					null, "../myfile.txt", false);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+//			assertEquals("Error code should be: security violation", 
+//						 SaveLocationException.SECURITY_VIOLATION,
+//						 sle.getErrorCode());
+		}
+		try {
+			// should not throw an exception
+			new ManagedDownloader(rfds, new IncompleteFileManager(), 
+					new GUID(GUID.makeGuid()), null, null, false);
+		}
+		catch (SaveLocationException sle) {
+			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
+		}
+		
+				
+		// TODO SaveLocationException.FILE_ALREADY_SAVED
+		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
+	}
+	
     
     private static RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
