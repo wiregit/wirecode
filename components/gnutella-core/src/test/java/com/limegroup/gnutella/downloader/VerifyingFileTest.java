@@ -404,4 +404,30 @@ public class VerifyingFileTest extends BaseTestCase {
         Thread.sleep(1000);
         assertEquals(exactTree.getNodeSize(),vf.getVerifiedBlockSize());
     }
+    
+    /**
+     * Tests that if the tree is found after the entire file is downloaded,
+     * we still verify accordingly
+     */
+    public void testTreeAddedAfterEnd() throws Exception {
+        vf.setHashTree(null);
+        vf.leaseWhite();
+        byte [] full = new byte [(int)completeFile.length()];
+        raf.readFully(full);
+        vf.writeBlock(0,full);
+        
+        // the file should be completed
+        Thread.sleep(500);
+        assertTrue(vf.isComplete());
+        
+        // give it a hashTree
+        vf.setHashTree(defaultHashTree);
+        
+        // now, it shouldn't be complete
+        assertFalse(vf.isComplete());
+        
+        // but things should be pending verification
+        vf.waitForPendingIfNeeded();
+        assertTrue(vf.isComplete());
+    }
 }

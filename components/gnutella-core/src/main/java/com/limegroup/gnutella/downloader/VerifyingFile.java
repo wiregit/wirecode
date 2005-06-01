@@ -490,7 +490,14 @@ public class VerifyingFile {
      * we do overlap checking.
      */
     public synchronized void setHashTree(HashTree tree) {
+        // if we did not have a tree previously and there are no pending blocks,
+        // trigger verification
+        HashTree previoius = hashTree;
         hashTree = tree;
+        if (previoius == null && 
+            pendingBlocks.getSize() == 0 && 
+            partialBlocks.getSize() > 0) 
+            QUEUE.add(new EmptyVerifier());
     }
     
     /**
@@ -654,4 +661,13 @@ public class VerifyingFile {
             }
         }
 	}
+    
+    private class EmptyVerifier implements Runnable {
+        public void run() {
+            verifyChunks();
+            synchronized(VerifyingFile.this) {
+                VerifyingFile.this.notify();
+            }
+        }
+    }
 }
