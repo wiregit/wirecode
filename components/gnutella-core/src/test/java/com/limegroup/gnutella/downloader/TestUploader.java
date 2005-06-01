@@ -888,6 +888,7 @@ public class TestUploader extends AssertComparisons {
         out.flush();
         // only if the flush didn't throw do we add to totalUploaded
         totalUploaded+=amountThisRequest;
+        amountThisRequest = 0;
     }
 
     /**
