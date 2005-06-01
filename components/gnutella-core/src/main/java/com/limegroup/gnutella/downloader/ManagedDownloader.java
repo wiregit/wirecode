@@ -392,9 +392,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      *  haven't started downloading.  Used for previewing purposes. */
     protected File incompleteFile;
    
-    /** Absolute File where the download will be stored when complete. Null indicates the default name and save location.*/
-    private File saveFile;
-   
     /**
      * The position of the downloader in the uploadQueue */
     private int queuePosition;
@@ -541,10 +538,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 		}
         this.cachedRFDs = new HashSet();
 		cachedRFDs.addAll(Arrays.asList(files));
+		this.propertiesMap = new HashMap();
 		if (files.length > 0) 
 			initPropertiesMap(files[0]);
-		else
-			propertiesMap = Collections.EMPTY_MAP;
 
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
@@ -552,9 +548,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     }
 
     protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
-        propertiesMap = new HashMap();
-        propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
-        propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
+		if (!propertiesMap.containsKey(DEFAULT_FILENAME))
+			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
+		if (!propertiesMap.containsKey(FILE_SIZE))
+			propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
     }
     
     /** 
@@ -575,11 +572,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             stream.writeObject(incompleteFileManager);
         }
 
-		// If appropriate, serialize saveFile
-		if (saveFile != null) {
-			propertiesMap.put(SAVE_FILE, saveFile);
-		}
-
         stream.writeObject(propertiesMap);
     }
 
@@ -594,18 +586,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 		
         Object next = stream.readObject();
         
+		RemoteFileDesc defaultRFD = null;
+		
         // old format
         if (next instanceof RemoteFileDesc[]) {
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
             if (rfds != null && rfds.length > 0) 
-                initPropertiesMap(rfds[0]);
+                defaultRFD = rfds[0];
             cachedRFDs = new HashSet(Arrays.asList(rfds));
         } else {
             // new format
             cachedRFDs = (Set) next;
             if (cachedRFDs.size() > 0) {
-                RemoteFileDesc any = (RemoteFileDesc)cachedRFDs.iterator().next();
-                initPropertiesMap(any); // in case the map isn't serialized
+                defaultRFD = (RemoteFileDesc)cachedRFDs.iterator().next();
             }
         }
 		
@@ -615,10 +608,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if (map instanceof Map) 
             propertiesMap = (Map)map;
         else if (propertiesMap == null)
-            propertiesMap = Collections.EMPTY_MAP; 
-
-		// set saveFile
-		saveFile = (File)propertiesMap.get(SAVE_FILE);
+            propertiesMap =  new HashMap();
+		
+		if (defaultRFD != null) {
+			initPropertiesMap(defaultRFD);
+		}
     }
 
     /** 
@@ -1887,7 +1881,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         synchronized (this) {
             if (!isRelocatable())
                 throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-            saveFile = candidateFile;
+            propertiesMap.put(SAVE_FILE, candidateFile);
         }
     }
    
@@ -1897,8 +1891,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
      */
     public synchronized File getSaveFile() {
-        if (saveFile != null)
-            return saveFile;
+        Object saveFile = propertiesMap.get(SAVE_FILE);
+		if (saveFile != null) {
+			return (File)saveFile;
+		}
         
         return new File(SharingSettings.getSaveDirectory(), getDefaultFileName());
     }  
@@ -2158,7 +2154,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // Make sure we can write into the complete file's directory.
         if (!FileUtils.setWriteable(getSaveFile().getParentFile()))
             return DISK_PROBLEM;
-        saveFile = getSaveFile();
+        File saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
 
@@ -2732,10 +2728,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     }
     
     protected synchronized String getDefaultFileName() {       
-        //Return the most specific information possible.  Case (b) is critical
-        //for picking the downloaded file name; see tryAllDownloads2.  See also
-        //http://core.limewire.org/issues/show_bug.cgi?id=122.
-
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
          if ( fileName == null) {
              Assert.that(false,"defaultFileName is null, "+

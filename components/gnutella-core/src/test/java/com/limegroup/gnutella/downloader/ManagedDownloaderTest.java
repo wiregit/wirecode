@@ -447,7 +447,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		catch (SaveLocationException sle) {
 			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
 		}
-		
+
+		// already being saved to
+		// already downloading the same => routerservice test
 				
 		// TODO SaveLocationException.FILE_ALREADY_SAVED
 		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
