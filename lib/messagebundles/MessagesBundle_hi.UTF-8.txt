@@ -608,6 +608,8 @@ NO=नहीं
 #? SEARCH_PUBLIC_BLOCK_STRING=
 #### SEARCH_RESULT_TABLE_LABEL=Results
 #? SEARCH_RESULT_TABLE_LABEL=
+#### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
+#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
 #### SEARCH_SEARCHING_LABEL=Searching...
 #? SEARCH_SEARCHING_LABEL=
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
@@ -675,10 +677,27 @@ NO=नहीं
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 #? SEARCH_BLOCK_HOST=
 
+################################################################################
+# Magnet stuff
+################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_LABEL=
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=
+
+################################################################################
+# Search actions
+################################################################################
+# {0} the space separated list of keywords
+#### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
+#? SEARCH_FOR_KEYWORDS_ACTION_NAME=
+# {0} the already translated mediatype
+#### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
+#? SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=
+# {0} the type of the search, e.g. Title, Album, Genre
+# {1} the keywords fo the search, e.g. name of the album
+#### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
+#? SEARCH_XML_FIELD_ACTION_NAME=
 
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
@@ -1203,6 +1222,8 @@ NO=नहीं
 #? LIBRARY_TABLE_LICENSE=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 #? LIBRARY_TABLE_UPLOAD_COUNT=
+#### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
+#? LIBRARY_TABLE_SEARCH_POPUP_MENU=
 #### LIBRARY_TABLE_ADVANCED_POPUP_MENU=Advanced
 #? LIBRARY_TABLE_ADVANCED_POPUP_MENU=
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
@@ -1380,6 +1401,76 @@ NO=नहीं
 ###################################################################
 # Key/value pairs for XML
 ###################################################################
+#### XML_audios__audio=Audio
+#? XML_audios__audio=
+#### XML_audios__audio__title__=Title
+#? XML_audios__audio__title__=
+#### XML_audios__audio__artist__=Artist
+#? XML_audios__audio__artist__=
+#### XML_audios__audio__album__=Album
+#? XML_audios__audio__album__=
+#### XML_audios__audio__genre__=Genre
+#? XML_audios__audio__genre__=
+#### XML_audios__audio__track__=Track
+#? XML_audios__audio__track__=
+#### XML_audios__audio__type__=Type
+#? XML_audios__audio__type__=
+#### XML_audios__audio__seconds__=Length
+#? XML_audios__audio__seconds__=
+#### XML_audios__audio__year__=Year
+#? XML_audios__audio__year__=
+#### XML_audios__audio__language__=Language
+#? XML_audios__audio__language__=
+#### XML_audios__audio__bitrate__=Bitrate
+#? XML_audios__audio__bitrate__=
+#### XML_audios__audio__comments__=Comments
+#? XML_audios__audio__comments__=
+#### XML_audios__audio__action__=Action
+#? XML_audios__audio__action__=
+#### XML_audios__audio__license__=Copyright
+#? XML_audios__audio__license__=
+#### XML_audios__audio__licensetype__=License Type
+#? XML_audios__audio__licensetype__=
+
+#### XML_videos__video=Video
+#? XML_videos__video=
+#### XML_videos__video__title__=Title
+#? XML_videos__video__title__=
+#### XML_videos__video__director__=Director
+#? XML_videos__video__director__=
+#### XML_videos__video__producer__=Producer
+#? XML_videos__video__producer__=
+#### XML_videos__video__studio__=Studio
+#? XML_videos__video__studio__=
+#### XML_videos__video__stars__=Stars
+#? XML_videos__video__stars__=
+#### XML_videos__video__type__=Type
+#? XML_videos__video__type__=
+#### XML_videos__video__length__=Length
+#? XML_videos__video__length__=
+#### XML_videos__video__year__=Year
+#? XML_videos__video__year__=
+#### XML_videos__video__language__=Language
+#? XML_videos__video__language__=
+#### XML_videos__video__subtitles__=Subtitles
+#? XML_videos__video__subtitles__=
+#### XML_videos__video__rating__=Rating
+#? XML_videos__video__rating__=
+#### XML_videos__video__comments__=Comments
+#? XML_videos__video__comments__=
+#### XML_videos__video__action__=Action
+#? XML_videos__video__action__=
+#### XML_videos__video__license__=Copyright
+#? XML_videos__video__license__=
+#### XML_videos__video__licensetype__=License Type
+#? XML_videos__video__licensetype__=
+#### XML_videos__video__height__= Height
+#? XML_videos__video__height__=
+#### XML_videos__video__width__=Width
+#? XML_videos__video__width__=
+#### XML_videos__video__bitrate=Bitrate
+#? XML_videos__video__bitrate=
+
 #MetaEditorFrame
 #### META_EDITOR_ANNOTATING_FILE=Annotating file
 #? META_EDITOR_ANNOTATING_FILE=
@@ -1908,18 +1999,22 @@ NO=नहीं
 #? ERROR_XML_SEARCH_TOO_LARGE=
 
 ################################################################################
+# Messages for Licensing
+################################################################################
+#### LICENSE_VIEW_LICENSE=View License
+#? LICENSE_VIEW_LICENSE=
+#### LICENSE_VERIFY=Verify
+#? LICENSE_VERIFY=
+
+################################################################################
 # Messages for Creative Commons Licensing
 ################################################################################
-#### LICENSE_CC_VIEW_LICENSE=View License
-#? LICENSE_CC_VIEW_LICENSE=
-#### LICENSE_CC_TITLE=License Details
+#### LICENSE_CC_TITLE=Creative Commons Details
 #? LICENSE_CC_TITLE=
 #### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
 #? LICENSE_CC_LOCATING=
-#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license. Click 'verify' to locate the details of this Creative Commons license.
+#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this Creative Commons license.
 #? LICENSE_CC_UNVERIFIED=
-#### LICENSE_CC_VERIFY=Verify
-#? LICENSE_CC_VERIFY=
 #### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
 #? LICENSE_CC_INVALID=
 #### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
@@ -1934,6 +2029,38 @@ NO=नहीं
 #? LICENSE_CC_VERIFICATION=
 #### LICENSE_CC=Creative Commons
 #? LICENSE_CC=
+
+################################################################################
+# Messages for Weed Licensing
+################################################################################
+#### LICENSE_WEED_TITLE=Weedshare Details
+#? LICENSE_WEED_TITLE=
+#### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
+#? LICENSE_WEED_LOCATING=
+#### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.
+#? LICENSE_WEED_UNVERIFIED=
+#### LICENSE_WEED_INVALID=LimeWire was unable to locate the details of this Weed file.
+#? LICENSE_WEED_INVALID=
+#### LICENSE_WEED_RETRY=You can try looking up the details again by clicking 'Verify'.
+#? LICENSE_WEED_RETRY=
+#### LICENSE_WEED_DETAILS=License Details:
+#? LICENSE_WEED_DETAILS=
+#### LICENSE_WEED_CLAIMED_DEED=View Weedshare Usage Rights
+#? LICENSE_WEED_CLAIMED_DEED=
+#### LICENSE_WEED_DEED=View Usage Rights
+#? LICENSE_WEED_DEED=
+#### LICENSE_WEED_VERIFICATION=View Verification Page
+#? LICENSE_WEED_VERIFICATION=
+#### LICENSE_WEED=Weedshare
+#? LICENSE_WEED=
+
+################################################################################
+# Messages for Unknown licenses
+################################################################################
+#### LICENSE_UNKNOWN_TITLE=License Details
+#? LICENSE_UNKNOWN_TITLE=
+#### LICENSE_UNKNOWN_INVALID=LimeWire was unable to determine the license for this file.
+#? LICENSE_UNKNOWN_INVALID=
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
