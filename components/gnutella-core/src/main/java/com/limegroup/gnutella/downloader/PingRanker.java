@@ -142,7 +142,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         }
         
         // initialize the guid if we don't have one
-        if (myGUID == null) {
+        if (myGUID == null && meshHandler != null) {
             myGUID = new GUID(GUID.makeGuid());
             RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
         }
