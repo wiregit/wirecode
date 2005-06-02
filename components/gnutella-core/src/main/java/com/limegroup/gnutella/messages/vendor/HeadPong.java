@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -22,7 +24,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -309,12 +311,13 @@ public class HeadPong extends VendorMessage {
     		if (ping.requestsPushLocs()){
     			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
     				HeadPing.FWT_PUSH_ALTLOCS;
-    			didNotSendPushAltLocs = !writePushLocs(caos,desc, FWTOnly);
+    			didNotSendPushAltLocs = !writePushLocs(caos, 
+                        RouterService.getAltlocManager().getPush(urn,-1,FWTOnly));
     		}
     		
     		//now add any non-firewalled altlocs in case they were requested. 
     		if (ping.requestsAltlocs()) 
-    			didNotSendAltLocs=!writeLocs(caos,desc);
+    			didNotSendAltLocs=!writeLocs(caos, RouterService.getAltlocManager().getDirect(urn,-1));
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -532,84 +535,77 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writePushLocs(CountingOutputStream caos,
-			FileDesc desc,boolean FWTonly) throws IOException {
+	private static final boolean writePushLocs(CountingOutputStream caos, Collection pushlocs) 
+    throws IOException {
 	
-		DataOutputStream daos = new DataOutputStream(caos);
-		//this operates on a copy of the alternate location collection
-		//since it may need to remove any PushLocs that do not support
-		//FW2FW transfer.
-		AlternateLocationCollection altlocs = 
-			AlternateLocationCollection.create(desc.getSHA1Urn());
-		
-		altlocs.addAll(desc.getPushAlternateLocationCollection());
-		
-		
-		if (FWTonly) {
-			LOG.debug("adding only fwt-enabled pushlocs in pong");
-			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
-				PushAltLoc current = (PushAltLoc)iter.next();
-				if (current.supportsFWTVersion() <1)
-					iter.remove();
-			}
-		}
-		
-		//do we have any (left) ?
-		if (altlocs.getAltLocsSize()==0)
-			return false;
-		
-		//push altlocs are bigger than normal altlocs, however we 
-		//don't know by how much.  The size can be between
-		//23 and 47 bytes.  We assume its 47.
-		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
-		
+        if (pushlocs == null)
+            return false;
+
+        //push altlocs are bigger than normal altlocs, however we 
+        //don't know by how much.  The size can be between
+        //23 and 47 bytes.  We assume its 47.
+        int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 47;
+        
+        // if we don't have any space left, we can't send any pushlocs
+        if (available == 0)
+            return false;
+        
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+available+ " push locs to pong");
 		
-		byte [] altbytes = altlocs.toBytesPush(available);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (Iterator iter = pushlocs.iterator(); iter.hasNext() && available > 0;) {
+            PushAltLoc loc = (PushAltLoc) iter.next();
+            if (loc.getPushAddress().getProxies().isEmpty())
+                continue;
+            baos.write(loc.getPushAddress().toBytes());
+        }
 		
-		if (altbytes == null){
+        byte [] altbytes = baos.toByteArray();
+        
+		if (altbytes.length == 0){
 			//altlocs will not fit or none available - say we didn't send them
-			LOG.debug("push locs will not fit :(");
+			LOG.debug("did not send any push locs");
 			return false;
 		} else { 
 			LOG.debug("adding push altlocs");
-			daos.writeShort((short)altbytes.length);
+            ByteOrder.short2beb((short)altbytes.length,caos);
 			caos.write(altbytes);
 			return true;
 		}
-
 	}
 	
-	private static final boolean writeLocs(CountingOutputStream caos,
-			FileDesc desc) throws IOException {
-		
-		DataOutputStream daos = new DataOutputStream(caos);
-		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+	private static final boolean writeLocs(CountingOutputStream caos, Collection altlocs) 
+    throws IOException {
 		
 		//do we have any altlocs?
 		if (altlocs==null)
 			return false;
-		
-		//how many can we fit in the packet?
-		int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
-		
+        
+        //how many can we fit in the packet?
+        int toSend = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
+        
+        if (toSend == 0)
+            return false;
+        
 		if (LOG.isDebugEnabled())
-			LOG.debug("trying to add up to "+toPack+" locs to pong");
+			LOG.debug("trying to add up to "+ toSend +" locs to pong");
+        
+        DataOutputStream daos = new DataOutputStream(caos);
+		byte [] altbytes = new byte[toSend * 6];
+        int sent = 0;
+		for (Iterator iter = altlocs.iterator(); iter.hasNext() && sent < toSend;) {
+            DirectAltLoc loc = (DirectAltLoc) iter.next();
+            byte [] addr = loc.getHost().getInetAddress().getAddress();
+            System.arraycopy(addr,0,altbytes,sent*6,4);
+            ByteOrder.short2leb((short)loc.getHost().getPort(), altbytes, sent*6+4);
+            sent++;
+        }
 		
-		byte [] altbytes = altlocs.toBytes(toPack);
-		
-		if (altbytes ==null){
-			//altlocs will not fit or none available - say we didn't send them
-			LOG.debug("altlocs will not fit :(");
-			return false;
-			
-		} else { 
-			LOG.debug("adding altlocs");
-			daos.writeShort((short)altbytes.length);
-			caos.write(altbytes);
-			return true;
-		}
+		LOG.debug("adding altlocs");
+		ByteOrder.short2beb((short)altbytes.length,caos);
+		caos.write(altbytes);
+		return true;
 			
 	}
 	

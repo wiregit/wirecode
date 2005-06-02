@@ -1323,8 +1323,10 @@ public abstract class FileManager {
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
-            if (indices.size()==0)
+            if (indices.size()==0) {
+                RouterService.getAltlocManager().purge(urn);
                 _urnMap.remove(urn);
+            }
 		}
     }
 
