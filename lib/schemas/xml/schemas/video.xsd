@@ -1,35 +1,21 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
-<!--
-  The XSD 1.1 conformance has been validated with those online validators:
-  http://www.w3.org/2001/03/webdata/xsv
-  http://apps.gotdotnet.com/xmltools/xsdvalidator/Default.aspx
--->
-
 <schema xml:lang="en"
  xmlns="http://www.w3.org/2001/XMLSchema"
- xmlns:target="http://www.limewire.com/schemas/video.xsd"
+ xmlns:i18n="http://www.limewire.com/schemas/i18n"
+ i18n:locales="http://www.limewire.com/schemas/i18n/video.locales.xml"
  targetNamespace="http://www.limewire.com/schemas/video.xsd">
 
   <element name="videos">
     <complexType>
-      <!-- <complexContent><restriction base="anyType"> -->
-
-      <sequence>
-        <element name="video" minOccurs="1" maxOccurs="unbounded" type="target:video"/>
-      </sequence>
-
-      <!-- </restriction></complexContent> -->
+      <element name="video" minOccurs="1" maxOccurs="unbounded" type="videoType"/>
     </complexType>
   </element>
 
-  <complexType name="video">
-    <!-- <complexContent><restriction base="anyType"> -->
-
-    <attribute use="optional" name="title" type="string"/>
-    <attribute use="optional" name="type">
-      <simpleType>
-        <restriction base="string">
+  <complexType name="videoType">
+    <all>
+      <attribute name="title" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="type" minOccurs="0" maxOccurs="1">
+        <simpleType base="string">
           <enumeration value="Music Video"/>
           <enumeration value="Commercial"/>
           <enumeration value="Trailer"/>
@@ -39,60 +25,42 @@
           <enumeration value="DVD Movie"/>
           <enumeration value="Adult"/>
           <enumeration value="Other"/>
-         </restriction>
-      </simpleType>
-    </attribute>
-    <attribute use="optional" name="year" type="gYear"/>
-    <attribute use="optional" name="director" type="string"/>
-    <attribute use="optional" name="studio" type="string"/>
-    <attribute use="optional" name="language" type="string"/>
-    <attribute use="optional" name="stars" type="string"/>
-    <attribute use="optional" name="producer" type="string"/>
-    <attribute use="optional" name="subtitles" type="string"/>
-    <attribute use="optional" name="rating">
-      <simpleType>
-        <restriction base="string">
+        </simpleType>
+      </attribute>
+      <attribute name="year" minOccurs="0" maxOccurs="1" type="year"/>
+      <attribute name="rating" minOccurs="0" maxOccurs="1">
+        <simpleType base="string">
           <enumeration value="G"/><!--General Audience-->
           <enumeration value="PG"/><!--Parental Guidance suggested, not suitable for children-->
           <enumeration value="PG-13"/><!--Parents strongly cautioned, inappropriate under 13-->
           <enumeration value="R"/><!--Restricted, requires accompanying parent-->
           <enumeration value="NC-17"/><!--No one 17 or under admitted-->
           <enumeration value="NR"/><!--Not Rated by MPAA-->
-        </restriction>
-      </simpleType>
-    </attribute>
-    <attribute use="optional" name="minutes" type="decimal"/>
-    <attribute use="optional" name="size">
-      <simpleType>
-        <restriction base="target:intList">
-          <length fixed="true" value="2"/>
-        </restriction>
-      </simpleType>
-    </attribute>
-    <attribute use="optional" name="SHA1" type="int"/>
-    <attribute use="optional" name="availability" type="string"/>
-    <attribute use="optional" name="price" type="string"/>
-    <attribute use="optional" name="shipping" type="string"/>
-    <attribute use="optional" name="link" type="anyURI"/>
-    <attribute use="optional" name="comments">
-      <simpleType>
-        <restriction base="string">
-          <maxLength value="100"/>
-        </restriction>
-      </simpleType>
-    </attribute>
-
-    <!-- needed to reference the associated QueryHit in searches -->
-    <attribute use="optional" name="index" type="int"/>
-
-    <!-- must be last attribute in all supported schemas -->
-    <attribute use="optional" name="action" type="string"/>
-
-    <!-- </restriction></complexContent> -->
+        </simpleType>
+      </attribute>
+      <attribute name="length" minOccurs="0" maxOccurs="1" type="duration" editable="false"/>
+      <attribute name="comments" minOccurs="0" maxOccurs="1">
+        <simpleType base="string">
+          <maxInclusive value="100"/>
+        </simpleType>
+      </attribute>
+      <attribute name="licensetype" editable="false">
+        <simpleType base="string">
+          <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>
+        </simpleType>
+      </attribute>
+      <attribute name="license" type="string"/>
+      <attribute name="height" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
+      <attribute name="width" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
+      <attribute name="bitrate" type="short" editable="false"/>
+      <attribute name="action" minOccurs="0" maxOccurs="0" type="string"/>
+      <attribute name="director" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="studio" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="language" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="stars" minOccurs="0" maxOccurs="3" type="string"/>
+      <attribute name="producer" minOccurs="0" maxOccurs="2" type="string"/>
+      <attribute name="subtitles" minOccurs="0" maxOccurs="3" type="string"/>
+    </all>
   </complexType>
-
-  <simpleType name="intList">
-    <list itemType="int"/>
-  </simpleType>
 
 </schema>
