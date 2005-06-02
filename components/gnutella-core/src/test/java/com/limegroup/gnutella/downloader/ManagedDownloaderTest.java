@@ -472,8 +472,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		RemoteFileDesc[] hashRFDS = new RemoteFileDesc[] {
 				newRFD("dl", "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")
 		};
-		
-		// already downloading the same => routerservice test
 		try {
 			manager.download(hashRFDS, Collections.EMPTY_LIST,
 					new GUID(GUID.makeGuid()), false, null, null);

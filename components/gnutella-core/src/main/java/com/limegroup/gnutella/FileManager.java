@@ -807,6 +807,8 @@ public abstract class FileManager {
 	/**
 	 * Adds the given file to this, even if it exists outside of what is
 	 * currently accepted to be shared.
+	 * <p>
+	 * Too large files are still not shareable this way.
 	 */
 	public FileDesc addFileAlways(File file, List list) {
 		SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
@@ -815,6 +817,11 @@ public abstract class FileManager {
 		return addFileIfShared(file, list);
 	}
     
+	/**
+	 * Convenience wrapper for {@link #addFileAlways(File, List) addFileAlways
+	 * @param file
+	 * @return
+	 */
 	public FileDesc addFileAlways(File file) {
 		return addFileAlways(file, Collections.EMPTY_LIST);
 	}

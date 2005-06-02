@@ -489,9 +489,7 @@ public class DownloadManager implements BandwidthTracker {
                                             boolean overwrite, File saveDir,
 											String fileName) 
 		throws SaveLocationException {
-        //Check if file would conflict with any other downloads in progress.
-        //TODO3: if only a few of many files conflicts, we could just ignore
-        //them.
+
 		String fName = getFileName(files, fileName);
         if (conflicts(files, fName)) {
 			throw new SaveLocationException

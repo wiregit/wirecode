@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -135,7 +137,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     public void testGetSharedFilesWithNoShared() throws Exception {
         FileDesc[] sharedFiles =  fman.getSharedFileDescriptors(_sharedDir);
-        assertNull("should not be sharing any files", sharedFiles);
+        assertEquals("should not be sharing any files " + Arrays.asList(sharedFiles), 
+				0, sharedFiles.length);
     }
     
     public void testOneSharedFile() throws Exception {
@@ -175,8 +178,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected length of shared files", 1, files.length);
         assertEquals("files should be the same", files[0].getFile(), f1);
         files=fman.getSharedFileDescriptors(FileUtils.getParentFile(_sharedDir));
-        assertNull("file manager listed shared files in file's parent dir",
-            files);
+        assertEquals("file manager listed shared files in file's parent dir",
+            0, files.length);
     }
     
     public void testAddingOneSharedFile() throws Exception {
@@ -305,8 +308,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Try to add a huge file.  (It will be ignored.)
         f4=createFakeTestFile(Integer.MAX_VALUE+1l);
-        assertEquals("shouldn't have been able to add shared file", 
-            null, addFile(f4));
+        assertNull("shouldn't have been able to add huge shared file", 
+            addFile(f4));
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
@@ -698,7 +701,71 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         assertFalse("non-shared file found in list of shared files", found);
     }
+	
+	public void testAddFileAlways() throws Exception {
+		// test if too large files are not shared
+		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
+		System.out.println("large file size " + tooLarge.length());
+		assertNull("Too large file should not have been shared", 
+				fman.addFileAlways(tooLarge));
+		
+		// test if files in shared directories are still shared
+		File test = createNewTestFile(5);
+		assertNotNull("File in shared directory should have been shared",
+				fman.addFileAlways(test));
+		
+		// test that non-existent files are not shared
+		test = new File("non existent file");
+		assertNull("Nonexistent file should not have been shared",
+				fman.addFileAlways(test));
+		
+		// test that file in non shared directory is shared
+		File dir = createNewBaseDirectory("notshared");
+		dir.mkdir();
+		test = createNewNamedTestFile(500, "specially shared", dir);
+		assertNotNull("File should have been shared", fman.addFileAlways(test));
+	}
+	
+	public void testIsFileShareable() throws Exception {
+		File nonexistent = new File("nonexistent");
+		assertFalse("File should not be shareable", fman.isFileShareable(nonexistent));
+		
+		// now add it to the specially shared files
+		fman.addFutureSharedFile(nonexistent);
+		
+		assertTrue("File should be shareable now", fman.isFileShareable(nonexistent));
+		
+		File normallyShared = createNewTestFile(40);
+		fman.addFileIfShared(normallyShared);
+		
+		assertTrue("File should be shareable now", fman.isFileShareable(normallyShared));
+	}
 
+	public void testIsFileInCompletelySharedDirectory() throws Exception {
+		// non existent file should not be in a shared directory
+		File nonexistent = new File("nonexistent");
+		assertFalse("File should not be in a shared directory", 
+				fman.isFileInCompletelySharedDirectory(nonexistent));
+		
+		File dir = createNewBaseDirectory("notshared");
+		dir.mkdir();
+		File test = new File(dir, "noshared");
+		assertFalse("File should not be in a shared directory",
+				fman.isFileInCompletelySharedDirectory(test));
+		
+		// test for files in subdirs
+		File subDir = new File(_sharedDir, "newSubDir");
+		subDir.mkdir();
+		assertTrue("Subdir should be in shared directory", 
+				fman.isFileInCompletelySharedDirectory(subDir));
+		
+		test = createNewNamedTestFile(50, "subdirfile", subDir);
+		waitForLoad();
+		// test if subdir is shared
+		assertTrue("File in subdir should be in shared directory now",
+				fman.isFileInCompletelySharedDirectory(test));
+	}
+	
     /**
      * Tests whether specially shared files are indeed shared despite having
      * an extension that is not on the list of shareable extensions.
