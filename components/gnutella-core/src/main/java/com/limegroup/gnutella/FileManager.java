@@ -1035,7 +1035,7 @@ public abstract class FileManager {
             return null;
         }        
 
-        // Look for matching file ...         
+		// Look for matching file ...         
         FileDesc fd = (FileDesc)_fileToFileDescMap.get(f);
         if (fd == null)
             return null;
@@ -1047,7 +1047,7 @@ public abstract class FileManager {
 		else
 			if (!SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.contains(f))
 				SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.add(f);
-		
+
         int i = fd.getIndex();
         Assert.that(((FileDesc)_files.get(i)).getFile().equals(f),
                     "invariant broken!");
@@ -1055,7 +1055,7 @@ public abstract class FileManager {
         _files.set(i, null);
         _fileToFileDescMap.remove(f);
         _needRebuild = true;
-        
+
         // If it's an incomplete file, the only reference we 
         // have is the URN, so remove that and be done.
         // We also return false, because the file was never really
