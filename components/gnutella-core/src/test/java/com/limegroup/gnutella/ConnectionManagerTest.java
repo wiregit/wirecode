@@ -6,8 +6,9 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -451,6 +452,9 @@ public class ConnectionManagerTest extends BaseTestCase {
     
     
     private void initializeStart(ManagedConnection c) throws Exception {
+        //  Need to setup the _outputRunner member of c as well...
+        PrivilegedAccessor.setValue(c, "_outputRunner", new NullOutputRunner() );
+        
         PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
             "connectionInitializingIncoming",
             new Object[] { c },
@@ -595,5 +599,11 @@ public class ConnectionManagerTest extends BaseTestCase {
         ConnectionManager mgr = RouterService.getConnectionManager();
         PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
         PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections", null);
-    }     
+    }
+    
+    private class NullOutputRunner implements OutputRunner {
+        //  Overridden methods do nothing
+        public void send(Message m) {}
+        public void shutdown() {}
+    }
 }
