@@ -492,11 +492,11 @@ public class DownloadManager implements BandwidthTracker {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.
-        if (conflicts(files, fileName)) {
-//            throw new AlreadyDownloadingException(conflict);
+		String fName = getFileName(files, fileName);
+        if (conflicts(files, fName)) {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING,
-					new File(fileName));
+					new File(fName != null ? fName : ""));
         }
 
         //Purge entries from incompleteFileManager that have no corresponding
@@ -663,9 +663,7 @@ public class DownloadManager implements BandwidthTracker {
 		for (int i = 0; i < rfds.length && urn == null; i++) {
 			urn = rfds[0].getSHA1Urn();
 		}
-		for (int i = 0; i < rfds.length && fileName == null; i++) {
-			fileName = rfds[0].getFileName();
-		}
+		
 		return conflicts(urn, fileName, rfds[0].getSize());
 	}
 	
@@ -1412,6 +1410,13 @@ public class DownloadManager implements BandwidthTracker {
             o.notify();
         }
     }
+	
+	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
+		for (int i = 0; i < rfds.length && fileName == null; i++) {
+			fileName = rfds[0].getFileName();
+		}
+		return fileName;
+	}
     
     /**
      * sends a tcp push if the udp push has failed.

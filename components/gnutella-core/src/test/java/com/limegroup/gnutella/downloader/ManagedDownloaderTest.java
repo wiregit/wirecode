@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -448,9 +449,73 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
 		}
 
-		// already being saved to
+		// already downloading based on filename and same size
+		try {
+			manager.download(rfds, Collections.EMPTY_LIST, 
+					new GUID(GUID.makeGuid()), false, null, null);
+		}
+		catch (SaveLocationException sle) {
+			fail("There should not have been an exception of type " + sle.getErrorCode());
+		}
+		try {
+			manager.download(rfds, Collections.EMPTY_LIST,
+					new GUID(GUID.makeGuid()), false, null, null);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: already downloading", 
+					SaveLocationException.FILE_ALREADY_DOWNLOADING,
+					sle.getErrorCode());
+		}
+		
+		// already downloading based on hash
+		RemoteFileDesc[] hashRFDS = new RemoteFileDesc[] {
+				newRFD("dl", "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")
+		};
+		
 		// already downloading the same => routerservice test
+		try {
+			manager.download(hashRFDS, Collections.EMPTY_LIST,
+					new GUID(GUID.makeGuid()), false, null, null);
+		}
+		catch (SaveLocationException sle) {
+			fail("There should not have been an exception of type " + sle.getErrorCode());
+		}
+		try {
+			manager.download(hashRFDS, Collections.EMPTY_LIST,
+					new GUID(GUID.makeGuid()), false, null, null);
+			fail("No exception thrown");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: already downloading", 
+					SaveLocationException.FILE_ALREADY_DOWNLOADING,
+					sle.getErrorCode());
+		}
 				
+		// other download is already being saved to the same file with different hashes
+		try {
+			RemoteFileDesc[] fds = new RemoteFileDesc[] {
+					newRFD("savedto", "urn:sha1:QLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB")
+			};
+			manager.download(fds, Collections.EMPTY_LIST,
+					new GUID(GUID.makeGuid()), false, null, "alreadysavedto");
+		}
+		catch (SaveLocationException sle) {
+			fail("There should not have been an exception of type " + sle.getErrorCode());
+		}
+		try {
+			RemoteFileDesc[] fds = new RemoteFileDesc[] {
+					newRFD("otherfd", "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB")
+			};
+			manager.download(fds, Collections.EMPTY_LIST,
+					new GUID(GUID.makeGuid()), false, null, "alreadysavedto");
+		}
+		catch (SaveLocationException sle) {
+			assertEquals("Error code should be: already being saved to", 
+					SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO,
+					sle.getErrorCode());
+		}
+		
 		// TODO SaveLocationException.FILE_ALREADY_SAVED
 		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
 	}
