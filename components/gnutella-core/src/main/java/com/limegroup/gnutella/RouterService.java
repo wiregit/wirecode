@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -168,6 +169,11 @@ public class RouterService {
 	private static final SearchResultHandler RESULT_HANDLER =
 		new SearchResultHandler();
 
+    /**
+     * The manager of altlocs
+     */
+    private static AltLocManager altManager = AltLocManager.instance();
+    
     /**
      * isShuttingDown flag
      */
@@ -508,6 +514,10 @@ public class RouterService {
         return downloader;
     }
 
+    public static AltLocManager getAltlocManager() {
+        return altManager;
+    }
+    
 	/**
 	 * Accessor for the <tt>UDPService</tt> instance.
 	 *

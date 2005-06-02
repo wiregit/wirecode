@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +16,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.metadata.AudioMetaData;
@@ -138,7 +138,7 @@ public class Response {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
-			    getAsEndpoints(fd.getAlternateLocationCollection()),
+			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn(), -1)),
 			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
@@ -415,8 +415,8 @@ public class Response {
      * Utility method for converting the non-firewalled elements of an
      * AlternateLocationCollection to a smaller set of endpoints.
      */
-    private static Set getAsEndpoints(AlternateLocationCollection col) {
-        if( col == null || col.getAltLocsSize() == 0)
+    private static Set getAsEndpoints(Collection col) {
+        if( col == null || col.isEmpty() )
             return Collections.EMPTY_SET;
         
         synchronized(col) {

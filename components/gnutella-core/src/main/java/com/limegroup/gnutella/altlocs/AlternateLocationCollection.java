@@ -17,8 +17,8 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * <p>
  * @see AlternateLocation
  */
-public final class AlternateLocationCollection 
-	implements HTTPHeaderValue, AlternateLocationCollector {
+final class AlternateLocationCollection 
+	implements HTTPHeaderValue {
 	    
     private static final int MAX_SIZE = 100;
 

@@ -2,16 +2,13 @@ package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -97,7 +94,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * the ManagedDownloader of a new location for this.
      */
     public boolean add(AlternateLocation al) {
-        boolean ret = super.add(al);
+        boolean ret = RouterService.getAltlocManager().add(al);
         if (ret) {
             ManagedDownloader md = getMyDownloader();
             if( md != null )
@@ -111,7 +108,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * ManagedDownloader of the location.
      */
     public boolean addVerified(AlternateLocation al) {
-        return super.add(al);
+        return RouterService.getAltlocManager().add(al);
     }
     
 	/**
@@ -123,33 +120,6 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return null;
     }
 
-    
-	/**
-     * Adds the alternate locations to this FileDesc and also notifies the
-     * ManagedDownloader of new locations for this.
-     */
-	public int addAll(AlternateLocationCollection alc) {
-	    ManagedDownloader md = getMyDownloader();
-	    
-        // if no downloader, just add the collection.
-	    if( md == null )
-	        return super.addAll(alc);
-	    
-        // otherwise, iterate through and individually add them, to make
-        // sure they get added to the downloader.
-        int added = 0;
-        synchronized(alc) {
-        for(Iterator iter = alc.iterator(); iter.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-            if( super.add(al) ) {
-                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
-                added++;
-            }
-        } //end of for
-        } //end of synchronized block
-        return added;
-	}
-	
     private ManagedDownloader getMyDownloader() {
         return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
     }

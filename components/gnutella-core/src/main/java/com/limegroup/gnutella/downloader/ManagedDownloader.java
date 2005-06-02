@@ -46,8 +46,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -359,10 +357,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 	
     /**
      * The collection of alternate locations we successfully downloaded from
-     * somthing from. We will never use this data-structure until the very end,
-     * when we have become active uploaders of the file.
+     * somthing from.
      */
-	private AlternateLocationCollection validAlts; 
+	private Set validAlts; 
 	
 	/**
 	 * A list of the most recent failed locations, so we don't try them again.
@@ -656,6 +653,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 		// make sure all rfds have the same sha1
         verifyAllFiles();
 		
+        validAlts = new HashSet();
         // stores up to 1000 locations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
@@ -1032,10 +1030,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 //create validAlts
-                validAlts = AlternateLocationCollection.create(hash);
-                addLocationsToDownload(fd.getAlternateLocationCollection(),
-                                       fd.getPushAlternateLocationCollection(),
-                                       (int)size);
+                Collection [] alts = RouterService.getAltlocManager().getBoth(hash,-1,false);
+                if (alts != null) 
+                    addLocationsToDownload(alts[0],alts[1],(int)size);
+                
             }
         }
     }
@@ -1044,34 +1042,21 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * Adds the alternate locations from the collections as possible
      * download sources.
      */
-    private void addLocationsToDownload(AlternateLocationCollection direct,
-            AlternateLocationCollection push,
+    private void addLocationsToDownload(Collection direct,
+            Collection push,
                                         int size) {
-        List locs = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize());
+        List locs = new ArrayList(direct.size()+push.size());
         // always add the direct alt locs.
-        if(direct != null) {
-            synchronized(direct) {
-                Iterator iter = direct.iterator();
-                while(iter.hasNext()) {
-                    AlternateLocation loc = (AlternateLocation)iter.next();
-                    locs.add(loc.createRemoteFileDesc(size));
-                }
-            }
-        }
-                
-        //also adds any existing firewalled locations.
-        //If I'm firewalled, only those that support FWT are added.
-        //this assumes that FWT will always be backwards compatible
-        if(push != null) {
-            synchronized(push) {
-            	Iterator iter = push.iterator();
-            	while(iter.hasNext()) {
-            		PushAltLoc loc = (PushAltLoc)iter.next();
-                        locs.add(loc.createRemoteFileDesc(size));
-            	}
-            }
+        for (Iterator iter = direct.iterator(); iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation) iter.next();
+            locs.add(loc.createRemoteFileDesc(size));
         }
         
+        for (Iterator iter = push.iterator(); iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation) iter.next();
+            locs.add(loc.createRemoteFileDesc(size));
+        }
+                
         addPossibleSources(locs);
     }
 
@@ -1538,13 +1523,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if (good)
             cachedRFDs.add(rfd);
         
-        IncompleteFileDesc ifd = null;
-        //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
-        // of the AlternateLocationCollection, they must use seperate
-        // AlternateLocation objects.
-        AlternateLocation loc = null;
-        AlternateLocation forFD = null;
-        
         if(!rfd.isAltLocCapable())
             return;
         
@@ -1554,40 +1532,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         
         Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
         
-        // If a validAlts collection wasn't created already
-        // (which would only be possible if the initial set of
-        // RFDs did not have a hash, but subsequent searches
-        // produced RFDs with hashes), create the collection.
-        if( validAlts == null )
-            validAlts = AlternateLocationCollection.create(downloadSHA1);
-        
+        AlternateLocation loc;
         try {
             loc = AlternateLocation.create(rfd);
-            forFD = AlternateLocation.create(rfd);
-            
         } catch(IOException iox) {
             return;
         }
 
-        // the forFD altloc will be stored in the rfd, so it needs to point to the
-        // current set of proxies.  The loc altloc will be sent to uploaders, so it 
-        // needs to contain a snapshot of the set of proxies it had when it failed or
-        // succeeded.
-        if (forFD instanceof PushAltLoc) {
-            
-            // it is possible that an HTTPUploader just received a NFAlt header
-            // which cleared the proxies of this pushloc.  If that happens we do
-            // not inform anybody. The PE will get removed from the FD by the uploader
-            // (we perform this check on a copy of the set)
+        // if this is a pushloc, update the proxies accordingly
+        if (loc instanceof PushAltLoc) {
             
             PushAltLoc ploc = (PushAltLoc)loc;
-            if (ploc.isDemoted())
-                return;
-            
-            PushAltLoc pFD = (PushAltLoc)forFD;
-            pFD.updateProxies(good);
-            
-            Assert.that(!ploc.isDemoted());
+            ploc.updateProxies(good);
         }
         
         for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
@@ -1610,25 +1566,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             		httpDloader.addFailedAltLoc(loc);
             }
         }
-
-        FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
-        if( fd != null && fd instanceof IncompleteFileDesc) {
-            ifd = (IncompleteFileDesc)fd;
-            if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
-                // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.silent(false, "wrong IFD.\n" +
-                           "we are resuming :"+(this instanceof ResumeDownloader)+
-                           "ours  :   " + incompleteFile +
-                           "\ntheirs: " + ifd.getFile() +
-                           "\nour hash    : " + downloadSHA1 +
-                           "\ntheir hashes: " +
-                           DataUtils.listSet(ifd.getUrns())+
-                          "\nifm.hashes : "+incompleteFileManager.dumpHashes());
-                fileManager.removeFileIfShared(incompleteFile);
-                ifd = null; // do not use, it's bad.
-            }
-        }
-
+        
+        // add to the local collections
         synchronized(altLock) {
             if(good) {
                 //check if validAlts contains loc to avoid duplicate stats, and
@@ -1641,8 +1580,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                         else
                             DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(loc);
-                    if( ifd != null )
-                        ifd.addVerified(forFD);
                 }
             }  else {
                     if(rfd.isFromAlternateLocation() )
@@ -1652,12 +1589,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                                 DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
                     
                     validAlts.remove(loc);
-                    if( ifd != null )
-                        ifd.remove(forFD);
                     invalidAlts.add(rfd.getRemoteHostData());
                     recentInvalidAlts.add(loc);
             }
-        } 
+        }
+        
+        // and to the global collection
+        if (good)
+            RouterService.getAltlocManager().add(loc);
+        else
+            RouterService.getAltlocManager().remove(loc);
     }
 
     public synchronized void addPossibleSources(Collection c) {
@@ -1910,10 +1851,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 
         // Create a new validAlts for this sha1.
         // initialize the HashTree
-        if( downloadSHA1 != null ) {
-            validAlts = AlternateLocationCollection.create(downloadSHA1);
+        if( downloadSHA1 != null ) 
             initializeHashTree();
-        }
         
         // load up the ranker with the hosts we know about
         initializeRanker();
@@ -2111,44 +2050,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         FileDesc fileDesc = 
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
-		// Add the alternate locations to the newly saved local file
-		if(validAlts != null && fileDesc != null)
-		    storeAlternateLocations(fileDesc);
-
 		return COMPLETE;
     }
     
-    /**
-     * Saves the alternate locations in a file and notifies the gui
-     */
-    private void storeAlternateLocations(FileDesc fileDesc) {
-        URN fileHash = fileDesc.getSHA1Urn();
-		if(fileHash.equals(validAlts.getSHA1Urn())) {
-		    LOG.trace("MANAGER: adding valid alts to FileDesc");
-			// making this call now is necessary to avoid writing the 
-			// same alternate locations back to the requester as they sent 
-			// in their original headers
-            addLocationsToFile(validAlts, fileDesc);
-			//tell the library we have alternate locations
-			callback.handleSharedFileUpdate(completeFile);
-        }
-    }
-    
-    /**
-     * Adds the specified AlternateLocationCollection to the Collector,
-     * cloning each location first.
-     */
-    private void addLocationsToFile(AlternateLocationCollection validAlts,
-                                    AlternateLocationCollector collector) {
-        
-        synchronized(altLock) {
-            for(Iterator i = validAlts.iterator(); i.hasNext();) {
-                AlternateLocation al = (AlternateLocation)i.next();
-                collector.add(al.createClone());
-            }
-        }
-    }
-
     /**
      * Returns true if the file exists.
      * The file must be an absolute path.
@@ -2450,7 +2354,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 	public int getNumberOfAlternateLocations() {
 	    if ( validAlts == null ) return 0;
         synchronized(altLock) {
-            return validAlts.getAltLocsSize();
+            return validAlts.size();
         }
     }
 

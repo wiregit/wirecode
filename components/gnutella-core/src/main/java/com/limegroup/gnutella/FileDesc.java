@@ -14,9 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -36,7 +33,7 @@ import com.limegroup.gnutella.util.I18NConvert;
  *    FileDesc fd=new FileDesc(file, urns, index);
  * </pre>
  */
-public class FileDesc implements AlternateLocationCollector {
+public class FileDesc {
     
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
@@ -96,16 +93,6 @@ public class FileDesc implements AlternateLocationCollector {
 	    Collections.EMPTY_LIST;
 
 	/**
-	 * The collection of alternate locations for the file.
-	 */
-	protected AlternateLocationCollection ALT_LOCS;
-	
-	/**
-	 * The collection of firewalled alternate locations for the file.
-	 */
-	protected AlternateLocationCollection PUSH_ALT_LOCS;
-	
-	/**
 	 * The number of hits this file has recieved.
 	 */
 	private int _hits;	
@@ -157,8 +144,6 @@ public class FileDesc implements AlternateLocationCollector {
 		if(SHA1_URN == null) {
 			throw new IllegalArgumentException("no SHA1 URN");
 		}
-        ALT_LOCS = AlternateLocationCollection.create(SHA1_URN);
-        PUSH_ALT_LOCS = AlternateLocationCollection.create(SHA1_URN);
         try {
             addUrnsForSelf();
         } catch(IllegalArgumentException e) {
@@ -247,11 +232,6 @@ public class FileDesc implements AlternateLocationCollector {
 		return _modTime;
 	}
 
-    // inherit doc comment
-    public URN getSHA1Urn() {
-		return SHA1_URN;
-	}
-
 	/**
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
@@ -276,6 +256,10 @@ public class FileDesc implements AlternateLocationCollector {
 	public File getFile() {
 	    return FILE;
 	}
+    
+    public URN getSHA1Urn() {
+        return SHA1_URN;
+    }
 
 	/**
 	 * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
@@ -369,19 +353,6 @@ public class FileDesc implements AlternateLocationCollector {
     public License getLicense() {
         return _license;
     }
-
-	/**
-	 * @return the <tt>AlternateLocationCollection</tt> for this 
-	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
-	 *  if it is not initialized
-	 */
-	public AlternateLocationCollection getAlternateLocationCollection() {
-		return ALT_LOCS;
-	}
-	
-	public AlternateLocationCollection getPushAlternateLocationCollection() {
-		return PUSH_ALT_LOCS;
-	}
 	
 	/**
 	 * Adds URNs for this' location to the alternate location collection.
@@ -390,104 +361,10 @@ public class FileDesc implements AlternateLocationCollector {
     public void addUrnsForSelf() {
         if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue()) {
         	AlternateLocation alt = AlternateLocation.create(SHA1_URN);
-        	if (alt instanceof DirectAltLoc)
-        		ALT_LOCS.add(alt);
-        	else
-        		PUSH_ALT_LOCS.add(alt);
+        	RouterService.getAltlocManager().add(alt);
         }
     }
-	
 
-	/** 
-	 * Implements <tt>AlternateLocationCollector</tt> interface.
-	 *
-	 * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
-	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
-	 */
-	public boolean add(AlternateLocation al) {
-        if(al == null) {
-            throw new NullPointerException("cannot accept null alt locs");
-        }
-		URN sha1 = al.getSHA1Urn();
-		if(sha1 == null) {
-			throw new IllegalArgumentException("sha1 cannot be null");
-		}
-		if(!sha1.equals(SHA1_URN)) {
-			throw new IllegalArgumentException("URN does not match:\n"+
-											   SHA1_URN+"\n"+sha1);
-		}
-		
-		if (al instanceof DirectAltLoc)
-			return ALT_LOCS.add(al);
-		else
-			return PUSH_ALT_LOCS.add(al);
-		
-	}
-    /**
-     * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the alternate location
-	 *  has a different SHA1 than this file, or if its sha1 is <tt>null</tt>
-     */
-    public boolean remove(AlternateLocation al) {
-        if(al == null)
-            throw new NullPointerException("cannot accept null alt locs");
-
-		URN sha1 = al.getSHA1Urn();
-		if(sha1 == null)
-			throw new IllegalArgumentException("sha1 cannot be null");
-
-		if(!sha1.equals(SHA1_URN))
-			throw new IllegalArgumentException("URN does not match:\n"+
-											   SHA1_URN+"\n"+sha1);
-
-		if (al instanceof DirectAltLoc)
-			return ALT_LOCS.remove(al);
-		else
-			return PUSH_ALT_LOCS.remove(al);
-    }
-
-	/**
-     * Implements the <tt>AlternateLocationCollector</tt> interface.
-     * Adds the specified <tt>AlternateLocationCollection</tt> to this 
-     * collection.
-     *
-     * @param alc the <tt>AlternateLocationCollection</tt> to add
-     * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
-     *  <tt>null</tt>
-     * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
-     *  collection to add does not match the collection of <tt>this</tt>
-     */
-	public int addAll(AlternateLocationCollection alc) {
-        if(alc == null) {
-            throw new NullPointerException("cannot accept null alt loc coll");
-        }
-		if(!alc.getSHA1Urn().equals(SHA1_URN)) {
-			throw new IllegalArgumentException("SHA1 does not match:\n"+
-											   SHA1_URN+"\n"+alc.getSHA1Urn());
-		}
-		
-		int added =0;
-		
-		for (Iterator iter= alc.iterator();iter.hasNext();)
-			if (add((AlternateLocation)iter.next()))
-				added++;
-			
-		return added;
-	}
-
-	// implements AlternateLocationCollector interface
-	public boolean hasAlternateLocations() {
-		return ALT_LOCS.hasAlternateLocations() ||
-			PUSH_ALT_LOCS.hasAlternateLocations();
-	}
-	
-	// implements AlternateLocationCollector interface
-	public int getAltLocsSize() {
-	    return ALT_LOCS.getAltLocsSize() + PUSH_ALT_LOCS.getAltLocsSize();
-	}
-	
-    
     /**
      * Adds any URNs that can be locally calculated; may take a while to 
 	 * complete on large files.
@@ -621,10 +498,7 @@ public class FileDesc implements AlternateLocationCollector {
 				"urns:     "+listInformation(URNS.iterator())+"\r\n"+
 				"docs:     "+
 				 (_limeXMLDocs == null ? "null" : 
-				        listInformation(_limeXMLDocs.iterator()) )
-				            +"\r\n"+
-				"alt locs: "+ALT_LOCS+"\r\n"+
-				"push locs: "+PUSH_ALT_LOCS+"\r\n");
+				        listInformation(_limeXMLDocs.iterator()) ));
 	}
 }
 

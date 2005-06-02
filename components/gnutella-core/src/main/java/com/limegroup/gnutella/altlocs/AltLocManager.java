@@ -153,5 +153,14 @@ public class AltLocManager {
     public void purge(){
         urnMap.clear();
     }
+    
+    public void purge(URN sha1) {
+        urnMap.remove(sha1);
+    }
+    
+    public boolean hasAltlocs(URN sha1) {
+        AlternateLocationCollection al = (AlternateLocationCollection) urnMap.get(sha1);
+        return al != null && al.hasAlternateLocations();
+    }
 
 }
