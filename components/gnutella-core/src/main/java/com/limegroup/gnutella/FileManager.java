@@ -1428,7 +1428,7 @@ public abstract class FileManager {
 		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
         	return false;
         
-        if (file == null || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+        if (file.isDirectory() || !file.canRead() || file.isHidden() ) 
             return false;
         
         //  Short-circuit if file is specially shared 
