@@ -532,6 +532,21 @@ class LimeXMLSchemaFieldExtractor
             if(hiddenAttribute.getNodeValue().equalsIgnoreCase("true"))
                 fieldInfo.setHidden(true);
         }
+
+        Node defaultVizAttribute = attributes.getNamedItem("defaultViz");
+        if(defaultVizAttribute != null) {
+            if(defaultVizAttribute.getNodeValue().equalsIgnoreCase("true"))
+                fieldInfo.setDefaultVisibility(true);
+        }
+        
+        Node widthAttribute = attributes.getNamedItem("width");
+        if(widthAttribute != null) {
+            try {
+                int i = Integer.parseInt(widthAttribute.getNodeValue());
+                fieldInfo.setDefaultWidth(i);
+            } catch(NumberFormatException ignored) {}
+        }
+        
         
         //test for enumeration
         processSimpleTypeForEnumeration(n, fieldInfo);

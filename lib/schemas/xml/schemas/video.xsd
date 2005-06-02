@@ -13,7 +13,7 @@
 
   <complexType name="videoType">
     <all>
-      <attribute name="title" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="title" minOccurs="0" maxOccurs="1" type="string" width="100"/>
       <attribute name="type" minOccurs="0" maxOccurs="1">
         <simpleType base="string">
           <enumeration value="Music Video"/>
@@ -27,8 +27,8 @@
           <enumeration value="Other"/>
         </simpleType>
       </attribute>
-      <attribute name="year" minOccurs="0" maxOccurs="1" type="year"/>
-      <attribute name="rating" minOccurs="0" maxOccurs="1">
+      <attribute name="year" minOccurs="0" maxOccurs="1" type="year" width="20"/>
+      <attribute name="rating" minOccurs="0" maxOccurs="1" width="5">
         <simpleType base="string">
           <enumeration value="G"/><!--General Audience-->
           <enumeration value="PG"/><!--Parental Guidance suggested, not suitable for children-->
@@ -38,7 +38,7 @@
           <enumeration value="NR"/><!--Not Rated by MPAA-->
         </simpleType>
       </attribute>
-      <attribute name="length" minOccurs="0" maxOccurs="1" type="duration" editable="false"/>
+      <attribute name="length" minOccurs="0" maxOccurs="1" type="duration" editable="false" width="20"/>
       <attribute name="comments" minOccurs="0" maxOccurs="1">
         <simpleType base="string">
           <maxInclusive value="100"/>
@@ -54,13 +54,13 @@
       <attribute name="height" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
       <attribute name="width" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
       <attribute name="bitrate" type="short" editable="false"/>
-      <attribute name="action" minOccurs="0" maxOccurs="0" type="string"/>
-      <attribute name="director" minOccurs="0" maxOccurs="1" type="string"/>
-      <attribute name="studio" minOccurs="0" maxOccurs="1" type="string"/>
+      <attribute name="action" minOccurs="0" maxOccurs="0" type="string" hidden="true"/>
+      <attribute name="director" minOccurs="0" maxOccurs="1" type="string" />
+      <attribute name="studio" minOccurs="0" maxOccurs="1" type="string" />
       <attribute name="language" minOccurs="0" maxOccurs="1" type="string"/>
-      <attribute name="stars" minOccurs="0" maxOccurs="3" type="string"/>
-      <attribute name="producer" minOccurs="0" maxOccurs="2" type="string"/>
-      <attribute name="subtitles" minOccurs="0" maxOccurs="3" type="string"/>
+      <attribute name="stars" minOccurs="0" maxOccurs="3" type="string" />
+      <attribute name="producer" minOccurs="0" maxOccurs="2" type="string" />
+      <attribute name="subtitles" minOccurs="0" maxOccurs="3" type="string" width="5"/>
     </all>
   </complexType>
 

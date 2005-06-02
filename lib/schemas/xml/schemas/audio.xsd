@@ -13,9 +13,9 @@
 
   <complexType name="audioType">
     <all>
-      <attribute name="title" type="string"/>
-      <attribute name="artist" type="string"/>
-      <attribute name="album" type="string"/>
+      <attribute name="title" type="string" width="100"/>
+      <attribute name="artist" type="string" />
+      <attribute name="album" type="string" />
       <attribute name="genre">
         <simpleType base="string">
           <enumeration value="Blues"/>
@@ -161,17 +161,17 @@
           <enumeration value="Other"/>
         </simpleType>
       </attribute>
-      <attribute name="year" type="year"/>
-      <attribute name="seconds" type="duration" editable="false"/>
+      <attribute name="year" type="year" width="20"/>
+      <attribute name="seconds" type="duration" editable="false" width="20"/>
       <attribute name="language" type="language"/>
-      <attribute name="bitrate" type="short" editable="false"/>
+      <attribute name="bitrate" type="short" editable="false" width="51" defaultViz="true"/>
       <attribute name="comments">
         <simpleType base="string">
           <maxInclusive value="100"/> 
         </simpleType>
       </attribute>
       <attribute name="license" type="string"/>
-      <attribute name="action" type="string"/>
+      <attribute name="action" type="string" hidden="true"/>
     </all>
   </complexType>
 

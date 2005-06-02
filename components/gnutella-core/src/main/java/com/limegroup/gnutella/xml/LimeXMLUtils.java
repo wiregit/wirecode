@@ -486,39 +486,6 @@ public class LimeXMLUtils
     //return the encoded string
     return buffer.toString();
     }
-    
-    /**
-     * takes a string and returns the same string with the first letter 
-     * capitalized
-     * <p>
-     * 11/2/01 Also replaces any "_" with " "
-     */
-    public static String capitalizeFirst(String str)
-    {
-        String first = str.substring(0,1).toUpperCase(Locale.US);
-        String last = str.substring(1); 
-        String retStr = first+last;
-        return retStr.replace('_',' ');
-        
-    }
-
-    /**
-     * picks up the last strng in the colName and return it.
-     */
-    public static String processColName(String colName)
-    {
-        if (colName.endsWith(XMLStringUtils.DELIMITER)){//remove the last delim
-            colName=
-            colName.substring(0,colName.lastIndexOf(XMLStringUtils.DELIMITER));
-        }        
-        int index = colName.lastIndexOf(XMLStringUtils.DELIMITER);
-
-        if(index==-1)//we could not find a DELIMITER
-            return colName;
-        index += XMLStringUtils.DELIMITER.length();
-        return capitalizeFirst(colName.substring(index));
-    }
-
 
     /** @return A properly formatted version of the input data.
      */
