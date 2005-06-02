@@ -92,7 +92,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * Adds the alternate location to this FileDesc and also notifies
      * the ManagedDownloader of a new location for this.
-     */
+     *
     public boolean add(AlternateLocation al) {
         boolean ret = RouterService.getAltlocManager().add(al);
         if (ret) {
@@ -101,15 +101,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
                 md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
         }
         return ret;
-    }
-    
-    /**
-     * Adds a verified location to this FileDesc, not notifying the
-     * ManagedDownloader of the location.
-     */
-    public boolean addVerified(AlternateLocation al) {
-        return RouterService.getAltlocManager().add(al);
-    }
+    }*/
     
 	/**
      * Returns null, overrides super.getHashTree to prevent us from offering

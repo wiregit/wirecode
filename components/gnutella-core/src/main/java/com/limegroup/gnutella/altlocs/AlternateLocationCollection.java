@@ -2,6 +2,7 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
@@ -17,7 +18,7 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * <p>
  * @see AlternateLocation
  */
-final class AlternateLocationCollection 
+public final class AlternateLocationCollection 
 	implements HTTPHeaderValue {
 	    
     private static final int MAX_SIZE = 100;

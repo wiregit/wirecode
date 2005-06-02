@@ -46,6 +46,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -1030,9 +1031,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 //create validAlts
-                Collection [] alts = RouterService.getAltlocManager().getBoth(hash,-1,false);
-                if (alts != null) 
-                    addLocationsToDownload(alts[0],alts[1],(int)size);
+                addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
+                        RouterService.getAltlocManager().getPush(hash,false),
+                        RouterService.getAltlocManager().getPush(hash,true),
+                        (int)size);
                 
             }
         }
@@ -1042,19 +1044,31 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * Adds the alternate locations from the collections as possible
      * download sources.
      */
-    private void addLocationsToDownload(Collection direct,
-            Collection push,
+    private void addLocationsToDownload(AlternateLocationCollection direct,
+            AlternateLocationCollection push,
+            AlternateLocationCollection fwt,
                                         int size) {
-        List locs = new ArrayList(direct.size()+push.size());
+        List locs = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
         // always add the direct alt locs.
-        for (Iterator iter = direct.iterator(); iter.hasNext();) {
-            AlternateLocation loc = (AlternateLocation) iter.next();
-            locs.add(loc.createRemoteFileDesc(size));
+        synchronized(direct) {
+            for (Iterator iter = direct.iterator(); iter.hasNext();) {
+                AlternateLocation loc = (AlternateLocation) iter.next();
+                locs.add(loc.createRemoteFileDesc(size));
+            }
         }
         
-        for (Iterator iter = push.iterator(); iter.hasNext();) {
-            AlternateLocation loc = (AlternateLocation) iter.next();
-            locs.add(loc.createRemoteFileDesc(size));
+        synchronized(push) {
+            for (Iterator iter = push.iterator(); iter.hasNext();) {
+                AlternateLocation loc = (AlternateLocation) iter.next();
+                locs.add(loc.createRemoteFileDesc(size));
+            }
+        }
+        
+        synchronized(fwt) {
+            for (Iterator iter = fwt.iterator(); iter.hasNext();) {
+                AlternateLocation loc = (AlternateLocation) iter.next();
+                locs.add(loc.createRemoteFileDesc(size));
+            }
         }
                 
         addPossibleSources(locs);

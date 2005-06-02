@@ -30,6 +30,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -584,21 +585,20 @@ public final class HTTPUploader implements Uploader {
      * have not been sent out already.
      */
     Set getNextSetOfAltsToSend() {
-        Collection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn(),-1);
+        AlternateLocationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
         Set ret = null;
         
-        Iterator iter  = coll.iterator();
-        //Synchronization note: We hold the locks of two
-        //AlternateLocationCollections concurrently, but one of them is a
-        //local variable, so we are OK.            
-        for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-            if(_writtenLocs.contains(al))
-                continue;
-            _writtenLocs.add(al);
-            if(ret == null) ret = new HashSet();
-            ret.add(al);
-            i++;
+        synchronized(coll) {
+            Iterator iter  = coll.iterator();
+            for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
+                AlternateLocation al = (AlternateLocation)iter.next();
+                if(_writtenLocs.contains(al))
+                    continue;
+                _writtenLocs.add(al);
+                if(ret == null) ret = new HashSet();
+                ret.add(al);
+                i++;
+            }
         }
         return ret == null ? Collections.EMPTY_SET : ret;
      
@@ -608,32 +608,67 @@ public final class HTTPUploader implements Uploader {
         if (!_wantsFalts)
             return Collections.EMPTY_SET;
         
-    	Collection coll = 
-            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(),-1,_FWTVersion > 0);
+        // always send pushlocs that can do FWT
+    	AlternateLocationCollection coll = 
+            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
     	
     	Set ret = null;
     	
     	if (coll != null) {
-        		Iterator iter  = coll.iterator();
-        		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-        			PushAltLoc al = (PushAltLoc)iter.next();
-        			
-        			if(_writtenPushLocs.contains(al))
-        			    continue;
-        			
-        			// it is possible to end up having a PE with all
-        			// proxies removed.  In that case we remove it explicitly
-        			if(al.getPushAddress().getProxies().isEmpty()) {
-        			    RouterService.getAltlocManager().remove(al);
-        				continue;
-        			}
-        			
-        			_writtenPushLocs.add(al);
-        			
-        			if(ret == null) ret = new HashSet();
-        			ret.add(al);
-        			i++;
-        	}
+            synchronized(coll) {
+                Iterator iter  = coll.iterator();
+                for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+                    PushAltLoc al = (PushAltLoc)iter.next();
+                    
+                    if(_writtenPushLocs.contains(al))
+                        continue;
+                    
+                    // it is possible to end up having a PE with all
+                    // proxies removed.  In that case we remove it explicitly
+                    if(al.getPushAddress().getProxies().isEmpty()) {
+                        RouterService.getAltlocManager().remove(al);
+                        continue;
+                    }
+                    
+                    _writtenPushLocs.add(al);
+                    
+                    if(ret == null) ret = new HashSet();
+                    ret.add(al);
+                    i++;
+                }
+            }
+        }
+
+        // if they indicated they want pushlocs that do not do FWT, some some of those as well
+        if (_FWTVersion == 0) {
+            coll = 
+                RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
+            
+            
+            if (coll != null) {
+                synchronized(coll) {
+                    Iterator iter  = coll.iterator();
+                    for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+                        PushAltLoc al = (PushAltLoc)iter.next();
+                        
+                        if(_writtenPushLocs.contains(al))
+                            continue;
+                        
+                        // it is possible to end up having a PE with all
+                        // proxies removed.  In that case we remove it explicitly
+                        if(al.getPushAddress().getProxies().isEmpty()) {
+                            RouterService.getAltlocManager().remove(al);
+                            continue;
+                        }
+                        
+                        _writtenPushLocs.add(al);
+                        
+                        if(ret == null) ret = new HashSet();
+                        ret.add(al);
+                        i++;
+                    }
+                }
+            }
         }
         
         return ret == null ? Collections.EMPTY_SET : ret;

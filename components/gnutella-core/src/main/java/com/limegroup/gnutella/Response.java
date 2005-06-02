@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.metadata.AudioMetaData;
@@ -138,7 +139,7 @@ public class Response {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
-			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn(), -1)),
+			    getAsEndpoints(RouterService.getAltlocManager().getDirect(fd.getSHA1Urn())),
 			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
 			 null);
 	}
@@ -415,8 +416,8 @@ public class Response {
      * Utility method for converting the non-firewalled elements of an
      * AlternateLocationCollection to a smaller set of endpoints.
      */
-    private static Set getAsEndpoints(Collection col) {
-        if( col == null || col.isEmpty() )
+    private static Set getAsEndpoints(AlternateLocationCollection col) {
+        if( col == null || !col.hasAlternateLocations() )
             return Collections.EMPTY_SET;
         
         synchronized(col) {

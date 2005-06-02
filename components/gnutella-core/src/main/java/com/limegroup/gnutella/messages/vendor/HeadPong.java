@@ -24,12 +24,14 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
+import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -311,13 +313,32 @@ public class HeadPong extends VendorMessage {
     		if (ping.requestsPushLocs()){
     			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
     				HeadPing.FWT_PUSH_ALTLOCS;
-    			didNotSendPushAltLocs = !writePushLocs(caos, 
-                        RouterService.getAltlocManager().getPush(urn,-1,FWTOnly));
+                
+                Iterator iter = null;
+                if (FWTOnly) {
+                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
+                    synchronized(push) {
+                        didNotSendPushAltLocs = !writePushLocs(caos,push.iterator());
+                    }
+                } else {
+                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,false);
+                    synchronized(push) {
+                        synchronized(fwt) {
+                            didNotSendPushAltLocs = 
+                                !writePushLocs(caos,new DualIterator(push.iterator(),fwt.iterator()));
+                        }
+                    }
+                }
     		}
     		
     		//now add any non-firewalled altlocs in case they were requested. 
-    		if (ping.requestsAltlocs()) 
-    			didNotSendAltLocs=!writeLocs(caos, RouterService.getAltlocManager().getDirect(urn,-1));
+    		if (ping.requestsAltlocs()) {
+                AlternateLocationCollection col = RouterService.getAltlocManager().getDirect(urn);
+                synchronized(col) {
+                    didNotSendAltLocs=!writeLocs(caos, col.iterator());
+                }
+            }
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -535,7 +556,7 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writePushLocs(CountingOutputStream caos, Collection pushlocs) 
+	private static final boolean writePushLocs(CountingOutputStream caos, Iterator pushlocs) 
     throws IOException {
 	
         if (pushlocs == null)
@@ -554,7 +575,7 @@ public class HeadPong extends VendorMessage {
 			LOG.debug("trying to add up to "+available+ " push locs to pong");
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (Iterator iter = pushlocs.iterator(); iter.hasNext() && available > 0;) {
+        for (Iterator iter = pushlocs; iter.hasNext() && available > 0;) {
             PushAltLoc loc = (PushAltLoc) iter.next();
             if (loc.getPushAddress().getProxies().isEmpty())
                 continue;
@@ -575,7 +596,7 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writeLocs(CountingOutputStream caos, Collection altlocs) 
+	private static final boolean writeLocs(CountingOutputStream caos, Iterator altlocs) 
     throws IOException {
 		
 		//do we have any altlocs?
@@ -594,7 +615,7 @@ public class HeadPong extends VendorMessage {
         DataOutputStream daos = new DataOutputStream(caos);
 		byte [] altbytes = new byte[toSend * 6];
         int sent = 0;
-		for (Iterator iter = altlocs.iterator(); iter.hasNext() && sent < toSend;) {
+		for (Iterator iter = altlocs; iter.hasNext() && sent < toSend;) {
             DirectAltLoc loc = (DirectAltLoc) iter.next();
             byte [] addr = loc.getHost().getInetAddress().getAddress();
             System.arraycopy(addr,0,altbytes,sent*6,4);

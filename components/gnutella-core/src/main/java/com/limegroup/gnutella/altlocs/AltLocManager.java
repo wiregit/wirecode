@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +18,16 @@ public class AltLocManager {
         return INSTANCE;
     }
     
+    private static final int DIRECT = 0;
+    private static final int PUSH = 1;
+    private static final int FWT = 2;
+    
+    /**
+     * Mapping of URN - > array of three alternate locations.
+     * LOCKING: itself for all map operations as well as operations on the contained arrays
+     */
     private final Map urnMap = Collections.synchronizedMap(new HashMap());
+    
     private AltLocManager() {}
     
     /**
@@ -29,12 +39,28 @@ public class AltLocManager {
         AlternateLocationCollection col = null;
         
         synchronized(urnMap) {
-            col = (AlternateLocationCollection) urnMap.get(sha1);
+            AlternateLocationCollection []cols = 
+                (AlternateLocationCollection []) urnMap.get(sha1);
             
-            if (col == null) {
-                col = AlternateLocationCollection.create(sha1);
+            if (cols == null) {
+                cols = new AlternateLocationCollection[3];
                 urnMap.put(sha1,col);
             }
+            
+            int type = -1;
+            if (al instanceof DirectAltLoc) 
+                type = DIRECT;
+            else {
+                PushAltLoc push = (PushAltLoc) al;
+                if (push.supportsFWTVersion() < 1) 
+                    type = PUSH;
+                else 
+                    type = FWT;
+            }
+            
+            if (cols[type] == null)
+                cols[type] = AlternateLocationCollection.create(sha1);
+            col = cols[type];
         }
         
         return col.add(al);
@@ -47,13 +73,30 @@ public class AltLocManager {
     public boolean remove(AlternateLocation al) {
         URN sha1 = al.getSHA1Urn();
         synchronized(urnMap) {
-            AlternateLocationCollection col = (AlternateLocationCollection) urnMap.get(sha1);
-            if (col == null)
+            AlternateLocationCollection [] cols = 
+                (AlternateLocationCollection []) urnMap.get(sha1);
+            if (cols == null)
                 return false;
             
+            int type = -1;
+            if (al instanceof DirectAltLoc) 
+                type = DIRECT;
+            else {
+                PushAltLoc push = (PushAltLoc) al;
+                if (push.supportsFWTVersion() < 1)
+                    type = PUSH;
+                else
+                    type = FWT;
+            }
+            
+            AlternateLocationCollection col = cols[type];
+            
             boolean ret = col.remove(al);
-            if (!col.hasAlternateLocations())
-                urnMap.remove(sha1);
+            if (!col.hasAlternateLocations()) {
+                cols[type] = null;
+                if (cols[DIRECT] == null && cols[PUSH] == null && cols[FWT] == null)
+                    urnMap.remove(sha1);
+            }
             return ret;
         }
     }
@@ -62,24 +105,12 @@ public class AltLocManager {
      * @param sha1 the URN for which to get altlocs
      * @param size the maximum number of altlocs to return
      */
-    public Collection getDirect(URN sha1, int size) {
-        AlternateLocationCollection col = (AlternateLocationCollection) urnMap.get(sha1);
-        if (col == null)
+    public AlternateLocationCollection getDirect(URN sha1) {
+        AlternateLocationCollection []cols = (AlternateLocationCollection []) urnMap.get(sha1);
+        if (cols == null)
             return null;
         
-        if (size == -1)
-            size = col.getAltLocsSize();
-        List ret = new ArrayList(size);
-        
-        for (Iterator iter = col.iterator(); iter.hasNext() && size > 0;) {
-            AlternateLocation current = (AlternateLocation) iter.next();
-            if (current instanceof DirectAltLoc) {
-                ret.add(current);
-                size--;
-            }
-        }
-        
-        return ret;
+        return cols[DIRECT];
     }
     
     /**
@@ -87,67 +118,12 @@ public class AltLocManager {
      * @param size the maximum number of altlocs to return
      * @param FWTOnly whether the altlocs must support FWT
      */
-    public Collection getPush(URN sha1, int size, boolean FWTOnly) {
-        AlternateLocationCollection col = (AlternateLocationCollection) urnMap.get(sha1);
-        if (col == null)
+    public AlternateLocationCollection getPush(URN sha1, boolean FWTOnly) {
+        AlternateLocationCollection []cols = (AlternateLocationCollection []) urnMap.get(sha1);
+        if (cols == null)
             return null;
         
-        if (size == -1)
-            size = col.getAltLocsSize();
-        List ret = new ArrayList(size);
-        
-        for (Iterator iter = col.iterator(); iter.hasNext() && size > 0;) {
-            AlternateLocation current = (AlternateLocation) iter.next();
-            if (current instanceof PushAltLoc) {
-                if (FWTOnly) {
-                    PushAltLoc push = (PushAltLoc) current;
-                    if (push.supportsFWTVersion() == 0)
-                        continue;
-                }
-                ret.add(current);
-                size--;
-            }
-        }
-        
-        return ret;
-    }
-    
-    /**
-     * @param sha1 the URN for which to get altlocs
-     * @param size the maximum number of altlocs to return
-     * @param FWTOnly whether the altlocs must support FWT
-     * @return a Collection of direct altlocs at index [0], and Collection of push 
-     * altlocs at index [1]
-     */
-    public Collection[] getBoth(URN sha1, int size, boolean FWTOnly) {
-        AlternateLocationCollection col = (AlternateLocationCollection) urnMap.get(sha1);
-        if (col == null)
-            return null;
-        
-        if (size == -1)
-            size = col.getAltLocsSize();
-        List direct = new ArrayList(size);
-        List push = new ArrayList(size);
-        
-        for (Iterator iter = col.iterator(); iter.hasNext();) {
-            if (direct.size() == size && push.size() == size) 
-                break;
-            
-            AlternateLocation current = (AlternateLocation) iter.next();
-            
-            if (current instanceof DirectAltLoc && direct.size() < size)
-                direct.add(current);
-            if (current instanceof PushAltLoc && push.size() < size) {
-                if (FWTOnly) {
-                    PushAltLoc palt = (PushAltLoc) current;
-                    if (palt.supportsFWTVersion() == 0)
-                        continue;
-                }
-                push.add(current);
-            }
-        }
-        
-        return new Collection[]{direct,push};
+        return cols[FWTOnly ? FWT : PUSH];
     }
     
     public void purge(){
@@ -159,8 +135,14 @@ public class AltLocManager {
     }
     
     public boolean hasAltlocs(URN sha1) {
-        AlternateLocationCollection al = (AlternateLocationCollection) urnMap.get(sha1);
-        return al != null && al.hasAlternateLocations();
+        synchronized(urnMap) {
+            AlternateLocationCollection []al = (AlternateLocationCollection[]) urnMap.get(sha1);
+            if (al == null)
+                return false;
+            return ( al[DIRECT] != null && al[DIRECT].hasAlternateLocations() ) ||
+                ( al[PUSH] != null && al[PUSH].hasAlternateLocations() ) ||
+                ( al[FWT] != null && al[FWT].hasAlternateLocations() );
+        }
     }
 
 }
