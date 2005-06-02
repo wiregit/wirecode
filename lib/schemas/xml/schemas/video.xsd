@@ -44,9 +44,10 @@
           <maxInclusive value="100"/>
         </simpleType>
       </attribute>
-      <attribute name="licensetype" editable="false">
+      <attribute name="licensetype" editable="false" hidden="true">
         <simpleType base="string">
           <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>
+          <enumeration name="Weedshare" value="http://www.shmedlic.com/license/3play.aspx"/>
         </simpleType>
       </attribute>
       <attribute name="license" type="string"/>

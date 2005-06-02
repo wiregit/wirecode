@@ -24,6 +24,12 @@ public class SchemaFieldInfo
     private boolean _editable = true;
     
     /**
+     * Whether or not this field should be hidden in GUI displays.
+     * (This does not mean it will or should be hidden from searching.)
+     */
+    private boolean _hidden = false;
+    
+    /**
      * List (of NameValue) to store enumerated values, if associated with this
      *field
      */
@@ -99,6 +105,20 @@ public class SchemaFieldInfo
      */
     public boolean isEditable() {
         return _editable;
+    }
+    
+    /**
+     * Sets whether or not this field should be hidden.
+     */
+    void setHidden(boolean hidden) {
+        this._hidden = hidden;
+    }
+    
+    /**
+     * Gets whether or not this field is hidden.
+     */
+    public boolean isHidden() {
+        return _hidden;
     }
     
      /**

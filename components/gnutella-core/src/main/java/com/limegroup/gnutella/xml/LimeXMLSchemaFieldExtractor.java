@@ -527,6 +527,12 @@ class LimeXMLSchemaFieldExtractor
                 fieldInfo.setEditable(false);
         }
         
+        Node hiddenAttribute = attributes.getNamedItem("hidden");
+        if(hiddenAttribute != null) {
+            if(hiddenAttribute.getNodeValue().equalsIgnoreCase("true"))
+                fieldInfo.setHidden(true);
+        }
+        
         //test for enumeration
         processSimpleTypeForEnumeration(n, fieldInfo);
         

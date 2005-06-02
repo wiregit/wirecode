@@ -90,7 +90,7 @@ public interface License {
     
     /**
      * Gets the name of this license.
-     * For example, "Creative Commons License", or "Weed License", or "Bad License".
+     * For example, "Creative Commons License", or "Weed License".
      */
-     public String getLicenseName();
+    public String getLicenseName();
 }

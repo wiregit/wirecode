@@ -145,10 +145,11 @@
           <enumeration value="Euro-House"/>
           <enumeration value="Dance Hall"/>
         </simpleType>
-      </attribute>
-      <attribute name="licensetype" editable="false">
+      </attribute> 
+      <attribute name="licensetype" editable="false" hidden="true">
         <simpleType base="string">
           <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>
+          <enumeration name="Weedshare" value="http://www.shmedlic.com/license/3play.aspx"/>
         </simpleType>
       </attribute>
       <attribute name="track" type="short"/>
