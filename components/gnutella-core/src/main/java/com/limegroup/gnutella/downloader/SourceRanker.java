@@ -111,8 +111,8 @@ public abstract class SourceRanker {
      * stops the ranker, clearing any state
      */
     public synchronized void stop() {
-        meshHandler = null;
         clearState();
+        meshHandler = null;
     }
     
     protected abstract void clearState();

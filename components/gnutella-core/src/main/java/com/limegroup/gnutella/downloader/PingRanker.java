@@ -145,7 +145,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (myGUID == null) {
             myGUID = new GUID(GUID.makeGuid());
             RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
-            running = true;
         }
         
         // do not allow duplicate hosts 
@@ -362,14 +361,21 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
 
 
-    public void registered(byte[] guid) {
+    public synchronized void registered(byte[] guid) {
         if (LOG.isDebugEnabled())
             LOG.debug("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
+	running = true;
     }
 
-    public void unregistered(byte[] guid) {
+    public synchronized void unregistered(byte[] guid) {
         if (LOG.isDebugEnabled())
             LOG.debug("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
+	
+        running = false;
+        verifiedHosts.clear();
+        pingedHosts.clear();
+        testedLocations.clear();
+        newHosts.clear();
     }
     
     public synchronized boolean isCancelled(){
@@ -377,11 +383,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     protected synchronized void clearState(){
-        running = false;
-        verifiedHosts.clear();
-        pingedHosts.clear();
-        testedLocations.clear();
-        newHosts.clear();
         if (myGUID != null) {
             RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
