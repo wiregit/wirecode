@@ -804,18 +804,6 @@ public abstract class FileManager {
     //  Adding and removing shared files and directories
     ///////////////////////////////////////////////////////////////////////////
 		
-    /**
-      * @modifies this
-      * @effects adds the given file to this, if it exists in a completely
-      * shared directory and has a shared extension.
-      * 
-      * @return the <tt>FileDesc</tt> for the new file if it was successfully
-      *         added, otherwise <tt>null</tt>
-      */
-    public FileDesc addFileIfShared(File file) {
-        return addFileIfShared(file, true);
-    }
-	
 	/**
 	 * Adds the given file to this, even if it exists outside of what is
 	 * currently accepted to be shared.
@@ -830,6 +818,18 @@ public abstract class FileManager {
 	public FileDesc addFileAlways(File file) {
 		return addFileAlways(file, Collections.EMPTY_LIST);
 	}
+	
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists in a completely
+     * shared directory and has a shared extension.
+     * 
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully
+     *         added, otherwise <tt>null</tt>
+     */
+   public FileDesc addFileIfShared(File file) {
+       return addFileIfShared(file, true);
+   }
 	
     /**
      * The actual implementation of addFileIfShared(File)
