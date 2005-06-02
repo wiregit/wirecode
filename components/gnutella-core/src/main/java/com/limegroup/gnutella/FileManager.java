@@ -226,7 +226,7 @@ public abstract class FileManager {
      */
     private static final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
         public boolean accept(File f) {
-            return isFilePhysicallyShareable(f, f.length());
+            return isFilePhysicallyShareable(f);
         }
     };    
         
@@ -902,6 +902,11 @@ public abstract class FileManager {
     private FileDesc addFile(File file) {
         repOk();
 
+		if (!isFilePhysicallyShareable(file)) {
+			LOG.trace("not physically shareable: "+file);
+			return null;
+		}
+		
         if (!isFileShareable(file)) {
 			LOG.trace("NOT SHAREABLE: "+file);
 			return null;
@@ -1415,8 +1420,12 @@ public abstract class FileManager {
      * Returns false otherwise.
      * @see isFileShareable(File) 
      */
-    public static boolean isFilePhysicallyShareable(File file, long fileLength) {
-        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+    public static boolean isFilePhysicallyShareable(File file) {
+		if (file == null)
+			return false;
+		
+		long fileLength = file.length();
+		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
         	return false;
         
         if (file == null || file.isDirectory() || !file.canRead() || file.isHidden() ) 
