@@ -1428,15 +1428,12 @@ public abstract class FileManager {
      * @see isFileShareable(File) 
      */
     public static boolean isFilePhysicallyShareable(File file) {
-		if (file == null)
-			return false;
-		
+		if (file == null || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+            return false;
+                
 		long fileLength = file.length();
 		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
         	return false;
-        
-        if (file.isDirectory() || !file.canRead() || file.isHidden() ) 
-            return false;
         
         //  Short-circuit if file is specially shared 
         if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
