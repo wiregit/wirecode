@@ -1407,6 +1407,18 @@ public abstract class FileManager {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
+	
+	/**
+	 * Returns true if this dir is completely shared. 
+	 */
+	public boolean isCompletelySharedDirectory(File dir) {
+		if (dir == null)
+			return false;
+		
+		synchronized (this) {
+			return _completelySharedDirectories.contains(dir);
+		}
+	}
 
 	/**
 	 * Returns true if the given file is in a completely shared directory
