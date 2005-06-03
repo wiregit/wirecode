@@ -31,9 +31,9 @@ import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.DualFlipIterator;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.MultiRRIterator;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -326,7 +326,8 @@ public class HeadPong extends VendorMessage {
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
-                                !writePushLocs(caos,new DualFlipIterator(push.iterator(),fwt.iterator()));
+                                !writePushLocs(caos,
+                                        new MultiRRIterator(new Iterator[]{push.iterator(),fwt.iterator()}));
                         }
                     }
                 }

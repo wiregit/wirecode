@@ -145,5 +145,21 @@ public class AltLocManager {
                 ( al[FWT] != null && al[FWT].hasAlternateLocations() );
         }
     }
+    
+    public int getNumLocs(URN sha1) {
+        synchronized(urnMap) {
+        AlternateLocationCollection []al = (AlternateLocationCollection[]) urnMap.get(sha1);
+        if (al == null)
+            return 0;
+        int num = 0;
+        if (al[DIRECT]!= null)
+            num+=al[DIRECT].getAltLocsSize();
+        if (al[PUSH]!= null)
+            num+=al[PUSH].getAltLocsSize();
+        if (al[FWT]!= null)
+            num+=al[FWT].getAltLocsSize();
+        return num;
+        }
+    }
 
 }
