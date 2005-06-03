@@ -25,15 +25,18 @@ public class MagnetOptions {
 	public String toString() {
 		String ret = MAGNET;
 		
-        for (int i = 0; i < _xt.size(); i++) 
+		int size = _xt.size();
+        for (int i = 0; i < size; i++) 
             ret += "&xt="+_xt.get(i)+"";
 		if ( _dn != null ) 
 			ret += "&dn="+_dn+"";
 		if ( _kt != null ) 
 			ret += "&kt="+_kt+"";
-        for (int i = 0; i < _xs.size(); i++) 
+		size = _xs.size();
+        for (int i = 0; i < size; i++) 
             ret += "&xs="+_xs.get(i)+"";
-        for (int i = 0; i < _as.size(); i++) 
+		size = _as.size();
+        for (int i = 0; i < size; i++) 
             ret += "&as="+_as.get(i)+"";
 		return ret;
 	}
