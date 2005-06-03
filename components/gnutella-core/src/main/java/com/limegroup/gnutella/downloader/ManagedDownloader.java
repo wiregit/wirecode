@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.DownloadManager;
@@ -42,7 +41,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -53,12 +51,10 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -68,11 +64,7 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -2653,7 +2645,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 
     public synchronized int getContentLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
-        return i != null ? i.intValue() : 0;
+        return i != null ? i.intValue() : -1;
     }
 
     /**
