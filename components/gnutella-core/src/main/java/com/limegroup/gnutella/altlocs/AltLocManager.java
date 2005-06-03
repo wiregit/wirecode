@@ -110,7 +110,7 @@ public class AltLocManager {
         if (cols == null)
             return null;
         
-        return cols[DIRECT];
+        return cols[DIRECT] == null ? AlternateLocationCollection.EMPTY : cols[DIRECT];
     }
     
     /**
@@ -121,9 +121,10 @@ public class AltLocManager {
     public AlternateLocationCollection getPush(URN sha1, boolean FWTOnly) {
         AlternateLocationCollection []cols = (AlternateLocationCollection []) urnMap.get(sha1);
         if (cols == null)
-            return null;
+            return AlternateLocationCollection.EMPTY;
         
-        return cols[FWTOnly ? FWT : PUSH];
+        AlternateLocationCollection ret = cols[FWTOnly ? FWT : PUSH]; 
+        return ret == null ? AlternateLocationCollection.EMPTY : ret;
     }
     
     public void purge(){

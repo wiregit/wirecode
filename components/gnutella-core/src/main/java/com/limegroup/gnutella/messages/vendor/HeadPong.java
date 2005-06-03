@@ -31,7 +31,7 @@ import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.DualIterator;
+import com.limegroup.gnutella.util.DualFlipIterator;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -326,7 +326,7 @@ public class HeadPong extends VendorMessage {
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
-                                !writePushLocs(caos,new DualIterator(push.iterator(),fwt.iterator()));
+                                !writePushLocs(caos,new DualFlipIterator(push.iterator(),fwt.iterator()));
                         }
                     }
                 }
@@ -559,7 +559,7 @@ public class HeadPong extends VendorMessage {
 	private static final boolean writePushLocs(CountingOutputStream caos, Iterator pushlocs) 
     throws IOException {
 	
-        if (pushlocs == null)
+        if (!pushlocs.hasNext())
             return false;
 
         //push altlocs are bigger than normal altlocs, however we 
@@ -600,7 +600,7 @@ public class HeadPong extends VendorMessage {
     throws IOException {
 		
 		//do we have any altlocs?
-		if (altlocs==null)
+		if (!altlocs.hasNext())
 			return false;
         
         //how many can we fit in the packet?

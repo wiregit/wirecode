@@ -43,6 +43,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CountingOutputStream;
+import com.limegroup.gnutella.util.DualFlipIterator;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 
@@ -608,69 +609,39 @@ public final class HTTPUploader implements Uploader {
         if (!_wantsFalts)
             return Collections.EMPTY_SET;
         
-        // always send pushlocs that can do FWT
-    	AlternateLocationCollection coll = 
+    	AlternateLocationCollection fwt = 
             RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
+        
+        AlternateLocationCollection push = _FWTVersion > 0 ? AlternateLocationCollection.EMPTY : 
+            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
     	
     	Set ret = null;
     	
-    	if (coll != null) {
-            synchronized(coll) {
-                Iterator iter  = coll.iterator();
-                for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-                    PushAltLoc al = (PushAltLoc)iter.next();
-                    
-                    if(_writtenPushLocs.contains(al))
-                        continue;
-                    
-                    // it is possible to end up having a PE with all
-                    // proxies removed.  In that case we remove it explicitly
-                    if(al.getPushAddress().getProxies().isEmpty()) {
-                        RouterService.getAltlocManager().remove(al);
-                        continue;
-                    }
-                    
-                    _writtenPushLocs.add(al);
-                    
-                    if(ret == null) ret = new HashSet();
-                    ret.add(al);
-                    i++;
-                }
-            }
-        }
+    	synchronized(push) {
+    	    synchronized (fwt) {
+    	        Iterator iter  = new DualFlipIterator(fwt.iterator(),push.iterator());
+    	        for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+    	            PushAltLoc al = (PushAltLoc)iter.next();
+    	            
+    	            if(_writtenPushLocs.contains(al))
+    	                continue;
+    	            
+    	            // it is possible to end up having a PE with all
+    	            // proxies removed.  In that case we remove it explicitly
+    	            if(al.getPushAddress().getProxies().isEmpty()) {
+    	                RouterService.getAltlocManager().remove(al);
+    	                continue;
+    	            }
+    	            
+    	            _writtenPushLocs.add(al);
+    	            
+    	            if(ret == null) ret = new HashSet();
+    	            ret.add(al);
+    	            i++;
+    	        }
+    	    }
+    	}
 
-        // if they indicated they want pushlocs that do not do FWT, some some of those as well
-        if (_FWTVersion == 0) {
-            coll = 
-                RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
-            
-            
-            if (coll != null) {
-                synchronized(coll) {
-                    Iterator iter  = coll.iterator();
-                    for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-                        PushAltLoc al = (PushAltLoc)iter.next();
-                        
-                        if(_writtenPushLocs.contains(al))
-                            continue;
-                        
-                        // it is possible to end up having a PE with all
-                        // proxies removed.  In that case we remove it explicitly
-                        if(al.getPushAddress().getProxies().isEmpty()) {
-                            RouterService.getAltlocManager().remove(al);
-                            continue;
-                        }
-                        
-                        _writtenPushLocs.add(al);
-                        
-                        if(ret == null) ret = new HashSet();
-                        ret.add(al);
-                        i++;
-                    }
-                }
-            }
-        }
-        
         return ret == null ? Collections.EMPTY_SET : ret;
     }
     

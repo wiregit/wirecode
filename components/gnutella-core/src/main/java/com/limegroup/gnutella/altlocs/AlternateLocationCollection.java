@@ -18,10 +18,21 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * <p>
  * @see AlternateLocation
  */
-public final class AlternateLocationCollection 
+public class AlternateLocationCollection 
 	implements HTTPHeaderValue {
 	    
     private static final int MAX_SIZE = 100;
+    
+    public static final AlternateLocationCollection EMPTY;
+    static {
+        AlternateLocationCollection col = null;
+        try {
+            col = new EmptyCollection();
+        } catch (IOException bad) {
+            ErrorService.error(bad);
+        }
+        EMPTY = col;
+    }
 
 	/**
 	 * This uses a <tt>FixedSizeSortedSet</tt> so that the highest * entry
@@ -412,5 +423,15 @@ public final class AlternateLocationCollection
     	}
     	
     	return baos.toByteArray();
+    }
+    
+    private static class EmptyCollection extends AlternateLocationCollection {
+        EmptyCollection() throws IOException {
+            super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+        }
+        
+        public boolean add(AlternateLocation loc) {
+            return false;
+        }
     }
 }
