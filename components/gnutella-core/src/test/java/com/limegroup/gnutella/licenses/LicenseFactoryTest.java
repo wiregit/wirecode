@@ -25,71 +25,130 @@ public final class LicenseFactoryTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void testCreate() throws Exception {
+	public void testCreateWithBadLicenses() throws Exception {
 	    License l = LicenseFactory.create(null);
 	    assertNull(l);
 	    
-	    // BAD: no 'verify at'
 	    l = LicenseFactory.create("no string");
 	    assertNull(l);
 	    
-	    // CCBAD: 'verify at' without location
-	    l = LicenseFactory.create("verify at");   
+	    l = LicenseFactory.create("http://home.org");
+	    assertNull(l);
+    }
+    
+    public void testCreateForBadCCLicenses() throws Exception {
+	    // 'verify at' without location
+	    License l = LicenseFactory.create("verify at");   
 	    assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
-	    // CCBAD: 'verify at' with invalid URI
+	    // 'verify at' with invalid URI
 	    l = LicenseFactory.create("verify at nowhere");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
-	    // a-ok CC
-	    l = LicenseFactory.create("verify at http://home.org");
-	    assertNotNull(l);
-	    assertEquals(CCLicense.class, l.getClass());
-	    assertFalse(l.isVerified());
-	    assertFalse(l.isValid(null));
-	    
-	    // BAD: no 'verify at'.
-	    l = LicenseFactory.create("http://home.org");
-	    assertNull(l);
-	    
-	    // CCBAD: no authority
+	    // no authority in lookup URI
 	    l = LicenseFactory.create("verify at http://");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
-	    // a-ok CC
-	    l = LicenseFactory.create("verify at http://home.org/path");
-	    assertNotNull(l);
-	    assertEquals(CCLicense.class, l.getClass());
-	    assertFalse(l.isVerified());
-	    assertFalse(l.isValid(null));
-	    
-	    // a-ok CC
-	    l = LicenseFactory.create("this license should verify at http://nowhere.com");
-	    assertNotNull(l);
-	    assertEquals(CCLicense.class, l.getClass());
-	    assertFalse(l.isVerified());
-	    assertFalse(l.isValid(null));
-	    
-	    // CCBAD: authority has spaces in it.
+	    // lookup URI isn't the end.
 	    l = LicenseFactory.create("verify at http://life.org is not fair.");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
-	    
-	    // 
-	    
-	    
+	    assertEquals("Creative Commons License", l.getLicenseName());
     }
+    
+    public void testCreateForCCLicenses() throws Exception {
+	    License l = LicenseFactory.create("verify at http://home.org");
+	    assertNotNull(l);
+	    assertEquals(CCLicense.class, l.getClass());
+	    assertFalse(l.isVerified());
+	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
+	    
+	    l = LicenseFactory.create("verify at http://home.org/path");
+	    assertNotNull(l);
+	    assertEquals(CCLicense.class, l.getClass());
+	    assertFalse(l.isVerified());
+	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
+	    
+	    l = LicenseFactory.create("this license should verify at http://nowhere.com");
+	    assertNotNull(l);
+	    assertEquals(CCLicense.class, l.getClass());
+	    assertFalse(l.isVerified());
+	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
+    }
+    
+    public void testInvalidWeedLicenses() throws Exception {
+        // no cid or vid
+	    License l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx");
+	    assertNull(l);
+	    
+	    // no data in cid or vid.
+	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: ");
+	    assertNull(l);
+	    
+	    // no vid.
+	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 098301");
+	    assertNull(l);
+	    
+	    // no cid
+	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx vid: 134572");
+	    assertNull(l);
+	    
+	    // no data in vid.
+	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 12350975 vid: ");
+	    assertNull(l);
+	    
+	    // no data in cid.
+	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: 123509713");
+	    assertNull(l);
+    }
+    
+    public void testWeedLicenses() {
+        License l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 1 vid: 2");
+        assertNotNull(l);
+        assertEquals(WeedLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        assertFalse(l.isValid(null));
+        assertEquals("Weed License", l.getLicenseName());
+        assertEquals(l.getLicenseURI().toString(), weedURI("1", "2"));
+        
+        l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 00131 vid: 01093722 somethn: else");
+        assertNotNull(l);
+        assertEquals(WeedLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        assertFalse(l.isValid(null));
+        assertEquals("Weed License", l.getLicenseName());
+        assertEquals(l.getLicenseURI().toString(), weedURI("00131", "01093722"));
+        
+        l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx a: b vid: q somethn: else cid: d");
+        assertNotNull(l);
+        assertEquals(WeedLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        assertFalse(l.isValid(null));
+        assertEquals("Weed License", l.getLicenseName());
+        assertEquals(l.getLicenseURI().toString(), weedURI("d", "q"));
+    }
+    
+    private String weedURI(String cid, String vid) {
+        return "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
+    }
+        
     
     public void testIsVerifiedAndValidAndCaching() throws Exception {
         URN urn1 = urn("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456");

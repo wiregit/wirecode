@@ -71,7 +71,7 @@ public final class LicenseFactory {
                     license = new CCLicense(licenseString, uri);
                 else
                     license = new BadCCLicense(licenseString);
-            } else if(isWeedLicense(licenseString)) {
+            } else if(isWeedLicense(licenseString) && uri != null) {
                 license = new WeedLicense(uri);
             }
         }
@@ -164,22 +164,42 @@ public final class LicenseFactory {
         int cidx = license.indexOf(WeedInfo.CID);
         int vidx = license.indexOf(WeedInfo.VID);
         
-        if(cidx == -1 || vidx == -1)
+        // If no cid or vid, exit.
+        if(cidx == -1 || vidx == -1) {
+            LOG.debug("No cid or vid, bailing.");
             return null;
-        cidx += WeedInfo.CID.length();
-        vidx += WeedInfo.VID.length();
+        }
+            
+        cidx += WeedInfo.CID.length();;
+        vidx += WeedInfo.VID.length();;
             
         int cend = license.indexOf(" ", cidx);
         int vend = license.indexOf(" ", vidx);
-        if(cend == -1 && vend == -1) // one or the other must be set.
+        // If there's no ending space for BOTH, exit.
+        // (it's okay if one is at the end, but both can't be)
+        if(cend == -1 && vend == -1) {
+            LOG.debug("No endings for both cid & vid, bailing");
             return null;
+        }
         if(cend == -1)
             cend = license.length();
         if(vend == -1)
             vend = license.length();
         
+        // If the cid or vid are empty, exit.
         String cid = license.substring(cidx, cend).trim();
         String vid = license.substring(vidx, vend).trim();
+        if(cid.length() == 0 || vid.length() == 0) {
+            LOG.debug("cid or vid is empty, bailing");
+            return null;
+        }
+        
+        if(cid.startsWith(WeedInfo.VID.trim()) || vid.startsWith(WeedInfo.CID.trim())) {
+            LOG.debug("cid starts with vid, or vice versa, bailing.");
+            return null;
+        }
+            
+        
         String location = "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
         try {
             return new URI(location.toCharArray());
