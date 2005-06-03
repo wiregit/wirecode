@@ -43,7 +43,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.DualFlipIterator;
+import com.limegroup.gnutella.util.MultiRRIterator;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 
@@ -619,7 +619,8 @@ public final class HTTPUploader implements Uploader {
     	
     	synchronized(push) {
     	    synchronized (fwt) {
-    	        Iterator iter  = new DualFlipIterator(fwt.iterator(),push.iterator());
+    	        Iterator iter  = 
+    	        	new MultiRRIterator(new Iterator[]{fwt.iterator(),push.iterator()});
     	        for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
     	            PushAltLoc al = (PushAltLoc)iter.next();
     	            
