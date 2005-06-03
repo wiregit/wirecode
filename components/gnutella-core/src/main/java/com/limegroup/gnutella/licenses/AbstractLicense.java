@@ -89,6 +89,13 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
      * Returns null if the page could not be found.
      */
     protected String getBody(String url) {
+        return getBodyFromURL(url);
+    }
+    
+    /**
+     * Retrieves the body from the given URL.
+     */
+    protected String getBodyFromURL(String url) {
         if(LOG.isTraceEnabled())
             LOG.trace("Contacting: " + url);
         

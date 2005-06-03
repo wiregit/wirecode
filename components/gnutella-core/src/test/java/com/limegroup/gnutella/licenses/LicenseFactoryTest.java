@@ -31,26 +31,23 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    
 	    // BAD: no 'verify at'
 	    l = LicenseFactory.create("no string");
-	    assertNotNull(l);
-	    assertEquals(BadCCLicense.class, l.getClass());
-	    assertTrue(l.isVerified());
-	    assertFalse(l.isValid(null));
+	    assertNull(l);
 	    
-	    // BAD: 'verify at' without location
+	    // CCBAD: 'verify at' without location
 	    l = LicenseFactory.create("verify at");   
 	    assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
-	    // BAD: 'verify at' with invalid URI
+	    // CCBAD: 'verify at' with invalid URI
 	    l = LicenseFactory.create("verify at nowhere");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
-	    // a-ok
+	    // a-ok CC
 	    l = LicenseFactory.create("verify at http://home.org");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
@@ -59,38 +56,39 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    
 	    // BAD: no 'verify at'.
 	    l = LicenseFactory.create("http://home.org");
-        assertNotNull(l);
-	    assertEquals(BadCCLicense.class, l.getClass());
-	    assertTrue(l.isVerified());
-	    assertFalse(l.isValid(null));
+	    assertNull(l);
 	    
-	    // BAD: no authority
+	    // CCBAD: no authority
 	    l = LicenseFactory.create("verify at http://");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
-	    // a-ok
+	    // a-ok CC
 	    l = LicenseFactory.create("verify at http://home.org/path");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
-	    // a-ok
+	    // a-ok CC
 	    l = LicenseFactory.create("this license should verify at http://nowhere.com");
 	    assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
-	    // BAD: authority has spaces in it.
+	    // CCBAD: authority has spaces in it.
 	    l = LicenseFactory.create("verify at http://life.org is not fair.");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
+	    
+	    // 
+	    
+	    
     }
     
     public void testIsVerifiedAndValidAndCaching() throws Exception {
@@ -116,10 +114,10 @@ public final class LicenseFactoryTest extends BaseTestCase {
         assertFalse(LicenseFactory.isVerifiedAndValid(null, "verify at http://home.org"));
         
         // Okay, that's out of the way -- now cache some licenses and see if they're valid.
-        License l1 = new StubLicense(vf1, rdf1);
-        License l2 = new StubLicense(vf2, rdf2);
-        License l3 = new StubLicense(vf3, rdf3);
-        License l4 = new StubLicense(vf4, rdf4);
+        License l1 = new StubCCLicense(vf1, rdf1);
+        License l2 = new StubCCLicense(vf2, rdf2);
+        License l3 = new StubCCLicense(vf3, rdf3);
+        License l4 = new StubCCLicense(vf4, rdf4);
         l1.verify(null);
         l2.verify(null);
         l3.verify(null);

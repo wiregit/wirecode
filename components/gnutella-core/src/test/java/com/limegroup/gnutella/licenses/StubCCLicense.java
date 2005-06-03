@@ -4,7 +4,7 @@ import com.limegroup.gnutella.ErrorService;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
-class StubLicense extends CCLicense {
+class StubCCLicense extends CCLicense {
 
 
     private static final URI LICENSE_URI;
@@ -23,15 +23,15 @@ class StubLicense extends CCLicense {
     
     private final String details;
     
-    StubLicense(String page) {
+    StubCCLicense(String page) {
         this("license text", page);
     }
 
-    StubLicense(String license, String page) {
+    StubCCLicense(String license, String page) {
         this(license, page, null);
     }
     
-    StubLicense(String license, String page, String details) {
+    StubCCLicense(String license, String page, String details) {
         super(license, getURI(license));
         this.page = page;
         this.details = details;
@@ -45,7 +45,7 @@ class StubLicense extends CCLicense {
             return uri;
     }
     
-    protected String getBody(String url) {
+    protected String getBodyFromURL(String url) {
         if(url.equals(getLicenseURI().toString()))
             return page;
         else
@@ -60,25 +60,6 @@ class StubLicense extends CCLicense {
                 waiter.wait();
             } catch(InterruptedException ie) {
                 ErrorService.error(ie);
-            }
-        }
-    }
-    
-    public static class Listener implements VerificationListener {
-        private VerificationListener vl;
-        
-        Listener() { this(null); }
-        
-        Listener(VerificationListener vl) {
-            this.vl = vl;
-        }
-        
-        public void licenseVerified(License l) {
-            if(vl != null && l != this)
-                vl.licenseVerified(l);
-
-            synchronized(this) {
-                notify();
             }
         }
     }
