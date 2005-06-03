@@ -32,21 +32,21 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    // BAD: no 'verify at'
 	    l = LicenseFactory.create("no string");
 	    assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: 'verify at' without location
 	    l = LicenseFactory.create("verify at");   
 	    assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: 'verify at' with invalid URI
 	    l = LicenseFactory.create("verify at nowhere");
         assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
@@ -60,14 +60,14 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    // BAD: no 'verify at'.
 	    l = LicenseFactory.create("http://home.org");
         assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: no authority
 	    l = LicenseFactory.create("verify at http://");
         assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
@@ -88,7 +88,7 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    // BAD: authority has spaces in it.
 	    l = LicenseFactory.create("verify at http://life.org is not fair.");
         assertNotNull(l);
-	    assertEquals(BadLicense.class, l.getClass());
+	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
     }
