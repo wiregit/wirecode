@@ -466,7 +466,7 @@ public abstract class FileManager {
     }
     
     /**
-     * Returns a list of all shared file descriptors.
+     * Returns an array of all shared file descriptors.
      */
     public synchronized FileDesc[] getAllSharedFileDescriptors() {
         // Instead of using _files.toArray, use
@@ -828,8 +828,8 @@ public abstract class FileManager {
 	
     /**
      * @modifies this
-     * @effects adds the given file to this, if it exists in a completely
-     * shared directory and has a shared extension.
+     * @effects adds the given file to list of shared files,
+     * if it is shareable, see {@link #isFileShareable(File)}.
      * 
      * @return the <tt>FileDesc</tt> for the new file if it was successfully
      *         added, otherwise <tt>null</tt>
