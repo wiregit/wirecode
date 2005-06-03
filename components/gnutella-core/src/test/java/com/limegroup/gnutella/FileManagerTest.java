@@ -74,6 +74,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         	    
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
+		
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	    
 		File tmpFile = File.createTempFile("tmp", "file");
@@ -100,7 +101,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		emptyExtensionDir.mkdir();
 		emptyExtensionDir.deleteOnExit();
 		
-		f = new File(emptyExtensionDir, "emptyextesion.");
+		f = new File(emptyExtensionDir, "emptyextension.");
 		f.createNewFile();
 		f.deleteOnExit();
 		
@@ -226,7 +227,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", files[0].getFile(), f1);
     }
     
-    public void testAddAnotherSharedFileDifferentIndex() throws Exception {
+    public void XXXtestAddAnotherSharedFileDifferentIndex() throws Exception {
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
@@ -448,7 +449,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
      * if there are no complete files.
      */
     public void testGetFileDescForUrn() throws Exception {
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
+		assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete",
             0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending",
@@ -731,23 +732,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		test = createNewNamedTestFile(500, "specially shared", dir);
 		test.deleteOnExit();
 		assertNotNull("File should have been shared", fman.addFileAlways(test));
-	}
-	
-	public void testIsFileShareable() throws Exception {
-		File nonexistent = new File("nonexistent");
-		assertFalse("File should not be shareable", fman.isFileShareable(nonexistent));
-		
-		// now add it to the specially shared files
-		fman.addFutureSharedFile(nonexistent);
-		
-		assertTrue("File should be shareable now", fman.isFileShareable(nonexistent));
-		
-		File normallyShared = createNewTestFile(40);
-		normallyShared.deleteOnExit();
-		fman.addFileIfShared(normallyShared);
-		waitForLoad();
-		
-		assertTrue("File should be shareable now", fman.isFileShareable(normallyShared));
 	}
 
 	public void testIsFileInCompletelySharedDirectory() throws Exception {

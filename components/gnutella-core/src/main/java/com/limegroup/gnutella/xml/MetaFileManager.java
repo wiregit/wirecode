@@ -11,7 +11,6 @@ import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
