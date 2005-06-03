@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.util;
 
 import java.util.List;
-import java.util.Vector;
+import java.util.LinkedList;
+import java.util.Collections;
 
 /**
  * A queue of items to be processed.
@@ -13,8 +14,21 @@ public class ProcessingQueue {
     
     /**
      * The list of items to be processed.
+     *
+     * Note that the List is synchronized, despite using external synchronization.
+     * This is necessary because we use
+     *
+     *      while(QUEUE.size() > 0) ((Runnable)QUEUE.remove(0)).run();
+     *
+     * Which is in a different thread than the one that adds.  We do not want to
+     * lock this while running (because then nothing more can be added), but we
+     * need to ensure that the list is properly synchronized among adds and removes.
+     *
+     * Locking on this is used to ensure that a Thread is running and processing
+     * any newly added item.  Note the comments in the synchronized(this) block
+     * after running, as well as in the finally block.
      */
-    private final List QUEUE = new Vector();
+    private final List QUEUE = Collections.synchronizedList(new LinkedList());
     
     /**
      * The name of the thread to be created.
