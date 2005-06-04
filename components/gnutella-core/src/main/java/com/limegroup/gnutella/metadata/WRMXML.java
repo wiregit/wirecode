@@ -64,10 +64,7 @@ public class WRMXML {
      */
     public boolean isValid() {
         return _documentNode != null &&
-               _securityversion != null &&
-               _cid != null &&
                _lainfo != null &&
-               _kid != null &&
                _hashalgorithm != null &&
                _signalgorithm != null &&
                _signatureValue != null;
