@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.WRMXML;
 
 /**
  * A factory for constructing Licenses based on licenses.
@@ -18,6 +19,7 @@ public final class LicenseFactory {
     
     public static final String WEED_NAME = "Weed License";
     public static final String CC_NAME = "Creative Commons License";
+    public static final String UNKNOWN_NAME = "Unknown License";
     
     private LicenseFactory() {}
     
@@ -41,6 +43,8 @@ public final class LicenseFactory {
             return CC_NAME;
         else if(isWeedLicense(licenseString))
             return WEED_NAME;
+        else if(isUnknownLicense(licenseString))
+            return UNKNOWN_NAME;
         else
             return null;
     }
@@ -73,6 +77,8 @@ public final class LicenseFactory {
                     license = new BadCCLicense(licenseString);
             } else if(isWeedLicense(licenseString) && uri != null) {
                 license = new WeedLicense(uri);
+            } else if(isUnknownLicense(licenseString)) {
+                license = new UnknownLicense();
             }
         }
         
@@ -91,6 +97,11 @@ public final class LicenseFactory {
     /** Determines if the given string can be a Weed license. */
     private static boolean isWeedLicense(String s) {
         return s.indexOf(WeedInfo.LAINFO) != -1;
+    }
+    
+    /** Determines if the given string can be an Unknown license. */
+    private static boolean isUnknownLicense(String s) {
+        return s.indexOf(WRMXML.PROTECTED) != -1;
     }
     
     /**
@@ -198,7 +209,6 @@ public final class LicenseFactory {
             LOG.debug("cid starts with vid, or vice versa, bailing.");
             return null;
         }
-            
         
         String location = "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
         try {

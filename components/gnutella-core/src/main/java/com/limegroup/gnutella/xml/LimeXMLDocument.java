@@ -22,6 +22,7 @@ import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.WRMXML;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -120,6 +121,7 @@ public class LimeXMLDocument implements Serializable {
     private static final int NO_LICENSE = 0;
     private static final int CC_LICENSE = 1;
     private static final int WEED_LICENSE = 2;
+    private static final int UNKNOWN_LICENSE = 3;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -268,6 +270,7 @@ public class LimeXMLDocument implements Serializable {
         case NO_LICENSE: return Collections.EMPTY_LIST;
         case WEED_LICENSE: return WEED_INDIVISIBLE;
         case CC_LICENSE: return CC_INDIVISIBLE;
+        case UNKNOWN_LICENSE: return Collections.EMPTY_LIST; // not searchable.
         default: return Collections.EMPTY_LIST;
         }
     }
@@ -396,7 +399,8 @@ public class LimeXMLDocument implements Serializable {
                 String key = (String)next.getKey();
                 if(licenseType == CC_LICENSE && key.endsWith(XML_LICENSE_ATTRIBUTE))
                     return (String)next.getValue();
-                else if(licenseType == WEED_LICENSE && key.endsWith(XML_LICENSE_TYPE_ATTRIBUTE))
+                else if((licenseType == WEED_LICENSE || licenseType == UNKNOWN_LICENSE) && 
+                        key.endsWith(XML_LICENSE_TYPE_ATTRIBUTE))
                     return (String)next.getValue();
             }
         }
@@ -595,8 +599,10 @@ public class LimeXMLDocument implements Serializable {
             licenseType = CC_LICENSE;
         } else if(hasWeedLicense(type)) {
             licenseType = WEED_LICENSE;
+        } else if(hasUnknownLicense(type)) {
+            licenseType = UNKNOWN_LICENSE;
         } else {
-            fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+            //fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
             licenseType = NO_LICENSE;
         }
 
@@ -618,6 +624,12 @@ public class LimeXMLDocument implements Serializable {
                type.startsWith(WeedInfo.LAINFO) &&
                type.indexOf(WeedInfo.VID) != -1 &&
                type.indexOf(WeedInfo.CID) != -1;
+    }
+    
+    /** Determiens if this has some kind of license. */
+    private boolean hasUnknownLicense(String type) {
+        return type != null &&
+               type.startsWith(WRMXML.PROTECTED);
     }
     
     /**

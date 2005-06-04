@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
  * which in turn was based off the work from the avifile project, at 
  *  http://avifile.sourceforge.net/ .
  */
-public class ASFParser {
+class ASFParser {
     
     private static final Log LOG = LogFactory.getLog(ASFParser.class); 
     
@@ -40,11 +40,13 @@ public class ASFParser {
     private static final int TYPE_INT = 3;
     private static final int TYPE_LONG = 4;
     
-    private String _album, _artist, _title, _year, _copyright, _rating, _genre, _comment;
+    private String _album, _artist, _title, _year, _copyright,
+                   _rating, _genre, _comment, _drmType;
     private short _track = -1;
     private int _bitrate = -1, _length = -1, _width = -1, _height = -1;
     private boolean _hasAudio, _hasVideo;
     private WeedInfo _weed;
+    private WRMXML _wrmdata;
     
     String getAlbum() { return _album; }
     String getArtist() { return _artist; }
@@ -61,10 +63,19 @@ public class ASFParser {
     int getHeight() { return _height; }
     
     WeedInfo getWeedInfo() { return _weed; }
+    WRMXML getWRMXML() { return _wrmdata; }
     
     boolean hasAudio() { return _hasAudio; }
     boolean hasVideo() { return _hasVideo; }
-        
+    
+    String getLicenseInfo() {
+        if(_weed != null)
+            return _weed.getLicenseInfo();
+        else if(_wrmdata != null && _drmType != null)
+            return WRMXML.PROTECTED + _drmType;
+        else
+            return null;
+    }        
     
     /**
      * Constructs a new ASFParser based off the given file, parsing all the known properties.
@@ -156,6 +167,8 @@ public class ASFParser {
             parseContentDescription(ds);
         else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_DESCRIPTION_ID))
             parseExtendedContentDescription(ds);
+        else if(Arrays.equals(id, IDs.CONTENT_ENCRYPTION_ID))
+            parseContentEncryption(ds);
         else if(Arrays.equals(id, IDs.EXTENDED_CONTENT_ENCRYPTION_ID))
             parseExtendedContentEncryption(ds);
         else {
@@ -215,6 +228,28 @@ public class ASFParser {
     }
     
     /**
+     * Parses the content encryption object, to determine if the file is protected.
+     * We parse through it all, even though we don't use all of it, to ensure
+     * that the object is well-formed.
+     */
+    private void parseContentEncryption(DataInputStream ds) throws IOException {
+        LOG.debug("Parsing content encryption");
+        int size = ByteOrder.leb2int(ds); // data
+        IOUtils.ensureSkip(ds, size);
+        
+        size = ByteOrder.leb2int(ds); // type
+        byte[] b = new byte[size];
+        ds.readFully(b);
+        _drmType = new String(b).trim();
+        
+        size = ByteOrder.leb2int(ds); // data
+        IOUtils.ensureSkip(ds, size);
+        
+        size = ByteOrder.leb2int(ds); // url
+        IOUtils.ensureSkip(ds, size);
+    }   
+    
+    /**
      * Parses the extended content encryption object, looking for encryption's
      * we know about.
      * Currently, this is Weed.
@@ -225,9 +260,19 @@ public class ASFParser {
         byte[] b = new byte[size];
         ds.readFully(b);
         String xml = new String(b, "UTF-16").trim();
-        try {
-            _weed = new WeedInfo(xml);
+        WRMXML wrmdata = new WRMXML(xml);
+        if(!wrmdata.isValid()) {
+            LOG.debug("WRM Data is invalid.");
+            return;
+        }
+
+        _wrmdata = wrmdata;
+        
+        WeedInfo weed = new WeedInfo(wrmdata);
+        if(weed.isValid()) {
             LOG.debug("Parsed weed data.");
+            _weed = weed;
+            _wrmdata = weed;
             if(_weed.getAuthor() != null)
                 _artist = _weed.getAuthor();
             if(_weed.getTitle() != null)
@@ -236,8 +281,7 @@ public class ASFParser {
                 _comment = _weed.getDescription();
             if(_weed.getCollection() != null)
                 _album = _weed.getCollection();
-        } catch(IllegalArgumentException ignored) {
-            LOG.warn("Invalid encryption info: " + xml, ignored);
+            return;
         }
     }
     

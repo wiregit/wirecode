@@ -1,36 +1,10 @@
 package com.limegroup.gnutella.metadata;
 
-import java.io.StringReader;
-import java.io.IOException;
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-
 /**
  * Encapsulates information about Weedified files.
  * See http://www.weedshare.com.
  */
-public class WeedInfo {
-    
-    private static final Log LOG = LogFactory.getLog(WeedInfo.class);
+public class WeedInfo extends WRMXML {
     
     public static final String LAINFO = "http://www.shmedlic.com/license/3play.aspx";
     public static final String LDIST  = "Shared Media Licensing, Inc.";
@@ -44,13 +18,13 @@ public class WeedInfo {
     private String _contentDistributor, _contentDistributorURL;
     private String _price, _collection, _description, _copyright;
     private String _artistURL, _author, _title;
-    private String _lainfo;
     
     /**
-     * Constructs a new WeedInfo based off the given XML.
-     * If the XML is malformed, or is not a Weed file, throws an IllegalArgumentException.
+     * Constructs a new WeedInfo based off the given WRMXML.
      */
-    public WeedInfo(String xml) throws IllegalArgumentException {
+    public WeedInfo(WRMXML data) {
+        super(data._documentNode);
+        
         //The XML should look something like:
         //<WRMHEADER version="2.0.0.0">
         //    <DATA>
@@ -82,19 +56,17 @@ public class WeedInfo {
         //        <VALUE>XZkWZWCq919yum!bBGdxvnpiS38npAqAofxT8AkegyJ27zTlb9v4gA==</VALUE>
         //    </SIGNATURE>
         //</WRMHEADER> 
-        
-        parse(xml);
-        
-        if(!LAINFO.equals(_lainfo))
-            throw new IllegalArgumentException("Invalid LAINFO: " + _lainfo);
-        if(!LURL.equals(_licenseDistributorURL))
-            throw new IllegalArgumentException("Invalid LURL: " + _licenseDistributorURL);
-        if(!LDIST.equals(_licenseDistributor))
-            throw new IllegalArgumentException("Invalid LDIST: " + _licenseDistributor);
-        if(_contentId == null)
-            throw new IllegalArgumentException("No content Id!");
-        if(_versionId == null)
-            throw new IllegalArgumentException("No version Id!");
+    }
+    
+    /**
+     * Determines if this WeedInfo is valid.
+     */
+    public boolean isValid() {
+        return  LAINFO.equals(_lainfo) &&
+                LURL.equals(_licenseDistributorURL) &&
+                LDIST.equals(_licenseDistributor) &&
+                _contentId != null &&
+                _versionId != null;
     }
     
     public String getVersionId() { return _versionId; }
@@ -111,82 +83,46 @@ public class WeedInfo {
     public String getAuthor() { return _author; }
     public String getArtistURL() { return _artistURL; }
     public String getTitle() { return _title; }
-    public String getLAInfo()    { return _lainfo; }
     
     public String getLicenseInfo() {
         return _lainfo + CID + _contentId + VID +  _versionId;
     }
     
-    /** Parses the content encryption XML looking for Weed info. */
-    private void parse(String xml) {
-        DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(xml));
-        try {
-            parser.parse(is);
-        } catch (IOException ioe) {
-            throw new IllegalArgumentException(ioe);
-        } catch (SAXException saxe) {
-            throw new IllegalArgumentException(saxe);
-        }
+    protected void parseChild(String parentNodeName, String name, String attribute, String value) {
+        super.parseChild(parentNodeName, name, attribute, value);
         
-        Node doc = parser.getDocument().getDocumentElement();
-        if(doc.getNodeName().equals("WRMHEADER")) {
-            NodeList children = doc.getChildNodes();
-            for(int i = 0; i < children.getLength(); i++) {
-                Node child = (Node)children.item(i);
-                if(child.getNodeName().equals("DATA")) {
-                    parseData(child);
-                    break;
-                }
-            }
-        }
-    }
-    
-    /** Parses the data element, looking for all weed info. */
-    private void parseData(Node data) {
-        NodeList children = data.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
-            String name = child.getNodeName();
-            String value = LimeXMLUtils.getTextContent(child);
-            if(value == null)
-                continue;
-            value = value.trim();
-            if(value.equals(""))
-                continue;
-                
-            if(name.equals("VersionID"))
-                _versionId = value;
-            else if(name.equals("ContentID"))
-                _contentId = value;
-            else if(name.equals("License_Date"))
-                _licenseDate = value;
-            else if(name.equals("License_Distributor"))
-                _licenseDistributor = value;
-            else if(name.equals("License_Distributor_URL"))
-                _licenseDistributorURL = value;
-            else if(name.equals("Publish_Date"))
-                _publishDate = value;
-            else if(name.equals("Content_Distributor"))
-                _contentDistributor = value;
-            else if(name.equals("Content_Distributor_URL"))
-                _contentDistributorURL = value;
-            else if(name.equals("Price"))
-                _price = value;
-            else if(name.equals("Collection"))
-                _collection = value;
-            else if(name.equals("Description"))
-                _description = value;
-            else if(name.equals("Copyright"))
-                _copyright = value;
-            else if(name.equals("Artist_URL"))
-                _artistURL = value;
-            else if(name.equals("Author"))
-                _author = value;
-            else if(name.equals("Title"))
-                _title = value;
-            else if(name.equals("LAINFO"))
-                _lainfo = value;
-        }
+        if(attribute != null || !parentNodeName.equals("DATA"))
+            return;
+        
+        if(name.equals("VersionID"))
+            _versionId = value;
+        else if(name.equals("ContentID"))
+            _contentId = value;
+        else if(name.equals("License_Date"))
+            _licenseDate = value;
+        else if(name.equals("License_Distributor"))
+            _licenseDistributor = value;
+        else if(name.equals("License_Distributor_URL"))
+            _licenseDistributorURL = value;
+        else if(name.equals("Publish_Date"))
+            _publishDate = value;
+        else if(name.equals("Content_Distributor"))
+            _contentDistributor = value;
+        else if(name.equals("Content_Distributor_URL"))
+            _contentDistributorURL = value;
+        else if(name.equals("Price"))
+            _price = value;
+        else if(name.equals("Collection"))
+            _collection = value;
+        else if(name.equals("Description"))
+            _description = value;
+        else if(name.equals("Copyright"))
+            _copyright = value;
+        else if(name.equals("Artist_URL"))
+            _artistURL = value;
+        else if(name.equals("Author"))
+            _author = value;
+        else if(name.equals("Title"))
+            _title = value;
     }
 }
