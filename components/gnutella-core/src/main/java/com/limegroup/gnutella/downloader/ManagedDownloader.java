@@ -761,9 +761,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             }
             
             complete = isCompleted();
-            if (downloadSHA1 != null && complete)
-                RouterService.getAltlocManager().removeListener(downloadSHA1, this);
-            
             ranker.stop();
         }
         
@@ -1594,7 +1591,32 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         } catch(IOException iox) {
             return;
         }
+        
+        AlternateLocation local;
+        
+        // if this is a pushloc, update the proxies accordingly
+        if (loc instanceof PushAltLoc) {
+            
+            // Note: we update the proxies of a clone in order not to lose the
+            // original proxies
+            local = loc.createClone();
+            PushAltLoc ploc = (PushAltLoc)loc;
+            
+            // no need to notify mesh about pushlocs w/o any proxies
+            if (ploc.getPushAddress().getProxies().isEmpty())
+                return;
+            
+            ploc.updateProxies(good);
+        } else
+            local = loc;
+        
+        // and to the global collection
+        if (good)
+            RouterService.getAltlocManager().add(loc, this);
+        else
+            RouterService.getAltlocManager().remove(loc, this);
 
+        // add to the downloaders
         for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
@@ -1602,17 +1624,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             // no need to tell uploader about itself and since many firewalled
             // downloads may have the same port and host, we also check their
             // push endpoints
-            if(! (loc instanceof PushAltLoc) ? 
+            if(! (local instanceof PushAltLoc) ? 
                     (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
                     r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
                 continue;
             
             //no need to send push altlocs to older uploaders
-            if (loc instanceof DirectAltLoc || httpDloader.wantsFalts()) {
+            if (local instanceof DirectAltLoc || httpDloader.wantsFalts()) {
             	if (good)
-            		httpDloader.addSuccessfulAltLoc(loc);
+            		httpDloader.addSuccessfulAltLoc(local);
             	else
-            		httpDloader.addFailedAltLoc(loc);
+            		httpDloader.addFailedAltLoc(local);
             }
         }
         
@@ -1622,42 +1644,26 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 //check if validAlts contains loc to avoid duplicate stats, and
                 //spurious count increments in the local
                 //AlternateLocationCollections
-                if(!validAlts.contains(loc)) {
+                if(!validAlts.contains(local)) {
                     if(rfd.isFromAlternateLocation() )
                         if (rfd.needsPush())
                             DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
                         else
                             DownloadStat.ALTERNATE_WORKED.incrementStat(); 
-                    validAlts.add(loc);
+                    validAlts.add(local);
                 }
             }  else {
                     if(rfd.isFromAlternateLocation() )
-                        if(loc instanceof PushAltLoc)
+                        if(local instanceof PushAltLoc)
                                 DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
                         else
                                 DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
                     
-                    validAlts.remove(loc);
+                    validAlts.remove(local);
                     invalidAlts.add(rfd.getRemoteHostData());
-                    recentInvalidAlts.add(loc);
+                    recentInvalidAlts.add(local);
             }
         }
-        
-        // if this is a pushloc, update the proxies accordingly
-        if (loc instanceof PushAltLoc) {
-
-            // Note: we update the proxies of a clone in order not to lose the
-            // original proxies
-            loc = loc.createClone();
-            PushAltLoc ploc = (PushAltLoc)loc; 
-            ploc.updateProxies(good);
-        }
-        
-        // and to the global collection
-        if (good)
-            RouterService.getAltlocManager().add(loc, this);
-        else
-            RouterService.getAltlocManager().remove(loc, this);
     }
 
     public synchronized void addPossibleSources(Collection c) {
@@ -1781,6 +1787,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Cleans up information before this downloader is removed from memory.
      */
     public synchronized void finish() {
+        if (downloadSHA1 != null)
+            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
+        
         if(cachedRFDs != null) {
             for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
 				RemoteFileDesc rfd = (RemoteFileDesc) iter.next();

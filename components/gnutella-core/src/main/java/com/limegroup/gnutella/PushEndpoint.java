@@ -751,7 +751,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    
 	    synchronized void updateProxies(Set s, boolean add){
 	        Set existing = new IpPortSet();
-	        
+            
+	        if (s == null)
+                s = _proxies;
+            
 	        if (_proxies!=null)
 	            existing.addAll(_proxies);
 	        
