@@ -1411,7 +1411,7 @@ public class DownloadManager implements BandwidthTracker {
 	
 	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
 		for (int i = 0; i < rfds.length && fileName == null; i++) {
-			fileName = rfds[0].getFileName();
+			fileName = rfds[i].getFileName();
 		}
 		return fileName;
 	}

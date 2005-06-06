@@ -1124,20 +1124,6 @@ public abstract class FileManager {
         return fd;
     }
     
-	/**
-	 * Adds the given <tt>file</tt> as a file that should be
-	 * shareable once it is created.
-	 * <p>
-	 * Only adds files that are not in a shared directory.
-	 */
-	public void addFutureSharedFile(File file) {
-		if (isFileInCompletelySharedDirectory(file))
-			return;
-		
-		if (!SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
-			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
-	}
-	
     /**
      * Adds an incomplete file to be used for partial file sharing.
      *
