@@ -18,9 +18,6 @@ public class FileDescStub extends FileDesc {
     public static final Set DEFAULT_SET;
     public static final int DEFAULT_SIZE = 1126400;
     
-    private AlternateLocationCollection _altLocCollection;
-    private AlternateLocationCollection _pushLocCollection;
-    
     static {
         DEFAULT_SET = new HashSet();
         URN sha1 = null;
@@ -67,29 +64,4 @@ public class FileDescStub extends FileDesc {
     public long getSize() {
         return DEFAULT_SIZE;
     }
-    
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
-	 */
-	public AlternateLocationCollection getAlternateLocationCollection() {
-        if(_altLocCollection == null)
-            return super.getAlternateLocationCollection();
-        else
-		    return _altLocCollection;
-	}
-	
-	public AlternateLocationCollection getPushAlternateLocationCollection() {
-        if(_pushLocCollection == null)
-            return super.getPushAlternateLocationCollection();
-        else
-		    return _pushLocCollection;
-	}
-	
-	public void setAlternateLocationCollection(AlternateLocationCollection what) {
-		_altLocCollection=what;
-	}
-	
-	public void setPushAlternateLocationCollection(AlternateLocationCollection what) {
-		_pushLocCollection=what;
-	}
 }

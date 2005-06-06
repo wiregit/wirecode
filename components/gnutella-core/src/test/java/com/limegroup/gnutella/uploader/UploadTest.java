@@ -205,28 +205,9 @@ public class UploadTest extends BaseTestCase {
         while(FD.getHashTree() == null)
             Thread.sleep(300);
         ROOT32 = FD.getHashTree().getRootHash();
-        // remove all alts for clarity.
-        List alts = new LinkedList();
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
-        for(Iterator i = alc.iterator(); i.hasNext(); )
-            alts.add((AlternateLocation)i.next());
-        for(Iterator i = alts.iterator(); i.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)i.next();
-            alc.remove(al); // demote
-            alc.remove(al); // remove
-        }
-        alts.clear();
-        alc = FD.getPushAlternateLocationCollection();
-        for(Iterator i = alc.iterator(); i.hasNext(); )
-            alts.add((AlternateLocation)i.next());
-        for(Iterator i = alts.iterator(); i.hasNext(); ) {
-            PushAltLoc al = (PushAltLoc)i.next();
-            PushEndpoint pe = al.getPushAddress();
-            PushEndpoint.overwriteProxies(pe.getClientGUID(), Collections.EMPTY_SET);
-            alc.remove(al); // remove
-        }
         
-        assertEquals(0, FD.getAltLocsSize());
+        // remove all alts for clarity.
+        RouterService.getAltlocManager().purge();
 
         try {Thread.sleep(300); } catch (InterruptedException e) { }
 		
@@ -542,13 +523,13 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-		FD.add(direct);
-		FD.add(push);
-		FD.add(pushFwt);
+		RouterService.getAltlocManager().add(direct);
+        RouterService.getAltlocManager().add(push);
+        RouterService.getAltlocManager().add(pushFwt);
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
 		assertEquals(1,pushFwt.supportsFWTVersion());
-		assertEquals(3,FD.getAltLocsSize());        
+		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));        
         
         boolean passed = download(fileName, 
                                   "X-Alt:",
@@ -592,13 +573,14 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-		FD.add(direct);
-		FD.add(push);
-		FD.add(pushFwt);
+        RouterService.getAltlocManager().add(direct);
+        RouterService.getAltlocManager().add(push);
+        RouterService.getAltlocManager().add(pushFwt);
+		
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
 		assertEquals(1,pushFwt.supportsFWTVersion());
-		assertEquals(3,FD.getAltLocsSize());                
+		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));                
         
         boolean passed = download(fileName,
                                   FALTFeatures,
@@ -641,13 +623,13 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-		FD.add(direct);
-		FD.add(push);
-		FD.add(pushFwt);
+        RouterService.getAltlocManager().add(direct);
+        RouterService.getAltlocManager().add(push);
+        RouterService.getAltlocManager().add(pushFwt);
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
 		assertEquals(1,pushFwt.supportsFWTVersion());
-		assertEquals(3,FD.getAltLocsSize());             
+		assertEquals(3,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));             
         
         boolean passed = download(fileName,
                                   FWALTFeatures,
@@ -682,19 +664,19 @@ public class UploadTest extends BaseTestCase {
 		AlternateLocation push = AlternateLocation.create(
 				clientGUID.toHexString()+";1.2.3.4:5",sha1);
         ((PushAltLoc)push).updateProxies(true);
-        assertEquals(0, FD.getAltLocsSize());
+        assertEquals(0, RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));
         boolean passed = download(fileName,
                           "X-Alt: " + direct.httpStringValue() + "\r\n" + 
                           "X-FAlt: " + push.httpStringValue(),
                           "abcdefghijklmnopqrstuvwxyz"
                          );
         assertTrue(passed);
-		assertEquals(2,FD.getAltLocsSize());
-		assertEquals(1,FD.getPushAlternateLocationCollection().getAltLocsSize());
-		assertEquals(1,FD.getAlternateLocationCollection().getAltLocsSize());
+		assertEquals(2,RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));
+		assertEquals(1,RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
+		assertEquals(1,RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).getAltLocsSize());
 		
-		assertTrue(FD.getPushAlternateLocationCollection().contains(push));
-		assertTrue(FD.getAlternateLocationCollection().contains(direct));
+		assertTrue(RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).contains(push));
+		assertTrue(RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).contains(direct));
     }
     
     // Tests for alternate locations
@@ -702,7 +684,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -710,7 +692,7 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         // Ensure that one removal doesn't stop it.
-        FD.remove(al);
+        RouterService.getAltlocManager().remove(al);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 1.1.1.1:1");
@@ -720,14 +702,14 @@ public class UploadTest extends BaseTestCase {
         //another removal removes the first one.
         String loc2 = "http://2.2.2.2:2/uri-res/N2R?" + hash;
         AlternateLocation al2 = AlternateLocation.create(loc2);
-        FD.add(al2);
+        RouterService.getAltlocManager().add(al2);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 2.2.2.2:2, 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Remove the first guy again, should only have loc2 left.
-        FD.remove(al);
+        RouterService.getAltlocManager().remove(al);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 2.2.2.2:2");
@@ -736,12 +718,11 @@ public class UploadTest extends BaseTestCase {
     
     //Tests that headers the downloader gives are used.
     public void testSentHeaderIsUsed() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
         
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -757,7 +738,8 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        AlternateLocationCollection alc = RouterService.getAltlocManager().getDirect(FD.getSHA1Urn());
+        assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         List alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -778,7 +760,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Should still have it.
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -792,18 +774,17 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Now is removed.
-        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
     }
     
     //Tests that headers the downloader gives are used.
     public void testMiniNewHeaderIsUsed() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
         
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -819,7 +800,8 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        AlternateLocationCollection alc = RouterService.getAltlocManager().getDirect(FD.getSHA1Urn());
+        assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         List alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -840,7 +822,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Should still have it.
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -854,7 +836,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Now is removed.
-        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
         
         //Now try a header without a port, should be 6346.
@@ -866,7 +848,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -877,12 +859,11 @@ public class UploadTest extends BaseTestCase {
     // Tests that headers with multiple values in them are
     // read correctly
     public void testMultipleAlternates() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
         
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -902,7 +883,8 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // Make sure the FD has that loc now.
-        assertEquals("wrong # locs", 4, FD.getAltLocsSize());
+        AlternateLocationCollection alc = RouterService.getAltlocManager().getDirect(FD.getSHA1Urn());
+        assertEquals("wrong # locs", 4, alc.getAltLocsSize());
         List alts = new LinkedList();
         for(Iterator i = alc.iterator(); i.hasNext(); )
             alts.add(i.next());
@@ -917,7 +899,7 @@ public class UploadTest extends BaseTestCase {
                           "abcdefghijklmnopqrstuvwxyz");
         assertTrue("alt failed", passed);
         // Should still have it.
-        assertEquals("wrong # locs", 4, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 4, alc.getAltLocsSize());
         
         //Remove
         passed = download("/uri-res/N2R?" + hash,
@@ -925,7 +907,7 @@ public class UploadTest extends BaseTestCase {
                           "abcdefghijklmnopqrstuvwxyz");
         assertTrue("alt failed", passed);
         // Now is removed.
-        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
     }        
     
@@ -936,10 +918,8 @@ public class UploadTest extends BaseTestCase {
         
         boolean passed;
         GUID g = new GUID(GUID.makeGuid());
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
-        alc.clear();
         
-        assertEquals(0,FD.getAltLocsSize());
+        
         URN urn = URN.createSHA1Urn(hash);
         
         PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
@@ -954,8 +934,8 @@ public class UploadTest extends BaseTestCase {
         
         String bcdHttp = bcd.httpStringValue();
         
-        FD.add(bcd);
-        assertEquals(1,FD.getAltLocsSize());
+        RouterService.getAltlocManager().add(bcd);
+        assertEquals(1,RouterService.getAltlocManager().getNumLocs(urn));
         
         
         passed=download("/uri-res/N2R?" + hash,
@@ -964,7 +944,7 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         //two of the proxies of bcd should be gone
-        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 1, RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
         assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
         
         
@@ -977,7 +957,7 @@ public class UploadTest extends BaseTestCase {
         
         // all proxies should be gone, and bcd should be removed from 
         // the filedesc
-        assertEquals("wrong # locs", 0, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 0, RouterService.getAltlocManager().getPush(FD.getSHA1Urn(),false).getAltLocsSize());
         assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
     }
     
@@ -985,12 +965,11 @@ public class UploadTest extends BaseTestCase {
     // because all these connections require that local_is_private
     // is false, which turns off isPrivateAddress checking.
     public void testInvalidAltsAreIgnored() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
         
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1005,7 +984,8 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
-        assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
+        AlternateLocationCollection alc = RouterService.getAltlocManager().getDirect(FD.getSHA1Urn());
+        assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
         
         invalidAddr = "http://255.255.255.255:6346/uri-res/N2R?" + hash;
@@ -1015,7 +995,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
-        assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
 
         // Add an invalid port
@@ -1026,7 +1006,7 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
-        assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
         
         invalidPort = "http://1.2.3.4:-2/uri-res/N2R?" + hash;
@@ -1036,17 +1016,16 @@ public class UploadTest extends BaseTestCase {
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // FD should still only have 1
-        assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
+        assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
     }
     
     public void test10AltsAreSent() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
         
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1054,10 +1033,10 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         for(int i = 0; i < 20; i++) {
-            FD.add( AlternateLocation.create(
+            RouterService.getAltlocManager().add( AlternateLocation.create(
                 "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash));
         }
-        assertEquals(21, alc.getAltLocsSize());
+        assertEquals(21, RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).getAltLocsSize());
     
         String pre = "1.1.1.";
         String post = "";
@@ -1083,12 +1062,11 @@ public class UploadTest extends BaseTestCase {
     }
     
     public void testChunksGiveDifferentLocs() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
 
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1096,10 +1074,10 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         for(int i = 0; i < 20; i++) {
-            FD.add( AlternateLocation.create(
+            RouterService.getAltlocManager().add( AlternateLocation.create(
                 "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash));
         }
-        assertEquals(21, alc.getAltLocsSize());        
+        assertEquals(21, RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));        
         
         //1. Write request
         Socket s = new Socket("localhost", PORT);
@@ -1155,7 +1133,7 @@ public class UploadTest extends BaseTestCase {
                          required);
                          
         // Now if some more are added to file desc, make sure they're reported.
-        FD.add( AlternateLocation.create(
+        RouterService.getAltlocManager().add( AlternateLocation.create(
                 "http://1.1.1.99:6346/uri-res/N2R?" + hash));
         required = "X-Alt: " + pre + 99 + post;
         downloadInternal11(reqFile,
@@ -1169,47 +1147,47 @@ public class UploadTest extends BaseTestCase {
     }
     
     public void testPrioritizingAlternates() throws Exception {
-        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
 
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        FD.add(al);
+        RouterService.getAltlocManager().add(al);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // get rid of it.
-        FD.remove(al);
-        FD.remove(al);
+        RouterService.getAltlocManager().remove(al);
+        RouterService.getAltlocManager().remove(al);
         
         for(int i = 0; i < 50; i++) {
             al = AlternateLocation.create(
                 "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash);
             
-            FD.add(al);
+            RouterService.getAltlocManager().add(al);
             
             //0-9, make as demoted.
             if( i < 10 ) {
-                FD.remove(al); // should demote.
+                RouterService.getAltlocManager().remove(al); // should demote.
             }
             // 10-19, increment once.
             else if( i < 20 ) {
-                FD.add(al); // should increment.
+                RouterService.getAltlocManager().add(al); // should increment.
             }
             // 20-29, increment & demote.
             else if( i < 30 ) {
-                FD.add(al); // increment
-                FD.remove(al); // demote
+                RouterService.getAltlocManager().add(al); // increment
+                RouterService.getAltlocManager().remove(al); // demote
             }
             // 30-39, increment twice.
             else if( i < 40 ) {
-                FD.add(al); //increment
-                FD.add(al); //increment
+                RouterService.getAltlocManager().add(al); //increment
+                RouterService.getAltlocManager().add(al); //increment
             }
             // 40-49, leave normal.
         }
+        AlternateLocationCollection alc = RouterService.getAltlocManager().getDirect(FD.getSHA1Urn());
         assertEquals(50, alc.getAltLocsSize());
         
         //Order of return should be:

@@ -1684,7 +1684,6 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=200;
         //second half of file + 1/8 of the file
         final int STOP_AFTER = TestFile.length()/10;
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
@@ -1705,14 +1704,10 @@ public class DownloadTest extends BaseTestCase {
                     FileDesc fd = RouterService.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertInstanceof( IncompleteFileDesc.class, fd );
-                    fd.add(
+                    RouterService.getAltlocManager().add(
                         AlternateLocation.create(rfd2));
-                    AlternateLocationCollection alcs =
-                        AlternateLocationCollection.create(
-                            TestFile.hash());
-                    alcs.add(
+                    RouterService.getAltlocManager().add(
                         AlternateLocation.create(rfd3));
-                    fd.addAll(alcs);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -1762,10 +1757,6 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation al1 = AlternateLocation.create(rfd1);
         AlternateLocation al2 = AlternateLocation.create(rfd2);
         AlternateLocation al3 = AlternateLocation.create(rfd3);
-        AlternateLocationCollection alcs =
-            AlternateLocationCollection.create(TestFile.hash());
-        alcs.add(al2);
-        alcs.add(al3);
         
         IncompleteFileManager ifm = dm.getIncompleteFileManager();
         // put the hash for this into IFM.
@@ -1779,8 +1770,9 @@ public class DownloadTest extends BaseTestCase {
             RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
-        fd.add(al1);
-        fd.addAll(alcs);
+        RouterService.getAltlocManager().add(al1);
+        RouterService.getAltlocManager().add(al2);
+        RouterService.getAltlocManager().add(al3);
         
         tResume(incFile);
 
