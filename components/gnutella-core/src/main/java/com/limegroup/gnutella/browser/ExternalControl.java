@@ -345,7 +345,7 @@ public class ExternalControl {
 		while (tokens.hasMoreTokens()) {
 			String next = tokens.nextToken();
 			MagnetOptions[] options = parseMagnet(next);
-			if (options != null && options.length > 0) {
+			if (options.length > 0) {
 				List opts = Arrays.asList(options);
 				list.addAll(opts);
 			}
@@ -353,10 +353,14 @@ public class ExternalControl {
 		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
 	}
 	
+	/**
+	 * Returns an empty array if the string could not be parsed.
+	 * @param arg
+	 * @return
+	 */
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
-		MagnetOptions[] ret = null;
-		HashMap         options = new HashMap();
+		HashMap options = new HashMap();
 
 		// Strip out any single quotes added to escape the string
 		if ( arg.startsWith("'") )
@@ -366,7 +370,7 @@ public class ExternalControl {
 		
 		// Parse query  -  TODO: case sensitive?
 		if ( !arg.startsWith(MagnetOptions.MAGNET) )
-			return ret;
+			return new MagnetOptions[0];
 
 		// Parse and assemble magnet options together.
 		//
@@ -444,11 +448,7 @@ public class ExternalControl {
      	if (hashOnly)
      	    MessageService.showMessage("DOWNLOAD_HASH_ONLY_MAGNET");
      	
-		ret = new MagnetOptions[options.size()];
-		ret = (MagnetOptions[]) options.values().toArray(ret);
-
-		
-		return ret;
+		return (MagnetOptions[]) options.values().toArray(new MagnetOptions[0]);
 	}
 
 	
