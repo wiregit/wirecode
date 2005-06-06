@@ -60,6 +60,7 @@ class LicenseCache {
      * Adds a verified license.
      */
     synchronized void addVerifiedLicense(License license) {
+        LOG.debug("Adding license (uri: " + license.getLicenseURI() + "): " + license);
         licenses.put(license.getLicenseURI(), license);
     }
     
@@ -94,6 +95,7 @@ class LicenseCache {
      */
     synchronized boolean isVerifiedAndValid(URN urn, URI uri) {
         License license = (License)licenses.get(uri);
+        LOG.debug("Found license (uri: " + uri + "): " + license);
         return license != null && license.isValid(urn);
     }
     

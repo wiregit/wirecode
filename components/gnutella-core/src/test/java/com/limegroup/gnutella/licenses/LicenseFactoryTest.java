@@ -117,6 +117,10 @@ public final class LicenseFactoryTest extends BaseTestCase {
 	    // no data in cid.
 	    l = LicenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: vid: 123509713");
 	    assertNull(l);
+	    
+        // garbage before uri
+        l = LicenseFactory.create("garbage http://www.shmedlic.com/license/3play.aspx vid: 1234 cid: 4566");
+        assertNull(l);
     }
     
     public void testWeedLicenses() {
@@ -145,12 +149,34 @@ public final class LicenseFactoryTest extends BaseTestCase {
         assertEquals(l.getLicenseURI().toString(), weedURI("d", "q"));
     }
     
+    public void testUnknownLicense() {
+        License l = LicenseFactory.create("licensed: ");
+        assertNotNull(l);
+        assertEquals(UnknownLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        assertFalse(l.isValid(null));
+        assertEquals("Unknown License", l.getLicenseName());
+        assertNull(l.getLicenseURI());
+        
+        l = LicenseFactory.create("licensed: DRM");
+        assertNotNull(l);
+        assertEquals(UnknownLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        assertFalse(l.isValid(null));
+        assertEquals("Unknown License", l.getLicenseName());
+        assertNull(l.getLicenseURI());
+    }
+    
+    public void testInvalidUnknownLicenses() {
+        License l = LicenseFactory.create("DRM licensed: ");
+        assertNull(l);
+    }        
+    
     private String weedURI(String cid, String vid) {
         return "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
     }
-        
     
-    public void testIsVerifiedAndValidAndCaching() throws Exception {
+    public void testIsVerifiedAndValidAndCachingWithCCLicenses() throws Exception {
         URN urn1 = urn("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456");
         URN urn2 = urn("654321ZYXWVUTSRQPONMLKJIHGFEDBCA");
         URN urn3 = urn("ALPHABETSOUPMAKESGOODFOODYUMMMMY");
@@ -226,6 +252,46 @@ public final class LicenseFactoryTest extends BaseTestCase {
         assertTrue(d4.isValid(null));
     }
     
+    public void testIsVerifiedAndValidWithWeed() throws Exception {
+        License l1 = new StubWeedLicense("123", "456", wxml(true));
+        License l2 = new StubWeedLicense("123", "457", wxml(false));
+        String v1 = "http://www.shmedlic.com/license/3play.aspx cid: 123 vid: 456";
+        String v2 = "http://www.shmedlic.com/license/3play.aspx cid: 123 vid: 457";
+        
+        // these haven't been verified yet.
+        assertFalse(l1.isVerified());
+        assertFalse(l2.isVerified());
+        
+        // (and they aren't valid)
+        assertFalse(LicenseFactory.isVerifiedAndValid(null, v1));
+        assertFalse(LicenseFactory.isVerifiedAndValid(null, v2));
+        
+        // Verify them.
+        l1.verify(null);
+        l2.verify(null);
+
+        // Yes, verifying worked.
+        assertTrue(l1.isVerified());
+        assertTrue(l2.isVerified());
+        
+        // And validity was checked properly.
+        assertTrue(l1.isValid(null));
+        assertFalse(l2.isValid(null));
+        
+        // And quick lookups work correctly.
+        assertTrue(LicenseFactory.isVerifiedAndValid(null, v1));
+        assertFalse(LicenseFactory.isVerifiedAndValid(null, v2));
+        
+        // And recreating preserves the prior lookup state.
+        License d1 = LicenseFactory.create(v1);
+        assertTrue(d1.isVerified());
+        assertTrue(d1.isValid(null));
+
+        // Even if it wasn't valid.
+        License d2 = LicenseFactory.create(v2);
+        assertTrue(d2.isVerified());
+        assertFalse(d2.isValid(null));
+    }
     
     private URN urn(String string) throws Exception {
         return URN.createSHA1Urn("urn:sha1:" + string);
@@ -251,6 +317,11 @@ public final class LicenseFactoryTest extends BaseTestCase {
                    "</rdf:RDF>";
         }
     }
-        
+    
+    private String wxml(boolean valid) {
+        return "<WeedVerifyData>" +
+                    "<Status>" + (valid ? "Verified" : "Unverified") +"</Status>" +
+               "</WeedVerifyData>";
+    }
 }
             

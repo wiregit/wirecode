@@ -96,12 +96,12 @@ public final class LicenseFactory {
     
     /** Determines if the given string can be a Weed license. */
     private static boolean isWeedLicense(String s) {
-        return s.indexOf(WeedInfo.LAINFO) != -1;
+        return s.startsWith(WeedInfo.LAINFO);
     }
     
     /** Determines if the given string can be an Unknown license. */
     private static boolean isUnknownLicense(String s) {
-        return s.indexOf(WRMXML.PROTECTED) != -1;
+        return s.startsWith(WRMXML.PROTECTED);
     }
     
     /**
@@ -210,13 +210,7 @@ public final class LicenseFactory {
             return null;
         }
         
-        String location = "http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=" + vid + "&contentid=" + cid;
-        try {
-            return new URI(location.toCharArray());
-        } catch(URIException e) {
-            LOG.error("Unable to create URI", e);
-            return null;
-        }
+        return WeedLicense.buildURI(cid, vid);
     }
 }
        

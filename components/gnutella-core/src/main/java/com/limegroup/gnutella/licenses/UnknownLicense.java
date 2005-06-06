@@ -13,7 +13,7 @@ public class UnknownLicense implements NamedLicense {
     /** Sets the license name. */
     public void setLicenseName(String name) { this.name = name; }
     
-    public boolean isVerified() { return true; }
+    public boolean isVerified() { return false; }
     public boolean isVerifying() { return false; }
     public boolean isValid(URN urn) { return false; }
     public String getLicenseDescription(URN urn) { return null; }

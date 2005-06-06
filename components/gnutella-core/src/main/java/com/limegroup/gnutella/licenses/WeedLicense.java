@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -31,6 +32,13 @@ class WeedLicense extends AbstractLicense {
     
     private static final long serialVersionUID = 1230497157539025753L;
     
+    /** The site to contact for verification (non-final for testing). */
+    private static       String URI = "http://www.weedshare.com/license/verify_usage_rights.aspx";
+    /** The versionid attribute. */
+    private static final String VID = "versionid";
+    /** The contentid attribute. */
+    private static final String CID = "contentid";
+    
     /** The artist. */
     private String artist;
     
@@ -42,6 +50,15 @@ class WeedLicense extends AbstractLicense {
     
     /** Whether or not the license is valid. */
     private boolean valid;
+    
+    /** Builds the URI from the given cid & vid. */
+    public static final URI buildURI(String cid, String vid) {
+        try {
+            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid).toCharArray());
+        } catch(URIException bad) {
+            return null;
+        }  
+    }
     
     /**
      * Constructs a new WeedLicense.
