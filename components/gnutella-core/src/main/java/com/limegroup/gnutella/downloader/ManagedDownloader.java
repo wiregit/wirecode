@@ -707,8 +707,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             public void run() {
                 try {
                     receivedNewSources = false;
-                    performDownload();
-                    completeDownload();
+                    int status = performDownload();
+                    completeDownload(status);
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
@@ -733,19 +733,46 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * This essentially pumps the state of the download to different
      * areas, depending on what is required or what has already occurred.
      */
-    private void completeDownload() {
-        boolean complete = isCompleted();
+    private void completeDownload(int status) {
+        
+        boolean complete;
+        // If TAD2 gave a completed state, set the state correctly & exit.
+        // Otherwise...
+        // If we manually stopped then set to ABORTED, else set to the 
+        // appropriate state (either a busy host or no hosts to try).
+        synchronized(this) {
+            switch(status) {
+            case COMPLETE:
+            case DISK_PROBLEM:
+            case CORRUPT_FILE:
+                setState(status);
+                break;
+            case WAITING_FOR_RETRY:
+            case GAVE_UP:
+                if(stopped)
+                    setState(ABORTED);
+                else if(paused)
+                    setState(PAUSED);
+                else
+                    setState(status);
+                break;
+            default:
+                Assert.that(false, "Bad status from tad2: "+status);
+            }
+            
+            complete = isCompleted();
+            if (downloadSHA1 != null && complete)
+                RouterService.getAltlocManager().removeListener(downloadSHA1, this);
+            
+            ranker.stop();
+        }
+        
         long now = System.currentTimeMillis();
 
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
         manager.remove(this, complete);
-        
-        if (downloadSHA1 != null)
-            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
-        
-        ranker.stop();
         
         if(LOG.isTraceEnabled())
             LOG.trace("MD completing <" + getFileName() + 
@@ -1770,10 +1797,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param deserialized True if this downloader was deserialized from disk,
      * false if it was newly constructed.
      */
-    protected void performDownload() {
+    protected int performDownload() {
         if(checkHosts()) {//files is global
             setState(GAVE_UP);
-            return;
+            return GAVE_UP;
         }
 
         // 1. initialize the download
@@ -1813,30 +1840,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if(LOG.isDebugEnabled())
             LOG.debug("MANAGER: TAD2 returned: " + status);
                    
-        // If TAD2 gave a completed state, set the state correctly & exit.
-        // Otherwise...
-        // If we manually stopped then set to ABORTED, else set to the 
-        // appropriate state (either a busy host or no hosts to try).
-        synchronized(this) {
-            switch(status) {
-            case COMPLETE:
-            case DISK_PROBLEM:
-            case CORRUPT_FILE:
-                setState(status);
-                return;
-            case WAITING_FOR_RETRY:
-            case GAVE_UP:
-                if(stopped)
-                    setState(ABORTED);
-                else if(paused)
-                    setState(PAUSED);
-                else
-                    setState(status);
-                return;
-            default:
-                Assert.that(false, "Bad status from tad2: "+status);
-            }
-        }
+        return status;
     }
 
 	private static final int MIN_NUM_CONNECTIONS      = 2;

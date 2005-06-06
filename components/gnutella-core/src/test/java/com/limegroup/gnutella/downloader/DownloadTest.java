@@ -233,6 +233,7 @@ public class DownloadTest extends BaseTestCase {
         uploader5.stopThread();
 
         deleteAllFiles();
+        RouterService.getAltlocManager().purge();
         
         try {
             Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
@@ -1702,7 +1703,7 @@ public class DownloadTest extends BaseTestCase {
         Thread locAdder = new Thread( new Runnable() {
             public void run() {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                     FileDesc fd = RouterService.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertInstanceof( IncompleteFileDesc.class, fd );
