@@ -3,8 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
-
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
  * its methods to stop and resume downloads.  Note that there is no start method;
@@ -35,6 +33,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
 
+    
     /**
      * Stops this.  If the download is already stopped, does nothing.
      *     @modifies this
@@ -56,6 +55,11 @@ public interface Downloader extends BandwidthTracker {
      * from.
      */
     public boolean isInactive();
+	
+	/**
+     * Determines if this can have its saveLocation changed.
+     */
+    public boolean isRelocatable();
     
     /**
      * Returns the inactive priority of this download.
@@ -70,7 +74,7 @@ public interface Downloader extends BandwidthTracker {
      * launches another query.  Otherwise does nothing and returns false. 
      *     @modifies this 
      */
-    public boolean resume() throws AlreadyDownloadingException;
+    public boolean resume();
     
     /**
      * Returns the file that this downloader is using.
@@ -94,6 +98,20 @@ public interface Downloader extends BandwidthTracker {
     public File getDownloadFragment();
 
     /**
+     * Sets the directory where the file will be saved. If saveLocation is null, 
+     * the default save directory will be used.
+     *
+     * @param saveDirectory the directory where the file should be saved. null indicates the default.
+     * @param fileName the name of the file to be saved in saveDirectory. null indicates the default.
+     * @param overwrite is true if saving should be allowed to overwrite existing files
+     * @throws SaveLocationException when the new file location could not be set
+     */
+    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
+    
+    /** Returns the file under which the download will be saved when complete.  Counterpart to setSaveFile. */
+    public File getSaveFile();
+    
+    /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
      * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP, COULDNT_MOVE_TO_LIBRARY,
      * WAITING_FOR_RESULTS, or CORRUPT_FILE
@@ -105,13 +123,6 @@ public interface Downloader extends BandwidthTracker {
      * state, in seconds.  Returns Integer.MAX_VALUE if unknown.
      */
     public int getRemainingStateTime();
-
-    /** 
-     * Returns the name of the current or last file this is downloading, or null
-     * in the rare case that this has no more files to download.  (This might
-     * happen if this has been stopped.)
-     */
-    public String getFileName();
 
     /**
      * Returns the size of this file in bytes, i.e., the total amount to
@@ -223,7 +234,5 @@ public interface Downloader extends BandwidthTracker {
 	 * @return the amount of data lost due to corruption
 	 */
 	public int getAmountLost();
-
-
 }
 

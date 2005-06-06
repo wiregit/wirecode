@@ -168,7 +168,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals("unexpected query name",
                      "filename", qr.getQuery());    
         assertEquals("unexpected filename",
-                     "filename.txt", rd.getFileName());        
+                     "filename.txt", rd.getSaveFile().getName());        
     }
 
 

@@ -56,7 +56,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
     }
 
     public static void setSettings() throws Exception {
-        SharingSettings.setDirectories(new File[0]);
+        SharingSettings.setSharedDirectories(new File[0]);
     }
 
     public static void quickDrainAll() throws Exception {

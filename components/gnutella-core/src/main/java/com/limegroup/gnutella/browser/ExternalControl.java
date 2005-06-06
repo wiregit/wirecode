@@ -24,9 +24,8 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
-import com.limegroup.gnutella.downloader.FileExistsException;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -172,9 +171,8 @@ public class ExternalControl {
 
             // Validate that we have something to go with from magnet
             // If not, report an error.
-            if ( !( urls.size() > 0  || 
-                    urn != null || 
-                    (curOpt.getKT() != null && !"".equals(curOpt.getKT())) ) ) {
+            if ( urls.size() == 0  && urn == null 
+					&& (curOpt.getKT() == null || curOpt.getKT().length() == 0)) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet. urls.size == " + urls.size() +
                              "curOpt.kt == " + curOpt.getKT());
@@ -184,7 +182,7 @@ public class ExternalControl {
                 else
                     errorMsg = curOpt.toString();
                 MessageService.showError("ERROR_BAD_MAGNET_LINK", errorMsg);
-                return;
+                return;	
             }
             
             // Warn the user that the link was slightly invalid
@@ -194,15 +192,20 @@ public class ExternalControl {
             try {
             	RouterService.download
                    	(urn,curOpt.getKT(),curOpt.getDN(),defaultURLs,false);//!overwrite
-            } catch ( AlreadyDownloadingException a ) {  
-                MessageService.showError(
-                    "ERROR_ALREADY_DOWNLOADING", a.getFilename());
-			} catch ( IllegalArgumentException il ) { 
-			    ErrorService.error(il);
-			} catch (FileExistsException fex) {
-                MessageService.showError(
-                    "ERROR_ALREADY_EXISTS", fex.getFileName());
             }
+            catch ( IllegalArgumentException il ) { 
+			    ErrorService.error(il);
+			}
+			catch (SaveLocationException sle) {
+				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
+                MessageService.showError(
+                    "ERROR_ALREADY_EXISTS", sle.getFile().getName());
+				}
+				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
+					MessageService.showError(
+		                    "ERROR_ALREADY_DOWNLOADING", sle.getFile().getName());	
+				}
+			}
 		}
 	}
 	

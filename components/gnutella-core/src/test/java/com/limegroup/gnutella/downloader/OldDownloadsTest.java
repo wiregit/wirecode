@@ -60,7 +60,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
              1, callback.downloaders.size());
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);
         assertEquals("unexpected filename",
-             name, md.getFileName());
+             name, md.getSaveFile().getName());
         assertEquals("unexpected content length!",
              size, md.getContentLength());
     }

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -30,13 +29,13 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.UDPService;
@@ -378,7 +377,7 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTree(true);
         
         TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
-        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete(false);
         assertEquals(6,uploader1.getRequestsReceived());
@@ -666,7 +665,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds2 ={rfd2};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST,false,null);
+            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         
@@ -700,7 +699,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds2 ={rfd2};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST,false,null);
+            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()/2);
         
@@ -949,7 +948,7 @@ public class DownloadTest extends BaseTestCase {
         
         
         Downloader download=
-            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, false, null);
+            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete(false);
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -1256,7 +1255,7 @@ public class DownloadTest extends BaseTestCase {
 
         
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, false, null);
+            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(1000);
         download.addDownload(later,false);
 
@@ -1839,7 +1838,7 @@ public class DownloadTest extends BaseTestCase {
         // we must ensure that RFD1 is tried first, so the wait
         // is only set to 1 minute.
         
-        ManagedDownloader download= (ManagedDownloader) RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+        ManagedDownloader download= (ManagedDownloader) RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         download.addDownload(rfd2,true);
         
@@ -2221,8 +2220,9 @@ public class DownloadTest extends BaseTestCase {
         Downloader downloader = null;
         try {
             downloader = RouterService.download(rfds,false,null);
-        } catch (AlreadyDownloadingException adx) {
-            assertTrue("downloader already downloading??",false);
+        } catch (SaveLocationException sle) {
+            assertTrue("downloader already downloading??, error code: " + sle.getErrorCode(),
+					false);
         }
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
@@ -2319,7 +2319,7 @@ public class DownloadTest extends BaseTestCase {
       List alts) throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, alts, false, null);
+        download=RouterService.download(rfds, alts, null, false);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
