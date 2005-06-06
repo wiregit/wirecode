@@ -361,7 +361,7 @@ public class FileDesc {
     public void addUrnsForSelf() {
         if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue()) {
         	AlternateLocation alt = AlternateLocation.create(SHA1_URN);
-        	RouterService.getAltlocManager().add(alt);
+        	RouterService.getAltlocManager().add(alt, null);
         }
     }
 

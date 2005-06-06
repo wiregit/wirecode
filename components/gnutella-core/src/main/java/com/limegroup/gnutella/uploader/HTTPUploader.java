@@ -630,7 +630,7 @@ public final class HTTPUploader implements Uploader {
     	            // it is possible to end up having a PE with all
     	            // proxies removed.  In that case we remove it explicitly
     	            if(al.getPushAddress().getProxies().isEmpty()) {
-    	                RouterService.getAltlocManager().remove(al);
+    	                RouterService.getAltlocManager().remove(al, null);
     	                continue;
     	            }
     	            
@@ -1226,9 +1226,9 @@ public final class HTTPUploader implements Uploader {
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if(isGood) 
-                    RouterService.getAltlocManager().add(al);
+                    RouterService.getAltlocManager().add(al, null);
                 else
-                    RouterService.getAltlocManager().remove(al);
+                    RouterService.getAltlocManager().remove(al, null);
                         
                 if (al instanceof DirectAltLoc)
                  	_writtenLocs.add(al);

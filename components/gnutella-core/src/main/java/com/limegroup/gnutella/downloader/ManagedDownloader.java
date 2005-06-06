@@ -45,6 +45,7 @@ import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -102,7 +103,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * unconnected. <b>Furthermore, it is necessary to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-public class ManagedDownloader implements Downloader, MeshHandler, Serializable {
+public class ManagedDownloader implements Downloader, MeshHandler, AltLocListener, Serializable {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
@@ -648,6 +649,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 			iter.hasNext() && downloadSHA1 == null;) {
 				RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
 				downloadSHA1 = rfd.getSHA1Urn();
+                RouterService.getAltlocManager().addListener(downloadSHA1,this);
             }
         }
 		
@@ -739,6 +741,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
         manager.remove(this, complete);
+        
+        if (downloadSHA1 != null)
+            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
         
         ranker.stop();
         
@@ -1274,6 +1279,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         return retVal;
     }
 
+    /**
+     * notifies this downloader that an alternate location has been added.
+     */
+    public synchronized void locationAdded(AlternateLocation loc) {
+        Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
+        addDownload(loc.createRemoteFileDesc(getContentLength()),false);
+    }
+    
     /** 
      * Attempts to add the given location to this.  If rfd is accepted, this
      * will terminate after downloading rfd or any of the other locations in
@@ -1381,8 +1394,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         rfd.setDownloading(true);
-        if(downloadSHA1 == null)
+        if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
+            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+        }
 
         //add to allFiles for resume purposes if caching...
         if(cache) 
@@ -1613,9 +1628,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         
         // and to the global collection
         if (good)
-            RouterService.getAltlocManager().add(loc);
+            RouterService.getAltlocManager().add(loc, this);
         else
-            RouterService.getAltlocManager().remove(loc);
+            RouterService.getAltlocManager().remove(loc, this);
     }
 
     public synchronized void addPossibleSources(Collection c) {

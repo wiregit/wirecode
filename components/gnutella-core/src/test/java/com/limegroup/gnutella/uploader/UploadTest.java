@@ -523,9 +523,9 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-		RouterService.getAltlocManager().add(direct);
-        RouterService.getAltlocManager().add(push);
-        RouterService.getAltlocManager().add(pushFwt);
+		RouterService.getAltlocManager().add(direct, null);
+        RouterService.getAltlocManager().add(push, null);
+        RouterService.getAltlocManager().add(pushFwt, null);
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
 		assertEquals(1,pushFwt.supportsFWTVersion());
@@ -573,9 +573,9 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-        RouterService.getAltlocManager().add(direct);
-        RouterService.getAltlocManager().add(push);
-        RouterService.getAltlocManager().add(pushFwt);
+        RouterService.getAltlocManager().add(direct, null);
+        RouterService.getAltlocManager().add(push, null);
+        RouterService.getAltlocManager().add(pushFwt, null);
 		
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
@@ -623,9 +623,9 @@ public class UploadTest extends BaseTestCase {
         pushFwt.updateProxies(true);
 		
 		
-        RouterService.getAltlocManager().add(direct);
-        RouterService.getAltlocManager().add(push);
-        RouterService.getAltlocManager().add(pushFwt);
+        RouterService.getAltlocManager().add(direct, null);
+        RouterService.getAltlocManager().add(push, null);
+        RouterService.getAltlocManager().add(pushFwt, null);
 		
 		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
 		assertEquals(1,pushFwt.supportsFWTVersion());
@@ -684,7 +684,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -692,7 +692,7 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         // Ensure that one removal doesn't stop it.
-        RouterService.getAltlocManager().remove(al);
+        RouterService.getAltlocManager().remove(al, null);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 1.1.1.1:1");
@@ -702,14 +702,14 @@ public class UploadTest extends BaseTestCase {
         //another removal removes the first one.
         String loc2 = "http://2.2.2.2:2/uri-res/N2R?" + hash;
         AlternateLocation al2 = AlternateLocation.create(loc2);
-        RouterService.getAltlocManager().add(al2);
+        RouterService.getAltlocManager().add(al2, null);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 2.2.2.2:2, 1.1.1.1:1");
         assertTrue("alt failed", passed);
         
         //Remove the first guy again, should only have loc2 left.
-        RouterService.getAltlocManager().remove(al);
+        RouterService.getAltlocManager().remove(al, null);
         passed = download("/uri-res/N2R?" + hash,null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 2.2.2.2:2");
@@ -722,7 +722,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -784,7 +784,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -863,7 +863,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -934,7 +934,7 @@ public class UploadTest extends BaseTestCase {
         
         String bcdHttp = bcd.httpStringValue();
         
-        RouterService.getAltlocManager().add(bcd);
+        RouterService.getAltlocManager().add(bcd, null);
         assertEquals(1,RouterService.getAltlocManager().getNumLocs(urn));
         
         
@@ -969,7 +969,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1025,7 +1025,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1034,7 +1034,7 @@ public class UploadTest extends BaseTestCase {
         
         for(int i = 0; i < 20; i++) {
             RouterService.getAltlocManager().add( AlternateLocation.create(
-                "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash));
+                "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash), null);
         }
         assertEquals(21, RouterService.getAltlocManager().getDirect(FD.getSHA1Urn()).getAltLocsSize());
     
@@ -1066,7 +1066,7 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1075,7 +1075,7 @@ public class UploadTest extends BaseTestCase {
         
         for(int i = 0; i < 20; i++) {
             RouterService.getAltlocManager().add( AlternateLocation.create(
-                "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash));
+                "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash), null);
         }
         assertEquals(21, RouterService.getAltlocManager().getNumLocs(FD.getSHA1Urn()));        
         
@@ -1134,7 +1134,7 @@ public class UploadTest extends BaseTestCase {
                          
         // Now if some more are added to file desc, make sure they're reported.
         RouterService.getAltlocManager().add( AlternateLocation.create(
-                "http://1.1.1.99:6346/uri-res/N2R?" + hash));
+                "http://1.1.1.99:6346/uri-res/N2R?" + hash), null);
         required = "X-Alt: " + pre + 99 + post;
         downloadInternal11(reqFile,
                          "Range: bytes=6-7",
@@ -1151,39 +1151,39 @@ public class UploadTest extends BaseTestCase {
         // Add a simple marker alt so we know it only contains that
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        RouterService.getAltlocManager().add(al);
+        RouterService.getAltlocManager().add(al, null);
         boolean passed = false;
         passed = download("/uri-res/N2R?" + hash, null,
                           "abcdefghijklmnopqrstuvwxyz",
                           "X-Alt: 1.1.1.1:1");
         assertTrue("alt failed", passed);
         // get rid of it.
-        RouterService.getAltlocManager().remove(al);
-        RouterService.getAltlocManager().remove(al);
+        RouterService.getAltlocManager().remove(al, null);
+        RouterService.getAltlocManager().remove(al, null);
         
         for(int i = 0; i < 50; i++) {
             al = AlternateLocation.create(
                 "http://1.1.1." + i + ":6346/uri-res/N2R?" + hash);
             
-            RouterService.getAltlocManager().add(al);
+            RouterService.getAltlocManager().add(al,null);
             
             //0-9, make as demoted.
             if( i < 10 ) {
-                RouterService.getAltlocManager().remove(al); // should demote.
+                RouterService.getAltlocManager().remove(al,null); // should demote.
             }
             // 10-19, increment once.
             else if( i < 20 ) {
-                RouterService.getAltlocManager().add(al); // should increment.
+                RouterService.getAltlocManager().add(al, null); // should increment.
             }
             // 20-29, increment & demote.
             else if( i < 30 ) {
-                RouterService.getAltlocManager().add(al); // increment
-                RouterService.getAltlocManager().remove(al); // demote
+                RouterService.getAltlocManager().add(al, null); // increment
+                RouterService.getAltlocManager().remove(al, null); // demote
             }
             // 30-39, increment twice.
             else if( i < 40 ) {
-                RouterService.getAltlocManager().add(al); //increment
-                RouterService.getAltlocManager().add(al); //increment
+                RouterService.getAltlocManager().add(al, null); //increment
+                RouterService.getAltlocManager().add(al, null); //increment
             }
             // 40-49, leave normal.
         }

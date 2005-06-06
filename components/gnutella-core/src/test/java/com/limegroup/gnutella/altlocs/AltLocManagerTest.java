@@ -31,9 +31,9 @@ public class AltLocManagerTest extends BaseTestCase {
         AlternateLocation push = AlternateLocation.create(g.toHexString()+";1.1.1.1:1",HugeTestUtils.SHA1);
         AlternateLocation pushFWT = AlternateLocation.create(g2.toHexString()+";fwt/1.0;2:2.2.2.2;3.3.3.3:3",HugeTestUtils.SHA1);
         
-        manager.add(direct);
-        manager.add(push);
-        manager.add(pushFWT);
+        manager.add(direct, null);
+        manager.add(push, null);
+        manager.add(pushFWT, null);
         
         AlternateLocationCollection c = manager.getDirect(HugeTestUtils.SHA1);
         assertEquals(1,c.getAltLocsSize());
@@ -57,17 +57,17 @@ public class AltLocManagerTest extends BaseTestCase {
     
     public void testPromotionDemotion() throws Exception {
         AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",HugeTestUtils.SHA1);
-        manager.add(direct);
-        manager.remove(direct);
+        manager.add(direct, null);
+        manager.remove(direct, null);
         AlternateLocationCollection c = manager.getDirect(HugeTestUtils.SHA1);
         assertTrue(c.contains(direct));
         assertTrue(direct.isDemoted());
         
-        manager.add(direct);
+        manager.add(direct, null);
         assertFalse(direct.isDemoted());
         
-        manager.remove(direct);
-        manager.remove(direct);
+        manager.remove(direct, null);
+        manager.remove(direct, null);
         assertEquals(AlternateLocationCollection.EMPTY,manager.getDirect(HugeTestUtils.SHA1));
     }
     

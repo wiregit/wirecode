@@ -453,7 +453,7 @@ public class HeadTest extends BaseTestCase {
 		
 		for(int i=0;i<10;i++ ) {
             AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
-            RouterService.getAltlocManager().add(al);
+            RouterService.getAltlocManager().add(al, null);
 		}
         _alCollectionComplete = RouterService.getAltlocManager().getDirect(_haveFull);
         assertEquals("failed to set test up",10,
@@ -461,7 +461,7 @@ public class HeadTest extends BaseTestCase {
         
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
-            RouterService.getAltlocManager().add(al);
+            RouterService.getAltlocManager().add(al, null);
 		}
         _alCollectionIncomplete = RouterService.getAltlocManager().getDirect(_havePartial);
         assertEquals("failed to set test up",10,
@@ -476,7 +476,7 @@ public class HeadTest extends BaseTestCase {
 				";1.2.3.4:5",_havePartial);
         ((PushAltLoc)firewalled).updateProxies(true);
 		pe = ((PushAltLoc)firewalled).getPushAddress();
-        RouterService.getAltlocManager().add(firewalled);
+        RouterService.getAltlocManager().add(firewalled, null);
 		_pushCollection = RouterService.getAltlocManager().getPush(_havePartial, false);
 	}
 	

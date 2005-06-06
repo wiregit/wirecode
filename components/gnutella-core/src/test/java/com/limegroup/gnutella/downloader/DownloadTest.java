@@ -283,6 +283,7 @@ public class DownloadTest extends BaseTestCase {
     
     
     ////////////////////////// Test Cases //////////////////////////
+
     
     /**
      * Tests a basic download that does not swarm.
@@ -315,62 +316,62 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds = {rfd};
         
         HTTP11Listener grayVerifier = new HTTP11Listener() {
-        	private int requestNo;
-        	public void requestHandled(){}
-        	public void thexRequestStarted() {}
+            private int requestNo;
+            public void requestHandled(){}
+            public void thexRequestStarted() {}
             public void thexRequestHandled() {}
-        	
-        	// checks whether we request chunks at the proper offset, etc.
-        	public void requestStarted(TestUploader uploader) {
-        		
-        		Interval i = null;
-        		try {
-        			IntervalSet leased = null;
-        			File incomplete = null;
-        			incomplete = ifm.getFile(rfd);
-        			assertNotNull(incomplete);
-        			VerifyingFile vf = ifm.getEntry(incomplete);
-            		assertNotNull(vf);
-            		leased = (IntervalSet)
-    					PrivilegedAccessor.getValue(vf,"leasedBlocks");
-            		assertNotNull(leased);
-            		List l = leased.getAllIntervalsAsList();
-            		assertEquals(1,l.size());
-    				i = (Interval)l.get(0);
-        		} catch (Exception bad) {
-        			fail(bad);
-        		}
-        		
-        		switch(requestNo) {
-        			case 0: 
-        				// first request, we should have 0-99999 gray
-        				assertEquals(0,i.low);
-        				assertEquals(99999,i.high);
-        				break;
-        			case 1:
-        				// on the second request we have 100K-256K
-        				assertEquals(100000,i.low);
-        				assertEquals(256*1024 -1,i.high);
-        				break;
-        			case 2:
-        				// 256K-512K
-        				assertEquals(256*1024,i.low);
-        				assertEquals(512*1024 -1, i.high);
-        				break;
-        			case 3:
-        				// 512K-768K
-        				assertEquals(512*1024,i.low);
-        				assertEquals(768*1024 -1, i.high);
-        				break;
-        			case 4:
-        				// 768K-1,000,000
-        				assertEquals(768*1024,i.low);
-        				assertEquals(999999, i.high);
-        				break;
-        		}
-        		requestNo++;
-        		
-        	}
+            
+            // checks whether we request chunks at the proper offset, etc.
+            public void requestStarted(TestUploader uploader) {
+                
+                Interval i = null;
+                try {
+                    IntervalSet leased = null;
+                    File incomplete = null;
+                    incomplete = ifm.getFile(rfd);
+                    assertNotNull(incomplete);
+                    VerifyingFile vf = ifm.getEntry(incomplete);
+                    assertNotNull(vf);
+                    leased = (IntervalSet)
+                        PrivilegedAccessor.getValue(vf,"leasedBlocks");
+                    assertNotNull(leased);
+                    List l = leased.getAllIntervalsAsList();
+                    assertEquals(1,l.size());
+                    i = (Interval)l.get(0);
+                } catch (Exception bad) {
+                    fail(bad);
+                }
+                
+                switch(requestNo) {
+                    case 0: 
+                        // first request, we should have 0-99999 gray
+                        assertEquals(0,i.low);
+                        assertEquals(99999,i.high);
+                        break;
+                    case 1:
+                        // on the second request we have 100K-256K
+                        assertEquals(100000,i.low);
+                        assertEquals(256*1024 -1,i.high);
+                        break;
+                    case 2:
+                        // 256K-512K
+                        assertEquals(256*1024,i.low);
+                        assertEquals(512*1024 -1, i.high);
+                        break;
+                    case 3:
+                        // 512K-768K
+                        assertEquals(512*1024,i.low);
+                        assertEquals(768*1024 -1, i.high);
+                        break;
+                    case 4:
+                        // 768K-1,000,000
+                        assertEquals(768*1024,i.low);
+                        assertEquals(999999, i.high);
+                        break;
+                }
+                requestNo++;
+                
+            }
         };
         
         uploader1.setHTTPListener(grayVerifier);
@@ -1103,11 +1104,11 @@ public class DownloadTest extends BaseTestCase {
 
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
-			AlternateLocationCollection.create(rfd2.getSHA1Urn());
+            AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
         
         AlternateLocation al2 =
-			AlternateLocation.create(rfd2);
+            AlternateLocation.create(rfd2);
         ualt.add(al2);
 
         uploader1.setGoodAlternateLocations(ualt);
@@ -1428,9 +1429,9 @@ public class DownloadTest extends BaseTestCase {
                          AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
 
-        AlternateLocation al1 =	AlternateLocation.create(rfd1);
-        AlternateLocation al2 =	AlternateLocation.create(rfd2);
-        AlternateLocation al3 =	AlternateLocation.create(rfd3);
+        AlternateLocation al1 = AlternateLocation.create(rfd1);
+        AlternateLocation al2 = AlternateLocation.create(rfd2);
+        AlternateLocation al3 = AlternateLocation.create(rfd3);
         ualt.add(al2);
         ualt.add(al3);
 
@@ -1492,8 +1493,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation agood = AlternateLocation.create(rfd1);
 
         assertEquals("uploader got bad alt locs",0,alt1.size());
-        AlternateLocationCollection coll = (AlternateLocationCollection)
-        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        Set coll = (Set) PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
         assertTrue(coll.contains(agood));
         assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]));
         assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]));
@@ -1707,9 +1707,9 @@ public class DownloadTest extends BaseTestCase {
                         getFileDescForUrn(TestFile.hash());
                     assertInstanceof( IncompleteFileDesc.class, fd );
                     RouterService.getAltlocManager().add(
-                        AlternateLocation.create(rfd2));
+                        AlternateLocation.create(rfd2),this);
                     RouterService.getAltlocManager().add(
-                        AlternateLocation.create(rfd3));
+                        AlternateLocation.create(rfd3),this);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -1772,9 +1772,9 @@ public class DownloadTest extends BaseTestCase {
             RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
-        RouterService.getAltlocManager().add(al1);
-        RouterService.getAltlocManager().add(al2);
-        RouterService.getAltlocManager().add(al3);
+        RouterService.getAltlocManager().add(al1, null);
+        RouterService.getAltlocManager().add(al2, null);
+        RouterService.getAltlocManager().add(al3, null);
         
         tResume(incFile);
 
