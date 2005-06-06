@@ -1248,7 +1248,7 @@ public abstract class FileManager {
         }
 
         _numFiles--;
-        _filesSize-=fd.getSize();
+        _filesSize-=fd.getFileSize();
 
         //Remove references to this from directory listing
         File parent=FileUtils.getParentFile(f);
@@ -1654,7 +1654,7 @@ public abstract class FileManager {
                             "unexpected null in FileManager for query:\n"+
                             request);
 
-            if ((filter != null) && !filter.allow(desc.getName()))
+            if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
             desc.incrementHitCount();
@@ -1936,7 +1936,7 @@ public abstract class FileManager {
                 continue;
             FileDesc desc=(FileDesc)_files.get(i);
             numFilesCount++;
-            sizeFilesCount+=desc.getSize();
+            sizeFilesCount+=desc.getFileSize();
 
             //a) Ensure is has the right index.
             Assert.that(desc.getIndex()==i,

@@ -99,7 +99,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		UploadSettings.HARD_MAX_UPLOADS.setValue(0);
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
-			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			String request = "/get/"+fd.getIndex()+"/"+fd.getFileName()+" HTTP/1.1\r\n"+
 				HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
 				fd.getSHA1Urn()+"\r\n\r\n";
 
@@ -149,7 +149,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = 
-			    "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			    "/get/"+fd.getIndex()+"/"+fd.getFileName()+" HTTP/1.1\r\n"+
 			    HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
                 fd.getSHA1Urn()+"\r\n\r\n";
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
@@ -168,11 +168,11 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, 
 										 "/get/"+fd.getIndex()+"/"+
-										 fd.getName()+ 
+										 fd.getFileName()+ 
 										 " HTTP/1.1\r\n\r\n", fd);
 			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, 
 										 "/get/"+fd.getIndex()+"/"+
-										 fd.getName()+ 
+										 fd.getFileName()+ 
 										 " HTTP/1.1\r\n\r\n", fd);
 		}
 	}
@@ -186,7 +186,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = 
-			    "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			    "/get/"+fd.getIndex()+"/"+fd.getFileName()+" HTTP/1.1\r\n"+
 			    HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
 			    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"+"\r\n\r\n";
 			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, STATUS_404);
@@ -202,7 +202,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = 
-			    "/get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
+			    "/get/"+fd.getIndex()+"/"+fd.getFileName()+"invalid"+" HTTP/1.1\r\n"+
 			    HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
                 fd.getSHA1Urn();
 			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, STATUS_404);
@@ -249,7 +249,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 				continue;
 			} else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(curString)) { 
 				String value = HTTPUtils.extractHeaderValue(curString);
-				assertEquals("sizes should match for "+fd, (int)fd.getSize(), 
+				assertEquals("sizes should match for "+fd, (int)fd.getFileSize(), 
 							 Integer.parseInt(value));						
 			} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
 				continue;

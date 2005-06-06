@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -331,6 +333,25 @@ public class ExternalControl {
         }
         return ret;
     }
+	
+	/**
+	 * Allows multiline parsing of magnet links.
+	 * @param magnets
+	 * @return
+	 */
+	public static MagnetOptions[] parseMagnets(String magnets) {
+		ArrayList list = new ArrayList();
+		StringTokenizer tokens = new StringTokenizer(magnets, System.getProperty("line.separator"));
+		while (tokens.hasMoreTokens()) {
+			String next = tokens.nextToken();
+			MagnetOptions[] options = parseMagnet(next);
+			if (options != null && options.length > 0) {
+				List opts = Arrays.asList(options);
+				list.addAll(opts);
+			}
+		}
+		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
+	}
 	
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");

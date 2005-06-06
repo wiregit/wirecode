@@ -6,6 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,12 +20,12 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
@@ -36,7 +39,7 @@ import com.limegroup.gnutella.util.I18NConvert;
  *    FileDesc fd=new FileDesc(file, urns, index);
  * </pre>
  */
-public class FileDesc implements AlternateLocationCollector {
+public class FileDesc implements AlternateLocationCollector, FileDetails {
     
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
@@ -224,7 +227,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 *
 	 * @return the size of the file on disk, in bytes
 	 */
-	public long getSize() {
+	public long getFileSize() {
 		return _size;
 	}
 
@@ -233,7 +236,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * 
 	 * @return the name of this file
 	 */
-	public String getName() {
+	public String getFileName() {
 		return _name;
 	}
 
@@ -355,6 +358,10 @@ public class FileDesc implements AlternateLocationCollector {
     public List getLimeXMLDocuments() {
         return _limeXMLDocs;
     }
+	
+	public LimeXMLDocument getXMLDocument() {
+		return _limeXMLDocs.isEmpty() ? null : (LimeXMLDocument)_limeXMLDocs.get(0);
+	}
     
     /**
      * Determines if a license exists on this FileDesc.
@@ -625,6 +632,19 @@ public class FileDesc implements AlternateLocationCollector {
 				            +"\r\n"+
 				"alt locs: "+ALT_LOCS+"\r\n"+
 				"push locs: "+PUSH_ALT_LOCS+"\r\n");
+	}
+	
+	public InetSocketAddress getSocketAddress() {
+		
+		try {
+			return new InetSocketAddress(InetAddress.getByAddress
+					(RouterService.getAcceptor().getAddress(true)), 
+					RouterService.getAcceptor().getPort(true));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
 

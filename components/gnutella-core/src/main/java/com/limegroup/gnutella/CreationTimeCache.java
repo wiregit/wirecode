@@ -277,7 +277,7 @@ public final class CreationTimeCache {
                 }
 
                 if (filter == null) urnList.add(currURN);
-                else if (filter.allow(fd.getName())) urnList.add(currURN);
+                else if (filter.allow(fd.getFileName())) urnList.add(currURN);
             }
         }
 

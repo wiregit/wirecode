@@ -910,9 +910,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
-			if(fd.getName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			if(fd.getFileName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
 			    continue;
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(fd.getFileName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -957,9 +957,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = new Response(fd);
 			assertEquals(expectTime, testResponse.getCreateTime());
-			if(fd.getName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
+			if(fd.getFileName().length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
 			    continue;
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(fd.getFileName());
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
