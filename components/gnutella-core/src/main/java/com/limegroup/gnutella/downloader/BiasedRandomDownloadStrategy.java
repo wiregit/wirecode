@@ -109,7 +109,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
     }
 
     
-    /////////////////// Private Helper Methods /////////////////////////////
+    /////////////////// Private Helper Methods ////////////////////////////
     
     /**
      * Calculates the probability that the next block assigned should be
