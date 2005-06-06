@@ -75,7 +75,7 @@ public class PushAltLoc extends AlternateLocation {
         AlternateLocation ret = null;
         try {
 
-        		ret = new PushAltLoc(_pushAddress,SHA1_URN);
+        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN);
         } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;

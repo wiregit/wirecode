@@ -1553,13 +1553,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             return;
         }
 
-        // if this is a pushloc, update the proxies accordingly
-        if (loc instanceof PushAltLoc) {
-            
-            PushAltLoc ploc = (PushAltLoc)loc;
-            ploc.updateProxies(good);
-        }
-        
         for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
@@ -1606,6 +1599,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                     invalidAlts.add(rfd.getRemoteHostData());
                     recentInvalidAlts.add(loc);
             }
+        }
+        
+        // if this is a pushloc, update the proxies accordingly
+        if (loc instanceof PushAltLoc) {
+
+            // Note: we update the proxies of a clone in order not to lose the
+            // original proxies
+            loc = loc.createClone();
+            PushAltLoc ploc = (PushAltLoc)loc; 
+            ploc.updateProxies(good);
         }
         
         // and to the global collection

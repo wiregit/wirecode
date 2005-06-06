@@ -433,5 +433,9 @@ public class AlternateLocationCollection
         public boolean add(AlternateLocation loc) {
             return false;
         }
+        
+        public int addAll(AlternateLocationCollection other) {
+            return 0;
+        }
     }
 }

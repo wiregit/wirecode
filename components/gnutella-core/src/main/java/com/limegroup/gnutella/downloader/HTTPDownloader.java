@@ -1479,6 +1479,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
                 // update the FWT version we know for this host
             	PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
+                PushEndpoint.setAddr(_rfd.getClientGUID(),_rfd);
             }
         }
     }
@@ -1528,6 +1529,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         try {
             PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
+            PushEndpoint.setAddr(_rfd.getClientGUID(),_rfd);
         }catch(IOException tooBad) {
             // invalid header - ignore it.
         }

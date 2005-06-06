@@ -40,22 +40,18 @@ public class AltLocManagerTest extends BaseTestCase {
         assertTrue(c.contains(direct));
         
         c = manager.getPush(HugeTestUtils.SHA1, false);
-        assertEquals(2,c.getAltLocsSize());
-        assertTrue(c.contains(push));
-        assertTrue(c.contains(pushFWT));
-        
-        c = manager.getPush(HugeTestUtils.SHA1, false);
         assertEquals(1,c.getAltLocsSize());
-        assertTrue(c.contains(push) || c.contains(pushFWT));
+        assertTrue(c.contains(push));
+        
         
         c = manager.getPush(HugeTestUtils.SHA1, true);
         assertEquals(1,c.getAltLocsSize());
         assertTrue(c.contains(pushFWT));
         
         manager.purge();
-        assertNull(manager.getDirect(HugeTestUtils.SHA1));
-        assertNull(manager.getPush(HugeTestUtils.SHA1, false));
-        assertNull(manager.getPush(HugeTestUtils.SHA1, true));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getDirect(HugeTestUtils.SHA1));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getPush(HugeTestUtils.SHA1, false));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getPush(HugeTestUtils.SHA1, true));
     }
     
     
@@ -72,7 +68,7 @@ public class AltLocManagerTest extends BaseTestCase {
         
         manager.remove(direct);
         manager.remove(direct);
-        assertNull(manager.getDirect(HugeTestUtils.SHA1));
+        assertEquals(AlternateLocationCollection.EMPTY,manager.getDirect(HugeTestUtils.SHA1));
     }
     
 }

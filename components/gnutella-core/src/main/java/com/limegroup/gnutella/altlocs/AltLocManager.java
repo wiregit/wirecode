@@ -34,7 +34,7 @@ public class AltLocManager {
      * adds a given altloc to the manager
      * @return whether the manager already knew about this altloc
      */
-    public boolean add(AlternateLocation al){
+    public boolean add(AlternateLocation al) {
         URN sha1 = al.getSHA1Urn();
         AlternateLocationCollection col = null;
         
@@ -44,7 +44,7 @@ public class AltLocManager {
             
             if (cols == null) {
                 cols = new AlternateLocationCollection[3];
-                urnMap.put(sha1,col);
+                urnMap.put(sha1,cols);
             }
             
             int type = -1;
@@ -90,6 +90,8 @@ public class AltLocManager {
             }
             
             AlternateLocationCollection col = cols[type];
+            if (col == null)
+                return false;
             
             boolean ret = col.remove(al);
             if (!col.hasAlternateLocations()) {
@@ -108,7 +110,7 @@ public class AltLocManager {
     public AlternateLocationCollection getDirect(URN sha1) {
         AlternateLocationCollection []cols = (AlternateLocationCollection []) urnMap.get(sha1);
         if (cols == null)
-            return null;
+            return AlternateLocationCollection.EMPTY;
         
         return cols[DIRECT] == null ? AlternateLocationCollection.EMPTY : cols[DIRECT];
     }

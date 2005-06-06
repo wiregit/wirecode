@@ -169,14 +169,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
 		} else {
 		    PushEndpoint copy;
-            if (rfd.getPushAddr() != null) {
-                copy = new PushEndpoint(
-		            rfd.getClientGUID(),
-		            rfd.getPushAddr().getProxies(),
-		            rfd.getPushAddr().getFeatures(),
-		            rfd.getPushAddr().supportsFWTVersion(),
-		            new IpPortImpl(rfd.getHost(),rfd.getPort()));
-            } else 
+            if (rfd.getPushAddr() != null) 
+                copy = rfd.getPushAddr();
+            else 
                 copy = new PushEndpoint(rfd.getClientGUID(),Collections.EMPTY_SET,0,0,null);
 		    return new PushAltLoc(copy,urn);
 		} 

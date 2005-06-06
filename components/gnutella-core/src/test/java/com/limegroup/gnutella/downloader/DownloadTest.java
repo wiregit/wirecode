@@ -1328,9 +1328,12 @@ public class DownloadTest extends BaseTestCase {
                 savedFile.getName(),pusher2,guid);
         
         RemoteFileDesc [] now = {pushRFD2};
-        RemoteFileDesc [] later = {openRFD};
         
-        tGeneric(now,later);
+        ManagedDownloader download=
+            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, false, null);
+        Thread.sleep(2000);
+        download.addDownload(openRFD,false);
+        waitForComplete(false);
         
         List alc = uploader1.incomingGoodAltLocs;
         assertEquals(1,alc.size());
@@ -1452,8 +1455,7 @@ public class DownloadTest extends BaseTestCase {
         
         //Test Downloader has correct alts: the downloader should have
         //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
-        AlternateLocationCollection coll = (AlternateLocationCollection)
-        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        Set coll = (Set) PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
         assertTrue(coll.contains(al1));
         assertTrue(coll.contains(al3));
         Iterator iter = coll.iterator();
