@@ -665,8 +665,10 @@ public abstract class FileManager {
             // Add the files that were just marked as being shareable.
             if (!loadThreadInterrupted()) {
 				Iterator it = added.iterator();
-				while (it.hasNext() && !loadThreadInterrupted())
+				while (it.hasNext() && !loadThreadInterrupted()) {
+					synchronized (this) { _numPendingFiles--; }
 					addFileIfShared((File)it.next(), true);
+				}
 			}
             
             // Compact the index once.  As an optimization, we skip this
@@ -798,7 +800,6 @@ public abstract class FileManager {
 		SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
-		synchronized (this) { _numPendingFiles++; }
 		return addFileIfShared(file, list);
 	}
     
@@ -837,20 +838,17 @@ public abstract class FileManager {
         File f = null;
         try {
             f = FileUtils.getCanonicalFile(file);
-            if (!f.exists()) {
-				_numPendingFiles--;
-                return null;
-            }
+            if (!f.exists())
+				return null;
         } catch (IOException e) {
-			_numPendingFiles--;
             return null;
 	    }
 
         //TODO: if overwriting an existing, take special care.
-		if (!isFileShareable(f)) {
-			LOG.trace("file not shareable FOOL!  "+f);
+		if (!isFileShareable(f))
 			return null;
-		}
+		
+		synchronized (this) { _numPendingFiles++; }
         FileDesc fd = addFile(f);
         synchronized(this) { _numPendingFiles--; }
         _needRebuild = true;
