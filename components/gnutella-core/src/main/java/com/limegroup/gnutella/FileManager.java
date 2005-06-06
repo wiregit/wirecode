@@ -747,7 +747,7 @@ public abstract class FileManager {
                 
 			_completelySharedDirectories.add(directory);
 			_sharedDirectories.put(directory, new IntSet());
-            if( !isForcedShare)
+            if (!isForcedShare)
                 RouterService.getCallback().addSharedDirectory(directory, parent);
         }
 		
