@@ -1353,11 +1353,11 @@ public class RouterService {
      *
      * If any of the files already being downloaded (or queued for downloaded)
      * has the same temporary name as any of the files in 'files', throws
-     * AlreadyDownloadingException.  Note, however, that this doesn't guarantee
+     * SaveLocationException.  Note, however, that this doesn't guarantee
      * that a successfully downloaded file can be moved to the library.<p>
      *
      * If overwrite==false, then if any of the files already exists in the
-     * download directory, FileExistsException is thrown and no files are
+     * download directory, SaveLocationException is thrown and no files are
      * modified.  If overwrite==true, the files may be overwritten.<p>
      * 
      * Otherwise returns a Downloader that allows you to stop and resume this
@@ -1371,9 +1371,10 @@ public class RouterService {
      * @param queryGUID guid of the query that returned the results (i.e. files)
 	 * @param overwrite true iff the download should proceedewithout
      *  checking if it's on disk
-	 * @param saveDir can be null, then the download directory from the settings
+	 * @param saveDir can be null, then the save directory from the settings
 	 * is used
-	 * @param fileName can be null, then one of the filenames of the <code>files</code>
+	 * @param fileName can be null, then one of the filenames of the 
+	 * <code>files</code> array is used
 	 * array is used
      * @return the download object you can use to start and resume the download
      * @throws SaveLocationException if there is an error when setting the final
@@ -1382,9 +1383,11 @@ public class RouterService {
      */
 	public static Downloader download(RemoteFileDesc[] files, 
 	                                  List alts, GUID queryGUID,
-                                      boolean overwrite, File saveDir, String fileName)
+                                      boolean overwrite, File saveDir,
+									  String fileName)
 		throws SaveLocationException {
-		return downloader.download(files, alts, queryGUID, overwrite, saveDir, fileName);
+		return downloader.download(files, alts, queryGUID, overwrite, saveDir,
+								   fileName);
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files, 
@@ -1430,18 +1433,27 @@ public class RouterService {
      *  if unknown
      *
      * @exception IllegalArgumentException both urn and textQuery are null 
+	 * @throws SaveLocationException when the download could not be started, 
+	 * see {@link SaveLocationException} for all possible error codes
      */
 	public static synchronized Downloader download(URN urn, String textQuery,
-            String filename, String [] defaultURL, boolean overwrite,
-            File saveDir)
-			throws IllegalArgumentException, SaveLocationException {
-		return downloader.download(urn, textQuery, filename, defaultURL, overwrite, 
-				saveDir);
+												   String filename,
+												   String [] defaultURL,
+												   boolean overwrite,
+												   File saveDir)
+	throws SaveLocationException {
+		return downloader.download(urn, textQuery, filename, defaultURL, 
+								   overwrite, saveDir);
 	}
 	
+	/**
+	 * Convenience wrapper for 
+	 * {@link #download(URN, String, String, String[], boolean, File)
+	 * download(URN, String, String, String[], boolean, null)}
+	 */
 	public static synchronized Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite) 
-            throws IllegalArgumentException, SaveLocationException { 
+            throws SaveLocationException { 
         return download(urn,textQuery,filename,defaultURL, overwrite, null);
     }
 	
@@ -1451,7 +1463,7 @@ public class RouterService {
      * Starts a resume download for the given incomplete file.
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
- * @throws SaveLocationException 
+     * @throws SaveLocationException 
      */ 
     public static Downloader download(File incompleteFile)
             throws CantResumeException, SaveLocationException {

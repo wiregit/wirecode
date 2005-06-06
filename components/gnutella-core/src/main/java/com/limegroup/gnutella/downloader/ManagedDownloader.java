@@ -1016,7 +1016,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
-			// TODO fberger see if this is correct
             incompleteFile = 
                 incompleteFileManager.getFile(getSaveFile().getName(),
 						downloadSHA1,getContentLength());
@@ -1151,17 +1150,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 			}
 		}
 		return false;
-		
-
-		// old todo entry for this method
-		
-        //TODO3: this is stricter than necessary.  What if a location has
-        //been removed?  Tricky without global variables.  At the least we
-        //should return false if in COULDNT_DOWNLOAD state.
     }
 
 	/**
-	 * Returns <code>true</code> this downloader's urn matches the given urn
+	 * Returns <code>true</code> if this downloader's urn matches the given urn
 	 * or if a downloader started for the triple (urn, fileName, fileSize) would
 	 * write to the same incomplete file as this downloader does.  
 	 * @param urn can be <code>null</code>, then the check is based upon fileName
@@ -1836,12 +1828,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         return 0;//Nothing to preview!
     }
 
-    /** Sets the file name and directory where the download will be saved once complete 
+    /**
+	 * Sets the file name and directory where the download will be saved once
+	 * complete.
      * 
      * @param overwrite true if overwriting an existing file is allowed
      * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
      */
-    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
+    public void setSaveFile(File saveDirectory, String fileName,
+							boolean overwrite) 
+		throws SaveLocationException {
         if (saveDirectory == null)
             saveDirectory = SharingSettings.getSaveDirectory();
         if (fileName == null)
@@ -1860,10 +1856,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         } catch (IOException e) {
             throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
         }
-
+		
         if (! FileUtils.setWriteable(saveDirectory))    
             throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
-     
+		
         if (candidateFile.exists()) {
             if (!candidateFile.isFile())
                 throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
@@ -2726,7 +2722,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             return Integer.MAX_VALUE;
         }
     }
-    
+
+    /**
+	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
+	 * the properties map.
+	 * <p>
+	 * Subclasses should put the name into the map or overriede this
+	 * method.
+	 */
     protected synchronized String getDefaultFileName() {       
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
          if ( fileName == null) {
