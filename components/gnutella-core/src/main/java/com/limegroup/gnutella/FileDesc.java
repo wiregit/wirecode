@@ -360,7 +360,8 @@ public class FileDesc implements AlternateLocationCollector, FileDetails {
     }
 	
 	public LimeXMLDocument getXMLDocument() {
-		return _limeXMLDocs.isEmpty() ? null : (LimeXMLDocument)_limeXMLDocs.get(0);
+		return _limeXMLDocs.isEmpty() ? null 
+			: (LimeXMLDocument)_limeXMLDocs.get(0);
 	}
     
     /**
@@ -641,8 +642,6 @@ public class FileDesc implements AlternateLocationCollector, FileDetails {
 					(RouterService.getAcceptor().getAddress(true)), 
 					RouterService.getAcceptor().getPort(true));
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return null;
 	}

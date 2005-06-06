@@ -31,7 +31,8 @@ public interface FileDetails {
 	 */
 	Set getUrns();
 	/**
-	 * Returns the xml document.
+	 * Returns the xml document or <code>null</code> if there is none for this
+	 * file.
 	 * @return
 	 */
 	LimeXMLDocument getXMLDocument();

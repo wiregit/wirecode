@@ -341,7 +341,8 @@ public class ExternalControl {
 	 */
 	public static MagnetOptions[] parseMagnets(String magnets) {
 		ArrayList list = new ArrayList();
-		StringTokenizer tokens = new StringTokenizer(magnets, System.getProperty("line.separator"));
+		StringTokenizer tokens = new StringTokenizer
+			(magnets, System.getProperty("line.separator"));
 		while (tokens.hasMoreTokens()) {
 			String next = tokens.nextToken();
 			MagnetOptions[] options = parseMagnet(next);
