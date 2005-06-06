@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.browser;
 
 import java.net.URLEncoder;
-import java.util.Locale;
 
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class ExternalControlTest extends BaseTestCase {
@@ -45,12 +43,22 @@ public class ExternalControlTest extends BaseTestCase {
 	}
 
 	public void testParseValidMagnets() {
-		String magnets = "";
-		for (int i = 0; i < validMagnets.length; i++) {
-			magnets += validMagnets[i].toString();
-			magnets += System.getProperty("line.separator");
-		}
+		String magnets = createMultiLineMagnetLinks(validMagnets);
 		MagnetOptions[] opts = ExternalControl.parseMagnets(magnets);
 		assertEquals("Should have parsed " + validMagnets.length + " magnets", validMagnets.length, opts.length);
+		// and parse again
+		assertEquals("Should have parsed " + opts.length + " magnets", opts.length, 
+				ExternalControl.parseMagnets(createMultiLineMagnetLinks(opts)).length);
+	}
+	
+	private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < opts.length; i++) {
+			if (i > 0) {
+				buffer.append(System.getProperty("line.separator"));
+			}
+			buffer.append(opts[i].toString());
+		}
+		return buffer.toString();
 	}
 }
