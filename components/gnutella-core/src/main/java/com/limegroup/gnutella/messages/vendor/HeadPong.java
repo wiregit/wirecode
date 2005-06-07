@@ -24,6 +24,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -585,10 +586,10 @@ public class HeadPong extends VendorMessage {
                 continue;
             }
             
-            if (loc.canBeSent(true)) {
+            if (loc.canBeSent(AlternateLocation.MESH_PING)) {
                 baos.write(loc.getPushAddress().toBytes());
                 available --;
-                loc.send(now,true);
+                loc.send(now,AlternateLocation.MESH_PING);
             } else if (!loc.canBeSentAny())
                 pushlocs.remove();
         }
@@ -626,8 +627,8 @@ public class HeadPong extends VendorMessage {
         long now = System.currentTimeMillis();
 		while(altlocs.hasNext() && sent < toSend) {
             DirectAltLoc loc = (DirectAltLoc) altlocs.next();
-            if (loc.canBeSent(true)) {
-                loc.send(now,true);
+            if (loc.canBeSent(AlternateLocation.MESH_PING)) {
+                loc.send(now,AlternateLocation.MESH_PING);
                 baos.write(loc.getHost().getInetAddress().getAddress());
                 ByteOrder.short2leb((short)loc.getHost().getPort(),baos);
                 sent++;

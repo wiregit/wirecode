@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -420,6 +421,7 @@ public class Response {
         if( col == null || !col.hasAlternateLocations() )
             return Collections.EMPTY_SET;
         
+        long now = System.currentTimeMillis();
         synchronized(col) {
             Set endpoints = null;
             int i = 0;
@@ -429,13 +431,17 @@ public class Response {
             	if (!(o instanceof DirectAltLoc))
             		continue;
                 DirectAltLoc al = (DirectAltLoc)o;
-                Endpoint host = al.getHost();
-                if( !NetworkUtils.isMe(host.getAddress(), host.getPort()) ) {
-                    if (endpoints == null)
-                        endpoints = new HashSet();
-                    endpoints.add( al.getHost() );
-                    i++;
-                }
+                if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
+                    Endpoint host = al.getHost();
+                    if( !NetworkUtils.isMe(host.getAddress(), host.getPort()) ) {
+                        if (endpoints == null)
+                            endpoints = new HashSet();
+                        endpoints.add( al.getHost() );
+                        i++;
+                        al.send(now, AlternateLocation.MESH_RESPONSE);
+                    }
+                } else if (!al.canBeSentAny())
+                    iter.remove();
             }
             return endpoints == null ? Collections.EMPTY_SET : endpoints;
         }

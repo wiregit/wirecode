@@ -596,12 +596,12 @@ public final class HTTPUploader implements Uploader {
                 if(_writtenLocs.contains(al))
                     continue;
                 
-                if (al.canBeSent(false)) {
+                if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
                     _writtenLocs.add(al);
                     if(ret == null) ret = new HashSet();
                     ret.add(al);
                     i++;
-                    al.send(now,false);
+                    al.send(now,AlternateLocation.MESH_LEGACY);
                 } else if (!al.canBeSentAny()) 
                     iter.remove();
             }
@@ -639,8 +639,8 @@ public final class HTTPUploader implements Uploader {
     	                continue;
     	            }
     	            
-                    if (al.canBeSent(false)) {
-                        al.send(now,false);
+                    if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
+                        al.send(now,AlternateLocation.MESH_LEGACY);
                         _writtenPushLocs.add(al);
                         
                         if(ret == null) ret = new HashSet();

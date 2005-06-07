@@ -36,7 +36,10 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */
     public static final String ALT_VENDOR = "ALT";
 
-	
+	public static final int MESH_PING = 0;
+    public static final int MESH_LEGACY = 1;
+    public static final int MESH_RESPONSE = 2;
+    
 	/**
 	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
 	 * can be <tt>null</tt>.
@@ -73,7 +76,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     /**
      * Two counter objects to keep track of altloc expiration
      */
-    private final Average legacy, ping;
+    private final Average legacy, ping, response;
     
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -230,6 +233,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		SHA1_URN=sha1;
         legacy = new Average();
         ping = new Average();
+        response = new Average(2f); // send altlocs in responses more often
 	}
 	
 
@@ -307,24 +311,40 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     public abstract AlternateLocation createClone();
     
     
-    public synchronized void send(long now, boolean pingMesh) {
-        if (pingMesh)
-            ping.send(now);
-        else
-            legacy.send(now);
+    public synchronized void send(long now, int meshType) {
+        switch(meshType) {
+        case MESH_LEGACY :
+            legacy.send(now);return;
+        case MESH_PING :
+            ping.send(now);return;
+        case MESH_RESPONSE :
+            response.send(now);return;
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
+        }
     }
     
-    public synchronized boolean canBeSent(boolean pingMesh) {
-        return pingMesh ? ping.canBeSent() : legacy.canBeSent();
+    public synchronized boolean canBeSent(int meshType) {
+        switch(meshType) {
+        case MESH_LEGACY :
+            return legacy.canBeSent();
+        case MESH_PING :
+            return ping.canBeSent();
+        case MESH_RESPONSE :
+            return response.canBeSent();
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
+        }
     }
     
     public synchronized boolean canBeSentAny() {
-        return canBeSent(true) || canBeSent(false);
+        return canBeSent(MESH_LEGACY) || canBeSent(MESH_PING) || canBeSent(MESH_RESPONSE);
     }
     
     synchronized void resetSent() {
         ping.reset();
         legacy.reset();
+        response.reset();
     }
     
     ///////////////////////////////helpers////////////////////////////////
@@ -501,13 +521,28 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 	}
 
     private static class Average {
-        private int numTimes, average;
+        /** The number of times this altloc was given out */
+        private int numTimes;
+        /** The average time in ms between giving out the altloc */
+        private long average;
+        /** The last time the altloc was given out */
         private long lastSentTime;
+        /** The bias this specific Average will have relative to other averages */
+        private final float bias;
+        
+        public Average() {
+            bias = 1f;
+        }
+        
+        public Average(float bias) {
+            this.bias = bias;
+        }
+        
         public void send(long now) {
             if (lastSentTime == 0)
                 lastSentTime = now;
             
-            average = (int) ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
+            average =  ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
             lastSentTime = now;
         }
         
@@ -517,7 +552,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             
             float damper = UploadSettings.ALTLOC_EXPIRATION_DAMPER.getValue();
             double threshold = Math.abs(Math.log(average) / Math.log(damper));
-            return numTimes < threshold;
+            return numTimes < threshold * bias;
         }
         
         public void reset() {
