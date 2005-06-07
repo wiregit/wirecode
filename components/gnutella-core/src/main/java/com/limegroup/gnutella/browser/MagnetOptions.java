@@ -65,14 +65,23 @@ public class MagnetOptions {
 		URN urn = extractSHA1URNFromList(getExactTopics());
 		
 		if (urn == null) {
-			urn = extractSHA1URNFromList(getXS());
-		}
-		if (urn == null) {
-			urn = extractSHA1URNFromList(getAS());
+			urn = extractSHA1URNFromURLS(getDefaultURLs());
 		}
 		return urn;
 	}
 	
+	private URN extractSHA1URNFromURLS(String[] defaultURLs) {
+		for (int i = 0; i < defaultURLs.length; i++) {
+			try {
+				URI uri = new URI(defaultURLs[i].toCharArray());
+				return URN.createSHA1Urn(uri.getQuery());
+			} catch (URIException e) {
+			} catch (IOException e) {
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns true if there are enough pieces of information to start e.g a
 	 * download from it.
