@@ -28,10 +28,11 @@ public class MetaDataReader {
 		if(nameValList.isEmpty())
 			throw new IOException("invalid/no data.");
 		
-		if(LimeXMLSchemaRepository.instance().getSchema(data.getSchema()) == null)
-             throw new IOException("schema: " + data.getSchema() + " doesn't exist");
+		String uri = data.getSchemaURI();
+		if(LimeXMLSchemaRepository.instance().getSchema(uri) == null)
+             throw new IOException("schema: " + uri + " doesn't exist");
 
-		return new LimeXMLDocument(nameValList, data.getSchema());
+		return new LimeXMLDocument(nameValList, uri);
 	}
 	
 	

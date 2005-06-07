@@ -68,7 +68,7 @@ public abstract class VideoMetaData extends MetaData {
 		return null;
 	}
 	
-	public String getSchema() { return schemaURI; }
+	public String getSchemaURI() { return schemaURI; }
 	
     public String getTitle() { return title; }
     public String getYear() { return year; }

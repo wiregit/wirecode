@@ -88,7 +88,7 @@ public abstract class AudioMetaData extends MetaData {
     	
     }
     
-    public String getSchema() {
+    public String getSchemaURI() {
         return schemaURI;
     }
     

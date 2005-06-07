@@ -53,9 +53,9 @@ public abstract class MetaData {
 	public abstract List toNameValueList();
 	
 	/** 
-	 * Retrieves the XML schema that this MetaData can be read with.
+	 * Retrieves the XML schema URI that this MetaData can be read with.
 	 */
-	public abstract String getSchema();
+	public abstract String getSchemaURI();
 	
 	/**
 	 * populates this's data fields with data read from the media file
