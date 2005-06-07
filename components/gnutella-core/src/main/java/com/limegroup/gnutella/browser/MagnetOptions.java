@@ -23,6 +23,7 @@ public class MagnetOptions {
     private List _xs;
 	private List _xt;
     private List _as;
+	private String errorMessage;
 	
     public MagnetOptions() {
         _dn = null;
@@ -52,7 +53,7 @@ public class MagnetOptions {
 	}
 	
 	public URN getSHA1Urn() {
-		URN urn = extractSHA1URNFromList(getXT());
+		URN urn = extractSHA1URNFromList(getExactTopics());
 		
 		if (urn == null) {
 			urn = extractSHA1URNFromList(getXS());
@@ -65,7 +66,7 @@ public class MagnetOptions {
 	
 	public boolean isValid() {
 		 return getDefaultURLs().length > 0  || getSHA1Urn() != null 
-			|| (getKT() != null && getKT().length() > 0);
+			|| (getKeywordTopic() != null && getKeywordTopic().length() > 0);
 	}
 	
 	private URN extractSHA1URNFromList(List strings) {
@@ -81,7 +82,7 @@ public class MagnetOptions {
 	
 	public List getPotentialURLs() {
 		List urls = new ArrayList();
-		urls.addAll(getPotentialURLs(getXT()));
+		urls.addAll(getPotentialURLs(getExactTopics()));
 		urls.addAll(getPotentialURLs(getXS()));
 		urls.addAll(getPotentialURLs(getAS()));
 		return urls;
@@ -106,32 +107,33 @@ public class MagnetOptions {
 			 }
 			 catch(URIException e) {
 				 it.remove(); // if not, remove it from the list.
+				 errorMessage = e.getLocalizedMessage();
              }
 		 }
 		 return (String[])urls.toArray(new String[urls.size()]);
 	 }
     
-    public String getDN() {
+    public String getDisplayName() {
         return _dn;
     }
     
-    public void setDN(String str) {
+    public void setDisplayName(String str) {
         _dn = str;
     }
 
-    public String getKT() {
+    public String getKeywordTopic() {
         return _kt;
     }
     
-    public void setKT(String str) {
+    public void setKeywordTopic(String str) {
         _kt = str;
     }
 
-    public List getXT() {
+    public List getExactTopics() {
         return _xt;
     }
     
-    public void addXT(String str) {
+    public void addExactTopic(String str) {
         _xt.add(str);
     }
 
@@ -150,5 +152,14 @@ public class MagnetOptions {
     public void addAS(String str) {
         _as.add(str);
     }
+	
+	/**
+	 * Returns a localized error message if of the last invalid url that was 
+	 * parsed.
+	 * @return null if there was no error
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
 }
 

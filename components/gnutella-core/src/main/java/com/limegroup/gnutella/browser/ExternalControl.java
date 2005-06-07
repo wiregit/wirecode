@@ -353,11 +353,11 @@ public class ExternalControl {
 				curOptions = new MagnetOptions();
 
 			if ( keystr.startsWith("xt") ) {
-				curOptions.addXT(cmdstr);
+				curOptions.addExactTopic(cmdstr);
 			} else if ( keystr.startsWith("dn") ) {
-				curOptions.setDN(cmdstr);
+				curOptions.setDisplayName(cmdstr);
 			} else if ( keystr.startsWith("kt") ) {
-				curOptions.setKT(cmdstr);
+				curOptions.setKeywordTopic(cmdstr);
 			} else if ( keystr.startsWith("xs") ) {
 				curOptions.addXS(cmdstr);
 			} else if ( keystr.startsWith("as") ) {
@@ -367,10 +367,10 @@ public class ExternalControl {
 		
 			// make sure the magnet has something besides a hash
 			boolean currentHashOnly=false;
-			if (!curOptions.getXT().isEmpty()) {
+			if (!curOptions.getExactTopics().isEmpty()) {
 			    currentHashOnly = 
-			        curOptions.getKT()==null &&
-			        curOptions.getDN()==null &&
+			        curOptions.getKeywordTopic()==null &&
+			        curOptions.getDisplayName()==null &&
 			        curOptions.getAS().isEmpty() &&
 			        curOptions.getXS().isEmpty();
 			    

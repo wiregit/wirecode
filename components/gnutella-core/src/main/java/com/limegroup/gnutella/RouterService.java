@@ -1472,7 +1472,7 @@ public class RouterService {
 		if (!magnet.isValid()) {
 			throw new IllegalArgumentException("invalid magnet");
 		}
-		return download(magnet.getSHA1Urn(), magnet.getKT(), magnet.getDN(),
+		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), magnet.getDisplayName(),
 				magnet.getDefaultURLs(), overwrite);
 	}
 
@@ -1496,7 +1496,7 @@ public class RouterService {
 		if (fileName == null) {
 			throw new NullPointerException("fileName is null");
 		}
-		return download(magnet.getSHA1Urn(), magnet.getKT(), fileName,
+		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), fileName,
 				magnet.getDefaultURLs(), overwrite, saveDir);
 	}
 

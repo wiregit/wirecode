@@ -14,14 +14,14 @@ public class ExternalControlTest extends BaseTestCase {
 	
 	public void setUp() {
 		MagnetOptions o1 = new MagnetOptions();
-		o1.setDN(URLEncoder.encode("compilc.:fileNm?7ßä"));
-		o1.setKT(URLEncoder.encode("keyword topic string"));
-		o1.addXT("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
+		o1.setDisplayName(URLEncoder.encode("compilc.:fileNm?7ßä"));
+		o1.setKeywordTopic(URLEncoder.encode("keyword topic string"));
+		o1.addExactTopic("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
 		o1.addXS("http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
 		
 		MagnetOptions o2 = new MagnetOptions();
-		o2.setDN(URLEncoder.encode("compile me"));
-		o1.addXT("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
+		o2.setDisplayName(URLEncoder.encode("compile me"));
+		o1.addExactTopic("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
 		o1.addXS("http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
 		
 		validMagnets = new MagnetOptions[] {
