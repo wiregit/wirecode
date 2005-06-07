@@ -55,7 +55,7 @@ if ("__main__" == __name__):
 
    # defaults
    log_name = "log.txt"
-   case_delimiter = "INFO"
+   record_delimiter = "INFO  [main]"
    file_header = None
    initial_output_number = 0   
 
@@ -64,7 +64,7 @@ if ("__main__" == __name__):
       if len(arg) > 4 and arg[:4] == "log=":
          log_name = arg[4:]
       elif len(arg) > 10 and arg[:10] == "delimiter=":
-         case_delimiter = arg[10:]
+         record_delimiter = arg[10:]
       elif arg[:7] == "header=":
          file_header = arg[7:]
          if file_header[-1] != "\n":
@@ -72,6 +72,6 @@ if ("__main__" == __name__):
 
    mylog = open(log_name)
 
-   split_log(mylog, log_name+".", case_delimiter, initial_output_number, file_header)
+   split_log(mylog, log_name+".", record_delimiter, initial_output_number, file_header)
 
 
