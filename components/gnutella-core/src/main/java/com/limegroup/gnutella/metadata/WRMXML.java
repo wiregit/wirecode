@@ -31,7 +31,8 @@ public class WRMXML {
     //        <SECURITYVERSION>XXXX</SECURITYVERSION>
     //        <CID>XXXX</CID>
     //        <LAINFO>XXXX</LAINFO>
-    //        <KID>XXXX</CHECKSUM>
+    //        <KID>XXXX</KID>
+    //        <CHECKSUM>XXXX</CHECKSUM>
     //    </DATA>
     //    <SIGNATURE>
     //        <HASHALGORITHM type="XXXX"></HASHALGORITHM>
@@ -40,7 +41,7 @@ public class WRMXML {
     //    </SIGNATURE>
     //</WRMHEADER> 
     
-    protected String _securityversion, _cid, _lainfo, _kid;
+    protected String _securityversion, _cid, _lainfo, _kid, _checksum;
     protected String _hashalgorithm, _signalgorithm, _signatureValue;
     protected Node _documentNode;
     
@@ -77,6 +78,7 @@ public class WRMXML {
     public String getHashAlgorithm() { return _hashalgorithm; }
     public String getSignAlgorithm() { return _signalgorithm; }
     public String getSignatureValue() { return _signatureValue; }
+    public String getChecksum() { return _checksum; }
     
     
     /** Parses the content encryption XML. */
@@ -161,6 +163,8 @@ public class WRMXML {
                 _lainfo = value;
             else if(name.equals("KID"))
                 _kid = value;
+            else if(name.equals("CHECKSUM"))
+                _checksum = value;
         } else if(nodeName.equals("SIGNATURE")) {
             if(name.equals("HASHALGORITHM") && "type".equals(attribute))
                 _hashalgorithm = value;
