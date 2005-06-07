@@ -520,6 +520,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	public void testThatAlternateLocationsAreReturned() throws Exception {
 	    addFilesToLibrary();
 
+	    FileDesc[] fds = fman.getAllSharedFileDescriptors();
+	    for(int i = 0; i < fds.length; i++) {
+	        String urn = fds[i].getSHA1Urn().httpStringValue();
+	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
+	            String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
+	            RouterService.getAltlocManager().add(AlternateLocation.create(loc),null);
+	        }
+	    }
+        
         boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
@@ -541,6 +550,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			    testResponse.getLocations(), hits[0].getLocations());
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
+        RouterService.getAltlocManager().purge();
     }	
     
     /**
