@@ -613,18 +613,17 @@ public class HeadPong extends VendorMessage {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+ toSend +" locs to pong");
         
-        DataOutputStream daos = new DataOutputStream(caos);
-		byte [] altbytes = new byte[toSend * 6];
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int sent = 0;
 		for (Iterator iter = altlocs; iter.hasNext() && sent < toSend;) {
             DirectAltLoc loc = (DirectAltLoc) iter.next();
-            byte [] addr = loc.getHost().getInetAddress().getAddress();
-            System.arraycopy(addr,0,altbytes,sent*6,4);
-            ByteOrder.short2leb((short)loc.getHost().getPort(), altbytes, sent*6+4);
+            baos.write(loc.getHost().getInetAddress().getAddress());
+            ByteOrder.short2leb((short)loc.getHost().getPort(),baos);
             sent++;
         }
 		
 		LOG.debug("adding altlocs");
+        byte [] altbytes = baos.toByteArray();
 		ByteOrder.short2beb((short)altbytes.length,caos);
 		caos.write(altbytes);
 		return true;

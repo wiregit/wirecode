@@ -1,12 +1,9 @@
 
 package com.limegroup.gnutella.downloader;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -15,18 +12,15 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.AssertFailure;
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.IntervalSet;
 
 /**
