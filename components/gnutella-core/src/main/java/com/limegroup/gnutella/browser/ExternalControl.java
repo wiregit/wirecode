@@ -148,21 +148,23 @@ public class ExternalControl {
 		                  "options [" + curOpt + "]");
             }
 
+			
+			String msg = curOpt.getErrorMessage();
+			msg = msg != null ? msg : curOpt.toString();
+			
             // Validate that we have something to go with from magnet
             // If not, report an error.
             if (!curOpt.isValid()) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
-				// TODO fberger add error message again
-                MessageService.showError("ERROR_BAD_MAGNET_LINK", "");
+                MessageService.showError("ERROR_BAD_MAGNET_LINK", msg);
 				return;	
             }
             
             // Warn the user that the link was slightly invalid
-			// TODO fberger make this work again
-//            if( errorMsg != null )
-//                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
+            if( msg != null )
+                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
             
             try {
             	RouterService.download(curOpt, false);
