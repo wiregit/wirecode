@@ -60,12 +60,49 @@ public final class UploadSettings extends LimeProps {
     public static final IntSetting SOFT_MAX_UPLOADS =
         FACTORY.createIntSetting("SOFT_MAXIMUM_UPLOADS", 5);   
 
+    /**
+     * settings whether to expire the different types of meshes
+     */
+    public static final BooleanSetting EXPIRE_LEGACY =
+        FACTORY.createSettableBooleanSetting("EXPIRE_LEGACY",true,"AlternateLocation.expireLegacy");
+    public static final BooleanSetting EXPIRE_PING =
+        FACTORY.createSettableBooleanSetting("EXPIRE_PING",true,"AlternateLocation.expirePing");
+    public static final BooleanSetting EXPIRE_RESPONSE =
+        FACTORY.createSettableBooleanSetting("EXPIRE_RESPONSES",true,"AlternateLocation.expireResponse");
+    
+    /**
+     * settings for the number of times each altloc should be given out
+     * (larger == more times)
+     */
+    public static final FloatSetting LEGACY_BIAS =
+        FACTORY.createSettableFloatSetting("LEGACY_BIAS",1f,"AlternateLocation.legacyBias",100f,0f);
+    public static final FloatSetting PING_BIAS =
+        FACTORY.createSettableFloatSetting("PING_BIAS",1f,"AlternateLocation.pingBias",100f,0f);
+    public static final FloatSetting RESPONSE_BIAS = // send altlocs in responses more often by default
+        FACTORY.createSettableFloatSetting("RESPONSE_BIAS",3f,"AlternateLocation.responseBias",100f,0f);
+    
 
-    public static final FloatSetting ALTLOC_EXPIRATION_DAMPER =
-        FACTORY.createSettableFloatSetting("ALTLOC_DAMPER",
-                (float)Math.E/2,"AlternateLocation.damper",
+    /**
+     * settings for the speed at which the number of times an altloc can be given out regrows 
+     * (smaller == faster)
+     */
+    public static final FloatSetting LEGACY_EXPIRATION_DAMPER =
+        FACTORY.createSettableFloatSetting("LEGACY_DAMPER",
+                (float)Math.E/2,"AlternateLocation.legacyDamper",
                 (float)Math.E-0.1f,
-                (float)Math.E/10);
+                (float)Math.E/100);
+    public static final FloatSetting PING_EXPIRATION_DAMPER =
+        FACTORY.createSettableFloatSetting("PING_DAMPER",
+                    (float)Math.E/2,"AlternateLocation.pingDamper",
+                    (float)Math.E-0.1f,
+                    (float)Math.E/100);
+    public static final FloatSetting RESPONSE_EXPIRATION_DAMPER =
+        FACTORY.createSettableFloatSetting("RESPONSE_DAMPER",
+                (float)Math.E/2,"AlternateLocation.responseDamper",
+                (float)Math.E-0.1f,
+                (float)Math.E/100);
+    
+    
     /**
      * A test SIMPP setting.
      */

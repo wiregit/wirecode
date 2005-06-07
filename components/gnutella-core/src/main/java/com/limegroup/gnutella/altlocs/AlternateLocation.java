@@ -233,7 +233,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		SHA1_URN=sha1;
         legacy = new Average();
         ping = new Average();
-        response = new Average(2f); // send altlocs in responses more often
+        response = new Average();
 	}
 	
 
@@ -327,11 +327,21 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     public synchronized boolean canBeSent(int meshType) {
         switch(meshType) {
         case MESH_LEGACY :
-            return legacy.canBeSent();
+            if (!UploadSettings.EXPIRE_LEGACY.getValue())
+                return true;
+            return  legacy.canBeSent(UploadSettings.LEGACY_BIAS.getValue(), 
+                    UploadSettings.LEGACY_EXPIRATION_DAMPER.getValue());
         case MESH_PING :
-            return ping.canBeSent();
+            if (!UploadSettings.EXPIRE_PING.getValue())
+                return true;
+            return ping.canBeSent(UploadSettings.PING_BIAS.getValue(),
+                    UploadSettings.PING_EXPIRATION_DAMPER.getValue());
         case MESH_RESPONSE :
-            return response.canBeSent();
+            if (!UploadSettings.EXPIRE_RESPONSE.getValue())
+                return true; 
+            return response.canBeSent(UploadSettings.RESPONSE_BIAS.getValue(),
+                    UploadSettings.RESPONSE_EXPIRATION_DAMPER.getValue());
+            
         default :
             throw new IllegalArgumentException("unknown mesh type");
         }
@@ -527,16 +537,6 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         private long average;
         /** The last time the altloc was given out */
         private long lastSentTime;
-        /** The bias this specific Average will have relative to other averages */
-        private final float bias;
-        
-        public Average() {
-            bias = 1f;
-        }
-        
-        public Average(float bias) {
-            this.bias = bias;
-        }
         
         public void send(long now) {
             if (lastSentTime == 0)
@@ -546,11 +546,10 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             lastSentTime = now;
         }
         
-        public boolean canBeSent() {
+        public boolean canBeSent(float bias, float damper) {
             if (numTimes < 2 || average == 0)
                 return true;
             
-            float damper = UploadSettings.ALTLOC_EXPIRATION_DAMPER.getValue();
             double threshold = Math.abs(Math.log(average) / Math.log(damper));
             return numTimes < threshold * bias;
         }
