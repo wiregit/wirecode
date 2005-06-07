@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,24 +35,32 @@ public class MagnetOptions {
     }
     
 	public String toString() {
-		String ret = MAGNET;
+		StringBuffer ret = new StringBuffer(MAGNET);
 		
 		int size = _xt.size();
         for (int i = 0; i < size; i++) 
-            ret += "&xt="+_xt.get(i)+"";
-		if ( _dn != null ) 
-			ret += "&dn="+_dn+"";
-		if ( _kt != null ) 
-			ret += "&kt="+_kt+"";
+            ret.append("&xt=").append(_xt.get(i));
+		if (_dn != null) 
+			ret.append("&dn=").append(URLEncoder.encode(_dn));
+		if (_kt != null) 
+			ret.append("&kt=").append(URLEncoder.encode(_kt));
 		size = _xs.size();
         for (int i = 0; i < size; i++) 
-            ret += "&xs="+_xs.get(i)+"";
+            ret.append("&xs=").append(_xs.get(i));
 		size = _as.size();
         for (int i = 0; i < size; i++) 
-            ret += "&as="+_as.get(i)+"";
-		return ret;
+            ret.append("&as=").append(_as.get(i));
+		
+		return ret.toString();
 	}
 	
+	/**
+	 * Returns the sha1 urn of this magnet uri if it has one.
+	 * <p>
+	 * It looks in the exacty topics, the exact sources and then in the alternate
+	 * sources for it.
+	 * @return
+	 */
 	public URN getSHA1Urn() {
 		URN urn = extractSHA1URNFromList(getExactTopics());
 		
@@ -64,9 +73,24 @@ public class MagnetOptions {
 		return urn;
 	}
 	
+	/**
+	 * Returns true if there are enough pieces of information to start e.g a
+	 * download from it.
+	 * @return
+	 */
 	public boolean isValid() {
-		 return getDefaultURLs().length > 0  || getSHA1Urn() != null 
-			|| (getKeywordTopic() != null && getKeywordTopic().length() > 0);
+		 return getDefaultURLs().length > 0  && (getSHA1Urn() != null 
+			|| (getKeywordTopic() != null && getKeywordTopic().length() > 0));
+	}
+	
+	/**
+	 * Returns whether the magnet has no other fields set than the hash.
+	 * <p>
+	 * If this is the case the user has to kick of a search manually.
+	 * @return
+	 */
+	public boolean isHashOnly() {
+		return _kt == null && _dn == null && _as.isEmpty() && _xs.isEmpty();
 	}
 	
 	private URN extractSHA1URNFromList(List strings) {
@@ -80,7 +104,7 @@ public class MagnetOptions {
 		return null;
     }
 	
-	public List getPotentialURLs() {
+	private List getPotentialURLs() {
 		List urls = new ArrayList();
 		urls.addAll(getPotentialURLs(getExactTopics()));
 		urls.addAll(getPotentialURLs(getXS()));
@@ -88,7 +112,7 @@ public class MagnetOptions {
 		return urls;
 	}
 	
-	public List getPotentialURLs(List strings) {
+	private List getPotentialURLs(List strings) {
 		List ret = new ArrayList();
 		for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
 			String str = (String)iter.next();
@@ -98,25 +122,33 @@ public class MagnetOptions {
 		return ret;
 	}
 	 
-	 public String[] getDefaultURLs() {
-		 List urls = getPotentialURLs();
-		 for(Iterator it = urls.iterator(); it.hasNext(); ) {
-			 try {
-				 String nextURL = (String)it.next();
-				 new URI(nextURL.toCharArray());  // is it a valid URI?
-			 }
-			 catch(URIException e) {
-				 it.remove(); // if not, remove it from the list.
-				 errorMessage = e.getLocalizedMessage();
+	/**
+	 * Returns all valid urls that can be tried for downloading.
+	 * @return
+	 */
+	public String[] getDefaultURLs() {
+		List urls = getPotentialURLs();
+		for(Iterator it = urls.iterator(); it.hasNext(); ) {
+			try {
+				String nextURL = (String)it.next();
+				new URI(nextURL.toCharArray());  // is it a valid URI?
+			}
+			catch(URIException e) {
+				it.remove(); // if not, remove it from the list.
+				errorMessage = e.getLocalizedMessage();
              }
-		 }
-		 return (String[])urls.toArray(new String[urls.size()]);
-	 }
-    
+		}
+		return (String[])urls.toArray(new String[urls.size()]);
+	}
+	
     public String getDisplayName() {
         return _dn;
     }
     
+	/**
+	 * Sets the display name.
+	 * @param str
+	 */
     public void setDisplayName(String str) {
         _dn = str;
     }
