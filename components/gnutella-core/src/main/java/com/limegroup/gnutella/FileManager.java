@@ -962,7 +962,7 @@ public abstract class FileManager {
             // the installer.  We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!isInstallerFile(file) && !isForcedShare(file)) {
+            if (!isForcedShare(file)) {
                 URN mainURN = fileDesc.getSHA1Urn();
                 CreationTimeCache ctCache = CreationTimeCache.instance();
                 synchronized (ctCache) {
@@ -1236,31 +1236,6 @@ public abstract class FileManager {
     //  Search, etc.
     ///////////////////////////////////////////////////////////////////////////
 		
-	/** Simple test that checks whether this might be an installer.
-     *  Is this test internationalized?  Not yet but maybe it should be....
-     */
-    protected boolean isInstallerFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        
-        // filename can't be less than 'limewire.***'
-        if (fileName.length() < 12) return false;
-        String pre = fileName.substring(0, 8);
-
-        // there might not be a dot so make sure
-        int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex < 0) return false;
-        String post = fileName.substring(lastDotIndex);
-
-        if (pre.equals("limewire") &&
-            (post.equals(".dmg") || post.equals(".bin") || 
-             post.equals(".zip") || post.equals(".exe") ||
-             post.equals(".tgz"))
-            ) return true;
-        
-        return false;
-    }
-
-
     /**
      * @modifies this
      * @effects enters the given FileDesc into the _urnMap under all its 
