@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ByteReader;
@@ -1059,6 +1060,44 @@ public class UploadTest extends BaseTestCase {
                           "abcdefghijklmnopqrstuvwxyz",
                           required);
         assertTrue(passed);
+    }
+    
+    public void testAltsExpire() throws Exception {
+        UploadSettings.ALTLOC_EXPIRATION_DAMPER.setValue((float)Math.E - 0.2f);
+        // test that an altloc will expire if given out too often
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        assertTrue(al.canBeSent(false));
+        RouterService.getAltlocManager().add(al, null);
+        
+        int i = 0;
+        try {
+            for (i = 0; i < 10; i++) {
+                download("/uri-res/N2R?" + hash, null,
+                        "abcdefghijklmnopqrstuvwxyz",
+                        "X-Alt: 1.1.1.1:1");
+            }
+            fail("altloc didn't expire");
+        } catch (AssertionFailedError expected) {}
+        assertLessThan(10, i);
+        assertFalse(al.canBeSent(false));
+    }
+    
+    public void testAltsDontExpire() throws Exception {
+        UploadSettings.ALTLOC_EXPIRATION_DAMPER.setValue((float)Math.E/4);
+        // test that an altloc will not expire if given out less often
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        assertTrue(al.canBeSent(false));
+        RouterService.getAltlocManager().add(al, null);
+        
+        for (int i = 0; i < 10; i++) {
+            assertTrue(download("/uri-res/N2R?" + hash, null,
+                    "abcdefghijklmnopqrstuvwxyz",
+            "X-Alt: 1.1.1.1:1"));
+            Thread.sleep(8*1000);
+        }
+        assertTrue(al.canBeSent(false));
     }
     
     public void testChunksGiveDifferentLocs() throws Exception {

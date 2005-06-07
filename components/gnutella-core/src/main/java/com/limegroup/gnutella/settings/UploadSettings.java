@@ -61,6 +61,11 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("SOFT_MAXIMUM_UPLOADS", 5);   
 
 
+    public static final FloatSetting ALTLOC_EXPIRATION_DAMPER =
+        FACTORY.createSettableFloatSetting("ALTLOC_DAMPER",
+                (float)Math.E/2,"AlternateLocation.damper",
+                (float)Math.E-0.1f,
+                (float)Math.E/10);
     /**
      * A test SIMPP setting.
      */

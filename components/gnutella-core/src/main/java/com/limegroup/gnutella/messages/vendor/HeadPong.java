@@ -575,24 +575,32 @@ public class HeadPong extends VendorMessage {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+available+ " push locs to pong");
 		
+        long now = System.currentTimeMillis();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (Iterator iter = pushlocs; iter.hasNext() && available > 0;) {
-            PushAltLoc loc = (PushAltLoc) iter.next();
-            if (loc.getPushAddress().getProxies().isEmpty())
+        while (pushlocs.hasNext() && available > 0) {
+            PushAltLoc loc = (PushAltLoc) pushlocs.next();
+
+            if (loc.getPushAddress().getProxies().isEmpty()) {
+                pushlocs.remove();
                 continue;
-            baos.write(loc.getPushAddress().toBytes());
+            }
+            
+            if (loc.canBeSent(true)) {
+                baos.write(loc.getPushAddress().toBytes());
+                available --;
+                loc.send(now,true);
+            } else if (!loc.canBeSentAny())
+                pushlocs.remove();
         }
 		
-        byte [] altbytes = baos.toByteArray();
-        
-		if (altbytes.length == 0){
+		if (baos.size() == 0) {
 			//altlocs will not fit or none available - say we didn't send them
 			LOG.debug("did not send any push locs");
 			return false;
 		} else { 
 			LOG.debug("adding push altlocs");
-            ByteOrder.short2beb((short)altbytes.length,caos);
-			caos.write(altbytes);
+            ByteOrder.short2beb((short)baos.size(),caos);
+			baos.writeTo(caos);
 			return true;
 		}
 	}
@@ -615,17 +623,21 @@ public class HeadPong extends VendorMessage {
         
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int sent = 0;
-		for (Iterator iter = altlocs; iter.hasNext() && sent < toSend;) {
-            DirectAltLoc loc = (DirectAltLoc) iter.next();
-            baos.write(loc.getHost().getInetAddress().getAddress());
-            ByteOrder.short2leb((short)loc.getHost().getPort(),baos);
-            sent++;
+        long now = System.currentTimeMillis();
+		while(altlocs.hasNext() && sent < toSend) {
+            DirectAltLoc loc = (DirectAltLoc) altlocs.next();
+            if (loc.canBeSent(true)) {
+                loc.send(now,true);
+                baos.write(loc.getHost().getInetAddress().getAddress());
+                ByteOrder.short2leb((short)loc.getHost().getPort(),baos);
+                sent++;
+            } else if (!loc.canBeSentAny())
+                altlocs.remove();
         }
 		
 		LOG.debug("adding altlocs");
-        byte [] altbytes = baos.toByteArray();
-		ByteOrder.short2beb((short)altbytes.length,caos);
-		caos.write(altbytes);
+		ByteOrder.short2beb((short)baos.size(),caos);
+		baos.writeTo(caos);
 		return true;
 			
 	}

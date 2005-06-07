@@ -588,17 +588,22 @@ public final class HTTPUploader implements Uploader {
     Set getNextSetOfAltsToSend() {
         AlternateLocationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
         Set ret = null;
-        
+        long now = System.currentTimeMillis();
         synchronized(coll) {
             Iterator iter  = coll.iterator();
             for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
                 AlternateLocation al = (AlternateLocation)iter.next();
                 if(_writtenLocs.contains(al))
                     continue;
-                _writtenLocs.add(al);
-                if(ret == null) ret = new HashSet();
-                ret.add(al);
-                i++;
+                
+                if (al.canBeSent(false)) {
+                    _writtenLocs.add(al);
+                    if(ret == null) ret = new HashSet();
+                    ret.add(al);
+                    i++;
+                    al.send(now,false);
+                } else if (!al.canBeSentAny()) 
+                    iter.remove();
             }
         }
         return ret == null ? Collections.EMPTY_SET : ret;
@@ -616,7 +621,7 @@ public final class HTTPUploader implements Uploader {
             RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
     	
     	Set ret = null;
-    	
+    	long now = System.currentTimeMillis();
     	synchronized(push) {
     	    synchronized (fwt) {
     	        Iterator iter  = 
@@ -630,15 +635,19 @@ public final class HTTPUploader implements Uploader {
     	            // it is possible to end up having a PE with all
     	            // proxies removed.  In that case we remove it explicitly
     	            if(al.getPushAddress().getProxies().isEmpty()) {
-    	                RouterService.getAltlocManager().remove(al, null);
+    	                iter.remove();
     	                continue;
     	            }
     	            
-    	            _writtenPushLocs.add(al);
-    	            
-    	            if(ret == null) ret = new HashSet();
-    	            ret.add(al);
-    	            i++;
+                    if (al.canBeSent(false)) {
+                        al.send(now,false);
+                        _writtenPushLocs.add(al);
+                        
+                        if(ret == null) ret = new HashSet();
+                        ret.add(al);
+                        i++;
+                    } else if (!al.canBeSentAny())
+                        iter.remove();
     	        }
     	    }
     	}

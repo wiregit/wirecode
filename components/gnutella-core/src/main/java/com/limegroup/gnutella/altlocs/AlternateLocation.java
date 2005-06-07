@@ -14,6 +14,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -68,6 +69,11 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      * of 1.
      */
     protected volatile int _count = 0;
+    
+    /**
+     * Two counter objects to keep track of altloc expiration
+     */
+    private final Average legacy, ping;
     
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -222,6 +228,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		if(sha1 == null)
             throw new IOException("null sha1");	
 		SHA1_URN=sha1;
+        legacy = new Average();
+        ping = new Average();
 	}
 	
 
@@ -298,6 +306,26 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */ 
     public abstract AlternateLocation createClone();
     
+    
+    public synchronized void send(long now, boolean pingMesh) {
+        if (pingMesh)
+            ping.send(now);
+        else
+            legacy.send(now);
+    }
+    
+    public synchronized boolean canBeSent(boolean pingMesh) {
+        return pingMesh ? ping.canBeSent() : legacy.canBeSent();
+    }
+    
+    public synchronized boolean canBeSentAny() {
+        return canBeSent(true) || canBeSent(false);
+    }
+    
+    synchronized void resetSent() {
+        ping.reset();
+        legacy.reset();
+    }
     
     ///////////////////////////////helpers////////////////////////////////
 
@@ -472,6 +500,32 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         return 17*37+this.SHA1_URN.hashCode();        
 	}
 
+    private static class Average {
+        private int numTimes, average;
+        private long lastSentTime;
+        public void send(long now) {
+            if (lastSentTime == 0)
+                lastSentTime = now;
+            
+            average = (int) ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
+            lastSentTime = now;
+        }
+        
+        public boolean canBeSent() {
+            if (numTimes < 2 || average == 0)
+                return true;
+            
+            float damper = UploadSettings.ALTLOC_EXPIRATION_DAMPER.getValue();
+            double threshold = Math.abs(Math.log(average) / Math.log(damper));
+            return numTimes < threshold;
+        }
+        
+        public void reset() {
+            numTimes = 0;
+            average = 0;
+            lastSentTime = 0;
+        }
+    }
 }
 
 

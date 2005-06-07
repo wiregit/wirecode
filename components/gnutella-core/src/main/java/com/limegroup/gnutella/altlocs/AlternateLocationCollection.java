@@ -161,6 +161,7 @@ public class AlternateLocationCollection
 
                 alt.increment();
                 alt.promote();
+                alt.resetSent();
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
 
@@ -327,104 +328,7 @@ public class AlternateLocationCollection
         }
         return ret;
     }
-    
-    /**
-     * 
-     * @return the non-firewalled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytes() {
-    	return toBytes(MAX_SIZE);
-    }
-    
-    /**
-     * 
-     * @param number number of altlocs to return. 
-     * @return the non-firewlled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytes(int number) {
-    	
-    
-	FixedSizeSortedSet clone=null;
-
-	
-	
-	if (number <=0)
-		return null;
-	
-	synchronized(this) {
-		clone = (FixedSizeSortedSet) LOCATIONS.clone();
-	}
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	
-	
-	try{
-    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
-    		Object o = iter.next();
-    		if (!(o instanceof DirectAltLoc))
-    			continue;
-    		
-    		DirectAltLoc current = (DirectAltLoc)o;
-    		byte [] addr = current.getHost().getInetAddress().getAddress();
-    		baos.write(addr);
-    		ByteOrder.short2leb((short)current.getHost().getPort(),baos);
-    		number--;
-    	}
-	}catch(IOException impossible){
-		ErrorService.error(impossible);
-	}
-	
-    	return baos.toByteArray();
-    }
-    
-    /**
-     * 
-     * @return the firewalled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytesPush() {
-    	return toBytesPush(MAX_SIZE);
-    }
-
-    /**
-     * 
-     * @param number number of altlocs to return. 
-     * @return the non-firewlled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytesPush(int number) {
-    	
-    	if (number <=0)
-    		return null;
-    	
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	FixedSizeSortedSet clone;
-    	
-    	
-    	synchronized(this) {
-    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
-    	}
-    	
-    	int total = 0;
-    	
-    	try {
-    		for (Iterator iter = clone.iterator();iter.hasNext() && total <number;) {
-    			Object o = iter.next();
-    			if (!(o instanceof PushAltLoc))
-    				continue;
-    			
-    			PushAltLoc current = (PushAltLoc)o;
-    			
-    			if (current.getPushAddress().getProxies().isEmpty())
-    				continue;
-    			
-    			baos.write(current.getPushAddress().toBytes());
-    			total++;
-    		}
-    	}catch(IOException impossible) {
-    		ErrorService.error(impossible);
-    	}
-    	
-    	return baos.toByteArray();
-    }
-    
+      
     private static class EmptyCollection extends AlternateLocationCollection {
         EmptyCollection() throws IOException {
             super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
