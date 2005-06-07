@@ -190,7 +190,6 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
                 blockSize, assignment.high-assignment.low+1);
     }
     
-   
     /** Test behavior for a file where fileSize * MIN_PREVIEW_FRACTION
      * is just over MIN_PREVIEW_BYTES. 
      */
@@ -285,6 +284,50 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
                 blockSize, assignment.high-assignment.low+1);
     }
     
+    /**
+     * Test that the biased random downloader downloads in
+     * random order if the user is idle, even if none of
+     * the file has yet been downloaded.  Also test
+     * that if the user becomes non-idle, the system
+     * reverts to a sequential download if the number of
+     * downloaded previewable bytes is low.
+     */
+    public void testIdle() throws Exception {
+        /* Set up a strategy that thinks the user is idle */
+        strategy = new BiasedRandomDownloadStrategy(fileSize) {
+            private long idleTime;
+            protected long getIdleTime() {
+                return idleTime;
+            }
+        };
+        PrivilegedAccessor.setValue(strategy, "pseudoRandom", prng);
+        PrivilegedAccessor.setValue(strategy, "idleTime", 
+                new Long(BiasedRandomDownloadStrategy.MIN_IDLE_MILLISECONDS));
+        prng.setLong(1);
+        prng.setInt(1);
+        
+        Interval assignment = strategy.pickAssignment(availableBytes,
+                0, fileSize-1, blockSize);
+        
+        assertNotEquals("Idle download should not be sequential.", 
+                0, assignment.low);
+        
+        /*  Make the user non-idle */
+        PrivilegedAccessor.setValue(strategy, "idleTime", 
+                new Long(BiasedRandomDownloadStrategy.MIN_IDLE_MILLISECONDS-1));
+        /* Set prng for the highest probability of a random download */
+        prng.setFloat(0.0f);
+        
+        assignment = strategy.pickAssignment(availableBytes,
+                0, fileSize-1, blockSize);
+        
+        assertEquals("Non-idle download should be sequential if few bytes"+
+                " have been assigned.", 0, assignment.low);
+    }
+    
+    /** 
+     * Test that invalid values for blockSize throw IllegalArgumentException. 
+     */
     public void testInvalidBlockSize() {
         // Try an invalid block size and see if it throws
         // an InvalidInputException
@@ -298,6 +341,9 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         assertTrue("Failed to complain about invalid block size", false);
     }
     
+    /** 
+     * Test that invalid values for previewLength throw IllegalArgumentException. 
+     */
     public void testInvalidPreviewLength() {
         // Try an invalid preview length and see if it throws
         // an InvalidInputException
@@ -311,6 +357,9 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         assertTrue("Failed to complain about invalid preview length", false);
     }
     
+    /** 
+     * Test that invalid values for lastNeededByte throw IllegalArgumentException. 
+     */
     public void testInvalidLastNeededByte() {
         // Try calling with lastNeededByte > previewLength
         // and see if it throws an exception
@@ -329,12 +378,12 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
      * A helper method that simulates chosing blocks to download and removes
      * them from availableBytes.
      * 
-     * @param strategy
-     * @param availableBytes
-     * @param fileSize
-     * @param blockSize
-     * @param blockCount
-     * @param expectedAssignments
+     * @param strategy selection strategy to be tested.
+     * @param availableBytes is passed to strategy.
+     * @param fileSize is passed to strategy.
+     * @param blockSize is passed to strategy.
+     * @param expectedAssignments are checked against the actual assignments, 
+     *      in order.
      */
     private void testAssignments(SelectionStrategy strategy,
             IntervalSet availableBytes, long fileSize, long blockSize,
