@@ -41,7 +41,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
      * Number of milliseconds the user has to be idle before being considered idle.
      * This factors into the download order strategy.
      */
-    private static final int MIN_IDLE_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
+    /* package */ static final int MIN_IDLE_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
     
     public BiasedRandomDownloadStrategy(long fileSize) {
         super(fileSize);
@@ -66,7 +66,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         // the returned value will be strictly less than 1.0.  Therefore, if getBiasProbability()
         // returns 1.0, nextFloat() < getBiasProbability() with probability 100%.  Other behavior
         // indicates a bug in java.util.Random.
-        if (SystemUtils.getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
+        if (getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
                 || pseudoRandom.nextFloat() >= getBiasProbability(previewLength, completedSize)) {
             return super.pickAssignment(availableIntervals, previewLength, lastNeededByte, blockSize);
         }
@@ -135,5 +135,18 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
             return 0.5f;
         
         return 0.0f;
+    }
+    
+    /**
+     * Gets the number of milliseconds that the user has been idle.
+     * The actual granularity of this time measurement is likely much 
+     * greater than one millisecond.
+     * 
+     * This is stubbed out in some tests.
+     * 
+     * @return the number of milliseconds that the user has been idle.
+     */
+    protected long getIdleTime() {
+        return SystemUtils.getIdleTime();
     }
 }
