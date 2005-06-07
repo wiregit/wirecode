@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -1436,7 +1437,7 @@ public class RouterService {
 	 * @throws SaveLocationException when the download could not be started, 
 	 * see {@link SaveLocationException} for all possible error codes
      */
-	public static synchronized Downloader download(URN urn, String textQuery,
+	public static Downloader download(URN urn, String textQuery,
 												   String filename,
 												   String [] defaultURL,
 												   boolean overwrite,
@@ -1451,13 +1452,53 @@ public class RouterService {
 	 * {@link #download(URN, String, String, String[], boolean, File)
 	 * download(URN, String, String, String[], boolean, null)}
 	 */
-	public static synchronized Downloader download(URN urn, String textQuery,
+	public static Downloader download(URN urn, String textQuery,
             String filename, String [] defaultURL, boolean overwrite) 
             throws SaveLocationException { 
-        return download(urn,textQuery,filename,defaultURL, overwrite, null);
+        return download(urn, textQuery, filename, defaultURL, overwrite, null);
     }
 	
-	
+	/**
+	 * 
+	 * @param magnet
+	 * @param overwrite
+	 * @return
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not 
+	 * {@link MagnetOptions#isValid() valid}.
+	 */
+	public static Downloader download(MagnetOptions magnet, boolean overwrite) 
+		throws SaveLocationException {
+		if (!magnet.isValid()) {
+			throw new IllegalArgumentException("invalid magnet");
+		}
+		return download(magnet.getSHA1Urn(), magnet.getKT(), magnet.getDN(),
+				magnet.getDefaultURLs(), overwrite);
+	}
+
+	/**
+	 * 
+	 * @param magnet
+	 * @param overwrite
+	 * @param saveDir
+	 * @param fileName
+	 * @return
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not
+	 * {@link MagnetOptions#isValid() valid}.
+	 * @throws NullPointerException if <code>fileName</code> is null.
+	 */
+	public static Downloader download(MagnetOptions magnet, boolean overwrite,
+			File saveDir, String fileName) throws SaveLocationException {
+		if (!magnet.isValid()) {
+			throw new IllegalArgumentException("invalid magnet");
+		}
+		if (fileName == null) {
+			throw new NullPointerException("fileName is null");
+		}
+		return download(magnet.getSHA1Urn(), magnet.getKT(), fileName,
+				magnet.getDefaultURLs(), overwrite, saveDir);
+	}
 
    /**
      * Starts a resume download for the given incomplete file.

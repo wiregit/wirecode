@@ -202,7 +202,7 @@ public class IncompleteFileManager implements Serializable {
     }       
 
     public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
-        return getFile(rfd.getFileName(),rfd.getSHA1Urn(),rfd.getSize());
+        return getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
     }
     
     /** 

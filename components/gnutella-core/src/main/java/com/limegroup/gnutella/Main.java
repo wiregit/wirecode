@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.Vector;
 
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -281,5 +282,9 @@ public class Main implements ActivityCallback, ErrorCallback {
     }
     
     public void addressStateChanged() {}
+
+	public boolean handleMagnets(final MagnetOptions[] magnets) {
+		return false;
+	}
 
 }

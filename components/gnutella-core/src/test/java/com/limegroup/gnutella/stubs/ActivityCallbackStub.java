@@ -12,6 +12,7 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -72,4 +73,7 @@ public class ActivityCallbackStub implements ActivityCallback {
         return false;
     }
     public void addressStateChanged() {}
+	public boolean handleMagnets(final MagnetOptions[] magnets) {
+		return false;
+	}
 }

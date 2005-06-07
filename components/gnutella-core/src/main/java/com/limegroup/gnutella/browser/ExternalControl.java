@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,15 +107,16 @@ public class ExternalControl {
 
 	    MagnetOptions options[] = parseMagnet(arg);
 
-		if ( options == null ) {
+		if (options.length == 0) {
 		    if(LOG.isWarnEnabled())
 		        LOG.warn("Invalid magnet, ignoring: " + arg);
 			return;
         }
 		
-		downloadMagnet(options);
-        
-        
+		// ask callback if it wants to handle the magnets itself
+		if (!callback.handleMagnets(options)) {
+			downloadMagnet(options);
+		}
 	}
 	
 	/**
@@ -121,7 +124,8 @@ public class ExternalControl {
 	 * parse and download the magnet separately (which is what I intend to do in the gui) --zab
 	 * @param options the magnet options returned from parseMagnet
 	 */
-	public static void downloadMagnet(MagnetOptions []options) {
+	public static void downloadMagnet(MagnetOptions[] options) {
+		
 		if(LOG.isDebugEnabled()) {
             for(int i = 0; i < options.length; i++) {
                 LOG.debug("Kicking off downloader for option " + i +
@@ -129,41 +133,16 @@ public class ExternalControl {
             }
         }                 
 
-		// Kick off appropriate downloaders
-        // 
-        MagnetOptions curOpt;
-
 		for ( int i = 0; i < options.length; i++ ) {
-            curOpt = options[i];
+			MagnetOptions curOpt = options[i];
 
             // Find SHA1 URN
-			URN urn = extractSHA1URN(curOpt);
+			URN urn = curOpt.getSHA1Urn();
 
 			// Collect up http locations
-			String defaultURLs[] = null;
-			ArrayList urls = new ArrayList();
-            String errorMsg = null;
-            
-            urls.addAll(collectPotentialURLs(curOpt.getXT()));
-            urls.addAll(collectPotentialURLs(curOpt.getXS()));
-            urls.addAll(collectPotentialURLs(curOpt.getAS()));
-                
-			if (urls.size() > 0) {
-                // Verify each URL before adding it to the defaultURLs.
-                for(Iterator it = urls.iterator(); it.hasNext(); ) {
-                    try {
-                        String nextURL = (String)it.next();
-                        new URI(nextURL.toCharArray());  // is it a valid URI?
-                    } catch(URIException e) {
-                        LOG.warn("Invalid URI in magnet", e);
-                        errorMsg = e.getMessage();
-                        it.remove(); // if not, remove it from the list.
-                    }
-                }
-		        defaultURLs = (String[])urls.toArray(new String[urls.size()]);
-			}
+			String defaultURLs[] = curOpt.getDefaultURLs();
 			
-		    if(LOG.isDebugEnabled()) {
+		    if (LOG.isDebugEnabled()) {
 		        LOG.debug("Processing magnet with params:\n" +
 		                  "urn [" + urn + "]\n" +
 		                  "options [" + curOpt + "]");
@@ -171,27 +150,22 @@ public class ExternalControl {
 
             // Validate that we have something to go with from magnet
             // If not, report an error.
-            if ( urls.size() == 0  && urn == null 
-					&& (curOpt.getKT() == null || curOpt.getKT().length() == 0)) {
+            if (!curOpt.isValid()) {
                 if(LOG.isWarnEnabled()) {
-                    LOG.warn("Invalid magnet. urls.size == " + urls.size() +
-                             "curOpt.kt == " + curOpt.getKT());
+                    LOG.warn("Invalid magnet: " + curOpt);
                 }
-                if ( errorMsg != null )
-                    errorMsg = curOpt.toString() + " (" + errorMsg + ")";
-                else
-                    errorMsg = curOpt.toString();
-                MessageService.showError("ERROR_BAD_MAGNET_LINK", errorMsg);
-                return;	
+				// TODO fberger add error message again
+                MessageService.showError("ERROR_BAD_MAGNET_LINK", "");
+				return;	
             }
             
             // Warn the user that the link was slightly invalid
-            if( errorMsg != null )
-                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
+			// TODO fberger make this work again
+//            if( errorMsg != null )
+//                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
             
             try {
-            	RouterService.download
-                   	(urn,curOpt.getKT(),curOpt.getDN(),defaultURLs,false);//!overwrite
+            	RouterService.download(curOpt, false);
             }
             catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
@@ -293,52 +267,37 @@ public class ExternalControl {
 	    return false;
 	}
     
-    private static URN extractSHA1URN(MagnetOptions curOpt) {
-        try {
-            return extractSHA1URNFromList(curOpt.getXT());
-        } catch (IOException e1) {
-            /* try XS, AS...*/
-            try {
-                return extractSHA1URNFromList(curOpt.getXS());
-            } catch (IOException e2) {
-                /* try AS...*/
-                try {
-                    return extractSHA1URNFromList(curOpt.getAS());
-                } catch (IOException e3) {
-                    /* failed. */
-                    return null;
-                }
-            }
-        }
-    }
     
-    private static URN extractSHA1URNFromList(List strings) throws IOException {
-        for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
-            try {
-                return URN.createSHA1Urn((String)iter.next());
-            } catch (IOException e) {
-                /* if this was the last String, throw exception */
-                if (!iter.hasNext())
-                    throw e;
-            } 
-        }
-        throw new IOException("List was empty. No URNs found.");
-    }
-
-    private static List collectPotentialURLs(List strings) {
-        List ret = new ArrayList();
-        for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
-            String str = (String)iter.next();
-            if (str.startsWith(HTTP))
-                ret.add(str);
-        }
-        return ret;
-    }
+   
 	
+	/**
+	 * Allows multiline parsing of magnet links.
+	 * @param magnets
+	 * @return
+	 */
+	public static MagnetOptions[] parseMagnets(String magnets) {
+		ArrayList list = new ArrayList();
+		StringTokenizer tokens = new StringTokenizer
+			(magnets, System.getProperty("line.separator"));
+		while (tokens.hasMoreTokens()) {
+			String next = tokens.nextToken();
+			MagnetOptions[] options = parseMagnet(next);
+			if (options.length > 0) {
+				List opts = Arrays.asList(options);
+				list.addAll(opts);
+			}
+		}
+		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
+	}
+	
+	/**
+	 * Returns an empty array if the string could not be parsed.
+	 * @param arg
+	 * @return
+	 */
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
-		MagnetOptions[] ret = null;
-		HashMap         options = new HashMap();
+		HashMap options = new HashMap();
 
 		// Strip out any single quotes added to escape the string
 		if ( arg.startsWith("'") )
@@ -348,7 +307,7 @@ public class ExternalControl {
 		
 		// Parse query  -  TODO: case sensitive?
 		if ( !arg.startsWith(MagnetOptions.MAGNET) )
-			return ret;
+			return new MagnetOptions[0];
 
 		// Parse and assemble magnet options together.
 		//
@@ -426,11 +385,7 @@ public class ExternalControl {
      	if (hashOnly)
      	    MessageService.showMessage("DOWNLOAD_HASH_ONLY_MAGNET");
      	
-		ret = new MagnetOptions[options.size()];
-		ret = (MagnetOptions[]) options.values().toArray(ret);
-
-		
-		return ret;
+		return (MagnetOptions[]) options.values().toArray(new MagnetOptions[0]);
 	}
 
 	

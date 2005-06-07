@@ -59,7 +59,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 *
 	 * @return the size of the file on disk, in bytes
 	 */
-	public long getSize() {
+	public long getFileSize() {
 		return _size;
 	}
 
@@ -68,7 +68,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 * 
 	 * @return the name of this file
 	 */
-	public String getName() {
+	public String getFileName() {
 		return _name;
 	}
     
@@ -98,7 +98,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         if (ret) {
             ManagedDownloader md = getMyDownloader();
             if( md != null )
-                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
+                md.addDownload(al.createRemoteFileDesc((int)getFileSize()), 
+							   false);
         }
         return ret;
     }
@@ -139,7 +140,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         for(Iterator iter = alc.iterator(); iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next();
             if( super.add(al) ) {
-                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
+                md.addDownload(al.createRemoteFileDesc((int)getFileSize()),
+							   false);
                 added++;
             }
         } //end of for

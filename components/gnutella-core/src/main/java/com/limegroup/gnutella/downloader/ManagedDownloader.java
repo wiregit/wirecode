@@ -1281,7 +1281,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // get other info...
 		final URN otherUrn = other.getSHA1Urn();
         final String otherName = other.getFileName();
-        final long otherLength = other.getSize();
+        final long otherLength = other.getFileSize();
 
         synchronized (this) {
             if(otherUrn != null && downloadSHA1 != null)
@@ -1292,7 +1292,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                 // get current info....
                 RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
                 final String thisName = rfd.getFileName();
-                final long thisLength = rfd.getSize();
+                final long thisLength = rfd.getFileSize();
 				
                 // if they are similarly named and same length
                 // do length check first, much less expensive.....
@@ -2647,7 +2647,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         // get all docs possible
         for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-			LimeXMLDocument doc = rfd.getXMLDoc();
+			LimeXMLDocument doc = rfd.getXMLDocument();
 			if(doc != null) {
 				allDocs.add(doc);
 			}

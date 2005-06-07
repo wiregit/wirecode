@@ -84,7 +84,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
         };
     }
     
-    public long getSize() {
+    public long getFileSize() {
         return size;
     }
     

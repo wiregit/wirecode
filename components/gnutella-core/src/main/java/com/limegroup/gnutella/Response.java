@@ -135,7 +135,7 @@ public class Response {
 	 *  this <tt>Response</tt> -- must not be <tt>null</tt>
 	 */
 	public Response(FileDesc fd) {
-		this(fd.getIndex(), fd.getSize(), fd.getName(), 
+		this(fd.getIndex(), fd.getFileSize(), fd.getFileName(), 
 			 fd.getUrns(), null, 
 			 new GGEPContainer(
 			    getAsEndpoints(fd.getAlternateLocationCollection()),

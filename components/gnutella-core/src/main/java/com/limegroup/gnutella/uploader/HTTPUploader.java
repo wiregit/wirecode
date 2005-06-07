@@ -252,7 +252,7 @@ public final class HTTPUploader implements Uploader {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to set the fd for uploader "+this+ " with "+fd);
 	    _fileDesc = fd;
-	    _fileSize = (int)fd.getSize();
+	    _fileSize = (int)fd.getFileSize();
 	    // initializd here because we'll only write locs if a FileDesc exists
 	    // only initialize once, so we don't write out previously written locs
 	    if( _writtenLocs == null )

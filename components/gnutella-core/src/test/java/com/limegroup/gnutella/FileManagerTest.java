@@ -543,7 +543,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
-			String name = I18NConvert.instance().getNorm(fd.getName());
+			String name = I18NConvert.instance().getNorm(fd.getFileName());
 			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
 			    continue;
 			QueryRequest qr = QueryRequest.createQuery(name);
@@ -573,7 +573,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
-			String name = I18NConvert.instance().getNorm(fd.getName());
+			String name = I18NConvert.instance().getNorm(fd.getFileName());
 			if(name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue())
 			    continue;
 			QueryRequest qr = QueryRequest.createQuery(name);
