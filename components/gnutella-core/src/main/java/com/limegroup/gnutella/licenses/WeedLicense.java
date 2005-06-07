@@ -107,9 +107,18 @@ class WeedLicense extends AbstractLicense {
      * probibited, and required.
      */
     public String getLicenseDescription(URN urn) {
-        return "Artist: " + artist + "\n"
-             + "Title: " + title + "\n"
-             + "Price: " + price;
+        if(artist == null && title == null && price == null) {
+            return "Details unknown.";
+        } else {
+            StringBuffer sb = new StringBuffer();
+            if(artist != null)
+                sb.append("Artist: " + artist + "\n");
+            if(title != null)
+                sb.append("Title: " + title + "\n");
+            if(price != null)
+                sb.append("Price: " + price);
+            return sb.toString();
+        }
     }
 
     /** Clears prior validation information. */    
@@ -147,6 +156,10 @@ class WeedLicense extends AbstractLicense {
             String name = child.getNodeName();
             String value = LimeXMLUtils.getTextContent(child);
             if(name == null || value == null)
+                continue;
+
+            value = value.trim();
+            if(value.equals(""))
                 continue;
                 
             if(name.equals("Status"))
