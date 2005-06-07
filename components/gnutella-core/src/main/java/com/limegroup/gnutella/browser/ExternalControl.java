@@ -108,15 +108,16 @@ public class ExternalControl {
 
 	    MagnetOptions options[] = parseMagnet(arg);
 
-		if ( options == null ) {
+		if (options.length == 0) {
 		    if(LOG.isWarnEnabled())
 		        LOG.warn("Invalid magnet, ignoring: " + arg);
 			return;
         }
 		
-		downloadMagnet(options);
-        
-        
+		// ask callback if it wants to handle the magnets itself
+		if (!callback.handleMagnets(options)) {
+			downloadMagnet(options);
+		}
 	}
 	
 	/**
