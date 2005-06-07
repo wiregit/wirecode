@@ -95,6 +95,9 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         LEAF[0].initialize();
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
+        //  Give the connection a chance to send its initial messages
+        Thread.sleep( 1000*2 );        
+        
         MessagesSupportedVendorMessage msvm = 
             (MessagesSupportedVendorMessage)getFirstMessageOfType(LEAF[0],
                 MessagesSupportedVendorMessage.class, 500);
