@@ -29,6 +29,9 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     
     private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
     
+    /**
+     * The queue that all license verification attempts are processed in.
+     */
     private static final ProcessingQueue VQUEUE = new ProcessingQueue("LicenseVerifier");
     
     private static final long serialVersionUID = 6508972367931096578L;
@@ -93,7 +96,8 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     }
     
     /**
-     * Retrieves the body from the given URL.
+     * Contacts the given URL and downloads returns the body of the
+     * HTTP request.
      */
     protected String getBodyFromURL(String url) {
         if(LOG.isTraceEnabled())
@@ -118,6 +122,11 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     
     /**
      * Attempts to parse the given XML.
+     * The actual handling of the XML is sent to parseDocumentNode,
+     * which subclasses can implement as they see fit.
+     *
+     * If this is a request directly from our Verifier, 'liveData' is true.
+     * Subclasses may use this to know where the XML data is coming from.
      */
     protected void parseXML(String xml, boolean liveData) {
         if(xml == null)
@@ -143,6 +152,8 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     
     /**
      * Runnable that actually does the verification.
+     * This will retrieve the body of a webpage from the licenseURI,
+     * parse it, set the last verified time, and cache it in the LicenseCache.
      */
     private class Verifier implements Runnable {
         private final VerificationListener vc;

@@ -96,7 +96,10 @@ public class WRMXML {
         parseDocument(parser.getDocument().getDocumentElement());
     }
     
-    /** Parses through the given document node. */
+    /**
+     * Parses through the given document node, handing each child
+     * node to parseNode.
+     */
     protected void parseDocument(Node node) {
         _documentNode = node;
         if(!_documentNode.getNodeName().equals("WRMHEADER"))
@@ -111,6 +114,9 @@ public class WRMXML {
     
     /**
      * Parses a node.
+     * 'nodeName' is the parent node's name.
+     * All child elements of this node are sent to parseChild, and all
+     * attributes are parsed via parseAttributes.
      */
     protected void parseNode(String nodeName, Node data) {
         NodeList children = data.getChildNodes();
@@ -132,6 +138,9 @@ public class WRMXML {
     
     /**
      * Parses the attributes of a given node.
+     * 'parentNodeName' is the parent node of this child, and child is the node
+     * which the attributes are part of.
+     * Attributes are sent to parseChild for parsing.
      */
     protected void parseAttributes(String parentNodeName, Node child) {
         NamedNodeMap nnm = child.getAttributes();
@@ -150,7 +159,13 @@ public class WRMXML {
     }
     
     
-    /** Parses a child of the data node. */
+    /**
+     * Parses a child of the data node.
+     * @param nodeName the parent node's name
+     * @param name the name of this node
+     * @param attribute the attribute's name, or null if not an attribute.
+     * @param value the value of the node's text content (or the attribute)
+     */
     protected void parseChild(String nodeName, String name, String attribute, String value) {
         if(nodeName.equals("DATA")) {
             if(attribute != null)

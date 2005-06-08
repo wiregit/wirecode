@@ -90,6 +90,9 @@ public class WeedInfo extends WRMXML {
         return _lainfo + CID + _contentId + VID +  _versionId;
     }
     
+    /**
+     * Extends WRMXML's parseChild to look for Weed-specific elements.
+     */
     protected void parseChild(String parentNodeName, String name, String attribute, String value) {
         super.parseChild(parentNodeName, name, attribute, value);
         
