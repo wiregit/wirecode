@@ -534,7 +534,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         /** The number of times this altloc was given out */
         private int numTimes;
         /** The average time in ms between giving out the altloc */
-        private long average;
+        private double average;
         /** The last time the altloc was given out */
         private long lastSentTime;
         
