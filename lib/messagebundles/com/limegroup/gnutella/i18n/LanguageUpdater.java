@@ -157,7 +157,8 @@ class LanguageUpdater {
             in = new BufferedInputStream(new FileInputStream(info.getFileName()));
             in.mark(3);
             if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
-                in.reset();            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
+                in.reset();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
 
             out = new BufferedOutputStream(new FileOutputStream(info.getAlternateFileName()));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "ISO-8859-1"));
