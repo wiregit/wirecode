@@ -134,23 +134,17 @@ public class ExternalControl {
         }                 
 
 		for ( int i = 0; i < options.length; i++ ) {
+
 			MagnetOptions curOpt = options[i];
 
-            // Find SHA1 URN
-			URN urn = curOpt.getSHA1Urn();
-
-			// Collect up http locations
-			String defaultURLs[] = curOpt.getDefaultURLs();
-			
 		    if (LOG.isDebugEnabled()) {
+				URN urn = curOpt.getSHA1Urn();
 		        LOG.debug("Processing magnet with params:\n" +
 		                  "urn [" + urn + "]\n" +
 		                  "options [" + curOpt + "]");
             }
-
 			
 			String msg = curOpt.getErrorMessage();
-			msg = msg != null ? msg : curOpt.toString();
 			
             // Validate that we have something to go with from magnet
             // If not, report an error.
@@ -158,6 +152,7 @@ public class ExternalControl {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
+				msg = msg != null ? msg : curOpt.toString();
                 MessageService.showError("ERROR_BAD_MAGNET_LINK", msg);
 				return;	
             }
@@ -275,7 +270,7 @@ public class ExternalControl {
 	/**
 	 * Allows multiline parsing of magnet links.
 	 * @param magnets
-	 * @return
+	 * @return array may be empty, but is never <code>null</code>
 	 */
 	public static MagnetOptions[] parseMagnets(String magnets) {
 		ArrayList list = new ArrayList();
@@ -285,8 +280,7 @@ public class ExternalControl {
 			String next = tokens.nextToken();
 			MagnetOptions[] options = parseMagnet(next);
 			if (options.length > 0) {
-				List opts = Arrays.asList(options);
-				list.addAll(opts);
+				list.addAll(Arrays.asList(options));
 			}
 		}
 		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
@@ -295,7 +289,7 @@ public class ExternalControl {
 	/**
 	 * Returns an empty array if the string could not be parsed.
 	 * @param arg
-	 * @return
+	 * @return array may be empty, but is never <code>null</code>
 	 */
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
@@ -367,9 +361,7 @@ public class ExternalControl {
 			options.put(iIndex,curOptions);
 		}
 		
-		return (MagnetOptions[]) options.values().toArray(new MagnetOptions[0]);
+		return (MagnetOptions[])options.values().toArray(new MagnetOptions[0]);
 	}
-
-	
 
 }

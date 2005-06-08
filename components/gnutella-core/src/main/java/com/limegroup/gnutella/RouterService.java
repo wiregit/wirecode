@@ -1459,9 +1459,11 @@ public class RouterService {
     }
 	
 	/**
-	 * 
-	 * @param magnet
-	 * @param overwrite
+	 * Creates a downloader for a magnet.
+	 * @param magnetprovides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should be overwritten
 	 * @return
 	 * @throws SaveLocationException
 	 * @throws IllegalArgumentException if the magnet is not 
@@ -1472,16 +1474,22 @@ public class RouterService {
 		if (!magnet.isValid()) {
 			throw new IllegalArgumentException("invalid magnet");
 		}
-		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), magnet.getDisplayName(),
-				magnet.getDefaultURLs(), overwrite);
+		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), 
+						magnet.getDisplayName(), magnet.getDefaultURLs(), 
+						overwrite);
 	}
 
 	/**
-	 * 
-	 * @param magnet
-	 * @param overwrite
-	 * @param saveDir
-	 * @param fileName
+	 * Creates a downloader for a magnet using the given additional options.
+	 *
+	 * @param magnet provides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should be overwritten
+	 * @param saveDir can be null, then the save directory from the settings
+	 * is used
+	 * @param fileName the final filename of the download, must not be 
+	 * <code>null</code>
 	 * @return
 	 * @throws SaveLocationException
 	 * @throws IllegalArgumentException if the magnet is not
@@ -1497,7 +1505,7 @@ public class RouterService {
 			throw new NullPointerException("fileName is null");
 		}
 		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), fileName,
-				magnet.getDefaultURLs(), overwrite, saveDir);
+						magnet.getDefaultURLs(), overwrite, saveDir);
 	}
 
    /**

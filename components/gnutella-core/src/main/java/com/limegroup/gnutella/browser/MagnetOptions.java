@@ -63,16 +63,18 @@ public class MagnetOptions {
 	 */
 	public URN getSHA1Urn() {
 		URN urn = extractSHA1URNFromList(getExactTopics());
-		
-		if (urn == null) {
-			urn = extractSHA1URNFromList(getXS());
+		if (urn != null) {
+			return urn;
 		}
-		if (urn == null) {
-			urn = extractSHA1URNFromList(getAS());
+		urn = extractSHA1URNFromList(getXS());
+		if (urn != null) {
+			return urn;
 		}
-		if (urn == null) {
-			urn = extractSHA1URNFromURLS(getDefaultURLs());
+		urn = extractSHA1URNFromList(getAS());
+		if (urn != null) {
+			return urn;
 		}
+		urn = extractSHA1URNFromURLS(getDefaultURLs());
 		return urn;
 	}
 	
@@ -94,6 +96,8 @@ public class MagnetOptions {
 	/**
 	 * Returns true if there are enough pieces of information to start e.g a
 	 * download from it.
+	 * <p>At any rate there has to be at least one default url and a sha1 or
+	 * a non empty keyword topic.
 	 * @return
 	 */
 	public boolean isValid() {
