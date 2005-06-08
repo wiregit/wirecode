@@ -71,4 +71,26 @@ public class AltLocManagerTest extends BaseTestCase {
         assertEquals(AlternateLocationCollection.EMPTY,manager.getDirect(HugeTestUtils.SHA1));
     }
     
+    public void testNotification() throws Exception {
+        // test that a registered listener receives notification of an altloc
+        Listener l = new Listener();
+        AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",HugeTestUtils.SHA1);
+        manager.addListener(HugeTestUtils.SHA1,l);
+        manager.add(direct, null);
+        assertEquals(direct,l.loc);
+        
+        // test that a listener does not receive notification that comes from itself
+        l.loc = null;
+        manager.remove(direct, null);manager.remove(direct, null);
+        assertFalse(manager.hasAltlocs(HugeTestUtils.SHA1));
+        manager.add(direct,l);
+        assertNull(l.loc);
+    }
+    
+    private static class Listener implements AltLocListener {
+        public AlternateLocation loc;
+        public void locationAdded(AlternateLocation loc) {
+            this.loc = loc;
+        }
+    }
 }

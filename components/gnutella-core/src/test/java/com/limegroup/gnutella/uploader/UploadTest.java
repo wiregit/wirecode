@@ -15,6 +15,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -39,7 +43,10 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
@@ -50,6 +57,7 @@ import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -62,6 +70,8 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -70,8 +80,10 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -155,7 +167,8 @@ public class UploadTest extends BaseTestCase {
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
 		    new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
+            new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
+        IPFilter.refreshIPFilter();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -1063,13 +1076,14 @@ public class UploadTest extends BaseTestCase {
     }
     
     public void testAltsExpire() throws Exception {
-        UploadSettings.ALTLOC_EXPIRATION_DAMPER.setValue((float)Math.E - 0.2f);
+        UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float)Math.E - 0.2f);
         // test that an altloc will expire if given out too often
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        assertTrue(al.canBeSent(false));
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         RouterService.getAltlocManager().add(al, null);
         
+        // send it out several times
         int i = 0;
         try {
             for (i = 0; i < 10; i++) {
@@ -1080,15 +1094,19 @@ public class UploadTest extends BaseTestCase {
             fail("altloc didn't expire");
         } catch (AssertionFailedError expected) {}
         assertLessThan(10, i);
-        assertFalse(al.canBeSent(false));
+        assertFalse(al.canBeSent(AlternateLocation.MESH_LEGACY));
+        
+        // now add the altloc again, it will be reset
+        RouterService.getAltlocManager().add(al, null);
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
     }
     
     public void testAltsDontExpire() throws Exception {
-        UploadSettings.ALTLOC_EXPIRATION_DAMPER.setValue((float)Math.E/4);
+        UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float)Math.E/4);
         // test that an altloc will not expire if given out less often
         String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
         AlternateLocation al = AlternateLocation.create(loc);
-        assertTrue(al.canBeSent(false));
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
         RouterService.getAltlocManager().add(al, null);
         
         for (int i = 0; i < 10; i++) {
@@ -1097,9 +1115,136 @@ public class UploadTest extends BaseTestCase {
             "X-Alt: 1.1.1.1:1"));
             Thread.sleep(8*1000);
         }
-        assertTrue(al.canBeSent(false));
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
     }
     
+    /**
+     * tests that when an altloc has expired from all the meshes it is removed.
+     */
+    public void testExpiredAltsRemoved() throws Exception {
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"*.*.*.*"});
+        IPFilter.refreshIPFilter();
+        // set the expiration values to the bare minimum 
+        UploadSettings.LEGACY_BIAS.setValue(0f);
+        UploadSettings.PING_BIAS.setValue(0f);
+        UploadSettings.RESPONSE_BIAS.setValue(0f);
+        
+        // create an altloc
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
+        assertTrue(al.canBeSent(AlternateLocation.MESH_PING));
+        assertTrue(al.canBeSent(AlternateLocation.MESH_RESPONSE));
+        RouterService.getAltlocManager().add(al, null);
+        
+        // drain the meshes in various orders
+        drainLegacy();
+        drainPing();
+        drainResponse();
+        assertFalse(RouterService.getAltlocManager().hasAltlocs(al.getSHA1Urn()));
+        
+        // and re-add the altloc
+        al = AlternateLocation.create(loc);
+        RouterService.getAltlocManager().add(al, null);
+        
+        // repeat
+        drainResponse();
+        drainLegacy();
+        drainPing();
+        assertFalse(RouterService.getAltlocManager().hasAltlocs(al.getSHA1Urn()));
+        
+        al = AlternateLocation.create(loc);
+        RouterService.getAltlocManager().add(al, null);
+        
+        // repeat 2
+        drainPing();
+        drainResponse();
+        drainLegacy();
+        assertFalse(RouterService.getAltlocManager().hasAltlocs(al.getSHA1Urn()));
+        
+        UploadSettings.LEGACY_BIAS.revertToDefault();
+        UploadSettings.PING_BIAS.revertToDefault();
+        UploadSettings.RESPONSE_BIAS.revertToDefault();
+    }
+    
+    private void drainLegacy() throws Exception {
+        int i = 0;
+        try {
+            for (; i < 20; i++) {
+                download("/uri-res/N2R?" + hash, null,
+                        "abcdefghijklmnopqrstuvwxyz",
+                        "X-Alt: 1.1.1.1:1");
+            }
+            fail("altloc didn't expire");
+        } catch (AssertionFailedError expected) {}
+        assertGreaterThan(1,i);
+        assertLessThan(20,i);
+    }
+    
+    private void drainPing() throws Exception {
+        HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),FD.getSHA1Urn(),HeadPing.ALT_LOCS);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ping.write(baos);
+        byte [] data = baos.toByteArray();
+        DatagramPacket toSend = new DatagramPacket(data,data.length, 
+                new InetSocketAddress(InetAddress.getLocalHost(),PORT));
+        
+        int i = 0;
+        for (; i < 20; i++) {
+            DatagramSocket sock = null;
+            try {
+                sock = new DatagramSocket(10000+i);
+                sock.setSoTimeout(2000);
+                sock.send(toSend);
+                byte [] recv = new byte[1000];
+                DatagramPacket rcv = new DatagramPacket(recv,recv.length);
+                sock.receive(rcv);
+                ByteArrayInputStream bais = new ByteArrayInputStream(recv,0,rcv.getLength());
+                HeadPong pong = (HeadPong) Message.read(bais);
+                if (pong.getAltLocs().isEmpty())
+                    break;
+            } finally {
+                if (sock != null)
+                    sock.close();
+            }
+        }
+        
+        assertGreaterThan(1,i);
+        assertLessThan(20,i);
+    }
+    
+    private void drainResponse() throws Exception {
+        FilterSettings.FILTER_HASH_QUERIES.setValue(false); // easier with hash
+        MyReplyHandler handler = new MyReplyHandler();
+        
+        assertTrue(RouterService.getAltlocManager().hasAltlocs(FD.getSHA1Urn()));
+        int i = 0;
+        for (; i < 20; i++) {
+            QueryRequest request = QueryRequest.createQuery(FD.getSHA1Urn());
+            RouterService.getMessageRouter().handleMessage(request, handler);
+            assertNotNull(handler.received);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            handler.received.write(baos);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            QueryReply reply = (QueryReply) Message.read(bais);
+            Response resp = reply.getResultsArray()[0];
+            if (resp.getLocations().isEmpty())
+                break;
+            handler.received = null;
+        }
+        
+        assertGreaterThan(1,i);
+        assertLessThan(20,i);
+        FilterSettings.FILTER_HASH_QUERIES.revertToDefault();
+    }
+    
+    private static class MyReplyHandler extends ManagedConnectionStub {
+        public QueryReply received;
+        public void handleQueryReply(QueryReply queryReply, ReplyHandler receivingConnection) {
+            received = queryReply;
+        }
+        
+    }
     public void testChunksGiveDifferentLocs() throws Exception {
 
         // Add a simple marker alt so we know it only contains that
