@@ -35,6 +35,10 @@ public class MagnetOptions {
     }
     
 	public String toString() {
+		return toMagnet();
+	}
+	
+	public String toMagnet() {
 		StringBuffer ret = new StringBuffer(MAGNET);
 		
 		int size = _xt.size();
@@ -51,7 +55,7 @@ public class MagnetOptions {
         for (int i = 0; i < size; i++) 
             ret.append("&as=").append(_as.get(i));
 		
-		return ret.toString();
+		return ret.toString();	
 	}
 	
 	/**
