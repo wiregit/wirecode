@@ -65,6 +65,12 @@ public class MagnetOptions {
 		URN urn = extractSHA1URNFromList(getExactTopics());
 		
 		if (urn == null) {
+			urn = extractSHA1URNFromList(getXS());
+		}
+		if (urn == null) {
+			urn = extractSHA1URNFromList(getAS());
+		}
+		if (urn == null) {
 			urn = extractSHA1URNFromURLS(getDefaultURLs());
 		}
 		return urn;

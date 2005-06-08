@@ -45,6 +45,10 @@ public class ExternalControlTest extends BaseTestCase {
 		
 		MagnetOptions[] opts = ExternalControl.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
 		assertEquals("Should have parsed 2 magnets", 2, opts.length);
+		
+		// compound magnets
+		opts = ExternalControl.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
+		assertEquals("Should have parsed 2 magnets", 2, opts.length);
 	}
 
 	public void testParseValidMagnets() {
@@ -54,6 +58,13 @@ public class ExternalControlTest extends BaseTestCase {
 		// and parse again
 		assertEquals("Should have parsed " + opts.length + " magnets", opts.length, 
 				ExternalControl.parseMagnets(createMultiLineMagnetLinks(opts)).length);
+		
+		// compound magnets with multiple lines
+		opts = ExternalControl.parseMagnets
+			("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7"
+					+ System.getProperty("line.separator")
+					+ "magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
+		assertEquals("Should have parsed 2 magnets", 4, opts.length);
 	}
 	
 	private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
