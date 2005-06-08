@@ -74,7 +74,10 @@ public class MagnetOptions {
 		for (int i = 0; i < defaultURLs.length; i++) {
 			try {
 				URI uri = new URI(defaultURLs[i].toCharArray());
-				return URN.createSHA1Urn(uri.getQuery());
+				String query = uri.getQuery();
+				if (query != null) {
+					return URN.createSHA1Urn(uri.getQuery());
+				}
 			} catch (URIException e) {
 			} catch (IOException e) {
 			}

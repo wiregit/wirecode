@@ -29,6 +29,11 @@ public class ExternalControlTest extends BaseTestCase {
 		};
 	}
 	
+	public void testParseInvalidMagnet() {
+		MagnetOptions[] opts = ExternalControl.parseMagnet("magnet:?");
+		assertEquals("Wrong number of parsed magnets", 0, opts.length);
+	}
+	
 	public void testParseValidMagnet() {
 		
 		for (int i = 0; i < validMagnets.length; i++) {
