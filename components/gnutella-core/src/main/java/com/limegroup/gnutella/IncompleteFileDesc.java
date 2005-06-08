@@ -89,20 +89,6 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return new BufferedInputStream(new FileInputStream(getFile()));
     }
     
-    /**
-     * Adds the alternate location to this FileDesc and also notifies
-     * the ManagedDownloader of a new location for this.
-     *
-    public boolean add(AlternateLocation al) {
-        boolean ret = RouterService.getAltlocManager().add(al);
-        if (ret) {
-            ManagedDownloader md = getMyDownloader();
-            if( md != null )
-                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
-        }
-        return ret;
-    }*/
-    
 	/**
      * Returns null, overrides super.getHashTree to prevent us from offering
      * HashTrees for incomplete files.

@@ -335,11 +335,11 @@ public class AlternateLocationCollection
         }
         
         public boolean add(AlternateLocation loc) {
-            return false;
+            throw new UnsupportedOperationException();
         }
         
         public int addAll(AlternateLocationCollection other) {
-            return 0;
+            throw new UnsupportedOperationException();
         }
     }
 }

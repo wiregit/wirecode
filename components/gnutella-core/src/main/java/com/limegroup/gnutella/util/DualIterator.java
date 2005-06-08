@@ -10,17 +10,17 @@ public class DualIterator implements Iterator {
     /**
      * The primary iterator.
      */
-    protected final Iterator i1;
+    private final Iterator i1;
     
     /**
      * The secondary iterator.
      */
-    protected final Iterator i2;
+    private final Iterator i2;
     
     /**
      * Whether or not we have reached the secondary iterator.
      */
-    protected boolean onOne;
+    private boolean onOne;
     
     /**
      * Constructs a new DualIterator backed by two iterators.

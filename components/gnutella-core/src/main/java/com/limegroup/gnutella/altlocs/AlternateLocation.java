@@ -36,6 +36,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */
     public static final String ALT_VENDOR = "ALT";
 
+    /**
+     * The three types of medium altlocs travel through
+     */
 	public static final int MESH_PING = 0;
     public static final int MESH_LEGACY = 1;
     public static final int MESH_RESPONSE = 2;
