@@ -12,7 +12,7 @@ public class WeedInfo extends WRMXML {
     public static final String CID = " cid: ";
     public static final String VID = " vid: ";
     
-    private String _versionId, _contentId;
+    private String _versionId, _contentId, _ice9;
     private String _licenseDate, _licenseDistributor, _licenseDistributorURL;
     private String _publishDate;
     private String _contentDistributor, _contentDistributorURL;
@@ -69,11 +69,12 @@ public class WeedInfo extends WRMXML {
                 _versionId != null;
     }
     
+    public String getIce9() { return _ice9; }
     public String getVersionId() { return _versionId; }
     public String getContentId() { return _contentId; }
     public String getLicenseDate() { return _licenseDate; }
-    public String getLicenseDistributorURL() { return _licenseDistributor; }
-    public String getLicenseDistributor() { return _licenseDistributorURL; }
+    public String getLicenseDistributorURL() { return _licenseDistributorURL; }
+    public String getLicenseDistributor() { return _licenseDistributor; }
     public String getPublishDate() { return _publishDate; }
     public String getContentDistributor() { return _contentDistributor; }
     public String getContentDistrubutorURL() { return _contentDistributorURL; }
@@ -83,6 +84,7 @@ public class WeedInfo extends WRMXML {
     public String getAuthor() { return _author; }
     public String getArtistURL() { return _artistURL; }
     public String getTitle() { return _title; }
+    public String getCopyright() { return _copyright; }
     
     public String getLicenseInfo() {
         return _lainfo + CID + _contentId + VID +  _versionId;
@@ -124,5 +126,9 @@ public class WeedInfo extends WRMXML {
             _author = value;
         else if(name.equals("Title"))
             _title = value;
+        else if(name.equals("ice9"))
+            _ice9 = value;
+        else if(name.equals("Copyright"))
+            _copyright = value;
     }
 }

@@ -281,6 +281,8 @@ class ASFParser {
                 _comment = _weed.getDescription();
             if(_weed.getCollection() != null)
                 _album = _weed.getCollection();
+            if(_weed.getCopyright() != null)
+                _copyright = _weed.getCopyright();
             return;
         }
     }
