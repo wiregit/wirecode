@@ -1173,9 +1173,11 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Downloader downloader = 
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
+        
+        //  Don't try using the same default file 
         Downloader downloader2 = 
-            RouterService.download(new RemoteFileDesc[] { rfd2 }, false, 
-                new GUID(guid));
+            RouterService.download(new RemoteFileDesc[] { rfd2 }, 
+                new GUID(guid), false, null, "anotherFile" );
         
 
         // let downloaders do stuff  
