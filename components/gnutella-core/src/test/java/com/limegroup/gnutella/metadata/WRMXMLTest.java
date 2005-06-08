@@ -124,5 +124,30 @@ public final class WRMXMLTest extends BaseTestCase {
         
         assertFalse(data.isValid());
     }
+    
+    public void testBareMinimum() {
+        WRMXML data = new WRMXML(
+            "<WRMHEADER>" +
+                "<DATA>" + 
+                    "<LAINFO>myLAINFO</LAINFO>" +
+                "</DATA>" +
+                "<SIGNATURE>" +
+                    "<HASHALGORITHM type=\"sha1\"></HASHALGORITHM>" +
+                    "<SIGNALGORITHM type=\"msdrm\"></SIGNALGORITHM>" +
+                    "<VALUE>myValue</VALUE>" +
+                "</SIGNATURE>" +
+            "</WRMHEADER>"
+        );
+        
+        assertTrue(data.isValid());
+        assertEquals(null, data.getSecurityVersion());
+        assertEquals(null, data.getCID());
+        assertEquals("myLAINFO", data.getLAInfo());
+        assertEquals(null, data.getKID());
+        assertEquals(null, data.getChecksum());
+        assertEquals("sha1", data.getHashAlgorithm());
+        assertEquals("msdrm", data.getSignAlgorithm());
+        assertEquals("myValue", data.getSignatureValue());
+    }
        
 }
