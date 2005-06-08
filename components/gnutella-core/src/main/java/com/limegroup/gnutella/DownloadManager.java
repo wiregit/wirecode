@@ -556,7 +556,6 @@ public class DownloadManager implements BandwidthTracker {
 			String fileName = (filename!=null && !filename.equals(""))
 				? filename : urn.toString();
             if (conflicts(urn, fileName, 0)) {
-//                throw new AlreadyDownloadingException(fileName);
 				throw new SaveLocationException
 				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File("fileName"));
             }
