@@ -16,7 +16,6 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -540,6 +539,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         private double average;
         /** The last time the altloc was given out */
         private long lastSentTime;
+        /** The last calculated threshold, -1 if dirty */
+        private double cachedTreshold = -1;
         
         public void send(long now) {
             if (lastSentTime == 0)
@@ -547,14 +548,17 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             
             average =  ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
             lastSentTime = now;
+            cachedTreshold = -1;
         }
         
         public boolean canBeSent(float bias, float damper) {
             if (numTimes < 2 || average == 0)
                 return true;
             
-            double threshold = Math.abs(Math.log(average) / Math.log(damper));
-            return numTimes < threshold * bias;
+            if (cachedTreshold == -1)
+                cachedTreshold = Math.abs(Math.log(average) / Math.log(damper));
+            
+            return numTimes < cachedTreshold * bias;
         }
         
         public void reset() {
