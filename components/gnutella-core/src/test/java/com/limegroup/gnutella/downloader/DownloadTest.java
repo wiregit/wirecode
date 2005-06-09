@@ -1331,7 +1331,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc [] now = {pushRFD2};
         
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, false, null);
+            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(2000);
         download.addDownload(openRFD,false);
         waitForComplete(false);
