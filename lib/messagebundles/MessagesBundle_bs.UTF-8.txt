@@ -823,7 +823,7 @@ LIBRARY_EXPLORE_BUTTON_LABEL=Traži
 LIBRARY_EXPLORE_BUTTON_TIP=Otvori imenik biblioteke.
 #### LIBRARY_PLAYLIST_BUTTON_LABEL=Enqueue
 LIBRARY_PLAYLIST_BUTTON_LABEL=Na play listu
-#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Play List
+#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Playlist
 LIBRARY_PLAYLIST_BUTTON_TIP=Dodaj selektirane datoteke na play listu.
 #### LIBRARY_ANNOTATE_BUTTON_LABEL=Describe...
 LIBRARY_ANNOTATE_BUTTON_LABEL=Opiši...
@@ -842,17 +842,17 @@ LIBRARY_RENAME_BUTTON_LABEL=Promjeni ime
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Otvori...
-#### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Play List
+#### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
 PLAYLIST_LOAD_BUTTON_TIP=Otvori jednu postojeću play listu.
 #### PLAYLIST_SAVE_BUTTON_LABEL=Save As...
 PLAYLIST_SAVE_BUTTON_LABEL=Pohrani kao....
-#### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Play List to a File
+#### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Playlist to a File
 PLAYLIST_SAVE_BUTTON_TIP=Zadrži postojeću play listu na datoteci.
 #### PLAYLIST_DELETE_BUTTON_LABEL=Remove
 PLAYLIST_DELETE_BUTTON_LABEL=Odstrani
-#### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Play List
+#### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Playlist
 PLAYLIST_DELETE_BUTTON_TIP=Odstrani selektiranu datoteku sa play liste.
-#### PLAYLIST_FILE_DESCRIPTION=Play List Files (*.m3u)
+#### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=Play lista datoteka (*.m3u)
 
 ################################################################################
@@ -1310,7 +1310,7 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=Nova datoteka
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Zaustavi razmjenu
 #### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
 LIBRARY_TREE_RENAME_FOLDER_LABEL=Promjeni ime
-#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Play List
+#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Na Play listu
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
 LIBRARY_TREE_SAVED_DIRECTORY=Pohranjene datoteke
@@ -1332,7 +1332,7 @@ LIBRARY_BURN_LABEL=Snimite CD
 ###################################################################
 # Key/value pairs for PlayListGUI
 ###################################################################
-#### PLAYLIST_TITLE=MP3 Play List
+#### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 Play lista
 #### PLAYLIST_TABLE_NAME=Name
 PLAYLIST_TABLE_NAME=Ime
@@ -1346,9 +1346,9 @@ PLAYLIST_OPTIONS_STRING=Play opcije:
 PLAYLIST_OPTIONS_CONTINUE=Neprekidno
 #### PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 PLAYLIST_OPTIONS_SHUFFLE=Izmješano
-#### PLAYLIST_DIALOG_OPEN_TITLE=Open Play List (.m3u)
+#### PLAYLIST_DIALOG_OPEN_TITLE=Open Playlist (.m3u)
 PLAYLIST_DIALOG_OPEN_TITLE=Otvori Play listu (.m3u)
-#### PLAYLIST_DIALOG_SAVE_TITLE=Save Play List As
+#### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
 PLAYLIST_DIALOG_SAVE_TITLE=Pohrani Play listu kao
 #### PLAYLIST_DIALOG_SAVE_SAVE=Save
 PLAYLIST_DIALOG_SAVE_SAVE=Pohrani
@@ -1676,7 +1676,7 @@ SPLASH_STATUS_CONNECTION_WINDOW=Punjenje priključnog prozora...
 SPLASH_STATUS_STATISTICS_WINDOW=Punjenje statistike prozora...
 #### SPLASH_STATUS_STATUS_WINDOW=Loading status window...
 SPLASH_STATUS_STATUS_WINDOW=Punjenje stanja prozora...
-#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading play list window...
+#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading playlist window...
 SPLASH_STATUS_PLAYLIST_WINDOW=Punjenje prozora sa Play listom...
 #### SPLASH_STATUS_MENUS=Loading menus...
 SPLASH_STATUS_MENUS=Punjenje imenika...
@@ -1943,9 +1943,9 @@ ERROR_CONNECT_STRING=Spojna žila mora biti najmanje dužine 1, da sadrži jedan
 ERROR_PORT_RANGE=Molimo vas uđite na portu izmedu 1 i 65535.
 #### ERROR_INVALID_GROUP=You need to select a valid group.
 ERROR_INVALID_GROUP=Potrebno je da odaberete važeću grupu.
-#### ERROR_ALREADY_DOWNLOADING=You are already downloading
+#### ERROR_ALREADY_DOWNLOADING=You are already downloading this file to
 ERROR_ALREADY_DOWNLOADING=Trenutno vi downloadujete
-#### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading "{0}".
+#### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading this file to "{0}".
 #? FORMATTED_ERROR_ALREADY_DOWNLOADING=
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=Već ste downloadovali
@@ -2087,7 +2087,7 @@ OPTIONS_BUGS_MAIN_TITLE=Izvještaj o kvaru
 OPTIONS_GUI_MAIN_TITLE=Prikaz
 #### OPTIONS_POPUPS_MAIN_TITLE=Popups
 OPTIONS_POPUPS_MAIN_TITLE=Popups
-#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete Text
+#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Automatski završen tekst
 #### OPTIONS_THEME_MAIN_TITLE=Skin
 OPTIONS_THEME_MAIN_TITLE=Omotač
@@ -2315,7 +2315,7 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Upload brzina:
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Djelimične datoteke
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Možete odabrati da li ili ne želite automatsku razmjenu djelimično downlodiranih datoteka.
-#### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing
+#### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing:
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Omogući djelimičnu razmjenu
 
 ################################################################################
@@ -2369,7 +2369,7 @@ OPTIONS_SHUTDOWN_LABEL=Možete odabrati standardnu opciju procesa zatvaranja.
 OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Zatvorite odmah
 #### OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after Transfers
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Zatvorite nakon transakcije
-#### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to SystemTray
+#### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Smanjite zamjenu sistema
 
 ################################################################################
@@ -2423,18 +2423,18 @@ OPTIONS_ITUNES_PREFERENCE_LABEL=LimeWire može unijeti novije downloadovane pjes
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Razmjena
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
 OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Možete razmjenjivati vašu muziku na lokalnoj mreži za iTunes ili drugi digitalni audio pristupni protokol. Omogućite podudaran način ako osjetite problem sa iTunes razmjenom. Ovaj način koristi više sredstava i sporiji je, ali može da odredi problem.
-#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share My Music:
 OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Razmjeni moju muziku:
-#### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared Name:
 OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Razmjenjeno ime:
-#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility mode:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility Mode:
 OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Podudaran modus:
 
-#### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Password Protection
 OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Zahtjeva se lozinka
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Možete ograničiti pristup ovom servisu postavljanjem lozinke.
-#### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+#### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Zahtjeva se lozinka:
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Lozinka:
@@ -2488,18 +2488,18 @@ OPTIONS_ALWAYS_USE_ANSWER=Uvijek koristite ovaj odgovor
 OPTIONS_POPUPS_TITLE=Popups reklame
 #### OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen 'Do not display this message again' or 'Always use this answer'.
 OPTIONS_POPUPS_LABEL=Ponovo pokažite poruke koje ste smjestili pod 'Ne pokazujte više ovu poruku' ili 'Uvijek koristite ovaj odgovor'.
-#### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert To Default
+#### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Vraćanje na standardnu opciju
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield
 ################################################################################
-#### OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
+#### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Automatsko kompletiranje
-#### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields
+#### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 OPTIONS_AUTOCOMPLETE_LABEL=Možete omogućiti ili onemogućiti automatsko kompletiranje datoteka u formi teksta.
-#### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields
+#### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields:
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Omogućite automatsko kompletiranje datoteka u formi teksta
 
 ################################################################################
@@ -2718,7 +2718,7 @@ OPTIONS_ROUTER_TITLE=Router konfiguracija
 OPTIONS_ROUTER_LABEL=LimeWire može funkcionisati iza firewalla ili routera. Korištenje Universal Plug 'n Play (UPnP), LimeWire može automatski oblikovati vaš firewall ili router da optimalno funkcionišu. Ako vaš router ne prihvata UPnP, LimeWire može biti manuelno podešen da se oglasi na vanjskom otvoru. (Morate takođe podesiti router na manuelnu kofiguraciju.)
 #### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
 OPTIONS_ROUTER_UPNP=Koristite UPnP (Preporučeno)
-#### OPTIONS_ROUTER_PORT=Manual Port Forward
+#### OPTIONS_ROUTER_PORT=Manual Port Forward:
 OPTIONS_ROUTER_PORT=Proslijedite na Portu ručno
 #### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
 OPTIONS_ROUTER_NOTHING=Ne činite ništa (Nije preporučeno)
@@ -2778,19 +2778,19 @@ OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Prolaz v4
 OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Prolaz v5
 #### OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
 OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
-#### OPTIONS_PROXY_HOST_LABEL=Proxy
+#### OPTIONS_PROXY_HOST_LABEL=Proxy:
 OPTIONS_PROXY_HOST_LABEL=Proxy
-#### OPTIONS_PROXY_PORT_LABEL=Port
+#### OPTIONS_PROXY_PORT_LABEL=Port:
 OPTIONS_PROXY_PORT_LABEL=Porta
 #### OPTIONS_PROXY_LOGIN_TITLE=Login Details
 OPTIONS_PROXY_LOGIN_TITLE=Logiranje detalja
 #### OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
 OPTIONS_PROXY_LOGIN_LABEL=Konfiguracija korisničkog imena i lozinke koja će biti korištena za Proxy.
-#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication. (Does not work for HTTP Proxies)
+#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication (Does Not Work for HTTP Proxies):
 OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Dozvolite potvrdu autentičnosti. (Ne funkcioniše kod HTTP Proxija)
-#### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username
+#### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username:
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Ime korisnika
-#### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password
+#### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Lozinka
 
 ################################################################################

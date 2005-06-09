@@ -823,7 +823,7 @@ LIBRARY_EXPLORE_BUTTON_LABEL=Исследовать
 LIBRARY_EXPLORE_BUTTON_TIP=Открыть папку
 #### LIBRARY_PLAYLIST_BUTTON_LABEL=Enqueue
 LIBRARY_PLAYLIST_BUTTON_LABEL=В плейлист
-#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Play List
+#### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Playlist
 LIBRARY_PLAYLIST_BUTTON_TIP=Добавть выбранные файлы в плейлист (список для проигрывания)
 #### LIBRARY_ANNOTATE_BUTTON_LABEL=Describe...
 LIBRARY_ANNOTATE_BUTTON_LABEL=Описание...
@@ -842,17 +842,17 @@ LIBRARY_RENAME_BUTTON_LABEL=Переименовать
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Открыть...
-#### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Play List
+#### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
 PLAYLIST_LOAD_BUTTON_TIP=Открыть плейлист
 #### PLAYLIST_SAVE_BUTTON_LABEL=Save As...
 PLAYLIST_SAVE_BUTTON_LABEL=Сохранить...
-#### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Play List to a File
+#### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Playlist to a File
 PLAYLIST_SAVE_BUTTON_TIP=Сохранить текущий плейлист
 #### PLAYLIST_DELETE_BUTTON_LABEL=Remove
 PLAYLIST_DELETE_BUTTON_LABEL=Удалить
-#### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Play List
+#### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Playlist
 PLAYLIST_DELETE_BUTTON_TIP=Удалить выбранные файлы из плейлиста
-#### PLAYLIST_FILE_DESCRIPTION=Play List Files (*.m3u)
+#### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=Плейлисты (*.m3u)
 
 ################################################################################
@@ -1310,7 +1310,7 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=Новая папка
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Отменить доступ
 #### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
 LIBRARY_TREE_RENAME_FOLDER_LABEL=Переименовать
-#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Play List
+#### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=В плейлист
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
 LIBRARY_TREE_SAVED_DIRECTORY=Сохранённые файлы
@@ -1332,7 +1332,7 @@ LIBRARY_BURN_LABEL=Записать на CD...
 ###################################################################
 # Key/value pairs for PlayListGUI
 ###################################################################
-#### PLAYLIST_TITLE=MP3 Play List
+#### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 плейлист
 #### PLAYLIST_TABLE_NAME=Name
 PLAYLIST_TABLE_NAME=Имя
@@ -1346,9 +1346,9 @@ PLAYLIST_OPTIONS_STRING=Настройки проигрывания:
 PLAYLIST_OPTIONS_CONTINUE=Непрерывное
 #### PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 PLAYLIST_OPTIONS_SHUFFLE=Случайный порядок
-#### PLAYLIST_DIALOG_OPEN_TITLE=Open Play List (.m3u)
+#### PLAYLIST_DIALOG_OPEN_TITLE=Open Playlist (.m3u)
 PLAYLIST_DIALOG_OPEN_TITLE=Выберите плейлист (.m3u)
-#### PLAYLIST_DIALOG_SAVE_TITLE=Save Play List As
+#### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
 PLAYLIST_DIALOG_SAVE_TITLE=Сохранить плейлист как...
 #### PLAYLIST_DIALOG_SAVE_SAVE=Save
 PLAYLIST_DIALOG_SAVE_SAVE=Сохранить
@@ -1676,7 +1676,7 @@ SPLASH_STATUS_CONNECTION_WINDOW=Инициализация окна соедин
 SPLASH_STATUS_STATISTICS_WINDOW=Инициализация окна статистики...
 #### SPLASH_STATUS_STATUS_WINDOW=Loading status window...
 SPLASH_STATUS_STATUS_WINDOW=Инициализация окна статуса...
-#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading play list window...
+#### SPLASH_STATUS_PLAYLIST_WINDOW=Loading playlist window...
 SPLASH_STATUS_PLAYLIST_WINDOW=Инициализация окна плейлиста...
 #### SPLASH_STATUS_MENUS=Loading menus...
 SPLASH_STATUS_MENUS=Инициализация меню...
@@ -1943,9 +1943,9 @@ ERROR_FORCE_IP_PORT_RANGE=Вы должны ввести номер порта �
 ERROR_PORT_RANGE=Пожалуйста, введите номер порта в диапазоне от 1 до 65535.
 #### ERROR_INVALID_GROUP=You need to select a valid group.
 #? ERROR_INVALID_GROUP=
-#### ERROR_ALREADY_DOWNLOADING=You are already downloading
+#### ERROR_ALREADY_DOWNLOADING=You are already downloading this file to
 ERROR_ALREADY_DOWNLOADING=Вы уже загружаете
-#### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading "{0}".
+#### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading this file to "{0}".
 #? FORMATTED_ERROR_ALREADY_DOWNLOADING=
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=Вы уже загрузили
@@ -2087,7 +2087,7 @@ OPTIONS_BUGS_MAIN_TITLE=Отчёты об ошибках
 OPTIONS_GUI_MAIN_TITLE=Вид
 #### OPTIONS_POPUPS_MAIN_TITLE=Popups
 OPTIONS_POPUPS_MAIN_TITLE=Всплывающие сообщения
-#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete Text
+#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Автодополнение текста
 #### OPTIONS_THEME_MAIN_TITLE=Skin
 #? OPTIONS_THEME_MAIN_TITLE=
@@ -2315,7 +2315,7 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Скорость выгрузки:
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Частично загруженные файлы
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Вы можете указать, будет ли открыт доступ к частично загруженным файлам.
-#### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing
+#### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing:
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Разрешить доступ к частично загруженным файлам:
 
 ################################################################################
@@ -2369,7 +2369,7 @@ OPTIONS_SHUTDOWN_LABEL=Вы можете задать поведение при 
 OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Выйти немедленно
 #### OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after Transfers
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Выйти после завершения текущих загрузок/выгрузок
-#### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to SystemTray
+#### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Свернуться в область системного трея
 
 ################################################################################
@@ -2423,18 +2423,18 @@ OPTIONS_ITUNES_PREFERENCE_LABEL=Вы можете импортировать з�
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Доступ
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
 OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Вы можете раздать свою музыку в локальной сети и сделать её доступной для iTunes и других проигрывателей поддерживающих Протокол Доступа к Цифровому Аудио (Digital Audio Access Protocol, DAAP).\n\nПри наличии проблем включите режим совместимости.
-#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share My Music:
 OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Открыть доступ к моей музыке:
-#### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared Name:
 OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Имя ресурса:
-#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility mode:
+#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility Mode:
 OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Режим совместимости
 
-#### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Password Protection
 OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Защита паролем
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Вы можете ограничить доступ к этому сервису защитив его паролем.
-#### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+#### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Требовать пароль:
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Пароль:
@@ -2488,18 +2488,18 @@ OPTIONS_ALWAYS_USE_ANSWER=Всегда использовать этот отв�
 OPTIONS_POPUPS_TITLE=Всплывающие сообщения
 #### OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen 'Do not display this message again' or 'Always use this answer'.
 OPTIONS_POPUPS_LABEL=Показывать сообщения для которых вы выбрали "Больше не показывать это сообщение" или "Всегда использовать этот ответ".
-#### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert To Default
+#### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Вернуться к настройке по умолчанию
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield
 ################################################################################
-#### OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
+#### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Автодополнение
-#### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields
+#### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 OPTIONS_AUTOCOMPLETE_LABEL=Вы можете разрешить или запретить автодополнение текстовых полей
-#### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields
+#### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields:
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Разрешить автодополнение текстовых полей
 
 ################################################################################
@@ -2718,7 +2718,7 @@ OPTIONS_PORT_BOX_LABEL=Порт для ожидания входящих сое�
 #? OPTIONS_ROUTER_LABEL=
 #### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
 #? OPTIONS_ROUTER_UPNP=
-#### OPTIONS_ROUTER_PORT=Manual Port Forward
+#### OPTIONS_ROUTER_PORT=Manual Port Forward:
 #? OPTIONS_ROUTER_PORT=
 #### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
 #? OPTIONS_ROUTER_NOTHING=
@@ -2778,19 +2778,19 @@ OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
 OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
 #### OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
 OPTIONS_PROXY_HTTP_BUTTON_LABEL=Прокси HTTP
-#### OPTIONS_PROXY_HOST_LABEL=Proxy
+#### OPTIONS_PROXY_HOST_LABEL=Proxy:
 OPTIONS_PROXY_HOST_LABEL=Хост
-#### OPTIONS_PROXY_PORT_LABEL=Port
+#### OPTIONS_PROXY_PORT_LABEL=Port:
 OPTIONS_PROXY_PORT_LABEL=Порт
 #### OPTIONS_PROXY_LOGIN_TITLE=Login Details
 OPTIONS_PROXY_LOGIN_TITLE=Подключение к прокси
 #### OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
 OPTIONS_PROXY_LOGIN_LABEL=Имя и пароль для подключения к прокси.
-#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication. (Does not work for HTTP Proxies)
+#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication (Does Not Work for HTTP Proxies):
 OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Использовать имя и пароль. (Не работает для HTTP-прокси)
-#### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username
+#### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username:
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Имя
-#### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password
+#### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Пароль
 
 ################################################################################
