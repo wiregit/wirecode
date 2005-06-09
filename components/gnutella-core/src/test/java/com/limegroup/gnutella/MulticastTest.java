@@ -28,6 +28,8 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 public class MulticastTest extends BaseTestCase {
 
     private static ActivityCallback CALLBACK;
+    
+    private static final int DELAY = 1000;
         
     private static MetaFileManager FMAN;
     
@@ -63,7 +65,9 @@ public class MulticastTest extends BaseTestCase {
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
@@ -124,7 +128,7 @@ public class MulticastTest extends BaseTestCase {
         RouterService.query(guid, "sam");
         
         // sleep to let the search go.
-        sleep(300);
+        sleep(DELAY);
         
         assertEquals( "unexpected number of multicast messages", 1, 
             MESSAGE_ROUTER.multicasted.size() );
@@ -150,8 +154,8 @@ public class MulticastTest extends BaseTestCase {
         RouterService.query(guid, "metadata"); // search for the name
         
         // sleep to let the search process.
-        sleep(300);
-        
+        sleep(DELAY);
+
         assertEquals( "unexpected number of multicast messages", 1, 
             MESSAGE_ROUTER.multicasted.size() );
             
@@ -193,7 +197,7 @@ public class MulticastTest extends BaseTestCase {
         // that we can convert to an RFD.
         byte[] guid = RouterService.newQueryGUID();
         RouterService.query(guid, "metadata");
-        sleep(300);
+        sleep(DELAY);
         assertEquals("should have sent query", 1,
             MESSAGE_ROUTER.multicasted.size());
         assertEquals("should have gotten reply", 1,
@@ -225,7 +229,7 @@ public class MulticastTest extends BaseTestCase {
         
         
         // sleep to make sure the push goes through.
-        sleep(300);
+        sleep(DELAY);
         
         assertEquals("should have sent & received push", 1,
             MESSAGE_ROUTER.multicasted.size());
@@ -256,7 +260,7 @@ public class MulticastTest extends BaseTestCase {
         // that we can convert to an RFD.
         byte[] guid = RouterService.newQueryGUID();
         RouterService.query(guid, "metadata");
-        sleep(300);
+        sleep(DELAY);
         assertEquals("should have sent query", 1,
             MESSAGE_ROUTER.multicasted.size());
         assertEquals("should have gotten reply", 1,
@@ -303,6 +307,22 @@ public class MulticastTest extends BaseTestCase {
         
         assertTrue("file should have been downloaded & saved",
             new File(_savedDir, "metadata.mp3").exists());
+
+//  Get rid of this file, so the -Dtimes=X option works properly...  =)
+assertEquals("unexpected number of shared files", 2,
+    FMAN.getNumFiles() );
+
+File temp=new File( _savedDir, "metadata.mp3");        
+if( temp.exists() ) {
+    FMAN.removeFileIfShared(temp);
+    temp.delete();
+}
+sleep(2*DELAY);
+assertFalse( "file should have been deleted",temp.exists() );
+
+assertEquals("unexpected number of shared files", 1,
+        FMAN.getNumFiles() );
+
 	}
     
     private static void setGUID(Message m, GUID g) {
