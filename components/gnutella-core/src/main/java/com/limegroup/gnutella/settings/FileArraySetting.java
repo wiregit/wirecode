@@ -187,12 +187,10 @@ public class FileArraySetting extends Setting {
 		File file = null;
 		for (int i = 0; i < value.length; i++) {
 			file = value[i];
-			System.out.println("FileArraySetting.clean: "+file);
 			if (file == null)
 				continue;
 			if (!file.exists())
 				continue;
-			System.out.println("\t\t\tadded!");
 			list.add(file);
 		}
 		setValue((File[])list.toArray(new File[0]));
