@@ -134,27 +134,6 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	}	
 
 	/**
-	 * Tests the method for adding a collections of alternate locations to
-	 * this AlternateLocationCollection.
-	 */
-	public void testAddAlternateLocationCollection() {
-		AlternateLocationCollection alc1 = 
-			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
-		Iterator iter = _alternateLocations.iterator();
-		for(AlternateLocation al = (AlternateLocation)iter.next(); 
-			iter.hasNext();   al = (AlternateLocation)iter.next()) {
-			alc1.add(al);
-		}
-
-		AlternateLocationCollection alc2 = 
-			AlternateLocationCollection.create(_alCollection.getSHA1Urn());
-		alc2.addAll(alc1);
-		assertEquals("was not able to add all from the collection.",
-		    alc1.getAltLocsSize(),
-		    alc2.getAltLocsSize());
-	}	
-
-	/**
 	 * Tests the method for checking whether or not the specified alternate
 	 * location collection has alternate locations stored.
 	 */

@@ -1,12 +1,9 @@
 package com.limegroup.gnutella.altlocs;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -39,9 +36,7 @@ public class AlternateLocationCollection
      * inserted is removed when the limit is reached.  
      * <p>
      * LOCKING: obtain this' monitor when iterating. Note that all modifications
-     * to LOCATIONS are synchronized on this.  allAll method has the potential
-     * for deadlocks, so the AlternateLocationCollection provided is cloned and
-     * the lock on the original is released.
+     * to LOCATIONS are synchronized on this.  
      *
      * LOCKING: Never grab the lock on AlternateLocationCollection.class if you
      * have this' monitor. If both locks are needed, always lock on
@@ -198,37 +193,6 @@ public class AlternateLocationCollection
 		}
     }
 
-	/**
-     * Implements the <tt>AlternateLocationCollector</tt> interface.  Adds the
-     * specified <tt>AlternateLocationCollection</tt> to this collection. Note
-     * that to avoid deadlocks, the given AlternateLocationCollection is cloned
-     * first
-     * <p>
-     * @param alc the <tt>AlternateLocationCollection</tt> to add
-     * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
-     *  <tt>null</tt>
-     * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
-     *  collection to add does not match the collection of <tt>this</tt> */
-	public int addAll(AlternateLocationCollection alc) {
-        if(alc == null) 
-            throw new NullPointerException("ALC is null");
-
-		if(!alc.getSHA1Urn().equals(SHA1)) 
-			throw new IllegalArgumentException("SHA1 does not match");
-
-		int added = 0;
-        Iterator iter=null;
-        synchronized(alc) {
-            iter = ((FixedSizeSortedSet)alc.LOCATIONS.clone()).iterator();
-        }
-        while(iter.hasNext()) {
-            AlternateLocation curLoc = (AlternateLocation)iter.next();
-            if( add(curLoc) )
-                added++;
-        }
-		return added;
-	}
-
     public synchronized void clear() {
         LOCATIONS.clear();
     }
@@ -335,10 +299,6 @@ public class AlternateLocationCollection
         }
         
         public boolean add(AlternateLocation loc) {
-            throw new UnsupportedOperationException();
-        }
-        
-        public int addAll(AlternateLocationCollection other) {
             throw new UnsupportedOperationException();
         }
     }
