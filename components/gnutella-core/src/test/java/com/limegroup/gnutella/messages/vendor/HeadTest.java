@@ -163,11 +163,6 @@ public class HeadTest extends BaseTestCase {
 		_partial.setRangesByte(_ranges.toBytes());
 		_complete = new FileDescStub("complete",_haveFull,2);
 		
-		_complete.setAlternateLocationCollection(_alCollectionComplete);
-		_partial.setAlternateLocationCollection(_alCollectionIncomplete);
-		_partial.setPushAlternateLocationCollection(_pushCollection);
-		
-		
 		
 		Map urns = new HashMap();
 		urns.put(_havePartial,_partial);
@@ -458,19 +453,20 @@ public class HeadTest extends BaseTestCase {
 		
 		for(int i=0;i<10;i++ ) {
             AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
-			_alCollectionComplete.add(al);
+            RouterService.getAltlocManager().add(al, null);
 		}
+        _alCollectionComplete = RouterService.getAltlocManager().getDirect(_haveFull);
         assertEquals("failed to set test up",10,
         		_alCollectionComplete.getAltLocsSize());
         
         for(int i=0;i<10;i++ ) {
             AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
-			_alCollectionIncomplete.add(al);
+            RouterService.getAltlocManager().add(al, null);
 		}
+        _alCollectionIncomplete = RouterService.getAltlocManager().getDirect(_havePartial);
         assertEquals("failed to set test up",10,
         		_alCollectionIncomplete.getAltLocsSize());
         
-
         
         //add some firewalled altlocs to the incomplete collection
         
@@ -480,8 +476,8 @@ public class HeadTest extends BaseTestCase {
 				";1.2.3.4:5",_havePartial);
         ((PushAltLoc)firewalled).updateProxies(true);
 		pe = ((PushAltLoc)firewalled).getPushAddress();
-		_pushCollection=AlternateLocationCollection.create(_havePartial);
-		_pushCollection.add(firewalled);
+        RouterService.getAltlocManager().add(firewalled, null);
+		_pushCollection = RouterService.getAltlocManager().getPush(_havePartial, false);
 	}
 	
 }

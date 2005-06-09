@@ -16,6 +16,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -23,6 +25,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -165,6 +168,11 @@ public class RouterService {
 	private static final SearchResultHandler RESULT_HANDLER =
 		new SearchResultHandler();
 
+    /**
+     * The manager of altlocs
+     */
+    private static AltLocManager altManager = AltLocManager.instance();
+    
     /**
      * isShuttingDown flag
      */
@@ -505,6 +513,10 @@ public class RouterService {
         return downloader;
     }
 
+    public static AltLocManager getAltlocManager() {
+        return altManager;
+    }
+    
 	/**
 	 * Accessor for the <tt>UDPService</tt> instance.
 	 *
@@ -1222,8 +1234,7 @@ public class RouterService {
         
         return hosts;
     }
-
-
+    
     /**
      *  Returns the number of messaging connections.
      */

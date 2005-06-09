@@ -14,8 +14,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -35,7 +35,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */
     public static final String ALT_VENDOR = "ALT";
 
-	
+    /**
+     * The three types of medium altlocs travel through
+     */
+	public static final int MESH_PING = 0;
+    public static final int MESH_LEGACY = 1;
+    public static final int MESH_RESPONSE = 2;
+    
 	/**
 	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
 	 * can be <tt>null</tt>.
@@ -68,6 +74,11 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      * of 1.
      */
     protected volatile int _count = 0;
+    
+    /**
+     * Two counter objects to keep track of altloc expiration
+     */
+    private final Average legacy, ping, response;
     
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -169,14 +180,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
 		} else {
 		    PushEndpoint copy;
-            if (rfd.getPushAddr() != null) {
-                copy = new PushEndpoint(
-		            rfd.getClientGUID(),
-		            rfd.getPushAddr().getProxies(),
-		            rfd.getPushAddr().getFeatures(),
-		            rfd.getPushAddr().supportsFWTVersion(),
-		            new IpPortImpl(rfd.getHost(),rfd.getPort()));
-            } else 
+            if (rfd.getPushAddr() != null) 
+                copy = rfd.getPushAddr();
+            else 
                 copy = new PushEndpoint(rfd.getClientGUID(),Collections.EMPTY_SET,0,0,null);
 		    return new PushAltLoc(copy,urn);
 		} 
@@ -227,6 +233,9 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		if(sha1 == null)
             throw new IOException("null sha1");	
 		SHA1_URN=sha1;
+        legacy = new Average();
+        ping = new Average();
+        response = new Average();
 	}
 	
 
@@ -303,6 +312,52 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      */ 
     public abstract AlternateLocation createClone();
     
+    
+    public synchronized void send(long now, int meshType) {
+        switch(meshType) {
+        case MESH_LEGACY :
+            legacy.send(now);return;
+        case MESH_PING :
+            ping.send(now);return;
+        case MESH_RESPONSE :
+            response.send(now);return;
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
+        }
+    }
+    
+    public synchronized boolean canBeSent(int meshType) {
+        switch(meshType) {
+        case MESH_LEGACY :
+            if (!UploadSettings.EXPIRE_LEGACY.getValue())
+                return true;
+            return  legacy.canBeSent(UploadSettings.LEGACY_BIAS.getValue(), 
+                    UploadSettings.LEGACY_EXPIRATION_DAMPER.getValue());
+        case MESH_PING :
+            if (!UploadSettings.EXPIRE_PING.getValue())
+                return true;
+            return ping.canBeSent(UploadSettings.PING_BIAS.getValue(),
+                    UploadSettings.PING_EXPIRATION_DAMPER.getValue());
+        case MESH_RESPONSE :
+            if (!UploadSettings.EXPIRE_RESPONSE.getValue())
+                return true; 
+            return response.canBeSent(UploadSettings.RESPONSE_BIAS.getValue(),
+                    UploadSettings.RESPONSE_EXPIRATION_DAMPER.getValue());
+            
+        default :
+            throw new IllegalArgumentException("unknown mesh type");
+        }
+    }
+    
+    public synchronized boolean canBeSentAny() {
+        return canBeSent(MESH_LEGACY) || canBeSent(MESH_PING) || canBeSent(MESH_RESPONSE);
+    }
+    
+    synchronized void resetSent() {
+        ping.reset();
+        legacy.reset();
+        response.reset();
+    }
     
     ///////////////////////////////helpers////////////////////////////////
 
@@ -477,6 +532,41 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         return 17*37+this.SHA1_URN.hashCode();        
 	}
 
+    private static class Average {
+        /** The number of times this altloc was given out */
+        private int numTimes;
+        /** The average time in ms between giving out the altloc */
+        private double average;
+        /** The last time the altloc was given out */
+        private long lastSentTime;
+        /** The last calculated threshold, -1 if dirty */
+        private double cachedTreshold = -1;
+        
+        public void send(long now) {
+            if (lastSentTime == 0)
+                lastSentTime = now;
+            
+            average =  ( (average * numTimes) + (now - lastSentTime) ) / ++numTimes;
+            lastSentTime = now;
+            cachedTreshold = -1;
+        }
+        
+        public boolean canBeSent(float bias, float damper) {
+            if (numTimes < 2 || average == 0)
+                return true;
+            
+            if (cachedTreshold == -1)
+                cachedTreshold = Math.abs(Math.log(average) / Math.log(damper));
+            
+            return numTimes < cachedTreshold * bias;
+        }
+        
+        public void reset() {
+            numTimes = 0;
+            average = 0;
+            lastSentTime = 0;
+        }
+    }
 }
 
 

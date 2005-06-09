@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -43,6 +43,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CountingOutputStream;
+import com.limegroup.gnutella.util.MultiRRIterator;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 
@@ -585,71 +586,72 @@ public final class HTTPUploader implements Uploader {
      * have not been sent out already.
      */
     Set getNextSetOfAltsToSend() {
-        AlternateLocationCollection coll =
-                                    _fileDesc.getAlternateLocationCollection();
+        AlternateLocationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
         Set ret = null;
+        long now = System.currentTimeMillis();
         synchronized(coll) {
             Iterator iter  = coll.iterator();
-            //Synchronization note: We hold the locks of two
-            //AlternateLocationCollections concurrently, but one of them is a
-            //local variable, so we are OK.            
             for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
                 AlternateLocation al = (AlternateLocation)iter.next();
                 if(_writtenLocs.contains(al))
                     continue;
-                _writtenLocs.add(al);
-                if(ret == null) ret = new HashSet();
-                ret.add(al);
-                i++;
+                
+                if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
+                    _writtenLocs.add(al);
+                    if(ret == null) ret = new HashSet();
+                    ret.add(al);
+                    i++;
+                    al.send(now,AlternateLocation.MESH_LEGACY);
+                } else if (!al.canBeSentAny()) 
+                    iter.remove();
             }
-            return ret == null ? Collections.EMPTY_SET : ret;
         }
+        return ret == null ? Collections.EMPTY_SET : ret;
+     
     }
     
     Set getNextSetOfPushAltsToSend() {
-    	AlternateLocationCollection coll = 
-    		_fileDesc.getPushAlternateLocationCollection();
+        if (!_wantsFalts)
+            return Collections.EMPTY_SET;
+        
+    	AlternateLocationCollection fwt = 
+            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
+        
+        AlternateLocationCollection push = _FWTVersion > 0 ? AlternateLocationCollection.EMPTY : 
+            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
     	
     	Set ret = null;
-    	
-    	if (coll != null && _wantsFalts)
-        	synchronized(coll) {
-        		Iterator iter  = coll.iterator();
-        		//Synchronization note: We hold the locks of two
-        		//AlternateLocationCollections concurrently, but one of them is a
-        		//local variable, so we are OK.            
-        		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-        			PushAltLoc al = (PushAltLoc)iter.next();
-        			
-        			if(_writtenPushLocs.contains(al))
-        			    continue;
-        			
-        			// it is possible to end up having a PE with all
-        			// proxies removed.  In that case we remove it explicitly
-        			if(al.getPushAddress().getProxies().isEmpty()) {
-        			    iter.remove();
-        				continue;
-        			}
-        			
-        			//if the downloader indicated that they are firewalled
-        			//but the altloc did not say that it supports FWT transfer,
-        			//we do not send it.
-        			
-        			//Note: if in the future we introduce incompatible
-        			//versions of the FWT protocol, this is the place to ensure that
-        			//we only send those altlocs that support the appropriate protocol.
-        			if (_FWTVersion>0 && al.supportsFWTVersion()==0)
-        					continue;
+    	long now = System.currentTimeMillis();
+    	synchronized(push) {
+    	    synchronized (fwt) {
+    	        Iterator iter  = 
+    	        	new MultiRRIterator(new Iterator[]{fwt.iterator(),push.iterator()});
+    	        for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+    	            PushAltLoc al = (PushAltLoc)iter.next();
+    	            
+    	            if(_writtenPushLocs.contains(al))
+    	                continue;
+    	            
+    	            // it is possible to end up having a PE with all
+    	            // proxies removed.  In that case we remove it explicitly
+    	            if(al.getPushAddress().getProxies().isEmpty()) {
+    	                iter.remove();
+    	                continue;
+    	            }
+    	            
+                    if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
+                        al.send(now,AlternateLocation.MESH_LEGACY);
+                        _writtenPushLocs.add(al);
+                        
+                        if(ret == null) ret = new HashSet();
+                        ret.add(al);
+                        i++;
+                    } else if (!al.canBeSentAny())
+                        iter.remove();
+    	        }
+    	    }
+    	}
 
-        			_writtenPushLocs.add(al);
-        			
-        			if(ret == null) ret = new HashSet();
-        			ret.add(al);
-        			i++;
-        		}
-            
-        	}
-        
         return ret == null ? Collections.EMPTY_SET : ret;
     }
     
@@ -1030,7 +1032,7 @@ public final class HTTPUploader implements Uploader {
             return false;
                 
         if(_fileDesc != null) 
-            parseAlternateLocations(str, _fileDesc, true);
+            parseAlternateLocations(str, true);
         return true;
     }
 
@@ -1039,7 +1041,7 @@ public final class HTTPUploader implements Uploader {
             return false;
         
         if(_fileDesc != null)
-            parseAlternateLocations(str, _fileDesc, false);
+            parseAlternateLocations(str, false);
         return true;
     }
     
@@ -1051,7 +1053,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null) 
-            parseAlternateLocations(str, _fileDesc, true);
+            parseAlternateLocations(str, true);
         return true;
     }
 
@@ -1063,7 +1065,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null)
-            parseAlternateLocations(str, _fileDesc, false);
+            parseAlternateLocations(str, false);
         return true;
     }
     
@@ -1204,15 +1206,11 @@ public final class HTTPUploader implements Uploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
 	 *  locations should be added to
 	 */
-	private void parseAlternateLocations(final String altHeader,
-                                       final AlternateLocationCollector alc,
-                                       boolean isGood) {
+	private void parseAlternateLocations(final String altHeader, boolean isGood) {
 
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		URN sha1 =_fileDesc.getSHA1Urn(); 
-		if (!sha1.equals(alc.getSHA1Urn()))
-		    return;
 		
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
@@ -1237,9 +1235,9 @@ public final class HTTPUploader implements Uploader {
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if(isGood) 
-                    alc.add(al);
+                    RouterService.getAltlocManager().add(al, null);
                 else
-                    alc.remove(al);
+                    RouterService.getAltlocManager().remove(al, null);
                         
                 if (al instanceof DirectAltLoc)
                  	_writtenLocs.add(al);

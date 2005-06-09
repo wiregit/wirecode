@@ -372,10 +372,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             LOG.debug("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
 	
         running = false;
+        newHosts.addAll(verifiedHosts);
+        newHosts.addAll(testedLocations);
         verifiedHosts.clear();
         pingedHosts.clear();
         testedLocations.clear();
-        newHosts.clear();
     }
     
     public synchronized boolean isCancelled(){

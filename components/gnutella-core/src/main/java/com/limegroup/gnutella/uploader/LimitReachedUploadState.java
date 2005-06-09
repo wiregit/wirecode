@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -82,7 +83,7 @@ public class LimitReachedUploadState extends UploadState {
 				// write the Retry-After header, using different values
 				// depending on if we had any alts to send or not.
 				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-				    ! FILE_DESC.hasAlternateLocations() ? 
+				    ! RouterService.getAltlocManager().hasAltlocs(FILE_DESC.getSHA1Urn()) ? 
 				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
 				    ostream);
                 ostream.write(str.getBytes());

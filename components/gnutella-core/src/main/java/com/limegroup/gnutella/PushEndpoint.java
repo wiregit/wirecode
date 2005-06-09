@@ -332,9 +332,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * address, or null if we don't have such.
 	 */
 	protected IpPort getValidExternalAddress() {
-	    if (!NetworkUtils.isValidExternalIpPort(_externalAddr))
+        IpPort ret = getIpPort();
+	    if (!NetworkUtils.isValidExternalIpPort(ret))
 	        return null;
-	    return _externalAddr;
+	    return ret;
 	}
 	
     /**
@@ -530,27 +531,46 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
     /**
+     * updates the external address of all PushEndpoints for the given guid
+     */
+    public static void setAddr(byte [] guid, IpPort addr) {
+        GUID g = new GUID(guid);
+        GuidSetWrapper current = (GuidSetWrapper)
+            GUID_PROXY_MAP.get(g);
+        if (current!=null)
+            current.setIpPort(addr);
+    }
+    
+    private IpPort getIpPort() {
+        GuidSetWrapper current = (GuidSetWrapper)
+            GUID_PROXY_MAP.get(_guid);
+        return current == null || current.getIpPort() == null ? 
+                _externalAddr : current.getIpPort();
+    }
+    
+    /**
      * Implements the IpPort interface, returning a bogus ip if we don't know
      * it.
      */
     public String getAddress() {
-        return _externalAddr != null ? 
-                _externalAddr.getAddress() : 
-                    RemoteFileDesc.BOGUS_IP;
+        IpPort addr = getIpPort();
+        return addr != null ? addr.getAddress() : RemoteFileDesc.BOGUS_IP;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.util.IpPort#getInetAddress()
      */
     public InetAddress getInetAddress() {
-        return _externalAddr != null ? _externalAddr.getInetAddress() : null;
+        IpPort addr = getIpPort();
+        return addr != null ? addr.getInetAddress() : null;
     }
     
     /**
      * Implements the IpPort interface, returning a bogus port if we don't know it
      */
     public int getPort() {
-        return _externalAddr != null ? _externalAddr.getPort() : 6346;
+        IpPort addr = getIpPort();
+        return addr != null ? addr.getPort() : 6346;
     }
 	
 	/**
@@ -600,6 +620,14 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    _guid = guidRef;
 	    _proxies = null;
 	}
+    
+    public PushEndpoint createClone() {
+        return new PushEndpoint(_guid.bytes(), 
+                getProxies(),
+                getFeatures(),
+                supportsFWTVersion(), 
+                getIpPort());
+    }
 	
 	/**
 	 * Overwrites the current known push proxies for the host specified
@@ -709,6 +737,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    private final WeakReference _guidRef;
 	    private Set _proxies;
 	    private int _features,_fwtVersion;
+        private IpPort _externalAddr;
 	    
 	    GuidSetWrapper(GUID guid) {
 	    	this(guid,0,0);
@@ -722,7 +751,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    
 	    synchronized void updateProxies(Set s, boolean add){
 	        Set existing = new IpPortSet();
-	        
+            
+	        if (s == null)
+                s = _proxies;
+            
 	        if (_proxies!=null)
 	            existing.addAll(_proxies);
 	        
@@ -757,6 +789,14 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    synchronized void setFWTVersion(int version){
 	    	_fwtVersion=version;
 	    }
+        
+        synchronized void setIpPort(IpPort addr) {
+            _externalAddr = addr;
+        }
+        
+        synchronized IpPort getIpPort() {
+            return _externalAddr;
+        }
 	    
 	    GUID getGuid() {
 	        return (GUID) _guidRef.get();

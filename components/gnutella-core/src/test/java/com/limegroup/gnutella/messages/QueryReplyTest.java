@@ -1064,7 +1064,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             String urn = fds[i].getSHA1Urn().httpStringValue();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
-                fds[i].add(AlternateLocation.create(loc));
+                RouterService.getAltlocManager().add(AlternateLocation.create(loc), null);
             }
         }
     }

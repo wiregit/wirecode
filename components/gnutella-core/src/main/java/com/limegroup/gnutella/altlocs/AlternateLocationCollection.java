@@ -1,11 +1,9 @@
 package com.limegroup.gnutella.altlocs;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -17,19 +15,28 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * <p>
  * @see AlternateLocation
  */
-public final class AlternateLocationCollection 
-	implements HTTPHeaderValue, AlternateLocationCollector {
+public class AlternateLocationCollection 
+	implements HTTPHeaderValue {
 	    
     private static final int MAX_SIZE = 100;
+    
+    public static final AlternateLocationCollection EMPTY;
+    static {
+        AlternateLocationCollection col = null;
+        try {
+            col = new EmptyCollection();
+        } catch (IOException bad) {
+            ErrorService.error(bad);
+        }
+        EMPTY = col;
+    }
 
 	/**
 	 * This uses a <tt>FixedSizeSortedSet</tt> so that the highest * entry
      * inserted is removed when the limit is reached.  
      * <p>
      * LOCKING: obtain this' monitor when iterating. Note that all modifications
-     * to LOCATIONS are synchronized on this.  allAll method has the potential
-     * for deadlocks, so the AlternateLocationCollection provided is cloned and
-     * the lock on the original is released.
+     * to LOCATIONS are synchronized on this.  
      *
      * LOCKING: Never grab the lock on AlternateLocationCollection.class if you
      * have this' monitor. If both locks are needed, always lock on
@@ -149,6 +156,7 @@ public final class AlternateLocationCollection
 
                 alt.increment();
                 alt.promote();
+                alt.resetSent();
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
 
@@ -184,37 +192,6 @@ public final class AlternateLocationCollection
             }
 		}
     }
-
-	/**
-     * Implements the <tt>AlternateLocationCollector</tt> interface.  Adds the
-     * specified <tt>AlternateLocationCollection</tt> to this collection. Note
-     * that to avoid deadlocks, the given AlternateLocationCollection is cloned
-     * first
-     * <p>
-     * @param alc the <tt>AlternateLocationCollection</tt> to add
-     * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
-     *  <tt>null</tt>
-     * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
-     *  collection to add does not match the collection of <tt>this</tt> */
-	public int addAll(AlternateLocationCollection alc) {
-        if(alc == null) 
-            throw new NullPointerException("ALC is null");
-
-		if(!alc.getSHA1Urn().equals(SHA1)) 
-			throw new IllegalArgumentException("SHA1 does not match");
-
-		int added = 0;
-        Iterator iter=null;
-        synchronized(alc) {
-            iter = ((FixedSizeSortedSet)alc.LOCATIONS.clone()).iterator();
-        }
-        while(iter.hasNext()) {
-            AlternateLocation curLoc = (AlternateLocation)iter.next();
-            if( add(curLoc) )
-                added++;
-        }
-		return added;
-	}
 
     public synchronized void clear() {
         LOCATIONS.clear();
@@ -315,101 +292,14 @@ public final class AlternateLocationCollection
         }
         return ret;
     }
-    
-    /**
-     * 
-     * @return the non-firewalled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytes() {
-    	return toBytes(MAX_SIZE);
-    }
-    
-    /**
-     * 
-     * @param number number of altlocs to return. 
-     * @return the non-firewlled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytes(int number) {
-    	
-    
-	FixedSizeSortedSet clone=null;
-
-	
-	
-	if (number <=0)
-		return null;
-	
-	synchronized(this) {
-		clone = (FixedSizeSortedSet) LOCATIONS.clone();
-	}
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	
-	
-	try{
-    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
-    		Object o = iter.next();
-    		if (!(o instanceof DirectAltLoc))
-    			continue;
-    		
-    		DirectAltLoc current = (DirectAltLoc)o;
-    		byte [] addr = current.getHost().getInetAddress().getAddress();
-    		baos.write(addr);
-    		ByteOrder.short2leb((short)current.getHost().getPort(),baos);
-    		number--;
-    	}
-	}catch(IOException impossible){
-		ErrorService.error(impossible);
-	}
-	
-    	return baos.toByteArray();
-    }
-    
-    /**
-     * 
-     * @return the firewalled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytesPush() {
-    	return toBytesPush(MAX_SIZE);
-    }
-
-    /**
-     * 
-     * @param number number of altlocs to return. 
-     * @return the non-firewlled alternate locations packed as ip:port pairs.
-     */
-    public byte [] toBytesPush(int number) {
-    	
-    	if (number <=0)
-    		return null;
-    	
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    	FixedSizeSortedSet clone;
-    	
-    	
-    	synchronized(this) {
-    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
-    	}
-    	
-    	int total = 0;
-    	
-    	try {
-    		for (Iterator iter = clone.iterator();iter.hasNext() && total <number;) {
-    			Object o = iter.next();
-    			if (!(o instanceof PushAltLoc))
-    				continue;
-    			
-    			PushAltLoc current = (PushAltLoc)o;
-    			
-    			if (current.getPushAddress().getProxies().isEmpty())
-    				continue;
-    			
-    			baos.write(current.getPushAddress().toBytes());
-    			total++;
-    		}
-    	}catch(IOException impossible) {
-    		ErrorService.error(impossible);
-    	}
-    	
-    	return baos.toByteArray();
+      
+    private static class EmptyCollection extends AlternateLocationCollection {
+        EmptyCollection() throws IOException {
+            super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+        }
+        
+        public boolean add(AlternateLocation loc) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
