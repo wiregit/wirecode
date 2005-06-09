@@ -1676,7 +1676,15 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
-    public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
+    public void testPartialAddsAltsActiveDownload() throws Exception {
+        altBootstrapTest(false);
+    }
+    
+    public void testPartialBootstrapsInactiveDownload() throws Exception {
+        altBootstrapTest(true);
+    }
+    
+    private void altBootstrapTest(final boolean complete) throws Exception {
         LOG.info("-Testing a shared partial funnels alt locs to downloader");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -1702,10 +1710,13 @@ public class DownloadTest extends BaseTestCase {
         Thread locAdder = new Thread( new Runnable() {
             public void run() {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(complete ? 4000 : 1500);
                     FileDesc fd = RouterService.getFileManager().
                         getFileDescForUrn(TestFile.hash());
-                    assertInstanceof( IncompleteFileDesc.class, fd );
+                    if (!complete)
+                        assertTrue(fd instanceof IncompleteFileDesc);
+                    else
+                        assertFalse(fd instanceof IncompleteFileDesc);
                     RouterService.getAltlocManager().add(
                         AlternateLocation.create(rfd2),this);
                     RouterService.getAltlocManager().add(
