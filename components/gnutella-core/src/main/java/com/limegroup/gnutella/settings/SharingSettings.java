@@ -219,6 +219,21 @@ public class SharingSettings extends LimeProps {
     public static final FileArraySetting SPECIAL_FILES_NOT_TO_SHARE =
         FACTORY.createFileArraySetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
     
+	/**
+	 * Cleans special file sharing settings by removing references to files that
+	 * no longer exist.
+	 */
+	public static final void clean() {
+		SPECIAL_FILES_TO_SHARE.clean();
+		SPECIAL_FILES_NOT_TO_SHARE.clean();
+		DIRECTORIES_TO_SHARE.clean();
+		DIRECTORIES_NOT_TO_SHARE.clean();
+		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.clean();
+		DIRECTORIES_TO_SHARE_NON_RECURSIVELY.clean();
+		SENSITIVE_DIRECTORIES_TO_SHARE.clean();
+		SENSITIVE_DIRECTORIES_NOT_TO_SHARE.clean();
+	}
+	
     /**
 	 * File extensions that are shared.
 	 */

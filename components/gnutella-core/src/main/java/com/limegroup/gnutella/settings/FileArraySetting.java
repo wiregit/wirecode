@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -20,7 +21,7 @@ public class FileArraySetting extends Setting {
 
 	/**
 	 * Creates a new <tt>FileArraySetting</tt> instance with the specified
-	 * key and defualt value.
+	 * key and default value.
 	 *
 	 * @param key the constant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
@@ -51,7 +52,7 @@ public class FileArraySetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	public void setValue(File[] value) {
+	public synchronized void setValue(File[] value) {
 		super.setValue(decode(value));
 	}
 
@@ -60,7 +61,7 @@ public class FileArraySetting extends Setting {
 	 *
 	 * @param Adds file to the array.
 	 */
-	public void add(File file) {
+	public synchronized void add(File file) {
 	    if (file == null)
 	        return;
 	    
@@ -77,7 +78,7 @@ public class FileArraySetting extends Setting {
 	 * @return false when the array does not contain the file or when the
 	 * file is <code>null</code> 
 	 */
-	public boolean remove(File file) {
+	public synchronized boolean remove(File file) {
 	    if (file == null)
 	        return false;
 	    
@@ -100,14 +101,14 @@ public class FileArraySetting extends Setting {
 	/**
 	 * Returns true if the given file is contained in this array.
 	 */
-	public boolean contains(File file) {
+	public synchronized boolean contains(File file) {
 	    return indexOf(file) >= 0;
 	}
 	
 	/**
 	 * Returns the index of the given file in this array, -1 if file is not found.
 	 */
-	public int indexOf(File file) {
+	public synchronized int indexOf(File file) {
 	    if (file == null)
 	        return -1;
 	    
@@ -128,7 +129,7 @@ public class FileArraySetting extends Setting {
 	/**
 	 * Returns the length of the array.
 	 */
-	public int length() {
+	public synchronized int length() {
 	    return value.length;
 	}
 	
@@ -136,7 +137,7 @@ public class FileArraySetting extends Setting {
      * @param sValue property string value
      *
      */
-    protected void loadValue(String sValue) {
+    protected synchronized void loadValue(String sValue) {
 		value = encode(sValue);
     }
     
@@ -178,4 +179,22 @@ public class FileArraySetting extends Setting {
         return buffer.toString();
     }
 
+	/**
+	 * Removes non-existent members from this.
+	 */
+	public synchronized void clean() {
+		List list = new LinkedList();
+		File file = null;
+		for (int i = 0; i < value.length; i++) {
+			file = value[i];
+			System.out.println("FileArraySetting.clean: "+file);
+			if (file == null)
+				continue;
+			if (!file.exists())
+				continue;
+			System.out.println("\t\t\tadded!");
+			list.add(file);
+		}
+		setValue((File[])list.toArray(new File[0]));
+	}
 }

@@ -310,7 +310,8 @@ public abstract class FileManager {
      *      @modifies this
      *      @see loadSettings */
     public void start() {
-		loadSettings(false);
+		SharingSettings.clean();
+		loadSettings(false);		
     }
 
 	

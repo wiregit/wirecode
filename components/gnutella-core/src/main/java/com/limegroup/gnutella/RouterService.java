@@ -203,7 +203,7 @@ public class RouterService {
      * 3 - shutting down
      * 4 - shut down
      */
-    private static volatile int _started;
+    private static volatile int _state;
 
 
 	/**
@@ -267,10 +267,10 @@ public class RouterService {
   	public static void asyncGuiInit() {
   		
   		synchronized(RouterService.class) {
-  			if (_started > 0) // already did this?
+  			if (_state > 0) // already did this?
   				return;
   			else
-  				_started = 1;
+  				_state = 1;
   		}
   		
   	    Thread t = new ManagedThread(new Initializer());
@@ -286,10 +286,10 @@ public class RouterService {
   	public static void preGuiInit() {
   		
   		synchronized(RouterService.class) {
-  			if (_started > 0) // already did this?
+  			if (_state > 0) // already did this?
   				return;
   			else
-  				_started = 1;
+  				_state = 1;
   		}
   		
   	    (new Initializer()).run();
@@ -314,7 +314,7 @@ public class RouterService {
     	        return;
     	        
             preGuiInit();
-            _started = 2;
+            _state = 2;
     
     		// Now, link all the pieces together, starting the various threads.
 
@@ -457,7 +457,7 @@ public class RouterService {
      *  otherwise <tt>false</tt>
      */
     public static boolean isStarted() {
-        return _started >= 2;
+        return _state >= 2;
     }
 
     /**
@@ -817,14 +817,14 @@ public class RouterService {
      * Determines if this is shutting down.
      */
     private static boolean isShuttingDown() {
-        return _started >= 3;
+        return _state >= 3;
     }
     
     /**
      * Determines if this is shut down.
      */
     private static boolean isShutdown() {
-        return _started >= 4;
+        return _state >= 4;
     }
 
     /**
@@ -837,7 +837,7 @@ public class RouterService {
             if(!isStarted())
                 return;
                 
-            _started = 3;
+            _state = 3;
             
             getAcceptor().shutdown();
             
@@ -869,7 +869,7 @@ public class RouterService {
             
             runShutdownItems();
             
-            _started = 4;
+            _state = 4;
             
         } catch(Throwable t) {
             ErrorService.error(t);
