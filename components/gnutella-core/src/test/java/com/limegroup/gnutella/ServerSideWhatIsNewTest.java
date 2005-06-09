@@ -80,6 +80,7 @@ public class ServerSideWhatIsNewTest
         //the interactive prompts below.
         ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
@@ -97,6 +98,7 @@ public class ServerSideWhatIsNewTest
         
         berkeley = new File(_sharedDir, "berkeley.txt");
         susheel = new File(_sharedDir, "susheel.txt");
+        
         winInstaller = new File(_sharedDir, "LimeWireWin3.69.0010.exe");
         linInstaller = new File(_sharedDir, "LimeWireLinux.bin");
         osxInstaller = new File(_sharedDir, "LimeWireOSX.dmg");
@@ -137,7 +139,6 @@ public class ServerSideWhatIsNewTest
 
         // client side seems to follow the setup process A-OK
     }
-
 
     // test that the CreationTimeCache is as expected
     public void testCreationTimeCacheInitialState() throws Exception {
@@ -702,27 +703,41 @@ public class ServerSideWhatIsNewTest
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
     }
 
-    
     public void testInstallersNotSharedInCache() throws Exception {
+        //  Make sure that the modified times are not the same
+        susheel.setLastModified(123456);
+        berkeley.setLastModified(123457);
+        
         FileManager fm = rs.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
-
+        
         winInstaller =
             CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         linInstaller =
             CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
         osxInstaller =
             CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
+
+        //  Gotta make use of the force-share folder for this test
+        if( FileManager.FORCED_SHARE.exists() ) {
+            File [] toDelete = FileManager.FORCED_SHARE.listFiles();
+            for (int j = 0; j < toDelete.length; j++) {
+                toDelete[j].delete();
+            }
+        } else {
+            FileManager.FORCED_SHARE.mkdir();
+        }
+
         CommonUtils.copy(winInstaller, 
-                         new File(_sharedDir, "LimeWireWin3.69.0010.exe"));
+                         new File(FileManager.FORCED_SHARE, "LimeWireWin3.69.0010.exe"));
         CommonUtils.copy(linInstaller, 
-                         new File(_sharedDir, "LimeWireLinux.bin"));
+                         new File(FileManager.FORCED_SHARE, "LimeWireLinux.bin"));
         CommonUtils.copy(osxInstaller, 
-                         new File(_sharedDir, "LimeWireOSX.dmg"));
+                         new File(FileManager.FORCED_SHARE, "LimeWireOSX.dmg"));
 
         rs.getFileManager().loadSettings(false);
         int i = 0;
-        for (; (i < 15) && (rs.getNumSharedFiles() < 5); i++)
+        for (; (i < 15) && (rs.getNumSharedFiles()+rs.getFileManager().getNumForcedFiles() < 5); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue("num shared files? " + rs.getNumSharedFiles(),
                                 false);
@@ -730,7 +745,11 @@ public class ServerSideWhatIsNewTest
         // we should be sharing two files - two text files and three installers
         // but the creation time cache should only have the two text files
         // as entries....
-        assertEquals(5, rs.getNumSharedFiles());
+        //
+        //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
+        //      files don't count), and 3 forced shared files
+        assertEquals(2, rs.getNumSharedFiles());
+        assertEquals(3, rs.getFileManager().getNumForcedFiles());
 
         {
             Map urnToLong = 
@@ -768,6 +787,12 @@ public class ServerSideWhatIsNewTest
             assertTrue(susheel.exists());
             assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
         }
+        
+        File [] toDelete = FileManager.FORCED_SHARE.listFiles();
+        for (int j = 0; j < toDelete.length; j++) {
+            toDelete[j].delete();
+        }
+        FileManager.FORCED_SHARE.delete();
 
     }
 
