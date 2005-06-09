@@ -55,7 +55,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    URN good = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
 	    URN bad = URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
 	    
-	    License l = new StubLicense(RDF_GOOD);
+	    License l = new StubCCLicense(RDF_GOOD);
 	    Callback c = new Callback();
 	    assertFalse(c.completed);
 	    assertFalse(l.isVerified());
@@ -79,33 +79,33 @@ public final class CCLicenseTest extends BaseTestCase {
     }
     
     public void testGuessLicenseDeed() throws Exception {
-        License l = new StubLicense("", "");
+        License l = new StubCCLicense("", "");
         assertFalse(l.isVerified());
         assertNull(l.getLicenseDeed(null));
         
-        l = new StubLicense("a license, http://creativecommons.org/licenses/mylicese is cool", "");
+        l = new StubCCLicense("a license, http://creativecommons.org/licenses/mylicese is cool", "");
         assertFalse(l.isVerified());
         assertEquals("http://creativecommons.org/licenses/mylicese", l.getLicenseDeed(null).toExternalForm());
         
-        l = new StubLicense("a license, http:// creativecommons.org/licenses/mylicese", "");
+        l = new StubCCLicense("a license, http:// creativecommons.org/licenses/mylicese", "");
         assertFalse(l.isVerified());
         assertNull(l.getLicenseDeed(null));
         
-        l = new StubLicense("http://creativecommons.org/licenses/me", "");
+        l = new StubCCLicense("http://creativecommons.org/licenses/me", "");
         assertEquals("http://creativecommons.org/licenses/me", l.getLicenseDeed(null).toExternalForm());
         
-        l = new StubLicense("alazamhttp://creativecommons.org/licenses/me2", "");
+        l = new StubCCLicense("alazamhttp://creativecommons.org/licenses/me2", "");
         assertNull(l.getLicenseDeed(null));
         
-        l = new StubLicense("http://limewire.org", "");
+        l = new StubCCLicense("http://limewire.org", "");
         assertNull(l.getLicenseDeed(null));
         
-        l = new StubLicense("creativecommons.org/licenses", "");
+        l = new StubCCLicense("creativecommons.org/licenses", "");
         assertNull(l.getLicenseDeed(null));
     }
     
     public void testCopy() throws Exception {
-        License l = new StubLicense("text1", "");
+        License l = new StubCCLicense("text1", "");
         assertEquals("text1", l.getLicense());
         assertEquals("http://1.2.3.4/page", l.getLicenseURI().toString());
         
@@ -115,7 +115,7 @@ public final class CCLicenseTest extends BaseTestCase {
     }
     
     public void testSerializeAndDeserialize() throws Exception {
-        License l = new StubLicense("license text", "");
+        License l = new StubCCLicense("license text", "");
         assertEquals("license text", l.getLicense());
         assertNull(l.getLicenseDeed(null));
         assertEquals("http://1.2.3.4/page", l.getLicenseURI().toString());
@@ -138,7 +138,7 @@ public final class CCLicenseTest extends BaseTestCase {
         assertFalse(l.isValid(null));
         
         // Now try with a full out parsed License.
-	    l = new StubLicense("good license text", RDF_GOOD);
+	    l = new StubCCLicense("good license text", RDF_GOOD);
 	    l.verify(null);
 	    assertEquals("good license text", l.getLicense());
 	    assertTrue(l.isVerified());
@@ -172,7 +172,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    URN badUrn = URN.createSHA1Urn("urn:sha1:BADBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
         
         // GOOD: within HTML comments.
-        License l = new StubLicense("<html><--" +
+        License l = new StubCCLicense("<html><--" +
 "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
 "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
 "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
@@ -189,25 +189,25 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertEquals("Permissions unknown.", l.getLicenseDescription(null));
 	    
 	    // BAD: No data.
-	    l = new StubLicense("<rdf:RDF/>");
+	    l = new StubCCLicense("<rdf:RDF/>");
 	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 
         // BAD: RDF not bound.
-	    l = new StubLicense("<rdf:RDF><Work/></rdf:RDF>");
+	    l = new StubCCLicense("<rdf:RDF><Work/></rdf:RDF>");
 	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, no license for it.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><Work/></rdf:RDF>");
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><Work/></rdf:RDF>");
 	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, Valid for specific URN, but no license for it.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD\"/></rdf:RDF>");
 	    l.verify(null);
 	    assertTrue(l.isVerified());
@@ -215,7 +215,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertFalse(l.isValid(goodUrn));
 	    
 	    // GOOD: Work, license.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work>" +
 	    "<license rdf:resource=\"http://creativecommons.org/licenses/by/2.0/\" />"  +
 	    "</Work></rdf:RDF>");
@@ -226,7 +226,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertTrue(l.isValid(badUrn));
 	    
 	    // GOOD: Work, license & URN.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://mydeed.com\" />" +
 	    "</Work></rdf:RDF>");
@@ -239,7 +239,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertFalse(l.isValid(badUrn));
 	    
 	    // GOOD: Multiple works, licenses & URNs.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
 	    "</Work>" +
@@ -257,14 +257,14 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertFalse(l.isValid(badUrn));
 	    
 	    // No Work item.
-        l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+        l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
         "<License/></rdf:RDF>");
         l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // Valid, duplicate distribution permission ignored.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work>" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
 	    "</Work>" +
@@ -281,7 +281,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	                 "Required: Attribution", l.getLicenseDescription(null));
 	    
         // Valid, unknown License element.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work>" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
 	    "</Work>" +
@@ -299,7 +299,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	                 
         // Matches up the licenses among the multiple works correctly.
 	    // GOOD: Multiple works, licenses & URNs.
-	    l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
+	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
 	    "</Work>" +
@@ -332,7 +332,7 @@ public final class CCLicenseTest extends BaseTestCase {
                      "Required: Peace", l.getLicenseDescription(goodUrn2));
 	                 
         // Valid, unknown body element.
-        l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
+        l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Work><license rdf:resource=\"http://deed1.com\" /></Work>" +
         "<Unknown/></rdf:RDF>");
         l.verify(null);
@@ -340,7 +340,7 @@ public final class CCLicenseTest extends BaseTestCase {
         assertTrue(l.isValid(null));
         
         // Invalid -- Work is inside an unknown element.
-        l = new StubLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
+        l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Unknown><Work><license rdf:resource=\"http://deed1.com\" /></Work></Unknown></rdf:RDF>");
         l.verify(null);
         assertTrue(l.isVerified());
@@ -352,7 +352,7 @@ public final class CCLicenseTest extends BaseTestCase {
     public void testMultipleLicenseElementsInWork() throws Exception {
         URN goodUrn = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
         
-	    License l = new StubLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
+	    License l = new StubCCLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
 	    "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
@@ -486,7 +486,7 @@ public final class CCLicenseTest extends BaseTestCase {
     
         try {
             License l = LicenseFactory.create("verify at http://127.0.0.1:44444/");
-            VerificationListener vl = new StubLicense.Listener();
+            VerificationListener vl = new Listener();
             synchronized(vl) {
                 l.verify(vl);
                 vl.wait();
@@ -539,7 +539,7 @@ public final class CCLicenseTest extends BaseTestCase {
             // and even 33333 (even though it failed 'cause it had the wrong addr).
             
             l = LicenseFactory.create("verify at http://127.0.0.1:55555/");
-            vl = new StubLicense.Listener();
+            vl = new Listener();
             synchronized(vl) {
                 l.verify(vl);
                 vl.wait();

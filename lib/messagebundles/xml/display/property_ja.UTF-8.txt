@@ -48,4 +48,4 @@ properties__property__city__               = 町
 properties__property__zip__                = 郵便番号
 properties__property__state__              = 州
 properties__property__country__            = 国
-properties__property__action__ = アクション^10
+properties__property__action__ = アクション

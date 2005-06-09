@@ -165,25 +165,21 @@ public class OGMMetaData extends VideoMetaData {
 			String value = comment.substring(index + 1);
 
 			if (key.equalsIgnoreCase(COMMENT_TAG)) {
-				if (_comments.length() > 0)
-					_comments = _comments + "\n";
-				_comments = _comments + value;
+				if(getComment() != null)
+				    setComment(getComment() + "\n" + value);
+                else
+                    setComment(value);
 			} else if (key.equalsIgnoreCase(LANGUAGE_TAG)) {
-				if (_language.length() > 0)
-					_language = _language + ";";
-				_language = _language + value;
+			    if(getLanguage() != null)
+			        setLanguage(getLanguage() + ";" + value);
+			    else
+			        setLanguage(value);
 			} else if (key.equalsIgnoreCase(LICENSE_TAG)) {
-				_license = value;
+			    setLicense(value);
 			} else if (key.equalsIgnoreCase(TITLE_TAG)) {
-				_title = value;
+			    setTitle(value);
 			} else if (key.equalsIgnoreCase(DATE_TAG)) {
-				if (value.length() > 4)
-					value = value.substring(0, 4);
-				try {
-					_year = Short.parseShort(value);
-				} catch (NumberFormatException nfe) {
-					// ignore
-				}
+			    setYear(value);
 			}
 		}
 	}

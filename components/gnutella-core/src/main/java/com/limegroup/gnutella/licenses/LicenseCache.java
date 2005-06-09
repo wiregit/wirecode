@@ -163,7 +163,6 @@ class LicenseCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
-
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(

@@ -49,7 +49,7 @@ public final class LicenseReadingTest extends BaseTestCase {
 	                 amd.getLicense());
         
 	    
-	    LimeXMLDocument doc = new LimeXMLDocument(nvList, AudioMetaData.schemaURI);
+	    LimeXMLDocument doc = new LimeXMLDocument(nvList, amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicense(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
@@ -126,5 +126,47 @@ public final class LicenseReadingTest extends BaseTestCase {
 	                 "http://creativecommons.org/technology/verifytest/", 
 	                 amd.getLicense());
     }
+    
+    public void testReadWeed() throws Exception {
+	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
+	    assertTrue(f.exists());
+	    
+	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
+	    assertNotNull(amd);
+	    LimeXMLDocument doc = new LimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+	    assertTrue(doc.isLicenseAvailable());
+	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
+	    assertEquals("<?xml version=\"1.0\"?>" +
+"<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">" +
+"<audio title=\"Love Everybody\" artist=\"The Presidents of the United States of America\" album=" +
+"\"Love Everybody\" genre=\"Rock\" licensetype=" +
+"\"http://www.shmedlic.com/license/3play.aspx cid: 214324 vid: 0000000000001370651\" " +
+"track=\"1\" year=\"2004\" seconds=\"158\" bitrate=\"192\" license=\"2004 PUSA Inc.\"/></audios>",
+                    doc.getXMLString());
+	    
+	    List indivList = new LinkedList();
+	    indivList.add("http://www.shmedlic.com/license/3play.aspx");
+	    assertEquals(indivList, doc.getKeyWordsIndivisible());
+	    
+	    boolean licenseTypeFound = false;
+	    for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
+	        Map.Entry next = (Map.Entry)i.next();
+	        String name = (String)next.getKey();
+	        if(name.equals("audios__audio__licensetype__")) {
+	            licenseTypeFound = true;
+	            assertEquals("http://www.shmedlic.com/license/3play.aspx cid: 214324 vid: 0000000000001370651", next.getValue());
+	        }
+        }
+        assertTrue(licenseTypeFound);
+        
+        License l = doc.getLicense();
+        assertNotNull(l);
+        assertEquals(WeedLicense.class, l.getClass());
+        assertFalse(l.isVerified());
+        // don't validate -- don't wanna hit the web.
+        assertEquals("http://weedshare.com/company/policies/summary_usage_rights.aspx",
+                     l.getLicenseDeed(null).toString());
+        assertEquals("http://www.weedshare.com/license/verify_usage_rights.aspx?" +
+                     "versionid=0000000000001370651&contentid=214324", l.getLicenseURI().toString());
+    }
 }
-            

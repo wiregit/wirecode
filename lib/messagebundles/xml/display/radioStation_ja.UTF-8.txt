@@ -16,4 +16,4 @@ radioStations__radioStation__description__ = 記述
 radioStations__radioStation__comments__    = コメント
 radioStations__radioStation__image__       = イメージ
 radioStations__radioStation__link__        = リンク
-radioStations__radioStation__action__ = アクション^10
+radioStations__radioStation__action__ = アクション

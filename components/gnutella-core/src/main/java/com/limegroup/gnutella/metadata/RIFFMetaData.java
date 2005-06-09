@@ -30,16 +30,14 @@ public class RIFFMetaData extends VideoMetaData {
 		byte[] dword = new byte[4];
 		dis.readFully(dword);
 
-		if (dword[0] != 'R' || dword[1] != 'I' || dword[2] != 'F'
-				|| dword[3] != 'F')
+		if (dword[0] != 'R' || dword[1] != 'I' || dword[2] != 'F' || dword[3] != 'F')
 			return;
 
 		// skip the file size
 		IOUtils.ensureSkip(dis, 4);
 
 		dis.readFully(dword);
-		if (dword[0] != 'A' || dword[1] != 'V' || dword[2] != 'I'
-				|| dword[3] != ' ')
+		if (dword[0] != 'A' || dword[1] != 'V' || dword[2] != 'I' || dword[3] != ' ')
 			return;
 
 		// skip some more pointless chunk IDs
@@ -59,8 +57,7 @@ public class RIFFMetaData extends VideoMetaData {
 		// read total number of frames
 		dis.readFully(dword);
 		int totalFrames = ByteOrder.leb2int(dword, 0, 4);
-
-		_seconds = (short) (1L * microsPerFrame * totalFrames / 1000 );
+        setLength((short) (1L * microsPerFrame * totalFrames / 1000 ));
 
 		// boring data
 		IOUtils.ensureSkip(dis, 4);
@@ -74,11 +71,11 @@ public class RIFFMetaData extends VideoMetaData {
 
 		// width in pixel
 		dis.readFully(dword);
-		_width = ByteOrder.leb2int(dword, 0, 4);
+		setWidth(ByteOrder.leb2int(dword, 0, 4));
 
 		// height in pixel
 		dis.readFully(dword);
-		_height = ByteOrder.leb2int(dword, 0, 4);
+		setHeight(ByteOrder.leb2int(dword, 0, 4));
 		
 		// reserved stuff
 		IOUtils.ensureSkip(dis, 16);

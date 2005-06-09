@@ -1,37 +1,23 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
-<!--
-  The XSD 1.1 conformance has been validated with those online validators:
-  http://www.w3.org/2001/03/webdata/xsv (XSV 2.5-2 20010502)
-  http://apps.gotdotnet.com/xmltools/xsdvalidator/Default.aspx
--->
-
 <schema xml:lang="en"
  xmlns="http://www.w3.org/2001/XMLSchema"
- xmlns:target="http://www.limewire.com/schemas/audio.xsd"
+ xmlns:i18n="http://www.limewire.com/schemas/i18n"
+ i18n:locales="http://www.limewire.com/schemas/i18n/audio.locales.xml"
  targetNamespace="http://www.limewire.com/schemas/audio.xsd">
 
-  <element name="audios">
+  <element name="audios" minOccurs="1" maxOccurs="1">
     <complexType>
-      <!-- <complexContent><restriction base="anyType"> -->
-
-      <sequence>
-        <element name="audio" minOccurs="1" maxOccurs="unbounded" type="target:audio"/>
-      </sequence>
-
-      <!-- </restriction></complexContent> -->
+      <element name="audio" minOccurs="1" maxOccurs="unbounded" type="audioType"/>
     </complexType>
   </element>
 
-  <complexType name="audio">
-    <!-- <complexContent><restriction base="anyType"> -->
-
-    <attribute use="optional" name="title" type="string"/>
-    <attribute use="optional" name="artist" type="string"/>
-    <attribute use="optional" name="album" type="string"/>
-    <attribute use="optional" name="genre">
-      <simpleType>
-        <restriction base="string">
+  <complexType name="audioType">
+    <all>
+      <attribute name="title" type="string" width="100"/>
+      <attribute name="artist" type="string" />
+      <attribute name="album" type="string" />
+      <attribute name="genre">
+        <simpleType base="string">
           <enumeration value="Blues"/>
           <enumeration value="Classic Rock"/>
           <enumeration value="Country"/>
@@ -45,7 +31,7 @@
           <enumeration value="New Age"/>
           <enumeration value="Oldies"/>
           <enumeration value="Other"/>
-          <enumeration value="Pop"/>
+          <enumeration value="Pop"/> 
           <enumeration value="R &amp; B"/>
           <enumeration value="Rap"/>
           <enumeration value="Reggae"/>
@@ -94,7 +80,7 @@
           <enumeration value="Gangsta"/>
           <enumeration value="Top 40"/>
           <enumeration value="Christian Rap"/>
-          <enumeration value="Pop/Funk"/>
+          <enumeration value="Pop+Funk"/>
           <enumeration value="Jungle"/>
           <enumeration value="Native American"/>
           <enumeration value="Cabaret"/>
@@ -140,7 +126,7 @@
           <enumeration value="Sonata"/>
           <enumeration value="Symphony"/>
           <enumeration value="Booty Bass"/>
-          <enumeration value="Primus"/>
+          <enumeration value="Primus"/> 
           <enumeration value="Porn Groove"/>
           <enumeration value="Satire"/>
           <enumeration value="Slow Jam"/>
@@ -158,42 +144,35 @@
           <enumeration value="A capella"/>
           <enumeration value="Euro-House"/>
           <enumeration value="Dance Hall"/>
-        </restriction>
-      </simpleType>
-    </attribute>
-    <attribute use="optional" name="track" type="short"/>
-    <attribute use="optional" name="type">
-      <simpleType>
-        <restriction base="string">
+        </simpleType>
+      </attribute> 
+      <attribute name="licensetype" editable="false" hidden="true">
+        <simpleType base="string">
+          <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>
+          <enumeration name="Weedshare" value="http://www.shmedlic.com/license/3play.aspx"/>
+        </simpleType>
+      </attribute>
+      <attribute name="track" type="short"/>
+      <attribute name="type">
+        <simpleType base="string">
           <enumeration value="Song"/>
           <enumeration value="Speech"/>
           <enumeration value="Audiobook"/>
           <enumeration value="Other"/>
-        </restriction>
-      </simpleType>
-    </attribute>
-    <attribute use="optional" name="seconds" type="int"/>
-    <attribute use="optional" name="year" type="gYear"/>
-    <attribute use="optional" name="language" type="language"/>
-    <attribute use="optional" name="SHA1" type="string"/>
-    <attribute use="optional" name="bitrate" type="short"/>
-    <attribute use="optional" name="price" type="string"/>
-    <attribute use="optional" name="link" type="anyURI"/>
-    <attribute use="optional" name="comments">
-      <simpleType>
-        <restriction base="string">
-          <maxLength value="100"/>
-        </restriction>
-      </simpleType>
-    </attribute>
-
-    <!-- needed to reference the associated QueryHit in searches -->
-    <attribute use="optional" name="index" type="int"/>
-
-    <!-- must be last attribute in all supported schemas -->
-    <attribute use="optional" name="action" type="string"/>
-
-    <!-- </restriction></complexContent> -->
+        </simpleType>
+      </attribute>
+      <attribute name="year" type="year" width="20"/>
+      <attribute name="seconds" type="duration" editable="false" width="20"/>
+      <attribute name="language" type="language"/>
+      <attribute name="bitrate" type="short" editable="false" width="51" defaultViz="true"/>
+      <attribute name="comments">
+        <simpleType base="string">
+          <maxInclusive value="100"/> 
+        </simpleType>
+      </attribute>
+      <attribute name="license" type="string"/>
+      <attribute name="action" type="string" hidden="true"/>
+    </all>
   </complexType>
 
 </schema>
