@@ -243,6 +243,10 @@ public class DownloadTest extends BaseTestCase {
         // get rid of any pushlocs in the map
         System.runFinalization();
         System.gc();
+        
+        FileDesc []shared = RouterService.getFileManager().getAllSharedFileDescriptors();
+        for (int i = 0; i < shared.length; i++) 
+            RouterService.getFileManager().removeFileIfShared(shared[i].getFile());
     }
     
     private static void deleteAllFiles() {
@@ -1681,6 +1685,8 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void testPartialBootstrapsInactiveDownload() throws Exception {
+        // this is different from testResumePartialWithAlternateLocations where the
+        // download is resumed manuall
         altBootstrapTest(true);
     }
     
@@ -1713,10 +1719,7 @@ public class DownloadTest extends BaseTestCase {
                     Thread.sleep(complete ? 4000 : 1500);
                     FileDesc fd = RouterService.getFileManager().
                         getFileDescForUrn(TestFile.hash());
-                    if (!complete)
-                        assertTrue(fd instanceof IncompleteFileDesc);
-                    else
-                        assertFalse(fd instanceof IncompleteFileDesc);
+                    assertTrue(fd instanceof IncompleteFileDesc);
                     RouterService.getAltlocManager().add(
                         AlternateLocation.create(rfd2),this);
                     RouterService.getAltlocManager().add(
