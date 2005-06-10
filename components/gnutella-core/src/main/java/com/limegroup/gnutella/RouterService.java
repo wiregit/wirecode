@@ -1472,7 +1472,7 @@ public class RouterService {
 	public static Downloader download(MagnetOptions magnet, boolean overwrite) 
 		throws SaveLocationException {
 		if (!magnet.isDownloadable()) {
-			throw new IllegalArgumentException("invalid magnet");
+			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
 		}
 		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), 
 						magnet.getDisplayName(), magnet.getDefaultURLs(), 
@@ -1499,7 +1499,7 @@ public class RouterService {
 	public static Downloader download(MagnetOptions magnet, boolean overwrite,
 			File saveDir, String fileName) throws SaveLocationException {
 		if (!magnet.isDownloadable()) {
-			throw new IllegalArgumentException("invalid magnet");
+			throw new IllegalArgumentException("invalid magnet: not enough information for downloading");
 		}
 		if (fileName == null) {
 			throw new NullPointerException("fileName is null");
