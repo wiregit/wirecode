@@ -10,14 +10,10 @@ public interface SelectionStrategy {
      * to block boundaries.  However, there are no guarantees on alignment.
      * 
      * @param availableIntervals a representation of the set of 
-     *      bytes available for download from a given server
-     * @param previewLength the number of contiguous bytes from the 
-     *      beginning of the file that have already been assigned 
-     *      (and will presumably soon be available for preview)
-     * @param lastNeededByte all bytes after lastNeededByte have been assigned for
-     *      download.  Note that this information may not be availbable
-     *      from availableIntervals, since availableIntervals may contain server-specific
-     *      information.
+     *      bytes available for download from a given server, minus
+     *      the set of bytes that we already have (or have assigned)
+     * @param lowerBound the first byte that has not been assigned yet
+     * @param upperBound the last byte that has not been assigned yet
      * @param fileSize the total length of the file being downloaded
      * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
      *      be ignared.  An attempt will be made to make the high end of the interval one less
@@ -26,7 +22,7 @@ public interface SelectionStrategy {
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
     public Interval pickAssignment(IntervalSet availableIntervals, 
-            long previewLength,
-            long lastNeededBlock,
+            long lowerBound,
+            long upperBound,
             long blockSize) throws java.util.NoSuchElementException;
 }
