@@ -82,48 +82,44 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectation);
     }
-
-    public void testFragmentationAvoidance() {
-        // Set up a couple of gaps in our available bytes
-        long gap1 = blockSize + 1;
-        long gap2 = 3 * blockSize + 4;
-        availableBytes.delete(new Interval(gap1));
-        availableBytes.delete(new Interval(gap2));
-
-        // Ensure that randomLocations[0] will be 0
-        prng.setFloat(0.0f);
-
-        // Create the expected assignments
-        Interval[] expectation = new Interval[3];
-        expectation[0] = new Interval(0, blockSize - 1);
-        expectation[1] = new Interval(blockSize + 2, 2 * blockSize - 1);
-        expectation[2] = new Interval(3 * blockSize + 5, 4 * blockSize - 1);
-
-        // Use indexes corresponding to pre-existing
-        // fragments in the download
-        int[] testInts = { 0, 1, 2 };
-        prng.setInts(testInts);
-
-        testAssignments(strategy, availableBytes, fileSize, blockSize,
-                expectation);
+    
+    public void testUpdateSkippedLocations() {
+        // Skip forward
+        // Set up RandomLocation[7] to be 1*blockSize
+        // Then set up RandomLocation[3] to be 0.
+        // Downloading two blocks starting at 0
+        // should cause location 7 to be skipped
+        // and re-set to 5*blockSize
+        prng.setInts(new int[]{7,3,3,7});
+        prng.setLongs(new long[]{1L, 0L, 5L});
         
-        // Run the above test, but use setFloat to ensure
-        // randomLocations[0] is random rather than aligned
-        // with the beginning of the file
-        prng.setFloat(1.0f-EPSILON);
+        Interval assignment = null;
+        for(int i=4; i >= 1; i--) {
+            assignment = strategy.pickAssignment(availableBytes, 0, 
+                fileSize-1, blockSize);
+            availableBytes.delete(assignment);
+        }
+        assertEquals("random location is not getting reset when skipped.", 
+                assignment.low, 5*blockSize);
+        
+        // Skip backward
+        fileSize = 8*blockSize;
         availableBytes = IntervalSet.createSingletonSet(0,fileSize-1);
-        availableBytes.delete(new Interval(gap1));
-        availableBytes.delete(new Interval(gap2));
-       
-        // Expected assignments are the same, except for the
-        // assignment corresponding to randomLocations index 0
-        prng.setInts(testInts);
-        long randomBlock = 7;
-        prng.setLong(randomBlock); // Random index zero will consume one random long
-        expectation[0] = new Interval(randomBlock*blockSize, (randomBlock+1)*blockSize-1);
+        // Set up location 8 to point to the second-to last block of the file.
+        // Set up location 5 to point to the last block of the file.
+        // The second download from location 5 should cause location 8 to
+        // be skipped over and therefore lazily updated to block 2
+        prng.setInts(new int[]{8,5,5,8});
+        prng.setLongs(new long[]{6L, 7L, 2L});
         
-        testAssignments(strategy, availableBytes, fileSize, blockSize,
-                expectation);
+        assignment = null;
+        for(int i=4; i >= 1; i--) {
+            assignment = strategy.pickAssignment(availableBytes, 0, 
+                fileSize-1, blockSize);
+            availableBytes.delete(assignment);
+        }
+        assertEquals("random location is not getting reset when skipped backwards.", 
+                assignment.low, 2*blockSize);
     }
     
     /** Tests lazy updating of randomLocations */
@@ -155,7 +151,7 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         // Set up available bytes to be typical
         // situation where wrapping occurs.
         // We need only the first half block and the second
-        // to fourth blocks.
+        // to fourth blocks.  
         availableBytes = IntervalSet.createSingletonSet(5,
                 4 * blockSize - 1);
         availableBytes.delete(new Interval(blockSize/2, blockSize-1));
@@ -184,10 +180,13 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
      * wrapped inside pickAssignment.
      */
     public void testRandomNumberWraps() throws Exception {
+        fileSize = blockSize*4193+9;
+        strategy = createRandomStrategy(fileSize, prng);
+        
         // corner case of first block
         testRandomNumberWraps(0, 0, blockSize*107+4, 972);
         // corner case of last block
-        testRandomNumberWraps(fileSize/blockSize, 2000, fileSize, 123);
+        testRandomNumberWraps(fileSize/blockSize, 2000, fileSize-1, 123);
         // And some arbitrary tests, keeping in mind availableBlocks
         // only represents blocks 0-10
         testRandomNumberWraps(10, 2000, blockSize*107+4, 412);
@@ -232,7 +231,7 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         assertTrue("Failed to complain about invalid block size", false);
     }
     
-    public void testInvalidPreviewLength() {
+    public void testInvalidLowerBound() {
         // Try an invalid preview length and see if it throws
         // an InvalidInputException
         try {
@@ -242,20 +241,31 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
             // Wohoo!  Exception thrown... test passed
             return;
         }
-        assertTrue("Failed to complain about invalid preview length", false);
+        assertTrue("Failed to complain about negative lowerBound", false);
     }
     
-    public void testInvalidLastNeededByte() {
-        // Try calling with lastNeededByte > previewLength
+    public void testInvalidUpperBound() {
+        // Try calling with lowerBound > upperBound
         // and see if it throws an exception
+        boolean caughtException = false;
         try {
             strategy.pickAssignment(availableBytes, 2001, 
                     2000, blockSize);
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed
-            return;
+            caughtException = true;
         }
-        assertTrue("Failed to complain about invalid preview length", false);
+        assertTrue("Failed to complain about lowerBound > upperBound", caughtException);
+        
+        caughtException = false;
+        try {
+            strategy.pickAssignment(availableBytes, 2001, 
+                    fileSize+1, blockSize);
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed
+            caughtException = true;
+        }
+        assertTrue("Failed to complain about upperBound larger than file", caughtException);
     }
     
     /** Make sure we throw NoSuchElement exception if there is nothing to
