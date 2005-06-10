@@ -104,7 +104,7 @@ public class MagnetOptions {
 	 * a non empty keyword topic.
 	 * @return
 	 */
-	public boolean isValid() {
+	public boolean isDownloadable() {
 		 return getDefaultURLs().length > 0  && (getSHA1Urn() != null 
 			|| (getKeywordTopic() != null && getKeywordTopic().length() > 0));
 	}
@@ -117,6 +117,15 @@ public class MagnetOptions {
 	 */
 	public boolean isHashOnly() {
 		return _kt == null && _dn == null && _as.isEmpty() && _xs.isEmpty();
+	}
+	
+	/**
+	 * Returns true if only the keyword topic is specified.
+	 * @return
+	 */
+	public boolean isKeywordTopicOnly() {
+		return _kt != null && _dn == null && _as.isEmpty() && _xs.isEmpty()
+			&& _xt.isEmpty();
 	}
 	
 	private URN extractSHA1URNFromList(List strings) {

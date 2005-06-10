@@ -1467,11 +1467,11 @@ public class RouterService {
 	 * @return
 	 * @throws SaveLocationException
 	 * @throws IllegalArgumentException if the magnet is not 
-	 * {@link MagnetOptions#isValid() valid}.
+	 * {@link MagnetOptions#isDownloadable() valid}.
 	 */
 	public static Downloader download(MagnetOptions magnet, boolean overwrite) 
 		throws SaveLocationException {
-		if (!magnet.isValid()) {
+		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("invalid magnet");
 		}
 		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), 
@@ -1493,12 +1493,12 @@ public class RouterService {
 	 * @return
 	 * @throws SaveLocationException
 	 * @throws IllegalArgumentException if the magnet is not
-	 * {@link MagnetOptions#isValid() valid}.
+	 * {@link MagnetOptions#isDownloadable() valid}.
 	 * @throws NullPointerException if <code>fileName</code> is null.
 	 */
 	public static Downloader download(MagnetOptions magnet, boolean overwrite,
 			File saveDir, String fileName) throws SaveLocationException {
-		if (!magnet.isValid()) {
+		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("invalid magnet");
 		}
 		if (fileName == null) {

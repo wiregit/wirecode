@@ -148,7 +148,7 @@ public class ExternalControl {
 			
             // Validate that we have something to go with from magnet
             // If not, report an error.
-            if (!curOpt.isValid()) {
+            if (!curOpt.isDownloadable()) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
