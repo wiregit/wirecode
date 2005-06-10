@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.util.Random;
+import java.util.List;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -52,11 +53,17 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     private final long[] randomLocations = new long[16];
     
     /** The size the download will be once completed. */
-    protected long completedSize;
+    protected final long completedSize;
     
     public RandomDownloadStrategy(long completedSize) {
         super();
         this.completedSize = completedSize;
+        /* Set all randomLocations to be less than the minimum lowerBound,
+         * so that they will be lazily updated. 
+         */
+        for(int i=randomLocations.length - 1; i >= 0; i--) {
+            randomLocations[i] = -1L;
+        }
     }
     
     /**
@@ -68,11 +75,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 
      * 
      * @param availableIntervals a representation of the set of 
-     *      bytes available for download from a given server
-     * @param previewLength the number of contiguous bytes from the 
+     *      bytes available for download from a given server, minus
+     *      the set of bytes that we already have (or have assigned)
+     * @param lowerBound the number of contiguous bytes from the 
      *      beginning of the file that have already been assigned 
      *      (and will presumably soon be available for preview)
-     * @param lastNeededByte all bytes after lastNeededByte have been assigned for
+     * @param upperBound all bytes after lastNeededByte have been assigned for
      *      download.  Note that this information may not be availbable
      *      from availableIntervals, since availableIntervals may contain server-specific
      *      information.
@@ -84,47 +92,27 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long previewLength,
-            long lastNeededByte,
+            long lowerBound,
+            long upperBound,
             long blockSize) throws java.util.NoSuchElementException {
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
-        if (previewLength < 0)
-            throw new IllegalArgumentException("Preview length must be >= 0, "+previewLength+"<0");
-        if (previewLength > lastNeededByte)
-            throw new IllegalArgumentException("Preview length greater than last needed byte "+
-                    previewLength+">"+lastNeededByte);
+        if (lowerBound < 0)
+            throw new IllegalArgumentException("lowerBound must be >= 0, "+lowerBound+"<0");
+        if (upperBound >= completedSize)
+            throw new IllegalArgumentException("upperBound must be less than completedSize "+
+                    upperBound+" >= "+completedSize);
+        if (lowerBound > upperBound)
+            throw new IllegalArgumentException("lowerBound greater than upperBound "+
+                    lowerBound+" > "+upperBound);
             
         // Which random range should be extended?
         int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             
-        // Lazy update of the random location
-        if (randomLocations[randomIndex] == 0) {
-            // If the "random" location is zero, it has never been initialized
-            // or will point to the first block and then be randomly updated
-            // next time around, after the first block has been assigned.
-            // We should try to align it to with the Nth available fragment
-            if (availableIntervals.getAllIntervalsAsList().size() > randomIndex) {
-                randomLocations[randomIndex] = ((Interval) availableIntervals
-                        .getAllIntervalsAsList().get(randomIndex)).low;
-
-                // Undo the heavy bias this creates towards the first block of
-                // the file in freshly started downloads.
-                // Note that if completedSize <= blockSize, it's a moot point as
-                // there's only one block to pick.
-                if (randomLocations[randomIndex] == 0
-                        && pseudoRandom.nextFloat() > ((float) blockSize)/completedSize)
-                    randomLocations[randomIndex] = getRandomLocation(previewLength,
-                            lastNeededByte, blockSize);
-            } else {
-                // Definitely uninitialized, so initialize
-                randomLocations[randomIndex] = getRandomLocation(previewLength,
-                        lastNeededByte, blockSize);
-            }
-        } else if (randomLocations[randomIndex] < previewLength || 
-                randomLocations[randomIndex] > lastNeededByte) {
+        if (randomLocations[randomIndex] < lowerBound || 
+                randomLocations[randomIndex] > upperBound) {
             // Make the random location somewhere between the first and last bytes we still need to assign
-            randomLocations[randomIndex] = getRandomLocation(previewLength, lastNeededByte, blockSize);
+            randomLocations[randomIndex] = getRandomLocation(lowerBound, upperBound, blockSize);
         }
         
         // The lowest start location of an ideally matched interval.
@@ -163,6 +151,18 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             if (bestLow >= randomPoint) {
                 // We've found our ideal location.  Log it and return
                 
+                // See which (if any) randomLocations have been skipped
+                for(int i=randomLocations.length-1; i >= 0; i--) {
+                    if (i != randomIndex &&
+                            randomLocations[randomIndex] <= randomLocations[i] &&
+                            bestHigh >= randomLocations[i]) {
+                        // A random location has been skipped, so force a lazy update
+                        // by setting the random location below the smallest legal
+                        // lowerBound
+                        randomLocations[i] = -1;
+                    }
+                }
+                
                 // Log it
                 if (LOG.isDebugEnabled()) { 
                     LOG.debug("Random download, index="+randomIndex+
@@ -175,9 +175,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 if (candidate.high == bestHigh && candidate.low == bestLow) {
                     return candidate;
                 }
-                if (bestHigh < candidate.high)
-                    return new Interval(bestLow, bestHigh);
-                return new Interval(bestLow,candidate.high);
+                return new Interval(bestLow,bestHigh);
             } else {
                 // If randomPoint < candidate.high, then earlier code would
                 // have stepped bestLow >= randomPoint, and we would have
@@ -204,6 +202,20 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         
         if (lastSuitableInterval == null)
             throw new NoSuchElementException();
+        
+        // We're stepping backwards in the file if we've gotten to this point
+        
+        // See which (if any) randomLocations have been skipped
+        for(int i=randomLocations.length-1; i >= 0; i--) {
+            if (i != randomIndex &&
+                    randomLocations[randomIndex] >= randomLocations[i] &&
+                    lastSuitableInterval.low <= randomLocations[i]) {
+                // A random location has been skipped, so force a lazy update
+                // by setting the random location below the smallest legal
+                // lowerBound
+                randomLocations[i] = -1;
+            }
+        }
         
         // The only way to get here is if we have selected a random lowerBound,
         // and there are no suitible Intervals at or after lowerBound.

@@ -48,17 +48,17 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
     }
     
     public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long previewLength,
-            long lastNeededByte,
+            long lowerBound,
+            long upperBound,
             long blockSize) throws java.util.NoSuchElementException {
         // Input validation
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
-        if (previewLength < 0)
-            throw new IllegalArgumentException("Preview length must be >= 0, "+previewLength+"<0");
-        if (previewLength > lastNeededByte)
+        if (lowerBound < 0)
+            throw new IllegalArgumentException("Preview length must be >= 0, "+lowerBound+"<0");
+        if (lowerBound > upperBound)
             throw new IllegalArgumentException("Preview length greater than last needed byte "+
-                    previewLength+">"+lastNeededByte);
+                    lowerBound+">"+upperBound);
         
         // Determine if we should return a uniformly distributed Interval
         // or the first interval.
@@ -67,8 +67,8 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         // returns 1.0, nextFloat() < getBiasProbability() with probability 100%.  Other behavior
         // indicates a bug in java.util.Random.
         if (getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
-                || pseudoRandom.nextFloat() >= getBiasProbability(previewLength, completedSize)) {
-            return super.pickAssignment(availableIntervals, previewLength, lastNeededByte, blockSize);
+                || pseudoRandom.nextFloat() >= getBiasProbability(lowerBound, completedSize)) {
+            return super.pickAssignment(availableIntervals, lowerBound, upperBound, blockSize);
         }
         
         Interval candidate = availableIntervals.getFirst();
