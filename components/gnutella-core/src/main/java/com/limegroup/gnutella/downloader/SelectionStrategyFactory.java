@@ -28,7 +28,7 @@ public class SelectionStrategyFactory {
             for (int i = previewableExtensions.length-1; i >= 0; i--) {
                 // If the extension is previewable, return a strategy
                 // favorable for previewing
-                if (previewableExtensions[i].equals(extension)) {
+                if (previewableExtensions[i].toLowerCase().equals(extension)) {
                     if (LOG.isDebugEnabled()) { 
                         LOG.debug("Extension ("+extension+") is previewable."); 
                     }
