@@ -2263,7 +2263,7 @@ OPTIONS_BUGS_MAIN_TITLE=تقارير الخطأ
 OPTIONS_GUI_MAIN_TITLE=عرض
 #### OPTIONS_POPUPS_MAIN_TITLE=Popups
 OPTIONS_POPUPS_MAIN_TITLE=النوافذ المنبثقة
-#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Text Autocompletion
+#### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocompletion
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=إكمال النص تلقائيا
 #### OPTIONS_THEME_MAIN_TITLE=Skin
 OPTIONS_THEME_MAIN_TITLE=سمة
@@ -2375,7 +2375,7 @@ OPTIONS_SHARED_DIRS_BUTTON_TIP=مشاركة المجلد.
 #? OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=
 #### OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download Sharing
 #? OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=
-#### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to folders that are not shared.
+#### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 #? OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=
 
 ################################################################################
@@ -2575,11 +2575,11 @@ OPTIONS_CHAT_ACTIVE_LABEL=يمكنك تمكين أو إيقاف تشغيل ال�
 ################################################################################
 # Key/Value pairs for the player options in the options window
 ################################################################################
-#### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire MP3 Player:
+#### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=استخدم مشغل LimeWire لملفات MP3.
 #### OPTIONS_PLAYER_PREFERENCE_TITLE=Player Options
 OPTIONS_PLAYER_PREFERENCE_TITLE=خيارات المشغل
-#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can use the internal player or your system default. A restart is required to enable/disable the player controls.
+#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player.  The media player and playlist will appear only if this option is set.  A restart will be required when enabling or disabling the media controls.
 OPTIONS_PLAYER_PREFERENCE_LABEL=يمكنك استخدام المشغل الداخلي أو المشغل الافتراضي للنظام. لتفعيل/عدم تفعيل تحكمات المشغل لا بد من إعادة التشغيل.
 
 ################################################################################
