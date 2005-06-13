@@ -30,5 +30,14 @@ public final class URLHandlerSettings extends LimeProps {
 	 */
 	public static final StringSetting AUDIO_PLAYER =
 		FACTORY.createStringSetting("AUDIO_PLAYER", "xterm -e mplayer $URL$");
+	
+	/**
+	 * Setting for the bitzi lookup string, has to be processed through 
+	 * {@link MessageFormat#format(java.lang.String, java.lang.Object[])} for
+	 * adding the urn.
+	 */
+	public static final StringSetting BITZI_LOOKUP_URL =
+		FACTORY.createStringSetting("BITZI_LOOKUP_URL",
+				"http://bitzi.com/lookup/{0}?ref=limewire");
 }
 
