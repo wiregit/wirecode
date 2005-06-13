@@ -2488,6 +2488,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         ranker.addToPool(rfd);
 	}
     
+    synchronized void forgetRFD(RemoteFileDesc rfd) {
+        cachedRFDs.remove(rfd);
+    }
+    
 	/**
 	 * Returns the number of alternate locations that this download is using.
 	 */

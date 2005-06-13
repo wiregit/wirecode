@@ -560,6 +560,7 @@ public class DownloadWorker implements Runnable {
                  return ret;
         } catch(IOException e) {
                 // even the push failed :(
+            _manager.forgetRFD(_rfd);
         }
         
         
