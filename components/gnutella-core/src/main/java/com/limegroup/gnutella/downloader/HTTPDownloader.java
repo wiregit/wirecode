@@ -61,6 +61,7 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -1477,9 +1478,12 @@ public class HTTPDownloader implements BandwidthTracker {
                     continue;
                 }
 
-                // update the FWT version we know for this host
-            	PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
-                PushEndpoint.setAddr(_rfd.getClientGUID(),_rfd);
+                // try to update the FWT version and external address we know for this host
+            	try {
+            	    PushEndpoint.setAddr(_rfd.getClientGUID(),
+            	            new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()));
+            	    PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
+                } catch (IOException ignored) {}
             }
         }
     }
@@ -1529,7 +1533,8 @@ public class HTTPDownloader implements BandwidthTracker {
         
         try {
             PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
-            PushEndpoint.setAddr(_rfd.getClientGUID(),_rfd);
+            PushEndpoint.setAddr(_rfd.getClientGUID(),
+                    new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()));
         }catch(IOException tooBad) {
             // invalid header - ignore it.
         }
