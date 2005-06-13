@@ -124,9 +124,6 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
         PushEndpoint pe = new PushEndpoint(g1.bytes(),proxies);
         PushEndpoint pe2 = new PushEndpoint(g2.bytes(),proxies2);
         
-        pe.overwriteProxies(g1.bytes(), proxies);
-        pe.overwriteProxies(g2.bytes(), proxies2);
-        
         //test an rfd with push proxies
 		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
                 HugeTestUtils.URNS[0].httpStringValue(), 10, 
