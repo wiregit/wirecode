@@ -123,20 +123,11 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		GUID g2 = new GUID(GUID.makeGuid());
         PushEndpoint pe = new PushEndpoint(g1.bytes(),proxies);
         PushEndpoint pe2 = new PushEndpoint(g2.bytes(),proxies2);
-        Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         
-        //  PushEndpoint's GUID_PROXY_MAP holds GuidSetWrappers, not IPPortSets
-        PushEndpoint.GuidSetWrapper gsw1 = new PushEndpoint.GuidSetWrapper(g1);
-        PushEndpoint.GuidSetWrapper gsw2 = new PushEndpoint.GuidSetWrapper(g2);
-        
-        gsw1.overwriteProxies(proxies);
-        gsw2.overwriteProxies(proxies2);
-        
-        m.put(g1, gsw1);
-        m.put(g2, gsw2);
+        pe.overwriteProxies(g1.bytes(), proxies);
+        pe.overwriteProxies(g2.bytes(), proxies2);
         
         //test an rfd with push proxies
-        
 		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
                 HugeTestUtils.URNS[0].httpStringValue(), 10, 
                 pe.getClientGUID(), 10, true, 2, true, null, 
@@ -166,10 +157,6 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 GUID g3 = new GUID(GUID.makeGuid());
 		 PushEndpoint noProxies = new PushEndpoint(g3.bytes());
 
-         // See above, re: GuidSetWrapper
-         PushEndpoint.GuidSetWrapper gsw3 = new PushEndpoint.GuidSetWrapper(g3);
-
-         m.put(g3, gsw3);
 		 RemoteFileDesc fwalledNotGood = 
 		 	new RemoteFileDesc(fwalled, noProxies);
 		 
