@@ -645,6 +645,10 @@ public class FileDesc implements AlternateLocationCollector, FileDetails {
 		}
 		return null;
 	}
+	
+	public boolean isFirewalled() {
+		return !RouterService.acceptedIncomingConnection();
+	}
 }
 
 

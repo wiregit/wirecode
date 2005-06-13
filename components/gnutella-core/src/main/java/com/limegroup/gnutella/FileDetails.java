@@ -41,5 +41,10 @@ public interface FileDetails {
 	 * @return
 	 */
 	InetSocketAddress getSocketAddress();
+	/**
+	 * Returns whether or not the host that holds this file is firewalled.
+	 * @return
+	 */	
+	boolean isFirewalled();
 	
 }
