@@ -378,7 +378,16 @@ public class ConnectionManager {
         return !NetworkUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
-               !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue();
+               !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
+               !isBehindProxy();
+    }
+    
+    /**
+     * @return if we are currently using a http or socks4/5 proxy to connect.
+     */
+    public boolean isBehindProxy() {
+        return ConnectionSettings.CONNECTION_METHOD.getValue() != 
+            ConnectionSettings.C_NO_PROXY;
     }
     
     /**
