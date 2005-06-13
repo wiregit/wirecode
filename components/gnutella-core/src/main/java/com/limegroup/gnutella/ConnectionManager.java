@@ -781,8 +781,7 @@ public class ConnectionManager {
 		    
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
-		    if(!hr.isGoodUltrapeer() || 
-		      (Sockets.getAttempts() < limeAttempts && !hr.isLimeWire())) {
+		    if(!hr.isGoodUltrapeer() || (_connectionAttempts < limeAttempts && !hr.isLimeWire())) {
 		        return false;
 		    // if we have slots, allow it.
 		    } else if (_shieldedConnections < _preferredConnections) {
@@ -1298,8 +1297,6 @@ public class ConnectionManager {
                                           c.getPort()), true, c.getLocalePref());
             }
         }
-        
-        Sockets.clearAttempts();
     }
 
     /**

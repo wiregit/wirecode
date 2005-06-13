@@ -34,7 +34,7 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Creates the pipes, buffer & registers channels for interest.
      */
-    synchronized void init() throws IOException {
+    synchronized NIOOutputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             
@@ -44,6 +44,7 @@ class NIOOutputStream implements WriteObserver {
         this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         sink = new BufferOutputStream(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
+        return this;
     }
     
     /**

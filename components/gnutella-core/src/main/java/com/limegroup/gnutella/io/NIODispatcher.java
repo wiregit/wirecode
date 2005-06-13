@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.io;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.SelectableChannel;
@@ -9,6 +10,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
@@ -27,7 +29,11 @@ import org.apache.commons.logging.Log;
  * To register interest initially in either reading, writing, accepting, or connecting,
  * use registerRead, registerWrite, registerReadWrite, registerAccept, or registerConnect.
  *
- * When handling events, interest is done different ways.  A channel registered for accepting
+ * A channel registering for a connect can specify a timeout.  If the timeout is greater than
+ * 0 and a connect event hasn't happened in that length of time, the channel will be cancelled 
+ * and handleIOException will be called on the Observer. 
+ *
+ * When handling events, future interest is done different ways.  A channel registered for accepting
  * will remain registered for accepting until that channel is closed.  There is no way to 
  * turn off interest in accepting.  A channel registered for connecting will turn off all
  * interest (for any operation) once the connect event has been handled.  Channels registered
@@ -85,6 +91,9 @@ public class NIODispatcher implements Runnable {
     /** The throttle queue. */
     private final List /* of NBThrottle */ THROTTLE = new ArrayList();
     
+    /** The timeout queue. */
+    private final List /* of Timeout */ TIMEOUTS = new ArrayList();
+    
     /**
      * Temporary list used where REGISTER & LATER are combined, so that
      * handling IOException or running arbitrary code can't deadlock.
@@ -112,40 +121,42 @@ public class NIODispatcher implements Runnable {
 	    
     /** Register interest in accepting */
     public void registerAccept(SelectableChannel channel, AcceptObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_ACCEPT);
+        register(channel, attachment, SelectionKey.OP_ACCEPT, 0);
     }
     
     /** Register interest in connecting */
-    public void registerConnect(SelectableChannel channel, ConnectObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_CONNECT);
+    public void registerConnect(SelectableChannel channel, ConnectObserver attachment, int timeout) {
+        register(channel, attachment, SelectionKey.OP_CONNECT, timeout);
     }
     
     /** Register interest in reading */
     public void registerRead(SelectableChannel channel, ReadObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ);
+        register(channel, attachment, SelectionKey.OP_READ, 0);
     }
     
     /** Register interest in writing */
     public void registerWrite(SelectableChannel channel, WriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_WRITE);
+        register(channel, attachment, SelectionKey.OP_WRITE, 0);
     }
     
     /** Register interest in both reading & writing */
     public void registerReadWrite(SelectableChannel channel, ReadWriteObserver attachment) {
-        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE, 0);
     }
     
     /** Register interest */
-    private void register(SelectableChannel channel, IOErrorObserver handler, int op) {
+    private void register(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
 		if(Thread.currentThread() == dispatchThread) {
 			try {
-				channel.register(selector, op, handler);
+				SelectionKey key = channel.register(selector, op, handler);
+                if(timeout != 0)
+		            addNotify(key, handler, timeout, System.currentTimeMillis());
 			} catch(IOException iox) {
                 handler.handleIOException(iox);
             }
 		} else {
 	        synchronized(Q_LOCK) {
-				REGISTER.add(new RegisterOp(channel, handler, op));
+				REGISTER.add(new RegisterOp(channel, handler, op, timeout));
 			}
         }
     }
@@ -255,13 +266,14 @@ public class NIODispatcher implements Runnable {
     private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);        
-            
+        removeNotify(sk, handler);
+
         SocketChannel channel = (SocketChannel)sk.channel();
         
         boolean finished = channel.finishConnect();
         if(finished) {
             sk.interestOps(0); // interested in nothing just yet.
-            handler.handleConnect();
+            handler.handleConnect(channel.socket());
         } else {
             cancel(sk, handler);
         }
@@ -281,8 +293,8 @@ public class NIODispatcher implements Runnable {
      * deadlock.
      */
     private void addPendingItems() {
+        long now = System.currentTimeMillis();
         synchronized(Q_LOCK) {
-            long now = System.currentTimeMillis();
             for(int i = 0; i < THROTTLE.size(); i++)
                 ((NBThrottle)THROTTLE.get(i)).tick(now);
 
@@ -300,7 +312,9 @@ public class NIODispatcher implements Runnable {
                     if(item instanceof RegisterOp) {
                         RegisterOp next = (RegisterOp)item;
                         try {
-                            next.channel.register(selector, next.op, next.handler);
+                            SelectionKey key = next.channel.register(selector, next.op, next.handler);
+                            if(next.timeout != 0)
+                                addNotify(key, next.handler, next.timeout, now);
                         } catch(IOException iox) {
                             next.handler.handleIOException(iox);
                         }
@@ -323,6 +337,63 @@ public class NIODispatcher implements Runnable {
         synchronized(Q_LOCK) {
             for(int i = 0; i < THROTTLE.size(); i++)
                 ((NBThrottle)THROTTLE.get(i)).selectableKeys(keys);
+        }
+    }
+    
+    /**
+     * Processes all the items that can be timed out.  If the current time
+     * is beyond the timeout time, cancels the item & generates a handleIOException
+     * on the item.
+     */
+    private void processTimeouts() {
+        if(!TIMEOUTS.isEmpty()) {
+            long now = System.currentTimeMillis();
+            for(int i = TIMEOUTS.size() - 1; i >= 0; i--) {
+                Timeout next = (Timeout)TIMEOUTS.get(i);
+                if(now >= next.dead) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Killing timed out connect: " + next.handler);
+                    cancel(next.key, next.handler); 
+                    next.handler.handleIOException(new SocketTimeoutException("no connection in: " + next.timeout));
+                    TIMEOUTS.remove(i);
+                } else {
+                    break; // TIMEOUTS is sorted.
+                }
+            }
+        }
+    }
+    
+    /**
+     * Adds a single item into TIMEOUTs, in order.
+     */
+    private void addNotify(SelectionKey key, IOErrorObserver handler, int timeout, long now) {
+        long then = now + timeout;
+        Timeout t = new Timeout(key, handler, timeout, then);
+        if(TIMEOUTS.isEmpty()) {
+            // Common case.
+            TIMEOUTS.add(t);
+        } else if(then >= ((Timeout)TIMEOUTS.get(TIMEOUTS.size() - 1)).dead) {
+            // Another common case.
+            TIMEOUTS.add(t);
+        } else {
+            // Quick lookup.
+            int insertion = Collections.binarySearch(TIMEOUTS, t);
+            if(insertion < 0)
+                insertion = (insertion + 1) * -1;
+            TIMEOUTS.add(insertion, t);
+        }
+    }
+    
+    /**
+     * Removes a single ConnectObserver & SelectionKey from TIMEOUTS.
+     */
+    private void removeNotify(SelectionKey key, IOErrorObserver handler) {
+        for(int i = TIMEOUTS.size() - 1; i >= 0; i--) {
+            Timeout next = (Timeout)TIMEOUTS.get(i);
+            if(next.key == key && next.handler == handler) {
+                TIMEOUTS.remove(i);
+                break;
+            }
         }
     }
     
@@ -363,8 +434,8 @@ public class NIODispatcher implements Runnable {
             if(keys.size() == 0)
                 continue;
             
-            if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + keys.size() + ") keys.");
+           // if(LOG.isDebugEnabled())
+           //     LOG.debug("Selected (" + keys.size() + ") keys.");
             
             readyThrottles(keys);
             
@@ -375,6 +446,8 @@ public class NIODispatcher implements Runnable {
             }
             
             keys.clear();
+            
+            processTimeouts();
         }
     }
     
@@ -435,13 +508,36 @@ public class NIODispatcher implements Runnable {
         private final SelectableChannel channel;
         private final IOErrorObserver handler;
         private final int op;
+        private final int timeout;
     
-        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op) {
+        RegisterOp(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
             this.channel = channel;
             this.handler = handler;
             this.op = op;
+            this.timeout = timeout;
         }
     }
+    
+    /** Encapsulates an IOErrorObserver on a timing-out operation. */
+    private static class Timeout implements Comparable {
+        private final SelectionKey key;
+        private final IOErrorObserver handler;
+        private final int timeout;
+        private final long dead;
+        
+        Timeout(SelectionKey key, IOErrorObserver handler, int timeout, long dead) {
+            this.key = key;
+            this.handler = handler;
+            this.timeout = timeout;
+            this.dead = dead;
+        }
+        
+        public int compareTo(Object a) {
+            Timeout o = (Timeout)a;
+            return dead > o.dead ? 1 : dead < o.dead ? -1 : 0;
+        }
+    }
+        
     
 }
 

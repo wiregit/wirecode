@@ -43,18 +43,17 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /** The ReadObserver this is being notified about read events */
     private ReadObserver reader;
     
-    /** Any exception that occurred while trying to connect */
-    private IOException storedException = null;
+    /** The ConnectObserver this delegates to about connect events */
+    private ConnectObserver connecter;
+    
+    /** If this Socket has already been shutdown. */
+    private boolean shutdown = false;
     
     /**
      * The host we're connected to.
      * (Necessary because Sockets retrieved from channels null out the host when disconnected)
      */
     private InetAddress connectedTo;
-    
-    /** Lock used to signal/wait for connecting */
-    private final Object LOCK = new Object();
-    
     
     /**
      * Constructs an NIOSocket using a pre-existing Socket.
@@ -63,10 +62,8 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     NIOSocket(Socket s) throws IOException {
         channel = s.getChannel();
         socket = s;
-        writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, channel);
-        ((NIOOutputStream)writer).init();
-        ((NIOInputStream)reader).init();
+        writer = new NIOOutputStream(this, channel).init();
+        reader = new NIOInputStream(this, channel).init();
         NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
     }
@@ -197,18 +194,18 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /**
      * Notification that a connect can occur.
      *
-     * This notifies the waiting lock so that connect can continue.
+     * This passes it off on to the delegating connecter and then forgets the
+     * connecter for the duration of the connection.
      */
-    public void handleConnect() throws IOException {
-        synchronized(LOCK) {
-            LOCK.notify();
-        }
+    public void handleConnect(Socket s) throws IOException {
+        connecter.handleConnect(this);
+        connecter = null;
     }
     
     /**
      * Notification that a read can occur.
      *
-     * This passes it off to the NIOInputStream.
+     * This passes it off to the delegating reader.
      */
     public void handleRead() throws IOException {
         reader.handleRead();
@@ -217,7 +214,7 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /**
      * Notification that a write can occur.
      *
-     * This passes it off to the NIOOutputStream.
+     * This passes it off to the delegating writer.
      */
     public boolean handleWrite() throws IOException {
         return writer.handleWrite();
@@ -226,15 +223,8 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /**
      * Notification that an IOException occurred while processing a
      * read, connect, or write.
-     *
-     * This wakes up any waiting locks and shuts down the socket & all streams.
      */
     public void handleIOException(IOException iox) {
-        synchronized(LOCK) {
-            storedException = iox;
-            LOCK.notify();
-        }
-        
         shutdown();
     }
     
@@ -244,6 +234,10 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     public void shutdown() {
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
+
+        if(shutdown)
+            return;
+        shutdown = true;
         
         try {
             shutdownInput();
@@ -255,6 +249,8 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
             
         reader.shutdown();
         writer.shutdown();
+        if(connecter != null)
+            connecter.shutdown();
         
         try {
             socket.close();
@@ -263,10 +259,6 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         try {
             channel.close();
         } catch(IOException ignored) {}
-
-        synchronized(LOCK) {
-            LOCK.notify();
-        }
     }
     
     /** Binds the socket to the SocketAddress */
@@ -286,37 +278,49 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     
     /** Connects to addr with the given timeout (in milliseconds) */
     public void connect(SocketAddress addr, int timeout) throws IOException {
-        connectedTo = ((InetSocketAddress)addr).getAddress();
-
-        synchronized(LOCK) {
-            if(!channel.connect(addr)) {
-                NIODispatcher.instance().registerConnect(channel, this);
+        BlockingConnecter connecter = new BlockingConnecter();
+        synchronized(connecter) {
+            if(!connect(addr, timeout, connecter)) {
                 try {
-                    LOCK.wait(timeout);
-                } catch(InterruptedException ix) {
-                    throw new InterruptedIOException(ix);
+                    connecter.wait();
+                } catch(InterruptedException ie) {
+                    shutdown();
+                    throw new InterruptedIOException(ie);
                 }
                 
-                IOException x = storedException;
-                storedException = null;
-                if(x != null) {
+                if(!isConnected()) {
                     shutdown();
-                    throw x;
-                } if(!isConnected()) {
-                    shutdown();
-                    throw new SocketTimeoutException("couldn't connect in " + timeout + " milliseconds");
-                }   
+                    throw new IOException("Unable to connect!");
+                }
             }
         }
+    }
+    
+    /**
+     * Connects to the specified address within the given timeout (in milliseconds).
+     * The given ConnectObserver will be notified of success or failure.
+     * In the event of success, observer.handleConnect is called.  In a failure,
+     * observer.shutdown is called.  observer.handleIOException is never called.
+     *
+     * Returns true if this was able to connect immediately.  The observer is still
+     * notified about the success even it it was immediate.
+     */
+    public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
+        connectedTo = ((InetSocketAddress)addr).getAddress();
+        this.connecter = observer;
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("Connected to: " + addr);
-            
-        if(writer instanceof NIOOutputStream)
-            ((NIOOutputStream)writer).init();
-        
-        if(reader instanceof NIOInputStream)
-            ((NIOInputStream)reader).init();
+        try {
+            if(channel.connect(addr)) {
+                observer.handleConnect(this);
+                return true;
+            } else {
+                NIODispatcher.instance().registerConnect(channel, this, timeout);
+                return false;
+            }
+        } catch(IOException failed) {
+            shutdown();
+            return false;
+        }
     }
     
      /**
@@ -487,4 +491,15 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     public String toString() {
         return "NIOSocket::" + channel.toString();
     }
+    
+    /** A ConnectObserver to use when someone wants to do a blocking connection. */
+    private static class BlockingConnecter implements ConnectObserver {
+        BlockingConnecter() {}
+         
+        public synchronized void handleConnect(Socket s) { notify(); }
+        public synchronized void shutdown() { notify(); }
+        
+        // unused.
+        public void handleIOException(IOException iox) {}
+    }          
 }
