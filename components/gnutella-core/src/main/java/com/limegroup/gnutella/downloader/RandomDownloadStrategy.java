@@ -32,11 +32,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
     
     /**
-     * A global pseudorandom number generator.  At least according to the Java 1.4.2 spec,
-     * it will be seeded using System.getTimeMillis().
-     * 
-     * We don't really care about values duplicated across threads, so don't bother
-     * serializing access.
+     * A global pseudorandom number generator. We don't really care about values 
+     * duplicated across threads, so don't bother serializing access.
      * 
      * This really should be final, except that making it non-final makes tests
      * much more simple.
