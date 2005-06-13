@@ -858,8 +858,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
         else if (!NetworkUtils.isValidPort(getPort()))
             return true;
         
-        // make sure we have some push proxies.
-        else return _firewalled && _pushAddr!=null;
+        else return isFirewalled();
     }
     
     /**
