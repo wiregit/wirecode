@@ -335,6 +335,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         IpPort ret = getIpPort();
 	    if (!NetworkUtils.isValidExternalIpPort(ret))
 	        return null;
+        
+        Assert.that(!ret.getAddress().equals(RemoteFileDesc.BOGUS_IP),"bogus ip address leaked");
 	    return ret;
 	}
 	
@@ -361,6 +363,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             byte [] host = new byte[6];
             dais.readFully(host);
             addr = QueryReply.IPPortCombo.getCombo(host);
+            if (addr.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
+                addr = null;
+                version = 0;
+            }
         }
         
         byte [] tmp = new byte[6];
