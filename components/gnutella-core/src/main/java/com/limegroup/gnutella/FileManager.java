@@ -557,7 +557,7 @@ public abstract class FileManager {
             //TODO: the call to join would block if the call to File.list called
             //by listFiles called by updateSharedDirectories blocks.  If this is the 
             //case, we need to spawn a thread before join'ing.
-            if (_loadThread!=null) {
+            if (_loadThread != null) {
                 _loadThreadInterrupted = true;
                 _loadThread.interrupt();
                 try {
