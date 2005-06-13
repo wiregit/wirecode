@@ -140,15 +140,14 @@ public abstract class SourceRanker {
             if (original instanceof PingRanker)
                 return original;
             better = new PingRanker();
-            better.addToPool(original.getShareableHosts());
         }else {
             if (original instanceof LegacyRanker)
                 return original;
             better = new LegacyRanker();
-            better.addToPool(original.getShareableHosts());
         }
         
         better.setMeshHandler(original.getMeshHandler());
+        better.addToPool(original.getShareableHosts());
         original.stop();
         return better;
     }
