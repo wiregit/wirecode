@@ -50,7 +50,7 @@ public final class IPFilter extends SpamFilter {
 
     /** 
      * Checks if a given host is banned.  This method will be
-     * called when accepting an incomming or outgoing connection.
+     * called when accepting an incoming or outgoing connection.
      * @param host preferably an IP in the form of A.B.C.D, but if
      *  it is a DNS name then a lookup will be performed.
      * @return true if this host is allowed, false if it is banned

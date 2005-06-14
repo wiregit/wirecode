@@ -328,7 +328,7 @@ public class ConnectionManager {
      */
      void acceptConnection(Socket socket) {
          //1. Initialize connection.  It's always safe to recommend new headers.
-         Thread.currentThread().setName("IncommingConnectionThread");
+         Thread.currentThread().setName("IncomingConnectionThread");
          ManagedConnection connection = new ManagedConnection(socket);
          try {
              initializeExternallyGeneratedConnection(connection);
