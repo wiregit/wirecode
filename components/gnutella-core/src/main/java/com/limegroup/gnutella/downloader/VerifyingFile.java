@@ -478,42 +478,6 @@ public class VerifyingFile {
         
         return ret;
     }
-    
-    /**
-     * Fits an interval inside a chunk.  This ensures that the interval is never larger
-     * than chunksize and finishes at exact chunk offset.
-     */ /*
-    private synchronized Interval alignInterval(Interval temp, int chunkSize) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
-        
-        Interval interval;
-        
-        int intervalSize = temp.high - temp.low+1;
-        
-        // find where the next chunk starts
-        int chunkStart = ( 1 + temp.low / chunkSize ) * chunkSize ;
-        
-        // if we're already covering an exact chunk, return 
-        if (chunkStart == temp.high+1 && intervalSize == chunkSize) {
-            LOG.debug("already at exact chunk");
-            return temp;
-        }
-        
-        // try to map the area until the chunk border
-        if (chunkStart < temp.high) {
-            interval = new Interval(temp.low, chunkStart-1);
-            temp = new Interval(chunkStart,temp.high);
-            releaseBlock(temp);
-        } else
-            interval = temp;
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("aligned to interval: "+interval+" state is: "+dumpState());
-        
-        return interval;
-    }
-    */
 
     /**
      * Leases the specified interval.
