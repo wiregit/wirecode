@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +26,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.URLDecoder;
 
 public class ExternalControl {
     
@@ -100,7 +98,7 @@ public class ExternalControl {
 		callback.restoreApplication();
 		callback.showDownloads();
 
-	    MagnetOptions options[] = parseMagnet(arg);
+	    MagnetOptions options[] = MagnetOptions.parseMagnet(arg);
 
 		if (options.length == 0) {
 		    if(LOG.isWarnEnabled())
@@ -273,7 +271,7 @@ public class ExternalControl {
 			(magnets, System.getProperty("line.separator"));
 		while (tokens.hasMoreTokens()) {
 			String next = tokens.nextToken();
-			MagnetOptions[] options = parseMagnet(next);
+			MagnetOptions[] options = MagnetOptions.parseMagnet(next);
 			if (options.length > 0) {
 				list.addAll(Arrays.asList(options));
 			}
@@ -286,77 +284,6 @@ public class ExternalControl {
 	 * @param arg
 	 * @return array may be empty, but is never <code>null</code>
 	 */
-	public static MagnetOptions[] parseMagnet(String arg) {
-	    LOG.trace("enter parseMagnet");
-		HashMap options = new HashMap();
-
-		// Strip out any single quotes added to escape the string
-		if ( arg.startsWith("'") )
-			arg = arg.substring(1);
-		if ( arg.endsWith("'") )
-			arg = arg.substring(0,arg.length()-1);
-		
-		// Parse query  -  TODO: case sensitive?
-		if ( !arg.startsWith(MagnetOptions.MAGNET) )
-			return new MagnetOptions[0];
-
-		// Parse and assemble magnet options together.
-		//
-		arg = arg.substring(8);
-		StringTokenizer st = new StringTokenizer(arg, "&");
-		String          keystr;
-		String          cmdstr;
-		int             start;
-		int             index;
-		Integer         iIndex;
-		int             periodLoc;
-		MagnetOptions   curOptions;
-		
-		// Process each key=value pair
-     	while (st.hasMoreTokens()) {
-		    keystr = st.nextToken();
-			keystr = keystr.trim();
-			start  = keystr.indexOf("=")+1;
-			if(start == 0) continue; // no '=', ignore.
-		    cmdstr = keystr.substring(start);
-			keystr = keystr.substring(0,start-1);
-            try {
-                cmdstr = URLDecoder.decode(cmdstr);
-            } catch (IOException e1) {
-                continue;
-            }
-			// Process any numerical list of cmds
-			if ( (periodLoc = keystr.indexOf(".")) > 0 ) {
-				try {
-			        index = Integer.parseInt(keystr.substring(periodLoc+1));
-				} catch (NumberFormatException e) {
-					continue;
-				}
-			} else {
-				index = 0;
-			}
-			// Add to any existing options
-			iIndex = new Integer(index);
-			curOptions = (MagnetOptions) options.get(iIndex);			
-			if (curOptions == null) 
-				curOptions = new MagnetOptions();
-
-			if ( keystr.startsWith("xt") ) {
-				curOptions.addExactTopic(cmdstr);
-			} else if ( keystr.startsWith("dn") ) {
-				curOptions.setDisplayName(cmdstr);
-			} else if ( keystr.startsWith("kt") ) {
-				curOptions.setKeywordTopic(cmdstr);
-			} else if ( keystr.startsWith("xs") ) {
-				curOptions.addXS(cmdstr);
-			} else if ( keystr.startsWith("as") ) {
-				curOptions.addAS(cmdstr);
-			}
-			
-			options.put(iIndex,curOptions);
-		}
-		
-		return (MagnetOptions[])options.values().toArray(new MagnetOptions[0]);
-	}
+	
 
 }

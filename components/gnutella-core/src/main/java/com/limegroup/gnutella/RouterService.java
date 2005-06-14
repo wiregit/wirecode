@@ -1437,26 +1437,8 @@ public class RouterService {
 	 * @throws SaveLocationException when the download could not be started, 
 	 * see {@link SaveLocationException} for all possible error codes
      */
-	public static Downloader download(URN urn, String textQuery,
-												   String filename,
-												   String [] defaultURL,
-												   boolean overwrite,
-												   File saveDir)
-	throws SaveLocationException {
-		return downloader.download(urn, textQuery, filename, defaultURL, 
-								   overwrite, saveDir);
-	}
 	
-	/**
-	 * Convenience wrapper for 
-	 * {@link #download(URN, String, String, String[], boolean, File)
-	 * download(URN, String, String, String[], boolean, null)}
-	 */
-	public static Downloader download(URN urn, String textQuery,
-            String filename, String [] defaultURL, boolean overwrite) 
-            throws SaveLocationException { 
-        return download(urn, textQuery, filename, defaultURL, overwrite, null);
-    }
+	
 	
 	/**
 	 * Creates a downloader for a magnet.
@@ -1474,9 +1456,7 @@ public class RouterService {
 		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
 		}
-		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), 
-						magnet.getDisplayName(), magnet.getDefaultURLs(), 
-						overwrite);
+		return downloader.download(magnet, overwrite, null, magnet.getDisplayName());
 	}
 
 	/**
@@ -1504,8 +1484,7 @@ public class RouterService {
 		if (fileName == null) {
 			throw new NullPointerException("fileName is null");
 		}
-		return download(magnet.getSHA1Urn(), magnet.getKeywordTopic(), fileName,
-						magnet.getDefaultURLs(), overwrite, saveDir);
+		return downloader.download(magnet, overwrite, saveDir, fileName);
 	}
 
    /**

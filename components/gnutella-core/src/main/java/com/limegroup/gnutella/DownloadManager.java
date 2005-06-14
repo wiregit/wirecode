@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -539,22 +540,29 @@ public class DownloadManager implements BandwidthTracker {
 	 *  null 
      * @throws SaveLocationException 
      */
-    public synchronized Downloader download(URN urn, String textQuery, 
-											String filename, 
-											String [] defaultURL,
-											boolean overwrite, 
-											File saveDir)
-		throws IllegalArgumentException, SaveLocationException {
-        if (textQuery==null && urn==null && filename==null && 
-            (defaultURL == null || defaultURL.length == 0) )
-            throw new IllegalArgumentException("Need something for requeries");
+    public synchronized Downloader download(MagnetOptions magnet,
+			boolean overwrite,
+			File saveDir,
+			String fileName)
+	throws IllegalArgumentException, SaveLocationException {
+		
+		if (!magnet.isDownloadable()) 
+            throw new IllegalArgumentException("We can't download magnet");
         
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
         
+		URN urn = magnet.getSHA1Urn();
         if (urn != null) {
-			String fileName = (filename!=null && !filename.equals(""))
-				? filename : urn.toString();
+			if (fileName == null) {
+				if ((magnet.getDisplayName() == null ||
+						magnet.getDisplayName().length() == 0)) {
+					fileName = urn.toString();
+				}
+				else {
+					fileName = magnet.getDisplayName();
+				}
+			}
             if (conflicts(urn, fileName, 0)) {
 				throw new SaveLocationException
 				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File("fileName"));
@@ -570,8 +578,8 @@ public class DownloadManager implements BandwidthTracker {
 
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
-            new MagnetDownloader(incompleteFileManager, urn, textQuery,
-                filename, defaultURL, saveDir, overwrite);
+            new MagnetDownloader(incompleteFileManager, magnet, 
+					saveDir, overwrite, fileName);
         initializeDownload(downloader);
         return downloader;
     }

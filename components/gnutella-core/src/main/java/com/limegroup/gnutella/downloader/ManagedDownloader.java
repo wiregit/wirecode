@@ -1387,7 +1387,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * or silently ignored (because we're already downloading or going to
      * attempt to download from the host described in the RFD).
      */
-    protected synchronized final boolean addDownloadForced(RemoteFileDesc rfd,
+    protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
 
         // DO NOT DOWNLOAD FROM YOURSELF.
