@@ -76,11 +76,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         // Calculate what the high byte offset should be.
         // This will be at most blockSize-1 bytes greater than the low.
         // Skip ahead one block.
-        long alignedHigh = candidate.low + blockSize;
-        // Cut back to the aligned boundary.
-        alignedHigh -= alignedHigh % blockSize;
-        // Step back one byte from the boundary.
-        alignedHigh -= 1;
+        long alignedHigh = alignHigh(candidate.low, blockSize);
 
         // n % blockSize < blockSize
         // Therefore (n % blockSize) + 1 <= blockSize

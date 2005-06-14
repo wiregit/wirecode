@@ -134,13 +134,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 
             // Calculate what the high byte offset should be.
             // This will be at most blockSize-1 bytes greater than bestLow
-            // Skip ahead one block
-            long bestHigh = bestLow+blockSize;
-            // Cut back to the aligned boundary
-            bestHigh -= bestHigh % blockSize;
-            // Step back one byte from the boundary
-            bestHigh -= 1;
-            
+            long bestHigh = alignHigh(bestLow,blockSize);
+      
             if (bestHigh > candidate.high)
                 bestHigh = candidate.high;
 
@@ -180,7 +175,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 // high point.
                 
                 // step the low point backward to the block boundary
-                bestLow = candidate.high-(candidate.high % blockSize);
+                bestLow = alignLow(candidate.high, blockSize);
                 // Adjust bestLow to be within the interval
                 // We already know bestLow <= bestHigh <= candidate.high
                 if (bestLow < candidate.low)
@@ -232,6 +227,18 @@ public class RandomDownloadStrategy implements SelectionStrategy {
 
     
     ///////////////////// Private Helper Methods /////////////////////////////////
+    /** Aligns location to one byte before the next highest block boundary */
+    protected long alignHigh(long location, long blockSize) {
+        location += blockSize;
+        location -= location % blockSize;
+        return location - 1;
+    }
+    
+    /** Aligns location to the nearest block boundary that is at or before location */
+    protected long alignLow(long location, long blockSize) {
+        location -= location % blockSize;
+        return location;
+    }
     
     /**
      * Calculates a random block-aligned byte offset into the file, 
