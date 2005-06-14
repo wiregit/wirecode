@@ -6,51 +6,16 @@ import com.limegroup.gnutella.util.BaseTestCase;
 
 public class ExternalControlTest extends BaseTestCase {
 
-	private MagnetOptions[] validMagnets; 
+	MagnetOptions[] validMagnets;
 	
 	public ExternalControlTest(String name) {
 		super(name);
 	}
 	
 	public void setUp() {
-		MagnetOptions o1 = new MagnetOptions();
-		o1.setDisplayName(URLEncoder.encode("compilc.:fileNm?7ßä"));
-		o1.setKeywordTopic(URLEncoder.encode("keyword topic string"));
-		o1.addExactTopic("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
-		o1.addXS("http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
-		
-		MagnetOptions o2 = new MagnetOptions();
-		o2.setDisplayName(URLEncoder.encode("compile me"));
-		o1.addExactTopic("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
-		o1.addXS("http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
-		
-		validMagnets = new MagnetOptions[] {
-				o1, o2
-		};
+		validMagnets = MagnetOptions.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
 	}
 	
-	public void testParseInvalidMagnet() {
-		MagnetOptions[] opts = ExternalControl.parseMagnet("magnet:?");
-		assertEquals("Wrong number of parsed magnets", 0, opts.length);
-	}
-	
-	public void testParseValidMagnet() {
-		
-		for (int i = 0; i < validMagnets.length; i++) {
-			MagnetOptions[] opts = ExternalControl.parseMagnet(validMagnets[i].toString());
-			assertEquals("Should have parsed one magnet", 1, opts.length);
-			opts = ExternalControl.parseMagnet(opts[0].toString());
-			assertEquals("Should have parsed one magnet", 1, opts.length);
-		}
-		
-		MagnetOptions[] opts = ExternalControl.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
-		assertEquals("Should have parsed 2 magnets", 2, opts.length);
-		
-		// compound magnets
-		opts = ExternalControl.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
-		assertEquals("Should have parsed 2 magnets", 2, opts.length);
-	}
-
 	public void testParseValidMagnets() {
 		String magnets = createMultiLineMagnetLinks(validMagnets);
 		MagnetOptions[] opts = ExternalControl.parseMagnets(magnets);

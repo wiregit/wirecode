@@ -128,7 +128,7 @@ public class MagnetOptions implements Serializable {
 	}
 	
     private MagnetOptions(Map options) {
-		optionsMap  = Collections.unmodifiableMap(options);
+		optionsMap = Collections.unmodifiableMap(options);
     }
     
 	public String toString() {
@@ -181,7 +181,8 @@ public class MagnetOptions implements Serializable {
 			if (urn == null)
 				urn = URN.INVALID;
 			
-		} else if (urn == URN.INVALID)
+		}
+		if (urn == URN.INVALID)
 			return null;
 		
 		return urn;

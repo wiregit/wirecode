@@ -555,8 +555,8 @@ public class DownloadManager implements BandwidthTracker {
 		URN urn = magnet.getSHA1Urn();
         if (urn != null) {
 			if (fileName == null) {
-				if ((magnet.getDisplayName() == null ||
-						magnet.getDisplayName().length() == 0)) {
+				if (magnet.getDisplayName() == null 
+						|| magnet.getDisplayName().length() == 0) {
 					fileName = urn.toString();
 				}
 				else {
@@ -565,7 +565,7 @@ public class DownloadManager implements BandwidthTracker {
 			}
             if (conflicts(urn, fileName, 0)) {
 				throw new SaveLocationException
-				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File("fileName"));
+				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
             }
         }
 

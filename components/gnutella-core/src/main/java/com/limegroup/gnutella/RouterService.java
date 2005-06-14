@@ -1417,29 +1417,6 @@ public class RouterService {
 		return download(files, queryGUID, overwrite, null, null);
 	}	
         
-
-    /*
-     * Creates a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
-     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
-     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
-     * <tt>filename</tt> is specified, it will be used as the name of the
-     * complete file; otherwise it will be taken from any search results or
-     * guessed from <tt>defaultURL</tt>.
-     *
-     * @param urn the hash of the file (exact topic), or null if unknown
-     * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
-     * @param defaultURLs the initial locations to try (exact source), or null 
-     *  if unknown
-     *
-     * @exception IllegalArgumentException both urn and textQuery are null 
-	 * @throws SaveLocationException when the download could not be started, 
-	 * see {@link SaveLocationException} for all possible error codes
-     */
-	
-	
-	
 	/**
 	 * Creates a downloader for a magnet.
 	 * @param magnetprovides the information of the  file to download, must be
