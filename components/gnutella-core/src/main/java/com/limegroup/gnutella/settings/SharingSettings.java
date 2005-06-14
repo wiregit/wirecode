@@ -297,6 +297,7 @@ public class SharingSettings extends LimeProps {
 		if (dir == null || !dir.isDirectory() || !dir.exists())
             throw new IOException();
 
+		DIRECTORIES_NOT_TO_SHARE.remove(dir);
 		if (!DIRECTORIES_TO_SHARE.contains(dir))
 			DIRECTORIES_TO_SHARE.add(dir);
     }
@@ -305,7 +306,10 @@ public class SharingSettings extends LimeProps {
 	 * Removes the given dir from the shared directories.
 	 */
 	public static final void removeSharedDirectory(File dir) {
-		DIRECTORIES_TO_SHARE.remove(dir);
+		if (DIRECTORIES_TO_SHARE.contains(dir))
+			DIRECTORIES_TO_SHARE.remove(dir);
+		else
+			DIRECTORIES_NOT_TO_SHARE.add(dir);
 		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.remove(dir);
 	}
     
