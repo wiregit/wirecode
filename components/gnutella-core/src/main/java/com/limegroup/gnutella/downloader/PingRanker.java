@@ -35,11 +35,6 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
     
     /**
-     * a cached instance of the ping to send to non-firewalled hosts
-     */
-    private HeadPing ping;
-    
-    /**
      * the pinger to send the pings
      */
     private UDPPinger pinger;
@@ -327,7 +322,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             
             // older push proxies do not route but respond directly, we want to get responses
             // from other push proxies
-            if (!pong.hasFile() && !pong.isGGEPPong())
+            if (!pong.hasFile() && !pong.isGGEPPong() && rfd.needsPush())
                 return;
             
             // if the pong is firewalled, remove the other proxies from the 
@@ -364,7 +359,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public synchronized void registered(byte[] guid) {
         if (LOG.isDebugEnabled())
             LOG.debug("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
-	running = true;
+        running = true;
     }
 
     public synchronized void unregistered(byte[] guid) {
@@ -377,6 +372,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         verifiedHosts.clear();
         pingedHosts.clear();
         testedLocations.clear();
+        lastPingTime = 0;
     }
     
     public synchronized boolean isCancelled(){

@@ -2243,7 +2243,9 @@ public class DownloadTest extends BaseTestCase {
      * we send out an NAlt for that source
      */
     public void testHeadPongNAlts() throws Exception {
-        // make sure we can receive solicited
+        int sleep = DownloadSettings.WORKER_INTERVAL.getValue();
+        
+        // make sure we use the ping ranker
         PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming", 
                 Boolean.TRUE);
         assertTrue(RouterService.canReceiveSolicited());
@@ -2251,21 +2253,30 @@ public class DownloadTest extends BaseTestCase {
         
        // create one source that will actually download and another one to which a headping should be sent 
        RemoteFileDesc rfd = newRFDWithURN(PORT_1,100);
-       RemoteFileDesc noFile = newRFDWithURN(10000,100);
+       RemoteFileDesc noFile = newRFDWithURN(PORT_2,100);
        
-       // let the first guy know about the second guy
        AlternateLocation toBeDemoted = AlternateLocation.create(noFile);
-       AlternateLocationCollection col = AlternateLocationCollection.create(TestFile.hash());
-       col.add(toBeDemoted);
-       uploader1.setGoodAlternateLocations(col);
        
        // create a listener for the headping
-       UDPAcceptor l = new UDPAcceptor(10000);
+       UDPAcceptor l = new UDPAcceptor(PORT_2);
        
-       tGeneric(new RemoteFileDesc[]{rfd},new RemoteFileDesc[]{noFile});
+       ManagedDownloader download= (ManagedDownloader) 
+           RouterService.download(new RemoteFileDesc[]{rfd}, Collections.EMPTY_LIST, null, false);
+       LOG.debug("started download");
+       
+       // after a while clear the ranker and add the second host.
+       Thread.sleep((int)(sleep * 1.5));
+       SourceRanker.getAppropriateRanker().stop();
+       SourceRanker.getAppropriateRanker().setMeshHandler(download);
+       download.addDownload(noFile,false);
+       
+       LOG.debug("waiting for download to complete");
+       waitForComplete(false);
        
        // the first downloader should have received an NAlt
        assertTrue(uploader1.incomingBadAltLocs.contains(toBeDemoted));
+       assertEquals(0,uploader2.getConnections());
+       l.interrupt();
     }
 
     /*
@@ -2580,6 +2591,7 @@ public class DownloadTest extends BaseTestCase {
             }catch(IOException bad) {
                 ErrorService.error(bad);
             }
+            setPriority(Thread.MAX_PRIORITY);
             start();
         }
         
@@ -2592,13 +2604,11 @@ public class DownloadTest extends BaseTestCase {
                     sock.receive(p);
                     ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
                     m = Message.read(bais);
-                    if (m instanceof HeadPing) {
-                        if (noFile) {
-                            handleNoFile(p.getSocketAddress());
-                            return;
-                        }
-                        else
-                            continue;
+                    LOG.debug("received "+m.getClass()+ " no file? "+noFile);
+                    if (noFile) {
+                        if (m instanceof HeadPing) 
+                            handleNoFile(p.getSocketAddress(),new GUID(m.getGUID()));
+                        continue;
                     }
                     else
                         break;
@@ -2630,8 +2640,8 @@ public class DownloadTest extends BaseTestCase {
             }
         }
         
-        private void handleNoFile(SocketAddress from) {
-            HeadPing ping = new HeadPing(HugeTestUtils.SHA1);
+        private void handleNoFile(SocketAddress from,GUID g) {
+            HeadPing ping = new HeadPing(g,HugeTestUtils.SHA1,0);
             HeadPong pong = new HeadPong(ping);
             assertFalse(pong.hasFile());
             try {
