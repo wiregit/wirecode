@@ -2243,6 +2243,10 @@ public class DownloadTest extends BaseTestCase {
      * we send out an NAlt for that source
      */
     public void testHeadPongNAlts() throws Exception {
+        
+        uploader1.setRate(100);
+        uploader2.setRate(100);
+        
         int sleep = DownloadSettings.WORKER_INTERVAL.getValue();
         
         // make sure we use the ping ranker
@@ -2275,7 +2279,16 @@ public class DownloadTest extends BaseTestCase {
        
        // the first downloader should have received an NAlt
        assertTrue(uploader1.incomingBadAltLocs.contains(toBeDemoted));
+       // the first uploader should have uploaded the whole file
+       assertGreaterThan(0,uploader1.getConnections());
+       assertEquals(TestFile.length(),uploader1.fullRequestsUploaded());
+       
+       // the second downloader should not be contacted
        assertEquals(0,uploader2.getConnections());
+       assertEquals(0,uploader2.getAmountUploaded());
+       // only one ping should have been sent to the second uploader
+       assertEquals(1,l.pings);
+       
        l.interrupt();
     }
 
@@ -2564,6 +2577,7 @@ public class DownloadTest extends BaseTestCase {
         private GUID _g;
         public boolean sentGIV;
         private boolean noFile;
+        public int pings;
         
         public UDPAcceptor(int port) {
             noFile = true;
@@ -2650,6 +2664,7 @@ public class DownloadTest extends BaseTestCase {
                 DatagramPacket pack = 
                     new DatagramPacket(baos.toByteArray(),baos.toByteArray().length,from);
                 sock.send(pack);
+                pings++;
             } catch (Exception e) {
                 fail(e);
             }
