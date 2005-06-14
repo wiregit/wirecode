@@ -11,6 +11,9 @@ import java.net.SocketException;
 import java.util.Random;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -20,11 +23,14 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase {
-
+    private static final Log LOG = LogFactory.getLog(QueryUnicasterTest.class);
+    
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -34,7 +40,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
 
     private final int NUM_UDP_LOOPS = 25;
-
+    
     private final RouterService _rs = new RouterService(new
                                                         ActivityCallbackStub(),
                                                         new MessageRouterStub());
@@ -62,17 +68,26 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     
     public void setUp() throws Exception {
         _rs.start();
+
+        QueryUnicaster qu = QueryUnicaster.instance();        
+        PrivilegedAccessor.invokeMethod( qu, "resetUnicastEndpointsAndQueries", null );
+       
+        ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
     }
 
     
     public void testConstruction() {
         QueryUnicaster qu = QueryUnicaster.instance();
+        
         assertEquals("unexpected amount of unicast endpoints",
             0, qu.getUnicastEndpoints().size());
     }
 
-
     public void testQueries() throws Exception {
+        _messages.clear();
+        _shouldRun=true;
+
         // start udp hosts....
         Thread[] udpLoopers = new Thread[NUM_UDP_LOOPS];
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
@@ -102,6 +117,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
         // add a Query
 		QueryRequest qr = QueryRequest.createQuery("Susheel", (byte)2);
+        
 		assertEquals("unexpected number of queries",
 		    0, QueryUnicaster.instance().getQueryNumber() );
         QueryUnicaster.instance().addQuery(qr, null);
@@ -133,15 +149,20 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             else
                 fail("unexpected message: " + currMessage);
         }
+
         assertEquals("unexpected number of messages", numMessages, numPings + numQRs);
+        
         // can't send a Query without sending a Ping....
         assertLessThanOrEquals("unexpected number of QRs", numPings, numQRs);
         assertGreaterThan("unexpected number of QRs", 0, numQRs);
         assertLessThanOrEquals("unexpected number of QRs", numQKReqs, numQRs);
-        debug("QueryUnicasterTest.testQueries(): numMessages = " + numMessages);
-        debug("QueryUnicasterTest.testQueries(): numQRs = " + numQRs);
-        debug("QueryUnicasterTest.testQueries(): numPings = " + numPings);
-
+        
+        if( LOG.isDebugEnabled() ) {
+            LOG.debug("QueryUnicasterTest.testQueries(): numMessages = " + numMessages);
+            LOG.debug("QueryUnicasterTest.testQueries(): numQRs = " + numQRs);
+            LOG.debug("QueryUnicasterTest.testQueries(): numPings = " + numPings);
+        }
+            
         // shut off udp listeners....
         _shouldRun = false;
         for (int i = 0; i < NUM_UDP_LOOPS; i++)
@@ -155,7 +176,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         
         // get rid of old query...
         QueryReply qRep = generateFakeReply(qr.getGUID(), 251);
-        QueryUnicaster.instance().handleQueryReply(qRep);        
+        QueryUnicaster.instance().handleQueryReply(qRep);
     }
 
 
@@ -172,7 +193,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             final int index = i;
             udpLoopers[i] = new Thread() {
                     public void run() {
-                        udpLoop(5500 + index);
+                        udpLoop(5000 + index);      //  Bugfix: port 5000+i not 5500+i
                     }
                 };
             udpLoopers[i].start();
@@ -197,8 +218,11 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             }
             
             //add some results...
+            //  BugFix: now works despite different NUM_UDP_LOOPS values
+            int low=250/NUM_UDP_LOOPS+1;    int hi=254/NUM_UDP_LOOPS+1;
+            if( low<25 )low=25;             if( hi<35 )hi=35;
             QueryReply qRep = generateFakeReply(qr.getGUID(),
-                                                getNumberBetween(25, 35));
+                                                getNumberBetween(low, hi));
             QueryUnicaster.instance().handleQueryReply(qRep);
         }
 
@@ -229,14 +253,22 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         }
         assertEquals("unexpected number of messages", numMessages, numPings + numQRs);
         assertLessThan("unexpected number of QRs", 11, numQRs); // 15 * 25 >> 250
-        assertGreaterThan("unexpected endpoint size",
-            0, QueryUnicaster.instance().getUnicastEndpoints().size() );
-        debug("QueryUnicasterTest.testQueries(): numMessages = " +
-              numMessages);
-        debug("QueryUnicasterTest.testQueries(): numQRs = " +
-              numQRs);
-        debug("QueryUnicasterTest.testQueries(): numPings = " +
-              numPings);
+        
+        //  If we are using fewer than 11 UDP endpoints, then ALL of them will have been
+        //      used to reply to the UnicastQuery, so none will be left.  Therefore, only
+        //      apply the following assert if there are more left over.
+        if( NUM_UDP_LOOPS>10 )
+            assertGreaterThan("unexpected endpoint size",
+                    0, QueryUnicaster.instance().getUnicastEndpoints().size() );
+        
+        if( LOG.isDebugEnabled() ) {
+            LOG.debug("QueryUnicasterTest.testQueries(): numMessages = " +
+                  numMessages);
+            LOG.debug("QueryUnicasterTest.testQueries(): numQRs = " +
+                  numQRs);
+            LOG.debug("QueryUnicasterTest.testQueries(): numPings = " +
+                  numPings);
+        }
 
         // shut off udp listeners....
         _shouldRun = false;
@@ -286,17 +318,20 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 		try {
 			socket = new DatagramSocket(port);
             socket.setSoTimeout(1000);
-            debug("QueryUnicasterTest.udpLoop(): listening on port " +
+            if( LOG.isDebugEnabled() )
+                LOG.debug("QueryUnicasterTest.udpLoop(): listening on port " +
                   port);
 			//socket.setSoTimeout(SOCKET_TIMEOUT);
 		} 
         catch (SocketException e) {
-            debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
+            if( LOG.isDebugEnabled() )
+                LOG.debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
                   port);
 			return;
 		}
         catch (RuntimeException e) {
-            debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
+            if( LOG.isDebugEnabled() )
+                LOG.debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
                   port);
 			return;
 		}
@@ -335,12 +370,14 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                                                               2,2, true,
                                                               qk);
                             pRep.hop();
-                            debug("QueryUnicasterTest.udpLoop(): sending QK.");
+                            LOG.debug("QueryUnicasterTest.udpLoop(): sending QK.");
                             QueryUnicaster.instance().handleQueryKeyPong(pRep);
                         }
                     }
                     // log the message....
                     synchronized (_messages) {
+                        if( LOG.isDebugEnabled() )
+                            LOG.debug(" ** Adding message to _messages queue (newSize="+(_messages.size()+1)+") m="+message);
                         _messages.add(message);
                         _messages.notify();
                     }
@@ -355,22 +392,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                 continue;
             }
 		}
-        debug("QueryUnicasterTest.udpLoop(): closing down port " +
+        if( LOG.isDebugEnabled() )
+            LOG.debug("QueryUnicasterTest.udpLoop(): closing down port " +
               port);
 		socket.close();
 	}
-
-
-    private final static boolean debugOn = false;
-    private final static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final static void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
-
 
 }

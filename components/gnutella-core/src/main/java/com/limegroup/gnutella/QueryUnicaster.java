@@ -227,9 +227,8 @@ public final class QueryUnicaster {
             try {
                 waitForQueries();
                 GUESSEndpoint toQuery = getUnicastHost();
-
                 // no query key to use in my query!
-                if (!_queryKeys.containsKey(toQuery)) { 
+                if (!_queryKeys.containsKey(toQuery)) {
                     // send a QueryKey Request
                     PingRequest pr = PingRequest.createQueryKeyRequest();
                     udpService.send(pr,toQuery.getAddress(), toQuery.getPort());
@@ -247,10 +246,7 @@ public final class QueryUnicaster {
                     Iterator iter = _queries.values().iterator();
                     while (iter.hasNext()) {
                         QueryBundle currQB = (QueryBundle)iter.next();
-                        if ((currQB._numResults > QueryBundle.MAX_RESULTS) ||
-                            (currQB._hostsQueried.size() > 
-                             QueryBundle.MAX_QUERIES)
-                            )
+                        if (currQB._hostsQueried.size() > QueryBundle.MAX_QUERIES)
                             // query is now stale....
                             _qGuidsToRemove.add(new GUID(currQB._qr.getGUID()));
                         else if (currQB._hostsQueried.contains(toQuery))
@@ -479,8 +475,21 @@ public final class QueryUnicaster {
     private void addResults(GUID queryGUID, int numResultsToAdd) {
         synchronized (_queries) {
             QueryBundle qb = (QueryBundle) _queries.get(queryGUID);
-            if (qb != null) // add results if possible...
+            if (qb != null) {// add results if possible...
                 qb._numResults += numResultsToAdd;
+                
+                //  This code moved from queryLoop() since that ftn. blocks before
+                //      removing stale queries, when out of hosts to query.
+                if( qb._numResults>QueryBundle.MAX_RESULTS ) {
+                    synchronized( _qGuidsToRemove ) {
+                        _qGuidsToRemove.add(new GUID(qb._qr.getGUID()));
+                        purgeGuidsInternal();
+                        _qGuidsToRemove.clear();                        
+                    }
+                }
+
+            }
+            
         }
     }
 
@@ -523,6 +532,35 @@ public final class QueryUnicaster {
             return toReturn;
         }
         return (GUESSEndpoint) _queryHosts.removeLast();
+    }
+    
+    /** removes all Unicast Endpoints, reset associated members
+     */
+    private void resetUnicastEndpointsAndQueries() {
+        LOG.debug("Resetting unicast endpoints.");        
+        synchronized (_queries) {
+            _queries.clear();
+            _queries.notifyAll();
+        }
+
+        synchronized (_queryHosts) {
+            _queryHosts.clear();
+            _queryHosts.notifyAll();
+        }
+        
+        synchronized (_queryKeys) {
+            _queryKeys.clear();
+            _queryKeys.notifyAll();
+        }
+        
+        synchronized (_pingList) {
+            _pingList.clear();
+            _pingList.notifyAll();
+        }
+
+        _lastPingTime=0;        
+        _testUDPPingsSent=0;
+        
     }
 
 
