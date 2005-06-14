@@ -461,13 +461,8 @@ public class VerifyingFile {
             LOG.debug("needed bytes: "+neededBytes);
         
         // Calculate previewLength and lastNeededByte
-        List neededByteList = neededBytes.getAllIntervalsAsList();
-        int neededIntervalCount = neededByteList.size();
-        if (neededIntervalCount < 1)
-            throw new NoSuchElementException();
-        
-        long previewLength = ((Interval)neededByteList.get(0)).low;
-        long lastNeededByte = ((Interval)neededByteList.get(neededIntervalCount-1)).high;
+        long previewLength = neededBytes.getFirst().low;
+        long lastNeededByte = neededBytes.getLast().high;
         
         // Calculate the union of neededBlocks and availableBlocks
         availableRanges.delete(neededBytes.invert(completedSize));
@@ -487,7 +482,7 @@ public class VerifyingFile {
     /**
      * Fits an interval inside a chunk.  This ensures that the interval is never larger
      * than chunksize and finishes at exact chunk offset.
-     */
+     */ /*
     private synchronized Interval alignInterval(Interval temp, int chunkSize) {
         if (LOG.isDebugEnabled())
             LOG.debug("alligning "+temp +" with chunk size "+chunkSize+"\n"+dumpState());
@@ -518,6 +513,7 @@ public class VerifyingFile {
         
         return interval;
     }
+    */
 
     /**
      * Leases the specified interval.

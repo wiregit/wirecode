@@ -163,6 +163,15 @@ public class IntervalSet {
     }
     
     /**
+     * Returns the last element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
+     */
+    public Interval getLast() throws NoSuchElementException {
+        Interval ret = (Interval)intervals.last();
+        return ret;
+    }
+    
+    /**
      * Removes the first element.  Throws NoSuchElementException
      * if no intervals exist.
      */
