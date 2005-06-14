@@ -70,10 +70,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         
         // Determine if we should return a uniformly distributed Interval
         // or the first interval.
-        // Note that the specification for java.util.Random.nextFloat() explicitly states that
-        // the returned value will be strictly less than 1.0.  Therefore, if getBiasProbability()
-        // returns 1.0, nextFloat() < getBiasProbability() with probability 100%.  Other behavior
-        // indicates a bug in java.util.Random.
+        // nextFloat() returns a float on [0.0 1.0)
         if (getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
                 || pseudoRandom.nextFloat() >= getBiasProbability(lowerBound, completedSize)) {
             return super.pickAssignment(availableIntervals, lowerBound, upperBound, blockSize);
@@ -83,17 +80,12 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
 
         // Calculate what the high byte offset should be.
         // This will be at most blockSize-1 bytes greater than the low.
-        // Skip ahead one block.
         long alignedHigh = alignHigh(candidate.low, blockSize);
 
-        // n % blockSize < blockSize
-        // Therefore (n % blockSize) + 1 <= blockSize
-        // Therefore n-blockSize-(n % blockSize)-1 >= n
-        // Therefore alignedHigh >= candidate.low, and we
+        // alignedHigh >= candidate.low, and therefore we
         // only have to check if alignedHigh > candidate.high.
-        if (alignedHigh > candidate.high) {
+        if (alignedHigh > candidate.high)
             alignedHigh = candidate.high;
-        }
 
         // Our ideal interval is [candidate.low, alignedHigh]
         
@@ -102,13 +94,10 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         if (ret.high != alignedHigh)
             ret = new Interval(candidate.low, alignedHigh);
 
-        // Log it
-        if (LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled())
             LOG.debug("Non-random download, range=" + ret + " out of choices "
                     + availableIntervals);
-        }
 
-        // return
         return ret;
     }
 

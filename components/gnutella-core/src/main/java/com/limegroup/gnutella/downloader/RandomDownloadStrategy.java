@@ -57,9 +57,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     public RandomDownloadStrategy(long completedSize) {
         super();
         this.completedSize = completedSize;
-        /* Set all randomLocations to be less than the minimum lowerBound,
-         * so that they will be lazily updated. 
-         */
+        // Set all randomLocations to be less than the minimum lowerBound,
+        // so that they will be lazily updated. 
         for(int i=randomLocations.length - 1; i >= 0; i--)
             randomLocations[i] = -1L;
     }
@@ -242,9 +241,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * This function is safe for files larger than 2 GB, files with chunks larger than 2 GB,
      * and files containing more than 2 GiBi chunks.
      * 
-     * This function is also imperceptibly biased; the bias is approximately
-     * one part in (9e+18 / (downloadedSize/chunkSize)), which is vanishlingly small, 
-     * even for several terabyte files with chunk sizes of 1024 bytes.
+     * This function is practically unbiased for files smaller than several terabytes.
      */
     private long getRandomLocation(long minIndex, long maxIndex, long blockSize) {
         // If minIndex is in the middle of a block, include the
