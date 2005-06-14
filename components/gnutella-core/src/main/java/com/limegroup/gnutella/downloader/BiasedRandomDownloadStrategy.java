@@ -10,10 +10,18 @@ import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.SystemUtils;
 
 /** 
- * This SelectionStrategy uses user idle time, the number of previewable bytes
- * already downloaded, and a random factor to determine if it should hand the
- * assignment decission off to its super class, or simply extend the previewable
- * portion of the file by assigning the first suitible block.
+ * This SelectionStrategy sometimes selects the first available chunk and
+ * sometimes selects a random chunk from availableIntervals.  This balances
+ * the user's need to preview a file against the network's need to maximize
+ * distribution of the most rare block.
+ * 
+ * If the user is idle MIN_IDLE_MILLISECONDS or more, a random chunk is always
+ * selected.  Otherwise, the following strategy is used: if the first 
+ * MIN_PRIVIEW_BYTES or MIN_PREVIEW_FRACTION of the file has not yet been 
+ * assigned to Downloaders, the first chunk is selected.  If the first 50% of the
+ * file has not been assigned to Downloaders, there's a 50% chance that the first
+ * available chunk will be assigned and a 50% chance that a random chunk will be
+ * assigned.  Otherwise, a random chunk is assigned. 
  */
 public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
     

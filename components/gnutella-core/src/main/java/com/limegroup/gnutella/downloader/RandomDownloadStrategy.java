@@ -11,14 +11,16 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.util.IntervalSet;
 
 /** 
- * This SelectionStrategy uses 16 pseudorandom locations (offsets into the file), 
- * pseudorandomly selects one of the 16 offsets, and downloads the first available 
- * aligned chunk after the offset.  This balances the need to minimize the number 
- * of Intervals in VerifyingFile (for a small download.dat file) against the need
- * for a uniform distribution of downloaded chunks over all hosts (to increase the 
- * availability of the rarest chunk).
+ * This SelectionStrategy selects random Intervals from the availableIntervals.
  * 
- * For efficiency, the random offsets are aligned to chunk boundaries.  Changing
+ * This SelectionStrategy does so by using 16 pseudorandom locations 
+ * (offsets into the file), pseudorandomly selects one of the 16 offsets, 
+ * and downloads the first available aligned chunk after the offset.  This balances
+ * the need to minimize the number of Intervals in VerifyingFile 
+ * (for a small download.dat file) against the need for a uniform distribution of 
+ * downloaded chunks over all hosts (to increase the availability of the rarest chunk).
+ * 
+ * For network efficiency, the random offsets are aligned to chunk boundaries.  Changing
  * the chunk size does not, however, cause any random locations to be re-calculated.
  * 
  * Random locations are replaced with new random locations only when they cease to 
@@ -58,18 +60,15 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         /* Set all randomLocations to be less than the minimum lowerBound,
          * so that they will be lazily updated. 
          */
-        for(int i=randomLocations.length - 1; i >= 0; i--) {
+        for(int i=randomLocations.length - 1; i >= 0; i--)
             randomLocations[i] = -1L;
-        }
     }
     
     /**
-     * Encapsulates a pseudorandom uniformly distributed algorithm for deciding which block of 
-     * a file to download next.
+     * Picks a random block of a file to download next.
      * 
-     * For efficiency reasons attempts will be made to align the start and end of intervals
-     * to block boundaries.  However, there are no guarantees on alignment.
-     * 
+     * For efficiency reasons attempts will be made to align the start and end of 
+     * intervals to block boundaries.  However, there are no guarantees on alignment.
      * 
      * @param availableIntervals a representation of the set of 
      *      bytes available for download from a given server, minus
@@ -102,15 +101,16 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         if (lowerBound > upperBound)
             throw new IllegalArgumentException("lowerBound greater than upperBound "+
                     lowerBound+" > "+upperBound);
+        if (availableIntervals.isEmpty())
+            throw new NoSuchElementException();
             
         // Which random range should be extended?
         int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
             
         if (randomLocations[randomIndex] < lowerBound || 
-                randomLocations[randomIndex] > upperBound) {
+                randomLocations[randomIndex] > upperBound)
             // Make the random location somewhere between the first and last bytes we still need to assign
             randomLocations[randomIndex] = getRandomLocation(lowerBound, upperBound, blockSize);
-        }
         
         // The lowest start location of an ideally matched interval.
         long randomPoint = randomLocations[randomIndex];
@@ -164,9 +164,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
                 }
                 
                 // return
-                if (candidate.high == bestHigh && candidate.low == bestLow) {
+                if (candidate.high == bestHigh && candidate.low == bestLow)
                     return candidate;
-                }
                 return new Interval(bestLow,bestHigh);
             } else {
                 // If randomPoint < candidate.high, then earlier code would
@@ -192,21 +191,17 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // If we had found the ideal block, we would have returned from within one
         // of the Iterator loops.
         
-        if (lastSuitableInterval == null)
-            throw new NoSuchElementException();
-        
         // We're stepping backwards in the file if we've gotten to this point
         
         // See which (if any) randomLocations have been skipped
         for(int i=randomLocations.length-1; i >= 0; i--) {
             if (i != randomIndex &&
                     randomLocations[randomIndex] >= randomLocations[i] &&
-                    lastSuitableInterval.low <= randomLocations[i]) {
+                    lastSuitableInterval.low <= randomLocations[i])
                 // A random location has been skipped, so force a lazy update
                 // by setting the random location below the smallest legal
                 // lowerBound
                 randomLocations[i] = -1;
-            }
         }
         
         // The only way to get here is if we have selected a random lowerBound,
@@ -215,13 +210,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // so it's not necessarily the case that lowerBound > lastNeededByte.
         // Therefore, do not lazily update the random location here.
         
-        // Log it
-        LOG.debug("Picking last block before random download point, index="+
-                randomIndex+", random location="+
-                randomLocations[randomIndex]+
-                ", range="+ lastSuitableInterval +
-                " out of choices "+availableIntervals);
-        // return
+        if(LOG.isDebugEnabled())
+            LOG.debug("Picking last block before random download point, index="+
+                    randomIndex+", random location="+
+                    randomLocations[randomIndex]+
+                    ", range="+ lastSuitableInterval +
+                    " out of choices "+availableIntervals);
         return lastSuitableInterval;
     }
 
@@ -267,9 +261,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         
         // Generate a random blockNumber on the range [minBlock, maxBlock]
         // return blockSize * blockNumber
-        //
-        // Note that pseudoRandom.nextLong() & (-1L >>> 1) is a uniform distribution
-        // over all non-negative longs.
-        return blockSize * (minBlock + ((pseudoRandom.nextLong() & (-1L >>> 1)) % (maxBlock-minBlock+1)));
+        return blockSize * (minBlock + Math.abs(pseudoRandom.nextLong() % (maxBlock-minBlock+1)));
     }
 }
