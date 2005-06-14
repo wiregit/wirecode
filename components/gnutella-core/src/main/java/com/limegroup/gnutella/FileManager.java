@@ -798,6 +798,8 @@ public abstract class FileManager {
 	 * Too large files are still not shareable this way.
 	 */
 	public FileDesc addFileAlways(File file, List list) {
+		if (isFileShared(file))
+			return (FileDesc)_fileToFileDescMap.get(file);
 		SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
 			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
