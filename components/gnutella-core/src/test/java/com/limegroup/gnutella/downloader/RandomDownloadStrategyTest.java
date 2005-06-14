@@ -175,24 +175,6 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectations);
     }
-
-    /** White-box test to make sure the random block number gets properly 
-     * wrapped inside pickAssignment.
-     */
-    public void testRandomNumberWraps() throws Exception {
-        fileSize = blockSize*4193+9;
-        strategy = createRandomStrategy(fileSize, prng);
-        
-        // corner case of first block
-        testRandomNumberWraps(0, 0, blockSize*107+4, 972);
-        // corner case of last block
-        testRandomNumberWraps(fileSize/blockSize, 2000, fileSize-1, 123);
-        // And some arbitrary tests, keeping in mind availableBlocks
-        // only represents blocks 0-10
-        testRandomNumberWraps(10, 2000, blockSize*107+4, 412);
-        testRandomNumberWraps(6, blockSize*4, blockSize*11+19, 8437);
-        testRandomNumberWraps(3, 7, blockSize*4193+8, 82);
-    }
     
     /** Test the case where the availableBytes
      * contains the Interval we return.
@@ -286,35 +268,6 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
     }
     
     /////////////// helper methods ////////////////
-    /** Helper for testRandomNumberWraps(void) */ 
-    private void testRandomNumberWraps(long targetBlockNumber, 
-            long previewLength, long lastNeededByte, 
-            long arbitraryWrapCount) throws Exception{
-        // Reset all of strategy's state
-        strategy = createRandomStrategy(fileSize, prng);
-        // Give the strategy an arbitrary index of 3 into 
-        // the random locations table
-        prng.setInt(3);
-        
-        long previewBlockNumber = previewLength/blockSize;
-        long lastBlockNumber    = lastNeededByte/blockSize; 
-        
-        // Wrap an arbitrary numbe of times, remembering
-        // that RandomDownloadStrategy intentionally never starts
-        // on the partial block at the end of the file
-       
-        // This next part relies on knowledge of how the random long is converted
-        // into a block number inside RandomDownloadStrategy
-        prng.setLong(arbitraryWrapCount*(lastBlockNumber-previewBlockNumber+1)+
-                targetBlockNumber-previewBlockNumber);
-        
-        Interval assignment = strategy.pickAssignment(availableBytes, previewLength,
-                lastNeededByte, blockSize);
-        
-        assertEquals("Internal wrapping of random longs not working as expected",
-                targetBlockNumber*blockSize, assignment.low);
-    }
-    
     /**
      * A helper method that simulates chosing blocks to download and removes
      * them from availableBytes.
