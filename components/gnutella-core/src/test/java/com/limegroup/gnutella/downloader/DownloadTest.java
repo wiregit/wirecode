@@ -2624,6 +2624,8 @@ public class DownloadTest extends BaseTestCase {
                             handleNoFile(p.getSocketAddress(),new GUID(m.getGUID()));
                         continue;
                     }
+                    else if (m instanceof HeadPing)
+                        continue;
                     else
                         break;
                 }
