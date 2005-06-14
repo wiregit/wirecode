@@ -314,7 +314,7 @@ public class DownloadManager implements BandwidthTracker {
         
         for (Iterator iter = l.iterator(); iter.hasNext();) {
             ManagedDownloader current = (ManagedDownloader) iter.next();
-            if (current.getSHA1Urn().equals(sha1))
+            if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
                 return current;
         }
         return null;
