@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.spam;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
 public class RatingTable {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
@@ -30,18 +35,6 @@ public class RatingTable {
 	private static final int MAX_SIZE = 50000;
 
 	private static final RatingTable INSTANCE = new RatingTable();
-
-	/**
-	 * Save data from this table to disk.
-	 */
-	public static void save() {
-		try {
-			INSTANCE.writeData();
-		} catch (IOException ioe) {
-			if (INSTANCE.LOG.isDebugEnabled())
-				INSTANCE.LOG.debug(ioe);
-		}
-	}
 
 	/**
 	 * @return single instance of this
@@ -216,52 +209,56 @@ public class RatingTable {
 	private Map readData() throws IOException {
 		TreeMap tokens;
 
-		File spamFile = CommonUtils.getResourceFile("spam.dat");
-
-		FileInputStream fis = null;
+		ObjectInputStream is = null;
 		try {
-			fis = new FileInputStream(spamFile);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			tokens = (TreeMap) ois.readObject();
+			is = new ObjectInputStream(
+                    new BufferedInputStream(
+                            new FileInputStream(getSpamDat())));
+			tokens = (TreeMap) is.readObject();
 		} catch (ClassNotFoundException cnfe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(cnfe);
 			return new TreeMap();
 		} finally {
-			if (fis != null)
-				fis.close();
+            IOUtils.close(is);
 		}
 		return tokens;
 	}
-
-	/**
-	 * save data to disk
-	 * 
-	 * @throws IOException
-	 */
-	private synchronized void writeData() throws IOException {
-		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenMap " + _tokenMap.size());
-
-		// this blocks a while, may do it off-thread...
-		if (_tokenMap.size() > MAX_SIZE)
-			clearOldEntries();
-
-		for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
-			((Token) iter.next()).age();
-
-		File spamFile = CommonUtils.getResourceFile("spam.dat");
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(spamFile);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(_tokenMap);
-		} finally {
-			if (fos != null)
-				fos.close();
-		}
+    
+    /**
+     * Save data from this table to disk.
+     */
+    public synchronized void save() {
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("size of tokenMap " + _tokenMap.size());
+        
+        try {
+            // this blocks a while, may do it off-thread...
+            if (_tokenMap.size() > MAX_SIZE)
+                clearOldEntries();
+            
+            for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
+                ((Token) iter.next()).age();
+            
+            File spamFile = getSpamDat();
+            ObjectOutputStream oos = null;
+            try {
+                oos = new ObjectOutputStream(
+                        new BufferedOutputStream(
+                                new FileOutputStream(getSpamDat())));
+                oos.writeObject(_tokenMap);
+                oos.flush();
+            } finally {
+                IOUtils.close(oos);
+            }
+        
+        } catch (IOException iox) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("saving rating table failed", iox);
+        }
 	}
-
+    
 	/**
 	 * check size of _tokenMap and clears old entries if necessary
 	 */
@@ -294,5 +291,9 @@ public class RatingTable {
 			Object o = iter.next();
 			_tokenMap.put(o, o);
 		}
+	}
+    
+	private static File getSpamDat() {
+	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
 	}
 }
