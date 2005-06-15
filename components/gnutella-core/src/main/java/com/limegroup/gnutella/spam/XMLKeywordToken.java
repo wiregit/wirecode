@@ -35,12 +35,20 @@ public class XMLKeywordToken extends AbstractToken {
 	private byte _good;
 
 	private byte _bad;
+    
+    private final int _hashCode;
 
 	XMLKeywordToken(String xmlField, byte[] keyword) {
 		_good = 90; // give every keyword initial credit
 		_bad = 0;
 		_keyword = keyword;
 		_xmlField = xmlField.getBytes();
+        
+        int hash = xmlField.hashCode();
+        for(int i = 0;i < keyword.length; i++)
+            hash = (37 * hash) + keyword[i];
+        
+        _hashCode = hash;
 	}
 
 	/**
@@ -89,37 +97,19 @@ public class XMLKeywordToken extends AbstractToken {
 		return TYPE;
 	}
 
-	/**
-	 * implements interface <tt>Comparable</tt>
-	 */
-	public int compareTo(Object o) {
-		Token tok = (Token) o;
-
-		if (TYPE != tok.getType())
-			return TYPE - tok.getType();
-
-		XMLKeywordToken other = (XMLKeywordToken) tok;
-
-		if (this._xmlField.length != other._xmlField.length)
-			return this._xmlField.length - other._xmlField.length;
-
-		if (this._keyword.length != other._keyword.length)
-			return this._keyword.length - other._keyword.length;
-
-		for (int i = 0; i < _xmlField.length; i++) {
-			int dif = this._xmlField[i] - other._xmlField[i];
-			if (dif != 0)
-				return dif;
-		}
-
-		for (int i = 0; i < _keyword.length; i++) {
-			int dif = this._keyword[i] - other._keyword[i];
-			if (dif != 0)
-				return dif;
-		}
-		return 0;
-	}
-
+    public final int hashCode() {
+        return _hashCode;
+    }
+    
+    public final boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (!(o instanceof XMLKeywordToken))
+            return false;
+        
+        return _hashCode == o.hashCode();
+    }
+    
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */

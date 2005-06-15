@@ -27,13 +27,4 @@ public abstract class AbstractToken implements Token {
 		// rating is
 		return (int) ((0 | _age) * 100 * (0.1 + Math.pow(1 - getRating(), 0.1)));
 	}
-	
-	/**
-	 * override Object.equals
-	 */
-	public boolean equals(Object other) {
-		if (! (other instanceof AbstractToken))
-			return false;
-		return this.compareTo(other) == 0;
-	}
 }

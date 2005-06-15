@@ -31,14 +31,34 @@ public class KeywordToken extends AbstractToken {
 	private byte _good;
 
 	private byte _bad;
+    
+    private final int _hashCode;
 
 	KeywordToken(byte[] keyword) {
 		// give every keyword initial credit
 		_good = INITAL_GOOD; 
 		_bad = 0;
 		_keyword = keyword;
+		int h = 0;
+		for (int i = 0; i < _keyword.length; i++) 
+		    h = 31*h + _keyword[i];
+
+        _hashCode = h;
 	}
 
+    public final int hashCode() {
+        return _hashCode;
+    }
+    
+    public final boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (! (o instanceof KeywordToken))
+            return false;
+        
+        return _hashCode == o.hashCode();
+    }
+    
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
@@ -83,29 +103,6 @@ public class KeywordToken extends AbstractToken {
 	 */
 	public int getType() {
 		return TYPE;
-	}
-
-	/**
-	 * implements interface <tt>Comparable</tt>
-	 */
-	public int compareTo(Object o) {
-		Token tok = (Token) o;
-
-		if (TYPE != tok.getType())
-			return TYPE - tok.getType();
-
-		KeywordToken other = (KeywordToken) tok;
-
-		if (this._keyword.length != other._keyword.length)
-			return this._keyword.length - other._keyword.length;
-
-		for (int i = 0; i < _keyword.length; i++) {
-			int dif = this._keyword[i] - other._keyword[i];
-			if (dif != 0)
-				return dif;
-		}
-
-		return 0;
 	}
 
 	/**

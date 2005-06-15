@@ -65,20 +65,19 @@ public class UrnToken extends AbstractToken {
 	public int getType() {
 		return TYPE;
 	}
-
-	/**
-	 * implements interface <tt>Comparable</tt>
-	 */
-	public int compareTo(Object o) {
-		Token tok = (Token) o;
-
-		if (TYPE != tok.getType())
-			return TYPE - tok.getType();
-
-		UrnToken other = (UrnToken) tok;
-
-		return other._urn.toString().compareTo(this._urn.toString());
-	}
+    
+    public final int hashCode() {
+        return _urn.hashCode();
+    }
+    
+    public final boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (!(o instanceof UrnToken))
+            return false;
+        
+        return hashCode() == o.hashCode();
+    }
 
 	/**
 	 * overrides method from <tt>Object</tt>

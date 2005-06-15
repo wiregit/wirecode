@@ -13,8 +13,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -61,7 +64,7 @@ public class RatingTable {
 		} catch (IOException ioe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(ioe);
-			map = new TreeMap();
+			map = new HashMap(1000);
 		}
 		_tokenMap = map;
 
@@ -235,7 +238,7 @@ public class RatingTable {
         synchronized(this) {
             if (_tokenMap.size() > MAX_SIZE)
                 clearOldEntries();
-            copy = new TreeMap(_tokenMap);
+            copy = new HashMap(_tokenMap);
         }
         
         if (LOG.isDebugEnabled())

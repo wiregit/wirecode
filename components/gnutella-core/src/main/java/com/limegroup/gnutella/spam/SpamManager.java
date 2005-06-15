@@ -80,7 +80,9 @@ public class SpamManager {
 
 		// rate simple spam...
 		float rating = 0.f;
-		if (rfd.getSHA1Urn() == null && rfd.getXMLDoc().getAction().length() == 0)
+		if (rfd.getSHA1Urn() == null && 
+                rfd.getXMLDoc() != null &&
+                rfd.getXMLDoc().getAction().length() == 0)
 			rating = 1 - (1 - rating) * NO_SHA1_URN_RATING;
         
 		if (isIncompleteFile(rfd.getFileName().toLowerCase(Locale.US))) {

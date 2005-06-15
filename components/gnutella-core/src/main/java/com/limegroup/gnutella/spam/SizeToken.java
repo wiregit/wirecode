@@ -15,14 +15,6 @@ public class SizeToken extends AbstractToken {
 	 */
 	private static final int MAX = 10;
 
-	/**
-	 * This value will be or'd to all sizes to allow this filter to work better
-	 * for certain kinds of spam, were the spammer varies the file size a bit
-	 * 
-	 * Whether or not this is really a good idea remains to be seen....
-	 */
-	private static final byte FUZZ_FACTOR = 0xF;
-
 	private static final int TYPE = TYPE_SIZE;
 
 	private final long _size;
@@ -74,26 +66,18 @@ public class SizeToken extends AbstractToken {
 		return TYPE;
 	}
 
-	/**
-	 * implements interface <tt>Comparable</tt>
-	 */
-	public int compareTo(Object o) {
-		Token tok = (Token) o;
-
-		if (TYPE != tok.getType())
-			return TYPE - tok.getType();
-
-		SizeToken other = (SizeToken) tok;
-
-		long dif = (this._size - other._size) & ~FUZZ_FACTOR;
-
-		if (dif > 0)
-			return 1;
-		else if (dif < 0)
-			return -1;
-		return 0;
-	}
-
+    public final int hashCode() {
+        return (int)(_size ^ (_size >>> 32));
+    }
+    
+    public final boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (!(o instanceof SizeToken))
+            return false;
+        
+        return hashCode() == o.hashCode();
+    }
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */

@@ -35,6 +35,8 @@ public class AddressToken extends AbstractToken {
 	private byte _good;
 
 	private byte _bad;
+    
+    private final int _hashCode;
 
 	public AddressToken(byte[] address, int port) {
 		Assert.that(address.length == 4);
@@ -43,7 +45,18 @@ public class AddressToken extends AbstractToken {
 		_bad = 0;
 		_address = address;
 		_port = (short) port;
+        _hashCode = getHashCode();
 	}
+    
+    private int getHashCode() {
+        int hashCode = TYPE;
+        hashCode = (TYPE * hashCode) + _address[0];
+        hashCode = (TYPE * hashCode) + _address[1];
+        hashCode = (TYPE * hashCode) + _address[2];
+        hashCode = (TYPE * hashCode) + _address[3];
+        hashCode = (TYPE * hashCode) + _port;
+        return hashCode;
+    }
 
 	/**
 	 * implements interface <tt>Token</tt>
@@ -91,25 +104,18 @@ public class AddressToken extends AbstractToken {
 		return TYPE;
 	}
 
-	/**
-	 * implements interface <tt>Comparable</tt>
-	 */
-	public int compareTo(Object o) {
-		Token tok = (Token) o;
-
-		if (TYPE != tok.getType())
-			return TYPE - tok.getType();
-
-		AddressToken other = (AddressToken) tok;
-
-		for (int i = 0; i < _address.length; i++) {
-			int dif = this._address[i] - other._address[i];
-			if (dif != 0)
-				return dif;
-		}
-
-		return this._port - other._port;
-	}
+    public final int hashCode() {
+        return _hashCode;
+    }
+    
+    public final boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if ( ! (o instanceof AddressToken))
+            return false;
+        
+        return _hashCode == o.hashCode();
+    }
 
 	/**
 	 * overrides method from <tt>Object</tt>
