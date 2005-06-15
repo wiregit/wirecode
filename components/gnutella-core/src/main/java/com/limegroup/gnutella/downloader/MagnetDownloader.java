@@ -2,6 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashSet;
@@ -63,8 +65,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /** The string to prefix download files with in the rare case that we don't
      *  have a download name and can't calculate one from the URN. */
     static final String DOWNLOAD_PREFIX="MAGNET download from ";
-
-	private static final String MAGNET = "MAGNET"; 
+	
+	private static final transient String MAGNET = "MAGNET"; 
 	
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -104,7 +106,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		Assert.that(getMagnet() != null);
 		Assert.that(getMagnet().getSHA1Urn() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(manager,fileManager,callback);
+        super.initialize(manager, fileManager, callback);
     }
 	
 	private MagnetOptions getMagnet() {
@@ -328,6 +330,32 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		if (!hasRFD())
 			initPropertiesMap(rfd);
 		return super.addDownloadForced(rfd, cache);
+	}
+	
+	/**
+	 * Overriden to write out nothing.
+	 * @param stream
+	 * @throws IOException
+	 */
+	private synchronized void writeObject(ObjectOutputStream stream)
+		throws IOException {
+	}
+
+	
+	private void readObject(ObjectInputStream stream)
+	throws IOException, ClassNotFoundException {
+		if (getMagnet() == null) {
+			ObjectInputStream.GetField fields = stream.readFields();
+			String textQuery = (String) fields.get("_textQuery", null);
+			URN urn = (URN) fields.get("_urn", null);
+			String fileName = (String) fields.get("_filename", null);
+			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
+			MagnetOptions magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
+			if (!magnet.isDownloadable()) {
+				throw new IOException("Old undownloadable magnet");
+			}
+			propertiesMap.put(MAGNET, magnet);
+		}
 	}
 
     /**

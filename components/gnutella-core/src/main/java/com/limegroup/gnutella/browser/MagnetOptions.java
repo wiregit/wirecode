@@ -37,6 +37,20 @@ public class MagnetOptions implements Serializable {
 	private transient String localizedErrorMessage;
 	private transient URN urn;
 	
+	public static MagnetOptions createMagnet(String kt, String fileName,
+											 URN urn, String[] defaultURLs) {
+		HashMap map = new HashMap();
+		map.put(KT, kt);
+		map.put(DN, fileName);
+		if (urn != null) {
+			addAppend(map, XT, urn.httpStringValue());
+		}
+		for (int i = 0; defaultURLs != null && i < defaultURLs.length; i++) {
+			addAppend(map, AS, defaultURLs[i]);
+		}
+		return new MagnetOptions(map);
+	}
+	
 	/**
 	 * Returns an empty array if the string could not be parsed.
 	 * @param arg a string like "magnet:?xt.1=urn:sha1:49584DFD03&xt.2=urn:sha1:495345k"
