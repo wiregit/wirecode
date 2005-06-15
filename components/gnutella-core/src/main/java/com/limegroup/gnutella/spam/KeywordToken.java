@@ -1,0 +1,117 @@
+package com.limegroup.gnutella.spam;
+
+/**
+ * A token holding a simple keyword
+ */
+public class KeywordToken extends AbstractToken {
+	private static final long serialVersionUID = 3257850995487748662L;
+
+	public static final int TYPE = TYPE_KEYWORD;
+
+	/**
+	 * must be positive
+	 * 
+	 * This is a heuristic value to prevent an token from becoming bad
+	 * after only a small number of bad evaluations.
+	 */
+	private static final byte INITAL_GOOD = 20;
+
+	/**
+	 * must be positive
+	 * 
+	 * This value determines how dynamic the filter is. A low MAX value will
+	 * allow this Token to get a bad rating after occourring only a few times in
+	 * spam, a high value will make it very improbable that the filter will
+	 * change its mind about a certain token without user-intervention
+	 */
+	private static final int MAX = 100;
+
+	private final byte[] _keyword;
+
+	private byte _good;
+
+	private byte _bad;
+
+	KeywordToken(byte[] keyword) {
+		// give every keyword initial credit
+		_good = INITAL_GOOD; 
+		_bad = 0;
+		_keyword = keyword;
+	}
+
+	/**
+	 * implements interface <tt>Token</tt>
+	 */
+	public float getRating() {
+		return (float)Math.pow(1.f * _bad / (_good + _bad + 1), 2);
+	}
+
+	/**
+	 * implements interface <tt>Token</tt>
+	 */
+	public void rate(int rating) {
+		_age = 0;
+		switch (rating) {
+		case RATING_GOOD:
+			_good++;
+			break;
+		case RATING_SPAM:
+			_bad++;
+			break;
+		case RATING_USER_MARKED_GOOD:
+			_bad = 0;
+			break;
+		case RATING_USER_MARKED_SPAM:
+			_bad = (byte) Math.min(_bad + 10, MAX);
+			break;
+		case RATING_CLEARED:
+			_bad = 0;
+			_good = INITAL_GOOD;
+			break;
+		default:
+			throw new IllegalArgumentException("unknown type of rating");
+		}
+
+		if (_good >= MAX || _bad >= MAX) {
+			_good = (byte) (_good * 9 / 10);
+			_bad = (byte) (_bad * 9 / 10);
+		}
+	}
+
+	/**
+	 * implements interface <tt>Token</tt>
+	 */
+	public int getType() {
+		return TYPE;
+	}
+
+	/**
+	 * implements interface <tt>Comparable</tt>
+	 */
+	public int compareTo(Object o) {
+		Token tok = (Token) o;
+
+		if (TYPE != tok.getType())
+			return TYPE - tok.getType();
+
+		KeywordToken other = (KeywordToken) tok;
+
+		if (this._keyword.length != other._keyword.length)
+			return this._keyword.length - other._keyword.length;
+
+		for (int i = 0; i < _keyword.length; i++) {
+			int dif = this._keyword[i] - other._keyword[i];
+			if (dif != 0)
+				return dif;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * overrides method from <tt>Object</tt>
+	 */
+	public String toString() {
+		return new String(_keyword) + " " + _good + " " + _bad;
+	}
+}

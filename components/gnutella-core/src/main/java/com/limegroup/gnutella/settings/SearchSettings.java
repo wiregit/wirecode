@@ -75,8 +75,26 @@ public final class SearchSettings extends LimeProps {
 	 */    
     public static final IntSetting PARALLEL_SEARCH =
         FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
-    
+	
+	/**
+	 * Whether or not to enable the spam filter.
+	 */    
+    public static final BooleanSetting ENABLE_SPAM_FILTER =
+        FACTORY.createBooleanSetting("ENABLE_SPAM_FILTER", true);
+
     /**
+	 * Set how sensitive the spamfilter should be
+	 */    
+    public static final FloatSetting FILTER_SPAM_RESULTS =
+        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.5f);
+    
+	/**
+	 * Whether or not to filter spam results
+	 */    
+    public static final BooleanSetting MARK_SPAM_RESULTS =
+        FACTORY.createBooleanSetting("MARK_SPAM_RESULTS", true);
+    
+	/**
      * Do not issue query keys more than this often
      */
     public static final IntSetting QUERY_KEY_DELAY = 

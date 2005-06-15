@@ -20,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -78,6 +79,7 @@ public final class SearchResultHandler {
      */ 
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
+		SpamManager.instance().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
     }
@@ -213,7 +215,8 @@ public final class SearchResultHandler {
             return false;
         }
 
-        int numSentToFrontEnd = 0;
+        int numGoodSentToFrontEnd = 0;
+		int numSpamSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -225,25 +228,30 @@ public final class SearchResultHandler {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
-            numSentToFrontEnd++;
+			
+			if (! SpamManager.instance().isSpam(rfd))
+				numGoodSentToFrontEnd++;
+			else
+				numSpamSentToFrontEnd++;
         } //end of response loop
 
         // ok - some responses may have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, numSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd, numSpamSentToFrontEnd);
 
-        return (numSentToFrontEnd > 0);
+        return (numGoodSentToFrontEnd + numSpamSentToFrontEnd > 0);
     }
 
 
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
-                                                 final int numSentToFrontEnd) {
+                                                 final int numGoodSentToFrontEnd, 
+                                                 final int numSpamSentToFrontEnd) {
 
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
         // technically Ultrapeers don't use this info, but we are keeping it
         // around for further use
-        if (numSentToFrontEnd > 0) {
+        if (numGoodSentToFrontEnd + numSpamSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
             if (gc == null)
@@ -254,7 +262,7 @@ public final class SearchResultHandler {
             
             // update the object
             LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
-            gc.increment(numSentToFrontEnd);
+            gc.increment(numGoodSentToFrontEnd, numSpamSentToFrontEnd);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
@@ -333,32 +341,40 @@ public final class SearchResultHandler {
         private final long _time;
         private final GUID _guid;
         private final QueryRequest _qr;
-        private int _numResults;
+        private int _numGoodResults, _numSpamResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
         
         public GuidCount(QueryRequest qr) {
             _qr = qr;
             _guid = new GUID(qr.getGUID());
-            _numResults = 0;
+            _numGoodResults = 0;
+			_numSpamResults = 0;
             _time = System.currentTimeMillis();
         }
 
         public GUID getGUID() { return _guid; }
-        public int getNumResults() { return _numResults; }
-        public int getNextReportNum() { return _nextReportNum; }
+        public int getNumResults() {
+        	// count spamResults as half a proper result
+			return _numGoodResults + _numSpamResults / 2;
+		}
+		public int getNextReportNum() { return _nextReportNum; }
         public long getTime() { return _time; }
         public QueryRequest getQueryRequest() { return _qr; }
         public boolean isFinished() { return markAsFinished; }
         public void tallyReport() { 
-            _nextReportNum = _numResults + REPORT_INTERVAL; 
+            _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
 
-        public void increment(int incr) { _numResults += incr; }
+        public void increment(int good, int spam) {
+			_numGoodResults += good;
+			_numSpamResults += spam;
+		}
         public void markAsFinished() { markAsFinished = true; }
 
         public String toString() {
-            return "" + _guid + ":" + _numResults + ":" + _nextReportNum;
+            return "" + _guid + ":" + _numGoodResults + ":" + _numSpamResults
+					+ ":" + _nextReportNum;
         }
     }
 

@@ -162,6 +162,11 @@ public class RemoteFileDesc implements IpPort, Serializable {
      * Whether to serialize the push proxies
      */
     private transient volatile boolean _serializeProxies = false;
+	
+	/**
+	 * the spam rating of this rfd.
+	 */
+	private transient float _spamRating = 0.f;
     
     /**
      * A map of various properties we want to serialize.  Currently we use
@@ -974,4 +979,12 @@ public class RemoteFileDesc implements IpPort, Serializable {
     public int getQueueStatus() {
         return _queueStatus;
     }
+	
+	public void setSpamRating(float rating) {
+		_spamRating = rating;
+	}
+	
+	public float getSpamRating() {
+		return _spamRating;
+	}
 }
