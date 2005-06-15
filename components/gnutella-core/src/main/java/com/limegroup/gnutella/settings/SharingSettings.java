@@ -149,20 +149,21 @@ public class SharingSettings extends LimeProps {
         return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
     
-    /**
-     * Gets all potential save directories.
-     */
-    public static final Set getAllSaveDirectories() {
-        Set set = new HashSet(7);
-        set.add(getSaveDirectory());
-        synchronized(downloadDirsByDescription) {
-            for(Iterator i = downloadDirsByDescription.values().iterator(); i.hasNext(); ) {
-                FileSetting next = (FileSetting)i.next();
-                set.add(next.getValue());
-            }
-        }
-        return set;
-    }
+    /**  
+      * Gets all potential save directories.  
+     */  
+    public static final Set getAllSaveDirectories() {  
+        Set set = new HashSet(7);  
+        set.add(getSaveDirectory());  
+        synchronized(downloadDirsByDescription) {  
+            for(Iterator i = downloadDirsByDescription.values().iterator(); i.hasNext(); ) {  
+                FileSetting next = (FileSetting)i.next();  
+                set.add(next.getValue());  
+            }  
+        }  
+        return set;  
+    }  
+
     
     /*********************************************************************/
     
@@ -181,38 +182,38 @@ public class SharingSettings extends LimeProps {
     /**
 	 * The shared directories. 
 	 */
-    private static final FileArraySetting DIRECTORIES_TO_SHARE =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+    public static final FileSetSetting DIRECTORIES_TO_SHARE =
+        FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
     
     /**
 	 * The directories not to share.
 	 */
-    public static final FileArraySetting DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
+    public static final FileSetSetting DIRECTORIES_NOT_TO_SHARE =
+        FACTORY.createFileSetSetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
 	
     /**
 	 * Directories that are shared but not browseable.
 	 */
-    public static final FileArraySetting DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE", new File[0]);
+    public static final FileSetSetting DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE =
+        FACTORY.createFileSetSetting("DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE", new File[0]);
     
     /**
      * Shared directories that should not be shared recursively.
      * */
-    public static final FileArraySetting DIRECTORIES_TO_SHARE_NON_RECURSIVELY =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
+    public static final FileSetSetting DIRECTORIES_TO_SHARE_NON_RECURSIVELY =
+        FACTORY.createFileSetSetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
     
     /**
      * Sensitive directories that are explicitly allowed to be shared.
      * */
-    public static final FileArraySetting SENSITIVE_DIRECTORIES_TO_SHARE =
-        FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_TO_SHARE", new File[0]);
+    public static final FileSetSetting SENSITIVE_DIRECTORIES_TO_SHARE =
+        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_TO_SHARE", new File[0]);
     
     /**
      * Sensitive directories that are explicitly not allowed to be shared.
      * */
-    public static final FileArraySetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
+    public static final FileSetSetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
+        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
     
 	/**
 	 * The setting if the files of finished downloads should also be shared when
@@ -225,15 +226,15 @@ public class SharingSettings extends LimeProps {
      * Individual files that should be shared despite being located outside
      * of any shared directory, and despite any extension limitations.
      * */
-    public static final FileArraySetting SPECIAL_FILES_TO_SHARE =
-        FACTORY.createFileArraySetting("SPECIAL_FILES_TO_SHARE", new File[0]);
+    public static final FileSetSetting SPECIAL_FILES_TO_SHARE =
+        FACTORY.createFileSetSetting("SPECIAL_FILES_TO_SHARE", new File[0]);
     
     /**
      * Individual files that should be not shared despite being located inside
      * a shared directory.
      * */
-    public static final FileArraySetting SPECIAL_FILES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
+    public static final FileSetSetting SPECIAL_FILES_NOT_TO_SHARE =
+        FACTORY.createFileSetSetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
     
 	/**
 	 * Cleans special file sharing settings by removing references to files that
@@ -292,87 +293,6 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final BooleanSetting ALLOW_BROWSER =
         FACTORY.createBooleanSetting("ALLOW_BROWSER", false);
-        
-    /**
-	 * Adds one directory to the directory string only if
-     * it is a directory and is not already listed.
-	 *
-     * <p><b>Modifies:</b> DIRECTORIES_TO_SHARE</p>
-     *
-	 * @param dir  a <tt>File</tt> instance denoting the
-	 *             abstract pathname of the new directory
-	 *             to add
-	 *
-	 * @throws  IOException
-	 *          if the directory denoted by the directory pathname
-	 *          String parameter did not exist prior to this method
-	 *          call and could not be created, or if the canonical
-	 *          path could not be retrieved from the file system
-	 */
-    public static final void addSharedDirectory(File dir) throws IOException {
-		if (dir == null || !dir.isDirectory() || !dir.exists())
-            throw new IOException();
-
-		DIRECTORIES_NOT_TO_SHARE.remove(dir);
-		if (!DIRECTORIES_TO_SHARE.contains(dir))
-			DIRECTORIES_TO_SHARE.add(dir);
-    }
-	
-	/**
-	 * Removes the given dir from the shared directories.
-	 */
-	public static final void removeSharedDirectory(File dir) {
-		if (DIRECTORIES_TO_SHARE.contains(dir))
-			DIRECTORIES_TO_SHARE.remove(dir);
-		else
-			DIRECTORIES_NOT_TO_SHARE.add(dir);
-		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.remove(dir);
-	}
-    
-	/**
-	 * Returns whether the given dir is a shared directory.
-	 */
-	public static final boolean isSharedDirectory(File dir) {
-		return DIRECTORIES_TO_SHARE.contains(dir);
-	}
-	
-	/**
-	 * Returns the number of shared directories.
-	 */
-	public static final int getSharedDirectoriesCount() {
-		return DIRECTORIES_TO_SHARE.length();
-	}
-    
-	/**
-	 * Returns a File[] of shared directories.
-	 */
-	public static final File[] getSharedDirectories() {
-		return DIRECTORIES_TO_SHARE.getValue();
-	}
-    
-    /**
-	 * Sets the shared directories.  This method filters
-     * out any duplicate or invalid directories in the string.
-     * Note, however, that it does not currently filter out
-     * listing subdirectories that have parent directories
-     * also in the string.
-	 *
-     * <p><b>Modifies:</b> DIRECTORIES_TO_SHARE</p>
-     *
-	 * @param dirs an array of <tt>File</tt> instances denoting
-	 *  the abstract pathnames of the shared directories
-	 */
-    public static final void setSharedDirectories(File[] files) throws IOException {
-        Set set = new HashSet();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i] == null || !files[i].isDirectory() || !files[i].exists())
-                throw new IOException();            
-            set.add(files[i]);
-        }
-        
-        DIRECTORIES_TO_SHARE.setValue((File[])set.toArray(new File[0]));
-    }
-	
 	
 	/**
 	 * Returns the download directory file setting for a mediatype. The
@@ -384,15 +304,14 @@ public class SharingSettings extends LimeProps {
 	 * @return the filesetting for the media type
 	 */
 	public static final FileSetting getFileSettingForMediaType(MediaType type) {
-		FileSetting setting = (FileSetting)downloadDirsByDescription.get(type.getDescriptionKey());
+		FileSetting setting = (FileSetting)downloadDirsByDescription.get
+			(type.getDescriptionKey());
 		if (setting == null) {
-			setting = FACTORY.createProxyFileSetting(
-			    "DIRECTORY_FOR_SAVING_" + type.getDescriptionKey() + "_FILES",
-			    DIRECTORY_FOR_SAVING_FILES
-			);
+			setting = FACTORY.createProxyFileSetting
+			("DIRECTORY_FOR_SAVING_" 
+			 + type.getDescriptionKey() + "_FILES", DIRECTORY_FOR_SAVING_FILES);
 			downloadDirsByDescription.put(type.getDescriptionKey(), setting);
 		}
-
 		return setting;
 	}
 }

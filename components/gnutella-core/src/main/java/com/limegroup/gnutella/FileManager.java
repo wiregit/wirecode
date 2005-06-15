@@ -201,9 +201,19 @@ public abstract class FileManager {
     protected volatile int _revision = 0;
     
     /**
-     * The revision that finished loading.
+     * The revision that finished loading all pending files.
      */
-    private volatile int _loadFinished = -1;
+    private volatile int _pendingFinished = -1;
+    
+    /**
+     * The revision that finished updating shared directories.
+     */
+    private volatile int _updatingFinished = -1;
+    
+    /**
+     * The last revision that finished both pending & updating.
+     */
+    private volatile int _loadingFinished = -1;
     
     /**
      * The filter object to use to discern shareable files.
@@ -540,12 +550,28 @@ public abstract class FileManager {
     }
     
     /**
+     * Notification that something finished loading.
+     */
+    private void tryToFinish() {
+        int revision;
+        synchronized(this) {
+            if(_pendingFinished != _updatingFinished || // Pending's revision must == update
+               _pendingFinished != _revision ||       // The revision must be the current library's
+               _loadingFinished >= _revision)         // And we can't have already finished.
+                return;
+            _loadingFinished = _revision;
+            revision = _loadingFinished;
+        }
+        
+        loadFinished(revision);
+    }
+    
+    /**
      * Kicks off necessary stuff for loading being done.
      */
     protected void loadFinished(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Finished loading revision: " + revision);
-        _loadFinished = revision;
         
         // Various cleanup & persisting...
         trim();
@@ -561,7 +587,7 @@ public abstract class FileManager {
      * Returns whether or not the loading is finished.
      */
     public boolean isLoadFinished() {
-        return _loadFinished == _revision;
+        return _loadingFinished == _revision;
     }
 
     /** 
@@ -574,7 +600,7 @@ public abstract class FileManager {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
         
-        final File[] directories = new File[SharingSettings.getSharedDirectoriesCount() + 1];
+        final File[] directories;
         synchronized (this) {
             // Reset the file list info
             resetVariables();
@@ -592,11 +618,7 @@ public abstract class FileManager {
             //from smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
             
-            // add 'NetworkShare' as an always shared subdirectory.
-            File[] tmpDirs = SharingSettings.getSharedDirectories();
-            System.arraycopy(tmpDirs, 0, directories, 0, tmpDirs.length);
-            directories[tmpDirs.length] = FORCED_SHARE;
-
+            directories = SharingSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
                     return (a.toString()).length()-(b.toString()).length();
@@ -611,16 +633,22 @@ public abstract class FileManager {
         //Load the shared directories and add their files.
         for(int i = 0; i < directories.length && _revision == revision; i++)
             updateSharedDirectories(directories[i], null, revision);
+            
+        // Update the FORCED_SHARE directory.
+        updateSharedDirectories(FORCED_SHARE, null, revision);
 
         // Add specially shared files
-        File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-        for(int i = 0; i <  specialFiles.length && _revision == revision; i++)
-            addFileIfShared(specialFiles[i], Collections.EMPTY_LIST, true, revision, null);
+        Set specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
+        for(Iterator i = specialFiles.iterator(); i.hasNext() && _revision == revision; )
+            addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
 
         trim();
         
         if(LOG.isDebugEnabled())
             LOG.debug("Finished queueing shared files for revision: " + revision);
+            
+        _updatingFinished = revision;
+        tryToFinish();
     }
     
     /**
@@ -673,6 +701,10 @@ public abstract class FileManager {
             }
         }
 		
+        // Exit quickly (without doing the dir lookup) if revisions changed.
+        if(_revision != revision)
+            return;
+
         // STEP 1:
         // Add directory
         boolean isForcedShare = directory.equals(FORCED_SHARE);
@@ -721,6 +753,60 @@ public abstract class FileManager {
 	///////////////////////////////////////////////////////////////////////////
 	//  Adding and removing shared files and directories
 	///////////////////////////////////////////////////////////////////////////
+	/**
+	 * Removes a given directory from being completely shared.
+	 */
+	public void removeFolderIfShared(File folder) {
+	    removeFolderIfShared(folder, true);
+	}
+	
+	/**
+	 * Removes a given directory from being completed shared.
+	 * If 'firstPass' is true, this will remove it from the root-level of
+	 * shared folders if it existed there.  (If it is false & it was
+	 * a root-level shared folder, the folder remains shared.)
+	 *
+	 * The first time this is called, firstPass must be true in order to ensure
+	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
+	 * to the DIRECTORIES_NOT_TO_SHARE.
+	 */
+	void removeFolderIfShared(File folder, boolean firstPass) {
+	    try {
+	        folder = FileUtils.getCanonicalFile(folder);
+	    } catch(IOException ignored) {}
+	        
+        if(_completelySharedDirectories.contains(folder)) {
+            if(!firstPass && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder))
+                return; // it was a root-share & we aren't gonna force it out.
+            else if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder) && !firstPass)
+                SharingSettings.DIRECTORIES_NOT_TO_SHARE.add(folder); // it wasn't a root share & we already removed the parent
+            
+            File[] subs = folder.listFiles();
+            if(subs != null) {
+                for(int i = 0; i < subs.length; i++) {
+                    File f = subs[i];
+                    if(f.isDirectory())
+                        removeFolderIfShared(f, false);
+                    else if(f.isFile())
+                        removeFileIfShared(f);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Adds a given folder to be shared.
+     */
+    public void addSharedFolder(File folder) {
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch(IOException ignored) {}
+        
+        SharingSettings.DIRECTORIES_NOT_TO_SHARE.remove(folder);
+        SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+        updateSharedDirectories(folder, null, _revision);
+    }
+	
 	/**
 	 * Always shares the given file.
 	 */
@@ -845,8 +931,8 @@ public abstract class FileManager {
                     callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED));
                 }
                 
-                if(_numPendingFiles == 0 && revision == _revision && !isLoadFinished())
-                    loadFinished(revision);
+                _pendingFinished = revision;
+                tryToFinish();
             }
             
             public boolean isOwner(Object o) {
