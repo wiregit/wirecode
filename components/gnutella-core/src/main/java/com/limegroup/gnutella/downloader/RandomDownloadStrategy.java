@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.util.Random;
-import java.util.List;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -121,101 +120,25 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         Iterator intervalIterator = availableIntervals.getAllIntervals();
         // Get the first alligned range after a random place in the file
     
+        Interval optimalInterval = null;
         while (intervalIterator.hasNext()) {
-            Interval candidate = (Interval) intervalIterator.next();
-            // Calculate the most useful low index for this range,
-            // where the primary criterion is bestLow >= randomPoint
-            // and lower bestLows are preferable (as a second criterion).
-            long bestLow = candidate.low;
-            if (bestLow < randomPoint && candidate.high >= randomPoint) {
-                bestLow = randomPoint;
+            optimalInterval = optimizeInterval((Interval) intervalIterator.next(),
+                    randomPoint, blockSize);
+            // Check if it really is optimal
+            if (optimalInterval.low >= randomPoint) {
+                // Lazily update any randomLocations that have coalesced 
+                // with this randomLocation.  randomPoint <= optimalInterval.high
+                clearRandomLocationsBetween(randomPoint, optimalInterval.high, randomIndex);
+                return optimalInterval; 
             }
-                
-            // Calculate what the high byte offset should be.
-            // This will be at most blockSize-1 bytes greater than bestLow
-            long bestHigh = alignHigh(bestLow,blockSize);
-      
-            if (bestHigh > candidate.high)
-                bestHigh = candidate.high;
-
-            // Is it after our random lower bound ?
-            if (bestLow >= randomPoint) {
-                // We've found our ideal location.  Log it and return
-                
-                // See which (if any) randomLocations have been skipped
-                for(int i=randomLocations.length-1; i >= 0; i--) {
-                    if (i != randomIndex &&
-                            randomLocations[randomIndex] <= randomLocations[i] &&
-                            bestHigh >= randomLocations[i]) {
-                        // A random location has been skipped, so force a lazy update
-                        // by setting the random location below the smallest legal
-                        // lowerBound
-                        randomLocations[i] = -1;
-                    }
-                }
-                
-                // Log it
-                if (LOG.isDebugEnabled()) { 
-                    LOG.debug("Random download, index="+randomIndex+
-                            ", random location="+randomLocations[randomIndex]+
-                            ", range=["+bestLow+"-"+bestHigh+
-                            "] out of choices "+availableIntervals); 
-                }
-                
-                // return
-                if (candidate.high == bestHigh && candidate.low == bestLow)
-                    return candidate;
-                return new Interval(bestLow,bestHigh);
-            } else {
-                // If randomPoint < candidate.high, then earlier code would
-                // have stepped bestLow >= randomPoint, and we would have
-                // returned.  Therefore, candidate.high is now our best
-                // high point.
-                
-                // step the low point backward to the block boundary
-                bestLow = alignLow(candidate.high, blockSize);
-                // Adjust bestLow to be within the interval
-                // We already know bestLow <= bestHigh <= candidate.high
-                if (bestLow < candidate.low)
-                    bestLow = candidate.low;
-                
-                if (bestLow == candidate.low) {
-                    lastSuitableInterval = candidate;
-                } else {
-                    lastSuitableInterval = new Interval(bestLow, candidate.high);
-                }
-            } // close of lowerBound check if-else code block
-        } // close of Iterator loop
-        
-        // If we had found the ideal block, we would have returned from within one
-        // of the Iterator loops.
-        
-        // We're stepping backwards in the file if we've gotten to this point
-        
-        // See which (if any) randomLocations have been skipped
-        for(int i=randomLocations.length-1; i >= 0; i--) {
-            if (i != randomIndex &&
-                    randomLocations[randomIndex] >= randomLocations[i] &&
-                    lastSuitableInterval.low <= randomLocations[i])
-                // A random location has been skipped, so force a lazy update
-                // by setting the random location below the smallest legal
-                // lowerBound
-                randomLocations[i] = -1;
         }
-        
-        // The only way to get here is if we have selected a random lowerBound,
-        // and there are no suitible Intervals at or after lowerBound.
-        // Note that this may only be the case for this particular server,
-        // so it's not necessarily the case that lowerBound > lastNeededByte.
-        // Therefore, do not lazily update the random location here.
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("Picking last block before random download point, index="+
-                    randomIndex+", random location="+
-                    randomLocations[randomIndex]+
-                    ", range="+ lastSuitableInterval +
-                    " out of choices "+availableIntervals);
-        return lastSuitableInterval;
+        // optimalInterval really isn't optimal.  We've settled for the last interval
+        // and it is still before randomPoint
+       
+        // Lazily update any randomLocations that have coalesced with this randomLocation
+        // randomPoint > optimalInterval.low
+        clearRandomLocationsBetween(optimalInterval.low, randomPoint, randomIndex);
+       return optimalInterval;
     }
 
     
@@ -231,6 +154,80 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     protected long alignLow(long location, long blockSize) {
         location -= location % blockSize;
         return location;
+    }
+    
+    /**
+     * Sets randomLocations between lowBound and highBound (inclusive) to
+     * -1, except for the randomLocation at excludeIndex.
+     * 
+     * This will cause the affected randomLocations to be lazily updated
+     * next time they are used, since -1 is before all legal lower bounds
+     * passed to pickAssignment.
+     * 
+     * @param lowBound
+     * @param highBound
+     * @param excludeIndex
+     */
+    private void clearRandomLocationsBetween(long lowBound, long highBound, 
+            int excludeIndex) {
+        for(int index=randomLocations.length-1; index >= 0; index--) {
+            if(randomLocations[index] >= lowBound &&
+                    randomLocations[index] <= highBound &&
+                    index != excludeIndex)
+                randomLocations[index] = -1L;
+        }
+    }
+    
+    /** Returns candidate or a sub-interval of candidate that best 
+     * fits the following goals:
+     * 
+     * 1.a) returnInterval.low >= location
+     * 1.b) returnInterval.low is as close to location as possible
+     * 1.c) returnInterval does not span a blockSize boundary
+     * 1.d) returnInterval is as large as possible without violating 1.a-1.c
+     * 
+     * failing 1.a, the secondary goals become most important:
+     * 2.a) returnInterval.high <= location
+     * 2.b) returnInterval.high is as close to location as possible
+     * 2.c) returnInterval does not span a blockSize boundary
+     * 2.d) returnInterval is as large as possible without violating 2.a-2.c
+     */
+    private Interval optimizeInterval(Interval candidate,
+            long location, long blockSize) {
+        
+            // Calculate the most suitable low value contained
+            // in candidate.
+            long bestLow = candidate.low;
+            if (bestLow < location && candidate.high >= location) {
+                bestLow = location;
+            }
+            
+            // See if goal 1.a is violated
+            if (bestLow >= location) {
+                // Calculate the most suitable high byte based on goal 1.c 
+                // This will be at most blockSize-1 bytes greater than bestLow
+                long bestHigh = alignHigh(bestLow,blockSize);
+      
+                if (bestHigh > candidate.high)
+                    bestHigh = candidate.high;
+                
+                if (candidate.high == bestHigh && candidate.low == bestLow)
+                    return candidate;
+                return new Interval(bestLow,bestHigh);
+            } else {
+                // candidate.high < location
+                // Goal 1.a cannot be met, so move on to secondary goals
+                bestLow = alignLow(candidate.high, blockSize);
+                // Adjust low to be within candidate
+                if (bestLow < candidate.low)
+                    bestLow = candidate.low;
+                
+                if (bestLow == candidate.low) {
+                    return candidate;
+                } else {
+                    return new Interval(bestLow, candidate.high);
+                }
+            }   
     }
     
     /**
