@@ -33,9 +33,7 @@ public class SpamManager {
 	public static final float GOOD_THRESHOLD = 0.15f;
 
 	/**
-	 * inverse rating (1 - probability) for an RFD without SHA1 urn. These are
-	 * files from suspicious clients and I don't mean to be patronizing but the
-	 * user should be disencouraged from downloading it :)
+	 * inverse rating (1 - probability) for an RFD without SHA1 urn. 
 	 */
 	private static final float NO_SHA1_URN_RATING = 0.5f;
 
@@ -82,8 +80,9 @@ public class SpamManager {
 
 		// rate simple spam...
 		float rating = 0.f;
-		if (rfd.getSHA1Urn() == null)
+		if (rfd.getSHA1Urn() == null && rfd.getXMLDoc().getAction().length() == 0)
 			rating = 1 - (1 - rating) * NO_SHA1_URN_RATING;
+        
 		if (isIncompleteFile(rfd.getFileName().toLowerCase(Locale.US))) {
 			rating = 1 - (1 - rating) * INCOMPLETE_FILE_RATING;
 		}

@@ -242,7 +242,6 @@ public class RatingTable {
             LOG.debug("size of tokenMap " + copy.size());
         
         try {
-            File spamFile = getSpamDat();
             ObjectOutputStream oos = null;
             try {
                 oos = new ObjectOutputStream(
