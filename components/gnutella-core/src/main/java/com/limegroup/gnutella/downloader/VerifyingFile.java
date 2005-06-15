@@ -441,13 +441,13 @@ public class VerifyingFile {
      *      a chunkSize boundary and will be at most chunkSize bytes large.
      * @return the leased interval
      */
-    private synchronized Interval leaseWhiteHelper(IntervalSet availableRanges, long chunkSize) throws NoSuchElementException {
+    private synchronized Interval leaseWhiteHelper(IntervalSet availableBytes, long chunkSize) throws NoSuchElementException {
         if (LOG.isDebugEnabled())
             LOG.debug("leasing white, state:\n"+dumpState());
       
         // If ranges is null, make ranges represent the entire file
-        if (availableRanges == null)
-            availableRanges = IntervalSet.createSingletonSet(0, completedSize-1);
+        if (availableBytes == null)
+            availableBytes = IntervalSet.createSingletonSet(0, completedSize-1);
         
         // Figure out which blocks we still need to assign
         IntervalSet neededBytes = IntervalSet.createSingletonSet(0, completedSize-1);
@@ -460,15 +460,11 @@ public class VerifyingFile {
         if (LOG.isDebugEnabled())
             LOG.debug("needed bytes: "+neededBytes);
         
-        // Calculate previewLength and lastNeededByte
-        long previewLength = neededBytes.getFirst().low;
-        long lastNeededByte = neededBytes.getLast().high;
-        
         // Calculate the union of neededBlocks and availableBlocks
-        availableRanges.delete(neededBytes.invert(completedSize));
+        availableBytes.delete(neededBytes.invert(completedSize));
         
-        Interval ret = blockChooser.pickAssignment(availableRanges, previewLength, 
-                lastNeededByte, chunkSize);
+        Interval ret = blockChooser.pickAssignment(availableBytes, neededBytes,
+                chunkSize);
         
         leaseBlock(ret);
         

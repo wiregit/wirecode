@@ -55,15 +55,16 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         super(fileSize);
     }
     
-    public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long lowerBound,
-            long upperBound,
+    public synchronized Interval pickAssignment(IntervalSet candidateBytes,
+            IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
+        long lowerBound = neededBytes.getFirst().low;
+        long upperBound = neededBytes.getLast().high;
         // Input validation
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
         if (lowerBound < 0)
-            throw new IllegalArgumentException("Preview length must be >= 0, "+lowerBound+"<0");
+            throw new IllegalArgumentException("First needed byte must be >= 0, "+lowerBound+"<0");
         if (lowerBound > upperBound)
             throw new IllegalArgumentException("Preview length greater than last needed byte "+
                     lowerBound+">"+upperBound);
@@ -73,10 +74,10 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         // nextFloat() returns a float on [0.0 1.0)
         if (getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
                 || pseudoRandom.nextFloat() >= getBiasProbability(lowerBound, completedSize)) {
-            return super.pickAssignment(availableIntervals, lowerBound, upperBound, blockSize);
+            return super.pickAssignment(candidateBytes, neededBytes, blockSize);
         }
         
-        Interval candidate = availableIntervals.getFirst();
+        Interval candidate = candidateBytes.getFirst();
 
         // Calculate what the high byte offset should be.
         // This will be at most blockSize-1 bytes greater than the low.
@@ -96,7 +97,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
 
         if (LOG.isDebugEnabled())
             LOG.debug("Non-random download, range=" + ret + " out of choices "
-                    + availableIntervals);
+                    + candidateBytes);
 
         return ret;
     }

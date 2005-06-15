@@ -171,6 +171,11 @@ public class IntervalSet {
         return ret;
     }
     
+    /** @return the number of Intervals in this IntervalSet */
+    public int getNumberOfIntervals() {
+        return intervals.size();
+    }
+    
     /**
      * Removes the first element.  Throws NoSuchElementException
      * if no intervals exist.

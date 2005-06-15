@@ -32,6 +32,9 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
     
+    /** Maximum number of file framgents we're willing to intentionally create */
+    private static final int MAX_FRAGMENTS = 16;
+    
     /**
      * A global pseudorandom number generator. We don't really care about values 
      * duplicated across threads, so don't bother serializing access.
@@ -40,15 +43,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * much more simple.
      */
     protected static Random pseudoRandom = new Random();
-
-    /**
-     * A list of the 16 "random" locations in the file from which the random downloader chooses.
-     * This is done in order to minimize fragmentation (and therefore size) of the IntervalSets 
-     * that must be stored to disk by VerifyingFile.
-     * 
-     * These are lazily updated to be after the end of the first contiguous range of assigned blocks.
-     */
-    private final long[] randomLocations = new long[16];
     
     /** The size the download will be once completed. */
     protected final long completedSize;
@@ -56,10 +50,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     public RandomDownloadStrategy(long completedSize) {
         super();
         this.completedSize = completedSize;
-        // Set all randomLocations to be less than the minimum lowerBound,
-        // so that they will be lazily updated. 
-        for(int i=randomLocations.length - 1; i >= 0; i--)
-            randomLocations[i] = -1L;
     }
     
     /**
@@ -68,16 +58,11 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * For efficiency reasons attempts will be made to align the start and end of 
      * intervals to block boundaries.  However, there are no guarantees on alignment.
      * 
-     * @param availableIntervals a representation of the set of 
-     *      bytes available for download from a given server, minus
-     *      the set of bytes that we already have (or have assigned)
-     * @param lowerBound the number of contiguous bytes from the 
-     *      beginning of the file that have already been assigned 
-     *      (and will presumably soon be available for preview)
-     * @param upperBound all bytes after lastNeededByte have been assigned for
-     *      download.  Note that this information may not be availbable
-     *      from availableIntervals, since availableIntervals may contain server-specific
-     *      information.
+     * @param candidateBytes a representation of the set of 
+     *      bytes available for download from a given server, minus the set
+     *      of bytes that have already been leased, verified, etc.
+     * @param neededBytes a representation of the set of bytes
+     *      of the file that have not been leased, verified, etc.
      * @param fileSize the total length of the file being downloaded
      * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
      *      be ignared.  An attempt will be made to make the high end of the interval one less
@@ -85,60 +70,72 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public synchronized Interval pickAssignment(IntervalSet availableIntervals,
-            long lowerBound,
-            long upperBound,
+    public synchronized Interval pickAssignment(IntervalSet candidateBytes,
+            IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
+        long lowerBound = neededBytes.getFirst().low;
+        long upperBound = neededBytes.getLast().high;
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
         if (lowerBound < 0)
             throw new IllegalArgumentException("lowerBound must be >= 0, "+lowerBound+"<0");
         if (upperBound >= completedSize)
-            throw new IllegalArgumentException("upperBound must be less than completedSize "+
+            throw new IllegalArgumentException("Greatest needed byte must be less than completedSize "+
                     upperBound+" >= "+completedSize);
-        if (lowerBound > upperBound)
-            throw new IllegalArgumentException("lowerBound greater than upperBound "+
-                    lowerBound+" > "+upperBound);
-        if (availableIntervals.isEmpty())
+        if (candidateBytes.isEmpty())
             throw new NoSuchElementException();
             
-        // Which random range should be extended?
-        int randomIndex = pseudoRandom.nextInt() & 0xF; // integer [0 15]
-            
-        if (randomLocations[randomIndex] < lowerBound || 
-                randomLocations[randomIndex] > upperBound)
-            // Make the random location somewhere between the first and last bytes we still need to assign
-            randomLocations[randomIndex] = getRandomLocation(lowerBound, upperBound, blockSize);
+        // The ideal location from which to select an Interval
+        long idealLocation = 0;
         
-        // The lowest start location of an ideally matched interval.
-        long randomPoint = randomLocations[randomIndex];
+        int fragmentCount = neededBytes.getNumberOfIntervals();   
+        
+        if (fragmentCount >= MAX_FRAGMENTS) {
+            // No fragments to spare, so attempt to reduce fragmentation by
+            // setting idealLocation to the first byte of any fragment, or
+            // the last byte of the last fragment.
+            // Since we download on either side of the idealLocation, this has
+            // the effect of "growing" our contiguous blocks of downloaded data
+            // in both directions until they coalesce.
+            int randomFragmentNumber = pseudoRandom.nextInt(fragmentCount + 1);
+            if (randomFragmentNumber == fragmentCount)
+                idealLocation = neededBytes.getLast().high + 1;
+            else
+                idealLocation = ((Interval)neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
+        } else {
+            // There are fragments to spare, so download from a random location
+            getRandomLocation(neededBytes.getFirst().low, neededBytes.getLast().high, blockSize);
+        }
        
         // The first properly aligned interval, returned in the case that
         // there are no aligned intervals available after lowerBound
         Interval lastSuitableInterval = null;
         
-        Iterator intervalIterator = availableIntervals.getAllIntervals();
+        Iterator intervalIterator = candidateBytes.getAllIntervals();
         // Get the first alligned range after a random place in the file
     
-        Interval optimalInterval = null;
+        Interval intervalAbove = null;
+        Interval intervalBelow = null;
         while (intervalIterator.hasNext()) {
-            optimalInterval = optimizeInterval((Interval) intervalIterator.next(),
-                    randomPoint, blockSize);
-            // Check if it really is optimal
-            if (optimalInterval.low >= randomPoint) {
-                // Lazily update any randomLocations that have coalesced 
-                // with this randomLocation.  randomPoint <= optimalInterval.high
-                clearRandomLocationsBetween(randomPoint, optimalInterval.high, randomIndex);
-                return optimalInterval; 
+            intervalAbove = optimizeInterval((Interval) intervalIterator.next(),
+                    idealLocation, blockSize);
+            // Check if it really is above
+            if (intervalAbove.low >= idealLocation) {
+                break; 
             }
+            intervalBelow = intervalAbove;
         }
-        // optimalInterval really isn't optimal.  We've settled for the last interval
-        // and it is still before randomPoint
-       
-        // Lazily update any randomLocations that have coalesced with this randomLocation
-        // randomPoint > optimalInterval.low
-        clearRandomLocationsBetween(optimalInterval.low, randomPoint, randomIndex);
-       return optimalInterval;
+        
+        // If candidateBytes is not empty, at least one of
+        // intervalAbove or intervalBelow is not null.
+        // If we don't have a choice, return the Interval that makes sense
+        if (intervalAbove == null)
+            return intervalBelow;
+        if (intervalBelow == null)
+            return intervalAbove;
+        
+        // We have a choice, so return each with equal probability.
+        return ((pseudoRandom.nextInt()&1) == 1) ? intervalAbove : intervalBelow;
     }
 
     
@@ -154,28 +151,6 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     protected long alignLow(long location, long blockSize) {
         location -= location % blockSize;
         return location;
-    }
-    
-    /**
-     * Sets randomLocations between lowBound and highBound (inclusive) to
-     * -1, except for the randomLocation at excludeIndex.
-     * 
-     * This will cause the affected randomLocations to be lazily updated
-     * next time they are used, since -1 is before all legal lower bounds
-     * passed to pickAssignment.
-     * 
-     * @param lowBound
-     * @param highBound
-     * @param excludeIndex
-     */
-    private void clearRandomLocationsBetween(long lowBound, long highBound, 
-            int excludeIndex) {
-        for(int index=randomLocations.length-1; index >= 0; index--) {
-            if(randomLocations[index] >= lowBound &&
-                    randomLocations[index] <= highBound &&
-                    index != excludeIndex)
-                randomLocations[index] = -1L;
-        }
     }
     
     /** Returns candidate or a sub-interval of candidate that best 

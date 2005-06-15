@@ -9,20 +9,19 @@ public interface SelectionStrategy {
      * For efficiency reasons attempts will be made to align the start and end of intervals
      * to block boundaries.  However, there are no guarantees on alignment.
      * 
-     * @param availableIntervals a representation of the set of 
-     *      bytes available for download from a given server, minus
+     * @param candidateBytes a representation of the set of 
+     *      bytes that are candidates for downloading.  These are the
+     *      bytes of the file that a given for download from a given server, minus
      *      the set of bytes that we already have (or have assigned)
-     * @param lowerBound the first byte that has not been assigned yet
-     * @param upperBound the last byte that has not been assigned yet
-     * @param fileSize the total length of the file being downloaded
+     * @param neededBytes a representation of the set of bytes
+     *      of the file that have not yet been leased, verified, etc.
      * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
-     *      be ignared.  An attempt will be made to make the high end of the interval one less
-     *      than a multiple of blockSize.  Any values less than 1 will generate IllegalArgumentExceptions.
-     * @return the Interval that should be assigned next, with a size of at most blockSize bytes
+     *      be ignared.  The returned Interval will in no case span a blockSize boundary.
+     *      Any values less than 1 will generate IllegalArgumentExceptions.
+     * @return the Interval that should be assigned next, which does not span a blockSize boundary
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public Interval pickAssignment(IntervalSet availableIntervals, 
-            long lowerBound,
-            long upperBound,
+    public Interval pickAssignment(IntervalSet candidateBytes, 
+            IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException;
 }
