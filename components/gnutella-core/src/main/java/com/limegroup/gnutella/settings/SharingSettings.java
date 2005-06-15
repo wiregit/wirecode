@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.Iterator;
 
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -146,6 +147,21 @@ public class SharingSettings extends LimeProps {
      */
     public static final File getSaveDirectory() {
         return DIRECTORY_FOR_SAVING_FILES.getValue();
+    }
+    
+    /**
+     * Gets all potential save directories.
+     */
+    public static final Set getAllSaveDirectories() {
+        Set set = new HashSet(7);
+        set.add(getSaveDirectory());
+        synchronized(downloadDirsByDescription) {
+            for(Iterator i = downloadDirsByDescription.values().iterator(); i.hasNext(); ) {
+                FileSetting next = (FileSetting)i.next();
+                set.add(next.getValue());
+            }
+        }
+        return set;
     }
     
     /*********************************************************************/
@@ -368,14 +384,15 @@ public class SharingSettings extends LimeProps {
 	 * @return the filesetting for the media type
 	 */
 	public static final FileSetting getFileSettingForMediaType(MediaType type) {
-		FileSetting setting = (FileSetting)downloadDirsByDescription.get
-			(type.getDescriptionKey());
+		FileSetting setting = (FileSetting)downloadDirsByDescription.get(type.getDescriptionKey());
 		if (setting == null) {
-			setting = FACTORY.createProxyFileSetting
-			("DIRECTORY_FOR_SAVING_" 
-			 + type.getDescriptionKey() + "_FILES", DIRECTORY_FOR_SAVING_FILES);
+			setting = FACTORY.createProxyFileSetting(
+			    "DIRECTORY_FOR_SAVING_" + type.getDescriptionKey() + "_FILES",
+			    DIRECTORY_FOR_SAVING_FILES
+			);
 			downloadDirsByDescription.put(type.getDescriptionKey(), setting);
 		}
+
 		return setting;
 	}
 }

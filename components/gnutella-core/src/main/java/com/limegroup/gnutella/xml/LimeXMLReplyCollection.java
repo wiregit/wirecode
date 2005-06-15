@@ -25,7 +25,6 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
@@ -56,7 +55,14 @@ public class LimeXMLReplyCollection {
      * SYNCHRONIZATION: Synchronize on mainMap when accessing, 
      *  adding or removing.
      */
-    private final HashMap /* URN -> LimeXMLDocument */ mainMap;
+    private final Map /* URN -> LimeXMLDocument */ mainMap;
+    
+    /**
+     * The old map that was read off disk.
+     *
+     * Used while initially processing FileDescs to add.
+     */
+    private final Map /* URN -> LimeXMLDocument */ oldMap;
     
     /**
      * A mapping of fields in the LimeXMLDocument to a Trie
@@ -96,79 +102,77 @@ public class LimeXMLReplyCollection {
      * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
      */
-    public LimeXMLReplyCollection(FileManager fm, String URI) {
+    public LimeXMLReplyCollection(String URI) {
         this.schemaURI = URI;
         this.trieMap = new HashMap();
         this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
                                  LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap();
+        this.oldMap = readMapFromDisk();
+    }
+    
+    /**
+     * Initializes the map using either LimeXMLDocuments in the list of potential
+     * documents, or elements stored in oldMap.  Items in potential take priority.
+     */
+    void intialize(FileDesc fd, List potential) {
+        URN urn = fd.getSHA1Urn();
+        LimeXMLDocument doc = null;
         
-        if(fm != null) {
-            Map hashToXML = readMapFromDisk();
-            if(hashToXML != null)
-                parseStoredMap(fm, hashToXML);
+        // First try to get a doc from the potential list.
+        for(Iterator i = potential.iterator(); i.hasNext(); ) {
+            LimeXMLDocument next = (LimeXMLDocument)i.next();
+            if(next.getSchemaURI().equals(schemaURI)) {
+                doc = next;
+                break;
+            }
+        }
+        
+        // Then try to get it from the old map.
+        if(doc == null)
+            doc = (LimeXMLDocument)oldMap.get(urn);
+        
+        
+        // Then try and see it, with validation and all.
+        if(doc != null) {
+            doc = validate(doc, fd.getFile(), fd);
+            if(doc != null) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Adding old document for file: " + fd.getFile() + ", doc: " + doc);
+                    addReply(fd, doc);
+            }
         }
     }
     
     /**
-     * Creates documents for files that may not have docs already.
+     * Creates a LimeXMLDocument for the given FileDesc if no XML already exists
+     * for it.
      */
-    void initialize(FileDesc[] fds) {
-        synchronized(mainMap) {
-            for(int i = 0; i < fds.length; i++) {
-                FileDesc fd = fds[i];
-                File file = fd.getFile();
-                if(fd instanceof IncompleteFileDesc)
-                    continue;
-                
-                if(mainMap.containsKey(fd.getSHA1Urn()))
-                    continue;
-                    
-                // If we have no documents for this FD, or the file-format only supports
-                // a single kind of metadata, construct a document.
-                // This is necessary so that we don't keep trying to parse formats that could
-                // be multiple kinds of files every time.   
-                if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
-                    LimeXMLDocument doc = constructDocument(file);
-                    if(doc == null)
-                        continue;
-                    
+    void createIfNecessary(FileDesc fd) {
+        URN urn = fd.getSHA1Urn();
+        if(!mainMap.containsKey(urn)) {
+            File file = fd.getFile();
+            // If we have no documents for this FD, or the file-format only supports
+            // a single kind of metadata, construct a document.
+            // This is necessary so that we don't keep trying to parse formats that could
+            // be multiple kinds of files every time.   
+            if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
+                LimeXMLDocument doc = constructDocument(file);
+                if(doc != null) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
                     addReply(fd, doc);
                 }
             }
         }
-        
-        writeMapToDisk();
     }
     
     /**
-     * Reads through an existing map & builds up mainMap.
+     * Notification that initial loading is done.
      */
-    private void parseStoredMap(FileManager fm, Map hashToXML) {
-        for(Iterator i = hashToXML.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            if(!(next.getKey() instanceof URN) || !(next.getValue() instanceof LimeXMLDocument))
-                continue;
-            
-            URN urn = (URN)next.getKey();
-            LimeXMLDocument doc = (LimeXMLDocument)next.getValue();
-            if(urn == null || doc == null)
-                continue;
-            
-            FileDesc fd = fm.getFileDescForUrn(urn);
-            if(fd == null || fd instanceof IncompleteFileDesc)
-                continue;
-            
-            doc = validate(doc, fd.getFile(), fd);
-            if(doc == null)
-                continue;
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("Adding new document for file: " + fd.getFile() + ", doc: " + doc);
-            addReply(fd, doc);
-        }
+    void loadFinished() {
+        oldMap.clear();
+        writeMapToDisk();
     }
     
     /**
@@ -502,7 +506,7 @@ public class LimeXMLReplyCollection {
         URN hash = fd.getSHA1Urn();
         boolean found;
         LimeXMLDocument val;
-        synchronized(mainMap){
+        synchronized(mainMap) {
             val = (LimeXMLDocument)mainMap.remove(hash);
             found = (val != null);
         }
@@ -531,8 +535,7 @@ public class LimeXMLReplyCollection {
      * Writes this media file to disk, using the XML in the doc.
      */
     public int mediaFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc,  boolean checkBetter) {
-        boolean wrote=false;
-        int mp3WriteState = -1;
+        int writeState = -1;
         
         if(LOG.isDebugEnabled())
             LOG.debug("writing: " + fileName + " to disk.");
@@ -540,29 +543,24 @@ public class LimeXMLReplyCollection {
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
         MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
-        if (commitWith != null)  {// commit to disk.
-        	if(commitWith.getCorrectDocument() == null) 
-        		mp3WriteState = commitMetaData(fileName, commitWith);
-        	else { 
-        		//The id3 data on disk is better than the data we got in the
+        if (commitWith != null)  {
+        	if(commitWith.getCorrectDocument() == null) {
+        		writeState = commitMetaData(fileName, commitWith);
+        	} else { 
+        		//The data on disk is better than the data we got in the
         		//query reply. So we should update the Document we added
         		removeDoc(fd);
         		addReply(fd, commitWith.getCorrectDocument());
-        		mp3WriteState = NORMAL;//no need to write anything
+        		writeState = NORMAL;//no need to write anything
         	}
         }
         
-        
-        Assert.that(mp3WriteState != INCORRECT_FILETYPE, 
-                    "trying to write id3 to non mp3 file");
+        Assert.that(writeState != INCORRECT_FILETYPE, "trying to write data to unwritable file");
 
-        // write out the mainmap in serial form...
-        wrote = writeMapToDisk();
-
-        if(!wrote) //writing serialized map failed
+        if(!writeMapToDisk())
             return RW_ERROR;
-
-        return mp3WriteState;//wrote successful, return mp3WriteState
+        else
+            return writeState;
     }
 
     /**

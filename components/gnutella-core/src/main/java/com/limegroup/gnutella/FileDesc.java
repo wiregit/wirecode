@@ -25,13 +25,6 @@ import com.limegroup.gnutella.util.I18NConvert;
 /**
  * This class contains data for an individual shared file.  It also provides
  * various utility methods for checking against the encapsulated data.<p>
- *
- * Constructing a FileDesc is usually done in two steps, which allows the caller
- * to avoid holding a lock when hashing a file:
- * <pre>
- *    Set urns=FileDesc.calculateAndCacheURN(file);
- *    FileDesc fd=new FileDesc(file, urns, index);
- * </pre>
  */
 public class FileDesc {
     
@@ -52,9 +45,9 @@ public class FileDesc {
     private final String _name;
 
 	/**
-	 * The size of the file, casted to an <tt>int</tt>.
+	 * The size of the file.
 	 */
-    private final int _size;
+    private final long _size;
 
 	/**
 	 * The modification time of the file, which can be updated.
@@ -113,76 +106,35 @@ public class FileDesc {
 	 *
 	 * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
-     * @param urns the return value from calculateAndCacheURN(file);
-     *  an unmodifiable <tt>Set</tt> of <tt>URN</tt>'s.
+     * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
-     * @see calculateAndCacheURN
      */
     public FileDesc(File file, Set urns, int index) {	
-		if((file == null)) {
-			throw new NullPointerException("cannot create a FileDesc with "+
-										   "a null File");
-		}
-		if(index < 0) {
-			throw new IndexOutOfBoundsException("negative values not "+
-												"permitted in FileDesc: " +
-												index);
-		}
-		if(urns == null) {
-			throw new NullPointerException("cannot create a FileDesc with "+
-										   "a null URN Set");
-		}
-		// make a defensive copy
-		FILE = new File(file.getAbsolutePath());
+		if((file == null))
+			throw new NullPointerException("cannot create a FileDesc with a null File");
+		if(index < 0)
+			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
+		if(urns == null)
+			throw new NullPointerException("cannot create a FileDesc with a null URN Set");
+
+		FILE = file;
         _index = index;
         _name = I18NConvert.instance().compose(FILE.getName());
-        _path = FILE.getAbsolutePath(); //TODO: right method?
-        _size = (int)FILE.length();
+        _path = FILE.getAbsolutePath();
+        _size = FILE.length();
         _modTime = FILE.lastModified();
         URNS = Collections.unmodifiableSet(urns);
 		SHA1_URN = extractSHA1();
-		if(SHA1_URN == null) {
+		if(SHA1_URN == null)
 			throw new IllegalArgumentException("no SHA1 URN");
-		}
+
         try {
             addUrnsForSelf();
         } catch(IllegalArgumentException e) {
             // oh well, we'll add it later.
-        }                        
+        }
+        
         _hits = 0; // Starts off with 0 hits
-    }		
-
-    /** 
-     * Returns the set of URNs for a file to be passed to the FileDesc
-     * constructor.  This is done by looking it up in UrnCache or calculating it
-     * from disk.  constructor.  Updates the UrnCache. 
-     * 
-     * @return an unmodifiable <tt>Set</tt> of <tt>URN</tt>.  If the calling
-     * thread is interrupted while executing this, returns an empty set.  
-	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument is
-	 *  <tt>null</tt>
-     * @throws <tt>IOException</tt> if there is an IO error calculating the 
-     *  URN
-     * @throws <tt>InterruptedException</tt> if the thread that calculates
-     *  the URN is interrupted
-     */
-    public static Set /* of URN */ calculateAndCacheURN(File file) 
-        throws IOException, InterruptedException {
-        if(file == null)
-            throw new NullPointerException("cannot accept null file argument");
-		if(!file.isFile())
-			throw new IOException("not a file: "+file);
-		Set urns = UrnCache.instance().getUrns(file);
-        // TODO: If we ever create more URN types (other than SHA1)
-        // we cannot just check for size == 0, we must check for
-        // size == NUM_URNS_WE_WANT, and calculateUrns should only
-        // calculate the URN for the specific hash we still need.
-		if(urns.size() == 0) {			
-			// expensive the first time a new file is added
-			urns = calculateUrns(file);
-			UrnCache.instance().addUrns(file, urns);
-		}
-        return urns;
     }
 
 	/**
@@ -236,12 +188,10 @@ public class FileDesc {
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
 	private URN extractSHA1() {
-        Iterator iter = URNS.iterator(); 
-        while(iter.hasNext()) {
+	    for(Iterator iter = URNS.iterator(); iter.hasNext(); ) {
             URN urn = (URN)iter.next();
-            if(urn.isSHA1()) {
+            if(urn.isSHA1())
                 return urn;
-            }
         }
 
 		// this should never happen!!
@@ -364,22 +314,6 @@ public class FileDesc {
         	RouterService.getAltlocManager().add(alt, null);
         }
     }
-
-    /**
-     * Adds any URNs that can be locally calculated; may take a while to 
-	 * complete on large files.
-	 *
-	 * @param file the <tt>File</tt> instance to calculate URNs for
-	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances.  If 
-     * the calling thread is interrupted while executing this, returns an empty
-     * set.
-     */
-    private static Set calculateUrns(File file) 
-        throws IOException, InterruptedException {
-        Set set = new HashSet(1);
-        set.add(URN.createSHA1Urn(file));
-        return set;
-	}
     
     /**
      * Determine whether or not the given <tt>URN</tt> instance is 
@@ -390,18 +324,7 @@ public class FileDesc {
 	 *  for this file, <tt>false</tt> otherwise
      */
     public boolean containsUrn(URN urn) {
-        if(urn == null) {
-            throw new NullPointerException("null URNS not allowed in containsUrn");
-        }
-        // now check if given urn matches
-        Iterator iter = URNS.iterator();
-        while(iter.hasNext()){
-            if (urn.equals((URN)iter.next())) {
-                return true;
-            }
-        }
-        // no match
-        return false;
+        return URNS.contains(urn);
     }
     
     /**
@@ -495,10 +418,8 @@ public class FileDesc {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+listInformation(URNS.iterator())+"\r\n"+
-				"docs:     "+
-				 (_limeXMLDocs == null ? "null" : 
-				        listInformation(_limeXMLDocs.iterator()) ));
+				"urns:     "+URNS+"\r\n"+
+				"docs:     "+ _limeXMLDocs);
 	}
 }
 

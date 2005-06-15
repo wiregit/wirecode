@@ -2,14 +2,11 @@ package com.limegroup.gnutella.xml;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collection;
 
 
 /** 
  * Used to map schema URIs to Reply Collections.
- *<p>
- * Uses the singleton pattern.
- * <p> 
- * Used by the RichInfoLoader, which is responsible for creating this mapping
  * 
  * @author Sumeet Thadani
  */
@@ -24,14 +21,10 @@ public class SchemaReplyCollectionMapper{
     }
 
 
-    //To enforce the instance pattern
-    public static synchronized SchemaReplyCollectionMapper instance(){
-        if (instance != null)
-            return instance;
-        else{
+    public static synchronized SchemaReplyCollectionMapper instance() {
+        if (instance == null)
             instance = new SchemaReplyCollectionMapper();
-            return instance;
-        }
+        return instance;
     }
     
 
@@ -42,10 +35,8 @@ public class SchemaReplyCollectionMapper{
      * this method will replace thet old reply collection with the new one. 
      * The old collection will be lost!
      */
-    public void add(String schemaURI, LimeXMLReplyCollection replyCollection){
-        synchronized(mapper){
-            mapper.put(schemaURI,replyCollection);        
-        }
+    public synchronized void add(String schemaURI, LimeXMLReplyCollection replyCollection) {
+        mapper.put(schemaURI, replyCollection);
     }
     
     /**
@@ -55,9 +46,15 @@ public class SchemaReplyCollectionMapper{
      * @ return the <tt>LimeXMLReplyCollection</tt> for the given schema URI,
      * or <tt>null</tt> if we the requested mapping does not exist
      */
-    public LimeXMLReplyCollection getReplyCollection(String schemaURI){
-        synchronized(mapper){
-            return (LimeXMLReplyCollection)mapper.get(schemaURI);
-        }
+    public synchronized LimeXMLReplyCollection getReplyCollection(String schemaURI) {
+        return (LimeXMLReplyCollection)mapper.get(schemaURI);
+    }
+    
+    /**
+     * Returns a collection of all available LimeXMLReplyCollections.
+     * YOU MUST SYNCHRONIZE ITERATION OVER THE COLLECTION IF IT CAN BE MODIFIED.
+     */
+    public synchronized Collection getCollections() {
+        return mapper.values();
     }
 }

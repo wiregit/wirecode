@@ -14,12 +14,18 @@ public class FileManagerEvent extends EventObject {
     public static final int REMOVE  = 2;
     public static final int RENAME  = 3;
     public static final int CHANGE  = 4;
+    public static final int FAILED  = 5;
+    public static final int ALREADY_SHARED = 6;
     
     private final int kind;
     private final FileDesc[] files;
     
     public FileManagerEvent(FileManager manager, int kind) {
-        this(manager, kind, null);
+        this(manager, kind, (FileDesc[])null);
+    }
+    
+    public FileManagerEvent(FileManager manager, int kind, FileDesc fd) {
+        this(manager, kind, new FileDesc[] { fd });
     }
     
     public FileManagerEvent(FileManager manager, int kind, FileDesc[] files) {
@@ -71,6 +77,21 @@ public class FileManagerEvent extends EventObject {
         return (kind==CHANGE);
     }
     
+    /**
+     * Returns true if this is a FAILED add event (ie, addFile failed).
+     */
+    public boolean isFailedEvent() {
+        return (kind==FAILED);
+    }
+
+    /**
+     * Returns true if this is an event for a file that was ALREADY_SHARED
+     * (ie, an addFile event was ignored because the file was already shared)
+     */
+    public boolean isAlreadySharedEvent() {
+        return (kind==ALREADY_SHARED);
+    }
+    
     public String toString() {
         StringBuffer buffer = new StringBuffer("FileManagerEvent: [event=");
         
@@ -86,6 +107,9 @@ public class FileManagerEvent extends EventObject {
                 break;
             case CHANGE:
                 buffer.append("CHANGE");
+                break;
+            case FAILED:
+                buffer.append("FAILED");
                 break;
             default:
                 buffer.append("UNKNOWN");

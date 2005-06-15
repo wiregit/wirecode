@@ -14,21 +14,8 @@ public class ProcessingQueue {
     
     /**
      * The list of items to be processed.
-     *
-     * Note that the List is synchronized, despite using external synchronization.
-     * This is necessary because we use
-     *
-     *      while(QUEUE.size() > 0) ((Runnable)QUEUE.remove(0)).run();
-     *
-     * Which is in a different thread than the one that adds.  We do not want to
-     * lock this while running (because then nothing more can be added), but we
-     * need to ensure that the list is properly synchronized among adds and removes.
-     *
-     * Locking on this is used to ensure that a Thread is running and processing
-     * any newly added item.  Note the comments in the synchronized(this) block
-     * after running, as well as in the finally block.
      */
-    private final List QUEUE = Collections.synchronizedList(new LinkedList());
+    private final List QUEUE = new LinkedList();
     
     /**
      * The name of the thread to be created.
@@ -74,6 +61,13 @@ public class ProcessingQueue {
     }
     
     /**
+     * Clears all pending items that haven't been processed yet.
+     */
+    public synchronized void clear() {
+        QUEUE.clear();
+    }
+    
+    /**
      * Starts a new runner.
      */
     private synchronized void startRunner() {
@@ -87,16 +81,25 @@ public class ProcessingQueue {
     }
     
     /**
+     * Gets the next item to be processed.
+     */
+    private synchronized Runnable next() {
+        if(QUEUE.size() > 0)
+            return (Runnable)QUEUE.remove(0);
+        else
+            return null;
+    }
+    
+    /**
      * The runnable that processes the queue.
      */
     private class Processor implements Runnable {
         public void run() {
             try {
                 while(true) {
-                    while(QUEUE.size() > 0) {
-                        Runnable next = (Runnable)QUEUE.remove(0);
+                    Runnable next = next();
+                    if(next != null)
                         next.run();
-                    }
 
                     // Ideally this would be in a finally clause -- but if it
                     // is then we can potentially ignore exceptions that were
