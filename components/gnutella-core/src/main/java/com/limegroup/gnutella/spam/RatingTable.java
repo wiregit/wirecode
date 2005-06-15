@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
@@ -228,26 +229,26 @@ public class RatingTable {
     /**
      * Save data from this table to disk.
      */
-    public synchronized void save() {
+    public void save() {
+        Map copy;
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("size of tokenMap " + _tokenMap.size());
-        
-        try {
-            // this blocks a while, may do it off-thread...
+        synchronized(this) {
             if (_tokenMap.size() > MAX_SIZE)
                 clearOldEntries();
-            
-            for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
-                ((Token) iter.next()).age();
-            
+            copy = new TreeMap(_tokenMap);
+        }
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("size of tokenMap " + copy.size());
+        
+        try {
             File spamFile = getSpamDat();
             ObjectOutputStream oos = null;
             try {
                 oos = new ObjectOutputStream(
                         new BufferedOutputStream(
                                 new FileOutputStream(getSpamDat())));
-                oos.writeObject(_tokenMap);
+                oos.writeObject(copy);
                 oos.flush();
             } finally {
                 IOUtils.close(oos);
@@ -258,6 +259,16 @@ public class RatingTable {
                 LOG.debug("saving rating table failed", iox);
         }
 	}
+    
+    /**
+     * Marks that the table will be serialized to disc and not accessed for
+     * a long time (i.e. LimeWire is about to get shut down)
+     */
+    public synchronized void saveAndAge() {
+        for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
+            ((Token) iter.next()).age();
+        save();
+    }
     
 	/**
 	 * check size of _tokenMap and clears old entries if necessary
