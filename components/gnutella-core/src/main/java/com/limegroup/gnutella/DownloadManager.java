@@ -579,7 +579,7 @@ public class DownloadManager implements BandwidthTracker {
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
             new MagnetDownloader(incompleteFileManager, magnet, 
-					saveDir, overwrite, fileName);
+					overwrite, saveDir, fileName);
         initializeDownload(downloader);
         return downloader;
     }

@@ -76,24 +76,20 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * non-null.)  If <tt>filename</tt> is specified, it will be used as the
      * name of the complete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
-     *
-     * @param manager controls download queuing; passed to superclass
-     * @param filemanager shares saved files; passed to superclass
      * @param ifm maintains blocks stored on disk; passed to superclass
-     * @param callback notifies GUI of updates; passed to superclass
-     * @param urn the hash of the file (exact topic), or null if unknown
-     * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
-     * @param defaultURLs the initial locations to try (exact source), or null 
-     *  if unknown
+     * @param magnet contains all the information for the download, must be
+     * {@link MagnetOptions#isDownloadable() downloadable}.
+     * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
+     * @param fileName the final file name, must not be <code>null</code>
+     *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
     public MagnetDownloader(IncompleteFileManager ifm,
                             MagnetOptions magnet,
-                            File saveDir,
                             boolean overwrite,
+                            File saveDir,
                             String fileName) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
