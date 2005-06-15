@@ -52,7 +52,7 @@ public class UrnToken extends AbstractToken {
 			_bad = 0;
 			break;
 		case RATING_USER_MARKED_SPAM:
-			_bad = (byte) Math.min(_bad + 3, MAX);
+			_bad = MAX;
 			break;
 		default:
 			throw new IllegalArgumentException("unknown type of rating");
