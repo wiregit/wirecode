@@ -40,11 +40,11 @@ public class ExternalControl {
 	public static String preprocessArgs(String args[]) {
 	    LOG.trace("enter proprocessArgs");
 
-		String arg = new String();
-		for(int i = 0; i < args.length; i++) {
-			arg += args[i];
+		StringBuffer arg = new StringBuffer();
+		for (int i = 0; i < args.length; i++) {
+			arg.append(args[i]);
 		}
-		return arg;
+		return arg.toString();
 	}
 
     /**
@@ -257,9 +257,6 @@ public class ExternalControl {
 	    return false;
 	}
     
-    
-   
-	
 	/**
 	 * Allows multiline parsing of magnet links.
 	 * @param magnets
@@ -279,11 +276,6 @@ public class ExternalControl {
 		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
 	}
 	
-	/**
-	 * Returns an empty array if the string could not be parsed.
-	 * @param arg
-	 * @return array may be empty, but is never <code>null</code>
-	 */
 	
 
 }
