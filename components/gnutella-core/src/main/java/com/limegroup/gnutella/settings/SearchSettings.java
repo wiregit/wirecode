@@ -86,7 +86,7 @@ public final class SearchSettings extends LimeProps {
 	 * Set how sensitive the spamfilter should be
 	 */    
     public static final FloatSetting FILTER_SPAM_RESULTS =
-        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.5f);
+        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 1.0f);
     
 	/**
 	 * Whether or not to filter spam results
