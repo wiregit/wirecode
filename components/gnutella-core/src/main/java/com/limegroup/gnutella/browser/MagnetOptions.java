@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -37,16 +39,55 @@ public class MagnetOptions implements Serializable {
 	private transient String localizedErrorMessage;
 	private transient URN urn;
 	
-	public static MagnetOptions createMagnet(String kt, String fileName,
+	/**
+	 * Creates a MagnetOptions object from file details.
+	 * <p>
+	 * The resulting MagnetOptions might not be 
+	 * {@link #isDownloadable() downloadable}.
+	 * @param fileDetails
+	 * @return
+	 */
+	public static MagnetOptions createMagnet(FileDetails fileDetails) {
+		HashMap map = new HashMap();
+		map.put(DN, fileDetails.getFileName());
+		URN urn = fileDetails.getSHA1Urn();
+		if (urn != null) {
+			addAppend(map, XT, urn.httpStringValue());
+		}
+		InetSocketAddress isa = fileDetails.getSocketAddress();
+		if (isa != null && urn != null) {
+			StringBuffer addr = new StringBuffer("http://");
+			addr.append(isa.getAddress().getHostAddress()).append(':')
+			.append(isa.getPort()).append("/uri-res/N2R?");
+			addr.append(urn.httpStringValue());
+			addAppend(map, XS, addr.toString());
+		}
+		return new MagnetOptions(map);
+	}
+	
+	/**
+	 * Creates a MagnetOptions object from a several parameters.
+	 * <p>
+	 * The resulting MagnetOptions might not be 
+	 * {@link #isDownloadable() downloadable}.
+	 * @param keywordTopics can be <code>null</code>
+	 * @param fileName can be <code>null</code>
+	 * @param urn can be <code>null</code>
+	 * @param defaultURLs can be <code>null</code>
+	 * @return
+	 */
+	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
 											 URN urn, String[] defaultURLs) {
 		HashMap map = new HashMap();
-		map.put(KT, kt);
+		map.put(KT, keywordTopics);
 		map.put(DN, fileName);
 		if (urn != null) {
 			addAppend(map, XT, urn.httpStringValue());
 		}
-		for (int i = 0; defaultURLs != null && i < defaultURLs.length; i++) {
+		if (defaultURLs != null) {
+			for (int i = 0; i < defaultURLs.length; i++) {
 			addAppend(map, AS, defaultURLs[i]);
+			}
 		}
 		return new MagnetOptions(map);
 	}
