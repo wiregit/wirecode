@@ -119,4 +119,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting NO_STILL_CONNECTING =
         FACTORY.createBooleanSetting("NO_STILL_CONNECTING", false);
+	
+	/**
+	 * Setting for whether to show the question dialog when files have been
+	 * dropped somewhere on limewire.
+	 */
+	public static final BooleanSetting SHARE_DROPPED_FILES =
+		FACTORY.createBooleanSetting("SHARE_DROPPED_FILES", false);
 }
