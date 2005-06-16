@@ -58,6 +58,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * @param candidateBytes a representation of the set of 
      *      bytes available for download from a given server, minus the set
      *      of bytes that have already been leased, verified, etc.
+     *      This guarantees candidateBytes is a subset of neededBytes.
      * @param neededBytes a representation of the set of bytes
      *      of the file that have not been leased, verified, etc.
      * @param fileSize the total length of the file being downloaded
@@ -105,6 +106,9 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             if (candidateInterval.high >= idealLocation) {
                 intervalAbove = optimizeIntervalAbove(candidateInterval,idealLocation,
                         blockSize);
+                // Since we started iterating from the low end of candidateBytes,
+                // the first intervalAbove is the one closest to idealLocation
+                // and there will be no more changes in intervalBelow
                 break;
             }
         }
@@ -173,7 +177,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 3) returnInterval does not span a blockSize boundary
      * 4) returnInterval is as large as possible without violating goals 1-3
      * 
-     * @require candidate.high >= location
+     * Required precondition: candidate.high >= location
      */
     private Interval optimizeIntervalAbove(Interval candidate,
             long location, long blockSize) {
@@ -205,7 +209,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * 3) returnInterval does not span a blockSize boundary
      * 4) returnInterval is as large as possible without violating goals 1-3
      * 
-     * @require candidate.low < location
+     * Required precondition: candidate.low < location
      */
     private Interval optimizeIntervalBelow(Interval candidate,
             long location, long blockSize) {
