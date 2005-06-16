@@ -76,4 +76,17 @@ public class DownloadSettings extends LimeProps {
     public static final IntSetting WORKER_INTERVAL =
         FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
     
+    /**
+     * Use a download SelectionStrategy tailored for previewing if the file's extension is
+     * in this list.
+     */
+    // TODO KAM -- Are aiff and aif previewable?
+    private static String[] defaultPreviewableExtensions = {"html", "htm", "xml", "txt", "rtf", "tex",
+        "mp3", "mp4", "wav", "au", "aif", "aiff", "ra", "ram", "wma", "wmv", "midi", "aifc", "snd",
+        "mpg", "mpeg", "asf", "qt", "mov", "avi", "mpe", "ogg", "rm", "m4a", "flac", "fla"};
+    public static final StringArraySetting PREVIEWABLE_EXTENSIONS = 
+        FACTORY.createSettableStringArraySetting("PREVIEWABLE_EXTENSIONS", 
+                defaultPreviewableExtensions,
+                "PREVIEWABLE_EXTENSIONS");
+        
 }
