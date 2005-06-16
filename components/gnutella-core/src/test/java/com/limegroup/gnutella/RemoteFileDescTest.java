@@ -126,14 +126,14 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
         Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         
         //  PushEndpoint's GUID_PROXY_MAP holds GuidSetWrappers, not IPPortSets
-        PushEndpoint.GuidSetWrapper gsw1 = new PushEndpoint.GuidSetWrapper(g1);
-        PushEndpoint.GuidSetWrapper gsw2 = new PushEndpoint.GuidSetWrapper(g2);
+//        PushEndpoint.GuidSetWrapper gsw1 = new PushEndpoint.GuidSetWrapper(g1);
+//        PushEndpoint.GuidSetWrapper gsw2 = new PushEndpoint.GuidSetWrapper(g2);
         
-        gsw1.overwriteProxies(proxies);
-        gsw2.overwriteProxies(proxies2);
+//        gsw1.overwriteProxies(proxies);
+//        gsw2.overwriteProxies(proxies2);
         
-        m.put(g1, gsw1);
-        m.put(g2, gsw2);
+//        m.put(g1, gsw1);
+//        m.put(g2, gsw2);
         
         //test an rfd with push proxies
         
@@ -167,9 +167,9 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 PushEndpoint noProxies = new PushEndpoint(g3.bytes());
 
          // See above, re: GuidSetWrapper
-         PushEndpoint.GuidSetWrapper gsw3 = new PushEndpoint.GuidSetWrapper(g3);
+//         PushEndpoint.GuidSetWrapper gsw3 = new PushEndpoint.GuidSetWrapper(g3);
 
-         m.put(g3, gsw3);
+//         m.put(g3, gsw3);
 		 RemoteFileDesc fwalledNotGood = 
 		 	new RemoteFileDesc(fwalled, noProxies);
 		 
