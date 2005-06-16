@@ -12,21 +12,18 @@ import com.limegroup.gnutella.util.IntervalSet;
 /** 
  * This SelectionStrategy selects random Intervals from the availableIntervals.
  * 
- * This SelectionStrategy does so by using 16 pseudorandom locations 
- * (offsets into the file), pseudorandomly selects one of the 16 offsets, 
- * and downloads the first available aligned chunk after the offset.  This balances
- * the need to minimize the number of Intervals in VerifyingFile 
- * (for a small download.dat file) against the need for a uniform distribution of 
- * downloaded chunks over all hosts (to increase the availability of the rarest chunk).
+ * If the number of Intervals contained in neededBytes is less than MAX_FRAGMENTS,
+ * then a random location between the first and last bytes (inclusive) of neededBytes
+ * is chosen.  We find the last chunk before this location and the first chunk after.
+ * We return one or the other chunk (as an Interval) with equal probability.  Of
+ * course, if there are only available bytes on one side of the location, then there
+ * is only one choice for which chunk to return.  For network efficiency, the random 
+ * location is aligned to blockSize boundaries.
  * 
- * For network efficiency, the random offsets are aligned to chunk boundaries.  Changing
- * the chunk size does not, however, cause any random locations to be re-calculated.
+ * If the number of Intervals in neededBytes is greater than or equal to MAX_FRAGMENTS,
+ * then the same algorithm is used, except that the location is chosen randomly from
+ * an endpoint of one of the existing fragments, in an attempt to coalesce fragments.
  * 
- * Random locations are replaced with new random locations only when they cease to 
- * fall between previewLength and lastNeededByte.
- * 
- * If a particular source cannot provide bytes after the selected random location,
- * the block closest before the random location is selected instead.
  */
 public class RandomDownloadStrategy implements SelectionStrategy {
     
@@ -85,36 +82,20 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         if (candidateBytes.isEmpty())
             throw new NoSuchElementException();
             
-        // The ideal location from which to select an Interval
-        long idealLocation = 0;
-        
-        int fragmentCount = neededBytes.getNumberOfIntervals();   
-        
-        if (fragmentCount >= MAX_FRAGMENTS) {
-            // No fragments to spare, so attempt to reduce fragmentation by
-            // setting idealLocation to the first byte of any fragment, or
-            // the last byte of the last fragment.
-            // Since we download on either side of the idealLocation, this has
-            // the effect of "growing" our contiguous blocks of downloaded data
-            // in both directions until they coalesce.
-            int randomFragmentNumber = pseudoRandom.nextInt(fragmentCount + 1);
-            if (randomFragmentNumber == fragmentCount)
-                idealLocation = neededBytes.getLast().high + 1;
-            else
-                idealLocation = ((Interval)neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
-        } else {
-            // There are fragments to spare, so download from a random location
-            getRandomLocation(neededBytes.getFirst().low, neededBytes.getLast().high, blockSize);
-        }
+        // The returned Interval will be the last chunk before idealLocation
+        // or the first chunk after idealLocation
+        long idealLocation = getIdealLocation(neededBytes, blockSize);
        
         // The first properly aligned interval, returned in the case that
         // there are no aligned intervals available after lowerBound
         Interval lastSuitableInterval = null;
         
         Iterator intervalIterator = candidateBytes.getAllIntervals();
-        // Get the first alligned range after a random place in the file
-    
+        
+        // First aligned chunk after idealLocation
         Interval intervalAbove = null;
+        
+        // Last aligned chunk before idealLocation
         Interval intervalBelow = null;
         while (intervalIterator.hasNext()) {
             intervalAbove = optimizeInterval((Interval) intervalIterator.next(),
@@ -151,6 +132,30 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     protected long alignLow(long location, long blockSize) {
         location -= location % blockSize;
         return location;
+    }
+    
+    /** 
+     * Calculates the "ideal location" on which to base an assignment.
+     */
+    private long getIdealLocation(IntervalSet neededBytes, long blockSize) {
+        int fragmentCount = neededBytes.getNumberOfIntervals();   
+        
+        if (fragmentCount >= MAX_FRAGMENTS) {
+            // No fragments to spare, so attempt to reduce fragmentation by
+            // setting idealLocation to the first byte of any fragment, or
+            // the last byte of the last fragment.
+            // Since we download on either side of the idealLocation, this has
+            // the effect of "growing" our contiguous blocks of downloaded data
+            // in both directions until they coalesce.
+            int randomFragmentNumber = pseudoRandom.nextInt(fragmentCount + 1);
+            if (randomFragmentNumber == fragmentCount)
+                return neededBytes.getLast().high + 1;
+            else
+                return ((Interval)neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
+        } else {
+            // There are fragments to spare, so download from a random location
+            return getRandomLocation(neededBytes.getFirst().low, neededBytes.getLast().high, blockSize);
+        }
     }
     
     /** Returns candidate or a sub-interval of candidate that best 

@@ -65,9 +65,11 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
         if (lowerBound < 0)
             throw new IllegalArgumentException("First needed byte must be >= 0, "+lowerBound+"<0");
-        if (lowerBound > upperBound)
-            throw new IllegalArgumentException("Preview length greater than last needed byte "+
-                    lowerBound+">"+upperBound);
+        if (upperBound > completedSize)
+            throw new IllegalArgumentException("neededBytes contains bytes beyond the end of the file."+
+                    upperBound + " >= " + completedSize);
+        if (candidateBytes.isEmpty())
+            throw new NoSuchElementException();
         
         // Determine if we should return a uniformly distributed Interval
         // or the first interval.
