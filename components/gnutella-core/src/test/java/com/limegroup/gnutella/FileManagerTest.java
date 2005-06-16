@@ -718,10 +718,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	public void testAddFileAlways() throws Exception {
 		// test if too large files are not shared
 		// test does not work because fake file is replaced
-//		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
-//		FileDesc desc = fman.addFileAlways(tooLarge);
-//		assertNull("Too large file should not have been shared", 
-//				desc);
+		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
+		FileDesc desc = fman.addFileAlways(tooLarge);
+		assertNull("Too large file should not have been shared", desc);
 		
 		// test if files in shared directories are still shared
 		File test = createNewTestFile(5);
@@ -1196,6 +1195,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         public long length() {
             return length;
         }
+		
+		public File getCanonicalFile() {
+			return this;
+		}
     }
     
     public class FManCallback extends ActivityCallbackStub {
