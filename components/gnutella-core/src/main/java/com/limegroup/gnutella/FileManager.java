@@ -312,7 +312,7 @@ public abstract class FileManager {
      *      @see loadSettings */
     public void start() {
 		SharingSettings.clean();
-		loadSettings(false);		
+		loadSettings();
     }
 
 	
@@ -525,11 +525,9 @@ public abstract class FileManager {
      *
      * This method is non-blocking and thread-safe.
      *
-     * @modifies this 
-	 * @param notifyOnClear if true, callback is notified via clearSharedFiles
-     *  when the previous load settings thread has been killed.
+     * @modifies this
      */
-    public void loadSettings(final boolean notifyOnClear) {
+    public void loadSettings() {
         final int currentRevision = ++_revision;
         if(LOG.isDebugEnabled())
             LOG.debug("Starting new library revision: " + currentRevision);
@@ -537,7 +535,7 @@ public abstract class FileManager {
         LOADER.add(new Runnable() {
             public void run() {
                 loadStarted(currentRevision);
-                loadSettingsInternal(currentRevision, notifyOnClear);
+                loadSettingsInternal(currentRevision);
             }
         });
     }
@@ -596,7 +594,7 @@ public abstract class FileManager {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    protected void loadSettingsInternal(int revision, boolean notifyOnClear) {
+    protected void loadSettingsInternal(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
         
@@ -627,8 +625,7 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        if (notifyOnClear) 
-            RouterService.getCallback().clearSharedFiles();
+        RouterService.getCallback().fileManagerLoading();
             
         //Load the shared directories and add their files.
         for(int i = 0; i < directories.length && _revision == revision; i++)
@@ -717,9 +714,10 @@ public abstract class FileManager {
                 LOG.debug("Adding completely shared directory: " + directory);
 
 			_completelySharedDirectories.add(directory);
-			_sharedDirectories.put(directory, new IntSet());
-            if (!isForcedShare)
-                RouterService.getCallback().addSharedDirectory(directory, parent);
+            if (!isForcedShare) {
+                RouterService.getCallback().handleFileManagerEvent(
+                    new FileManagerEvent(this, FileManagerEvent.ADD_FOLDER, directory, parent));
+            }
         }
 		
         // STEP 2:
@@ -757,36 +755,52 @@ public abstract class FileManager {
 	 * Removes a given directory from being completely shared.
 	 */
 	public void removeFolderIfShared(File folder) {
-	    removeFolderIfShared(folder, true);
+	    removeFolderIfShared(folder, null);
 	}
 	
 	/**
 	 * Removes a given directory from being completed shared.
-	 * If 'firstPass' is true, this will remove it from the root-level of
-	 * shared folders if it existed there.  (If it is false & it was
+	 * If 'parent' is null, this will remove it from the root-level of
+	 * shared folders if it existed there.  (If it is non-null & it was
 	 * a root-level shared folder, the folder remains shared.)
 	 *
-	 * The first time this is called, firstPass must be true in order to ensure
+	 * The first time this is called, parent must be non-null in order to ensure
 	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
-	void removeFolderIfShared(File folder, boolean firstPass) {
+	void removeFolderIfShared(File folder, File parent) {
 	    try {
 	        folder = FileUtils.getCanonicalFile(folder);
 	    } catch(IOException ignored) {}
 	        
         if(_completelySharedDirectories.contains(folder)) {
-            if(!firstPass && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder))
-                return; // it was a root-share & we aren't gonna force it out.
-            else if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder) && !firstPass)
-                SharingSettings.DIRECTORIES_NOT_TO_SHARE.add(folder); // it wasn't a root share & we already removed the parent
+            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
+                // we don't wanna remove it, since it's a root-share, nor do we want
+                // to remove any of its children, so we return immediately.
+                return;
+            } else if(parent == null) {
+                if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
+                    SharingSettings.DIRECTORIES_NOT_TO_SHARE.add(folder);
+                RouterService.getCallback().handleFileManagerEvent(
+                    new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
+            }
+            
+            // note that if(parent != null && not a root share)
+            // we DO NOT ADD to DIRECTORIES_NOT_TO_SHARE.
+            // this is by design, because the parent has already been removed
+            // from sharing, which inherently will remove the child directories.
+            // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
+            // entries.
+            synchronized(this) {
+                _completelySharedDirectories.remove(folder);
+            }
             
             File[] subs = folder.listFiles();
             if(subs != null) {
                 for(int i = 0; i < subs.length; i++) {
                     File f = subs[i];
                     if(f.isDirectory())
-                        removeFolderIfShared(f, false);
+                        removeFolderIfShared(f, folder);
                     else if(f.isFile())
                         removeFileIfShared(f);
                 }
@@ -873,7 +887,7 @@ public abstract class FileManager {
         final FileEventListener callback = listener == null ? EMPTY_CALLBACK : listener;
 
         if(revision != _revision) {
-            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED));
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
             return;
         }
         
@@ -881,18 +895,18 @@ public abstract class FileManager {
         try {
             f = FileUtils.getCanonicalFile(f);
         } catch (IOException e) {
-            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED));
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
             return;
 	    }
 	    
         synchronized(this) {
 		    if (revision != _revision || !isFileShareable(f)) {
-                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED));
+                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
                 return;
             }
         
             if(isFileShared(f)) {
-                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED));
+                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, f));
                 return;
             }
             
@@ -909,7 +923,7 @@ public abstract class FileManager {
 		        synchronized(this) {
     		        if(revision != _revision) {
     		            LOG.warn("Revisions changed, dropping share.");
-                        callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED));
+                        callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
                         return;
                     }
                 
@@ -928,7 +942,7 @@ public abstract class FileManager {
                     callback.handleFileEvent(evt); // always notify the individual callback.
                 } else {
                     // If URNs was empty, or loading failed, notify...
-                    callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED));
+                    callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
                 }
                 
                 _pendingFinished = revision;
@@ -988,9 +1002,7 @@ public abstract class FileManager {
         
         // files that are forcibly shared over the network
         // aren't counted or shown.
-        if (!parent.equals(FORCED_SHARE))
-            RouterService.getCallback().addSharedFile(fileDesc, parent);
-        else
+        if (parent.equals(FORCED_SHARE))
             _numForcedFiles++;
 	
         //Index the filename.  For each keyword...
@@ -1111,7 +1123,7 @@ public abstract class FileManager {
 	        if (notify) {
 	            FileManagerEvent evt = new FileManagerEvent(this, 
 	                                            FileManagerEvent.REMOVE, 
-	                                            new FileDesc[] { fd });
+	                                            fd );
 	                                            
 	            RouterService.getCallback().handleFileManagerEvent(evt);
 	        }
@@ -1157,7 +1169,7 @@ public abstract class FileManager {
         if (notify) {
             FileManagerEvent evt = new FileManagerEvent(this, 
                                             FileManagerEvent.REMOVE, 
-                                            new FileDesc[] { fd });
+                                            fd);
                                             
             RouterService.getCallback().handleFileManagerEvent(evt);
         }
@@ -1227,7 +1239,8 @@ public abstract class FileManager {
         _numIncompleteFiles++;
         _needRebuild = true;
         File parent = FileUtils.getParentFile(incompleteFile);
-        RouterService.getCallback().addSharedFile(ifd, parent);
+        RouterService.getCallback().handleFileManagerEvent(
+            new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
     }
 
     /**
