@@ -98,15 +98,22 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // Last aligned chunk before idealLocation
         Interval intervalBelow = null;
         while (intervalIterator.hasNext()) {
-            intervalAbove = optimizeInterval((Interval) intervalIterator.next(),
-                    idealLocation, blockSize);
-            // Check if it really is above
-            if (intervalAbove.low >= idealLocation) {
-                break; 
+            Interval candidateInterval = (Interval) intervalIterator.next();
+            if (candidateInterval.low < idealLocation)
+                intervalBelow = optimizeIntervalBelow(candidateInterval, idealLocation,
+                        blockSize);
+            if (candidateInterval.high >= idealLocation) {
+                intervalAbove = optimizeIntervalAbove(candidateInterval,idealLocation,
+                        blockSize);
+                break;
             }
-            intervalBelow = intervalAbove;
         }
         
+        if (LOG.isDebugEnabled())
+            LOG.debug("idealLocation="+idealLocation
+                    +" intervalAbove="+intervalAbove
+                    +" intervalBelow="+intervalBelow
+                    +" out of possibilites:"+candidateBytes);
         // If candidateBytes is not empty, at least one of
         // intervalAbove or intervalBelow is not null.
         // If we don't have a choice, return the Interval that makes sense
@@ -161,53 +168,65 @@ public class RandomDownloadStrategy implements SelectionStrategy {
     /** Returns candidate or a sub-interval of candidate that best 
      * fits the following goals:
      * 
-     * 1.a) returnInterval.low >= location
-     * 1.b) returnInterval.low is as close to location as possible
-     * 1.c) returnInterval does not span a blockSize boundary
-     * 1.d) returnInterval is as large as possible without violating 1.a-1.c
+     * 1) returnInterval.low >= location
+     * 2) returnInterval.low is as close to location as possible
+     * 3) returnInterval does not span a blockSize boundary
+     * 4) returnInterval is as large as possible without violating goals 1-3
      * 
-     * failing 1.a, the secondary goals become most important:
-     * 2.a) returnInterval.high <= location
-     * 2.b) returnInterval.high is as close to location as possible
-     * 2.c) returnInterval does not span a blockSize boundary
-     * 2.d) returnInterval is as large as possible without violating 2.a-2.c
+     * @require candidate.high >= location
      */
-    private Interval optimizeInterval(Interval candidate,
+    private Interval optimizeIntervalAbove(Interval candidate,
             long location, long blockSize) {
         
-            // Calculate the most suitable low value contained
-            // in candidate.
-            long bestLow = candidate.low;
-            if (bestLow < location && candidate.high >= location) {
-                bestLow = location;
-            }
+        // Calculate the most suitable low value contained
+        // in candidate. (satisfying goals 1 & 2)
+        long bestLow = candidate.low;
+        if (bestLow < location) {
+            bestLow = location;
+        }
             
-            // See if goal 1.a is violated
-            if (bestLow >= location) {
-                // Calculate the most suitable high byte based on goal 1.c 
-                // This will be at most blockSize-1 bytes greater than bestLow
-                long bestHigh = alignHigh(bestLow,blockSize);
+        // Calculate the most suitable high byte based on goal 3
+        // This will be at most blockSize-1 bytes greater than bestLow
+        long bestHigh = alignHigh(bestLow,blockSize);
       
-                if (bestHigh > candidate.high)
-                    bestHigh = candidate.high;
+        if (bestHigh > candidate.high)
+            bestHigh = candidate.high;
                 
-                if (candidate.high == bestHigh && candidate.low == bestLow)
-                    return candidate;
-                return new Interval(bestLow,bestHigh);
-            } else {
-                // candidate.high < location
-                // Goal 1.a cannot be met, so move on to secondary goals
-                bestLow = alignLow(candidate.high, blockSize);
-                // Adjust low to be within candidate
-                if (bestLow < candidate.low)
-                    bestLow = candidate.low;
+        if (candidate.high == bestHigh && candidate.low == bestLow)
+            return candidate;
+        return new Interval(bestLow,bestHigh); 
+    }
+    
+    /** Returns candidate or a sub-interval of candidate that best 
+     * fits the following goals:
+     * 
+     * 1) returnInterval.high <= location
+     * 2) returnInterval.high is as close to location as possible
+     * 3) returnInterval does not span a blockSize boundary
+     * 4) returnInterval is as large as possible without violating goals 1-3
+     * 
+     * @require candidate.low < location
+     */
+    private Interval optimizeIntervalBelow(Interval candidate,
+            long location, long blockSize) {
+        
+        // Calculate the most suitable low value contained
+        // in candidate. (satisfying goals 1 & 2)
+        long bestHigh = candidate.high;
+        if (bestHigh >= location) {
+            bestHigh = location - 1;
+        }
+            
+        // Calculate the most suitable high byte based on goal 3
+        // This will be at most blockSize-1 bytes greater than bestLow
+        long bestLow = alignLow(bestHigh,blockSize);
+      
+        if (bestLow < candidate.low)
+            bestLow = candidate.low;
                 
-                if (bestLow == candidate.low) {
-                    return candidate;
-                } else {
-                    return new Interval(bestLow, candidate.high);
-                }
-            }   
+        if (candidate.high == bestHigh && candidate.low == bestLow)
+            return candidate;
+        return new Interval(bestLow,bestHigh); 
     }
     
     /**

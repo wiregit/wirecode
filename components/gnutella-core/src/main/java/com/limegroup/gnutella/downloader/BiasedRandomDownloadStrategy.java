@@ -98,7 +98,9 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
             ret = new Interval(candidate.low, alignedHigh);
 
         if (LOG.isDebugEnabled())
-            LOG.debug("Non-random download, range=" + ret + " out of choices "
+            LOG.debug("Non-random download, probability="
+                    +getBiasProbability(lowerBound, completedSize)
+                    +", range=" + ret + " out of choices "
                     + candidateBytes);
 
         return ret;
