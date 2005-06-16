@@ -10,13 +10,12 @@ import java.util.Iterator;
  * This is not well tested; it's just here as a testing stub. 
  */
 public class TestSequentialStrategy implements SelectionStrategy {
-    public Interval pickAssignment(IntervalSet availableIntervals,
-            long previewLength,
-            long lastNeededByte,
+    public Interval pickAssignment(IntervalSet availableBytes,
+            IntervalSet neededBytes,
             long blockSize) throws NoSuchElementException {
         
         // Construct test cases such that this won't result in getting the first element of an empty list
-        Iterator intervalIterator = availableIntervals.getAllIntervals();
+        Iterator intervalIterator = availableBytes.getAllIntervals();
         
         // If we don't need alignment, we're done
         if (blockSize < 1 && intervalIterator.hasNext())
@@ -42,6 +41,6 @@ public class TestSequentialStrategy implements SelectionStrategy {
         }
         
         // All Intervals have been tested and found to be lacking
-        throw new NoSuchElementException("blockSize:"+blockSize+" Intervals:"+availableIntervals); 
+        throw new NoSuchElementException("blockSize:"+blockSize+" Intervals:"+availableBytes); 
     }
 }

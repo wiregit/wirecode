@@ -90,7 +90,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(3);
         prng.setLong(1);
         Interval assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random", 
@@ -103,7 +103,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setLong(1);
         
         assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
                 availableBytes.getFirst().low,
@@ -154,7 +154,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(3);
         prng.setLong(1);
         Interval assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random.", 
@@ -165,7 +165,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setFloat(0.5f-EPSILON);
         
         assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertEquals("Expected sequential assignment.",
                 availableBytes.getFirst().low,
@@ -181,7 +181,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setLong(1); // random location block offset
         
         assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
                 availableBytes.getFirst().low,
@@ -244,7 +244,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(3);
         prng.setLong(1);
         Interval assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         // Check that it wasn't a sequential download
         assertNotEquals("Got a sequential download when it should have been random.", 
@@ -255,7 +255,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setFloat(0.5f-EPSILON);
         
         assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertEquals("Expected sequential assignment.",
                 availableBytes.getFirst().low,
@@ -275,7 +275,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setLong(1); // random location block offset
         
         assignment = strategy.pickAssignment(availableBytes,
-                availableBytes.getFirst().low, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertNotEquals("Expected non-sequential assignment",
                 availableBytes.getFirst().low,
@@ -307,7 +307,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(1);
         
         Interval assignment = strategy.pickAssignment(availableBytes,
-                0, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertNotEquals("Idle download should not be sequential.", 
                 0, assignment.low);
@@ -319,7 +319,7 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         prng.setFloat(0.0f);
         
         assignment = strategy.pickAssignment(availableBytes,
-                0, fileSize-1, blockSize);
+                availableBytes, blockSize);
         
         assertEquals("Non-idle download should be sequential if few bytes"+
                 " have been assigned.", 0, assignment.low);
@@ -332,8 +332,8 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
         // Try an invalid block size and see if it throws
         // an InvalidInputException
         try {
-            strategy.pickAssignment(availableBytes, 0, 
-                    fileSize-1, 0);
+            strategy.pickAssignment(availableBytes, 
+                    availableBytes, 0);
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed
             return;
@@ -342,35 +342,19 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
     }
     
     /** 
-     * Test that invalid values for previewLength throw IllegalArgumentException. 
-     */
-    public void testInvalidPreviewLength() {
-        // Try an invalid preview length and see if it throws
-        // an InvalidInputException
-        try {
-            strategy.pickAssignment(availableBytes, -1, 
-                    fileSize-1, blockSize);
-        } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            return;
-        }
-        assertTrue("Failed to complain about invalid preview length", false);
-    }
-    
-    /** 
      * Test that invalid values for lastNeededByte throw IllegalArgumentException. 
      */
-    public void testInvalidLastNeededByte() {
+    public void testNoAvailableBytes() {
         // Try calling with lastNeededByte > previewLength
         // and see if it throws an exception
         try {
-            strategy.pickAssignment(availableBytes, 2001, 
-                    2000, blockSize);
-        } catch (IllegalArgumentException e) {
+            strategy.pickAssignment(new IntervalSet(),
+                    availableBytes, blockSize);
+        } catch (java.util.NoSuchElementException e) {
             // Wohoo!  Exception thrown... test passed
             return;
         }
-        assertTrue("Failed to complain about invalid preview length", false);
+        assertTrue("Failed to complain about no available bytes", false);
     }
     
     ///////////// Helper Methods //////////////////////////
@@ -389,8 +373,8 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
             IntervalSet availableBytes, long fileSize, long blockSize,
             Interval[] expectedAssignments) {
         for (int i = 0; i < expectedAssignments.length; i++) {
-            Interval assignment = strategy.pickAssignment(availableBytes, 0,
-                    fileSize - 1, blockSize);
+            Interval assignment = strategy.pickAssignment(availableBytes,
+                    availableBytes, blockSize);
             availableBytes.delete(assignment);
             assertEquals("Wrong assignment for chunk #" + i,
                     expectedAssignments[i], assignment);

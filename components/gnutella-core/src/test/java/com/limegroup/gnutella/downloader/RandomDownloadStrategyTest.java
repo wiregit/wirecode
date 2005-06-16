@@ -48,19 +48,20 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
     }
 
     public void testSequentialLocations() throws Exception {
-        // Set up prng so we should download
-        // blocks 5 and 6 (6th and 7th block)
-        prng.setLong(5);
-        // Two identical non-zero indexes into
-        // the random locations pool
-        int[] testIndexes = { 9, 9 };
-        prng.setInts(testIndexes);
+        // Set up prng so our ideal location is always the 5th block boundary
+        prng.setLongs(new long[] {5, 5, 5, 5});
+        // Set ints so that the strategy picks two chunks 
+        // after idealLocation (two odd ints)
+        // followed by two chunks before idealLocation (two even ints)
+        prng.setInts(new int[] {-1,487137, -2, 65538});
 
         // Set the expected assignments
-        Interval[] expectations = new Interval[2];
+        Interval[] expectations = new Interval[4];
         expectations[0] = new Interval(5 * blockSize, 6 * blockSize - 1);
         expectations[1] = new Interval(6 * blockSize, 7 * blockSize - 1);
-
+        expectations[2] = new Interval(4 * blockSize, 5 * blockSize - 1);
+        expectations[3] = new Interval(3 * blockSize, 4 * blockSize - 1);
+        
         // Test
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectations);
@@ -83,108 +84,16 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
                 expectation);
     }
     
-    public void testUpdateSkippedLocations() {
-        // Skip forward
-        // Set up RandomLocation[7] to be 1*blockSize
-        // Then set up RandomLocation[3] to be 0.
-        // Downloading two blocks starting at 0
-        // should cause location 7 to be skipped
-        // and re-set to 5*blockSize
-        prng.setInts(new int[]{7,3,3,7});
-        prng.setLongs(new long[]{1L, 0L, 5L});
-        
-        Interval assignment = null;
-        for(int i=4; i >= 1; i--) {
-            assignment = strategy.pickAssignment(availableBytes, 0, 
-                fileSize-1, blockSize);
-            availableBytes.delete(assignment);
-        }
-        assertEquals("random location is not getting reset when skipped.", 
-                assignment.low, 5*blockSize);
-        
-        // Skip backward
-        fileSize = 8*blockSize;
-        availableBytes = IntervalSet.createSingletonSet(0,fileSize-1);
-        // Set up location 8 to point to the second-to last block of the file.
-        // Set up location 5 to point to the last block of the file.
-        // The second download from location 5 should cause location 8 to
-        // be skipped over and therefore lazily updated to block 2
-        prng.setInts(new int[]{8,5,5,8});
-        prng.setLongs(new long[]{6L, 7L, 2L});
-        
-        assignment = null;
-        for(int i=4; i >= 1; i--) {
-            assignment = strategy.pickAssignment(availableBytes, 0, 
-                fileSize-1, blockSize);
-            availableBytes.delete(assignment);
-        }
-        assertEquals("random location is not getting reset when skipped backwards.", 
-                assignment.low, 2*blockSize);
-    }
-    
-    /** Tests lazy updating of randomLocations */
-    public void testLazyLocationUpdates() {
-        // Randomly select the last block, and then the 7th
-        long[] randomLocations = {fileSize/blockSize, 7};
-        prng.setLongs(randomLocations);
-        int[] randomIndexes = {11,11};
-        prng.setInts(randomIndexes);
-        
-        // First download sets the random location
-        Interval assignment = strategy.pickAssignment(availableBytes, 0, 
-                fileSize-1, blockSize);
-        availableBytes.delete(assignment);
-        assertEquals("Downloaded wrong block", 
-                new Interval(blockSize*(fileSize/blockSize), fileSize-1),
-                assignment);
-        
-        // Now download a second block, remembering to indicate that
-        // the last block is no longer available
-        assignment = strategy.pickAssignment(availableBytes, 0, 
-                availableBytes.getFirst().high, blockSize);
-        assertEquals("Downloaded wrong block", 
-                new Interval(7*blockSize,8*blockSize-1),
-                assignment);
-    }
-    
-    public void testWrappingAssignment() {
-        // Set up available bytes to be typical
-        // situation where wrapping occurs.
-        // We need only the first half block and the second
-        // to fourth blocks.  
-        availableBytes = IntervalSet.createSingletonSet(5,
-                4 * blockSize - 1);
-        availableBytes.delete(new Interval(blockSize/2, blockSize-1));
-        // The following line increases test coverage by triggering
-        // an optimization that prevents unneccessary Interval creation
-        availableBytes.delete(new Interval(2*blockSize-1));
-        
-        prng.setLong(3);
-        // Identical indexes into the random locations array
-        int[] testInts = { 7, 7, 7, 7};
-        prng.setInts(testInts);
-
-        // We expect to be assigned blocks #3,most of #2, #1, 
-        // and the final part of #0
-        Interval[] expectations = new Interval[4];
-        expectations[0] = new Interval(3 * blockSize, 4 * blockSize - 1);
-        expectations[1] = new Interval(2 * blockSize, 3 * blockSize - 1);
-        expectations[2] = new Interval(    blockSize, 2 * blockSize - 2);
-        expectations[3] = new Interval(5            ,   blockSize/2 - 1);
-        
-        testAssignments(strategy, availableBytes, fileSize, blockSize,
-                expectations);
-    }
-    
     /** Test the case where the availableBytes
-     * contains the Interval we return.
+     * contains the Interval we return and makes
+     * sure a new Interval is not created if not necessary.
      */
     public void testReturnOptimization() {
         availableBytes = IntervalSet.createSingletonSet(blockSize,2*blockSize-1);
         prng.setInt(1);
         prng.setLong(0);
         
-        Interval assignment = strategy.pickAssignment(availableBytes, 0, fileSize-1, blockSize);
+        Interval assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
         assertTrue("Return optimization not working", availableBytes.getFirst() == assignment);
     }
     
@@ -193,9 +102,9 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
      */
     public void testSliverDownload() {
         availableBytes = IntervalSet.createSingletonSet(2475,2483);
-        prng.setInt(12);
         prng.setLong(17);
-        Interval assignment = strategy.pickAssignment(availableBytes, 2475, 2483, blockSize);
+        availableBytes = IntervalSet.createSingletonSet(2475, 2483);
+        Interval assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
         assertEquals("Only a sliver of the file left, and something other than the sliver"+
                 "was returned", availableBytes.getFirst(), assignment);
     }
@@ -204,50 +113,13 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         // Try an invalid block size and see if it throws
         // an InvalidInputException
         try {
-            strategy.pickAssignment(availableBytes, 0, 
-                    fileSize-1, 0);
+            strategy.pickAssignment(availableBytes, 
+                    availableBytes, 0);
         } catch (IllegalArgumentException e) {
             // Wohoo!  Exception thrown... test passed
             return;
         }
         assertTrue("Failed to complain about invalid block size", false);
-    }
-    
-    public void testInvalidLowerBound() {
-        // Try an invalid preview length and see if it throws
-        // an InvalidInputException
-        try {
-            strategy.pickAssignment(availableBytes, -1, 
-                    fileSize-1, blockSize);
-        } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            return;
-        }
-        assertTrue("Failed to complain about negative lowerBound", false);
-    }
-    
-    public void testInvalidUpperBound() {
-        // Try calling with lowerBound > upperBound
-        // and see if it throws an exception
-        boolean caughtException = false;
-        try {
-            strategy.pickAssignment(availableBytes, 2001, 
-                    2000, blockSize);
-        } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            caughtException = true;
-        }
-        assertTrue("Failed to complain about lowerBound > upperBound", caughtException);
-        
-        caughtException = false;
-        try {
-            strategy.pickAssignment(availableBytes, 2001, 
-                    fileSize+1, blockSize);
-        } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            caughtException = true;
-        }
-        assertTrue("Failed to complain about upperBound larger than file", caughtException);
     }
     
     /** Make sure we throw NoSuchElement exception if there is nothing to
@@ -258,8 +130,8 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
         prng.setInt(15);
         prng.setLong(2);
         try {
-            strategy.pickAssignment(availableBytes, 0, 
-                    fileSize, blockSize);
+            strategy.pickAssignment(availableBytes,
+                    IntervalSet.createSingletonSet(0,fileSize-1), blockSize);
         } catch (NoSuchElementException e) {
             // Wohoo!  Exception thrown... test passed
             return;
@@ -283,8 +155,8 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
             IntervalSet availableBytes, long fileSize, long blockSize,
             Interval[] expectedAssignments) {
         for (int i = 0; i < expectedAssignments.length; i++) {
-            Interval assignment = strategy.pickAssignment(availableBytes, 0,
-                    fileSize - 1, blockSize);
+            Interval assignment = strategy.pickAssignment(availableBytes, 
+                    IntervalSet.createSingletonSet(0, fileSize - 1), blockSize);
             availableBytes.delete(assignment);
             assertEquals("Wrong assignment for chunk #" + i,
                     expectedAssignments[i], assignment);
