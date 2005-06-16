@@ -190,24 +190,12 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final FileSetSetting DIRECTORIES_NOT_TO_SHARE =
         FACTORY.createFileSetSetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
-	
-    /**
-	 * Directories that are shared but not browseable.
-	 */
-    public static final FileSetSetting DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE =
-        FACTORY.createFileSetSetting("DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE", new File[0]);
-    
-    /**
-     * Shared directories that should not be shared recursively.
-     * */
-    public static final FileSetSetting DIRECTORIES_TO_SHARE_NON_RECURSIVELY =
-        FACTORY.createFileSetSetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
     
     /**
      * Sensitive directories that are explicitly allowed to be shared.
      * */
-    public static final FileSetSetting SENSITIVE_DIRECTORIES_TO_SHARE =
-        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_TO_SHARE", new File[0]);
+    public static final FileSetSetting SENSITIVE_DIRECTORIES_VALIDATED =
+        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_VALIDATED", new File[0]);
     
     /**
      * Sensitive directories that are explicitly not allowed to be shared.
@@ -241,14 +229,12 @@ public class SharingSettings extends LimeProps {
 	 * no longer exist.
 	 */
 	public static final void clean() {
-		SPECIAL_FILES_TO_SHARE.clean();
-		SPECIAL_FILES_NOT_TO_SHARE.clean();
-		DIRECTORIES_TO_SHARE.clean();
-		DIRECTORIES_NOT_TO_SHARE.clean();
-		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.clean();
-		DIRECTORIES_TO_SHARE_NON_RECURSIVELY.clean();
-		SENSITIVE_DIRECTORIES_TO_SHARE.clean();
-		SENSITIVE_DIRECTORIES_NOT_TO_SHARE.clean();
+		DIRECTORIES_TO_SHARE.clean(null);
+		DIRECTORIES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
+		SPECIAL_FILES_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
+		SPECIAL_FILES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
+		SENSITIVE_DIRECTORIES_VALIDATED.clean(DIRECTORIES_TO_SHARE);
+		SENSITIVE_DIRECTORIES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
 	}
 	
     /**

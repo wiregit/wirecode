@@ -689,8 +689,8 @@ public abstract class FileManager {
             if (SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
                 return;
             
-            //  go through directories that explicitly should be shared
-            if (!SharingSettings.SENSITIVE_DIRECTORIES_TO_SHARE.contains(directory)) {
+            // if we haven't already validated the sensitive directory, ask about it.
+            if (!SharingSettings.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
                 if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
@@ -736,9 +736,8 @@ public abstract class FileManager {
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.
-        // Do not share subdirectories if this directory is on the
-        // directories-to-share-non-recursively list.
-        if (SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.contains(directory) || isForcedShare) 
+        // TODO: when we add non-recursive support, add it here.
+        if (isForcedShare) 
             return;
         
         // Do not share subdirectories of the forcibly shared dir.
@@ -773,7 +772,17 @@ public abstract class FileManager {
 	        folder = FileUtils.getCanonicalFile(folder);
 	    } catch(IOException ignored) {}
 	        
-        if(_completelySharedDirectories.contains(folder)) {
+
+        // grab the value quickly.  release the lock
+        // so that we don't hold it during a long recursive function.
+        // it's no big deal if it changes, we'll just do some extra work for a short
+        // bit of time.
+        boolean contained;
+        synchronized(this) {
+            contained = _completelySharedDirectories.contains(folder);
+        }
+        
+        if(contained) {
             if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
                 // we don't wanna remove it, since it's a root-share, nor do we want
                 // to remove any of its children, so we return immediately.
@@ -791,6 +800,8 @@ public abstract class FileManager {
             // from sharing, which inherently will remove the child directories.
             // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
             // entries.
+            
+           
             synchronized(this) {
                 _completelySharedDirectories.remove(folder);
             }
@@ -1459,7 +1470,7 @@ public abstract class FileManager {
         }
         
         //  check for user home directory
-        String userHome = System.getProperty("user.dir");
+        String userHome = System.getProperty("user.home");
         if (file.equals(new File(userHome)))
             return true;
         

@@ -140,14 +140,25 @@ public class FileSetSetting extends Setting {
     }
 
 	/**
-	 * Removes non-existent members from this.
+	 * Removes non-existent members and members that do not have a parent
+	 * in validParents from this.  If validParents is null, this only
+	 * removes non-existent members.
 	 */
-	public synchronized void clean() {
+	public synchronized void clean(FileSetSetting validParents) {
 	    for(Iterator i = value.iterator(); i.hasNext(); ) {
 	        File next = (File)i.next();
-	        if(!next.exists())
+	        if(!next.exists() || (validParents != null && !hasParent(next, validParents)))
 	            i.remove();
+        }
 	    setValue(value);
-	}
-}
+    }
+    
+    private boolean hasParent(File parent, FileSetSetting parents) {
+        while(parent != null) {
+            if(parents.contains(parent))
+                return true;
+            parent = parent.getParentFile();
+        }
+        return false;
+     }
 }
