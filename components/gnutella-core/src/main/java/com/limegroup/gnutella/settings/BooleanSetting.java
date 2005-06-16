@@ -52,4 +52,12 @@ public final class BooleanSetting extends Setting {
     protected void loadValue(String sValue) {
         value = Boolean.valueOf(sValue.trim()).booleanValue();
     }
+	
+	/**
+	 * Inverts the value of this setting.  If it was true,
+	 * sets it to false and vice versa.
+	 */
+	public void invert() {
+		setValue(!getValue());
+	}
 }
