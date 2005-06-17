@@ -81,7 +81,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * {@link MagnetOptions#isDownloadable() downloadable}.
      * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
-     * @param fileName the final file name, must not be <code>null</code>
+     * @param fileName the final file name, can be <code>null</code>
      *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
@@ -93,7 +93,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             String fileName) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, fileName, overwrite);
+        super(new RemoteFileDesc[0], ifm, null, saveDir, 
+        		checkMagnetAndExtractFileName(magnet, fileName), overwrite);
 		propertiesMap.put(MAGNET, magnet);
     }
     
@@ -354,6 +355,28 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 	}
 
+	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, String fileName) {
+		if (!magnet.isDownloadable()) {
+			throw new IllegalArgumentException("magnet not downloadable");
+		}
+		if (fileName != null) {
+			return fileName;
+		}
+		fileName = magnet.getDisplayName();
+		if (fileName != null) {
+			return fileName;
+		}
+		fileName = magnet.getKeywordTopic();
+		if (fileName != null) {
+			return fileName;
+		}
+		URN urn = magnet.getSHA1Urn();
+		if (urn != null) {
+			return urn.toString();
+		}
+		return magnet.getDefaultURLs()[0];
+	}
+	
     /**
      * Overrides ManagedDownloader to display a reasonable file name even
      * when no locations have been found.
