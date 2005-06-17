@@ -19,7 +19,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 		ActivityCallback callback = new Main();
 		//RouterService.setCallback(callback);
 		RouterService service = new RouterService(callback);
-		service.preGuiInit();
+		RouterService.preGuiInit();
 		service.start();    
 
 
@@ -282,4 +282,5 @@ public class Main implements ActivityCallback, ErrorCallback {
     
     public void addressStateChanged() {}
 
+	public void acceptedIncomingChanged(boolean status) {}
 }

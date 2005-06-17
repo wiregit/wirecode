@@ -194,4 +194,9 @@ public interface ActivityCallback
      * Indicates a component is loading.
      */
     public void componentLoading(String component);
+	
+	/**
+	 * Indicates that the firewalled state of this has changed. 
+	 */
+	public void acceptedIncomingChanged(boolean status);
 }
