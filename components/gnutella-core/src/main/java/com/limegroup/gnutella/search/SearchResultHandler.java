@@ -216,7 +216,6 @@ public final class SearchResultHandler {
         }
 
         int numGoodSentToFrontEnd = 0;
-		int numSpamSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -231,27 +230,24 @@ public final class SearchResultHandler {
 			
 			if (! SpamManager.instance().isSpam(rfd))
 				numGoodSentToFrontEnd++;
-			else
-				numSpamSentToFrontEnd++;
         } //end of response loop
 
         // ok - some responses may have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd, numSpamSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
 
-        return (numGoodSentToFrontEnd + numSpamSentToFrontEnd > 0);
+        return numGoodSentToFrontEnd > 0;
     }
 
 
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
-                                                 final int numGoodSentToFrontEnd, 
-                                                 final int numSpamSentToFrontEnd) {
+                                                 final int numGoodSentToFrontEnd) {
 
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
         // technically Ultrapeers don't use this info, but we are keeping it
         // around for further use
-        if (numGoodSentToFrontEnd + numSpamSentToFrontEnd > 0) {
+        if (numGoodSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
             if (gc == null)
@@ -262,7 +258,7 @@ public final class SearchResultHandler {
             
             // update the object
             LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
-            gc.increment(numGoodSentToFrontEnd, numSpamSentToFrontEnd);
+            gc.increment(numGoodSentToFrontEnd);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
@@ -366,10 +362,10 @@ public final class SearchResultHandler {
             _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
 
-        public void increment(int good, int spam) {
+        public void increment(int good) {
 			_numGoodResults += good;
-			_numSpamResults += spam;
 		}
+        
         public void markAsFinished() { markAsFinished = true; }
 
         public String toString() {

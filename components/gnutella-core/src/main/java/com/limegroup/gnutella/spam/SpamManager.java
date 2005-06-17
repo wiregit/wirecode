@@ -44,11 +44,11 @@ public class SpamManager {
 	private static final float INCOMPLETE_FILE_RATING = 0.2f;
 
 	private static final SpamManager INSTANCE = new SpamManager();
-
+    
 	public static SpamManager instance() {
 		return INSTANCE;
 	}
-
+    
 	private SpamManager() {
 	}
 
@@ -92,7 +92,8 @@ public class SpamManager {
 		// apply bayesian filter
 		rating = 1 - (1 - rating) * (1 - RatingTable.instance().getRating(rfd));
 		rfd.setSpamRating(rating);
-		return rating >= SPAM_THRESHOLD;
+		return rating >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
+                SearchSettings.QUERY_SPAM_CUTOFF.getValue());
 	}
 
 	/**
@@ -127,7 +128,7 @@ public class SpamManager {
 	public void clearFilterData() {
 		RatingTable.instance().clear();
 	}
-	
+    
 	/**
 	 * look for
 	 * <ul>
