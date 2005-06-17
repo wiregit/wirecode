@@ -531,7 +531,7 @@ public class DownloadManager implements BandwidthTracker {
      *
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
+     * @param filename the final file name, or <code>null</code> if unknown
      * @param saveLocation can be null, then the default save location is used
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
@@ -547,7 +547,7 @@ public class DownloadManager implements BandwidthTracker {
 	throws IllegalArgumentException, SaveLocationException {
 		
 		if (!magnet.isDownloadable()) 
-            throw new IllegalArgumentException("We can't download magnet");
+            throw new IllegalArgumentException("magnet not downloadable");
         
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
@@ -563,10 +563,13 @@ public class DownloadManager implements BandwidthTracker {
 					fileName = magnet.getDisplayName();
 				}
 			}
-            if (conflicts(urn, fileName, 0)) {
-				throw new SaveLocationException
-				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
-            }
+        }
+        else if (fileName == null) {
+        	fileName = magnet.getDefaultURLs()[0];
+        }
+        if (conflicts(urn, fileName, 0)) {
+			throw new SaveLocationException
+			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
         //Note: If the filename exists, it would be nice to check that we are

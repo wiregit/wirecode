@@ -206,7 +206,7 @@ public class MagnetOptions implements Serializable {
 			ret.append("&dn=").append(URLEncoder.encode(getDisplayName()));
 		if (getKeywordTopic() != null) 
 			ret.append("&kt=").append(URLEncoder.encode(getKeywordTopic()));
-		for (Iterator iter= getXS().iterator(); iter.hasNext();) {
+		for (Iterator iter = getXS().iterator(); iter.hasNext();) {
 			String xs = (String) iter.next();
 			ret.append("&xs=").append(xs);
 		}

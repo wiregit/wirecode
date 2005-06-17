@@ -236,7 +236,8 @@ public interface Downloader extends BandwidthTracker {
 	public int getAmountLost();
 
 	/**
-	 * Returns the sha1 urn associated with the file being downloaded.
+	 * Returns the sha1 urn associated with the file being downloaded, or
+	 * <code>null</code> if there is none.
 	 * @return
 	 */
 	public URN getSHA1Urn();

@@ -1445,22 +1445,15 @@ public class RouterService {
 	 * should be overwritten
 	 * @param saveDir can be null, then the save directory from the settings
 	 * is used
-	 * @param fileName the final filename of the download, must not be 
+	 * @param fileName the final filename of the download, can be
 	 * <code>null</code>
 	 * @return
 	 * @throws SaveLocationException
 	 * @throws IllegalArgumentException if the magnet is not
-	 * {@link MagnetOptions#isDownloadable() valid}.
-	 * @throws NullPointerException if <code>fileName</code> is null.
+	 * {@link MagnetOptions#isDownloadable() downloadable}.
 	 */
 	public static Downloader download(MagnetOptions magnet, boolean overwrite,
 			File saveDir, String fileName) throws SaveLocationException {
-		if (!magnet.isDownloadable()) {
-			throw new IllegalArgumentException("invalid magnet: not enough information for downloading");
-		}
-		if (fileName == null) {
-			throw new NullPointerException("fileName is null");
-		}
 		return downloader.download(magnet, overwrite, saveDir, fileName);
 	}
 

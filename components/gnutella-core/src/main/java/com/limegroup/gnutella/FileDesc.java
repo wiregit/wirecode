@@ -636,11 +636,11 @@ public class FileDesc implements AlternateLocationCollector, FileDetails {
 	}
 	
 	public InetSocketAddress getSocketAddress() {
-		
+		// TODO maybe cache this, even statically
 		try {
 			return new InetSocketAddress(InetAddress.getByAddress
-					(RouterService.getAcceptor().getAddress(true)), 
-					RouterService.getAcceptor().getPort(true));
+										 (RouterService.getAcceptor().getAddress(true)), 
+										 RouterService.getAcceptor().getPort(true));
 		} catch (UnknownHostException e) {
 		}
 		return null;

@@ -376,27 +376,4 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 		return magnet.getDefaultURLs()[0];
 	}
-	
-    /**
-     * Overrides ManagedDownloader to display a reasonable file name even
-     * when no locations have been found.
-     *
-    protected synchronized String getDefaultFileName() {        
-        if (_filename!=null)
-            return _filename;
-        else {
-            String fname = null;
-			// Check the super name if I have an RFD
-			if ( hasRFD() )   
-                fname = super.getDefaultFileName();
-
-			// If I still don't have a good name, resort to whatever I have.
-            if ( fname == null || fname.equals(UNKNOWN_FILENAME) )
-			    fname = getFileNameHint();
-			return fname;
-		}
-    }
-
-    */
-    
 }
