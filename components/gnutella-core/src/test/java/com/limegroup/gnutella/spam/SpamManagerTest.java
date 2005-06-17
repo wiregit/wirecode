@@ -9,6 +9,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -26,7 +27,7 @@ public class SpamManagerTest extends BaseTestCase {
     /** various names of files - some tokens need to exist in each" */
     private static final String name1 = "badger badger badger";
     private static final String name2 = "badger mushroom mushroom";
-    private static final String name3 = "double nil mushroom";
+    private static final String name3 = "mushroom mushroom snake";
     
     /** addresses */
     private static final String addr1 = "1.1.1.1";
@@ -35,7 +36,7 @@ public class SpamManagerTest extends BaseTestCase {
     private static final int port2 = 6347;
     
     /** urns */
-    private static  URN urn1, urn2;
+    private static  URN urn1, urn2, urn3;
     
     /** sizes */
     private static final int size1 = 1000;
@@ -55,12 +56,13 @@ public class SpamManagerTest extends BaseTestCase {
     static LimeXMLDocument doc1, doc2;
     
     static SpamManager manager = SpamManager.instance();
-    static RemoteFileDesc rfd1, rfd2, rfd3;
+    static RemoteFileDesc badgers, mushrooms, snake;
     
     public static void globalSetUp() {
         try {
             urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
             urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+            urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
             doc1 = new LimeXMLDocument(xml1);
             doc2 = new LimeXMLDocument(xml2);
         } catch (Exception bad) {
@@ -69,16 +71,91 @@ public class SpamManagerTest extends BaseTestCase {
     }
     
     public void setUp() {
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
         manager.clearFilterData();
     }
     
     public void tearDown() {
-        if (rfd1 != null)
-            rfd1.setSpamRating(0f);
-        if (rfd2 != null)
-            rfd2.setSpamRating(0f);
-        if (rfd3 != null)
-            rfd3.setSpamRating(0f);
+        if (badgers != null)
+            badgers.setSpamRating(0f);
+        if (mushrooms != null)
+            mushrooms.setSpamRating(0f);
+        if (snake != null)
+            snake.setSpamRating(0f);
+    }
+    
+    /** 
+     * tests that when the user sets one result to be spammy, it affects
+     * the rating of other results with similar tokens in them
+     */
+    public void testSetSpam() throws Exception {
+        badgers = createRFD(addr1, port1, name1, null, urn1, size1);
+        mushrooms = createRFD(addr2, port2, name2, null, urn2, size2);
+        snake = createRFD(addr2, port2, name3, null, urn2, size2);
+        
+        // originally, none of the rfds should be considered spam
+        assertFalse(manager.isSpam(badgers));
+        assertFalse(manager.isSpam(mushrooms));
+        assertFalse(manager.isSpam(snake));
+        assertTrue(badgers.getSpamRating() == 0);
+        assertTrue(mushrooms.getSpamRating() == 0);
+        assertTrue(snake.getSpamRating() == 0);
+        
+        // lets say the user marks the badgers as spam
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{badgers});
+        
+        // the badgers should be spam, but the other rfd's not
+        assertTrue(manager.isSpam(badgers));
+        assertFalse(manager.isSpam(mushrooms));
+        assertFalse(manager.isSpam(snake));
+        
+        // the badger & mushroom rfd should have some spam rating increase
+        // but should not be as spammy as the badgers
+        assertGreaterThan(0, mushrooms.getSpamRating());
+        assertLessThan(badgers.getSpamRating(), mushrooms.getSpamRating());
+        
+        // the mushroom & snake rfd should still be 0
+        assertTrue(0 == snake.getSpamRating());
+    }
+    
+    /** 
+     * tests that when the user sets one result to be not spam, it affects
+     * the rating of other results with similar tokens in them
+     */    
+    public void testSetNotSpam() throws Exception {
+        badgers = createRFD(addr1, port1, name1, null, urn1, size1);
+        mushrooms = createRFD(addr1, port1, name2, null, urn1, size1);
+        snake = createRFD(addr1, port1, name3, null, urn3, size1);
+        // rfd2 will be marked as spam, so we work with a very similar rfd
+        RemoteFileDesc newMushroom = createRFD(addr1, port1, name2, null, urn2, size1);
+        
+        // mark the badgers and mushrooms as spam
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{badgers,mushrooms});
+        
+        // the snake and new rfd should be brought above the spam treshold, but not be 100%
+        // furthermore, rfd2new should have higher spam rating than the snake
+        assertTrue("not spam? "+badgers.getSpamRating(),manager.isSpam(badgers));
+        assertTrue("not spam? "+mushrooms.getSpamRating(),manager.isSpam(mushrooms));
+        assertTrue("not spam? "+snake.getSpamRating(),manager.isSpam(snake));
+        assertTrue("not spam? "+newMushroom.getSpamRating(),manager.isSpam(newMushroom));
+        
+        assertTrue("not spam? "+badgers.getSpamRating(),1f == badgers.getSpamRating());
+        assertTrue("not spam? "+mushrooms.getSpamRating(),1f == mushrooms.getSpamRating());
+        assertLessThan("not spam? "+snake.getSpamRating(),1f,snake.getSpamRating());
+        assertLessThan("not spam? "+snake.getSpamRating(),1f,newMushroom.getSpamRating());
+        assertLessThan("not spam? "+newMushroom.getSpamRating(),newMushroom.getSpamRating(),snake.getSpamRating());
+        
+        
+        // if the user says the snake is not spammy at all, the mushrooms should drop
+        manager.handleUserMarkedGood(new RemoteFileDesc[]{snake});
+        assertFalse(manager.isSpam(snake));
+        assertTrue(manager.isSpam(badgers));
+        assertTrue(manager.isSpam(mushrooms));
+        assertFalse(manager.isSpam(newMushroom));
+        
+        assertTrue(1f == badgers.getSpamRating());
+        assertLessThan(1f,newMushroom.getSpamRating());
+        assertTrue(0f == snake.getSpamRating());
     }
     
     private static RemoteFileDesc createRFD(String addr, int port,
