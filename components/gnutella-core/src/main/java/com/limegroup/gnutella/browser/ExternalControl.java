@@ -293,7 +293,12 @@ public class ExternalControl {
 	    return false;
 	}
     
-    private static URN extractSHA1URN(MagnetOptions curOpt) {
+    /**
+     * Get the SHA1 URN out of a magnet,
+     * 
+     * Returns null if not found.
+     */
+    public static URN extractSHA1URN(MagnetOptions curOpt) {
         try {
             return extractSHA1URNFromList(curOpt.getXT());
         } catch (IOException e1) {
