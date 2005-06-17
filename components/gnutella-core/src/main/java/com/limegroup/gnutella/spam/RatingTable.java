@@ -109,10 +109,7 @@ public class RatingTable {
 
 		rating = 1 - rating;
 
-		if (rating > SpamManager.SPAM_THRESHOLD
-				&& rating < SpamManager.MAX_THRESHOLD)
-			// if rating == 1, we have encountered one really bad token.
-			// don't let that f'up the ratings of all other tokens...
+		if (rating > SpamManager.SPAM_THRESHOLD)
 			markInternal(tokens, Token.RATING_SPAM);
 		else if (rating <= SpamManager.GOOD_THRESHOLD)
 			markInternal(tokens, Token.RATING_GOOD);

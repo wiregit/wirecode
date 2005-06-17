@@ -9,6 +9,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.DataUtils;
@@ -71,7 +72,7 @@ public class SpamManagerTest extends BaseTestCase {
     }
     
     public void setUp() {
-        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
+        SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
         manager.clearFilterData();
     }
     
@@ -123,6 +124,7 @@ public class SpamManagerTest extends BaseTestCase {
      * the rating of other results with similar tokens in them
      */    
     public void testSetNotSpam() throws Exception {
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
         badgers = createRFD(addr1, port1, name1, null, urn1, size1);
         mushrooms = createRFD(addr1, port1, name2, null, urn1, size1);
         snake = createRFD(addr1, port1, name3, null, urn3, size1);
@@ -149,13 +151,66 @@ public class SpamManagerTest extends BaseTestCase {
         // if the user says the snake is not spammy at all, the mushrooms should drop
         manager.handleUserMarkedGood(new RemoteFileDesc[]{snake});
         assertFalse(manager.isSpam(snake));
+        assertFalse(manager.isSpam(newMushroom));
         assertTrue(manager.isSpam(badgers));
         assertTrue(manager.isSpam(mushrooms));
-        assertFalse(manager.isSpam(newMushroom));
         
         assertTrue(1f == badgers.getSpamRating());
         assertLessThan(1f,newMushroom.getSpamRating());
         assertTrue(0f == snake.getSpamRating());
+    }
+    
+    /**
+     * tests that the URN is the most important factor when checking for spam
+     */
+    public void testUrnOverrides() throws Exception {
+        // the badgers and snake have nothing in common but the urn
+        badgers = createRFD(addr1, port1, name1, null, urn1, size1);
+        snake = createRFD(addr2, port2, name2, null, urn1, size2);
+        
+        // marking one spam will automatically mark the other.
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{badgers});
+        
+        assertTrue(manager.isSpam(snake));
+        
+        // and vice versa
+        manager.handleUserMarkedGood(new RemoteFileDesc[]{snake});
+        
+        assertFalse(manager.isSpam(badgers));
+    }
+    
+    /** 
+     * tests that the ratings are lowered for keywords the user searches for
+     */
+    public void testQueryLowers() throws Exception {
+        // make all the players independent, and mark the mushrooms as spam
+        // the badgers and snake should have a little higher ratings because of that
+        badgers = createRFD(addr1, port1, name1, null, urn1, size1);
+        mushrooms = createRFD(addr2, port2, name2, null, urn2, size2);
+        snake = createRFD(addr1, port1, name3, null, urn3, size1);
+        
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{mushrooms});
+        
+        assertTrue(manager.isSpam(mushrooms));
+        assertFalse(manager.isSpam(badgers));
+        assertFalse(manager.isSpam(snake));
+        
+        float badgerRating = badgers.getSpamRating();
+        float snakeRating = snake.getSpamRating();
+        assertGreaterThan(0f, badgerRating);
+        assertGreaterThan(0f, snakeRating);
+        
+        // make the user send a query with a badger and a mushroom
+        QueryRequest qr = QueryRequest.createQuery("badger mushroom");
+        manager.startedQuery(qr);
+        
+        // nothing should have changed wrt spam or not
+        assertFalse(manager.isSpam(badgers));
+        assertFalse(manager.isSpam(snake));
+        
+        // but the badger and snake should have lower spam ratings
+        assertLessThan(badgerRating, badgers.getSpamRating());
+        assertLessThan(snakeRating, snake.getSpamRating());
     }
     
     private static RemoteFileDesc createRFD(String addr, int port,
