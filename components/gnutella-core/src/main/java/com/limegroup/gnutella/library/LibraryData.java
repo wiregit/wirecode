@@ -41,10 +41,10 @@ public class LibraryData implements Settings {
     public final Set SPECIAL_FILES_TO_SHARE = DATA.getSet("SPECIAL_FILES_TO_SHARE");
     
     /**
-     * Individual files that should be not shared despite being located inside
+     * Files that should be not shared despite being located inside
      * a shared directory.
      */
-    public final Set SPECIAL_FILES_NOT_TO_SHARE = DATA.getSet("SPECIAL_FILES_NOT_TO_SHARE");    
+    public final Set FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
      * Whether or not a 'save' operation is actually going to save to disk.
@@ -96,7 +96,7 @@ public class LibraryData implements Settings {
 		Set parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);
 		clean(SPECIAL_FILES_TO_SHARE, null);
-		clean(SPECIAL_FILES_NOT_TO_SHARE, parents);
+		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);
 		clean(SENSITIVE_DIRECTORIES_NOT_TO_SHARE, parents);
 	}

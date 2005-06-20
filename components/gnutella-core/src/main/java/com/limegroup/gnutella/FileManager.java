@@ -682,8 +682,8 @@ public abstract class FileManager {
      * @modifies this
      */
     private void updateSharedDirectories(File directory, File parent, int revision) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Attempting to share directory: " + directory);
+//        if(LOG.isDebugEnabled())
+//            LOG.debug("Attempting to share directory: " + directory);
         
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
@@ -730,8 +730,8 @@ public abstract class FileManager {
             if (_completelySharedDirectories.contains(directory))
                 return;
 
-            if(LOG.isDebugEnabled())
-                LOG.debug("Adding completely shared directory: " + directory);
+//            if(LOG.isDebugEnabled())
+//                LOG.debug("Adding completely shared directory: " + directory);
 
 			_completelySharedDirectories.add(directory);
             if (!isForcedShare) {
@@ -792,7 +792,6 @@ public abstract class FileManager {
 	    try {
 	        folder = FileUtils.getCanonicalFile(folder);
 	    } catch(IOException ignored) {}
-	        
 
         // grab the value quickly.  release the lock
         // so that we don't hold it during a long recursive function.
@@ -811,8 +810,6 @@ public abstract class FileManager {
             } else if(parent == null) {
                 if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
                     _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
-                RouterService.getCallback().handleFileManagerEvent(
-                    new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
             }
             
             // note that if(parent != null && not a root share)
@@ -821,7 +818,6 @@ public abstract class FileManager {
             // from sharing, which inherently will remove the child directories.
             // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
             // entries.
-            
            
             synchronized(this) {
                 _completelySharedDirectories.remove(folder);
@@ -833,10 +829,16 @@ public abstract class FileManager {
                     File f = subs[i];
                     if(f.isDirectory())
                         removeFolderIfShared(f, folder);
-                    else if(f.isFile())
+                    else if(f.isFile() && !_data.SPECIAL_FILES_TO_SHARE.contains(f))
                         removeFileIfShared(f);
                 }
             }
+            
+            // send the event last.  this is a hack so that the GUI can properly
+            // receive events with the children first, moving any leftover children up to
+            // potential parent directories.
+            RouterService.getCallback().handleFileManagerEvent(
+                new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
         }
     }
     
@@ -876,7 +878,7 @@ public abstract class FileManager {
 	 * The listener is notified if this file could or couldn't be shared.
 	 */
 	 public void addFileAlways(File file, List list, FileEventListener callback) {
-		_data.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
+		_data.FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
 			_data.SPECIAL_FILES_TO_SHARE.add(file);
 			
@@ -1098,10 +1100,8 @@ public abstract class FileManager {
 		file = fd.getFile();
 		if (file == null)
 			return;
-		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
-			_data.SPECIAL_FILES_TO_SHARE.remove(file);
-		else if (!_data.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
-            _data.SPECIAL_FILES_NOT_TO_SHARE.add(file);
+		if (!_data.SPECIAL_FILES_TO_SHARE.remove(file))
+            _data.FILES_NOT_TO_SHARE.add(file);
 	}
 	
 	/**
@@ -1498,7 +1498,7 @@ public abstract class FileManager {
 			return false;
 		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
-		if (_data.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
+		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
