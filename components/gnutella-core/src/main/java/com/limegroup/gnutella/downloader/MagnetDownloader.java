@@ -394,6 +394,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		if (urn != null) {
 			return urn.toString();
 		}
+		// TODO fberger this has to be encoded/decoded to work
 		return magnet.getDefaultURLs()[0];
 	}
 }

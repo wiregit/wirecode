@@ -84,7 +84,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         assertTrue(RouterService.isConnected());
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
@@ -92,12 +92,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         callback = new ActivityCallbackStub();
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
-        try {
-            PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-            PrivilegedAccessor.setValue(RouterService.class,"router",router);
-        }catch(Exception e) {
-            ErrorService.error(e);
-        }
+        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+        PrivilegedAccessor.setValue(RouterService.class,"router",router);
     }
 
     

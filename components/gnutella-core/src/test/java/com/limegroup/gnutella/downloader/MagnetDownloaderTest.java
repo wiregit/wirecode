@@ -59,12 +59,11 @@ public class MagnetDownloaderTest extends BaseTestCase {
                 return true;
             }
         };
-        
         PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         assertTrue(RouterService.isConnected());
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
@@ -72,15 +71,11 @@ public class MagnetDownloaderTest extends BaseTestCase {
         callback = new ActivityCallbackStub();
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
-        try {
-            PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-            PrivilegedAccessor.setValue(RouterService.class,"router",router);
-        }catch(Exception e) {
-            ErrorService.error(e);
-        }
+        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+        PrivilegedAccessor.setValue(RouterService.class,"router",router);
     }
 
-    public void testInvalidMagnetDownloads() {
+    public void testInvalidMagnetDownloads() throws Exception {
     	// is invalid because we don't have a url
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
@@ -91,9 +86,6 @@ public class MagnetDownloaderTest extends BaseTestCase {
 		}
 		catch (IllegalArgumentException iae) {
 		} 
-		catch (SaveLocationException e) {
-			fail("save location exception should not have been thrown");
-		}
 		
 		// invalid: has empty kt
 		opts = MagnetOptions.parseMagnet("magnet:?kt=&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
@@ -105,9 +97,6 @@ public class MagnetDownloaderTest extends BaseTestCase {
 		}
 		catch (IllegalArgumentException iae) {
 		} 
-		catch (SaveLocationException e) {
-			fail("save location exception should not have been thrown");
-		}
 		
 		// invalid: has only a display name
 		opts = MagnetOptions.parseMagnet("magnet:?dn=me");
@@ -119,80 +108,45 @@ public class MagnetDownloaderTest extends BaseTestCase {
 		}
 		catch (IllegalArgumentException iae) {
 		} 
-		catch (SaveLocationException e) {
-			fail("save location exception should not have been thrown");
-		}
     }
     
-    public void testValidMagnetDownloads() {
+    public void testValidMagnetDownloads() throws Exception {
     	// valid: has a url and a sha1
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xs=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		try {
-			manager.download(opts[0], true, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			fail("Should not have thrown illegal argument exception");
-		}
-		catch (SaveLocationException sle) {
-			fail("Should not have thrown save location exception " + sle);
-		}
-		
+		manager.download(opts[0], true, null, null);
+				
 		// valid: has a url and keyword topic
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://bear.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		try {
-			manager.download(opts[0], true, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			fail("Should not have thrown illegal argument exception");
-		}
-		catch (SaveLocationException sle) {
-			fail("Should not have thrown save location exception " + sle);
-		}
+		manager.download(opts[0], true, null, null);
 		
 		// valid: has everything
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
-		try {
-			manager.download(opts[0], true, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			fail("Should not have thrown illegal argument exception");
-		}
-		catch (SaveLocationException sle) {
-			fail("Should not have thrown save location exception " + sle);
-		}
+		manager.download(opts[0], true, null, null);
+		
 		
 		// downloadable: has kt and hash
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		try {
-			manager.download(opts[0], true, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			fail("Should not have thrown illegal argument exception");
-		}
-		catch (SaveLocationException sle) {
-			fail("Should not have thrown save location exception " + sle);
-		}
+		manager.download(opts[0], true, null, null);
 		
 		// downloadable: has dn and hash
 		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		try {
-			manager.download(opts[0], true, null, null);
-		}
-		catch (IllegalArgumentException iae) {
-			fail("Should not have thrown illegal argument exception");
-		}
-		catch (SaveLocationException sle) {
-			fail("Should not have thrown save location exception " + sle);
-		}
+		manager.download(opts[0], true, null, null);
+		
+		// downloadable hash only magnet
+		opts = MagnetOptions.parseMagnet("magnet:?xt=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		assertEquals("Wrong number of parsed magnets", 1, opts.length);
+		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be hash only", opts[0].isHashOnly());
+		manager.download(opts[0], true, null, null);
     }
 }

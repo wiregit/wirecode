@@ -565,6 +565,7 @@ public class DownloadManager implements BandwidthTracker {
 			}
         }
         else if (fileName == null) {
+        	// TODO fberger this is not a valid filename
         	fileName = magnet.getDefaultURLs()[0];
         }
         if (conflicts(urn, fileName, 0)) {
