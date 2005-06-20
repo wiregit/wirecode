@@ -413,6 +413,7 @@ public class MagnetOptions implements Serializable {
     	}
     	try {
     		File file = File.createTempFile("magnet", "");
+    		file.deleteOnExit();
     		extractedFileName = file.getName();
     		return extractedFileName;
     	} catch (IOException ie) {

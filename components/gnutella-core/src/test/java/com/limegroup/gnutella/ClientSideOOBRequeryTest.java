@@ -735,7 +735,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                      //(System.currentTimeMillis() - currTime));
         int guessWaitTime = ((Integer)PrivilegedAccessor.getValue(ManagedDownloader.class,"GUESS_WAIT_TIME")).intValue();
         Thread.sleep(guessWaitTime+2000);
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+        assertEquals(Downloader.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();
@@ -907,7 +907,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         long timeoutVal = 8000 - (System.currentTimeMillis() - currTime);
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+        assertEquals(Downloader.BUSY, downloader.getState());
         // purge front end of query
         ((MyCallback)getCallback()).clearGUID();
 
@@ -1076,7 +1076,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Thread.sleep((UDP_ACCESS.length * 1500) - 
                      (System.currentTimeMillis() - currTime));
 
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+        assertEquals(Downloader.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();
@@ -1183,9 +1183,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         boolean oneGood = false, twoGood = false;
         for (int i = 0; i <= MAX_TRIES; i++) {
             Thread.sleep(500);
-            if (downloader.getState() == Downloader.WAITING_FOR_RETRY)
+            if (downloader.getState() == Downloader.BUSY)
                 oneGood = true;
-            if (downloader2.getState() == Downloader.WAITING_FOR_RETRY)
+            if (downloader2.getState() == Downloader.BUSY)
                 twoGood = true;
             if (oneGood && twoGood) break;
             if (i == MAX_TRIES) fail("didn't GUESS!!");
@@ -1406,7 +1406,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+        assertEquals(Downloader.BUSY, downloader.getState());
 
         ((MyCallback)getCallback()).clearGUID();
         downloader.stop();

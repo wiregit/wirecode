@@ -165,7 +165,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	        
         switch(md.getState()) {
         case Downloader.QUEUED:
-        case Downloader.WAITING_FOR_RETRY:
+        case Downloader.BUSY:
         case Downloader.ABORTED:
         case Downloader.GAVE_UP:
         case Downloader.DISK_PROBLEM:

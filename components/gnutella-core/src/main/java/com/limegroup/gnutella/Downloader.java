@@ -12,7 +12,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int QUEUED                  = 0;
     public static final int CONNECTING              = 1;
     public static final int DOWNLOADING             = 2;
-    public static final int WAITING_FOR_RETRY       = 3;
+    public static final int BUSY                    = 3;
     public static final int COMPLETE                = 4;
     public static final int ABORTED                 = 5;
     /** When a downloader is in the GAVE_UP state, it can still try downloading

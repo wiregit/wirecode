@@ -771,8 +771,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             ; // all done for now.
 
        // If busy, try waiting for that busy host.
-        else if (getState() == WAITING_FOR_RETRY)
-            setState(WAITING_FOR_RETRY, ranker.calculateWaitTime());
+        else if (getState() == BUSY)
+            setState(BUSY, ranker.calculateWaitTime());
         
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
@@ -833,7 +833,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                       ", left: " + getRemainingStateTime());
         
         switch(getState()) {
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
             // If we're finished waiting on busy hosts,
@@ -964,7 +964,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         case WAITING_FOR_USER:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case PAUSED:
             return true;
         }
@@ -1972,7 +1972,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
             case CORRUPT_FILE:
                 setState(status);
                 return;
-            case WAITING_FOR_RETRY:
+            case BUSY:
             case GAVE_UP:
                 if(stopped)
                     setState(ABORTED);
@@ -2463,7 +2463,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
                 if (_workers.size() == 0 && !ranker.hasNonBusy())   {                        
                     if ( ranker.calculateWaitTime() > 0) {
                         LOG.trace("MANAGER: terminating with busy");
-                        return WAITING_FOR_RETRY;
+                        return BUSY;
                     } else {
                         LOG.trace("MANAGER: terminating w/o hope");
                         return GAVE_UP;
@@ -2710,7 +2710,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         long remaining;
         switch (state) {
         case CONNECTING:
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case WAITING_FOR_RESULTS:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:

@@ -101,7 +101,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     public void initialize(DownloadManager manager, FileManager fileManager, 
             ActivityCallback callback) {
 		Assert.that(getMagnet() != null);
-		// TODO fberger ask
         downloadSHA1 = getMagnet().getSHA1Urn();
         super.initialize(manager, fileManager, callback);
     }
@@ -129,7 +128,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 							getSaveFile().getName(), magnet.getSHA1Urn());
 							
 					initPropertiesMap(firstDesc);
-					addDownloadForced(firstDesc,true);
+					addDownloadForced(firstDesc, true);
 				} catch (IOException badRFD) {}
 			}
 			
@@ -172,7 +171,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     }*/
 
 
-    /** 
+	/** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
      * returns null.  Package-access and static for easy testing.
@@ -366,6 +365,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			}
 			propertiesMap.put(MAGNET, magnet);
 		}
+	}
+
+	/**
+	 * Only allow requeries when <code>downloadSHA1</code> is not null.
+	 */
+	protected boolean shouldSendRequeryImmediately(int numRequeries) {
+		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
+				: false;
 	}
 
 	/**
