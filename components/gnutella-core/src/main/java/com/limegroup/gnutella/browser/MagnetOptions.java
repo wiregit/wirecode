@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,9 @@ public class MagnetOptions implements Serializable {
 	
 	public static final String MAGNET    = "magnet:?";
 	private static final String HTTP     = "http://";
+	 /** The string to prefix download files with in the rare case that we don't
+     *  have a download name and can't calculate one from the URN. */
+    private static final String DOWNLOAD_PREFIX="MAGNET download from ";
 	
 	private final Map optionsMap;
 	
@@ -402,14 +407,13 @@ public class MagnetOptions implements Serializable {
     	String[] urls = getDefaultURLs();
     	if (urls.length > 0) {
     		try {
-    			URI uri = new URI(urls[0].toCharArray());
-    			extractedFileName = uri.getPath();
+    			URL url = new URL(urls[0]);
+    			extractedFileName = extractFileName(url);
     			if (extractedFileName != null && extractedFileName.length() > 0) {
     				return extractedFileName;
     			}
-    		} catch (URIException e) {
-    		} catch (NullPointerException e) {
-    		}
+    		} catch (MalformedURLException e) {
+			}
     	}
     	try {
     		File file = File.createTempFile("magnet", "");
@@ -452,5 +456,27 @@ public class MagnetOptions implements Serializable {
 	public String getErrorMessage() {
 		return localizedErrorMessage;
 	}
+	
+	/** 
+	 * Returns the filename to use for the download, guessed if necessary. 
+     * @param url the URL for the resource, which must not be <code>null</code>
+     */
+    public static String extractFileName(URL url) {
+    	//If the URL has a filename, return that.  Remember that URL.getFile()
+        //may include directory information, e.g., "/path/file.txt" or "/path/".
+        //It also returns "" if no file part.
+        String path = url.getFile();   
+        if (path.length() > 0) {
+            int i = path.lastIndexOf('/');
+            if (i < 0)
+                return path;                  //e.g., "file.txt"
+            if (i >= 0 && i < (path.length()-1))
+            	return path.substring(i+1);   //e.g., "/path/to/file"
+        }
+        
+        //In the rare case of no filename ("http://www.limewire.com" or
+        //"http://www.limewire.com/path/"), just make something up.
+        return DOWNLOAD_PREFIX + url.getHost();        
+    }
 }
 

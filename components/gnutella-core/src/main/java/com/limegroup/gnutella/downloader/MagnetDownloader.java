@@ -62,9 +62,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /** Prevent versioning problems. */
     static final long serialVersionUID = 9092913030585214105L;
-    /** The string to prefix download files with in the rare case that we don't
-     *  have a download name and can't calculate one from the URN. */
-    static final String DOWNLOAD_PREFIX="MAGNET download from ";
+   
 	
 	private static final transient String MAGNET = "MAGNET"; 
 	
@@ -198,7 +196,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
-                filename(filename, url),
+                filename != null ? filename : MagnetOptions.extractFileName(url),
                 contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
@@ -213,32 +211,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 null,           //no push proxies
                 0);         //assume no firewall transfer
     } 
-
-    /** Returns the filename to use for the download, guessed if necessary. 
-     *  Package-access and static for easy testing. 
-     *  @param filename the filename to use if non-null
-     *  @param url the URL for the resource, which must not be null */
-    static String filename(String filename, URL url) {
-        //If the URI specified a download name, use that.
-        if (filename!=null)
-            return filename;
-
-        //If the URL has a filename, return that.  Remember that URL.getFile()
-        //may include directory information, e.g., "/path/file.txt" or "/path/".
-        //It also returns "" if no file part.
-        String path=url.getFile();   
-        if (path.length()>0) {
-            int i=path.lastIndexOf('/');
-            if (i<0)
-                return path;                  //e.g., "file.txt"
-            if (i>=0 && i<(path.length()-1))
-                return path.substring(i+1);   //e.g., "/path/to/file"
-        }
-         
-        //In the rare case of no filename ("http://www.limewire.com" or
-        //"http://www.limewire.com/path/"), just make something up.
-        return DOWNLOAD_PREFIX+url.getHost();        
-    }
 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
