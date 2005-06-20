@@ -407,12 +407,13 @@ public class MagnetOptions implements Serializable {
     	String[] urls = getDefaultURLs();
     	if (urls.length > 0) {
     		try {
-    			URL url = new URL(urls[0]);
-    			extractedFileName = extractFileName(url);
+    			URI uri = new URI(urls[0].toCharArray());
+    			extractedFileName = extractFileName(uri);
     			if (extractedFileName != null && extractedFileName.length() > 0) {
     				return extractedFileName;
     			}
-    		} catch (MalformedURLException e) {
+			} catch (URIException e) {
+			} catch (NullPointerException e) {
 			}
     	}
     	try {
@@ -422,7 +423,7 @@ public class MagnetOptions implements Serializable {
     		return extractedFileName;
     	} catch (IOException ie) {
     	}
-    	extractedFileName = "magnet download";
+    	extractedFileName = DOWNLOAD_PREFIX;
     	return extractedFileName;
     }
     
@@ -459,14 +460,20 @@ public class MagnetOptions implements Serializable {
 	
 	/** 
 	 * Returns the filename to use for the download, guessed if necessary. 
-     * @param url the URL for the resource, which must not be <code>null</code>
+     * @param uri the URL for the resource, which must not be <code>null</code>
      */
-    public static String extractFileName(URL url) {
+    public static String extractFileName(URI uri) {
     	//If the URL has a filename, return that.  Remember that URL.getFile()
         //may include directory information, e.g., "/path/file.txt" or "/path/".
         //It also returns "" if no file part.
-        String path = url.getFile();   
-        if (path.length() > 0) {
+        String path = null;
+        String host = null;
+		try {
+			path = uri.getPath();
+			host = uri.getHost();
+		} catch (URIException e) {
+		}
+        if (path != null && path.length() > 0) {
             int i = path.lastIndexOf('/');
             if (i < 0)
                 return path;                  //e.g., "file.txt"
@@ -476,7 +483,12 @@ public class MagnetOptions implements Serializable {
         
         //In the rare case of no filename ("http://www.limewire.com" or
         //"http://www.limewire.com/path/"), just make something up.
-        return DOWNLOAD_PREFIX + url.getHost();        
+        if (host != null) {
+        	return DOWNLOAD_PREFIX + host;
+        }
+        else {
+        	return DOWNLOAD_PREFIX;
+        }
     }
 }
 

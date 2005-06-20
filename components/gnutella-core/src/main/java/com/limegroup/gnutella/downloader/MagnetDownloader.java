@@ -192,11 +192,13 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         if (urn!=null)
             urns.add(urn);
         
+        URI uri = new URI(url);
+        
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
-                filename != null ? filename : MagnetOptions.extractFileName(url),
+                filename != null ? filename : MagnetOptions.extractFileName(uri),
                 contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
