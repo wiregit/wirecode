@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.browser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -38,6 +39,7 @@ public class MagnetOptions implements Serializable {
 	private transient String [] defaultURLs;
 	private transient String localizedErrorMessage;
 	private transient URN urn;
+	private transient String extractedFileName;
 	
 	/**
 	 * Creates a MagnetOptions object from file details.
@@ -372,6 +374,51 @@ public class MagnetOptions implements Serializable {
 	
     public String getDisplayName() {
         return (String)optionsMap.get(DN);
+    }
+    
+    /**
+     * Returns a file name that can be used for saving for a downloadable magnet.
+     * <p>
+     * Guaranteed to return a non-null value
+     * @return 
+     */
+    public String getFileNameForSaving() {
+    	if (extractedFileName != null) {
+    		return extractedFileName;
+    	}
+    	extractedFileName = getDisplayName();
+    	if (extractedFileName != null && extractedFileName.length() > 0) {
+    		return extractedFileName;
+    	}
+    	extractedFileName = getKeywordTopic();
+    	if (extractedFileName != null && extractedFileName.length() > 0) {
+    		return extractedFileName;
+    	}
+    	URN urn = getSHA1Urn();
+    	if (urn != null) {
+    		extractedFileName = urn.toString();
+    		return extractedFileName;
+    	}
+    	String[] urls = getDefaultURLs();
+    	if (urls.length > 0) {
+    		try {
+    			URI uri = new URI(urls[0].toCharArray());
+    			extractedFileName = uri.getPath();
+    			if (extractedFileName != null && extractedFileName.length() > 0) {
+    				return extractedFileName;
+    			}
+    		} catch (URIException e) {
+    		} catch (NullPointerException e) {
+    		}
+    	}
+    	try {
+    		File file = File.createTempFile("magnet", "");
+    		extractedFileName = file.getName();
+    		return extractedFileName;
+    	} catch (IOException ie) {
+    	}
+    	extractedFileName = "magnet download";
+    	return extractedFileName;
     }
     
     public String getKeywordTopic() {

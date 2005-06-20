@@ -382,19 +382,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		if (fileName != null) {
 			return fileName;
 		}
-		fileName = magnet.getDisplayName();
-		if (fileName != null) {
-			return fileName;
-		}
-		fileName = magnet.getKeywordTopic();
-		if (fileName != null) {
-			return fileName;
-		}
-		URN urn = magnet.getSHA1Urn();
-		if (urn != null) {
-			return urn.toString();
-		}
-		// TODO fberger this has to be encoded/decoded to work
-		return magnet.getDefaultURLs()[0];
+		return magnet.getFileNameForSaving();
 	}
 }

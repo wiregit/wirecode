@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -552,23 +554,10 @@ public class DownloadManager implements BandwidthTracker {
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
         
-		URN urn = magnet.getSHA1Urn();
-        if (urn != null) {
-			if (fileName == null) {
-				if (magnet.getDisplayName() == null 
-						|| magnet.getDisplayName().length() == 0) {
-					fileName = urn.toString();
-				}
-				else {
-					fileName = magnet.getDisplayName();
-				}
-			}
+        if (fileName == null) {
+        	fileName = magnet.getFileNameForSaving();
         }
-        else if (fileName == null) {
-        	// TODO fberger this is not a valid filename
-        	fileName = magnet.getDefaultURLs()[0];
-        }
-        if (conflicts(urn, fileName, 0)) {
+        if (conflicts(magnet.getSHA1Urn(), fileName, 0)) {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
