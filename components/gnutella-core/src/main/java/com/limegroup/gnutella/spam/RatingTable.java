@@ -109,7 +109,7 @@ public class RatingTable {
 
 		rating = 1 - rating;
 
-		if (rating > SpamManager.SPAM_THRESHOLD)
+		if (rating > SpamManager.SPAM_THRESHOLD && rating < SpamManager.MAX_THRESHOLD)
 			markInternal(tokens, Token.RATING_SPAM);
 		else if (rating <= SpamManager.GOOD_THRESHOLD)
 			markInternal(tokens, Token.RATING_GOOD);
@@ -208,18 +208,18 @@ public class RatingTable {
 	 * @throws IOException
 	 */
 	private Map readData() throws IOException {
-		TreeMap tokens;
+		Map tokens;
 
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-			tokens = (TreeMap) is.readObject();
+			tokens = (HashMap) is.readObject();
 		} catch (ClassNotFoundException cnfe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(cnfe);
-			return new TreeMap();
+			return new HashMap();
 		} finally {
             IOUtils.close(is);
 		}
