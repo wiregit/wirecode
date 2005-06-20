@@ -331,7 +331,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         SpamManager.instance().handleUserMarkedSpam(new RemoteFileDesc[]{anita});
         assertTrue(SpamManager.instance().isSpam(anita));
         
-        // now send back results and make sure that we get a QueryStatus
+        // now send back results and make sure that we do not get a QueryStatus
         // from the leaf
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int j = 0; j < res.length; j++)
@@ -344,32 +344,20 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         testUP[0].send(m);
         testUP[0].flush();
         Thread.sleep(1000);
-        // the gui should see some results
+        
+        // the gui should be informed about the results 
         assertEquals(REPORT_INTERVAL * 4, myCallback.responses.size());
         
-        // but the ultrapeers should not see anything cause the results were spam.
+        // but the ultrapeers should not be told about them cause they were all spam.
         drainQSRespones();
     }
     
+    /**
+     * drains the ultrapeers for any QueryStatusResponses and fails if one is received.
+     * @throws Exception
+     */
     private static void drainQSRespones() throws Exception {
-        Thread [] drainers = new ManagedThread[testUP.length];
-        for (int i = 0; i < testUP.length; i++) {
-            final int index = i;
-            drainers[i] = new ManagedThread() {
-                    public void managedRun() {
-                        try {
-                            QueryStatusResponse stat = 
-                                getFirstQueryStatus(testUP[index]);
-                            assertNull(stat);
-                        } catch (Exception bad) {
-                            fail(bad);
-                        }
-                    }
-                };
-            drainers[i].start();
-        }
-        for(int i = 0;i < drainers.length;i++)
-            drainers[i].join();
+        failIfAnyArrive(testUP,QueryStatusResponse.class);
     }
 
     private static byte[] myIP() {
