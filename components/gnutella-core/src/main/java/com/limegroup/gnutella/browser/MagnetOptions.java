@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -271,10 +269,10 @@ public class MagnetOptions implements Serializable {
 	}
 
 	/**
-	 * Returns true if there are enough pieces of information to start e.g a
+	 * Returns true if there are enough pieces of information to start a
 	 * download from it.
-	 * <p>At any rate there has to be at least one default url and a sha1 or
-	 * a non empty keyword topic.
+	 * <p>At any rate there has to be at least one default url or a sha1 and
+	 * a non empty keyword topic/display name.
 	 * @return
 	 */
 	public boolean isDownloadable() {
@@ -299,6 +297,10 @@ public class MagnetOptions implements Serializable {
 			!getExactTopics().isEmpty();
 	}
 	
+	/**
+	 * Returns a query string or <code>null</code> if there is none.
+	 * @return
+	 */
 	public String getQueryString() {
 		String kt = getKeywordTopic();
 		if (kt != null && kt.length() > 0) {
@@ -377,6 +379,10 @@ public class MagnetOptions implements Serializable {
 		return defaultURLs;
 	}
 	
+	/**
+	 * Returns the display name, i.e. filename or <code>null</code>.
+	 * @return
+	 */
     public String getDisplayName() {
         return (String)optionsMap.get(DN);
     }
@@ -413,7 +419,6 @@ public class MagnetOptions implements Serializable {
     				return extractedFileName;
     			}
 			} catch (URIException e) {
-			} catch (NullPointerException e) {
 			}
     	}
     	try {
@@ -427,18 +432,34 @@ public class MagnetOptions implements Serializable {
     	return extractedFileName;
     }
     
+    /**
+     * Returns the keyword topic if there is one, otherwise <code>null</code>.
+     * @return
+     */
     public String getKeywordTopic() {
         return (String)optionsMap.get(KT);
     }
     
+    /**
+     * Returns a list of exact topic strings, they can be url or urn string.
+     * @return
+     */
     public List getExactTopics() {
 		return getList(XT); 
     }
     
+    /**
+     * Returns the list of exact source strings, they should be urls.
+     * @return
+     */
     public List getXS() {
         return getList(XS);
     }
 	
+    /**
+     * Returns the list of alternate source string, they should  be urls.
+     * @return
+     */
     public List getAS() { 
         return getList(AS);
     }
