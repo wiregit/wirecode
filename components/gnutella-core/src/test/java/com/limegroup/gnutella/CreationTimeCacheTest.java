@@ -508,7 +508,7 @@ public class CreationTimeCacheTest
         });
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
-			Set urns = FileDesc.calculateAndCacheURN(files[i]);            
+			Set urns = calculateAndCacheURN(files[i]);            
 			fileDescs[i] = new FileDesc(files[i], urns, i);
             CreationTimeCache.instance().addTime(fileDescs[i].getSHA1Urn(),
                                                  files[i].lastModified());

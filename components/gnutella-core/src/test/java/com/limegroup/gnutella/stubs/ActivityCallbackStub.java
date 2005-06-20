@@ -72,4 +72,5 @@ public class ActivityCallbackStub implements ActivityCallback {
         return false;
     }
     public void addressStateChanged() {}
+    public void fileManagerLoading() {}
 }

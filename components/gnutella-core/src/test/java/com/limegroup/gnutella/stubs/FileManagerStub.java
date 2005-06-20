@@ -76,10 +76,6 @@ public class FileManagerStub extends FileManager {
     	_descs = new Vector();
     }
     
-    protected FileDesc addFileIfShared(File f, List docs, boolean notify) {
-        return addFileIfShared(f, notify);
-    }
-    
     public void setFiles(Map m) {
     	_files = m;
     }
@@ -88,6 +84,10 @@ public class FileManagerStub extends FileManager {
         if (_files==null)
             return fdStub;
     	return (FileDesc)_files.get(f);
+    }
+    
+    public void fileChanged(File f) {
+        throw new UnsupportedOperationException();
     }
 }
 

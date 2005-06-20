@@ -115,7 +115,7 @@ public class LimeXMLReplyCollection {
      * Initializes the map using either LimeXMLDocuments in the list of potential
      * documents, or elements stored in oldMap.  Items in potential take priority.
      */
-    void intialize(FileDesc fd, List potential) {
+    void initialize(FileDesc fd, List potential) {
         URN urn = fd.getSHA1Urn();
         LimeXMLDocument doc = null;
         

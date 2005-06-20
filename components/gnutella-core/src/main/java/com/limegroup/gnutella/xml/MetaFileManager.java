@@ -284,7 +284,7 @@ public class MetaFileManager extends FileManager {
         if(fd != null) {
             Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
             for(Iterator i = replies.iterator(); i.hasNext(); )
-                ((LimeXMLReplyCollection)i.next()).intialize(fd, metadata);
+                ((LimeXMLReplyCollection)i.next()).initialize(fd, metadata);
             for(Iterator i = replies.iterator(); i.hasNext(); )
                 ((LimeXMLReplyCollection)i.next()).createIfNecessary(fd);
         }

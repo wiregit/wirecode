@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -24,6 +27,8 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -370,7 +375,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         SharingSettings.setSaveDirectory(_savedDir);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-        SharingSettings.setSharedDirectories( new File[] { _sharedDir } );
+        setSharedDirectories( new File[] { _sharedDir } );
     }
     
     /**
@@ -544,6 +549,39 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     
     ///////////////////////// Useful Testing Methods //////////////////////////
+    public static void setSharedDirectories(File[] dirs) {
+        Set set = new HashSet(Arrays.asList(dirs));
+        SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
+    }
+    
+    public static Set calculateAndCacheURN(File f) {
+        final Set myUrns = new HashSet(1);
+        UrnCallback blocker = new UrnCallback() {
+            public void urnsCalculated(File file, Set urns) {
+                synchronized(myUrns) {
+                    myUrns.addAll(urns);
+                    myUrns.notify();
+                }
+            }
+            
+            public boolean isOwner(Object o) {
+                return false;
+            }
+        };
+        
+        synchronized(myUrns) {
+            UrnCache.instance().calculateAndCacheUrns(f, blocker);
+            try {
+                myUrns.wait();
+            } catch(InterruptedException ie) {
+                fail("interrupted!", ie);
+            }
+        }
+        
+        return myUrns;
+    }
+    
+    
     private static final int TIMEOUT = 2000;
     
     /**

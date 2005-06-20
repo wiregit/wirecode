@@ -76,7 +76,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
         });
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
-			Set urns = FileDesc.calculateAndCacheURN(files[i]);
+			Set urns = calculateAndCacheURN(files[i]);
 			fileDescs[i] = new FileDesc(files[i], urns, i);
 		}				
 		return fileDescs;

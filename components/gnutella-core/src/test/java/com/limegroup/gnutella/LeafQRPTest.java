@@ -66,27 +66,12 @@ public class LeafQRPTest extends ClientSideTestCase {
             // we are waiting for all messages to be processed
         }
 
-        // get the URNS for the files
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
-        URN berkeleyURN = (URN) iter.next();
-        iter = FileDesc.calculateAndCacheURN(susheel).iterator();
-        URN susheelURN = (URN) iter.next();
-
         // send a query that should hit in the qrt
         QueryRequest query = QueryRequest.createQuery("berkeley");
         QueryRequest query2 = QueryRequest.createQuery("susheel");
 
         assertTrue("qrt did not contain: " + query, qrt.contains(query));
         assertTrue("qrt did not contain: " + query2, qrt.contains(query2));
-
-        /* //TODO: investigate why this isn't working....
-        retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
-        assertEquals(4, retSet.cardinality());
-        */
    }
 
 }

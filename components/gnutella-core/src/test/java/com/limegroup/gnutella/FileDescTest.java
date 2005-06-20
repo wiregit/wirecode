@@ -76,7 +76,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		_fileArray = (File[])fileList.toArray(new File[0]);
 		_fileDescArray = new FileDesc[_fileArray.length];
 		for(int i=0; i<_fileArray.length; i++) {
-			Set urns = FileDesc.calculateAndCacheURN(_fileArray[i]);
+			Set urns = calculateAndCacheURN(_fileArray[i]);
 			_fileDescArray[i] = new FileDesc(_fileArray[i], urns, i);
 		}
 	}
@@ -88,65 +88,9 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		File file = CommonUtils.getResourceFile("build.xml");
 
 		try {
-			Set urns = FileDesc.calculateAndCacheURN(file);
+			Set urns = calculateAndCacheURN(file);
 			new FileDesc(null, urns, 0);
-			fail("null values should not be permitted for FileDesc "+
-				 "constructor");
-		} catch(NullPointerException e) {
-		}		
+			fail("null values should not be permitted for FileDesc constructor");
+		} catch(NullPointerException ignored) {}		
 	}
-
-	/**
-	 * Tests the calculateAndCacheURN method
-	 */
-	public void testCalculateAndCacheURN() throws Exception {
-		File file = new File(getSaveDirectory(), "nonexistentfile");
-		if(file.exists()) file.delete();
-		try {
-			FileDesc.calculateAndCacheURN(file);
-			fail("nonexistent files should not be permitted");
-		} catch(IOException e) {
-		}		
-
-		try {
-			FileDesc.calculateAndCacheURN(null);
-			fail("null files should not be permitted");
-		} catch(NullPointerException e) {
-		}		
-	}
-
-	/**
-	 * Tests the containsUrn method that returns whether or not the 
-	 * <tt>FileDesc</tt> contains the specified URN.
-	 */
-//  	public void testContainsUrn() {
-//  		for(int i=0; i<_fileDescArray.length; i++) {
-//  			Iterator iter0 = _containedUrnSet.iterator();
-//  			while(iter0.hasNext()) {
-//  				URN urn = (URN)iter0.next();
-//  				assertTrue("The FileDesc should contain the URN: "+urn,
-//  						   _fileDescArray[i].containsUrn(urn));
-//  			}
-			
-//  			Iterator iter1 = _uncontainedUrnSet.iterator();
-//  			while(iter1.hasNext()) {
-//  				URN urn = (URN)iter1.next();
-//  				assertTrue("The FileDesc should not contain the URN: "+urn,
-//  						   !_fileDescArray[i].containsUrn(urn));
-//  			}
-//  		}
-//  	}
-
-
-	/**
-	 * Tests the method for getting the SHA1 URN from the FileDesc.
-	 */
-//  	public void testGetSHA1Urn() {
-//  		URN firstUrn = null;
-//  		for(int i=0; i<_fileDescArray.length; i++) {
-//  			URN urn = _fileDescArray[i].getSHA1Urn();
-//  			if(firstUrn == null) firstUrn = urn;			
-//  			assertTrue("These urns should be equal", firstUrn.equals(urn));
-//  		}		
-//  	}
 }

@@ -393,9 +393,9 @@ public class LeafRoutingTest extends BaseTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
+        Iterator iter = calculateAndCacheURN(berkeley).iterator();
         URN berkeleyURN = (URN) iter.next();
-        iter = FileDesc.calculateAndCacheURN(susheel).iterator();
+        iter = calculateAndCacheURN(susheel).iterator();
         URN susheelURN = (URN) iter.next();
 
         // send a query that should hit
@@ -412,8 +412,7 @@ public class LeafRoutingTest extends BaseTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(),
-                             FileDesc.calculateAndCacheURN(berkeley));
+                assertEquals(first.getUrns(), calculateAndCacheURN(berkeley));
             }
         } while (!(m instanceof QueryReply)) ;
         
@@ -431,8 +430,7 @@ public class LeafRoutingTest extends BaseTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(),
-                             FileDesc.calculateAndCacheURN(susheel));
+                assertEquals(first.getUrns(), calculateAndCacheURN(susheel));
             }
         } while (!(m instanceof QueryReply)) ;
     }
