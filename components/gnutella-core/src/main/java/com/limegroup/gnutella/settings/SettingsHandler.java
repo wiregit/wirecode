@@ -19,7 +19,7 @@ public final class SettingsHandler {
      * Adds a settings class to the list of factories that 
      * this handler will act upon.
      */
-    public static void addSettings( AbstractSettings setting ) {
+    public static void addSettings(Settings setting ) {
         PROPS.add( setting );
     }
     
@@ -27,7 +27,7 @@ public final class SettingsHandler {
      * Removes a settings class from the list of factories that
      * this handler will act upon.
      */
-    public static void removeSettings( AbstractSettings setting) {
+    public static void removeSettings(Settings setting) {
         PROPS.remove( setting );
     }
 
@@ -36,7 +36,7 @@ public final class SettingsHandler {
      */
     public static void reload() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((AbstractSettings)PROPS.get(i)).reload();
+            ((Settings)PROPS.get(i)).reload();
     }
     
     /**
@@ -44,7 +44,7 @@ public final class SettingsHandler {
      */
     public static void save() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((AbstractSettings)PROPS.get(i)).save();
+            ((Settings)PROPS.get(i)).save();
     }
     
     /**
@@ -52,7 +52,7 @@ public final class SettingsHandler {
      */
     public static void revertToDefault() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((AbstractSettings)PROPS.get(i)).revertToDefault();
+            ((Settings)PROPS.get(i)).revertToDefault();
     }
     
     /**
@@ -60,6 +60,6 @@ public final class SettingsHandler {
      */
     public static void setShouldSave(boolean shouldSave) {
         for(int i = 0; i < PROPS.size(); i++)
-            ((AbstractSettings)PROPS.get(i)).setShouldSave(shouldSave);
+            ((Settings)PROPS.get(i)).setShouldSave(shouldSave);
     }
 }    

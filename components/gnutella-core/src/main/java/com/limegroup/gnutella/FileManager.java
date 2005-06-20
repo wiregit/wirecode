@@ -23,6 +23,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
@@ -66,6 +67,11 @@ public abstract class FileManager {
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
      **********************************************************************/
+     
+    /**
+     * All of the data for FileManager.
+     */
+    private final LibraryData _data = new LibraryData();
 
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -311,7 +317,7 @@ public abstract class FileManager {
      *      @modifies this
      *      @see loadSettings */
     public void start() {
-		SharingSettings.clean();
+        _data.clean();
 		loadSettings();
     }
 
@@ -541,6 +547,18 @@ public abstract class FileManager {
     }
     
     /**
+     * Loads the FileManager with a new list of directories.
+     */
+    public void loadWithNewDirectories(Set shared) {
+        SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
+        synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
+            for(Iterator i = shared.iterator(); i.hasNext(); )
+                _data.DIRECTORIES_NOT_TO_SHARE.remove((File)i.next());
+        }
+	    RouterService.getFileManager().loadSettings();
+    }
+    
+    /**
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
@@ -635,9 +653,11 @@ public abstract class FileManager {
         updateSharedDirectories(FORCED_SHARE, null, revision);
 
         // Add specially shared files
-        Set specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
-        for(Iterator i = specialFiles.iterator(); i.hasNext() && _revision == revision; )
-            addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
+        Set specialFiles = _data.SPECIAL_FILES_TO_SHARE;
+        synchronized(specialFiles) {
+            for(Iterator i = specialFiles.iterator(); i.hasNext() && _revision == revision; )
+                addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
+        }
 
         trim();
         
@@ -680,17 +700,17 @@ public abstract class FileManager {
             return;
 
 		// Do not share directories on the do not share list
-		if (SharingSettings.DIRECTORIES_NOT_TO_SHARE.contains(directory))
+		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
 			return;
         
         // Do not share sensitive directories
         if (isSensitiveDirectory(directory)) {
             //  go through directories that explicitly should not be shared
-            if (SharingSettings.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
+            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
                 return;
             
             // if we haven't already validated the sensitive directory, ask about it.
-            if (!SharingSettings.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+            if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
                 if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
@@ -750,6 +770,7 @@ public abstract class FileManager {
 	///////////////////////////////////////////////////////////////////////////
 	//  Adding and removing shared files and directories
 	///////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Removes a given directory from being completely shared.
 	 */
@@ -789,7 +810,7 @@ public abstract class FileManager {
                 return;
             } else if(parent == null) {
                 if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
-                    SharingSettings.DIRECTORIES_NOT_TO_SHARE.add(folder);
+                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
                 RouterService.getCallback().handleFileManagerEvent(
                     new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
             }
@@ -827,7 +848,7 @@ public abstract class FileManager {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
         
-        SharingSettings.DIRECTORIES_NOT_TO_SHARE.remove(folder);
+        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
         SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
         updateSharedDirectories(folder, null, _revision);
     }
@@ -855,9 +876,9 @@ public abstract class FileManager {
 	 * The listener is notified if this file could or couldn't be shared.
 	 */
 	 public void addFileAlways(File file, List list, FileEventListener callback) {
-		SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
+		_data.SPECIAL_FILES_NOT_TO_SHARE.remove(file);
 		if (!isFileShareable(file))
-			SharingSettings.SPECIAL_FILES_TO_SHARE.add(file);
+			_data.SPECIAL_FILES_TO_SHARE.add(file);
 			
 		addFileIfShared(file, list, true, _revision, callback);
 	}
@@ -1077,10 +1098,10 @@ public abstract class FileManager {
 		file = fd.getFile();
 		if (file == null)
 			return;
-		if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
-			SharingSettings.SPECIAL_FILES_TO_SHARE.remove(file);
-		else if (!SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
-            SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.add(file);
+		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
+			_data.SPECIAL_FILES_TO_SHARE.remove(file);
+		else if (!_data.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
+            _data.SPECIAL_FILES_NOT_TO_SHARE.add(file);
 	}
 	
 	/**
@@ -1261,7 +1282,7 @@ public abstract class FileManager {
     public abstract void fileChanged(File f);
 
     ///////////////////////////////////////////////////////////////////////////
-    //  Search, etc.
+    //  Search, utility, etc...
     ///////////////////////////////////////////////////////////////////////////
 		
     /**
@@ -1330,8 +1351,8 @@ public abstract class FileManager {
         List xmlDocs = new LinkedList(toRemove.getLimeXMLDocuments());
 		final FileDesc removed = removeFileIfShared(oldName, false);
         Assert.that(removed == toRemove, "invariant broken.");
-		if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(oldName) && !isFileInCompletelySharedDirectory(newName))
-			SharingSettings.SPECIAL_FILES_TO_SHARE.add(newName);
+		if (_data.SPECIAL_FILES_TO_SHARE.contains(oldName) && !isFileInCompletelySharedDirectory(newName))
+			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -1363,6 +1384,61 @@ public abstract class FileManager {
                 return intSet;
             }
         });
+    }
+
+    
+    /**
+	 * Validates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE'
+	 * to SENSITIVE_DIRECTORIES_VALIDATED'.
+	 */
+	public void validateSensitiveFile(File dir) {
+        _data.SENSITIVE_DIRECTORIES_VALIDATED.add(dir);
+        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.remove(dir);
+    }
+
+	/**
+	 * Invalidates a file, removing it from the shared directories, validated
+	 * sensitive directories, and adding it to the sensitive directories
+	 * not to share (so we don't ask again in the future).
+	 */
+	public void invalidateSensitiveFile(File dir) {
+        _data.SENSITIVE_DIRECTORIES_VALIDATED.remove(dir);
+        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(dir);
+        SharingSettings.DIRECTORIES_TO_SHARE.remove(dir);   
+    }
+    
+    /**
+     * Determines if there are any files shared that are not in completely shared directories.
+     */
+    public boolean hasIndividualFiles() {
+        return !_data.SPECIAL_FILES_TO_SHARE.isEmpty();
+    }
+    
+    /**
+     * Returns all files that are shared while not in shared directories.
+     */
+    public File[] getIndividualFiles() {
+        Set candidates = _data.SPECIAL_FILES_TO_SHARE;
+        synchronized(candidates) {
+    		ArrayList files = new ArrayList(candidates.size());
+    		for(Iterator i = candidates.iterator(); i.hasNext(); ) {
+    			File f = (File)i.next();
+    			if (f.exists())
+    				files.add(f);
+    		}
+    		
+    		if (files.isEmpty())
+    			return new File[0];
+            else
+    		    return (File[])files.toArray(new File[files.size()]);
+        }
+    }
+    
+    /**
+     * Determines if a given file is shared while not in a completely shared directory.
+     */
+    public boolean isIndividualShare(File f) {
+        return _data.SPECIAL_FILES_TO_SHARE.contains(f);
     }
 
 	/**
@@ -1420,9 +1496,9 @@ public abstract class FileManager {
 	private boolean isFileShareable(File file) {
 		if (!isFilePhysicallyShareable(file))
 			return false;
-		if (SharingSettings.SPECIAL_FILES_TO_SHARE.contains(file))
+		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
-		if (SharingSettings.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
+		if (_data.SPECIAL_FILES_NOT_TO_SHARE.contains(file))
 			return false;
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))

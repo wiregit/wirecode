@@ -184,65 +184,18 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final FileSetSetting DIRECTORIES_TO_SHARE =
         FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
-    
+
     /**
-	 * The directories not to share.
-	 */
-    public static final FileSetSetting DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileSetSetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
-    
-    /**
-     * Sensitive directories that are explicitly allowed to be shared.
-     * */
-    public static final FileSetSetting SENSITIVE_DIRECTORIES_VALIDATED =
-        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_VALIDATED", new File[0]);
-    
-    /**
-     * Sensitive directories that are explicitly not allowed to be shared.
-     * */
-    public static final FileSetSetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileSetSetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
-    
-	/**
-	 * The setting if the files of finished downloads should also be shared when
-	 * they were not saved to a shared directory.
-	 */
+     * Whether or not to auto-share files when using 'Download As'.
+     */
 	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
 		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
-	
-    /**
-     * Individual files that should be shared despite being located outside
-     * of any shared directory, and despite any extension limitations.
-     * */
-    public static final FileSetSetting SPECIAL_FILES_TO_SHARE =
-        FACTORY.createFileSetSetting("SPECIAL_FILES_TO_SHARE", new File[0]);
-    
-    /**
-     * Individual files that should be not shared despite being located inside
-     * a shared directory.
-     * */
-    public static final FileSetSetting SPECIAL_FILES_NOT_TO_SHARE =
-        FACTORY.createFileSetSetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
-    
-	/**
-	 * Cleans special file sharing settings by removing references to files that
-	 * no longer exist.
-	 */
-	public static final void clean() {
-		DIRECTORIES_TO_SHARE.clean(null);
-		DIRECTORIES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
-		SPECIAL_FILES_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
-		SPECIAL_FILES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
-		SENSITIVE_DIRECTORIES_VALIDATED.clean(DIRECTORIES_TO_SHARE);
-		SENSITIVE_DIRECTORIES_NOT_TO_SHARE.clean(DIRECTORIES_TO_SHARE);
-	}
 	
     /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", 
-                                            DEFAULT_EXTENSIONS_TO_SHARE);
+        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
                                             
     /**
      * Sets the probability (expressed as a percentage) that an incoming
