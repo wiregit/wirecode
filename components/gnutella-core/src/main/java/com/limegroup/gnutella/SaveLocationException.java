@@ -68,4 +68,9 @@ public class SaveLocationException extends IOException {
 	public File getFile() {
 		return file;
 	}
+	
+	public String toString() {
+		return "Save Location Exception, error code " + errorCode
+		+ ", for file " + file;
+	}
 }
