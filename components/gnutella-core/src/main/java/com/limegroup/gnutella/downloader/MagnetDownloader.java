@@ -101,7 +101,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     public void initialize(DownloadManager manager, FileManager fileManager, 
             ActivityCallback callback) {
 		Assert.that(getMagnet() != null);
-		Assert.that(getMagnet().getSHA1Urn() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
         super.initialize(manager, fileManager, callback);
     }
@@ -323,7 +322,12 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         return false;
     }
 
-	protected synchronized boolean addDownloadForced(RemoteFileDesc rfd, boolean cache) {
+	/**
+	 * Overridden for internal purposes, returns result from super method
+	 * call.
+	 */
+	protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
+													 boolean cache) {
 		if (!hasRFD())
 			initPropertiesMap(rfd);
 		return super.addDownloadForced(rfd, cache);
@@ -331,6 +335,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 	
 	/**
 	 * Overriden to write out nothing.
+	 * <p>
+	 * This way we get rid of the fields from the old magnet downloader 
+	 * versions.
 	 * @param stream
 	 * @throws IOException
 	 */
@@ -338,7 +345,12 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		throws IOException {
 	}
 
-	
+	/**
+	 * Creates a magnet downloader object when converting from the old 
+	 * downloader version.
+	 * 
+	 * @throws IOException when the created magnet is not downloadable
+	 */
 	private void readObject(ObjectInputStream stream)
 	throws IOException, ClassNotFoundException {
 		if (getMagnet() == null) {
@@ -355,7 +367,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 	}
 
-	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, String fileName) {
+	/**
+	 * Checks if the magnet is downloadable and extracts a fileName if
+	 * <code>fileName</code> is null.
+	 *
+	 * @throws IllegalArgumentException if the magnet is not downloadable
+	 */
+	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, 
+														String fileName) {
 		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("magnet not downloadable");
 		}
