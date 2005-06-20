@@ -101,6 +101,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     public void initialize(DownloadManager manager, FileManager fileManager, 
             ActivityCallback callback) {
 		Assert.that(getMagnet() != null);
+		// TODO fberger ask
         downloadSHA1 = getMagnet().getSHA1Urn();
         super.initialize(manager, fileManager, callback);
     }
