@@ -249,9 +249,11 @@ public class VerifyingFile {
     
     /**
      * Returns a block of data that needs to be written.
+     * 
+     * This method will not break up contiguous chunks into smaller chunks.
      */
     public Interval leaseWhite() throws NoSuchElementException {
-        return leaseWhiteHelper(null, DEFAULT_CHUNK_SIZE);
+        return leaseWhiteHelper(null, completedSize);
     }
     
     /**

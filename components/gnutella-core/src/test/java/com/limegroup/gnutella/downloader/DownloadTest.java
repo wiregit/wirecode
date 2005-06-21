@@ -1425,7 +1425,8 @@ public class DownloadTest extends BaseTestCase {
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=5;
-        final int STOP_AFTER = TestFile.length()/10 - 2;          
+        // Make sure uploader2 will never complete an upload
+        final int STOP_AFTER = 0;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
