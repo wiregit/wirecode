@@ -125,6 +125,9 @@ public final class UrnCache {
      * Clears all callbacks that are owned by the given owner.
      */
     public synchronized void clearPendingHashes(Object owner) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Clearing all pending hashes owned by: " + owner);
+        
         for(Iterator i = pendingHashing.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
             File f = (File)next.getKey();
@@ -132,13 +135,31 @@ public final class UrnCache {
             for(int j = callbacks.size() - 1; j >= 0; j--) {
                 UrnCallback c = (UrnCallback)callbacks.get(j);
                 if(c.isOwner(owner))
-                    callbacks.remove(i);
+                    callbacks.remove(j);
             }            
             // if there's no more callbacks for this file, remove it.
             if(callbacks.isEmpty())
                 i.remove();
         }
     }
+    
+    /**
+     * Clears all callbacks for the given file that are owned by the given owner.
+     */
+    public synchronized void clearPendingHashesFor(File file, Object owner) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Clearing all pending hashes for: " + file + ", owned by: " + owner);
+        List callbacks = (List)pendingHashing.get(file);
+        if(callbacks != null) {
+            for(int j = callbacks.size() - 1; j >= 0; j--) {
+                UrnCallback c = (UrnCallback)callbacks.get(j);
+                if(c.isOwner(owner))
+                    callbacks.remove(j);
+            }
+            if(callbacks.isEmpty())
+                pendingHashing.remove(file);
+        }
+    }   
     
     /**
      * Adds any URNs that can be locally calculated; may take a while to 
@@ -294,9 +315,6 @@ public final class UrnCache {
         }
         
         public void run() {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Processing hashable file: " + file);
-            
             Set urns;
             List callbacks;
             

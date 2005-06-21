@@ -829,8 +829,10 @@ public abstract class FileManager {
                     File f = subs[i];
                     if(f.isDirectory())
                         removeFolderIfShared(f, folder);
-                    else if(f.isFile() && !_data.SPECIAL_FILES_TO_SHARE.contains(f))
-                        removeFileIfShared(f);
+                    else if(f.isFile() && !_data.SPECIAL_FILES_TO_SHARE.contains(f)) {
+                        if(removeFileIfShared(f) == null)
+                            UrnCache.instance().clearPendingHashesFor(f, this);
+                    }
                 }
             }
             
@@ -975,7 +977,7 @@ public abstract class FileManager {
 	//	            LOG.debug("URNs calculated for file: " + f);
 		        
 		        FileDesc fd = null;
-		        synchronized(this) {
+		        synchronized(FileManager.this) {
     		        if(revision != _revision) {
     		            LOG.warn("Revisions changed, dropping share.");
                         callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
@@ -1013,7 +1015,7 @@ public abstract class FileManager {
     /**
      * Loads a single shared file.
      */
-    protected FileDesc loadFile(File file, List metadata, Set urns) {
+    protected synchronized FileDesc loadFile(File file, List metadata, Set urns) {
         FileDesc fd = addFile(file, urns);
         _needRebuild = true;
         return fd;
@@ -1028,7 +1030,7 @@ public abstract class FileManager {
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-    private FileDesc addFile(File file, Set urns) {
+    private synchronized FileDesc addFile(File file, Set urns) {
    //     if(LOG.isDebugEnabled())
    //         LOG.debug("Sharing file: " + file);
         
@@ -1112,15 +1114,16 @@ public abstract class FileManager {
 	public synchronized void stopSharingFile(File file) {
 		if (file == null)
 			return;
+
 		FileDesc fd = removeFileIfShared(file);
-		if (fd == null)
+		if (fd == null) {
+		    UrnCache.instance().clearPendingHashesFor(file, this);
 			return;
+        }
 
 		//  Remove from setting if individually shared, otherwise
 		//  add to files not to share
 		file = fd.getFile();
-		if (file == null)
-			return;
 		if (!_data.SPECIAL_FILES_TO_SHARE.remove(file))
             _data.FILES_NOT_TO_SHARE.add(file);
 	}
