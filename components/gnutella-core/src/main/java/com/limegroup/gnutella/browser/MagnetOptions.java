@@ -99,10 +99,21 @@ public class MagnetOptions implements Serializable {
 		}
 		if (defaultURLs != null) {
 			for (int i = 0; i < defaultURLs.length; i++) {
-			addAppend(map, AS, defaultURLs[i]);
+				addAppend(map, AS, defaultURLs[i]);
 			}
 		}
-		return new MagnetOptions(map);
+		MagnetOptions magnet = new MagnetOptions(map);
+		magnet.urn = urn;
+		if (defaultURLs != null) {
+			// copy array to protect against outside changes
+			magnet.defaultURLs = new String[defaultURLs.length];
+			System.arraycopy(defaultURLs, 0, magnet.defaultURLs, 0, 
+					magnet.defaultURLs.length);
+		}
+		else {
+			magnet.defaultURLs = new String[0];
+		}
+		return magnet;
 	}
 	
 	/**
@@ -181,10 +192,10 @@ public class MagnetOptions implements Serializable {
 			}
 		}
 		
-		MagnetOptions [] ret = new MagnetOptions[options.size()];
+		MagnetOptions[] ret = new MagnetOptions[options.size()];
 		int i = 0;
 		for (Iterator iter = options.values().iterator(); iter.hasNext(); i++) {
-			Map current = (Map) iter.next();
+			Map current = (Map)iter.next();
 			ret[i] = new MagnetOptions(current);
 		}
 		return ret;
@@ -233,7 +244,7 @@ public class MagnetOptions implements Serializable {
 			String as = (String) iter.next();
 			ret.append("&as=").append(as);
 		}
-		
+
 		return ret.toString();	
 	}
 	
