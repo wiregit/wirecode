@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.Settings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -95,7 +96,6 @@ public class LibraryData implements Settings {
 		SharingSettings.DIRECTORIES_TO_SHARE.clean();
 		Set parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);
-		clean(SPECIAL_FILES_TO_SHARE, null);
 		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);
 		clean(SENSITIVE_DIRECTORIES_NOT_TO_SHARE, parents);
@@ -134,4 +134,4 @@ public class LibraryData implements Settings {
         }
         return false;
     }
-}
+}   

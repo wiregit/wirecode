@@ -318,6 +318,7 @@ public abstract class FileManager {
      *      @see loadSettings */
     public void start() {
         _data.clean();
+        cleanIndividualFiles();
 		loadSettings();
     }
 
@@ -1480,7 +1481,21 @@ public abstract class FileManager {
      * Determines if a given file is shared while not in a completely shared directory.
      */
     public boolean isIndividualShare(File f) {
-        return _data.SPECIAL_FILES_TO_SHARE.contains(f);
+        return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
+    }
+    
+    /**
+     * Cleans all stale entries from the Set of individual files.
+     */
+    private void cleanIndividualFiles() {
+        Set files = _data.SPECIAL_FILES_TO_SHARE;
+        synchronized(files) {
+            for(Iterator i = files.iterator(); i.hasNext(); ) {
+                Object o = i.next();
+                if(!(o instanceof File) || !(isFilePhysicallyShareable((File)o)))
+                    i.remove();
+            }
+        }
     }
 
 	/**
