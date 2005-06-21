@@ -541,8 +541,7 @@ public final class SettingsFactory {
      * @param key the key for the setting
      * @param defaultValue the default value for the setting
      */
-    public synchronized FileArraySetting 
-        createFileArraySetting(String key, File[] defaultValue) {
+    public synchronized FileArraySetting createFileArraySetting(String key, File[] defaultValue) {
         FileArraySetting result = 
         new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
@@ -553,6 +552,26 @@ public final class SettingsFactory {
                              String key, File[] defaultValue, String simppKey) {
         FileArraySetting result = 
         new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        handleSettingInternal(result, simppKey);
+        return result;
+    }
+
+    /**
+     * Creates a new <tt>FileSetSetting</tt> instance for a File array 
+     * setting with the specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized FileSetSetting createFileSetSetting(String key, File[] defaultValue) {
+        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
+    public synchronized FileSetSetting createSettableFileSetSetting(
+                             String key, File[] defaultValue, String simppKey) {
+        FileSetSetting result = new FileSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
     }

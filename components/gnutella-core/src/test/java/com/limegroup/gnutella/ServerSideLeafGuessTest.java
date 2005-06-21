@@ -159,9 +159,8 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // now send a URN query, make sure that works....
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
+        File berkeley = CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        Iterator iter = calculateAndCacheURN(berkeley).iterator();
         URN berkeleyURN = (URN) iter.next();
         
         // we should be able to send a URN query
@@ -183,8 +182,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
         iter = qRep.getResults();
         Response first = (Response) iter.next();
-        assertEquals(first.getUrns(),
-                     FileDesc.calculateAndCacheURN(berkeley));
+        assertEquals(first.getUrns(), calculateAndCacheURN(berkeley));
     }
 
 

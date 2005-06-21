@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.Iterator;
 
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -148,6 +149,22 @@ public class SharingSettings extends LimeProps {
         return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
     
+    /**  
+      * Gets all potential save directories.  
+     */  
+    public static final Set getAllSaveDirectories() {  
+        Set set = new HashSet(7);  
+        set.add(getSaveDirectory());  
+        synchronized(downloadDirsByDescription) {  
+            for(Iterator i = downloadDirsByDescription.values().iterator(); i.hasNext(); ) {  
+                FileSetting next = (FileSetting)i.next();  
+                set.add(next.getValue());  
+            }  
+        }  
+        return set;  
+    }  
+
+    
     /*********************************************************************/
     
     /**
@@ -166,81 +183,20 @@ public class SharingSettings extends LimeProps {
     /**
 	 * The shared directories. 
 	 */
-    private static final FileArraySetting DIRECTORIES_TO_SHARE =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
-    
+    public static final FileSetSetting DIRECTORIES_TO_SHARE =
+        FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+
     /**
-	 * The directories not to share.
-	 */
-    public static final FileArraySetting DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("DIRECTORIES_NOT_TO_SEARCH_FOR_FILES", new File[0]);
-	
-    /**
-	 * Directories that are shared but not browseable.
-	 */
-    public static final FileArraySetting DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE", new File[0]);
-    
-    /**
-     * Shared directories that should not be shared recursively.
-     * */
-    public static final FileArraySetting DIRECTORIES_TO_SHARE_NON_RECURSIVELY =
-        FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
-    
-    /**
-     * Sensitive directories that are explicitly allowed to be shared.
-     * */
-    public static final FileArraySetting SENSITIVE_DIRECTORIES_TO_SHARE =
-        FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_TO_SHARE", new File[0]);
-    
-    /**
-     * Sensitive directories that are explicitly not allowed to be shared.
-     * */
-    public static final FileArraySetting SENSITIVE_DIRECTORIES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("SENSITIVE_DIRECTORIES_NOT_TO_SHARE", new File[0]);
-    
-	/**
-	 * The setting if the files of finished downloads should also be shared when
-	 * they were not saved to a shared directory.
-	 */
+     * Whether or not to auto-share files when using 'Download As'.
+     */
 	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
 		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
-	
-    /**
-     * Individual files that should be shared despite being located outside
-     * of any shared directory, and despite any extension limitations.
-     * */
-    public static final FileArraySetting SPECIAL_FILES_TO_SHARE =
-        FACTORY.createFileArraySetting("SPECIAL_FILES_TO_SHARE", new File[0]);
-    
-    /**
-     * Individual files that should be not shared despite being located inside
-     * a shared directory.
-     * */
-    public static final FileArraySetting SPECIAL_FILES_NOT_TO_SHARE =
-        FACTORY.createFileArraySetting("SPECIAL_FILES_NOT_TO_SHARE", new File[0]);
-    
-	/**
-	 * Cleans special file sharing settings by removing references to files that
-	 * no longer exist.
-	 */
-	public static final void clean() {
-		SPECIAL_FILES_TO_SHARE.clean();
-		SPECIAL_FILES_NOT_TO_SHARE.clean();
-		DIRECTORIES_TO_SHARE.clean();
-		DIRECTORIES_NOT_TO_SHARE.clean();
-		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.clean();
-		DIRECTORIES_TO_SHARE_NON_RECURSIVELY.clean();
-		SENSITIVE_DIRECTORIES_TO_SHARE.clean();
-		SENSITIVE_DIRECTORIES_NOT_TO_SHARE.clean();
-	}
 	
     /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", 
-                                            DEFAULT_EXTENSIONS_TO_SHARE);
+        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
                                             
     /**
      * Sets the probability (expressed as a percentage) that an incoming
@@ -277,87 +233,6 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final BooleanSetting ALLOW_BROWSER =
         FACTORY.createBooleanSetting("ALLOW_BROWSER", false);
-        
-    /**
-	 * Adds one directory to the directory string only if
-     * it is a directory and is not already listed.
-	 *
-     * <p><b>Modifies:</b> DIRECTORIES_TO_SHARE</p>
-     *
-	 * @param dir  a <tt>File</tt> instance denoting the
-	 *             abstract pathname of the new directory
-	 *             to add
-	 *
-	 * @throws  IOException
-	 *          if the directory denoted by the directory pathname
-	 *          String parameter did not exist prior to this method
-	 *          call and could not be created, or if the canonical
-	 *          path could not be retrieved from the file system
-	 */
-    public static final void addSharedDirectory(File dir) throws IOException {
-		if (dir == null || !dir.isDirectory() || !dir.exists())
-            throw new IOException();
-
-		DIRECTORIES_NOT_TO_SHARE.remove(dir);
-		if (!DIRECTORIES_TO_SHARE.contains(dir))
-			DIRECTORIES_TO_SHARE.add(dir);
-    }
-	
-	/**
-	 * Removes the given dir from the shared directories.
-	 */
-	public static final void removeSharedDirectory(File dir) {
-		if (DIRECTORIES_TO_SHARE.contains(dir))
-			DIRECTORIES_TO_SHARE.remove(dir);
-		else
-			DIRECTORIES_NOT_TO_SHARE.add(dir);
-		DIRECTORIES_TO_SHARE_BUT_NOT_BROWSE.remove(dir);
-	}
-    
-	/**
-	 * Returns whether the given dir is a shared directory.
-	 */
-	public static final boolean isSharedDirectory(File dir) {
-		return DIRECTORIES_TO_SHARE.contains(dir);
-	}
-	
-	/**
-	 * Returns the number of shared directories.
-	 */
-	public static final int getSharedDirectoriesCount() {
-		return DIRECTORIES_TO_SHARE.length();
-	}
-    
-	/**
-	 * Returns a File[] of shared directories.
-	 */
-	public static final File[] getSharedDirectories() {
-		return DIRECTORIES_TO_SHARE.getValue();
-	}
-    
-    /**
-	 * Sets the shared directories.  This method filters
-     * out any duplicate or invalid directories in the string.
-     * Note, however, that it does not currently filter out
-     * listing subdirectories that have parent directories
-     * also in the string.
-	 *
-     * <p><b>Modifies:</b> DIRECTORIES_TO_SHARE</p>
-     *
-	 * @param dirs an array of <tt>File</tt> instances denoting
-	 *  the abstract pathnames of the shared directories
-	 */
-    public static final void setSharedDirectories(File[] files) throws IOException {
-        Set set = new HashSet();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i] == null || !files[i].isDirectory() || !files[i].exists())
-                throw new IOException();            
-            set.add(files[i]);
-        }
-        
-        DIRECTORIES_TO_SHARE.setValue((File[])set.toArray(new File[0]));
-    }
-	
 	
 	/**
 	 * Returns the download directory file setting for a mediatype. The

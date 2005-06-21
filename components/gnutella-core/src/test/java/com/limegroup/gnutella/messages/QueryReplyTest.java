@@ -1032,27 +1032,18 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                 return !file.isDirectory() && file.getName().indexOf("$")!=-1;
             }
         });
+        
 		assertNotNull("no files to test against", testFiles);
 		assertNotEquals("no files to test against", 0, testFiles.length);
+		
+   		for(int i = 0; i < testFiles.length; i++) {
+			if(!testFiles[i].isFile())
+			    continue;
+			File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
+			assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
+		}
 
         waitForLoad();
-
-   		for(int i=0; i<testFiles.length; i++) {
-			if(!testFiles[i].isFile()) continue;
-			File shared = new File(
-			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
-			assertTrue("unable to get file",
-			    CommonUtils.copy( testFiles[i], shared));
-            assertNotEquals(null, fman.addFileIfShared(shared));
-		}
-        
-        // the below test depends on the filemanager loading shared files in 
-        // alphabetical order, and listFiles returning them in alphabetical
-        // order since neither of these must be true, a length check can
-        // suffice instead.
-        //for(int i=0; i<files.length; i++)
-        //    assertEquals(files[i].getName()+".tmp", 
-        //                 fman.get(i).getFile().getName());
             
         assertEquals("unexpected number of shared files",
             testFiles.length, fman.getNumFiles() );
@@ -1089,7 +1080,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     private void waitForLoad() {
         synchronized(loaded) {
             try {
-                fman.loadSettings(false); // true won't matter either                
+                fman.loadSettings();
                 loaded.wait();
             } catch (InterruptedException e) {
                 //good.

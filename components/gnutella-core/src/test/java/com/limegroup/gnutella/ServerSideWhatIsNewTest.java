@@ -86,7 +86,7 @@ public class ServerSideWhatIsNewTest
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
-        SharingSettings.setSharedDirectories( new File[] { _sharedDir, _savedDir } );
+        setSharedDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
         berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -322,12 +322,12 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
 
-        rs.getFileManager().loadSettings(false);
+        rs.getFileManager().loadSettings();
         int i = 0;
         for (; (i < 15) && (rs.getNumSharedFiles() < 4); i++)
             Thread.sleep(1000);
-        if (i == 15) assertTrue("num shared files? " + rs.getNumSharedFiles(),
-                                false);
+        if (i == 15)
+            fail("num shared files? " + rs.getNumSharedFiles());
 
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         URN tempFile2URN = fm.getURNForFile(tempFile2);
@@ -403,7 +403,14 @@ public class ServerSideWhatIsNewTest
             writer.close();
         }
 
-        assertNotNull(rs.getFileManager().fileChanged(tempFile1));
+        FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
+        assertNotNull(beforeChanged);
+        fm.fileChanged(tempFile1);
+        Thread.sleep(3000);
+        FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
+        assertNotNull(afterChanged);
+        assertNotSame(beforeChanged, afterChanged);
+        
         assertNotNull(fm.getURNForFile(tempFile1));
         assertNotEquals(tempFile1URN, fm.getURNForFile(tempFile1));
         assertEquals(ctCache.getCreationTime(fm.getURNForFile(tempFile1)),
@@ -465,7 +472,13 @@ public class ServerSideWhatIsNewTest
             writer.close();
         }
 
-        assertNotNull(rs.getFileManager().fileChanged(tempFile1));
+        FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
+        assertNotNull(beforeChanged);
+        fm.fileChanged(tempFile1);
+        Thread.sleep(3000);
+        FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
+        assertNotNull(afterChanged);
+        assertNotSame(beforeChanged, afterChanged);
         assertNotNull(fm.getURNForFile(tempFile1));
         assertNotEquals(tempFile1URN, fm.getURNForFile(tempFile1));
         assertEquals(fm.getURNForFile(tempFile1), fm.getURNForFile(tempFile2));
@@ -565,10 +578,9 @@ public class ServerSideWhatIsNewTest
         tempFile2.delete(); tempFile2 = null;
         berkeley.delete(); berkeley = null;
 
-        fm.loadSettings(false);
+        fm.loadSettings();
         Thread.sleep(2000);
-        assertEquals("num shared files? " + rs.getNumSharedFiles(), 1,
-                     rs.getNumSharedFiles());
+        assertEquals("num shared files", 1, rs.getNumSharedFiles());
 
         URN susheelURN = fm.getURNForFile(susheel);
         {
@@ -735,12 +747,12 @@ public class ServerSideWhatIsNewTest
         CommonUtils.copy(osxInstaller, 
                          new File(FileManager.FORCED_SHARE, "LimeWireOSX.dmg"));
 
-        rs.getFileManager().loadSettings(false);
+        rs.getFileManager().loadSettings();
         int i = 0;
         for (; (i < 15) && (rs.getNumSharedFiles()+rs.getFileManager().getNumForcedFiles() < 5); i++)
             Thread.sleep(1000);
-        if (i == 15) assertTrue("num shared files? " + rs.getNumSharedFiles(),
-                                false);
+        if (i == 15)
+            fail("num shared files? " + rs.getNumSharedFiles());
 
         // we should be sharing two files - two text files and three installers
         // but the creation time cache should only have the two text files

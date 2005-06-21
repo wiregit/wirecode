@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Collections;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -102,7 +103,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * IntWrapper stores the amount of bytes read.
 	 */
 	private static final Map /* File -> IntWrapper */ progressMap =
-	    new HashMap();
+	    Collections.synchronizedMap(new HashMap());
 	
 	/**
 	 * Gets the amount of bytes hashed for a file that is being hashed.

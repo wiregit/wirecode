@@ -225,18 +225,14 @@ public class Main implements ActivityCallback, ErrorCallback {
     public void setPort(int port){}
 
     public int getNumUploads(){ return 0; }
-
-	public void addSharedDirectory(File file, File parent) {}
-
-	public void addSharedFile(FileDesc file, File parent) {}
-	
+    
 	public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
 	
 	public void handleFileManagerEvent(FileManagerEvent evt) {}
 	
 	public void handleSharedFileUpdate(File file) {}
 
-	public void clearSharedFiles() {}
+	public void fileManagerLoading() {}
 
 	public void acceptChat(Chatter chat) {}
 

@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * Abstract Settings class that all settings classes should extend.
  * Provides basic functionality for all settings classes.
  */
-public abstract class AbstractSettings {
+public abstract class AbstractSettings implements Settings {
         
     /**
      * properties file

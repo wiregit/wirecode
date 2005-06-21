@@ -23,8 +23,8 @@ public class SimpleFileManager extends FileManager {
         ;
     }
     
-    protected FileDesc addFileIfShared(File f, List docs, boolean notify) {
-        return addFileIfShared(f, notify);
+    public void fileChanged(File f) {
+        throw new UnsupportedOperationException("unsupported");
     }
     
     public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {

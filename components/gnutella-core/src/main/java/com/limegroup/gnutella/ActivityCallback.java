@@ -88,34 +88,15 @@ public interface ActivityCallback
      */    
     public void browseHostFailed(GUID guid);
         
+	/**
+	 * Notification that the file manager is beginning loading.
+	 */
+	public void fileManagerLoading();
+
     /**
      * Notifies a user that the filemanager has completely loaded.
      */
     public void fileManagerLoaded();
-
-
-    /**
-     * Notifies the GUI that the given directory has been shared.  This method
-     * is called exactly once per directory per change to the shared directory
-     * and extension settings.  Note that the files in directory are not
-     * necessarily yet indexed at the time of this call.
-     *
-     * @param directory MUST be a directory
-     * @param parent MUST be the parent of directory, or null if no parent
-     *  exists. 
-     */
-    public void addSharedDirectory(final File directory, final File parent);
-
-    /**
-     * Notifies the GUI that the given file has been shared.  This method is
-     * called exactly once per file per change to the shared directory and
-     * extension settings.
-     *
-     * @param file MUST be a file descriptor for the file.
-     * @param parent MUST be the parent of directory, or null if no parent
-     *  exists. 
-     */
-    public void addSharedFile(final FileDesc file, final File parent);
     
     /**
      * Notifies the GUI that the user is attempting to share a sensitive
@@ -137,11 +118,6 @@ public interface ActivityCallback
      */    
     public void handleSharedFileUpdate(File file);
 
-	/**
-	 * The list of shared files has been emptied.
-	 */
-	public void clearSharedFiles();
-	
 	/**
 	 * Notification that an update became available.
 	 */

@@ -101,8 +101,7 @@ public class FileUtils {
         } catch(IOException ioe) {
             String msg = ioe.getMessage();
             // windows bugs out :(
-            if(CommonUtils.isWindows() && msg != null && 
-               msg.indexOf("There are no more files") != -1)
+            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There are no more files") != -1)
                 return f.getAbsolutePath();
             else
                 throw ioe;
@@ -116,8 +115,7 @@ public class FileUtils {
         } catch(IOException ioe) {
             String msg = ioe.getMessage();
             // windows bugs out :(
-            if(CommonUtils.isWindows() && msg != null && 
-               msg.indexOf("There are no more files") != -1)
+            if(CommonUtils.isWindows() && msg != null && msg.indexOf("There are no more files") != -1)
                 return f.getAbsoluteFile();
             else
                 throw ioe;

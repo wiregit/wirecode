@@ -2184,11 +2184,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
 
         
-		FileDesc fileDesc = null;
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileDesc = fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+			fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
 		else
-		    fileDesc = fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
+		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
 		return COMPLETE;
     }

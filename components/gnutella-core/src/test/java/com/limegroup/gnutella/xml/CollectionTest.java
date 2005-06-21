@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 import java.io.ObjectOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -28,8 +29,8 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     final File mason = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
     final File test1 = CommonUtils.getResourceFile(fileLocation + "test1.mp3");
     final File test2 = CommonUtils.getResourceFile(fileLocation + "test2.mp3");
-    final String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
-    final String schemaURIVideo = "http://www.limewire.com/schemas/video.xsd";
+    final String audioSchemaURI = "http://www.limewire.com/schemas/audio.xsd";
+    final String videoSchemaURI = "http://www.limewire.com/schemas/video.xsd";
 
     private final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
         "audio" + XMLStringUtils.DELIMITER;
@@ -65,20 +66,24 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("Necessary file test2.mp3 cannot be found!", test2.exists());
         
         Set urns;
-        urns = FileDesc.calculateAndCacheURN(mason);
+        urns = calculateAndCacheURN(mason);
         files[0] = new FileDesc(mason, urns, 0);
-        urns = FileDesc.calculateAndCacheURN(test1);
+        urns = calculateAndCacheURN(test1);
         files[1] = new FileDesc(test1, urns, 1);
-        urns = FileDesc.calculateAndCacheURN(test2);
+        urns = calculateAndCacheURN(test2);
         files[2] = new FileDesc(test2, urns, 2);
     }
 
     public void testAudio() {
         clearDirectory();
         // test construction
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(null, schemaURI);
+        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
-        collection.initialize(files);
+        for(int i = 0; i < files.length; i++)
+            collection.initialize(files[i], Collections.EMPTY_LIST);
+        assertEquals(0, collection.getCount());            
+        for(int i = 0; i < files.length; i++)
+            collection.createIfNecessary(files[i]);
         assertEquals("LimeXMLCollection count wrong!", 2, collection.getCount());
 
         // test assocation
@@ -113,9 +118,13 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testVideo() {
         clearDirectory();
         // test construction
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(null, schemaURIVideo);
+        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(videoSchemaURI);
         assertEquals(0, collection.getCount());
-        collection.initialize(files);
+        for(int i = 0; i < files.length; i++)
+            collection.initialize(files[i], Collections.EMPTY_LIST);
+        assertEquals(0, collection.getCount());            
+        for(int i = 0; i < files.length; i++)
+            collection.createIfNecessary(files[i]);
         assertEquals(0, collection.getCount());
 
         // test assocation
@@ -136,15 +145,20 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     public void testMatching() {
         clearDirectory();
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(null, schemaURI);
+        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
-        collection.initialize(files);
+        for(int i = 0; i < files.length; i++)
+            collection.initialize(files[i], Collections.EMPTY_LIST);
+        assertEquals(0, collection.getCount());            
+        for(int i = 0; i < files.length; i++)
+            collection.createIfNecessary(files[i]);
+        assertEquals("LimeXMLCollection count wrong!", 2, collection.getCount());
 
         // make sure that a simple match works....
         List nameVals = new ArrayList();
         nameVals.add(new NameValue(TITLE_KEY, "tfie"));
         LimeXMLDocument searchDoc = new LimeXMLDocument(nameVals, 
-                                                        schemaURI);
+                                                        audioSchemaURI);
         List results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                      1, results.size());
@@ -153,7 +167,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // if we put it in the artist field ...
         nameVals = new ArrayList();
         nameVals.add(new NameValue(ARTIST_KEY, "tfie"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                      0, results.size());
@@ -163,7 +177,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.clear();
         nameVals.add(new NameValue(ALBUM_KEY, "susheel"));
         nameVals.add(new NameValue(TITLE_KEY, "o"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                          1, results.size());
@@ -173,7 +187,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.add(new NameValue(TITLE_KEY, "tfield"));
         nameVals.add(new NameValue(ALBUM_KEY, "ignored"));
         nameVals.add(new NameValue(ARTIST_KEY, "afield"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                      1, results.size());
@@ -182,7 +196,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.clear();
         nameVals.add(new NameValue(TITLE_KEY, "othertf"));
         nameVals.add(new NameValue(ARTIST_KEY, "otherafi"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results", 
                           1, results.size()); 
@@ -191,7 +205,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.clear();
         nameVals.add(new NameValue(TITLE_KEY, "othert"));
         nameVals.add(new NameValue(ARTIST_KEY, "othra"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                           0, results.size());
@@ -200,7 +214,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.clear();
         nameVals.add(new NameValue(ALBUM_KEY, "swi"));
         nameVals.add(new NameValue(TRACK_KEY, "ferb"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                         0, results.size());
@@ -208,7 +222,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // has all nulls, this was a terrible bug in previous versions...
         nameVals.clear();
         nameVals.add(new NameValue(TRACK_KEY, "ferb"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                          0,  results.size());
@@ -216,7 +230,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test matching on numeric value ...
         nameVals.clear();
         nameVals.add(new NameValue(BITRATE_KEY, "64"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                         2, results.size());
@@ -224,7 +238,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test things don't match on partial numeric value...
         nameVals.clear();
         nameVals.add(new NameValue(BITRATE_KEY, "6"));
-        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        searchDoc = new LimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                         0, results.size());
@@ -235,9 +249,17 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         createFiles();
         populateDirectory();
 
-        LimeXMLReplyCollection audioCollection = new LimeXMLReplyCollection(new TestFM(files), schemaURI);
-        LimeXMLReplyCollection videoCollection = new LimeXMLReplyCollection(new TestFM(files), schemaURIVideo);
+        LimeXMLReplyCollection audioCollection = new LimeXMLReplyCollection(audioSchemaURI);
+        LimeXMLReplyCollection videoCollection = new LimeXMLReplyCollection(videoSchemaURI);
+        assertEquals(0, audioCollection.getCount());
+        assertEquals(0, videoCollection.getCount());
+        
+        for(int i = 0; i < files.length; i++)
+            audioCollection.initialize(files[i], Collections.EMPTY_LIST);
         assertEquals("LimeXMLCollection count wrong!", 2, audioCollection.getCount());
+        
+        for(int i = 0; i < files.length; i++)
+            videoCollection.initialize(files[i], Collections.EMPTY_LIST);
         assertEquals("LimeXMLCollection count wrong!", 2, videoCollection.getCount());
 
         // test assocation
@@ -284,15 +306,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         String dir3 = dir1 + " studio=\"" + keywds[2] + "\"";
 
 
-        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(null, schemaURIVideo);
-        
-
-        //documents to add to the collection
-        LimeXMLDocument newDoc =
-            new LimeXMLDocument(buildXMLString(dir2));
-        
-        LimeXMLDocument newDoc2 =
-            new LimeXMLDocument(buildXMLString(dir3));
+        LimeXMLReplyCollection collection = new LimeXMLReplyCollection(videoSchemaURI);
+        LimeXMLDocument newDoc = new LimeXMLDocument(buildXMLString(dir2));
+        LimeXMLDocument newDoc2 = new LimeXMLDocument(buildXMLString(dir3));
         
         //addReply calls addKeywords (which uses I18NConvert)
         collection.addReply(files[0], newDoc);
@@ -306,57 +322,41 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
                     l.contains(keywds[2])));
 
         //the query document
-        LimeXMLDocument newDocQ =
-            new LimeXMLDocument(buildXMLString(dir1));
-
-        LimeXMLDocument newDocQ2 =
-            new LimeXMLDocument(buildXMLString(dir3));
+        LimeXMLDocument newDocQ = new LimeXMLDocument(buildXMLString(dir1));
+        LimeXMLDocument newDocQ2 = new LimeXMLDocument(buildXMLString(dir3));
 
         //make sure we get matches that we expect
         l = collection.getMatchingReplies(newDocQ);
-        assertEquals("should of found two matches",
-                     2,
-                     l.size());
+        assertEquals("should of found two matches", 2, l.size());
         
         l = collection.getMatchingReplies(newDocQ2);
-        assertEquals("should of found only one match",
-                     1,
-                     l.size());
+        assertEquals("should of found only one match", 1, l.size());
         
         //make sure we get the same xml string...
         assertEquals("didn't get expected xml string",
-                     newDoc2.getXMLString(),
-                     ((LimeXMLDocument)l.iterator().next()).getXMLString());
+                     newDoc2.getXMLString(), ((LimeXMLDocument)l.iterator().next()).getXMLString());
 
 
         //check we get the right docs back from getDocForHash
-        LimeXMLDocument returnDoc = 
-            collection.getDocForHash(files[0].getSHA1Urn());
+        LimeXMLDocument returnDoc = collection.getDocForHash(files[0].getSHA1Urn());
         assertEquals("didn't get expected xml string (getDocForHash)",
-                     newDoc.getXMLString(),
-                     returnDoc.getXMLString());
+                     newDoc.getXMLString(), returnDoc.getXMLString());
         
-        returnDoc =
-            collection.getDocForHash(files[1].getSHA1Urn());
+        returnDoc = collection.getDocForHash(files[1].getSHA1Urn());
         assertEquals("didn't get expected xml string (getDocForHash)",
-                     newDoc2.getXMLString(),
-                     returnDoc.getXMLString());
+                     newDoc2.getXMLString(), returnDoc.getXMLString());
         
 
         //remove 
         collection.removeDoc(files[1]);
         
         l = collection.getMatchingReplies(newDocQ2);
-        assertEquals("should not of found a match",
-                     0,
-                     l.size());
+        assertEquals("should not of found a match", 0, l.size());
         
         //make sure the keywords got deleted as well
         l = collection.getKeyWords();
         assertTrue("unexpected keywords",
-                   (l.contains(keywds[0]) &&
-                    l.contains(keywds[1]) &&
-                    !l.contains(keywds[2])));
+                   l.contains(keywds[0]) && l.contains(keywds[1]) && !l.contains(keywds[2]));
     }
 
     // build xml string for video
@@ -393,7 +393,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         map = new HashMap();
         nameVals.add(new NameValue("videos__video__director__","daswani"));
         nameVals.add(new NameValue("videos__video__title__","susheel"));
-        doc = new LimeXMLDocument(nameVals, schemaURIVideo);
+        doc = new LimeXMLDocument(nameVals, videoSchemaURI);
         doc.setIdentifier(test2);
         doc.getXMLString();
         map.put(getHash(test2), doc);
@@ -431,20 +431,6 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch(IOException ioe) {
             return null;
         } catch(InterruptedException ie) {
-            return null;
-        }
-    }
-    
-    private static class TestFM extends FileManagerStub {
-        private FileDesc[] fds;
-        TestFM(FileDesc[] fds) {
-            this.fds = fds;
-        }
-        
-        public FileDesc getFileDescForUrn(URN urn) {
-            for(int i = 0; i < fds.length; i++)
-                if(fds[i].getSHA1Urn().equals(urn))
-                    return fds[i];
             return null;
         }
     }

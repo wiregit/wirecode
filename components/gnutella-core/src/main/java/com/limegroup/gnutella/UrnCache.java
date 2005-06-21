@@ -14,9 +14,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -28,7 +33,6 @@ import org.apache.commons.logging.Log;
  * Modified by Gordon Mohr (2002/02/19): Added URN storage, calculation, caching
  * Repackaged by Greg Bildson (2002/02/19): Moved to dedicated class.
  *
- * @see FileDesc
  * @see URN
  */
 public final class UrnCache {
@@ -57,8 +61,17 @@ public final class UrnCache {
      * UrnCache is a singleton, so obtaining UrnCache's monitor is sufficient--
      * and slightly more convenient.
      */
-    private static final Map /* UrnSetKey -> HashSet */ URN_MAP =
-		createMap();
+    private static final Map /* UrnSetKey -> HashSet */ URN_MAP = createMap();
+    
+    /**
+     * The ProcessingQueue that Files are hashed in.
+     */
+    private final ProcessingQueue QUEUE = new ProcessingQueue("Hasher");
+    
+    /**
+     * The set of files that are pending hashing to the callbacks that are listening to them.
+     */
+    private Map /* File -> List (of UrnCallback) */ pendingHashing = new HashMap();
 
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
@@ -66,9 +79,8 @@ public final class UrnCache {
 	 * @return the <tt>UrnCache</tt> instance
      */
     public static synchronized UrnCache instance() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new UrnCache();
-		}
         return instance;
     }
 
@@ -77,6 +89,92 @@ public final class UrnCache {
      */
     private UrnCache() {
 		removeOldEntries(URN_MAP);
+	}
+
+    /**
+     * Calculates the given File's URN and caches it.  The callback will
+     * be notified of the URNs.  If they're already calculated, the callback
+     * will be notified immediately.  Otherwise, it will be notified when hashing
+     * completes, fails, or is interrupted.
+     */
+    public synchronized void calculateAndCacheUrns(File file, UrnCallback callback) {
+		if(!file.isFile())
+			throw new IllegalArgumentException("not a file: "+file);
+			
+    	Set urns = getUrns(file);
+        // TODO: If we ever create more URN types (other than SHA1)
+        // we cannot just check for size == 0, we must check for
+        // size == NUM_URNS_WE_WANT, and calculateUrns should only
+        // calculate the URN for the specific hash we still need.
+        if(!urns.isEmpty()) {
+            callback.urnsCalculated(file, urns);
+        } else {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Adding: " + file + " to be hashed.");
+            List list = (List)pendingHashing.get(file);
+            if(list == null) {
+                list = new ArrayList(1);
+                pendingHashing.put(file, list);
+            }
+            list.add(callback);
+            QUEUE.add(new Processor(file));
+        }
+    }
+    
+    /**
+     * Clears all callbacks that are owned by the given owner.
+     */
+    public synchronized void clearPendingHashes(Object owner) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Clearing all pending hashes owned by: " + owner);
+        
+        for(Iterator i = pendingHashing.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            File f = (File)next.getKey();
+            List callbacks = (List)next.getValue();
+            for(int j = callbacks.size() - 1; j >= 0; j--) {
+                UrnCallback c = (UrnCallback)callbacks.get(j);
+                if(c.isOwner(owner))
+                    callbacks.remove(j);
+            }            
+            // if there's no more callbacks for this file, remove it.
+            if(callbacks.isEmpty())
+                i.remove();
+        }
+    }
+    
+    /**
+     * Clears all callbacks for the given file that are owned by the given owner.
+     */
+    public synchronized void clearPendingHashesFor(File file, Object owner) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Clearing all pending hashes for: " + file + ", owned by: " + owner);
+        List callbacks = (List)pendingHashing.get(file);
+        if(callbacks != null) {
+            for(int j = callbacks.size() - 1; j >= 0; j--) {
+                UrnCallback c = (UrnCallback)callbacks.get(j);
+                if(c.isOwner(owner))
+                    callbacks.remove(j);
+            }
+            if(callbacks.isEmpty())
+                pendingHashing.remove(file);
+        }
+    }   
+    
+    /**
+     * Adds any URNs that can be locally calculated; may take a while to 
+	 * complete on large files.  After calculation, the items are added
+	 * for future remembering.
+	 *
+	 * @param file the <tt>File</tt> instance to calculate URNs for
+	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances.  If 
+     * the calling thread is interrupted while executing this, returns an empty
+     * set.
+     */
+    public Set calculateUrns(File file) throws IOException, InterruptedException {
+        Set set = new HashSet(1);
+        set.add(URN.createSHA1Urn(file));
+        return set;
 	}
     
     /**
@@ -91,18 +189,17 @@ public final class UrnCache {
      */
     public synchronized Set getUrns(File file) {
         // don't trust failed mod times
-        if (file.lastModified() == 0L) {
+        if (file.lastModified() == 0L)
 			return Collections.EMPTY_SET;
-		} 
+
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
-		if(cachedUrns == null) {
+		if(cachedUrns == null)
 			return Collections.EMPTY_SET;
-		}
 
-		return Collections.unmodifiableSet(cachedUrns);
+		return cachedUrns;
     }
     
     /**
@@ -116,7 +213,7 @@ public final class UrnCache {
     /**
      * Add URNs for the specified <tt>FileDesc</tt> instance to URN_MAP.
 	 *
-	 * @param fileDesc the <tt>FileDesc</tt> instance containing URNs to store
+	 * @param file the <tt>File</tt> instance containing URNs to store
      */
     public synchronized void addUrns(File file, Set urns) {
 		UrnSetKey key = new UrnSetKey(file);
@@ -202,13 +299,52 @@ public final class UrnCache {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(URN_CACHE_FILE)));
             oos.writeObject(URN_MAP);
-        } catch (Exception e) {
+            oos.flush();
+        } catch (IOException e) {
             ErrorService.error(e);
         } finally {
-            if(oos != null) {
-                try {
-                    oos.close();
-                } catch(IOException ignored) {}
+            IOUtils.close(oos);
+        }
+    }
+    
+    private class Processor implements Runnable {
+        private final File file;
+        
+        Processor(File f) {
+            file = f;
+        }
+        
+        public void run() {
+            Set urns;
+            List callbacks;
+            
+            synchronized(UrnCache.this) {
+                callbacks = (List)pendingHashing.remove(file);
+                urns = getUrns(file); // already calculated?
+            }
+            
+            // If there was atleast one callback listening, try and send it out
+            // (which may involve calculating it).
+            if(callbacks != null && !callbacks.isEmpty()) {
+                // If not calculated, calculate OUTSIDE OF LOCK.
+                if(urns.isEmpty()) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Hashing file: " + file);
+                    try {
+                        urns = calculateUrns(file);
+                        addUrns(file, urns);
+                    } catch(IOException ignored) {
+                        LOG.warn("Unable to calculate URNs", ignored);
+                    } catch(InterruptedException ignored) {
+                        LOG.warn("Unable to calculate URNs", ignored);
+                    }
+                }
+                
+                // Note that because we already removed this list from the Map,
+                // we don't need to synchronize while iterating over it, because
+                // nothing else can modify it now.
+                for(int i = 0; i < callbacks.size(); i++)
+                    ((UrnCallback)callbacks.get(i)).urnsCalculated(file, urns);
             }
         }
     }

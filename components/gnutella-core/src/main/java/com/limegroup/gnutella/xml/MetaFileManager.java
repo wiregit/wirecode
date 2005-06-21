@@ -8,12 +8,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -31,11 +34,6 @@ import org.apache.commons.logging.LogFactory;
 public class MetaFileManager extends FileManager {
     
     private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
-    
-    /**
-     * Lock used when loading meta-settings.
-     */
-    private final Object META_LOCK = new Object();
     
     /**
      * Overrides FileManager.query.
@@ -110,70 +108,67 @@ public class MetaFileManager extends FileManager {
      * recursing infinitely trying to write this metadata.
      * However, it isn't very robust to blindly assume that the only
      * metadata associated with this file was audio metadata.
-     * So, we make use of the fact that addFileIfShared will only
-     * add one type of metadata per file.  We read the ID3 tags off
+     * So, we make use of the fact that loadFile will only
+     * add one type of metadata per file.  We read the document tags off
      * the file and insert it first into the list, ensuring
      * that the existing metadata is the one that's added, short-circuiting
      * any infinite loops.
      */
-    public FileDesc fileChanged(File f) {
+    public void fileChanged(File f) {
         if(LOG.isTraceEnabled())
             LOG.debug("File Changed: " + f);
         
         FileDesc fd = getFileDescForFile(f);
         if( fd == null )
-            return null;
+            return;
             
         // store the creation time for later re-input
         CreationTimeCache ctCache = CreationTimeCache.instance();
-        Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
+        final Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
         List xmlDocs = fd.getLimeXMLDocuments();        
         if(LimeXMLUtils.isEditableFormat(f)) {
             try {
-                LimeXMLDocument diskID3Doc = MetaDataReader.readDocument(f);
-                xmlDocs = resolveWriteableDocs(xmlDocs,diskID3Doc);
+                LimeXMLDocument diskDoc = MetaDataReader.readDocument(f);
+                xmlDocs = resolveWriteableDocs(xmlDocs, diskDoc);
             } catch(IOException e) {
                 // if we were unable to read this document,
                 // then simply add the file without metadata.
-                return super.fileChanged(f);
+                xmlDocs = Collections.EMPTY_LIST;
             }
         }
 
-        FileDesc removed = removeFileIfShared(f, false);        
-        if(fd != removed) {
-            Assert.that(false, 
-                "wanted to remove: " + fd +
-                "\ndid remove: " + removed);
-        }
+        final FileDesc removed = removeFileIfShared(f, false);        
+        if(fd != removed)
+            Assert.that(false, "wanted to remove: " + fd + "\ndid remove: " + removed);
+            
         _needRebuild = true;
-        fd = addFileIfShared(f, xmlDocs, false);
-        // file may not be shared anymore or may be installer file
-        if ((fd != null) && (cTime != null)) { 
-            //re-populate the ctCache
-            synchronized (ctCache) {
-                ctCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified
-                ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
-                ctCache.commitTime(fd.getSHA1Urn());
-            }
-        }
         
-        // Notify the GUI about the changes...
-        FileManagerEvent evt = null;
+        addFileIfShared(f, xmlDocs, false, _revision, new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                // Retarget the event for the GUI.
+                FileManagerEvent newEvt = null;
         
-        if (fd != null) {
-            evt = new FileManagerEvent(this, 
+                if(evt.isAddEvent()) {
+                    FileDesc fd = evt.getFileDescs()[0];
+                    CreationTimeCache ctCache = CreationTimeCache.instance();
+                    //re-populate the ctCache
+                    synchronized (ctCache) {
+                        ctCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified
+                        ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+                        ctCache.commitTime(fd.getSHA1Urn());
+                    }
+                    newEvt = new FileManagerEvent(MetaFileManager.this, 
                                        FileManagerEvent.CHANGE, 
                                        new FileDesc[]{removed,fd});
-        } else {
-            evt = new FileManagerEvent(this, 
-                                       FileManagerEvent.REMOVE, 
-                                       new FileDesc[]{removed});
-        }
-                                            
-        RouterService.getCallback().handleFileManagerEvent(evt);
-        
-        return fd;
+                } else {
+                    newEvt = new FileManagerEvent(MetaFileManager.this, 
+                                       FileManagerEvent.REMOVE,
+                                       removed);
+                }
+                RouterService.getCallback().handleFileManagerEvent(newEvt);
+            }
+        });
     }        
     
     /**
@@ -192,6 +187,7 @@ public class MetaFileManager extends FileManager {
                 break;
             }
         }
+
         if(id3Doc.equals(audioDoc)) //No issue -- both documents are the same
             return allDocs; //did not modify list, keep using it
         
@@ -214,6 +210,7 @@ public class MetaFileManager extends FileManager {
             if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
+
         audioDoc = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);
         retList.add(audioDoc);
         return retList;
@@ -230,8 +227,7 @@ public class MetaFileManager extends FileManager {
         if( fd == null )
             return null;
             
-        SchemaReplyCollectionMapper mapper =
-            SchemaReplyCollectionMapper.instance();            
+        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();            
             
         //Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will
@@ -250,111 +246,50 @@ public class MetaFileManager extends FileManager {
         _needRebuild = true;
         return fd;
     }
-
+    
     /**
-     * @modifies this
-     * @effects calls addFileIfShared(file), then stores any metadata from the
-     *  given XML documents.  metadata may be null if there is no data.  Returns
-     *  the value from addFileIfShared.  Returns the value from addFileIfShared.
-     *  <b>WARNING: this is a potential security hazard.</b> 
-     *
-     * @return The FileDesc that was added, or null if nothing added.
+     * Notification that FileManager loading is starting.
      */
-    protected FileDesc addFileIfShared(File file, List metadata, boolean notify) {
-        
-        // do not kick off a FileManagerEvent.ADD event
-        FileDesc fd = super.addFileIfShared(file, false);
-        
-        // if not added, exit.
-        if( fd == null )
-            return null;
-            
-        // if added, but no metadata, try and create some.
-        if( metadata == null || metadata.size() == 0) {
-            // not mp3, can't create any ... 
-            if(!LimeXMLUtils.isSupportedFormat(file))
-                return fd;
-
-            LimeXMLDocument doc;
-            try {
-                doc = MetaDataReader.readDocument(file);
-            } catch(IOException ioe) {
-                // unable to read? oh well, no metadata.
-                return fd;
-            }
-            // create a list of metadata and add the doc to it.
-            metadata = new LinkedList();
-            metadata.add(doc);
-            // fall through and add it.
-        }
-
-        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
-        // add xml docs as appropriate, one per schema.
-        List schemasAddedTo = new LinkedList();
-        for(Iterator iter = metadata.iterator(); iter.hasNext(); ) {
-            LimeXMLDocument currDoc = (LimeXMLDocument)iter.next();
-            String uri = currDoc.getSchemaURI();
-            LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
-            if (collection != null && !schemasAddedTo.contains(uri)) {
-                schemasAddedTo.add(uri);
-                if( LimeXMLUtils.isMP3File(file) && AudioMetaData.isCorrupted(currDoc) )
-                    currDoc = AudioMetaData.fixCorruption(currDoc);
-                collection.mediaFileToDisk(fd, file.getPath(), currDoc, true);
-                collection.addReply(fd, currDoc);
-            }
-        }
-
-        _needRebuild = true;
-        
-        	// Notify the GUI...
-        if (notify && fd != null) {
-            FileManagerEvent evt =
-                new FileManagerEvent(this, FileManagerEvent.ADD, new FileDesc[]{fd});
-
-            RouterService.getCallback().handleFileManagerEvent(evt);
-        }
-        
-        return fd;
-    }
-
-    /**This method overrides FileManager.loadSettingsBlocking(), though
-     * it calls the super method to load up the shared file DB.  Then, it
-     * processes these files and annotates them automatically as apropos.
-     * TODO2: Eventually we will think that its too much of a burden
-     * to have this thread be blocking in which case we will have to 
-     * have the load thread also handle the reloading of the meta-data.
-     * Question: Do we really want to reload the meta-data whenever a we
-     * want to update the file information?? It depends on how we want to 
-     * handle the meta-data and its relation to the file system
-     */
-    protected void loadSettingsBlocking(boolean notifyOnClear){
+    protected void loadStarted(int revision) {
 		RouterService.getCallback().setAnnotateEnabled(false);
-        super.loadSettingsBlocking(notifyOnClear);
-        if (loadThreadInterrupted())
-            return;
-            
-        synchronized(META_LOCK) {
-            LimeXMLSchemaRepository schemaRepository =  LimeXMLSchemaRepository.instance();
-            if (loadThreadInterrupted())
-                return;
-
-            // Load up the reply collections.
-            String[] schemas = schemaRepository.getAvailableSchemaURIs();
-            SchemaReplyCollectionMapper mapper =  SchemaReplyCollectionMapper.instance();
-            for(int i = 0; i < schemas.length && !loadThreadInterrupted(); i++) {
-                String schema = schemas[i];
-                mapper.add(schema, new LimeXMLReplyCollection(this, schema));
-            }
-            
-            // Then add existing FileDescs to the collections.
-            FileDesc fds[] = super.getAllSharedFileDescriptors();
-            for(int i = 0; i < schemas.length && !loadThreadInterrupted(); i++) {
-                LimeXMLReplyCollection info = mapper.getReplyCollection(schemas[i]);
-                info.initialize(fds);
-            }
-        }
         
-		RouterService.getCallback().setAnnotateEnabled(true);
+        // Load up new ReplyCollections.
+        LimeXMLSchemaRepository schemaRepository =  LimeXMLSchemaRepository.instance();
+        String[] schemas = schemaRepository.getAvailableSchemaURIs();
+        SchemaReplyCollectionMapper mapper =  SchemaReplyCollectionMapper.instance();
+        for(int i = 0; i < schemas.length; i++)
+            mapper.add(schemas[i], new LimeXMLReplyCollection(schemas[i]));
+            
+        super.loadStarted(revision);
+    }
+    
+    /**
+     * Notification that FileManager loading is finished.
+     */
+    protected void loadFinished(int revision) {
+        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(Iterator i = replies.iterator(); i.hasNext(); )
+            ((LimeXMLReplyCollection)i.next()).loadFinished();
+            
+        RouterService.getCallback().setAnnotateEnabled(true);
+
+        super.loadFinished(revision);
+    }
+    
+    /**
+     * Notification that a single FileDesc has its URNs.
+     */
+    protected FileDesc loadFile(File file, List metadata, Set urns) {
+        FileDesc fd = super.loadFile(file, metadata, urns);
+        if(fd != null) {
+            Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+            for(Iterator i = replies.iterator(); i.hasNext(); )
+                ((LimeXMLReplyCollection)i.next()).initialize(fd, metadata);
+            for(Iterator i = replies.iterator(); i.hasNext(); )
+                ((LimeXMLReplyCollection)i.next()).createIfNecessary(fd);
+        }
+        _needRebuild = true;
+        return fd;
     }
 
     /**

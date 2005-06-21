@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -46,11 +47,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private Response[] responses;
     private FileDesc[] files;
 
-	private File emptyDir = null;
-	private File emptyNameDir;
-	private File emptyExtensionDir;
-	private File recursiveDir;
-
     public FileManagerTest(String name) {
         super(name);
     }
@@ -76,47 +72,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    fman = new SimpleFileManager();
 		
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
-	    
-		File tmpFile = File.createTempFile("tmp", "file");
-		File tmpDir = tmpFile.getParentFile();
-		tmpFile.delete();
-		
-		emptyDir = new File(tmpDir, "emptydir");
-		emptyDir.mkdir();
-		emptyDir.deleteOnExit();
-		
-		File subDir = new File(emptyDir, "subdir");
-		subDir.mkdir();
-		subDir.deleteOnExit();
-		
-		emptyNameDir = new File(tmpDir, "emptyname");
-		emptyNameDir.mkdir();
-		emptyNameDir.deleteOnExit();
-		
-		File f = new File(emptyNameDir, ".emptyname");
-		f.createNewFile();
-		f.deleteOnExit();
-		
-		emptyExtensionDir = new File(tmpDir, "emptyextension");
-		emptyExtensionDir.mkdir();
-		emptyExtensionDir.deleteOnExit();
-		
-		f = new File(emptyExtensionDir, "emptyextension.");
-		f.createNewFile();
-		f.deleteOnExit();
-		
-		recursiveDir = new File(tmpDir, "recursivedir");
-		recursiveDir.mkdir();
-		recursiveDir.deleteOnExit();
-		f = new File(recursiveDir, "afile.txt");
-		f.createNewFile();
-		f.deleteOnExit();
-		f = new File(recursiveDir, "subdir");
-		f.mkdir();
-		f.deleteOnExit();
-		f = new File(f, "subfile.txt");
-		f.createNewFile();
-		f.deleteOnExit();
 	}
 	
 	public void tearDown() {
@@ -188,10 +143,13 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f2 = createNewTestFile(3);
         f3 = createNewTestFile(11);
 
-        assertEquals("should not have been able to share file",
-                  null, fman.addFileIfShared(new File("C:\\bad.ABCDEF")));
-        assertNotEquals("should have been able to share file", 
-                  null, fman.addFileIfShared(f2));
+        FileManagerEvent result = addIfShared(new File("C:\\bad.ABCDEF"));
+        assertTrue(result.toString(), result.isFailedEvent());
+        
+        result = addIfShared(f2);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertNotNull(result.getFileDescs()[0]);
+        
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
@@ -213,11 +171,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
         f3 = createNewTestFile(11);
 
-        //Remove file that's shared.  Back to 1 file.                        
-        assertNull("shouldn't have been able to remove unshared file", 
-            fman.removeFileIfShared(f3));
-        assertNotNull("should have been able to remove shared file", 
-            fman.removeFileIfShared(f2));
+        //Remove file that's shared.  Back to 1 file.                   
+        assertEquals(2, fman.getNumFiles());     
+        assertNull("shouldn't have been able to remove unshared file",  fman.removeFileIfShared(f3));
+        assertNotNull("should have been able to remove shared file", fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
@@ -227,7 +184,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", files[0].getFile(), f1);
     }
     
-    public void XXXtestAddAnotherSharedFileDifferentIndex() throws Exception {
+    public void testAddAnotherSharedFileDifferentIndex() throws Exception {
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
@@ -235,16 +192,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         fman.removeFileIfShared(f2);
 
         //Add a new second file, with new index.
-        assertNotNull("should have been able to add shared file", 
-            fman.addFileIfShared(f3));
+        FileManagerEvent result = addIfShared(f3);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertNotNull(result.getFileDescs()[0]);
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
-        assertNotEquals("unexpected response[0] index",
-            1, responses[0].getIndex());
-        assertNotEquals("unexpected response[1] index",
-            1, responses[1].getIndex());
+        assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
+        assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
         fman.get(0);
         fman.get(2);
         assertNull("should be null (unshared)", fman.get(1));
@@ -282,19 +238,24 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
         f3 = createNewTestFile(11);
         fman.removeFileIfShared(f2);
-        fman.addFileIfShared(f3);
+        addIfShared(f3);
 
-        //Rename files
-        assertTrue("shouldn't have been able to rename unshared file", 
-            !fman.renameFileIfShared(f2, f2));
-        assertTrue("should have been able to rename shared file",
-             fman.renameFileIfShared(f1, f2));
+        FileManagerEvent result = renameIfShared(f2, new File("c:\\asdfoih"));
+        assertTrue(result.toString(), result.isFailedEvent());
+        assertEquals(f2, result.getFiles()[0]);
+        
+        result = renameIfShared(f1, f2);
+        assertTrue(result.toString(), result.isRenameEvent());
+        assertEquals(f1, result.getFileDescs()[0].getFile());
+        assertEquals(f2, result.getFileDescs()[1].getFile());
         files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 2, files.length);
         assertEquals("files differ", files[0].getFile(), f3);
         assertEquals("files differ", files[1].getFile(), f2);
-        assertTrue("shouldn't have been able to rename shared file", 
-            !fman.renameFileIfShared(f2, new File("C\\garbage.XSADF")));
+        
+        result = renameIfShared(f2, new File("C\\garbage.XSADF"));
+        assertTrue(result.toString(), result.isRemoveEvent());
+        assertEquals(f2, result.getFileDescs()[0].getFile());
         files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
         assertEquals("files differ", files[0].getFile(), f3);
@@ -307,21 +268,23 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f2 = createNewTestFile(3);
         
         //Try to add a huge file.  (It will be ignored.)
-        f4=createFakeTestFile(Integer.MAX_VALUE+1l);
-        assertNull("shouldn't have been able to add huge shared file", 
-            addFile(f4));
+        f4 = createFakeTestFile(Integer.MAX_VALUE+1l);
+        FileManagerEvent result = addIfShared(f4);
+        assertTrue(result.toString(), result.isFailedEvent());
+        assertEquals(f4, result.getFiles()[0]);
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
         f5=createFakeTestFile(Integer.MAX_VALUE-1);
         f6=createFakeTestFile(Integer.MAX_VALUE);
-        assertNotEquals("should have been able to add shared file",
-            null, addFile(f5));
-        assertNotEquals("should have been able to add shared file",
-            null, addFile(f6));
+        result = addIfShared(f5);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(f5, result.getFileDescs()[0].getFile());
+        result = addIfShared(f6);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
-        assertEquals("unexpected fman size",
-            Integer.MAX_VALUE, fman.getSize());
+        assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
@@ -330,60 +293,38 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     /**
-     * Calls FileManager.addFile directly.  This is necessary so we keep the
-     * file object.  Otherwise addFileIfShared will actually call addFile
-     * with the canonical file, which is a different object.
-     */
-    private FileDesc addFile(File f) throws Exception {
-        FileDesc fd = (FileDesc)PrivilegedAccessor.invokeMethod(
-            fman, "addFile", new Object[] {f}, new Class[] {File.class} );
-        return fd;
-    }
-    
-    /**
      * Tests adding incomplete files to the FileManager.
      */
     public void testAddIncompleteFile() throws Exception {    
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());    
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());    
         
         // add one incomplete file and make sure the numbers go up.
         Set urns = new HashSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
-        fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with another hash, it should be added.
         urns = new HashSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(
-            new File("c"), urns, "c", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("c"), urns, "c", 0, new VerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            2, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
     }
     
     /**
@@ -391,33 +332,25 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public void testRemovingIncompleteFiles() {
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set urns = new HashSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(
-            new File("a"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
         urns = new HashSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(
-            new File("b"), urns, "b", 0, new VerifyingFile(0));
-        assertEquals("unexpected shared incomplete",
-            2, fman.getNumIncompleteFiles());
+        fman.addIncompleteFile(new File("b"), urns, "b", 0, new VerifyingFile(0));
+        assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
         fman.removeFileIfShared( new File("a") );
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
         
         fman.removeFileIfShared( new File("c") );
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
         
         fman.removeFileIfShared( new File("b") );
-        assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
     }
     
     /**
@@ -425,18 +358,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public void testQueryRequestsDoNotReturnIncompleteFiles() {
         assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set urns = new HashSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(
-            new File("sambe"), urns, "a", 0, new VerifyingFile(0));
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());            
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
             
         QueryRequest qr = QueryRequest.createQuery(urn, "sambe");
         Response[] hits = fman.query(qr);
@@ -458,10 +387,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         Set urns = new HashSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(
-            new File("sambe"), urns, "a", 0, new VerifyingFile(0));
-        assertEquals("unexpected shared incomplete",
-            1, fman.getNumIncompleteFiles());
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
+        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
             
         // First test that we DO get this IFD.
         FileDesc fd = fman.getFileDescForUrn(urn);
@@ -471,10 +398,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f3 = createNewTestFile(11);   
         waitForLoad();
         assertEquals("unexected shared files", 1, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending",
-            0, fman.getNumPendingFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
         
         // ensure it got shared.
         files=fman.getSharedFileDescriptors(_sharedDir);
@@ -484,8 +409,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         urns = fd.getUrns();
         
         // now add an ifd with those urns.
-        fman.addIncompleteFile(
-            new File("sam"), urns, "b", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("sam"), urns, "b", 0, new VerifyingFile(0));
         
         FileDesc retFD = fman.getFileDescForUrn(urn);    
         assertNotNull(retFD);
@@ -592,8 +516,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			if ( hits.length != 1 ) continue;
 			checked = true;
 			assertEquals("responses should be equal", testResponse, hits[0]);
-			assertEquals("should have 10 other alts",
-			    10, testResponse.getLocations().size());
+			assertEquals("should have 10 other alts", 10, testResponse.getLocations().size());
 			assertEquals("should have equal alts",
 			    testResponse.getLocations(), hits[0].getLocations());
 		}
@@ -638,8 +561,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         qrt = fman.getQRT();
         
         //make sure the removed file is no longer in qrt
-        assertFalse("query should not be in qrt",
-                   qrt.contains(qr));
+        assertFalse("query should not be in qrt", qrt.contains(qr));
         
         //just check that the one of the other files is still 
         //in the qrt
@@ -656,6 +578,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertFalse("query should not be in qrt", qrt.contains(qr));
 
         //now rename one of the files
+        FileManagerEvent result = renameIfShared(f2, f4);
+        assertTrue(result.toString(), result.isRenameEvent());
         fman.renameFileIfShared(f2, f4);
         qrt = fman.getQRT();
         
@@ -677,38 +601,21 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //  create "shared" and "notShared" out of shared directory
         File shared    = createNewNamedTestFile(10, "shared", _sharedDir.getParentFile());
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
-
-        //  Add "shared" to special shared files
-        SharingSettings.SPECIAL_FILES_TO_SHARE.add(shared);
+        getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
         waitForLoad();
 
         //  assert that "shared" and "notShared" are not in a shared directory
-        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
-        assertFalse("notShared should not be shared in a shared directory", fman.isFileInCompletelySharedDirectory(notShared));
+        assertFalse(fman.isFileInCompletelySharedDirectory(shared));
+        assertFalse(fman.isFileInCompletelySharedDirectory(notShared));
         
         //  assert that "shared" is shared
         FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
         assertNotNull("no shared files, even though just added a specially shared file", sharedFiles);
-        boolean found = false;
-        for(int i = 0; i < sharedFiles.length; i++) {
-            FileDesc fd = sharedFiles[i];
-            if(fd == null) continue;
-            if(fd.getFile().equals(shared)) {
-                found = true;
-            }
-        }
-        assertTrue("specially shared file not found in list of shared files", found);
+        assertEquals(1, sharedFiles.length);
+        assertEquals(shared, sharedFiles[0].getFile());
+        assertEquals(sharedFiles[0], fman.getFileDescForFile(shared));
         
-        //  assert that "notShared" is not shared
-        found = false;
-        for(int i = 0; i < sharedFiles.length; i++) {
-            FileDesc fd = sharedFiles[i];
-            if(fd == null) continue;
-            if(fd.getFile().equals(notShared)) {
-                found = true;
-            }
-        }
-        assertFalse("non-shared file found in list of shared files", found);
+        assertNull(fman.getFileDescForFile(notShared));
     }
 	
 	/**
@@ -716,61 +623,73 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 * @throws Exception
 	 */
 	public void testAddFileAlways() throws Exception {
+	    assertFalse(fman.isLoadFinished());
+	    waitForLoad(); // ensure it's loaded with 0 files.
+	    assertEquals(0, fman.getNumFiles());
+	    assertTrue(fman.isLoadFinished());
+	    
 		// test if too large files are not shared
-		// test does not work because fake file is replaced
-//		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
-//		FileDesc desc = fman.addFileAlways(tooLarge);
-//		assertNull("Too large file should not have been shared", 
-//				desc);
+		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
+		FileManagerEvent result = addAlways(tooLarge);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(tooLarge, result.getFiles()[0]);
 		
 		// test if files in shared directories are still shared
 		File test = createNewTestFile(5);
-		test.deleteOnExit();
-		assertNotNull("File in shared directory should have been shared",
-				fman.addFileAlways(test));
+		result = addAlways(test);
+		assertTrue(result.toString(), result.isAddEvent());
+		assertEquals(test, result.getFileDescs()[0].getFile());
+		assertEquals(1, fman.getNumFiles());
+		
+		// try again, it will fail because it's already shared.
+		result = addAlways(test);
+		assertTrue(result.toString(), result.isAlreadySharedEvent());
+		assertEquals(test, result.getFiles()[0]);
 		
 		// test that non-existent files are not shared
-		test = new File("non existent file");
-		assertNull("Nonexistent file should not have been shared",
-				fman.addFileAlways(test));
+		test = new File("non existent file").getCanonicalFile();
+		result = addAlways(test);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(test, result.getFiles()[0]);
 		
 		// test that file in non shared directory is shared
 		File dir = createNewBaseDirectory("notshared");
 		dir.mkdir();
 		dir.deleteOnExit();
 		test = createNewNamedTestFile(500, "specially shared", dir);
-		test.deleteOnExit();
-		assertNotNull("File should have been shared", fman.addFileAlways(test));
+		result = addAlways(test);
+		assertTrue(result.toString(), result.isAddEvent());
+		assertEquals(test, result.getFileDescs()[0].getFile());
+        assertEquals(2, fman.getNumFiles());
+        
+        // try again, it will fail because it's already shared.
+        result = addAlways(test);
+        assertTrue(result.toString(), result.isAlreadySharedEvent());
+        assertEquals(test, result.getFiles()[0]);
 	}
 
 	public void testIsFileInCompletelySharedDirectory() throws Exception {
 		// non existent file should not be in a shared directory
 		File nonexistent = new File("nonexistent");
-		assertFalse("File should not be in a shared directory", 
-				fman.isFileInCompletelySharedDirectory(nonexistent));
+		assertFalse("File should not be in a shared directory", fman.isFileInCompletelySharedDirectory(nonexistent));
 		
 		File dir = createNewBaseDirectory("notshared");
 		dir.mkdir();
 		dir.deleteOnExit();
 		File test = createNewNamedTestFile(10, "noshared", dir);
-		test.deleteOnExit();
-		assertFalse("File should not be in a shared directory",
-				fman.isFileInCompletelySharedDirectory(test));
+		assertFalse("File should not be in a shared directory",fman.isFileInCompletelySharedDirectory(test));
 		
 		// test for files in subdirs
 		File subDir = new File(_sharedDir, "newSubDir");
 		subDir.mkdir();
 		subDir.deleteOnExit();
 		waitForLoad();
-		assertTrue("Subdir should be in shared directory", 
-				fman.isFileInCompletelySharedDirectory(subDir));
+		assertTrue("Subdir should be in shared directory", fman.isFileInCompletelySharedDirectory(subDir));
 		
 		test = createNewNamedTestFile(50, "subdirfile", subDir);
-		test.deleteOnExit();
 		waitForLoad();
 		// test if subdir is shared
-		assertTrue("File in subdir should be in shared directory now",
-				fman.isFileInCompletelySharedDirectory(test));
+		assertTrue("File in subdir should be in shared directory now", fman.isFileInCompletelySharedDirectory(test));
 	}
 	
 	/**
@@ -780,189 +699,71 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 * @throws Exception
 	 */
 	public void testAddFileIfShared() throws Exception {
-
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
-		waitForLoad();
-		
 		// non shareable files:
 		
-		// too large: cannot be tested with fake files
+		// too large tested above
 		
 		// non shareable extension in shared directory
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
+		waitForLoad(); // set the extensions correctly.
 		File nonshareable = createNewNamedTestFile(10, "nonshareable extension");
-		nonshareable.deleteOnExit();
-		assertNull("File with non shareable extension should not have been added",
-				fman.addFileIfShared(nonshareable));
+		FileManagerEvent result = addIfShared(nonshareable);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(nonshareable, result.getFiles()[0]);
+		nonshareable.delete();
 		
 		// not in shared directory and not specially shared, but valid extension
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
-		waitForLoad();
-		File validExt = createNewNamedTestFile(10, "valid extension",
-				_sharedDir.getParentFile());
-		validExt.deleteOnExit();
-		assertNull("File with valid extension in non shared directory should not have been added",
-				fman.addFileIfShared(validExt));
+		waitForLoad(); // set the new extensions
+		File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
+		result = addIfShared(validExt);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(validExt, result.getFiles()[0]);
 
 		// nonexistent in shared directory
 		File nonexistent = new File(_sharedDir, "test." + EXTENSION);
-		assertNull("Nonexistent file with valid extension in shared directory should not have been added",
-				fman.addFileIfShared(nonexistent));
+		result = addIfShared(nonexistent);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// nonexistent in non shared directory
-		nonexistent = new File("nonexistent." + EXTENSION);
-		assertNull("Nonexistent file with valid extension should not have been added",
-				fman.addFileIfShared(nonexistent));
+		nonexistent = new File("nonexistent." + EXTENSION).getCanonicalFile();
+		result = addIfShared(nonexistent);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// nonexistent, but specially shared
-		SharingSettings.SPECIAL_FILES_TO_SHARE.add(nonexistent);
-		assertNull("Nonexistent file with valid extension and specially shared should not have been added",
-				fman.addFileIfShared(nonexistent));
+		result = addAlways(nonexistent);
+		assertTrue(result.toString(), result.isFailedEvent());
+		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// shareable files:
 		
 		// files with shareable extension in shared directory
 		File shareable = createNewNamedTestFile(10, "shareable");
-		shareable.deleteOnExit();
-		assertNotNull("Existing file with valid extension in shared directory should have been added",
-				fman.addFileIfShared(shareable));
+		result = addIfShared(shareable);
+		assertTrue(result.toString(), result.isAddEvent());
+		assertEquals(shareable, result.getFileDescs()[0].getFile());
+		assertEquals(1, fman.getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.get(0));
 		
 		// files with shareable extension, specially shared
-		File speciallyShareable = createNewNamedTestFile(10, "specially shareable", 
-				_sharedDir.getParentFile());
-		speciallyShareable.deleteOnExit();
-		SharingSettings.SPECIAL_FILES_TO_SHARE.add(speciallyShareable);
-		assertNotNull("Existing file with valid extension specially shared should have been added",
-				fman.addFileIfShared(speciallyShareable));
+		File speciallyShareable = createNewNamedTestFile(10, "specially shareable", _sharedDir.getParentFile());
+		result = addAlways(speciallyShareable);
+		assertTrue(result.toString(), result.isAddEvent());
+		assertEquals(speciallyShareable, result.getFileDescs()[0].getFile());
+		assertEquals(2, fman.getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.get(1));
 		
 		// files with non shareable extension, specially shared
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
-		File speciallyShared = createNewNamedTestFile(10, "speciall shared", 
-				_sharedDir.getParentFile());
-		speciallyShared.deleteOnExit();
-		SharingSettings.SPECIAL_FILES_TO_SHARE.add(speciallyShared);
-		assertNotNull("Existing file with invalid extension specially shared should have been added",
-				fman.addFileIfShared(speciallyShared));
+		File speciallyShared = createNewNamedTestFile(10, "speciall shared", _sharedDir.getParentFile());
+		result = addAlways(speciallyShared);
+		assertTrue(result.toString(), result.isAddEvent());
+		assertEquals(speciallyShared, result.getFileDescs()[0].getFile());
+		assertEquals(3, fman.getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.get(2));
 	}
-	
-    /**
-     * Tests whether specially shared files are indeed shared despite having
-     * an extension that is not on the list of shareable extensions.
-     */
-    public void testSpecialSharingWithNonShareableExtension() throws Exception {
-        //  create "shared" file out of shared directory
-        File tmp = createNewNamedTestFile(10, "tmp", _sharedDir.getParentFile());
-        File shared = new File(tmp.getParentFile(), "shared.badextension");
-        tmp.renameTo(shared);
-                
-        //  Add "shared" to special shared files
-        SharingSettings.SPECIAL_FILES_TO_SHARE.add(shared);
-        waitForLoad();
-
-        //  assert that "shared" file does not have a shareable extension
-        Method extensionCheck =
-            PrivilegedAccessor.getMethod(FileManager.class,  
-                "hasShareableExtension", new Class[] { File.class });
-        Object[] params = new File[] { shared };
-        boolean valid = 
-            ((Boolean)extensionCheck.invoke(FileManager.class, 
-                params)).booleanValue();
-        assertFalse("shared file should not have a shareable extension", valid);
-        
-        //  assert that "shared" is not in shared directories
-        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
-        
-        //  assert that "shared" is shared
-        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
-        assertNotEquals("no shared files, even though just added a specially shared file", 0, sharedFiles.length);
-        boolean found = false;
-        for(int i = 0; i < sharedFiles.length; i++) {
-            FileDesc fd = sharedFiles[i];
-            if(fd == null) continue;
-            if(fd.getFile().equals(shared)) {
-                found = true;
-            }
-        }
-        assertTrue("specially shared file not found in list of shared files", found);
-    }
-
-	public void testGetFilesRecursive() throws Exception {
-	
-		File[] fa = FileUtils.getFilesRecursive(emptyDir, null);
-		assertEquals("directory should have no files, only a subdir", 0, fa.length);
-		
-		fa = FileUtils.getFilesRecursive(emptyNameDir, null);
-		assertEquals("directory should have 1 hidden file", 1, fa.length);
-		
-		fa = FileUtils.getFilesRecursive(emptyNameDir, new String[] {
-				"emptyname"});
-		assertEquals("directory should have no file matching extension \"emptyname\"",
-				0, fa.length);
-		
-		fa = FileUtils.getFilesRecursive(emptyExtensionDir, null);
-		assertEquals("directory should have one file", 1, fa.length);
-		
-		fa = FileUtils.getFilesRecursive(emptyExtensionDir, 
-				new String[] { "" });
-		assertEquals("directory should have no file matching empty extension", 
-				0, fa.length);
-		
-		// test if files in subdirectories are found too
-		fa = FileUtils.getFilesRecursive(recursiveDir, null);
-		assertEquals("wrong number of files found", 2, fa.length);
-		
-		// test if files in subdirectories are found with filter
-		fa = FileUtils.getFilesRecursive(recursiveDir, new String[] {
-				"unmatchedextension", "", "txt"});
-		assertEquals("wrong number of matching files found", 2, fa.length);
-	}
-	
-    /**
-     * Tests whether a directory placed on the non-recursive share list
-     * successfully does not share files in its subdirectories. 
-     */
-    public void testNonRecursiveSharing() throws Exception {
-        //  add file "shared" in shared directory
-        File shared = createNewNamedTestFile(10, "shared");
-        waitForLoad();
-        
-        //  assert that "shared" is in a shared directory
-        assertTrue("shared should be in a shared directory", fman.isFileInCompletelySharedDirectory(shared));
-
-        //  make sure "shared" is shared
-        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
-        assertNotNull("no shared files, even though just added a shared file", sharedFiles);
-        boolean found = false;
-        for(int i = 0; i < sharedFiles.length; i++) {
-            FileDesc fd = sharedFiles[i];
-            if(fd == null) continue;
-            if(fd.getFile().equals(shared)) {
-                found = true;
-            }
-        }
-        assertTrue("shared file not found in list of shared files", found);
-        
-        //  make new subdirectory in shared directory
-        File subDir = new File(shared.getParent(), "noShare");
-        assertTrue("subdirectory \"noShare\" could not be created", subDir.mkdirs());
-        
-        //  mark shared directory so that it's shared non-recursively
-        SharingSettings.DIRECTORIES_TO_SHARE_NON_RECURSIVELY.add(subDir);
-
-        //  add "notShared" to subdirectory
-        File notShared = createNewNamedTestFile(10, "notShared", subDir);
-        waitForLoad();
-        
-        //  make sure "notShared" is not shared
-        found = false;
-        for(int i = 0; i < sharedFiles.length; i++) {
-            FileDesc fd = sharedFiles[i];
-            if(fd == null) continue;
-            if(fd.getFile().equals(notShared)) {
-                found = true;
-            }
-        }
-        assertFalse("file not intended to be shared found in list of shared files", found);
-    }
     
     /**
      * Tests whether the FileManager.isSensitiveDirectory(File) function is functioning properly. 
@@ -983,106 +784,52 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         
         //  check that the user's home dir is a sensitive directory
-        String userHome = System.getProperty("user.dir");
+        String userHome = System.getProperty("user.home");
         assertTrue("user's home directory should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome)));
         
         //  check for OS-specific directories:
         String realOS = System.getProperty("os.name");
+        
+        try {
+            
         setOSName("Windows");
-        if(CommonUtils.isWindows()) {
-            //  check for "Documents and Settings"
-            assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Documents and Settings")));
-            
-            //  check for "My Documents"
-            assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "My Documents")));
-            
-            //  check for "Desktop"
-            assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "Desktop")));
-            
-            //  check for "Program Files"
-            assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Program Files")));
-            
-            //  check for "Windows"
-            assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Windows")));
-            
-            //  check for "WINNT"
-            assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("WINNT")));
-        }
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "My Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("WINNT")));
         
         setOSName("Mac OS X");
-        if(CommonUtils.isMacOSX()) {
-            //  check for /Users
-            assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Users")));
-            
-            //  check for /System
-            assertTrue("System should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System")));
-            
-            //  check for /System Folder
-            assertTrue("System Folder should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System Folder")));
-            
-            //  check for /Previous Systems
-            assertTrue("Previous Systems should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Previous Systems")));
-            
-            //  check for /private
-            assertTrue("private should be a sensitive directory", FileManager.isSensitiveDirectory(new File("private")));
-            
-            //  check for /Volumes
-            assertTrue("Volumes should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Volumes")));
-            
-            //  check for /Desktop
-            assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Desktop")));
-            
-            //  check for /Applications
-            assertTrue("Applications should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications")));
-            
-            //  check for /Applications (Mac OS 9)
-            assertTrue("Applications (Mac OS 9) should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications (Mac OS 9)")));
-            
-            //  check for /Network
-            assertTrue("Network should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Network")));
-        }
+        assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Users")));
+        assertTrue("System should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System")));
+        assertTrue("System Folder should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System Folder")));
+        assertTrue("Previous Systems should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Previous Systems")));
+        assertTrue("private should be a sensitive directory", FileManager.isSensitiveDirectory(new File("private")));
+        assertTrue("Volumes should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Volumes")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Desktop")));
+        assertTrue("Applications should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications")));
+        assertTrue("Applications (Mac OS 9) should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications (Mac OS 9)")));
+        assertTrue("Network should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Network")));
         
         setOSName("Linux");
-        if(CommonUtils.isPOSIX()) {
-            //  check for /bin
-            assertTrue("bin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("bin")));
-            
-            //  check for /boot
-            assertTrue("boot should be a sensitive directory", FileManager.isSensitiveDirectory(new File("boot")));
-            
-            //  check for /dev
-            assertTrue("dev should be a sensitive directory", FileManager.isSensitiveDirectory(new File("dev")));
-            
-            //  check for /etc
-            assertTrue("etc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("etc")));
-            
-            //  check for /home
-            assertTrue("home should be a sensitive directory", FileManager.isSensitiveDirectory(new File("home")));
-            
-            //  check for /mnt
-            assertTrue("mnt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("mnt")));
-            
-            //  check for /opt
-            assertTrue("opt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("opt")));
-            
-            //  check for /proc
-            assertTrue("proc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("proc")));
-            
-            //  check for /root
-            assertTrue("root should be a sensitive directory", FileManager.isSensitiveDirectory(new File("root")));
-            
-            //  check for /sbin
-            assertTrue("sbin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("sbin")));
-            
-            //  check for /usr
-            assertTrue("usr should be a sensitive directory", FileManager.isSensitiveDirectory(new File("usr")));
-            
-            //  check for /var
-            assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File("var")));
-        }
+        assertTrue("bin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("bin")));
+        assertTrue("boot should be a sensitive directory", FileManager.isSensitiveDirectory(new File("boot")));
+        assertTrue("dev should be a sensitive directory", FileManager.isSensitiveDirectory(new File("dev")));
+        assertTrue("etc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("etc")));
+        assertTrue("home should be a sensitive directory", FileManager.isSensitiveDirectory(new File("home")));
+        assertTrue("mnt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("mnt")));
+        assertTrue("opt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("opt")));
+        assertTrue("proc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("proc")));
+        assertTrue("root should be a sensitive directory", FileManager.isSensitiveDirectory(new File("root")));
+        assertTrue("sbin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("sbin")));
+        assertTrue("usr should be a sensitive directory", FileManager.isSensitiveDirectory(new File("usr")));
+        assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File("var")));
         
-        //  revert the os.name system property back to normal 
-        setOSName(realOS);
+        } finally {
+            //  revert the os.name system property back to normal 
+            setOSName(realOS);
+        }
     }
     
     /**
@@ -1099,30 +846,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         String norm = I18NConvert.instance().getNorm(f.getName());
         norm = StringUtils.replace(norm, "_", " ");
         return QueryRequest.createQuery(norm);
-    }
-
-    /**
-     * Helper function to create a new temporary file of the given size,
-     * with the given name, in the default shared directory.
-     */
-    protected File createNewNamedTestFile(int size, String name) 
-        throws Exception {
-        return createNewNamedTestFile(size, name, _sharedDir);
-    }
-
-    /**
-     * Helper function to create a new temporary file of the given size,
-     * with the given name, in the given directory.
-     */
-    protected File createNewNamedTestFile(int size, String name, File directory) throws Exception {
-		File file = File.createTempFile(name, "." + EXTENSION, directory);
-        file.deleteOnExit();
-        OutputStream out = new FileOutputStream(file);
-        out.write(new byte[size]);
-        out.flush();
-        out.close();
-        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
-        return FileUtils.getCanonicalFile(file);
     }
 	
 	private void addFilesToLibrary() throws Exception {
@@ -1143,16 +866,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		assertNotNull("no files to test against", testFiles);
 		assertNotEquals("no files to test against", 0, testFiles.length);
 
-        waitForLoad();
-
    		for(int i=0; i<testFiles.length; i++) {
 			if(!testFiles[i].isFile()) continue;
 			File shared = new File(
 			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
-			assertTrue("unable to get file",
-			    CommonUtils.copy( testFiles[i], shared));
-            assertNotEquals(null, fman.addFileIfShared(shared));
+			assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
 		}
+
+        waitForLoad();
+
         
         // the below test depends on the filemanager loading shared files in 
         // alphabetical order, and listFiles returning them in alphabetical
@@ -1166,15 +888,32 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             testFiles.length, fman.getNumFiles() );
     }
     
+
+
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name, in the default shared directory.
+     */
+    protected File createNewNamedTestFile(int size, String name) throws Exception {
+        return createNewNamedTestFile(size, name, _sharedDir);
+    }
+
     protected File createNewTestFile(int size) throws Exception {
-		File file = File.createTempFile("FileManager_unit_test", 
-		    "." + EXTENSION , _sharedDir);
-		file.deleteOnExit();
-        OutputStream out=new FileOutputStream(file);
+        return createNewNamedTestFile(size, "FileManager_unit_test", _sharedDir);
+    }
+
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name, in the given directory.
+     */
+    protected File createNewNamedTestFile(int size, String name, File directory) throws Exception {
+		File file = File.createTempFile(name, "." + EXTENSION, directory);
+        file.deleteOnExit();
+        OutputStream out = new FileOutputStream(file);
         out.write(new byte[size]);
         out.flush();
         out.close();
-        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
         return FileUtils.getCanonicalFile(file);
     }
 
@@ -1183,6 +922,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     File createFakeTestFile(long size) throws Exception {
         File real=createNewTestFile(1);
         return new HugeFakeFile(real.getParentFile(), real.getName(), size);       
+    }
+    
+    protected LibraryData getLibraryData() throws Exception {
+        return (LibraryData)PrivilegedAccessor.getValue(fman, "_data");
     }
 
     private static class HugeFakeFile extends File {
@@ -1196,6 +939,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         public long length() {
             return length;
         }
+        
+        public File getCanonicalFile() {
+            return this;
+        }
     }
     
     public class FManCallback extends ActivityCallbackStub {
@@ -1204,17 +951,53 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
                 loaded.notify();
             }
         }
-    }
+    }       
 
     protected void waitForLoad() {
         synchronized(loaded) {
             try {
-                fman.loadSettings(false); // true won't matter either                
-                loaded.wait();
+                fman.loadSettings();
+                loaded.wait(10000);
             } catch (InterruptedException e) {
                 //good.
             }
         }
     }    
+    
+    public static class Listener implements FileEventListener {
+        public FileManagerEvent evt;
+        public synchronized void handleFileEvent(FileManagerEvent fme) {
+            evt = fme;
+            notify();
+        }
+    }
+    
+    protected FileManagerEvent addIfShared(File f) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.addFileIfShared(f, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
+    
+    protected FileManagerEvent addAlways(File f) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.addFileAlways(f, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
+    
+    protected FileManagerEvent renameIfShared(File f1, File f2) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.renameFileIfShared(f1, f2, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
 }
+
 
