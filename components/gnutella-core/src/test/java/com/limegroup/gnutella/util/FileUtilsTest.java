@@ -55,6 +55,37 @@ public final class FileUtilsTest extends BaseTestCase {
                 FileUtils.getFileExtension(nullFiles[i]));
         };
     }
+
+	public void testGetFilesRecursive() throws Exception {
+	
+		File[] fa = FileUtils.getFilesRecursive(emptyDir, null);
+		assertEquals("directory should have no files, only a subdir", 0, fa.length);
+		
+		fa = FileUtils.getFilesRecursive(emptyNameDir, null);
+		assertEquals("directory should have 1 hidden file", 1, fa.length);
+		
+		fa = FileUtils.getFilesRecursive(emptyNameDir, new String[] {
+				"emptyname"});
+		assertEquals("directory should have no file matching extension \"emptyname\"",
+				0, fa.length);
+		
+		fa = FileUtils.getFilesRecursive(emptyExtensionDir, null);
+		assertEquals("directory should have one file", 1, fa.length);
+		
+		fa = FileUtils.getFilesRecursive(emptyExtensionDir, 
+				new String[] { "" });
+		assertEquals("directory should have no file matching empty extension", 
+				0, fa.length);
+		
+		// test if files in subdirectories are found too
+		fa = FileUtils.getFilesRecursive(recursiveDir, null);
+		assertEquals("wrong number of files found", 2, fa.length);
+		
+		// test if files in subdirectories are found with filter
+		fa = FileUtils.getFilesRecursive(recursiveDir, new String[] {
+				"unmatchedextension", "", "txt"});
+		assertEquals("wrong number of matching files found", 2, fa.length);
+	}
     
     /**
      * Tests the setWriteable method.
