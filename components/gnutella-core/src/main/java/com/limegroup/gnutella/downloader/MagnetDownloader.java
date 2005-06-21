@@ -24,7 +24,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;

@@ -1594,7 +1594,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         if (good)
             cachedRFDs.add(rfd);
         
-        IncompleteFileDesc ifd = null;
+        
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
         // AlternateLocation objects.
@@ -1668,6 +1668,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
+        IncompleteFileDesc ifd = null;
         if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
             if(!downloadSHA1.equals(ifd.getSHA1Urn())) {

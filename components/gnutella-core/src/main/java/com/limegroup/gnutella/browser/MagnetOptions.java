@@ -60,14 +60,22 @@ public class MagnetOptions implements Serializable {
 			addAppend(map, XT, urn.httpStringValue());
 		}
 		InetSocketAddress isa = fileDetails.getSocketAddress();
+		String url = null;
 		if (isa != null && urn != null) {
 			StringBuffer addr = new StringBuffer("http://");
 			addr.append(isa.getAddress().getHostAddress()).append(':')
 			.append(isa.getPort()).append("/uri-res/N2R?");
 			addr.append(urn.httpStringValue());
-			addAppend(map, XS, addr.toString());
+			url = addr.toString();
+			addAppend(map, XS, url);
 		}
-		return new MagnetOptions(map);
+		MagnetOptions magnet = new MagnetOptions(map);
+		// set already known values
+		magnet.urn = urn;
+		if (url != null) {
+			magnet.defaultURLs = new String[] { url };
+		}
+		return magnet;
 	}
 	
 	/**
@@ -197,10 +205,16 @@ public class MagnetOptions implements Serializable {
     }
     
 	public String toString() {
-		return toMagnet();
+		return toExternalForm();
 	}
 	
-	public String toMagnet() {
+	/**
+	 * Returns the magnet uri representation as it can be used in an html link.
+	 * <p>
+	 * Display name and keyword topic are url encoded.
+	 * @return
+	 */
+	public String toExternalForm() {
 		StringBuffer ret = new StringBuffer(MAGNET);
 		
 		for (Iterator iter = getExactTopics().iterator(); iter.hasNext();) {
