@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -25,7 +24,6 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -1626,13 +1624,13 @@ public class RouterService {
         	
         	for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
         		ManagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}
         	
         	for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
         		ManagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}
         }

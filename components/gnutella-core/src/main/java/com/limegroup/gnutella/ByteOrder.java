@@ -77,10 +77,10 @@ public class ByteOrder {
      *   call ubytes2long() on the result.
      */
     public static int leb2int(final byte[] x, final int offset) {
-        return ( (int)x[offset    ] & 0xFF       ) |
-               (((int)x[offset + 1] & 0xFF) <<  8) |
-               (((int)x[offset + 2] & 0xFF) << 16) |
-               ( (int)x[offset + 3]         << 24);
+        return ( x[offset    ] & 0xFF       ) |
+               ((x[offset + 1] & 0xFF) <<  8) |
+               ((x[offset + 2] & 0xFF) << 16) |
+               ( x[offset + 3]         << 24);
     }
 
     /**
@@ -93,30 +93,30 @@ public class ByteOrder {
      *   call ubytes2long() on the result.
      */
     public static int beb2int(final byte[] x, final int offset) {
-        return ( (int)x[offset    ]         << 24) |
-               (((int)x[offset + 1] & 0xFF) << 16) |
-               (((int)x[offset + 2] & 0xFF) <<  8) |
-               ( (int)x[offset + 3] & 0xFF       );
+        return ( x[offset    ]         << 24) |
+               ((x[offset + 1] & 0xFF) << 16) |
+               ((x[offset + 2] & 0xFF) <<  8) |
+               ( x[offset + 3] & 0xFF       );
     }
 
     /**
      * Little-endian bytes to int - stream version.
      */
     public static int leb2int(final InputStream is) throws IOException{
-        return ( (int)is.read() & 0xFF       ) |
-               (((int)is.read() & 0xFF) <<  8) |
-               (((int)is.read() & 0xFF) << 16) |
-               ( (int)is.read()         << 24);
+        return ( is.read() & 0xFF       ) |
+               ((is.read() & 0xFF) <<  8) |
+               ((is.read() & 0xFF) << 16) |
+               ( is.read()         << 24);
     }
 
     /**
      * Big-endian bytes to int - stream version.
      */
     public static int beb2int(final InputStream is) throws IOException{
-        return ( (int)is.read()         << 24) |
-               (((int)is.read() & 0xFF) << 16) |
-               (((int)is.read() & 0xFF) <<  8) |
-               ( (int)is.read() & 0xFF       );
+        return ( is.read()         << 24) |
+               ((is.read() & 0xFF) << 16) |
+               ((is.read() & 0xFF) <<  8) |
+               ( is.read() & 0xFF       );
     }
 
     /**
@@ -137,19 +137,19 @@ public class ByteOrder {
             throws IndexOutOfBoundsException, IllegalArgumentException {
         switch (n) {
         case 1:
-            return   (int)x[offset    ] & 0xFF        ;
+            return   x[offset    ] & 0xFF        ;
         case 2:
-            return ( (int)x[offset    ] & 0xFF       ) |
-                   (((int)x[offset + 1] & 0xFF) <<  8);
+            return ( x[offset    ] & 0xFF       ) |
+                   ((x[offset + 1] & 0xFF) <<  8);
         case 3:
-            return ( (int)x[offset    ] & 0xFF       ) |
-                   (((int)x[offset + 1] & 0xFF) <<  8) |
-                   (((int)x[offset + 2] & 0xFF) << 16);
+            return ( x[offset    ] & 0xFF       ) |
+                   ((x[offset + 1] & 0xFF) <<  8) |
+                   ((x[offset + 2] & 0xFF) << 16);
         case 4:
-            return ( (int)x[offset    ] & 0xFF       ) |
-                   (((int)x[offset + 1] & 0xFF) <<  8) |
-                   (((int)x[offset + 2] & 0xFF) << 16) |
-                   ( (int)x[offset + 3]         << 24);
+            return ( x[offset    ] & 0xFF       ) |
+                   ((x[offset + 1] & 0xFF) <<  8) |
+                   ((x[offset + 2] & 0xFF) << 16) |
+                   ( x[offset + 3]         << 24);
         default:
             throw new IllegalArgumentException("No bytes specified");
         }
@@ -173,48 +173,48 @@ public class ByteOrder {
             throws IndexOutOfBoundsException, IllegalArgumentException {
         switch (n) {
         case 1:
-            return   (long)x[offset    ] & 0xFFL        ;
+            return   x[offset    ] & 0xFFL        ;
         case 2:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8);
         case 3:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16);
         case 4:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16) |
-                   (((long)x[offset + 3] & 0xFFL) << 24);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16) |
+                   ((x[offset + 3] & 0xFFL) << 24);
         case 5:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16) |
-                   (((long)x[offset + 3] & 0xFFL) << 24) |
-                   (((long)x[offset + 4] & 0xFFL) << 32);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16) |
+                   ((x[offset + 3] & 0xFFL) << 24) |
+                   ((x[offset + 4] & 0xFFL) << 32);
         case 6:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16) |
-                   (((long)x[offset + 3] & 0xFFL) << 24) |
-                   (((long)x[offset + 4] & 0xFFL) << 32) |
-                   (((long)x[offset + 5] & 0xFFL) << 40);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16) |
+                   ((x[offset + 3] & 0xFFL) << 24) |
+                   ((x[offset + 4] & 0xFFL) << 32) |
+                   ((x[offset + 5] & 0xFFL) << 40);
         case 7:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16) |
-                   (((long)x[offset + 3] & 0xFFL) << 24) |
-                   (((long)x[offset + 4] & 0xFFL) << 32) |
-                   (((long)x[offset + 5] & 0xFFL) << 40) |
-                   (((long)x[offset + 6] & 0xFFL) << 48);
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16) |
+                   ((x[offset + 3] & 0xFFL) << 24) |
+                   ((x[offset + 4] & 0xFFL) << 32) |
+                   ((x[offset + 5] & 0xFFL) << 40) |
+                   ((x[offset + 6] & 0xFFL) << 48);
         case 8:
-            return ( (long)x[offset    ] & 0xFFL       ) |
-                   (((long)x[offset + 1] & 0xFFL) <<  8) |
-                   (((long)x[offset + 2] & 0xFFL) << 16) |
-                   (((long)x[offset + 3] & 0xFFL) << 24) |
-                   (((long)x[offset + 4] & 0xFFL) << 32) |
-                   (((long)x[offset + 5] & 0xFFL) << 40) |
-                   (((long)x[offset + 6] & 0xFFL) << 48) |
+            return ( x[offset    ] & 0xFFL       ) |
+                   ((x[offset + 1] & 0xFFL) <<  8) |
+                   ((x[offset + 2] & 0xFFL) << 16) |
+                   ((x[offset + 3] & 0xFFL) << 24) |
+                   ((x[offset + 4] & 0xFFL) << 32) |
+                   ((x[offset + 5] & 0xFFL) << 40) |
+                   ((x[offset + 6] & 0xFFL) << 48) |
                    ( (long)x[offset + 7]          << 56);
         default:
             throw new IllegalArgumentException("No bytes specified");
@@ -225,14 +225,14 @@ public class ByteOrder {
      * Little-endian bytes to long.  Stream version.
      */
     public static long leb2long(InputStream is) throws IOException {
-        return ( (long)is.read() & 0xFFL       ) |
-               (((long)is.read() & 0xFFL) <<  8) |
-               (((long)is.read() & 0xFFL) << 16) |
-               (((long)is.read() & 0xFFL) << 24) |
-               (((long)is.read() & 0xFFL) << 32) |
-               (((long)is.read() & 0xFFL) << 40) |
-               (((long)is.read() & 0xFFL) << 48) |
-               ( (long)is.read()          << 56);
+        return ( is.read() & 0xFFL       ) |
+               ((is.read() & 0xFFL) <<  8) |
+               ((is.read() & 0xFFL) << 16) |
+               ((is.read() & 0xFFL) << 24) |
+               ((is.read() & 0xFFL) << 32) |
+               ((is.read() & 0xFFL) << 40) |
+               ((is.read() & 0xFFL) << 48) |
+               ( is.read()          << 56);
     }
 
     /**
@@ -253,19 +253,19 @@ public class ByteOrder {
             throws IndexOutOfBoundsException, IllegalArgumentException {
         switch (n) {
         case 1:
-            return   (int)x[offset    ] & 0xFF        ;
+            return   x[offset    ] & 0xFF        ;
         case 2:
-            return (((int)x[offset    ] & 0xFF) <<  8) |
-                   ( (int)x[offset + 1] & 0xFF       );
+            return ((x[offset    ] & 0xFF) <<  8) |
+                   ( x[offset + 1] & 0xFF       );
         case 3:
-            return (((int)x[offset    ] & 0xFF) << 16) |
-                   (((int)x[offset + 1] & 0xFF) <<  8) |
-                   ( (int)x[offset + 2] & 0xFF       );
+            return ((x[offset    ] & 0xFF) << 16) |
+                   ((x[offset + 1] & 0xFF) <<  8) |
+                   ( x[offset + 2] & 0xFF       );
         case 4:
-            return ( (int)x[offset    ]         << 24) |
-                   (((int)x[offset + 1] & 0xFF) << 16) |
-                   (((int)x[offset + 2] & 0xFF) <<  8) |
-                   ( (int)x[offset + 3] & 0xFF       );
+            return ( x[offset    ]         << 24) |
+                   ((x[offset + 1] & 0xFF) << 16) |
+                   ((x[offset + 2] & 0xFF) <<  8) |
+                   ( x[offset + 3] & 0xFF       );
         default:
             throw new IllegalArgumentException("No bytes specified");
         }
@@ -488,21 +488,21 @@ public class ByteOrder {
      * it as integer.  For example, ubyte2int(0xFF) == 255, not -1.
      */
     public static int ubyte2int(final byte x) {
-        return (int)x & 0xFF;
+        return x & 0xFF;
     }
 
     /**
      * Interprets the value of x as an unsigned two-byte number.
      */
     public static int ubytes2int(final short x) {
-        return (int)x & 0xFFFF;
+        return x & 0xFFFF;
     }
 
     /**
      * Interprets the value of x as an unsigned four-byte number.
      */
     public static long ubytes2long(final int x) {
-        return (long)x & 0xFFFFFFFFL;
+        return x & 0xFFFFFFFFL;
     }
 
     /**

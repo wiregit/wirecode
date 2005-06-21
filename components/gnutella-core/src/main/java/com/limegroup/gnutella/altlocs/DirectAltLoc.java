@@ -3,11 +3,10 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.URL;
-import java.net.UnknownHostException;
-
+import java.util.HashSet;
+import java.util.Set;
 
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
@@ -17,8 +16,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An alternate location that is directly reachable, i.e. not firewalled.

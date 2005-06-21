@@ -14,21 +14,15 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 import org.apache.commons.httpclient.URI;
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
-import org.xml.sax.InputSource;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.URN;
 
 /**
  * A concrete implementation of a License, for Creative Commons licenses.
@@ -310,7 +304,7 @@ class CCLicense extends AbstractLicense {
         // Do a first pass for Work elements.
         if(liveData) {
             for(int i = 0; i < children.getLength(); i++) {
-                Node child = (Node)children.item(i);
+                Node child = children.item(i);
                 if(child.getNodeName().equals("Work"))
                     parseWorkItem(child);
             }
@@ -318,7 +312,7 @@ class CCLicense extends AbstractLicense {
         
         // And a second pass for License elements.
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             if(child.getNodeName().equals("License"))
                 parseLicenseItem(child);
         }
@@ -352,7 +346,7 @@ class CCLicense extends AbstractLicense {
         // Get the license child element.
         NodeList children = work.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             if(child.getNodeName().equals("license")) {
                 attributes = child.getAttributes();
                 Node resource = attributes.getNamedItem("rdf:resource");
@@ -397,7 +391,7 @@ class CCLicense extends AbstractLicense {
         // Get the 'permit', 'requires', and 'prohibits' values.
         NodeList children = license.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             String name = child.getNodeName();
             if(name.equalsIgnoreCase("requires")) {
                 if(required == null)

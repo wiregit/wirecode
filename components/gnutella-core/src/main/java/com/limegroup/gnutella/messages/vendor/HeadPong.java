@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -315,7 +314,6 @@ public class HeadPong extends VendorMessage {
     			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
     				HeadPing.FWT_PUSH_ALTLOCS;
                 
-                Iterator iter = null;
                 if (FWTOnly) {
                     AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
                     synchronized(push) {

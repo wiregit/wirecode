@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.ObjectInputStream;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.CommonUtils;

@@ -5,7 +5,6 @@ import java.text.ParseException;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
-import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**

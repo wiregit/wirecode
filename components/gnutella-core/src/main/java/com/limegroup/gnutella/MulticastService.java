@@ -157,7 +157,7 @@ public final class MulticastService implements Runnable {
                     // but that's only available on 1.4 ... 
                 }                        
             }
-            _socket = (MulticastSocket) multicastSocket;
+            _socket = multicastSocket;
             _receiveLock.notify();
         }
 	}

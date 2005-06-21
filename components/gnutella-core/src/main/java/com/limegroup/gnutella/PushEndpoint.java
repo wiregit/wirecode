@@ -347,7 +347,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         byte [] guid =new byte[16];
         Set proxies = new IpPortSet(); 
         IpPort addr = null;
-        boolean hasAddr=false;
         
         int header = dais.read() & 0xFF;
         

@@ -686,7 +686,6 @@ public class Response {
 
             Set locations = null;
             long createTime = -1;
-            final byte[] ip = new byte[4];
             
             // if the block has a ALTS value, get it, parse it,
             // and move to the next.

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -12,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Collection;
-import java.util.zip.GZIPInputStream;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -30,7 +28,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way

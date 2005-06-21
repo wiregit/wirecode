@@ -2,8 +2,6 @@ package com.limegroup.gnutella;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.Message;

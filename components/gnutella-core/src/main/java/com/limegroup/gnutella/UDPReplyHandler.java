@@ -2,9 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.messages.Message;

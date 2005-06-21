@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.browser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -97,7 +96,7 @@ public class HTTPHandler {
      *  Echo back a page.
      */
 	public void uploadPage(String page) {
-        int             length  = (int)page.length();
+        int             length  = page.length();
 		byte[]          content;
 
         try {

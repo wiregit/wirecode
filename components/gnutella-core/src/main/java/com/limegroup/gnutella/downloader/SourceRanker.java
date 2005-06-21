@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import com.limegroup.gnutella.RemoteFileDesc;

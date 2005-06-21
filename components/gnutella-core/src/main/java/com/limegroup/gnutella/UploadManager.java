@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -1151,14 +1150,14 @@ public class UploadManager implements BandwidthTracker {
 		// speed is.  Note, that they may have set this
 		// wrong, but we have no way to tell.
 		float connectionSpeed = 
-            ((float)ConnectionSettings.CONNECTION_SPEED.getValue())/8.f;
+            ConnectionSettings.CONNECTION_SPEED.getValue()/8.0f;
 		// the second number is the speed that they have 
 		// allocated to uploads.  This is really a percentage
 		// that the user is willing to allocate.
 		float speed = UploadSettings.UPLOAD_SPEED.getValue();
 		// the total bandwith available then, is the percentage
 		// allocated of the total bandwith.
-		float totalBandwith = ((connectionSpeed*((float)speed/100.F)));
+		float totalBandwith = connectionSpeed*speed/100.0f;
 		return totalBandwith;
 	}
 

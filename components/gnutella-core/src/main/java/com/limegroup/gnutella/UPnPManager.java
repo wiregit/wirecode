@@ -6,7 +6,6 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Enumeration;

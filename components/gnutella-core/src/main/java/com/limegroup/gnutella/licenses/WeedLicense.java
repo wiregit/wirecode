@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.licenses;
 
-import java.io.Serializable;
-
 import java.net.URL;
 import java.net.MalformedURLException;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -15,13 +12,8 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
-import org.xml.sax.InputSource;
 
 /**
  * A concrete implementation of a License, for Weed licenses.
@@ -152,7 +144,7 @@ class WeedLicense extends AbstractLicense {
         
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             String name = child.getNodeName();
             String value = LimeXMLUtils.getTextContent(child);
             if(name == null || value == null)

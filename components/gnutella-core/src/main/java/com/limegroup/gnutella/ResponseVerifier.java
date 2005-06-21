@@ -102,7 +102,7 @@ public class ResponseVerifier {
             }
         }
 
-        return (int)((float)numMatchingWords * 100.f/(float)numQueryWords);
+        return (int)(100.0f * numMatchingWords/numQueryWords);
     }
 
     /**

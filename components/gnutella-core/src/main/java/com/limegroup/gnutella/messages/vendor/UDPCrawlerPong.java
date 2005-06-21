@@ -103,14 +103,14 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		if (!request.hasLocaleInfo()) {
 		//do a randomized trim.
-			if (request.getNumberUP() != request.ALL && 
+			if (request.getNumberUP() != UDPCrawlerPing.ALL && 
 				request.getNumberUP() < endpointsUP.size()) {
 				//randomized trim
 				int index = (int) Math.floor(Math.random()*
 					(endpointsUP.size()-request.getNumberUP()));
 				endpointsUP = endpointsUP.subList(index,index+request.getNumberUP());
 			}
-			if (request.getNumberLeaves() != request.ALL && 
+			if (request.getNumberLeaves() != UDPCrawlerPing.ALL && 
 					request.getNumberLeaves() < endpointsLeaf.size()) {
 				//randomized trim
 				int index = (int) Math.floor(Math.random()*
@@ -137,10 +137,10 @@ public class UDPCrawlerPong extends VendorMessage {
 			endpointsLeaf=prefedcons;
 			
 			//then trim down to the requested number
-			if (request.getNumberUP() != request.ALL && 
+			if (request.getNumberUP() != UDPCrawlerPing.ALL && 
 					request.getNumberUP() < endpointsUP.size())
 				endpointsUP = endpointsUP.subList(0,request.getNumberUP());
-			if (request.getNumberLeaves() != request.ALL && 
+			if (request.getNumberLeaves() != UDPCrawlerPing.ALL && 
 					request.getNumberLeaves() < endpointsLeaf.size())
 				endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
 		}

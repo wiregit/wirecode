@@ -4,10 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Properties;
 
-import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
