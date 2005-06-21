@@ -57,33 +57,69 @@ public final class FileUtilsTest extends BaseTestCase {
     }
 
 	public void testGetFilesRecursive() throws Exception {
-	
+		File tmpFile = File.createTempFile("tmp", "file");
+		File tmpDir = tmpFile.getParentFile();
+		tmpFile.delete();
+		
+        File emptyDir = new File(tmpDir, "emptydir");
+        File emptyNameDir = new File(tmpDir, "emptyname");
+        File emptyExtensionDir = new File(tmpDir, "emptyextension");
+        File recursiveDir = new File(tmpDir, "recursivedir");
+        
+        emptyDir.mkdir();
+        emptyNameDir.mkdir();
+        emptyExtensionDir.mkdir();
+        recursiveDir.mkdir();
+        
+        emptyDir.deleteOnExit();
+        emptyNameDir.deleteOnExit();
+        emptyExtensionDir.deleteOnExit();
+        recursiveDir.deleteOnExit();
+        
+		File subDir = new File(emptyDir, "subdir");
+		subDir.mkdir();
+		subDir.deleteOnExit();
+		
+		File f = new File(emptyNameDir, ".emptyname");
+		f.createNewFile();
+		f.deleteOnExit();
+		
+		f = new File(emptyExtensionDir, "emptyextension.");
+		f.createNewFile();
+		f.deleteOnExit();
+		
+		f = new File(recursiveDir, "afile.txt");
+		f.createNewFile();
+		f.deleteOnExit();
+		
+		f = new File(recursiveDir, "subdir");
+		f.mkdir();
+		f.deleteOnExit();
+		f = new File(f, "subfile.txt");
+		f.createNewFile();
+		f.deleteOnExit();
+	    
 		File[] fa = FileUtils.getFilesRecursive(emptyDir, null);
 		assertEquals("directory should have no files, only a subdir", 0, fa.length);
 		
 		fa = FileUtils.getFilesRecursive(emptyNameDir, null);
 		assertEquals("directory should have 1 hidden file", 1, fa.length);
 		
-		fa = FileUtils.getFilesRecursive(emptyNameDir, new String[] {
-				"emptyname"});
-		assertEquals("directory should have no file matching extension \"emptyname\"",
-				0, fa.length);
+		fa = FileUtils.getFilesRecursive(emptyNameDir, new String[] {"emptyname"});
+		assertEquals("directory should have no file matching extension \"emptyname\"", 0, fa.length);
 		
 		fa = FileUtils.getFilesRecursive(emptyExtensionDir, null);
 		assertEquals("directory should have one file", 1, fa.length);
 		
-		fa = FileUtils.getFilesRecursive(emptyExtensionDir, 
-				new String[] { "" });
-		assertEquals("directory should have no file matching empty extension", 
-				0, fa.length);
+		fa = FileUtils.getFilesRecursive(emptyExtensionDir, new String[] { "" });
+		assertEquals("directory should have no file matching empty extension", 0, fa.length);
 		
 		// test if files in subdirectories are found too
 		fa = FileUtils.getFilesRecursive(recursiveDir, null);
 		assertEquals("wrong number of files found", 2, fa.length);
 		
 		// test if files in subdirectories are found with filter
-		fa = FileUtils.getFilesRecursive(recursiveDir, new String[] {
-				"unmatchedextension", "", "txt"});
+		fa = FileUtils.getFilesRecursive(recursiveDir, new String[] {"unmatchedextension", "", "txt"});
 		assertEquals("wrong number of matching files found", 2, fa.length);
 	}
     

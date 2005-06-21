@@ -47,11 +47,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private Response[] responses;
     private FileDesc[] files;
 
-	private File emptyDir = null;
-	private File emptyNameDir;
-	private File emptyExtensionDir;
-	private File recursiveDir;
-
     public FileManagerTest(String name) {
         super(name);
     }
@@ -77,47 +72,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    fman = new SimpleFileManager();
 		
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
-	    
-		File tmpFile = File.createTempFile("tmp", "file");
-		File tmpDir = tmpFile.getParentFile();
-		tmpFile.delete();
-		
-		emptyDir = new File(tmpDir, "emptydir");
-		emptyDir.mkdir();
-		emptyDir.deleteOnExit();
-		
-		File subDir = new File(emptyDir, "subdir");
-		subDir.mkdir();
-		subDir.deleteOnExit();
-		
-		emptyNameDir = new File(tmpDir, "emptyname");
-		emptyNameDir.mkdir();
-		emptyNameDir.deleteOnExit();
-		
-		File f = new File(emptyNameDir, ".emptyname");
-		f.createNewFile();
-		f.deleteOnExit();
-		
-		emptyExtensionDir = new File(tmpDir, "emptyextension");
-		emptyExtensionDir.mkdir();
-		emptyExtensionDir.deleteOnExit();
-		
-		f = new File(emptyExtensionDir, "emptyextension.");
-		f.createNewFile();
-		f.deleteOnExit();
-		
-		recursiveDir = new File(tmpDir, "recursivedir");
-		recursiveDir.mkdir();
-		recursiveDir.deleteOnExit();
-		f = new File(recursiveDir, "afile.txt");
-		f.createNewFile();
-		f.deleteOnExit();
-		f = new File(recursiveDir, "subdir");
-		f.mkdir();
-		f.deleteOnExit();
-		f = new File(f, "subfile.txt");
-		f.createNewFile();
-		f.deleteOnExit();
 	}
 	
 	public void tearDown() {
@@ -759,7 +713,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		// not in shared directory and not specially shared, but valid extension
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
 		File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
-		result = addIfShared(addIfShared(validExt));
+		result = addIfShared(validExt);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(validExt, result.getFiles()[0]);
 
@@ -843,7 +797,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Windows")));
         assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("WINNT")));
         
-        setOSName("Mac OS X")
+        setOSName("Mac OS X");
         assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Users")));
         assertTrue("System should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System")));
         assertTrue("System Folder should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System Folder")));
@@ -1015,7 +969,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
-    protected FileManagerEvent addIfShared(File f) {
+    protected FileManagerEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
             fman.addFileIfShared(f, fel);
@@ -1024,7 +978,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         return fel.evt;
     }
     
-    protected FileManagerEvent addAlways(File f) {
+    protected FileManagerEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
             fman.addFileAlways(f, fel);
@@ -1033,7 +987,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         return fel.evt;
     }
     
-    protected FileManagerEvent renameIfShared(File f1, File f2) {
+    protected FileManagerEvent renameIfShared(File f1, File f2) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
             fman.renameFileIfShared(f1, f2, fel);
