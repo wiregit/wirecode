@@ -63,17 +63,17 @@ public class MagnetOptionsTest extends BaseTestCase {
 		// valid magnets
 		
 		// valid: has a url and a sha1
-		opts = MagnetOptions.parseMagnet("magnet:?xs=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		opts = MagnetOptions.parseMagnet("magnet:?xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 		// valid: has a url and keyword topic
-		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://bear.limewire.com:6346");
+		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 		// valid: has everything
-		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		
@@ -93,19 +93,19 @@ public class MagnetOptionsTest extends BaseTestCase {
 		
 		// hash only
 		
-		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		assertTrue("Should be hash only", opts[0].isHashOnly());
 		
 		// not hash only
 		
-		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://bear.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
 		
-		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://bear.limewire.com:6346");
+		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
