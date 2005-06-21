@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.net.URLEncoder;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class MagnetOptionsTest extends BaseTestCase {
@@ -108,6 +109,41 @@ public class MagnetOptionsTest extends BaseTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
+	}
+
+	public void testGetFileNameForSaving() throws Exception {
+
+		MagnetOptions magnet = MagnetOptions.createMagnet(null, "file name", null, null);
+		assertEquals("file name", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet("keywords", null, null, null);
+		assertEquals("keywords", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet("keywords", "", null, null);
+		assertEquals("keywords", magnet.getFileNameForSaving());
+		
+		URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+		
+		magnet = MagnetOptions.createMagnet(null, null, urn, null);
+		assertEquals(urn.toString(), magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet("", "", urn, null);
+		assertEquals(urn.toString(), magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet(null, null, null, new String[] { "http://www.limewire.com:4444/test.file" });
+		assertEquals("test.file", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet(null, null, null, new String[] { "http://www.limewire.com:4444/test.file?notpartofthename" });
+		assertEquals("test.file", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet("", "", null, new String[] { "http://192.168.0.2/test.file" });
+		assertEquals("test.file", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet(null, null, null, new String[] { "http://host/" });
+		assertEquals("MAGNET download from host", magnet.getFileNameForSaving());
+		
+		magnet = MagnetOptions.createMagnet(null, null, null, null);
+		assertNotNull(magnet.getFileNameForSaving());
 	}
 
 }
