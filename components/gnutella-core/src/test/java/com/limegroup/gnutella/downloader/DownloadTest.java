@@ -320,63 +320,74 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc[] rfds = {rfd};
         
         HTTP11Listener grayVerifier = new HTTP11Listener() {
-            private int requestNo;
+            //private int requestNo;
+            //public void requestHandled(){}
+            //public void thexRequestStarted() {}
+
+            /** The only lease that is DEFAULT_CHUNK_SIZE large */
+       	    private Interval firstLease = null;
+            
             public void requestHandled(){}
             public void thexRequestStarted() {}
             public void thexRequestHandled() {}
             
-            // checks whether we request chunks at the proper offset, etc.
+       	    // checks whether we request chunks at the proper offset, etc.
             public void requestStarted(TestUploader uploader) {
+                long fileSize = 0;
                 
-                Interval i = null;
+       	        Interval i = null;
                 try {
-                    IntervalSet leased = null;
-                    File incomplete = null;
+       	            IntervalSet leased = null;
+       	            File incomplete = null;
                     incomplete = ifm.getFile(rfd);
                     assertNotNull(incomplete);
                     VerifyingFile vf = ifm.getEntry(incomplete);
+                    fileSize = ((Integer)PrivilegedAccessor.getValue(vf, "completedSize")
+                                  ).longValue();
                     assertNotNull(vf);
-                    leased = (IntervalSet)
-                        PrivilegedAccessor.getValue(vf,"leasedBlocks");
-                    assertNotNull(leased);
+            	    leased = (IntervalSet)
+                                    PrivilegedAccessor.getValue(vf,"leasedBlocks");
+            	    assertNotNull(leased);
                     List l = leased.getAllIntervalsAsList();
                     assertEquals(1,l.size());
                     i = (Interval)l.get(0);
                 } catch (Exception bad) {
-                    fail(bad);
+                  fail(bad);
                 }
-                
-                switch(requestNo) {
-                    case 0: 
-                        // first request, we should have 0-99999 gray
-                        assertEquals(0,i.low);
-                        assertEquals(99999,i.high);
-                        break;
-                    case 1:
-                        // on the second request we have 100K-256K
-                        assertEquals(100000,i.low);
-                        assertEquals(256*1024 -1,i.high);
-                        break;
-                    case 2:
-                        // 256K-512K
-                        assertEquals(256*1024,i.low);
-                        assertEquals(512*1024 -1, i.high);
-                        break;
-                    case 3:
-                        // 512K-768K
-                        assertEquals(512*1024,i.low);
-                        assertEquals(768*1024 -1, i.high);
-                        break;
-                    case 4:
-                        // 768K-1,000,000
-                        assertEquals(768*1024,i.low);
-                        assertEquals(999999, i.high);
-                        break;
-                }
-                requestNo++;
-                
-            }
-        };
+        		
+                if (firstLease == null) {
+                    // first request, we should have the chunk aligned to
+                    // a DEFAULT_CHUNK_SIZE boundary
+                    assertEquals("First chunk has improperly aligned low byte.",
+                            0, i.low % VerifyingFile.DEFAULT_CHUNK_SIZE);
+                    if (i.high != fileSize-1 &&
+                            i.high % VerifyingFile.DEFAULT_CHUNK_SIZE != 
+                                VerifyingFile.DEFAULT_CHUNK_SIZE-1) {
+                        assertTrue("First chunk has improperly aligned high byte.",
+                                false);
+                    }
+                    firstLease = i;
+                } else {
+                    // on all other requests, we have 256k blocks
+                    // Check that the low byte is aligned    
+                    if (i.low % (256 * 1024) != 0 &&
+                            i.low != firstLease.high + 1) {
+                        assertTrue("Un-aligned low byte on chunk that is "+
+                                "not adjascent to the DEFAULT_CHUNK_SIZE chunk.",
+                                false);
+                    }
+                    // Check that the high byte is aligned    
+                    if (i.high % (256 * 1024) != 256*1024-1 &&
+                            i.high != firstLease.low - 1 &&
+                            i.high != fileSize-1) {
+                        assertTrue("Un-aligned high byte on chunk that is "+
+                                "not adjascent to the DEFAULT_CHUNK_SIZE chunk "+
+                                "and is not the last chunk of the file",
+                                false);
+                    }
+                } // close of if-else
+            } // close of method
+        }; // close of inner class
         
         uploader1.setHTTPListener(grayVerifier);
         uploader1.setSendThexTreeHeader(true);
@@ -1607,8 +1618,8 @@ public class DownloadTest extends BaseTestCase {
         assertFalse(u2Alt.isEmpty());
 
         AlternateLocation al = AlternateLocation.create(TestFile.hash());
-        assertTrue( u1Alt.contains(al) );
-        assertTrue( u2Alt.contains(al) );        
+        assertTrue(u1Alt.toString()+" should contain "+al, u1Alt.contains(al) );
+        assertTrue(u2Alt.toString()+" should contain "+al,  u2Alt.contains(al) );        
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are started at different times.

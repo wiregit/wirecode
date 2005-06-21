@@ -33,6 +33,19 @@ public class IntervalSet {
         intervals = new TreeSet(IntervalComparator.INSTANCE);
     }
 
+    /**
+     * Creates an interval set representing a single Interval.
+     * 
+     * @param lowBound the lower bound of the represented Interval
+     * @param highBound the upper bound of the represented Interval
+     * @return an IntervalSet representing the range lowBound to highBound, inclusive.
+     */
+    public static IntervalSet createSingletonSet(long lowBound, long highBound) {
+        IntervalSet ret = new IntervalSet();
+        ret.add(new Interval(lowBound, highBound));
+        return ret;
+    }
+    
     public void add(Interval addInterval) {
         int low = addInterval.low;
         int high = addInterval.high;
@@ -132,12 +145,35 @@ public class IntervalSet {
     }
     
     /**
-     * Deletes the specified all intervals in the specified set
+     * Deletes all intervals in the specified set
      * from this set.
      */
     public void delete(IntervalSet set) {
         for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
             delete((Interval)iter.next());
+    }
+    
+    /**
+     * Returns the first element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
+     */
+    public Interval getFirst() throws NoSuchElementException {
+        Interval ret = (Interval)intervals.first();
+        return ret;
+    }
+    
+    /**
+     * Returns the last element without modifying this IntervalSet.
+     * @throws NoSuchElementException if no intervals exist.
+     */
+    public Interval getLast() throws NoSuchElementException {
+        Interval ret = (Interval)intervals.last();
+        return ret;
+    }
+    
+    /** @return the number of Intervals in this IntervalSet */
+    public int getNumberOfIntervals() {
+        return intervals.size();
     }
     
     /**
@@ -191,13 +227,13 @@ public class IntervalSet {
             }
             //case b:
             if(low<=interval.high && interval.low < low) {
-                overlapBlocks.add(new Interval((int)low,
-                                           Math.min((int)high,interval.high)));
+                overlapBlocks.add(new Interval(low,
+                                           Math.min(high,interval.high)));
             }
             //case c:
             if(interval.low <= high && interval.high > high) {
-                overlapBlocks.add(new Interval(Math.max(interval.low,(int)low),
-                                               (int)high));
+                overlapBlocks.add(new Interval(Math.max(interval.low,low),
+                                               high));
             }
             //Note: There is one condition under which case b and c are both
             //true. In this case the same interval will be added twice. The

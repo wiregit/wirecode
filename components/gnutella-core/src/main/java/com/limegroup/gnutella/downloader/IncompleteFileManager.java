@@ -426,20 +426,20 @@ public class IncompleteFileManager implements Serializable {
                 Iterator iter = ((List)o).iterator();
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile((int)getCompletedSize(f));
-                } catch(IllegalArgumentException iae) {
+                    vf = new VerifyingFile((int) getCompletedSize(f));
+                } catch (IllegalArgumentException iae) {
                     vf = new VerifyingFile();
                 }
-                while(iter.hasNext()) {
-                    Interval interval = (Interval)iter.next();
-                    //older intervals excuded the high'th byte, so we decrease
-                    //the value of interval.high. An effect of this is that
-                    //an older client with a newer download.dat downloads one
-                    //byte extra for each interval.
-                    interval= new Interval(interval.low,interval.high-1);
+                while (iter.hasNext()) {
+                    Interval interval = (Interval) iter.next();
+                    // older intervals excuded the high'th byte, so we decrease
+                    // the value of interval.high. An effect of this is that
+                    // an older client with a newer download.dat downloads one
+                    // byte extra for each interval.
+                    interval = new Interval(interval.low, interval.high - 1);
                     vf.addInterval(interval);
                 }
-                        retMap.put(f, vf);
+                retMap.put(f, vf);
             }
         }//end of for
         return retMap;

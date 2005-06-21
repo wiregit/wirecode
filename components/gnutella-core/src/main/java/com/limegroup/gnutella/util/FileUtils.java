@@ -155,13 +155,25 @@ public class FileUtils {
     /**
      * Utility method that returns the file extension of the given file.
      * 
-     * @param f the <tt>File</tt> instance that the extension should
-     *   be extracted from
+     * @param f the <tt>File</tt> instance from which the extension 
+     *   should be extracted
      * @return the file extension string, or <tt>null</tt> if the extension
      *   could not be extracted
      */
     public static String getFileExtension(File f) {
         String name = f.getName();
+        return getFileExtension(name);
+    }
+     
+    /**
+     * Utility method that returns the file extension of the given file.
+     * 
+     * @param name the file name <tt>String</tt> from which the extension
+     *  should be extracted
+     * @return the file extension string, or <tt>null</tt> if the extension
+     *   could not be extracted
+     */
+    public static String getFileExtension(String name) {
         int index = name.lastIndexOf(".");
         if(index == -1) return null;
         
