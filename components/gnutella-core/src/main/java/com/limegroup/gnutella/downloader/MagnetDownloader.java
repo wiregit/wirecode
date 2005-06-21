@@ -270,30 +270,18 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /** 
      * Overrides ManagedDownloader to allow any files with the right
-     * hash/keywords, even if this doesn't currently have any download
-     * locations.  
+     * hash even if this doesn't currently have any download
+     * locations.
+     * <p>
+     * We only allow for additions if the download has a sha1.  
      */
     protected boolean allowAddition(RemoteFileDesc other) {        
-        //Allow if we have a hash and other matches it.
-		MagnetOptions magnet = getMagnet();
-		URN urn = magnet.getSHA1Urn();
-        if (urn!=null) {
-            Set urns=other.getUrns();
-            if (urns!=null && urns.contains(urn))
-                return true;
-        }
-        //Allow if we specified query keywords and the filename matches.  TODO3:
-        //this tokenizes the query keyword every time.  Would it be better to
-        //make ResponseVerifier.getSearchTerms/score(keywords[], name) public?
-		String textQuery = magnet.getQueryString();
-		if (textQuery == null) {
-			textQuery = getSaveFile().getName();
+        // Allow if we have a hash and other matches it.
+		URN otherSHA1 = other.getSHA1Urn();
+		if (downloadSHA1 != null && otherSHA1 != null) {
+			return downloadSHA1.equals(otherSHA1);
 		}
-		int score=ResponseVerifier.score(textQuery, null, other);
-		if (score==100)
-			return true;
-		//No match?  Error.
-        return false;
+		return false;
     }
 
 	/**

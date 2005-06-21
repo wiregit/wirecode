@@ -1158,8 +1158,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 	 * write to the same incomplete file as this downloader does.  
 	 * @param urn can be <code>null</code>, then the check is based upon fileName
 	 * and fileSize
-	 * @param fileName
-	 * @param fileSize
+	 * @param fileName, must not be <code>null</code>
+	 * @param fileSize, can be 0
 	 * @return
 	 */
 	public boolean conflicts(URN urn, String fileName, int fileSize) {
@@ -1172,7 +1172,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
 				return conflictsWithIncompleteFile(file);
 			} catch (IOException e) {
 			}
-
 		}
 		return false;
 	}
@@ -1380,7 +1379,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, Serializable 
      * added to 'files', the list of RFDs we will connect to.
      *
      * If the RFD matches one already in allFiles, the new one is
-     * NOT added to allFiles, but IS added the list of RFDs to connect to
+     * NOT added to allFiles, but IS added to the list of RFDs to connect to
      * if and only if a matching RFD is not currently in that list.
      *
      * This ALWAYS returns true, because the download is either allowed
