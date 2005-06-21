@@ -863,6 +863,13 @@ public abstract class FileManager {
 	}
 	
 	/**
+	 * Always shares a file, notifying the given callback when shared.
+	 */
+	public void addFileAlways(File file, FileEventListener callback) {
+	    addFileAlways(file, Collections.EMPTY_LIST, callback);
+	}
+	
+	/**
 	 * Always shares the given file, using the given list of metadata.
 	 */
 	public void addFileAlways(File file, List list) {
@@ -891,6 +898,13 @@ public abstract class FileManager {
    public void addFileIfShared(File file) {
        addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, null);
    }
+   
+    /**
+     * Adds the given file if it's shared, notifying the given callback.
+     */
+    public void addFileIfShared(File file, FileEventListener callback) {
+        addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, callback);
+    }
     
     /**
      * Adds the file if it's shared, using the given list of metadata.
@@ -913,42 +927,49 @@ public abstract class FileManager {
      * @param notify if true signals the front-end via 
      *        ActivityCallback.handleFileManagerEvent() about the Event
      */
-    protected void addFileIfShared(File f, final List metadata, final boolean notify,
-                                   final int revision, FileEventListener listener) {
+    protected void addFileIfShared(File file, List metadata, boolean notify,
+                                   int revision, FileEventListener callback) {
      //   if(LOG.isDebugEnabled())
      //       LOG.debug("Attempting to share file: " + f);
-
-        final FileEventListener callback = listener == null ? EMPTY_CALLBACK : listener;
+        if(callback == null)
+            callback = EMPTY_CALLBACK;
 
         if(revision != _revision) {
-            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
         }
         
         // Make sure capitals are resolved properly, etc.
         try {
-            f = FileUtils.getCanonicalFile(f);
+            file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
-            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
+            callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
 	    }
 	    
         synchronized(this) {
-		    if (revision != _revision || !isFileShareable(f)) {
-                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, f));
+		    if (revision != _revision || !isFileShareable(file)) {
+                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
             }
         
-            if(isFileShared(f)) {
-                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, f));
+            if(isFileShared(file)) {
+                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
                 return;
             }
             
             _numPendingFiles++;
         }
 
-	    final File file = f;		
-		UrnCache.instance().calculateAndCacheUrns(file, new UrnCallback() {
+		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+    }
+    
+    /**
+     * Constructs a new UrnCallback that will possibly load the file with the given URNs.
+     */
+    protected UrnCallback getNewUrnCallback(final File file, final List metadata, final boolean notify,
+                                            final int revision, final FileEventListener callback) {
+        return new UrnCallback() {
 		    public void urnsCalculated(File f, Set urns) {
 	//	        if(LOG.isDebugEnabled())
 	//	            LOG.debug("URNs calculated for file: " + f);
@@ -986,7 +1007,7 @@ public abstract class FileManager {
             public boolean isOwner(Object o) {
                 return o == FileManager.this;
             }
-        });
+        };
     }
     
     /**
@@ -1335,6 +1356,13 @@ public abstract class FileManager {
             }
 		}
     }
+    
+    /**
+     * Renames a from from 'oldName' to 'newName'.
+     */
+    public void renameFileIfShared(File oldName, File newName) {
+        renameFileIfShared(oldName, newName, null);
+    }
 
     /** 
      * If oldName isn't shared, returns false.  Otherwise removes "oldName",
@@ -1343,15 +1371,20 @@ public abstract class FileManager {
      * Note that this does not change the disk.
      * @modifies this 
      */
-    public synchronized void renameFileIfShared(File oldName, final File newName) {
+    public synchronized void renameFileIfShared(File oldName, final File newName, final FileEventListener callback) {
         FileDesc toRemove = getFileDescForFile(oldName);
-        if (toRemove == null)
+        if (toRemove == null) {
+            FileManagerEvent evt = new FileManagerEvent(this, FileManagerEvent.FAILED, oldName);
+            RouterService.getCallback().handleFileManagerEvent(evt);
+            if(callback != null)
+                callback.handleFileEvent(evt);
             return;
+        }
             
         List xmlDocs = new LinkedList(toRemove.getLimeXMLDocuments());
 		final FileDesc removed = removeFileIfShared(oldName, false);
         Assert.that(removed == toRemove, "invariant broken.");
-		if (_data.SPECIAL_FILES_TO_SHARE.contains(oldName) && !isFileInCompletelySharedDirectory(newName))
+		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
@@ -1370,6 +1403,8 @@ public abstract class FileManager {
                                        removed);
                 }
                 RouterService.getCallback().handleFileManagerEvent(newEvt);
+                if(callback != null)
+                    callback.handleFileEvent(newEvt);
             }
         });
     }
