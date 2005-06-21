@@ -554,7 +554,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
     }
     
-    public static Set calculateAndCacheURN(File f) {
+    public static Set calculateAndCacheURN(File f) throws Exception {
         final Set myUrns = new HashSet(1);
         UrnCallback blocker = new UrnCallback() {
             public void urnsCalculated(File file, Set urns) {
@@ -571,11 +571,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         
         synchronized(myUrns) {
             UrnCache.instance().calculateAndCacheUrns(f, blocker);
-            try {
-                myUrns.wait();
-            } catch(InterruptedException ie) {
-                fail("interrupted!", ie);
-            }
+            if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
+                myUrns.wait(3000);
         }
         
         return myUrns;
@@ -744,7 +741,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                     return m;
                 i = 0;
             } catch (InterruptedIOException ie) {
-                ie.printStackTrace();
+//                ie.printStackTrace();
                 return null;            
             } catch (IOException iox) {
                 //ignore iox
