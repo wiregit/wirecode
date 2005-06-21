@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -23,8 +24,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * the same tests ran for SimpleFileManager can be run for 
  * MetaFileManager.
  */
-public class MetaFileManagerTest 
-    extends com.limegroup.gnutella.FileManagerTest {
+public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest {
 
     public MetaFileManagerTest(String name) {
         super(name);
@@ -49,9 +49,7 @@ public class MetaFileManagerTest
         	    
 	    cleanFiles(_sharedDir, false);
         fman = new MetaFileManager();
-        PrivilegedAccessor.setValue(RouterService.class, 
-                                    "fileManager",
-                                    fman);
+        PrivilegedAccessor.setValue(RouterService.class,  "fileManager", fman);
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	    
 	}
@@ -64,7 +62,9 @@ public class MetaFileManagerTest
 	    LimeXMLDocument d1 = new LimeXMLDocument(buildAudioXMLString(
 	        "artist=\"Sammy B\" album=\"Jazz in G\""));
 	    List l1 = new ArrayList(); l1.add(d1);
-	    fman.addFileIfShared(f1, l1);
+	    FileManagerEvent result = addIfShared(f1, l1);
+	    assertTrue(result.toString(), result.isAddEvent());
+	    assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 	    
 	    Response[] r1 = fman.query(QueryRequest.createQuery("sam",
 	                                buildAudioXMLString("artist=\"sam\"")));
@@ -98,7 +98,9 @@ public class MetaFileManagerTest
         LimeXMLDocument d2 = new LimeXMLDocument(buildAudioXMLString(
             "album=\"jazz in e\""));
         List l2 = new ArrayList(); l2.add(d2);
-        fman.addFileIfShared(f2, l2);
+        result = addIfShared(f2, l2);
+	    assertTrue(result.toString(), result.isAddEvent());
+	    assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         // pure keyword.
         Response[] r5 = fman.query(QueryRequest.createQuery("jazz in d"));
@@ -131,29 +133,23 @@ public class MetaFileManagerTest
 
         //now test xml metadata in the QRT
         File f2 = createNewNamedTestFile(11, "metadatafile2");
-        LimeXMLDocument newDoc2 =
-            new LimeXMLDocument(buildVideoXMLString(dir2));
-
+        LimeXMLDocument newDoc2 = new LimeXMLDocument(buildVideoXMLString(dir2));
         List l2 = new ArrayList();
         l2.add(newDoc2);
         
-        fman.addFileIfShared(f2, l2);
+	    FileManagerEvent result = addIfShared(f2, l2);
+	    assertTrue(result.toString(), result.isAddEvent());
+	    assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         qrt = fman.getQRT();
         
-        assertTrue("expected in QRT", 
-                   qrt.contains 
-                   (get_qr(buildVideoXMLString(dir2))));
-        assertFalse("should not be in QRT", 
-                    qrt.contains
-                    (get_qr(buildVideoXMLString("sasami juzo"))));
+        assertTrue("expected in QRT", qrt.contains (get_qr(buildVideoXMLString(dir2))));
+        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString("director=\"sasami juzo\""))));
         
         //now remove the file and make sure the xml gets deleted.
         fman.removeFileIfShared(f2);
         qrt = fman.getQRT();
        
-        assertFalse("should not be in QRT",
-                    qrt.contains
-                    (get_qr(buildVideoXMLString(dir2))));
+        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString(dir2))));
     }
 
     public void testMetaQueries() throws Exception {
@@ -161,16 +157,13 @@ public class MetaFileManagerTest
         String dir1 = "director=\"loopola\"";
 
         //make sure there's nothing with this xml query
-        Response[] res = 
-            fman.query(QueryRequest.createQuery("", 
-                                                buildVideoXMLString(dir1)));
+        Response[] res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
         
         assertEquals("there should be no matches", 0, res.length);
         
         File f1 = createNewNamedTestFile(10, "test_this");
         
-        LimeXMLDocument newDoc1 = 
-            new LimeXMLDocument(buildVideoXMLString(dir1));
+        LimeXMLDocument newDoc1 = new LimeXMLDocument(buildVideoXMLString(dir1));
         List l1 = new ArrayList();
         l1.add(newDoc1);
 
@@ -178,8 +171,7 @@ public class MetaFileManagerTest
         String dir2 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
         File f2 = createNewNamedTestFile(11, "hmm");
 
-        LimeXMLDocument newDoc2 = 
-            new LimeXMLDocument(buildVideoXMLString(dir2));
+        LimeXMLDocument newDoc2 = new LimeXMLDocument(buildVideoXMLString(dir2));
         List l2 = new ArrayList();
         l2.add(newDoc2);
 
@@ -193,45 +185,43 @@ public class MetaFileManagerTest
         l3.add(newDoc3);
         
         //add files and check they are returned as responses
-        fman.addFileIfShared(f1, l1);
-        fman.addFileIfShared(f2, l2);
-        fman.addFileIfShared(f3, l3);
+        FileManagerEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        result = addIfShared(f2, l2);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        result = addIfShared(f3, l3);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 
-        res = fman.query(QueryRequest.createQuery("", 
-                                                  buildVideoXMLString(dir1)));
+        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 
-        res = fman.query(QueryRequest.createQuery("", 
-                                                 buildVideoXMLString(dir2)));
+        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
         
         //remove a file
         fman.removeFileIfShared(f1);
 
-        res = fman.query(QueryRequest.createQuery("", 
-                                                  buildVideoXMLString(dir1)));
+        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be no matches", 0, res.length);
         
         //make sure the two other files are there
-        res = fman.query(QueryRequest.createQuery("",
-                                                  buildVideoXMLString(dir2)));
+        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
 
         //remove another and check we still have on left
         fman.removeFileIfShared(f2);
-        
-        res = fman.query(QueryRequest.createQuery("",
-                                                  buildVideoXMLString(dir3)));
-        
+        res = fman.query(QueryRequest.createQuery("",buildVideoXMLString(dir3)));
         assertEquals("there should be one match", 1, res.length);
 
         //remove the last file and make sure we get no replies
         fman.removeFileIfShared(f3);
-        
-        res = fman.query(QueryRequest.createQuery("",
-                                                  buildVideoXMLString(dir3)));
+        res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
-        
     }
 
     private QueryRequest get_qr(File f) {
@@ -257,7 +247,15 @@ public class MetaFileManagerTest
             + keyname 
             + "></audio></audios>";
     }    
-
+    
+    protected FileManagerEvent addIfShared(File f, List l) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.addFileIfShared(f, l, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
 
 }
 

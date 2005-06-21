@@ -665,6 +665,8 @@ public abstract class FileManager {
             LOG.debug("Finished queueing shared files for revision: " + revision);
             
         _updatingFinished = revision;
+        if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
+            _pendingFinished = revision;
         tryToFinish();
     }
     
@@ -931,8 +933,8 @@ public abstract class FileManager {
      */
     protected void addFileIfShared(File file, List metadata, boolean notify,
                                    int revision, FileEventListener callback) {
-     //   if(LOG.isDebugEnabled())
-     //       LOG.debug("Attempting to share file: " + f);
+//        if(LOG.isDebugEnabled())
+//            LOG.debug("Attempting to share file: " + file);
         if(callback == null)
             callback = EMPTY_CALLBACK;
 
@@ -973,8 +975,8 @@ public abstract class FileManager {
                                             final int revision, final FileEventListener callback) {
         return new UrnCallback() {
 		    public void urnsCalculated(File f, Set urns) {
-	//	        if(LOG.isDebugEnabled())
-	//	            LOG.debug("URNs calculated for file: " + f);
+//		        if(LOG.isDebugEnabled())
+//		            LOG.debug("URNs calculated for file: " + f);
 		        
 		        FileDesc fd = null;
 		        synchronized(FileManager.this) {
@@ -1002,8 +1004,10 @@ public abstract class FileManager {
                     callback.handleFileEvent(new FileManagerEvent(FileManager.this, FileManagerEvent.FAILED, file));
                 }
                 
-                _pendingFinished = revision;
-                tryToFinish();
+                if(_numPendingFiles == 0) {
+                    _pendingFinished = revision;
+                    tryToFinish();
+                }
             }
             
             public boolean isOwner(Object o) {

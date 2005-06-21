@@ -171,11 +171,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         waitForLoad();
         f3 = createNewTestFile(11);
 
-        //Remove file that's shared.  Back to 1 file.                        
-        assertNull("shouldn't have been able to remove unshared file", 
-            fman.removeFileIfShared(f3));
-        assertNotNull("should have been able to remove shared file", 
-            fman.removeFileIfShared(f2));
+        //Remove file that's shared.  Back to 1 file.                   
+        assertEquals(2, fman.getNumFiles());     
+        assertNull("shouldn't have been able to remove unshared file",  fman.removeFileIfShared(f3));
+        assertNotNull("should have been able to remove shared file", fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
@@ -624,6 +623,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 * @throws Exception
 	 */
 	public void testAddFileAlways() throws Exception {
+	    assertFalse(fman.isLoadFinished());
+	    waitForLoad(); // ensure it's loaded with 0 files.
+	    assertEquals(0, fman.getNumFiles());
+	    assertTrue(fman.isLoadFinished());
+	    
 		// test if too large files are not shared
 		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
 		FileManagerEvent result = addAlways(tooLarge);
@@ -639,11 +643,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		
 		// try again, it will fail because it's already shared.
 		result = addAlways(test);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isAlreadySharedEvent());
 		assertEquals(test, result.getFiles()[0]);
 		
 		// test that non-existent files are not shared
-		test = new File("non existent file");
+		test = new File("non existent file").getCanonicalFile();
 		result = addAlways(test);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(test, result.getFiles()[0]);
@@ -660,36 +664,32 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // try again, it will fail because it's already shared.
         result = addAlways(test);
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.isAlreadySharedEvent());
         assertEquals(test, result.getFiles()[0]);
 	}
 
 	public void testIsFileInCompletelySharedDirectory() throws Exception {
 		// non existent file should not be in a shared directory
 		File nonexistent = new File("nonexistent");
-		assertFalse("File should not be in a shared directory", 
-				fman.isFileInCompletelySharedDirectory(nonexistent));
+		assertFalse("File should not be in a shared directory", fman.isFileInCompletelySharedDirectory(nonexistent));
 		
 		File dir = createNewBaseDirectory("notshared");
 		dir.mkdir();
 		dir.deleteOnExit();
 		File test = createNewNamedTestFile(10, "noshared", dir);
-		assertFalse("File should not be in a shared directory",
-				fman.isFileInCompletelySharedDirectory(test));
+		assertFalse("File should not be in a shared directory",fman.isFileInCompletelySharedDirectory(test));
 		
 		// test for files in subdirs
 		File subDir = new File(_sharedDir, "newSubDir");
 		subDir.mkdir();
 		subDir.deleteOnExit();
 		waitForLoad();
-		assertTrue("Subdir should be in shared directory", 
-				fman.isFileInCompletelySharedDirectory(subDir));
+		assertTrue("Subdir should be in shared directory", fman.isFileInCompletelySharedDirectory(subDir));
 		
 		test = createNewNamedTestFile(50, "subdirfile", subDir);
 		waitForLoad();
 		// test if subdir is shared
-		assertTrue("File in subdir should be in shared directory now",
-				fman.isFileInCompletelySharedDirectory(test));
+		assertTrue("File in subdir should be in shared directory now", fman.isFileInCompletelySharedDirectory(test));
 	}
 	
 	/**
@@ -705,13 +705,16 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		
 		// non shareable extension in shared directory
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
+		waitForLoad(); // set the extensions correctly.
 		File nonshareable = createNewNamedTestFile(10, "nonshareable extension");
 		FileManagerEvent result = addIfShared(nonshareable);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(nonshareable, result.getFiles()[0]);
+		nonshareable.delete();
 		
 		// not in shared directory and not specially shared, but valid extension
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+		waitForLoad(); // set the new extensions
 		File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
 		result = addIfShared(validExt);
 		assertTrue(result.toString(), result.isFailedEvent());
@@ -724,7 +727,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// nonexistent in non shared directory
-		nonexistent = new File("nonexistent." + EXTENSION);
+		nonexistent = new File("nonexistent." + EXTENSION).getCanonicalFile();
 		result = addIfShared(nonexistent);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(nonexistent, result.getFiles()[0]);
@@ -740,15 +743,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		File shareable = createNewNamedTestFile(10, "shareable");
 		result = addIfShared(shareable);
 		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(shareable, result.getFileDescs()[0]);
+		assertEquals(shareable, result.getFileDescs()[0].getFile());
 		assertEquals(1, fman.getNumFiles());
 		assertEquals(result.getFileDescs()[0], fman.get(0));
 		
 		// files with shareable extension, specially shared
 		File speciallyShareable = createNewNamedTestFile(10, "specially shareable", _sharedDir.getParentFile());
-		result = addAlways(shareable);
+		result = addAlways(speciallyShareable);
 		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(speciallyShareable, result.getFileDescs()[0]);
+		assertEquals(speciallyShareable, result.getFileDescs()[0].getFile());
 		assertEquals(2, fman.getNumFiles());
 		assertEquals(result.getFileDescs()[0], fman.get(1));
 		
@@ -757,7 +760,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		File speciallyShared = createNewNamedTestFile(10, "speciall shared", _sharedDir.getParentFile());
 		result = addAlways(speciallyShared);
 		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(speciallyShared, result.getFileDescs()[0]);
+		assertEquals(speciallyShared, result.getFileDescs()[0].getFile());
 		assertEquals(3, fman.getNumFiles());
 		assertEquals(result.getFileDescs()[0], fman.get(2));
 	}
@@ -961,8 +964,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }    
     
-    private static class Listener implements FileEventListener {
-        FileManagerEvent evt;
+    public static class Listener implements FileEventListener {
+        public FileManagerEvent evt;
         public synchronized void handleFileEvent(FileManagerEvent fme) {
             evt = fme;
             notify();

@@ -48,7 +48,7 @@ public class FileManagerEvent extends EventObject {
      * Useful for 'FAILED', 'ALREADY_SHARED', 'REMOVE_FOLDER' events.
      */
     public FileManagerEvent(FileManager manager, int kind, File file) {
-        this(manager, kind, file, null);
+        this(manager, kind, new File[] { file } );
     }
     
     /**
@@ -56,9 +56,16 @@ public class FileManagerEvent extends EventObject {
      * Useful for 'ADD_FOLDER' events.
      */
     public FileManagerEvent(FileManager manager, int kind, File folder, File parent) {
+        this(manager, kind, new File[] { folder, parent });
+    }
+    
+    /**
+     * Constructs a FileManagerEvent with a bunch of files.
+     */
+    public FileManagerEvent(FileManager manager, int kind, File[] files) {
         super(manager);
         this.kind = kind;
-        this.files = new File[] { folder, parent };
+        this.files = files;
         this.fds = null;
     }
     
@@ -160,6 +167,9 @@ public class FileManagerEvent extends EventObject {
             case FAILED:
                 buffer.append("FAILED");
                 break;
+            case ALREADY_SHARED:
+                buffer.append("ALREADY_SHARED");
+                break;
             case ADD_FOLDER:
                 buffer.append("ADD_FOLDER");
                 break;
@@ -173,16 +183,22 @@ public class FileManagerEvent extends EventObject {
         
         if (fds != null) {
             buffer.append(", fds=").append(fds.length).append("\n");
-            for(int i = 0; i < fds.length; i++)
+            for(int i = 0; i < fds.length; i++) {
                 buffer.append(fds[i]);
+                if(i != fds.length -1)
+                    buffer.append(", ");
+            }
         } else {
             buffer.append(", fds=null");
         }
         
         if (files != null) {
             buffer.append(", files=").append(files.length).append("\n");
-            for(int i = 0; i < files.length; i++)
+            for(int i = 0; i < files.length; i++) {
                 buffer.append(files[i]);
+                if(i != files.length -1)
+                    buffer.append(", ");
+            }
         } else {
             buffer.append(", files=null");
         }
