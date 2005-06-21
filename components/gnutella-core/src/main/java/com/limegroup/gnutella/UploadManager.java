@@ -576,7 +576,7 @@ public class UploadManager implements BandwidthTracker {
                 return;
             }
             // If the name they want isn't the name we have, FNF.
-            if(!uploader.getFileName().equals(fd.getName())) {
+            if(!uploader.getFileName().equals(fd.getFileName())) {
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " wrong file name");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
@@ -1431,7 +1431,7 @@ public class UploadManager implements BandwidthTracker {
                   "Invalid URN query", isHTTP11Request(requestLine));
 		}		
         UploadStat.URN_GET.incrementStat();
-		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
+		return new HttpRequestLine(desc.getIndex(), desc.getFileName(), 
 								   isHTTP11Request(requestLine), params, false);
 	}
 

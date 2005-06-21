@@ -119,4 +119,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting NO_STILL_CONNECTING =
         FACTORY.createBooleanSetting("NO_STILL_CONNECTING", false);
+	
+	/**
+	 * Setting for whether or not to display a warning message if one of the
+	 * created magnet links contains a firewalled address.
+	 */
+	public static final BooleanSetting FIREWALLED_MAGNET_LINK = 
+		FACTORY.createBooleanSetting("FIREWALLED_MAGNET_LINK", false);
 }

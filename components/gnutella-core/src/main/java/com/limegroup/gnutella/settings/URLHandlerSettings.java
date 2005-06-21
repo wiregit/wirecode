@@ -30,5 +30,6 @@ public final class URLHandlerSettings extends LimeProps {
 	 */
 	public static final StringSetting AUDIO_PLAYER =
 		FACTORY.createStringSetting("AUDIO_PLAYER", "xterm -e mplayer $URL$");
+	
 }
 

@@ -755,7 +755,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case CORRUPT_FILE:
                 setState(status);
                 break;
-            case WAITING_FOR_RETRY:
+			case BUSY:
             case GAVE_UP:
                 if(stopped)
                     setState(ABORTED);
@@ -799,8 +799,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             ; // all done for now.
 
        // If busy, try waiting for that busy host.
-        else if (getState() == WAITING_FOR_RETRY)
-            setState(WAITING_FOR_RETRY, ranker.calculateWaitTime());
+        else if (getState() == BUSY)
+            setState(BUSY, ranker.calculateWaitTime());
         
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
@@ -861,7 +861,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                       ", left: " + getRemainingStateTime());
         
         switch(getState()) {
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
             // If we're finished waiting on busy hosts,
@@ -992,7 +992,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         case WAITING_FOR_USER:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case PAUSED:
             return true;
         }
@@ -1186,8 +1186,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * write to the same incomplete file as this downloader does.  
 	 * @param urn can be <code>null</code>, then the check is based upon fileName
 	 * and fileSize
-	 * @param fileName
-	 * @param fileSize
+	 * @param fileName, must not be <code>null</code>
+	 * @param fileSize, can be 0
 	 * @return
 	 */
 	public boolean conflicts(URN urn, String fileName, int fileSize) {
@@ -1200,7 +1200,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 				return conflictsWithIncompleteFile(file);
 			} catch (IOException e) {
 			}
-
 		}
 		return false;
 	}
@@ -1309,7 +1308,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         // get other info...
 		final URN otherUrn = other.getSHA1Urn();
         final String otherName = other.getFileName();
-        final long otherLength = other.getSize();
+        final long otherLength = other.getFileSize();
 
         synchronized (this) {
             if(otherUrn != null && downloadSHA1 != null)
@@ -1320,7 +1319,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 // get current info....
                 RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
                 final String thisName = rfd.getFileName();
-                final long thisLength = rfd.getSize();
+                final long thisLength = rfd.getFileSize();
 				
                 // if they are similarly named and same length
                 // do length check first, much less expensive.....
@@ -1416,14 +1415,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * added to 'files', the list of RFDs we will connect to.
      *
      * If the RFD matches one already in allFiles, the new one is
-     * NOT added to allFiles, but IS added the list of RFDs to connect to
+     * NOT added to allFiles, but IS added to the list of RFDs to connect to
      * if and only if a matching RFD is not currently in that list.
      *
      * This ALWAYS returns true, because the download is either allowed
      * or silently ignored (because we're already downloading or going to
      * attempt to download from the host described in the RFD).
      */
-    protected synchronized final boolean addDownloadForced(RemoteFileDesc rfd,
+    protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
 
         // DO NOT DOWNLOAD FROM YOURSELF.
@@ -2411,7 +2410,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 if (_workers.size() == 0 && !ranker.hasNonBusy())   {                        
                     if ( ranker.calculateWaitTime() > 0) {
                         LOG.trace("MANAGER: terminating with busy");
-                        return WAITING_FOR_RETRY;
+                        return BUSY;
                     } else {
                         LOG.trace("MANAGER: terminating w/o hope");
                         return GAVE_UP;
@@ -2599,7 +2598,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         // get all docs possible
         for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
 			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-			LimeXMLDocument doc = rfd.getXMLDoc();
+			LimeXMLDocument doc = rfd.getXMLDocument();
 			if(doc != null) {
 				allDocs.add(doc);
 			}
@@ -2662,7 +2661,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         long remaining;
         switch (state) {
         case CONNECTING:
-        case WAITING_FOR_RETRY:
+        case BUSY:
         case WAITING_FOR_RESULTS:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:

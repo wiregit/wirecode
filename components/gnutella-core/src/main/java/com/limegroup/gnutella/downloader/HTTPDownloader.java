@@ -761,7 +761,7 @@ public class HTTPDownloader implements BandwidthTracker {
             try {
                 HashTree hashTree =
                     HashTree.createHashTree(in, _rfd.getSHA1Urn().toString(),
-                                            _root32, (long)_rfd.getSize());
+                                            _root32, _rfd.getFileSize());
                 _thexSucceeded = true;
                 return ConnectionStatus.getThexResponse(hashTree);
             } catch(IOException ioe) {

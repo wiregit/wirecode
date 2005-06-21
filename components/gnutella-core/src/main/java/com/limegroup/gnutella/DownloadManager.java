@@ -22,11 +22,14 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -528,7 +531,7 @@ public class DownloadManager implements BandwidthTracker {
      *
      * @param urn the hash of the file (exact topic), or null if unknown
      * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
+     * @param filename the final file name, or <code>null</code> if unknown
      * @param saveLocation can be null, then the default save location is used
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
@@ -537,27 +540,24 @@ public class DownloadManager implements BandwidthTracker {
 	 *  null 
      * @throws SaveLocationException 
      */
-    public synchronized Downloader download(URN urn, String textQuery, 
-											String filename, 
-											String [] defaultURL,
-											boolean overwrite, 
-											File saveDir)
-		throws IllegalArgumentException, SaveLocationException {
-        if (textQuery==null && urn==null && filename==null && 
-            (defaultURL == null || defaultURL.length == 0) )
-            throw new IllegalArgumentException("Need something for requeries");
+    public synchronized Downloader download(MagnetOptions magnet,
+			boolean overwrite,
+			File saveDir,
+			String fileName)
+	throws IllegalArgumentException, SaveLocationException {
+		
+		if (!magnet.isDownloadable()) 
+            throw new IllegalArgumentException("magnet not downloadable");
         
         //remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge(false);
         
-        if (urn != null) {
-			String fileName = (filename!=null && !filename.equals(""))
-				? filename : urn.toString();
-            if (conflicts(urn, fileName, 0)) {
-//                throw new AlreadyDownloadingException(fileName);
-				throw new SaveLocationException
-				(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File("fileName"));
-            }
+        if (fileName == null) {
+        	fileName = magnet.getFileNameForSaving();
+        }
+        if (conflicts(magnet.getSHA1Urn(), fileName, 0)) {
+			throw new SaveLocationException
+			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
         //Note: If the filename exists, it would be nice to check that we are
@@ -569,8 +569,8 @@ public class DownloadManager implements BandwidthTracker {
 
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
-            new MagnetDownloader(incompleteFileManager, urn, textQuery,
-                filename, defaultURL, saveDir, overwrite);
+            new MagnetDownloader(incompleteFileManager, magnet, 
+					overwrite, saveDir, fileName);
         initializeDownload(downloader);
         return downloader;
     }

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -170,4 +171,15 @@ public interface ActivityCallback
      * Indicates a component is loading.
      */
     public void componentLoading(String component);
+	
+	/**
+	 * The core passes parsed magnets to the GUI and asks it if it wants
+	 * to handle them itself.
+	 * <p>
+	 * If this is the case the callback should return <code>true</code>, otherwise
+	 * the core starts the downloads itself.
+	 * @param magnets
+	 * @return true if the callback handles the magnet links
+	 */
+	public boolean handleMagnets(final MagnetOptions[] magnets);
 }

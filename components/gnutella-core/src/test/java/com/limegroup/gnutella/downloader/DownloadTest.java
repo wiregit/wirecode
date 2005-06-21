@@ -2246,7 +2246,7 @@ public class DownloadTest extends BaseTestCase {
         }
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
-                     Downloader.WAITING_FOR_RETRY, downloader.getState());
+                     Downloader.BUSY, downloader.getState());
     }
         
     /**
@@ -2556,7 +2556,7 @@ public class DownloadTest extends BaseTestCase {
     
     private static void waitForBusy(Downloader downloader) {
         for(int i=0; i< 12; i++) { //wait 12 seconds
-            if(downloader.getState() == Downloader.WAITING_FOR_RETRY)
+            if(downloader.getState() == Downloader.BUSY)
                 return;
             try {
                 Thread.sleep(1000);// try again after a second

@@ -57,7 +57,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 *
 	 * @return the size of the file on disk, in bytes
 	 */
-	public long getSize() {
+	public long getFileSize() {
 		return _size;
 	}
 
@@ -66,7 +66,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 * 
 	 * @return the name of this file
 	 */
-	public String getName() {
+	public String getFileName() {
 		return _name;
 	}
     
@@ -112,7 +112,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	        
         switch(md.getState()) {
         case Downloader.QUEUED:
-        case Downloader.WAITING_FOR_RETRY:
+        case Downloader.BUSY:
         case Downloader.ABORTED:
         case Downloader.GAVE_UP:
         case Downloader.DISK_PROBLEM:

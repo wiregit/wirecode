@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -43,7 +44,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements IpPort, Serializable {
+public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
@@ -188,7 +189,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
               false,                        // chat capable
               2,                            // quality
               false,                        // browse hostable
-              rfd.getXMLDoc(),              // xml doc
+              rfd.getXMLDocument(),              // xml doc
               rfd.getUrns(),                // urns
               false,                        // reply to MCast
               false,                        // is firewalled
@@ -216,7 +217,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
                 false,                        // chat capable
                 rfd.getQuality(),                            // quality
                 false,                        // browse hostable
-                rfd.getXMLDoc(),              // xml doc
+                rfd.getXMLDocument(),              // xml doc
                 rfd.getUrns(),                // urns
                 false,                        // reply to MCast
                 true,                        // is firewalled
@@ -648,6 +649,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
 	 * @return the size in bytes of this file
 	 */
 	public final int getSize() {return _size;}
+	
+	public final long getFileSize() { return _size; }
 
 	/**
 	 * Accessor for the file name for this file, which can be <tt>null</tt>.
@@ -693,7 +696,7 @@ public class RemoteFileDesc implements IpPort, Serializable {
 	 * @return the <tt>LimeXMLDocument</tt> for this <tt>RemoteFileDesc</tt>, 
 	 * which can be <tt>null</tt>.
 	 */
-    public final LimeXMLDocument getXMLDoc() {
+    public final LimeXMLDocument getXMLDocument() {
         if (_xmlDocs==null)
             return null;
         else
@@ -974,4 +977,12 @@ public class RemoteFileDesc implements IpPort, Serializable {
     public int getQueueStatus() {
         return _queueStatus;
     }
+
+	public InetSocketAddress getSocketAddress() {
+		InetAddress addr = getInetAddress();
+		if (addr != null) {
+			return new InetSocketAddress(addr, getPort());
+		}
+		return null;
+	}
 }

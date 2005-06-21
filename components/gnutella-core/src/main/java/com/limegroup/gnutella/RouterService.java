@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -1425,48 +1426,45 @@ public class RouterService {
 		return download(files, queryGUID, overwrite, null, null);
 	}	
         
-
-    /*
-     * Creates a new MAGNET downloader.  Immediately tries to download from
-     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
-     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
-     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
-     * <tt>filename</tt> is specified, it will be used as the name of the
-     * complete file; otherwise it will be taken from any search results or
-     * guessed from <tt>defaultURL</tt>.
-     *
-     * @param urn the hash of the file (exact topic), or null if unknown
-     * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
-     * @param defaultURLs the initial locations to try (exact source), or null 
-     *  if unknown
-     *
-     * @exception IllegalArgumentException both urn and textQuery are null 
-	 * @throws SaveLocationException when the download could not be started, 
-	 * see {@link SaveLocationException} for all possible error codes
-     */
-	public static synchronized Downloader download(URN urn, String textQuery,
-												   String filename,
-												   String [] defaultURL,
-												   boolean overwrite,
-												   File saveDir)
-	throws SaveLocationException {
-		return downloader.download(urn, textQuery, filename, defaultURL, 
-								   overwrite, saveDir);
-	}
-	
 	/**
-	 * Convenience wrapper for 
-	 * {@link #download(URN, String, String, String[], boolean, File)
-	 * download(URN, String, String, String[], boolean, null)}
+	 * Creates a downloader for a magnet.
+	 * @param magnetprovides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should be overwritten
+	 * @return
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not 
+	 * {@link MagnetOptions#isDownloadable() valid}.
 	 */
-	public static synchronized Downloader download(URN urn, String textQuery,
-            String filename, String [] defaultURL, boolean overwrite) 
-            throws SaveLocationException { 
-        return download(urn,textQuery,filename,defaultURL, overwrite, null);
-    }
-	
-	
+	public static Downloader download(MagnetOptions magnet, boolean overwrite) 
+		throws SaveLocationException {
+		if (!magnet.isDownloadable()) {
+			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
+		}
+		return downloader.download(magnet, overwrite, null, magnet.getDisplayName());
+	}
+
+	/**
+	 * Creates a downloader for a magnet using the given additional options.
+	 *
+	 * @param magnet provides the information of the  file to download, must be
+	 *  valid
+	 * @param overwrite whether an existing file a the final file location 
+	 * should be overwritten
+	 * @param saveDir can be null, then the save directory from the settings
+	 * is used
+	 * @param fileName the final filename of the download, can be
+	 * <code>null</code>
+	 * @return
+	 * @throws SaveLocationException
+	 * @throws IllegalArgumentException if the magnet is not
+	 * {@link MagnetOptions#isDownloadable() downloadable}.
+	 */
+	public static Downloader download(MagnetOptions magnet, boolean overwrite,
+			File saveDir, String fileName) throws SaveLocationException {
+		return downloader.download(magnet, overwrite, saveDir, fileName);
+	}
 
    /**
      * Starts a resume download for the given incomplete file.

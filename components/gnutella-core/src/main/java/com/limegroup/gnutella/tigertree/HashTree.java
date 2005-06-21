@@ -114,7 +114,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         InputStream in = null;
         try {
             in = fd.createInputStream();
-            return createHashTree(fd.getSize(), in, fd.getSHA1Urn());
+            return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
         } finally {
             if(in != null) {
                 try {

@@ -23,6 +23,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -500,4 +501,8 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
     public void handleFileManagerEvent(FileManagerEvent fme) {}
     
     public void fileManagerLoading() {}
+
+	public boolean handleMagnets(final MagnetOptions[] magnets) {
+		return false;
+	}
 }

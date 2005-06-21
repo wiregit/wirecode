@@ -12,7 +12,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int QUEUED                  = 0;
     public static final int CONNECTING              = 1;
     public static final int DOWNLOADING             = 2;
-    public static final int WAITING_FOR_RETRY       = 3;
+    public static final int BUSY                    = 3;
     public static final int COMPLETE                = 4;
     public static final int ABORTED                 = 5;
     /** When a downloader is in the GAVE_UP state, it can still try downloading
@@ -234,5 +234,12 @@ public interface Downloader extends BandwidthTracker {
 	 * @return the amount of data lost due to corruption
 	 */
 	public int getAmountLost();
+
+	/**
+	 * Returns the sha1 urn associated with the file being downloaded, or
+	 * <code>null</code> if there is none.
+	 * @return
+	 */
+	public URN getSHA1Urn();
 }
 

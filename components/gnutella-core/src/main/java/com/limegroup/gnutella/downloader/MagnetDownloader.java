@@ -2,6 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashSet;
@@ -19,12 +21,13 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -58,20 +61,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /** Prevent versioning problems. */
     static final long serialVersionUID = 9092913030585214105L;
-    /** The string to prefix download files with in the rare case that we don't
-     *  have a download name and can't calculate one from the URN. */
-    static final String DOWNLOAD_PREFIX="MAGNET download from ";
 
-    /** The string to use for requery attempts, or null if not provided.
-     *  INVARIANT: _textQuery!=null || _urn!=null */
-    private String _textQuery;
-    /** The URN of the file we're looking for, or null if not provided. */
-    private URN _urn;
-    /** The download filename, or null if not provided. */
-    private String _filename;
-    /** The default location, or null if not provided.  Not currently used, but
-     *  may be useful later. */
-    private String[] _defaultURLs;
+	private static final transient String MAGNET = "MAGNET"; 
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -82,41 +73,37 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * name of the complete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
      *
-     * @param manager controls download queuing; passed to superclass
-     * @param filemanager shares saved files; passed to superclass
-     * @param ifm maintains blocks stored on disk; passed to superclass
-     * @param callback notifies GUI of updates; passed to superclass
-     * @param urn the hash of the file (exact topic), or null if unknown
-     * @param textQuery requery keywords (keyword topic), or null if unknown
-     * @param filename the final file name, or null if unknown
-     * @param defaultURLs the initial locations to try (exact source), or null 
-     *  if unknown
+     * @param magnet contains all the information for the download, must be
+     * {@link MagnetOptions#isDownloadable() downloadable}.
+     * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
+	 * @param fileName the final file name, can be <code>null</code>
+	 *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
     public MagnetDownloader(IncompleteFileManager ifm,
-                            URN urn,
-                            String textQuery,
-                            String filename,
-                            String [] defaultURLs,
+							MagnetOptions magnet,
+							boolean overwrite,
                             File saveDir,
-                            boolean overwrite) throws SaveLocationException {
+                            String fileName) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, filename, overwrite);
-
-        this._textQuery=textQuery;
-        this._urn=urn;
-        this._filename=filename;
-        this._defaultURLs=defaultURLs;
+        super(new RemoteFileDesc[0], ifm, null, saveDir, 
+			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
+		propertiesMap.put(MAGNET, magnet);
     }
     
     public void initialize(DownloadManager manager, FileManager fileManager, 
             ActivityCallback callback) {
-        downloadSHA1 = _urn;
-        super.initialize(manager,fileManager,callback);
+		Assert.that(getMagnet() != null);
+        downloadSHA1 = getMagnet().getSHA1Urn();
+        super.initialize(manager, fileManager, callback);
     }
+
+	private MagnetOptions getMagnet() {
+		return (MagnetOptions)propertiesMap.get(MAGNET);
+	}
     
     /**
      * overrides ManagedDownloader to ensure that we issue requests to the known
@@ -124,28 +111,35 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      */
     protected int initializeDownload() {
         
-        Assert.that(_defaultURLs != null &&  _defaultURLs.length > 0);
+		if (!hasRFD()) {
+			MagnetOptions magnet = getMagnet();
+			String[] defaultURLs = magnet.getDefaultURLs();
+			if (defaultURLs.length == 0 )
+				return Downloader.GAVE_UP;
+
+
+			RemoteFileDesc firstDesc = null;
+			
+			for (int i = 0; i < defaultURLs.length && firstDesc == null; i++) {
+				try {
+					firstDesc = createRemoteFileDesc(defaultURLs[i],
+													 getSaveFile().getName(), magnet.getSHA1Urn());
+							
+					initPropertiesMap(firstDesc);
+					addDownloadForced(firstDesc, true);
+				} catch (IOException badRFD) {}
+			}
         
-        RemoteFileDesc firstDesc = null;
-        
-        for (int i = 0; i < _defaultURLs.length && firstDesc == null; i++) {
-            try {
-                firstDesc = createRemoteFileDesc(_defaultURLs[i],_filename,_urn);
-                initPropertiesMap(firstDesc);
-                addDownloadForced(firstDesc,true);
-            } catch (IOException badRFD) {}
-        }
-        
-        // if all locations included in the magnet URI fail we can't do much
-        if (firstDesc == null)
-            return GAVE_UP;
-        
+			// if all locations included in the magnet URI fail we can't do much
+			if (firstDesc == null)
+				return GAVE_UP;
+		}
         return super.initializeDownload();
     }
     
     /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
-     */
+     *
     protected int performDownload() {     
 
 		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
@@ -170,7 +164,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
         //Start the downloads for real.
         return super.performDownload();
-    }
+		}*/
 
 
     /** 
@@ -196,11 +190,13 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         if (urn!=null)
             urns.add(urn);
         
+        URI uri = new URI(url);
+        
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
-                filename(filename, url),
+                filename != null ? filename : MagnetOptions.extractFileName(uri),
                 contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
@@ -215,32 +211,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 null,           //no push proxies
                 0);         //assume no firewall transfer
     } 
-
-    /** Returns the filename to use for the download, guessed if necessary. 
-     *  Package-access and static for easy testing. 
-     *  @param filename the filename to use if non-null
-     *  @param url the URL for the resource, which must not be null */
-    static String filename(String filename, URL url) {
-        //If the URI specified a download name, use that.
-        if (filename!=null)
-            return filename;
-
-        //If the URL has a filename, return that.  Remember that URL.getFile()
-        //may include directory information, e.g., "/path/file.txt" or "/path/".
-        //It also returns "" if no file part.
-        String path=url.getFile();   
-        if (path.length()>0) {
-            int i=path.lastIndexOf('/');
-            if (i<0)
-                return path;                  //e.g., "file.txt"
-            if (i>=0 && i<(path.length()-1))
-                return path.substring(i+1);   //e.g., "/path/to/file"
-        }
-         
-        //In the rare case of no filename ("http://www.limewire.com" or
-        //"http://www.limewire.com/path/"), just make something up.
-        return DOWNLOAD_PREFIX+url.getHost();        
-    }
 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
@@ -284,94 +254,89 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      */
     protected QueryRequest newRequery(int numRequeries)
         throws CantResumeException {
-        
-        if (_textQuery != null) {
-            String q = StringUtils.createQueryString(_textQuery);
+        MagnetOptions magnet = getMagnet();
+		String textQuery = magnet.getQueryString();
+        if (textQuery != null) {
+            String q = StringUtils.createQueryString(textQuery);
             return QueryRequest.createQuery(q);
-        } else if (_filename != null) {
-            String q = StringUtils.createQueryString(_filename);
-            return QueryRequest.createQuery(q);
-        } else
-            throw new CantResumeException("no keywords or filename");
-        
-        /* //TODO: if we ever add back URN query support
-        boolean isRequery = numRequeries!=0;
-		if(isRequery && (_urn != null)) {
-			if (_filename == null)
-			    return QueryRequest.createRequery(_urn);
-			else
-			    return QueryRequest.createRequery(_urn, _filename);
-		} else if(isRequery) {
-			return QueryRequest.createRequery(_textQuery);
-		} else if(_urn != null) {
-			if (_filename == null)
-                return QueryRequest.createQuery(_urn);
-			else
-                return QueryRequest.createQuery(_urn, _filename);
         }
-        
-		if (_urn != null) 
-            return QueryRequest.createQuery(_urn, _textQuery);
-		return QueryRequest.createQuery(_textQuery);
-        */
+        else {
+            String q = StringUtils.createQueryString(getSaveFile().getName());
+            return QueryRequest.createQuery(q);
+        }
     }
 
     /** 
      * Overrides ManagedDownloader to allow any files with the right
-     * hash/keywords, even if this doesn't currently have any download
+     * hash even if this doesn't currently have any download
      * locations.  
+     * <p>
+     * We only allow for additions if the download has a sha1.  
      */
     protected boolean allowAddition(RemoteFileDesc other) {        
-        //Allow if we have a hash and other matches it.
-        if (_urn!=null) {
-            Set urns=other.getUrns();
-            if (urns!=null && urns.contains(_urn))
-                return true;
+        // Allow if we have a hash and other matches it.
+		URN otherSHA1 = other.getSHA1Urn();
+		if (downloadSHA1 != null && otherSHA1 != null) {
+			return downloadSHA1.equals(otherSHA1);
         }
-        //Allow if we specified query keywords and the filename matches.  TODO3:
-        //this tokenizes the query keyword every time.  Would it be better to
-        //make ResponseVerifier.getSearchTerms/score(keywords[], name) public?
-        if (_textQuery!=null) {
-            int score=ResponseVerifier.score(_textQuery, null, other);
-            if (score==100)
-                return true;
-        }
-        //No match?  Error.
         return false;
     }
 
     /**
-     * Overrides ManagedDownloader to display a reasonable file name even
-     * when no locations have been found.
+	 * Overridden for internal purposes, returns result from super method
+	 * call.
      */
-    protected synchronized String getDefaultFileName() {        
-        if (_filename!=null)
-            return _filename;
-        else {
-            String fname = null;
-			// Check the super name if I have an RFD
-			if ( hasRFD() )   
-                fname = super.getDefaultFileName();
+	protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
+													 boolean cache) {
+		if (!hasRFD())
+			initPropertiesMap(rfd);
+		return super.addDownloadForced(rfd, cache);
+	}
 
-			// If I still don't have a good name, resort to whatever I have.
-            if ( fname == null || fname.equals(UNKNOWN_FILENAME) )
-			    fname = getFileNameHint();
-			return fname;
+	/**
+	 * Creates a magnet downloader object when converting from the old 
+	 * downloader version.
+	 * 
+	 * @throws IOException when the created magnet is not downloadable
+	 */
+	private void readObject(ObjectInputStream stream)
+	throws IOException, ClassNotFoundException {
+		if (getMagnet() == null) {
+			ObjectInputStream.GetField fields = stream.readFields();
+			String textQuery = (String) fields.get("_textQuery", null);
+			URN urn = (URN) fields.get("_urn", null);
+			String fileName = (String) fields.get("_filename", null);
+			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
+			MagnetOptions magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
+			if (!magnet.isDownloadable()) {
+				throw new IOException("Old undownloadable magnet");
+			}
+			propertiesMap.put(MAGNET, magnet);
 		}
     }
 
     /**
-     * Overrides ManagedDownloader to display a reasonable file name 
-     * when neither it or we have an idea of what the filename is.
+	 * Only allow requeries when <code>downloadSHA1</code> is not null.
      */
-    private String getFileNameHint() {        
-        if ( _urn != null )
-			return _urn.toString();
-        else if ( _textQuery != null )
-            return _textQuery;
-        else if ( _defaultURLs != null && _defaultURLs.length > 0 )
-            return _defaultURLs[0];
-		else
-			return "";
+	protected boolean shouldSendRequeryImmediately(int numRequeries) {
+		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
+				: false;
+	}
+
+	/**
+	 * Checks if the magnet is downloadable and extracts a fileName if
+	 * <code>fileName</code> is null.
+	 *
+	 * @throws IllegalArgumentException if the magnet is not downloadable
+	 */
+	private static String checkMagnetAndExtractFileName(MagnetOptions magnet, 
+														String fileName) {
+		if (!magnet.isDownloadable()) {
+			throw new IllegalArgumentException("magnet not downloadable");
+		}
+		if (fileName != null) {
+			return fileName;
+		}
+		return magnet.getFileNameForSaving();
     }
 }

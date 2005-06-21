@@ -61,7 +61,7 @@ public class FileDescStub extends FileDesc {
         };
     }
 
-    public long getSize() {
+    public long getFileSize() {
         return DEFAULT_SIZE;
     }
 }

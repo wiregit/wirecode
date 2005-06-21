@@ -42,6 +42,7 @@ public class SaveLocationException extends IOException {
 	private File file;
 	
 	public SaveLocationException(int errorCode, File file) {
+		super("error code " + errorCode + ", file " + file);
 		this.errorCode = errorCode;
 		this.file = file;
 	}
@@ -68,4 +69,5 @@ public class SaveLocationException extends IOException {
 	public File getFile() {
 		return file;
 	}
+		
 }
