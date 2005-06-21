@@ -295,18 +295,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 	}
 	
 	/**
-	 * Overriden to write out nothing.
-	 * <p>
-	 * This way we get rid of the fields from the old magnet downloader 
-	 * versions.
-	 * @param stream
-	 * @throws IOException
-	 */
-	private synchronized void writeObject(ObjectOutputStream stream)
-		throws IOException {
-	}
-
-	/**
 	 * Creates a magnet downloader object when converting from the old 
 	 * downloader version.
 	 * 
