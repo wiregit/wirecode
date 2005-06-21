@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketImplFactory;
 
+import com.limegroup.gnutella.UDPService;
+
 /** 
  *  Create a reliable udp connection interface.
  */
@@ -104,11 +106,11 @@ public class UDPConnection extends Socket {
 
 
     public int getPort() {
-        return -1;
+        return _processor.getPort();
     }
 
     public int getLocalPort() {
-        return -1;
+        return UDPService.instance().getStableUDPPort();
     }
 
     // These won't compile in Java 1.3

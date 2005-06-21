@@ -456,6 +456,10 @@ public class UDPConnectionProcessor {
         return lip;
     }
 
+    int getPort() {
+        return _port;
+    }
+    
     /**
      *  Prepare for handling an open connection.
      */
