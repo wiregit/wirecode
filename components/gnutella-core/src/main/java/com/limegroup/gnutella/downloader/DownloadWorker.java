@@ -684,9 +684,9 @@ public class DownloadWorker implements Runnable {
             _downloader.doDownload();
             _rfd.resetFailedCount();
             if(http11)
-                DownloadStat.SUCCESFULL_HTTP11.incrementStat();
+                DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
             else
-                DownloadStat.SUCCESFULL_HTTP10.incrementStat();
+                DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
         } catch (DiskException e) {
             // something went wrong while writing to the file on disk.
             // kill the other threads and set

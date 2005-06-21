@@ -33,9 +33,14 @@ public abstract class AbstractStatistic implements Statistic {
 	protected final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
 
 	/**
-	 * Long for the statistic currently being added to.
+	 * Int for the statistic currently being added to.
 	 */
 	protected volatile int _current = 0;
+
+	/**
+	 * Int for the most recently stored statistic. 
+	 */
+	private volatile int _lastStored = 0;
 
 	/**
 	 * Variable for the total number of messages received for this 
@@ -88,6 +93,15 @@ public abstract class AbstractStatistic implements Statistic {
 		return _max;
 	}
 
+	public int getCurrent() {
+		return _current;
+	}
+	
+	
+	public int getLastStored() {
+		return _lastStored;
+	}
+	
 	// inherit doc comment
 	public void incrementStat() {
 		_current++;
@@ -139,6 +153,7 @@ public abstract class AbstractStatistic implements Statistic {
 				}
 			}
 		}
+		_lastStored = _current;
 		_current = 0;
 		_totalStatsRecorded++;
 	}
