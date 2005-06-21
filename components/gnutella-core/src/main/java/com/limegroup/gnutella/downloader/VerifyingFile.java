@@ -248,37 +248,37 @@ public class VerifyingFile {
     }
     
     /**
-     * Returns the first full block of data that needs to be written.
+     * Returns a block of data that needs to be written.
      */
-    public synchronized Interval leaseWhite() throws NoSuchElementException {
+    public Interval leaseWhite() throws NoSuchElementException {
         return leaseWhiteHelper(null, DEFAULT_CHUNK_SIZE);
     }
     
     /**
-     * Returns the first block of data that needs to be written.
+     * Returns a block of data that needs to be written.
      * The returned block will NEVER be larger than chunkSize.
      */
-    public synchronized Interval leaseWhite(int chunkSize) 
+    public Interval leaseWhite(int chunkSize) 
       throws NoSuchElementException {
         return leaseWhiteHelper(null, chunkSize);
     }
     
     /**
-     * Returns the first block of data that needs to be written
+     * Returns a block of data that needs to be written
      * and is within the specified set of ranges.
      * The parameter IntervalSet is modified
      */
-    public synchronized Interval leaseWhite(IntervalSet ranges)
+    public Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
         return leaseWhiteHelper(ranges, DEFAULT_CHUNK_SIZE);
     }
     
     /**
-     * Returns the first block of data that needs to be written
+     * Returns a block of data that needs to be written
      * and is within the specified set of ranges.
      * The returned block will NEVER be larger than chunkSize.
      */
-    public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize)
+    public Interval leaseWhite(IntervalSet ranges, int chunkSize)
       throws NoSuchElementException {
         return leaseWhiteHelper(ranges, chunkSize);
     }

@@ -67,18 +67,25 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
                 expectations);
     }
 
+    /** Tests that an interval spanning idealLocation gets split in two */
+    public void testSplitInterval() {
+        fail();
+    }
+    
     public void testSingleByteChunk() throws Exception {
-        // Remove a single byte
+        // Remove two single bytes
         availableBytes.delete(new Interval(5 * blockSize + 1));
-
+        availableBytes.delete(new Interval(6 * blockSize - 2));
+        
         // Set up the random number generator so that
-        // block #5 (6th block) is selected
-        prng.setLong(5);
-        prng.setInt(3);
+        // it tries both above and below our single byte
+        prng.setLongs(new long[] {5,6});
+        prng.setInts(new int[] {3,0}); //go forward, then go backward
 
         // We expect a single byte assignment
-        Interval[] expectation = new Interval[1];
+        Interval[] expectation = new Interval[2];
         expectation[0] = new Interval(5 * blockSize);
+        expectation[1] = new Interval(6 * blockSize-1);
 
         testAssignments(strategy, availableBytes, fileSize, blockSize,
                 expectation);
@@ -101,25 +108,57 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
      *  There's only a sliver left.
      */
     public void testSliverDownload() {
-        availableBytes = IntervalSet.createSingletonSet(2475,2483);
-        prng.setLong(17);
+        // Set ideal location before the sliver
+        prng.setLong(1);
         availableBytes = IntervalSet.createSingletonSet(2475, 2483);
         Interval assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
         assertEquals("Only a sliver of the file left, and something other than the sliver"+
                 "was returned", availableBytes.getFirst(), assignment);
+        
+        // Same thing, except the ideal location is after the sliver
+        prng.setLong(8);
+        availableBytes = IntervalSet.createSingletonSet(2475,2483);
+        assignment = strategy.pickAssignment(availableBytes, availableBytes, blockSize);
+        assertEquals("Only a sliver of the file left, and something other than the sliver"+
+                "was returned", availableBytes.getFirst(), assignment);
     }
     
-    public void testInvalidBlockSize() {
-        // Try an invalid block size and see if it throws
-        // an InvalidInputException
+    
+    /**
+     * Test that various invalid inputs throw IllegalArgumentException.
+     */
+    public void testInvalidInputs() {
+        // Try an invalid block size
         try {
-            strategy.pickAssignment(availableBytes, 
+            strategy.pickAssignment(availableBytes,
                     availableBytes, 0);
+            fail("Failed to complain about invalid block size");
         } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            return;
+            // Wohoo!  Exception thrown... test passed... do nothing
         }
-        assertTrue("Failed to complain about invalid block size", false);
+
+        // createSingletonSet might throw its own IllegalArgumentException
+        // so create it outside of the try-catch
+        IntervalSet badNeededBytes = IntervalSet.createSingletonSet(-5,10);
+        // Try telling the strategy that we need some bytes
+        // before the beginning of the file
+        try {
+            strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
+            fail("Failed to complain about negative Intervals in neededBytes");
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed... do nothing
+        }
+
+        badNeededBytes = IntervalSet.createSingletonSet(fileSize,fileSize);
+        // Try telling the strategy that we need a byte after the end
+        // of the file
+        try {
+            strategy.pickAssignment(availableBytes,
+                    badNeededBytes, blockSize);
+            fail("Failed to complain about neededBytes extending past the end of the file");
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed... do nothing
+        }
     }
     
     /** Make sure we throw NoSuchElement exception if there is nothing to

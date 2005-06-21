@@ -68,7 +68,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public synchronized Interval pickAssignment(IntervalSet candidateBytes,
+    public Interval pickAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
         long lowerBound = neededBytes.getFirst().low;

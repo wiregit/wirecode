@@ -325,36 +325,57 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
                 " have been assigned.", 0, assignment.low);
     }
     
-    /** 
-     * Test that invalid values for blockSize throw IllegalArgumentException. 
-     */
-    public void testInvalidBlockSize() {
-        // Try an invalid block size and see if it throws
-        // an InvalidInputException
-        try {
-            strategy.pickAssignment(availableBytes, 
-                    availableBytes, 0);
-        } catch (IllegalArgumentException e) {
-            // Wohoo!  Exception thrown... test passed
-            return;
-        }
-        assertTrue("Failed to complain about invalid block size", false);
-    }
     
-    /** 
-     * Test that invalid values for lastNeededByte throw IllegalArgumentException. 
+    /**
+     * Test that various invalid inputs throw IllegalArgumentException.
+     */
+    public void testInvalidInputs() {
+        // Try an invalid block size
+        try {
+            strategy.pickAssignment(availableBytes,
+                    availableBytes, 0);
+            fail("Failed to complain about invalid block size");
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed... do nothing
+        }
+
+        // createSingletonSet might throw its own IllegalArgumentException
+        // so create it outside of the try-catch
+        IntervalSet badNeededBytes = IntervalSet.createSingletonSet(-5,10);
+        // Try telling the strategy that we need some bytes
+        // before the beginning of the file
+        try {
+            strategy.pickAssignment(availableBytes, badNeededBytes, blockSize);
+            fail("Failed to complain about negative Intervals in neededBytes");
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed... do nothing
+        }
+
+        badNeededBytes = IntervalSet.createSingletonSet(fileSize,fileSize);
+        // Try telling the strategy that we need a byte after the end
+        // of the file
+        try {
+            strategy.pickAssignment(availableBytes,
+                    badNeededBytes, blockSize);
+            fail("Failed to complain about neededBytes extending past the end of the file");
+        } catch (IllegalArgumentException e) {
+            // Wohoo!  Exception thrown... test passed... do nothing
+        }
+    }
+
+    /**
+     * Test that asking for bytes from an empty set results
+     * in NoSuch ElementException.
      */
     public void testNoAvailableBytes() {
-        // Try calling with lastNeededByte > previewLength
-        // and see if it throws an exception
+        // Call with empty set of candidateBytes
         try {
             strategy.pickAssignment(new IntervalSet(),
                     availableBytes, blockSize);
+            fail("Failed to complain about no available bytes");
         } catch (java.util.NoSuchElementException e) {
             // Wohoo!  Exception thrown... test passed
-            return;
         }
-        assertTrue("Failed to complain about no available bytes", false);
     }
     
     ///////////// Helper Methods //////////////////////////
