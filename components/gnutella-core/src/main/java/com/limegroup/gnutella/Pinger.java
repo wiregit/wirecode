@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * This class continually sends broadcast pings on behalf of an Ultrapeer

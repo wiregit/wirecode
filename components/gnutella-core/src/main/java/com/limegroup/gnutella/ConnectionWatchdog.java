@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.ManagedThread;
 
 /*
  * A "watchdog" that periodically examines connections and

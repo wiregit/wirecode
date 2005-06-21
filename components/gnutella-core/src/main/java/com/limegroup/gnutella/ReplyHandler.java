@@ -1,8 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Set;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;

@@ -18,7 +18,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -52,7 +51,6 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.version.UpdateHandler;

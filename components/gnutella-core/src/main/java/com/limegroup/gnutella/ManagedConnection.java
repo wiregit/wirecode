@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -13,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Throttle;
@@ -37,7 +35,6 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.version.UpdateHandler;
 

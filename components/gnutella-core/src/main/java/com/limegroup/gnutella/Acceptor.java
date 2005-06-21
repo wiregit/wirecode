@@ -172,7 +172,7 @@ public class Acceptor implements Runnable {
         //   See the notes for _address.
         try {
             setAddress(UPNP_MANAGER != null ? 
-                    UPNP_MANAGER.getLocalAddress() : 
+                    UPnPManager.getLocalAddress() : 
                         InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {

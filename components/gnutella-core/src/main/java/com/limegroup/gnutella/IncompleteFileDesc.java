@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
