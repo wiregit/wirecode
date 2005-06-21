@@ -321,7 +321,17 @@ public abstract class FileManager {
         cleanIndividualFiles();
 		loadSettings();
     }
+    
+    public void stop() {
+        save();
+    }
 
+    protected void save(){
+        _data.save();
+            
+        UrnCache.instance().persistCache();
+        CreationTimeCache.instance().persistCache();
+    }
 	
     ///////////////////////////////////////////////////////////////////////////
     //  Accessors
@@ -592,10 +602,9 @@ public abstract class FileManager {
         
         // Various cleanup & persisting...
         trim();
-        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         CreationTimeCache.instance().pruneTimes();
-		UrnCache.instance().persistCache();
-        CreationTimeCache.instance().persistCache();
+        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        save();
         SavedFileManager.instance().run();
         RouterService.getCallback().fileManagerLoaded();
     }

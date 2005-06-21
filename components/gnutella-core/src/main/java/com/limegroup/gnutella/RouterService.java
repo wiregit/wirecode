@@ -858,10 +858,8 @@ public class RouterService {
             
             downloader.writeSnapshot();
             
-            UrnCache.instance().persistCache();
-
-            CreationTimeCache.instance().persistCache();
-
+            fileManager.stop();
+            
             TigerTreeCache.instance().persistCache();
 
             LicenseFactory.persistCache();

@@ -172,7 +172,6 @@ public class LimeXMLReplyCollection {
      */
     void loadFinished() {
         oldMap.clear();
-        writeMapToDisk();
     }
     
     /**
@@ -514,21 +513,14 @@ public class LimeXMLReplyCollection {
         boolean written = false;
         
         if(found){
-            written = writeMapToDisk();
-            if( written ) {
-                fd.removeLimeXMLDocument((LimeXMLDocument)val);
-                removeKeywords(val);
-            } else { // put it back to maintain consistency
-                synchronized(mainMap) {
-                    mainMap.put(hash,val);
-                }
-            }
+            fd.removeLimeXMLDocument((LimeXMLDocument)val);
+            removeKeywords(val);
         }
         
         if(LOG.isDebugEnabled())
             LOG.debug("found: " + found + ", written: " + written);
         
-        return (found && written);
+        return found;
     }
     
     /**
@@ -557,10 +549,7 @@ public class LimeXMLReplyCollection {
         
         Assert.that(writeState != INCORRECT_FILETYPE, "trying to write data to unwritable file");
 
-        if(!writeMapToDisk())
-            return RW_ERROR;
-        else
-            return writeState;
+        return writeState;
     }
 
     /**

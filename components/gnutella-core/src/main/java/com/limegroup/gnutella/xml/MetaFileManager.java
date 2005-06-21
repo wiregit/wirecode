@@ -35,6 +35,8 @@ public class MetaFileManager extends FileManager {
     
     private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
     
+    private Saver saver;
+    
     /**
      * Overrides FileManager.query.
      *
@@ -267,10 +269,16 @@ public class MetaFileManager extends FileManager {
      * Notification that FileManager loading is finished.
      */
     protected void loadFinished(int revision) {
+        // save ourselves to disk every minute
+        if (saver == null) {
+            saver = new Saver();
+            RouterService.schedule(saver,60*1000,60*1000);
+        }
+        
         Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
         for(Iterator i = replies.iterator(); i.hasNext(); )
             ((LimeXMLReplyCollection)i.next()).loadFinished();
-            
+        
         RouterService.getCallback().setAnnotateEnabled(true);
 
         super.loadFinished(revision);
@@ -291,7 +299,15 @@ public class MetaFileManager extends FileManager {
         _needRebuild = true;
         return fd;
     }
-
+    
+    protected void save() {
+        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(Iterator i = replies.iterator(); i.hasNext(); )
+            ((LimeXMLReplyCollection)i.next()).writeMapToDisk();
+        
+        super.save();
+    }
+    
     /**
      * Creates a new array, the size of which is less than or equal
      * to normals.length + metas.length.
@@ -440,6 +456,12 @@ public class MetaFileManager extends FileManager {
         }
 
         return retResponses;
+    }
+    
+    private class Saver implements Runnable {
+        public void run() {
+            save();
+        }
     }
 }
 
