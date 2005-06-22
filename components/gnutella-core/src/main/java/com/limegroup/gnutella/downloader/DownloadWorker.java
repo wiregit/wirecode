@@ -735,15 +735,18 @@ public class DownloadWorker implements Runnable {
     }
     
     String getInfo() {
-        synchronized(_downloader) {
-            return this + "hashcode " + hashCode() + " will release? "
-            + _shouldRelease + " interrupted? " + _interrupted
-            + " active? " + _downloader.isActive() 
-            + " initial reading " + _downloader.getInitialReadingPoint()
-            + " initial writing " + _downloader.getInitialWritingPoint()
-            + " amount to read " + _downloader.getAmountToRead()
-            + " amount read " + _downloader.getAmountRead();
-        }
+        if (_downloader != null) {
+            synchronized(_downloader) {
+                return this + "hashcode " + hashCode() + " will release? "
+                + _shouldRelease + " interrupted? " + _interrupted
+                + " active? " + _downloader.isActive() 
+                + " initial reading " + _downloader.getInitialReadingPoint()
+                + " initial writing " + _downloader.getInitialWritingPoint()
+                + " amount to read " + _downloader.getAmountToRead()
+                + " amount read " + _downloader.getAmountRead();
+            }
+        } else 
+            return "worker not started";
     }
     
     /** 
