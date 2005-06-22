@@ -337,22 +337,19 @@ public final class SearchResultHandler {
         private final long _time;
         private final GUID _guid;
         private final QueryRequest _qr;
-        private int _numGoodResults, _numSpamResults;
+        private int _numGoodResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
         
         public GuidCount(QueryRequest qr) {
             _qr = qr;
             _guid = new GUID(qr.getGUID());
-            _numGoodResults = 0;
-			_numSpamResults = 0;
             _time = System.currentTimeMillis();
         }
 
         public GUID getGUID() { return _guid; }
         public int getNumResults() {
-        	// count spamResults as half a proper result
-			return _numGoodResults + _numSpamResults / 2;
+			return _numGoodResults ;
 		}
 		public int getNextReportNum() { return _nextReportNum; }
         public long getTime() { return _time; }
@@ -369,8 +366,7 @@ public final class SearchResultHandler {
         public void markAsFinished() { markAsFinished = true; }
 
         public String toString() {
-            return "" + _guid + ":" + _numGoodResults + ":" + _numSpamResults
-					+ ":" + _nextReportNum;
+            return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }
     }
 

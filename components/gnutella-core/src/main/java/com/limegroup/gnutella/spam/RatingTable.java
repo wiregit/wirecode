@@ -6,25 +6,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;

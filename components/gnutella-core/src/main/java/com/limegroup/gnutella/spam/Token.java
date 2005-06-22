@@ -31,6 +31,11 @@ public interface Token extends Serializable {
 	 */
 	public static final int TYPE_XML_KEYWORD = 5;
 
+    /**
+     * A Token representing the vendor
+     */
+    public static final int TYPE_VENDOR = 6;
+
 	/**
 	 * the user marked this token as spam
 	 */

@@ -78,6 +78,7 @@ public class Tokenizer {
 		if (desc.getSHA1Urn() != null)
 			set.add(getUrnToken(desc));
 		set.add(getSizeToken(desc));
+        set.add(getVendorToken(desc));
 		set.add(getAddressToken(desc));
 		Token[] tokens = new Token[set.size()];
 		tokens = (Token[]) set.toArray(tokens);
@@ -103,6 +104,7 @@ public class Tokenizer {
 			if (descs[i].getSHA1Urn() != null)
 				set.add(getUrnToken(descs[i]));
 			set.add(getSizeToken(descs[i]));
+            set.add(getVendorToken(descs[i]));
 			set.add(getAddressToken(descs[i]));
 		}
 		Token[] tokens = new Token[set.size()];
@@ -170,6 +172,14 @@ public class Tokenizer {
 	private static Token getSizeToken(RemoteFileDesc desc) {
 		return new SizeToken(desc.getSize());
 	}
+    
+    /**
+     * Returns a (most often) previously cached token for the specific
+     * vendor
+     */
+    private static Token getVendorToken(RemoteFileDesc desc) {
+        return VendorToken.getToken(desc.getVendor());
+    }
 
 	/**
 	 * Builds an AddressToken for a RemoteFileDesc
