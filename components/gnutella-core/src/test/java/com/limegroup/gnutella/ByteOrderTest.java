@@ -200,16 +200,16 @@ public class ByteOrderTest extends BaseTestCase {
 
         in2=(short)0xFFFF;
         assertLessThan(0,in2);
-        assertEquals(0x0000FFFF, ByteOrder.ubytes2int(in2));
-        assertGreaterThan(0, ByteOrder.ubytes2int(in2));
+        assertEquals(0x0000FFFF, ByteOrder.ushort2int(in2));
+        assertGreaterThan(0, ByteOrder.ushort2int(in2));
     }
     
     public void testUBytes2Long() {
     
         in3=(int)0xFFFFFFFF;
         assertLessThan(0, in3);
-        assertEquals(0x00000000FFFFFFFFl, ByteOrder.ubytes2long(in3));
-        assertGreaterThan(0, ByteOrder.ubytes2long(in3));
+        assertEquals(0x00000000FFFFFFFFl, ByteOrder.uint2long(in3));
+        assertGreaterThan(0, ByteOrder.uint2long(in3));
     }
     
     public void testLeb2ShortAndUBytes2Int() {
@@ -217,7 +217,7 @@ public class ByteOrderTest extends BaseTestCase {
         byte[] buf={(byte)0xFF, (byte)0xFF};
         in2=ByteOrder.leb2short(buf,0);
         assertEquals(-1, in2);
-        out2=ByteOrder.ubytes2int(in2);
+        out2=ByteOrder.ushort2int(in2);
         assertEquals(0x0000FFFF, out2);
     }
     
@@ -226,7 +226,7 @@ public class ByteOrderTest extends BaseTestCase {
         byte[] buf2={(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
         in3=ByteOrder.leb2int(buf2,0);
         assertEquals(-1, in3);
-        out4=ByteOrder.ubytes2long(in3);
+        out4=ByteOrder.uint2long(in3);
         assertEquals(0x00000000FFFFFFFFl, out4);
     }
     

@@ -551,7 +551,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     public int getPort() {
-        return ByteOrder.ubytes2int(ByteOrder.leb2short(_payload,1));
+        return ByteOrder.ushort2int(ByteOrder.leb2short(_payload,1));
     }
 
     /** Returns the IP address of the responding host in standard
@@ -570,7 +570,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     public long getSpeed() {
-        return ByteOrder.ubytes2long(ByteOrder.leb2int(_payload,7));
+        return ByteOrder.uint2long(ByteOrder.leb2int(_payload,7));
     }
     
     /**
@@ -1343,7 +1343,7 @@ public class QueryReply extends Message implements Serializable{
                 throw new BadPacketException("Weird Input");
 
             String host = NetworkUtils.ip2string(networkData, 0);
-            int port = ByteOrder.ubytes2int(ByteOrder.leb2short(networkData, 4));
+            int port = ByteOrder.ushort2int(ByteOrder.leb2short(networkData, 4));
             if (!NetworkUtils.isValidPort(port))
                 throw new BadPacketException("Bad Port: " + port);
             _port = port;

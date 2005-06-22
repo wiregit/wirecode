@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
@@ -14,18 +17,23 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public abstract class MetaData {
 	
+    private static final Log LOG = LogFactory.getLog(MetaData.class); 
+    
 	protected MetaData(){} // use the factory instead of instantiating
-	
+    
     /** Creates MetaData for the file, if possible. */	
 	public static MetaData parse(File f) throws IOException {
-		if (LimeXMLUtils.isSupportedAudioFormat(f))
-			return AudioMetaData.parseAudioFile(f);
-		else if (LimeXMLUtils.isSupportedVideoFormat(f))
-			return VideoMetaData.parseVideoMetaData(f);
-		//TODO: add other media formats here			
-	    else if (LimeXMLUtils.isSupportedMultipleFormat(f))
-	        return parseMultipleFormat(f);
-	        
+        try {
+            if (LimeXMLUtils.isSupportedAudioFormat(f))
+                return AudioMetaData.parseAudioFile(f);
+            else if (LimeXMLUtils.isSupportedVideoFormat(f))
+                return VideoMetaData.parseVideoMetaData(f);
+            //TODO: add other media formats here			
+            else if (LimeXMLUtils.isSupportedMultipleFormat(f))
+                return parseMultipleFormat(f);
+        } catch (OutOfMemoryError e) {
+            LOG.warn("Ran out of memory while parsing.",e);
+        }
 		return null;
 	}
 	

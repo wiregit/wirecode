@@ -577,7 +577,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             ReceivedErrorStat.PING_REPLY_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("invalid payload length");   
         }
-        int port = ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
+        int port = ByteOrder.ushort2int(ByteOrder.leb2short(payload,0));
  		if(!NetworkUtils.isValidPort(port)) {
  		    ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port: "+port); 
@@ -678,9 +678,9 @@ public class PingReply extends Message implements Serializable, IpPort {
                       GGEP ggep, InetAddress ip) {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         PAYLOAD = payload;
-        PORT = ByteOrder.ubytes2int(ByteOrder.leb2short(PAYLOAD,0));
-        FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
-        KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
+        PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
+        FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,6));
+        KILOBYTES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,10));
 
         IP = ip;
 
@@ -773,7 +773,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     if (NetworkUtils.isValidAddress(myip)) {
                         try{
                             myIP = NetworkUtils.getByAddress(myip);
-                            myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
+                            myPort = ByteOrder.ushort2int(ByteOrder.leb2short(data,4));
                             
                             if (NetworkUtils.isPrivateAddress(myIP) ||
                                     !NetworkUtils.isValidPort(myPort) ) {

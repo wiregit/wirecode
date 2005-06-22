@@ -48,7 +48,7 @@ public final class QueryStatusResponse extends VendorMessage {
      *  for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
-        return ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 0));
+        return ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
     }
 
     /** The query guid that this response refers to.

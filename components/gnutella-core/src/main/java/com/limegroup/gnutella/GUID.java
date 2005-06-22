@@ -309,7 +309,7 @@ public class GUID implements Comparable {
     /** Gets bytes 13-14 as a port.
      */
     public static int getPort(byte[] guidBytes) {
-        return ByteOrder.ubytes2int(ByteOrder.leb2short(guidBytes, 13));
+        return ByteOrder.ushort2int(ByteOrder.leb2short(guidBytes, 13));
     }
 
     /** 

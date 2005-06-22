@@ -42,7 +42,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-            int vectorSize = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             for (int i = 0; i < vectorSize; i++)
                 _messagesSupported.add(new SupportedMessageBlock(bais));
         } catch (IOException ioe) {
@@ -301,8 +301,8 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             _vendorID = new byte[4];
             encodedBlock.read(_vendorID, 0, _vendorID.length);
 
-            _selector =ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
-            _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
+            _selector =ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
+            _version = ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
             _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 

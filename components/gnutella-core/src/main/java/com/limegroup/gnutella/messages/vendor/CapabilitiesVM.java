@@ -69,7 +69,7 @@ public final class CapabilitiesVM extends VendorMessage {
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-            int vectorSize = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             // constructing the SMB will cause a BadPacketException if the
             // network data is invalid
             for (int i = 0; i < vectorSize; i++)
@@ -248,7 +248,7 @@ public final class CapabilitiesVM extends VendorMessage {
             _capabilityName = new byte[4];
             encodedBlock.read(_capabilityName, 0, _capabilityName.length);
 
-            _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
+            _version = ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
             _hashCode = computeHashCode(_capabilityName, _version);
 
         }

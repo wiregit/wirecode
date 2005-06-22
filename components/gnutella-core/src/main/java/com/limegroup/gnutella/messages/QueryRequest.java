@@ -1289,7 +1289,7 @@ public class QueryRequest extends Message implements Serializable{
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
-			tempMinSpeed = ByteOrder.ubytes2int(sp);
+			tempMinSpeed = ByteOrder.ushort2int(sp);
             tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
             // handle extensions, which include rich query and URN stuff
             byte[] extsBytes = super.readNullTerminatedBytes(bais);

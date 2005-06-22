@@ -38,7 +38,7 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          payload.length);
         // get the port from the payload....
-        _port = ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 0));
+        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
         if( !NetworkUtils.isValidPort(_port) )
             throw new BadPacketException("invalid port");
     }

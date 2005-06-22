@@ -256,9 +256,9 @@ public abstract class VendorMessage extends Message {
             vendorID = new byte[4];
             bais.read(vendorID, 0, vendorID.length);
             // get the selector....
-            selector = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            selector = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             // get the version....
-            version = ByteOrder.ubytes2int(ByteOrder.leb2short(bais));
+            version = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             // get the rest....
             restOf = new byte[bais.available()];
             bais.read(restOf, 0, restOf.length);

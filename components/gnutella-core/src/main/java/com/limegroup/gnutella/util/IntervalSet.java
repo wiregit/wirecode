@@ -388,8 +388,8 @@ public class IntervalSet {
         
     	IntervalSet ret = new IntervalSet();
     	for (int i =0; i< data.length/8;i++) {
-    		int low = (int)ByteOrder.ubytes2long(ByteOrder.beb2int(data,i*8));
-    		int high = (int)ByteOrder.ubytes2long(ByteOrder.beb2int(data,i*8+4));
+    		int low = (int)ByteOrder.uint2long(ByteOrder.beb2int(data,i*8));
+    		int high = (int)ByteOrder.uint2long(ByteOrder.beb2int(data,i*8+4));
             if (high < low)
                 throw new IOException();
     		ret.add(new Interval(low,high));

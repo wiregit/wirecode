@@ -218,7 +218,7 @@ class ASFParser {
         LOG.debug("Parsing extended stream properties");
         
         IOUtils.ensureSkip(ds, 56);
-        short channels = ByteOrder.leb2short(ds);
+        int channels = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
         int sampleRate = ByteOrder.leb2int(ds);
         int byteRate = ByteOrder.leb2int(ds);
         if(_bitrate == -1)
@@ -299,7 +299,7 @@ class ASFParser {
         int[] sizes = { -1, -1, -1, -1, -1 };
         
         for(int i = 0; i < sizes.length; i++)
-            sizes[i] = ByteOrder.leb2short(ds);
+            sizes[i] = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
         
         byte[][] info = new byte[5][];
         for(int i = 0; i < sizes.length; i++)
@@ -334,18 +334,18 @@ class ASFParser {
      */
     private void parseExtendedContentDescription(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content description");
-        int fieldCount = ByteOrder.leb2short(ds);
+        int fieldCount = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
         
         if(LOG.isDebugEnabled())
             LOG.debug("Extended fieldCount: " + fieldCount);
         
         for(int i = 0; i < fieldCount; i++) {
-            int fieldSize = ByteOrder.leb2short(ds);
+            int fieldSize = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
             byte[] field = new byte[fieldSize];
             ds.readFully(field);
             String fieldName = string(field);
-            int dataType = ByteOrder.leb2short(ds);
-            int dataSize = ByteOrder.leb2short(ds);
+            int dataType = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
+            int dataSize = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
             
             switch(dataType) {
             case TYPE_STRING:

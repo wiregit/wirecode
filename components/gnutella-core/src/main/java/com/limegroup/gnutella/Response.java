@@ -219,8 +219,8 @@ public class Response {
     public static Response createFromStream(InputStream is) 
 		throws IOException {
         // extract file index & size
-        long index=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
-        long size=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
+        long index=ByteOrder.uint2long(ByteOrder.leb2int(is));
+        long size=ByteOrder.uint2long(ByteOrder.leb2int(is));
         
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IOException("invalid index: " + index);
@@ -711,7 +711,7 @@ public class Response {
  
             if (locBytes.length % 6 == 0) {
                 for (int j = 0; j < locBytes.length; j += 6) {
-                    int port = ByteOrder.ubytes2int(ByteOrder.leb2short(locBytes, j+4));
+                    int port = ByteOrder.ushort2int(ByteOrder.leb2short(locBytes, j+4));
                     if (!NetworkUtils.isValidPort(port))
                         continue;
                     byte[] ip = new byte[4];

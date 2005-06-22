@@ -494,14 +494,14 @@ public class ByteOrder {
     /**
      * Interprets the value of x as an unsigned two-byte number.
      */
-    public static int ubytes2int(final short x) {
+    public static int ushort2int(final short x) {
         return x & 0xFFFF;
     }
 
     /**
      * Interprets the value of x as an unsigned four-byte number.
      */
-    public static long ubytes2long(final int x) {
+    public static long uint2long(final int x) {
         return x & 0xFFFFFFFFL;
     }
 

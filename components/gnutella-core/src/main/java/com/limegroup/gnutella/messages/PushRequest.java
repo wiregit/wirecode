@@ -111,7 +111,7 @@ public class PushRequest extends Message implements Serializable {
     }
 
     public long getIndex() {
-        return ByteOrder.ubytes2long(ByteOrder.leb2int(payload, 16));
+        return ByteOrder.uint2long(ByteOrder.leb2int(payload, 16));
     }
 
     public boolean isFirewallTransferPush() {
@@ -128,7 +128,7 @@ public class PushRequest extends Message implements Serializable {
     }
 
     public int getPort() {
-        return ByteOrder.ubytes2int(ByteOrder.leb2short(payload, 24));
+        return ByteOrder.ushort2int(ByteOrder.leb2short(payload, 24));
     }
 
     public Message stripExtendedPayload() {

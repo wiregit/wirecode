@@ -54,7 +54,7 @@ public final class UDPConnectBackRedirect extends VendorMessage {
         }
 
         // get the port from the payload....
-        _port = ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 
+        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 
                                                          ip.length));
         if (!NetworkUtils.isValidPort(_port))
             throw new BadPacketException("invalid port");
