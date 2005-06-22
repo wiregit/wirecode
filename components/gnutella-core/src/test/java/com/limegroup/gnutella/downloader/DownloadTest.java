@@ -1592,13 +1592,14 @@ public class DownloadTest extends BaseTestCase {
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
         final int RATE=50;
-        final int STOP_AFTER = TestFile.length()/2;
+        final int STOP_AFTER = (TestFile.length()/2)+1;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2};
