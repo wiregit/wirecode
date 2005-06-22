@@ -159,6 +159,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         TestSuite suite = new LimeTestSuite();
         LimeTestSuite.setTestClass(cls);
         for (int ii = 0; ii < tests.length; ii++) {
+            if (!tests[ii].startsWith("test"))
+                tests[ii]="test"+tests[ii];
             suite.addTest(TestSuite.createTest(cls, tests[ii]));
         }
         return suite;
