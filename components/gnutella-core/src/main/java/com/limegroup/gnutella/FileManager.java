@@ -222,6 +222,11 @@ public abstract class FileManager {
     private volatile int _loadingFinished = -1;
     
     /**
+     * Whether the FileManager has been shutdown.
+     */
+    protected volatile boolean shutdown;
+    
+    /**
      * The filter object to use to discern shareable files.
      */
     private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
@@ -324,6 +329,7 @@ public abstract class FileManager {
     
     public void stop() {
         save();
+        shutdown = true;
     }
 
     protected void save(){

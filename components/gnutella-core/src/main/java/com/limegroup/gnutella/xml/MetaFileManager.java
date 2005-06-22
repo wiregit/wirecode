@@ -460,7 +460,8 @@ public class MetaFileManager extends FileManager {
     
     private class Saver implements Runnable {
         public void run() {
-            save();
+            if (!shutdown)
+                save();
         }
     }
 }
