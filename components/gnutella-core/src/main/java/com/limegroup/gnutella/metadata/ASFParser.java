@@ -128,6 +128,12 @@ class ASFParser {
         if(LOG.isDebugEnabled())
             LOG.debug("Data Offset: " + dataOffset + ", objectCount: " + objectCount);
         
+        if (dataOffset < 0)
+            throw new IOException("ASF file is corrupt. Data offset negative:"
+                    +dataOffset);
+        if (objectCount < 0)
+            throw new IOException("ASF file is corrupt. Object count unreasonable:"
+                    + ByteOrder.uint2long(objectCount));
         if(objectCount > 100)
             throw new IOException("object count very high: " + objectCount);
             
@@ -138,6 +144,8 @@ class ASFParser {
                 
             ds.readFully(object);
             long size = ByteOrder.leb2long(ds) - 24;
+            if (size < 0)
+                throw new IOException("ASF file is corrupt.  Object size < 0 :"+size);
             counter.clearAmountRead();
             readObject(ds, object, size);
             int read = counter.getAmountRead();
@@ -187,9 +195,14 @@ class ASFParser {
         IOUtils.ensureSkip(ds, 48);
         
         int duration = (int)(ByteOrder.leb2long(ds) / 10000000);
+        if (duration < 0)
+            throw new IOException("ASF file corrupt.  Duration < 0:"+duration);
         _length = duration;
         IOUtils.ensureSkip(ds, 20);
         int maxBR = ByteOrder.leb2int(ds);
+        if (maxBR < 0)
+            throw new IOException("ASF file corrupt.  Max bitrate > 2 Gb/s:"+
+                    ByteOrder.uint2long(maxBR));
         if(LOG.isDebugEnabled())
             LOG.debug("maxBitrate: " + maxBR);
         _bitrate = maxBR / 1000;
@@ -207,7 +220,13 @@ class ASFParser {
             _hasVideo = true;
             IOUtils.ensureSkip(ds, 38);
             _width = ByteOrder.leb2int(ds);
+            if (_width < 0)
+                throw new IOException("ASF file corrupt.  Video width excessive:"+
+                        ByteOrder.uint2long(_width));
             _height = ByteOrder.leb2int(ds);
+            if (_height < 0)
+                throw new IOException("ASF file corrupt.  Video height excessive:"+
+                        ByteOrder.uint2long(_height));
         }
         
         // we aren't reading everything, but we'll skip over just fine.
@@ -220,7 +239,13 @@ class ASFParser {
         IOUtils.ensureSkip(ds, 56);
         int channels = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
         int sampleRate = ByteOrder.leb2int(ds);
+        if (sampleRate < 0)
+            throw new IOException("ASF file corrupt.  Sample rate excessive:"+
+                    ByteOrder.uint2long(sampleRate));
         int byteRate = ByteOrder.leb2int(ds);
+        if (byteRate < 0)
+            throw new IOException("ASF file corrupt.  Byte rate excessive:"+
+                    ByteOrder.uint2long(byteRate));
         if(_bitrate == -1)
             _bitrate = byteRate * 8 / 1000;
         if(LOG.isDebugEnabled())
@@ -234,19 +259,19 @@ class ASFParser {
      */
     private void parseContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing content encryption");
-        int size = ByteOrder.leb2int(ds); // data
-        IOUtils.ensureSkip(ds, size);
+        long skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // data
+        IOUtils.ensureSkip(ds, skipSize);
         
-        size = ByteOrder.leb2int(ds); // type
-        byte[] b = new byte[size];
+        int typeSize = ByteOrder.leb2int(ds); // type
+        byte[] b = new byte[typeSize];
         ds.readFully(b);
         _drmType = new String(b).trim();
         
-        size = ByteOrder.leb2int(ds); // data
-        IOUtils.ensureSkip(ds, size);
+        skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // data
+        IOUtils.ensureSkip(ds, skipSize);
         
-        size = ByteOrder.leb2int(ds); // url
-        IOUtils.ensureSkip(ds, size);
+        skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // url
+        IOUtils.ensureSkip(ds, skipSize);
     }   
     
     /**
@@ -257,6 +282,9 @@ class ASFParser {
     private void parseExtendedContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content encryption");
         int size = ByteOrder.leb2int(ds);
+        if (size < 0)
+            throw new IOException("ASF file reports excessive length of encryption data:"
+                    +ByteOrder.uint2long(size));
         byte[] b = new byte[size];
         ds.readFully(b);
         String xml = new String(b, "UTF-16").trim();
@@ -434,8 +462,12 @@ class ASFParser {
             LOG.debug("Parsing extended int, field: " + field + ", size: " + size + ", value: " + value);
             
         if(Extended.WM_TRACK_NUMBER.equals(field)) {
-            if(_track == -1)
-                _track = (short)value;
+            if(_track == -1) {
+                short shortValue = (short)value;
+                if (shortValue < 0)
+                    throw new IOException("ASF file reports negative track number "+shortValue);
+                _track = shortValue;
+            }
         }
     }
     
