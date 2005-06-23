@@ -689,6 +689,14 @@ public class IntervalSetTest extends BaseTestCase {
     	assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
     }
     
+    // Test failure case from beta testing
+    public void testContains() {
+        iSet = IntervalSet.createSingletonSet(1542374,1572863);
+        iSet.add(new Interval(1645963,1835007));
+        iSet.add(new Interval(2077669,2228223));
+        assertTrue(iSet.contains(new Interval(1542374,1543397)));
+    }
+    
     ///// Private helper methods ///// 
 
     private Interval getIntervalAt(int i) {
