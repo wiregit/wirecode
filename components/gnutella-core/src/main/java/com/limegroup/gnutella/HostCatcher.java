@@ -258,21 +258,17 @@ public class HostCatcher {
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
-	public HostCatcher() {}
+	public HostCatcher() {
+        pinger = new UniqueHostPinger();
+        udpHostCache = new UDPHostCache(pinger);
+    }
 
     /**
-     * Links the HostCatcher up with the other back end pieces, and, if quick
-     * connect is not specified in the SettingsManager, loads the hosts in the
-     * host list into the maybe set.  (The likelys set is empty.)  If filename
-     * does not exist, then no error message is printed and this is initially
-     * empty.  The file is expected to contain a sequence of lines in the format
-     * "<host>:port\n".  Lines not in this format are silently ignored.
+     * Initializes any components required for HostCatcher.
+     * Currently, this schedules occasional services.
      */
     public void initialize() {
         LOG.trace("START scheduling");
-        
-        pinger = new UniqueHostPinger();
-        udpHostCache = new UDPHostCache(pinger);
         
         scheduleServices();
     }

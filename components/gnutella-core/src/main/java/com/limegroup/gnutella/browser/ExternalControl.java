@@ -91,9 +91,10 @@ public class ExternalControl {
 
 		ActivityCallback callback = RouterService.getCallback();
 
-		// Make sure that connections are active
-		if ( RouterService.getNumInitializedConnections() <= 0 ) 
-		    RouterService.connect();
+        // No reason to make sure connections are active.  We don't even know
+        // at this point if the magnet requires a search.
+//		if ( RouterService.getNumInitializedConnections() <= 0 ) 
+//		    RouterService.connect();
 
 		callback.restoreApplication();
 		callback.showDownloads();
