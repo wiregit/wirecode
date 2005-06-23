@@ -271,8 +271,6 @@ public class DownloadWorker implements Runnable {
         //http11 status while inside connectAndDownload.
         boolean http11 = true;//must enter the loop
         
-        try {
-
         while(http11) {
             //Step 2. OK. We have established TCP Connection. This 
             //downloader should choose a part of the file to download
@@ -367,12 +365,6 @@ public class DownloadWorker implements Runnable {
                 releaseRanges();
             }
         } // end of while(http11)
-        
-        } finally {
-            // we must ensure that all _downloaders are removed from the data
-            // structure before returning from this method.
-            _manager.removeActiveWorker(this);
-        }
     }
     
     private ConnectionStatus requestTHEXIfNeeded() {
