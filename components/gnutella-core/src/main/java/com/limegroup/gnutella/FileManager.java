@@ -968,10 +968,17 @@ public abstract class FileManager {
 	    }
 	    
         synchronized(this) {
-		    if (revision != _revision || !isFileShareable(file)) {
-                callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+		    if (revision != _revision) { 
+		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
             }
+			// if file is not shareable, also remove it from special files
+			// to share since in that case it's not physically shareable then
+		    if (!isFileShareable(file)) {
+		    	_data.SPECIAL_FILES_TO_SHARE.remove(file);
+		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
+                return;
+		    }
         
             if(isFileShared(file)) {
                 callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
