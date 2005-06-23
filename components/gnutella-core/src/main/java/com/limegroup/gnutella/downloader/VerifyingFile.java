@@ -217,7 +217,7 @@ public class VerifyingFile {
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
 			Assert.that(false, "trying to write an interval "+intvl+
-                    " that wasn't leased "+dumpState());
+                    " that wasn't leased.\n"+dumpState());
         }
 		
 		
