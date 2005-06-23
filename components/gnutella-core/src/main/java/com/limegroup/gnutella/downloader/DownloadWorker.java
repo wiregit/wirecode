@@ -240,19 +240,13 @@ public class DownloadWorker implements Runnable {
         
         //Step 1. establish a TCP Connection, either by opening a socket,
         //OR by sending a push request.
-        _downloader = establishConnection();
+        establishConnection();
         
-        // if we could not connect, return
+        // if we have a downloader at this point, it must be good to proceed or
+        // it must be properly stopped.
         if(_downloader == null)
             return;
         
-        // if we the worker was killed outside of a network io operation,
-        // make sure we stop the downloader and return.
-        if (_interrupted) {
-            _downloader.stop();
-            return;
-        }
-
         //initilaize the newly created HTTPDownloader with whatever AltLocs we
         //have discovered so far. These will be cleared out after the first
         //write, from them on, only newly successful rfds will be sent as alts
@@ -490,19 +484,19 @@ public class DownloadWorker implements Runnable {
      * to connect. Remember this rfd by putting it back into files and return
      * null 
      */
-    private HTTPDownloader establishConnection() {
+    private void establishConnection() {
         if(LOG.isTraceEnabled())
             LOG.trace("establishConnection(" + _rfd + ")");
         
         if (_rfd == null) //bad rfd, discard it and return null
-            return null; // throw new NoSuchElementException();
+            return; // throw new NoSuchElementException();
         
         if (_manager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
             _manager.addRFD(_rfd);
-            return null;
+            return;
         }
 
-        HTTPDownloader ret;
+        HTTPDownloader ret = null;
         boolean needsPush = _rfd.needsPush();
         
         
@@ -516,7 +510,7 @@ public class DownloadWorker implements Runnable {
                 state != ManagedDownloader.DISK_PROBLEM && state != ManagedDownloader.CORRUPT_FILE && 
                 state != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
                     if(_interrupted)
-                        return null; // we were signalled to stop.
+                        return; // we were signalled to stop.
                     _manager.setState(ManagedDownloader.CONNECTING, 
                             needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
                 }
@@ -539,10 +533,10 @@ public class DownloadWorker implements Runnable {
                 try {
                     ret = connectDirectly();
                 } catch(IOException e2) {
-                    return null; // impossible to connect.
+                    return ; // impossible to connect.
                 }
             }
-            return ret;
+            return;
         }        
         
         // otherwise, we're not multicast.
@@ -551,25 +545,29 @@ public class DownloadWorker implements Runnable {
         if( !needsPush ) {
             try {
                 ret = connectDirectly();
-                return ret;
             } catch(IOException e) {
                 // fall through to the push ...
             }
         }
         try {
                  ret = connectWithPush();
-                 return ret;
         } catch(IOException e) {
                 // even the push failed :(
             _manager.forgetRFD(_rfd);
         }
         
+        // did we connect at all?
+        _downloader = ret;
         
-        // if we're here, everything failed.
+        // if we didn't connect at all, tell the rest about this rfd
+        if (_downloader == null)
+            _manager.informMesh(_rfd, false);
+        else if (_interrupted) {
+            // if the worker got killed, make sure the downloader is stopped.
+            _downloader.stop();
+            _downloader = null;
+        }
         
-        _manager.informMesh(_rfd, false);
-        
-        return null;
     }
     
     /**
