@@ -123,6 +123,11 @@ public class UDPService implements ReadWriteObserver {
      * The GUID that we send for Pings, useful to test solicited support.
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
+    
+    /**
+     * Determines if this was ever started.
+     */
+    private boolean _started = false;
 
 
     /**
@@ -174,6 +179,20 @@ public class UDPService implements ReadWriteObserver {
     public GUID getSolicitedGUID() {
         return SOLICITED_PING_GUID;
     }
+    
+    /**
+     * Starts listening for UDP messages & allowing UDP messages to be written.
+     */
+    public void start() {
+        DatagramChannel channel;
+        synchronized(this) {
+            _started = true;
+            channel = _channel;
+        }
+        
+        if(channel != null)
+            NIODispatcher.instance().registerReadWrite(channel, this);
+    }
 
     /** 
      * Returns a new DatagramSocket that is bound to the given port.  This
@@ -214,17 +233,22 @@ public class UDPService implements ReadWriteObserver {
 	    }
 	    
 	    if(datagramSocket != null) {
-    	    _channel = datagramSocket.getChannel();
-    	    if(_channel == null)
-    	        throw new IllegalArgumentException("No channel!");
-    	        
-            NIODispatcher.instance().registerReadWrite(_channel, this);
-    	        
-            // set the port in the FWT records
-            synchronized(this) {
+	        boolean wasStarted;
+	        synchronized(this) {
+        	    _channel = datagramSocket.getChannel();
+        	    if(_channel == null)
+        	        throw new IllegalArgumentException("No channel!");
+        	        
+                wasStarted = _started;
+            
+                // set the port in the FWT records
                 _lastReportedPort=_channel.socket().getLocalPort();
                 _portStable=true;
             }
+            
+            // If it was already started at one point, re-start to register this new channel.
+            if(wasStarted)
+                start();
         }
 	}
 	
