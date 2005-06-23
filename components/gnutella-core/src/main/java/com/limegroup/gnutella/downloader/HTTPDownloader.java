@@ -57,6 +57,7 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NPECatchingInputStream;
@@ -1477,8 +1478,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
                 // try to update the FWT version and external address we know for this host
             	try {
-            	    PushEndpoint.setAddr(_rfd.getClientGUID(),
-            	            new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()));
+            	    updatePEAddress();
             	    PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
                 } catch (IOException ignored) {}
             }
@@ -1530,13 +1530,19 @@ public class HTTPDownloader implements BandwidthTracker {
         
         try {
             PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
-            PushEndpoint.setAddr(_rfd.getClientGUID(),
-                    new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()));
+            updatePEAddress();
         }catch(IOException tooBad) {
             // invalid header - ignore it.
         }
         
     }
+    
+    private void updatePEAddress() throws IOException {
+        IpPort newAddr = new IpPortImpl(_socket.getInetAddress().getHostAddress(),_socket.getPort()); 
+        if (NetworkUtils.isValidExternalIpPort(newAddr))
+            PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+    }
+    
     /////////////////////////////// Download ////////////////////////////////
 
     /*

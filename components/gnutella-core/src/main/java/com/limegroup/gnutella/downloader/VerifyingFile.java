@@ -289,6 +289,10 @@ public class VerifyingFile {
      * Removes the specified internal from the set of leased intervals.
      */
     public synchronized void releaseBlock(Interval in) {
+        if (!leasedBlocks.contains(in)) {
+            Assert.that(false, "trying to release an interval "+in+
+                    " that wasn't leased "+dumpState());
+        }
         if(LOG.isInfoEnabled())
             LOG.info("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);

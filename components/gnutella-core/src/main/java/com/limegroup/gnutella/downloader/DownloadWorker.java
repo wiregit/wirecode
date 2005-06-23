@@ -420,12 +420,7 @@ public class DownloadWorker implements Runnable {
             if (LOG.isDebugEnabled())
                 LOG.debug("releasing ranges "+new Interval(low,high));
             
-            // necessary to synchronize on steal lock, otherwise a downloader may 
-            // try to steal while another downloader has died and released its
-            // ranges.
-            synchronized(_stealLock) {
-                _commonOutFile.releaseBlock(new Interval(low,high));
-            }
+            _commonOutFile.releaseBlock(new Interval(low,high));
         } else 
 			LOG.debug("nothing to release!");
     }
