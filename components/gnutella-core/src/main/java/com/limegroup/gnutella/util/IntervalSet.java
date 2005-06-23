@@ -61,7 +61,7 @@ public class IntervalSet {
             if (low >= interval.low && interval.high >= high) //   <low, high>
                 return;                                       // ....interval....
             
-            if (low<=interval.high - 1 && interval.low < low)    //     <low, high>
+            if (low<=interval.high + 1 && interval.low < low)    //     <low, high>
                 lower=interval;                                  //  interval........
 
             if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
