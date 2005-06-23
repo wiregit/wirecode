@@ -47,8 +47,8 @@ public class IntervalSet {
     }
     
     public void add(Interval addInterval) {
-        int low = addInterval.low;
-        int high = addInterval.high;
+        final int low = addInterval.low;
+        final int high = addInterval.high;
         Interval lower=null;
         Interval higher=null;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
@@ -58,17 +58,14 @@ public class IntervalSet {
                 continue;
             }
 
-            if (low<=interval.high && interval.low<low)    //     <low, high>
-                lower=interval;                            //  interval........
+            if (low >= interval.low && interval.high >= high) //   <low, high>
+                return;                                       // ....interval....
+            
+            if (low<=interval.high - 1 && interval.low < low)    //     <low, high>
+                lower=interval;                                  //  interval........
 
-            if (interval.high == low-1)             //             <low,high>
-                lower=interval;                     // ....interval
-
-            if (interval.low<=high && interval.high>high)  //     <low, high>
-                higher=interval;                           //  .........interval
-
-            if (high == interval.low-1)              //  <low, high>
-                higher = interval;                   //             ...interval
+            if (interval.low - 1 <=high && interval.high > high)  //     <low, high>
+                higher=interval;                                  //  .........interval
             
             // if high < interval.low we must have found all overlaps since
             // intervals is sorted.
