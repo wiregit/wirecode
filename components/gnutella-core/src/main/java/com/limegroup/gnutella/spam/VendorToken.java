@@ -81,9 +81,9 @@ public class VendorToken extends AbstractToken {
             _bad++;
             break;
         case RATING_USER_MARKED_GOOD:
-            _bad = 0;
+            _bad = (byte) (_bad / 2); // bad rating should decrease slowly
             break;
-        case RATING_USER_MARKED_SPAM: // bad rating for these should grow slowly.
+        case RATING_USER_MARKED_SPAM: // bad rating should increase slowly.
             _bad = (byte) Math.min(_bad + 2, MAX);
             break;
         case RATING_CLEARED:
