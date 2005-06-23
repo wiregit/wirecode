@@ -59,6 +59,7 @@ import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.NPECatchingInputStream;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -429,7 +430,7 @@ public class HTTPDownloader implements BandwidthTracker {
             //If platform supports it, set SO_KEEPALIVE option.  This helps
             //detect a crashed uploader.
             Sockets.setKeepAlive(_socket, true);
-            _input = new BufferedInputStream(_socket.getInputStream());
+            _input = new NPECatchingInputStream(new BufferedInputStream(_socket.getInputStream()));
             _output = new BufferedOutputStream(_socket.getOutputStream());
             
         } catch (IOException e) {
