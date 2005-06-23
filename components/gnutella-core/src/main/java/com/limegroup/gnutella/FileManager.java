@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -807,6 +806,9 @@ public abstract class FileManager {
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
 	void removeFolderIfShared(File folder, File parent) {
+		if (!folder.isDirectory())
+			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
+		
 	    try {
 	        folder = FileUtils.getCanonicalFile(folder);
 	    } catch(IOException ignored) {}
@@ -866,12 +868,16 @@ public abstract class FileManager {
      * Adds a given folder to be shared.
      */
     public void addSharedFolder(File folder) {
+		if (!folder.isDirectory())
+			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
+		
         try {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
         
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
-        SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+		if (!isCompletelySharedDirectory(folder.getParentFile()))
+			SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
         updateSharedDirectories(folder, null, _revision);
     }
 	
@@ -1139,7 +1145,6 @@ public abstract class FileManager {
 	 * the special lists as necessary.
 	 */
 	public synchronized void stopSharingFile(File file) {
-	
 		try {
 			file = FileUtils.getCanonicalFile(file);
 		} catch (IOException e) {
@@ -1149,7 +1154,6 @@ public abstract class FileManager {
 		// remove file already here to heed against race conditions
 		// wrt to filemanager events being handled on other threads
 		boolean removed = _data.SPECIAL_FILES_TO_SHARE.remove(file); 
-		
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
 		    UrnCache.instance().clearPendingHashesFor(file, this);
