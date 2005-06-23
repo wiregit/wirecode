@@ -7,6 +7,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -445,6 +446,9 @@ public class UDPService implements ReadWriteObserver {
                 } catch(ConnectException ignored) {
                 } catch(NoRouteToHostException ignored) {
                 } catch(PortUnreachableException ignored) {
+                } catch(SocketException maybeIgnore) {
+                    if(!isIgnorable(maybeIgnore))
+                        throw maybeIgnore;
                 }
 	        }
 	        
@@ -453,6 +457,21 @@ public class UDPService implements ReadWriteObserver {
 	        return false;
 	    }
     }
+    
+    /**
+     * Determines if the given SocketException is ignorable.
+     */
+    private boolean isIgnorable(IOException iox) {
+        String msg = iox.getMessage();
+        if(msg == null)
+            return false;
+        
+        msg = msg.toLowerCase();
+        return msg.indexOf("interrupted function call") != -1
+            || msg.indexOf("network is down") != -1
+            || msg.indexOf("host is down") != -1;
+    }
+               
 	        
 	
 	/** Wrapper for outgoing data */

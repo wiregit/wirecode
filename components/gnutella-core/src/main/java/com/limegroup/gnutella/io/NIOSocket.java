@@ -375,7 +375,17 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     }
     
     public InetAddress getLocalAddress() {
-        return socket.getLocalAddress();
+        try {
+            return socket.getLocalAddress();
+        } catch(Error osxSucks) {
+            // On OSX 10.3 w/ Java 1.4.2_05, if the connection dies
+            // prior to this method being called, an Error is thrown.
+            try {
+                return InetAddress.getLocalHost();
+            } catch(UnknownHostException uhe) {
+                return null;
+            }
+        }
     }
     
     public boolean getOOBInline() throws SocketException {

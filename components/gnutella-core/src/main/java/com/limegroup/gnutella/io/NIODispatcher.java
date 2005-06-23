@@ -56,14 +56,19 @@ public class NIODispatcher implements Runnable {
      * Constructs the sole NIODispatcher, starting its thread.
      */
     private NIODispatcher() {
+        boolean failed = false;
         try {
             selector = Selector.open();
         } catch(IOException iox) {
-            throw new RuntimeException(iox);
+            failed = true;
         }
         
-        dispatchThread = new ManagedThread(this, "NIODispatcher");
-        dispatchThread.start();
+        if(!failed) {        
+            dispatchThread = new ManagedThread(this, "NIODispatcher");
+            dispatchThread.start();
+        } else {
+            dispatchThread = null;
+        }
     }
     
     /** The thread this is being run on. */
@@ -94,7 +99,11 @@ public class NIODispatcher implements Runnable {
      * Object, deadlock would occur.
      */
     private final ArrayList UNLOCKED = new ArrayList();
-     
+    
+    /** Returns true if the NIODispatcher is merrily chugging along. */
+    public boolean isRunning() {
+        return dispatchThread != null;
+    }
 	
 	/** Determine if this is the dispatch thread. */
 	public boolean isDispatchThread() {
