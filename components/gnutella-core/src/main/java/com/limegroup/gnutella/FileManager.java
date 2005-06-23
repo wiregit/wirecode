@@ -1139,20 +1139,27 @@ public abstract class FileManager {
 	 * the special lists as necessary.
 	 */
 	public synchronized void stopSharingFile(File file) {
-		if (file == null)
+	
+		try {
+			file = FileUtils.getCanonicalFile(file);
+		} catch (IOException e) {
 			return;
-
+		}
+		
+		// remove file already here to heed against race conditions
+		// wrt to filemanager events being handled on other threads
+		boolean removed = _data.SPECIAL_FILES_TO_SHARE.remove(file); 
+		
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
 		    UrnCache.instance().clearPendingHashesFor(file, this);
-			return;
         }
-
-		//  Remove from setting if individually shared, otherwise
-		//  add to files not to share
-		file = fd.getFile();
-		if (!_data.SPECIAL_FILES_TO_SHARE.remove(file))
-            _data.FILES_NOT_TO_SHARE.add(file);
+		else {
+			file = fd.getFile();
+			// if file was not specially shared, add it to files_not_to_share
+			if (!removed)
+				_data.FILES_NOT_TO_SHARE.add(file);
+		}
 	}
 	
 	/**
@@ -1503,7 +1510,7 @@ public abstract class FileManager {
      * Determines if a given file is shared while not in a completely shared directory.
      */
     public boolean isIndividualShare(File f) {
-        return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
+    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
     }
     
     /**
