@@ -64,6 +64,34 @@ public class SystemUtils {
     }
     
     /**
+     * Retrieves the amount in Megabytes of free disk space, or -1 if there was an error
+     * 
+     * @return -1 if error occurred, else the number of free MB on the target drive
+     */
+    public static long getDiskSpaceMB( String drive ) {
+        if(supportsFreeSpace()) 
+            return getFreeDiskSpaceMB(drive);
+        
+        return -1;
+    }
+    
+    
+    /**
+     * Returns whether or not the OS supports Disk Free Space call
+     *
+     * @return <tt>true</tt> if we're able to determine the idle time on this
+     *  operating system, otherwise <tt>false</tt>
+     */
+    public static boolean supportsFreeSpace() {
+        if(isLoaded) {
+            if(CommonUtils.isWindows2000orXP())
+                return true;
+        }
+            
+        return false;
+    }
+    
+    /**
      * Sets the number of open files, if supported.
      */
     public static long setOpenFileLimit(int max) {
@@ -86,4 +114,5 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
+    private static final native long getFreeDiskSpaceMB(String drive);
 }
