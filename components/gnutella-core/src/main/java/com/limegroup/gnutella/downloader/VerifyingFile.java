@@ -462,7 +462,7 @@ public class VerifyingFile {
         if (LOG.isDebugEnabled())
             LOG.debug("needed bytes: "+neededBytes);
         
-        // Calculate the union of neededBlocks and availableBlocks
+        // Calculate the intersection of neededBytes and availableBytes
         availableBytes.delete(neededBytes.invert(completedSize));
         
         Interval ret = blockChooser.pickAssignment(availableBytes, neededBytes,
