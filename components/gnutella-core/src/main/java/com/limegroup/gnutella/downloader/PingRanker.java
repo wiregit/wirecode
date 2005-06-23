@@ -228,7 +228,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             iter.remove();
             
             if (rfd.needsPush()) {
-                if (rfd.getPushProxies().size() > 0)
+                if (rfd.getPushProxies().size() > 0 && rfd.getSHA1Urn() != null)
                     pingProxies(rfd);
             } else {
                 pingedHosts.put(rfd,rfd);
