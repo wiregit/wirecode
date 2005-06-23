@@ -564,21 +564,26 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(32, interval.high); 
     }
     
-    public void testRemoveFirstAndIsEmpty() {
+    public void testGetFirstAndIsEmpty() {
         // [0-4], [17-17], [20-20], [28-28], [31-32]
         assertEquals(5, numIntervals());
-        assertEquals(new Interval(0, 4), iSet.removeFirst());
+        assertEquals(new Interval(0, 4), iSet.getFirst());
+        iSet.delete(iSet.getFirst());
         assertFalse(iSet.isEmpty());
-        assertEquals(new Interval(17, 17), iSet.removeFirst());
+        assertEquals(new Interval(17, 17), iSet.getFirst());
+        iSet.delete(iSet.getFirst());
         assertFalse(iSet.isEmpty());
-        assertEquals(new Interval(20, 20), iSet.removeFirst());
+        assertEquals(new Interval(20, 20), iSet.getFirst());
+        iSet.delete(iSet.getFirst());
         assertFalse(iSet.isEmpty());
-        assertEquals(new Interval(28, 28), iSet.removeFirst());
+        assertEquals(new Interval(28, 28), iSet.getFirst());
+        iSet.delete(iSet.getFirst());
         assertFalse(iSet.isEmpty());
-        assertEquals(new Interval(31, 32), iSet.removeFirst());
+        assertEquals(new Interval(31, 32), iSet.getFirst());
+        iSet.delete(iSet.getFirst());
         assertTrue(iSet.isEmpty());
         try {
-            iSet.removeFirst();
+            iSet.getFirst();
             fail("expected exception");
         } catch(NoSuchElementException nsee) {}
     }
@@ -600,7 +605,7 @@ public class IntervalSetTest extends BaseTestCase {
         IntervalSet clone = (IntervalSet)iSet.clone();
         assertEquals(1, clone.getAllIntervalsAsList().size());
         assertEquals(new Interval(0, 100), clone.getAllIntervals().next());
-        clone.removeFirst();
+        clone.delete(clone.getFirst());
         assertEquals(0, clone.getAllIntervalsAsList().size());
         assertEquals(1, numIntervals());
         assertEquals(new Interval(0, 100), getIntervalAt(0));

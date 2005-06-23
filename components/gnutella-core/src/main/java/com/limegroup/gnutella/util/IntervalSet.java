@@ -155,8 +155,7 @@ public class IntervalSet {
      * @throws NoSuchElementException if no intervals exist.
      */
     public Interval getFirst() throws NoSuchElementException {
-        Interval ret = (Interval)intervals.first();
-        return ret;
+        return (Interval)intervals.first();
     }
     
     /**
@@ -171,16 +170,6 @@ public class IntervalSet {
     /** @return the number of Intervals in this IntervalSet */
     public int getNumberOfIntervals() {
         return intervals.size();
-    }
-    
-    /**
-     * Removes the first element.  Throws NoSuchElementException
-     * if no intervals exist.
-     */
-    public Interval removeFirst() throws NoSuchElementException {
-        Interval ret = (Interval)intervals.first();
-        intervals.remove(ret);
-        return ret;
     }
 
 	/**
