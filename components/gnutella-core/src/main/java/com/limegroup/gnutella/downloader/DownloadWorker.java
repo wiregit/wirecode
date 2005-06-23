@@ -242,8 +242,16 @@ public class DownloadWorker implements Runnable {
         //OR by sending a push request.
         _downloader = establishConnection();
         
-        if(_downloader == null)//any exceptions in the method internally?
-            return;//no work was done, try to get another thread
+        // if we could not connect, return
+        if(_downloader == null)
+            return;
+        
+        // if we the worker was killed outside of a network io operation,
+        // make sure we stop the downloader and return.
+        if (_interrupted) {
+            _downloader.stop();
+            return;
+        }
 
         //initilaize the newly created HTTPDownloader with whatever AltLocs we
         //have discovered so far. These will be cleared out after the first
