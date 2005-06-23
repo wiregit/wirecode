@@ -688,7 +688,7 @@ public class ManagedConnection extends Connection
     /**
      * Notification that a message is available to be processed (via asynch-processing).
      */
-    public void processReadMessage(Message m) {
+    public void processReadMessage(Message m) throws IOException {
         updateReadStatistics(m);
         _connectionStats.addReceived();
         handleMessageInternal(m);

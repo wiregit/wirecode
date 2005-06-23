@@ -1105,35 +1105,33 @@ public class Connection implements IpPort {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = null;
-        try {
-            // DO THE ACTUAL READ
-            msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            
-            updateReadStatistics(msg);
-        } catch(NullPointerException npe) {
-            LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
-            throw CONNECTION_CLOSED;
-        }
+        Message msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+        updateReadStatistics(msg);
         return msg;
     }
     
     /**
      * Updates the read statistics.
      */
-    protected void updateReadStatistics(Message msg) {
-        // _bytesReceived must be set differently
-        // when compressed because the inflater will
-        // read more input than a single message,
-        // making it appear as if the deflated input
-        // was actually larger.
+    protected void updateReadStatistics(Message msg) throws IOException {
+            // _bytesReceived must be set differently
+            // when compressed because the inflater will
+            // read more input than a single message,
+            // making it appear as if the deflated input
+            // was actually larger.
         if( isReadDeflated() ) {
-            long newIn  = _inflater.getTotalIn();
-            long newOut = _inflater.getTotalOut();
-            CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData((int)(newOut - _bytesReceived));
-            CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData((int)(newIn - _compressedBytesReceived));
-            _compressedBytesReceived = newIn;
-            _bytesReceived = newOut;
+            try {
+                long newIn  = _inflater.getTotalIn();
+                long newOut = _inflater.getTotalOut();
+                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData((int)(newOut - _bytesReceived));
+                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData((int)(newIn - _compressedBytesReceived));
+                _compressedBytesReceived = newIn;
+                _bytesReceived = newOut;
+            } catch(NullPointerException npe) {
+                // Inflater is broken and can throw an NPE if it was ended
+                // at an odd time.
+                throw CONNECTION_CLOSED;
+            }
         } else if(msg != null) {
             _bytesReceived += msg.getTotalLength();
         }
