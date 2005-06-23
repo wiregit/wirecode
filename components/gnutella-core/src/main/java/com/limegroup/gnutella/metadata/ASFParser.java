@@ -263,6 +263,8 @@ class ASFParser {
         IOUtils.ensureSkip(ds, skipSize);
         
         int typeSize = ByteOrder.leb2int(ds); // type
+        if (typeSize < 0)
+            throw new IOException("ASF file is corrupt.  Type size < 0: "+typeSize);
         byte[] b = new byte[typeSize];
         ds.readFully(b);
         _drmType = new String(b).trim();
