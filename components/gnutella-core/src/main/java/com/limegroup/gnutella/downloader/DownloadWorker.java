@@ -166,8 +166,9 @@ public class DownloadWorker implements Runnable {
     
     /**
      * The downloader that will do the actual downloading
+     * TODO: un-volatilize after fixing the assertion failures
      */
-    private HTTPDownloader _downloader;
+    private volatile HTTPDownloader _downloader;
     
     /**
      * Whether I should release the ranges that I have leased for download
