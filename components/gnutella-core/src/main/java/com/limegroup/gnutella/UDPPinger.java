@@ -19,12 +19,8 @@ import org.apache.commons.logging.Log;
 public class UDPPinger {
     
     private static final Log LOG = LogFactory.getLog(UDPPinger.class);
-
-    protected static final MessageRouter ROUTER = 
-        RouterService.getMessageRouter();
         
-    protected static final ProcessingQueue QUEUE = 
-         new ProcessingQueue("UDPHostRanker");
+    protected static final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
         
     /**
      * The time to wait before expiring a message listener.
@@ -152,7 +148,7 @@ public class UDPPinger {
         final byte[] messageGUID = message.getGUID();
         
         if (listener != null)
-            ROUTER.registerMessageListener(messageGUID, listener);
+            RouterService.getMessageRouter().registerMessageListener(messageGUID, listener);
 
         
         Iterator iter = hosts.iterator();
@@ -166,7 +162,7 @@ public class UDPPinger {
             // indefinitely in memory for no reason.
             Runnable udpMessagePurger = new Runnable() {
                     public void run() {
-                        ROUTER.unregisterMessageListener(messageGUID, listener);
+                        RouterService.getMessageRouter().unregisterMessageListener(messageGUID, listener);
                     }
                 };
          
