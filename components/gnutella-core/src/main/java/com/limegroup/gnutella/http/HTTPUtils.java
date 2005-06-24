@@ -16,6 +16,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * This class supplies general facilities for handling HTTP, such as
@@ -336,6 +337,6 @@ public final class HTTPUtils {
      * Encodes a name using URLEncoder, using %20 instead of + for spaces.
      */
     private static String encode(String name, String encoding) throws IOException {
-        return URLEncoder.encode(name, encoding).replace("+", "%20");
+        return StringUtils.replace(URLEncoder.encode(name, encoding), "+", "%20");
     }
 }
