@@ -544,11 +544,14 @@ public class DownloadWorker implements Runnable {
                 // fall through to the push ...
             }
         }
-        try {
-                 ret = connectWithPush();
-        } catch(IOException e) {
+        
+        if (ret == null) {
+            try {
+                ret = connectWithPush();
+            } catch(IOException e) {
                 // even the push failed :(
-            _manager.forgetRFD(_rfd);
+                _manager.forgetRFD(_rfd);
+            }
         }
         
         // did we connect at all?
