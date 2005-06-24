@@ -1409,7 +1409,8 @@ public abstract class FileManager {
      * If oldName isn't shared, returns false.  Otherwise removes "oldName",
      * adds "newName", and returns true iff newName is actually shared.  The new
      * file may or may not have the same index as the original.
-     * Note that this does not change the disk.
+     *
+     * This assumes that oldName has been deleted & newName exists now.
      * @modifies this 
      */
     public synchronized void renameFileIfShared(File oldName, final File newName, final FileEventListener callback) {
@@ -1421,18 +1422,26 @@ public abstract class FileManager {
                 callback.handleFileEvent(evt);
             return;
         }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);
             
         List xmlDocs = new LinkedList(toRemove.getLimeXMLDocuments());
 		final FileDesc removed = removeFileIfShared(oldName, false);
         Assert.that(removed == toRemove, "invariant broken.");
 		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
+			
+        // Prepopulate the cache with new URNs.
+        UrnCache.instance().addUrns(newName, removed.getUrns());
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Add of newFile returned callback: " + evt);
+
                 // Retarget the event for the GUI.
                 FileManagerEvent newEvt = null;
-        
                 if(evt.isAddEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
                     newEvt = new FileManagerEvent(FileManager.this, 
