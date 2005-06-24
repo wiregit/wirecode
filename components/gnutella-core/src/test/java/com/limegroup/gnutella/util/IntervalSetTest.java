@@ -5,14 +5,20 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 
+import com.limegroup.gnutella.downloader.DownloadTest;
 import com.limegroup.gnutella.downloader.Interval;
 
 /**
  * Unit tests for IntervalSet
  */
 public class IntervalSetTest extends BaseTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(IntervalSetTest.class);
     
     private static IntervalSet iSet = null;
     private static Interval interval = null;
@@ -689,12 +695,14 @@ public class IntervalSetTest extends BaseTestCase {
     	assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
     }
     
-    // Test failure case from beta testing
+    // Test failure cases from beta testing
     public void testContains() {
+        LOG.info("-- testing contains()");
+        
         iSet = IntervalSet.createSingletonSet(1542374,1572863);
         iSet.add(new Interval(1645963,1835007));
         iSet.add(new Interval(2077669,2228223));
-        assertTrue(iSet.contains(new Interval(1542374,1543397)));
+        assertTrue(iSet.contains(new Interval(1542374,1543397)));  
     }
     
     ///// Private helper methods ///// 

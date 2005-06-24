@@ -218,6 +218,7 @@
             <jvmarg value="-Djava.util.logging.config.file=${log.properties}"/>
             <jvmarg value="-Djunit.test.method=${method}"/>
 	    <jvmarg value="-Djunit.test.times=${times}"/>
+	    <jvmarg value="-Xmx512M"/>    
             <classpath refid="default.classpath" />
             
             <formatter type="xml" />

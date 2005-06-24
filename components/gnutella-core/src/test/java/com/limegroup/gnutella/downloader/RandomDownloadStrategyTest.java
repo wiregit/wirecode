@@ -69,7 +69,7 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
 
     /** Tests that an interval spanning idealLocation gets split in two */
     public void testSplitInterval() {
-        fail();
+        fail("This test needs to be implemented.");
     }
     
     public void testSingleByteChunk() throws Exception {
