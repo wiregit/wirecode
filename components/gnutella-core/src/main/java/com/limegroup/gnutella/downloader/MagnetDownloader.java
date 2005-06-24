@@ -301,18 +301,23 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 	 */
 	private void readObject(ObjectInputStream stream)
 	throws IOException, ClassNotFoundException {
-		if (getMagnet() == null) {
+        MagnetOptions magnet = getMagnet();
+		if (magnet == null) {
 			ObjectInputStream.GetField fields = stream.readFields();
 			String textQuery = (String) fields.get("_textQuery", null);
 			URN urn = (URN) fields.get("_urn", null);
 			String fileName = (String) fields.get("_filename", null);
 			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
-			MagnetOptions magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
+			magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
 			if (!magnet.isDownloadable()) {
 				throw new IOException("Old undownloadable magnet");
 			}
 			propertiesMap.put(MAGNET, magnet);
 		}
+        
+        if (propertiesMap.get(DEFAULT_FILENAME) == null) 
+            propertiesMap.put(DEFAULT_FILENAME, magnet.getFileNameForSaving());
+        
     }
 
     /**

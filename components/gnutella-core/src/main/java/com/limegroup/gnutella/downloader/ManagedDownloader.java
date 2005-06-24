@@ -211,6 +211,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
 
+    /** counter to distinguish between downloads that were not deserialized ok */
+    private static int unknownIndex = 0;
+    
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
      * files, _activeWorkers, busy and setState.  We should  not hold lock 
@@ -524,10 +527,15 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                              String fileName, boolean overwrite) 
 		throws SaveLocationException {
 		this(files, ifc, originalQueryGUID);
+        
+        Assert.that(files.length > 0 || fileName != null);
+        if (files.length == 0)
+            propertiesMap.put(DEFAULT_FILENAME,fileName);
+        
 		setSaveFile(saveDirectory, fileName, overwrite);
     }
 	
-	public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
 							 GUID originalQueryGUID) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
@@ -547,7 +555,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
-		if (!propertiesMap.containsKey(DEFAULT_FILENAME))
+		if (propertiesMap.get(DEFAULT_FILENAME) == null)
 			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
 		if (!propertiesMap.containsKey(FILE_SIZE))
 			propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
@@ -612,6 +620,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		if (defaultRFD != null) {
 			initPropertiesMap(defaultRFD);
 		}
+        
+        if (propertiesMap.get(DEFAULT_FILENAME) == null) {
+            propertiesMap.put(DEFAULT_FILENAME,"Unknown "+(++unknownIndex));
+        }
     }
 
     /** 
@@ -2558,6 +2570,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Informs this downloader about how to handle corruption.
      */
     public void discardCorruptDownload(final boolean delete) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("User chose to delete corrupt "+delete);
         
         // offload this from the swing thread since it will require
         // access to the verifying file.
