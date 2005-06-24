@@ -954,7 +954,6 @@ public class DownloadTest extends BaseTestCase {
         final int RATE = 100;
         uploader1.setCorruption(true);
         uploader1.setCorruptBoundary(50);
-        uploader1.stopAfter(256*1024);
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader1.setRate(RATE);
@@ -965,7 +964,7 @@ public class DownloadTest extends BaseTestCase {
         
         
         Downloader download=
-            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, null, false);
+            RouterService.download(new RemoteFileDesc[]{rfd1}, Collections.EMPTY_LIST, null, false);
         waitForComplete(false);
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -993,12 +992,12 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         uploader1.setRate(RATE);
-        uploader2.setRate(RATE);
+        uploader2.setRate(RATE/10);
 
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         
-        tGenericCorrupt( new RemoteFileDesc[] { rfd1, rfd2 } );
+        tGenericCorrupt( new RemoteFileDesc[] { rfd1}, new RemoteFileDesc[] {rfd2} );
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
         assertNull(tree);
         assertTrue(callback.corruptChecked);
@@ -1008,7 +1007,9 @@ public class DownloadTest extends BaseTestCase {
         // tried once or twice.
         assertLessThanOrEquals(2, uploader2.getConnections());
         
-        assertLessThan(TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
+        assertLessThan("u1: " + uploader1.getAmountUploaded()+
+                "u2: " + uploader2.getAmountUploaded(),
+                TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
 
     }
     

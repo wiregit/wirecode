@@ -54,7 +54,7 @@ public class TestUploader extends AssertComparisons {
     private final String name;
 
     /** Number of bytes uploaded */
-    private volatile int totalUploaded;
+    private volatile int fullRequestsUploaded;
     /** The number of connections received */
     private int connects=0;
     /** The maximum number of connect attempts */
@@ -287,10 +287,11 @@ public class TestUploader extends AssertComparisons {
      * Resets the rate, amount uploaded, stop byte, etc.
      */
     public void reset() {
+        LOG.debug("resetting uploader "+name);
 	    storedGoodLocs   = null;//new AlternateLocationCollection();
 	    storedBadLocs = null;
 	    incomingGoodAltLocs = null;//new AlternateLocationCollection();
-        totalUploaded = 0;
+        fullRequestsUploaded = 0;
         stopAfter = -1;
         rate = 10000;
         stopped = false;
@@ -325,11 +326,11 @@ public class TestUploader extends AssertComparisons {
     }
 
     public int fullRequestsUploaded() {
-        return totalUploaded;
+        return fullRequestsUploaded;
     }
     
     public int getAmountUploaded() {
-        return totalUploaded+amountThisRequest;
+        return fullRequestsUploaded+amountThisRequest;
     }
     
     /** Sets the upload throttle rate 
@@ -852,20 +853,28 @@ public class TestUploader extends AssertComparisons {
         }
 
         amountThisRequest = 0;
+        boolean sentCorrupt = false;
         for (int i=start; i<stop; ) {
+            
             //1 second write cycle
-            if (stopAfter > -1 && totalUploaded + amountThisRequest == stopAfter) {
-                stopped=true;
-                out.flush();
-                totalUploaded+=amountThisRequest;
-                LOG.debug(name+" stopped at "+totalUploaded);
-                throw new IOException();
+            if (stopAfter > -1){
+                Assert.that(fullRequestsUploaded + amountThisRequest <= stopAfter,
+                        "total "+fullRequestsUploaded+" this "+amountThisRequest+" stop "+stopAfter);
+                if (fullRequestsUploaded + amountThisRequest == stopAfter) {
+                    
+                    stopped=true;
+                    out.flush();
+                    LOG.debug(name+" stopped at "+(fullRequestsUploaded + amountThisRequest));
+                    throw new IOException();
+                }
             }
             throttle.request(1);
             if(sendCorrupt &&
                i-start >= corruptBoundary &&
-               stop-i >= corruptBoundary)
+               stop-i >= corruptBoundary) {
+                sentCorrupt = true;
                 out.write(TestFile.getByte(i)+(byte)1);
+            }
             else
                 out.write(TestFile.getByte(i));
             
@@ -873,9 +882,11 @@ public class TestUploader extends AssertComparisons {
             i++;
             
         }
+        if (sentCorrupt)
+            LOG.debug("corrupt data sent");
         out.flush();
-        // only if the flush didn't throw do we add to totalUploaded
-        totalUploaded+=amountThisRequest;
+        // only if the flush didn't throw do we add to fullRequestsUploaded
+        fullRequestsUploaded += amountThisRequest;
         amountThisRequest = 0;
     }
 
@@ -1065,7 +1076,7 @@ public class TestUploader extends AssertComparisons {
                     mySocket.setSoTimeout(8000);
                 }
             } catch (IOException e) {
-                if(totalUploaded < totalAmountToUpload)
+                if(fullRequestsUploaded < totalAmountToUpload)
                     killedByDownloader = true;
                 LOG.debug("Exception in uploader (" + name + ")", e);
             } catch(Throwable t) {
