@@ -245,12 +245,12 @@ public class SharingSettings extends LimeProps {
 	 */
 	public static final FileSetting getFileSettingForMediaType(MediaType type) {
 		FileSetting setting = (FileSetting)downloadDirsByDescription.get
-			(type.getDescriptionKey());
+			(type.getMimeType());
 		if (setting == null) {
 			setting = FACTORY.createProxyFileSetting
-			("DIRECTORY_FOR_SAVING_" 
-			 + type.getDescriptionKey() + "_FILES", DIRECTORY_FOR_SAVING_FILES);
-			downloadDirsByDescription.put(type.getDescriptionKey(), setting);
+			("DIRECTORY_FOR_SAVING_" + type.getMimeType() + "_FILES",
+			 DIRECTORY_FOR_SAVING_FILES);
+			downloadDirsByDescription.put(type.getMimeType(), setting);
 		}
 		return setting;
 	}

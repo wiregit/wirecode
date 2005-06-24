@@ -188,6 +188,9 @@ public class MediaType implements Serializable {
      * Constructs a MediaType with only a MIME-Type.
      */
     public MediaType(String schema) {
+    	if (schema == null) {
+    		throw new NullPointerException("schema must not be null");
+    	}
         this.schema = schema;
         this.descriptionKey = null;
         this.exts = Collections.EMPTY_SET;
@@ -205,6 +208,9 @@ public class MediaType implements Serializable {
      */
     public MediaType(String schema, String descriptionKey,
                      String[] extensions) {
+    	if (schema == null) {
+    		throw new NullPointerException("schema must not be null");
+    	}
         this.schema = schema;
         this.descriptionKey = descriptionKey;
         this.isDefault = true;
