@@ -2683,9 +2683,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 */
     protected synchronized String getDefaultFileName() {       
         String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
-         if ( fileName == null) {
+         if (fileName == null) {
              Assert.that(false,"defaultFileName is null, "+
-                         "subclass may have not overridden getFileName");
+                         "subclass may have not overridden getDefaultFileName");
          }
 		 return CommonUtils.convertFileName(fileName);
     }
