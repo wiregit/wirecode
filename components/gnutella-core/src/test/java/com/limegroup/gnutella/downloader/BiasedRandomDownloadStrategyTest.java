@@ -4,8 +4,10 @@ import com.limegroup.gnutella.util.BaseTestCase;
 
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.SystemUtils;
 
 import java.util.Random;
+
 
 public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
     
@@ -52,6 +54,8 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
      *  and then never sequential after MIN_PREVIEW_BYTES.
      */
     public void testSmallFile() throws Exception {
+        assertEquals("Disabling of idle time has not worked.  This test cannot pass.",
+                0L, SystemUtils.getIdleTime());
         long previewLimit = ((Integer)
                 PrivilegedAccessor.getValue(strategy,"MIN_PREVIEW_BYTES")
                 ).longValue(); // 1 MB
@@ -116,6 +120,8 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
      *  first 50% of the file has been downloaded.
      */
     public void testMediumFile() throws Exception {
+        assertEquals("Disabling of idle time has not worked.  This test cannot pass.",
+                0L, SystemUtils.getIdleTime());
         long previewLimit = ((Integer)
                 PrivilegedAccessor.getValue(strategy,"MIN_PREVIEW_BYTES")
                 ).longValue(); // 1 MB
@@ -194,6 +200,8 @@ public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
      * is just over MIN_PREVIEW_BYTES. 
      */
     public void testLargeFile() throws Exception {
+        assertEquals("Disabling of idle time has not worked.  This test cannot pass.",
+                0L, SystemUtils.getIdleTime());
         long minPreviewBytes = ((Integer)
                 PrivilegedAccessor.getValue(strategy,"MIN_PREVIEW_BYTES")
                 ).longValue(); // 1 MB
