@@ -69,7 +69,36 @@ public class RandomDownloadStrategyTest extends BaseTestCase {
 
     /** Tests that an interval spanning idealLocation gets split in two */
     public void testSplitInterval() {
-        fail("This test needs to be implemented.");
+        // Break the neededBytes into 3 intervals
+        availableBytes.delete(new Interval(fileSize/3));
+        availableBytes.delete(new Interval((2*fileSize)/3));
+        
+        
+        // Set things up to ask for a chunk bothe before and after
+        // the middle of the file
+        long[] idealLocations = new long[2];
+        idealLocations[0] = (fileSize/2)/blockSize;
+        idealLocations[1] = idealLocations[0];
+        prng.setLongs(idealLocations);
+        // Return something before the idealLocation, then
+        // something after the idealLocation
+        prng.setInts(new int[] {0,1});
+        
+        Interval assignment = strategy.pickAssignment(availableBytes, 
+                availableBytes, blockSize);
+        
+        assertEquals("Failed to break Interval before idealLocation",
+                new Interval((idealLocations[0]-1)*blockSize,
+                        idealLocations[0]*blockSize-1), 
+                assignment);
+        
+        assignment = strategy.pickAssignment(availableBytes, 
+                availableBytes, blockSize);
+        
+        assertEquals("Failed to break Interval after idealLocation",
+                new Interval(idealLocations[1]*blockSize,
+                        (idealLocations[1]+1)*blockSize-1), 
+                assignment);
     }
     
     public void testSingleByteChunk() throws Exception {
