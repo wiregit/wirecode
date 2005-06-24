@@ -1517,58 +1517,6 @@ public class DownloadTest extends BaseTestCase {
         assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
     }
 
-    public void testAddAltlocToSwarm() throws Exception {
-        // this test is totally redundant - see testUploaderAlternateLocations
-        LOG.info("-Testing swarming of rfds ignoring alt ...");
-        
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-                                            SpeedConstants.MODEM_SPEED_INT);
-        final int RATE=200;
-        //second half of file + 1/8 of the file
-        final int STOP_AFTER = 1*TestFile.length()/10;
-        uploader1.setRate(RATE);
-        uploader1.stopAfter(STOP_AFTER);
-        uploader2.setRate(RATE);
-        uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
-        RemoteFileDesc rfd3=newRFDWithURN(PORT_3,100,TestFile.hash().toString());
-        RemoteFileDesc rfd4=newRFDWithURN(PORT_4,100,TestFile.hash().toString());
-        RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
-
-        //Prebuild an uploader alt in lieu of rdf4
-        AlternateLocationCollection ualt = 
-			AlternateLocationCollection.create(rfd4.getSHA1Urn());
-
-        AlternateLocation al4 = AlternateLocation.create(rfd4);
-        ualt.add(al4);
-
-        uploader1.setGoodAlternateLocations(ualt);
-
-        tGeneric(rfds);
-
-        //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();
-        int u4 = uploader4.fullRequestsUploaded();
-        LOG.debug("\tu1: "+u1+"\n");
-        LOG.debug("\tu2: "+u2+"\n");
-        LOG.debug("\tu3: "+u3+"\n");
-        LOG.debug("\tu4: "+u4+"\n");
-        LOG.debug("\tTotal: "+(u1+u2+u3)+"\n");
-
-        //Note: The amount downloaded from each uploader will not 
-        //be equal, because the uploaders are started at different times.
-
-        assertEquals("u1 did too much work", STOP_AFTER, u1);
-        assertGreaterThan("u2 did no work", 0, u2);
-        assertGreaterThan("u3 did no work", 0, u3);
-        assertEquals("u4 was used", 0, u4);
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
-    }
-    
     public void testAddSelfToMeshWithTree() throws Exception {
         
         // change the minimum required bytes so it'll be added.
@@ -1748,9 +1696,9 @@ public class DownloadTest extends BaseTestCase {
         tGeneric(rfds);
 
         //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();
+        int u1 = uploader1.getAmountUploaded();
+        int u2 = uploader2.getAmountUploaded();
+        int u3 = uploader3.getAmountUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tu3: "+u3+"\n");
