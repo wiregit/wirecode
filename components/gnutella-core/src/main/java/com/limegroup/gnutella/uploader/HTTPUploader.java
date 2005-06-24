@@ -1001,6 +1001,8 @@ public final class HTTPUploader implements Uploader {
 				(str.indexOf("WebDownloader") != -1) ) {
                 if (!_hadPassword)
                     throw new FreeloaderUploadingException();
+                
+                    
 			}
 		}
 		_userAgent = str.substring(11).trim();

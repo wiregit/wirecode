@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
+import java.net.URLEncoder;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
@@ -87,9 +88,8 @@ public final class HTTPUtils {
 	 *  header value to write to the stream
 	 * @param out the <tt>Writer</tt> instance to write to
 	 */
-	public static void writeHeader(HTTPHeaderName name, String value, 
-								   Writer out) 
-		throws IOException {
+	public static void writeHeader(HTTPHeaderName name, String value, Writer out) 
+	  throws IOException {
 		if(name == null) {
 			throw new NullPointerException("null name in writing http header");
 		} else if(value == null) {
@@ -116,9 +116,8 @@ public final class HTTPUtils {
 	 *  header value to write to the stream
 	 * @param os the <tt>OutputStream</tt> instance to write to
 	 */
-	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, 
-								   OutputStream os) 
-		throws IOException {
+	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, OutputStream os) 
+      throws IOException {
 		if(name == null) {
 			throw new NullPointerException("null name in writing http header");
 		} else if(value == null) {
@@ -209,8 +208,7 @@ public final class HTTPUtils {
 	 * @param writer the <tt>Writer</tt> instance to write the header to
 	 * @throws IOException if an IO error occurs during the write
 	 */
-    public static void writeHeader(HTTPHeaderName name, int value, 
-        Writer writer) throws IOException {
+    public static void writeHeader(HTTPHeaderName name, int value, Writer writer) throws IOException {
         writeHeader(name, String.valueOf(value), writer);
     }
     
@@ -223,9 +221,17 @@ public final class HTTPUtils {
      * @param stream the <tt>OutputStream</tt> instance to write the header to
      * @throws IOException if an IO error occurs during the write
      */
-    public static void writeHeader(HTTPHeaderName name, int value, 
-        OutputStream stream) throws IOException {
+    public static void writeHeader(HTTPHeaderName name, int value, OutputStream stream) throws IOException {
         writeHeader(name, String.valueOf(value), stream);
+    }
+    
+    /**
+     * Writes the Content-Disposition header, assuming an 'attachment'.
+     */
+    public static void writeContentDisposition(String name, Writer writer) throws IOException {
+        writeHeader(HTTPHeaderName.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + encode(name, "US-ASCII") + "\"",
+                    writer);
     }
     
     /**
@@ -324,5 +330,12 @@ public final class HTTPUtils {
             new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
         return df.format(new Date());
+    }
+    
+    /**
+     * Encodes a name using URLEncoder, using %20 instead of + for spaces.
+     */
+    private static String encode(String name, String encoding) throws IOException {
+        return URLEncoder.encode(name, encoding).replace("+", "%20");
     }
 }

@@ -109,38 +109,22 @@ public final class NormalUploadState extends UploadState {
 				ostream.write("HTTP/1.1 206 Partial Content\r\n");
 			}
 			
-			// Server
-            HTTPUtils.writeHeader(HTTPHeaderName.SERVER, 
-                ConstantHTTPHeaderValue.SERVER_VALUE, ostream);
-            
-            // Content Type
-            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_TYPE, 
-                getMimeType(), ostream);
-            
-            // Content Length
-            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 
-                _amountRequested, ostream);
-            
-            // Date
+            HTTPUtils.writeHeader(HTTPHeaderName.SERVER, ConstantHTTPHeaderValue.SERVER_VALUE, ostream);
+            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_TYPE, getMimeType(), ostream);
+            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, _amountRequested, ostream);
             HTTPUtils.writeDate(ostream);
+            HTTPUtils.writeContentDisposition(_fileName, ostream);
 			
-			// Version 0.5 of limewire misinterpreted Content-range
-			// to be 1 - n instead of 0 - (n-1), but because this is
-			// an optional field in the regular case, we don't need
-			// to send it.
-			// 
-			// Earlier version of LimeWire mistakenly sent "bytes=" instead of
-			// "bytes ".  Thankfully most clients understand both.
-			//
-			// _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
-			// an INCLUSIVE index.
+			// _uploadEnd is an EXCLUSIVE index internally, but HTTP uses an INCLUSIVE index.
 			if (_uploadBegin != 0 || _amountRequested != _fileSize) {
 			    ostream.write("Content-Range: bytes " + _uploadBegin  +
 				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
+			
 			writeAlts(ostream);
 			writeRanges(ostream);
 			writeProxies(ostream);
+			
 			if(FILE_DESC != null) {
 				URN urn = FILE_DESC.getSHA1Urn();
 				
@@ -167,9 +151,7 @@ public final class NormalUploadState extends UploadState {
             // write X-Thex-URI header with root hash if we have already 
             // calculated the tigertree
             if (FILE_DESC.getHashTree()!=null)
-                HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
-                                      FILE_DESC.getHashTree(),
-                                      ostream);
+                HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI, FILE_DESC.getHashTree(), ostream);
             
 			ostream.write("\r\n");
 			

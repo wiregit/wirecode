@@ -201,6 +201,12 @@ public class HTTPHeaderName {
 	 */
 	public static final HTTPHeaderName DOWNLOADED = 
 		new HTTPHeaderName("X-Downloaded");
+		
+    /**
+     * Header for the content disposition.
+     */
+    public static final HTTPHeaderName CONTENT_DISPOSITION =
+        new HTTPHeaderName("Content-Disposition");
     
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
