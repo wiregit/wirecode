@@ -271,6 +271,9 @@ public class UDPService implements ReadWriteObserver {
                 from = _channel.receive(BUFFER);
             } catch(IOException iox) {
                 break;
+            } catch(Error error) {
+                // Stupid implementations giving bogus errors.  Grrr!.
+                break;
             }
             
             // no packet.
@@ -493,7 +496,9 @@ public class UDPService implements ReadWriteObserver {
         msg = msg.toLowerCase();
         return msg.indexOf("interrupted function call") != -1
             || msg.indexOf("network is down") != -1
-            || msg.indexOf("host is down") != -1;
+            || msg.indexOf("host is down") != -1
+            || msg.indexOf("network is unreachable") != -1
+            || msg.indexOf("no buffer space available") != -1;
     }
                
 	        

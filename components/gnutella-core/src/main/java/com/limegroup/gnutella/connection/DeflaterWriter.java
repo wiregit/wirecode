@@ -147,7 +147,13 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
 
             while(true) {
                 // Step 2: Try and deflate the existing data.
-                int deflated = deflater.deflate(outgoing.array());
+                int deflated;
+                try {
+                    deflated = deflater.deflate(outgoing.array());
+                } catch(NullPointerException npe) {
+                    // stupid deflater not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCause(npe);
+                }
                 if(deflated > 0) {
                     outgoing.position(0).limit(deflated);
                     break; // we managed to deflate some data, try to write it...
@@ -159,15 +165,20 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
                 // We must use different levels of syncing because we have to make sure
                 // that we write everything out of deflate after each level is set.
                 // Otherwise compression doesn't work.
-                if(sync == 0) {
-                    deflater.setInput(EMPTY);
-                    deflater.setLevel(Deflater.NO_COMPRESSION);
-                    sync = 1;
-                    continue;
-                } else if(sync == 1) {
-                    deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
-                    sync = 2;
-                    continue;
+                try {
+                    if(sync == 0) {
+                        deflater.setInput(EMPTY);
+                        deflater.setLevel(Deflater.NO_COMPRESSION);
+                        sync = 1;
+                        continue;
+                    } else if(sync == 1) {
+                        deflater.setLevel(Deflater.DEFAULT_COMPRESSION);
+                        sync = 2;
+                        continue;
+                    }
+                } catch(NullPointerException npe) {
+                    // stupid deflater not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCause(npe);
                 }
                 
                 // Step 4: If we have no data, tell any interested parties to add some.
@@ -192,7 +203,12 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
                 }
                 
                 //Step 5: We've got new data to deflate.
-                deflater.setInput(incoming.array(), 0, incoming.position());
+                try {
+                    deflater.setInput(incoming.array(), 0, incoming.position());
+                } catch(NullPointerException npe) {
+                    // stupid deflater not supporting asynchronous ends..
+                    throw (IOException) new IOException().initCause(npe);
+                }
                 incoming.clear();
                 sync = 0;
             }

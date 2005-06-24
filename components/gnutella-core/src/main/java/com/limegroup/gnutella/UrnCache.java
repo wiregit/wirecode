@@ -97,10 +97,7 @@ public final class UrnCache {
      * will be notified immediately.  Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public synchronized void calculateAndCacheUrns(File file, UrnCallback callback) {
-		if(!file.isFile())
-			throw new IllegalArgumentException("not a file: "+file);
-			
+    public synchronized void calculateAndCacheUrns(File file, UrnCallback callback) {			
     	Set urns = getUrns(file);
         // TODO: If we ever create more URN types (other than SHA1)
         // we cannot just check for size == 0, we must check for
