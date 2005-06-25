@@ -51,6 +51,11 @@ class LicenseCache {
      * to cache info.  This information lasts forever.
      */
     private Map /* Object -> Object */ data;
+    
+    /**
+     * Whether or not data is dirty since the last time we wrote to disk.
+     */
+    private boolean dirty = false;
 
     private static final LicenseCache INSTANCE = new LicenseCache();
     private LicenseCache() { deserialize(); }
@@ -61,6 +66,7 @@ class LicenseCache {
      */
     synchronized void addVerifiedLicense(License license) {
         licenses.put(license.getLicenseURI(), license);
+        dirty = true;
     }
     
     /**
@@ -68,6 +74,7 @@ class LicenseCache {
      */
     synchronized void addData(Object key, Object value) {
         data.put(key, value);
+        dirty = true;
     }
     
     /**
@@ -154,8 +161,10 @@ class LicenseCache {
         // discard outdated info
         for(Iterator i = licenses.values().iterator(); i.hasNext(); ) {
             License license = (License)i.next();
-            if(license.getLastVerifiedTime() < cutoff)
+            if(license.getLastVerifiedTime() < cutoff) {
+                dirty = true;
                 i.remove();
+            }
         }
     }
 
@@ -163,6 +172,9 @@ class LicenseCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
+        if(!dirty)
+            return;
+        
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(
@@ -179,5 +191,7 @@ class LicenseCache {
                 } catch(IOException ignored) {}
             }
         }
+        
+        dirty = false;
     }
 }

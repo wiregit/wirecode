@@ -77,6 +77,11 @@ public class LimeXMLReplyCollection {
     private final Map /* String -> Trie (String -> List) */ trieMap;
     
     /**
+     * Whether or not data became dirty after we last wrote to disk.
+     */
+    private boolean dirty = false;
+    
+    /**
      * The location on disk that information is serialized to.
      */
     private final File dataFile;
@@ -171,7 +176,13 @@ public class LimeXMLReplyCollection {
      * Notification that initial loading is done.
      */
     void loadFinished() {
-        oldMap.clear();
+        synchronized(mainMap) {
+            if(oldMap.equals(mainMap)) {
+                dirty = false;
+            }
+            oldMap.clear();
+        }
+    
     }
     
     /**
@@ -367,6 +378,7 @@ public class LimeXMLReplyCollection {
     public void addReply(FileDesc fd, LimeXMLDocument replyDoc) {
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
+            dirty = true;
             mainMap.put(hash,replyDoc);
             addKeywords(replyDoc);
         }
@@ -484,10 +496,10 @@ public class LimeXMLReplyCollection {
         LimeXMLDocument oldDoc = null;
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap) {
+            dirty = true;
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
             if(oldDoc == null) 
-                Assert.that(false, 
-                            "attempted to replace doc that did not exist!!");
+                Assert.that(false, "attempted to replace doc that did not exist!!");
             removeKeywords(oldDoc);
             addKeywords(newDoc);
         }
@@ -502,25 +514,22 @@ public class LimeXMLReplyCollection {
      * the FileDesc.
      */
     public boolean removeDoc(FileDesc fd) {
-        URN hash = fd.getSHA1Urn();
-        boolean found;
         LimeXMLDocument val;
         synchronized(mainMap) {
-            val = (LimeXMLDocument)mainMap.remove(hash);
-            found = (val != null);
+            val = (LimeXMLDocument)mainMap.remove(fd.getSHA1Urn());
+            if(val != null)
+                dirty = true;
         }
         
-        boolean written = false;
-        
-        if(found){
+        if(val != null) {
             fd.removeLimeXMLDocument((LimeXMLDocument)val);
             removeKeywords(val);
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("found: " + found + ", written: " + written);
+            LOG.debug("removed: " + val);
         
-        return found;
+        return val != null;
     }
     
     /**
@@ -633,21 +642,27 @@ public class LimeXMLReplyCollection {
     
     /** Serializes the current map to disk. */
     public boolean writeMapToDisk() {
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
-            synchronized (mainMap) {
+        boolean wrote = false;
+        synchronized(mainMap) {
+            if(!dirty)
+                return true;
+                
+            ObjectOutputStream out = null;
+            try {
+                out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
                 out.writeObject(mainMap);
+                out.flush();
+                wrote = true;
+            } catch(Throwable ignored) {
+                LOG.trace("Unable to write", ignored);
+            } finally {
+                IOUtils.close(out);
             }
-            out.flush();
-            return true;
-        } catch(Throwable ignored) {
-            LOG.trace("Unable to write", ignored);
-        } finally {
-            IOUtils.close(out);
+            
+            dirty = false;
         }
         
-        return false;
+        return wrote;
     }
     
     /** Reads the map off of the disk. */

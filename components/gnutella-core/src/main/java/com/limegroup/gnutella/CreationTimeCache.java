@@ -75,6 +75,11 @@ public final class CreationTimeCache {
      * Creation Time (Long) -> Set of URNs
      */
     private final SortedMap TIME_TO_URNSET_MAP;
+    
+    /**
+     * Whether or not data is dirty since the last time we saved.
+     */
+    private boolean dirty = false;
 
     /**
 	 * Returns the <tt>CreationTimeCache</tt> instance.
@@ -94,7 +99,6 @@ public final class CreationTimeCache {
         URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
         TIME_TO_URNSET_MAP = new TreeMap(Comparators.inverseLongComparator());
-        pruneTimes(false);
         constructURNMap();
 	}
     
@@ -126,7 +130,10 @@ public final class CreationTimeCache {
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {
-        removeURNFromURNSet(urn, (Long) URN_TO_TIME_MAP.remove(urn));
+        Long time = (Long) URN_TO_TIME_MAP.remove(urn);
+        removeURNFromURNSet(urn, time);
+        if(time != null)
+            dirty = true;
     }
 
 
@@ -146,6 +153,7 @@ public final class CreationTimeCache {
                     if(!(currEntry.getKey() instanceof URN) ||
                        !(currEntry.getValue() instanceof Long)) {
                         iter.remove();
+                        dirty = true;
                         continue;
                     }
                     URN currURN = (URN) currEntry.getKey();
@@ -156,6 +164,7 @@ public final class CreationTimeCache {
                     // to know about one.  getFileDescForUrn prefers FDs over iFDs.
                     FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
                     if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
+                        dirty = true;
                         iter.remove();
                         if (shouldClearURNSetMap)
                             removeURNFromURNSet(currURN, cTime);
@@ -184,14 +193,19 @@ public final class CreationTimeCache {
      * @throws IllegalArgumentException If urn is null or time is invalid.
      */
     public synchronized void addTime(URN urn, long time) 
-        throws IllegalArgumentException {
-        if (urn == null) throw new IllegalArgumentException("Null URN.");
-        if (time <= 0) throw new IllegalArgumentException("Bad Time = " +
-                                                          time);
+      throws IllegalArgumentException {
+        if (urn == null)
+            throw new IllegalArgumentException("Null URN.");
+        if (time <= 0)
+            throw new IllegalArgumentException("Bad Time = " + time);
         Long cTime = new Long(time);
 
         // populate urn to time
-        URN_TO_TIME_MAP.put(urn, cTime);
+        Long existing = (Long)URN_TO_TIME_MAP.get(urn);
+        if(existing == null || !existing.equals(cTime)) {
+            dirty = true;
+            URN_TO_TIME_MAP.put(urn, cTime);
+        }
     }
 
     /**
@@ -306,6 +320,9 @@ public final class CreationTimeCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
+        if(!dirty)
+            return;
+        
         //It's not ideal to hold a lock while writing to disk, but I doubt think
         //it's a problem in practice.
         ObjectOutputStream oos = null;
@@ -322,6 +339,8 @@ public final class CreationTimeCache {
             }
             catch (IOException ignored) {}
         }
+        
+        dirty = false;
     }
 
     /** Evicts the urn from the TIME_TO_URNSET_MAP.

@@ -72,6 +72,11 @@ public final class UrnCache {
      * The set of files that are pending hashing to the callbacks that are listening to them.
      */
     private Map /* File -> List (of UrnCallback) */ pendingHashing = new HashMap();
+    
+    /**
+     * Whether or not data is dirty since the last time we saved.
+     */
+    private boolean dirty = false;
 
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
@@ -88,7 +93,7 @@ public final class UrnCache {
      * Create and initialize urn cache.
      */
     private UrnCache() {
-		removeOldEntries(URN_MAP);
+		dirty = removeOldEntries(URN_MAP);
 	}
 
     /**
@@ -205,6 +210,7 @@ public final class UrnCache {
     public synchronized void removeUrns(File f) {
         UrnSetKey k = new UrnSetKey(f);
         URN_MAP.remove(k);
+        dirty = true;
     }
 
     /**
@@ -215,6 +221,7 @@ public final class UrnCache {
     public synchronized void addUrns(File file, Set urns) {
 		UrnSetKey key = new UrnSetKey(file);
         URN_MAP.put(key, Collections.unmodifiableSet(urns));
+        dirty = true;
     }
         
     /**
@@ -263,8 +270,9 @@ public final class UrnCache {
 	 *
 	 * @param map the <tt>Map</tt> to check
 	 */
-	private static void removeOldEntries(Map map) {
+	private static boolean removeOldEntries(Map map) {
         // discard outdated info
+        boolean dirty = false;
         Iterator iter = map.keySet().iterator();
         while (iter.hasNext()) {
             Object next = iter.next();
@@ -276,18 +284,24 @@ public final class UrnCache {
                 // check to see if file still exists unmodified
                 File f = new File(key._path);
                 if (!f.exists() || f.lastModified() != key._modTime) {
+                    dirty = true;
                     iter.remove();
                 }
             } else {
+                dirty = true;
                 iter.remove();
             }
         }
+        return dirty;
     }
     
     /**
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
+        if(!dirty)
+            return;
+        
         //It's not ideal to hold a lock while writing to disk, but I doubt think
         //it's a problem in practice.
         URN_CACHE_FILE.renameTo(URN_CACHE_BACKUP_FILE);
@@ -302,6 +316,8 @@ public final class UrnCache {
         } finally {
             IOUtils.close(oos);
         }
+        
+        dirty = false;
     }
     
     private class Processor implements Runnable {

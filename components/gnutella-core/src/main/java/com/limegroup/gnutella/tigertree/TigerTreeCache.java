@@ -63,6 +63,11 @@ public final class TigerTreeCache {
      */
     private static final File CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
+        
+    /**
+     * Whether or not data dirtied since the last time we saved.
+     */
+    private static boolean dirty = false;        
 
     /**
      * Returns the <tt>TigerTreeCache</tt> instance.
@@ -115,7 +120,8 @@ public final class TigerTreeCache {
      * Purges the HashTree for this URN.
      */
     public synchronized void purgeTree(URN sha1) {
-        TREE_MAP.remove(sha1);
+        if(TREE_MAP.remove(sha1) != null)
+            dirty = true;
     }
 
     /**
@@ -129,6 +135,7 @@ public final class TigerTreeCache {
     public static synchronized void addHashTree(URN sha1, HashTree tree) {
         if (tree.isGoodDepth()) {
             TREE_MAP.put(sha1, tree);
+            dirty = true;
             if (LOG.isDebugEnabled())
                 LOG.debug("added hashtree for urn " +
                           sha1 + ";" + tree.getRootHash());
@@ -205,6 +212,7 @@ public final class TigerTreeCache {
                     continue;
             }
             iter.remove();
+            dirty = true;
         }
     }
 
@@ -212,6 +220,9 @@ public final class TigerTreeCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
+        if(!dirty)
+            return;
+        
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
@@ -231,6 +242,8 @@ public final class TigerTreeCache {
                 } catch(IOException ignored) {}
             }
         }
+        
+        dirty = true;
     }
 
     /**

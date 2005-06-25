@@ -76,6 +76,11 @@ public class UDPHostCache {
     private boolean dirty = false;
     
     /**
+     * Whether or not the set contains data different than when we last wrote.
+     */
+    private boolean writeDirty = false;
+    
+    /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
@@ -100,6 +105,14 @@ public class UDPHostCache {
             ExtendedEndpoint e = (ExtendedEndpoint)iter.next();
             e.write(out);
         }
+        writeDirty = false;
+    }
+    
+    /**
+     * Determines if data has been dirtied since the last time we wrote.
+     */
+    public synchronized boolean isWriteDirty() {
+        return writeDirty;
     }
     
     /**
@@ -131,6 +144,7 @@ public class UDPHostCache {
                udpHosts.size() < PERMANENT_SIZE)
                 add(ep);
             dirty = true;
+            writeDirty = true;
         }
     }
     
@@ -221,6 +235,8 @@ public class UDPHostCache {
         boolean removed2=udpHostsSet.remove(e);
         Assert.that(removed1==removed2,
                     "Set "+removed1+" but queue "+removed2);
+        if(removed1)
+            writeDirty = true;
         return removed1;
     }
     
@@ -252,6 +268,7 @@ public class UDPHostCache {
         udpHosts.add(e);
         udpHostsSet.add(e);
         dirty = true;
+        writeDirty = true;
         return true;
     }
     
@@ -361,6 +378,7 @@ public class UDPHostCache {
                         LOG.trace("No response from cache: " + ep);
                     ep.recordUDPHostCacheFailure();
                     dirty = true;
+                    writeDirty = true;
                     if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
                         remove(ep);
                 }
@@ -372,6 +390,7 @@ public class UDPHostCache {
                         LOG.trace("Valid response from cache: " + ep);
                     ep.recordUDPHostCacheSuccess();
                     dirty = true;
+                    writeDirty = true;
                 }
             }
         }

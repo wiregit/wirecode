@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.FileWriter;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -21,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
@@ -136,6 +138,12 @@ public class BootstrapServerManager {
      * The total amount of endpoints we've added to HostCatcher so far.
      */
     private volatile int _responsesAdded = 0;
+    
+    /**
+     * Whether or not the list of servers is dirty (has been changed
+     * since the last time we wrote).
+     */
+    private boolean dirty = false;
 
     /**
      * Accessor for the <tt>BootstrapServerManager</tt> instance.
@@ -157,8 +165,10 @@ public class BootstrapServerManager {
     public synchronized void addBootstrapServer(BootstrapServer server) {
 		if(server == null) 
 			throw new NullPointerException("null bootstrap server not allowed");
-        if (!SERVERS.contains(server))
+        if (!SERVERS.contains(server)) {
+            dirty = true;
             SERVERS.add(server);
+        }
         if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) {
             removeServer((BootstrapServer)SERVERS.get(0));
         }
@@ -187,6 +197,25 @@ public class BootstrapServerManager {
     public boolean isEndpointFetchInProgress() {
         return _hostFetchInProgress;
     }
+    
+    /**
+     * Writes the list of servers to disk.
+     */
+    public synchronized void write(FileWriter out) throws IOException {
+        for (Iterator iter = getBootstrapServers(); iter.hasNext(); ){
+            BootstrapServer e=(BootstrapServer)iter.next();
+            out.write(e.toString());
+            out.write(ExtendedEndpoint.EOL);
+        }
+        dirty = false;
+    }
+    
+    /**
+     * Determines if we're dirty.
+     */
+    public synchronized boolean isDirty() {
+        return dirty;
+    }   
 
     /**
      * Returns an iterator of the bootstrap servers in this, each as a
@@ -615,6 +644,7 @@ public class BootstrapServerManager {
      * Removes the server.
      */
     protected synchronized void removeServer(BootstrapServer server) {
+        dirty = true;
         SERVERS.remove(server);
         _lastIndex = Math.max(0, _lastIndex - 1);
     }

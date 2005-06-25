@@ -294,7 +294,7 @@ public class ExtendedEndpoint extends Endpoint {
      *  files, even on systems that normally use "\r\n" for end-of-line.  This
      *  has the nice advantage of making gnutella.net files portable across
      *  platforms. */
-    static final String EOL="\n";
+    public static final String EOL="\n";
 
     /**
      * Writes this' state to a single line of out.  Does not flush out.

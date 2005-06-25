@@ -255,6 +255,11 @@ public class HostCatcher {
      */
     private static final int MAX_CONNECTIONS = 5;
     
+    /**
+     * Whether or not hosts have been added since we wrote to disk.
+     */
+    private boolean dirty = false;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance.
 	 */
@@ -443,27 +448,25 @@ public class HostCatcher {
      */
     synchronized void write(File hostFile) throws IOException {
         repOk();
-        FileWriter out = new FileWriter(hostFile);       
-        //Write servers from GWebCache to output.
-        synchronized (gWebCache) {
-            for (Iterator iter=gWebCache.getBootstrapServers();iter.hasNext();){
-                BootstrapServer e=(BootstrapServer)iter.next();
-                out.write(e.toString());
-                out.write(ExtendedEndpoint.EOL);
+        
+        if(dirty || gWebCache.isDirty() || udpHostCache.isWriteDirty()) {
+            FileWriter out = new FileWriter(hostFile);
+            
+            //Write servers from GWebCache to output.
+            gWebCache.write(out);
+    
+            //Write udp hostcache endpoints.
+            udpHostCache.write(out);
+    
+            //Write elements of permanent from worst to best.  Order matters, as it
+            //allows read() to put them into queue in the right order without any
+            //difficulty.
+            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+                ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+                e.write(out);
             }
+            out.close();
         }
-
-        //Write udp hostcache endpoints.
-        udpHostCache.write(out);
-
-        //Write elements of permanent from worst to best.  Order matters, as it
-        //allows read() to put them into queue in the right order without any
-        //difficulty.
-        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-            ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
-            e.write(out);
-        }
-        out.close();
     }
 
     ///////////////////////////// Add Methods ////////////////////////////
@@ -749,6 +752,7 @@ public class HostCatcher {
             if (removed!=null)
                 //...and something else was removed.
                 permanentHostsSet.remove(removed);
+            dirty = true;
             return true;
         } else {
             //Uptime not good enough to add.  (Note that this is 
@@ -764,6 +768,8 @@ public class HostCatcher {
         boolean removed2=permanentHostsSet.remove(e);
         Assert.that(removed1==removed2,
                     "Queue "+removed1+" but set "+removed2);
+        if(removed1)
+            dirty = true;
         return removed1;
     }
 

@@ -301,10 +301,12 @@ public class MetaFileManager extends FileManager {
     }
     
     protected void save() {
-        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
-        for(Iterator i = replies.iterator(); i.hasNext(); )
-            ((LimeXMLReplyCollection)i.next()).writeMapToDisk();
-        
+        if(isLoadFinished()) {
+            Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+            for(Iterator i = replies.iterator(); i.hasNext(); )
+                ((LimeXMLReplyCollection)i.next()).writeMapToDisk();
+        }
+
         super.save();
     }
     
@@ -460,7 +462,7 @@ public class MetaFileManager extends FileManager {
     
     private class Saver implements Runnable {
         public void run() {
-            if (!shutdown)
+            if (!shutdown && isLoadFinished())
                 save();
         }
     }
