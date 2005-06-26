@@ -114,17 +114,7 @@ public class LimeXMLSchemaRepository
             Set keySet = _uriSchemaMap.keySet();
             schemaURIs = (String[])keySet.toArray(new String[0]);
         }
-        Arrays.sort(schemaURIs,new Comparator(){
-            public int compare(Object o1, Object o2){
-                //This treemap will be comparing only strings and so we can 
-                //get away with this. The regular Comparable interface was 
-                //introduced in 1.2 and the Macs still use 1.1
-                String a = (String)o1;
-                String b = (String)o2;
-                return a.compareTo(b);            
-            }
-        }
-        );
+        Arrays.sort(schemaURIs);
         return schemaURIs;
         
     }

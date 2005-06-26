@@ -144,7 +144,9 @@ public class MetaFileManager extends FileManager {
         if(fd != removed)
             Assert.that(false, "wanted to remove: " + fd + "\ndid remove: " + removed);
             
-        _needRebuild = true;
+        synchronized(this) {
+            _needRebuild = true;
+        }
         
         addFileIfShared(f, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -223,7 +225,7 @@ public class MetaFileManager extends FileManager {
      * Removes the LimeXMLDocuments associated with the removed
      * FileDesc from the various LimeXMLReplyCollections.
      */
-    protected FileDesc removeFileIfShared(File f, boolean notify) {
+    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
         FileDesc fd = super.removeFileIfShared(f, notify);
         // nothing removed, ignore.
         if( fd == null )
@@ -287,17 +289,22 @@ public class MetaFileManager extends FileManager {
     /**
      * Notification that a single FileDesc has its URNs.
      */
-    protected FileDesc loadFile(File file, List metadata, Set urns) {
-        FileDesc fd = super.loadFile(file, metadata, urns);
-        if(fd != null) {
-            Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
-            for(Iterator i = replies.iterator(); i.hasNext(); )
-                ((LimeXMLReplyCollection)i.next()).initialize(fd, metadata);
-            for(Iterator i = replies.iterator(); i.hasNext(); )
-                ((LimeXMLReplyCollection)i.next()).createIfNecessary(fd);
+    protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
+        super.loadFile(fd, file, metadata, urns);
+        boolean added = false;
+        
+        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(Iterator i = replies.iterator(); i.hasNext(); )
+            added |= (((LimeXMLReplyCollection)i.next()).initialize(fd, metadata) != null);
+        for(Iterator i = replies.iterator(); i.hasNext(); )
+            added |= (((LimeXMLReplyCollection)i.next()).createIfNecessary(fd) != null);
+            
+        if(added) {
+            synchronized(this) {
+                _needRebuild = true;
+            }
         }
-        _needRebuild = true;
-        return fd;
+
     }
     
     protected void save() {

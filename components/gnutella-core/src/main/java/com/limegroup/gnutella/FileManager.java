@@ -1019,11 +1019,15 @@ public abstract class FileManager {
                     
                     // Only load the file if we were able to calculate URNs and
                     // the file is still shareable.
-                    if(!urns.isEmpty() && isFileShareable(file))
-                        fd = loadFile(file, metadata, urns);
+                    if(!urns.isEmpty() && isFileShareable(file)) {
+                        fd = addFile(file, urns);
+                        _needRebuild = true;
+                    }
                 }
                     
                 if(fd != null) {
+                    loadFile(fd, file, metadata, urns);
+                    
                     FileManagerEvent evt = new FileManagerEvent(FileManager.this, FileManagerEvent.ADD, fd);
                     if(notify) // sometimes notify the GUI
                         RouterService.getCallback().handleFileManagerEvent(evt);
@@ -1048,10 +1052,7 @@ public abstract class FileManager {
     /**
      * Loads a single shared file.
      */
-    protected synchronized FileDesc loadFile(File file, List metadata, Set urns) {
-        FileDesc fd = addFile(file, urns);
-        _needRebuild = true;
-        return fd;
+    protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
     }   
   
     /**

@@ -120,7 +120,7 @@ public class LimeXMLReplyCollection {
      * Initializes the map using either LimeXMLDocuments in the list of potential
      * documents, or elements stored in oldMap.  Items in potential take priority.
      */
-    void initialize(FileDesc fd, List potential) {
+    LimeXMLDocument initialize(FileDesc fd, List potential) {
         URN urn = fd.getSHA1Urn();
         LimeXMLDocument doc = null;
         
@@ -147,14 +147,18 @@ public class LimeXMLReplyCollection {
                     addReply(fd, doc);
             }
         }
+        
+        return doc;
     }
     
     /**
      * Creates a LimeXMLDocument for the given FileDesc if no XML already exists
      * for it.
      */
-    void createIfNecessary(FileDesc fd) {
+    LimeXMLDocument createIfNecessary(FileDesc fd) {
+        LimeXMLDocument doc = null;
         URN urn = fd.getSHA1Urn();
+        
         if(!mainMap.containsKey(urn)) {
             File file = fd.getFile();
             // If we have no documents for this FD, or the file-format only supports
@@ -162,7 +166,7 @@ public class LimeXMLReplyCollection {
             // This is necessary so that we don't keep trying to parse formats that could
             // be multiple kinds of files every time.   
             if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
-                LimeXMLDocument doc = constructDocument(file);
+                doc = constructDocument(file);
                 if(doc != null) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
@@ -170,6 +174,8 @@ public class LimeXMLReplyCollection {
                 }
             }
         }
+        
+        return doc;
     }
     
     /**
