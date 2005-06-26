@@ -741,6 +741,11 @@ public class ConnectionManager {
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+		
+		// If it has not said whether or not it's an Ultrapeer or a Leaf
+		// (meaning it's an old-style connection), don't allow it.
+		if(!hr.isLeaf() && !hr.isUltrapeer())
+		    return false;
 
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
@@ -1218,12 +1223,15 @@ public class ConnectionManager {
      */
     private boolean connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
-	        // build the queues and start the output runner.
-	        // this MUST be done before _initializedConnections
-	        // or _initializedClientConnections has added this
-	        // connection to its list.  otherwise, messages may
-	        // attempt to be sent to the connection before it has
-	        // set up its output queues.
+            // Double-check that we haven't improperly allowed
+            // this connection.  It is possible that, because of race-conditions,
+            // we may have allowed both a 'Peer' and an 'Ultrapeer', or an 'Ultrapeer'
+            // and a leaf.  That'd 'cause undefined results if we allowed it.
+            if(!allowConnection(c.headers())) {
+                removeInternal(c);
+                return false;
+            }
+            
 
             //update the appropriate list of connections
             if(!c.isSupernodeClientConnection()){
