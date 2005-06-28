@@ -576,6 +576,9 @@ public abstract class MessageRouter {
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, handler);
         } 
+        else if(msg instanceof UpdateRequest) {
+            handleUpdateRequest((UpdateRequest)msg, handler);
+        }
         notifyMessageListener(msg, handler);
     }
     
