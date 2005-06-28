@@ -873,6 +873,15 @@ public class RouterService {
         }
     }
     
+    public static void shutdown(String toExecute) {
+        shutdown();
+        if (toExecute != null) {
+            try {
+                Runtime.getRuntime().exec(toExecute);
+            } catch (IOException tooBad) {}
+        }
+    }
+    
     /**
      * Deletes all preview files.
      */
