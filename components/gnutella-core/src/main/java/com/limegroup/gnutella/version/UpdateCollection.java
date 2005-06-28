@@ -13,6 +13,9 @@ import java.util.Iterator;
 import java.io.StringReader;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -23,6 +26,7 @@ import org.w3c.dom.DOMException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -83,6 +87,20 @@ class UpdateCollection {
      */
     List getUpdateData() {
         return updateDataList;
+    }
+    
+    /**
+     * Constructs a map of URN -> UpdateInformation for each update
+     * that contains a URN.
+     */
+    Map buildUpdateURNMap() {
+        Map map = new HashMap();
+        for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
+            UpdateData next = (UpdateData)i.next();
+            if(next.getUpdateURN() != null)
+                map.put(next.getUpdateURN(), next);
+        }
+        return Collections.unmodifiableMap(map);
     }
     
     /**
@@ -227,6 +245,9 @@ class UpdateCollection {
         String javaFrom = getAttributeText(attr, "javafrom");
         String javaTo = getAttributeText(attr, "javato");
         String os = getAttributeText(attr, "os");
+        String updateURN = getAttributeText(attr, "urn");
+        String updateCommand = getAttributeText(attr, "ucommand");
+        String updateName = getAttributeText(attr, "uname");
         
         if(forV == null || url == null || style == null) {
             LOG.error("Missing required for, url, or style.");
@@ -283,6 +304,19 @@ class UpdateCollection {
             os = "*";
         data.setOSList(OS.createFromList(os));
         
+        if(updateURN != null) {
+            try {
+                URN urn = URN.createSHA1Urn(updateURN);
+                String tt = URN.getTigerTreeRoot(updateURN);
+                data.setUpdateURN(urn);
+                data.setUpdateTTRoot(tt);
+            } catch(IOException ignored) {
+                LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
+            }
+        }
+        
+        data.setUpdateCommand(updateCommand);
+        data.setUpdateFileName(updateName);
         
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {

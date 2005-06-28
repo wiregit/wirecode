@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 
 import java.io.File;
 import java.util.Random;
+import java.util.Map;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -50,6 +51,11 @@ public class UpdateHandler {
      * The most recent update info for this machine.
      */
     private volatile UpdateInformation _updateInfo;
+    
+    /**
+     * A collection of URNs -> UpdateInformation about that URN.
+     */
+    private volatile Map _updateURNs;
     
     /**
      * The most recent id of the update info.
@@ -138,6 +144,8 @@ public class UpdateHandler {
         LOG.trace("Retrieved new data, storing & updating.");
         _lastId = uc.getId();
         _lastBytes = data;
+        
+        _updateURNs = uc.buildUpdateURNMap();
         
         if(!fromDisk) {
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);

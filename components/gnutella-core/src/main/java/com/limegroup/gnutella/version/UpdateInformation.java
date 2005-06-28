@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.version;
 
+import com.limegroup.gnutella.URN;
+
 /**
  * Simple interface for retrieving the most recent update info.
  */
@@ -24,5 +26,9 @@ public interface UpdateInformation {
     public String getButton2Text();
     
     public int getUpdateStyle();
+    
+    public URN getUpdateURN();
+    public String getTTRoot();
+    public String getUpdateCommand();
     
 }
