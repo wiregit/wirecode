@@ -355,28 +355,26 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		RemoteFileDesc[] rfds = new RemoteFileDesc[] { newRFD("download") };
 		File file = File.createTempFile("existing", "file");
 		file.deleteOnExit();
-		
-		try {
-			File noWritePermissionDir = null;
-			if (CommonUtils.isWindowsXP()) { 
-//				TODO provide win xp non readable directory, / didn't work
-				noWritePermissionDir = new File("C:\\winxp\\");
-			}
-//			else if (CommonUtils.isMacOSX()) {
-				// TODO provide osx non readable directory, / didn't work
-//			}
-			else {
-				noWritePermissionDir = new File("/");
-			} 
-			ManagedDownloader dl = new ManagedDownloader(rfds,
-					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
-					noWritePermissionDir, "does not matter", false);
-			fail("No exception thrown for dir " + noWritePermissionDir);
+
+		File noWritePermissionDir = null;
+		if (CommonUtils.isLinux()) {
+			noWritePermissionDir = new File("/");
 		}
-		catch (SaveLocationException sle) {
-			assertEquals("Should have no write permissions",
-						 SaveLocationException.DIRECTORY_NOT_WRITEABLE,
-						 sle.getErrorCode());
+		else if (CommonUtils.isWindows()) {
+			noWritePermissionDir = new File("C:\\WINDOWS\\);");
+		}
+		if (noWritePermissionDir != null) {
+			try {
+				ManagedDownloader dl = new ManagedDownloader(rfds,
+						new IncompleteFileManager(), new GUID(GUID.makeGuid()),
+						noWritePermissionDir, "does not matter", false);
+				fail("No exception thrown for dir " + noWritePermissionDir);
+			}
+			catch (SaveLocationException sle) {
+				assertEquals("Should have no write permissions",
+						SaveLocationException.DIRECTORY_NOT_WRITEABLE,
+						sle.getErrorCode());
+			}
 		}
 		try {
 			ManagedDownloader dl = new ManagedDownloader(rfds,
