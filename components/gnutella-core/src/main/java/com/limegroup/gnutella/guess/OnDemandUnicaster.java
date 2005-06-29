@@ -47,6 +47,7 @@ public class OnDemandUnicaster {
     public static void handleQueryKeyPong(PingReply pr) 
         throws NullPointerException, IllegalArgumentException {
 
+
         // validity checks
         // ------
         if (pr == null)
@@ -74,6 +75,7 @@ public class OnDemandUnicaster {
         if (bundle != null) {
             QueryRequest query = 
                 QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
+            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, endpoint.getAddress(), 
                       endpoint.getPort());
         }
@@ -112,6 +114,7 @@ public class OnDemandUnicaster {
         // ------
         else {
             QueryRequest query = QueryRequest.createQueryKeyQuery(queryURN, key);
+            RouterService.getMessageRouter().originateQueryGUID(query.getGUID());  
             _udp.send(query, ep.getAddress(), ep.getPort());
         }
         // ------
@@ -203,6 +206,5 @@ public class OnDemandUnicaster {
             }
         }
     }
-
 
 }

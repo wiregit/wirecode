@@ -304,6 +304,13 @@ public abstract class MessageRouter {
                                HOPS_FLOW_INTERVAL);
     }
 
+    /**
+     * Routes a query GUID to yourself.
+     */
+    public void originateQueryGUID(byte[] guid) {
+        _queryRouteTable.routeReply(guid, FOR_ME_REPLY_HANDLER);
+    }
+
     /** Call this to inform us that a query has been killed by a user or
      *  whatever.  Useful for purging unneeded info.<br>
      *  Callers of this should make sure that they have purged the guid from
