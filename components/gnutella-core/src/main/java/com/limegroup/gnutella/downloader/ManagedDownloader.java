@@ -23,7 +23,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
@@ -249,10 +249,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private FileManager fileManager;
     /** The repository of incomplete files. */
     private IncompleteFileManager incompleteFileManager;
-    /** A ManagedDownloader needs to have a handle to the ActivityCallback, so
+    /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
      * that it can notify the gui that a file is corrupt to ask the user what
      * should be done.  */
-    private ActivityCallback callback;
+    private DownloadCallback callback;
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
@@ -370,7 +370,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private Set recentInvalidAlts;
     
-    private VerifyingFile commonOutFile;
+    /**
+     * Manages writing stuff to disk, remember what's leased, what's verified,
+     * what is valid, etc........
+     */
+    protected VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
     /** MiniRemoteFileDesc -> Object. 
@@ -638,7 +642,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * being read from disk, false otherwise.
      */
     public void initialize(DownloadManager manager, FileManager fileManager, 
-                           ActivityCallback callback) {
+                           DownloadCallback callback) {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
@@ -1023,7 +1027,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * initializes the verifying file if the incompleteFile is initialized.
      */
-    private void initializeVerifyingFile() throws IOException {
+    protected void initializeVerifyingFile() throws IOException {
 
         if (incompleteFile == null)
             return;
@@ -2440,7 +2444,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 //remote queue.
                 if (shouldStartWorker()){
                     // see if we need to update our ranker
-                    ranker = SourceRanker.getAppropriateRanker(ranker);
+                    ranker = getSourceRanker(ranker);
                     
                     if (ranker.hasMore()) {
                         
@@ -2467,6 +2471,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 } catch (InterruptedException ignored) {}
             }
         }//end of while
+    }
+    
+    /**
+     * Retrieves the appropriate source ranker (or returns the current one).
+     */
+    protected SourceRanker getSourceRanker(SourceRanker ranker) {
+        return SourceRanker.getAppropriateRanker(ranker);
     }
     
     /**
@@ -2559,11 +2570,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 //when the user has made a decision. Until then the corruptState
                 //is set to waiting. We are not going to move files unless we
                 //are out of this state
-                callback.promptAboutCorruptDownload(this);
+                sendCorruptCallback();
                 //Note2:ActivityCallback is going to ask a message to be show to
                 //the user asynchronously
             }
         }
+    }
+    
+    /**
+     * Hook for sending a corrupt callback.
+     */
+    protected void sendCorruptCallback() {
+        callback.promptAboutCorruptDownload(this);
     }
 
     /**

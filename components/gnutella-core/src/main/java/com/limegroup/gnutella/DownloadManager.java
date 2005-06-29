@@ -36,6 +36,7 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
+import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -58,6 +59,7 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 
 /** 
@@ -86,7 +88,9 @@ public class DownloadManager implements BandwidthTracker {
     private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
 
     /** The callback for notifying the GUI of major changes. */
-    private ActivityCallback callback;
+    private DownloadCallback callback;
+    /** The callback for innetwork downloaders. */
+    private DownloadCallback innetworkCallback;
     /** The message router to use for pushes. */
     private MessageRouter router;
     /** Used to check if the file exists. */
@@ -104,6 +108,11 @@ public class DownloadManager implements BandwidthTracker {
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
+    
+    /** The number if IN-NETWORK active downloaders.  We don't count these when
+     * determing how many downloaders are active.
+     */
+    private int innetworkCount = 0;
     
     /**
      * files that we have sent an udp pushes and are waiting a connection from.
@@ -171,7 +180,7 @@ public class DownloadManager implements BandwidthTracker {
                   );
     }
     
-    protected void initialize(ActivityCallback callback, MessageRouter router,
+    protected void initialize(DownloadCallback callback, MessageRouter router,
                               FileManager fileManager) {
         this.callback = callback;
         this.router = router;
@@ -249,6 +258,8 @@ public class DownloadManager implements BandwidthTracker {
                 cleanupCompletedDownload(md, false);
             } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
                 i.remove();
+                if(md instanceof InNetworkDownloader)
+                    innetworkCount++;
                 active.add(md);
                 md.startDownload();
             } else {
@@ -440,14 +451,15 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                DownloadCallback dc = callback;
                 
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)
                     continue;
-
+                
                 waiting.add(downloader);                                 //1
-                downloader.initialize(this, this.fileManager, callback); //2
-                callback.addDownload(downloader);                        //3
+                downloader.initialize(this, this.fileManager, callback(downloader));       //2
+                callback(downloader).addDownload(downloader);                        //3
             }
             return true;
         } catch (ClassCastException e) {
@@ -470,7 +482,7 @@ public class DownloadManager implements BandwidthTracker {
      * modified.  If overwrite==true, the files may be overwritten.<p>
      * 
      * Otherwise returns a Downloader that allows you to stop and resume this
-     * download.  The ActivityCallback will also be notified of this download,
+     * download.  The DownloadCallback will also be notified of this download,
      * so the return value can usually be ignored.  The download begins
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
@@ -634,6 +646,21 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Downloads an InNetwork update, using the info from the UpdateInformation.
+     */
+    public synchronized Downloader download(UpdateInformation info, File dir) throws SaveLocationException {
+        File f = new File(dir, info.getUpdateFileName());
+        if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
+			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
+        
+        incompleteFileManager.purge(false);
+        ManagedDownloader d = new InNetworkDownloader(incompleteFileManager, info, dir);
+        initializeDownload(d);
+        return d;
+    }
+        
+    
+    /**
      * Performs common tasks for initializing the download.
      * 1) Initializes the downloader.
      * 2) Adds the download to the waiting list.
@@ -641,10 +668,17 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(ManagedDownloader md) {
-	    md.initialize(this, fileManager, callback);
+        md.initialize(this, fileManager, callback(md));
 		waiting.add(md);
-        callback.addDownload(md);
+        callback(md).addDownload(md);
         writeSnapshot(); // Save state for crash recovery.
+    }
+    
+    /**
+     * Returns the callback that should be used for the given md.
+     */
+    private DownloadCallback callback(ManagedDownloader md) {
+        return (md instanceof InNetworkDownloader) ? innetworkCallback : callback;
     }
         
 	/**
@@ -859,7 +893,7 @@ public class DownloadManager implements BandwidthTracker {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**
@@ -920,7 +954,7 @@ public class DownloadManager implements BandwidthTracker {
         dl.finish();
         if (dl.getQueryGUID() != null)
             router.downloadFinished(dl.getQueryGUID());
-        callback.removeDownload(dl);
+        callback(dl).removeDownload(dl);
         
         //Save this' state to disk for crash recovery.
         if(ser)
@@ -928,7 +962,7 @@ public class DownloadManager implements BandwidthTracker {
 
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
-            callback.downloadsComplete();
+            callback(dl).downloadsComplete();
     }           
     
     /** 

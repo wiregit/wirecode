@@ -121,6 +121,11 @@ public class VerifyingFile {
     private HashTree hashTree;
     
     /**
+     * The expected TigerTree root (null if we'll accept any).
+     */
+    private String expectedHashRoot;
+    
+    /**
      * Whether someone is currently requesting the hash tree
      */
     private boolean hashTreeRequested;
@@ -490,6 +495,14 @@ public class VerifyingFile {
         leasedBlocks.add(in);
     }
     
+    /**
+     * Sets the expected hash tree root.  If non-null, we'll only accept
+     * hash trees whose root hash matches this.
+     */
+    public synchronized void setExpectedHashTreeRoot(String root) {
+        expectedHashRoot = root;
+    }
+    
     public synchronized HashTree getHashTree() {
         return hashTree;
     }
@@ -499,6 +512,10 @@ public class VerifyingFile {
      * we do overlap checking.
      */
     public synchronized void setHashTree(HashTree tree) {
+        // doesn't match our expected tree, bail.
+        if(expectedHashRoot != null && !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
+            return;
+        
         // if we did not have a tree previously and there are no pending blocks,
         // trigger verification
         HashTree previoius = hashTree;

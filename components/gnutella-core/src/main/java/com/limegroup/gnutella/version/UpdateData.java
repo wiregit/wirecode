@@ -72,6 +72,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** The filename to name the update file on disk. */
     private String updateFileName;
     
+    /** The size of the update on disk. */
+    private int size;
+    
     /**
      * Constructs a new UpdateData object.
      */
@@ -85,7 +88,9 @@ class UpdateData implements Cloneable, UpdateInformation {
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
             ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
             ", javaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
-            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + "}";
+            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + 
+            ", urn: " + urn + ", ttroot: " + ttRoot + ", updateCommand: " + updateCommand +
+            ", updateFileName: " + updateFileName + ", size: " + size + "}";
     }
     
     /** Sets the from */
@@ -145,6 +150,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** Sets the filename to save the update to. */
     void setUpdateFileName(String filename) { updateFileName =  filename; }
     
+    /** Sets the size of the update. */
+    void setUpdateSize(int size) { this.size = size; }
+    
     /** Gets the language. */
     String getLanguage() { return language; }
     
@@ -182,6 +190,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     
     /** Gets the TigerTreeRoot hash. */
     public String getTTRoot() { return ttRoot; }
+    
+    /** Gets the size of the update. */
+    public long getSize() { return size; }
     
     /**
      * Determines if this matches (on all except language).
