@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.util.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -903,7 +903,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     public void testQueryReplyHasAlternates() throws Exception {
-        addFilesToLibrary();
+	addFilesToLibrary();
         addAlternateLocationsToFiles();
         
         boolean checked = false;
@@ -1017,36 +1017,44 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         }
     }
 
-	private void addFilesToLibrary() throws Exception {
-		String dirString = "com/limegroup/gnutella";
-		File testDir = CommonUtils.getResourceFile(dirString);
-		testDir = testDir.getCanonicalFile();
-		assertTrue("could not find the gnutella directory",
-		    testDir.isDirectory());
-		
+    private void addFilesToLibrary() throws Exception {
+	String dirString = "com/limegroup/gnutella";
+	File testDir = CommonUtils.getResourceFile(dirString);
+	testDir = testDir.getCanonicalFile();
+	assertTrue("could not find the gnutella directory",
+		   testDir.isDirectory());
+	
         File[] testFiles = testDir.listFiles(new FileFilter() { 
-            public boolean accept(File file) {
-                // use files with a $ because they'll generally
-                // trigger a single-response return, which is
-                // easier to check
-                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
-            }
-        });
-        
-		assertNotNull("no files to test against", testFiles);
-		assertNotEquals("no files to test against", 0, testFiles.length);
-		
-   		for(int i = 0; i < testFiles.length; i++) {
-			if(!testFiles[i].isFile())
-			    continue;
-			File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
-			assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
+		public boolean accept(File file) {
+		    // use files with a $ because they'll generally
+		    // trigger a single-response return, which is
+		    // easier to check
+		    return FileManager.isFilePhysicallyShareable(file) 
+			&& file.getName().indexOf("$")!=-1;
 		}
-
+	    });
+        
+	assertNotNull("no files to test against", testFiles);
+	assertNotEquals("no files to test against", 0, testFiles.length);
+	
+	for (int i = 0; i < testFiles.length; i++) {
+	    File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
+	    assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
+	}
+	
         waitForLoad();
-            
-        assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getNumFiles() );
+
+// 	if (testFiles.length != fman.getNumFiles()) {
+// 	    for (int i = 0; i < testFiles.length; i++) {
+// 		File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
+// 		 if (fman.getFileDescForFile(shared) == null) {
+// 		     System.out.println("File not shared " + shared);
+// 		 }
+// 	    }
+// 	}
+	
+	 assertEquals("unexpected number of shared files",
+		      testFiles.length, fman.getNumFiles() );
     }
     
     private void addAlternateLocationsToFiles() throws Exception {
