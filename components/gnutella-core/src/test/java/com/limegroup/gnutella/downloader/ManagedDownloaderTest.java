@@ -361,7 +361,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 			noWritePermissionDir = new File("/");
 		}
 		else if (CommonUtils.isWindows()) {
-			noWritePermissionDir = new File("C:\\WINDOWS\\);");
+			noWritePermissionDir = new File("C:\\WINDOWS\\");
 		}
 		if (noWritePermissionDir != null) {
 			try {
@@ -375,7 +375,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						SaveLocationException.DIRECTORY_NOT_WRITEABLE,
 						sle.getErrorCode());
 			}
-		}
+			}
 		try {
 			ManagedDownloader dl = new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
