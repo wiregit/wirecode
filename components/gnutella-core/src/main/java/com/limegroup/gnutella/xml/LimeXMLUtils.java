@@ -217,6 +217,11 @@ public class LimeXMLUtils {
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
             
+			if (currFieldName.endsWith("license_type__") && queryValue.length() > 0) {
+				if (replyDocValue == null || !replyDocValue.startsWith(queryValue))
+					return false;
+			}
+			
             if (replyDocValue == null || replyDocValue.equals(""))
                 nullCount++;
             else {
@@ -255,18 +260,7 @@ public class LimeXMLUtils {
         double matchCountD = (double)matchCount;
         double nullCountD = (double)nullCount;
 		
-		//  if license specified in query, require a match
-		License queryLicense = queryDoc.getLicense();
-		if (queryLicense != null) {
-			License replyLicense = replyDoc.getLicense();
-			if (replyLicense == null)
-				return false;
-			String queryLicenseName = queryLicense.getLicenseName(); 
-			if (queryLicenseName != null && !queryLicenseName.equalsIgnoreCase(replyLicense.getLicenseName()))
-				return false;
-		}
-		
-        if (size > 1) {
+		if (size > 1) {
 			if (matchedBitrate) {
 				// discount a bitrate match.  matching bitrate's shouldn't
                 // influence the logic because where size is 2, a matching
