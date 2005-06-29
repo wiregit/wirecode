@@ -361,7 +361,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 			noWritePermissionDir = new File("/");
 		}
 		else if (CommonUtils.isWindows()) {
-			noWritePermissionDir = new File("C:\\WINDOWS\\");
+			// doesn't work on 
+//			noWritePermissionDir = new File("C:\\WINDOWS\\");
 		}
 		if (noWritePermissionDir != null) {
 			try {
