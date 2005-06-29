@@ -47,7 +47,7 @@ public class MetaFileManager extends FileManager {
 
         if (shouldIncludeXMLInResponse(request)) {
             LimeXMLDocument doc = request.getRichQuery();
-            if( doc != null ) {
+            if (doc != null) {
                 Response[] metas = query(doc);
                 if (metas != null) // valid query & responses.
                     result = union(result, metas, doc);
@@ -78,9 +78,9 @@ public class MetaFileManager extends FileManager {
      * Adds XML to the response.  This assumes that shouldIncludeXMLInResponse
      * was already consulted and returned true.
      *
-     * If the FileDesc has no XMLDocuments, this does nothing.
-     * If the FileDesc has one XML Document, this sets it as the response doc.
-     * If the FileDesc has multiple XML Documents, this does nothing.
+     * If the FileDesc has no XML documents, this does nothing.
+     * If the FileDesc has one XML document, this sets it as the response doc.
+     * If the FileDesc has multiple XML documents, this does nothing.
      * The reasoning behind not setting the document when there are multiple
      * XML docs is that presumably the query will be a 'rich' query,
      * and we want to include only the schema that was in the query.

@@ -3,8 +3,8 @@
  *
  * Created on April 30, 2001, 4:51 PM
  */
-
 package com.limegroup.gnutella.xml;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,9 +17,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -27,14 +25,12 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
 
@@ -42,8 +38,7 @@ import com.limegroup.gnutella.util.IOUtils;
  * Contains utility methods
  * @author  asingla
  */
-public class LimeXMLUtils
-{
+public class LimeXMLUtils {
 
     private static final double MATCHING_RATE = .9;
 
@@ -71,11 +66,10 @@ public class LimeXMLUtils
      * Returns an instance of InputSource after reading the file, and trimming
      * the extraneous white spaces.
      * @param file The file from where to read
-     * @return The instance of InpiutSource created from the passed file
+     * @return The instance of InputSource created from the passed file
      * @exception IOException If file doesnt get opened or other I/O problems
      */
-    public static InputSource getInputSource(File file) throws IOException
-    {
+    public static InputSource getInputSource(File file) throws IOException {
         //open the file, read it, and derive the structure, store internally
         StringBuffer sb = new StringBuffer();
         String line = "";
@@ -176,8 +170,7 @@ public class LimeXMLUtils
      * @return array of bytes read
      * @exception IOException If any I/O exception occurs while reading data
      */
-    public static byte[] readFully(InputStream in) throws IOException
-    {
+    public static byte[] readFully(InputStream in) throws IOException {
         //create a new byte array stream to store the read data
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         
@@ -215,16 +208,16 @@ public class LimeXMLUtils
         int matchCount = 0; // number of matches
         int nullCount = 0; // number of fields in query not in replyDoc.
         boolean matchedBitrate = false;
-        for(Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
+        for (Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
             String currFieldName = (String)entry.getKey();
             String queryValue = (String)entry.getValue();
-            Assert.that( queryValue != null, "null value");
+            Assert.that(queryValue != null, "null value");
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
             
-            if((replyDocValue == null) || replyDocValue.equals(""))
+            if (replyDocValue == null || replyDocValue.equals(""))
                 nullCount++;
             else {
                 try {  
@@ -261,16 +254,28 @@ public class LimeXMLUtils
         double sizeD = (double)size;
         double matchCountD = (double)matchCount;
         double nullCountD = (double)nullCount;
-        if(size > 1){
-            if (matchedBitrate) {
-                // discount a bitrate match.  matching bitrate's shouldn't
+		
+		//  if license specified in query, require a match
+		License queryLicense = queryDoc.getLicense();
+		if (queryLicense != null) {
+			License replyLicense = replyDoc.getLicense();
+			if (replyLicense == null)
+				return false;
+			String queryLicenseName = queryLicense.getLicenseName(); 
+			if (queryLicenseName != null && !queryLicenseName.equalsIgnoreCase(replyLicense.getLicenseName()))
+				return false;
+		}
+		
+        if (size > 1) {
+			if (matchedBitrate) {
+				// discount a bitrate match.  matching bitrate's shouldn't
                 // influence the logic because where size is 2, a matching
                 // bitrate will result in a lot of irrelevant results.
                 sizeD--;
                 matchCountD--;
                 matchCount--;
             }
-            if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
+            if (((nullCountD + matchCountD)/sizeD) < MATCHING_RATE)
                 return false;
             // ok, it passed rate test, now make sure it had SOME matches...
             if (allowAllNulls || matchCount > 0)
@@ -695,7 +700,7 @@ public class LimeXMLUtils
     /**
      * Hashes the file using bits and pieces of the file.
      * 
-     * @return The SHA hash bytes of hte input bytes.
+     * @return The SHA hash bytes of the input bytes.
      * @throws IOException if hashing failed for any reason.
      */
     public static byte[] hashFile(File toHash) throws IOException {

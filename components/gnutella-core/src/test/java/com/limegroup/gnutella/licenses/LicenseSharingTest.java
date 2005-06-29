@@ -163,13 +163,47 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         
         for(Iterator i = reply.getResults(); i.hasNext(); ) {
             Response r = (Response)i.next();
-            assertNotNull(r.getDocument());
             LimeXMLDocument doc = r.getDocument();
+            assertNotNull(doc);
             assertTrue(r.toString(), doc.isLicenseAvailable());
             assertNotNull(r.toString(), doc.getLicense());
             assertInstanceof(WeedLicense.class, doc.getLicense());
         }
     }
+	
+	/**
+	 * Tests whether a search with a license in the query returns results
+	 * without a matching license.
+	 */
+	public void testLicenseRequiredXMLSearch() throws Exception {
+		setAcceptedIncoming();
+		
+		String richQuery = "<?xml version=\"1.0\"?><audios><audio title=\"love\" licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
+        new LimeXMLDocument(richQuery);
+
+        // we should send a query to the leaf and get results.
+        QueryRequest query = QueryRequest.createQuery("", richQuery);
+        testUP[1].send(query);
+        testUP[1].flush();
+
+        QueryReply reply = getFirstQueryReply(testUP[1]);
+        assertNotNull(reply);
+        assertEquals(query.getGUID(), reply.getGUID());
+        assertEquals(reply.getResultsAsList().toString(), 1, reply.getResultCount());
+        
+        if (!addXMLToResponses(reply))
+            fail("Couldn't add XML to response. :(");
+        
+        for (Iterator i = reply.getResults(); i.hasNext(); ) {
+            Response r = (Response)i.next();
+			System.out.println("Response "+i+": "+r);
+			LimeXMLDocument doc = r.getDocument();
+            assertNotNull(doc);
+            assertTrue(r.toString(), doc.isLicenseAvailable());
+            assertNotNull(r.toString(), doc.getLicense());
+            assertInstanceof(WeedLicense.class, doc.getLicense());
+        }
+	}
     
     private void setAcceptedIncoming() throws Exception {
         Acceptor ac = RouterService.getAcceptor();
