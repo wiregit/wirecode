@@ -992,6 +992,9 @@ public abstract class FileManager {
             }
             
             _numPendingFiles++;
+            // make sure _pendingFinished does not hold _revision
+            // while we're still adding files
+            _pendingFinished = -1;
         }
 
 		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
