@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 /**
- * Settings for Music Player
+ * Settings for Status Bar
  */
 public class StatusBarSettings extends LimeProps {
     
