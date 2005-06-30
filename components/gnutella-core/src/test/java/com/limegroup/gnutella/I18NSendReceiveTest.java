@@ -12,6 +12,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -83,7 +84,7 @@ public class I18NSendReceiveTest
 
     private static void setUpFiles() throws Exception {
         
-        for(int i = 0; i < 8; i++) {
+        for(int i = 0; i < FILES.length; i++) {
             File f = 
                 new File("com/limegroup/gnutella/" + FILES[i]);
             if(!f.exists()) {
@@ -136,8 +137,8 @@ public class I18NSendReceiveTest
         CONN_1.send(qr);
         CONN_1.flush();
         
-        getFirstQueryReply(CONN_1);
-        assertTrue("should not have received a QueryReply", !drain(CONN_1));
+        Message m = getFirstQueryReply(CONN_1);
+        assertNull("should not have received a QueryReply", m);
         drain(CONN_1);
 
         List expectedReply = new ArrayList();
