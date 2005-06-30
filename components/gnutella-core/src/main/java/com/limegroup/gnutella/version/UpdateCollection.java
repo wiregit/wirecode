@@ -56,6 +56,11 @@ class UpdateCollection {
     private List updateDataList = new LinkedList();
     
     /**
+     * The list of DownloadDatas in this collection.
+     */
+    private List downloadDataList = new LinkedList();
+    
+    /**
      * Ensure that this is only created by using the factory constructor.
      */
     private UpdateCollection() {}
@@ -90,17 +95,10 @@ class UpdateCollection {
     }
     
     /**
-     * Constructs a map of URN -> UpdateInformation for each update
-     * that contains a URN.
+     * Gets all updates that have information so we can download them.
      */
-    Map buildUpdateURNMap() {
-        Map map = new HashMap();
-        for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
-            UpdateData next = (UpdateData)i.next();
-            if(next.getUpdateURN() != null)
-                map.put(next.getUpdateURN(), next);
-        }
-        return Collections.unmodifiableMap(map);
+    List getUpdatesWithDownloadInformation() {
+        return Collections.unmodifiableList(downloadDataList);
     }
     
     /**
@@ -228,6 +226,12 @@ class UpdateCollection {
      *      javato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
      *      os       -- OPTIONAL (defaults to '*' -- accepts a comma delimited list.)
      *
+     * The below elements are necessary for downloading the update in the network.
+     *      urn      -- The BITPRINT of the download
+     *      ucommand -- The command to run to invoke the update.
+     *      uname    -- The filename on disk the update should have.
+     *      size     -- The size of the update when completed.
+     *
      * If any values exist but error while parsing, the entire block is considered
      * invalid and ignored.
      */
@@ -248,6 +252,7 @@ class UpdateCollection {
         String updateURN = getAttributeText(attr, "urn");
         String updateCommand = getAttributeText(attr, "ucommand");
         String updateName = getAttributeText(attr, "uname");
+        String fileSize = getAttributeText(attr, "size");
         
         if(forV == null || url == null || style == null) {
             LOG.error("Missing required for, url, or style.");
@@ -318,6 +323,16 @@ class UpdateCollection {
         data.setUpdateCommand(updateCommand);
         data.setUpdateFileName(updateName);
         
+        try {
+            data.setUpdateSize(Integer.parseInt(fileSize));
+        } catch(NumberFormatException nfe) {
+            LOG.warn("Invalid size: " + fileSize);
+        }
+        
+        // if this has enough information for downloading, add it to the list of potentials.
+        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0)
+            downloadDataList.add(data);
+                
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = (Node)children.item(i);

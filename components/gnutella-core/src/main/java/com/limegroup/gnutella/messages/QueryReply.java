@@ -117,6 +117,9 @@ public class QueryReply extends Message implements Serializable{
 
 	/** The raw ip address of the host returning the hit.*/
 	private byte[] _address = new byte[4];
+	
+	/** The cached clientGUID. */
+	private byte[] clientGUID = null;
 
     /** the PushProxy info for this hit.
      */
@@ -1010,13 +1013,16 @@ public class QueryReply extends Message implements Serializable{
     /** Returns the 16 byte client ID (i.e., the "footer") of the
      *  responding host.  */
     public byte[] getClientGUID() {
-        byte[] result=new byte[16];
-        //Copy the last 16 bytes of payload to result.  Note that there may
-        //be metainformation before the client GUID.  So it is not correct
-        //to simply count after the last result record.
-        int length=super.getLength();
-        System.arraycopy(_payload, length-16, result, 0, 16);
-        return result;
+        if(clientGUID == null) {
+            byte[] result = new byte[16];
+            //Copy the last 16 bytes of payload to result.  Note that there may
+            //be metainformation before the client GUID.  So it is not correct
+            //to simply count after the last result record.
+            int length=super.getLength();
+            System.arraycopy(_payload, length-16, result, 0, 16);
+            clientGUID = result;
+        }
+        return clientGUID;
     }
 
     /** Returns this, because it's always safe to send big replies. */

@@ -59,7 +59,7 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutella.version.DownloadInformation;
 
 
 /** 
@@ -318,16 +318,17 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     public ManagedDownloader getDownloaderForURN(URN sha1) {
-        List l;
         synchronized(this) {
-            l = new ArrayList(active);
-            l.addAll(waiting);
-        }
-        
-        for (Iterator iter = l.iterator(); iter.hasNext();) {
-            ManagedDownloader current = (ManagedDownloader) iter.next();
-            if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
-                return current;
+            for (Iterator iter = active.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
+                    return current;
+            }
+            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
+                    return current;
+            }
         }
         return null;
     }
@@ -646,9 +647,10 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
-     * Downloads an InNetwork update, using the info from the UpdateInformation.
+     * Downloads an InNetwork update, using the info from the DownloadInformation.
      */
-    public synchronized Downloader download(UpdateInformation info, File dir) throws SaveLocationException {
+    public synchronized Downloader download(DownloadInformation info) throws SaveLocationException {
+        File dir = FileManager.PREFERENCE_SHARE;
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
@@ -906,6 +908,9 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized void remove(ManagedDownloader downloader, 
                                     boolean completed) {
         active.remove(downloader);
+        if(downloader instanceof InNetworkDownloader)
+            innetworkCount--;
+        
         waiting.remove(downloader);
         if(completed)
             cleanupCompletedDownload(downloader, true);

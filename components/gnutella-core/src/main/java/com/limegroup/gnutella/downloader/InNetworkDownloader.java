@@ -3,7 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.Serializable;
 import java.io.IOException;
-
+                                                    
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.DownloadCallback;
@@ -12,7 +13,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutella.version.DownloadInformation;
 
 /**
  * A downloader that works in the background, using the network to continue itself.
@@ -34,7 +35,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Constructs a new downloader that's gonna work off the network.
      */
     public InNetworkDownloader(IncompleteFileManager incompleteFileManager,
-                               UpdateInformation info,
+                               DownloadInformation info,
                                File dir) throws SaveLocationException {
         super( new RemoteFileDesc[0], incompleteFileManager,
                null, dir, info.getUpdateFileName(), true);
@@ -44,6 +45,24 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         this.size = info.getSize();
         this.urn = info.getUpdateURN();
         this.ttRoot = info.getTTRoot();
+    }    
+    
+    /**
+     * Overriden to use a different incomplete directory.
+     */
+    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
+                                     URN urn, int length) throws IOException {
+        return ifm.getFile(name, urn, length, new File(FileManager.PREFERENCE_SHARE, "Incomplete"));
+    }
+    
+    /**
+     * Gets a new SourceRanker, using only LegacyRanker (not PingRanker).
+     */
+    protected SourceRanker getSourceRanker(SourceRanker oldRanker) {
+        if(oldRanker != null)
+            return oldRanker;
+        else
+            return new LegacyRanker();
     }
     
     /**

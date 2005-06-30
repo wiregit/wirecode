@@ -201,16 +201,30 @@ public class IncompleteFileManager implements Serializable {
             return f.getCanonicalFile();
     }       
 
+    /**
+     * Same as getFile(String, urn, int), except taking the values from the RFD.
+     *    getFile(rfd) == getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
+     */
     public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
         return getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
+    }
+
+    /** 
+     * Stub for calling
+     *  getFile(String, URN, int, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
+     */
+    public synchronized File getFile(String name, URN sha1, int size) throws IOException {
+        return getFile(name, sha1, size, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
     }
     
     /** 
      * Returns the fully-qualified temporary download file for the given
-     * file/location pair.  The location of the file is determined by the
-     * INCOMPLETE_DIRECTORY property.  For example, getFile("test.txt", 1999)
-     * may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt".  The
-     * disk is not modified.<p>
+     * file/location pair.  If an incomplete file already exists for this
+     * URN, that file is returned.  Otherwise, the location of the file is
+     * determined by the "incDir" variable.   For example, getFile("test.txt", 1999)
+     * may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt" if
+     * "incDir" is "C:\Program Files\LimeWire\Incomplete".  The
+     * disk is not modified, except for the file possibly being created.<p>
      *
      * This method gives duplicate files the same temporary file, which is
      * critical for resume and swarmed downloads.  That is, for all rfd_i and 
@@ -228,13 +242,11 @@ public class IncompleteFileManager implements Serializable {
      * @throws IOException if there was an IOError while determining the
      * file's name.
      */
-    public synchronized File getFile(String name, URN sha1, int size) throws IOException {
+    public synchronized File getFile(String name, URN sha1, int size, File incDir) throws IOException {
         boolean dirsMade = false;
         File baseFile = null;
         File canonFile = null;
         
-        
-	    File incDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
 		//make sure its created.. (the user might have deleted it)
 		dirsMade = incDir.mkdirs();
 		

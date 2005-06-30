@@ -22,7 +22,7 @@ public class LegacyRanker extends SourceRanker {
 
 	private final Set rfds;  
 	
-	protected LegacyRanker() {
+	public LegacyRanker() {
 		rfds = new HashSet();
 	}
 	

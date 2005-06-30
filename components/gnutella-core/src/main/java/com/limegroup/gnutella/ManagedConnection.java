@@ -33,6 +33,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
@@ -237,6 +238,11 @@ public class ManagedConnection extends Connection
      * looping started.
      */
     private boolean supernodeClientAtLooping = false;
+    
+    /**
+     * The last clientGUID a Hops=0 QueryReply had.
+     */
+    private byte[] clientGUID = DataUtils.EMPTY_GUID;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -710,6 +716,8 @@ public class ManagedConnection extends Connection
 			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             _connectionStats.addReceivedDropped();
         } else {
+            if(m instanceof QueryReply && m.getHops() == 0)
+                clientGUID = ((QueryReply)m).getClientGUID();
         
             //special handling for proxying.
             if(supernodeClientAtLooping) {
@@ -896,6 +904,13 @@ public class ManagedConnection extends Connection
         
         send(queryReply);
     }
+    
+    /**
+     * Gets the clientGUID of the remote host of the connection.
+     */
+    public byte[] getClientGUID() {
+        return clientGUID;
+    }
 
     /**
      * This method is called when a PushRequest is received for a QueryReply
@@ -945,10 +960,12 @@ public class ManagedConnection extends Connection
             }
             
             // see if there's a new update message.
-            if(capVM.supportsUpdate() > UpdateHandler.instance().getLatestId()) {
-                // request an update message.
+            int latestId = UpdateHandler.instance().getLatestId();
+            int currentId = capVM.supportsUpdate();
+            if(currentId > latestId)
                 send(new UpdateRequest());
-            }
+            else
+                UpdateHandler.instance().handleUpdateAvailable(this, currentId);
                 
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        

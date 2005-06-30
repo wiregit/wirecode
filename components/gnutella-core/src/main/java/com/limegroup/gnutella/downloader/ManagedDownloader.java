@@ -1060,10 +1060,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
-            incompleteFile = 
-                incompleteFileManager.getFile(getSaveFile().getName(),
-						downloadSHA1,getContentLength());
+            incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
+                                               downloadSHA1, getContentLength());
         }
+    }
+    
+    /**
+     * Retrieves an incomplete file from the given incompleteFileManager with the
+     * given name, URN & content-length.
+     */
+    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
+                                     URN urn, int length) throws IOException {
+        return ifm.getFile(name, urn, length);
     }
     
     /**
@@ -1073,21 +1081,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private synchronized void initializeAlternateLocations() {
         if( incompleteFile == null ) // no incomplete, no big deal.
             return;
-            
         
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.silent(false, "wrong IFD.\n" +
-                           "we are resuming :"+(this instanceof ResumeDownloader)+
-                           "ours  :   " + incompleteFile +
+                Assert.silent(false, "wrong IFD." +
+                           "\nclass: " + getClass().getName() +
+                           "\nours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
-                           "\ntheir hashes: " +
-                           DataUtils.listSet(ifd.getUrns())+
-                          "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                           "\ntheir hashes: " + ifd.getUrns()+
+                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
                 fileManager.removeFileIfShared(incompleteFile);
             }
         }
@@ -1097,16 +1103,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
-            // Find any matching file-desc for this URN.
-            fd = fileManager.getFileDescForUrn(hash);
-            if( fd != null ) {
-                //create validAlts
-                addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                        RouterService.getAltlocManager().getPush(hash,false),
-                        RouterService.getAltlocManager().getPush(hash,true),
-                        (int)size);
-                
-            }
+            //create validAlts
+            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
+                    RouterService.getAltlocManager().getPush(hash,false),
+                    RouterService.getAltlocManager().getPush(hash,true),
+                    (int)size);
         }
     }
     
@@ -1142,20 +1143,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
                 
         addPossibleSources(locs);
-    }
-
-    /**
-     * Returns true if 'other' could conflict with one of the files in this. In
-     * other words, if this.conflicts(other)==true, no other ManagedDownloader
-     * should attempt to download other.  
-     */
-    public boolean conflicts(RemoteFileDesc other) {
-        try {
-            File otherFile = incompleteFileManager.getFile(other);
-            return conflictsWithIncompleteFile(otherFile);
-        } catch(IOException ioe) {
-            return false;
-        }
     }
 
     /**
@@ -2171,7 +2158,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         //Add file to library.
         // first check if it conflicts with the saved dir....
-        if (fileExists(saveFile))
+        if (saveFile.exists())
             fileManager.removeFileIfShared(saveFile);
 
         //Add the URN of this file to the cache so that it won't
@@ -2205,15 +2192,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
 		return COMPLETE;
-    }
-    
-    /**
-     * Returns true if the file exists.
-     * The file must be an absolute path.
-     * @return True returned if the File exists.
-     */
-    private boolean fileExists(File f) {
-        return f.exists();
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

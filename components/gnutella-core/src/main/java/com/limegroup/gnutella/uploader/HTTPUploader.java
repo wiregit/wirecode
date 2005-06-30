@@ -271,10 +271,7 @@ public final class HTTPUploader implements Uploader {
             } catch(IOException ignored) {}
         }
         _fis = _fileDesc.createInputStream();
-        
-        File parent = _fileDesc.getFile().getParentFile();
-        if(parent != null)
-            _isForcedShare = parent.equals(FileManager.FORCED_SHARE);
+        _isForcedShare = FileManager.isForcedShare(_fileDesc);
 	}
 
 	/**
