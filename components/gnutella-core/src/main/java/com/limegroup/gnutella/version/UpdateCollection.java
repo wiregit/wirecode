@@ -119,7 +119,7 @@ class UpdateCollection {
                 if(lang.equals(next.getLanguage())) {
                     exactMatch = next;
                     break;
-                } else if("en".equals(next.getLanguage())) {
+                } else if("en".equals(next.getLanguage()) && englishMatch == null) {
                     englishMatch = next;
                 }
             }

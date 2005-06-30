@@ -16,6 +16,13 @@ public class UpdateSettings extends LimeProps {
             "updateDelay", 5*24*60*60*1000, 7*60*60*1000);
             
     /**
+     * Delay for downloading updates.
+     */
+    public static final LongSetting UPDATE_DOWNLOAD_DELAY =
+        FACTORY.createSettableLongSetting("UPDATE_DOWNLOAD_DELAY", 60*60*1000,
+            "updateDownloadDelay", 30*60*1000, 7*60*60*1000);
+            
+    /**
      * The style of updates.
      */
     public static final IntSetting UPDATE_STYLE = 

@@ -241,6 +241,19 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Determines if an 'In Network' download exists in either active or waiting.
+     */
+    public synchronized boolean hasInNetworkDownload() {
+        if(innetworkCount > 0)
+            return true;
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            if(i.next() instanceof InNetworkDownloader)
+                return true;
+        }
+        return false;
+    }
+    
+    /**
      * Schedules the runnable that pumps through waiting downloads.
      */
     public void scheduleWaitingPump() {

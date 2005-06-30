@@ -83,11 +83,23 @@ public class UpdateHandler {
     private volatile byte[] _lastBytes;
     
     /**
+     * The timestamp of the latest update.
+     */
+    private volatile long _lastTimestamp;
+    
+    /**
      * Initializes data as read from disk.
      */
     private void initialize() {
         LOG.trace("Initializing UpdateHandler");
         handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+        // Try to update ourselves (re-use hosts for downloading, etc..)
+        // at a reasonable interval.
+        RouterService.schedule(new Runnable() {
+            public void run() {
+                tryToUpdate();
+            }
+        }, 30 * 60 * 1000, 0);
     }
     
     /**
@@ -181,6 +193,7 @@ public class UpdateHandler {
     private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
         LOG.trace("Retrieved new data, storing & updating.");
         _lastId = uc.getId();
+        _lastTimestamp = uc.getTimestamp();
         _lastBytes = data;
         
         _updatesToDownload = uc.getUpdatesWithDownloadInformation();
@@ -252,8 +265,11 @@ public class UpdateHandler {
                         continue;
                     }
                     
-                    if(md == null) { // if there's no existing download for this update, add one.
-                        LOG.debug("Starting a new download");
+                    // If we don't have an existing download ...
+                    // and there's no existing InNetwork downloads & 
+                    // we're allowed to start a new one.
+                    if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
+                        LOG.debug("Starting a new InNetwork Download");
                         try {
                             md = (ManagedDownloader)dm.download(next);
                         } catch(SaveLocationException sle) {
@@ -262,10 +278,9 @@ public class UpdateHandler {
                     }
                     
                     if(md != null) {
-                        if(source != null) {
-                            LOG.debug("Adding single source: " + source);
+                        if(source != null)
                             md.addDownload(rfd(source, next), false);
-                        } else
+                        else
                             addCurrentDownloadSources(md, next);
                     }
                 }
@@ -313,6 +328,19 @@ public class UpdateHandler {
                                   Collections.EMPTY_SET,        // push proxies
                                   0,                            // creation time
                                   0);                           // firewalled transfer
+    }
+    
+    /**
+     * Determines if we're far enough past the timestamp to start a new
+     * in network download.
+     */
+    private boolean canStartDownload() {
+        long now = System.currentTimeMillis();
+        long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
+        long random = Math.abs(new Random().nextLong() % delay);
+        long timestamp = _lastTimestamp;
+        long then = timestamp + random;
+        return now < then;
     }
     
     /**
