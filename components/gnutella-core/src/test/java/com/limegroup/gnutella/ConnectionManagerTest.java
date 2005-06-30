@@ -69,6 +69,7 @@ public class ConnectionManagerTest extends BaseTestCase {
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
 
     public void tearDown() {
@@ -88,7 +89,8 @@ public class ConnectionManagerTest extends BaseTestCase {
      * @throws Exception if an error occurs
      */
     public void testAllowConnection() throws Exception {
-        
+        // NOTA BENE: you may have to turn on ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
+    	// which is deactivated in this.setSettings()
     }
     
     /**
