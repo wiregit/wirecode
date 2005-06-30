@@ -109,6 +109,11 @@ public class DownloadManager implements BandwidthTracker {
      *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
     
+    /**
+     * Whether or not the GUI has been init'd.
+     */
+    private volatile boolean guiInit = false;
+    
     /** The number if IN-NETWORK active downloaders.  We don't count these when
      * determing how many downloaders are active.
      */
@@ -180,9 +185,10 @@ public class DownloadManager implements BandwidthTracker {
                   );
     }
     
-    protected void initialize(DownloadCallback callback, MessageRouter router,
+    protected void initialize(DownloadCallback guiCallback, MessageRouter router,
                               FileManager fileManager) {
-        this.callback = callback;
+        this.callback = guiCallback;
+        this.innetworkCallback = new InNetworkCallback();
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
@@ -223,6 +229,15 @@ public class DownloadManager implements BandwidthTracker {
         RouterService.schedule(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
                                SNAPSHOT_CHECKPOINT_TIME);
+                               
+        guiInit = true;
+    }
+    
+    /**
+     * Is the GUI init'd?
+     */
+    public boolean isGUIInitd() {
+        return guiInit;
     }
     
     /**
@@ -651,6 +666,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     public synchronized Downloader download(DownloadInformation info) throws SaveLocationException {
         File dir = FileManager.PREFERENCE_SHARE;
+        dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
@@ -1492,6 +1508,16 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
-	
+    private static class InNetworkCallback implements DownloadCallback {
+        public void addDownload(Downloader d) {}
+        public void removeDownload(Downloader d) {}
+        public void downloadsComplete() {}
+    	public void showDownloads() {}
+    	// always discard corruption.
+        public void promptAboutCorruptDownload(Downloader dloader) {
+            dloader.discardCorruptDownload(true);
+        }
+        public String getHostValue(String key) { return null; }
+    }
 	
 }

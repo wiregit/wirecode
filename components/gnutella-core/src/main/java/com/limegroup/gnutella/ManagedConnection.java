@@ -964,7 +964,7 @@ public class ManagedConnection extends Connection
             int currentId = capVM.supportsUpdate();
             if(currentId > latestId)
                 send(new UpdateRequest());
-            else
+            else if(currentId == latestId)
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
                 
         }

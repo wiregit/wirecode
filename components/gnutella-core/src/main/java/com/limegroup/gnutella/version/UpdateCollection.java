@@ -330,8 +330,10 @@ class UpdateCollection {
         }
         
         // if this has enough information for downloading, add it to the list of potentials.
-        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0)
+        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
+            LOG.debug("Adding new download data item: " + data);
             downloadDataList.add(data);
+        }
                 
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {

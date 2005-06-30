@@ -31,6 +31,7 @@ import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -620,6 +621,7 @@ public abstract class FileManager {
         RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
         SavedFileManager.instance().run();
+        UpdateHandler.instance().tryToUpdate();
         RouterService.getCallback().fileManagerLoaded();
     }
     

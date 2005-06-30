@@ -133,6 +133,9 @@ public abstract class SourceRanker {
      * the current one is stopped.
      */
     public static SourceRanker getAppropriateRanker(SourceRanker original) {
+        if(original == null)
+            return getAppropriateRanker();
+        
         SourceRanker better;
         if (RouterService.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue()) {

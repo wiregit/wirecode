@@ -248,7 +248,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /** The place to share completed downloads (and their metadata) */
     private FileManager fileManager;
     /** The repository of incomplete files. */
-    private IncompleteFileManager incompleteFileManager;
+    protected IncompleteFileManager incompleteFileManager;
     /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
      * that it can notify the gui that a file is corrupt to ask the user what
      * should be done.  */
@@ -665,7 +665,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         queuePosition=Integer.MAX_VALUE;
         queuedVendor = "";
         triedLocatingSources = false;
-		ranker = SourceRanker.getAppropriateRanker();
+		ranker = getSourceRanker(null);
         ranker.setMeshHandler(this);
         // get the SHA1 if we can.
         if(cachedRFDs.size() > 0 && downloadSHA1 == null) {
@@ -1053,7 +1053,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     protected void initializeIncompleteFile() throws IOException {
-        if (incompleteFile != null || cachedRFDs == null || cachedRFDs.isEmpty())
+        if (incompleteFile != null)
             return;
         
         if (downloadSHA1 != null)
@@ -1063,6 +1063,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
                                                downloadSHA1, getContentLength());
         }
+        
+        LOG.warn("Incomplete File: " + incompleteFile);
     }
     
     /**
