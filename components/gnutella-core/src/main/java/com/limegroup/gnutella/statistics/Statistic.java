@@ -37,7 +37,22 @@ public interface Statistic {
 	 *  time periods
 	 */
 	double getMax();
-
+	
+	/**
+	 * Accessor for the current recorded stat value over the most recent
+	 * time period.
+	 * 
+	 * @return the stat value current being added to
+	 */
+	int getCurrent();
+	
+	/**
+	 * Accessor for the most recently recorded stat value.
+	 * 
+	 * @return the most recently recorded stat value
+	 */
+	int getLastStored();
+	
 	/**
 	 * Increments this statistic by one.
 	 */

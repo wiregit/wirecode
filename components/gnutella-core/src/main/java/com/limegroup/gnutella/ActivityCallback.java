@@ -182,4 +182,9 @@ public interface ActivityCallback
 	 * @return true if the callback handles the magnet links
 	 */
 	public boolean handleMagnets(final MagnetOptions[] magnets);
+	
+	/**
+	 * Indicates that the firewalled state of this has changed. 
+	 */
+	public void acceptedIncomingChanged(boolean status);
 }

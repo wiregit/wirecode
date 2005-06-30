@@ -483,9 +483,11 @@ public class Acceptor implements Runnable {
 	 * Returns whether or not the status changed.
 	 */
 	private boolean setIncoming(boolean status) {
-	    boolean old = _acceptedIncoming;
+		if (_acceptedIncoming == status)
+			return false;
 	    _acceptedIncoming = status;
-	    return old != status;
+		RouterService.getCallback().acceptedIncomingChanged(status);
+	    return true;
 	}
 	
 	/**

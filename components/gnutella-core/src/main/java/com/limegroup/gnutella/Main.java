@@ -283,4 +283,5 @@ public class Main implements ActivityCallback, ErrorCallback {
 		return false;
 	}
 
+	public void acceptedIncomingChanged(boolean status) { }
 }

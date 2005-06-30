@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-
 /**
  * Settings for Music Player
  */

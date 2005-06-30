@@ -77,4 +77,5 @@ public class ActivityCallbackStub implements ActivityCallback {
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
 	}
+	public void acceptedIncomingChanged(boolean status) { }
 }

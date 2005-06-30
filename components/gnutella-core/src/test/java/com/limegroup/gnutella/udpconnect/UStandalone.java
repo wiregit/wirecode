@@ -101,8 +101,6 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
         	LOG.debug(str);
     }
 
-    private static long startTime;
-    private static long endTime;
     private static void tlogstart(String str) {
         LOG.debug("start" + str);
     }
@@ -237,7 +235,6 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 		}
 
 		public void managedRun() {
-			int rval;
 			log2("Begin read");
 
 			byte bdata[] = new byte[512];
@@ -505,4 +502,6 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
 	}
+
+	public void acceptedIncomingChanged(boolean status) { }
 }
