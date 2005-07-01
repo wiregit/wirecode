@@ -50,7 +50,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Keys/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=ОК
@@ -86,7 +86,7 @@ GENERAL_BROWSE_HOST_TIP=Види све датотеке на изабраном
 #? GENERAL_ADVANCED_SUB_MENU=
 
 ################################################################################
-# Keys/value pairs for right-click context menus.
+# Key/value pairs for right-click context menus.
 ################################################################################
 #### CONTEXT_MENU_UNDO=Undo
 CONTEXT_MENU_UNDO=Поништи посљедњу акцију
@@ -549,7 +549,31 @@ MENU_HELP_ERROR_MNEMONIC=E
 MENU_HELP_ERROR_ACCESSIBLE=Генериши грешку за тестирање.
 
 ################################################################################
-# Keys/value pairs for general tables info
+# Key/value pairs for status bar components and right-click menu
+################################################################################
+#### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality Text
+#? STATUS_BAR_SHOW_CONNECTION_QUALITY=
+#### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
+#? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
+#### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
+#? STATUS_BAR_SHOW_FIREWALL_STATUS=
+#### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
+#? STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=
+#### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
+#? STATUS_BAR_SHOW_MEDIA_PLAYER=
+#### STATUS_BAR_FIREWALL_LABEL=Firewall:
+#? STATUS_BAR_FIREWALL_LABEL=
+#### STATUS_BAR_FIREWALL_FOUND=Found
+#? STATUS_BAR_FIREWALL_FOUND=
+#### STATUS_BAR_FIREWALL_NOT_FOUND=Not Found
+#? STATUS_BAR_FIREWALL_NOT_FOUND=
+#### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
+#? STATUS_BAR_FIREWALL_FOUND_TOOLTIP=
+#### STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire has not detected a firewall
+#? STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=
+
+################################################################################
+# Key/value pairs for general tables info
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=Редови трака
@@ -559,11 +583,11 @@ TABLES_REAL_TIME_SORTING=Аутоматски извјештај
 TABLES_DISPLAY_TOOLTIPS=Проширене информације о иконама
 
 ################################################################################
-# Keys/value pairs for SearchView stuff...
+# Key/value pairs for SearchView stuff
 ################################################################################
-#### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
+#### SEARCH_NOT_CONNECTED=You are not connected to the network.  To connect, select "Connect" from the "File" menu.  Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Нисте повезани на мрежу. Да бисте се повезали, изаберите опцију "Повезивање" из менија "Датотеке". Претраживање неће функционисати док се не повежете на мрежу.
-#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
+#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network.  Your search may not return many results until you are fully connected to the network.
 SEARCH_STILL_CONNECTING=LimeWire се тренутно повезује на мрежу. Претраживање неће функционисати док се повезивање у потпуности не заврши.
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=Преузимање
@@ -623,7 +647,7 @@ SEARCH_RESULT_TABLE_LABEL=Резултати
 SEARCH_SEARCHING_LABEL=Претрага...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Једна од изабраних датотека је извршни програм
-#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
+#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus.  Are
 SEARCH_VIRUS_MSG_TWO=и постоји могућност да садржи вирус. Да ли сте
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=сигурни да желите да је преузмете?
@@ -753,7 +777,7 @@ RESULT_PANEL_ADDED=Креирано
 #### RESULT_PANEL_LICENSE=License
 RESULT_PANEL_LICENSE=Лиценца
 
-#Filter labels.
+#Filter labels
 #### SEARCH_FILTER_ALL=All
 SEARCH_FILTER_ALL=Све
 #### SEARCH_FILTER_OPTION=Option
@@ -860,7 +884,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Избаци изабрану датотеку из �
 PLAYLIST_FILE_DESCRIPTION=Датотеке са крај листама (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player...
+# Key/value pairs for the integrated media player
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
@@ -1015,49 +1039,49 @@ PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Лозинка
 STATISTICS_AVAILABLE=доступно
 #### STATISTICS_FILES=Files
 STATISTICS_FILES=датотека
+#### STATISTICS_FILES_TOOLTIP=files
+#? STATISTICS_FILES_TOOLTIP=
+#### STATISTICS_FILES_TOOLTIP_PENDING=files (Loading...)
+#? STATISTICS_FILES_TOOLTIP_PENDING=
 #### STATISTICS_DISCONNECTED=Disconnected / no files available
 STATISTICS_DISCONNECTED=Нема мреже / нема доступних датотека
-#### STATISTICS_SHARING=Sharing
-STATISTICS_SHARING=дијељењем
-#### STATISTICS_SHARING_TOOLTIP=The number of files you are sharing.
+#### STATISTICS_SHARING_TOOLTIP=You are sharing
 STATISTICS_SHARING_TOOLTIP=Број датотека које делите.
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
 STATISTICS_CONNECTION_DISCONNECTED=Нема мреже
-#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
+#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network.  To connect, choose Connect from the File menu.
 STATISTICS_CONNECTION_DISCONNECTED_TIP=Нисте повезани на мрежу. Да бисте се повезали, изаберите "Повезивање" из менија Датотеке.
-#### STATISTICS_CONNECTION_CONNECTING=Connecting
+#### STATISTICS_CONNECTION_CONNECTING=Starting
 STATISTICS_CONNECTION_CONNECTING=Повезивање у току
-#### STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
+#### STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network
 STATISTICS_CONNECTION_CONNECTING_TIP=Тренутно сте повезани на мрежу.
 #### STATISTICS_CONNECTION_POOR=Poor
 STATISTICS_CONNECTION_POOR=Слаб
-#### STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
+#### STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network
 STATISTICS_CONNECTION_POOR_TIP=Повезани сте са премало рачунара, ваша веза са мрежом је нестабилна.
 #### STATISTICS_CONNECTION_FAIR=Fair
 STATISTICS_CONNECTION_FAIR=Задовољавајући
-#### STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
+#### STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger
 STATISTICS_CONNECTION_FAIR_TIP=Ваша веза са мрежом постаје боља.
 #### STATISTICS_CONNECTION_GOOD=Good
 STATISTICS_CONNECTION_GOOD=Добар
-#### STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
+#### STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection
 STATISTICS_CONNECTION_GOOD_TIP=Још увек нисте потпуно повезани на мрежу, али имате врло добру везу.
 #### STATISTICS_CONNECTION_EXCELLENT=Excellent
 STATISTICS_CONNECTION_EXCELLENT=Одличан
-#### STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
+#### STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong
 STATISTICS_CONNECTION_EXCELLENT_TIP=Одлично сте повезани на мрежу.
 #### STATISTICS_CONNECTION_TURBO_CHARGED=Turbo-Charged
 STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
-#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience Turbo-Charged connections all the time with LimeWire PRO.
+#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience Turbo-Charged connections all the time with LimeWire PRO!
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=Ако се претплатите на LimeWire Pro, можете имати TurboCharged везу.
-#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
+#### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Повезани сте на мрежу изузетно добро.
-#### STATISTICS_CONNECTION_QUALITY=Quality:
+#### STATISTICS_CONNECTION_QUALITY=Connection:
 STATISTICS_CONNECTION_QUALITY=Квалитет везе:
-#### STATISTICS_CONNECTION_IDLE=Idle
-STATISTICS_CONNECTION_IDLE=Нема активности
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
 STATISTICS_CONNECTION_WAKING_UP=Буђење
-#### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode.
+#### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode
 STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire се буди из неактивног стања.
 
 ################################################################################
@@ -1762,7 +1786,7 @@ LIST_EDITOR_REMOVE_BUTTON=Избаци
 #? INPUT_FIELD_GENERIC_CAPTION=
 
 ################################################################################
-# Keys/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Разговор...
@@ -1776,7 +1800,7 @@ GENERAL_LAUNCH_BUTTON_TIP=Покрени датотеку.
 #? GENERAL_CLEAR_HISTORY=
 
 ################################################################################
-# Keys/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 #? CHAT_BLOCK_BUTTON_LABEL=
@@ -2273,6 +2297,8 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=Везе
 OPTIONS_CHAT_MAIN_TITLE=Разговор
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
 #? OPTIONS_PLAYER_MAIN_TITLE=
+#### OPTIONS_STATUS_BAR_MAIN_TITLE=Status Bar
+#? OPTIONS_STATUS_BAR_MAIN_TITLE=
 #### OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #? OPTIONS_ITUNES_MAIN_TITLE=
 #### OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
@@ -2469,7 +2495,7 @@ OPTIONS_SPEED_BOX_LABEL=Брзина:
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Почисти преузимања
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
 #? OPTIONS_DOWNLOAD_CLEAR_LABEL=
-#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Downloads:
+#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-Clear Completed Downloads:
 #? OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=
 
 ################################################################################
@@ -2607,6 +2633,38 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Слања брзина:
 #? OPTIONS_PLAYER_PREFERENCE_TITLE=
 #### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player.  The media player and playlist will appear only if this option is set.  A restart will be required when enabling or disabling the media controls.
 #? OPTIONS_PLAYER_PREFERENCE_LABEL=
+
+################################################################################
+# Key/Value pairs for the status bar options in the options window
+################################################################################
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Text Indicator:
+#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Connection Quality Indicator
+#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display text explaining your connection quality in the status bar.
+#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=
+#### OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Show Shared Files Indicator:
+#? OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=
+#### OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=Shared Files Indicator
+#? OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=
+#### OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=You can display how many files you are sharing in the status bar.
+#? OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=
+#### OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=Show Firewall Indicator:
+#? OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=
+#### OPTIONS_STATUS_BAR_FIREWALL_TITLE=Firewall Indicator
+#? OPTIONS_STATUS_BAR_FIREWALL_TITLE=
+#### OPTIONS_STATUS_BAR_FIREWALL_LABEL=You can display your firewall status in the status bar.
+#? OPTIONS_STATUS_BAR_FIREWALL_LABEL=
+#### OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=Show Bandwidth Indicator:
+#? OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=
+#### OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=Bandwidth Indicator
+#? OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=
+#### OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=You can display your bandwidth consumption in the status bar.
+#? OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=
+#### OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Downloads:
+#? OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=
+#### OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Uploads:
+#? OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=
 
 ################################################################################
 # Key/Value pairs for the iTunes options in the options window
