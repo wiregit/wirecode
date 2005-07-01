@@ -197,13 +197,13 @@ public final class ConnectionSettings extends LimeProps {
     public static final BooleanSetting UPNP_IN_USE =
     	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
     
-    public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
+    public static final String CONNECT_STRING_FIRST_WORD = "ZZZ";
     
     public static final StringSetting CONNECT_STRING =
-        FACTORY.createStringSetting("CONNECT_STRING", "GNUTELLA CONNECT/0.4");
+        FACTORY.createStringSetting("CONNECT_STRING", "ZZZ CONNECT/0.4");
         
     public static final StringSetting CONNECT_OK_STRING =
-        FACTORY.createStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
+        FACTORY.createStringSetting("CONNECT_OK_STRING", "ZZZ OK");
     
     /**
      * Setting for whether or not to use NIO for network IO.  This is useful,
