@@ -29,7 +29,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     private final URN urn;
     
     /** The TigerTree root for this download. */
-    private String ttRoot;
+    private final String ttRoot;
 
     /** 
      * Constructs a new downloader that's gonna work off the network.

@@ -8,11 +8,14 @@ import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -63,6 +66,11 @@ public class UpdateHandler {
     private final ProcessingQueue QUEUE = new ProcessingQueue("UpdateHandler");
     
     /**
+     * A Runnable that triggers updates.
+     */
+    private final Updater _updater = new Updater();
+    
+    /**
      * The most recent update info for this machine.
      */
     private volatile UpdateInformation _updateInfo;
@@ -103,8 +111,9 @@ public class UpdateHandler {
     private void initialize() {
         LOG.trace("Initializing UpdateHandler");
         handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+        
         // Try to update ourselves (re-use hosts for downloading, etc..)
-        // at a reasonable interval.
+        // at a specified interval.
         RouterService.schedule(new Runnable() {
             public void run() {
                 QUEUE.add(new Poller());
@@ -116,7 +125,7 @@ public class UpdateHandler {
      * Sparks off an attempt to download any pending updates.
      */
     public void tryToDownloadUpdates() {
-        QUEUE.add(new Updater());
+        QUEUE.add(_updater);
     }
     
     /**
@@ -167,10 +176,14 @@ public class UpdateHandler {
     
     /**
      * This will only return information if it was read from disk on startup
-     * and did not have a delay.
+     * and did not have a delay and there were no pending update downloads
      */
     public UpdateInformation getLatestUpdateInfo() {
-        return _updateInfo;
+        if (areUpdatesDownloaded(_updatesToDownload) && 
+                !RouterService.getDownloadManager().hasInNetworkDownload())
+            return _updateInfo;
+        
+        return null;
     }
     
     /**
@@ -195,6 +208,7 @@ public class UpdateHandler {
     
     /**
      * Stores the given data to disk & posts an update to neighboring connections.
+     * Starts the download of any updates
      */
     private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
         LOG.trace("Retrieved new data, storing & updating.");
@@ -235,13 +249,20 @@ public class UpdateHandler {
         int style = Math.min(UpdateInformation.STYLE_MAJOR,
                              UpdateSettings.UPDATE_STYLE.getValue());
         
-        UpdateInformation info = uc.getUpdateDataFor(limeV, 
-                                                     ApplicationSettings.getLanguage(),
-                                                     CommonUtils.isPro(),
-                                                     style,
-                                                     javaV);
-
-        notifyAboutInfo(uc, info, fromDisk);
+        _updateInfo = uc.getUpdateDataFor(limeV, 
+                    ApplicationSettings.getLanguage(),
+                    CommonUtils.isPro(),
+                    style,
+                    javaV);
+        
+        // if we had something to notify about, and we either
+        // didn't have anything to download, or finished the downloads (unlikely)
+        // notify the gui.
+        if(_updateInfo == null) {
+            LOG.warn("No relevant update info to notify about.");
+            return;
+        } else if (!fromDisk && areUpdatesDownloaded(_updatesToDownload)) 
+            notifyAboutInfo(uc);
     }
     
     /**
@@ -352,17 +373,18 @@ public class UpdateHandler {
             long random = Math.abs(RANDOM.nextLong() % delay);
             _nextDownloadTime = _lastTimestamp + random;
         }
-        return now < _nextDownloadTime;
+        if (LOG.isDebugEnabled())
+            LOG.debug("now is "+now+ " next time is "+_nextDownloadTime);
+        
+        return now > _nextDownloadTime;
     }
     
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(UpdateCollection uc, final UpdateInformation update, boolean fromDisk) {
-        if(update == null) {
-            LOG.warn("No relevant update info to notify about.");
-            return;
-        }
+    private void notifyAboutInfo(UpdateCollection uc) {
+        final UpdateInformation update = _updateInfo;
+        Assert.that(update != null);
         
         long now = System.currentTimeMillis();
         long delay = UpdateSettings.UPDATE_DELAY.getValue();
@@ -375,7 +397,7 @@ public class UpdateHandler {
         // or the time on the computer is hopelessly off, 
         // that being three days before the timestamp, where the timestamp
         // is supposed to be the current time of publishing, then delay. 
-        if(now < then && !(fromDisk && now+threeDays < timestamp)) {
+        if(now < then && !(now+threeDays < timestamp)) {
             if(LOG.isInfoEnabled())
                 LOG.info("Delaying Update." +
                          "\nNow    : " + now + 
@@ -387,19 +409,55 @@ public class UpdateHandler {
 
             RouterService.schedule(new Runnable() {
                 public void run() {
+                    // if we have already notified the gui, return
                     // only run if the ids weren't updated while we waited.
                     if(id == _lastId)
                         RouterService.getCallback().updateAvailable(update);
                 }
             }, then - now, 0);
+        } else             
+            RouterService.getCallback().updateAvailable(update);
+        
+    }
+    
+    /**
+     * Notifies this that an update with the given URN has finished downloading.
+     * 
+     * If we have more updates to download, we'll start the next one at
+     * a random time.
+     * 
+     * If not, we notify the gui.
+     */
+    public void inNetworkDownloadFinished(URN urn) {
+        if (!areUpdatesDownloaded(_updatesToDownload)) {
+            synchronized(this) {
+                _nextDownloadTime = 0;
+            }
         } else {
-            // If this was from the disk, store it for the GUI to pick up later.
-            if(fromDisk)
-                _updateInfo = update;
-            // Otherwise, it came while we were running -- send it off to the GUI.
+            UpdateInformation updateInfo = _updateInfo;
+            if (updateInfo != null) 
+                RouterService.getCallback().updateAvailable(updateInfo);
             else
-                RouterService.getCallback().updateAvailable(update);
+                LOG.warn("downloads finished, but no relevant update to notify");
+        } 
+    }
+    
+    /**
+     * @return whether all updates in the list have been successfully downloaded
+     */
+    private boolean areUpdatesDownloaded(List toDownload) {
+        if (toDownload == null)
+            return true;
+        
+        FileManager fm = RouterService.getFileManager();
+        for (Iterator iter = toDownload.iterator(); iter.hasNext();) {
+            DownloadInformation di = (DownloadInformation) iter.next();
+            FileDesc shared = fm.getFileDescForUrn(di.getUpdateURN());
+            if (shared == null || shared instanceof IncompleteFileDesc)
+                return false;
         }
+        
+        return true;
     }
     
     /**
@@ -439,5 +497,4 @@ public class UpdateHandler {
             },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
         }
     }
-    
 }

@@ -60,6 +60,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /** 
@@ -1521,10 +1522,17 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
+    /**
+     * Once an in-network download finishes, the UpdateHandler is notified.
+     */
     private static class InNetworkCallback implements DownloadCallback {
         public void addDownload(Downloader d) {}
-        public void removeDownload(Downloader d) {}
+        public void removeDownload(Downloader d) {
+            UpdateHandler.instance().inNetworkDownloadFinished(d.getSHA1Urn());
+        }
+        
         public void downloadsComplete() {}
+        
     	public void showDownloads() {}
     	// always discard corruption.
         public void promptAboutCorruptDownload(Downloader dloader) {
