@@ -621,7 +621,7 @@ public abstract class FileManager {
         RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
         SavedFileManager.instance().run();
-        UpdateHandler.instance().tryToUpdate();
+        UpdateHandler.instance().tryToDownloadUpdates();
         RouterService.getCallback().fileManagerLoaded();
     }
     

@@ -20,7 +20,14 @@ public class UpdateSettings extends LimeProps {
      */
     public static final LongSetting UPDATE_DOWNLOAD_DELAY =
         FACTORY.createSettableLongSetting("UPDATE_DOWNLOAD_DELAY", 60*60*1000,
-            "updateDownloadDelay", 30*60*1000, 7*60*60*1000);
+            "updateDownloadDelay", 30*60*1000, 77*60*60*1000);
+    
+    /**
+     * How often to retry download any updates.
+     */
+    public static final LongSetting UPDATE_RETRY_DELAY = 
+        FACTORY.createSettableLongSetting("UPDATE_RETRY_DELAY",30 * 60 * 1000,
+                "updateRetryDelay", 15 * 60 * 1000, 2 * 60 * 60 * 1000); 
             
     /**
      * The style of updates.

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.version;
 
 import java.io.File;
 import java.util.Random;
-import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -49,6 +47,11 @@ public class UpdateHandler {
      * The filename on disk where the public key is stored.
      */
     private static final String KEY = "version.key";
+    
+    /**
+     * init the random generator on class load time
+     */
+    private static final Random RANDOM = new Random();
     
     private static final UpdateHandler INSTANCE = new UpdateHandler();
     private UpdateHandler() { initialize(); }
@@ -84,8 +87,15 @@ public class UpdateHandler {
     
     /**
      * The timestamp of the latest update.
+     * LOCKING: this
      */
-    private volatile long _lastTimestamp;
+    private long _lastTimestamp;
+    
+    /**
+     * The next time we can make an attempt to download a pushed file.
+     * LOCKING: this 
+     */
+    private long _nextDownloadTime;
     
     /**
      * Initializes data as read from disk.
@@ -97,20 +107,16 @@ public class UpdateHandler {
         // at a reasonable interval.
         RouterService.schedule(new Runnable() {
             public void run() {
-                tryToUpdate();
+                QUEUE.add(new Poller());
             }
-        }, 30 * 60 * 1000, 0);
+        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0);
     }
     
     /**
      * Sparks off an attempt to download any pending updates.
      */
-    public void tryToUpdate() {
-        QUEUE.add(new Runnable() {
-            public void run() {
-                downloadUpdates(_updatesToDownload, null);
-            }
-        });
+    public void tryToDownloadUpdates() {
+        QUEUE.add(new Updater());
     }
     
     /**
@@ -193,7 +199,12 @@ public class UpdateHandler {
     private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
         LOG.trace("Retrieved new data, storing & updating.");
         _lastId = uc.getId();
-        _lastTimestamp = uc.getTimestamp();
+        
+        synchronized(this) {
+            _lastTimestamp = uc.getTimestamp();
+            _nextDownloadTime = 0;
+        }
+        
         _lastBytes = data;
         
         _updatesToDownload = uc.getUpdatesWithDownloadInformation();
@@ -239,7 +250,7 @@ public class UpdateHandler {
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
         if(version == _lastId)
             downloadUpdates(_updatesToDownload, rh);
-        else
+        else if (LOG.isDebugEnabled())
             LOG.debug("Another version? Me: " + version + ", here: " + _lastId);
     }
     
@@ -334,13 +345,14 @@ public class UpdateHandler {
      * Determines if we're far enough past the timestamp to start a new
      * in network download.
      */
-    private boolean canStartDownload() {
+    private synchronized boolean canStartDownload() {
         long now = System.currentTimeMillis();
-        long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
-        long random = Math.abs(new Random().nextLong() % delay);
-        long timestamp = _lastTimestamp;
-        long then = timestamp + random;
-        return now < then;
+        if (_nextDownloadTime == 0) {
+            long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
+            long random = Math.abs(RANDOM.nextLong() % delay);
+            _nextDownloadTime = _lastTimestamp + random;
+        }
+        return now < _nextDownloadTime;
     }
     
     /**
@@ -402,6 +414,30 @@ public class UpdateHandler {
      */
     private File getKeyFile() {
         return new File(CommonUtils.getUserSettingsDir(), KEY);
+    }
+    
+    /**
+     * a functor that tries to download updates once.
+     */
+    private class Updater implements Runnable {
+        public void run() {
+            downloadUpdates(_updatesToDownload, null);
+        }
+    }
+
+    /**
+     * a functor that repeatedly tries to download updates at a variable
+     * interval. 
+     */
+    private class Poller extends Updater {
+        public void run() {
+            super.run();
+            RouterService.schedule( new Runnable() {
+                public void run() {
+                    QUEUE.add(new Poller());
+                }
+            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
+        }
     }
     
 }
