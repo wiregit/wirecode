@@ -14,7 +14,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.apache.xerces.parsers.SAXParser;
 
 import com.limegroup.gnutella.ErrorService;

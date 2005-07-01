@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.version;
 
-import org.apache.commons.httpclient.URI;
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.util;
 
 import java.util.List;
 import java.util.LinkedList;
-import java.util.Collections;
 
 /**
  * A queue of items to be processed.

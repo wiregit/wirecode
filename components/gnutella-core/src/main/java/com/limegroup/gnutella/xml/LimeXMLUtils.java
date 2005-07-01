@@ -30,7 +30,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
 
@@ -728,7 +727,7 @@ public class LimeXMLUtils {
             }
             else { // need to do some mathy stuff.......
 
-                long thirds = fileLength / (long) 3;
+                long thirds = fileLength / 3;
 
                 // beginning input....
                 clearHashBytes(hashBytes);

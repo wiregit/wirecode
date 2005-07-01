@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.routing;
 
-import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -8,12 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.DataFormatException;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;

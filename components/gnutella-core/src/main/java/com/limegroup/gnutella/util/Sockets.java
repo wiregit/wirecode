@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**

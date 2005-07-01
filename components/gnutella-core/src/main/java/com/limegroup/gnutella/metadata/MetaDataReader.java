@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * Utility class that creates a <tt>LimeXMLDocument</tt> from a file.

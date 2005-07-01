@@ -7,10 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import com.jcraft.jorbis.Comment;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.IOUtils;
 

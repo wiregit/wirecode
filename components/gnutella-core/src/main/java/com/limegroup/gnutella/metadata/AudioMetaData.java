@@ -19,8 +19,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
-import com.limegroup.gnutella.licenses.CCConstants;
-
 /**
  * Encapsulates audio metadata.  Subclasses must implement parseFile.
  */

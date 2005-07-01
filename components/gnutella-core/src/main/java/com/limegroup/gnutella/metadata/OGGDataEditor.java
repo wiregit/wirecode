@@ -7,7 +7,6 @@ import java.io.IOException;
 import com.jcraft.jorbis.Comment;
 import com.jcraft.jorbis.JOrbisException;
 import com.jcraft.jorbis.VorbisFile;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 
 /**

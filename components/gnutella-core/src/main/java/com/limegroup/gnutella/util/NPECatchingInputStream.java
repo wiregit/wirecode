@@ -3,7 +3,6 @@ package com.limegroup.gnutella.util;
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * InputStream that catches NPEs from BufferedInputStream

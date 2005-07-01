@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;

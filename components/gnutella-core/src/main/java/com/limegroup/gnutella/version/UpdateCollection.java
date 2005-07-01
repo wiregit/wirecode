@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.version;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -15,11 +11,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 
 import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -188,7 +182,7 @@ class UpdateCollection {
         
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             if("msg".equals(child.getNodeName()))
                 parseMsgItem(child);
         }
@@ -286,7 +280,7 @@ class UpdateCollection {
         
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             if("lang".equals(child.getNodeName()))
                 parseLangItem((UpdateData)data.clone(), child);
         }

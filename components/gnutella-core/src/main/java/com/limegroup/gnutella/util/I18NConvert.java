@@ -2,8 +2,6 @@ package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.ErrorService;
-
 /**
  * class that handles the removal of accents, etc.
  */

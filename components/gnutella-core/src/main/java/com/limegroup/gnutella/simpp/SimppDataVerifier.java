@@ -12,7 +12,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import com.bitzi.util.Base32;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
 

@@ -7,7 +7,6 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -29,8 +28,7 @@ import java.util.List;
  * So element.attribute ==> element__attribute__
  * @author  asingla
  */
-public class XMLStringUtils
-{
+public class XMLStringUtils {
     
     /**
      * Delimiter used to preserve the structural information in the

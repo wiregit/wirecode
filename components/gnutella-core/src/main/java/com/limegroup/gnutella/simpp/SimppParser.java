@@ -2,7 +2,6 @@ package com.limegroup.gnutella.simpp;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -12,7 +11,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +51,7 @@ public class SimppParser {
             throw new SAXException("null xml for version info");
         InputSource inputSource = new InputSource(new StringReader(xmlStr));
         Document d = null;
-        synchronized(this.parser) {
+        synchronized(SimppParser.parser) {
             parser.parse(inputSource);
             d = parser.getDocument();
         }

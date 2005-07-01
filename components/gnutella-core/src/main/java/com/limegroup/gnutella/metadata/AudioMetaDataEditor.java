@@ -1,7 +1,4 @@
-
 package com.limegroup.gnutella.metadata;
-
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

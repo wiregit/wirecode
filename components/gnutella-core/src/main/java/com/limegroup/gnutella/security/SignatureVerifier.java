@@ -10,14 +10,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.File;
 
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.bitzi.util.Base32;
 
@@ -49,7 +44,7 @@ public class SignatureVerifier {
     }
     
     public String toString() {
-        String alg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
+        //String alg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
         return "text: " + new String(plainText) + ", sig: " + new String(signature) + 
                ", key: " + publicKey + ", alg: " + algorithm + ", digAlg: " + digAlg;
     }

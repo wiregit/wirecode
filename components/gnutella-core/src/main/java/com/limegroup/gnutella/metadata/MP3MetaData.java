@@ -6,7 +6,6 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.ByteOrder;
 
@@ -14,8 +13,6 @@ import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2Exception;
 import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
-
-import com.limegroup.gnutella.licenses.CCConstants;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -17,10 +16,7 @@ import java.util.Iterator;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.filters.IP;
-import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;

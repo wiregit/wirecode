@@ -3,7 +3,6 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashSet;

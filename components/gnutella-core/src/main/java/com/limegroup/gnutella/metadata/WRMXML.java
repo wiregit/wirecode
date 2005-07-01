@@ -3,12 +3,9 @@ package com.limegroup.gnutella.metadata;
 import java.io.StringReader;
 import java.io.IOException;
 import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -107,7 +104,7 @@ public class WRMXML {
         
         NodeList children = _documentNode.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             parseNode(child.getNodeName(), child);
         }
     }
@@ -121,7 +118,7 @@ public class WRMXML {
     protected void parseNode(String nodeName, Node data) {
         NodeList children = data.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
-            Node child = (Node)children.item(i);
+            Node child = children.item(i);
             parseAttributes(nodeName, child);
                         
             String name = child.getNodeName();            

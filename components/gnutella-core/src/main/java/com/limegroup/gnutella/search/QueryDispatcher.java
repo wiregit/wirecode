@@ -1,14 +1,11 @@
 package com.limegroup.gnutella.search;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
