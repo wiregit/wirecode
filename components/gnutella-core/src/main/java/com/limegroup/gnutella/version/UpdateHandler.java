@@ -355,7 +355,7 @@ public class UpdateHandler {
                                   urns,                         // urns
                                   false,                        // reply to MCast
                                   false,                        // is firewalled
-                                  "ALT",                        // vendor
+                                  "LIME",                        // vendor
                                   System.currentTimeMillis(),   // timestamp
                                   Collections.EMPTY_SET,        // push proxies
                                   0,                            // creation time
