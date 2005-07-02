@@ -1199,6 +1199,8 @@ DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Priblizite selektirane download bliže aktivnom 
 DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Udaljite selektirane download od aktivnog stanja.
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=Red čekanja
+#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file.  Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network.  Please respect your local copyright laws. 
+#? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -2495,7 +2497,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Najveći mogući broj downloada:
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Očistite downloade
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
 OPTIONS_DOWNLOAD_CLEAR_LABEL=Možete odabrati ako hoćete automatsko čišćenje potpuno završenih downloada.
-#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-Clear Completed Downloads:
+#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Clear Completed Downloads:
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Autočišćenje potpuno završenih downloada.
 
 ################################################################################

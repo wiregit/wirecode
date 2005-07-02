@@ -1199,6 +1199,8 @@ DOWNLOAD_STATUS_REMOTE_QUEUED=Zdalnie skolejkowane na pozycji
 #? DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 #? DOWNLOAD_PRIORITY_PRIORITIZE=
+#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file.  Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network.  Please respect your local copyright laws. 
+#? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -2495,7 +2497,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Pobrań maks.:
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Czyszczenie listy pobrań
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
 OPTIONS_DOWNLOAD_CLEAR_LABEL=Możesz ustalić czy chcesz automatycznie usuwać z listy ukończone pobrania.
-#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-Clear Completed Downloads:
+#### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Clear Completed Downloads:
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Automatycznie usuwaj ukończone pobrania:
 
 ################################################################################
