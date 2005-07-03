@@ -1700,6 +1700,12 @@ public class HTTPDownloader implements BandwidthTracker {
         _initialWritingPoint = start;
     }
     
+    synchronized void forgetRanges() {
+    	_initialWritingPoint = 0;
+    	_initialReadingPoint = 0;
+    	_amountToRead = 0;
+    }
+    
     ///////////////////////////// Accessors ///////////////////////////////////
 
     public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}

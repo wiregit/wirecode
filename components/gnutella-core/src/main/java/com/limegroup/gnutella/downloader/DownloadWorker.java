@@ -301,8 +301,13 @@ public class DownloadWorker implements Runnable {
                             _manager.addPossibleSources(_downloader.getLocationsReceived());
                         } finally {
                             // clear ranges did not connect
-                            if( status == null || !status.isConnected() )
-                                releaseRanges();
+                        	try {
+                        		if( status == null || !status.isConnected() )
+                        			releaseRanges();
+                        	} catch (AssertFailure bad) {
+                        		throw new AssertFailure("worker failed "+getInfo()+
+                        				" all workers: "+_manager.getWorkersInfo(),bad);
+                        	}
                         }
                 }
                 
@@ -407,12 +412,15 @@ public class DownloadWorker implements Runnable {
             return;
         _shouldRelease = false;
         
+        HTTPDownloader downloader = _downloader;
         int high, low;
-        synchronized(_downloader) {
+        synchronized(downloader) {
+        	
             // do not release ranges for downloaders that we have stolen from
             // since they are still marked as leased
-            low=_downloader.getInitialReadingPoint()+_downloader.getAmountRead();
-            high = _downloader.getInitialReadingPoint()+_downloader.getAmountToRead()-1;
+            low=downloader.getInitialReadingPoint()+downloader.getAmountRead();
+            high = downloader.getInitialReadingPoint()+downloader.getAmountToRead()-1;
+            downloader.forgetRanges();
         }
         
         if( (high-low)>=0) {//dloader failed to download a part assigned to it?
