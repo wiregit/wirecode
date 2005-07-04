@@ -585,9 +585,9 @@ TABLES_DISPLAY_TOOLTIPS=Проширене информације о икона�
 ################################################################################
 # Key/value pairs for SearchView stuff
 ################################################################################
-#### SEARCH_NOT_CONNECTED=You are not connected to the network.  To connect, select "Connect" from the "File" menu.  Your search may not return any results until you connect.
+#### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Нисте повезани на мрежу. Да бисте се повезали, изаберите опцију "Повезивање" из менија "Датотеке". Претраживање неће функционисати док се не повежете на мрежу.
-#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network.  Your search may not return many results until you are fully connected to the network.
+#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
 SEARCH_STILL_CONNECTING=LimeWire се тренутно повезује на мрежу. Претраживање неће функционисати док се повезивање у потпуности не заврши.
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=Преузимање
@@ -647,7 +647,7 @@ SEARCH_RESULT_TABLE_LABEL=Резултати
 SEARCH_SEARCHING_LABEL=Претрага...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Једна од изабраних датотека је извршни програм
-#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus.  Are
+#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
 SEARCH_VIRUS_MSG_TWO=и постоји могућност да садржи вирус. Да ли сте
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=сигурни да желите да је преузмете?
@@ -922,7 +922,7 @@ PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Лозинка
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
 #? DOWNLOADER_DIALOG_ERROR_LABEL=
 # {0} a short warning message which is localized independently
-#### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0} 
+#### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
 #? DOWNLOADER_DIALOG_WARNING_LABEL=
 # {0} the full path name of the file in question
 #### DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: A file with the same content already exists in the library at {0}
@@ -973,7 +973,7 @@ PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Лозинка
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Could not save download to the folder {0}, because you do not have write access to it.
 #? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=
 # {0} the full path name of the folder
-#### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist. 
+#### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
 #? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=
 # {0} the full path name of the folder/file
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Could not set download folder to {0}, because it represents an individual file, not a folder.
@@ -1049,7 +1049,7 @@ STATISTICS_DISCONNECTED=Нема мреже / нема доступних дат
 STATISTICS_SHARING_TOOLTIP=Број датотека које делите.
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
 STATISTICS_CONNECTION_DISCONNECTED=Нема мреже
-#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network.  To connect, choose Connect from the File menu.
+#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
 STATISTICS_CONNECTION_DISCONNECTED_TIP=Нисте повезани на мрежу. Да бисте се повезали, изаберите "Повезивање" из менија Датотеке.
 #### STATISTICS_CONNECTION_CONNECTING=Starting
 STATISTICS_CONNECTION_CONNECTING=Повезивање у току
@@ -1199,7 +1199,7 @@ DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Приближи изабрано преузим
 DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Удаљи изабрано преузимање од активног стања.
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=Стави у ред за чекање
-#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file.  Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network.  Please respect your local copyright laws. 
+#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
 #? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
 
 ###################################################################
@@ -2087,7 +2087,7 @@ ERROR_INTERNAL_OK=ОК
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
-#### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start.  This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine.  Please allow LimeWire access to the internet and restart LimeWire.
+#### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 #? ERROR_INTERNET_IS_BLOCKED=
 #### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 #? ERROR_DAAP_LOOPBACK_FAILED=
@@ -2429,7 +2429,7 @@ OPTIONS_SHARED_DIRS_BUTTON_TIP=Додај директоријум за дије
 #? OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 #? OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=
-#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders?  The following new folders will be shared:\n\n
+#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 #? OPTIONS_SHARED_NEW_SAVE_FOLDERS=
 
 ################################################################################
@@ -2633,7 +2633,7 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Слања брзина:
 #? OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_PLAYER_PREFERENCE_TITLE=Player Options
 #? OPTIONS_PLAYER_PREFERENCE_TITLE=
-#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player.  The media player and playlist will appear only if this option is set.  A restart will be required when enabling or disabling the media controls.
+#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player. The media player and playlist will appear only if this option is set. A restart will be required when enabling or disabling the media controls.
 #? OPTIONS_PLAYER_PREFERENCE_LABEL=
 
 ################################################################################
