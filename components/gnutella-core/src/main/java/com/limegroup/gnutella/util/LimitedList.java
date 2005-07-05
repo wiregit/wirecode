@@ -20,9 +20,7 @@ public class LimitedList {
     }
         
     public Object[] getAllElements() {
-        Object[] elems = new Object[_size];
-        elems = _list.toArray();
-        return elems;
+    	return _list.toArray();
     }
     
     public void print() {               
