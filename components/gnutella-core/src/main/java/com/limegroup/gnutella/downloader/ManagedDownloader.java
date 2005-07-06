@@ -756,6 +756,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private void completeDownload(int status) {
         
         boolean complete;
+        int waitTime = 0;
         // If TAD2 gave a completed state, set the state correctly & exit.
         // Otherwise...
         // If we manually stopped then set to ABORTED, else set to the 
@@ -781,6 +782,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             }
             
             complete = isCompleted();
+            waitTime = ranker.calculateWaitTime();
             ranker.stop();
         }
         
@@ -812,7 +814,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 
        // If busy, try waiting for that busy host.
         else if (getState() == BUSY)
-            setState(BUSY, ranker.calculateWaitTime());
+            setState(BUSY, waitTime);
         
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
