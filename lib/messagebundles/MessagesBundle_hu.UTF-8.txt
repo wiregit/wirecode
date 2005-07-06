@@ -1915,23 +1915,23 @@ SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Secure-settings töltése...
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_01=
-#### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
 #? SUPPORT_LIMEWIRE_02=
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 #? SUPPORT_LIMEWIRE_03=
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_04=
-#### SUPPORT_LIMEWIRE_05=Support open networks.
+#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_05=
-#### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_06=
-#### SUPPORT_LIMEWIRE_07=For Turbo-Charged Performance get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_07=
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
 #? SUPPORT_LIMEWIRE_08=
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
 #? SUPPORT_LIMEWIRE_09=
-#### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
 #? SUPPORT_LIMEWIRE_11=
 
 ################################################################################
@@ -2051,9 +2051,9 @@ MESSAGE_CONTINUE_DOWNLOAD=Folytatni akarja a letöltést?
 #? ERROR_ACCESS_DENIED_DOWNLOAD=
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 #? ERROR_ACCESS_DENIED_GENERIC=
-#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
 #? ERROR_INVALID_NAME_DOWNLOAD=
-#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 #? ERROR_INVALID_NAME_GENERIC=
 
 ################################################################################

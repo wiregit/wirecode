@@ -1915,23 +1915,23 @@ SHUTDOWN_WAIT=Molimo vas sačekajte, LimeWire se isključuje...
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=Za traženje Turbo Punjenje, kupite LimeWire Pro
-#### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
 SUPPORT_LIMEWIRE_02=Pritisnite ovdje za davanje potpore LimeWire u nastojanju za otvaranjem peer-to-peer mreže.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Kupite LimeWire Pro da nam pomognete naparaviti još brži download.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Za download Turbo Punjenje, kupite LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.
+#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Podržite otvorenu mrežu.
-#### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=Pritisnite ovdje za podršku otvorenom izvoru i otvorenom protokolu.
-#### SUPPORT_LIMEWIRE_07=For Turbo-Charged Performance get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Za izvođenje Turbo Punjenjem, kupite LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Zadržite internet otvorenim. Kupite Pro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
 SUPPORT_LIMEWIRE_09=Održavanje LimeWires košta novca. Kupite PRO
-#### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
 SUPPORT_LIMEWIRE_11=Razmjena podrške pomoći od nezavisnih medija
 
 ################################################################################
@@ -2051,9 +2051,9 @@ ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire nije bio u mogućnosti otvoriti potrebn
 ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire nije bio u mogućnosti da kreira ili da nastavi upisivanje na nekompletnim datotekama za odabrani download zato što vi nemate dozvolu za upisivanje na nepotpunim direktorijima. Za dalje korištenje LimeWire, molimo vas da odaberete drugi direktorij za pohranjivanje.
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 ERROR_ACCESS_DENIED_GENERIC=LimeWire nije bio u mogućnosti da ispiše potrebne datoteke zato što vi nemate potrebnu dozvolu za to. Vaši prioriteti možda neće biti podržani kada sljedeći put startujete LimeWire, ili će LimeWire djelovati u neočekivanom pravcu.
-#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
 ERROR_INVALID_NAME_DOWNLOAD=LimeWire nije bio u mogućnosti otvoriti nepotpunu datoteku za već odabrani download zato što ime datoteke sadrži znakove koji nisu podržani u vašem operativnom sistemu.
-#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 ERROR_INVALID_NAME_GENERIC=LimeWire ne može otvoriti potrebnu datoteku zato što ime datoteke sadrži znakove koje ne podržava vaš operativni sistem. LimeWire će u tom slučaju djelovati u neočekivanom pravcu.
 
 ################################################################################

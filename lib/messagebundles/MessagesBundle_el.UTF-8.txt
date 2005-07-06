@@ -1915,23 +1915,23 @@ SHUTDOWN_WAIT=Παρακαλώ περιμένετε, ενώ το LimeWire δια
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=Για TURBO-σύνδεση αναζητήσεις πάρτε το LimeWire Pro.
-#### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
 SUPPORT_LIMEWIRE_02=Πατήστε εδώ για να βοηθήσετε το LimeWire για την ανάπτυξη των ανοιχτών, peer-to-peer δικτύων.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Αγοράστε το LimeWire Pro, για να μας βοηθήσετε να κάνουμε ταχύτερο το κατέβασμα αρχείων.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Για TURBO-σύνδεση λήψεις, πάρτε το LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.
+#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Υποστήριξη ανοιχτών δικτύων.
-#### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=Πατήστε εδώ για να υποστηρίξετε τις ανοιχτές πηγές και τα ανοιχτά πρωτόκολλα.
-#### SUPPORT_LIMEWIRE_07=For Turbo-Charged Performance get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Για TURBO-σύνδεση απόδοση, πάρτε το LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Κρατήστε το Internet ανοιχτό. πάρτε το Pro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
 SUPPORT_LIMEWIRE_09=Η ανάπτυξη του LimeWire στοιχίζει αληθινά λεφτά. πάρτε το Pro.
-#### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
 SUPPORT_LIMEWIRE_11=Bοηθήστε την υποστήριξη του μοιράσματος των ανεξάρτητων περιεχομένων μέσα.
 
 ################################################################################
@@ -2051,9 +2051,9 @@ ERROR_LOCKED_BY_PROCESS_GENERIC=Το LimeWire αδυνατεί να ανοίξε
 ERROR_ACCESS_DENIED_DOWNLOAD=Το LimeWire αδυνατεί να δημιουργήσει ή να συνεχίσει ένα ελλιπές αρχείο για την επιλεγμένη λήψη, επειδή δεν έχετε τη δικαιοδοσία να γράψετε τα αρχεία στον κατάλογο των ανολοκλήρωτων αρχείων. Για να συνεχίσετε να χρησιμοποιείτε το LimeWire, παρακαλώ επιλέξτε ένα διαφορετικό κατάλογο αποθήκευσης αρχείων.
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 ERROR_ACCESS_DENIED_GENERIC=Το LimeWire αδυνατεί να γράψει ένα απαραίτητο αρχείο, επειδή δεν έχετε τις απαραίτητες δικαιοδοσίες. Οι προτιμήσεις σας δεν μπορούν να διατηρηθούν την επόμενη φορά που θα ανοίξετε το LimeWire, ή το LimeWire μπορεί να συμπεριφερθεί με απροσδόκητους τρόπους.
-#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
 ERROR_INVALID_NAME_DOWNLOAD=Το LimeWire αδυνατεί να ανοίξει το ελλιπές αρχείο για την επιλεγμένη λήψη, επειδή το όνομα του αρχείου περιέχει χαρακτήρες που δεν υποστηρίζονται από το λειτουργικό σας σύστημα.
-#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 ERROR_INVALID_NAME_GENERIC=Το LimeWire δεν μπορεί να ανοίξει ένα απαραίτητο αρχείο, επειδή το όνομα του αρχείου περιέχει χαρακτήρες, που δεν υποστηρίζονται από το λειτουργικό σας σύστημα. Το LimeWire μπορεί να συμπεριφερθεί με απροσδόκητους τρόπους.
 
 ################################################################################

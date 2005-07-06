@@ -1915,23 +1915,23 @@ SHUTDOWN_WAIT=Подождите, пока LimeWire завершит работ�
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=Для ТУРБО-поиска купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
 SUPPORT_LIMEWIRE_02=Щёлкните здесь, поддержите LimeWire и разработку открытых файлообменных сетей.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Купите LimeWire Pro, это поможет нам сделать загрузку ещё более быстрой.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Для ТУРБО-загрузки купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.
+#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Поддержите открытые сети.
-#### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=Щёлкните здесь, поддержите открытое ПО и открытые протоколы.
-#### SUPPORT_LIMEWIRE_07=For Turbo-Charged Performance get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Для ТУРБО-производительности купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Помогите сохранить Интернет открытым. Купите Pro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
 SUPPORT_LIMEWIRE_09=Разработка LimeWire требует денег. Купите Pro.
-#### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
 SUPPORT_LIMEWIRE_11=Поддержите файлообменные сети.
 
 ################################################################################
@@ -2051,9 +2051,9 @@ ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire не может открыть необ
 ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire не может создать или записать недозагруженный файл, так как у вас нет доступа на запись файлов в папку недозагруженных файлов. Пожалуйста, выберите другую папку для сохранения файлов.
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 ERROR_ACCESS_DENIED_GENERIC=LimeWire не может записать необходимый файл, так как у вас нет доступа на запись файлов. Ваши настройки могут быть не сохранены и LimeWire может вести себя непредсказуемо.
-#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
 ERROR_INVALID_NAME_DOWNLOAD=LimeWire не может открыть недозагруженный файл, так как имя файла содержит символы неподдерживаемые вашей операционной системой.
-#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 ERROR_INVALID_NAME_GENERIC=LimeWire не может открыть необходимый файл, так как имя файла содержит символы неподдерживаемые вашей операционной системой. LimeWire может вести себя непредсказуемо.
 
 ################################################################################
