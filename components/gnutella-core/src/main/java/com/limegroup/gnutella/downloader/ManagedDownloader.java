@@ -1398,11 +1398,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         // never add to a stopped download.
         if(stopped)
             return false;
-        
-        if(!hostIsAllowed(rfd))
+
+        if (!allowAddition(rfd))
             return false;
         
-        if (!allowAddition(rfd))
+        rfd.setDownloading(true);
+        
+        if(!hostIsAllowed(rfd))
             return false;
         
         return addDownloadForced(rfd, cache);
@@ -1456,8 +1458,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (ranker.addToPool(rfd)){
             if(LOG.isTraceEnabled())
                 LOG.trace("added rfd: " + rfd);
-            if(isInactive() || dloaderManagerThread == null)
-                receivedNewSources = true;
+            receivedNewSources = true;
         }
         
         return true;
@@ -1479,15 +1480,15 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
         
         if ( ranker.addToPool(c) ) {
-            if(isInactive() || dloaderManagerThread == null)
-                receivedNewSources = true;
+            if(LOG.isTraceEnabled())
+                LOG.trace("added rfds: " + c);
+            receivedNewSources = true;
         }
         
         return true;
     }
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
-        rfd.setDownloading(true);
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
             RouterService.getAltlocManager().addListener(downloadSHA1,this);
@@ -2421,7 +2422,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             synchronized(this) { 
                 // if everybody we know about is busy (or we don't know about anybody)
                 // and we're not downloading from anybody - terminate the download.
-                if (_workers.size() == 0 && !ranker.hasNonBusy())   {                        
+                if (_workers.size() == 0 && !ranker.hasNonBusy())   {
+                    
+                    receivedNewSources = false;
+                    
                     if ( ranker.calculateWaitTime() > 0) {
                         LOG.trace("MANAGER: terminating with busy");
                         return BUSY;

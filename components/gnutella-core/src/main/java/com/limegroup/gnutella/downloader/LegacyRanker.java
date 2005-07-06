@@ -96,10 +96,6 @@ public class LegacyRanker extends SourceRanker {
         return ret;
     }
 	
-    protected synchronized void clearState() {
-        rfds.clear();
-    }
-    
 	public boolean hasMore() {
 		return !rfds.isEmpty();
 	}

@@ -114,7 +114,7 @@ public abstract class SourceRanker {
         meshHandler = null;
     }
     
-    protected abstract void clearState();
+    protected void clearState() {}
     
     /**
      * @return a ranker appropriate for our system's capabilities.
