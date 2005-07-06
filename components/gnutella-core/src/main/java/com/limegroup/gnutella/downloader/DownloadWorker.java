@@ -305,7 +305,7 @@ public class DownloadWorker implements Runnable {
                         		if( status == null || !status.isConnected() )
                         			releaseRanges();
                         	} catch (AssertFailure bad) {
-                        		throw new AssertFailure("worker failed "+getInfo()+
+                        		throw new AssertFailure("status "+status+" worker failed "+getInfo()+
                         				" all workers: "+_manager.getWorkersInfo(),bad);
                         	}
                         }

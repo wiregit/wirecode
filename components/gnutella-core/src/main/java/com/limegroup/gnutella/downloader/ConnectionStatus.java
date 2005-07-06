@@ -228,4 +228,8 @@ public class ConnectionStatus {
             throw new IllegalStateException();
         return HASH_TREE;
     }
+
+    public String toString() {
+        return ""+getType();
+    }
 }
