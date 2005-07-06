@@ -2,13 +2,16 @@ package com.limegroup.gnutella.library;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.RandomAccess;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -102,12 +105,13 @@ class Container {
      */
     synchronized Set getSet(String name) {
         Object data = STORED.get(name);
-        if(data instanceof Set)
-            return Collections.synchronizedSet((Set)data);
-        else { // data == null || !(data instanceof Set)
-            Set set = new HashSet();
+        if (data != null) {
+        	return (Set)data;
+        }
+        else { 
+            Set set = Collections.synchronizedSet(new HashSet());
             STORED.put(name, set);
-            return Collections.synchronizedSet(set);
+            return set;
         }
     }
     
@@ -146,16 +150,18 @@ class Container {
                 Object k = next.getKey();
                 Object v = next.getValue();
                 synchronized(v) {
-                    if(v instanceof HashSet)
-                        toSave.put(k, new HashSet((HashSet)v));
-                    else if(v instanceof HashMap)
-                        toSave.put(k, new HashMap((HashMap)v));
-                    else if(v instanceof LinkedList)
-                        toSave.put(k, new LinkedList((LinkedList)v));
-                    else if(v instanceof ArrayList)
-                        toSave.put(k, new ArrayList((ArrayList)v));
-                    else if(v instanceof TreeSet)
-                        toSave.put(k, new TreeSet((TreeSet)v));
+                	if(v instanceof SortedSet)
+            			toSave.put(k, new TreeSet((SortedSet)v));
+            		else if(v instanceof Set)
+            			toSave.put(k, new HashSet((Set)v));
+            		else if(v instanceof Map)
+            			toSave.put(k, new HashMap((Map)v));
+            		else if(v instanceof List) {
+            			if (v instanceof RandomAccess)
+            				toSave.put(k, new ArrayList((List)v));
+            			else 
+            				toSave.put(k, new LinkedList((List)v));
+            		}
                     else {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Update to clone! key: " + k);
@@ -205,6 +211,33 @@ class Container {
             IOUtils.close(ois);
         }
         
-        return map != null ? map : new HashMap();
+        if (map != null) {
+        	
+        	HashMap toReturn = new HashMap(map.size());
+        	
+        	for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
+        		Map.Entry entry = (Map.Entry)i.next();
+        		Object k = entry.getKey();
+        		Object v = entry.getValue();
+        	
+        		if(v instanceof SortedSet)
+        			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet)v));
+        		else if(v instanceof Set)
+        			toReturn.put(k, Collections.synchronizedSet((Set)v));
+        		else if(v instanceof Map)
+        			toReturn.put(k, Collections.synchronizedMap((Map)v));
+        		else if(v instanceof List)
+        			toReturn.put(k, Collections.synchronizedList((List)v));
+        		else {
+        			if(LOG.isWarnEnabled())
+        				LOG.warn("Update to clone! key: " + k);
+        			toReturn.put(k, v);
+        		}
+        	}
+        	return toReturn;
+        }
+        else {
+        	return new HashMap();
+        }
     }
 }
