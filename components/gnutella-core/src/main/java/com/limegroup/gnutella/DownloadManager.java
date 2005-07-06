@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,6 +53,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -252,6 +254,21 @@ public class DownloadManager implements BandwidthTracker {
                 return true;
         }
         return false;
+    }
+    
+    /**
+     * Kills all in-network downloaders that are not present in the list of URNs
+     * @param urns a current set of urns that we are downloading in-network.
+     */
+    public synchronized void killOldInNetworkDownloaders(Collection urns) {
+        for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
+        iter.hasNext();) {
+            Downloader d = (Downloader)iter.next();
+            if (d instanceof InNetworkDownloader  && !urns.contains(d.getSHA1Urn())) {
+                d.stop();
+                iter.remove();
+            }
+        }
     }
     
     /**

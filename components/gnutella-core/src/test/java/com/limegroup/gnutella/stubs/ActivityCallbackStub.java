@@ -67,7 +67,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void handleSharedFileUpdate(File file) { }
     public void handleFileManagerEvent(FileManagerEvent evt) {}
     public void fileManagerLoaded() {}
-    public void updateAvailable(UpdateInformation uc) {}
+    public void updateAvailable(UpdateInformation uc, boolean restart) {}
     public void showError(String message, String messageKey) {}
     public boolean isQueryAlive(GUID guid) {
         return false;

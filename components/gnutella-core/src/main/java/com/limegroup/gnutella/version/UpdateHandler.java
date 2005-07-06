@@ -2,14 +2,17 @@ package com.limegroup.gnutella.version;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
+import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.ManagedConnection;
@@ -265,11 +268,15 @@ public class UpdateHandler {
         int style = Math.min(UpdateInformation.STYLE_MAJOR,
                              UpdateSettings.UPDATE_STYLE.getValue());
         
-        _updateInfo = uc.getUpdateDataFor(limeV, 
+        UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
                     CommonUtils.isPro(),
                     style,
                     javaV);
+        
+        prepareUpdateCommand(updateInfo);
+        
+        _updateInfo = updateInfo;
         
         // if we had something to notify about, and we either
         // didn't have anything to download, or finished the downloads (unlikely)
@@ -293,6 +300,29 @@ public class UpdateHandler {
     }
     
     /**
+     * replaces tokens in the update command with info about the specific system
+     * i.e. <PATH> -> C:\Documents And Settings.... 
+     */
+    private void prepareUpdateCommand(UpdateData info) {
+        String path = null;
+        String sep = File.separator;
+        String name = info.getUpdateFileName();
+        
+        try {
+            path = FileManager.PREFERENCE_SHARE.getCanonicalPath();
+        }catch (IOException bad) {
+            ErrorService.error(bad);
+            return;
+        }
+
+        String command = info.getUpdateCommand();
+        command = command.replaceAll("<PATH>",path);
+        command = command.replaceAll("<SEP>",sep);
+        command = command.replaceAll("<NAME>",name);
+        info.setUpdateCommand(command);
+    }
+    
+    /**
      * Notification that a given ReplyHandler may have an update we can use.
      */
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
@@ -307,9 +337,14 @@ public class UpdateHandler {
      */
     private void downloadUpdates(List toDownload, ReplyHandler source) {
         if(toDownload != null) {
+            DownloadManager dm = RouterService.getDownloadManager();
+            Set urns = new HashSet();
             for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
                 DownloadInformation next = (DownloadInformation)i.next();
-                DownloadManager dm = RouterService.getDownloadManager();
+                
+                if (next.getUpdateURN() != null)
+                    urns.add(next.getUpdateURN());
+                
                 FileManager fm = RouterService.getFileManager();
                 if(dm.isGUIInitd() && fm.isLoadFinished()) {
                     FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
@@ -344,6 +379,8 @@ public class UpdateHandler {
                     }
                 }
             }
+            
+            dm.killOldInNetworkDownloaders(urns);
         }
     }
     
@@ -439,11 +476,11 @@ public class UpdateHandler {
                     // if we have already notified the gui, return
                     // only run if the ids weren't updated while we waited.
                     if(id == _lastId)
-                        RouterService.getCallback().updateAvailable(update);
+                        RouterService.getCallback().updateAvailable(update, false);
                 }
             }, then - now, 0);
         } else             
-            RouterService.getCallback().updateAvailable(update);
+            RouterService.getCallback().updateAvailable(update,false);
         
     }
     
@@ -466,7 +503,7 @@ public class UpdateHandler {
         
         UpdateInformation updateInfo = _updateInfo;
         if (updateInfo != null && updateInfo.getUpdateURN().equals(urn))
-            RouterService.getCallback().updateAvailable(updateInfo);
+            RouterService.getCallback().updateAvailable(updateInfo,true);
     }
     
     /**
