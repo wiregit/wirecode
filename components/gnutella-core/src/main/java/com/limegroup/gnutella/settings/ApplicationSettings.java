@@ -61,6 +61,7 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final IntSetting APP_WIDTH =
         FACTORY.createIntSetting("APP_WIDTH", 840);
+	
     /**
 	 * The height that the application should be.
 	 */    

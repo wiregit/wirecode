@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import com.limegroup.gnutella.Assert;
 
-public abstract class AbstractNumberSetting extends Setting{
+public abstract class AbstractNumberSetting extends Setting {
 
     /**
      * Adds a safeguard against simpp making a setting take a value beyond the
