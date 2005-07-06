@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Collections;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.ManagedConnection;
@@ -16,6 +17,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -40,6 +42,9 @@ import org.apache.commons.logging.Log;
 public class UpdateHandler {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
+    
+    private static final int MIN_DOWNLOAD_ATTEMPTS = 500;
+    private static final int MIN_DOWNLOAD_TIME = 5;
 
     /**
      * The filename on disk where data is stored.
@@ -55,6 +60,11 @@ public class UpdateHandler {
      * init the random generator on class load time
      */
     private static final Random RANDOM = new Random();
+    
+    /**
+     * means to override the current time for tests
+     */
+    private static Clock clock = new Clock();
     
     private static final UpdateHandler INSTANCE = new UpdateHandler();
     private UpdateHandler() { initialize(); }
@@ -177,11 +187,17 @@ public class UpdateHandler {
     /**
      * This will only return information if it was read from disk on startup
      * and did not have a delay and there were no pending update downloads
+     * or the update downloads have failed.
      */
     public UpdateInformation getLatestUpdateInfo() {
-        if (areUpdatesDownloaded(_updatesToDownload) && 
-                !RouterService.getDownloadManager().hasInNetworkDownload())
-            return _updateInfo;
+        UpdateInformation updateInfo = _updateInfo;
+        
+        if (areUpdatesHopeless(updateInfo) ||
+                areUpdatesDownloaded(_updatesToDownload)) {
+            //TODO: determine by isMyUpdateDownloaded whether to display the 
+            // restart dialog or the url dialog
+            return updateInfo;
+        }
         
         return null;
     }
@@ -263,6 +279,17 @@ public class UpdateHandler {
             return;
         } else if (!fromDisk && areUpdatesDownloaded(_updatesToDownload)) 
             notifyAboutInfo(uc);
+        else {
+            // schedule a failover notification after a long time should the
+            // update downloads fail.
+            long delay = Math.max(0,
+                    _lastTimestamp + 
+                    MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue() -
+                    clock.now()); 
+            RouterService.schedule(new NotificationFailover(uc), 
+                    delay,
+                    10 * 60 * 1000);
+        }
     }
     
     /**
@@ -367,7 +394,7 @@ public class UpdateHandler {
      * in network download.
      */
     private synchronized boolean canStartDownload() {
-        long now = System.currentTimeMillis();
+        long now = clock.now();
         if (_nextDownloadTime == 0) {
             long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
             long random = Math.abs(RANDOM.nextLong() % delay);
@@ -386,7 +413,7 @@ public class UpdateHandler {
         final UpdateInformation update = _updateInfo;
         Assert.that(update != null);
         
-        long now = System.currentTimeMillis();
+        long now = clock.now();
         long delay = UpdateSettings.UPDATE_DELAY.getValue();
         long random = Math.abs(new Random().nextLong() % delay);
         long timestamp = uc.getTimestamp();
@@ -423,23 +450,23 @@ public class UpdateHandler {
     /**
      * Notifies this that an update with the given URN has finished downloading.
      * 
+     * If this was our update, we notify the gui.  Its ok if the user restarts
+     * as the rest of the updates will be downloaded the next session.
+     * 
      * If we have more updates to download, we'll start the next one at
      * a random time.
      * 
-     * If not, we notify the gui.
      */
     public void inNetworkDownloadFinished(URN urn) {
         if (!areUpdatesDownloaded(_updatesToDownload)) {
             synchronized(this) {
                 _nextDownloadTime = 0;
             }
-        } else {
-            UpdateInformation updateInfo = _updateInfo;
-            if (updateInfo != null) 
-                RouterService.getCallback().updateAvailable(updateInfo);
-            else
-                LOG.warn("downloads finished, but no relevant update to notify");
-        } 
+        }
+        
+        UpdateInformation updateInfo = _updateInfo;
+        if (updateInfo != null && updateInfo.getUpdateURN().equals(urn))
+            RouterService.getCallback().updateAvailable(updateInfo);
     }
     
     /**
@@ -458,6 +485,50 @@ public class UpdateHandler {
         }
         
         return true;
+    }
+    
+    /**
+     * @return whether we've given up downloading updates for this machine.
+     */
+    private boolean areUpdatesHopeless(UpdateInformation myInfo) {
+        // if we don't have any updates, we haven't given up on them
+        if (myInfo == null)
+            return false;
+        
+        // we don't give up if less than five times the initial delay has passsed
+        long now = clock.now();
+        long timeStamp;
+        synchronized(this) {
+            timeStamp = _lastTimestamp;
+        }
+        
+        if (now < 
+                timeStamp + MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
+            return false;
+            
+        // if my update is downloaded, I don't care about the rest
+        if (isMyUpdateDownloaded(myInfo))
+            return false;
+        
+        // we don't give up if we have tried to download the file less than many times
+        URN myUrn = myInfo.getUpdateURN();
+        
+        DownloadManager dm = RouterService.getDownloadManager();
+        Downloader myDownloader = dm.getDownloaderForURN(myUrn);
+        Assert.that(myDownloader instanceof InNetworkDownloader);
+        InNetworkDownloader myInDownloader = (InNetworkDownloader)myDownloader;
+        
+        return MIN_DOWNLOAD_ATTEMPTS < myInDownloader.getNumAttempts();
+    }
+    
+    private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+        FileManager fm = RouterService.getFileManager();
+        URN myUrn = myInfo.getUpdateURN();
+        FileDesc desc = fm.getFileDescForUrn(myUrn);
+        
+        if (desc == null)
+            return false;
+        return desc.getClass() == FileDesc.class;
     }
     
     /**
@@ -496,5 +567,33 @@ public class UpdateHandler {
                 }
             },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
         }
+    }
+    
+    private class NotificationFailover implements Runnable {
+        private final UpdateCollection uc;
+        private boolean shown;
+        
+        NotificationFailover(UpdateCollection uc) {
+            this.uc = uc;
+        }
+        public void run() {
+            if (shown)
+                return;
+            
+            UpdateInformation updateInfo = _updateInfo;
+            if (areUpdatesHopeless(updateInfo)) {
+                shown = true;
+                notifyAboutInfo(uc);
+            }
+        }
+    }
+}
+
+/**
+ * to be overriden in tests
+ */
+class Clock {
+    public long now() {
+        return System.currentTimeMillis();
     }
 }

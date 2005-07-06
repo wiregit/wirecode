@@ -30,6 +30,9 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     
     /** The TigerTree root for this download. */
     private final String ttRoot;
+    
+    /** The number of times we have attempted this download */
+    private int downloadAttempts;
 
     /** 
      * Constructs a new downloader that's gonna work off the network.
@@ -78,6 +81,11 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         }
     }
     
+    public synchronized void startDownload() {
+        downloadAttempts++;
+        super.startDownload();
+    }
+    
     /**
      * Ensures that the VerifyingFile knows what TTRoot we're expecting.
      */
@@ -103,5 +111,12 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         QueryRequest qr = newRequery(numRequeries);
         qr.setTTL((byte)2);
         return qr;
+    }
+    
+    /**
+     * @return how many times was this download attempted
+     */
+    public synchronized int getNumAttempts() {
+        return downloadAttempts;
     }
 }
