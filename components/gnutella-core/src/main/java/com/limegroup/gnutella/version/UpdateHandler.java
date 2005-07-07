@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.List;
 import java.util.Iterator;
@@ -282,8 +283,9 @@ public class UpdateHandler {
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
-        if (updateInfo != null && updatesToDownload.remove(updateInfo)) {
+        if (updateInfo != null && updatesToDownload.contains(updateInfo)) {
             prepareUpdateCommand(updateInfo);
+            updatesToDownload = new LinkedList(updatesToDownload);
             updatesToDownload.add(0,updateInfo);
         }
         
