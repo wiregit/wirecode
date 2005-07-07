@@ -93,5 +93,4 @@ public class DownloadSettings extends LimeProps {
         FACTORY.createSettableStringArraySetting("PREVIEWABLE_EXTENSIONS", 
                 defaultPreviewableExtensions,
                 "PREVIEWABLE_EXTENSIONS");
-        
 }
