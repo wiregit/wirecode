@@ -76,12 +76,6 @@ public class DownloadSettings extends LimeProps {
     public static final IntSetting WORKER_INTERVAL =
         FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",20000,1);
     
-	/**
-	 * Initial warning for first download.
-	 */
-	public static final IntSetting SHOW_FIRST_DOWNLOAD_WARNING =
-		FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", -10);
-	
     /**
      * Use a download SelectionStrategy tailored for previewing if the file's extension is
      * in this list.

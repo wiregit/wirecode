@@ -126,4 +126,10 @@ public class QuestionsHandler extends AbstractSettings {
 	 */
 	public static final BooleanSetting FIREWALLED_MAGNET_LINK = 
 		FACTORY.createBooleanSetting("FIREWALLED_MAGNET_LINK", false);
+
+    /**
+     * Initial warning for first download.
+     */
+    public static final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
+        FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
 }
