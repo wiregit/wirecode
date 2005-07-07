@@ -189,20 +189,27 @@ public class UpdateHandler {
     
     /**
      * This will only return information if it was read from disk on startup
-     * and did not have a delay and there were no pending update downloads
-     * or the update downloads have failed.
+     * and did not have a delay or the update downloads have failed.
      */
     public UpdateInformation getLatestUpdateInfo() {
+        // kill any hopeless updates
+        killHopelessUpdates(_updatesToDownload);
+        
         UpdateInformation updateInfo = _updateInfo;
         
-        if (areUpdatesHopeless(updateInfo) ||
-                areUpdatesDownloaded(_updatesToDownload)) {
-            //TODO: determine by isMyUpdateDownloaded whether to display the 
-            // restart dialog or the url dialog
-            return updateInfo;
-        }
+        // if we have no pending updates for us, we're ok.
+        if (updateInfo == null)
+            return null;
         
-        return null;
+        // if my update is downloaded, we notify the gui regardless of state of other updates
+        if (isMyUpdateDownloaded(updateInfo)) 
+            return updateInfo;
+        
+        // if we still have any in-network downloads, we do not notify
+        if (RouterService.getDownloadManager().hasInNetworkDownload())
+            return null;
+        else
+            return updateInfo;
     }
     
     /**
@@ -240,9 +247,6 @@ public class UpdateHandler {
         
         _lastBytes = data;
         
-        _updatesToDownload = uc.getUpdatesWithDownloadInformation();
-        downloadUpdates(_updatesToDownload, null);
-        
         if(!fromDisk) {
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
             CapabilitiesVM.reconstructInstance();
@@ -273,10 +277,21 @@ public class UpdateHandler {
                     CommonUtils.isPro(),
                     style,
                     javaV);
+
+        List updatesToDownload = uc.getUpdatesWithDownloadInformation();
         
-        prepareUpdateCommand(updateInfo);
+        // if we have an update for our machine, prepare the command line
+        // and move our update to the front of the list of updates
+        if (updateInfo != null) {
+            prepareUpdateCommand(updateInfo);
+            Assert.that(updatesToDownload.remove(updateInfo));
+            updatesToDownload.add(0,updateInfo);
+        }
         
         _updateInfo = updateInfo;
+        _updatesToDownload = updatesToDownload;
+        
+        downloadUpdates(updatesToDownload, null);
         
         // if we had something to notify about, and we either
         // didn't have anything to download, or finished the downloads (unlikely)
@@ -284,7 +299,7 @@ public class UpdateHandler {
         if(_updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (!fromDisk && areUpdatesDownloaded(_updatesToDownload)) 
+        } else if (!fromDisk && areUpdatesDownloaded(updatesToDownload)) 
             notifyAboutInfo(uc);
         else {
             // schedule a failover notification after a long time should the
@@ -365,7 +380,7 @@ public class UpdateHandler {
                     if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
                         LOG.debug("Starting a new InNetwork Download");
                         try {
-                            md = (ManagedDownloader)dm.download(next);
+                            md = (ManagedDownloader)dm.download(next, clock.now());
                         } catch(SaveLocationException sle) {
                             LOG.error("Unable to construct download", sle);
                         }
@@ -509,7 +524,7 @@ public class UpdateHandler {
     /**
      * @return whether all updates in the list have been successfully downloaded
      */
-    private boolean areUpdatesDownloaded(List toDownload) {
+    private static boolean areUpdatesDownloaded(List toDownload) {
         if (toDownload == null)
             return true;
         
@@ -525,40 +540,42 @@ public class UpdateHandler {
     }
     
     /**
-     * @return whether we've given up downloading updates for this machine.
+     * @return whether we killed any hopeless update downloads
      */
-    private boolean areUpdatesHopeless(UpdateInformation myInfo) {
-        // if we don't have any updates, we haven't given up on them
-        if (myInfo == null)
-            return false;
-        
-        // we don't give up if less than five times the initial delay has passsed
-        long now = clock.now();
-        long timeStamp;
-        synchronized(this) {
-            timeStamp = _lastTimestamp;
-        }
-        
-        if (now < 
-                timeStamp + MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
-            return false;
-            
-        // if my update is downloaded, I don't care about the rest
-        if (isMyUpdateDownloaded(myInfo))
-            return false;
-        
-        // we don't give up if we have tried to download the file less than many times
-        URN myUrn = myInfo.getUpdateURN();
+    private static void killHopelessUpdates(List updates) {
         
         DownloadManager dm = RouterService.getDownloadManager();
-        Downloader myDownloader = dm.getDownloaderForURN(myUrn);
-        Assert.that(myDownloader instanceof InNetworkDownloader);
-        InNetworkDownloader myInDownloader = (InNetworkDownloader)myDownloader;
+        if (!dm.hasInNetworkDownload())
+            return;
         
-        return MIN_DOWNLOAD_ATTEMPTS < myInDownloader.getNumAttempts();
+        long now = clock.now();
+        for (Iterator iter = updates.iterator(); iter.hasNext();) {
+            DownloadInformation info = (DownloadInformation) iter.next();
+            Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
+            if (downloader != null) {
+                InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
+                if (isHopeless(iDownloader, now)) 
+                    iDownloader.stop();
+            }
+        }
     }
     
-    private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+    /**
+     * @param now what time is it now
+     * @return whether the in-network downloader is considered hopeless
+     */
+    private static boolean isHopeless(InNetworkDownloader downloader, long now) {
+        if (now - downloader.getStartTime() < 
+                MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
+            return false;
+        
+        if (downloader.getNumAttempts() < MIN_DOWNLOAD_ATTEMPTS)
+            return false;
+        
+        return true;
+    }
+    
+    public static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
         FileManager fm = RouterService.getFileManager();
         URN myUrn = myInfo.getUpdateURN();
         FileDesc desc = fm.getFileDescForUrn(myUrn);
@@ -613,15 +630,15 @@ public class UpdateHandler {
         NotificationFailover(UpdateCollection uc) {
             this.uc = uc;
         }
+        
         public void run() {
+            killHopelessUpdates(_updatesToDownload);
+            
             if (shown)
                 return;
             
-            UpdateInformation updateInfo = _updateInfo;
-            if (areUpdatesHopeless(updateInfo)) {
-                shown = true;
-                notifyAboutInfo(uc);
-            }
+            shown = true;            
+            notifyAboutInfo(uc);
         }
     }
 }

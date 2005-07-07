@@ -33,13 +33,17 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     
     /** The number of times we have attempted this download */
     private int downloadAttempts;
+    
+    /** The time we created this download */
+    private final long startTime;
 
     /** 
      * Constructs a new downloader that's gonna work off the network.
      */
     public InNetworkDownloader(IncompleteFileManager incompleteFileManager,
                                DownloadInformation info,
-                               File dir) throws SaveLocationException {
+                               File dir,
+                               long startTime) throws SaveLocationException {
         super( new RemoteFileDesc[0], incompleteFileManager,
                null, dir, info.getUpdateFileName(), true);
         if(info.getSize() > Integer.MAX_VALUE)
@@ -48,6 +52,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         this.size = info.getSize();
         this.urn = info.getUpdateURN();
         this.ttRoot = info.getTTRoot();
+        this.startTime = startTime;
     }    
     
     /**
@@ -118,5 +123,9 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      */
     public synchronized int getNumAttempts() {
         return downloadAttempts;
+    }
+    
+    public long getStartTime() {
+        return startTime;
     }
 }

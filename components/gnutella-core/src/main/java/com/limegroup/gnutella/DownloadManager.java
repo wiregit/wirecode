@@ -264,10 +264,8 @@ public class DownloadManager implements BandwidthTracker {
         for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
         iter.hasNext();) {
             Downloader d = (Downloader)iter.next();
-            if (d instanceof InNetworkDownloader  && !urns.contains(d.getSHA1Urn())) {
+            if (d instanceof InNetworkDownloader  && !urns.contains(d.getSHA1Urn())) 
                 d.stop();
-                iter.remove();
-            }
         }
     }
     
@@ -695,7 +693,7 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * Downloads an InNetwork update, using the info from the DownloadInformation.
      */
-    public synchronized Downloader download(DownloadInformation info) throws SaveLocationException {
+    public synchronized Downloader download(DownloadInformation info, long now) throws SaveLocationException {
         File dir = FileManager.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
@@ -703,7 +701,7 @@ public class DownloadManager implements BandwidthTracker {
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge(false);
-        ManagedDownloader d = new InNetworkDownloader(incompleteFileManager, info, dir);
+        ManagedDownloader d = new InNetworkDownloader(incompleteFileManager, info, dir, now);
         initializeDownload(d);
         return d;
     }
