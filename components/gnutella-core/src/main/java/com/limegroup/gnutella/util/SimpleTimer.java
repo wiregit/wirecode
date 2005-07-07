@@ -22,7 +22,7 @@ public class SimpleTimer {
     /**
      * Whether or not we actively cancelled the timer.
      */
-    private volatile boolean cancelled = true;
+    private volatile boolean cancelled = false;
     
     /**
      * Creates a new active SimpleTimer with a callback for internal errors.
