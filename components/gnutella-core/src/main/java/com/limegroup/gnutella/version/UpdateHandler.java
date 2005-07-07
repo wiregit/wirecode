@@ -282,9 +282,8 @@ public class UpdateHandler {
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
-        if (updateInfo != null) {
+        if (updateInfo != null && updatesToDownload.remove(updateInfo)) {
             prepareUpdateCommand(updateInfo);
-            Assert.that(updatesToDownload.remove(updateInfo));
             updatesToDownload.add(0,updateInfo);
         }
         
@@ -294,12 +293,12 @@ public class UpdateHandler {
         downloadUpdates(updatesToDownload, null);
         
         // if we had something to notify about, and we either
-        // didn't have anything to download, or finished the downloads (unlikely)
+        // didn't have anything to download, or finished the download for myself (unlikely)
         // notify the gui.
         if(_updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (!fromDisk && areUpdatesDownloaded(updatesToDownload)) 
+        } else if (!fromDisk && isMyUpdateDownloaded(_updateInfo)) 
             notifyAboutInfo(uc);
         else {
             // schedule a failover notification after a long time should the
@@ -318,7 +317,10 @@ public class UpdateHandler {
      * replaces tokens in the update command with info about the specific system
      * i.e. <PATH> -> C:\Documents And Settings.... 
      */
-    private void prepareUpdateCommand(UpdateData info) {
+    private static void prepareUpdateCommand(UpdateData info) {
+        if (info == null || info.getUpdateCommand() == null)
+            return;
+        
         String path = null;
         String sep = File.separator;
         String name = info.getUpdateFileName();
@@ -574,10 +576,17 @@ public class UpdateHandler {
         
         return true;
     }
-    
+
+    /**
+     * @return true if the update for our specific machine is downloaded or
+     * there was nothing to download
+     */
     public static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
         FileManager fm = RouterService.getFileManager();
         URN myUrn = myInfo.getUpdateURN();
+        if (myUrn == null)
+            return true;
+        
         FileDesc desc = fm.getFileDescForUrn(myUrn);
         
         if (desc == null)
