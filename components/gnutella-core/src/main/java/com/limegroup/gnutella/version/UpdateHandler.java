@@ -51,6 +51,9 @@ public class UpdateHandler {
     private static final int MIN_DOWNLOAD_ATTEMPTS = 500;
     private static final int MIN_DOWNLOAD_TIME = 5;
 
+    
+    private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    
     /**
      * The filename on disk where data is stored.
      */
@@ -119,6 +122,11 @@ public class UpdateHandler {
      * LOCKING: this 
      */
     private long _nextDownloadTime;
+    
+    /**
+     * The time we'll notify the gui about an update with URL
+     */
+    private volatile long _nextNotificationTime;
     
     /**
      * Initializes data as read from disk.
@@ -191,27 +199,39 @@ public class UpdateHandler {
     
     /**
      * This will only return information if it was read from disk on startup
-     * and did not have a delay or the update downloads have failed.
+     * and did not have a delay or the update downloads have failed or 
      */
     public UpdateInformation getLatestUpdateInfo() {
-        // kill any hopeless updates
-        killHopelessUpdates(_updatesToDownload);
         
         UpdateInformation updateInfo = _updateInfo;
         
         // if we have no pending updates for us, we're ok.
-        if (updateInfo == null)
+        if (updateInfo == null) 
             return null;
         
-        // if my update is downloaded, we notify the gui regardless of state of other updates
-        if (isMyUpdateDownloaded(updateInfo)) 
+        // if we have an update but nothing to download, possibly show
+        if (updateInfo.getUpdateURN() == null && clock.now() > _nextNotificationTime) 
             return updateInfo;
         
-        // if we still have any in-network downloads, we do not notify
-        if (RouterService.getDownloadManager().hasInNetworkDownload())
-            return null;
-        else
-            return updateInfo;
+        DownloadManager dm = RouterService.getDownloadManager();
+        FileManager fm = RouterService.getFileManager();
+        
+        if (dm.isGUIInitd() && fm.isLoadFinished()) {
+            // kill any hopeless updates
+            killHopelessUpdates(_updatesToDownload);
+            
+            // if my update is downloaded, we notify the gui regardless of state of other updates
+            if (isMyUpdateDownloaded(updateInfo)) 
+                return updateInfo;
+            
+            // if we still have any in-network downloads, we do not notify
+            if (RouterService.getDownloadManager().hasInNetworkDownload())
+                return null;
+            else
+                return updateInfo;
+        }
+        
+        return null;
     }
     
     /**
@@ -290,6 +310,9 @@ public class UpdateHandler {
             updatesToDownload.add(0,updateInfo);
         }
         
+        
+        long now = clock.now();
+        _nextNotificationTime = now + Math.max(0,delay(now, uc.getTimestamp()));
         _updateInfo = updateInfo;
         _updatesToDownload = updatesToDownload;
         
@@ -306,10 +329,9 @@ public class UpdateHandler {
         else {
             // schedule a failover notification after a long time should the
             // update downloads fail.
-            long delay = Math.max(0,
+            long delay = Math.max(_nextNotificationTime - now,
                     _lastTimestamp + 
-                    MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue() -
-                    clock.now()); 
+                    MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue() - now);
             RouterService.schedule(new NotificationFailover(uc), 
                     delay,
                     10 * 60 * 1000);
@@ -461,42 +483,53 @@ public class UpdateHandler {
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(UpdateCollection uc) {
+    private void notifyAboutInfo(final UpdateCollection uc) {
         final UpdateInformation update = _updateInfo;
         Assert.that(update != null);
         
-        long now = clock.now();
-        long delay = UpdateSettings.UPDATE_DELAY.getValue();
-        long random = Math.abs(new Random().nextLong() % delay);
-        long timestamp = uc.getTimestamp();
-        long then = timestamp + random;
-        long threeDays = 1000 * 60 * 60 * 24 * 3;
-        final int id = uc.getId();
+        long delay = _nextNotificationTime - clock.now();
+        
         // If now is before the time we can show it, 
         // or the time on the computer is hopelessly off, 
         // that being three days before the timestamp, where the timestamp
         // is supposed to be the current time of publishing, then delay. 
-        if(now < then && !(now+threeDays < timestamp)) {
-            if(LOG.isInfoEnabled())
-                LOG.info("Delaying Update." +
-                         "\nNow    : " + now + 
-                         "\nStamp  : " + timestamp +
-                         "\nDelay  : " + delay + 
-                         "\nRandom : " + random + 
-                         "\nThen   : " + then +
-                         "\nDiff   : " + (then-now));
-
+        if(delay > 0) {
             RouterService.schedule(new Runnable() {
                 public void run() {
                     // if we have already notified the gui, return
                     // only run if the ids weren't updated while we waited.
-                    if(id == _lastId)
+                    if(uc.getId() == _lastId)
                         RouterService.getCallback().updateAvailable(update, false);
                 }
-            }, then - now, 0);
+            }, delay , 0);
         } else             
             RouterService.getCallback().updateAvailable(update,false);
         
+    }
+    
+    /**
+     * @return calculates a random delay after the timestamp, unless the timestamp
+     * is more than 3 days in the future.
+     */
+    private static long delay(long now, long timestamp) {
+        if (timestamp - now > THREE_DAYS)
+            return 0;
+        
+        long delay = UpdateSettings.UPDATE_DELAY.getValue();
+        long random = Math.abs(new Random().nextLong() % delay);
+        long then = timestamp + random;
+        
+        if(LOG.isInfoEnabled()) {
+            LOG.info("Delaying Update." +
+                     "\nNow    : " + now + 
+                     "\nStamp  : " + timestamp +
+                     "\nDelay  : " + delay + 
+                     "\nRandom : " + random + 
+                     "\nThen   : " + then +
+                     "\nDiff   : " + (then-now));
+        }
+
+        return then - now;
     }
     
     /**
