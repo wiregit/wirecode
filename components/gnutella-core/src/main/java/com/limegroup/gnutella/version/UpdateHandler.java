@@ -283,7 +283,7 @@ public class UpdateHandler {
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
-        if (updateInfo != null && updateInfo.getUpdateURN() != null)) {
+        if (updateInfo != null && updateInfo.getUpdateURN() != null) {
             prepareUpdateCommand(updateInfo);
             updatesToDownload = new LinkedList(updatesToDownload);
             updatesToDownload.add(0,updateInfo);
