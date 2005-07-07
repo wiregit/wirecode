@@ -84,11 +84,6 @@ public class UpdateHandler {
     private final ProcessingQueue QUEUE = new ProcessingQueue("UpdateHandler");
     
     /**
-     * A Runnable that triggers updates.
-     */
-    private final Updater _updater = new Updater();
-    
-    /**
      * The most recent update info for this machine.
      */
     private volatile UpdateInformation _updateInfo;
@@ -124,16 +119,24 @@ public class UpdateHandler {
     private long _nextDownloadTime;
     
     /**
+     * whether the current updates need to be cleared
+     */
+    private boolean _updatesNeedClearing;
+    
+    /**
      * The time we'll notify the gui about an update with URL
      */
-    private volatile long _nextNotificationTime;
     
     /**
      * Initializes data as read from disk.
      */
     private void initialize() {
         LOG.trace("Initializing UpdateHandler");
-        handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+        QUEUE.add(new Runnable() {
+            public void run() {
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+            }
+        });
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
@@ -148,7 +151,14 @@ public class UpdateHandler {
      * Sparks off an attempt to download any pending updates.
      */
     public void tryToDownloadUpdates() {
-        QUEUE.add(_updater);
+        QUEUE.add(new Runnable() {
+            public void run() {
+                UpdateInformation updateInfo = _updateInfo;
+                if (isMyUpdateDownloaded(updateInfo))
+                    RouterService.getCallback().updateAvailable(updateInfo);
+                downloadUpdates(_updatesToDownload, null);
+            }
+        });
     }
     
     /**
@@ -198,43 +208,6 @@ public class UpdateHandler {
     }
     
     /**
-     * This will only return information if it was read from disk on startup
-     * and did not have a delay or the update downloads have failed or 
-     */
-    public UpdateInformation getLatestUpdateInfo() {
-        
-        UpdateInformation updateInfo = _updateInfo;
-        
-        // if we have no pending updates for us, we're ok.
-        if (updateInfo == null) 
-            return null;
-        
-        // if we have an update but nothing to download, possibly show
-        if (updateInfo.getUpdateURN() == null && clock.now() > _nextNotificationTime) 
-            return updateInfo;
-        
-        DownloadManager dm = RouterService.getDownloadManager();
-        FileManager fm = RouterService.getFileManager();
-        
-        if (dm.isGUIInitd() && fm.isLoadFinished()) {
-            // kill any hopeless updates
-            killHopelessUpdates(_updatesToDownload);
-            
-            // if my update is downloaded, we notify the gui regardless of state of other updates
-            if (isMyUpdateDownloaded(updateInfo)) 
-                return updateInfo;
-            
-            // if we still have any in-network downloads, we do not notify
-            if (RouterService.getDownloadManager().hasInNetworkDownload())
-                return null;
-            else
-                return updateInfo;
-        }
-        
-        return null;
-    }
-    
-    /**
      * Handles processing a newly arrived message.
      *
      * (Processes the data immediately.)
@@ -262,10 +235,10 @@ public class UpdateHandler {
         LOG.trace("Retrieved new data, storing & updating.");
         _lastId = uc.getId();
         
-        synchronized(this) {
-            _lastTimestamp = uc.getTimestamp();
-            _nextDownloadTime = 0;
-        }
+        _lastTimestamp = uc.getTimestamp();
+        long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
+        long random = Math.abs(RANDOM.nextLong() % delay);
+        _nextDownloadTime = _lastTimestamp + random;
         
         _lastBytes = data;
         
@@ -310,32 +283,22 @@ public class UpdateHandler {
             updatesToDownload.add(0,updateInfo);
         }
         
-        
-        long now = clock.now();
-        _nextNotificationTime = now + Math.max(0,delay(now, uc.getTimestamp()));
         _updateInfo = updateInfo;
         _updatesToDownload = updatesToDownload;
+        _updatesNeedClearing = true;
         
         downloadUpdates(updatesToDownload, null);
         
-        // if we had something to notify about, and we either
-        // didn't have anything to download, or finished the download for myself (unlikely)
-        // notify the gui.
-        if(_updateInfo == null) {
+        if(updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (!fromDisk && isMyUpdateDownloaded(_updateInfo)) 
-            notifyAboutInfo(uc.getId());
-        else {
-            // schedule a failover notification after a long time should the
-            // update downloads fail or after we reach the notification time
-            long delay = Math.max(_nextNotificationTime - now,
-                    _lastTimestamp + 
-                    MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue() - now);
-            RouterService.schedule(new NotificationFailover(uc.getId()), 
-                    delay,
+        } else if (updateInfo.getUpdateURN() == null) {
+            LOG.debug("we have an update, but it doesn't need a download.  Scheduling...");
+            RouterService.schedule(new NotificationFailover(_lastId),
+                    delay(clock.now(), uc.getTimestamp()),
                     0);
-        }
+        } else 
+            LOG.debug("we have an update, it needs a download.  Rely on callbacks");
     }
     
     /**
@@ -373,52 +336,60 @@ public class UpdateHandler {
      * Tries to download updates.
      */
     private void downloadUpdates(List toDownload, ReplyHandler source) {
-        if(toDownload != null) {
-            DownloadManager dm = RouterService.getDownloadManager();
-            Set urns = new HashSet();
-            for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
-                DownloadInformation next = (DownloadInformation)i.next();
+        if (toDownload == null)
+            toDownload = Collections.EMPTY_LIST;
+        
+        DownloadManager dm = RouterService.getDownloadManager();
+        
+        
+        for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
+            DownloadInformation next = (DownloadInformation)i.next();
+            
+            FileManager fm = RouterService.getFileManager();
+            if(dm.isGUIInitd() && fm.isLoadFinished()) {
                 
-                if (next.getUpdateURN() != null)
-                    urns.add(next.getUpdateURN());
+                if (_updatesNeedClearing) {
+                    _updatesNeedClearing = false;
+                    dm.killDownloadersNotListed(toDownload);
+                }
                 
-                FileManager fm = RouterService.getFileManager();
-                if(dm.isGUIInitd() && fm.isLoadFinished()) {
-                    FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
-                    ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Looking for: " + next + ", got: " + shared);
-                        
-                    if(shared != null && shared.getClass() == FileDesc.class) {
-                        // if it's already shared, stop any existing download.
-                        if(md != null)
-                            md.stop();
-                        continue;
-                    }
-                    
-                    // If we don't have an existing download ...
-                    // and there's no existing InNetwork downloads & 
-                    // we're allowed to start a new one.
-                    if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
-                        LOG.debug("Starting a new InNetwork Download");
-                        try {
-                            md = (ManagedDownloader)dm.download(next, clock.now());
-                        } catch(SaveLocationException sle) {
-                            LOG.error("Unable to construct download", sle);
-                        }
-                    }
-                    
-                    if(md != null) {
-                        if(source != null)
-                            md.addDownload(rfd(source, next), false);
-                        else
-                            addCurrentDownloadSources(md, next);
+                String urn = next.getUpdateURN().httpStringValue();
+                if (UpdateSettings.FAILED_UPDATES.contains(urn))
+                    continue;
+                
+                FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
+                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Looking for: " + next + ", got: " + shared);
+                
+                if(shared != null && shared.getClass() == FileDesc.class) {
+                    // if it's already shared, stop any existing download.
+                    if(md != null)
+                        md.stop();
+                    continue;
+                }
+                
+                // If we don't have an existing download ...
+                // and there's no existing InNetwork downloads & 
+                // we're allowed to start a new one.
+                if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
+                    LOG.debug("Starting a new InNetwork Download");
+                    try {
+                        md = (ManagedDownloader)dm.download(next, clock.now());
+                    } catch(SaveLocationException sle) {
+                        LOG.error("Unable to construct download", sle);
                     }
                 }
+                
+                if(md != null) {
+                    if(source != null)
+                        md.addDownload(rfd(source, next), false);
+                    else
+                        addCurrentDownloadSources(md, next);
+                }
             }
-            
-            dm.killOldInNetworkDownloaders(urns);
         }
+        
     }
     
     /**
@@ -467,13 +438,9 @@ public class UpdateHandler {
      * Determines if we're far enough past the timestamp to start a new
      * in network download.
      */
-    private synchronized boolean canStartDownload() {
+    private boolean canStartDownload() {
         long now = clock.now();
-        if (_nextDownloadTime == 0) {
-            long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
-            long random = Math.abs(RANDOM.nextLong() % delay);
-            _nextDownloadTime = _lastTimestamp + random;
-        }
+        
         if (LOG.isDebugEnabled())
             LOG.debug("now is "+now+ " next time is "+_nextDownloadTime);
         
@@ -490,15 +457,7 @@ public class UpdateHandler {
         UpdateInformation update = _updateInfo;
         Assert.that(update != null);
         
-        long delay = _nextNotificationTime - clock.now();
-        
-        // if we still haven't reached the notification time, schedule another
-        // notification failover
-        if(delay > 0) 
-            RouterService.schedule(new NotificationFailover(id), delay , 0);
-        else             
-            RouterService.getCallback().updateAvailable(update,false);
-        
+        RouterService.getCallback().updateAvailable(update);
     }
     
     /**
@@ -531,39 +490,28 @@ public class UpdateHandler {
      * 
      * If this was our update, we notify the gui.  Its ok if the user restarts
      * as the rest of the updates will be downloaded the next session.
-     * 
-     * If we have more updates to download, we'll start the next one at
-     * a random time.
-     * 
      */
-    public void inNetworkDownloadFinished(URN urn) {
-        if (!areUpdatesDownloaded(_updatesToDownload)) {
-            synchronized(this) {
-                _nextDownloadTime = 0;
+    public void inNetworkDownloadFinished(final URN urn, final boolean good) {
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                UpdateData updateInfo = (UpdateData) _updateInfo;
+                if (updateInfo != null && updateInfo.getUpdateURN().equals(urn)) {
+                    if (!good) {
+                        // add it to the list of failed urns
+                        UpdateSettings.FAILED_UPDATES.add(urn.httpStringValue());
+                        
+                        // register a notification to the user later on.
+                        updateInfo.setUpdateCommand(null);
+                        long delay = delay(clock.now(),_lastTimestamp);
+                        RouterService.schedule(new NotificationFailover(_lastId),delay,0);
+                    } else
+                        RouterService.getCallback().updateAvailable(updateInfo);
+                }
             }
-        }
+        };
         
-        UpdateInformation updateInfo = _updateInfo;
-        if (updateInfo != null && updateInfo.getUpdateURN().equals(urn))
-            RouterService.getCallback().updateAvailable(updateInfo,true);
-    }
-    
-    /**
-     * @return whether all updates in the list have been successfully downloaded
-     */
-    private static boolean areUpdatesDownloaded(List toDownload) {
-        if (toDownload == null)
-            return true;
-        
-        FileManager fm = RouterService.getFileManager();
-        for (Iterator iter = toDownload.iterator(); iter.hasNext();) {
-            DownloadInformation di = (DownloadInformation) iter.next();
-            FileDesc shared = fm.getFileDescForUrn(di.getUpdateURN());
-            if (shared == null || shared instanceof IncompleteFileDesc)
-                return false;
-        }
-        
-        return true;
+        QUEUE.add(r);
     }
     
     /**
@@ -581,7 +529,7 @@ public class UpdateHandler {
             Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
             if (downloader != null) {
                 InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
-                if (isHopeless(iDownloader, now)) 
+                if (isHopeless(iDownloader, now))  
                     iDownloader.stop();
             }
         }
@@ -633,22 +581,16 @@ public class UpdateHandler {
         return new File(CommonUtils.getUserSettingsDir(), KEY);
     }
     
-    /**
-     * a functor that tries to download updates once.
-     */
-    private class Updater implements Runnable {
-        public void run() {
-            downloadUpdates(_updatesToDownload, null);
-        }
-    }
 
     /**
      * a functor that repeatedly tries to download updates at a variable
      * interval. 
      */
-    private class Poller extends Updater {
+    private class Poller implements Runnable {
         public void run() {
-            super.run();
+            downloadUpdates(_updatesToDownload, null);
+            killHopelessUpdates(_updatesToDownload);
+            
             RouterService.schedule( new Runnable() {
                 public void run() {
                     QUEUE.add(new Poller());
@@ -666,9 +608,7 @@ public class UpdateHandler {
         }
         
         public void run() {
-            killHopelessUpdates(_updatesToDownload);
-            
-            if (shown || isMyUpdateDownloaded(_updateInfo))
+            if (shown)
                 return;
             
             shown = true;

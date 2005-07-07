@@ -264,8 +264,8 @@ public class Main implements ActivityCallback, ErrorCallback {
 
 	public void setAnnotateEnabled(boolean enabled) {}
 	
-	public void updateAvailable(UpdateInformation update, boolean restart) {
-        if (restart)
+	public void updateAvailable(UpdateInformation update) {
+        if (update.getUpdateCommand() != null)
             System.out.println("there's a new version out "+update.getUpdateVersion()+
                     ", to get it shutdown limewire and run "+update.getUpdateCommand());
         else

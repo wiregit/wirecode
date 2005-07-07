@@ -36,7 +36,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     
     /** The time we created this download */
     private final long startTime;
-
+    
     /** 
      * Constructs a new downloader that's gonna work off the network.
      */

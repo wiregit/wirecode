@@ -49,6 +49,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -63,6 +64,7 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 
 /** 
@@ -260,13 +262,29 @@ public class DownloadManager implements BandwidthTracker {
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
-    public synchronized void killOldInNetworkDownloaders(Collection urns) {
+    public synchronized void killDownloadersNotListed(Collection updates) {
+        if (updates == null)
+            return;
+        
+        Set urns = new HashSet(updates.size());
+        for (Iterator iter = updates.iterator(); iter.hasNext();) {
+            UpdateInformation ui = (UpdateInformation) iter.next();
+            urns.add(ui.getUpdateURN());
+        }
+        
         for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
         iter.hasNext();) {
             Downloader d = (Downloader)iter.next();
             if (d instanceof InNetworkDownloader  && !urns.contains(d.getSHA1Urn())) 
                 d.stop();
         }
+        
+        Set hopeless= UpdateSettings.FAILED_UPDATES.getValue();
+        for (Iterator iter = urns.iterator(); iter.hasNext();) {
+            URN urn = (URN) iter.next();
+            hopeless.remove(urn.httpStringValue());
+        }
+        UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
     
     /**
@@ -693,7 +711,8 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * Downloads an InNetwork update, using the info from the DownloadInformation.
      */
-    public synchronized Downloader download(DownloadInformation info, long now) throws SaveLocationException {
+    public synchronized Downloader download(DownloadInformation info, long now) 
+    throws SaveLocationException {
         File dir = FileManager.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
@@ -701,7 +720,8 @@ public class DownloadManager implements BandwidthTracker {
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge(false);
-        ManagedDownloader d = new InNetworkDownloader(incompleteFileManager, info, dir, now);
+        ManagedDownloader d = 
+            new InNetworkDownloader(incompleteFileManager, info, dir, now);
         initializeDownload(d);
         return d;
     }
@@ -1543,7 +1563,9 @@ public class DownloadManager implements BandwidthTracker {
     private static class InNetworkCallback implements DownloadCallback {
         public void addDownload(Downloader d) {}
         public void removeDownload(Downloader d) {
-            UpdateHandler.instance().inNetworkDownloadFinished(d.getSHA1Urn());
+            InNetworkDownloader downloader = (InNetworkDownloader)d;
+            UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
+                    downloader.getState() == Downloader.COMPLETE);
         }
         
         public void downloadsComplete() {}

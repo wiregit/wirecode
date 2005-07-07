@@ -116,7 +116,7 @@ public interface ActivityCallback extends DownloadCallback
 	/**
 	 * Notification that an update became available.
 	 */
-	public void updateAvailable(UpdateInformation info, boolean restart);
+	public void updateAvailable(UpdateInformation info);
 
 	/**
 	 * Sets the enabled/disabled state of file annotation.
