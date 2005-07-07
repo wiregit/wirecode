@@ -634,10 +634,10 @@ public class UpdateHandler {
         public void run() {
             killHopelessUpdates(_updatesToDownload);
             
-            if (shown)
+            if (shown || isMyUpdateDownloaded(_updateInfo))
                 return;
             
-            shown = true;            
+            shown = true;
             notifyAboutInfo(uc);
         }
     }
