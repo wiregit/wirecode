@@ -806,7 +806,7 @@ public abstract class FileManager {
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
 	void removeFolderIfShared(File folder, File parent) {
-		if (!folder.isDirectory())
+		if (!folder.isDirectory() && folder.exists())
 			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
 		
 	    try {
