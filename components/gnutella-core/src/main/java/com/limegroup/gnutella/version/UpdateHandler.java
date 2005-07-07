@@ -325,16 +325,16 @@ public class UpdateHandler {
             LOG.warn("No relevant update info to notify about.");
             return;
         } else if (!fromDisk && isMyUpdateDownloaded(_updateInfo)) 
-            notifyAboutInfo(uc);
+            notifyAboutInfo(uc.getId());
         else {
             // schedule a failover notification after a long time should the
-            // update downloads fail.
+            // update downloads fail or after we reach the notification time
             long delay = Math.max(_nextNotificationTime - now,
                     _lastTimestamp + 
                     MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue() - now);
-            RouterService.schedule(new NotificationFailover(uc), 
+            RouterService.schedule(new NotificationFailover(uc.getId()), 
                     delay,
-                    10 * 60 * 1000);
+                    0);
         }
     }
     
@@ -483,26 +483,20 @@ public class UpdateHandler {
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(final UpdateCollection uc) {
-        final UpdateInformation update = _updateInfo;
+    private void notifyAboutInfo(int id) {
+        if (id != _lastId)
+            return;
+        
+        UpdateInformation update = _updateInfo;
         Assert.that(update != null);
         
         long delay = _nextNotificationTime - clock.now();
         
-        // If now is before the time we can show it, 
-        // or the time on the computer is hopelessly off, 
-        // that being three days before the timestamp, where the timestamp
-        // is supposed to be the current time of publishing, then delay. 
-        if(delay > 0) {
-            RouterService.schedule(new Runnable() {
-                public void run() {
-                    // if we have already notified the gui, return
-                    // only run if the ids weren't updated while we waited.
-                    if(uc.getId() == _lastId)
-                        RouterService.getCallback().updateAvailable(update, false);
-                }
-            }, delay , 0);
-        } else             
+        // if we still haven't reached the notification time, schedule another
+        // notification failover
+        if(delay > 0) 
+            RouterService.schedule(new NotificationFailover(id), delay , 0);
+        else             
             RouterService.getCallback().updateAvailable(update,false);
         
     }
@@ -664,11 +658,11 @@ public class UpdateHandler {
     }
     
     private class NotificationFailover implements Runnable {
-        private final UpdateCollection uc;
+        private final int id;
         private boolean shown;
         
-        NotificationFailover(UpdateCollection uc) {
-            this.uc = uc;
+        NotificationFailover(int id) {
+            this.id = id;
         }
         
         public void run() {
@@ -678,7 +672,7 @@ public class UpdateHandler {
                 return;
             
             shown = true;
-            notifyAboutInfo(uc);
+            notifyAboutInfo(id);
         }
     }
 }
