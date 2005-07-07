@@ -29,6 +29,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
@@ -323,19 +324,16 @@ public class UpdateHandler {
         if (info == null || info.getUpdateCommand() == null)
             return;
         
-        String path = null;
+        File path = FileManager.PREFERENCE_SHARE.getAbsoluteFile();
         String name = info.getUpdateFileName();
         
         try {
-            path = FileManager.PREFERENCE_SHARE.getCanonicalPath();
-        }catch (IOException bad) {
-            ErrorService.error(bad);
-            return;
-        }
+            path = FileUtils.getCanonicalFile(path);
+        }catch (IOException bad) {}
 
         String command = info.getUpdateCommand();
-        command = command.replaceAll("$",path);
-        command = command.replaceAll("%",name);
+        command = StringUtils.replace(command,"$",path.getPath()+File.separator);
+        command = StringUtils.replace(command,"%",name);
         info.setUpdateCommand(command);
     }
     
