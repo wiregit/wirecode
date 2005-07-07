@@ -322,7 +322,6 @@ public class UpdateHandler {
             return;
         
         String path = null;
-        String sep = File.separator;
         String name = info.getUpdateFileName();
         
         try {
@@ -333,9 +332,8 @@ public class UpdateHandler {
         }
 
         String command = info.getUpdateCommand();
-        command = command.replaceAll("<PATH>",path);
-        command = command.replaceAll("<SEP>",sep);
-        command = command.replaceAll("<NAME>",name);
+        command = command.replaceAll("$",path);
+        command = command.replaceAll("%",name);
         info.setUpdateCommand(command);
     }
     
