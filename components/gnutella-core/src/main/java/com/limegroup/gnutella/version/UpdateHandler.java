@@ -293,6 +293,8 @@ public class UpdateHandler {
                 LOG.debug("we have an update, but it doesn't need a download.  " +
                     "or all our updates are hopeles. Scheduling...");
             
+            updateInfo.setUpdateCommand(null);
+            
             RouterService.schedule(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
                     0);
