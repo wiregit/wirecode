@@ -28,6 +28,21 @@ public class UpdateSettings extends LimeProps {
     public static final LongSetting UPDATE_RETRY_DELAY = 
         FACTORY.createSettableLongSetting("UPDATE_RETRY_DELAY",1 * 60 * 1000,
                 "updateRetryDelay", 2 * 60 * 60 * 1000, 1 * 60 * 1000); 
+    
+    /**
+     * If this many times the initial delay passed since the update timestamp, we may
+     * give up.
+     */
+    public static final IntSetting UPDATE_GIVEUP_FACTOR =
+        FACTORY.createSettableIntSetting("UPDATE_GIVEUP_FACTOR", 5, 
+                "updateGiveUpFactor", 50, 2);
+    
+    /**
+     * If we try downloading a given update more than this many times, we may give up.
+     */
+    public static final IntSetting UPDATE_MIN_ATTEMPTS =
+        FACTORY.createSettableIntSetting("UPDATE_MIN_ATTEMPTS", 500,
+                "updateMinAttempts", 2000, 50);
             
     /**
      * The style of updates.

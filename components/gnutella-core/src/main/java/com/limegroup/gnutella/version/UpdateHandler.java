@@ -48,10 +48,6 @@ public class UpdateHandler {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
     
-    private static final int MIN_DOWNLOAD_ATTEMPTS = 500;
-    private static final int MIN_DOWNLOAD_TIME = 5;
-
-    
     private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
     
     /**
@@ -108,13 +104,11 @@ public class UpdateHandler {
     
     /**
      * The timestamp of the latest update.
-     * LOCKING: this
      */
     private long _lastTimestamp;
     
     /**
      * The next time we can make an attempt to download a pushed file.
-     * LOCKING: this 
      */
     private long _nextDownloadTime;
     
@@ -547,10 +541,11 @@ public class UpdateHandler {
      */
     private static boolean isHopeless(InNetworkDownloader downloader, long now) {
         if (now - downloader.getStartTime() < 
-                MIN_DOWNLOAD_TIME * UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
+                UpdateSettings.UPDATE_GIVEUP_FACTOR.getValue() * 
+                UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
             return false;
         
-        if (downloader.getNumAttempts() < MIN_DOWNLOAD_ATTEMPTS)
+        if (downloader.getNumAttempts() < UpdateSettings.UPDATE_MIN_ATTEMPTS.getValue())
             return false;
         
         return true;
