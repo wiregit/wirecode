@@ -224,15 +224,15 @@ public class Connection implements IpPort {
 	/**
 	 * Gnutella 0.6 connect string.
 	 */
-    private String GNUTELLA_CONNECT_06 = "ZZZ CONNECT/0.6";
+    private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
 
 	/**
 	 * Gnutella 0.6 accept connection string.
 	 */
-    public static final String GNUTELLA_OK_06 = "ZZZ/0.6 200 OK";
-    public static final String GNUTELLA_06 = "ZZZ/0.6";
+    public static final String GNUTELLA_OK_06 = "GNUTELLA/0.6 200 OK";
+    public static final String GNUTELLA_06 = "GNUTELLA/0.6";
     public static final String _200_OK     = " 200 OK";
-    public static final String GNUTELLA_06_200 = "ZZZ/0.6 200";
+    public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
