@@ -2034,7 +2034,7 @@ public abstract class MessageRouter {
 
         byte[] data = UpdateHandler.instance().getLatestBytes();
         if(data != null) {
-            UpdateResponse msg = new UpdateResponse(data);
+            UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
             handler.reply(msg);
         }
     }
@@ -2044,7 +2044,7 @@ public abstract class MessageRouter {
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        UpdateHandler.instance().handleNewData(resp.getPayload());
+        UpdateHandler.instance().handleNewData(resp.getUpdate());
     }
 
     /**
