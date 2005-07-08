@@ -478,7 +478,7 @@ public class UpdateHandler {
                      "\nDiff   : " + (then-now));
         }
 
-        return then - now;
+        return Math.max(0,then - now);
     }
     
     /**
