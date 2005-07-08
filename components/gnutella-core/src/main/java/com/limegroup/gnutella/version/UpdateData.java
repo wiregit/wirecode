@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.version;
 
+import org.apache.commons.httpclient.URI;
+import com.limegroup.gnutella.URN;
+
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -57,6 +60,21 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** The text of the update title. */
     private String updateTitle;
     
+    /** The URN of the version. */
+    private URN urn;
+    
+    /** The Tiger Tree Root of the version. */
+    private String ttRoot;
+    
+    /** The command to run to launch the update. */
+    private String updateCommand;
+    
+    /** The filename to name the update file on disk. */
+    private String updateFileName;
+    
+    /** The size of the update on disk. */
+    private int size;
+    
     /**
      * Constructs a new UpdateData object.
      */
@@ -70,7 +88,9 @@ class UpdateData implements Cloneable, UpdateInformation {
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
             ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
             ", javaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
-            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + "}";
+            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + 
+            ", urn: " + urn + ", ttroot: " + ttRoot + ", updateCommand: " + updateCommand +
+            ", updateFileName: " + updateFileName + ", size: " + size + "}";
     }
     
     /** Sets the from */
@@ -118,6 +138,21 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** Sets the text of the title */
     void setUpdateTitle(String t) { updateTitle = t; }
     
+    /** Sets the update URN. */
+    void setUpdateURN(URN urn) { this.urn = urn; }
+    
+    /** Sets the update TT root. */
+    void setUpdateTTRoot(String root) { this.ttRoot = root; }
+    
+    /** Sets the update command to run. */
+    void setUpdateCommand(String command) { updateCommand = command; }
+    
+    /** Sets the filename to save the update to. */
+    void setUpdateFileName(String filename) { updateFileName =  filename; }
+    
+    /** Sets the size of the update. */
+    void setUpdateSize(int size) { this.size = size; }
+    
     /** Gets the language. */
     String getLanguage() { return language; }
     
@@ -143,6 +178,21 @@ class UpdateData implements Cloneable, UpdateInformation {
     
     /** Gets the update title. */
     public String getUpdateTitle() { return updateTitle; }
+    
+    /** Gets the update file name. */
+    public String getUpdateFileName() { return updateFileName; }
+    
+    /** Gets the update command to run. */
+    public String getUpdateCommand() { return updateCommand; }
+    
+    /** Gets the update URN */
+    public URN getUpdateURN() { return urn; }
+    
+    /** Gets the TigerTreeRoot hash. */
+    public String getTTRoot() { return ttRoot; }
+    
+    /** Gets the size of the update. */
+    public long getSize() { return size; }
     
     /**
      * Determines if this matches (on all except language).

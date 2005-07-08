@@ -3,7 +3,7 @@ package com.limegroup.gnutella.version;
 /**
  * Simple interface for retrieving the most recent update info.
  */
-public interface UpdateInformation {
+public interface UpdateInformation extends DownloadInformation {
     
     public static int STYLE_BETA = 0;
     public static int STYLE_MINOR = 1;
@@ -24,5 +24,4 @@ public interface UpdateInformation {
     public String getButton2Text();
     
     public int getUpdateStyle();
-    
 }

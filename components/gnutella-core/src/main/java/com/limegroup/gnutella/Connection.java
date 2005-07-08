@@ -1492,6 +1492,16 @@ public class Connection implements IpPort {
             return _capabilities.supportsWhatIsNew();
         return false;
     }
+    
+    /**
+     * Gets the remote host's 'update' version.
+     */
+    public int getRemoteHostUpdateVersion() {
+        if(_capabilities != null)
+            return _capabilities.supportsUpdate();
+        else
+            return -1;
+    }
 
     /**
      * Returns whether or not this connection represents a local address.

@@ -22,7 +22,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback
+public interface ActivityCallback extends DownloadCallback 
 {
     
     /**
@@ -59,12 +59,6 @@ public interface ActivityCallback
      * Add a query string to the monitor screen
      */
     public void handleQueryString( String query );
-
-    /** Add a file to the download window */
-    public void addDownload(Downloader d);
-
-    /** Remove a downloader from the download window. */
-    public void removeDownload(Downloader d);
 
     /** Add an uploader to the upload window */
     public void addUpload(Uploader u);
@@ -128,44 +122,22 @@ public interface ActivityCallback
 	 * Sets the enabled/disabled state of file annotation.
 	 */
 	public void setAnnotateEnabled(boolean enabled);
-
-     /** 
-      * Notifies the GUI that all active downloads have been completed.
-      */   
-    public void downloadsComplete();
     
     /** 
      * Notifies the GUI that all active uploads have been completed.
      */  
     public void uploadsComplete();
 
-    /**
-     * Shows the user a message informing her that a file being downloaded 
-     * is corrupt.
-     * <p>
-     * This method MUST call dloader.discardCorruptDownload(boolean b) 
-     * otherwise there will be threads piling up waiting for a notification
-     */
-    public void promptAboutCorruptDownload(Downloader dloader);
-
 	/**
 	 *  Tell the GUI to deiconify.
 	 */
 	public void restoreApplication();
-
-	/**
-	 *  Show active downloads
-	 */
-	public void showDownloads();
 
     /**
      * @return true If the guid that maps to a query result screen is still
      * available/viewable to the user.
      */
     public boolean isQueryAlive(GUID guid);
-
-
-    public String getHostValue(String key);
     
     /**
      * Indicates a component is loading.

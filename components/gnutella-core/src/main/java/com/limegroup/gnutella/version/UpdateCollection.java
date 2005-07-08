@@ -9,6 +9,9 @@ import java.util.Iterator;
 import java.io.StringReader;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Node;
@@ -17,6 +20,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -44,6 +48,11 @@ class UpdateCollection {
      * The list of UpdateData's in this collection.
      */
     private List updateDataList = new LinkedList();
+    
+    /**
+     * The list of DownloadDatas in this collection.
+     */
+    private List downloadDataList = new LinkedList();
     
     /**
      * Ensure that this is only created by using the factory constructor.
@@ -80,6 +89,13 @@ class UpdateCollection {
     }
     
     /**
+     * Gets all updates that have information so we can download them.
+     */
+    List getUpdatesWithDownloadInformation() {
+        return Collections.unmodifiableList(downloadDataList);
+    }
+    
+    /**
      * Gets the UpdateData that is relevant to us.
      * Returns null if there is no relevant update.
      */
@@ -97,7 +113,7 @@ class UpdateCollection {
                 if(lang.equals(next.getLanguage())) {
                     exactMatch = next;
                     break;
-                } else if("en".equals(next.getLanguage())) {
+                } else if("en".equals(next.getLanguage()) && englishMatch == null) {
                     englishMatch = next;
                 }
             }
@@ -204,6 +220,12 @@ class UpdateCollection {
      *      javato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
      *      os       -- OPTIONAL (defaults to '*' -- accepts a comma delimited list.)
      *
+     * The below elements are necessary for downloading the update in the network.
+     *      urn      -- The BITPRINT of the download
+     *      ucommand -- The command to run to invoke the update.
+     *      uname    -- The filename on disk the update should have.
+     *      size     -- The size of the update when completed.
+     *
      * If any values exist but error while parsing, the entire block is considered
      * invalid and ignored.
      */
@@ -221,6 +243,10 @@ class UpdateCollection {
         String javaFrom = getAttributeText(attr, "javafrom");
         String javaTo = getAttributeText(attr, "javato");
         String os = getAttributeText(attr, "os");
+        String updateURN = getAttributeText(attr, "urn");
+        String updateCommand = getAttributeText(attr, "ucommand");
+        String updateName = getAttributeText(attr, "uname");
+        String fileSize = getAttributeText(attr, "size");
         
         if(forV == null || url == null || style == null) {
             LOG.error("Missing required for, url, or style.");
@@ -277,7 +303,32 @@ class UpdateCollection {
             os = "*";
         data.setOSList(OS.createFromList(os));
         
+        if(updateURN != null) {
+            try {
+                URN urn = URN.createSHA1Urn(updateURN);
+                String tt = URN.getTigerTreeRoot(updateURN);
+                data.setUpdateURN(urn);
+                data.setUpdateTTRoot(tt);
+            } catch(IOException ignored) {
+                LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
+            }
+        }
         
+        data.setUpdateCommand(updateCommand);
+        data.setUpdateFileName(updateName);
+        
+        try {
+            data.setUpdateSize(Integer.parseInt(fileSize));
+        } catch(NumberFormatException nfe) {
+            LOG.warn("Invalid size: " + fileSize);
+        }
+        
+        // if this has enough information for downloading, add it to the list of potentials.
+        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
+            LOG.debug("Adding new download data item: " + data);
+            downloadDataList.add(data);
+        }
+                
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);

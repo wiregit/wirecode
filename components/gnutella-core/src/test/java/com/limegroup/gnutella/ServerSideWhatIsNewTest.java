@@ -731,21 +731,21 @@ public class ServerSideWhatIsNewTest
             CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
 
         //  Gotta make use of the force-share folder for this test
-        if( FileManager.FORCED_SHARE.exists() ) {
-            File [] toDelete = FileManager.FORCED_SHARE.listFiles();
+        if( FileManager.PROGRAM_SHARE.exists() ) {
+            File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
             for (int j = 0; j < toDelete.length; j++) {
                 toDelete[j].delete();
             }
         } else {
-            FileManager.FORCED_SHARE.mkdir();
+            FileManager.PROGRAM_SHARE.mkdir();
         }
 
         CommonUtils.copy(winInstaller, 
-                         new File(FileManager.FORCED_SHARE, "LimeWireWin3.69.0010.exe"));
+                         new File(FileManager.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe"));
         CommonUtils.copy(linInstaller, 
-                         new File(FileManager.FORCED_SHARE, "LimeWireLinux.bin"));
+                         new File(FileManager.PROGRAM_SHARE, "LimeWireLinux.bin"));
         CommonUtils.copy(osxInstaller, 
-                         new File(FileManager.FORCED_SHARE, "LimeWireOSX.dmg"));
+                         new File(FileManager.PROGRAM_SHARE, "LimeWireOSX.dmg"));
 
         rs.getFileManager().loadSettings();
         int i = 0;
@@ -800,11 +800,11 @@ public class ServerSideWhatIsNewTest
             assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
         }
         
-        File [] toDelete = FileManager.FORCED_SHARE.listFiles();
+        File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
         for (int j = 0; j < toDelete.length; j++) {
             toDelete[j].delete();
         }
-        FileManager.FORCED_SHARE.delete();
+        FileManager.PROGRAM_SHARE.delete();
 
     }
 

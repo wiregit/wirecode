@@ -165,6 +165,11 @@ public interface ReplyHandler extends IpPort {
      * Handles SimppVM
      */
     public void handleSimppVM(SimppVM simppVM) throws IOException;
+    
+    /**
+     * Gets the clientGUID of this ReplyHandler.
+     */
+    public byte[] getClientGUID();
 
 }
 

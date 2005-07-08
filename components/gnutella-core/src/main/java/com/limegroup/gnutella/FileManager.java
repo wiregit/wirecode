@@ -31,6 +31,7 @@ import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -51,14 +52,23 @@ public abstract class FileManager {
     public static final String BROWSE_QUERY = "*.*";
     
     /** Subdirectory that is always shared */
-    public static final File FORCED_SHARE;
+    public static final File PROGRAM_SHARE;
+    
+    /** Subdirectory that also is always shared. */
+    public static final File PREFERENCE_SHARE;
     
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
-        FORCED_SHARE = forceShare;
+        PROGRAM_SHARE = forceShare;
+        
+        forceShare = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+        try {
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        PREFERENCE_SHARE = forceShare;
     }
     
     private static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
@@ -616,6 +626,7 @@ public abstract class FileManager {
         RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
         SavedFileManager.instance().run();
+        UpdateHandler.instance().tryToDownloadUpdates();
         RouterService.getCallback().fileManagerLoaded();
     }
     
@@ -671,14 +682,16 @@ public abstract class FileManager {
 
         //clear this, list of directories retrieved
         RouterService.getCallback().fileManagerLoading();
+
+        // Update the FORCED_SHARE directory.
+        updateSharedDirectories(PROGRAM_SHARE, null, revision);
+        updateSharedDirectories(PREFERENCE_SHARE, null, revision);
             
         //Load the shared directories and add their files.
         _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
             updateSharedDirectories(directories[i], null, revision);
             
-        // Update the FORCED_SHARE directory.
-        updateSharedDirectories(FORCED_SHARE, null, revision);
 
         // Add specially shared files
         Set specialFiles = _data.SPECIAL_FILES_TO_SHARE;
@@ -755,7 +768,7 @@ public abstract class FileManager {
 
         // STEP 1:
         // Add directory
-        boolean isForcedShare = directory.equals(FORCED_SHARE);
+        boolean isForcedShare = isForcedShareDirectory(directory);
         synchronized (this) {
             // if it was already added, ignore.
             if (_completelySharedDirectories.contains(directory))
@@ -1115,7 +1128,7 @@ public abstract class FileManager {
         
         // files that are forcibly shared over the network
         // aren't counted or shown.
-        if (parent.equals(FORCED_SHARE))
+        if(isForcedShareDirectory(parent))
             _numForcedFiles++;
 	
         //Index the filename.  For each keyword...
@@ -1258,8 +1271,8 @@ public abstract class FileManager {
         boolean removed = siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        // files that are forcibly shared over the network aren't counted        
-        if (parent.equals(FORCED_SHARE)) {
+        // files that are forcibly shared over the network aren't counted
+        if(isForcedShareDirectory(parent)) {
             notify = false;
             _numForcedFiles--;
         }
@@ -2101,7 +2114,14 @@ public abstract class FileManager {
      */
     public static boolean isForcedShare(File file) {
         File parent = file.getParentFile();
-        return parent != null && parent.equals(FORCED_SHARE);
+        return parent != null && isForcedShareDirectory(parent);
+    }
+    
+    /**
+     * Determines if this File is a network shared directory.
+     */
+    public static boolean isForcedShareDirectory(File f) {
+        return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
     }
 }
 

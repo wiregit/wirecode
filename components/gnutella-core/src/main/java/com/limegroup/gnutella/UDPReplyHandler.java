@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -296,5 +297,9 @@ public final class UDPReplyHandler implements ReplyHandler {
 	
 	public int getPort() {
 		return PORT;
+	}
+	
+	public byte[] getClientGUID() {
+	    return DataUtils.EMPTY_GUID;
 	}
 }

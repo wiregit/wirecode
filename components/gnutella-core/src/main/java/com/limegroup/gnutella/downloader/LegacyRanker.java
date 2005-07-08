@@ -22,13 +22,13 @@ public class LegacyRanker extends SourceRanker {
 
 	private final Set rfds;  
 	
-	protected LegacyRanker() {
+	public LegacyRanker() {
 		rfds = new HashSet();
 	}
 	
 	public synchronized boolean addToPool(RemoteFileDesc host) {
         if (LOG.isDebugEnabled())
-            LOG.debug("adding host "+host+" to be ranked",new Exception());
+            LOG.debug("adding host "+host+" to be ranked");
 		return rfds.add(host);
 	}
 

@@ -23,7 +23,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
@@ -248,11 +248,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /** The place to share completed downloads (and their metadata) */
     private FileManager fileManager;
     /** The repository of incomplete files. */
-    private IncompleteFileManager incompleteFileManager;
-    /** A ManagedDownloader needs to have a handle to the ActivityCallback, so
+    protected IncompleteFileManager incompleteFileManager;
+    /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
      * that it can notify the gui that a file is corrupt to ask the user what
      * should be done.  */
-    private ActivityCallback callback;
+    private DownloadCallback callback;
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
@@ -370,7 +370,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private Set recentInvalidAlts;
     
-    private VerifyingFile commonOutFile;
+    /**
+     * Manages writing stuff to disk, remember what's leased, what's verified,
+     * what is valid, etc........
+     */
+    protected VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
     /** MiniRemoteFileDesc -> Object. 
@@ -638,7 +642,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * being read from disk, false otherwise.
      */
     public void initialize(DownloadManager manager, FileManager fileManager, 
-                           ActivityCallback callback) {
+                           DownloadCallback callback) {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
@@ -661,7 +665,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         queuePosition=Integer.MAX_VALUE;
         queuedVendor = "";
         triedLocatingSources = false;
-		ranker = SourceRanker.getAppropriateRanker();
+		ranker = getSourceRanker(null);
         ranker.setMeshHandler(this);
         // get the SHA1 if we can.
         if(cachedRFDs.size() > 0 && downloadSHA1 == null) {
@@ -1025,7 +1029,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * initializes the verifying file if the incompleteFile is initialized.
      */
-    private void initializeVerifyingFile() throws IOException {
+    protected void initializeVerifyingFile() throws IOException {
 
         if (incompleteFile == null)
             return;
@@ -1051,17 +1055,27 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     protected void initializeIncompleteFile() throws IOException {
-        if (incompleteFile != null || cachedRFDs == null || cachedRFDs.isEmpty())
+        if (incompleteFile != null)
             return;
         
         if (downloadSHA1 != null)
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
-            incompleteFile = 
-                incompleteFileManager.getFile(getSaveFile().getName(),
-						downloadSHA1,getContentLength());
+            incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
+                                               downloadSHA1, getContentLength());
         }
+        
+        LOG.warn("Incomplete File: " + incompleteFile);
+    }
+    
+    /**
+     * Retrieves an incomplete file from the given incompleteFileManager with the
+     * given name, URN & content-length.
+     */
+    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
+                                     URN urn, int length) throws IOException {
+        return ifm.getFile(name, urn, length);
     }
     
     /**
@@ -1071,21 +1085,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private synchronized void initializeAlternateLocations() {
         if( incompleteFile == null ) // no incomplete, no big deal.
             return;
-            
         
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.silent(false, "wrong IFD.\n" +
-                           "we are resuming :"+(this instanceof ResumeDownloader)+
-                           "ours  :   " + incompleteFile +
+                Assert.silent(false, "wrong IFD." +
+                           "\nclass: " + getClass().getName() +
+                           "\nours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
-                           "\ntheir hashes: " +
-                           DataUtils.listSet(ifd.getUrns())+
-                          "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                           "\ntheir hashes: " + ifd.getUrns()+
+                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
                 fileManager.removeFileIfShared(incompleteFile);
             }
         }
@@ -1095,16 +1107,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
-            // Find any matching file-desc for this URN.
-            fd = fileManager.getFileDescForUrn(hash);
-            if( fd != null ) {
-                //create validAlts
-                addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                        RouterService.getAltlocManager().getPush(hash,false),
-                        RouterService.getAltlocManager().getPush(hash,true),
-                        (int)size);
-                
-            }
+            //create validAlts
+            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
+                    RouterService.getAltlocManager().getPush(hash,false),
+                    RouterService.getAltlocManager().getPush(hash,true),
+                    (int)size);
         }
     }
     
@@ -1140,20 +1147,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
                 
         addPossibleSources(locs);
-    }
-
-    /**
-     * Returns true if 'other' could conflict with one of the files in this. In
-     * other words, if this.conflicts(other)==true, no other ManagedDownloader
-     * should attempt to download other.  
-     */
-    public boolean conflicts(RemoteFileDesc other) {
-        try {
-            File otherFile = incompleteFileManager.getFile(other);
-            return conflictsWithIncompleteFile(otherFile);
-        } catch(IOException ioe) {
-            return false;
-        }
     }
 
     /**
@@ -2170,7 +2163,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         //Add file to library.
         // first check if it conflicts with the saved dir....
-        if (fileExists(saveFile))
+        if (saveFile.exists())
             fileManager.removeFileIfShared(saveFile);
 
         //Add the URN of this file to the cache so that it won't
@@ -2204,15 +2197,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
 
 		return COMPLETE;
-    }
-    
-    /**
-     * Returns true if the file exists.
-     * The file must be an absolute path.
-     * @return True returned if the File exists.
-     */
-    private boolean fileExists(File f) {
-        return f.exists();
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 
@@ -2446,7 +2430,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 //remote queue.
                 if (shouldStartWorker()){
                     // see if we need to update our ranker
-                    ranker = SourceRanker.getAppropriateRanker(ranker);
+                    ranker = getSourceRanker(ranker);
                     
                     if (ranker.hasMore()) {
                         
@@ -2473,6 +2457,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 } catch (InterruptedException ignored) {}
             }
         }//end of while
+    }
+    
+    /**
+     * Retrieves the appropriate source ranker (or returns the current one).
+     */
+    protected SourceRanker getSourceRanker(SourceRanker ranker) {
+        return SourceRanker.getAppropriateRanker(ranker);
     }
     
     /**
@@ -2565,11 +2556,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 //when the user has made a decision. Until then the corruptState
                 //is set to waiting. We are not going to move files unless we
                 //are out of this state
-                callback.promptAboutCorruptDownload(this);
+                sendCorruptCallback();
                 //Note2:ActivityCallback is going to ask a message to be show to
                 //the user asynchronously
             }
         }
+    }
+    
+    /**
+     * Hook for sending a corrupt callback.
+     */
+    protected void sendCorruptCallback() {
+        callback.promptAboutCorruptDownload(this);
     }
 
     /**

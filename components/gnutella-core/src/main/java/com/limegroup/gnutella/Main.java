@@ -265,7 +265,11 @@ public class Main implements ActivityCallback, ErrorCallback {
 	public void setAnnotateEnabled(boolean enabled) {}
 	
 	public void updateAvailable(UpdateInformation update) {
-	  System.out.println("You're running an older version.  Get " +
+        if (update.getUpdateCommand() != null)
+            System.out.println("there's a new version out "+update.getUpdateVersion()+
+                    ", to get it shutdown limewire and run "+update.getUpdateCommand());
+        else
+            System.out.println("You're running an older version.  Get " +
 	                     update.getUpdateVersion() + ", from " + update.getUpdateURL());
     }  
 

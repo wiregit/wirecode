@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
+import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -45,10 +47,12 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -56,6 +60,9 @@ import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 
 /** 
@@ -84,7 +91,9 @@ public class DownloadManager implements BandwidthTracker {
     private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
 
     /** The callback for notifying the GUI of major changes. */
-    private ActivityCallback callback;
+    private DownloadCallback callback;
+    /** The callback for innetwork downloaders. */
+    private DownloadCallback innetworkCallback;
     /** The message router to use for pushes. */
     private MessageRouter router;
     /** Used to check if the file exists. */
@@ -102,6 +111,16 @@ public class DownloadManager implements BandwidthTracker {
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
+    
+    /**
+     * Whether or not the GUI has been init'd.
+     */
+    private volatile boolean guiInit = false;
+    
+    /** The number if IN-NETWORK active downloaders.  We don't count these when
+     * determing how many downloaders are active.
+     */
+    private int innetworkCount = 0;
     
     /**
      * files that we have sent an udp pushes and are waiting a connection from.
@@ -169,9 +188,10 @@ public class DownloadManager implements BandwidthTracker {
                   );
     }
     
-    protected void initialize(ActivityCallback callback, MessageRouter router,
+    protected void initialize(DownloadCallback guiCallback, MessageRouter router,
                               FileManager fileManager) {
-        this.callback = callback;
+        this.callback = guiCallback;
+        this.innetworkCallback = new InNetworkCallback();
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
@@ -212,6 +232,55 @@ public class DownloadManager implements BandwidthTracker {
         RouterService.schedule(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
                                SNAPSHOT_CHECKPOINT_TIME);
+                               
+        guiInit = true;
+    }
+    
+    /**
+     * Is the GUI init'd?
+     */
+    public boolean isGUIInitd() {
+        return guiInit;
+    }
+    
+    /**
+     * Determines if an 'In Network' download exists in either active or waiting.
+     */
+    public synchronized boolean hasInNetworkDownload() {
+        if(innetworkCount > 0)
+            return true;
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            if(i.next() instanceof InNetworkDownloader)
+                return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Kills all in-network downloaders that are not present in the list of URNs
+     * @param urns a current set of urns that we are downloading in-network.
+     */
+    public synchronized void killDownloadersNotListed(Collection updates) {
+        if (updates == null)
+            return;
+        
+        Set urns = new HashSet(updates.size());
+        for (Iterator iter = updates.iterator(); iter.hasNext();) {
+            UpdateInformation ui = (UpdateInformation) iter.next();
+            urns.add(ui.getUpdateURN().httpStringValue());
+        }
+        
+        for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
+        iter.hasNext();) {
+            Downloader d = (Downloader)iter.next();
+            if (d instanceof InNetworkDownloader  && 
+                    !urns.contains(d.getSHA1Urn().httpStringValue())) 
+                d.stop();
+        }
+        
+        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
+        hopeless.retainAll(urns);
+        UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
     
     /**
@@ -247,6 +316,8 @@ public class DownloadManager implements BandwidthTracker {
                 cleanupCompletedDownload(md, false);
             } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
                 i.remove();
+                if(md instanceof InNetworkDownloader)
+                    innetworkCount++;
                 active.add(md);
                 md.startDownload();
             } else {
@@ -305,16 +376,17 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     public ManagedDownloader getDownloaderForURN(URN sha1) {
-        List l;
         synchronized(this) {
-            l = new ArrayList(active);
-            l.addAll(waiting);
-        }
-        
-        for (Iterator iter = l.iterator(); iter.hasNext();) {
-            ManagedDownloader current = (ManagedDownloader) iter.next();
-            if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
-                return current;
+            for (Iterator iter = active.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
+                    return current;
+            }
+            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
+                ManagedDownloader current = (ManagedDownloader) iter.next();
+                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
+                    return current;
+            }
         }
         return null;
     }
@@ -438,14 +510,15 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                DownloadCallback dc = callback;
                 
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)
                     continue;
-
+                
                 waiting.add(downloader);                                 //1
-                downloader.initialize(this, this.fileManager, callback); //2
-                callback.addDownload(downloader);                        //3
+                downloader.initialize(this, this.fileManager, callback(downloader));       //2
+                callback(downloader).addDownload(downloader);                        //3
             }
             return true;
         } catch (ClassCastException e) {
@@ -468,7 +541,7 @@ public class DownloadManager implements BandwidthTracker {
      * modified.  If overwrite==true, the files may be overwritten.<p>
      * 
      * Otherwise returns a Downloader that allows you to stop and resume this
-     * download.  The ActivityCallback will also be notified of this download,
+     * download.  The DownloadCallback will also be notified of this download,
      * so the return value can usually be ignored.  The download begins
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
@@ -632,6 +705,25 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     /**
+     * Downloads an InNetwork update, using the info from the DownloadInformation.
+     */
+    public synchronized Downloader download(DownloadInformation info, long now) 
+    throws SaveLocationException {
+        File dir = FileManager.PREFERENCE_SHARE;
+        dir.mkdirs();
+        File f = new File(dir, info.getUpdateFileName());
+        if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
+			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
+        
+        incompleteFileManager.purge(false);
+        ManagedDownloader d = 
+            new InNetworkDownloader(incompleteFileManager, info, dir, now);
+        initializeDownload(d);
+        return d;
+    }
+        
+    
+    /**
      * Performs common tasks for initializing the download.
      * 1) Initializes the downloader.
      * 2) Adds the download to the waiting list.
@@ -639,10 +731,17 @@ public class DownloadManager implements BandwidthTracker {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(ManagedDownloader md) {
-	    md.initialize(this, fileManager, callback);
+        md.initialize(this, fileManager, callback(md));
 		waiting.add(md);
-        callback.addDownload(md);
+        callback(md).addDownload(md);
         writeSnapshot(); // Save state for crash recovery.
+    }
+    
+    /**
+     * Returns the callback that should be used for the given md.
+     */
+    private DownloadCallback callback(ManagedDownloader md) {
+        return (md instanceof InNetworkDownloader) ? innetworkCallback : callback;
     }
         
 	/**
@@ -857,7 +956,7 @@ public class DownloadManager implements BandwidthTracker {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**
@@ -870,6 +969,9 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized void remove(ManagedDownloader downloader, 
                                     boolean completed) {
         active.remove(downloader);
+        if(downloader instanceof InNetworkDownloader)
+            innetworkCount--;
+        
         waiting.remove(downloader);
         if(completed)
             cleanupCompletedDownload(downloader, true);
@@ -918,7 +1020,7 @@ public class DownloadManager implements BandwidthTracker {
         dl.finish();
         if (dl.getQueryGUID() != null)
             router.downloadFinished(dl.getQueryGUID());
-        callback.removeDownload(dl);
+        callback(dl).removeDownload(dl);
         
         //Save this' state to disk for crash recovery.
         if(ser)
@@ -926,7 +1028,7 @@ public class DownloadManager implements BandwidthTracker {
 
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
-            callback.downloadsComplete();
+            callback(dl).downloadsComplete();
     }           
     
     /** 
@@ -1451,6 +1553,25 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
-	
+    /**
+     * Once an in-network download finishes, the UpdateHandler is notified.
+     */
+    private static class InNetworkCallback implements DownloadCallback {
+        public void addDownload(Downloader d) {}
+        public void removeDownload(Downloader d) {
+            InNetworkDownloader downloader = (InNetworkDownloader)d;
+            UpdateHandler.instance().inNetworkDownloadFinished(downloader.getSHA1Urn(),
+                    downloader.getState() == Downloader.COMPLETE);
+        }
+        
+        public void downloadsComplete() {}
+        
+    	public void showDownloads() {}
+    	// always discard corruption.
+        public void promptAboutCorruptDownload(Downloader dloader) {
+            dloader.discardCorruptDownload(true);
+        }
+        public String getHostValue(String key) { return null; }
+    }
 	
 }

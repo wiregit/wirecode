@@ -400,6 +400,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
      */
     public void reply(Message m){}
 
+
+    public byte[] getClientGUID() {
+        return RouterService.getMyGUID();
+    }
 }
 
 

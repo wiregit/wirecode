@@ -523,14 +523,22 @@ public final class SettingsFactory {
         handleSettingInternal(result, null);
         return result;
     }
-        
-
+    
     public synchronized StringArraySetting createSettableStringArraySetting(
               String key, String[] defaultValue, String simppKey) {
         StringArraySetting result = 
         new StringArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
                                                                     simppKey);
         handleSettingInternal(result, simppKey);
+        return result;
+    }
+    
+    public synchronized StringSetSetting
+        createStringSetSetting(String key, String defaultValue) {
+        StringSetSetting result =
+            new StringSetSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        
+        handleSettingInternal(result, null);
         return result;
     }
     
