@@ -497,12 +497,14 @@ public class UpdateHandler {
         
         Runnable r = new Runnable() {
             public void run() {
+                
+                // add it to the list of failed urns
+                if (!good)
+                    UpdateSettings.FAILED_UPDATES.add(urn.httpStringValue());
+                
                 UpdateData updateInfo = (UpdateData) _updateInfo;
                 if (updateInfo != null && updateInfo.getUpdateURN().equals(urn)) {
                     if (!good) {
-                        // add it to the list of failed urns
-                        UpdateSettings.FAILED_UPDATES.add(urn.httpStringValue());
-                        
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);

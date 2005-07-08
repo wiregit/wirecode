@@ -21,7 +21,7 @@ public class StringSetSetting extends Setting {
      * 
      * @return the value of this setting
      */
-    public Set getValue() {
+    public synchronized Set getValue() {
         return value;
     }
     
@@ -76,11 +76,11 @@ public class StringSetSetting extends Setting {
      *
      * @param value the value to store
      */
-    public void setValue(Set value) {
+    public synchronized void setValue(Set value) {
         super.setValue(decode(value));
     }
     
-    public boolean add(String s) {
+    public synchronized boolean add(String s) {
         if (value.add(s)) {
             setValue(decode(value));
             return true;
@@ -88,7 +88,7 @@ public class StringSetSetting extends Setting {
         return false;
     }
 
-    public boolean remove(String s) {
+    public synchronized boolean remove(String s) {
         if (value.remove(s)) {
             setValue(decode(value));
             return true;
@@ -96,7 +96,7 @@ public class StringSetSetting extends Setting {
         return false;
     }
     
-    public boolean contains(String s) {
+    public synchronized boolean contains(String s) {
         return value.contains(s);
     }
 
