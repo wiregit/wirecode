@@ -216,6 +216,11 @@ public abstract class FileManager {
     private volatile int _updatingFinished = -1;
     
     /**
+     * If true, indicates that the FileManager is currently updating.
+     */
+    private volatile boolean _isUpdating = false;
+    
+    /**
      * The last revision that finished both pending & updating.
      */
     private volatile int _loadingFinished = -1;
@@ -621,6 +626,13 @@ public abstract class FileManager {
         return _loadingFinished == _revision;
     }
 
+    /**
+     * Returns whether or not the updating is finished.
+     */
+    public boolean isUpdating() {
+        return _isUpdating;
+    }
+
     /** 
      * Loads all shared files, putting them in a queue for being added.
      *
@@ -661,6 +673,7 @@ public abstract class FileManager {
         RouterService.getCallback().fileManagerLoading();
             
         //Load the shared directories and add their files.
+        _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
             updateSharedDirectories(directories[i], null, revision);
             
@@ -673,6 +686,7 @@ public abstract class FileManager {
             for(Iterator i = specialFiles.iterator(); i.hasNext() && _revision == revision; )
                 addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
         }
+        _isUpdating = false;
 
         trim();
         
@@ -792,7 +806,10 @@ public abstract class FileManager {
 	 * Removes a given directory from being completely shared.
 	 */
 	public void removeFolderIfShared(File folder) {
-	    removeFolderIfShared(folder, null);
+        _isUpdating = true;
+        removeFolderIfShared(folder, null);
+        _isUpdating = false;
+
 	}
 	
 	/**
@@ -805,7 +822,7 @@ public abstract class FileManager {
 	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
-	void removeFolderIfShared(File folder, File parent) {
+	protected void removeFolderIfShared(File folder, File parent) {
 		if (!folder.isDirectory() && folder.exists())
 			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
 		
@@ -878,7 +895,9 @@ public abstract class FileManager {
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
 		if (!isCompletelySharedDirectory(folder.getParentFile()))
 			SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+        _isUpdating = true;
         updateSharedDirectories(folder, null, _revision);
+        _isUpdating = false;
     }
 	
 	/**
