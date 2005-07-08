@@ -520,6 +520,8 @@ public class UpdateHandler {
      * @return whether we killed any hopeless update downloads
      */
     private static void killHopelessUpdates(List updates) {
+        if (updates == null)
+            return;
         
         DownloadManager dm = RouterService.getDownloadManager();
         if (!dm.hasInNetworkDownload())
