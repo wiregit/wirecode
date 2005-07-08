@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.4 2004-10-12 21:45:28 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.5 2005-07-08 06:56:54 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -120,19 +120,25 @@ public class TigerTree extends MessageDigest {
 
     protected void engineUpdate(byte[] in, int offset, int length) {
         byteCount += length;
-
-        int remaining;
-        while (length >= (remaining = BLOCKSIZE - bufferOffset)) {
-            System.arraycopy(in, offset, buffer, bufferOffset, remaining);
-            bufferOffset += remaining;
-            blockUpdate();
-            length -= remaining;
-            offset += remaining;
-            bufferOffset = 0;
+        if (bufferOffset > 0) {
+        	int remaining = BLOCKSIZE - bufferOffset;
+        	System.arraycopy(in,offset,buffer,bufferOffset, remaining);
+        	blockUpdate();
+        	bufferOffset = 0;
+        	length -= remaining;
+        	offset += remaining;
+        }
+        
+        while (length >= BLOCKSIZE) {
+            blockUpdate(in, offset, BLOCKSIZE);
+            length -= BLOCKSIZE;
+            offset += BLOCKSIZE;
         }
 
-        System.arraycopy(in, offset, buffer, bufferOffset, length);
-        bufferOffset += length;
+        if (length > 0) {
+        	System.arraycopy(in, offset, buffer, 0, length);
+        	bufferOffset = length;
+        }
     }
 
     protected byte[] engineDigest() {
@@ -155,7 +161,7 @@ public class TigerTree extends MessageDigest {
 
         // composite neighboring nodes together up to top value
         while (nodes.size() > 1) {
-            List newNodes = new ArrayList();
+            List newNodes = new ArrayList(nodes.size() / 2 + 1 );
             Iterator iter = nodes.iterator();
             while (iter.hasNext()) {
                 byte[] left = (byte[]) iter.next();
@@ -193,15 +199,18 @@ public class TigerTree extends MessageDigest {
         throw new CloneNotSupportedException();
     }
 
+    protected void blockUpdate() {
+    	blockUpdate(buffer, 0, bufferOffset);
+    }
     /**
      * Update the internal state with a single block of size 1024 (or less, in
      * final block) from the internal buffer.
      */
-    protected void blockUpdate() {
+    protected void blockUpdate(byte [] buf, int pos, int len) {
         tiger.reset();
         tiger.update((byte) 0); // leaf prefix
-        tiger.update(buffer, 0, bufferOffset);
-        if ((bufferOffset == 0) & (nodes.size() > 0))
+        tiger.update(buf, pos, len);
+        if ((len == 0) && (nodes.size() > 0))
             return; // don't remember a zero-size hash except at very beginning
         nodes.add(tiger.digest());
     }
