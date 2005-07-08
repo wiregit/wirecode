@@ -13,6 +13,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
+import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * Stub for the <tt>ReplyHandler</tt> interface.
@@ -110,6 +111,9 @@ public class ReplyHandlerStub implements ReplyHandler {
 
     public void handleUDPCrawlerPong(UDPCrawlerPong pong){}
 
+    public byte [] getClientGUID() {
+        return DataUtils.EMPTY_GUID;
+    }
 }
 
 
