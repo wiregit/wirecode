@@ -269,21 +269,19 @@ public class DownloadManager implements BandwidthTracker {
         Set urns = new HashSet(updates.size());
         for (Iterator iter = updates.iterator(); iter.hasNext();) {
             UpdateInformation ui = (UpdateInformation) iter.next();
-            urns.add(ui.getUpdateURN());
+            urns.add(ui.getUpdateURN().httpStringValue());
         }
         
         for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
         iter.hasNext();) {
             Downloader d = (Downloader)iter.next();
-            if (d instanceof InNetworkDownloader  && !urns.contains(d.getSHA1Urn())) 
+            if (d instanceof InNetworkDownloader  && 
+                    !urns.contains(d.getSHA1Urn().httpStringValue())) 
                 d.stop();
         }
         
-        Set hopeless= UpdateSettings.FAILED_UPDATES.getValue();
-        for (Iterator iter = urns.iterator(); iter.hasNext();) {
-            URN urn = (URN) iter.next();
-            hopeless.remove(urn.httpStringValue());
-        }
+        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
+        hopeless.retainAll(urns);
         UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
     
