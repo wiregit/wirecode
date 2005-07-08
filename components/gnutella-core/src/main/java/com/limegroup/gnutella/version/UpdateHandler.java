@@ -154,8 +154,10 @@ public class UpdateHandler {
         QUEUE.add(new Runnable() {
             public void run() {
                 UpdateInformation updateInfo = _updateInfo;
-                if (isMyUpdateDownloaded(updateInfo))
+                
+                if (updateInfo != null && isMyUpdateDownloaded(updateInfo))
                     RouterService.getCallback().updateAvailable(updateInfo);
+                
                 downloadUpdates(_updatesToDownload, null);
             }
         });
