@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.5 2005-07-08 06:56:54 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.6 2005-07-08 21:14:04 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -15,7 +15,9 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -81,8 +83,7 @@ public class TigerTree extends MessageDigest {
     /** Internal Tiger MD instance */
     private MessageDigest tiger;
 
-    /** Interim tree node hash values */
-    private List nodes;
+    private Stack stack;
 
     /**
      * Constructor
@@ -92,7 +93,7 @@ public class TigerTree extends MessageDigest {
         buffer = new byte[BLOCKSIZE];
         bufferOffset = 0;
         byteCount = 0;
-        nodes = new ArrayList();
+        stack = new Stack();
         if(USE_CRYPTIX) {
             try {
                 tiger = MessageDigest.getInstance("Tiger", "CryptixCrypto");
@@ -159,34 +160,40 @@ public class TigerTree extends MessageDigest {
         // hash any remaining fragments
         blockUpdate();
 
-        // composite neighboring nodes together up to top value
-        while (nodes.size() > 1) {
-            List newNodes = new ArrayList(nodes.size() / 2 + 1 );
-            Iterator iter = nodes.iterator();
-            while (iter.hasNext()) {
-                byte[] left = (byte[]) iter.next();
-                if (iter.hasNext()) {
-                    byte[] right = (byte[]) iter.next();
-                    tiger.reset();
-                    tiger.update((byte) 1); // node prefix
-                    tiger.update(left, 0, left.length);
-                    tiger.update(right, 0, right.length);
-                    newNodes.add(tiger.digest());
-                } else {
-                    newNodes.add(left);
-                }
-            }
-            nodes = newNodes;
-        }
-        System.arraycopy(nodes.get(0), 0, buf, offset, HASHSIZE);
+        byte [] ret;
+        if (stack.size() > 1) 
+        	collapse();
+        
+        Assert.that(stack.size() == 1);
+        Node top = (Node)stack.pop();
+        ret = top.data;
+        
+        System.arraycopy(ret,0,buf,offset,HASHSIZE);
         engineReset();
         return HASHSIZE;
+    }
+
+    /**
+     * collapse whatever the tree is now to a root.
+     */
+    private void collapse() {
+    	while(stack.size() > 1) {
+    		Node right = (Node)stack.pop();
+    		Node left = (Node)stack.pop();
+    		tiger.reset();
+    		tiger.update((byte)1);
+    		tiger.update(left.data);
+    		tiger.update(right.data);
+    		stack.push(new Node(tiger.digest(),-1));
+    	}
+    	
+    	Assert.that(stack.size() == 1);
     }
 
     protected void engineReset() {
         bufferOffset = 0;
         byteCount = 0;
-        nodes = new ArrayList();
+        stack = new Stack();
         tiger.reset();
     }
 
@@ -210,11 +217,40 @@ public class TigerTree extends MessageDigest {
         tiger.reset();
         tiger.update((byte) 0); // leaf prefix
         tiger.update(buf, pos, len);
-        if ((len == 0) && (nodes.size() > 0))
+        if ((len == 0) && (stack.size() > 0))
             return; // don't remember a zero-size hash except at very beginning
-        nodes.add(tiger.digest());
+        byte [] digest = tiger.digest();
+        push(digest,0);
     }
 
+    private void push(byte [] data, int level) {
+    	if (!stack.isEmpty()) {
+    		Node n = (Node) stack.peek();
+    		if (n.level == level) {
+    			stack.pop();
+    			tiger.reset();
+    			tiger.update((byte) 1); // node prefix
+    			tiger.update(n.data);
+    			tiger.update(data);
+    			push(tiger.digest(),++level);
+    			return;
+    		}
+    		Assert.that(n.level > level);
+    	} 
+    	stack.push(new Node(data,level));
+    }
+    
+    private class Node {
+    	public final byte [] data;
+    	public final int level;
+    	Node(byte [] data, int level) {
+    		this.data = data;
+    		this.level = level;
+    	}
+    	public String toString() {
+    		return "level "+level;
+    	}
+    }
     /**
      * Public 
      * @param args
