@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
