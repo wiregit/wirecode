@@ -29,6 +29,7 @@ public class InterClientTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    static UpdateRequest dummy = new UpdateRequest();
     public void setUp() throws Exception {
         setEmpty();
     }
@@ -103,7 +104,7 @@ public class InterClientTest extends ClientSideTestCase {
         
         // Get the -10 file.
         byte[] b = readFile(-10);
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -128,7 +129,7 @@ public class InterClientTest extends ClientSideTestCase {
         
         // Get the -10 file.
         byte[] b = readFile(-10);
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -148,7 +149,7 @@ public class InterClientTest extends ClientSideTestCase {
         // Get the -10 file.
         byte[] b = readFile(-10);
         b[0] = '0'; // break the sig.
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -168,7 +169,7 @@ public class InterClientTest extends ClientSideTestCase {
         // Get the -10 file.
         byte[] b = readFile(-10);
         b[b.length-1] = '0'; // break the data.
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -187,7 +188,7 @@ public class InterClientTest extends ClientSideTestCase {
         
         // Get the -9 file.
         byte[] b = readFile(-9);
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -209,7 +210,7 @@ public class InterClientTest extends ClientSideTestCase {
         
         // Get the -8 file.
         byte[] b = readFile(-8);
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
@@ -228,7 +229,7 @@ public class InterClientTest extends ClientSideTestCase {
         
         // Get the -8 file.
         b = readFile(-8);
-        testUP[0].send(new UpdateResponse(b));
+        testUP[0].send(UpdateResponse.createUpdateResponse(b,dummy));
         testUP[0].flush();
         
         Thread.sleep(1000); // let it process.
