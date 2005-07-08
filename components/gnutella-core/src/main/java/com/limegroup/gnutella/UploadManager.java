@@ -202,6 +202,16 @@ public class UploadManager implements BandwidthTracker {
      * The file index used in this structure to indicate a HTTP Resource Get.
      */
     public static final int RESOURCE_INDEX = -7;
+
+    /** 
+     * The file index used in this structure to indicate a special request from a browser.
+     */
+    public static final int BROWSER_CONTROL_INDEX = -8;
+
+    /**
+     * Constant for the beginning of a BrowserControl request.
+     */
+    public static final String BROWSER_CONTROL_STR = "/browser-control";
     
     /**
      * Constant for HttpRequestLine parameter
@@ -456,6 +466,7 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getIndex() != RESOURCE_INDEX &&
+               uploader.getIndex() != BROWSER_CONTROL_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD &&
                !uploader.isForcedShare();
 	}
@@ -542,6 +553,9 @@ public class UploadManager implements BandwidthTracker {
         switch(uploader.getIndex()) {
         case BROWSE_HOST_FILE_INDEX:
             uploader.setState(Uploader.BROWSE_HOST);
+            return;
+        case BROWSER_CONTROL_INDEX:
+            uploader.setState(Uploader.BROWSER_CONTROL);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -1304,6 +1318,10 @@ public class UploadManager implements BandwidthTracker {
                 index = BROWSE_HOST_FILE_INDEX;
                 fileName = "Browse-Host Request";
                 UploadStat.BROWSE_HOST.incrementStat();
+            } else if(fileInfoPart.startsWith(BROWSER_CONTROL_STR)) {
+                //special case for browser-control request
+                index = BROWSER_CONTROL_INDEX;
+                fileName = fileInfoPart;
             } else if(fileInfoPart.startsWith(FV_REQ_BEGIN)) {
                 //special case for file view request
                 index = FILE_VIEW_FILE_INDEX;
