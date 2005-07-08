@@ -283,13 +283,16 @@ public class UpdateHandler {
         _updatesToDownload = updatesToDownload;
         _updatesNeedClearing = true;
         
-        downloadUpdates(updatesToDownload, null);
+        boolean started = downloadUpdates(updatesToDownload, null);
         
         if(updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (updateInfo.getUpdateURN() == null) {
-            LOG.debug("we have an update, but it doesn't need a download.  Scheduling...");
+        } else if (updateInfo.getUpdateURN() == null || !started) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("we have an update, but it doesn't need a download.  " +
+                    "or all our updates are hopeles. Scheduling...");
+            
             RouterService.schedule(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
                     0);
@@ -330,13 +333,14 @@ public class UpdateHandler {
     
     /**
      * Tries to download updates.
+     * @return whether we had any non-hopeless updates.
      */
-    private void downloadUpdates(List toDownload, ReplyHandler source) {
+    private boolean downloadUpdates(List toDownload, ReplyHandler source) {
         if (toDownload == null)
             toDownload = Collections.EMPTY_LIST;
         
         DownloadManager dm = RouterService.getDownloadManager();
-        
+        boolean ret = false;
         
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
@@ -352,6 +356,8 @@ public class UpdateHandler {
                 String urn = next.getUpdateURN().httpStringValue();
                 if (UpdateSettings.FAILED_UPDATES.contains(urn))
                     continue;
+                
+                ret = true;
                 
                 FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
                 ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
@@ -378,7 +384,7 @@ public class UpdateHandler {
                 }
                 
                 if(md != null) {
-                    if(source != null)
+                    if(source != null) 
                         md.addDownload(rfd(source, next), false);
                     else
                         addCurrentDownloadSources(md, next);
@@ -386,6 +392,7 @@ public class UpdateHandler {
             }
         }
         
+        return ret;
     }
     
     /**
