@@ -14,7 +14,6 @@ public class StringSetSetting extends Setting {
     public StringSetSetting(Properties defaultProps, Properties props,
             String key, String defaultValue) {
         super(defaultProps, props, key, defaultValue, null);
-        setPrivate(true);
     }
     
     /**
