@@ -2317,7 +2317,7 @@ OPTIONS_THEME_MAIN_TITLE=Скинова
 OPTIONS_SKIN_MAIN_TITLE=Скинова
 #### OPTIONS_SEARCH_MAIN_TITLE=Searching
 #? OPTIONS_SEARCH_MAIN_TITLE=
-#### OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Limit
+#### OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Basic
 #? OPTIONS_SEARCH_LIMIT_MAIN_TITLE=
 #### OPTIONS_SEARCH_QUALITY_MAIN_TITLE=Quality
 #? OPTIONS_SEARCH_QUALITY_MAIN_TITLE=
@@ -2506,6 +2506,17 @@ OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Преузимања брзина везе
 #? OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=
 #### OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Download Speed:
 OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Преузимања брзина:
+
+################################################################################
+# Key/Value pairs for the options for download license warning
+# in the options window
+################################################################################
+#### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=Clear Downloads
+#? OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=
+#### OPTIONS_DOWNLOAD_LICENSE_WARNING_LABEL=You can choose whether to be warned about downloading a file without a license.
+#? OPTIONS_DOWNLOAD_LICENSE_WARNING_LABEL=
+#### OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Show License Warning:
+#? OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -2728,7 +2739,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Аудио опције
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 #? OPTIONS_BUGS_TITLE=
-#### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard Bugs' will cause LimeWire to ignore all bugs (this is not recommended).
+#### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard All Errors' will cause LimeWire to ignore all bugs (this is not recommended).
 #? OPTIONS_BUGS_LABEL=
 #### OPTIONS_BUGS_VIEW_EXAMPLE=View Example
 #? OPTIONS_BUGS_VIEW_EXAMPLE=
