@@ -81,11 +81,6 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * The size of each node
      */
     private transient int _nodeSize;
-    
-    /**
-     * A digest for verification
-     */
-    private transient TigerTree _digest;
 
     /**
      * Constructs a new HashTree out of the given nodes, root, sha1
@@ -227,23 +222,16 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         if (in.low % _nodeSize == 0 && 
                 in.high - in.low +1 <= _nodeSize &&
                 (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
-            TigerTree digest = getDigest();
+            TigerTree digest = new TigerTree();
             digest.update(data);
             byte [] hash = digest.digest();
             byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
             boolean ok = Arrays.equals(treeHash, hash);
-            digest.reset();
             if (LOG.isDebugEnabled())
                 LOG.debug("interval "+in+" verified "+ok);
             return !ok;
         } 
         return true;
-    }
-    
-    private TigerTree getDigest() {
-    	if (_digest == null)
-    		_digest = new TigerTree();
-    	return _digest;
     }
 
     /**
