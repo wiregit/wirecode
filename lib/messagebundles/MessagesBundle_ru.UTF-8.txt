@@ -551,7 +551,7 @@ MENU_HELP_ERROR_ACCESSIBLE=Сгенерировать сообщение об о
 ################################################################################
 # Key/value pairs for status bar components and right-click menu
 ################################################################################
-#### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality Text
+#### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 #? STATUS_BAR_SHOW_CONNECTION_QUALITY=
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
 #? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
@@ -1071,7 +1071,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED=Турбозагрузка
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=Купив LimeWire Pro, вы сможете постоянно иметь такое соединение.
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Ваше соединение с сетью превосходного качества.
-#### STATISTICS_CONNECTION_QUALITY=Connection:
+#### STATISTICS_CONNECTION_QUALITY=Connection
 STATISTICS_CONNECTION_QUALITY=Качество:
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
 STATISTICS_CONNECTION_WAKING_UP=Просыпаюсь
@@ -1944,6 +1944,10 @@ UPDATE_MESSAGE_SMALL=Появилась новая версия, обновит�
 #? UPDATE_NOW_LABEL=
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 #? UPDATE_TIP=
+#### UPDATE_RESTART=LimeWire needs to be restarted to install the update.  If you choose not to update now, LimeWire will update automatically when you close.  Would you like to update now?
+#? UPDATE_RESTART=
+#### UPDATE_RESTART_TITLE=Update Ready
+#? UPDATE_RESTART_TITLE=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
@@ -2644,11 +2648,11 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Вы можете использовать вс�
 ################################################################################
 # Key/Value pairs for the status bar options in the options window
 ################################################################################
-#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Text Indicator:
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Connection Quality Indicator
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=
-#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display text explaining your connection quality in the status bar.
+#### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=
 #### OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Show Shared Files Indicator:
 #? OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=
