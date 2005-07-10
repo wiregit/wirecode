@@ -2749,6 +2749,15 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         return ourFile == null ? 0 : ourFile.getBlockSize();                
     }
+    
+    public int getAmountPending() {
+        VerifyingFile ourFile;
+        synchronized(this) {
+            ourFile = commonOutFile;
+        }
+        
+        return ourFile == null ? 0 : ourFile.getPendingSize();
+    }
      
     public synchronized Iterator /* of Endpoint */ getHosts() {
         return getHosts(false);

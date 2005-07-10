@@ -360,6 +360,14 @@ public class VerifyingFile {
         	pendingBlocks.getSize();
     }
     
+    public synchronized int getPendingSize() {
+        return pendingBlocks.getSize();
+    }
+    
+    public static int getNumPendingItems() {
+        return QUEUE.size();
+    }
+    
     /**
      * Returns the total number of verified bytes written to disk.
      */
@@ -582,7 +590,6 @@ public class VerifyingFile {
         
         byte []b = new byte[i.high - i.low+1];
         // read the interval from the file
-        long pos = -1;
         try {
 			synchronized(fos) {
 				fos.seek(i.low);

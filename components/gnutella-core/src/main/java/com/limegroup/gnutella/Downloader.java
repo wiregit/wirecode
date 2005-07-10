@@ -136,6 +136,11 @@ public interface Downloader extends BandwidthTracker {
     public int getAmountRead();
     
     /**
+     * @return the amount of data pending to be written on disk (i.e. in cache, queue)
+     */
+    public int getAmountPending();
+    
+    /**
      * Returns the locations from which this is currently downloading, as an
      * iterator of Endpoint.  If this is swarming, may return multiple
      * addresses.  Result meaningful only in the DOWNLOADING state.

@@ -66,6 +66,10 @@ public class ProcessingQueue {
         QUEUE.clear();
     }
     
+    public synchronized int size() {
+        return QUEUE.size();
+    }
+    
     /**
      * Starts a new runner.
      */
