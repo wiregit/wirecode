@@ -77,7 +77,6 @@ public class OGGWritingTest extends BaseTestCase {
         //3. Test if the data was written correctly
         data = (AudioMetaData)MetaData.parse(TEST_FILE);
 
-        assertTrue(data.toString(), data.isComplete());
         assertEquals("Title not written", "New Title", data.getTitle());
         assertEquals("Artist not written", "new Artist",  data.getArtist());
         assertEquals("Genre not written", "Classic Rock", data.getGenre());
