@@ -180,12 +180,16 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
-        storedException = null;
-        isOpen = true;
-        
-        // Figure out which SelectionStrategy to use
-        blockChooser = SelectionStrategyFactory.getStrategyFor(
+        SelectionStrategy myStrategy = SelectionStrategyFactory.getStrategyFor(
                 FileUtils.getFileExtension(file), completedSize);
+        
+        synchronized(this) {
+            storedException = null;
+            
+            // Figure out which SelectionStrategy to use
+            blockChooser = myStrategy;
+            isOpen = true;
+        }
     }
 
     /**
@@ -671,7 +675,7 @@ public class VerifyingFile {
     		try {
     		    if(LOG.isTraceEnabled())
     		        LOG.trace("Writing intvl: " + intvl);
-    		        
+                
     			synchronized(fos) {
     				fos.seek(intvl.low);
     				fos.write(buf, 0, intvl.high - intvl.low + 1);
@@ -685,6 +689,7 @@ public class VerifyingFile {
     			verifyChunks();
             } catch(IOException diskIO) {
                 synchronized(VerifyingFile.this) {
+                    pendingBlocks.delete(intvl);
                     storedException = diskIO;
                 }
             } finally {
