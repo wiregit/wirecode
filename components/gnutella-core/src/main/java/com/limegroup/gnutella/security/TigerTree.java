@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.6 2005-07-08 21:14:04 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.7 2005-07-11 00:05:13 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -15,7 +15,6 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
@@ -71,6 +70,9 @@ public class TigerTree extends MessageDigest {
         }
     }
 
+    /** a Marker for the Stack */
+    private static final byte[] MARKER = new byte[0];
+
     /** 1024 byte buffer */
     private final byte[] buffer;
 
@@ -83,7 +85,8 @@ public class TigerTree extends MessageDigest {
     /** Internal Tiger MD instance */
     private MessageDigest tiger;
 
-    private Stack stack;
+    /** The List of Nodes */
+    private ArrayList nodes;
 
     /**
      * Constructor
@@ -93,7 +96,7 @@ public class TigerTree extends MessageDigest {
         buffer = new byte[BLOCKSIZE];
         bufferOffset = 0;
         byteCount = 0;
-        stack = new Stack();
+	nodes = new ArrayList();
         if(USE_CRYPTIX) {
             try {
                 tiger = MessageDigest.getInstance("Tiger", "CryptixCrypto");
@@ -121,6 +124,8 @@ public class TigerTree extends MessageDigest {
 
     protected void engineUpdate(byte[] in, int offset, int length) {
         byteCount += length;
+	nodes.ensureCapacity(log2Ceil(byteCount / BLOCKSIZE));
+
         if (bufferOffset > 0) {
         	int remaining = BLOCKSIZE - bufferOffset;
         	System.arraycopy(in,offset,buffer,bufferOffset, remaining);
@@ -160,13 +165,9 @@ public class TigerTree extends MessageDigest {
         // hash any remaining fragments
         blockUpdate();
 
-        byte [] ret;
-        if (stack.size() > 1) 
-        	collapse();
+	byte []ret = collapse();
         
-        Assert.that(stack.size() == 1);
-        Node top = (Node)stack.pop();
-        ret = top.data;
+	Assert.that(ret != MARKER);
         
         System.arraycopy(ret,0,buf,offset,HASHSIZE);
         engineReset();
@@ -176,24 +177,33 @@ public class TigerTree extends MessageDigest {
     /**
      * collapse whatever the tree is now to a root.
      */
-    private void collapse() {
-    	while(stack.size() > 1) {
-    		Node right = (Node)stack.pop();
-    		Node left = (Node)stack.pop();
-    		tiger.reset();
-    		tiger.update((byte)1);
-    		tiger.update(left.data);
-    		tiger.update(right.data);
-    		stack.push(new Node(tiger.digest(),-1));
-    	}
-    	
-    	Assert.that(stack.size() == 1);
+    private byte[] collapse() {
+        byte [] last = null;
+	for (int i = 0 ; i < nodes.size(); i++) {
+	    byte [] current = (byte[]) nodes.get(i);
+	    if (current == MARKER)
+		continue;
+	    
+	    if (last == null) 
+		last = current;
+	    else {
+	       	tiger.reset();
+		tiger.update((byte)1);
+		tiger.update(current);
+		tiger.update(last);
+		last = tiger.digest();
+	    }
+	
+	    nodes.set(i,MARKER);
+	}
+	Assert.that(last != null);
+	return last;
     }
 
     protected void engineReset() {
         bufferOffset = 0;
         byteCount = 0;
-        stack = new Stack();
+	nodes = new ArrayList();
         tiger.reset();
     }
 
@@ -217,72 +227,42 @@ public class TigerTree extends MessageDigest {
         tiger.reset();
         tiger.update((byte) 0); // leaf prefix
         tiger.update(buf, pos, len);
-        if ((len == 0) && (stack.size() > 0))
+        if ((len == 0) && (nodes.size() > 0))
             return; // don't remember a zero-size hash except at very beginning
         byte [] digest = tiger.digest();
-        push(digest,0);
+        push(digest);
     }
 
-    private void push(byte [] data, int level) {
-    	if (!stack.isEmpty()) {
-    		Node n = (Node) stack.peek();
-    		if (n.level == level) {
-    			stack.pop();
-    			tiger.reset();
-    			tiger.update((byte) 1); // node prefix
-    			tiger.update(n.data);
-    			tiger.update(data);
-    			push(tiger.digest(),++level);
-    			return;
-    		}
-    		Assert.that(n.level > level);
-    	} 
-    	stack.push(new Node(data,level));
-    }
-    
-    private class Node {
-    	public final byte [] data;
-    	public final int level;
-    	Node(byte [] data, int level) {
-    		this.data = data;
-    		this.level = level;
-    	}
-    	public String toString() {
-    		return "level "+level;
-    	}
-    }
-    /**
-     * Public 
-     * @param args
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-     /*
-    public static void main(String[] args)
-        throws IOException, NoSuchAlgorithmException {
-        if (args.length < 1) {
-            System.out.println("You must supply a filename.");
-            return;
-        }
-        MessageDigest tt = new TigerTree();
-        FileInputStream fis;
 
-        for (int i = 0; i < args.length; i++) {
-            fis = new FileInputStream(args[i]);
-            int read;
-            byte[] in = new byte[1024];
-            while ((read = fis.read(in)) > -1) {
-                tt.update(in, 0, read);
-            }
-            fis.close();
-            byte[] digest = tt.digest();
-            String hash = new BigInteger(1, digest).toString(16);
-            while (hash.length() < 48) {
-                hash = "0" + hash;
-            }
-            System.out.println("hex:" + hash);
-            System.out.println("b32:" + Base32.encode(digest));
-            tt.reset();
+    private void push(byte [] data) {
+	if (!nodes.isEmpty()) {
+	   for (int i = 0; i < nodes.size(); i++) {
+		byte[] node =  (byte[]) nodes.get(i);
+		if (node == MARKER) {
+		   nodes.set(i,data);
+		   return;
+		}
+		
+		tiger.reset();
+		tiger.update((byte)1);
+		tiger.update(node);
+		tiger.update(data);
+		data = tiger.digest();
+		nodes.set(i,MARKER);
+	   }	
+	} 
+        nodes.add(data);	
+    }   
+
+    // calculates the next n with 2^n > number
+    public static int log2Ceil(long number) {
+        int n = 0;
+        while (number > 1) {
+            number++; // for rounding up.
+            number >>>= 1;
+            n++;
         }
-    }*/
+        return n;
+    }
+
 }

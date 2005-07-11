@@ -100,7 +100,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         FILE_SIZE = fileSize;
         ROOT_HASH = (byte[])((List)allNodes.get(0)).get(0);
         DEPTH = allNodes.size()-1;
-        Assert.that(log2Ceil(NODES.size()) == DEPTH);
+        Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         HashTreeNodeManager.instance().register(this, allNodes);
         _nodeSize = nodeSize;
     }
@@ -144,7 +144,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         if (fileSize % maxNodes != 0)
             idealNodeSize++;
         // calculate nodes size, node size must equal to 2^n, n in {10,11,...}
-        int n = log2Ceil(idealNodeSize);
+        int n = TigerTree.log2Ceil(idealNodeSize);
         // 2^n
         int nodeSize = 1 << n;
         
@@ -521,16 +521,5 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             }
         }
         return ret;
-    }
-
-    // calculates the next n with 2^n > number
-    private static int log2Ceil(int number) {
-        int n = 0;
-        while (number > 1) {
-            number++; // for rounding up.
-            number >>>= 1;
-            n++;
-        }
-        return n;
     }
 }
