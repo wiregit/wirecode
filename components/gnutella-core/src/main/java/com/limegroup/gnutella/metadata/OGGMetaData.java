@@ -75,7 +75,6 @@ public class OGGMetaData extends AudioMetaData{
 			setComment(safeQuery(COMMENT_TAG,comments[0]));
 			setGenre(safeQuery(GENRE_TAG,comments[0]));
 			setLicense(safeQuery(LICENSE_TAG, comments[0]));
-            setLicenseType("unknown");
 			
 			//oggs store the year in yyyy-mm-dd format
 			String year = safeQuery(DATE_TAG,comments[0]);
