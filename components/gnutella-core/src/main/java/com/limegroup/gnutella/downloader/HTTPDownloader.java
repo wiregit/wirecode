@@ -1704,6 +1704,7 @@ public class HTTPDownloader implements BandwidthTracker {
     	_initialWritingPoint = 0;
     	_initialReadingPoint = 0;
     	_amountToRead = 0;
+        _amountRead = 0;
     }
     
     ///////////////////////////// Accessors ///////////////////////////////////
@@ -1776,7 +1777,14 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getTotalAmountRead());
+        int totalAmountRead = 0;
+        synchronized(this) {
+            if (!_isActive)
+                return;
+            totalAmountRead = getTotalAmountRead();
+        }
+        
+        bandwidthTracker.measureBandwidth(totalAmountRead);
     }
 
     public float getMeasuredBandwidth() throws InsufficientDataException {

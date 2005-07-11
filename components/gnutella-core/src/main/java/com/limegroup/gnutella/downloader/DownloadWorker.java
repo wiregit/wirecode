@@ -1073,12 +1073,13 @@ public class DownloadWorker implements Runnable {
     }
     
     Interval getDownloadInterval() {
-        synchronized(_downloader) {
+        HTTPDownloader downloader = _downloader;
+        synchronized(downloader) {
             
-            int start = Math.max(_downloader.getInitialReadingPoint() + _downloader.getAmountRead(),
-                    _downloader.getInitialWritingPoint());
+            int start = Math.max(downloader.getInitialReadingPoint() + downloader.getAmountRead(),
+                    downloader.getInitialWritingPoint());
             
-            int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountToRead();
+            int stop = downloader.getInitialReadingPoint() + downloader.getAmountToRead();
             
             return new Interval(start,stop);
         }
