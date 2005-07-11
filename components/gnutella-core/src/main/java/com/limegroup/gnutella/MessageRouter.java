@@ -2029,8 +2029,6 @@ public abstract class MessageRouter {
      *  Handles an update request by sending a response.
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
-        if(req.getVersion() > UpdateRequest.VERSION)
-            return; //we are not going to deal with these types of requests. 
 
         byte[] data = UpdateHandler.instance().getLatestBytes();
         if(data != null) {
