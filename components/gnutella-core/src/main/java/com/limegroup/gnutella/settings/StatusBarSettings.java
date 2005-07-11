@@ -11,7 +11,7 @@ public class StatusBarSettings extends LimeProps {
      * Whether or not connection quality status should be displayed.
      */
     public static BooleanSetting CONNECTION_QUALITY_DISPLAY_ENABLED =
-        FACTORY.createBooleanSetting("CONNECTION_QUALITY_DISPLAY_ENABLED", false);
+        FACTORY.createBooleanSetting("CONNECTION_QUALITY_DISPLAY_ENABLED", true);
 
     /**
      * Whether or not number of shared files should be displayed.
@@ -23,7 +23,7 @@ public class StatusBarSettings extends LimeProps {
      * Whether or not firewall status should be displayed.
      */
     public static BooleanSetting FIREWALL_DISPLAY_ENABLED =
-        FACTORY.createBooleanSetting("FIREWALL_DISPLAY_ENABLED", false);
+        FACTORY.createBooleanSetting("FIREWALL_DISPLAY_ENABLED", true);
 
     /**
      * Whether or not bandwidth consumption should be displayed.
