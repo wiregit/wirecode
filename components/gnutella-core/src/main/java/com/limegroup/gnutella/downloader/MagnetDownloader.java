@@ -343,4 +343,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 		return magnet.getFileNameForSaving();
     }
+
+	/**
+	 * Overridden to make sure it calls the super method only if 
+	 * the filesize is known.
+	 */
+	protected void initializeIncompleteFile() throws IOException {
+		if (getContentLength() != -1) {
+			super.initializeIncompleteFile();
+		}
+	}
 }

@@ -2717,7 +2717,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return ( cachedRFDs != null && !cachedRFDs.isEmpty());
 	}
 	
-
+	/**
+	 * Return -1 if the file size is not known yet, i.e. is not stored in the
+	 * properties map under {@link #FILE_SIZE}.
+	 */
     public synchronized int getContentLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
         return i != null ? i.intValue() : -1;
