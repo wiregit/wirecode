@@ -260,6 +260,55 @@ public class InterClientTest extends ClientSideTestCase {
         byte [] payload = payload(m);
         GGEP g = new GGEP(payload,0,null);
         assertEquals(g.getBytes("C"),data);
+        assertFalse(g.hasKey("U"));
+    }
+    
+    public void testUncompressedGGEPResponse() throws Exception {
+        drain(testUP[0]);
+        
+        assertEquals(0, UpdateHandler.instance().getLatestId());
+        
+        // We should get no response, since we have no data to give.
+        testUP[0].send(new UpdateRequest());
+        testUP[0].flush();
+        Message m = getFirstInstanceOfMessageType(testUP[0], UpdateResponse.class);
+        assertNull(m);
+        
+        UpdateRequestStub request = new UpdateRequestStub(2,true,false);
+        byte[] data = setCurrent(-10);
+        testUP[0].send(request);
+        testUP[0].flush();
+        m = getFirstInstanceOfMessageType(testUP[0], UpdateResponse.class);
+        assertNotNull(m);
+        assertInstanceof(UpdateResponse.class, m);
+        
+        byte [] payload = payload(m);
+        GGEP g = new GGEP(payload,0,null);
+        assertEquals(g.getBytes("U"),data);
+        assertFalse(g.hasKey("C"));
+    }
+    
+    /**
+     * tests that a request with higher version w/o GGEP gets responded to properly
+     */
+    public void testHigherVersionNoGGEP() throws Exception {
+        drain(testUP[0]);
+        
+        assertEquals(0, UpdateHandler.instance().getLatestId());
+        
+        // We should get no response, since we have no data to give.
+        testUP[0].send(new UpdateRequest());
+        testUP[0].flush();
+        Message m = getFirstInstanceOfMessageType(testUP[0], UpdateResponse.class);
+        assertNull(m);
+        
+        UpdateRequestStub request = new UpdateRequestStub(2,false,false);
+        byte[] data = setCurrent(-10);
+        testUP[0].send(request);
+        testUP[0].flush();
+        m = getFirstInstanceOfMessageType(testUP[0], UpdateResponse.class);
+        assertNotNull(m);
+        assertEquals(data,payload(m));
     }
     
     private static void setCurrentId(int i) throws Exception {
@@ -334,6 +383,8 @@ public class InterClientTest extends ClientSideTestCase {
         GGEP g = new GGEP();
         if (requestsCompressed)
             g.put("C");
+        else
+            g.put("X"); //put something else
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         g.write(baos);
