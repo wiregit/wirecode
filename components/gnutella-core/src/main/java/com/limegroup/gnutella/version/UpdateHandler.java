@@ -262,7 +262,6 @@ public class UpdateHandler {
                     javaV);
 
         List updatesToDownload = uc.getUpdatesWithDownloadInformation();
-        killObsoleteUpdates(updatesToDownload);
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
@@ -316,18 +315,6 @@ public class UpdateHandler {
     }
     
     /**
-     * kills all in-network downloaders whose URNs are not listed in the list of updates.
-     */
-    private static void killObsoleteUpdates(List toDownload) {
-        if (toDownload == null)
-            toDownload = Collections.EMPTY_LIST;
-        
-        DownloadManager dm = RouterService.getDownloadManager();
-        if (dm.isGUIInitd())
-            dm.killDownloadersNotListed(toDownload);        
-    }
-    
-    /**
      * Notification that a given ReplyHandler may have an update we can use.
      */
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
@@ -345,6 +332,7 @@ public class UpdateHandler {
         if (toDownload == null)
             toDownload = Collections.EMPTY_LIST;
         
+        killObsoleteUpdates(toDownload);
         boolean ret = false;
         
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
@@ -394,6 +382,16 @@ public class UpdateHandler {
         }
         
         return ret;
+    }
+    
+    /**
+     * kills all in-network downloaders whose URNs are not listed in the list of updates.
+     */
+    private static void killObsoleteUpdates(List toDownload) {
+        
+        DownloadManager dm = RouterService.getDownloadManager();
+        if (dm.isGUIInitd())
+            dm.killDownloadersNotListed(toDownload);        
     }
     
     /**
