@@ -365,11 +365,18 @@ public class DownloadWorker implements Runnable {
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
             // If the download failed, don't keep trying to download.
+            boolean downloaded = false;
             try {
-                if(!doDownload(http11))
+                downloaded = doDownload(http11);
+                if(downloaded)
                     break;
             }finally {
-                releaseRanges();
+                try {
+                    releaseRanges();
+                } catch (AssertFailure bad) {
+                    throw new AssertFailure("downloaded "+downloaded+" worker failed "+getInfo()+
+                            " all workers: "+_manager.getWorkersInfo(),bad);
+                }
             }
         } // end of while(http11)
     }
