@@ -9,12 +9,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
-import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.FileDesc;
@@ -111,11 +108,6 @@ public class UpdateHandler {
      * The next time we can make an attempt to download a pushed file.
      */
     private long _nextDownloadTime;
-    
-    /**
-     * whether the current updates need to be cleared
-     */
-    private boolean _updatesNeedClearing;
     
     /**
      * The time we'll notify the gui about an update with URL
@@ -270,6 +262,7 @@ public class UpdateHandler {
                     javaV);
 
         List updatesToDownload = uc.getUpdatesWithDownloadInformation();
+        killObsoleteUpdates(updatesToDownload);
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
@@ -278,10 +271,9 @@ public class UpdateHandler {
             updatesToDownload = new LinkedList(updatesToDownload);
             updatesToDownload.add(0,updateInfo);
         }
-        
+
         _updateInfo = updateInfo;
         _updatesToDownload = updatesToDownload;
-        _updatesNeedClearing = true;
         
         boolean started = downloadUpdates(updatesToDownload, null);
         
@@ -324,6 +316,18 @@ public class UpdateHandler {
     }
     
     /**
+     * kills all in-network downloaders whose URNs are not listed in the list of updates.
+     */
+    private static void killObsoleteUpdates(List toDownload) {
+        if (toDownload == null)
+            toDownload = Collections.EMPTY_LIST;
+        
+        DownloadManager dm = RouterService.getDownloadManager();
+        if (dm.isGUIInitd())
+            dm.killDownloadersNotListed(toDownload);        
+    }
+    
+    /**
      * Notification that a given ReplyHandler may have an update we can use.
      */
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
@@ -341,19 +345,14 @@ public class UpdateHandler {
         if (toDownload == null)
             toDownload = Collections.EMPTY_LIST;
         
-        DownloadManager dm = RouterService.getDownloadManager();
         boolean ret = false;
         
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
-            
+        
+            DownloadManager dm = RouterService.getDownloadManager();
             FileManager fm = RouterService.getFileManager();
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
-                
-                if (_updatesNeedClearing) {
-                    _updatesNeedClearing = false;
-                    dm.killDownloadersNotListed(toDownload);
-                }
                 
                 String urn = next.getUpdateURN().httpStringValue();
                 if (UpdateSettings.FAILED_UPDATES.contains(urn))
@@ -564,7 +563,7 @@ public class UpdateHandler {
      * @return true if the update for our specific machine is downloaded or
      * there was nothing to download
      */
-    public static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+    private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
         FileManager fm = RouterService.getFileManager();
         URN myUrn = myInfo.getUpdateURN();
         if (myUrn == null)
