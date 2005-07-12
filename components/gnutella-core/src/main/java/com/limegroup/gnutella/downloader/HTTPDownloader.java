@@ -497,7 +497,6 @@ public class HTTPDownloader implements BandwidthTracker {
         synchronized(this) {
             _isActive = true;
             _amountToRead = stop-start;
-            _totalAmountRead += _amountRead;
             _amountRead = 0;
             _initialReadingPoint = start;
             _initialWritingPoint = start;
@@ -1704,7 +1703,8 @@ public class HTTPDownloader implements BandwidthTracker {
     	_initialWritingPoint = 0;
     	_initialReadingPoint = 0;
     	_amountToRead = 0;
-        _amountRead = 0;
+    	_totalAmountRead += _amountRead;
+      _amountRead = 0;
     }
     
     ///////////////////////////// Accessors ///////////////////////////////////
