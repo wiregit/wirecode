@@ -109,6 +109,8 @@ public class UpdateHandler {
      */
     private long _nextDownloadTime;
     
+    private boolean _killingObsoleteNecessary;
+    
     /**
      * The time we'll notify the gui about an update with URL
      */
@@ -262,6 +264,7 @@ public class UpdateHandler {
                     javaV);
 
         List updatesToDownload = uc.getUpdatesWithDownloadInformation();
+        _killingObsoleteNecessary = true;
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
@@ -387,11 +390,13 @@ public class UpdateHandler {
     /**
      * kills all in-network downloaders whose URNs are not listed in the list of updates.
      */
-    private static void killObsoleteUpdates(List toDownload) {
-        
-        DownloadManager dm = RouterService.getDownloadManager();
-        if (dm.isGUIInitd())
-            dm.killDownloadersNotListed(toDownload);        
+    private void killObsoleteUpdates(List toDownload) {
+        if (_killingObsoleteNecessary) {
+            _killingObsoleteNecessary = false;
+            DownloadManager dm = RouterService.getDownloadManager();
+            if (dm.isGUIInitd())
+                dm.killDownloadersNotListed(toDownload);
+        }
     }
     
     /**
