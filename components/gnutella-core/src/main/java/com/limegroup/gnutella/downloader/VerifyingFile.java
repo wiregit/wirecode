@@ -47,6 +47,11 @@ public class VerifyingFile {
     private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF");
     
     /**
+     * Do not queue up more than this many chunks otherwise the queue grows unbounded
+     */
+    private static final int MAX_PENDING_CHUNKS = 1024; // == 1MB
+    
+    /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
      */
     private static final float MAX_CORRUPTION = 0.1f;
@@ -235,12 +240,22 @@ public class VerifyingFile {
             Assert.that(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
-		
+        
+		waitIfTooManyPending();
+        
 		// Remove from lease, put in pending for writing.
         leasedBlocks.delete(intvl);
         pendingBlocks.add(intvl);
         
         saveToDisk(buf, intvl);
+    }
+    
+    private void waitIfTooManyPending() {
+        try {
+            while (pendingBlocks.getSize() > 0 && // make sure someone will notify us
+                    getNumPendingItems() > MAX_PENDING_CHUNKS)
+                wait();
+        } catch (InterruptedException ignored) {} // means the worker was killed  
     }
 
 	/**
@@ -673,6 +688,7 @@ public class VerifyingFile {
         }
         
         public void run() {
+            boolean freedPending = false;
     		try {
     		    if(LOG.isTraceEnabled())
     		        LOG.trace("Writing intvl: " + intvl);
@@ -685,6 +701,7 @@ public class VerifyingFile {
     			synchronized(VerifyingFile.this) {
     			    pendingBlocks.delete(intvl);
     			    partialBlocks.add(intvl);
+                    freedPending = true;
     			}
     			
     			verifyChunks();
@@ -695,7 +712,9 @@ public class VerifyingFile {
                 }
             } finally {
                 synchronized(VerifyingFile.this) {
-                    VerifyingFile.this.notify();
+                    if (!freedPending)
+                        pendingBlocks.delete(intvl);
+                    VerifyingFile.this.notifyAll(); //MD & any workers
                 }
             }
         }
@@ -705,7 +724,7 @@ public class VerifyingFile {
         public void run() {
             verifyChunks();
             synchronized(VerifyingFile.this) {
-                VerifyingFile.this.notify();
+                VerifyingFile.this.notifyAll();
             }
         }
     }
