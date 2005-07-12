@@ -205,6 +205,7 @@ public class DownloadWorker implements Runnable {
             
             connectAndDownload();
         } catch (Throwable e) {
+            LOG.debug("got an exception in run()",e);
              // Ignore InterruptedException -- the JVM throws
              // them for some reason at odd times, even though
              // we've caught and handled all of them
@@ -369,7 +370,7 @@ public class DownloadWorker implements Runnable {
             boolean downloaded = false;
             try {
                 downloaded = doDownload(http11);
-                if(downloaded)
+                if(!downloaded)
                     break;
             }finally {
                 try {
@@ -700,6 +701,8 @@ public class DownloadWorker implements Runnable {
                 DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
             else
                 DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
+            
+            LOG.debug("WORKER: successfully finished download");
         } catch (DiskException e) {
             // something went wrong while writing to the file on disk.
             // kill the other threads and set
