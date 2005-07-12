@@ -508,7 +508,6 @@ public class DownloadWorker implements Runnable {
             return;
         }
 
-        HTTPDownloader ret = null;
         boolean needsPush = _rfd.needsPush();
         
         
@@ -540,15 +539,14 @@ public class DownloadWorker implements Runnable {
         // but older ones didn't understand them
         if( _rfd.isReplyToMulticast() ) {
             try {
-                ret = connectWithPush();
+                _downloader = connectWithPush();
             } catch(IOException e) {
                 try {
-                    ret = connectDirectly();
+                    _downloader = connectDirectly();
                 } catch(IOException e2) {
                     return ; // impossible to connect.
                 }
             }
-            _downloader = ret;
             return;
         }        
         
@@ -557,23 +555,20 @@ public class DownloadWorker implements Runnable {
         // if we don't, try direct and if that fails try a push.        
         if( !needsPush ) {
             try {
-                ret = connectDirectly();
+                _downloader = connectDirectly();
             } catch(IOException e) {
                 // fall through to the push ...
             }
         }
         
-        if (ret == null) {
+        if (_downloader == null) {
             try {
-                ret = connectWithPush();
+                _downloader = connectWithPush();
             } catch(IOException e) {
                 // even the push failed :(
                 _manager.forgetRFD(_rfd);
             }
         }
-        
-        // did we connect at all?
-        _downloader = ret;
         
         // if we didn't connect at all, tell the rest about this rfd
         if (_downloader == null)
