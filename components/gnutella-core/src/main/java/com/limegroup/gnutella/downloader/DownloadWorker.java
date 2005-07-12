@@ -548,6 +548,7 @@ public class DownloadWorker implements Runnable {
                     return ; // impossible to connect.
                 }
             }
+            _downloader = ret;
             return;
         }        
         
