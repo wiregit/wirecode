@@ -525,7 +525,8 @@ public class VerifyingFile {
      */
     public synchronized void setHashTree(HashTree tree) {
         // doesn't match our expected tree, bail.
-        if(expectedHashRoot != null && !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
+        if(expectedHashRoot != null && tree != null &&
+                !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
             return;
         
         // if we did not have a tree previously and there are no pending blocks,
