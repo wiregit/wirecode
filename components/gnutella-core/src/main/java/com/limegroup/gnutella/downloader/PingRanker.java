@@ -163,6 +163,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
+        if (!hasMore())
+            return null;
         RemoteFileDesc ret;
         
         // try a verified host

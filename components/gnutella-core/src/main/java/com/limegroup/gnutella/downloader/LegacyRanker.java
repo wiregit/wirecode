@@ -44,7 +44,9 @@ public class LegacyRanker extends SourceRanker {
      * @return the best file/endpoint location 
      */
 	public synchronized RemoteFileDesc getBest() {
-		
+		if (!hasMore())
+            return null;
+        
         RemoteFileDesc ret = getBest(rfds.iterator());
         //The best rfd found so far
         boolean removed = rfds.remove(ret);

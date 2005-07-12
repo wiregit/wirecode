@@ -2432,11 +2432,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                     // see if we need to update our ranker
                     ranker = getSourceRanker(ranker);
                     
-                    if (ranker.hasMore()) {
-                        
-                        // get the best host
-                        RemoteFileDesc rfd = ranker.getBest();
-                        
+                    RemoteFileDesc rfd = ranker.getBest();
+                    
+                    if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
                         if( rfd.isBusy() ) 
