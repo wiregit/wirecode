@@ -290,6 +290,7 @@ public class DownloadWorker implements Runnable {
                 // consume the prior request's body
                 // if there was any.
                 _downloader.consumeBodyIfNecessary();
+                _downloader.forgetRanges();
                 
                 // if we didn't get queued doing the tree request,
                 // request another file.
