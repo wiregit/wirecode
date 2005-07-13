@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +50,7 @@ public class VerifyingFile {
     /**
      * Do not queue up more than this many chunks otherwise the queue grows unbounded
      */
-    private static final int MAX_PENDING_CHUNKS = 1024; // == 1MB
+    private static final int MAX_PENDING_CHUNKS = 512; // = half meg
     
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
@@ -63,6 +64,14 @@ public class VerifyingFile {
      *  since the chunk size will always be a power of two.
      */
     /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
+    
+    /** a bunch of cached byte[]s */
+    private static final Stack CACHE = new Stack();
+    static {
+        CACHE.ensureCapacity(MAX_PENDING_CHUNKS);
+        for (int i = 0; i < MAX_PENDING_CHUNKS; i++)
+            CACHE.push(new byte[HTTPDownloader.BUF_LENGTH]);
+    }
     
     /**
      * The file we're writing to / reading from.
@@ -677,14 +686,33 @@ public class VerifyingFile {
      * Runnable that writes chunks to disk & verifies partial blocks.
      */
     private class ChunkHandler implements Runnable {
+        /** The buffer we are about to write to the file */
         private final byte[] buf;
+        
+        /** The interval that we are about to write */
         private final Interval intvl;
         
+        /** Whether we got the byte[] from the cache */
+        private boolean cached;
+        
         public ChunkHandler(byte[] buf, Interval intvl) {
-           this.buf = new byte[buf.length];
+            byte [] temp = null;
+            if (buf.length == HTTPDownloader.BUF_LENGTH) {
+                synchronized(CACHE) {
+                    if (!CACHE.isEmpty()) {
+                        temp = (byte []) CACHE.pop();
+                        cached = true;
+                    }
+                }
+           }
+            
+           // cache empty or perhaps different size 
+           if (temp == null)
+               temp = new byte[buf.length];
+           
+           this.buf = temp;
            System.arraycopy(buf, 0, this.buf, 0, buf.length);
            this.intvl = intvl;
-
         }
         
         public void run() {
@@ -711,6 +739,10 @@ public class VerifyingFile {
                     storedException = diskIO;
                 }
             } finally {
+                // return the buffer to the cache
+                if (cached) 
+                    CACHE.push(buf);
+                
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
                         pendingBlocks.delete(intvl);
