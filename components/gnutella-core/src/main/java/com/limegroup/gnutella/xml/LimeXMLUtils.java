@@ -243,7 +243,8 @@ public class LimeXMLUtils {
                 // rigid.  so do a ignore case prefix match.
                 String queryValueLC = queryValue.toLowerCase(Locale.US);
                 String replyDocValueLC = I18NConvert.instance().getNorm(replyDocValue);
-                if(replyDocValueLC.startsWith(queryValueLC))
+                if (replyDocValueLC.startsWith(queryValueLC) ||
+                        replyDocValueLC.indexOf(" " + queryValueLC) >= 0)
                     matchCount++;
             }
         }
@@ -255,9 +256,9 @@ public class LimeXMLUtils {
         // We make an exception for queries of size 1 field. In this case, there
         // must be a 100% match (which is trivially >= %MATCHING_RATE)
         // * prefix match assumes a string; for numerics just do an equality test
-        double sizeD = (double)size;
-        double matchCountD = (double)matchCount;
-        double nullCountD = (double)nullCount;
+        double sizeD = size;
+        double matchCountD = matchCount;
+        double nullCountD = nullCount;
 		
 		if (size > 1) {
 			if (matchedBitrate) {
