@@ -256,7 +256,8 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
         
         try {
             socket.close();
-        } catch(IOException ignored) {}
+        } catch(IOException ignored) {
+        } catch(Error ignored) {} // nothing we can do about stupid internal errors.
             
         try {
             channel.close();
