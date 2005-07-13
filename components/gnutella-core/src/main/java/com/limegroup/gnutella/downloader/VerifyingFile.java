@@ -245,7 +245,6 @@ public class VerifyingFile {
             return;
         if(fos == null)
             throw new IllegalStateException("no fos!");
-        Assert.that(buf.length == HTTPDownloader.BUF_LENGTH);
         
         if (!isOpen())
             return;
@@ -254,6 +253,7 @@ public class VerifyingFile {
 		
         
         byte [] temp = getBuffer();
+        Assert.that(temp.length >= length);
         
         synchronized(this) {
     		/// some stuff to help debugging ///
@@ -768,8 +768,9 @@ public class VerifyingFile {
         public void run() {
             LOG.info("clearing cache");
             synchronized(CACHE) {
+                int size = CACHE.size();
                 CACHE.clear();
-                numCreated = 0;
+                numCreated -= size;
                 CACHE.notifyAll();
             }
         }
