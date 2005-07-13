@@ -26,6 +26,11 @@ public class ProcessingQueue {
      * not.
      */
     private final boolean MANAGED;
+
+    /**
+     * The priority at which to run this thread
+     */
+    private final int PRIORITY;
     
     /**
      * The thread doing the processing.
@@ -42,11 +47,22 @@ public class ProcessingQueue {
     /**
      * Constructs a new ProcessingQueue of the given name.  If managed
      * is true, uses a ManagedThread for processing.  Otherwise uses
-     * a normal thread.
+     * a normal thread.  The constructed thread has normal priority
      */
     public ProcessingQueue(String name, boolean managed) {
+        this(name,managed,Thread.NORM_PRIORITY);
+    }
+    
+    /**
+     * Constructs a new ProcessingQueue of the given name.  If managed
+     * is true, uses a ManagedThread for processing.  Otherwise uses
+     * a normal thread.  
+     * @param priority the priority of the processing thread
+     */
+    public ProcessingQueue(String name, boolean managed, int priority) {
         NAME = name;
         MANAGED = managed;
+        PRIORITY = priority;
     }
     
     /**
@@ -79,6 +95,7 @@ public class ProcessingQueue {
         else
             _runner = new Thread(new Processor(), NAME);
 
+        _runner.setPriority(PRIORITY);
         _runner.setDaemon(true);
         _runner.start();
     }

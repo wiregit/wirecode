@@ -45,7 +45,9 @@ public class VerifyingFile {
     /**
      * The thread that does the actual verification & writing
      */
-    private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF");
+    private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF", 
+            true, // managed 
+            Thread.NORM_PRIORITY+1); // a little higher priority than normal
     
     /**
      * Do not queue up more than this many chunks otherwise the queue grows unbounded
