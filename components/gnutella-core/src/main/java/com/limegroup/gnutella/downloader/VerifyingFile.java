@@ -376,6 +376,21 @@ public class VerifyingFile {
     }
 
     /**
+     * @return List of Intervals that should be serialized.  Excludes pending intervals.
+     */
+    public synchronized List getSerializableBlocks() {
+        IntervalSet ret = new IntervalSet();
+        for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
+        for (Iterator iter = partialBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
+        for (Iterator iter = savedCorruptBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
+        
+        return ret.getAllIntervalsAsList();
+        
+    }
+    /**
      * @return all downloaded blocks as list
      */
     public synchronized List getBlocksAsList() {

@@ -466,7 +466,7 @@ public class IncompleteFileManager implements Serializable {
             Object incompleteFile = iter.next();
             VerifyingFile vf  = (VerifyingFile)blocks.get(incompleteFile);
             synchronized(vf) {
-                List l = vf.getBlocksAsList();
+                List l = vf.getSerializableBlocks();
                 for(int i=0; i< l.size(); i++ ) {
                     //clone the list because we cant mutate VerifyingFile's List
                     Interval inter = (Interval)l.get(i);
