@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -52,7 +53,7 @@ public class VerifyingFile {
     /**
      * Do not queue up more than this many chunks otherwise the queue grows unbounded
      */
-    private static final int MAX_PENDING_CHUNKS = 512; // = half meg
+    private static final int MAX_CACHED_BUFFERS = 512; // = half meg
     
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
@@ -70,10 +71,15 @@ public class VerifyingFile {
     /** a bunch of cached byte[]s */
     private static final Stack CACHE = new Stack();
     static {
-        CACHE.ensureCapacity(MAX_PENDING_CHUNKS);
-        for (int i = 0; i < MAX_PENDING_CHUNKS; i++)
-            CACHE.push(new byte[HTTPDownloader.BUF_LENGTH]);
+        CACHE.ensureCapacity(MAX_CACHED_BUFFERS);
+        RouterService.schedule(new CacheCleaner(),10 * 60 * 1000, 10 * 60 * 1000);
     }
+    
+    /** 
+     * how many buffers were created
+     * LOCKING: hold CACHE 
+     */
+    private static int numCreated;
     
     /**
      * The file we're writing to / reading from.
@@ -217,14 +223,20 @@ public class VerifyingFile {
         partialBlocks.add(interval);
     }
 
-    public void writeBlock(long pos,byte[] data) {
+    /**
+     * Writes bytes to the underlying file.
+     * @throws InterruptedException if the downloader gets killed during the process
+     */
+    public void writeBlock(long pos,byte[] data) throws InterruptedException {
         writeBlock(pos,data.length,data);
     }
     
     /**
      * Writes bytes to the underlying file.
+     * @throws InterruptedException if the downloader gets killed during the process
      */
-    public synchronized void writeBlock(long currPos, int length, byte[] buf) {
+    public void writeBlock(long currPos, int length, byte[] buf) 
+    throws InterruptedException {
         
         if (LOG.isTraceEnabled())
             LOG.trace(" trying to write block at offset "+currPos+" with size "+length);
@@ -233,49 +245,54 @@ public class VerifyingFile {
             return;
         if(fos == null)
             throw new IllegalStateException("no fos!");
+        Assert.that(buf.length == HTTPDownloader.BUF_LENGTH);
         
         if (!isOpen())
             return;
 		
 		Interval intvl = new Interval(currPos,currPos+length-1);
 		
-		/// some stuff to help debugging ///
-		if (!leasedBlocks.contains(intvl)) {
-			Assert.that(false, "trying to write an interval "+intvl+
-                    " that wasn't leased.\n"+dumpState());
+        
+        byte [] temp = getBuffer();
+        
+        synchronized(this) {
+    		/// some stuff to help debugging ///
+    		if (!leasedBlocks.contains(intvl)) {
+    			Assert.that(false, "trying to write an interval "+intvl+
+                        " that wasn't leased.\n"+dumpState());
+            }
+    		
+    		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
+                savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+                Assert.that(false,"trying to write an interval "+intvl+
+                        " that was already written"+dumpState());
+    		}
+                
+            leasedBlocks.delete(intvl);
+            pendingBlocks.add(intvl);
         }
-		
-		
-		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
-            savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-            Assert.that(false,"trying to write an interval "+intvl+
-                    " that was already written"+dumpState());
-		}
         
-		waitIfTooManyPending();
+        System.arraycopy(buf,0,temp,0,length);
+        QUEUE.add(new ChunkHandler(temp,intvl));
         
-		// Remove from lease, put in pending for writing.
-        leasedBlocks.delete(intvl);
-        pendingBlocks.add(intvl);
-        
-        saveToDisk(buf, intvl);
     }
     
-    private void waitIfTooManyPending() {
-        try {
-            while (pendingBlocks.getSize() > 0 && // make sure someone will notify us
-                    getNumPendingItems() > MAX_PENDING_CHUNKS)
-                wait();
-        } catch (InterruptedException ignored) {} // means the worker was killed  
+    private static byte [] getBuffer() throws InterruptedException {
+        byte [] temp = null;
+        synchronized(CACHE) {
+            while (true) {
+                if (!CACHE.isEmpty())
+                    return (byte []) CACHE.pop();
+                else if (numCreated < MAX_CACHED_BUFFERS) {
+                    temp = new byte[HTTPDownloader.BUF_LENGTH];
+                    numCreated++;
+                    return temp;
+                } else 
+                    CACHE.wait();   
+            }
+        }
     }
 
-	/**
-	 * Saves the given interval to disk. 
-	 */
-	private void saveToDisk(byte [] buf, Interval invtl) {
-	    QUEUE.add(new ChunkHandler(buf, invtl));
-    }
-    
     public String dumpState() {
         return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
             "\ndiscarded:"+savedCorruptBlocks+
@@ -694,27 +711,9 @@ public class VerifyingFile {
         /** The interval that we are about to write */
         private final Interval intvl;
         
-        /** Whether we got the byte[] from the cache */
-        private boolean cached;
-        
         public ChunkHandler(byte[] buf, Interval intvl) {
-            byte [] temp = null;
-            if (buf.length == HTTPDownloader.BUF_LENGTH) {
-                synchronized(CACHE) {
-                    if (!CACHE.isEmpty()) {
-                        temp = (byte []) CACHE.pop();
-                        cached = true;
-                    }
-                }
-           }
-            
-           // cache empty or perhaps different size 
-           if (temp == null)
-               temp = new byte[buf.length];
-           
-           this.buf = temp;
-           System.arraycopy(buf, 0, this.buf, 0, buf.length);
-           this.intvl = intvl;
+            this.buf = buf;
+            this.intvl = intvl;
         }
         
         public void run() {
@@ -742,13 +741,15 @@ public class VerifyingFile {
                 }
             } finally {
                 // return the buffer to the cache
-                if (cached) 
+                synchronized(CACHE) {
                     CACHE.push(buf);
+                    CACHE.notifyAll();
+                }
                 
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
                         pendingBlocks.delete(intvl);
-                    VerifyingFile.this.notifyAll(); //MD & any workers
+                    VerifyingFile.this.notify(); 
                 }
             }
         }
@@ -758,7 +759,18 @@ public class VerifyingFile {
         public void run() {
             verifyChunks();
             synchronized(VerifyingFile.this) {
-                VerifyingFile.this.notifyAll();
+                VerifyingFile.this.notify();
+            }
+        }
+    }
+    
+    private static class CacheCleaner implements Runnable {
+        public void run() {
+            LOG.info("clearing cache");
+            synchronized(CACHE) {
+                CACHE.clear();
+                numCreated = 0;
+                CACHE.notifyAll();
             }
         }
     }

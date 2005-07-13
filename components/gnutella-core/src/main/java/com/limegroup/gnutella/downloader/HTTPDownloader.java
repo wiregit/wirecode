@@ -1614,20 +1614,23 @@ public class HTTPDownloader implements BandwidthTracker {
                         
                         // if are past our initial writing point, but we had to skip some bytes 
                         // or were told to stop sooner, trim the buffer
-                        byte []toWrite;
                         if (skipped > 0 || _amountRead+c >= _amountToRead) {
                             c = Math.min(c,_amountToRead - _amountRead);
                             if (LOG.isDebugEnabled())
                                 LOG.debug("trimming buffer by "+
                                         skipped +" to "+c+" bytes");
                             
-                            toWrite = new byte[c];
-                            System.arraycopy(buf,skipped,toWrite,0,c);
-                        } else
-                            toWrite = buf;
+                            byte [] temp = new byte[c];
+                            System.arraycopy(buf,skipped,temp,0,c);
+                            System.arraycopy(temp,0,buf,0,temp.length);
+                        } 
                         
                         // write to disk
-                        _incompleteFile.writeBlock(currPos,c,toWrite);
+                        try {
+                            _incompleteFile.writeBlock(currPos,c,buf);
+                        } catch (InterruptedException killed) {
+                            break;
+                        }
 				        
                         _amountRead+=c;
 				        currPos += c;//update the currPos for next iteration
