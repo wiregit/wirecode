@@ -429,7 +429,6 @@ public class DownloadWorker implements Runnable {
             // since they are still marked as leased
             low=downloader.getInitialReadingPoint()+downloader.getAmountRead();
             high = downloader.getInitialReadingPoint()+downloader.getAmountToRead()-1;
-            downloader.forgetRanges();
         }
         
         if( (high-low)>=0) {//dloader failed to download a part assigned to it?
@@ -438,6 +437,7 @@ public class DownloadWorker implements Runnable {
                 LOG.debug("releasing ranges "+new Interval(low,high));
             
             _commonOutFile.releaseBlock(new Interval(low,high));
+            downloader.forgetRanges();
         } else 
 			LOG.debug("nothing to release!");
     }
