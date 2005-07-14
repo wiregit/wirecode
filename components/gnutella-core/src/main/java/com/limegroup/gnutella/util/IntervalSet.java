@@ -341,7 +341,7 @@ public class IntervalSet {
      */
     private void addImpl(Interval i) {
         int point = Collections.binarySearch(intervals, i, IntervalComparator.INSTANCE);
-        if(point > 0)
+        if(point >= 0)
             throw new IllegalStateException("interval (" + i + ") already in list: " + intervals);
         point = -(point + 1);
         intervals.add(point, i);
