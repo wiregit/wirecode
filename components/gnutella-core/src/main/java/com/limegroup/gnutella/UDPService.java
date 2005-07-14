@@ -499,7 +499,9 @@ public class UDPService implements ReadWriteObserver {
             || msg.indexOf("host is down") != -1
             || msg.indexOf("network is unreachable") != -1
             || msg.indexOf("no buffer space available") != -1
-            || msg.indexOf("operation not permitted") != -1;
+            || msg.indexOf("operation not permitted") != -1
+            || msg.indexOf("socket operation on nonsocket") != -1
+            ;
     }
                
 	        
