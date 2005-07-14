@@ -757,10 +757,11 @@ public class DownloadWorker implements Runnable {
                 return this + "hashcode " + hashCode() + " will release? "
                 + _shouldRelease + " interrupted? " + _interrupted
                 + " active? " + _downloader.isActive() 
+                + " victim? " + _downloader.isVictim()
                 + " initial reading " + _downloader.getInitialReadingPoint()
                 + " initial writing " + _downloader.getInitialWritingPoint()
                 + " amount to read " + _downloader.getAmountToRead()
-                + " amount read " + _downloader.getAmountRead();
+                + " amount read " + _downloader.getAmountRead()+"\n";
             }
         } else 
             return "worker not started";

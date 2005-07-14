@@ -1570,18 +1570,21 @@ public class HTTPDownloader implements BandwidthTracker {
                 //Read from network.  It's possible that we've read more than
                 //requested because of a call to setAmountToRead() or stopAt() from another
                 //thread.  We check for that before we write to disk.
-                int atr,ar;
+                
+                // first see how much we have left to read, if any
+                int left;
                 synchronized(this) {
-                    atr=_amountToRead;
-                    ar = _amountRead;
+                    if (_amountRead >= _amountToRead) {
+                        _isActive = false;
+                        break;
+                    }
+                    left = _amountToRead - _amountRead;
                 }
                 
-                if (ar >= atr) 
-                    break;
-                
-                int left=atr - ar;
                 Assert.that(left>0);
 
+                // do the actual read from the network using the appropriate bandwidth 
+                // throttle
                 BandwidthThrottle throttle = _socket instanceof UDPConnection ?
                     UDP_THROTTLE : THROTTLE;
                 int toRead = throttle.request(Math.min(BUF_LENGTH, left));
@@ -1591,7 +1594,6 @@ public class HTTPDownloader implements BandwidthTracker {
                            
 				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
 
-                
 				synchronized(this) {
 				    if (_isActive) {
                         
@@ -1629,6 +1631,7 @@ public class HTTPDownloader implements BandwidthTracker {
                         try {
                             _incompleteFile.writeBlock(currPos,c,buf);
                         } catch (InterruptedException killed) {
+                            _isActive = false;
                             break;
                         }
 				        
@@ -1645,6 +1648,7 @@ public class HTTPDownloader implements BandwidthTracker {
             }  // end of while loop
 
             synchronized(this) {
+                _isActive = false;
                 if ( _amountRead < _amountToRead ) { 
                     throw new FileIncompleteException();  
                 }
@@ -1707,7 +1711,7 @@ public class HTTPDownloader implements BandwidthTracker {
     	_initialReadingPoint = 0;
     	_amountToRead = 0;
     	_totalAmountRead += _amountRead;
-      _amountRead = 0;
+    	_amountRead = 0;
     }
     
     ///////////////////////////// Accessors ///////////////////////////////////
@@ -1718,6 +1722,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}
 	public synchronized boolean isActive() { return _isActive; }
+    synchronized boolean isVictim() {return _disconnect; }
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
