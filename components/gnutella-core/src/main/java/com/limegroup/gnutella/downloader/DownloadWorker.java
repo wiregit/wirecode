@@ -421,14 +421,19 @@ public class DownloadWorker implements Runnable {
             return;
         _shouldRelease = false;
         
+        // do not release if the file is complete
+        if (_commonOutFile.isComplete())
+            return;
+        
         HTTPDownloader downloader = _downloader;
         int high, low;
         synchronized(downloader) {
         	
-            // do not release ranges for downloaders that we have stolen from
-            // since they are still marked as leased
-            low=downloader.getInitialReadingPoint()+downloader.getAmountRead();
-            high = downloader.getInitialReadingPoint()+downloader.getAmountToRead()-1;
+            // If this downloader was a thief and had to skip any ranges, do not
+            // release them.
+            low = downloader.getInitialReadingPoint() + downloader.getAmountRead();
+            low = Math.max(low,downloader.getInitialWritingPoint());
+            high = downloader.getInitialReadingPoint() + downloader.getAmountToRead()-1;
         }
         
         if( (high-low)>=0) {//dloader failed to download a part assigned to it?
