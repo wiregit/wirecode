@@ -180,7 +180,7 @@ public class VerifyingFileTest extends BaseTestCase {
             raf.seek(pos + chunk.length);
             
             // write it to the verifying file
-            vf.writeBlock(pos,chunk);
+            writeImpl(pos,chunk);
             pos+=chunk.length;
             
             // give it some time to verify
@@ -191,9 +191,24 @@ public class VerifyingFileTest extends BaseTestCase {
         // verify the last chunk
         chunk = new byte[(int)completeFile.length() - pos];
         raf.read(chunk);
-        vf.writeBlock(pos,chunk);
+        writeImpl(pos,chunk);
         Thread.sleep(1000);
         assertEquals(completeFile.length(),vf.getVerifiedBlockSize());
+    }
+    
+    private void writeImpl(int pos, byte[] chunk) throws Exception {
+        if (chunk.length > HTTPDownloader.BUF_LENGTH) {
+            int written = 0;
+            while (written < chunk.length) {
+                int toWrite = Math.min(chunk.length - written, HTTPDownloader.BUF_LENGTH);
+                byte [] temp = new byte[toWrite];
+                System.arraycopy(chunk,written,temp,0,toWrite);
+                written += toWrite;
+                vf.writeBlock(pos,temp);
+                pos += toWrite;
+            }
+        } else
+            vf.writeBlock(pos,chunk);
     }
     
     /**
@@ -209,7 +224,7 @@ public class VerifyingFileTest extends BaseTestCase {
         
         // write some data, not enough to fill a chunk
         // 0-200k
-        vf.writeBlock(0,chunk);
+        writeImpl(0,chunk);
         Thread.sleep(1000);
         assertEquals(0,vf.getVerifiedBlockSize());
         
@@ -217,7 +232,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // 200k-400k
         raf.read(chunk);
         
-        vf.writeBlock(200*1024,chunk);
+        writeImpl(200*1024,chunk);
         Thread.sleep(1000);
         assertEquals(256*1024,vf.getVerifiedBlockSize());
         assertEquals(400*1024,vf.getBlockSize());
@@ -226,7 +241,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // 600k-800k
         raf.seek(600*1024);
         raf.read(chunk);
-        vf.writeBlock(600*1024,chunk);
+        writeImpl(600*1024,chunk);
         Thread.sleep(1000);
         assertEquals(256*1024,vf.getVerifiedBlockSize());
         assertEquals(600*1024,vf.getBlockSize());
@@ -235,7 +250,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // 400k-600k = chunks 256-512 and 512-768 verifyable
         raf.seek(400*1024);
         raf.read(chunk);
-        vf.writeBlock(400*1024,chunk);
+        writeImpl(400*1024,chunk);
         Thread.sleep(1000);
         assertEquals(768*1024,vf.getVerifiedBlockSize());
         assertEquals(800*1024, vf.getBlockSize());
@@ -247,7 +262,7 @@ public class VerifyingFileTest extends BaseTestCase {
         
         raf.seek(completeFile.length()-chunk.length);
         raf.read(chunk);
-        vf.writeBlock(completeFile.length()-chunk.length,chunk);
+        writeImpl((int)(completeFile.length()-chunk.length),chunk);
         Thread.sleep(1000);
         assertEquals(768*1024,vf.getVerifiedBlockSize());
         assertEquals(800*1024+chunk.length, vf.getBlockSize());
@@ -255,7 +270,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // write something more, enough to fill up the last chunk which should get it verified
         raf.seek(completeFile.length() - 2*chunk.length);
         raf.read(chunk);
-        vf.writeBlock(completeFile.length() - 2*chunk.length,chunk);
+        writeImpl((int)(completeFile.length() - 2*chunk.length),chunk);
         Thread.sleep(1000);
         assertEquals(768*1024+completeFile.length() - lastOffset,vf.getVerifiedBlockSize());
         assertEquals(800*1024 + 2*chunk.length,vf.getBlockSize());
@@ -272,7 +287,7 @@ public class VerifyingFileTest extends BaseTestCase {
         
         // write a good chunk
         raf.read(chunk);
-        vf.writeBlock(0,chunk);
+        writeImpl(0,chunk);
         Thread.sleep(1000);
         
         assertEquals(chunk.length,vf.getVerifiedBlockSize());
@@ -283,7 +298,7 @@ public class VerifyingFileTest extends BaseTestCase {
         for (int i = 0;i< 100;i++)
             chunk[i]=(byte)i;
         
-        vf.writeBlock(chunk.length, chunk);
+        writeImpl(chunk.length, chunk);
         Thread.sleep(1000);
         
         // the chunk should not be verified or even written to disk
@@ -308,7 +323,7 @@ public class VerifyingFileTest extends BaseTestCase {
         raf.read(chunk);
         for (int i = 0;i< 100;i++)
             chunk[i]=(byte)i;
-        vf.writeBlock(raf.getFilePointer()-chunk.length,chunk);
+        writeImpl((int)raf.getFilePointer()-chunk.length,chunk);
         Thread.sleep(1000);
         assertFalse(raf.getFilePointer()+"",vf.isHopeless());
         
@@ -316,7 +331,7 @@ public class VerifyingFileTest extends BaseTestCase {
         raf.read(chunk);
         for (int i = 0;i< 100;i++)
             chunk[i]=(byte)i;
-        vf.writeBlock(raf.getFilePointer()-chunk.length,chunk);
+        writeImpl((int)(raf.getFilePointer()-chunk.length),chunk);
         Thread.sleep(1000);
         assertTrue(vf.isHopeless());
     }
@@ -327,7 +342,7 @@ public class VerifyingFileTest extends BaseTestCase {
         byte [] chunk = new byte[(int)completeFile.length()];
         
         raf.readFully(chunk);
-        vf.writeBlock(0,chunk);
+        writeImpl(0,chunk);
         Thread.sleep(1000);
         assertTrue(vf.isComplete());
     }
@@ -338,13 +353,13 @@ public class VerifyingFileTest extends BaseTestCase {
         vf.setDiscardUnverified(false);
         byte [] chunk = new byte[hashTree.getNodeSize()];
         raf.readFully(chunk);
-        vf.writeBlock(0,chunk);
+        writeImpl(0,chunk);
         
         Thread.sleep(1000);
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
         
         // write a bad chunk, it should not be discarded
-        vf.writeBlock(chunk.length,chunk);
+        writeImpl(chunk.length,chunk);
         Thread.sleep(1000);
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
         assertEquals(2*chunk.length, vf.getBlockSize());
@@ -354,7 +369,7 @@ public class VerifyingFileTest extends BaseTestCase {
         chunk = new byte[(int)completeFile.length() - 512*1024];
         raf.readFully(chunk);
         
-        vf.writeBlock(512*1024,chunk);
+        writeImpl(512*1024,chunk);
         Thread.sleep(1000);
         
         assertEquals((int)completeFile.length() - 256*1024, vf.getVerifiedBlockSize());
@@ -369,7 +384,7 @@ public class VerifyingFileTest extends BaseTestCase {
         raf.readFully(chunk);
         
         // write a chunk.  waitForPending should return very quickly
-        vf.writeBlock(0,chunk);
+        writeImpl(0,chunk);
         long now = System.currentTimeMillis();
         vf.waitForPendingIfNeeded();
         assertLessThanOrEquals(50,System.currentTimeMillis() - now);
@@ -381,7 +396,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // chunks have been verified.
         chunk = new byte[(int)completeFile.length() - hashTree.getNodeSize()];
         raf.readFully(chunk);
-        vf.writeBlock(hashTree.getNodeSize(),chunk);
+        writeImpl(hashTree.getNodeSize(),chunk);
         assertFalse(vf.isComplete());
         vf.waitForPendingIfNeeded();
         assertTrue(vf.isComplete());
@@ -422,7 +437,7 @@ public class VerifyingFileTest extends BaseTestCase {
         byte [] data = new byte[exactTree.getNodeSize()/2];
         raf.seek(exact.length() - data.length );
         raf.readFully(data);
-        vf.writeBlock(exact.length() - data.length ,data);
+        writeImpl((int)(exact.length() - data.length) ,data);
         
         // nothing should be verified
         Thread.sleep(1000);
@@ -431,7 +446,7 @@ public class VerifyingFileTest extends BaseTestCase {
         // now add the second piece of the last chunk
         raf.seek(exact.length() - 2*data.length );
         raf.readFully(data);
-        vf.writeBlock(exact.length() - 2*data.length ,data);
+        writeImpl((int)(exact.length() - 2*data.length) ,data);
         
         // the last chunk should be verified
         Thread.sleep(1000);
@@ -447,7 +462,7 @@ public class VerifyingFileTest extends BaseTestCase {
         vf.leaseWhite();
         byte [] full = new byte [(int)completeFile.length()];
         raf.readFully(full);
-        vf.writeBlock(0,full);
+        writeImpl(0,full);
         
         // the file should be completed
         Thread.sleep(500);
