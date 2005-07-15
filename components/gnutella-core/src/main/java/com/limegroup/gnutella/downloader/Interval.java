@@ -25,7 +25,7 @@ public class Interval implements Serializable{
                                             ", high: " + high);
         // Since high >= low, low >= Integer.MIN_VALUE implies
         // high >= Integer.MIN_VALUE.  Only one check is necessary.
-        if(low < Integer.MIN_VALUE)
+        if(low < 0)
             throw new IllegalArgumentException("low < min int:"+low);
         // high <= Integer.MAX_VALUE implies
         // low <= Integer.MAX_VALUE.  Only one check is necessary.
