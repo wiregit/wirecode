@@ -101,6 +101,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         ROOT_HASH = (byte[])((List)allNodes.get(0)).get(0);
         DEPTH = allNodes.size()-1;
         Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
+        Assert.that(NODES.size() * nodeSize >= fileSize);
         HashTreeNodeManager.instance().register(this, allNodes);
         _nodeSize = nodeSize;
     }
@@ -217,6 +218,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Checks whether the specific area of the file matches the hash tree. 
      */
     public boolean isCorrupt(Interval in, byte [] data) {
+        Assert.that(in.high <= FILE_SIZE);
+        
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
         if (in.low % _nodeSize == 0 && 
