@@ -86,7 +86,7 @@ public abstract class SourceRanker {
      * @return how much time we should wait before at least one host
      * will become non-busy
      */
-    public int calculateWaitTime() {
+    public synchronized int calculateWaitTime() {
         if (!hasMore())
             return 0;
         
