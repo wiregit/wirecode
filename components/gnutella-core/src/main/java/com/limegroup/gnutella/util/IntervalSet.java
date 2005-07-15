@@ -365,7 +365,14 @@ public class IntervalSet {
         public int compare(Object a, Object b) {
             Interval ia=(Interval)a;
             Interval ib=(Interval)b;
-            return ia.low-ib.low;
+            if ( ia.low > ib.low ) 
+                return 1;
+            else if (ia.low < ib.low )
+                return -1;
+            else
+                return 0;
+                
+           // return ia.low-ib.low;
         }
     }
     
