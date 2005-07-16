@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -68,7 +70,7 @@ public class VerifyingFile {
      */
     /* package */ static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
-    /** a bunch of cached byte[]s */
+    /** a bunch of cached byte[]s for partial chunks */
     private static final Stack CACHE = new Stack();
     static {
         CACHE.ensureCapacity(MAX_CACHED_BUFFERS);
@@ -80,6 +82,9 @@ public class VerifyingFile {
      * LOCKING: hold CACHE 
      */
     private static int numCreated;
+    
+    /** a bunch of cached byte[]s for verifyable chunks */
+    private static final Map CHUNK_CACHE = new HashMap(20);
     
     /**
      * The file we're writing to / reading from.
@@ -651,7 +656,8 @@ public class VerifyingFile {
         if (LOG.isDebugEnabled())
             LOG.debug("verifying interval "+i);
         
-        byte []b = new byte[i.high - i.low+1];
+        
+        byte []b = getChunkBuf(i.high - i.low+1);
         // read the interval from the file
         try {
 			synchronized(fos) {
@@ -670,7 +676,29 @@ public class VerifyingFile {
             LOG.debug("block corrupt!");
         
         return !corrupt;
-    }	
+    }
+    
+    /**
+     * @return a byte array of the specified size, using cached one
+     * if possible.
+     */
+	private static byte [] getChunkBuf(int size) {
+
+		// cache only chunks size powers of two
+		// others are very unlikely to be reused
+		int exp;
+		for (exp = 1 ; exp < size ; exp*=2);
+		if (exp > size) 
+			return new byte[size];
+		
+		Integer i = new Integer(size);
+		byte [] ret = (byte []) CHUNK_CACHE.get(i);
+		if (ret == null) {
+			ret = new byte[size];
+			CHUNK_CACHE.put(i,ret);
+		} 
+		return ret;
+	}
 	
     /**
      * iterates through the pending blocks and checks if the recent write has created
@@ -788,6 +816,13 @@ public class VerifyingFile {
                 numCreated -= size;
                 CACHE.notifyAll();
             }
+            QUEUE.add(new ChunkCacheCleaner());
         }
+    }
+    
+    private static class ChunkCacheCleaner implements Runnable {
+    	public void run() {
+    		CHUNK_CACHE.clear();
+    	}
     }
 }
