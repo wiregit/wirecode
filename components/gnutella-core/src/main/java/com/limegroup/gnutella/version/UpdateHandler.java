@@ -538,7 +538,7 @@ public class UpdateHandler {
         for (Iterator iter = updates.iterator(); iter.hasNext();) {
             DownloadInformation info = (DownloadInformation) iter.next();
             Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
-            if (downloader != null) {
+            if (downloader != null && downloader instanceof InNetworkDownloader) {
                 InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
                 if (isHopeless(iDownloader, now))  
                     iDownloader.stop();
