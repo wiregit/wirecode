@@ -113,7 +113,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Sends a targetted query for this.
      */
     protected synchronized QueryRequest newRequery(int numRequeries) {
-        QueryRequest qr = newRequery(numRequeries);
+        QueryRequest qr = super.newRequery(numRequeries);
         qr.setTTL((byte)2);
         return qr;
     }
