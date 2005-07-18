@@ -249,6 +249,34 @@ class UpdateCollection {
         String updateName = getAttributeText(attr, "uname");
         String fileSize = getAttributeText(attr, "size");
         
+        if(updateURN != null) {
+            try {
+                URN urn = URN.createSHA1Urn(updateURN);
+                String tt = URN.getTigerTreeRoot(updateURN);
+                data.setUpdateURN(urn);
+                data.setUpdateTTRoot(tt);
+            } catch(IOException ignored) {
+                LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
+            }
+        }
+        
+        data.setUpdateCommand(updateCommand);
+        data.setUpdateFileName(updateName);
+        
+        if(fileSize != null) {
+            try {
+                data.setUpdateSize(Integer.parseInt(fileSize));
+            } catch(NumberFormatException nfe) {
+                LOG.warn("Invalid size: " + fileSize);
+            }
+        }
+        
+        // if this has enough information for downloading, add it to the list of potentials.
+        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
+            LOG.debug("Adding new download data item: " + data);
+            downloadDataList.add(data);
+        }
+        
         if(forV == null || url == null || style == null) {
             LOG.error("Missing required for, url, or style.");
             return;
@@ -303,32 +331,6 @@ class UpdateCollection {
         if(os == null)
             os = "*";
         data.setOSList(OS.createFromList(os));
-        
-        if(updateURN != null) {
-            try {
-                URN urn = URN.createSHA1Urn(updateURN);
-                String tt = URN.getTigerTreeRoot(updateURN);
-                data.setUpdateURN(urn);
-                data.setUpdateTTRoot(tt);
-            } catch(IOException ignored) {
-                LOG.warn("Invalid bitprint urn: " + updateURN, ignored);
-            }
-        }
-        
-        data.setUpdateCommand(updateCommand);
-        data.setUpdateFileName(updateName);
-        
-        try {
-            data.setUpdateSize(Integer.parseInt(fileSize));
-        } catch(NumberFormatException nfe) {
-            LOG.warn("Invalid size: " + fileSize);
-        }
-        
-        // if this has enough information for downloading, add it to the list of potentials.
-        if(data.getUpdateURN() != null && data.getUpdateFileName() != null && data.getSize() != 0) {
-            LOG.debug("Adding new download data item: " + data);
-            downloadDataList.add(data);
-        }
                 
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
