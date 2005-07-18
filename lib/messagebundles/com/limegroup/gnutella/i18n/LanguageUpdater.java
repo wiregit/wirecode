@@ -234,7 +234,7 @@ class LanguageUpdater {
                     printer.println();
                 }
                 
-                if (value != null) {
+                if (value != null && line.getBraceCount() == Line.parseBraceCount(value)) {
                     printer.print(key);
                     printer.print("=");
                     printer.println(escape(value));

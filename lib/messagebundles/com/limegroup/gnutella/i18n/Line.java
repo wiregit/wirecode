@@ -6,6 +6,7 @@ class Line {
     private final String wholeLine;
     private final String key;
     private final String value;
+    private final int braces;
     
     /**
      * TODO: does not handle all comment lines properly!
@@ -21,6 +22,7 @@ class Line {
         if(data.startsWith("#") || data.trim().equals("")) {
             key = null;
             value = null;
+            braces = 0;
         } else {
             int eq = data.indexOf("=");
             if(eq == -1)
@@ -30,7 +32,27 @@ class Line {
                 value = "";
             else
                 value = data.substring(eq+1);
+            
+            braces = parseBraceCount(value);
         }
+    }
+    
+    static int parseBraceCount(String value) {
+        int count = 0;
+        int startIdx = value.indexOf("{");
+        while(startIdx != -1) {
+            int endIdx = value.indexOf("}", startIdx);
+            if(endIdx != -1) {
+                try {
+                    Integer.parseInt(value.substring(startIdx + 1, endIdx));
+                    count++;
+                } catch(NumberFormatException ignored) {}
+                startIdx = endIdx + 1;
+            } else {
+                break;
+            }
+        }
+        return count;
     }
     
     /**
@@ -59,6 +81,13 @@ class Line {
      */
     String getValue() {
         return value;
+    }
+    
+    /**
+     * Gets the number of braces this line had.
+     */
+    int getBraceCount() {
+        return braces;
     }
 }
  
