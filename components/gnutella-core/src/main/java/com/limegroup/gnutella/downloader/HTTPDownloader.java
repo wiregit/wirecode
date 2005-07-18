@@ -718,7 +718,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *   Queued -- means to sleep while queued.
      *   ThexResponse -- means the thex tree was received.
      */
-    public ConnectionStatus requestHashTree() {
+    public ConnectionStatus requestHashTree(URN sha1) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + 
                       " from " +_host + ":" + _port);
@@ -761,7 +761,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 in = new CountingInputStream(_input);
             try {
                 HashTree hashTree =
-                    HashTree.createHashTree(in, _rfd.getSHA1Urn().toString(),
+                    HashTree.createHashTree(in, sha1.toString(),
                                             _root32, _rfd.getFileSize());
                 _thexSucceeded = true;
                 return ConnectionStatus.getThexResponse(hashTree);
