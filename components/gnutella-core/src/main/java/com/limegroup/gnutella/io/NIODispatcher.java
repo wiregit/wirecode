@@ -329,9 +329,11 @@ public class NIODispatcher implements Runnable {
      */
     private void readyThrottles(Collection keys) {
         synchronized(Q_LOCK) {
-            for(int i = 0; i < THROTTLE.size(); i++)
-                ((NBThrottle)THROTTLE.get(i)).selectableKeys(keys);
+        	UNLOCKED.addAll(THROTTLE);
         }
+        for(int i = 0; i < UNLOCKED.size(); i++)
+            ((NBThrottle)UNLOCKED.get(i)).selectableKeys(keys);
+        UNLOCKED.clear();
     }
     
     /**
