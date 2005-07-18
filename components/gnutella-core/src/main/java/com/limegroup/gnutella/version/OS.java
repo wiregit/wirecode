@@ -68,6 +68,9 @@ class OS {
      * Prints out a comma separated list of the OSes.
      */
     static String toString(OS[] oses) {
+        if (oses == null)
+            return "";
+        
         String s = "";
         for(int i = 0; i < oses.length; i++) {
             s += oses[i].toString();
