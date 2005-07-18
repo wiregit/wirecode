@@ -391,7 +391,8 @@ public class DownloadWorker implements Runnable {
         // isn't good enough or we don't have a tree) and another
         // worker isn't currently requesting one
         if (_downloader.hasHashTree() &&
-                (ourTree == null || !ourTree.isDepthGoodEnough())) {
+                (ourTree == null || !ourTree.isDepthGoodEnough()) &&
+                _manager.getSHA1Urn() != null) {
             
             
             synchronized(_commonOutFile) {
@@ -400,7 +401,7 @@ public class DownloadWorker implements Runnable {
                 _commonOutFile.setHashTreeRequested(true);
             }
             
-            status = _downloader.requestHashTree();
+            status = _downloader.requestHashTree(_manager.getSHA1Urn());
             _commonOutFile.setHashTreeRequested(false);
             if(status.isThexResponse()) {
                 HashTree temp = status.getHashTree();
