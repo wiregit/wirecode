@@ -368,7 +368,7 @@ public class DownloadManager implements BandwidthTracker {
     }
     
     public synchronized int getNumActiveDownloads() {
-        return active.size();
+        return active.size() - innetworkCount;
     }
    
     public synchronized int getNumWaitingDownloads() {
@@ -1465,6 +1465,9 @@ public class DownloadManager implements BandwidthTracker {
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
             c = true;
             BandwidthTracker bt = (BandwidthTracker)iter.next();
+            if (bt instanceof InNetworkDownloader)
+                continue;
+            
             bt.measureBandwidth();
             currentTotal += bt.getAverageBandwidth();
         }
@@ -1478,6 +1481,9 @@ public class DownloadManager implements BandwidthTracker {
         float sum=0;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
             BandwidthTracker bt = (BandwidthTracker)iter.next();
+            if (bt instanceof InNetworkDownloader)
+                continue;
+            
             float curr = 0;
             try{
                 curr = bt.getMeasuredBandwidth();
