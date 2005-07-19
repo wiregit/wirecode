@@ -523,7 +523,9 @@ public class UpdateHandler {
                     UpdateSettings.FAILED_UPDATES.add(urn.httpStringValue());
                 
                 UpdateData updateInfo = (UpdateData) _updateInfo;
-                if (updateInfo != null && updateInfo.getUpdateURN().equals(urn)) {
+                if (updateInfo != null && 
+		   updateInfo.getUpdateURN() != null &&
+		   updateInfo.getUpdateURN().equals(urn)) {
                     if (!good) {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
