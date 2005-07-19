@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
+import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
@@ -277,12 +278,12 @@ public class UpdateHandler {
         _updateInfo = updateInfo;
         _updatesToDownload = updatesToDownload;
         
-        boolean started = downloadUpdates(updatesToDownload, null);
+        downloadUpdates(updatesToDownload, null);
         
         if(updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (updateInfo.getUpdateURN() == null || !started) {
+        } else if (updateInfo.getUpdateURN() == null || areUpdatesHopeless(updatesToDownload)) {
             if (LOG.isDebugEnabled())
                 LOG.debug("we have an update, but it doesn't need a download.  " +
                     "or all our updates are hopeles. Scheduling...");
@@ -316,6 +317,19 @@ public class UpdateHandler {
         command = StringUtils.replace(command,"%",name);
         info.setUpdateCommand(command);
     }
+
+    /**
+     * @return if all updates that we need to download are considered hopeless.
+     */
+    private static boolean areUpdatesHopeless(List updates) {
+        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
+        for (Iterator iter = updates.iterator(); iter.hasNext();) {
+            UpdateInformation update = (UpdateInformation) iter.next();
+            if (!hopeless.contains(update.getUpdateURN().httpStringValue()))
+                return false;
+        }
+        return true;
+    }
     
     /**
      * Notification that a given ReplyHandler may have an update we can use.
@@ -331,12 +345,11 @@ public class UpdateHandler {
      * Tries to download updates.
      * @return whether we had any non-hopeless updates.
      */
-    private boolean downloadUpdates(List toDownload, ReplyHandler source) {
+    private void downloadUpdates(List toDownload, ReplyHandler source) {
         if (toDownload == null)
             toDownload = Collections.EMPTY_LIST;
         
         killObsoleteUpdates(toDownload);
-        boolean ret = false;
         
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
@@ -344,12 +357,6 @@ public class UpdateHandler {
             DownloadManager dm = RouterService.getDownloadManager();
             FileManager fm = RouterService.getFileManager();
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
-                
-                String urn = next.getUpdateURN().httpStringValue();
-                if (UpdateSettings.FAILED_UPDATES.contains(urn))
-                    continue;
-                
-                ret = true;
                 
                 FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
                 ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
@@ -383,8 +390,6 @@ public class UpdateHandler {
                 }
             }
         }
-        
-        return ret;
     }
     
     /**
