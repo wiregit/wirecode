@@ -1318,7 +1318,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            if(otherUrn != null && downloadSHA1 != null)
+            int ourLength = getContentLength();
+            
+            if (ourLength != -1 && ourLength != otherLength)
+                return false;
+                
+            if (otherUrn != null && downloadSHA1 != null)
                 return otherUrn.equals(downloadSHA1);
             
             // compare to previously cached rfds

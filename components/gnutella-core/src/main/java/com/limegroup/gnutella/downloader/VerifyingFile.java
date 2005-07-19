@@ -592,6 +592,10 @@ public class VerifyingFile {
                 !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
             return;
         
+        // if the tree is of incorrect size, ignore it
+        if (tree.getFileSize() != completedSize)
+            return;
+        
         // if we did not have a tree previously and there are no pending blocks,
         // trigger verification
         HashTree previoius = hashTree;
