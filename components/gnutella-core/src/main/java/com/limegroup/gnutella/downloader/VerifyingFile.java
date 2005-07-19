@@ -593,7 +593,7 @@ public class VerifyingFile {
             return;
         
         // if the tree is of incorrect size, ignore it
-        if (tree.getFileSize() != completedSize)
+        if (tree != null && tree.getFileSize() != completedSize)
             return;
         
         // if we did not have a tree previously and there are no pending blocks,
@@ -601,6 +601,7 @@ public class VerifyingFile {
         HashTree previoius = hashTree;
         hashTree = tree;
         if (previoius == null && 
+            tree != null &&
             pendingBlocks.getSize() == 0 && 
             partialBlocks.getSize() > 0) 
             QUEUE.add(new EmptyVerifier());
