@@ -124,7 +124,9 @@ public class UploadManager implements BandwidthTracker {
     
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
-
+    
+    /** Number of force-shared active uploads */
+    private int _forcedUploads;
     
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
@@ -725,6 +727,8 @@ public class UploadManager implements BandwidthTracker {
             case ACCEPTED:
                 assertAsConnecting( uploader.getState() );
                 synchronized (this) {
+                    if (uploader.isForcedShare())
+                        _forcedUploads++;
                     _activeUploadList.add(uploader);
                 }
                 break;
@@ -845,11 +849,10 @@ public class UploadManager implements BandwidthTracker {
      */
     public synchronized boolean isServiceable() {
     	return hasFreeSlot(uploadsInProgress() + getNumQueuedUploads());
-        
     }
 
 	public synchronized int uploadsInProgress() {
-		return _activeUploadList.size();
+		return _activeUploadList.size() - _forcedUploads;
 	}
 
 	public synchronized int getNumQueuedUploads() {
@@ -1064,7 +1067,9 @@ public class UploadManager implements BandwidthTracker {
   		//try remove the urn from the map of unique uploaded files for that host.
   		
 		if (_activeUploadList.remove(uploader)) {
-		
+		    if (((HTTPUploader)uploader).isForcedShare())
+                _forcedUploads--;
+            
 			//at this point it is safe to allow other uploads from the same host
 			RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
 
@@ -1117,6 +1122,7 @@ public class UploadManager implements BandwidthTracker {
         //uploads, the probability that all just happen to have low capacity
         //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
         //expensive of quality, making swarmed downloads work better.
+        
 		if (current >= UploadSettings.HARD_MAX_UPLOADS.getValue()) {
             return false;
         } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
@@ -1585,10 +1591,12 @@ public class UploadManager implements BandwidthTracker {
         float currentTotal = 0f;
         boolean c = false;
         for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+			HTTPUploader up = (HTTPUploader)iter.next();
+            if (up.isForcedShare())
+                continue;
             c = true;
-			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			bt.measureBandwidth();
-			currentTotal += bt.getAverageBandwidth();
+			up.measureBandwidth();
+			currentTotal += up.getAverageBandwidth();
 		}
 		if ( c )
 		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
@@ -1599,14 +1607,11 @@ public class UploadManager implements BandwidthTracker {
 	public synchronized float getMeasuredBandwidth() {
         float sum=0;
         for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
-			BandwidthTracker bt = (BandwidthTracker)iter.next();
-            float curr = 0;
-            try {
-                curr = bt.getMeasuredBandwidth();
-            } catch(InsufficientDataException ide) {
-                curr = 0;
-            }
-			sum+= curr;
+			HTTPUploader up = (HTTPUploader)iter.next();
+            if (up.isForcedShare())
+                continue;
+            
+            sum += up.getMeasuredBandwidth();
 		}
         return sum;
 	}

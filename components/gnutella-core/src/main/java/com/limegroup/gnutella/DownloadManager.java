@@ -1463,11 +1463,11 @@ public class DownloadManager implements BandwidthTracker {
         float currentTotal = 0f;
         boolean c = false;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
-            c = true;
             BandwidthTracker bt = (BandwidthTracker)iter.next();
             if (bt instanceof InNetworkDownloader)
                 continue;
             
+            c = true;
             bt.measureBandwidth();
             currentTotal += bt.getAverageBandwidth();
         }
