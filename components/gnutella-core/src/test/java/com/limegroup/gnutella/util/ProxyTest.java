@@ -225,7 +225,7 @@ public class ProxyTest extends BaseTestCase {
                                               ConnectionSettings.C_HTTP_PROXY);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        //fps.setProxyVersion(HTTP);
+        fps.setProxyVersion(HTTP);
         fps.setHttpRequest(true);
         
         String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile2.txt";
@@ -240,7 +240,7 @@ public class ProxyTest extends BaseTestCase {
         assertEquals("invalid response from server","hello",resp);
         get.abort();
     }
-    
+
     public void testHTTPClientProxiesWithSocks4() throws Exception {
         //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
         ConnectionSettings.CONNECTION_METHOD.setValue(

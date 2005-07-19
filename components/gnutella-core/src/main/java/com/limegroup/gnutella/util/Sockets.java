@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
@@ -321,6 +322,7 @@ public class Sockets {
 	 */
 	private static Socket connectHTTP(String host, int port, int timeout)
 		throws IOException {
+		    
 		String connectString =
 			"CONNECT " + host + ":" + port + " HTTP/1.0\r\n\r\n";
 
@@ -341,8 +343,7 @@ public class Sockets {
 		os.flush();
 
 		// read response;
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
+		ByteReader reader = new ByteReader(in);
 		String line = reader.readLine();
         
 		// look for code 200
@@ -350,7 +351,6 @@ public class Sockets {
             IOUtils.close(proxySocket);
 			throw new IOException("HTTP connection failed");
         }
-
 		// skip the rest of the response
 		while (!line.equals("")) {
 			line = reader.readLine();
@@ -359,6 +359,7 @@ public class Sockets {
                 throw new IOException("end of stream");
             }
 		}
+		
 
 		// we should be connected now
 		proxySocket.setSoTimeout(0);

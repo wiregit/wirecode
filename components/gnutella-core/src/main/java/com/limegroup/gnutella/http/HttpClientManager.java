@@ -89,30 +89,6 @@ public class HttpClientManager {
         HttpClient client = new HttpClient(MANAGER);
         client.setConnectionTimeout(connectTimeout);
         client.setTimeout(soTimeout);
-        
-        int connectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
-        if (connectionType == ConnectionSettings.C_HTTP_PROXY) {
-			// use the user's proxy settings. He brought it on himself!
-			client.getHostConfiguration().setProxy(
-				ConnectionSettings.PROXY_HOST.getValue(),
-				ConnectionSettings.PROXY_PORT.getValue());
-		}
-        else if ( (connectionType == ConnectionSettings.C_SOCKS4_PROXY) ||
-                  (connectionType == ConnectionSettings.C_SOCKS5_PROXY) ) {
-            HostConfiguration hc = client.getHostConfiguration();
-            String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-            int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
-            String user = null;
-            String pass = null;
-            if(ConnectionSettings.PROXY_AUTHENTICATE.getValue() ) {
-                user = ConnectionSettings.PROXY_USERNAME.getValue();
-                pass = ConnectionSettings.PROXY_PASS.getValue();
-            }
-            if(connectionType == ConnectionSettings.C_SOCKS4_PROXY)
-                hc.setSOCKSProxySettings(4, proxyHost, proxyPort, user, pass);
-            else //It's SOCKS 5
-                hc.setSOCKSProxySettings(5, proxyHost, proxyPort, user, pass);
-        } 
         return client;
     }
     
