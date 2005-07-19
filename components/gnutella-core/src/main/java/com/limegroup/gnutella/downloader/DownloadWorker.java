@@ -594,7 +594,7 @@ public class DownloadWorker implements Runnable {
         LOG.trace("WORKER: attempt direct connection");
         HTTPDownloader ret;
         //Establish normal downloader.              
-        ret = new HTTPDownloader(_rfd, _commonOutFile);
+        ret = new HTTPDownloader(_rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
         // Note that connectTCP can throw IOException
         // (and the subclassed CantConnectException)
         try {
@@ -622,7 +622,6 @@ public class DownloadWorker implements Runnable {
        
         _manager.registerPushWaiter(this,mrfd);
 
-        boolean pushSent;
         Socket pushSocket = null;
         synchronized(this) {
             // only wait if we actually were able to send the push
@@ -653,7 +652,8 @@ public class DownloadWorker implements Runnable {
         }
         
         _manager.unregisterPushWaiter(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, _rfd, _commonOutFile);
+        ret = new HTTPDownloader(pushSocket, _rfd, _commonOutFile, 
+                _manager instanceof InNetworkDownloader);
         
         //Socket.getInputStream() throws IOX if the connection is closed.
         //So this connectTCP *CAN* throw IOX.

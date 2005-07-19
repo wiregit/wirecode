@@ -470,8 +470,12 @@ public final class HTTPUploader implements Uploader {
 	 */
 	void setAmountUploaded(int amount) {
 		int newData = amount - _amountRead;
-		if(newData > 0)
-            BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+		if(newData > 0) {
+            if (isForcedShare())
+                BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH.addData(newData);
+            else
+                BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+        }
 		_amountRead = amount;
 	}
     
@@ -757,8 +761,10 @@ public final class HTTPUploader implements Uploader {
                     break;
 
 
- 
-				BandwidthStat.
+                if (isForcedShare())
+                    BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
+                else 
+                    BandwidthStat.
                         HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 if (LOG.isDebugEnabled())
                 	LOG.debug("HTTPUploader.readHeader(): str = " +  str);

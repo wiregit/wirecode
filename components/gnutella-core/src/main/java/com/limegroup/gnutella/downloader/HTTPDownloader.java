@@ -268,6 +268,9 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private boolean _wantsFalts = false;
     
+    /** Whether to count the bandwidth used by this downloader */
+    private final boolean _inNetwork;
+    
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -282,9 +285,9 @@ public class HTTPDownloader implements BandwidthTracker {
      *  the file
      * @param stop the last byte to read+1
      */
-	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile) {
+	public HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile);
+        this(null, rfd, incompleteFile, inNetwork);
         _isPush=false;
 	}	
 
@@ -301,7 +304,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  not exist.
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
-                                                          VerifyingFile incompleteFile) {
+	        VerifyingFile incompleteFile, boolean inNetwork) {
         if(rfd == null) {
             throw new NullPointerException("null rfd");
         }
@@ -329,6 +332,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _writtenBadPushLocs = new HashSet();
 		_amountRead = 0;
 		_totalAmountRead = 0;
+        _inNetwork = inNetwork;
 		applyRate();
     }
 
@@ -870,7 +874,11 @@ public class HTTPDownloader implements BandwidthTracker {
 		if (str==null || str.equals(""))
             throw new IOException();
 
-		BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+        if (_inNetwork)
+            BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
+        else 
+            BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+        
         int code=parseHTTPCode(str, _rfd);	
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
@@ -880,8 +888,11 @@ public class HTTPDownloader implements BandwidthTracker {
 			str = _byteReader.readLine();
             if (str==null || str.equals(""))
                 break;
-                
-			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+            
+            if (_inNetwork)
+                BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
+            else 
+                BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
             //As of LimeWire 1.9, we ignore the "Content-length" header for
             //handling normal download flow.  The Content-Length is only
             //used for reading/discarding some HTTP body messages.
@@ -1591,8 +1602,11 @@ public class HTTPDownloader implements BandwidthTracker {
                 c = _byteReader.read(buf, 0, toRead);
                 if (c == -1) 
                     break;
-                           
-				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
+                
+                if (_inNetwork)
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(c);
+                else
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
 
 				synchronized(this) {
 				    if (_isActive) {
@@ -1851,6 +1865,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                   0, false, 0, false, null, null,
                                   false, false, "", 0, null, -1, 0);
         _incompleteFile = null;
+        _inNetwork = false;
 	}    
 }
 
