@@ -79,6 +79,7 @@ public class HttpClientManagerTest extends BaseTestCase {
         s8.shutdown();
         s9.shutdown();
         s10.shutdown();
+        s11.shutdown();
     }
     
     public void testExecuteMethodRedirecting() throws Exception {

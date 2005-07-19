@@ -1056,7 +1056,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         if(tcp)
             dloader.connectTCP(0);
         addThexHeader(dloader);
-        return dloader.requestHashTree();
+        return dloader.requestHashTree(dloader.getRemoteFileDesc().getSHA1Urn());
     }
     
     private static void addThexHeader(HTTPDownloader dl) throws Exception {
