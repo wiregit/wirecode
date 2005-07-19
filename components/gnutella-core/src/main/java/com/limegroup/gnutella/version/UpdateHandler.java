@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
-import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
@@ -286,14 +285,17 @@ public class UpdateHandler {
         } else if (updateInfo.getUpdateURN() == null || areUpdatesHopeless(updatesToDownload)) {
             if (LOG.isDebugEnabled())
                 LOG.debug("we have an update, but it doesn't need a download.  " +
-                    "or all our updates are hopeles. Scheduling...");
+                    "or all our updates are hopeles. Scheduling URL notification...");
             
             updateInfo.setUpdateCommand(null);
             
             RouterService.schedule(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
                     0);
-        } else 
+        } else if (isMyUpdateDownloaded(updateInfo)) {
+            LOG.debug("there is an update for me, but I happen to have it on disk");
+            RouterService.getCallback().updateAvailable(updateInfo);
+        } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
     }
     
@@ -322,7 +324,6 @@ public class UpdateHandler {
      * @return if all updates that we need to download are considered hopeless.
      */
     private static boolean areUpdatesHopeless(List updates) {
-        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
         for (Iterator iter = updates.iterator(); iter.hasNext();) {
             if (!isHopeless((DownloadInformation)iter.next()))
                 return false;
@@ -334,8 +335,8 @@ public class UpdateHandler {
      * @return if the given update is considered hopeless
      */
     private static boolean isHopeless(DownloadInformation info) {
-	return UpdateSettings.FAILED_UPDATES.contains(
-	    info.getUpdateURN().httpStringValue());
+        return UpdateSettings.FAILED_UPDATES.contains(
+                info.getUpdateURN().httpStringValue());
     }
     
     /**
@@ -361,8 +362,8 @@ public class UpdateHandler {
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
             
-	    if (isHopeless(next))
-	       continue; 
+            if (isHopeless(next))
+                continue; 
 
             DownloadManager dm = RouterService.getDownloadManager();
             FileManager fm = RouterService.getFileManager();
