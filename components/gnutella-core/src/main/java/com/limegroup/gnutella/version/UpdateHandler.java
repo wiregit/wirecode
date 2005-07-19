@@ -353,7 +353,11 @@ public class UpdateHandler {
         
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
-        
+            
+	    if (UpdateSettings.FAILED_UPDATES.contains(
+		next.getUpdateURN().httpStringValue()))
+	       continue; 
+
             DownloadManager dm = RouterService.getDownloadManager();
             FileManager fm = RouterService.getFileManager();
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
