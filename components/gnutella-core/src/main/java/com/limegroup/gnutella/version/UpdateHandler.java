@@ -324,11 +324,18 @@ public class UpdateHandler {
     private static boolean areUpdatesHopeless(List updates) {
         Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
         for (Iterator iter = updates.iterator(); iter.hasNext();) {
-            UpdateInformation update = (UpdateInformation) iter.next();
-            if (!hopeless.contains(update.getUpdateURN().httpStringValue()))
+            if (!isHopeless((DownloadInformation)iter.next()))
                 return false;
         }
         return true;
+    }
+
+    /**
+     * @return if the given update is considered hopeless
+     */
+    private static boolean isHopeless(DownloadInformation info) {
+	return UpdateSettings.FAILED_UPDATES.contains(
+	    info.getUpdateURN().httpStringValue());
     }
     
     /**
@@ -354,8 +361,7 @@ public class UpdateHandler {
         for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
             DownloadInformation next = (DownloadInformation)i.next();
             
-	    if (UpdateSettings.FAILED_UPDATES.contains(
-		next.getUpdateURN().httpStringValue()))
+	    if (isHopeless(next))
 	       continue; 
 
             DownloadManager dm = RouterService.getDownloadManager();
