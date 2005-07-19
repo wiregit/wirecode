@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -12,10 +15,13 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.auth.HttpAuthenticator;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.Sockets;
 
 
 /**
@@ -60,6 +66,8 @@ public class HttpClientManager {
         MANAGER = new MultiThreadedHttpConnectionManager();
         ((MultiThreadedHttpConnectionManager)MANAGER).
             setIdleConnectionTime(IDLE_TIME);
+        Protocol limeProtocol = new Protocol("http",new LimeSocketFactory(),80);
+        Protocol.registerProtocol("http",limeProtocol);
     }
             
     /**
@@ -81,6 +89,7 @@ public class HttpClientManager {
         HttpClient client = new HttpClient(MANAGER);
         client.setConnectionTimeout(connectTimeout);
         client.setTimeout(soTimeout);
+        
         int connectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
         if (connectionType == ConnectionSettings.C_HTTP_PROXY) {
 			// use the user's proxy settings. He brought it on himself!
@@ -189,6 +198,23 @@ public class HttpClientManager {
             }
         }
         throw new HttpException("Maximum redirects encountered, bailing");
+    }
+    
+    private static class LimeSocketFactory implements ProtocolSocketFactory {
+
+        public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
+        throws IOException, UnknownHostException {
+            return Sockets.connect(host,port,0);
+        }
+
+        public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+            return Sockets.connect(host,port,0);
+        }
+        
+        public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
+            return Sockets.connect(host,port, timeout);
+        }
+        
     }
     
 }
