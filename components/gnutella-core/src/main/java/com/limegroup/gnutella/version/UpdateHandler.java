@@ -282,7 +282,7 @@ public class UpdateHandler {
         if(updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
-        } else if (updateInfo.getUpdateURN() == null || areUpdatesHopeless(updatesToDownload)) {
+        } else if (updateInfo.getUpdateURN() == null || isHopeless(updateInfo)) {
             if (LOG.isDebugEnabled())
                 LOG.debug("we have an update, but it doesn't need a download.  " +
                     "or all our updates are hopeles. Scheduling URL notification...");
@@ -318,17 +318,6 @@ public class UpdateHandler {
         command = StringUtils.replace(command,"$",path.getPath()+File.separator);
         command = StringUtils.replace(command,"%",name);
         info.setUpdateCommand(command);
-    }
-
-    /**
-     * @return if all updates that we need to download are considered hopeless.
-     */
-    private static boolean areUpdatesHopeless(List updates) {
-        for (Iterator iter = updates.iterator(); iter.hasNext();) {
-            if (!isHopeless((DownloadInformation)iter.next()))
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -525,8 +514,8 @@ public class UpdateHandler {
                 
                 UpdateData updateInfo = (UpdateData) _updateInfo;
                 if (updateInfo != null && 
-		   updateInfo.getUpdateURN() != null &&
-		   updateInfo.getUpdateURN().equals(urn)) {
+                        updateInfo.getUpdateURN() != null &&
+                        updateInfo.getUpdateURN().equals(urn)) {
                     if (!good) {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
@@ -586,6 +575,9 @@ public class UpdateHandler {
      */
     private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
         FileManager fm = RouterService.getFileManager();
+        if (!fm.isLoadFinished())
+            return false;
+        
         URN myUrn = myInfo.getUpdateURN();
         if (myUrn == null)
             return true;
