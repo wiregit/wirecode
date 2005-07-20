@@ -555,6 +555,8 @@ public class BootstrapServerManager {
         if(urlString.indexOf(".limewire.com/") > -1)
             connectTo += "&clientGUID=" + 
                          ApplicationSettings.CLIENT_ID.getValue();
+        
+        HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
         HttpMethod get;
         try {
             get = new GetMethod(connectTo);
@@ -570,7 +572,6 @@ public class BootstrapServerManager {
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
         get.setFollowRedirects(false);
-        HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
             InputStream is = get.getResponseBodyAsStream();
