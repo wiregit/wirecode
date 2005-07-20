@@ -286,7 +286,11 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
     /** Connects to addr with the given timeout (in milliseconds) */
     public void connect(SocketAddress addr, int timeout) throws IOException {
         connectedTo = ((InetSocketAddress)addr).getAddress();
-
+        
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        if (iaddr.isUnresolved())
+            throw new IOException("unresolved: "+addr);
+        
         synchronized(LOCK) {
             if(!channel.connect(addr)) {
                 NIODispatcher.instance().registerConnect(channel, this);
