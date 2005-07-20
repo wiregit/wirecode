@@ -113,7 +113,7 @@ public class UploadTest extends BaseTestCase {
     private static final int callbackPort = 6671;
     private UploadManager upMan;
     /** The verifying file for the shared incomplete file */
-    private static final VerifyingFile vf = new VerifyingFile(252450);
+    private static VerifyingFile vf;
     /** The filedesc of the shared file. */
     private FileDesc FD;    
     /** The root32 of the shared file. */
@@ -123,8 +123,8 @@ public class UploadTest extends BaseTestCase {
      */
 	private static String FALTFeatures, FWALTFeatures;    
 
-    private static final RouterService ROUTER_SERVICE =
-        new RouterService(new FManCallback());
+    private static RouterService ROUTER_SERVICE;
+        
         
     private static final Object loaded = new Object();
 
@@ -162,6 +162,10 @@ public class UploadTest extends BaseTestCase {
 	    fos.close();
     }
 
+    public static void globalSetUp() {
+        vf = new VerifyingFile(252450);
+        ROUTER_SERVICE = new RouterService(new FManCallback());
+    }
 	protected void setUp() throws Exception {
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
