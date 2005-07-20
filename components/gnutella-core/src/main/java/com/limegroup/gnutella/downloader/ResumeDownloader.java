@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -75,7 +75,7 @@ public class ResumeDownloader extends ManagedDownloader
      *  non-zero and file previewing works. */
     public void initialize(DownloadManager manager, 
                            FileManager fileManager, 
-                           ActivityCallback callback) {
+                           DownloadCallback callback) {
         if(_hash != null)
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
