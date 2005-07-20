@@ -127,12 +127,12 @@ public class UpdateManager {
                 String ip = c.getAddress();
                 int port = c.getPort();
                 String connectTo = "http://" + ip + ":" + port + UPDATE;
+                HttpClient client = HttpClientManager.getNewClient();
                 HttpMethod get = new GetMethod(connectTo);
                 get.addRequestHeader("Cache-Control", "no-cache");
                 get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
                 get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                                      "close");
-                HttpClient client = HttpClientManager.getNewClient();
                 try {
                     client.executeMethod(get);
                     byte[] data = get.getResponseBody();

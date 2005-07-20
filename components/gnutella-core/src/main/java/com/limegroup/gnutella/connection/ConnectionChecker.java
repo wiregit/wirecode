@@ -190,14 +190,14 @@ public final class ConnectionChecker implements Runnable {
         if(LOG.isTraceEnabled()) {
             LOG.trace("connecting to: "+host);
         }
-        
+
+        HttpClient client = HttpClientManager.getNewClient(20000, 3000);
         HttpMethod head = new HeadMethod(host);
         head.addRequestHeader("Cache-Control", "no-cache");
         head.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         head.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
             "close");
         head.setFollowRedirects(false);
-        HttpClient client = HttpClientManager.getNewClient(20000, 3000);
         try {
             client.executeMethod(head);
             _connected = true;     

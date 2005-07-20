@@ -221,11 +221,11 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             //invalid URI, don't allow this URL.
             throw new IOException("invalid url: " + url);
         }
-    
+
+        HttpClient client = HttpClientManager.getNewClient();
         HttpMethod head = new HeadMethod(url.toExternalForm());
         head.addRequestHeader("User-Agent",
                               CommonUtils.getHttpServer());
-        HttpClient client = HttpClientManager.getNewClient();
         try {
             client.executeMethod(head);
             //Extract Content-length, but only if the response was 200 OK.

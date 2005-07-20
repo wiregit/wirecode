@@ -1252,10 +1252,10 @@ public class DownloadManager implements BandwidthTracker {
             final String ppIp = ppi.getAddress();
             final int ppPort = ppi.getPort();
             String connectTo =  "http://" + ppIp + ":" + ppPort + request;
+            HttpClient client = HttpClientManager.getNewClient();
             HeadMethod head = new HeadMethod(connectTo);
             head.addRequestHeader(nodeString, nodeValue);
             head.addRequestHeader("Cache-Control", "no-cache");
-            HttpClient client = HttpClientManager.getNewClient();
             if(LOG.isTraceEnabled())
                 LOG.trace("Push Proxy Requesting with: " + connectTo);
             try {
