@@ -29,8 +29,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class UrnHttpRequestTest extends BaseTestCase {
 
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());	   
+	private static RouterService ROUTER_SERVICE;	   
 
 
 	private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
@@ -48,6 +47,10 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 		return buildTestSuite(UrnHttpRequestTest.class);
 	}
 
+    public static void globalSetUp() {
+        ROUTER_SERVICE  = new RouterService(new ActivityCallbackStub());
+    }
+    
 	/**
 	 * Runs this test individually.
 	 */
