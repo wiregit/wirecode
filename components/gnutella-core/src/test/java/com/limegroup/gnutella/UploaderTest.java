@@ -1037,7 +1037,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         VerifyingFile vf = new VerifyingFile(0);
         vf.open(tmp);
         HTTPDownloader downloader = 
-			new HTTPDownloader(sb, rfd, vf);
+			new HTTPDownloader(sb, rfd, vf,true);
         tmp.delete();
         return downloader;
     }
