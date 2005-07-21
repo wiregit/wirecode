@@ -17,15 +17,13 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
- * of right events.  VERY slow--involves lots of timeouts--so not part of the
- * standard test suite.  
+ * of right events.  
  */
 public class ConnectionManagerTest extends BaseTestCase {
 
-    private static final TestHostCatcher CATCHER = new TestHostCatcher();
+    private static TestHostCatcher CATCHER;
 
-    private static final RouterService ROUTER_SERVICE =
-        new RouterService(new ActivityCallbackStub());
+    private static RouterService ROUTER_SERVICE;
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -40,6 +38,10 @@ public class ConnectionManagerTest extends BaseTestCase {
     }
     
     public static void globalSetUp() throws Exception {
+        ROUTER_SERVICE =
+            new RouterService(new ActivityCallbackStub());
+        CATCHER = new TestHostCatcher();
+        
         setSettings();
         launchAllBackends();
                 
