@@ -562,10 +562,13 @@ public class ManagedConnection extends Connection
      */
     private void startOutput() {
         MessageQueue queue;
-		if(isSupernodeSupernodeConnection())
+        // Taking this change out until we can safely handle attacks and overflow 
+        // TODO: make a cheaper Queue that still prevents flooding of ultrapeer
+        //       and ensures that clogged leaf doesn't drop QRP messages.
+		//if(isSupernodeSupernodeConnection())
 		    queue = new CompositeQueue();
-		else
-		    queue = new BasicQueue();
+		//else
+		    //queue = new BasicQueue();
 
 		if(isAsynchronous()) {
 		    MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
