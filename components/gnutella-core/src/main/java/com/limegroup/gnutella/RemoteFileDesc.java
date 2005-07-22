@@ -132,7 +132,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     /**
      * The earliest time to retry this host in milliseconds since 01-01-1970
      */
-    private transient long _earliestRetryTime = 0;
+    private transient volatile long _earliestRetryTime = 0;
 
     /**
      * The cached hash code for this RFD.
@@ -152,7 +152,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     /**
      * Whether or not this RFD is/was used for downloading.
      */
-    private transient boolean _isDownloading = false;
+    private transient volatile boolean _isDownloading = false;
     
     /**
      * The creation time of this file.
