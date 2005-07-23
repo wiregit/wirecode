@@ -48,7 +48,7 @@ public class UpdateSettings extends LimeProps {
      * The style of updates.
      */
     public static final IntSetting UPDATE_STYLE = 
-        FACTORY.createIntSetting("UPDATE_STYLE", UpdateInformation.STYLE_MAJOR);
+        FACTORY.createIntSetting("UPDATE_STYLE", UpdateInformation.STYLE_BETA);
     
     /**
      * Failed updates.
