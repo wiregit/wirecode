@@ -194,27 +194,27 @@ ABOUT_LICENSE_TIP=Просмотр лцензионного соглашения
 ABOUT_SCROLL_CHECK_BOX_LABEL=Прокручивать текст
 #### ABOUT_BUTTON_TIP=Close This Window
 ABOUT_BUTTON_TIP=Закрыть
-#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world.  The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant.  The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
+#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
 #? ABOUT_DEV_BLURB=
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 #? ABOUT_BIZDEV_BLURB=
-#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team: 
+#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 #? ABOUT_WEBDEV_BLURB=
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 #? ABOUT_SUPPORT_BLURB=
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
 #? ABOUT_PREVIOUS_DEV_BLURB=
-#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well.  Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
+#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
 #? ABOUT_I18N_BLURB=
-#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks.  These include:
+#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
 #? ABOUT_COMMUNITY_BLURB=
-#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project.  Without LimeWire users, the LimeWire network would not exist.
+#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 #? ABOUT_CONCLUSION=
- 
+
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
@@ -880,7 +880,6 @@ LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=В настройках LimeWire вы м�
 LIBRARY_SHARED_FILES_CONFIGURE=Настроить...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Настройка параметров общего доступа
-
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Открыть...
@@ -1935,23 +1934,23 @@ SHUTDOWN_WAIT=Подождите, пока LimeWire завершит работ�
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=Для ТУРБО-поиска купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development. Get PRO.
 SUPPORT_LIMEWIRE_02=Щёлкните здесь, поддержите LimeWire и разработку открытых файлообменных сетей.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Купите LimeWire Pro, это поможет нам сделать загрузку ещё более быстрой.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Для ТУРБО-загрузки купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_05=Support open networks. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Поддержите открытые сети.
-#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=Щёлкните здесь, поддержите открытое ПО и открытые протоколы.
 #### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Для ТУРБО-производительности купите LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Помогите сохранить Интернет открытым. Купите Pro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
 SUPPORT_LIMEWIRE_09=Разработка LimeWire требует денег. Купите Pro.
-#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content. Get PRO.
 SUPPORT_LIMEWIRE_11=Поддержите файлообменные сети.
 
 ################################################################################
@@ -1970,7 +1969,7 @@ UPDATE_LATER_LABEL=Обновить позже
 UPDATE_NOW_LABEL=Обновить сейчас
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 #? UPDATE_TIP=
-#### UPDATE_RESTART=LimeWire needs to be restarted to install the update.  If you choose not to update now, LimeWire will update automatically when you close.  Would you like to update now?
+#### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
 #? UPDATE_RESTART=
 #### UPDATE_RESTART_TITLE=Update Ready
 #? UPDATE_RESTART_TITLE=
@@ -4129,7 +4128,7 @@ STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Информация об входяще�
 #? ERROR_VENDOR_INVALID_PAYLOAD=
 #### ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
 #? ERROR_VENDOR_UNRECOGNIZED=
-#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed.  You may be able to fix this problem by changing LimeWire's Windows Compatibility.  Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu.  Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box.  Then click the 'OK' button at the bottom and restart LimeWire.
+#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed. You may be able to fix this problem by changing LimeWire's Windows Compatibility. Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu. Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box. Then click the 'OK' button at the bottom and restart LimeWire.
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################

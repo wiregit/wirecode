@@ -1,5 +1,5 @@
 ﻿#########################################################################
-# Messages Bundle for LimeWire 4.8.2
+# Messages Bundle for LimeWire 4.9.8
 # Specialization for: Bosnian & Bosnia Herzegovina (Latin script)
 # Thanks to: Ing. Salih Čavkić, Enver Julardžija and Bisera Uludag.
 #########################################################################
@@ -14,7 +14,7 @@ LOCALE_SCRIPT_NAME=Latin (Central European)
 LOCALE_ENGLISH_LANGUAGE_NAME=Bosnian
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
-LOCALE_NSIS_NAME=
+LOCALE_NSIS_NAME=Bosnian
 # See also other translatable items for the LimeWire installer:
 # http://www.limewire.org/fisheye/viewrep/limecvs/lib/installbundles/
 
@@ -83,7 +83,7 @@ GENERAL_BROWSE_HOST_LABEL=Pregledaj datoteke korisnika
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
 GENERAL_BROWSE_HOST_TIP=Pokaži sve datoteke na selektiranom računaru.
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
-#? GENERAL_ADVANCED_SUB_MENU=
+GENERAL_ADVANCED_SUB_MENU=Uspješno
 
 ################################################################################
 # Key/value pairs for right-click context menus.
@@ -194,27 +194,27 @@ ABOUT_LICENSE_TIP=Pokaži licencni ugovor za ovaj softwer.
 ABOUT_SCROLL_CHECK_BOX_LABEL=Automatski mrdni sa mišem
 #### ABOUT_BUTTON_TIP=Close This Window
 ABOUT_BUTTON_TIP=Zatvori ovaj prozor.
-#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world.  The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant.  The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
+#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
 #? ABOUT_DEV_BLURB=
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 #? ABOUT_BIZDEV_BLURB=
-#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team: 
+#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 #? ABOUT_WEBDEV_BLURB=
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 #? ABOUT_SUPPORT_BLURB=
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
 #? ABOUT_PREVIOUS_DEV_BLURB=
-#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well.  Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
+#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
 #? ABOUT_I18N_BLURB=
-#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks.  These include:
+#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
 #? ABOUT_COMMUNITY_BLURB=
-#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project.  Without LimeWire users, the LimeWire network would not exist.
+#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 #? ABOUT_CONCLUSION=
- 
+
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
@@ -572,19 +572,19 @@ MENU_HELP_ERROR_ACCESSIBLE=Uzrokuje Popup grešku za testiranje.
 # Key/value pairs for status bar components and right-click menu
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
-#? STATUS_BAR_SHOW_CONNECTION_QUALITY=
+STATUS_BAR_SHOW_CONNECTION_QUALITY=Prikaži kvalitet priključka.
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
-#? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
+STATUS_BAR_SHOW_SHARED_FILES_COUNT=Prikaži brojno podjelu datoteka.
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
-#? STATUS_BAR_SHOW_FIREWALL_STATUS=
+STATUS_BAR_SHOW_FIREWALL_STATUS=Prikaži Firewall status.
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
-#? STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=
+STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Prikaži potrošnju širine trake.
 #### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
-#? STATUS_BAR_SHOW_MEDIA_PLAYER=
+STATUS_BAR_SHOW_MEDIA_PLAYER=Prikaži Media Player.
 #### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
-#? STATUS_BAR_FIREWALL_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire je detektirao firewall.
 #### STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire has not detected a firewall
-#? STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire nije detektirao firewall.
 
 ################################################################################
 # Key/value pairs for general tables info
@@ -608,7 +608,7 @@ SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
 SEARCH_DOWNLOAD_BUTTON_TIP=Download sve selektirane datoteke.
 #### SEARCH_DOWNLOAD_AS_LABEL=Download As...
-#? SEARCH_DOWNLOAD_AS_LABEL=
+SEARCH_DOWNLOAD_AS_LABEL=Download kao...
 #### SEARCH_WISHLIST_BUTTON_LABEL=Add To Wishlist
 SEARCH_WISHLIST_BUTTON_LABEL=Dodaj na listu želja
 #### SEARCH_WISHLIST_BUTTON_TIP=Spawn a "LimeWire Robot" to Look for the Content
@@ -656,7 +656,7 @@ SEARCH_PUBLIC_BLOCK_STRING=Blokiraj drugog korisnika
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Rezultati
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
-#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
+SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Traži još
 #### SEARCH_SEARCHING_LABEL=Searching...
 SEARCH_SEARCHING_LABEL=Traženje...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
@@ -732,24 +732,24 @@ MAGNET_COPY_MAGNET_LINKS_LABEL=Kopiraj Magnet linkove na Klemploču
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the Selected Files to the Clipboard
 MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Kopiraj Magnet linkove selektiranih datoteka na Klemploču
 #### MAGNET_COPY_MAGNET_LINKS_WARNING=One or more of the created magnet links may not be accessible since their hosts are firewalled.
-#? MAGNET_COPY_MAGNET_LINKS_WARNING=
+MAGNET_COPY_MAGNET_LINKS_WARNING=Jedan ili više postavljenih magnet linkova možda nisu dostupni od kako su host firewallovali.
 
 ################################################################################
 # Search actions
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
-#? SEARCH_FOR_KEYWORDS_ACTION_NAME=
+SEARCH_FOR_KEYWORDS_ACTION_NAME=Traži ključne riječi: {0}
 # {0} the title of the search
 #### SEARCH_ACTION_NAME=Search for: {0}
-#? SEARCH_ACTION_NAME=
+SEARCH_ACTION_NAME=Traži za: {0}
 # {0} the already translated mediatype
 #### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
-#? SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=
+SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Traži "Šta je novo" za: {0}
 # {0} the type of the search, e.g. Title, Album, Genre
 # {1} the keywords fo the search, e.g. name of the album
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
-#? SEARCH_XML_FIELD_ACTION_NAME=
+SEARCH_XML_FIELD_ACTION_NAME=Traži za {0}: {1}
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
@@ -806,21 +806,21 @@ DOWNLOAD_LAUNCH_BUTTON_LABEL=Pregled
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
 DOWNLOAD_LAUNCH_BUTTON_TIP=Pregled selektiranog downloda.
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Lansiraj
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Lansiraj selektirane downloade.
 #### DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Launch Download
-#? DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Lansiraj download
 #### DOWNLOAD_KILL_BUTTON_LABEL=Cancel
-DOWNLOAD_KILL_BUTTON_LABEL=Stop
+DOWNLOAD_KILL_BUTTON_LABEL=Odustani
 #### DOWNLOAD_KILL_BUTTON_TIP=Cancel Selected Downloads
-DOWNLOAD_KILL_BUTTON_TIP=Stopiraj selektirani download.
+DOWNLOAD_KILL_BUTTON_TIP=Stopiraj selektirane downloade.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Očisti
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Očisti selektirane downloade.
 #### DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Clear Download
-#? DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Očisti download
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=Rezime
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
@@ -838,11 +838,11 @@ DOWNLOAD_PAUSE_BUTTON_LABEL=Pauza
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
 DOWNLOAD_PAUSE_BUTTON_TIP=Pauziraj selektirane downloade.
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Change File Location...
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Promjeni lokaciju datoteke...
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Edit the Final Filename of the Download
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Pokaži definitivno ime downloadovane datoteke.
 #### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
-#? DOWNLOAD_POPUP_MENU_CLEAR=
+DOWNLOAD_POPUP_MENU_CLEAR=Obriši sve neaktivne downloade
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Pristup
@@ -875,12 +875,11 @@ LIBRARY_RESUME_BUTTON_TIP=Nastavi download selektiranih nepotpuni datoteka.
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
 LIBRARY_RENAME_BUTTON_LABEL=Promjeni ime
 #### LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=You can configure the folders you share in LimeWire's Options.
-#? LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=
+LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=Možete formirati foldere koje dijelite u LimeWire opciji.
 #### LIBRARY_SHARED_FILES_CONFIGURE=Configure...
-#? LIBRARY_SHARED_FILES_CONFIGURE=
+LIBRARY_SHARED_FILES_CONFIGURE=Formiraj...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
-#? LIBRARY_SHARED_FILES_CONFIGURE_MENU=
-
+LIBRARY_SHARED_FILES_CONFIGURE_MENU=Formiraj podjelu opcija
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Otvori...
@@ -923,140 +922,140 @@ PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Lozinka
 # Key/value pairs for DownloaderDialog
 ################################################################################
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Save As...
-#? DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Pohrani kao...
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a Different Location for the Download
-#? DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Odaberi različite lokacije za download.
 #### DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Cancel the Download
-#? DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Odustani od downloada.
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Overwrite
-#? DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=
+DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Prepiši
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Overwrite the Existing File
-#? DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=
+DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Prepiši preko postojeće datoteke.
 # {0} a short error message which is localized independently
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
-#? DOWNLOADER_DIALOG_ERROR_LABEL=
+DOWNLOADER_DIALOG_ERROR_LABEL=Greška: {0}
 # {0} a short warning message which is localized independently
 #### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
-#? DOWNLOADER_DIALOG_WARNING_LABEL=
+DOWNLOADER_DIALOG_WARNING_LABEL=Upozorenje: {0}
 # {0} the full path name of the file in question
 #### DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: A file with the same content already exists in the library at {0}
-#? DOWNLOADER_DIALOG_NOTE_LABEL=
+DOWNLOADER_DIALOG_NOTE_LABEL=Jedna datoteka sa istim sadržajem već se nalazi u biblioteci na {0}
 #### NO_FILENAME_LABEL=No Filename
-#? NO_FILENAME_LABEL=
+NO_FILENAME_LABEL=Bez imena datoteke
 
 ################################################################################
 # Key/value pair for download location dialog
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
-#? DOWNLOAD_LOCATION_DIALOG_TITLE=
+DOWNLOAD_LOCATION_DIALOG_TITLE=Odaberi lokaciju za pohranjivanje
 #### DIRECTORY_CHOOSER_FILE_DESCRIPTION=All Folders
-#? DIRECTORY_CHOOSER_FILE_DESCRIPTION=
+DIRECTORY_CHOOSER_FILE_DESCRIPTION=Svi folderi
 
 ################################################################################
 # Key/value pair for save location error states
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
-#? SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Datoteka već postoji
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Filename Taken
-#? SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Preuzeto ime datoteke
 #### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
-#? SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download je već završio
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=No Write Permission
-#? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=Nemate dozvolu za upis
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Folder Does Not Exist
-#? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=
+SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Direktorij ne postoji
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Not a Folder
-#? SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=
+SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Ni jedan folder
 #### SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Invalid Filename
-#? SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=
+SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Nevažeće ime datoteke
 #### SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Not a File
-#? SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=
+SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Ni jedna datoteka
 #### SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Filesystem Error
-#? SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=
+SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Greška u sistemu datoteka
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Same File Already Being Downloaded
-#? SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Ista datoteka je već jednom downloadovana
 # {0} the full path name of the file
 #### SAVE_LOCATION_ALREADY_EXISTS_ERROR=A file already exists at {0}.
-#? SAVE_LOCATION_ALREADY_EXISTS_ERROR=
+SAVE_LOCATION_ALREADY_EXISTS_ERROR=Jedna datoteka već postoji na {0}.
 # {0} the full path name of the file
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Another download is already saving to {0}.
-#? SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Drugi download se već snima na {0}.
 #### SAVE_LOCATION_ALREADY_SAVED_ERROR=Could not set the file location, the download is already finished.
-#? SAVE_LOCATION_ALREADY_SAVED_ERROR=
+SAVE_LOCATION_ALREADY_SAVED_ERROR=Ne mogu datoteku postaviti na lokaciju, download je već završio.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Could not save download to the folder {0}, because you do not have write access to it.
-#? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Ne mogu pohraniti download u folder {0}, zbog toga što vi nemate pristup za upisivanje.
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
-#? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=
+SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Ne mogu pohraniti download u dirktorij {0}, zbog toga što folder ne postoji.
 # {0} the full path name of the folder/file
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Could not set download folder to {0}, because it represents an individual file, not a folder.
-#? SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=
+SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Ne mogu postaviti dowloadovani folder u {0}, zbog toga što on predstavlja individualnu datoteku, a ne folder.
 # {0} the full path name of the file
 #### SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Could not set file location to {0}, because the filename is invalid and may corrupt your system.
-#? SAVE_LOCATION_SECURITY_VIOLATION_ERROR=
+SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Ne mogu postaviti lokaciju datoteke u {0}, zbog toga što je ime datoteke nevažeće i može da ošteti vaš sistem.
 # {0} the full path name of the file
 #### SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Could not set file location to {0}, because it is not a regular file.
-#? SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=
+SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Ne mogu postaviti lokaciju datoteke u {0}, zbog toga što nije uredna datoteka.
 #### SAVE_LOCATION_FILESYSTEM_ERROR=Could not set file location due to an error in the filesystem.
-#? SAVE_LOCATION_FILESYSTEM_ERROR=
+SAVE_LOCATION_FILESYSTEM_ERROR=Ne mogu postaviti datoteku na mjesto koje će uzrokovati grešku u sistemu datoteka.
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=The same file is already being downloaded.
-#? SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=
+SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Ista datoteka je već downloadovana.
 
 ################################################################################
 # Key/value pairs for DownloaderUtils
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
-#? DOWNLOADER_UTILS_FILECHOOSER_TITLE=
+DOWNLOADER_UTILS_FILECHOOSER_TITLE=Pohrani download kao
 # {0} the full path name of the file in question
 #### DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=You already have the exact same file at {0}
-#? DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=
+DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=Vi već imate u potpunosti istu datoteku u {0}
 #### DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=Do you want to continue downloading anyway?
-#? DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=
+DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=Želite li u svakom slučaju dalje downloadovati?
 #### DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Continue
-#? DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=
+DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Nastavi
 #### DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Same File Already In Library
-#? DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=
+DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Ista datoteka već je u biblioteci
 
 ################################################################################
 # Key/value pair for sharing of files specially/individually
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
-#? SHARE_FILE_POPUP_MENU_LABEL=
+SHARE_FILE_POPUP_MENU_LABEL=Ramjena datoteke
 #### UNSHARE_FILE_POPUP_MENU_LABEL=Stop Sharing File
-#? UNSHARE_FILE_POPUP_MENU_LABEL=
+UNSHARE_FILE_POPUP_MENU_LABEL=Zaustavi razmjenu datoteke
 #### SHARE_FOLDER_POPUP_MENU_LABEL=Share Folder
-#? SHARE_FOLDER_POPUP_MENU_LABEL=
+SHARE_FOLDER_POPUP_MENU_LABEL=Razmjena foldera
 #### UNSHARE_FOLDER_POPUP_MENU_LABEL=Stop Sharing Folder
-#? UNSHARE_FOLDER_POPUP_MENU_LABEL=
+UNSHARE_FOLDER_POPUP_MENU_LABEL=Zaustavi razmjenu foldera
 #### SHARE_FILE_ACTION_NAME=Share New File...
-#? SHARE_FILE_ACTION_NAME=
+SHARE_FILE_ACTION_NAME=Razmjena nove datoteke...
 #### SHARE_FILE_ACTION_APPROVE_LABEL=Share
-#? SHARE_FILE_ACTION_APPROVE_LABEL=
+SHARE_FILE_ACTION_APPROVE_LABEL=Razmjena
 #### SHARE_FILE_ACTION_MNEMONIC=I
-#? SHARE_FILE_ACTION_MNEMONIC=
+SHARE_FILE_ACTION_MNEMONIC=D
 #### SHARE_NEW_FOLDER_ACTION_NAME=Share New Folder...
-#? SHARE_NEW_FOLDER_ACTION_NAME=
+SHARE_NEW_FOLDER_ACTION_NAME=Razmjena novog foldera...
 #### SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Opens a Window and Lets You Choose a New Folder to Share
-#? SHARE_NEW_FOLDER_ACTION_DESCRIPTION=
+SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Otvori jedan prozor i odaberi jedan novi folder za razmjenu
 #### SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
-#? SHARE_NEW_FOLDER_ACTION_MNEMONIC=
+SHARE_NEW_FOLDER_ACTION_MNEMONIC=F
 #### SHARE_FILE_FAILED=LimeWire was unable to share the file "{0}".
-#? SHARE_FILE_FAILED=
+SHARE_FILE_FAILED=LimeWire je nemoćan da razmijeni datoteku "{0}".
 #### SHARE_FILE_ALREADY_SHARED=The file "{0}" is already shared.
-#? SHARE_FILE_ALREADY_SHARED=
+SHARE_FILE_ALREADY_SHARED=Datoteka "{0}" već je razmijenjena.
 
 ################################################################################
 # Key/value pairs for Statistics String...
 ################################################################################
 #### STATISTICS_AVAILABLE=available
-STATISTICS_AVAILABLE=Dostupan
+STATISTICS_AVAILABLE=dostupan
 #### STATISTICS_FILES=Files
-STATISTICS_FILES=datoteka(e)
+STATISTICS_FILES=Datoteka(e)
 #### STATISTICS_FILES_TOOLTIP=files
-#? STATISTICS_FILES_TOOLTIP=
+STATISTICS_FILES_TOOLTIP=datoteke
 #### STATISTICS_FILES_TOOLTIP_PENDING=files (Loading...)
-#? STATISTICS_FILES_TOOLTIP_PENDING=
+STATISTICS_FILES_TOOLTIP_PENDING=datoteke (Puni...)
 #### STATISTICS_DISCONNECTED=Disconnected / no files available
 STATISTICS_DISCONNECTED=Isključen / datoteke nisu dostupne
 #### STATISTICS_SHARING_TOOLTIP=You are sharing
@@ -1092,7 +1091,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=Možete isprobati konekciju Turbo P
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Vaša konekcija na internetu je ekstremno jaka.
 #### STATISTICS_CONNECTION_QUALITY=Connection
-STATISTICS_CONNECTION_QUALITY=Kvalitet:
+STATISTICS_CONNECTION_QUALITY=Kvalitet
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
 STATISTICS_CONNECTION_WAKING_UP=Probudi
 #### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode
@@ -1108,9 +1107,9 @@ DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Prekini download
 #### DOWNLOAD_POPUP_MENU_RESUME=Resume Download
 DOWNLOAD_POPUP_MENU_RESUME=Iznuditi rezime
 #### DOWNLOAD_POPUP_MENU_SOURCES=Find More Sources for Download
-#? DOWNLOAD_POPUP_MENU_SOURCES=
+DOWNLOAD_POPUP_MENU_SOURCES=Pronađi više izvora za download
 #### DOWNLOAD_POPUP_MENU_PAUSE=Pause Download
-#? DOWNLOAD_POPUP_MENU_PAUSE=
+DOWNLOAD_POPUP_MENU_PAUSE=Pauza download
 #### DOWNLOAD_POPUP_MENU_LAUNCH=Preview Download
 DOWNLOAD_POPUP_MENU_LAUNCH=Prikaži datoteku
 #### DOWNLOAD_POPUP_MENU_CHAT=Chat with Host
@@ -1208,7 +1207,7 @@ DOWNLOAD_SEARCHING=Lociranje izvora...
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Žao nam je, ali LimeWie nije bio u mogućnosti ponovo restartovati vaše stare downloade.
 #### DOWNLOAD_MAGNET_DIALOG_MESSAGE=Would you like to start downloads from the following magnets?
-#? DOWNLOAD_MAGNET_DIALOG_MESSAGE=
+DOWNLOAD_MAGNET_DIALOG_MESSAGE=Željeli ste download početi sa sljedećeg magneta?
 #### DOWNLOAD_HASH_ONLY_MAGNET=LimeWire may not be able to start the download you have selected unless you start a search for it.
 DOWNLOAD_HASH_ONLY_MAGNET=LimeWire neće biti u mogućnosti downloadovati vaše selektirane datoteke ukoliko ne počnete sa traženjem istih
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
@@ -1220,7 +1219,7 @@ DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Udaljite selektirane download od aktivnog stan
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=Red čekanja
 #### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
-#? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
+DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire je nemoćan da pronađe licencu za ovu datoteku. Download u svakom slučaju?\n\nMolim pribilježi: LimeWire ne može nadgledati ili kontrolisati sadržaj Gnutela mreže. Molim da poštujete vaš lokalni zakon kopiranja.
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -1435,15 +1434,15 @@ LIBRARY_TABLE_LICENSE=Licenca
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
-#? LIBRARY_TABLE_SEARCH_POPUP_MENU=
+LIBRARY_TABLE_SEARCH_POPUP_MENU=Traži
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
 LIBRARY_TREE_NEW_FOLDER_LABEL=Nova datoteka
 #### LIBRARY_TREE_SHARE_FOLDER_LABEL=Share Folder
-#? LIBRARY_TREE_SHARE_FOLDER_LABEL=
+LIBRARY_TREE_SHARE_FOLDER_LABEL=Razmjena foldera
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing Folder
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Zaustavi razmjenu
 #### LIBRARY_TABLE_SHARING_SUB_MENU=Sharing
-#? LIBRARY_TABLE_SHARING_SUB_MENU=
+LIBRARY_TABLE_SHARING_SUB_MENU=Razmjena
 #### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
 LIBRARY_TREE_RENAME_FOLDER_LABEL=Promjeni ime
 #### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
@@ -1453,11 +1452,11 @@ LIBRARY_TREE_SAVED_DIRECTORY=Pohranjene datoteke
 #### LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete Files
 LIBRARY_TREE_INCOMPLETE_DIRECTORY=Nekompletne datoteke
 #### LIBRARY_TREE_SHARED_FILES_DIRECTORY=Shared Files
-#? LIBRARY_TREE_SHARED_FILES_DIRECTORY=
+LIBRARY_TREE_SHARED_FILES_DIRECTORY=Razmjena datoteka
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Individually Shared Files
-#? LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Pojedinačna razmjena datoteka
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
-#? LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Lista svih pojedinačnih razmjena datoteka.
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -1542,7 +1541,7 @@ SETUP_FIREWALL_LABEL_TWO=LimeWire sada traži dozvolu za korištenjem interneta.
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=Skenirajte datoteke
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
-SETUP_SCAN_LABEL=Želite li da LimeWire brzo pretraži vaš čvrsti disk radi postojanja drugih mediskih datoteka? Imaćete mogućnost da odaberete direktorije koje želite razmjenjivati kada se pretraga kompletira.
+SETUP_SCAN_LABEL=Želite li da LimeWire brzo pretraži vaš čvrsti disk radi postojanja drugih mediskih datoteka? Imaćete mogućnost da odaberete foldere koje želite razmjenjivati kada se pretraga kompletira.
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
 SETUP_WAIT_TITLE=Skeniranje čvrstog diska
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
@@ -1550,7 +1549,7 @@ SETUP_WAIT_LABEL=Molimo vas čekajte dok LimeWire pretraži vaš čvrsti disk...
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=Potvrdite skeniranje
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
-SETUP_CONFIRM_LABEL=Mi smo identifikovali direktorij koji možda želite razmjeniti. Ukoliko želite razmjenjivati jedan od ovih direktorija, jednostavno provjerite zajednički boks za čekiranje. Poddirektoriji razmjenjivog direktorija biće razmijenjeni.
+SETUP_CONFIRM_LABEL=Mi smo identifikovali folder koji možda želite razmjeniti. Ukoliko želite razmjenjivati jedan od ovih foldera, jednostavno provjerite zajednički boks za čekiranje. Podfolderi razmjenjivog foldera biće razmijenjeni.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire nije bio u mogućnosti da locira ni jednu datoteku za razmjenu. Za daljnu konfiguraciju LimeWire, pritisnite "Sljedeći".
 #### SETUP_FINISH_TITLE=Finish Setup
@@ -1570,7 +1569,7 @@ DIRECTORY_CHOOSER_CAPTION=Selektuj
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Selektuj
 #### FILE_CHOOSER_DIRECTORY_TITLE=Select Folder
-FILE_CHOOSER_DIRECTORY_TITLE=Selektuj direktorij
+FILE_CHOOSER_DIRECTORY_TITLE=Selektuj folder
 
 ################################################################################
 # Key/value pairs for strings in the init package
@@ -1582,11 +1581,11 @@ INIT_SAVE_DIRECTORY_FIELD_LABEL=Direktorij:
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
 INIT_SAVE_BROWSE_BUTTON_LABEL=Pretražite...
 #### INIT_SAVE_BROWSE_BUTTON_TIP=Choose Another Folder
-INIT_SAVE_BROWSE_BUTTON_TIP=Odaberite drugi direktorij.
+INIT_SAVE_BROWSE_BUTTON_TIP=Odaberite drugi folder.
 #### INIT_SAVE_DEFAULT_BUTTON_LABEL=Use Default
 INIT_SAVE_DEFAULT_BUTTON_LABEL=Koristite standardnu formu
 #### INIT_SAVE_DEFAULT_BUTTON_TIP=Use the Default Folder
-INIT_SAVE_DEFAULT_BUTTON_TIP=Koristite standardni direktorij.
+INIT_SAVE_DEFAULT_BUTTON_TIP=Koristite standardni folder.
 
 ################################################################################
 # Key/Value pairs for the pro window on startup
@@ -1622,74 +1621,74 @@ JAVA_UPGRADE_QUESTION=Želite li da imate novu Java verziju besplatno?
 # Key/value pairs for XML
 ###################################################################
 #### XML_audios__audio=Audio
-#? XML_audios__audio=
+XML_audios__audio=Audio
 #### XML_audios__audio__title__=Title
-#? XML_audios__audio__title__=
+XML_audios__audio__title__=Naziv
 #### XML_audios__audio__artist__=Artist
-#? XML_audios__audio__artist__=
+XML_audios__audio__artist__=Umjetnik
 #### XML_audios__audio__album__=Album
-#? XML_audios__audio__album__=
+XML_audios__audio__album__=Album
 #### XML_audios__audio__genre__=Genre
-#? XML_audios__audio__genre__=
+XML_audios__audio__genre__=Žanr
 #### XML_audios__audio__track__=Track
-#? XML_audios__audio__track__=
+XML_audios__audio__track__=Traka
 #### XML_audios__audio__type__=Type
-#? XML_audios__audio__type__=
+XML_audios__audio__type__=Tip
 #### XML_audios__audio__seconds__=Length
-#? XML_audios__audio__seconds__=
+XML_audios__audio__seconds__=Dužina
 #### XML_audios__audio__year__=Year
-#? XML_audios__audio__year__=
+XML_audios__audio__year__=Godina
 #### XML_audios__audio__language__=Language
-#? XML_audios__audio__language__=
+XML_audios__audio__language__=Jezik
 #### XML_audios__audio__bitrate__=Bitrate
-#? XML_audios__audio__bitrate__=
+XML_audios__audio__bitrate__=Bitrata
 #### XML_audios__audio__comments__=Comments
-#? XML_audios__audio__comments__=
+XML_audios__audio__comments__=Komentar
 #### XML_audios__audio__action__=Action
-#? XML_audios__audio__action__=
+XML_audios__audio__action__=Akcija
 #### XML_audios__audio__license__=Copyright
-#? XML_audios__audio__license__=
+XML_audios__audio__license__=Autorsko pravo
 #### XML_audios__audio__licensetype__=License Type
-#? XML_audios__audio__licensetype__=
+XML_audios__audio__licensetype__=Vrsta licence
 
 #### XML_videos__video=Video
-#? XML_videos__video=
+XML_videos__video=Video
 #### XML_videos__video__title__=Title
-#? XML_videos__video__title__=
+XML_videos__video__title__=Naziv
 #### XML_videos__video__director__=Director
-#? XML_videos__video__director__=
+XML_videos__video__director__=Direktor
 #### XML_videos__video__producer__=Producer
-#? XML_videos__video__producer__=
+XML_videos__video__producer__=Proizvođač
 #### XML_videos__video__studio__=Studio
-#? XML_videos__video__studio__=
+XML_videos__video__studio__=Studio
 #### XML_videos__video__stars__=Stars
-#? XML_videos__video__stars__=
+XML_videos__video__stars__=Zvijezde
 #### XML_videos__video__type__=Type
-#? XML_videos__video__type__=
+XML_videos__video__type__=Tip
 #### XML_videos__video__length__=Length
-#? XML_videos__video__length__=
+XML_videos__video__length__=Dužina
 #### XML_videos__video__year__=Year
-#? XML_videos__video__year__=
+XML_videos__video__year__=Godina
 #### XML_videos__video__language__=Language
-#? XML_videos__video__language__=
+XML_videos__video__language__=Jezik
 #### XML_videos__video__subtitles__=Subtitles
-#? XML_videos__video__subtitles__=
+XML_videos__video__subtitles__=Podnaslov
 #### XML_videos__video__rating__=Rating
-#? XML_videos__video__rating__=
+XML_videos__video__rating__=Klasa
 #### XML_videos__video__comments__=Comments
-#? XML_videos__video__comments__=
+XML_videos__video__comments__=Komentar
 #### XML_videos__video__action__=Action
-#? XML_videos__video__action__=
+XML_videos__video__action__=Akcija
 #### XML_videos__video__license__=Copyright
-#? XML_videos__video__license__=
+XML_videos__video__license__=Autorsko pravo
 #### XML_videos__video__licensetype__=License Type
-#? XML_videos__video__licensetype__=
+XML_videos__video__licensetype__=Vrsta licence
 #### XML_videos__video__height__= Height
-#? XML_videos__video__height__=
+XML_videos__video__height__=Visina
 #### XML_videos__video__width__=Width
-#? XML_videos__video__width__=
+XML_videos__video__width__=Širina
 #### XML_videos__video__bitrate__=Bitrate
-#? XML_videos__video__bitrate__=
+XML_videos__video__bitrate__=Bitrata
 
 #MetaEditorFrame
 #### META_EDITOR_ANNOTATING_FILE=Annotating file
@@ -1934,25 +1933,25 @@ SHUTDOWN_WAIT=Molimo vas sačekajte, LimeWire se isključuje...
 # support LimeWire through contributions.
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
-SUPPORT_LIMEWIRE_01=Za traženje Turbo Punjenje, kupite LimeWire Pro
-#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
+SUPPORT_LIMEWIRE_01=Za traženje Turbo Punjenje, kupite LimeWire Pro.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development. Get PRO.
 SUPPORT_LIMEWIRE_02=Pritisnite ovdje za davanje potpore LimeWire u nastojanju za otvaranjem peer-to-peer mreže.
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Kupite LimeWire Pro da nam pomognete naparaviti još brži download.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Za download Turbo Punjenje, kupite LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_05=Support open networks. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Podržite otvorenu mrežu.
-#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
-SUPPORT_LIMEWIRE_06=Pritisnite ovdje za podršku otvorenom izvoru i otvorenom protokolu.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols. Get LimeWire PRO.
+SUPPORT_LIMEWIRE_06=Pritisnite ovdje za podršku otvorenom izvoru i otvorenom protokolu. Kupite LimeWire PRO.
 #### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Za izvođenje Turbo Punjenjem, kupite LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Zadržite internet otvorenim. Kupite Pro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
-SUPPORT_LIMEWIRE_09=Održavanje LimeWires košta novca. Kupite PRO
-#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
-SUPPORT_LIMEWIRE_11=Razmjena podrške pomoći od nezavisnih medija
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
+SUPPORT_LIMEWIRE_09=Održavanje LimeWires košta novca. Kupite PRO.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content. Get PRO.
+SUPPORT_LIMEWIRE_11=Razmjena podrške pomoći od nezavisnih medija. Kupite PRO.
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
@@ -1970,7 +1969,7 @@ UPDATE_LATER_LABEL=Update kasnije
 UPDATE_NOW_LABEL=Update sada
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 UPDATE_TIP=Posjeti http://www.limewire.com za update!
-#### UPDATE_RESTART=LimeWire needs to be restarted to install the update.  If you choose not to update now, LimeWire will update automatically when you close.  Would you like to update now?
+#### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
 #? UPDATE_RESTART=
 #### UPDATE_RESTART_TITLE=Update Ready
 #? UPDATE_RESTART_TITLE=
@@ -1983,13 +1982,13 @@ MESSAGE_CAPTION=Poruka
 #### MESSAGE_ERROR_CAPTION=Error
 MESSAGE_ERROR_CAPTION=Greška
 #### MESSAGE_WARNING_CAPTION=Warning
-#? MESSAGE_WARNING_CAPTION=
+MESSAGE_WARNING_CAPTION=Upozorenje
 #### MESSAGE_SHARE_SAVE_DIR=Would you like to add the save folder to your list of shared folders? Subfolders of this folder will also be shared.
-MESSAGE_SHARE_SAVE_DIR=Želite li dodati direktorij za pohranjivanje na vašu listu za razmjenu? Poddirektoriji od ovog direktorija će takođe biti razmijenjeni.
+MESSAGE_SHARE_SAVE_DIR=Želite li dodati folder za pohranjivanje na vašu listu za razmjenu? Podfolderi od ovog foldera će takođe biti razmijenjeni.
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this folder?
-MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Jeste li sigurni da želite zaustaviti razmjenu ovog direktorija?
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Jeste li sigurni da želite zaustaviti razmjenu ovog foldera?
 #### MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire cannot stop sharing this folder.
-#? MESSAGE_CANNOT_UNSHARE_DIRECTORY=
+MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire ne može zaustaviti razmjenu ovog foldera.
 #### MESSAGE_OVERWRITE_EXISTING_FILE=Overwrite existing file
 MESSAGE_OVERWRITE_EXISTING_FILE=Upišite preko postojeće datoteke
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
@@ -2001,9 +2000,9 @@ MESSAGE_UNABLE_TO_DELETE_FILE_START=Nemoguće je izbrisati datoteku
 #### MESSAGE_UNABLE_TO_DELETE_FILE_END=. It may be in use by another application.
 MESSAGE_UNABLE_TO_DELETE_FILE_END=. Možda je u upotrebi od strane drugog zahtjeva.
 #### MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Unable to delete the folder
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Nemoguće je izbrisati direktorij
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Nemoguće je izbrisati folder
 #### MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Unable to rename the folder
-MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Nemoguće je promjeniti ime direktorija
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Nemoguće je promjeniti ime foldera
 #### MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. It may be in use by another application.
 MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Možda je u upotrebi od strane drugog zahtjeva.
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
@@ -2015,7 +2014,7 @@ MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire vam to neće dopustiti
 #### MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
 MESSAGE_INCOMPLETE_DIRECTORY_END=folder je rezervisan za nepotpune datoteke.
 #### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified folder for saving files. Please try a different folder.
-MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire nije bio u mogućnosti koristiti naznačeni direktorij za pohranjivanje datoteka. Molimo vas da pokušate sa drugim direktorijem.
+MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire nije bio u mogućnosti koristiti naznačeni folder za pohranjivanje datoteka. Molimo vas da pokušate sa drugim folderem.
 #### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
 MESSAGE_FILE_CORRUPT=LimeWire je otkrio nepravilnost u datoteci
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
@@ -2032,7 +2031,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Dijelite li ovaj folder?
 # when the user does not have a valid save directory.
 ################################################################################
 #### INVALID_SAVE_DIR_LABEL=The stored folder for saving files is not valid. Please enter a new folder in the folder chooser.
-INVALID_SAVE_DIR_LABEL=Pohranjeni direktorij za čuvanje datoteka nije više važeći. Molimo vas unesite novi direktorij u već odabrani izbornik.
+INVALID_SAVE_DIR_LABEL=Pohranjeni folder za čuvanje datoteka nije više važeći. Molimo vas unesite novi folder u već odabrani izbornik.
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
@@ -2072,7 +2071,7 @@ ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire nije bio u mogućnosti da downloduje o
 #### ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
 ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire nije bio u mogućnosti otvoriti potrebnu datoteku zato što je program zaključao datoteku. LimeWire može da djeluje u neočekivanom pravcu ukoliko dotičnu datoteku ne oslobodite.
 #### ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder.
-ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire nije bio u mogućnosti da kreira ili da nastavi upisivanje na nekompletnim datotekama za odabrani download zato što vi nemate dozvolu za upisivanje na nepotpunim direktorijima. Za dalje korištenje LimeWire, molimo vas da odaberete drugi direktorij za pohranjivanje.
+ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire nije bio u mogućnosti da kreira ili da nastavi upisivanje na nekompletnim datotekama za odabrani download zato što vi nemate dozvolu za upisivanje na nepotpunim folderima. Za dalje korištenje LimeWire, molimo vas da odaberete drugi folder za pohranjivanje.
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 ERROR_ACCESS_DENIED_GENERIC=LimeWire nije bio u mogućnosti da ispiše potrebne datoteke zato što vi nemate potrebnu dozvolu za to. Vaši prioriteti možda neće biti podržani kada sljedeći put startujete LimeWire, ili će LimeWire djelovati u neočekivanom pravcu.
 #### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
@@ -2112,7 +2111,7 @@ ERROR_INTERNAL_SERVLET_FAILED=LimeWire nije bio u mogućnosti da se priključi n
 # Key/Value pairs for error messages
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
-#? ERROR_INTERNET_IS_BLOCKED=
+ERROR_INTERNET_IS_BLOCKED=LimeWire nije uspio da inicijalizira i startuje. Ovo se obično pripisuje firewall programu koji blokira LimeWire prilaz internetu ili povratni priključak lokalnoj mašini. Molim dozvolite LimeWire prilaz internetu i iznova startujte LimeWire.
 #### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 ERROR_DAAP_LOOPBACK_FAILED=LimeWire nije bio u mogućnosti da započne Digitalni pristup audio protokolu (za razmjenu datoteka u iTunes-u) zato što je neophodna dopuna Microsofta ili je Firewall zaustavio pristup. LimeWire vas može uputiti na Microsoft internet stranicu sa potrebnim informacijama ukoliko želite da koristite ovaj oblik. Pritisnite 'Da' da odete na dopunu, 'Ne' za onemogućavanje datog oblika, ili 'Poništi' kad odlučite kasnije.
 #### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
@@ -2132,7 +2131,7 @@ ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeers sa krajnjim potrebama treba najmanje šes
 #### ERROR_TOO_HIGH_FOR_LEAF=Leaves only need one connection, since they are connected to an Ultrapeer.
 ERROR_TOO_HIGH_FOR_LEAF=Krajnje tačke trebaju samo jedan priključak, dok su priključene na Ultrapeer.
 #### ERROR_PORT=Could not find a port to use for incoming connections.\nPlease specify a port from the configuration window.
-ERROR_PORT=Ne može naći izlaz za nadolazeći priključak. \nMolimo vas specifirajte izlaz na prozoru za konfiguraciju.
+ERROR_PORT=Ne može naći izlaz za nadolazeći priključak.\nMolimo vas specifirajte izlaz na prozoru za konfiguraciju.
 #### ERROR_INCOMING_CONNECTIONS=Could not listen to socket for incoming connections; aborting.
 ERROR_INCOMING_CONNECTIONS=Ne može se čuti šoket na nadolazećem priključku; prekidajte.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
@@ -2142,13 +2141,13 @@ ERROR_NETWORK_FLOODING=Ovo traženje može da odbije dosta rezultata i da uspori
 #### ERROR_BROWSE_FAILED=Could not browse files on the requested host. This machine is probably not accepting more incoming connections.
 ERROR_BROWSE_FAILED=Ne može se pronaći datoteka na traženom host računaru. Ova mašina najvjerovatnije ne prihvata više nadolazećih konekcija.
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
-ERROR_INVALID_SAVE_DIRECTORY=Nevažeći direktorij za pohranu datoteka. Molimo vas koristite drugi direktorij ili se vratite na standardnu opciju.
+ERROR_INVALID_SAVE_DIRECTORY=Nevažeći folder za pohranu datoteka. Molimo vas koristite drugi folder ili se vratite na standardnu opciju.
 #### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save folder is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different folder.
-ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Vaš direktorij za pohranjivanje nije važeći. Možda je izbrisan, možda nemate dozvolu da upisujete ili je u pitanju neki drugi problem. Molim vas odaberite neki drugi direktorij.
+ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Vaš folder za pohranjivanje nije važeći. Možda je izbrisan, možda nemate dozvolu da upisujete ili je u pitanju neki drugi problem. Molim vas odaberite neki drugi folder.
 #### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save folder is invalid. You may not have permissions to write to the selected folder. LimeWire will revert to your previously selected folder.
-ERROR_INVALID_SAVE_DIRECTORY_SELECTION=Vaš odabrani direktorij za pohranjivanje nije važeći. Možda nemate dozvolu da upisujete u odabrani direktorij. LimeWire će odabrani direktorij vratiti u prijašnje stanje.
+ERROR_INVALID_SAVE_DIRECTORY_SELECTION=Vaš odabrani folder za pohranjivanje nije važeći. Možda nemate dozvolu da upisujete u odabrani folder. LimeWire će odabrani folder vratiti u prijašnje stanje.
 #### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files. Please use another folder or revert to the default.
-ERROR_INVALID_SHARED_DIRECTORY=Nevažeći direktorij za razmjenu datoteka. Molimo vas koristite drugi direktorij ili se vratite na standardnu opciju.
+ERROR_INVALID_SHARED_DIRECTORY=Nevažeći folder za razmjenu datoteka. Molimo vas koristite drugi folder ili se vratite na standardnu opciju.
 #### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
 ERROR_FORCE_IP_PORT_RANGE=Morate ući na ulazni port između 1 i 65535 ako manuelno forsirate vaš ulazni port.
 #### ERROR_CONNECT_STRING=Connect strings must be at least length 1, contain one space, and may not contain 'GIV', 'GET', or any other HTTP keywords.
@@ -2160,7 +2159,7 @@ ERROR_INVALID_GROUP=Potrebno je da odaberete važeću grupu.
 #### ERROR_ALREADY_DOWNLOADING=You are already downloading this file to
 ERROR_ALREADY_DOWNLOADING=Trenutno vi downloadujete
 #### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading this file to "{0}".
-#? FORMATTED_ERROR_ALREADY_DOWNLOADING=
+FORMATTED_ERROR_ALREADY_DOWNLOADING=Vi ste već downloadovali ovu datoteku u "{0}".
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=Već ste downloadovali
 #### NO_PREVIEW_BEGIN=There is nothing to preview for file
@@ -2174,7 +2173,7 @@ ERROR_CANT_RESUME_END=nepotpuna datoteka nije važeća i neće biti sažeta.
 #### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
 ERROR_OPEN_URL=LimeWire ne može pronaći vaš mrežni pretraživač kako bi pokazao sljedeće stranice:
 #### ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save folder. Please select a new save folder in the Options menu and try again.
-ERROR_ACCESSING_SAVE_DIRECTORY=Nemate pristup direktoriju za pohranjivanje. Molimo vas odaberite novi direktorij za pohranjivanje u imeniku pod pojmom Opcije i pokušate ponovo.
+ERROR_ACCESSING_SAVE_DIRECTORY=Nemate pristup folderu za pohranjivanje. Molimo vas odaberite novi folder za pohranjivanje u imeniku pod pojmom Opcije i pokušate ponovo.
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
 ERROR_DEL_META_USER=Ne možete odstraniti nepohranjen info.
 #### ERROR_DEL_META_SYSTEM=Unable to remove data.
@@ -2224,9 +2223,9 @@ ERROR_ITUNES_INTEGRATION=Greška se zbila sa LimeWire's iTunes integraciom. Za s
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
 ERROR_PROPS_CORRUPTED=Datoteka koju ste koristili za pohranjivanje prioriteta bila je potkupljena. LimeWire će koristiti standardnu opciju.
 #### ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
-ERROR_SEARCH_TOO_LARGE=Vaše traženje traje predugo. Molimo vas napravite tako da vaše traženje bude manje i probajte ponovo.
+ERROR_SEARCH_TOO_LARGE=Vaše traženje traje predugo. Molimo vas podesite da vaše traženje bude manje i probajte ponovo.
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
-ERROR_XML_SEARCH_TOO_LARGE=Vaše traženje je previše specifično. Molimo vas napravite tako da vaše traženje bude manje i probajte ponovo.
+ERROR_XML_SEARCH_TOO_LARGE=Vaše traženje je previše specifično. Molimo vas podesite da vaše traženje bude manje i probajte ponovo.
 
 ################################################################################
 # Messages for Licensing
@@ -2234,7 +2233,7 @@ ERROR_XML_SEARCH_TOO_LARGE=Vaše traženje je previše specifično. Molimo vas n
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=Pregled ovlaštenja
 #### LICENSE_VERIFY=Verify
-#? LICENSE_VERIFY=
+LICENSE_VERIFY=Verificiraj
 
 ################################################################################
 # Messages for Creative Commons Licensing
@@ -2244,11 +2243,11 @@ LICENSE_CC_TITLE=Detalji ovlaštenja.
 #### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
 LICENSE_CC_LOCATING=LimeWire je trenutno u procesu pronalaženja detalja ovog ovlaštenja.
 #### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this Creative Commons license.
-LICENSE_CC_UNVERIFIED=LimeWire nije još odobrio ovo odobrenje. Pritisnite 'Potvrda' za pronalaženje detalja od ovog Prosto Kreativnog odobrenja.
+LICENSE_CC_UNVERIFIED=LimeWire nije još odobrio ovu licencu.\nUdari 'Verificiraj' za pronalaženje detalja ovog Kreativnog odobrenja.
 #### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
-LICENSE_CC_INVALID=LimeWire nije bio u mogućnosti da pronađe detalje od ovog odobrenja.
+LICENSE_CC_INVALID=LimeWire nije bio u mogućnosti da pronađe detalje od ove licence.
 #### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
-LICENSE_CC_RETRY=Možete pokušati ovo odobrenje naparaviti validnim ponovnim pritiskom na 'Potvrda'.
+LICENSE_CC_RETRY=Možete pokušati ovu licencu naparaviti validnom ponovnim udarcem na 'Verificiraj'.
 #### LICENSE_CC_DETAILS=License Details:
 LICENSE_CC_DETAILS=Detalji licence:
 #### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
@@ -2264,33 +2263,33 @@ LICENSE_CC=Obične kreacije
 # Messages for Weed Licensing
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
-#? LICENSE_WEED_TITLE=
+LICENSE_WEED_TITLE=Detalji trinave razmjene
 #### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
-#? LICENSE_WEED_LOCATING=
+LICENSE_WEED_LOCATING=LimWire je kontaktirao www.weedshare.com za detalje o ovoj datoteci.
 #### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.
-#? LICENSE_WEED_UNVERIFIED=
+LICENSE_WEED_UNVERIFIED=LimeWire još nije verificirao ovu licencu.\nUdari 'Verificiraj' da smjestite detalje ove datoteke.
 #### LICENSE_WEED_INVALID=LimeWire was unable to locate the details of this Weed file.
-#? LICENSE_WEED_INVALID=
+LICENSE_WEED_INVALID=LimeWire je nemoćan da smjesti detalje od ove trinave datoteke.
 #### LICENSE_WEED_RETRY=You can try looking up the details again by clicking 'Verify'.
-#? LICENSE_WEED_RETRY=
+LICENSE_WEED_RETRY=Vi možete gore pogledati detalje ponovnim udarom na 'Verificiraj'.
 #### LICENSE_WEED_DETAILS=License Details:
-#? LICENSE_WEED_DETAILS=
+LICENSE_WEED_DETAILS=Detalji licence:
 #### LICENSE_WEED_CLAIMED_DEED=View Weedshare Usage Rights
-#? LICENSE_WEED_CLAIMED_DEED=
+LICENSE_WEED_CLAIMED_DEED=Pravo upotrebe trinave razmjene
 #### LICENSE_WEED_DEED=View Usage Rights
-#? LICENSE_WEED_DEED=
+LICENSE_WEED_DEED=Pravo opšte upotrebe
 #### LICENSE_WEED_VERIFICATION=View Verification Page
-#? LICENSE_WEED_VERIFICATION=
+LICENSE_WEED_VERIFICATION=Stranica opšte kontrole
 #### LICENSE_WEED=Weedshare
-#? LICENSE_WEED=
+LICENSE_WEED=Weedshare
 
 ################################################################################
 # Messages for Unknown licenses
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
-#? LICENSE_UNKNOWN_TITLE=
+LICENSE_UNKNOWN_TITLE=Detalji licence
 #### LICENSE_UNKNOWN_INVALID=This file may require a license in order to open and view.
-#? LICENSE_UNKNOWN_INVALID=
+LICENSE_UNKNOWN_INVALID=Ova datoteka može da zahtijeva da se otvori i pogleda licenca.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -2324,7 +2323,7 @@ OPTIONS_CHAT_MAIN_TITLE=Chat
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
 OPTIONS_PLAYER_MAIN_TITLE=Player
 #### OPTIONS_STATUS_BAR_MAIN_TITLE=Status Bar
-#? OPTIONS_STATUS_BAR_MAIN_TITLE=
+OPTIONS_STATUS_BAR_MAIN_TITLE=Stanje bara
 #### OPTIONS_ITUNES_MAIN_TITLE=iTunes
 OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #### OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
@@ -2342,9 +2341,9 @@ OPTIONS_POPUPS_MAIN_TITLE=Popups
 #### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocompletion
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Automatski završen tekst
 #### OPTIONS_THEME_MAIN_TITLE=Skin
-OPTIONS_THEME_MAIN_TITLE=Omotač
+OPTIONS_THEME_MAIN_TITLE=Omot
 #### OPTIONS_SKIN_MAIN_TITLE=Skin
-OPTIONS_SKIN_MAIN_TITLE=Omotač
+OPTIONS_SKIN_MAIN_TITLE=Omot
 #### OPTIONS_SEARCH_MAIN_TITLE=Searching
 OPTIONS_SEARCH_MAIN_TITLE=Traženje
 #### OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Basic
@@ -2381,9 +2380,9 @@ OPTIONS_CONNECT_PREF_MAIN_TITLE=Lokalna prednost
 # in the options window
 ################################################################################
 #### OPTIONS_LOCALIZE_TITLE=International Localization
-OPTIONS_LOCALIZE_TITLE=Internacionalna lokalizovanja
+OPTIONS_LOCALIZE_TITLE=Internacionalno lokalizovanje
 #### OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
-OPTIONS_LOCALIZE_LABEL=Možete namjestiti LimeWire tako da ga prikažete na sopstvenom jeziku kao i da se koristi u vašoj zemlji. Određena država ili teritorija takođe mogu biti korištene za vaše pronalaženje na mreži širom svijeta.
+OPTIONS_LOCALIZE_LABEL=Možete namjestiti LimeWire tako da ga prikažete na sopstvenom jeziku da se koristi u vašoj zemlji. Određena država ili teritorija takođe mogu biti korištene za vaše pronalaženje na mreži širom svijeta.
 #### OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Language
 OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Jezik
 #### OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Country
@@ -2396,35 +2395,35 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Država
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Napravili ste neke promjene u postavci. Želite li sačuvati ove promjene?
 #### OPTIONS_SAVE_DIR_TITLE=Save Folder
-OPTIONS_SAVE_DIR_TITLE=Pohrani u mapu
+OPTIONS_SAVE_DIR_TITLE=Pohrani u folder
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the folder for saving files.
-OPTIONS_SAVE_DIR_LABEL=Možete odabrati mapu u kojoj ćete sačuvati datoteku.
+OPTIONS_SAVE_DIR_LABEL=Možete odabrati folder u kojem ćete sačuvati datoteku.
 #### OPTIONS_SAVE_DIR_BOX_LABEL=Folder:
-OPTIONS_SAVE_DIR_BOX_LABEL=Direktorij:
+OPTIONS_SAVE_DIR_BOX_LABEL=Folder:
 #### OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Browse...
 OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Pretraživač...
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Use Default
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Koristi standardnu opciju.
 #### OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Choose Another Folder
-OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Odaberite drugi direktorij.
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Odaberite drugi folder.
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the Default Folder
-OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Koristite standardnu opciju direktorija.
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Koristite standardnu opciju foldera.
 #### OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=You can specify a download location for each media type.
-#? OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=
+OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=Vi možete specificirati download za svaku vrstu media.
 #### OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Open Dialog to Select a Folder
-#? OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=
+OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Otvori Dialog da selektirate jedan folder.
 #### OPTIONS_SAVE_RESET_BUTTON_LABEL=Reset
-#? OPTIONS_SAVE_RESET_BUTTON_LABEL=
+OPTIONS_SAVE_RESET_BUTTON_LABEL=Vrati na nulu
 #### OPTIONS_SAVE_RESET_BUTTON_TIP=Reset to Default Download Folder
-#? OPTIONS_SAVE_RESET_BUTTON_TIP=
+OPTIONS_SAVE_RESET_BUTTON_TIP=Vrati na standardni download folder.
 #### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Browse...
-#? OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=
+OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Pretražuj...
 #### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Choose Another Folder
-#? OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=
+OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Odaberite drugi folder.
 #### OPTIONS_SAVE_MEDIATYPE=Media Type
-#? OPTIONS_SAVE_MEDIATYPE=
+OPTIONS_SAVE_MEDIATYPE=Tip Media
 #### OPTIONS_SAVE_DIRECTORY=Save Folder
-#? OPTIONS_SAVE_DIRECTORY=
+OPTIONS_SAVE_DIRECTORY=Pohrani folder
 
 #### OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Incomplete Files
 OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Nedovršene datoteke
@@ -2438,23 +2437,23 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Dani kojima se zadržavaju nekopletir
 # in the options window
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
-OPTIONS_SHARED_DIRS_TITLE=Razmjena direktorija
+OPTIONS_SHARED_DIRS_TITLE=Razmjena foldera
 #### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
-OPTIONS_SHARED_DIRS_LABEL=Možete odabrati direktorij za razmjenu datoteka. Datoteke od ovog direktorij prikazane su u biblioteci.
+OPTIONS_SHARED_DIRS_LABEL=Možete odabrati folder za razmjenu datoteka. Datoteke od ovog folder prikazane su u biblioteci.
 #### OPTIONS_SHARED_DIRS_BOX_LABEL=Folders:
-OPTIONS_SHARED_DIRS_BOX_LABEL=Direktorij:
+OPTIONS_SHARED_DIRS_BOX_LABEL=Folder:
 #### OPTIONS_SHARED_DIRS_BUTTON_LABEL=Add Folder...
-OPTIONS_SHARED_DIRS_BUTTON_LABEL=Dodaj direktorij...
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=Dodaj folder...
 #### OPTIONS_SHARED_DIRS_BUTTON_TIP=Add a Folder to Share
-OPTIONS_SHARED_DIRS_BUTTON_TIP=Dodaj direktorij za razmjenu.
+OPTIONS_SHARED_DIRS_BUTTON_TIP=Dodaj folder za razmjenu.
 #### OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Share Finished Downloads:
-#? OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=
+OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Razmjena zavšeng dijela downloada:
 #### OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download Sharing
-#? OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=
+OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download razmjena
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
-#? OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=
+OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Vi možete razmijeniti datoteke koje ste downloadovali u nerazmjenjive foldere.
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
-#? OPTIONS_SHARED_NEW_SAVE_FOLDERS=
+OPTIONS_SHARED_NEW_SAVE_FOLDERS=Želite li razmijeniti vaš novi pohranjeni folder? Sljedeći novi folder biće razmijenjen:\n\n
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2675,33 +2674,33 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Možete koristiti unutarnji player ili tretenutn
 # Key/Value pairs for the status bar options in the options window
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Pokaži kvaliteta priključka na indikatoru:
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Connection Quality Indicator
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_TITLE=Indikator kvaliteta priključka
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=You can display a measurement of your connection quality in the status bar.
-#? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=
+OPTIONS_STATUS_BAR_CONNECTION_QUALITY_LABEL=Vi možete prikazati teks objašnjenje vašeg kvaliteta priključka u status baru.
 #### OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Show Shared Files Indicator:
-#? OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_SHARED_FILES_CHECK_BOX_LABEL=Pokaži indikator razmjene datoteka:
 #### OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=Shared Files Indicator
-#? OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=
+OPTIONS_STATUS_BAR_SHARED_FILES_TITLE=Indikator razmjene datoteka
 #### OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=You can display how many files you are sharing in the status bar.
-#? OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=
+OPTIONS_STATUS_BAR_SHARED_FILES_LABEL=Vi možete pokazati koliko ste datoteka razmijenili u status baru.
 #### OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=Show Firewall Indicator:
-#? OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_FIREWALL_CHECK_BOX_LABEL=Pokaži firewall indikator:
 #### OPTIONS_STATUS_BAR_FIREWALL_TITLE=Firewall Indicator
-#? OPTIONS_STATUS_BAR_FIREWALL_TITLE=
+OPTIONS_STATUS_BAR_FIREWALL_TITLE=Firewall indikator
 #### OPTIONS_STATUS_BAR_FIREWALL_LABEL=You can display your firewall status in the status bar.
-#? OPTIONS_STATUS_BAR_FIREWALL_LABEL=
+OPTIONS_STATUS_BAR_FIREWALL_LABEL=Vi možete prikazati stanje firewalla u tablici stanja.
 #### OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=Show Bandwidth Indicator:
-#? OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=
+OPTIONS_STATUS_BAR_BANDWIDTH_CHECK_BOX_LABEL=Pokaži indikator širine trake:
 #### OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=Bandwidth Indicator
-#? OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=
+OPTIONS_STATUS_BAR_BANDWIDTH_TITLE=Indikator širine trake
 #### OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=You can display your bandwidth consumption in the status bar.
-#? OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=
+OPTIONS_STATUS_BAR_BANDWIDTH_LABEL=Vi možete pokazati konzumciju širine treke u status baru.
 #### OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Downloads:
-#? OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=
+OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Download:
 #### OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Uploads:
-#? OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=
+OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Upload:
 
 ################################################################################
 # Key/Value pairs for the iTunes options in the options window
@@ -2723,12 +2722,12 @@ OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Možete razmjenjivati vašu muziku na lokal
 #### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share My Music:
 OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Razmjeni moju muziku:
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared Name:
-OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Razmjenjeno ime:
+OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Razmjeni ime:
 #### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility Mode:
 OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Podudaran modus:
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Password Protection
-OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Zahtjeva se lozinka
+OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Zaštita lozinke
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Možete ograničiti pristup ovom servisu postavljanjem lozinke.
 #### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
@@ -2750,7 +2749,7 @@ OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Slike opcija
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=You can choose which image viewer to use.
 OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=Možete odabrati koji prikazivač slika želite koristiti.
 #### OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image Viewer
-OPTIONS_IMAGE_VIEWER_BOX_LABEL=Prikaživač slika
+OPTIONS_IMAGE_VIEWER_BOX_LABEL=Prikazivač slika
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video Options
 OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video opcija
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
@@ -3096,7 +3095,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Lozinka
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=Širina propusnog obima
 #### STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
-STATS_BANDWIDTH_PANE_LABEL=Statistika širine trake propusnog obima uključuje i potpune informacije svih poslatih obima odtoka i dotoka Upstreams i Downstreams. Pritisnite na jednu od kategorija da vidite željenu statistiku.
+STATS_BANDWIDTH_PANE_LABEL=Statistika širine trake propusnog obima uključuje i potpune informacije svih poslatih obima odtoka Upstreams i dotoka Downstreams. Pritisnite na jednu od kategorija da vidite željenu statistiku.
 
 #### STATS_NET_PANE_TITLE=Network
 STATS_NET_PANE_TITLE=Mreža
@@ -4129,7 +4128,7 @@ ERROR_VENDOR_INVALID_VERSION=Nevažeća verzija
 ERROR_VENDOR_INVALID_PAYLOAD=Nevažeći Payload
 #### ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
 ERROR_VENDOR_UNRECOGNIZED=Neprepoznatljiva poruka prodavca
-#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed.  You may be able to fix this problem by changing LimeWire's Windows Compatibility.  Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu.  Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box.  Then click the 'OK' button at the bottom and restart LimeWire.
+#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed. You may be able to fix this problem by changing LimeWire's Windows Compatibility. Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu. Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box. Then click the 'OK' button at the bottom and restart LimeWire.
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
@@ -4464,8 +4463,8 @@ ALL_OOB_REQUESTS=Zatraženi odgovori
 #### ALL_OOB_RESPONSES=Responses Received
 ALL_OOB_RESPONSES=Odgovori primljeni
 #### ALL_OOB_BYPASSED=Responses Bypassed
-ALL_OOB_BYPASSED=Zaobiđeni odgovori
+ALL_OOB_BYPASSED=Mimoišli odgovori
 #### STATS_OOB_THROUGHPUT_TITLE=OOB Success Rate
 STATS_OOB_THROUGHPUT_TITLE=OOB uspješna procjena
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
-STATS_OOB_THROUGHPUT_LABEL=Broj odgovornih molbi primljenih preko OOB protokola.
+STATS_OOB_THROUGHPUT_LABEL=Broj reakcija pitanja primljenih preko OOB protokola.
