@@ -25,7 +25,7 @@ public class Sockets {
     /**
      * The maximum number of concurrent connection attempts.
      */
-    private static final int MAX_CONNECTING_SOCKETS = 8;
+    private static final int MAX_CONNECTING_SOCKETS = 6;
     
     /**
      * The current number of waiting socket attempts.
