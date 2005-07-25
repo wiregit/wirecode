@@ -109,4 +109,11 @@ public final class UploadSettings extends LimeProps {
     public static final IntSetting TEST_UPLOAD_SETTING = 
         FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING",4, 
                                                          "test_upload", 20, 3);
+    
+    /**
+     * How much to throttle the Thex upload speed.
+     */
+    public static final IntSetting THEX_UPLOAD_SPEED =
+        FACTORY.createSettableIntSetting("THEX_UPLOAD_SPEED",512,
+                "THEXUploadState.ThexUploadSpeed",4*1024,256);
 }

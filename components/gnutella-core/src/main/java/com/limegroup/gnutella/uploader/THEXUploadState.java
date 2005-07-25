@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
@@ -32,7 +33,7 @@ public class THEXUploadState extends UploadState {
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
      */
     private static final BandwidthThrottle THROTTLE =
-        new BandwidthThrottle(512);
+        new BandwidthThrottle(UploadSettings.THEX_UPLOAD_SPEED.getValue());
 
     /**
      * Constructs a new TigerTreeUploadState
@@ -105,6 +106,7 @@ public class THEXUploadState extends UploadState {
      */
     public void writeMessageBody(OutputStream os) throws IOException {
     	LOG.debug("writing message body");
+        THROTTLE.setRate(UploadSettings.THEX_UPLOAD_SPEED.getValue());
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
         // the tree might be large, but the watchdogs allows two minutes,
         // so this is okay, since if an entire tree wasn't written in two
