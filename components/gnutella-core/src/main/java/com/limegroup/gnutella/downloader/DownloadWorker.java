@@ -572,7 +572,8 @@ public class DownloadWorker implements Runnable {
                 _downloader = connectWithPush();
             } catch(IOException e) {
                 // even the push failed :(
-                _manager.forgetRFD(_rfd);
+            	if (needsPush)
+            		_manager.forgetRFD(_rfd);
             }
         }
         

@@ -135,6 +135,24 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     //  file from a query hit without a SHA1, if we can received UDP pings
                 return testedLocations.add(host); // we can't do anything yet
         }
+         
+        // do not allow duplicate hosts 
+        if (knowsAboutHost(host) && running)
+                return false;
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("adding new host "+host+" "+host.getPushAddr());
+        
+        boolean ret = false;
+        
+        // don't bother ranking multicasts
+        if (host.isReplyToMulticast())
+            ret = verifiedHosts.add(host);
+        else 
+        	ret = newHosts.add(host); // rank
+        
+        // make sure that if we were stopped, we return true
+        ret = ret | !running;
         
         // initialize the guid if we don't have one
         if (myGUID == null && meshHandler != null) {
@@ -142,18 +160,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
         }
         
-        // do not allow duplicate hosts 
-        if (knowsAboutHost(host))
-                return false;
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("adding new host "+host+" "+host.getPushAddr());
-        
-        // don't bother ranking multicasts
-        if (host.isReplyToMulticast())
-            return verifiedHosts.add(host);
-        
-        return newHosts.add(host);
+        return ret;
     }
     
     private boolean knowsAboutHost(RemoteFileDesc host) {

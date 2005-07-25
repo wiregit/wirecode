@@ -61,7 +61,6 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.ApproximateMatcher;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
@@ -264,11 +263,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	private SourceRanker ranker;
 
     /**
-     * The maximum number of times we'll try to recover.
-     */
-    private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
-
-    /**
      * The time to wait between requeries, in milliseconds.  This time can
      * safely be quite small because it is overridden by the global limit in
      * DownloadManager.  Package-access and non-final for testing.
@@ -447,13 +441,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private Object altLock;
 
     /**
-     * one BandwidthTrackerImpl so we don't have to allocate one for
-     * each download every time we write a snapshot.
-     */
-    private static final BandwidthTrackerImpl BANDWIDTH_TRACKER_IMPL =
-        new BandwidthTrackerImpl();
-    
-    /**
      * The number of times we've been bandwidth measured
      */
     private int numMeasures = 0;
@@ -513,6 +500,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * used in serializing and deserializing ManagedDownloaders. 
 	 */
     protected static final String SAVE_FILE = "saveFile";
+    
+    /** The key under which the URN is stored in the attribute map */
+    protected static final String SHA1_URN = "sha1Urn";
 
 
     /**
@@ -667,15 +657,20 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         triedLocatingSources = false;
 		ranker = getSourceRanker(null);
         ranker.setMeshHandler(this);
+        
         // get the SHA1 if we can.
-        if(cachedRFDs.size() > 0 && downloadSHA1 == null) {
-            for(Iterator iter = cachedRFDs.iterator();
-			iter.hasNext() && downloadSHA1 == null;) {
-				RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-				downloadSHA1 = rfd.getSHA1Urn();
-                RouterService.getAltlocManager().addListener(downloadSHA1,this);
-            }
+        if (downloadSHA1 == null)
+        	downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
+        
+        for(Iterator iter = cachedRFDs.iterator();
+        iter.hasNext() && downloadSHA1 == null;) {
+        	RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+        	downloadSHA1 = rfd.getSHA1Urn();
+        	RouterService.getAltlocManager().addListener(downloadSHA1,this);
         }
+        
+		if (downloadSHA1 != null)
+			propertiesMap.put(SHA1_URN,downloadSHA1);
 		
 		// make sure all rfds have the same sha1
         verifyAllFiles();
@@ -886,7 +881,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             // stable connections, or GUESSing,
             // but we're still inactive, then we queue ourselves
             // and wait till we get restarted.
-            if(getRemainingStateTime() <= 0)
+            if(getRemainingStateTime() <= 0 || hasNewSources())
                 setState(QUEUED);
             break;
         case WAITING_FOR_RESULTS:
@@ -901,6 +896,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             break;
         case WAITING_FOR_USER:
         case GAVE_UP:
+        	if (hasNewSources())
+        		setState(QUEUED);
         case QUEUED:
         case PAUSED:
             // If we're waiting for the user to do something,
@@ -1320,10 +1317,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         synchronized (this) {
             int ourLength = getContentLength();
             
-            if (ourLength != -1 && ourLength != otherLength)
+            if (ourLength != -1 && ourLength != otherLength) 
                 return false;
-                
-            if (otherUrn != null && downloadSHA1 != null)
+            
+            if (otherUrn != null && downloadSHA1 != null) 
                 return otherUrn.equals(downloadSHA1);
             
             // compare to previously cached rfds
@@ -1396,7 +1393,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         // never add to a stopped download.
         if(stopped)
             return false;
-
+        
         if (!allowAddition(rfd))
             return false;
         
@@ -1448,10 +1445,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return true;
         
         prepareRFD(rfd,cache);
-        
-        //...and notify manager to look for new workers.  The two cases we're
-        //interested: waiting for downloaders to complete (by waiting on
-        //this) or waiting for retry (handled by DownloadManager).
         
         if (ranker.addToPool(rfd)){
             if(LOG.isTraceEnabled())
@@ -2370,10 +2363,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private int fireDownloadWorkers() throws InterruptedException {
         LOG.trace("MANAGER: entered fireDownloadWorkers");
-
-        int size = -1;
-        //Assert.that(threads.size()==0,
-        //            "wrong threads size: " + threads.size());
 
         //While there is still an unfinished region of the file...
         while (true) {
