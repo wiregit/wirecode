@@ -25,10 +25,10 @@ public final class SpeedConstants {
     public static final int MAX_SPEED_INT	= 20000;
 
     public static final int MODEM_SWARM = 2;
-    public static final int T1_SWARM = 6;
-    public static final int T3_SWARM = 8;
+    public static final int T1_SWARM = 8;
+    public static final int T3_SWARM = 10;
     
-    
+   
     
     /** 
      * Converts the following bandwidth value, in kbytes/second, to 
