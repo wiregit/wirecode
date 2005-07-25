@@ -314,8 +314,7 @@ public class DownloadManager implements BandwidthTracker {
             } else if(md.isCancelled() ||md.isCompleted()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
-            } else if(hasFreeSlot() && 
-            		(md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
+            } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
                 i.remove();
                 if(md instanceof InNetworkDownloader)
                     innetworkCount++;
@@ -870,7 +869,7 @@ public class DownloadManager implements BandwidthTracker {
         // short-circuit.
         if(downloaders.isEmpty())
             return;
-        
+
         //For each response i, offer it to each downloader j.  Give a response
         // to at most one downloader.
         // TODO: it's possible that downloader x could accept response[i] but
@@ -881,10 +880,6 @@ public class DownloadManager implements BandwidthTracker {
             RemoteFileDesc rfd = r.toRemoteFileDesc(data);
             for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
                 ManagedDownloader currD = (ManagedDownloader)j.next();
-                if (rfd.getFileSize() == currD.getContentLength())
-                	LOG.debug("trying to add "+rfd+" to "+currD);
-                else
-                	LOG.debug(" rfd "+rfd.getFileSize()+" vs. "+currD.getContentLength());
                 // If we were able to add this specific rfd,
                 // add any alternates that this response might have
                 // also.
@@ -896,8 +891,7 @@ public class DownloadManager implements BandwidthTracker {
                         currD.addDownload(new RemoteFileDesc(rfd, ep), false);
                     }
                     break;
-                } else 
-                	LOG.debug(" did not add");
+                }
             }
         }
     }
@@ -962,8 +956,7 @@ public class DownloadManager implements BandwidthTracker {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount < 
-        DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**

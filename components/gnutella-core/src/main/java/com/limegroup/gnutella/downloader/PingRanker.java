@@ -137,7 +137,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         }
          
         // do not allow duplicate hosts 
-        if (knowsAboutHost(host) && running)
+        if (running && knowsAboutHost(host))
                 return false;
         
         if(LOG.isDebugEnabled())
