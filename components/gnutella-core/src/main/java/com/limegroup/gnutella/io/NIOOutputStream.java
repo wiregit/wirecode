@@ -40,7 +40,7 @@ class NIOOutputStream implements WriteObserver {
         if(shutdown)
             throw new IOException("already closed!");
 
-        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
+        this.buffer = NIOInputStream.getBuffer();
         sink = new BufferOutputStream(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
     }
@@ -97,6 +97,10 @@ class NIOOutputStream implements WriteObserver {
             sink.shutdown();
             
         shutdown = true;
+        if (buffer != null) {
+            buffer.clear();
+            NIOInputStream.CACHE.push(buffer);
+        }
     }
     
     /** Unused */
