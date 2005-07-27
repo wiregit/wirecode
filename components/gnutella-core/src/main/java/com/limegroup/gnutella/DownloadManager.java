@@ -734,7 +734,11 @@ public class DownloadManager implements BandwidthTracker {
         md.initialize(this, fileManager, callback(md));
 		waiting.add(md);
         callback(md).addDownload(md);
-        writeSnapshot(); // Save state for crash recovery.
+        RouterService.schedule(new Runnable() {
+        	public void run() {
+        		writeSnapshot(); // Save state for crash recovery.
+        	}
+        },0,0);
     }
     
     /**
