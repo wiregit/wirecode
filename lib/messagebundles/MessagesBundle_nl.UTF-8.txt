@@ -1,4 +1,4 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Dutch - Netherlands, Belgium
 # Thanks to: Willem Broekema, Edwin van Ouwerkerk Moria, Reinier Bergwerf, Jan Willem Lageman
