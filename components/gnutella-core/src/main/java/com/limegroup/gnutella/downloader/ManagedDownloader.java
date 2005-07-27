@@ -2913,7 +2913,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
     }
 
-    public synchronized void measureBandwidth() {
+    public void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
         Iterator iter = getActiveWorkers().iterator();
@@ -2923,9 +2923,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             dloader.measureBandwidth();
 			currentTotal += dloader.getAverageBandwidth();
 		}
-		if ( c )
-		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-		                    / ++numMeasures;
+		if ( c ) {
+            synchronized(this) {
+                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                    / ++numMeasures;
+            }
+        }
     }
     
     public float getMeasuredBandwidth() {
