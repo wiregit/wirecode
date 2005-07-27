@@ -222,7 +222,17 @@ class HTMLOutput {
 "      </table>\n" +
 "     </blockquote>\n" +
 "     To provide a translation, one just needs to append the translated text after\n" +
-"     the equal sign, and remove the leading comment mark and space.<br />\n" +
+"     the equal sign, and remove the leading comment mark and space.&nbsp; The French\n" +
+"     translation would look like the following:<br />\n" +
+"     <blockquote>\n" +
+"      <table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#b1b1b1\">\n" +
+"       <tr bgcolor=\"#EFEFEF\">\n" +
+"        <td><code>\n" +
+"#### SOME_NEW_LABEL=New!<br />\n" +
+"SOME_NEW_LABEL=Nouveau!</code></td>\n" +
+"       </tr>\n" +
+"      </table>\n" +
+"     </blockquote>\n" +
 "     <br />\n");
     }
     
