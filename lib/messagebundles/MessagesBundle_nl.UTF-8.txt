@@ -194,27 +194,27 @@ ABOUT_LICENSE_TIP=Toon de Licentieovereenkomst over deze software.
 ABOUT_SCROLL_CHECK_BOX_LABEL=Automatisch scrollen
 #### ABOUT_BUTTON_TIP=Close This Window
 ABOUT_BUTTON_TIP=Sluit dit venster.
-#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world.  The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant.  The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
+#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 ABOUT_INTRODUCTION=Geïnspireerd door de eigenaar van LimeWire, Mark Gorton, is het LimeWire-project opgezet in samenwerking met<a href="http://www.limewire.org/">open source effort</a> met medewerking van programmeurs en onderzoekers over de hele wereld. Het samenwerkingsverband van Gnutella weerspiegeld in het Gnutella Developers Forum (GDF), waarvan LimeWire particpant is.  De leden van het dagelijkse GDF-werk is om van Gnutella een, constant zichzelf verbeterende, innovatieve verzamelig protocollen te maken –- een eerbetoon aan de kracht van open protocollen en open standaarden.
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
 ABOUT_DEV_BLURB=Uiteraard is LimWire ook het resultaat van de talloze uren werk die de business developers van LimeWire eraan hebben besteed. 
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 ABOUT_BIZDEV_BLURB=De business developers van LimeWire gaan over de zakelijke strategiën en dagelijkse werkzaamheden: 
-#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team: 
+#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 ABOUT_WEBDEV_BLURB=De LimeWire <a href="http://www.limewire.com/">web site</a> en het LimeWire grafisch ontwerp zijn het werk van het webteam van LimeWire: 
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 ABOUT_SUPPORT_BLURB=Uw PRO-vragen aan LimeWire worden altijd beantwoordt door het technische helpdesk van LimeWire:
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
 ABOUT_PREVIOUS_DEV_BLURB=Verder hebben de volgende ontwikkelaars in het verleden meegewerkt in het LimeWire-team en zijn doorgegaan met andere projecten:
-#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well.  Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
-ABOUT_CONTRIBUTORS_BLURB= Daarnaast hebben de open source-medewerkers aanzienlijk werk verricht met betrekking tot virussen, ideëen en onderzoek voor dit project. Onderstaanden hebben ofwel meegewerkt aan de geschreven programmatuur die met elke versie van LimeWire wordt geleverd of grote virussen hebben ontdekt in deze code, of beide:
+#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
+ABOUT_CONTRIBUTORS_BLURB=Daarnaast hebben de open source-medewerkers aanzienlijk werk verricht met betrekking tot virussen, ideëen en onderzoek voor dit project. Onderstaanden hebben ofwel meegewerkt aan de geschreven programmatuur die met elke versie van LimeWire wordt geleverd of grote virussen hebben ontdekt in deze code, of beide:
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
 ABOUT_I18N_BLURB=LimeWire wil graag de velen medewerkers danken voor hun bijdrage aan het internationaliseren van het project, zowel voor de toepassing zelf als voor de LimeWire-website.
-#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks.  These include:
+#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
 ABOUT_COMMUNITY_BLURB=Een aantal collega’s binnen Gnutella verdienen een extra dankwoord. Dit zijn: 
-#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project.  Without LimeWire users, the LimeWire network would not exist.
+#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 ABOUT_CONCLUSION=Als laatste wil LimeWire graag een warm dankwoord wijden aan deze ontwikkelaars, gebruikers en alle anderen die hebben bijgedragen aan dit project. Zonder de LimeWire-gebruikers zou het LimeWire-netwerk niet bestaan. 
- 
+
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
@@ -744,7 +744,7 @@ SEARCH_FOR_KEYWORDS_ACTION_NAME=Zoeken naar trefwoorden: {0}
 #### SEARCH_ACTION_NAME=Search for: {0}
 SEARCH_ACTION_NAME=Zoeken naar: {0}
 # {0} the already translated mediatype
-#### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What's New" for: {0}
+#### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
 SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Zoeken in “Wat is Nieuw”: {0}
 # {0} the type of the search, e.g. Title, Album, Genre
 # {1} the keywords fo the search, e.g. name of the album
@@ -881,7 +881,6 @@ LIBRARY_SHARED_FILES_CONFIGURE=Configureren…
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configureer Gedeelde Opties
 
-
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Openen...
 #### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
@@ -988,13 +987,13 @@ SAVE_LOCATION_ALREADY_SAVED_ERROR=Bestandslocatie is niet gelukt, downloaden is 
 SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_ERROR=Download is niet opgeslagen in map {0} omdat u hier geen toegang tot heeft. 
 # {0} the full path name of the folder
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Could not save download to folder {0}, because the folder does not exist.
-SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=Download is niet opgelagen in de map omdat de map niet bestaat.  
+#? SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_ERROR=
 # {0} the full path name of the folder/file
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Could not set download folder to {0}, because it represents an individual file, not a folder.
 SAVE_LOCATION_NOT_A_DIRECOTRY_ERROR=Dowloand naar map {0} is niet gelukt omdat het geen map is.  
 # {0} the full path name of the file
 #### SAVE_LOCATION_SECURITY_VIOLATION_ERROR=Could not set file location to {0}, because the filename is invalid and may corrupt your system.
-SAVE_LOCATION_SECURITY_VIOLATION_ERROR=
+#? SAVE_LOCATION_SECURITY_VIOLATION_ERROR=
 # {0} the full path name of the file
 #### SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Could not set file location to {0}, because it is not a regular file.
 SAVE_LOCATION_FILE_NOT_REGULAR_ERROR=Bestandslocatie {0} kon niet worden gerealiseerd omdat het geen gangbaar bestand is. 
@@ -1183,6 +1182,12 @@ DOWNLOAD_STATUS_PAUSING=Onderbreken...
 DOWNLOAD_STATUS_PAUSED=Onderbroken
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=Een specifieke zoekopdracht is misschien nodig...
+# {0} the name of the skin
+# {1} the localized name of the menu item "Refresh Skins"
+# {2} the localized name of the "View" menu
+# {3} the localized name of the "Apply Skins" menu
+#### DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=You have downloaded a skin titled "{0}", you can activate the new skin by clicking "{1}" in the "{2}"->"{3}" menu and then selecting it from the list of available skins.
+#? DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=
 #### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
 DOWNLOAD_APPLY_NEW_THEME_START=U heeft een thema gedownload onder de naam "
 #### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
@@ -1929,23 +1934,23 @@ SHUTDOWN_WAIT=Een moment graag terwijl LimeWire sluit...
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=Voor supersnelle onderzoeken, koopt u LimeWire Pro.
-#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development. Get PRO.
 SUPPORT_LIMEWIRE_02=Klik hier voor ondersteuning van ontwikkeling van peer-to-peer-netwerken. Stap over op PRO. 
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=Stap over op LimeWire Pro zodat wij de downloads sneller kunnen maken.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=Voor supersnelle downloads, koopt u LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_05=Support open networks. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=Steun open netwerken. Stap over op LimeWire PRO.
-#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=Steun open bronnen en protocollen. Stap over op LimeWire PRO.
 #### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=Voor supersnelle prestaties koopt u LimeWire Pro.
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=Houd internet open. Koop LimeWirePro.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
 SUPPORT_LIMEWIRE_09=Het ontwikkelen van LimeWire is prijzig. Stap over op Pro.
-#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content. Get PRO.
 SUPPORT_LIMEWIRE_11=Steun LimeWire en de onafhankelijke media-inhouden. Stap over op PRO.
 
 ################################################################################
@@ -1964,7 +1969,7 @@ UPDATE_LATER_LABEL=Later opwaarderen
 UPDATE_NOW_LABEL=Nu opwaarderen 
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 UPDATE_TIP=Download de update op http://www.limewire.com!
-#### UPDATE_RESTART=LimeWire needs to be restarted to install the update.  If you choose not to update now, LimeWire will update automatically when you close.  Would you like to update now?
+#### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
 UPDATE_RESTART=LimeWire moet opnieuw worden gestart om de update te installeren. Wilt u nu opwaarderen?
 #### UPDATE_RESTART_TITLE=Update Ready
 UPDATE_RESTART_TITLE=Update is klaar 
@@ -1979,7 +1984,7 @@ MESSAGE_ERROR_CAPTION=Fout
 #### MESSAGE_WARNING_CAPTION=Warning
 MESSAGE_WARNING_CAPTION=Waarschuwing
 #### MESSAGE_SHARE_SAVE_DIR=Would you like to add the save folder to your list of shared folders? Subfolders of this folder will also be shared.
-MESSAGE_SHARE_SAVE_DIR=Wilt u de map om in op te slaan toevoegen aan u lijst van gedeelde mappen \? De onderliggende mappen worden dan ook gedeeld.
+MESSAGE_SHARE_SAVE_DIR=Wilt u de map om in op te slaan toevoegen aan u lijst van gedeelde mappen ? De onderliggende mappen worden dan ook gedeeld.
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this folder?
 MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Weet u zeker dat u deze map niet meer wilt delen? 
 #### MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire cannot stop sharing this folder.
@@ -3231,7 +3236,6 @@ STATS_RECEIVED_ALL_LABEL=Totaal aantal Gnutella-berichten die over TCP, UDP zijn
 STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=Dubbel TCP
 #### STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Number of duplicate queries received over TCP versus the total number of queries.
 STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Aantal dubbele vragen die over TCP tegenover het totale aantal vragen zijn ontvangen. 
-
 #### STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=Duplicate Multicast
 STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=Dubbele Multicast
 #### STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=Number of duplicate queries received over Multicast versus the total number of queries.
@@ -3258,7 +3262,7 @@ STATS_QUERY_REPLY_HOPS_LABEL=Alle ontvangen treffers, door middel van hops.
 #### STATS_QUERY_REPLY_TTL_TITLE=TTL
 STATS_QUERY_REPLY_TTL_TITLE=TTL
 #### STATS_QUERY_REPLY_TTL_LABEL=All received query hits, by time to live (TTL).
-STATS_QUERY_REPLY_TTL_LABEL= Alle ontvangen treffers, door middel van Time to Live(TTL).
+STATS_QUERY_REPLY_TTL_LABEL=Alle ontvangen treffers, door middel van Time to Live(TTL).
 
 # number of kilobytes
 #### STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=Total
@@ -3491,7 +3495,7 @@ STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=Niet verzonden
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Sent
 STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Zend
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to leaves, using query routing tables.
-STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL= Alle vragen die aan andere leaves werden gerout, maken gebruik van routing lijsten.
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=Alle vragen die aan andere leaves werden gerout, maken gebruik van routing lijsten.
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Sent
 STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Zend
 #### STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Not Sent
@@ -3582,11 +3586,12 @@ STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=Alle berichten van Gnutella verzonden over U
 #### STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
 #### STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=All Gnutella messages sent over Multicast, by message type.
-STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL= Alle berichten van Gnutella verzonden over Multicast, als bericht.
+STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=Alle berichten van Gnutella verzonden over Multicast, als bericht.
 #### STATS_SENT_ALL_TITLE=TCP, UDP or Multicast
 STATS_SENT_ALL_TITLE=TCP, UDP of Multicast
 #### STATS_SENT_ALL_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
 STATS_SENT_ALL_LABEL=Totaal aantal berichten van Gnutella die over TCP, UDP of Multicast zijn verzondern.
+
 # number of kilobytes
 #### STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=Total
 STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=Totaal
@@ -3595,19 +3600,20 @@ STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=Totaal aantal kilobytes voor berichten van
 #### STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 #### STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over TCP, by message type.
-STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL= Totaal aantal kilobytes voor berichten van Gnutella verzonden over TCP als bericht.
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Totaal aantal kilobytes voor berichten van Gnutella verzonden over TCP als bericht.
 #### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 #### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
-STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL= Totaal aantal kilobytes voor berichten van Gnutella verzonden over UDP als bericht.
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Totaal aantal kilobytes voor berichten van Gnutella verzonden over UDP als bericht.
 #### STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #### STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over Multicast, by message type.
-STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL= Totaal aantal kilobytes voor berichten van Gnutella verzonden over Multicast als bericht.
+STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Totaal aantal kilobytes voor berichten van Gnutella verzonden over Multicast als bericht.
 #### STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 STATS_SENT_BYTES_ALL_TITLE=TCP, UDP of Multicast
 #### STATS_SENT_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
-STATS_SENT_BYTES_ALL_LABEL= Totaal aantal kilobytes voor berichten van Gnutella verzonden over TCP, UDP of Multicast.
+STATS_SENT_BYTES_ALL_LABEL=Totaal aantal kilobytes voor berichten van Gnutella verzonden over TCP, UDP of Multicast.
+
 # number of messages sent for LimeWire-specific stats -- TCP
 #### STATS_LIME_SENT_TCP_MESSAGES_TITLE=Total
 STATS_LIME_SENT_TCP_MESSAGES_TITLE=Totaal
@@ -3620,19 +3626,19 @@ STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=TCP-pings verzonden vanaf alle Gnutella-
 #### STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_TCP_PING_REPLIES_LABEL= TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_TCP_QUERIES_TITLE=Queries
 STATS_LIME_SENT_TCP_QUERIES_TITLE=Vragen
 #### STATS_LIME_SENT_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_TCP_QUERIES_LABEL= TCP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_TCP_QUERIES_LABEL=TCP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=Vraag hits
 #### STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL= TCP-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=TCP-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL= TCP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=TCP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 # number of messages sent for LimeWire-specific stats -- UDP
 #### STATS_LIME_SENT_UDP_MESSAGES_TITLE=Total
 STATS_LIME_SENT_UDP_MESSAGES_TITLE=Totaal
@@ -3649,15 +3655,15 @@ STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=UDP-pings verzonden vanaf alle Gnutella-c
 #### STATS_LIME_SENT_UDP_QUERIES_TITLE=Queries
 STATS_LIME_SENT_UDP_QUERIES_TITLE=Vragen
 #### STATS_LIME_SENT_UDP_QUERIES_LABEL=UDP queries sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_UDP_QUERIES_LABEL= UDP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_UDP_QUERIES_LABEL=UDP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=Treffers
 #### STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=UDP query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL= UDP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=UDP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=UDP pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL= UDP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=UDP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 # number of messages sent for LimeWire-specific stats -- Multicast
 #### STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=Total
 STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=Totaal
@@ -3666,7 +3672,7 @@ STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=Totaal aantal berichten verzonden door 
 #### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
 STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=Multicast pings sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL= Multicast-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=Multicast-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_MULTICAST_PING_REPLIES_LABEL=Multicast pongs sent from all Gnutella clients versus other LimeWires.
@@ -3678,11 +3684,11 @@ STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=Multicast-vragen verzonden vanaf alle Gn
 #### STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=Treffers
 #### STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=Multicast query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL= Multicast-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=Multicast-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=Multicast pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL= Multicast-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=Multicast-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 
 # number of kilobytes sent for LimeWire-specific stats -- TCP
 #### STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=Total
@@ -3692,24 +3698,23 @@ STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=Totale kilobytes verzonden door andere 
 #### STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL= TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL= TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=TCP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=Queries
 STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=Vragen
 #### STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL= TCP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=TCP-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=Treffers
 #### STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL= TCP-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=TCP-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL= TCP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
-
+STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 # number of kilobytes sent for LimeWire-specific stats -- UDP
 #### STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=Total
 STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=Totaal
@@ -3722,20 +3727,19 @@ STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes voor UDP-pings verzonden
 #### STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL= Kilobytes voor UDP-pongs verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes voor UDP-pongs verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=Queries
 STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=Vragen
 #### STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL= Kilobytes voor UDP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes voor UDP-pings verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Treffers
 #### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL= Kilobytes voor UDP-vragen  verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes voor UDP-vragen  verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL= Kilobytes voor UDP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
-
+STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes voor UDP-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 # number of kilobytes sent for LimeWire-specific stats -- Multicast
 #### STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Total
 STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Totaal
@@ -3752,15 +3756,15 @@ STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=Kilobytes voor Multicast-pong
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=Queries
 STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=Vragen
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=Kilobytes for Multicast queries sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL= Kilobytes voor Multicast-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=Kilobytes voor Multicast-vragen verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Treffers
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Kilobytes for Multicast query hits sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL= Kilobytes voor Multicast-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Kilobytes voor Multicast-treffers verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Push
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
-STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL= Kilobytes voor Multicast-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
+STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes voor Multicast-pushes verzonden vanaf alle Gnutella-cliënten tegenover andere LimeWires.
 
 # ultrapeer-specific sent stats
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent
@@ -3769,18 +3773,19 @@ STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Verzonden
 STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=Alle vragen die aan andere Ultrapeers voor de laatste hop werden gerout, gebruiken vraag- en routing- lijsten.
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not Sent
 STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Niet verzonden
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=** ??
+#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
 STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
- 
+
 # leaf-specific sent stats
 #### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Sent
 STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Verzonden
 #### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
-STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL= Alle vragen die aan andere ultrapeers werden gerout, gebruiken vraag- en routing- lijsten.
+STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=Alle vragen die aan andere ultrapeers werden gerout, gebruiken vraag- en routing- lijsten.
 #### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not Sent
 STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Niet verzonden
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=**??
-STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL= 
+#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
+STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
+
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
 ################################################################################
@@ -3793,7 +3798,7 @@ STATS_HANDSHAKING_LEAF_LABEL=Statistieken voor bevestiging van een leaf.
 #### STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
 STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
 #### STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistics for handshaking as an ultrapeer.
-STATS_HANDSHAKING_ULTRAPEER_LABEL= Statistieken voor bevestiging van een ultrapeer.
+STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistieken voor bevestiging van een ultrapeer.
 #### STATS_HANDSHAKING_OUTGOING_TITLE=Outgoing
 STATS_HANDSHAKING_OUTGOING_TITLE=Uitgaand
 #### STATS_HANDSHAKING_OUTGOING_LABEL=Statistics for outgoing Gnutella connection handshaking.
@@ -3889,7 +3894,7 @@ STATS_DOWNLOAD_ALTERNATE_LABEL=Totale afgewisselde locaties ontvangen en verwijd
 #### STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
 STATS_DOWNLOAD_TRANFERS_TITLE=Overdracht
 #### STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
-STATS_DOWNLOAD_TRANFERS_LABEL= Totaal aantal overdrachten in bepaalde periode. Dit omvat zowel HTTP1.1 en HTTP1.0 overdrachten. Voor HTTP1.1, waarden per deel.
+STATS_DOWNLOAD_TRANFERS_LABEL=Totaal aantal overdrachten in bepaalde periode. Dit omvat zowel HTTP1.1 en HTTP1.0 overdrachten. Voor HTTP1.1, waarden per deel.
 #### STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP Connect Time
 STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=Aansluitingstijd van TCP
 #### STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
@@ -3907,7 +3912,7 @@ STATS_UPLOAD_REQUESTS_LABEL=Totale inkomend uploads verzoeken. Deze aantallen wo
 #### STATS_UPLOAD_RESPONSES_TITLE=Responses
 STATS_UPLOAD_RESPONSES_TITLE=Reacties
 #### STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the number of requests for which we have attempted to transfer a portion of a file.
-STATS_UPLOAD_RESPONSES_LABEL= Totale uitgaande uploads-verzoeken. Deze aantallen worden bij elke poging verhoogd, en zo elk deel HTTP/1.1. overdracht te laten omvatten 'Normaal' is het aantal verzoeken die wij hebben geprobeerd om gedeeltelijk over te brengen.
+STATS_UPLOAD_RESPONSES_LABEL=Totale uitgaande uploads-verzoeken. Deze aantallen worden bij elke poging verhoogd, en zo elk deel HTTP/1.1. overdracht te laten omvatten 'Normaal' is het aantal verzoeken die wij hebben geprobeerd om gedeeltelijk over te brengen.
 #### STATS_UPLOAD_METHODS_TITLE=Request Methods
 STATS_UPLOAD_METHODS_TITLE=De Methodes van het verzoek
 #### STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
@@ -3976,7 +3981,7 @@ COMPRESSED_UPSTREAM=Totale daadwerkelijke upstream
 #### UNCOMPRESSED_DOWNSTREAM=Total Potential Downstream
 UNCOMPRESSED_DOWNSTREAM=Totaal potentiële downstream
 #### COMPRESSED_DOWNSTREAM=Total Actual Downstream
-COMPRESSED_DOWNSTREAM= Totale daadwerkelijke upstream
+COMPRESSED_DOWNSTREAM=Totale daadwerkelijke upstream
 #### HTTP_UNCOMPRESSED=HTTP (Potential)
 HTTP_UNCOMPRESSED=HTTP (Potentieel)
 #### HTTP_COMPRESSED=HTTP (Actual)
@@ -4008,7 +4013,8 @@ RECEIVED_ALL_MULTICAST_MESSAGES=Multicast-berichten
 #### RECEIVED_TCP_DUPLICATE_QUERIES=Duplicates TCP
 RECEIVED_TCP_DUPLICATE_QUERIES=TCP-duplicaten
 #### RECEIVED_MULTICAST_DUPLICATE_QUERIES=Duplicates Multicast
-RECEIVED_MULTICAST_DUPLICATE_QUERIES= Multicast-duplicaten 
+RECEIVED_MULTICAST_DUPLICATE_QUERIES=Multicast-duplicaten 
+
 # Advanced Gnutella Received Kilobytes Total
 #### ALL_RECEIVED_BYTES=Received
 ALL_RECEIVED_BYTES=Ontvangen
@@ -4023,9 +4029,9 @@ RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP-berichten
 RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast-berichten
 # Advanced Gnutella Received Kilobytes Duplicate queries
 #### RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=Duplicates TCP
-RECEIVED_TCP_DUPLICATE_QUERIES_BYTES= TCP-duplicaten
+RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=TCP-duplicaten
 #### RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=Duplicates Multicast
-RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES= Multicast-duplicaten 
+RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=Multicast-duplicaten 
 
 # Advanced Gnutella Sent Messages Total
 #### ALL_SENT=Sent
@@ -4122,6 +4128,8 @@ ERROR_VENDOR_INVALID_VERSION=Ongeldige versie
 ERROR_VENDOR_INVALID_PAYLOAD=Ongeldige payload
 #### ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
 ERROR_VENDOR_UNRECOGNIZED=Onherkenbaar leveranciersbericht
+#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed. You may be able to fix this problem by changing LimeWire's Windows Compatibility. Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu. Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box. Then click the 'OK' button at the bottom and restart LimeWire.
+#? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
 # Key/value pairs for general message labels
@@ -4291,7 +4299,7 @@ DOWNLOAD_SUCCESFULL_HTTP10=Succesvol HTTP 1.0
 #### DOWNLOAD_FAILED_HTTP11=Failed HTTP 1.1
 DOWNLOAD_FAILED_HTTP11=Mislukt HTTP 1.1
 #### DOWNLOAD_FAILED_HTTP10=Failed HTTP 1.0
-DOWNLOAD_FAILED_HTTP10= Mislukt HTTP 1.0
+DOWNLOAD_FAILED_HTTP10=Mislukt HTTP 1.0
 #### DOWNLOAD_RETRIED_SUCCESS=Retried Success
 DOWNLOAD_RETRIED_SUCCESS=Nieuwe succesvolle poging
 #### DOWNLOAD_CONNECTION_ATTEMPTS=Attempted
@@ -4303,11 +4311,11 @@ DOWNLOAD_CONNECT_DIRECT_FAILURES=Mislukte directe verbinding
 #### DOWNLOAD_CONNECT_PUSH_SUCCESS=Successful Push Connection
 DOWNLOAD_CONNECT_PUSH_SUCCESS=Succesvolle push-verbinding
 #### DOWNLOAD_PUSH_FAILURE_INTERRUPTED=Failed Push (Interrupted)
-DOWNLOAD_PUSH_FAILURE_INTERRUPTED= Mislukte push (Onderbroken)
+DOWNLOAD_PUSH_FAILURE_INTERRUPTED=Mislukte push (Onderbroken)
 #### DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=Failed Push (No GIV Received)
-DOWNLOAD_PUSH_FAILURE_NO_RESPONSE= Mislukte push (geen GIV ontvangen)
+DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=Mislukte push (geen GIV ontvangen)
 #### DOWNLOAD_PUSH_FAILURE_LOST=Failed Push (Lost Connection)
-DOWNLOAD_PUSH_FAILURE_LOST= Mislukte push (Onderbroken verbinding)
+DOWNLOAD_PUSH_FAILURE_LOST=Mislukte push (Onderbroken verbinding)
 #### DOWNLOAD_TCP_CONNECT_TIME=TCP Connect Time
 DOWNLOAD_TCP_CONNECT_TIME=TCP-verbindingstijd
 #### DOWNLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
@@ -4362,7 +4370,7 @@ UPLOAD_STAT_HEAD=Head
 UPLOAD_STAT_UNKNOWN=Onbekend
 #### UPLOAD_STAT_PUSHED_GET=Pushed Get
 UPLOAD_STAT_PUSHED_GET=Pushed-get
-#### UPLOAD_STAT_PUSHED_HEAD=Pushed-head
+#### UPLOAD_STAT_PUSHED_HEAD=Pushed Head
 UPLOAD_STAT_PUSHED_HEAD=Pushed Head
 #### UPLOAD_STAT_PUSHED_UNKNOWN=Pushed Unknown
 UPLOAD_STAT_PUSHED_UNKNOWN=Pushed onbekend
@@ -4395,19 +4403,19 @@ LEAF_INCOMING_REJECT=Inkom. Verw.
 #### LEAF_INCOMING_ACCEPT=In Acc.
 LEAF_INCOMING_ACCEPT=Inkom. Geacc. 
 #### UP_OUTGOING_REJECT_FULL=Out Rej. (Full)
-UP_OUTGOING_REJECT_FULL= Uitg. Verw. (Full)
+UP_OUTGOING_REJECT_FULL=Uitg. Verw. (Full)
 #### UP_OUTGOING_GUIDANCE_FOLLOWED=Out Acc. (Followed Guidance)
-UP_OUTGOING_GUIDANCE_FOLLOWED= Uitg. Geacc. (onder begeleiding)
+UP_OUTGOING_GUIDANCE_FOLLOWED=Uitg. Geacc. (onder begeleiding)
 #### UP_OUTGOING_GUIDANCE_IGNORED=Out Acc. (Ignored Guidance)
 UP_OUTGOING_GUIDANCE_IGNORED=Uitg. Geacc. (begeleiding genegeerd)
 #### UP_OUTGOING_ACCEPT=Out Acc. (No Guidance)
 UP_OUTGOING_ACCEPT=Uitg. Geacc. (Geen begeleiding)
-#### UP_INCOMING_REJECT_LEAF=Inkom. Verwerp. (Leaf)
+#### UP_INCOMING_REJECT_LEAF=In Rej. (Leaf)
 UP_INCOMING_REJECT_LEAF=Inkom. Verw.  (Leaf)
 #### UP_INCOMING_ACCEPT_LEAF=In Acc. (Leaf)
 UP_INCOMING_ACCEPT_LEAF=Inkom. Geacc. (Leaf)
 #### UP_INCOMING_GUIDED=In Acc. (Guiding To Leaf)
-UP_INCOMING_GUIDED= Inkom. Geacc. (begeleiding naar Leaf)
+UP_INCOMING_GUIDED=Inkom. Geacc. (begeleiding naar Leaf)
 #### UP_INCOMING_ACCEPT_UP=In Acc. (Ultrapeer)
 UP_INCOMING_ACCEPT_UP=Inkom. Geacc. (Ultrapeer)
 #### UP_INCOMING_REJECT_NO_ROOM_LEAF=In Rej. (All Slots Taken)
@@ -4460,4 +4468,3 @@ ALL_OOB_BYPASSED=Gemeden reacties
 STATS_OOB_THROUGHPUT_TITLE=Succesgehalte van OOB
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 STATS_OOB_THROUGHPUT_LABEL=Aantal verzochte en ontvangen reacties via OOB-protocol.
-
