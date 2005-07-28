@@ -3,8 +3,6 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +90,6 @@ public class VerifyingFile {
      * The file we're writing to / reading from.
      */
     private volatile RandomAccessFile fos;
-    
-    private volatile FileChannel chan;
     
     /**
      * Whether this file is open for writing
@@ -211,7 +207,6 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
-        this.chan = fos.getChannel(); 
         SelectionStrategy myStrategy = SelectionStrategyFactory.getStrategyFor(
                 FileUtils.getFileExtension(file), completedSize);
         
@@ -388,27 +383,14 @@ public class VerifyingFile {
     /**
      * @return List of Intervals that should be serialized.  Excludes pending intervals.
      */
-    public List getSerializableBlocks() {
+    public synchronized List getSerializableBlocks() {
         IntervalSet ret = new IntervalSet();
-        synchronized(this) {
-        	for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
-        		ret.add((Interval) iter.next());
-        	for (Iterator iter = partialBlocks.getAllIntervals(); iter.hasNext();) 
-        		ret.add((Interval) iter.next());
-        	for (Iterator iter = savedCorruptBlocks.getAllIntervals(); iter.hasNext();) 
-        		ret.add((Interval) iter.next());
-        }
-        
-        if (chan != null) {
-        	try {
-        		chan.force(false);
-        	} catch(IOException bad) {
-        		synchronized(this) {
-        			storedException = bad;
-        			notifyAll();
-        		}
-        	}
-        }
+        for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
+        for (Iterator iter = partialBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
+        for (Iterator iter = savedCorruptBlocks.getAllIntervals(); iter.hasNext();) 
+            ret.add((Interval) iter.next());
         
         return ret.getAllIntervalsAsList();
         
@@ -527,11 +509,11 @@ public class VerifyingFile {
         // it to allow IncompleteFileDescs to funnel alt-locs
         // as sources to the downloader.
         isOpen = false;
-        if (chan != null) 
-        	try {chan.close();}catch(IOException e){}
-        	
-        if(fos != null)
-        	try {fos.close();} catch (IOException ioe) {}
+        if(fos==null)
+            return;
+        try { 
+            fos.close();
+        } catch (IOException ioe) {}
     }
     
     /////////////////////////private helpers//////////////////////////////
@@ -681,13 +663,11 @@ public class VerifyingFile {
         
         
         byte []b = getChunkBuf(i.high - i.low+1);
-        ByteBuffer tmp = ByteBuffer.wrap(b);
         // read the interval from the file
         try {
-			synchronized(chan) {
-				chan.force(false);
-				chan.position(i.low);
-				chan.read(tmp);
+			synchronized(fos) {
+				fos.seek(i.low);
+				fos.readFully(b);
 			}
         } catch (IOException bad) {
             // we failed reading back from the file - assume block is corrupt
@@ -790,11 +770,9 @@ public class VerifyingFile {
     		    if(LOG.isTraceEnabled())
     		        LOG.trace("Writing intvl: " + intvl);
                 
-    		    ByteBuffer tmp = ByteBuffer.wrap(buf);
-    		    tmp.limit(intvl.high - intvl.low +1);
-    			synchronized(chan) {
-    				chan.position(intvl.low);
-    				chan.write(tmp);
+    			synchronized(fos) {
+    				fos.seek(intvl.low);
+    				fos.write(buf, 0, intvl.high - intvl.low + 1);
     			}
     			
     			synchronized(VerifyingFile.this) {
