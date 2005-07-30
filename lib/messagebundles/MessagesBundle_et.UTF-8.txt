@@ -1095,7 +1095,7 @@ STATISTICS_CONNECTION_QUALITY=Ühenduse
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
 STATISTICS_CONNECTION_WAKING_UP=Ülesärkamine
 #### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode
-STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire ärkab üles magamise reþiimist.
+STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire ärkab üles magamise režiimist.
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -1629,7 +1629,7 @@ XML_audios__audio__artist__=Artist
 #### XML_audios__audio__album__=Album
 XML_audios__audio__album__=Album
 #### XML_audios__audio__genre__=Genre
-XML_audios__audio__genre__=Þanr
+XML_audios__audio__genre__=Žanr
 #### XML_audios__audio__track__=Track
 XML_audios__audio__track__=Lugu
 #### XML_audios__audio__type__=Type
@@ -1743,7 +1743,7 @@ META_EDITOR_ARTIST_LABEL=Artist:
 #### META_EDITOR_ALBUM_LABEL=Album:
 META_EDITOR_ALBUM_LABEL=Album:
 #### META_EDITOR_GENRE_LABEL=Genre:
-META_EDITOR_GENRE_LABEL=Þanr:
+META_EDITOR_GENRE_LABEL=Žanr:
 #### META_EDITOR_YEAR_LABEL=Year:
 META_EDITOR_YEAR_LABEL=Aasta:
 #### META_EDITOR_TYPE_LABEL=Type:
