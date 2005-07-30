@@ -55,11 +55,11 @@ HAS_TIPS_OF_THE_DAY=false
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=OK
 #### GENERAL_OK_BUTTON_TIP=Apply Operation
-GENERAL_OK_BUTTON_TIP=Rakenda Operastsioon.
+GENERAL_OK_BUTTON_TIP=Rakenda operastsioon.
 #### GENERAL_CANCEL_BUTTON_LABEL=Cancel
 GENERAL_CANCEL_BUTTON_LABEL=Tühista
 #### GENERAL_CANCEL_BUTTON_TIP=Cancel Operation
-GENERAL_CANCEL_BUTTON_TIP=Tühista Operatsioon.
+GENERAL_CANCEL_BUTTON_TIP=Tühista operatsioon.
 #### GENERAL_APPLY_BUTTON_LABEL=Apply
 GENERAL_APPLY_BUTTON_LABEL=Rakenda
 #### GENERAL_APPLY_BUTTON_TIP=Apply Operation
@@ -67,7 +67,7 @@ GENERAL_APPLY_BUTTON_TIP=Rakenda Operatsioon.
 #### GENERAL_CLOSE_BUTTON_LABEL=Close
 GENERAL_CLOSE_BUTTON_LABEL=Sulge
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window
-GENERAL_CLOSE_BUTTON_TIP=Sulge Aken.
+GENERAL_CLOSE_BUTTON_TIP=Sulge aken.
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
 GENERAL_BACK_BUTTON_LABEL=<< Ennista
 #### GENERAL_NEXT_BUTTON_LABEL=Next >>
@@ -75,13 +75,13 @@ GENERAL_NEXT_BUTTON_LABEL=Järgmine >>
 #### GENERAL_FINISH_BUTTON_LABEL=Finish
 GENERAL_FINISH_BUTTON_LABEL=Lõpeta
 #### GENERAL_DEFAULT_BUTTON_LABEL=Use Default
-GENERAL_DEFAULT_BUTTON_LABEL=Kasuta Vaikimisi
+GENERAL_DEFAULT_BUTTON_LABEL=Kasuta vaikimisi
 #### GENERAL_BROWSE_BUTTON_LABEL=Browse...
 GENERAL_BROWSE_BUTTON_LABEL=Sirvi...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
 GENERAL_BROWSE_HOST_LABEL=Sirvi võõrustajat
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
-GENERAL_BROWSE_HOST_TIP=Vaatle Võõrustaja Arvuti Kõiki Faile
+GENERAL_BROWSE_HOST_TIP=Vaatle võõrustaja arvuti kõiki faile.
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
 GENERAL_ADVANCED_SUB_MENU=Arenenud
 
@@ -105,21 +105,21 @@ CONTEXT_MENU_SELECT_ALL=Vali kõik
 #### OPTIONS_BUTTONS_OK_LABEL=OK
 OPTIONS_BUTTONS_OK_LABEL=OK
 #### OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
-OPTIONS_BUTTONS_OK_TIP=Rakenda Oma Muudatused ja Sulge Aken.
+OPTIONS_BUTTONS_OK_TIP=Rakenda oma muudatused ja sulge aken.
 #### OPTIONS_BUTTONS_CANCEL_LABEL=Cancel
 OPTIONS_BUTTONS_CANCEL_LABEL=Tühista
 #### OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-OPTIONS_BUTTONS_CANCEL_TIP=Tühista Oma Muudatused ja Sulge Aken.
+OPTIONS_BUTTONS_CANCEL_TIP=Tühista oma muudatused ja sulge aken.
 #### OPTIONS_BUTTONS_APPLY_LABEL=Apply
 OPTIONS_BUTTONS_APPLY_LABEL=Rakenda
 #### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
-OPTIONS_BUTTONS_APPLY_TIP=Rakenda Oma Muutatused.
+OPTIONS_BUTTONS_APPLY_TIP=Rakenda oma muutatused.
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
-OPTIONS_RESTART_REQUIRED=LimeWire Valikute Rakendamine Jõustub Pärast mist.
+OPTIONS_RESTART_REQUIRED=LimeWire valikute rakendamine jõustub pärast mist.
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
-OPTIONS_BUTTON_REVERT_TO_DEFAULT=Taasta Vaikolekud
+OPTIONS_BUTTON_REVERT_TO_DEFAULT=Taasta vaikolekud
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
-OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Taasta Kõik Tehase Vaiksätted.
+OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Taasta kõik tehase vaiksätted.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -133,21 +133,21 @@ NO=Ei
 # Key/value pairs for general informative terms
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
-GENERAL_AVERAGE_BANDWIDTH=Keskpärane Ülekandekiirus
+GENERAL_AVERAGE_BANDWIDTH=Keskpärane ülekandekiirus
 #### GENERAL_ALTERNATE_LOCATIONS=Valid Alternate Locations
-GENERAL_ALTERNATE_LOCATIONS=Kehtiv Alternatiiv Koht
+GENERAL_ALTERNATE_LOCATIONS=Kehtiv alternatiiv koht
 #### GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid Alternate Locations
-GENERAL_INVALID_ALTERNATE_LOCATIONS=Kehtetu Alternatiiv Koht
+GENERAL_INVALID_ALTERNATE_LOCATIONS=Kehtetu alternatiiv koht
 #### GENERAL_STARTED_ON=Started On
 GENERAL_STARTED_ON=Alustatud
 #### GENERAL_FINISHED_ON=Finished On
 GENERAL_FINISHED_ON=Lõpetatud
 #### GENERAL_TIME_SPENT=Time Spent
-GENERAL_TIME_SPENT=Kulutatud Aeg
+GENERAL_TIME_SPENT=Kulutatud aeg
 #### GENERAL_REVERT_TO_DEFAULT=Revert To Default
-GENERAL_REVERT_TO_DEFAULT=Taasta Algsätted
+GENERAL_REVERT_TO_DEFAULT=Taasta algsätted
 #### GENERAL_MORE_OPTIONS=More Options
-GENERAL_MORE_OPTIONS=Veel Valikuid
+GENERAL_MORE_OPTIONS=Veel valikuid
 
 # StatusLine, Statistics and GUIUtils
 #### GENERAL_UNIT_TERABYTES=TB
@@ -165,7 +165,7 @@ GENERAL_UNIT_KBPSEC=KB/s
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-APP_TITLE=LimeWire: Võimaldamaks Avatud Informatsiooni Jagamist
+APP_TITLE=LimeWire: võimaldamaks avatud informatsiooni jagamist
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
@@ -181,19 +181,19 @@ ABOUT_LABEL_TITLE=Teavet Limewire'st
 #### ABOUT_CREDITS_LABEL=Credits
 ABOUT_CREDITS_LABEL=Loojad
 #### ABOUT_CREDITS_TIP=Display Credits Information about LimeWire
-ABOUT_CREDITS_TIP=Väljasta LimeWire Loojate kohta Informatsiooni.
+ABOUT_CREDITS_TIP=Väljasta LimeWire loojate kohta informatsiooni.
 #### ABOUT_NOTICE_LABEL=Notice
 ABOUT_NOTICE_LABEL=Teated
 #### ABOUT_NOTICE_TIP=Display Distribution and Contact Information
-ABOUT_NOTICE_TIP=Väljasta Distributsiooni ja Kontakti Informatsiooni
+ABOUT_NOTICE_TIP=Väljasta distributsiooni ja kontakti informatsiooni.
 #### ABOUT_LICENSE_LABEL=License
 ABOUT_LICENSE_LABEL=Litsents
 #### ABOUT_LICENSE_TIP=Display the License Agreement about This Software
-ABOUT_LICENSE_TIP=Väljasta Selle Tarkvara Litsensi Leping
+ABOUT_LICENSE_TIP=Väljasta selle tarkvara litsensi leping.
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
-ABOUT_SCROLL_CHECK_BOX_LABEL=Automaatselt Keri
+ABOUT_SCROLL_CHECK_BOX_LABEL=Automaatselt keri
 #### ABOUT_BUTTON_TIP=Close This Window
-ABOUT_BUTTON_TIP=Sulge See Aken.
+ABOUT_BUTTON_TIP=Sulge see aken.
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
@@ -219,15 +219,15 @@ ABOUT_BUTTON_TIP=Sulge See Aken.
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
-TOTD_TITLE=Päeva Nõuanne
+TOTD_TITLE=Päeva nõuanne
 #### TOTD_INTRODUCTION=Did You Know...
-TOTD_INTRODUCTION=Kas Sa Tead...
+TOTD_INTRODUCTION=Kas sa tead...
 #### TOTD_SHOW_AT_STARTUP=Show Tips At Startup
-TOTD_SHOW_AT_STARTUP=Näita Nõuandeid Alguses
+TOTD_SHOW_AT_STARTUP=Näita nõuandeid alguses
 #### TOTD_NEXT=Next Tip
-TOTD_NEXT=Järgmine Nõuanne
+TOTD_NEXT=Järgmine nõuanne
 #### TOTD_PREVIOUS=Previous Tip
-TOTD_PREVIOUS=Eelmine Nõuanne
+TOTD_PREVIOUS=Eelmine nõuanne
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Sulge
 
@@ -243,21 +243,21 @@ GETTING_STARTED_CONTENTS=Kasutamaks LimeWiret leia vasakult otsingutäiteriba, t
 # Key/value pairs for the Going Pro image.
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
-GOING_PRO_TITLE=Maailma Kõige Võimsaim Failide Jagamis Programm!
+GOING_PRO_TITLE=Maailma kõige võimsaim failide jagamis programm!
 #### GOING_PRO_DESCRIPTION=Better search results\nTurbo-Charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
-GOING_PRO_DESCRIPTION=Paremad Otsingu Tulemused.\nTurbo-Kiirusega allalaadimiskiirus.\nJuurdepääs uutele võõrustajatele.\nIsiklik tehniline tugi.\nKuus kuud tasuta uuendusi.
+GOING_PRO_DESCRIPTION=Paremad otsingu tulemused.\nTurbo-Kiirusega allalaadimiskiirus.\nJuurdepääs uutele võõrustajatele.\nIsiklik tehniline tugi.\nKuus kuud tasuta uuendusi.
 
 ###################################################################
 # Key/value pairs for the Windows system tray
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
-TRAY_TOOLTIP=LimeWire: Joostes Gnutella Võrkul
+TRAY_TOOLTIP=LimeWire: joostes Gnutella võrkul
 #### TRAY_RESTORE_LABEL=Restore
 TRAY_RESTORE_LABEL=Taasta
 #### TRAY_ABOUT_LABEL=About
 TRAY_ABOUT_LABEL=Tutvustus
 #### TRAY_EXIT_LATER_LABEL=Exit after Transfers
-TRAY_EXIT_LATER_LABEL=Välj pärst Tirimisi
+TRAY_EXIT_LATER_LABEL=Välj pärst tirimisi
 #### TRAY_EXIT_LABEL=Exit
 TRAY_EXIT_LABEL=Välju
 
@@ -285,13 +285,13 @@ UPLOAD_TITLE=Üles laadimine
 # Key/value pairs for the tooltips of the main windows
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
-SEARCH_TIP=Otsi ja Tiri Faile.
+SEARCH_TIP=Otsi ja tiri faile.
 #### MONITOR_TIP=View Searches and Uploads
-MONITOR_TIP=Vaata Otsinguid ja Kaane.
+MONITOR_TIP=Vaata otsinguid ja kaane.
 #### CONNECTIONS_TIP=Show Connections to Other Clients
-CONNECTIONS_TIP=Näita Ühendusi Teiste Klientidega.
+CONNECTIONS_TIP=Näita ühendusi teiste klientidega.
 #### LIBRARY_TIP=View Repository of Saved Files
-LIBRARY_TIP=Vaata Failide Hoidlat.
+LIBRARY_TIP=Vaata failide hoidlat.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -303,67 +303,67 @@ MENU_FILE_TITLE_MNEMONIC=F
 #### MENU_FILE_CLOSE=Close
 MENU_FILE_CLOSE=Sulge
 #### MENU_FILE_CLOSE_MNEMONIC=C
-MENU_FILE_CLOSE_MNEMONIC=C
+MENU_FILE_CLOSE_MNEMONIC=S
 #### MENU_FILE_CLOSE_ACCESSIBLE=Close the Program
-MENU_FILE_CLOSE_ACCESSIBLE=Sulge Programm.
+MENU_FILE_CLOSE_ACCESSIBLE=Sulge programm.
 #### MENU_FILE_QUIT=Quit
 MENU_FILE_QUIT=Lahku
 #### MENU_FILE_QUIT_MNEMONIC=Q
-MENU_FILE_QUIT_MNEMONIC=Q
+MENU_FILE_QUIT_MNEMONIC=L
 #### MENU_FILE_CONNECT=Connect
 MENU_FILE_CONNECT=Ühenda
 #### MENU_FILE_CONNECT_MNEMONIC=O
-MENU_FILE_CONNECT_MNEMONIC=O
+MENU_FILE_CONNECT_MNEMONIC=H
 #### MENU_FILE_CONNECT_ACCESSIBLE=Connect to the Network
-MENU_FILE_CONNECT_ACCESSIBLE=Ühenda ennast võrku
+MENU_FILE_CONNECT_ACCESSIBLE=Ühenda ennast võrku.
 #### MENU_FILE_DISCONNECT=Disconnect
 MENU_FILE_DISCONNECT=Logi välja
 #### MENU_FILE_DISCONNECT_MNEMONIC=I
-MENU_FILE_DISCONNECT_MNEMONIC=I
+MENU_FILE_DISCONNECT_MNEMONIC=O
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
-#? MENU_FILE_DISCONNECT_ACCESSIBLE=
+MENU_FILE_DISCONNECT_ACCESSIBLE=Välju võrgust.
 #### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
-MENU_FILE_LIBRARY_NEW_FOLDER=Uus Kaust
+MENU_FILE_LIBRARY_NEW_FOLDER=Uus kaust
 #### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
+MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=U
 #### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
-MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Lisa Kaust Selekteerimaks Raamatukogu Kaust.
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Lisa kaust selekteerimaks raamatukogu kaust.
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
-MENU_FILE_LIBRARY_UNSHARE_FOLDER=Lõpeta Kausta Jagamine
+MENU_FILE_LIBRARY_UNSHARE_FOLDER=Lõpeta kausta jagamine
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
 #### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Lõpeta Selekteeritud Raamatukogu Kausta jagamine.
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Lõpeta selekteeritud raamatukogu kausta jagamine.
 #### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
 MENU_FILE_LIBRARY_RENAME_FOLDER=Nimeta kaust ümber
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
+MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=N
 #### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
-MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Nimeta Selekteeritud Raamatukogu kaust ümber.
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Nimeta selekteeritud raamatukogu kaust ümber.
 #### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
-MENU_FILE_LIBRARY_LAUNCH_FILES=Käivita Fail(id)
+MENU_FILE_LIBRARY_LAUNCH_FILES=Käivita fail(id)
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
-MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
+MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=K
 #### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
-MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Käivita Selekteeritud Fail(id).
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Käivita selekteeritud fail(id).
 #### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
-MENU_FILE_LIBRARY_DELETE_FILES=Kustuta Fail(id)
+MENU_FILE_LIBRARY_DELETE_FILES=Kustuta fail(id)
 #### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
+MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=S
 #### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
-MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Kustuda Selekteeritud Fail(id).
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Kustuda selekteeritud fail(id).
 #### MENU_FILE_LIBRARY_REFRESH=Refresh
 MENU_FILE_LIBRARY_REFRESH=Värskenda
 #### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
-MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
+MENU_FILE_LIBRARY_REFRESH_MNEMONIC=V
 #### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
 MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Vaata uuesti.
 #### MENU_FILE_LIBRARY_EXPLORE=Explore
 MENU_FILE_LIBRARY_EXPLORE=Avasta
 #### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
-MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
+MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=A
 #### MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open Library Folder
-MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Ava Raamatukogu kaust.
+MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Ava raamatukogu kaust.
 
 #### MENU_NAV_TITLE=Navigation
 MENU_NAV_TITLE=Navigatsioon
@@ -372,94 +372,94 @@ MENU_NAV_TITLE_MNEMONIC=N
 #### MENU_NAV_SEARCH=Search
 MENU_NAV_SEARCH=Otsi
 #### MENU_NAV_SEARCH_MNEMONIC=S
-MENU_NAV_SEARCH_MNEMONIC=S
+MENU_NAV_SEARCH_MNEMONIC=O
 #### MENU_NAV_SEARCH_ACCESSIBLE=Display the Search Screen
-MENU_NAV_SEARCH_ACCESSIBLE=Kuva Otsingu Ekraan.
+MENU_NAV_SEARCH_ACCESSIBLE=Kuva otsingu ekraan.
 #### MENU_NAV_MONITOR=Monitor
 MENU_NAV_MONITOR=Jälgi
 #### MENU_NAV_MONITOR_MNEMONIC=M
-MENU_NAV_MONITOR_MNEMONIC=M
+MENU_NAV_MONITOR_MNEMONIC=J
 #### MENU_NAV_MONITOR_ACCESSIBLE=Display the Monitor Screen
-MENU_NAV_MONITOR_ACCESSIBLE=Kuva Jälgimisekraan.
+MENU_NAV_MONITOR_ACCESSIBLE=Kuva jälgimis ekraan.
 #### MENU_NAV_CONN=Connections
 MENU_NAV_CONN=Ühendused
 #### MENU_NAV_CONN_MNEMONIC=C
-MENU_NAV_CONN_MNEMONIC=C
+MENU_NAV_CONN_MNEMONIC=H
 #### MENU_NAV_CONN_ACCESSIBLE=Display the Connections Screen
-MENU_NAV_CONN_ACCESSIBLE=Kuva Ühenduste Ekraan.
+MENU_NAV_CONN_ACCESSIBLE=Kuva ühenduste ekraan.
 #### MENU_NAV_LIB=Library
 MENU_NAV_LIB=Raamatukogu
 #### MENU_NAV_LIB_MNEMONIC=L
-MENU_NAV_LIB_MNEMONIC=L
+MENU_NAV_LIB_MNEMONIC=R
 #### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
-MENU_NAV_LIB_ACCESSIBLE=Kuva Raamatugogu Sisu.
+MENU_NAV_LIB_ACCESSIBLE=Kuva raamatugogu sisu.
 
 #### MENU_VIEW_TITLE=View
-MENU_VIEW_TITLE=V
+MENU_VIEW_TITLE=Vaata
 #### MENU_VIEW_TITLE_MNEMONIC=V
 MENU_VIEW_TITLE_MNEMONIC=V
 #### MENU_VIEW_SMALL_ICONS=Use Small Icons
-MENU_VIEW_SMALL_ICONS=Kasuta Väikseid Ikoone
+MENU_VIEW_SMALL_ICONS=Kasuta väikseid ikoone
 #### MENU_VIEW_SMALL_ICONS_MNEMONIC=S
-MENU_VIEW_SMALL_ICONS_MNEMONIC=S
+MENU_VIEW_SMALL_ICONS_MNEMONIC=V
 #### MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use Small Icons
-MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Kasuta Väiksid Ikoone.
+MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Kasuta väiksid ikoone.
 #### MENU_VIEW_TEXT_WITH_ICONS=Show Icon Text
-MENU_VIEW_TEXT_WITH_ICONS=Näita Icoonide teksti
+MENU_VIEW_TEXT_WITH_ICONS=Näita icoonide teksti
 #### MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 #### MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show Text Below Icons
-MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Näita Teksti Ikoonide All.
+MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Näita teksti ikoonide all.
 #### MENU_VIEW_SHOW_HIDE_TITLE=Show/Hide
 MENU_VIEW_SHOW_HIDE_TITLE=Näita/Peida
 #### MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
-MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
+MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=N
 #### MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or Hide individual tabs
-MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Näita või Peida isiklike lipikuid.
+MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Näita või peida isiklike lipikuid.
 #### MENU_VIEW_MONITOR=Monitor
 MENU_VIEW_MONITOR=Jälgi
 #### MENU_VIEW_MONITOR_MNEMONIC=M
-MENU_VIEW_MONITOR_MNEMONIC=M
+MENU_VIEW_MONITOR_MNEMONIC=J
 #### MENU_VIEW_MONITOR_ACCESSIBLE=Show Monitor Window
-MENU_VIEW_MONITOR_ACCESSIBLE=Näita Jälgimis Akent.
+MENU_VIEW_MONITOR_ACCESSIBLE=Näita jälgimis akent.
 #### MENU_VIEW_CONNECTIONS=Connections
 MENU_VIEW_CONNECTIONS=Ühendused
 #### MENU_VIEW_CONNECTIONS_MNEMONIC=C
-MENU_VIEW_CONNECTIONS_MNEMONIC=C
+MENU_VIEW_CONNECTIONS_MNEMONIC=H
 #### MENU_VIEW_CONNECTIONS_ACCESSIBLE=Show Connections Window
-MENU_VIEW_CONNECTIONS_ACCESSIBLE=Näita Ühenduse Akent.
+MENU_VIEW_CONNECTIONS_ACCESSIBLE=Näita ühenduse akent.
 #### MENU_VIEW_LIBRARY=Library
 MENU_VIEW_LIBRARY=Raamatukogu
 #### MENU_VIEW_LIBRARY_MNEMONIC=L
-MENU_VIEW_LIBRARY_MNEMONIC=L
+MENU_VIEW_LIBRARY_MNEMONIC=R
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
-MENU_VIEW_LIBRARY_ACCESSIBLE=Näita Raamatukogu Akent.
+MENU_VIEW_LIBRARY_ACCESSIBLE=Näita raamatukogu akent.
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=Jõusta küljendus
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
-MENU_VIEW_THEMES_TITLE_MNEMONIC=A
+MENU_VIEW_THEMES_TITLE_MNEMONIC=J
 #### MENU_VIEW_THEMES_GET_MORE=Get More Skins
-MENU_VIEW_THEMES_GET_MORE=Muretse Uusi Küljendusi
+MENU_VIEW_THEMES_GET_MORE=Muretse uusi küljendusi
 #### MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
-MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
+MENU_VIEW_THEMES_GET_MORE_MNEMONIC=M
 #### MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more skins from limewire.com
 MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Muretse uusi küljendusi limewire.com'ist.
 #### MENU_VIEW_THEMES_REFRESH=Refresh Skins
-MENU_VIEW_THEMES_REFRESH=Värskenda Küljendust
+MENU_VIEW_THEMES_REFRESH=Värskenda küljendust
 #### MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
-MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
+MENU_VIEW_THEMES_REFRESH_MNEMONIC=V
 #### MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk
-MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Vaheta Küljendust.
+MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Vaheta küljendust.
 #### MENU_VIEW_THEMES_USE_DEFAULT=Use Default
-MENU_VIEW_THEMES_USE_DEFAULT=Kasuta Algküljendust
+MENU_VIEW_THEMES_USE_DEFAULT=Kasuta algküljendust
 #### MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
-MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
+MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=A
 #### MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin
 MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Kasuta enda algküljendust.
 #### MENU_VIEW_LANGS_TITLE=Change Language
-MENU_VIEW_LANGS_TITLE=Vaheta Keelt
+MENU_VIEW_LANGS_TITLE=Vaheta keelt
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
-MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+MENU_VIEW_LANGS_TITLE_MNEMONIC=V
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
 MENU_VIEW_LANGS_RESTART_REQUIRED=Et LimWire keelemuutus toimiks peab toimuma alglaadimine.
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
@@ -471,21 +471,21 @@ MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Aita tõlkida LimeWiret enda keeld
 #### MENU_VIEW_SEARCH_TITLE=Search
 MENU_VIEW_SEARCH_TITLE=Otsi
 #### MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
-MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+MENU_VIEW_SEARCH_TITLE_MNEMONIC=O
 #### MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
-MENU_VIEW_SEARCH_ACCESSIBLE=Otsi Lipikute Valikuid.
+MENU_VIEW_SEARCH_ACCESSIBLE=Otsi lipikute valikuid.
 #### MENU_VIEW_SEARCH_FILTERS=Result Filters
-MENU_VIEW_SEARCH_FILTERS=Filtreeritud Tulemus
+MENU_VIEW_SEARCH_FILTERS=Filtreeritud tulemus
 #### MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
 MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
 #### MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
-MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Näita Otsingu Filtreeritud Tulemust.
+MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Näita otsingu filtreeritud tulemust.
 #### MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 #### MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 #### MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
-MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Näita Magnetmix'i Nuppu.
+MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Näita Magnetmix'i nuppu.
 
 #### MENU_RESOURCES_TITLE=Resources
 MENU_RESOURCES_TITLE=Resursid
@@ -496,83 +496,83 @@ MENU_RESOURCES_PRO=LimeWire PRO
 #### MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_MNEMONIC=P
 #### MENU_RESOURCES_PRO_ACCESSIBLE=Display the LimeWire PRO Website
-MENU_RESOURCES_PRO_ACCESSIBLE=Kuva Limewire PRO Veebileht.
+MENU_RESOURCES_PRO_ACCESSIBLE=Kuva Limewire PRO veebileht.
 
 #### MENU_TOOLS_TITLE=Tools
 MENU_TOOLS_TITLE=Seaded
 #### MENU_TOOLS_TITLE_MNEMONIC=T
-MENU_TOOLS_TITLE_MNEMONIC=T
+MENU_TOOLS_TITLE_MNEMONIC=S
 #### MENU_TOOLS_STATISTICS=Statistics
 MENU_TOOLS_STATISTICS=Statistika
 #### MENU_TOOLS_STATISTICS_MNEMONIC=S
 MENU_TOOLS_STATISTICS_MNEMONIC=S
 #### MENU_TOOLS_STATISTICS_ACCESSIBLE=Display the Statistics Screen
-MENU_TOOLS_STATISTICS_ACCESSIBLE=Kuva Statistika Ekraan.
+MENU_TOOLS_STATISTICS_ACCESSIBLE=Kuva statistika ekraan.
 #### MENU_TOOLS_OPTIONS=Options
 MENU_TOOLS_OPTIONS=Valikud
 #### MENU_TOOLS_OPTIONS_MNEMONIC=O
-MENU_TOOLS_OPTIONS_MNEMONIC=O
+MENU_TOOLS_OPTIONS_MNEMONIC=V
 #### MENU_TOOLS_OPTIONS_ACCESSIBLE=Display the Options Screen
-MENU_TOOLS_OPTIONS_ACCESSIBLE=Kuva Valikute Ekraan.
+MENU_TOOLS_OPTIONS_ACCESSIBLE=Kuva valikute ekraan.
 
 #### MENU_HELP_TITLE=Help
 MENU_HELP_TITLE=Abi
 #### MENU_HELP_TITLE_MNEMONIC=H
-MENU_HELP_TITLE_MNEMONIC=H
+MENU_HELP_TITLE_MNEMONIC=A
 #### MENU_HELP_USING_LIMEWIRE=Using LimeWire
 MENU_HELP_USING_LIMEWIRE=Kasutades LimeWire't
 #### MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
-MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
+MENU_HELP_USING_LIMEWIRE_MNEMONIC=A
 #### MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Help for Using LimeWire
 MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Kuidas kasutada LimeWire't.
 #### MENU_HELP_TOTD=Tip of the Day
-MENU_HELP_TOTD=Päeva Nõuanne
+MENU_HELP_TOTD=Päeva nõuanne
 #### MENU_HELP_TOTD_MNEMONIC=D
-MENU_HELP_TOTD_MNEMONIC=D
+MENU_HELP_TOTD_MNEMONIC=P
 #### MENU_HELP_TOTD_ACCESSIBLE=Show the Tip of the Day Window
-MENU_HELP_TOTD_ACCESSIBLE=Kuva Päeva Nõuande Aken.
+MENU_HELP_TOTD_ACCESSIBLE=Kuva päeva nõuande aken.
 #### MENU_HELP_FAQ=FAQ
 MENU_HELP_FAQ=KKK
 #### MENU_HELP_FAQ_MNEMONIC=F
-MENU_HELP_FAQ_MNEMONIC=F
+MENU_HELP_FAQ_MNEMONIC=K
 #### MENU_HELP_FAQ_ACCESSIBLE=Frequently Asked Questions for LimeWire
-MENU_HELP_FAQ_ACCESSIBLE=LimeWire KKK
+MENU_HELP_FAQ_ACCESSIBLE=Näita LimeWire KKK.
 #### MENU_HELP_FORUM=Forum
 MENU_HELP_FORUM=Foorum
 #### MENU_HELP_FORUM_MNEMONIC=M
-MENU_HELP_FORUM_MNEMONIC=M
+MENU_HELP_FORUM_MNEMONIC=F
 #### MENU_HELP_FORUM_ACCESSIBLE=Access the LimeWire Users' Forum
-MENU_HELP_FORUM_ACCESSIBLE=Juurdepääs LimeWire Kasutajate Foorumile.
+MENU_HELP_FORUM_ACCESSIBLE=Juurdepääs LimeWire kasutajate foorumile.
 #### MENU_HELP_FRIEND=Tell a Friend
-MENU_HELP_FRIEND=Räägi Sõbrale
+MENU_HELP_FRIEND=Räägi sõbrale
 #### MENU_HELP_FRIEND_MNEMONIC=T
-MENU_HELP_FRIEND_MNEMONIC=T
+MENU_HELP_FRIEND_MNEMONIC=R
 #### MENU_HELP_FRIEND_ACCESSIBLE=Tell a Friend about LimeWire
-MENU_HELP_FRIEND_ACCESSIBLE=Räägi Sõbrale LimeWire'st.
+MENU_HELP_FRIEND_ACCESSIBLE=Räägi sõbrale LimeWire'st.
 #### MENU_HELP_REVIEW=Review LimeWire
-MENU_HELP_REVIEW=LimeWire Ülevaade
+MENU_HELP_REVIEW=LimeWire ülevaade
 #### MENU_HELP_REVIEW_MNEMONIC=R
-MENU_HELP_REVIEW_MNEMONIC=R
+MENU_HELP_REVIEW_MNEMONIC=V
 #### MENU_HELP_REVIEW_ACCESSIBLE=Submit a Review of LimeWire
-MENU_HELP_REVIEW_ACCESSIBLE=LimeWIre Ülevaate Esitus.
+MENU_HELP_REVIEW_ACCESSIBLE=LimeWire ülevaate esitus.
 #### MENU_HELP_ABOUT=About LimeWire
 MENU_HELP_ABOUT=LimeWire'st
 #### MENU_HELP_ABOUT_MNEMONIC=A
-MENU_HELP_ABOUT_MNEMONIC=A
+MENU_HELP_ABOUT_MNEMONIC=L
 #### MENU_HELP_ABOUT_ACCESSIBLE=Information about LimeWire
 MENU_HELP_ABOUT_ACCESSIBLE=Informatsioon LimeWire kohta.
 #### MENU_HELP_ERROR=Generate Error
-MENU_HELP_ERROR=Genereeritud Viga
+MENU_HELP_ERROR=Genereeritud viga
 #### MENU_HELP_ERROR_MNEMONIC=E
-MENU_HELP_ERROR_MNEMONIC=E
+MENU_HELP_ERROR_MNEMONIC=G
 #### MENU_HELP_ERROR_ACCESSIBLE=Generate a Popup Error for Testing
-MENU_HELP_ERROR_ACCESSIBLE=Genereeri Veateade Testimiseks.
+MENU_HELP_ERROR_ACCESSIBLE=Genereeri veateade testimiseks.
 
 ################################################################################
 # Key/value pairs for status bar components and right-click menu
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
-STATUS_BAR_SHOW_CONNECTION_QUALITY=Näita Ühenduse Kvaliteet
+STATUS_BAR_SHOW_CONNECTION_QUALITY=Näita ühenduse kvaliteet
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
 #? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
@@ -580,7 +580,7 @@ STATUS_BAR_SHOW_CONNECTION_QUALITY=Näita Ühenduse Kvaliteet
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
 #? STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=
 #### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
-STATUS_BAR_SHOW_MEDIA_PLAYER=Näita Meedia Mängija
+STATUS_BAR_SHOW_MEDIA_PLAYER=Näita meedia mängija
 #### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
 #? STATUS_BAR_FIREWALL_FOUND_TOOLTIP=
 #### STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire has not detected a firewall
@@ -592,67 +592,67 @@ STATUS_BAR_SHOW_MEDIA_PLAYER=Näita Meedia Mängija
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=Vöötread
 #### TABLES_REAL_TIME_SORTING=Sort Automatically
-TABLES_REAL_TIME_SORTING=Sordi Automaatselt
+TABLES_REAL_TIME_SORTING=Sordi automaatselt
 #### TABLES_DISPLAY_TOOLTIPS=Extended Tooltips
-TABLES_DISPLAY_TOOLTIPS=Pikendatud Seadmeväli
+TABLES_DISPLAY_TOOLTIPS=Pikendatud seadmeväli
 
 ################################################################################
 # Key/value pairs for SearchView stuff
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
-SEARCH_NOT_CONNECTED=Sa ei ole ühendatud võrku. Ühendamiseks,vali "Ühenda", "Fail"-i menüüst. Sinu otsingud ei tagasta enne ühtegi tulemust, kui oled ühendatud.
+SEARCH_NOT_CONNECTED=Sa ei ole ühendatud võrku. Ühendamiseks, vali "Ühenda", "Fail"-i menüüst. Sinu otsingud ei tagasta enne ühtegi tulemust, kui oled ühendatud.
 #### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
 SEARCH_STILL_CONNECTING=LimeWire ühendab võrku. Veel ei tagasta sinu stsing tulemusi.
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=Tiri endale
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
-SEARCH_DOWNLOAD_BUTTON_TIP=Tiri Endale Kõik Selekteeritud Failid.
+SEARCH_DOWNLOAD_BUTTON_TIP=Tiri endale kõik selekteeritud failid.
 #### SEARCH_DOWNLOAD_AS_LABEL=Download As...
-SEARCH_DOWNLOAD_AS_LABEL=Tiri Nimega...
+SEARCH_DOWNLOAD_AS_LABEL=Tiri nimega...
 #### SEARCH_WISHLIST_BUTTON_LABEL=Add To Wishlist
 SEARCH_WISHLIST_BUTTON_LABEL=Lisa soovilisti
 #### SEARCH_WISHLIST_BUTTON_TIP=Spawn a "LimeWire Robot" to Look for the Content
-SEARCH_WISHLIST_BUTTON_TIP=Määra "LimeWire Robot" vaatamaks üle sisu.
+SEARCH_WISHLIST_BUTTON_TIP=Määra "LimeWire robot" vaatamaks üle sisu.
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
-SEARCH_BROWSE_HOST_BUTTON_LABEL=Sirvi Võõrustajat
+SEARCH_BROWSE_HOST_BUTTON_LABEL=Sirvi võõrustajat
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
-SEARCH_BROWSE_HOST_BUTTON_TIP=Vaata Selekteeritud Arvuti Kõiki Faile.
+SEARCH_BROWSE_HOST_BUTTON_TIP=Vaata selekteeritud arvuti kõiki faile.
 #### SEARCH_CHAT_BUTTON_LABEL=Chat...
 SEARCH_CHAT_BUTTON_LABEL=Saada teade...
 #### SEARCH_CHAT_BUTTON_TIP=Chat with Selected Host
-SEARCH_CHAT_BUTTON_TIP=Saada Selekteeritud Võõrustajale Teade.
+SEARCH_CHAT_BUTTON_TIP=Saada selekteeritud võõrustajale teade.
 #### SEARCH_BUY_CD_LABEL=Buy...
 SEARCH_BUY_CD_LABEL=Osta...
 #### SEARCH_BUY_CD_TIP=Buy Selected Item
-SEARCH_BUY_CD_TIP=Osta Selecteeritud Asi.
+SEARCH_BUY_CD_TIP=Osta selecteeritud asi.
 #### SEARCH_SEARCH_BUTTON_LABEL=Search
 SEARCH_SEARCH_BUTTON_LABEL=Otsi
 #### SEARCH_SEARCH_BUTTON_TIP=Search the Network for the Given Words
-SEARCH_SEARCH_BUTTON_TIP=Otsi Võrgust Antud Sõnu.
+SEARCH_SEARCH_BUTTON_TIP=Otsi võrgust antud sõnu.
 #### SEARCH_STOP_BUTTON_LABEL=Stop Search
-SEARCH_STOP_BUTTON_LABEL=Peata Otsing
+SEARCH_STOP_BUTTON_LABEL=Peata otsing
 #### SEARCH_STOP_BUTTON_TIP=Stop Collecting Search Results for Selected Tab
-SEARCH_STOP_BUTTON_TIP=Lõpeta Tulemuste kogumine selles lipikus.
+SEARCH_STOP_BUTTON_TIP=Lõpeta tulemuste kogumine selles lipikus.
 #### SEARCH_PUBLIC_KILL_STRING=Close Search
 SEARCH_PUBLIC_KILL_STRING=Sulge otsing
 #### SEARCH_PUBLIC_LAUNCH_STRING=Launch Action
 SEARCH_PUBLIC_LAUNCH_STRING=Käivita
 #### SEARCH_PUBLIC_STOP_STRING=Stop Search
-SEARCH_PUBLIC_STOP_STRING=Peata Otsing
+SEARCH_PUBLIC_STOP_STRING=Peata otsing
 #### SEARCH_PUBLIC_BROWSE_STRING=Browse Host
-SEARCH_PUBLIC_BROWSE_STRING=Sirvi Võõrustajat
+SEARCH_PUBLIC_BROWSE_STRING=Sirvi võõrustajat
 #### SEARCH_PUBLIC_CHAT_STRING=Chat With Host
 SEARCH_PUBLIC_CHAT_STRING=Saada võõrustajale teade
 #### SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Lookup File with Bitzi
-SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Leia Fail Bitzi'ga
+SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Leia fail Bitzi'ga
 #### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Show Magnet Details
-SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Näita Magnet'i Detaile
+SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Näita Magnet'i detaile
 #### SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_HTTP_PAGE_STRING=Veebileht faili(de) jaoks
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Korda otsingut
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Host
-SEARCH_PUBLIC_BLOCK_STRING=Blokeeri Võõrustaja
+SEARCH_PUBLIC_BLOCK_STRING=Blokeeri võõrustaja
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Tulemused
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
@@ -668,7 +668,7 @@ SEARCH_VIRUS_MSG_THREE=sa oled kindel, et soovid seda endale tirida?
 #### SEARCH_SHOW_MESSAGE_MSG=Don't show this message again
 SEARCH_SHOW_MESSAGE_MSG=Ära kuva mulle selliseid teateid enam
 #### SEARCH_DOWNLOAD_DIALOG_CONFIRM=Download Request
-SEARCH_DOWNLOAD_DIALOG_CONFIRM=Tirimise Soov
+SEARCH_DOWNLOAD_DIALOG_CONFIRM=Tirimise soov
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=Faili nimi
 #### SEARCH_MULTIPLE_HOSTS=Multiple
@@ -690,15 +690,15 @@ SEARCH_BROWSEHOST_DESC=Sisesta sõbra IP aadress kellega tahad ühendust luua ja
 #### SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
 SEARCH_BROWSEHOST_MYIP=Kui sinu sõbrad soovivad sinuga ühendust luua, peaksid nad sisestama
 #### SEARCH_BROWSEHOST_FIREWALLED=Your computer is behind a firewall or router and cannot receive direct connections.
-SEARCH_BROWSEHOST_FIREWALLED=Sinu arvuti on Tulemüüri või ruuteri taga ja ei saa vastu võtta otseseid ühendusi.
+SEARCH_BROWSEHOST_FIREWALLED=Sinu arvuti on tulemüüri või ruuteri taga ja ei saa vastu võtta otseseid ühendusi.
 #### SEARCH_BROWSEHOST_BUTTON=Direct Connect
 SEARCH_BROWSEHOST_BUTTON=Otsene ühendus
 #### SEARCH_WHATSNEW_HIDE_ADULT=Hide Adult Content
-SEARCH_WHATSNEW_HIDE_ADULT=Peida Täiskasvanutele mõeldud sisu
+SEARCH_WHATSNEW_HIDE_ADULT=Peida täiskasvanutele mõeldud sisu
 #### SEARCH_WHATSNEW_TITLE_ONE=Don't Know
-SEARCH_WHATSNEW_TITLE_ONE=Ei tea
+SEARCH_WHATSNEW_TITLE_ONE=Ei tea mida
 #### SEARCH_WHATSNEW_TITLE_TWO=What To Look For?
-SEARCH_WHATSNEW_TITLE_TWO=Mida Kõl otsida?
+SEARCH_WHATSNEW_TITLE_TWO=kõl otsida?
 #### SEARCH_WHATSNEW_DESC=A "What's New" search will search for files that have been recently added to the network.
 SEARCH_WHATSNEW_DESC="Mida uut" otsing otsib faile mis on alles hiljuti lisatud võrku.
 #### SEARCH_CURRENT_SEARCH=Current Search:
@@ -706,21 +706,21 @@ SEARCH_CURRENT_SEARCH=Praegune otsing:
 #### SEARCH_WHATS_NEW_SMALL=New
 SEARCH_WHATS_NEW_SMALL=Uus
 #### SEARCH_SELECT_TYPE=Select Search Type:
-SEARCH_SELECT_TYPE=Vali Otsingu tüüp
+SEARCH_SELECT_TYPE=Vali otsingu tüüp
 #### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
-SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Otsi Dokumendi Faile, kaasaarvatud html, txt, pdf ja muid.
+SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Otsi dokumendi faile, kaasaarvatud html, txt, pdf ja muid.
 #### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
-SEARCH_MEDIA_PROGRAMS_TOOLTIP=Otsi Dokumendi Faile, kaasaarvatud exe, zip, gz ja muid.
+SEARCH_MEDIA_PROGRAMS_TOOLTIP=Otsi dokumendi faile, kaasaarvatud exe, zip, gz ja muid.
 #### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
-SEARCH_MEDIA_AUDIO_TOOLTIP=Otsi Dokumendi Faile, kaasaarvatud mp3, wav, ogg ja muid.
+SEARCH_MEDIA_AUDIO_TOOLTIP=Otsi dokumendi faile, kaasaarvatud mp3, wav, ogg ja muid.
 #### SEARCH_MEDIA_VIDEO_TOOLTIP=Search For Video Files, Including avi, mpg, wmv, and More
-SEARCH_MEDIA_VIDEO_TOOLTIP=Otsi Dokumendi Faile, kaasaarvatud avi, mpg, wmv ja muid.
+SEARCH_MEDIA_VIDEO_TOOLTIP=Otsi dokumendi faile, kaasaarvatud avi, mpg, wmv ja muid.
 #### SEARCH_MEDIA_IMAGES_TOOLTIP=Search For Image Files, Including jpg, gif, png and More
-SEARCH_MEDIA_IMAGES_TOOLTIP=Otsi Dokumendi Faile, kaasaarvatud jpg, gif, png ja muid.
+SEARCH_MEDIA_IMAGES_TOOLTIP=Otsi dokumendi faile, kaasaarvatud jpg, gif, png ja muid.
 #### SEARCH_FILTER_RESULTS=Filter Results:
 SEARCH_FILTER_RESULTS=Filtreeritud tulemused:
 #### SEARCH_BACK_TO_SEARCH=Back To Search
-SEARCH_BACK_TO_SEARCH=Tagasi Otsingusse
+SEARCH_BACK_TO_SEARCH=Tagasi otsingusse
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 SEARCH_BLOCK_HOST=Kas soovid blokeeride sellelt võõrustajalt tulevad otsingu tulemused
 
@@ -728,9 +728,9 @@ SEARCH_BLOCK_HOST=Kas soovid blokeeride sellelt võõrustajalt tulevad otsingu t
 # Magnet stuff
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
-MAGNET_COPY_MAGNET_LINKS_LABEL=Kopeeri Magnet Lingid Vabamällu
+MAGNET_COPY_MAGNET_LINKS_LABEL=Kopeeri Magnet lingid vabamällu
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the Selected Files to the Clipboard
-MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Kopeeri Selekteeritud failide Magnet Lingid Vabamällu.
+MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Kopeeri selekteeritud failide Magnet lingid vabamällu.
 #### MAGNET_COPY_MAGNET_LINKS_WARNING=One or more of the created magnet links may not be accessible since their hosts are firewalled.
 MAGNET_COPY_MAGNET_LINKS_WARNING=Ühel või rohkematel loodud magnetilinkidele ei pääse ligi kuna nende võõrustajad on kaitstud tulemüüriga.
 
@@ -753,7 +753,7 @@ SEARCH_XML_FIELD_ACTION_NAME=Otsides {0}: {1}
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
-MEDIA_ANY_TYPE=Kõik Tüübid
+MEDIA_ANY_TYPE=Kõik tüübid
 #### MEDIA_DOCUMENTS=Documents
 MEDIA_DOCUMENTS=Dokumendid
 #### MEDIA_PROGRAMS=Programs
@@ -804,29 +804,29 @@ SEARCH_FILTER_MEDIA=Meedia
 #### DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
 DOWNLOAD_LAUNCH_BUTTON_LABEL=Eelvaade
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
-DOWNLOAD_LAUNCH_BUTTON_TIP=Vaata selekteeritud Faile.
+DOWNLOAD_LAUNCH_BUTTON_TIP=Vaata selekteeritu tirimine.
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
 DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Käivita
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Käivita selekteeritud Falid.
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Käivita selekteeritu tirimine.
 #### DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Launch Download
 DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Käivita tirimine
 #### DOWNLOAD_KILL_BUTTON_LABEL=Cancel
 DOWNLOAD_KILL_BUTTON_LABEL=Hülga
 #### DOWNLOAD_KILL_BUTTON_TIP=Cancel Selected Downloads
-DOWNLOAD_KILL_BUTTON_TIP=Hülga Selekteeritud Failid.
+DOWNLOAD_KILL_BUTTON_TIP=Hülga selekteeritud failid.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
 DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Tühjenda
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Tühjenda Selektereeitud Failidest.
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Tühjenda selektereeitud failidest.
 #### DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Clear Download
-DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Tühjenda Tirimine
+DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Tühjenda tirimine
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=Jätka
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
-DOWNLOAD_RESUME_BUTTON_TIP=Praavi Uuesti Selekteeritut Tirida.
+DOWNLOAD_RESUME_BUTTON_TIP=Praavi Uuesti selekteeritut tirida.
 #### DOWNLOAD_SOURCES_BUTTON_LABEL=Find Sources
-DOWNLOAD_SOURCES_BUTTON_LABEL=Otsi Võõrustajaid
+DOWNLOAD_SOURCES_BUTTON_LABEL=Otsi võõrustajaid
 #### DOWNLOAD_SOURCES_BUTTON_TIP=Try to Find Additional Sources for Downloads
 DOWNLOAD_SOURCES_BUTTON_TIP=Proovi leida lisa võõrustajaid kust tirida.
 #### DOWNLOAD_CLEAR_BUTTON_LABEL=Clear Inactive
@@ -836,50 +836,50 @@ DOWNLOAD_CLEAR_BUTTON_TIP=Eemalda mitte aktiivsetest.
 #### DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
 DOWNLOAD_PAUSE_BUTTON_LABEL=Paus
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
-DOWNLOAD_PAUSE_BUTTON_TIP=Peata Selekteeritu Tirimine.
+DOWNLOAD_PAUSE_BUTTON_TIP=Peata selekteeritu tirimine.
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Change File Location...
 DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Vaheta faili asukohta...
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Edit the Final Filename of the Download
-DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Muuda Tiritud Faili Nime.
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Muuda tiritud faili nime.
 #### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
-DOWNLOAD_POPUP_MENU_CLEAR=Puhasta Kõigist mitteaktiivsetest tirimistest
+DOWNLOAD_POPUP_MENU_CLEAR=Puhasta kõigist mitteaktiivsetest tirimistest
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Käivita
 #### LIBRARY_LAUNCH_BUTTON_TIP=Launch Selected Files
-LIBRARY_LAUNCH_BUTTON_TIP=Käivita Selekteeritud Failid.
+LIBRARY_LAUNCH_BUTTON_TIP=Käivita selekteeritud failid.
 #### LIBRARY_DELETE_BUTTON_LABEL=Delete
 LIBRARY_DELETE_BUTTON_LABEL=Kustuta
 #### LIBRARY_DELETE_BUTTON_TIP=Delete Selected Files
-LIBRARY_DELETE_BUTTON_TIP=Kustuta Selekteeritud Failid.
+LIBRARY_DELETE_BUTTON_TIP=Kustuta selekteeritud failid.
 #### LIBRARY_REFRESH_BUTTON_LABEL=Refresh
 LIBRARY_REFRESH_BUTTON_LABEL=Värskenda
 #### LIBRARY_REFRESH_BUTTON_TIP=Reload Shared Folders
-LIBRARY_REFRESH_BUTTON_TIP=Ümberlaadi Jagatud Kaustad.
+LIBRARY_REFRESH_BUTTON_TIP=Ümberlaadi jagatud kaustad.
 #### LIBRARY_EXPLORE_BUTTON_LABEL=Explore
 LIBRARY_EXPLORE_BUTTON_LABEL=Avasta
 #### LIBRARY_EXPLORE_BUTTON_TIP=Open Library Folder
-LIBRARY_EXPLORE_BUTTON_TIP=Ava Raamatukogu Kaust.
+LIBRARY_EXPLORE_BUTTON_TIP=Ava raamatukogu kaust.
 #### LIBRARY_PLAYLIST_BUTTON_LABEL=Enqueue
 LIBRARY_PLAYLIST_BUTTON_LABEL=Sea järjekorda
 #### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Playlist
-LIBRARY_PLAYLIST_BUTTON_TIP=Lisa Selekteeritud Failid Esitlusloendisse.
+LIBRARY_PLAYLIST_BUTTON_TIP=Lisa selekteeritud failid esitlusloendisse.
 #### LIBRARY_ANNOTATE_BUTTON_LABEL=Describe...
 LIBRARY_ANNOTATE_BUTTON_LABEL=Kirjelda...
 #### LIBRARY_ANNOTATE_BUTTON_TIP=Add Description to Selected File
-LIBRARY_ANNOTATE_BUTTON_TIP=Lisa Kirjeldus Selekteeritud Failidesse.
+LIBRARY_ANNOTATE_BUTTON_TIP=Lisa kirjeldus selekteeritud failidesse.
 #### LIBRARY_RESUME_BUTTON_LABEL=Resume
 LIBRARY_RESUME_BUTTON_LABEL=Jätka
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
-LIBRARY_RESUME_BUTTON_TIP=Jätka Mittelõpetatud Faili Tirimist.
+LIBRARY_RESUME_BUTTON_TIP=Jätka mittelõpetatud faili tirimist.
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
-LIBRARY_RENAME_BUTTON_LABEL=Nimeta Ümber
+LIBRARY_RENAME_BUTTON_LABEL=Nimeta ümber
 #### LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=You can configure the folders you share in LimeWire's Options.
-LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=Sa võid valmis seada kaustade võimalusi mida sa jagad LimeWire Valikutes.
+LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=Sa võid valmis seada kaustade võimalusi mida sa jagad LimeWire valikutes.
 #### LIBRARY_SHARED_FILES_CONFIGURE=Configure...
 LIBRARY_SHARED_FILES_CONFIGURE=Seadista
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
-LIBRARY_SHARED_FILES_CONFIGURE_MENU=Seadista Jagamise Võimalusi
+LIBRARY_SHARED_FILES_CONFIGURE_MENU=Seadista jagamise võimalusi
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Ava...
@@ -888,19 +888,19 @@ PLAYLIST_LOAD_BUTTON_TIP=Ava olemasolev esitlusloend.
 #### PLAYLIST_SAVE_BUTTON_LABEL=Save As...
 PLAYLIST_SAVE_BUTTON_LABEL=Salvesta Eraldi...
 #### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Playlist to a File
-PLAYLIST_SAVE_BUTTON_TIP=Salvesta Antud Esitlusloend Faili.
+PLAYLIST_SAVE_BUTTON_TIP=Salvesta antud esitlusloend faili.
 #### PLAYLIST_DELETE_BUTTON_LABEL=Remove
 PLAYLIST_DELETE_BUTTON_LABEL=Eemalda
 #### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Playlist
-PLAYLIST_DELETE_BUTTON_TIP=Eemalda selekteeritud fail Esitlusloendist.
+PLAYLIST_DELETE_BUTTON_TIP=Eemalda selekteeritud fail esitlusloendist.
 #### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
-PLAYLIST_FILE_DESCRIPTION=Esitlusloendi Failid (*.m3u)
+PLAYLIST_FILE_DESCRIPTION=Esitlusloendi failid (*.m3u)
 
 ################################################################################
 # Key/value pairs for the integrated media player
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
-MEDIA_PLAYER_DEFAULT_STRING=LimeWire Meedia Mängija
+MEDIA_PLAYER_DEFAULT_STRING=LimeWire meedia mängija
 #### MEDIA_PLAY_BUTTON_TIP=Play
 MEDIA_PLAY_BUTTON_TIP=Mängi
 #### MEDIA_PAUSE_BUTTON_TIP=Pause
@@ -922,24 +922,24 @@ PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Parool
 # Key/value pairs for DownloaderDialog
 ################################################################################
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Save As...
-DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Salvesta Eraldi...
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Salvesta eraldi...
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a Different Location for the Download
-DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Vali Muu Koht Tirimiseks.
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Vali muu koht tirimiseks.
 #### DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Cancel the Download
-DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Hülga Tirimine.
+DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Hülga tirimine.
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Overwrite
-DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Kirjuta Üle
+DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Kirjuta üle
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Overwrite the Existing File
 DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Kirjuta olemasolev fail üle.
 # {0} a short error message which is localized independently
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
-#? DOWNLOADER_DIALOG_ERROR_LABEL=
+DOWNLOADER_DIALOG_ERROR_LABEL=Viga: {0}
 # {0} a short warning message which is localized independently
 #### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
-#? DOWNLOADER_DIALOG_WARNING_LABEL=
+DOWNLOADER_DIALOG_WARNING_LABEL=Hoiatus: {0}
 # {0} the full path name of the file in question
 #### DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: A file with the same content already exists in the library at {0}
-DOWNLOADER_DIALOG_NOTE_LABEL==<b>Teade</b>: Sellise sisuga fail eksisteerib juba raamatukogus {0}
+DOWNLOADER_DIALOG_NOTE_LABEL==<b>Teade</b>: sellise sisuga fail eksisteerib juba raamatukogus {0}
 #### NO_FILENAME_LABEL=No Filename
 NO_FILENAME_LABEL=Failinimetu
 
@@ -947,7 +947,7 @@ NO_FILENAME_LABEL=Failinimetu
 # Key/value pair for download location dialog
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
-DOWNLOAD_LOCATION_DIALOG_TITLE=Vali Salvestamispaik
+DOWNLOAD_LOCATION_DIALOG_TITLE=Vali salvestamispaik
 #### DIRECTORY_CHOOSER_FILE_DESCRIPTION=All Folders
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=Kõik kataloogid
 
@@ -955,31 +955,31 @@ DIRECTORY_CHOOSER_FILE_DESCRIPTION=Kõik kataloogid
 # Key/value pair for save location error states
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
-SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Fail Juba Eksisteerib
+SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Fail juba eksisteerib
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Filename Taken
-SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Failinimi Kasutuses
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Failinimi kasutuses
 #### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
-SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Tirimine On Juba Lõpetatud
+SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Tirimine on juba lõpetatud
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=No Write Permission
-SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=Ei ole Salvestamisluba
+SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=Ei ole salvestamisluba
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Folder Does Not Exist
-SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Sellist Kausta Ei Leidu
+SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Sellist kausta ei leidu
 #### SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Not a Folder
-SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Pole Kaust
+SAVE_LOCATION_NOT_A_DIRECOTRY_SHORT_ERROR=Pole kaust
 #### SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Invalid Filename
-SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Ebakorrektne Failinimi
+SAVE_LOCATION_SECURITY_VIOLATION_SHORT_ERROR=Ebakorrektne failinimi
 #### SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Not a File
-SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Pole Fail
+SAVE_LOCATION_FILE_NOT_REGULAR_SHORT_ERROR=Pole fail
 #### SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Filesystem Error
 SAVE_LOCATION_FILESYSTEM_SHORT_ERROR=Failisüsteemi viga
 #### SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Same File Already Being Downloaded
-SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Sama Faili Juba Tiritakse
+SAVE_LOCATION_ALREADY_DOWNLOADING_SHORT_ERROR=Sama faili juba tiritakse
 # {0} the full path name of the file
 #### SAVE_LOCATION_ALREADY_EXISTS_ERROR=A file already exists at {0}.
-SAVE_LOCATION_ALREADY_EXISTS_ERROR=Selline Fail Juba Asetseb {0}.
+SAVE_LOCATION_ALREADY_EXISTS_ERROR=Selline fail juba asetseb {0}.
 # {0} the full path name of the file
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Another download is already saving to {0}.
-SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Teist Tirimist Juba Salvestatakse {0}.
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_ERROR=Teist tirimist juba salvestatakse {0}.
 #### SAVE_LOCATION_ALREADY_SAVED_ERROR=Could not set the file location, the download is already finished.
 SAVE_LOCATION_ALREADY_SAVED_ERROR=Ei suuda määrata faili asukohta, tirimine on juba lõpetatud.
 # {0} the full path name of the folder
@@ -1006,7 +1006,7 @@ SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Sama faili juba tiritakse.
 # Key/value pairs for DownloaderUtils
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
-DOWNLOADER_UTILS_FILECHOOSER_TITLE=Salvesta Eraldi
+DOWNLOADER_UTILS_FILECHOOSER_TITLE=Salvesta eraldi
 # {0} the full path name of the file in question
 #### DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=You already have the exact same file at {0}
 DOWNLOADER_UTILS_HASH_CONFLICT_MESSAGE=Sul juba on täpselt seesama fail {0} kaustas
@@ -1015,31 +1015,31 @@ DOWNLOADER_UTILS_HASH_CONFLICT_QUESTION=Kas tahad ikkagi tirimist jätkata?
 #### DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Continue
 DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Jätka
 #### DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Same File Already In Library
-DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Sama Fail Eksisteerib Raamatukogus
+DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Sama fail eksisteerib raamatukogus
 
 ################################################################################
 # Key/value pair for sharing of files specially/individually
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
-SHARE_FILE_POPUP_MENU_LABEL=Jaga Faili
+SHARE_FILE_POPUP_MENU_LABEL=Jaga faili
 #### UNSHARE_FILE_POPUP_MENU_LABEL=Stop Sharing File
-UNSHARE_FILE_POPUP_MENU_LABEL=Lõpeta Faili Jagamine
+UNSHARE_FILE_POPUP_MENU_LABEL=Lõpeta faili jagamine
 #### SHARE_FOLDER_POPUP_MENU_LABEL=Share Folder
-SHARE_FOLDER_POPUP_MENU_LABEL=Jaga Kausta
+SHARE_FOLDER_POPUP_MENU_LABEL=Jaga kausta
 #### UNSHARE_FOLDER_POPUP_MENU_LABEL=Stop Sharing Folder
-UNSHARE_FOLDER_POPUP_MENU_LABEL=Lõpeta Kasuta Jagamine
+UNSHARE_FOLDER_POPUP_MENU_LABEL=Lõpeta kasuta jagamine
 #### SHARE_FILE_ACTION_NAME=Share New File...
-SHARE_FILE_ACTION_NAME=Jaga Uut Faili...
+SHARE_FILE_ACTION_NAME=Jaga uut faili...
 #### SHARE_FILE_ACTION_APPROVE_LABEL=Share
 SHARE_FILE_ACTION_APPROVE_LABEL=Jaga
 #### SHARE_FILE_ACTION_MNEMONIC=I
-SHARE_FILE_ACTION_MNEMONIC=I
+SHARE_FILE_ACTION_MNEMONIC=F
 #### SHARE_NEW_FOLDER_ACTION_NAME=Share New Folder...
-SHARE_NEW_FOLDER_ACTION_NAME=Jaga Uut Kataloogi...
+SHARE_NEW_FOLDER_ACTION_NAME=Jaga uut kataloogi...
 #### SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Opens a Window and Lets You Choose a New Folder to Share
-SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Avab Akna ja Laseb Sinul Valida Uue Kausta Mida Jagada
+SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Avab akna ja laseb sinul valida uue kausta mida jagada.
 #### SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
-SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
+SHARE_NEW_FOLDER_ACTION_MNEMONIC=K
 #### SHARE_FILE_FAILED=LimeWire was unable to share the file "{0}".
 SHARE_FILE_FAILED=LimeWirel ei õnnestunuda jagada faili "{0}".
 #### SHARE_FILE_ALREADY_SHARED=The file "{0}" is already shared.
@@ -1053,13 +1053,13 @@ STATISTICS_AVAILABLE=kättesaadav
 #### STATISTICS_FILES=Files
 STATISTICS_FILES=Faili
 #### STATISTICS_FILES_TOOLTIP=files
-#? STATISTICS_FILES_TOOLTIP=
+STATISTICS_FILES_TOOLTIP=faili
 #### STATISTICS_FILES_TOOLTIP_PENDING=files (Loading...)
-#? STATISTICS_FILES_TOOLTIP_PENDING=
+STATISTICS_FILES_TOOLTIP_PENDING=Faili (Laen...)
 #### STATISTICS_DISCONNECTED=Disconnected / no files available
 STATISTICS_DISCONNECTED=Ühenduseta / failid pole saadaval
 #### STATISTICS_SHARING_TOOLTIP=You are sharing
-STATISTICS_SHARING_TOOLTIP=Arv Mitu Faili Sa Jagad
+STATISTICS_SHARING_TOOLTIP=Arv mitu faili sa jagad
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
 STATISTICS_CONNECTION_DISCONNECTED=Ühenduseta
 #### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
@@ -1091,11 +1091,11 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=Sa võid kogeda pidevat Turbo-Kiiru
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Sinu ühendus võrguga on äärmiselt tugev.
 #### STATISTICS_CONNECTION_QUALITY=Connection
-#? STATISTICS_CONNECTION_QUALITY=
+STATISTICS_CONNECTION_QUALITY=Ühenduse
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
 STATISTICS_CONNECTION_WAKING_UP=Ülesärkamine
 #### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode
-STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire ärkab Üles Magamise Reþiimist.
+STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire ärkab üles magamise reþiimist.
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -1103,19 +1103,19 @@ STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire ärkab Üles Magamise Reþiimist.
 # download statistics table cells.
 ################################################################################
 #### DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Cancel Download
-DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Tühista Tirimine
+DOWNLOAD_POPUP_MENU_KILL_DOWNLOAD=Tühista tirimine
 #### DOWNLOAD_POPUP_MENU_RESUME=Resume Download
-DOWNLOAD_POPUP_MENU_RESUME=Jätka Tirimist
+DOWNLOAD_POPUP_MENU_RESUME=Jätka tirimist
 #### DOWNLOAD_POPUP_MENU_SOURCES=Find More Sources for Download
-DOWNLOAD_POPUP_MENU_SOURCES=Leia Tirimise Jaoks Rohkem Võõrustajaid
+DOWNLOAD_POPUP_MENU_SOURCES=Leia tirimise jaoks rohkem võõrustajaid
 #### DOWNLOAD_POPUP_MENU_PAUSE=Pause Download
-DOWNLOAD_POPUP_MENU_PAUSE=Peata Tirimine
+DOWNLOAD_POPUP_MENU_PAUSE=Peata tirimine
 #### DOWNLOAD_POPUP_MENU_LAUNCH=Preview Download
-DOWNLOAD_POPUP_MENU_LAUNCH=Tirimise Eelvaade
+DOWNLOAD_POPUP_MENU_LAUNCH=Tirimise eelvaade
 #### DOWNLOAD_POPUP_MENU_CHAT=Chat with Host
-DOWNLOAD_POPUP_MENU_CHAT=Saada Võõrustajale Teade
+DOWNLOAD_POPUP_MENU_CHAT=Saada võõrustajale teade
 #### DOWNLOAD_POPUP_MENU_BROWSE=Browse Host
-DOWNLOAD_POPUP_MENU_BROWSE=Sirvi Võõrustajat
+DOWNLOAD_POPUP_MENU_BROWSE=Sirvi võõrustajat
 #### DOWNLOAD_PRIORITY_COLUMN=Priority
 DOWNLOAD_PRIORITY_COLUMN=Prioriteet
 #### DOWNLOAD_NAME_COLUMN=Name
@@ -1139,7 +1139,7 @@ DOWNLOAD_STATUS_QUEUED=Järjekorras
 #### DOWNLOAD_STATUS_CONNECTING=Connecting...
 DOWNLOAD_STATUS_CONNECTING=Ühendan...
 #### DOWNLOAD_STATUS_WAITING=Waiting On Busy Hosts
-DOWNLOAD_STATUS_WAITING=Võõrustajad on Hõivatud, ootan
+DOWNLOAD_STATUS_WAITING=Võõrustajad on hõivatud, ootan
 #### DOWNLOAD_STATUS_COMPLETE=Complete
 DOWNLOAD_STATUS_COMPLETE=Lõpetatud
 #### DOWNLOAD_STATUS_ABORTED=Aborted
@@ -1147,35 +1147,35 @@ DOWNLOAD_STATUS_ABORTED=Katkestatud
 #### DOWNLOAD_STATUS_FAILED=Awaiting Sources
 DOWNLOAD_STATUS_FAILED=Ootan allikaid
 #### DOWNLOAD_STATUS_DOWNLOADING=Downloading from
-DOWNLOAD_STATUS_DOWNLOADING=Tirin Siit
+DOWNLOAD_STATUS_DOWNLOADING=Tirin siit
 #### DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Disk Problem
-DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Ketta Probleem
+DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Ketta probleem
 #### DOWNLOAD_STATUS_CORRUPT_FILE=File Corrupted
-DOWNLOAD_STATUS_CORRUPT_FILE=Fail on Rikutud
+DOWNLOAD_STATUS_CORRUPT_FILE=Fail on rikutud
 #### DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering Corrupted File
-DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Taastan Rikutud Faili
+DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Taastan rikutud faili
 #### DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery Failed
-DOWNLOAD_STATUS_RECOVERY_FAILED=Taastamine Ebaõnnestus
+DOWNLOAD_STATUS_RECOVERY_FAILED=Taastamine ebaõnnestus
 #### DOWNLOAD_STATUS_REQUERYING=Querying Network
-DOWNLOAD_STATUS_REQUERYING=Võrgu Päring
+DOWNLOAD_STATUS_REQUERYING=Võrgu päring
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Waiting
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Ootan
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s for Sources
-DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=allikat
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s allikat
 #### DOWNLOAD_STATUS_WAITING_FOR_USER=Need More Sources
-DOWNLOAD_STATUS_WAITING_FOR_USER=Läheb Vaja Rohkem Allikaid
+DOWNLOAD_STATUS_WAITING_FOR_USER=Läheb vaja rohkem allikaid
 #### DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for Stable Connections
-DOWNLOAD_STATUS_WAITING_FOR_CONN=Ootan Stabiilset Ühendust
+DOWNLOAD_STATUS_WAITING_FOR_CONN=Ootan stabiilset ühendust
 #### DOWNLOAD_HOSTS_LABEL=hosts
 DOWNLOAD_HOSTS_LABEL=võõrustajalt
 #### DOWNLOAD_HOST_LABEL=host
 DOWNLOAD_HOST_LABEL=võõrustaja
 #### DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in Line, Position
-DOWNLOAD_STATUS_REMOTE_QUEUED=Ootan järjekorras, Positsioonil
+DOWNLOAD_STATUS_REMOTE_QUEUED=Ootan järjekorras, positsioonil
 #### DOWNLOAD_STATUS_HASHING=Verifying File Contents...
-DOWNLOAD_STATUS_HASHING=Kontrollin Faili Sisu...
+DOWNLOAD_STATUS_HASHING=Kontrollin faili sisu...
 #### DOWNLOAD_STATUS_SAVING=Saving File...
-DOWNLOAD_STATUS_SAVING=Salvestan Faili...
+DOWNLOAD_STATUS_SAVING=Salvestan faili...
 #### DOWNLOAD_STATUS_PAUSING=Pausing...
 DOWNLOAD_STATUS_PAUSING=Peatan...
 #### DOWNLOAD_STATUS_PAUSED=Paused
@@ -1193,17 +1193,17 @@ DOWNLOAD_APPLY_NEW_THEME_START=Sa ole tirinud uue küljenduse nimega "
 #### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
 DOWNLOAD_APPLY_NEW_THEME_END=." Kas sooviksid kasutada uut küljendust?
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
-DOWNLOAD_POSSIBLE_HOSTS=Võimalikud Võõrustajad
+DOWNLOAD_POSSIBLE_HOSTS=Võimalikud võõrustajad
 #### DOWNLOAD_BUSY_HOSTS=Busy Hosts
-DOWNLOAD_BUSY_HOSTS=Hõivatud Võõrustajad
+DOWNLOAD_BUSY_HOSTS=Hõivatud võõrustajad
 #### DOWNLOAD_QUEUED_HOSTS=Remotely Queued
-DOWNLOAD_QUEUED_HOSTS=Hetkel Päringut Esitamas
+DOWNLOAD_QUEUED_HOSTS=Hetkel päringut esitamas
 #### DOWNLOAD_CHUNKS=Chunks
 DOWNLOAD_CHUNKS=Kamakas
 #### DOWNLOAD_LOST=Lost To Corruption
-DOWNLOAD_LOST=Kaotatud Tänu Rikutusele
+DOWNLOAD_LOST=Kaotatud tänu rikutusele
 #### DOWNLOAD_SEARCHING=Locating Sources...
-DOWNLOAD_SEARCHING=Allikate Asukoha Määramine...
+DOWNLOAD_SEARCHING=Allikate asukoha määramine...
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Vabandust aga LimeWirel ei õnnestunud uuestikäivitada sinu vanu tirimisi.
 #### DOWNLOAD_MAGNET_DIALOG_MESSAGE=Would you like to start downloads from the following magnets?
@@ -1213,9 +1213,9 @@ DOWNLOAD_HASH_ONLY_MAGNET=LimeWire ei suuda alustada tirimisega mille oled selek
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
 DOWNLOAD_PRIORITY_ACTIVE=Aktiivne
 #### DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Move the Selected Download Closer to Becoming Active
-DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Liiguta Selekteeritud Tirimine Kõrgemale, et muuta nad aktiivseks
+DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Liiguta selekteeritud tirimine kõrgemale, et muuta nad aktiivseks.
 #### DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Move the Selected Download Further from Becoming Active
-DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Liiguta Selekteeritud Tirimine Madalamele, et muuta ta mitteaktiivseks
+DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Liiguta selekteeritud tirimine madalamele, et muuta ta mitteaktiivseks.
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=Järjekorras
 #### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
@@ -1225,21 +1225,21 @@ DOWNLOAD_PRIORITY_PRIORITIZE=Järjekorras
 # Key/value pairs for UploadView
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
-UPLOAD_POPUP_MENU_KILL_UPLOAD=Tapa Kaan
+UPLOAD_POPUP_MENU_KILL_UPLOAD=Tapa kaan
 #### UPLOAD_POPUP_MENU_CHAT=Chat with Host
-UPLOAD_POPUP_MENU_CHAT=Saada Teade
+UPLOAD_POPUP_MENU_CHAT=Saada teade
 #### UPLOAD_KILL_BUTTON_LABEL=Kill Upload
-UPLOAD_KILL_BUTTON_LABEL=Tapa Kaan
+UPLOAD_KILL_BUTTON_LABEL=Tapa kaan
 #### UPLOAD_KILL_BUTTON_TIP=Stop Selected Uploads
-UPLOAD_KILL_BUTTON_TIP=Peata Selekteeritud Kaanid.
+UPLOAD_KILL_BUTTON_TIP=Peata selekteeritud kaanid.
 #### UPLOAD_CLEAR_BUTTON_LABEL=Clear Inactive
-UPLOAD_CLEAR_BUTTON_LABEL=Puhasta Mitteaktiivsetest
+UPLOAD_CLEAR_BUTTON_LABEL=Puhasta mitteaktiivsetest
 #### UPLOAD_CLEAR_BUTTON_TIP=Remove Inactive Uploads
-UPLOAD_CLEAR_BUTTON_TIP=Eemalda mitteaktiivsed Kaanid.
+UPLOAD_CLEAR_BUTTON_TIP=Eemalda mitteaktiivsed kaanid.
 #### UPLOAD_CHAT_BUTTON_LABEL=Chat with Host
-UPLOAD_CHAT_BUTTON_LABEL=Saada Teade
+UPLOAD_CHAT_BUTTON_LABEL=Saada teade
 #### UPLOAD_CHAT_BUTTON_TIP=Chat with Another User of the Selected Host
-UPLOAD_CHAT_BUTTON_TIP=Saada Teade Teisele kasutajale Sellelt võõrustajalt.
+UPLOAD_CHAT_BUTTON_TIP=Saada teade teisele kasutajale sellelt võõrustajalt.
 #### UPLOAD_TABLE_STRING_NAME=Name
 UPLOAD_TABLE_STRING_NAME=Nimi
 #### UPLOAD_TABLE_STRING_HOST=Host
@@ -1263,25 +1263,25 @@ UPLOAD_TABLE_STRING_CONNECTING=Ühendamine
 #### UPLOAD_TABLE_STRING_UPLOADING=Uploading
 UPLOAD_TABLE_STRING_UPLOADING=Üleslaadimine
 #### UPLOAD_TABLE_STRING_LIMITREACHED=Upload Limit Reached
-UPLOAD_TABLE_STRING_LIMITREACHED=Üleslaadimise Pirni on Jutud
+UPLOAD_TABLE_STRING_LIMITREACHED=Üleslaadimise pirni on jutud
 #### UPLOAD_TABLE_STRING_FREELOADER=Freeloader Uploading
-#? UPLOAD_TABLE_STRING_FREELOADER=
+UPLOAD_TABLE_STRING_FREELOADER=Muiduleivasööjast üleslaadija
 #### UPLOAD_TABLE_STRING_PUSHFAILED=Couldn't Connect
 UPLOAD_TABLE_STRING_PUSHFAILED=Ei suutnud Ühendada
 #### UPLOAD_TABLE_STRING_INTERRUPTED=Transfer Interrupted
 UPLOAD_TABLE_STRING_INTERRUPTED=Ülekanne katkestatud
 #### UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range Unavailable
-UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Vahemid Mittekättesaadaval
+UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Vahemid mittekättesaadaval
 #### UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Malformed Request
-UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Väändunud Palve
+UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Väändunud palve
 #### UPLOAD_TABLE_STRING_COMPLETE=Complete
 UPLOAD_TABLE_STRING_COMPLETE=Lõpetatud
 #### UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned Greedy Servent
-UPLOAD_TABLE_STRING_BANNED_GREEDY=Keela Ahnepätsidel Juurdepääs
+UPLOAD_TABLE_STRING_BANNED_GREEDY=Keela ahnepätsidel juurdepääs
 #### UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash Tree
-UPLOAD_TABLE_STRING_HASH_TREE=Üleslaadin Hakitud Puud
+UPLOAD_TABLE_STRING_HASH_TREE=Üleslaadin hakitud puud
 #### UPLOAD_TABLE_STRING_FNF=File Not Found
-UPLOAD_TABLE_STRING_FNF=Faili Ei Leitud
+UPLOAD_TABLE_STRING_FNF=Faili ei leitud
 #### UPLOAD_TABLE_STRING_QUEUED=Queued at
 UPLOAD_TABLE_STRING_QUEUED=Ootab järjekorras
 #### UPLOAD_STRING_KBPSEC=KB/s
@@ -1295,11 +1295,11 @@ UPLOAD_QUEUED=Järjekorras
 # Key/value pairs for MonitorView
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
-MONITOR_VIEW_INCOMING_SEARCHES=Näita Sissetulevaid otsinguid
+MONITOR_VIEW_INCOMING_SEARCHES=Näita sissetulevaid otsinguid
 #### MONITOR_VIEW_SHOW_LAST=Show Last
-MONITOR_VIEW_SHOW_LAST=Näita Viimast
+MONITOR_VIEW_SHOW_LAST=Näita viimast
 #### MONITOR_VIEW_SEARCHES=Searches
-MONITOR_VIEW_SEARCHES=Otsingud
+MONITOR_VIEW_SEARCHES=otsingud
 #### MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer. Hence you will see few or no searches in the monitor window.
 MONITOR_VIEW_LEAF_MESSAGE=Sinu klient on terminal alliks ning on kaitstud Superkasutajaga. Seetõttu näed väheseid või ei näe üldse otsinguid ülevaateaknas.
 
@@ -1316,17 +1316,17 @@ T1_SPEED=T1
 #### T3_SPEED=T3 or Higher
 T3_SPEED=T3 või parem
 #### MULTICAST_SPEED=Ethernet
-MULTICAST_SPEED=Enternet
+MULTICAST_SPEED=Ethernet
 
 ################################################################################
 # HTML Page stuff
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
-HTML_PAGE_TITLE=Tiri Lehekülg
+HTML_PAGE_TITLE=Tiri lehekülg
 #### HTML_PAGE_LISTING=File Listing for
-HTML_PAGE_LISTING=Failide Sorteerimine alusel
+HTML_PAGE_LISTING=Failide sorteerimine alusel
 #### HTML_PAGE_MAGNET=Magnet Links for Fast Downloads (if you have LimeWire installed)
-HTML_PAGE_MAGNET=Magnet Lingid Kiireteks Tirimisteks (Kui sul on LimeWire installeeritud)
+HTML_PAGE_MAGNET=Magnet lingid kiireteks tirimisteks (kui sul on LimeWire installeeritud)
 
 ###################################################################
 # Key/value pairs for ConnectionView
@@ -1354,15 +1354,15 @@ CV_COLUMN_COMPRESSION=Tihendatud (I/O)
 #### CV_COLUMN_QRP_FULL=QRP (%)
 CV_COLUMN_QRP_FULL=QRP (%)
 #### CV_COLUMN_QRP_USED=QRP Empty
-CV_COLUMN_QRP_USED=QRP Tühi
+CV_COLUMN_QRP_USED=QRP tühi
 #### CV_BUTTON_REMOVE=Remove
 CV_BUTTON_REMOVE=Eemalda
 #### CV_BUTTON_TOOLTIP_REMOVE=Remove the Selected Connections
-CV_BUTTON_TOOLTIP_REMOVE=Eemalda Selekteeritud Ühendused.
+CV_BUTTON_TOOLTIP_REMOVE=Eemalda selekteeritud ühendused.
 #### CV_BUTTON_ADD=Add...
 CV_BUTTON_ADD=Lisa...
 #### CV_BUTTON_TOOLTIP_ADD=Create a New Outgoing Connection
-CV_BUTTON_TOOLTIP_ADD=Loo Uus Väljaminev Ühendus.
+CV_BUTTON_TOOLTIP_ADD=Loo uus väljaminev ühendus.
 #### CV_LABEL_KEEP_BEGIN=Keep approximately
 CV_LABEL_KEEP_BEGIN=Hoia täpselt
 #### CV_LABEL_KEEP_END=connections up.
@@ -1406,7 +1406,7 @@ CV_ADD_HOST_LABEL=Võõrustaja:
 #### CV_ADD_PORT_LABEL=Port:
 CV_ADD_PORT_LABEL=Port:
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
-CV_ADD_DIALOG_TITLE=Lisa Gnutella Ühendus
+CV_ADD_DIALOG_TITLE=Lisa Gnutella ühendus
 
 ################################################################################
 # Key/value pairs for strings in the library window
@@ -1436,27 +1436,27 @@ LIBRARY_TABLE_UPLOAD_COUNT=Üleslaadimisi
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
 LIBRARY_TABLE_SEARCH_POPUP_MENU=Otsi
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
-LIBRARY_TREE_NEW_FOLDER_LABEL=Uus Kaust
+LIBRARY_TREE_NEW_FOLDER_LABEL=Uus kaust
 #### LIBRARY_TREE_SHARE_FOLDER_LABEL=Share Folder
-LIBRARY_TREE_SHARE_FOLDER_LABEL=Jaga Kausta
+LIBRARY_TREE_SHARE_FOLDER_LABEL=Jaga kausta
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing Folder
-LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Lõpeta Kausta Jagamine
+LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Lõpeta kausta jagamine
 #### LIBRARY_TABLE_SHARING_SUB_MENU=Sharing
 LIBRARY_TABLE_SHARING_SUB_MENU=Jagamine
 #### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
-LIBRARY_TREE_RENAME_FOLDER_LABEL=Nimeta Ümber
+LIBRARY_TREE_RENAME_FOLDER_LABEL=Nimeta ümber
 #### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
-LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Lisa Kasuta Sisu Esitlusloendisse
+LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Lisa kasuta sisu esitlusloendisse
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
-LIBRARY_TREE_SAVED_DIRECTORY=Salvesta Failid
+LIBRARY_TREE_SAVED_DIRECTORY=Salvesta failid
 #### LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete Files
-LIBRARY_TREE_INCOMPLETE_DIRECTORY=Poolikud Failid
+LIBRARY_TREE_INCOMPLETE_DIRECTORY=Poolikud failid
 #### LIBRARY_TREE_SHARED_FILES_DIRECTORY=Shared Files
-LIBRARY_TREE_SHARED_FILES_DIRECTORY=Jagatud Failid
+LIBRARY_TREE_SHARED_FILES_DIRECTORY=Jagatud failid
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Individually Shared Files
-LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Üksikult Jagatud Failid
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Üksikult jagatud failid
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
-LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Loetelu Kõigist Üksikult Jagatud Failidest.
+LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Loetelu kõigist üksikult jagatud failidest.
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -1474,17 +1474,17 @@ PLAYLIST_TABLE_NAME=Nimi
 #### PLAYLIST_TABLE_LENGTH=Length
 PLAYLIST_TABLE_LENGTH=Pikkus
 #### PLAYLIST_TABLE_BITRATE=Bitrate
-PLAYLIST_TABLE_BITRATE=Biti Määr
+PLAYLIST_TABLE_BITRATE=Biti määr
 #### PLAYLIST_OPTIONS_STRING=Play Options:
-PLAYLIST_OPTIONS_STRING=Esitus Valikud
+PLAYLIST_OPTIONS_STRING=Esitus valikud
 #### PLAYLIST_OPTIONS_CONTINUE=Continuous
 PLAYLIST_OPTIONS_CONTINUE=Lakkamatu
 #### PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 PLAYLIST_OPTIONS_SHUFFLE=Segamine
 #### PLAYLIST_DIALOG_OPEN_TITLE=Open Playlist (.m3u)
-PLAYLIST_DIALOG_OPEN_TITLE=Ava Esitlusloend (.m3u)
+PLAYLIST_DIALOG_OPEN_TITLE=Ava esitlusloend (.m3u)
 #### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
-PLAYLIST_DIALOG_SAVE_TITLE=Salvesta Esitlusloend nimega
+PLAYLIST_DIALOG_SAVE_TITLE=Salvesta esitlusloend nimega
 #### PLAYLIST_DIALOG_SAVE_SAVE=Save
 PLAYLIST_DIALOG_SAVE_SAVE=Salvesta
 #### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
@@ -1507,7 +1507,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Faili koostisosi ei suudeta tuvastada.
 # if you don't have a limewire.props file
 ################################################################################
 #### SETUP_LANGUAGE_TITLE=Language Options
-SETUP_LANGUAGE_TITLE=Keele Valik
+SETUP_LANGUAGE_TITLE=Keele valik
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=Palun valige keel mida soovite, et LimeWire kasutaks.
 #### SETUP_WELCOME_TITLE=Welcome
@@ -1517,11 +1517,11 @@ SETUP_WELCOME_LABEL=Teretulemast LimeWire algsätestusse. LimeWire juhib sind l�
 #### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 SETUP_WELCOME_PARTIAL_LABEL=Teretulemast LimeWire algsätestusse. Limewirele on äsja lisandunud uusi tunnuseid mis vajavad sinu kunfigureerimist. LimeWire juhib sind läbi seeria tunnusvalikute konfigureerimaks neid uusi tunnuseid.
 #### SETUP_SAVE_TITLE=Save Folder
-SETUP_SAVE_TITLE=Salvesta Kaust
+SETUP_SAVE_TITLE=Salvesta kaust
 #### SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded. This folder will also be shared with other gnutella users by default.
 SETUP_SAVE_LABEL=Palun vali kaust kuhu sa soovid tiritud faile salvestada. Seda kausta samuti jagatakse teiste gnutella kasutajatega vaikimisi.
 #### SETUP_SPEED_TITLE=Connection Speed
-SETUP_SPEED_TITLE=Ühenduse Kiirus
+SETUP_SPEED_TITLE=Ühenduse kiirus
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=Palun vali oma interneti ühenduse kiirus. Selle kiiruse määramine on tähtis optimeerimaks võrgu suutlikust. Kui sa ei tea mis ühendus sul on vali ühendus mis tundub sellele kõige õigem (Mis tavaliselt peaks olema dsl).
 #### SETUP_STARTUP_TITLE=System Startup
@@ -1529,9 +1529,9 @@ SETUP_STARTUP_TITLE=Süsteemi starter
 #### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
 SETUP_STARTUP_LABEL=Kas sa soovid käivitada LimeWire automaatselt kui sa käivitad oma arvuti? Selle tulemusena LimeWire käivitub pärast kiiremini.
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
-SETUP_STARTUP_CHECKBOX=Käivita Automaatselt
+SETUP_STARTUP_CHECKBOX=Käivita automaatselt
 #### SETUP_FIREWALL_TITLE_ONE=Firewall Preparation
-SETUP_FIREWALL_TITLE_ONE=Tulemüüri Etteseadistamine
+SETUP_FIREWALL_TITLE_ONE=Tulemüüri etteseadistamine
 #### SETUP_FIREWALL_LABEL_ONE=LimeWire needs to receive information from the network in order to function properly. When you click next, some firewalls will ask your permission for LimeWire to use the network. You should allow LimeWire full access. Below is a picture of Windows Firewall asking to unblock LimeWire. Your firewall software may look different.
 SETUP_FIREWALL_LABEL_ONE=LimeWire peab saama võrgust informatsiooni, et funktsioneerida korralikult. Kui sa klikkid järgmine, mõned tulemüürid küsivad luba lasta LimeWirel ühenduda võrguga. Sa peaksid LimeWirel seda teha lubama: All on pilt, kus Windowsi Tulemüür küsib LimeWire avamise kohta. Sinu Tulemüüri tarkvara võib olla teistsugune.
 #### SETUP_FIREWALL_TITLE_TWO=Firewall Warning
@@ -1569,7 +1569,7 @@ DIRECTORY_CHOOSER_CAPTION=Selekteeri
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Selekteeri
 #### FILE_CHOOSER_DIRECTORY_TITLE=Select Folder
-FILE_CHOOSER_DIRECTORY_TITLE=Selekteeri Kaust
+FILE_CHOOSER_DIRECTORY_TITLE=Selekteeri kaust
 
 ################################################################################
 # Key/value pairs for strings in the init package
@@ -1585,37 +1585,37 @@ INIT_SAVE_BROWSE_BUTTON_TIP=Vali teine kaust.
 #### INIT_SAVE_DEFAULT_BUTTON_LABEL=Use Default
 INIT_SAVE_DEFAULT_BUTTON_LABEL=Kasuta vaikseadistust
 #### INIT_SAVE_DEFAULT_BUTTON_TIP=Use the Default Folder
-INIT_SAVE_DEFAULT_BUTTON_TIP=Kasuta Vaikseadistuse Kausta.
+INIT_SAVE_DEFAULT_BUTTON_TIP=Kasuta vaikseadistuse kausta.
 
 ################################################################################
 # Key/Value pairs for the pro window on startup
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
-PRO_TITLE=Uuenda Pro-ks
+PRO_TITLE=Uuenda PRO-ks
 #### PRO_LABEL_THANKS=For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
 PRO_LABEL_THANKS=Muretse LimeWire PRO, et kogeda Turbo-Kiirusega tirimist. Me karanteerime, et sulle meeldib parandatud jõudlusega PRO. Tänan aitamast hoida Internetti lahti kasutades LimeWiret.
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
-PRO_LABEL_QUESTION=Uuenda LimeWire Pro-ks?
+PRO_LABEL_QUESTION=Uuenda LimeWire PRO-ks?
 #### GO_PRO_TIP=Get LimeWire PRO Now
-GO_PRO_TIP=Muretse LimeWire PRO Kohe.
+GO_PRO_TIP=Muretse LimeWire PRO kohe.
 #### WHYGOPRO=Why
 WHYGOPRO=Miks
 #### WHYGOPRO_TIP=What does PRO give me?
-WHYGOPRO_TIP=Mida PRO Mulle annab?
+WHYGOPRO_TIP=Mida PRO mulle annab?
 #### GO_PRO_LATER=Later
 GO_PRO_LATER=Hiljem
 #### GO_PRO_LATER_TIP=Get LimeWire PRO Later
-GO_PRO_LATER_TIP=Muretse LimeWire PRO Hiljem.
+GO_PRO_LATER_TIP=Muretse LimeWire PRO hiljem.
 
 ################################################################################
 # Key/Value pairs for the upgrade java window.
 ################################################################################
 #### JAVA_UPGRADE_TITLE=Upgrade Your Java
-JAVA_UPGRADE_TITLE=Uuenda oma Jaavat
+JAVA_UPGRADE_TITLE=Uuenda oma Java-t
 #### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java. LimeWire looks and acts much better with newer versions of Java. Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
-JAVA_UPGRADE_MESSAGE=LimeWire on avastanud, et sinu süsteem kasutab vana Jaava versiooni. LimeWire näeb välja ja käitub palju paremini uuemate Jaava versioonidega. Nagu näiteks hiire kerimisnupu tugi, Windows XP väljanägemine ja palju teisi täiustusi.
+JAVA_UPGRADE_MESSAGE=LimeWire on avastanud, et sinu süsteem kasutab vana Java versiooni. LimeWire näeb välja ja käitub palju paremini uuemate Java versioonidega. Nagu näiteks hiire kerimisnupu tugi, Windows XP väljanägemine ja palju teisi täiustusi.
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
-JAVA_UPGRADE_QUESTION=Kas soovid saada tasuta Jaava uuenduse?
+JAVA_UPGRADE_QUESTION=Kas soovid saada tasuta Java uuenduse?
 
 ###################################################################
 # Key/value pairs for XML
@@ -1649,7 +1649,7 @@ XML_audios__audio__action__=Hagi
 #### XML_audios__audio__license__=Copyright
 XML_audios__audio__license__=Autoriõigus
 #### XML_audios__audio__licensetype__=License Type
-XML_audios__audio__licensetype__=Litsensi Tüüp
+XML_audios__audio__licensetype__=Litsensi tüüp
 
 #### XML_videos__video=Video
 XML_videos__video=Video
@@ -1705,23 +1705,23 @@ META_EDITOR_EDITING_LABEL=Redikeeri sisukokkuvõtet:
 META_EDITOR_ADDING_LABEL=Lisa sisukokkuvõttele:
 #MetaSearchFrame
 #### META_SEARCH_TITLE=MetaSearch Input Window
-META_SEARCH_TITLE=MetaOtsingu Sisestus Aken
+META_SEARCH_TITLE=MetaOtsingu sisestus aken
 #### META_SEARCH_STRING=Search String
-META_SEARCH_STRING=Otsi Stringi
+META_SEARCH_STRING=Otsi stringi
 #### META_SEARCH_CANCEL_BUTTON_LABEL=Cancel
 META_SEARCH_CANCEL_BUTTON_LABEL=Tühista
 #### META_SEARCH_SEARCH_BUTTON_LABEL=Search
 META_SEARCH_SEARCH_BUTTON_LABEL=Otsi
 #ViewChooserDialog
 #### VIEW_CHOOSER_TITLE=Choose View
-VIEW_CHOOSER_TITLE=Vali Vaade
+VIEW_CHOOSER_TITLE=Vali vaade
 #### VIEW_CHOOSER_OK_BUTTON_LABEL=OK
 VIEW_CHOOSER_OK_BUTTON_LABEL=OK
 #### VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Cancel
 VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Tühista
 #IndentingPanel
 #### XML_SEARCH_MORE_OPTIONS_LABEL=More Search Options
-XML_SEARCH_MORE_OPTIONS_LABEL=Veel Otsingu Valikuid
+XML_SEARCH_MORE_OPTIONS_LABEL=Veel otsingu valikuid
 
 #### META_EDITOR_INFO_TAB_LABEL=Info
 META_EDITOR_INFO_TAB_LABEL=Info
@@ -1774,7 +1774,7 @@ META_EDITOR_LICENSE_LABEL=Litsents:
 #### META_EDITOR_SIZE_LABEL=Size:
 META_EDITOR_SIZE_LABEL=Suurus:
 #### META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
-META_EDITOR_DATE_MODIFIED_LABEL=Viimati Muudetud:
+META_EDITOR_DATE_MODIFIED_LABEL=Viimati muudetud:
 #### META_EDITOR_KIND_LABEL=Kind:
 META_EDITOR_KIND_LABEL=Sort:
 #### META_EDITOR_MP3_KIND_LABEL=MPEG-1 Audio Layer 3
@@ -1796,9 +1796,9 @@ LIST_EDITOR_BROWSE_BUTTON=Sirvi...
 #### LIST_EDITOR_REMOVE_BUTTON=Remove
 LIST_EDITOR_REMOVE_BUTTON=Eemalda
 #### LIST_EDITOR_ADD_BUTTON_TIP=Add New List Item
-LIST_EDITOR_ADD_BUTTON_TIP=Lisa Uus Loetelu Ühik.
+LIST_EDITOR_ADD_BUTTON_TIP=Lisa uus loetelu ühik.
 #### LIST_EDITOR_REMOVE_BUTTON_TIP=Remove Selected Item
-LIST_EDITOR_REMOVE_BUTTON_TIP=Eemalda Selekteeritud Ühik.
+LIST_EDITOR_REMOVE_BUTTON_TIP=Eemalda selekteeritud ühik.
 
 ################################################################################
 # Key/value pairs for the InputField reusable component
@@ -1812,7 +1812,7 @@ INPUT_FIELD_GENERIC_CAPTION=Sisestus
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Saada teade...
 #### GENERAL_CHAT_BUTTON_TIP=Chat with Host
-GENERAL_CHAT_BUTTON_TIP=Saada Võõrustajale Teade.
+GENERAL_CHAT_BUTTON_TIP=Saada võõrustajale teade.
 #### GENERAL_LAUNCH_BUTTON_LABEL=Launch
 GENERAL_LAUNCH_BUTTON_LABEL=Käivita
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
@@ -1824,17 +1824,17 @@ GENERAL_CLEAR_HISTORY=Puhasta ajalugu
 # Key/value pairs for ButtonRow labels and tooltips
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
-CHAT_BLOCK_BUTTON_LABEL=Blokeeri Võõrustaja
+CHAT_BLOCK_BUTTON_LABEL=Blokeeri võõrustaja
 #### CHAT_SEND_BUTTON_LABEL=Send Message
-CHAT_SEND_BUTTON_LABEL=Saada Teade
+CHAT_SEND_BUTTON_LABEL=Saada teade
 #### CHAT_STOP_BUTTON_LABEL=End Chat
-CHAT_STOP_BUTTON_LABEL=Lõpeta Suhtlemine
+CHAT_STOP_BUTTON_LABEL=Lõpeta suhtlemine
 #### CHAT_BLOCK_BUTTON_TIP=Block Current Host
-CHAT_BLOCK_BUTTON_TIP=Blokeeri Võõrustaja.
+CHAT_BLOCK_BUTTON_TIP=Blokeeri võõrustaja.
 #### CHAT_SEND_BUTTON_TIP=Send a Message to a Host
-CHAT_SEND_BUTTON_TIP=Saada Võõrustajale Teade.
+CHAT_SEND_BUTTON_TIP=Saada võõrustajale teade.
 #### CHAT_STOP_BUTTON_TIP=Stop Chatting with a Host
-CHAT_STOP_BUTTON_TIP=Lõpeta Võõrutajaga Suhtlemine.
+CHAT_STOP_BUTTON_TIP=Lõpeta võõrutajaga suhtlemine.
 
 ################################################################################
 # Key/value pairs for the ChatFrame that is displayed while chatting
@@ -1850,7 +1850,7 @@ CHAT_YOU=Sina
 # Key/value pairs for splash screen status text
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading resources...
-SPLASH_STATUS_RESOURCE_MANAGER=laen ressursse...
+SPLASH_STATUS_RESOURCE_MANAGER=Laen ressursse...
 #### SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
 SPLASH_STATUS_HTML_ENGINE=Laen HTML mootorit...
 #### SPLASH_STATUS_SEARCH_WINDOW=Loading search window...
@@ -1890,7 +1890,7 @@ SPLASH_STATUS_MESSAGE_SERVICE=Laen teateid...
 #### SPLASH_STATUS_ICONS=Loading icons...
 SPLASH_STATUS_ICONS=Laen ikoone...
 #### SPLASH_STATUS_I18N=Loading internationalization support...
-#? SPLASH_STATUS_I18N=
+SPLASH_STATUS_I18N=Laen internatsionaliseerimise tuge...
 #### SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
 SPLASH_STATUS_DAAP=Laen Digitaalse Audio Juurdepääsu Protokolli...
 #### SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
@@ -1958,15 +1958,15 @@ SUPPORT_LIMEWIRE_11=Aita toetada jagada iseseisva meedia sisu. Muretse PRO.
 # update of LimeWire available
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
-UPDATE_DIALOG_CAPTION=Uuem Väljalase Saadaval!
+UPDATE_DIALOG_CAPTION=Uuem väljalase saadaval!
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 UPDATE_MESSAGE_SMALL=Uuem versioon on saadaval, uuendan?
 #### UPDATE_TITLE=A new version of LimeWire is available.
-UPDATE_TITLE=LimeWire uus Versioon on saadaval.
+UPDATE_TITLE=LimeWire uus versioon on saadaval.
 #### UPDATE_LATER_LABEL=Update Later
-UPDATE_LATER_LABEL=Uuenda Hiljem
+UPDATE_LATER_LABEL=Uuenda hiljem
 #### UPDATE_NOW_LABEL=Update Now
-UPDATE_NOW_LABEL=Uuenda Kohe
+UPDATE_NOW_LABEL=Uuenda kohe
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 UPDATE_TIP=Uuendamiseks mine http://www.limewire.com!
 #### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
@@ -2031,7 +2031,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Jagan seda kausta?
 # when the user does not have a valid save directory.
 ################################################################################
 #### INVALID_SAVE_DIR_LABEL=The stored folder for saving files is not valid. Please enter a new folder in the folder chooser.
-INVALID_SAVE_DIR_LABEL=Kaus ei sobi failide talletamiseks. Palun sisesta uus kaust kausta valikust
+INVALID_SAVE_DIR_LABEL=Kaus ei sobi failide talletamiseks. Palun sisesta uus kaust kausta valikust.
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
@@ -2083,7 +2083,7 @@ ERROR_INVALID_NAME_GENERIC=LimeWire ei suuda avada vajalikku faili kuna faili ni
 # Key/Value pairs for internal error messages
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
-ERROR_INTERNAL_TITLE=Sisemine Hälve
+ERROR_INTERNAL_TITLE=Sisemine hälve
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=LimeWirel esines sisemine viga. On võimalik, et Limewire taastub ja jätkab oma tööd normaalselt. Aitamaks vea parandamisel, palun klikki 'Saada' teatamaks LimeWiret sellest probleemist. Kui soovid, võid vajutada 'Vaata üle' vaatamaks informatsiooni mida saadetakse. Tänan.
 #### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
@@ -2095,15 +2095,15 @@ ERROR_INTERNAL_REVIEW=Vaata üle
 #### ERROR_INTERNAL_DISCARD=Discard
 ERROR_INTERNAL_DISCARD=Tunnista kõlbmatuks
 #### ERROR_INTERNAL_COPY=Copy Report
-ERROR_INTERNAL_COPY=Kopeeri Aruanne
+ERROR_INTERNAL_COPY=Kopeeri aruanne
 #### ERROR_INTERNAL_OK=OK
 ERROR_INTERNAL_OK=OK
 #### ERROR_INTERNAL_ALWAYS_SEND=Always Send Immediately
-ERROR_INTERNAL_ALWAYS_SEND=Alati Saada Momentaalselt
+ERROR_INTERNAL_ALWAYS_SEND=Alati saada momentaalselt
 #### ERROR_INTERNAL_ALWAYS_REVIEW=Always Ask For Review
-ERROR_INTERNAL_ALWAYS_REVIEW=Alati Küsi Ülevaatamist
+ERROR_INTERNAL_ALWAYS_REVIEW=Alati küsi ülevaatamist
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
-ERROR_INTERNAL_ALWAYS_DISCARD=Alati Tunnista Kõik Vead Kõlbmatuks
+ERROR_INTERNAL_ALWAYS_DISCARD=Alati tunnista kõik vead kõlbmatuks
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWirel ei õnnestund ühenduda serveriga, et saata aljärgnev veateade. Aitamaks viga parandada palun kopeerida alljärgnev tekst ekirja ja saata see aadressil bugs@limewire.com. Tänan.
 
@@ -2231,7 +2231,7 @@ ERROR_XML_SEARCH_TOO_LARGE=Sinu otsing on liiga täpne. Palun muuda oma otsing l
 # Messages for Licensing
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
-LICENSE_VIEW_LICENSE=Vaata Litsentsi
+LICENSE_VIEW_LICENSE=Vaata litsentsi
 #### LICENSE_VERIFY=Verify
 LICENSE_VERIFY=Kontrolli
 
@@ -2239,21 +2239,21 @@ LICENSE_VERIFY=Kontrolli
 # Messages for Creative Commons Licensing
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
-LICENSE_CC_TITLE=Creative Commons Detailid
+LICENSE_CC_TITLE=Creative Commons detailid
 #### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
 LICENSE_CC_LOCATING=LimeWire otsib hetkel selle litsensi detaile.
 #### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this Creative Commons license.
-LICENSE_CC_UNVERIFIED=LimeWire ei ole veel seda litsensi kontrollinud.\nKlikki 'Kontrolli' leidmaks detaile selle Loodud Kaasaskäidavad Detailid litsensi kohta.
+LICENSE_CC_UNVERIFIED=LimeWire ei ole veel seda litsensi kontrollinud.\nKlikki 'Kontrolli' leidmaks detaile selle Creative Commons detailid litsensi kohta.
 #### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
 LICENSE_CC_INVALID=LimeWirel ei õnnestunud leida selle litsensi detaile.
 #### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
 LICENSE_CC_RETRY=Sa võid uuesti proovida seda litsentsi klikkides 'Kontrolli'.
 #### LICENSE_CC_DETAILS=License Details:
-LICENSE_CC_DETAILS=Litsensi Detailid:
+LICENSE_CC_DETAILS=Litsensi detailid:
 #### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
-LICENSE_CC_CLAIMED_DEED=Nõua Vaadata Litsentsi Tegu
+LICENSE_CC_CLAIMED_DEED=Nõua vaadata litsentsi tegu
 #### LICENSE_CC_DEED=View License Deed
-LICENSE_CC_DEED=Vaata Litsensi Tegu
+LICENSE_CC_DEED=Vaata litsensi tegu
 #### LICENSE_CC_VERIFICATION=View Verification Page
 LICENSE_CC_VERIFICATION=Vaata kinnitus lehekülge
 #### LICENSE_CC=Creative Commons
@@ -2273,13 +2273,13 @@ LICENSE_WEED_INVALID=LimeWirel ei õnnesunud leida selle Weed faili detaile.
 #### LICENSE_WEED_RETRY=You can try looking up the details again by clicking 'Verify'.
 LICENSE_WEED_RETRY=Sa võid proovida vaadata detaile uuest klikate 'Kinnita'.
 #### LICENSE_WEED_DETAILS=License Details:
-LICENSE_WEED_DETAILS=Litsensi Detailid:
+LICENSE_WEED_DETAILS=Litsensi detailid:
 #### LICENSE_WEED_CLAIMED_DEED=View Weedshare Usage Rights
 LICENSE_WEED_CLAIMED_DEED=Vaata Weedshare kasutaja õiguseid
 #### LICENSE_WEED_DEED=View Usage Rights
-LICENSE_WEED_DEED=Vaata Kasutaja Õiguseid
+LICENSE_WEED_DEED=Vaata kasutaja õiguseid
 #### LICENSE_WEED_VERIFICATION=View Verification Page
-LICENSE_WEED_VERIFICATION=Vaata Kinnitus Lehekülge
+LICENSE_WEED_VERIFICATION=Vaata kinnitus lehekülge
 #### LICENSE_WEED=Weedshare
 LICENSE_WEED=Weedshare
 
@@ -2287,7 +2287,7 @@ LICENSE_WEED=Weedshare
 # Messages for Unknown licenses
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
-LICENSE_UNKNOWN_TITLE=Litsensi Detailid
+LICENSE_UNKNOWN_TITLE=Litsensi detailid
 #### LICENSE_UNKNOWN_INVALID=This file may require a license in order to open and view.
 LICENSE_UNKNOWN_INVALID=See fail võib vajada litsensi, et avaneda ja sisu vaadata.
 
@@ -2323,7 +2323,7 @@ OPTIONS_CHAT_MAIN_TITLE=Teate Saatmine
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
 OPTIONS_PLAYER_MAIN_TITLE=Mängija
 #### OPTIONS_STATUS_BAR_MAIN_TITLE=Status Bar
-#? OPTIONS_STATUS_BAR_MAIN_TITLE=
+OPTIONS_STATUS_BAR_MAIN_TITLE=Staatus
 #### OPTIONS_ITUNES_MAIN_TITLE=iTunes
 OPTIONS_ITUNES_MAIN_TITLE=iTuned
 #### OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
@@ -2365,22 +2365,22 @@ OPTIONS_COMPRESSION_MAIN_TITLE=Tihendamine
 #### OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
 OPTIONS_PREFERENCING_MAIN_TITLE=Eesõigused
 #### OPTIONS_FIREWALL_MAIN_TITLE=Firewall Config
-OPTIONS_FIREWALL_MAIN_TITLE=Tulemüüri Säted
+OPTIONS_FIREWALL_MAIN_TITLE=Tulemüüri säted
 #### OPTIONS_PRIVATE_NET_MAIN_TITLE=Private Network
-OPTIONS_PRIVATE_NET_MAIN_TITLE=Privaat Võrk
+OPTIONS_PRIVATE_NET_MAIN_TITLE=Privaat võrk
 #### OPTIONS_STARTUP_MAIN_TITLE=System Startup
-OPTIONS_STARTUP_MAIN_TITLE=Süsteemi Üleslaadimine
+OPTIONS_STARTUP_MAIN_TITLE=Süsteemi üleslaadimine
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
 OPTIONS_PROXY_MAIN_TITLE=Proksi
 #### OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale Preferencing
-OPTIONS_CONNECT_PREF_MAIN_TITLE=Kohalikud Eesõigused
+OPTIONS_CONNECT_PREF_MAIN_TITLE=Kohalikud eesõigused
 
 ################################################################################
 # Key/value pairs for the localization options window item
 # in the options window
 ################################################################################
 #### OPTIONS_LOCALIZE_TITLE=International Localization
-OPTIONS_LOCALIZE_TITLE=Rahvusvaheline Asukoht
+OPTIONS_LOCALIZE_TITLE=Rahvusvaheline asukoht
 #### OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
 OPTIONS_LOCALIZE_LABEL=Sa võid seadistada LimeWiret nii, et ta kasutaks sinu keelt nii nagu sa seda kasutad oma maal. Maa või maa-ala täpsustamist võib samuti kasutada leidmaks sind ülemaailmsest võrgust.
 #### OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Language
@@ -2395,7 +2395,7 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Maa
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Sa oled teinud muudatusi mõnedes sättetes. Kas soovid salvestada neid muudatusi?
 #### OPTIONS_SAVE_DIR_TITLE=Save Folder
-OPTIONS_SAVE_DIR_TITLE=Salvesta Kaust
+OPTIONS_SAVE_DIR_TITLE=Salvesta kaust
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the folder for saving files.
 OPTIONS_SAVE_DIR_LABEL=Sa võid valida kausta kuhu salvestada faile.
 #### OPTIONS_SAVE_DIR_BOX_LABEL=Folder:
@@ -2405,32 +2405,32 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=Sirvi...
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Use Default
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Kasuta vaiksätteid
 #### OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Choose Another Folder
-OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Vali Teine Kaust.
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Vali teine kaust.
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the Default Folder
-OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Kasuta Algsätestatud Kausta.
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Kasuta algsätestatud kausta.
 #### OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=You can specify a download location for each media type.
 OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=Sa võid määrata igale meedia tüübile oma allalaadimiskoha.
 #### OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Open Dialog to Select a Folder
-OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Ava Kausta Valimiseks Teateaken.
+OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Ava kausta valimiseks teateaken.
 #### OPTIONS_SAVE_RESET_BUTTON_LABEL=Reset
 OPTIONS_SAVE_RESET_BUTTON_LABEL=Taasta algväärtused
 #### OPTIONS_SAVE_RESET_BUTTON_TIP=Reset to Default Download Folder
-OPTIONS_SAVE_RESET_BUTTON_TIP=Taasta Algne Allalaadimis Kaust.
+OPTIONS_SAVE_RESET_BUTTON_TIP=Taasta algne allalaadimis kaust.
 #### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Browse...
 OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Sirvi...
 #### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Choose Another Folder
-OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Vali Teine Kaust.
+OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Vali teine kaust.
 #### OPTIONS_SAVE_MEDIATYPE=Media Type
-OPTIONS_SAVE_MEDIATYPE=Meedia Tüüp
+OPTIONS_SAVE_MEDIATYPE=Meedia tüüp
 #### OPTIONS_SAVE_DIRECTORY=Save Folder
-OPTIONS_SAVE_DIRECTORY=Salvesta Kaust
+OPTIONS_SAVE_DIRECTORY=Salvesta kaust
 
 #### OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Incomplete Files
-OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Pooleliolevad Failid
+OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Pooleliolevad failid
 #### OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=You can automatically delete old incomplete download files.
 OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=Sa võid automaatselt kustutada vanu poolelijäänud faile.
 #### OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Days to Keep Incomplete Files:
-OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Päevad kaua Hoida Poolelijäänud Faile:
+OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Päevad kaua hoida poolelijäänud faile:
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
@@ -2443,13 +2443,13 @@ OPTIONS_SHARED_DIRS_LABEL=Sa võid valida kaustasid mida soovid jagada. Falid ne
 #### OPTIONS_SHARED_DIRS_BOX_LABEL=Folders:
 OPTIONS_SHARED_DIRS_BOX_LABEL=Kaustad
 #### OPTIONS_SHARED_DIRS_BUTTON_LABEL=Add Folder...
-OPTIONS_SHARED_DIRS_BUTTON_LABEL=Lisa Kaust...
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=Lisa kaust...
 #### OPTIONS_SHARED_DIRS_BUTTON_TIP=Add a Folder to Share
-OPTIONS_SHARED_DIRS_BUTTON_TIP=Lisa Kaust Jagamiseks.
+OPTIONS_SHARED_DIRS_BUTTON_TIP=Lisa kaust jagamiseks.
 #### OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Share Finished Downloads:
-OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Jaga Lõpetatud Allalaadimisi:
+OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Jaga lõpetatud allalaadimisi:
 #### OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download Sharing
-OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Allalaadimise Jagamine
+OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Allalaadimise jagamine
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Sa võid jagada faile mis asuvad mittejagatud kaustades.
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
@@ -2460,15 +2460,15 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Kas sa soovid jagada oma uut salvestamise kausta
 # in the options window
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
-OPTIONS_SHARED_EXTENSIONS_TITLE=Jagatud Failitüübid
+OPTIONS_SHARED_EXTENSIONS_TITLE=Jagatud failitüübid
 #### OPTIONS_SHARED_EXTENSIONS_LABEL=You can choose which file extensions you would like to share.
 OPTIONS_SHARED_EXTENSIONS_LABEL=Sa võid valida milliseid failitüüpe sa soovid jagada.
 #### OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=Extensions:
 OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=Failitüübid:
 #### OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Use Defaults
-OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Kasuta Vaiksätteid
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Kasuta vaiksätteid
 #### OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Share the Default File Extensions
-OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Jaga Väiksätetega Määratud Failitüüpe.
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Jaga väiksätetega määratud failitüüpe.
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
@@ -2485,21 +2485,21 @@ OPTIONS_SPEED_BOX_LABEL=Kiirus:
 # Key/Value pairs for disabling supernode support
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
-OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Superkasutaja Võimalused
+OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Superkasutaja võimalused
 #### OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users. You can disable this if needed.
 OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Kui sinu arvutil on kiire interneti ühenus, LimeWire võib käituda "Superkasutajana" aeglasematele arvutitele. Sa võid selle välja lülitada kui soovid.
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
-OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Lülita Välja Superkasutaja Võimalused:
+OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Lülita välja Superkasutaja võimalused:
 
 ################################################################################
 # Key/Value pairs for disabling OOB support
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
-OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Otsing
+OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB otsing
 #### OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Searching results in faster result delivery to your client, though some internet connections may not work well with this feature.
-OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Otsingu tulemused, kiiremate tulemuste edastamisel kliendile, kuigi mõned interneti ühendused ei tööta hästi sellega.
+OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band otsingu tulemused, kiiremate tulemuste edastamisel kliendile, kuigi mõned interneti ühendused ei tööta hästi sellega.
 #### OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Enable OOB Searching:
-OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Luba OOB Otsing:
+OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Luba OOB otsing:
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
@@ -2510,31 +2510,31 @@ OPTIONS_DOWNLOAD_MAX_TITLE=Allalaadimiste maksimum
 #### OPTIONS_DOWNLOAD_MAX_LABEL=You can set the maximum number of simultaneous downloads.
 OPTIONS_DOWNLOAD_MAX_LABEL=Sa võid määrata korraga allalaaditava failide maksimumarvu.
 #### OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Maximum Downloads:
-OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Allalaadimiste Maksimum:
+OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Allalaadimiste maksimum:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
 # in the options window
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
-OPTIONS_DOWNLOAD_CLEAR_TITLE=Puhasta Allalaaditud
+OPTIONS_DOWNLOAD_CLEAR_TITLE=Puhasta allalaaditud
 #### OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
 OPTIONS_DOWNLOAD_CLEAR_LABEL=Sa võid valida kas automaatselt puhastada lõpetatud allalaadimised.
 #### OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Clear Completed Downloads:
-OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhastada Lõpetatud Allalaadimised:
+OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhastada lõpetatud allalaadimised:
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
 # to downloads in the options window
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
-OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Allalaadimise Ribavahe
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Allalaadimise ribavahe
 #### OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to downloads.
 OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=Sa võid määrata mitu protsenti oma ribavahest loovutad allalaadimisele.
 #### OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
-OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Pole Piiratud
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Pole piiratud
 #### OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Download Speed:
-OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse Kiirus
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse kiirus
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
@@ -2552,65 +2552,65 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse Kiirus
 # in the options window
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
-OPTIONS_UPLOAD_CLEAR_TITLE=Puhasta Üleslaetud
+OPTIONS_UPLOAD_CLEAR_TITLE=Puhasta üleslaetud
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
 OPTIONS_UPLOAD_CLEAR_LABEL=Sa võid valida kas automaatselt puhastada lõpetatud üleslaadimised.
 #### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
-OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhasta Lõpetatud Üleslaadimised:
+OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhasta lõpetatud üleslaadimised:
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
 # to uploads in the options window
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
-OPTIONS_UPLOAD_BANDWIDTH_TITLE=
+OPTIONS_UPLOAD_BANDWIDTH_TITLE=Üleslaadimise ribavahe
 #### OPTIONS_UPLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to uploads. To turn off uploads, reduce your upload slots to zero.
 OPTIONS_UPLOAD_BANDWIDTH_LABEL=Sa võid valida mitu protsenti sinu ribavahest loovutatakse üleslaadimisele. Et üleslaadimst välja lülitada, vähenda oma ülesleatavate kohtade arvu nulliks.
 #### OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Pole Piiratud
 #### OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Upload Speed:
-OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Üleslaadimise Kirus:
+OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Üleslaadimise kirus:
 
 ################################################################################
 # Key/Value pairs for the options for automatically sharing partially downloaded
 # files.
 ################################################################################
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Partial Files
-OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Poolikud Failid
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Poolikud failid
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Sa võid valida kas soovid jagada automaatselt veel pooleli olevaid faile.
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing:
-OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Luba Jagada Poolikuid:
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Luba jagada poolikuid:
 
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
-OPTIONS_UPLOAD_MAX_TITLE=Maksimum Ülesleatavad Kohad
+OPTIONS_UPLOAD_MAX_TITLE=Maksimum ülesleatavad kohad
 #### OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads. This value will only be reached if you have enough bandwidth.
 OPTIONS_UPLOAD_MAX_LABEL=Mitte kunagi ära luba ruhkem kui niipalju üleslaadijaid. Selle arvuni jõutakse ainult siis kui sul on piisavalt ribalaiust.
 #### OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max Upload Slots:
-OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Maksimum Ülesleatavad Kohad:
+OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Maksimum ülesleatavad kohad:
 
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_TITLE=Start Upload Slots
-OPTIONS_UPLOAD_SOFT_MAX_TITLE=Alusta Üleslaadimise Kohad
+OPTIONS_UPLOAD_SOFT_MAX_TITLE=Alusta üleslaadimise kohad
 #### OPTIONS_UPLOAD_SOFT_MAX_LABEL=Always allow at least this many uploads. Once this limit is reached, allow more uploads only if bandwidth is available. Setting this value too low may prevent you from reaching your upload capacity, hurting other users.
 OPTIONS_UPLOAD_SOFT_MAX_LABEL=Alati luba vähemalt nii palju üleslaadiisi. Kui jõutakse selle piirini, luba lisa üleslaadijaid ainult siis kui on vaba ribalaiust. Sätestades selle väärtuse liiga madalaks võib välistada sind jõudmaks enda üleslaadimise täieliku kastutamiseni, tehest haiget teistele kaustajatele.
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
-OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Alusta Üleslaadimise Kuhad:
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Alusta üleslaadimise kuhad:
 
 ################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
-OPTIONS_UPLOAD_PER_PERSON_TITLE=Üleslaadimisi Ühele Isikule
+OPTIONS_UPLOAD_PER_PERSON_TITLE=Üleslaadimisi ühele isikule
 #### OPTIONS_UPLOAD_PER_PERSON_LABEL=Allow this many uploads per person.
 OPTIONS_UPLOAD_PER_PERSON_LABEL=Luba nii palju üleslaadimisi igale isikule.
 #### OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Uploads Per Person:
-OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Üleslaadimisi Ühele Isikule:
+OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Üleslaadimisi ühele isikule:
 
 ################################################################################
 # Key/Value pairs for connecting on startup
@@ -2626,37 +2626,37 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Ühenda automaatselt võrku:
 # Key/Value pairs for shutdown options
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Options
-OPTIONS_SHUTDOWN_TITLE=Sulgemise Valikud
+OPTIONS_SHUTDOWN_TITLE=Sulgemise valikud
 #### OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
 OPTIONS_SHUTDOWN_LABEL=Sa võid valida sulgemise käitumisviisi.
 #### OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Shutdown Immediately
-OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Sulge Koheselt
+OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Sulge koheselt
 #### OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after Transfers
-OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Sulge pärast Allalaadimisi
+OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Sulge pärast allalaadimisi
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
-OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Vähenda Süsteemikandikule
+OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Vähenda süsteemikandikule
 
 ################################################################################
 # Key/Value pairs for update options
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
-OPTIONS_UPDATE_TITLE=Uuenduse Valikud
+OPTIONS_UPDATE_TITLE=Uuenduse valikud
 #### OPTIONS_UPDATE_LABEL=You can choose when you want to be notified of new LimeWire releases.
 OPTIONS_UPDATE_LABEL=Sa võid valida millal sa tahad teateid LimeWire uuendustest saada.
 #### OPTIONS_UPDATE_BETA=Beta Releases
-OPTIONS_UPDATE_BETA=Beeta Väljalasked
+OPTIONS_UPDATE_BETA=Beeta väljalasked
 #### OPTIONS_UPDATE_SERVICE=Service Releases
-OPTIONS_UPDATE_SERVICE=Teenuse Väljalase
+OPTIONS_UPDATE_SERVICE=Teenuse väljalase
 #### OPTIONS_UPDATE_MAJOR=Major Releases
-OPTIONS_UPDATE_MAJOR=Uuem Väljalase
+OPTIONS_UPDATE_MAJOR=Uuem väljalase
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
-OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Luba Teatevahetust:
+OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Luba teatevahetust:
 #### OPTIONS_CHAT_ACTIVE_TITLE=Host Communication
-OPTIONS_CHAT_ACTIVE_TITLE=Võõrustaja Kommunikatsioon
+OPTIONS_CHAT_ACTIVE_TITLE=Võõrustaja kommunikatsioon
 #### OPTIONS_CHAT_ACTIVE_LABEL=You can turn chat on or off.
 OPTIONS_CHAT_ACTIVE_LABEL=Sa võid teatevahetuse sisse või välja lülitada.
 
@@ -2664,11 +2664,11 @@ OPTIONS_CHAT_ACTIVE_LABEL=Sa võid teatevahetuse sisse või välja lülitada.
 # Key/Value pairs for the player options in the options window
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
-OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Kasutas LimeWire Meedia Pleierit:
+OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Kasutas LimeWire meedia pleierit:
 #### OPTIONS_PLAYER_PREFERENCE_TITLE=Player Options
-OPTIONS_PLAYER_PREFERENCE_TITLE=Pleieri Valikud
+OPTIONS_PLAYER_PREFERENCE_TITLE=Pleieri valikud
 #### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player. The media player and playlist will appear only if this option is set. A restart will be required when enabling or disabling the media controls.
-OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid Mängida meediat LimeWire pleieriga võis süsteemile instaleerid pleieriga. Meediapleier ja esitlusloend ilmuvad ainult juhul kui see valik on määratud. Muudatuste jõustumiseks väheb vaja programm uuesti käivitada.
+OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid mängida meediat LimeWire pleieriga võis süsteemile instaleerid pleieriga. Meediapleier ja esitlusloend ilmuvad ainult juhul kui see valik on määratud. Muudatuste jõustumiseks väheb vaja programm uuesti käivitada.
 
 ################################################################################
 # Key/Value pairs for the status bar options in the options window
@@ -2708,7 +2708,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid Mängida meediat Lime
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Luba iTunes failivahetus:
 #### OPTIONS_ITUNES_PREFERENCE_TITLE=Importing
-OPTIONS_ITUNES_PREFERENCE_TITLE=Toimub Andmeülekanne
+OPTIONS_ITUNES_PREFERENCE_TITLE=Toimub andmeülekanne
 #### OPTIONS_ITUNES_PREFERENCE_LABEL=You can have LimeWire import newly downloaded songs into iTunes.
 OPTIONS_ITUNES_PREFERENCE_LABEL=Sa võid LimeWirel lasta tõsta uued allalaetud laulud iTunes'i.
 
@@ -2718,20 +2718,20 @@ OPTIONS_ITUNES_PREFERENCE_LABEL=Sa võid LimeWirel lasta tõsta uued allalaetud 
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Jagamine
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
-OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Sa võid jagada Muusikat Kohtvõrgus ja muuta see saadavaks ka iTunes'ile kui ka teistele Digitalse Audio Juurdepääsu Protokolli (DAAP) lubavatele Pleieritele.\n\nKui esinevad probleemid iTunes'i Jagamisega siis lülita sisse Ühilduvus Laad. See kasutab rohkem arvuti ressursse kuid parandab probleemi.
+OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Sa võid jagada muusikat kohtvõrgus ja muuta see saadavaks ka iTunes'ile kui ka teistele Digitalse Audio Juurdepääsu Protokolli (DAAP) lubavatele Pleieritele.\n\nKui esinevad probleemid iTunes'i jagamisega siis lülita sisse ühilduvus laad. See kasutab rohkem arvuti ressursse kuid parandab probleemi.
 #### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share My Music:
-OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Jaga kaust Minu Muusika:
+OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Jaga kaust minu muusika:
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared Name:
-OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Jagatu Nimi:
+OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Jagatu nimi:
 #### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility Mode:
-OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Ühilduvus Laad:
+OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Ühilduvus laad:
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Password Protection
-OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Turvalisuse Võtmesõna
+OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Turvalisuse võtmesõna
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Sa saad piirata juurdepääsu sellele teenusele võtmesõnaga.
 #### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
-OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Sisesta Võtmesõna:
+OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Sisesta võtmesõna:
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Võtmesõna:
 
@@ -2739,39 +2739,39 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Võtmesõna:
 # Key/Value pairs for url handler options
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
-OPTIONS_BROWSER_PREFERENCE_TITLE=Sirvia Valikud
+OPTIONS_BROWSER_PREFERENCE_TITLE=Sirvia valikud
 #### OPTIONS_BROWSER_PREFERENCE_LABEL=You can choose which browser to use.
 OPTIONS_BROWSER_PREFERENCE_LABEL=Sa võid valida millist sirvijat kasutada.
 #### OPTIONS_BROWSER_BOX_LABEL=Browser
 OPTIONS_BROWSER_BOX_LABEL=Sirvija
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image Options
-OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Pildi Valikud
+OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Pildi valikud
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=You can choose which image viewer to use.
 OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=Sa võid valida millist pildivaatlejat kasutada.
 #### OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image Viewer
 OPTIONS_IMAGE_VIEWER_BOX_LABEL=Pildivaatleja
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video Options
-OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video Valikud
+OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video valikud
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
 OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=Sa võid valida millist video pleierit kasutada.
 #### OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video Player
-OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video Pleier
+OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video pleier
 #### OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio Options
-OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio Valikud
+OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio valikud
 #### OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=You can choose which audio player to use.
 OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Sa võid valida millist audio pleierit kasutada.
 #### OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio Player
-OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio Pleier
+OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio pleier
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message bug reports
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
-OPTIONS_BUGS_TITLE=Vigade Aruanne
+OPTIONS_BUGS_TITLE=Vigade aruanne
 #### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard All Errors' will cause LimeWire to ignore all bugs (this is not recommended).
-OPTIONS_BUGS_LABEL=Sa võid valida kuidas vigade aruandeid peaks saatma. Vaadata vea aruande näidet, klikki 'Vaata Näidet'. Valides 'Alati Saada Koheselt' võtab koheselt ühendust vigade serveriga kui LimeWirel esineb sisemine viga. Valides 'Alati Küsi Ülevaadet', küsib LimeWire enne sinu heakskiitu kui saadab vea aruande vea serverile. Valides 'Alati Tunnista Vead Kõlbmatuks' ei tee LimeWire ühestki veast välja (See ei ole soovitatav).
+OPTIONS_BUGS_LABEL=Sa võid valida kuidas vigade aruandeid peaks saatma. Vaadata vea aruande näidet, klikki 'Vaata näidet'. Valides 'Alati saada koheselt' võtab koheselt ühendust vigade serveriga kui LimeWirel esineb sisemine viga. Valides 'Alati küsi ülevaadet', küsib LimeWire enne sinu heakskiitu kui saadab vea aruande vea serverile. Valides 'Alati tunnista vead kõlbmatuks' ei tee LimeWire ühestki veast välja (See ei ole soovitatav).
 #### OPTIONS_BUGS_VIEW_EXAMPLE=View Example
-OPTIONS_BUGS_VIEW_EXAMPLE=Vaata Näidet
+OPTIONS_BUGS_VIEW_EXAMPLE=Vaata näidet
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
@@ -2785,38 +2785,38 @@ OPTIONS_POPUPS_TITLE=Teatajad
 #### OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen 'Do not display this message again' or 'Always use this answer'.
 OPTIONS_POPUPS_LABEL=Näita teateid millele oled valinud kas 'Ära mulle seda teadet enam edasta' või 'Alati kasuta seda vastust'.
 #### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
-OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Taasta Algseadistus:
+OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Taasta algseadistus:
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
-OPTIONS_AUTOCOMPLETE_TITLE=Teksti Proovilahendid
+OPTIONS_AUTOCOMPLETE_TITLE=Teksti proovilahendid
 #### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 OPTIONS_AUTOCOMPLETE_LABEL=Sa võid tekstiriba proovilahendid lülitada sisse või välja.
 #### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields:
-OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Lülita Tekstiriba Proovilahendid Sisse:
+OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Lülita tekstiriba proovilahendid sisse:
 
 ################################################################################
 # Key/Value pairs for theme options
 ################################################################################
 #### OPTIONS_THEME_TITLE=Skin Options
-OPTIONS_THEME_TITLE=Küljennduse Valikud
+OPTIONS_THEME_TITLE=Küljennduse valikud
 #### OPTIONS_THEME_LABEL=You can select from alternate skins for LimeWire.
 OPTIONS_THEME_LABEL=Sa võid valida ka LimeWire alternatiivseid küljendusi.
 #### OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate Skin File
-OPTIONS_THEME_BROWSE_BUTTON_TIP=Leia Küljenduse Fail.
+OPTIONS_THEME_BROWSE_BUTTON_TIP=Leia küljenduse fail.
 #### OPTIONS_THEME_DEFAULT_BUTTON_TIP=Use Default Skin File
-OPTIONS_THEME_DEFAULT_BUTTON_TIP=Kasuta Algküljenudst.
+OPTIONS_THEME_DEFAULT_BUTTON_TIP=Kasuta algküljenudst.
 #### OPTIONS_THEME_BOX_LABEL=File:
 OPTIONS_THEME_BOX_LABEL=Fail:
 #### OPTIONS_THEME_FILE_LABEL=You can choose your current skin.
 OPTIONS_THEME_FILE_LABEL=Sa võid valida ka oma käibeloleva küljenduse.
 #### OPTIONS_THEME_FILE_CHOOSER_TITLE=Choose Your skin
-OPTIONS_THEME_FILE_CHOOSER_TITLE=Vali Oma küljendus
+OPTIONS_THEME_FILE_CHOOSER_TITLE=Vali oma küljendus
 #### THEME_FILE_DESCRIPTION=LimeWire Skin Files (*.lwtp)
-THEME_FILE_DESCRIPTION=LimeWire Küljenduse Failid (*.lwtp)
+THEME_FILE_DESCRIPTION=LimeWire küljenduse failid (*.lwtp)
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=Proovimaks uusi küljendusi, pead LimeWire uuesti käivitama.
 
@@ -2824,23 +2824,23 @@ THEME_CHANGED_MESSAGE=Proovimaks uusi küljendusi, pead LimeWire uuesti käivita
 # Key/Value pairs for skin options
 ################################################################################
 #### OPTIONS_SKIN_TITLE=Skin Options
-OPTIONS_SKIN_TITLE=Külenduse Valikud
+OPTIONS_SKIN_TITLE=Külenduse valikud
 #### OPTIONS_SKIN_LABEL=Choose LimeWire's skin. Using SkinLF developed by L2FProd.com (http://www.L2FProd.com/).
 OPTIONS_SKIN_LABEL=Vali LimeWire küljenudus. Kasutades SkinLF mille on arendanud L2FProd.com (http://www.L2FProd.com).
 #### OPTIONS_SKIN_BROWSE_BOX_LABEL=Skin:
 OPTIONS_SKIN_BROWSE_BOX_LABEL=Küljendus
 #### OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Browse Skins...
-OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Sirvi Küljendusi...
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Sirvi küljendusi...
 #### OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Preview
 OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Eelvaade
 #### OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=No Skin
-OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=Pole Küljenuds
+OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=Pole küljenuds
 #### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Download...
 OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Tiri...
 #### OPTIONS_SKIN_BROWSE_BUTTON_TIP=Choose Another Skin
-OPTIONS_SKIN_BROWSE_BUTTON_TIP=Vali teine Küljendus.
+OPTIONS_SKIN_BROWSE_BUTTON_TIP=Vali teine küljendus.
 #### OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Preview Selected Skin
-OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Valitud Küljenuduse Eelvaade.
+OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Valitud küljenuduse eelvaade.
 #### OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Do Not Skin LimeWire
 OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Ära kasuta LimeWire küljenudsi.
 #### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Download New Skins from www.javootoo.com...
@@ -2864,58 +2864,58 @@ OPTIONS_BROWSE_SKIN_LABEL=Otsi küljendusi http://www.javootoo.com'ist
 #### SKIN_EDITOR_PREVIEW_BUTTON=Preview
 SKIN_EDITOR_PREVIEW_BUTTON=Eelvaade
 #### SKIN_EDITOR_REMOVE_BUTTON=Use Default
-SKIN_EDITOR_REMOVE_BUTTON=Kasuta Algküljendust
+SKIN_EDITOR_REMOVE_BUTTON=Kasuta algküljendust
 #### SKIN_EDITOR_BROWSE_BUTTON=Browse...
 SKIN_EDITOR_BROWSE_BUTTON=Sirvi...
 #### SKIN_EDITOR_PREVIEW_BUTTON_TIP=Preview Skin
-SKIN_EDITOR_PREVIEW_BUTTON_TIP=Küljenduse Eelvaade.
+SKIN_EDITOR_PREVIEW_BUTTON_TIP=Küljenduse eelvaade.
 #### SKIN_EDITOR_REMOVE_BUTTON_TIP=Use the Default Skin
 SKIN_EDITOR_REMOVE_BUTTON_TIP=Kasuta algküljenudst.
 #### SKIN_EDITOR_BROWSE_BUTTON_TIP=Browse for Skins
-SKIN_EDITOR_BROWSE_BUTTON_TIP=Sirvi Küljendusi.
+SKIN_EDITOR_BROWSE_BUTTON_TIP=Sirvi küljendusi.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
 # in the options window
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
-OPTIONS_SEARCH_MAX_TITLE=Maksimum Otsinguid
+OPTIONS_SEARCH_MAX_TITLE=Maksimum otsinguid
 #### OPTIONS_SEARCH_MAX_LABEL=You can set the maximum number of simultaneous searches you can perform.
 OPTIONS_SEARCH_MAX_LABEL=Sa võid määrata korraga toimuvate otsingute maksimaalse arvu.
 #### OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maximum Searches:
-OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maksimum Otsinguid.
+OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maksimum otsinguid.
 
 ################################################################################
 # Key/Value pairs for search quality options in the options window
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
-OPTIONS_SEARCH_QUALITY_TITLE=Otsingutulemuse Kvaliteet
+OPTIONS_SEARCH_QUALITY_TITLE=Otsingutulemuse kvaliteet
 #### OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
 OPTIONS_SEARCH_QUALITY_LABEL=Sa võid valida otsingutulemuste "Kvaliteet"-i mida näidatakse. Näeja tähekesega tulemuse indikaator väljastatakse juhul kui võõrustajal ei ole tulemüüri ja on vabu üleslaadimis kohti.
 #### OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Show Only Four Star Results
-OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Näita Ainult Nelja Tähekesega Tulemusi
+OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Näita ainult nelja tähekesega tulemusi
 #### OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Show Only Three and Four Star Results
-OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Näita Ainult Kolme ja Nelja Tähekesega Tulemusi
+OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Näita ainult kolme ja nelja tähekesega tulemusi
 #### OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Show Only Two, Three, and Four Star Results
-OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Näita Ainult Kahe, Kolme ja Nelja Tähekesega Tulemusi
+OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Näita ainult kahe, kolme ja nelja tähekesega tulemusi
 #### OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Show All Qualities
-OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Näita Kõiki Kvaliteete
+OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Näita kõiki kvaliteete
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
-OPTIONS_SEARCH_SPEED_TITLE=Otsingutulemuse Ühenduskiirus
+OPTIONS_SEARCH_SPEED_TITLE=Otsingutulemuse ühenduskiirus
 #### OPTIONS_SEARCH_SPEED_LABEL=You can select the minimum speed of search results to display.
 OPTIONS_SEARCH_SPEED_LABEL=Sa võid valida minimaalse kiiruse mille puhul tulemus tagastatakse.
 #### OPTIONS_SEARCH_SPEED_T3_LABEL=Show Only Results of T3 Speed or Higher
-OPTIONS_SEARCH_SPEED_T3_LABEL=Näita Ainult Tulemusi Mis On T3 Kiirusel Või Kiiremad
+OPTIONS_SEARCH_SPEED_T3_LABEL=Näita ainult tulemusi mis on T3 kiirusel või kiiremad
 #### OPTIONS_SEARCH_SPEED_T1_LABEL=Show Only Results of T1 Speed or Higher
-OPTIONS_SEARCH_SPEED_T1_LABEL=Näita Ainult Tulemusi Mis On T1 Kiirusel Või Kiiremad
+OPTIONS_SEARCH_SPEED_T1_LABEL=Näita ainult tulemusi mis on T1 kiirusel või kiiremad
 #### OPTIONS_SEARCH_SPEED_CABLE_LABEL=Show Only Results of Cable/DSL Speed or Higher
-OPTIONS_SEARCH_SPEED_CABLE_LABEL=Näita Ainult Tulemusi Mis On Kaabel/DSL Kiirusel Või Kiiremad
+OPTIONS_SEARCH_SPEED_CABLE_LABEL=Näita ainult tulemusi mis on kaabel/DSL kiirusel või kiiremad
 #### OPTIONS_SEARCH_SPEED_ALL_LABEL=Show All Speeds
-OPTIONS_SEARCH_SPEED_ALL_LABEL=Näita Kõiki Kiiruseid
+OPTIONS_SEARCH_SPEED_ALL_LABEL=Näita kõiki kiiruseid
 
 ################################################################################
 # Key/Value pairs for result filtering options
@@ -2931,25 +2931,25 @@ OPTIONS_IGNORE_RESULTS_LABEL=Sa võid eemaldada otsingutulemusi mis sisaldavad t
 # in the options window
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
-OPTIONS_IGNORE_RESULT_TYPES_TITLE=Eemalda tulemustest Tüübid
+OPTIONS_IGNORE_RESULT_TYPES_TITLE=Eemalda tulemustest tüübid
 #### OPTIONS_IGNORE_RESULT_TYPES_LABEL=You can specify general types of search results to filter.
 OPTIONS_IGNORE_RESULT_TYPES_LABEL=Sa võid täpsustada milliseid põhitüüpe otsing ei peaks edatama.
 #### OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignore Adult Content
-OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Eemalda Täiskasvanutele Mõeldud Materjalid
+OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Eemalda täiskasvanutele mõeldud materjalid
 #### OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignore .htm/.html Files
-OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Eemalda .htm/ .html Failid
+OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Eemalda .htm/ .html failid
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
-OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Eemalda .vbs Failid
+OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Eemalda .vbs failid
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
-OPTIONS_IGNORE_MESSAGES_TITLE=Eemalda Võõrustajaid
+OPTIONS_IGNORE_MESSAGES_TITLE=Eemalda võõrustajaid
 #### OPTIONS_IGNORE_MESSAGES_LABEL=You can disallow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the banned list.
 OPTIONS_IGNORE_MESSAGES_LABEL=Sa võid mitte lubada teateid vahetada teatud võõrustajatel, lisades nene IP adressi (nt. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") eemaldatute loetellu.
 #### OPTIONS_ALLOW_MESSAGES_TITLE=Allow Hosts
-OPTIONS_ALLOW_MESSAGES_TITLE=Luba Võõrustajaid
+OPTIONS_ALLOW_MESSAGES_TITLE=Luba võõrustajaid
 #### OPTIONS_ALLOW_MESSAGES_LABEL=You can allow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the allow list. This list is only needed to override the banned list.
 OPTIONS_ALLOW_MESSAGES_LABEL=Sa võid lubada teateid vahetada teatud võõrustajatel, lisades nene IP adressi (nt. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") lubatud loetellu. Seda loetelu läheb vaja ainult eemaldatud loetelu ülekirjutamiseks.
 
@@ -2957,26 +2957,26 @@ OPTIONS_ALLOW_MESSAGES_LABEL=Sa võid lubada teateid vahetada teatud võõrustaj
 # Key/Value pairs for disabling compression support
 ################################################################################
 #### OPTIONS_COMPRESSION_TITLE=Compression Capabilities
-OPTIONS_COMPRESSION_TITLE=Tihendamise Võimalused
+OPTIONS_COMPRESSION_TITLE=Tihendamise võimalused
 #### OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disabling these options.
 OPTIONS_COMPRESSION_LABEL=Andmevahetuse tihendamine vähendab kasutatavat ribavahelaiust, aga võib samuti suurendada arvuti koormat. Kui sinu arvuti käitub palju aeglasemalt kui normaalselt, proovi need valikud välja lülitada.
 #### OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Disable Outgoing Compression
-OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Lülita välja väljaminevad Tihendamised
+OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Lülita välja väljaminevad tihendamised
 #### OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Disable Incoming Compression
-OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Lülita välja sissetulevad Tihendamised
+OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Lülita välja sissetulevad tihendamised
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
 # in the advanced panel of the options window
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
-OPTIONS_CONNECT_PREF_TITLE=Ühenduse Eesõigused
+OPTIONS_CONNECT_PREF_TITLE=Ühenduse eesõigused
 #### OPTIONS_CONNECT_PREF_LABEL=You can limit who is able to connect to you based on the number of files they share.
 OPTIONS_CONNECT_PREF_LABEL=Sa võid seadistada eesõigused inimestele vastavalt failide arvule mida nad jagavad.
 #### OPTIONS_CONNECT_PREF_BOX_LABEL=Files You Must Share to Not be a Freeloader:
 OPTIONS_CONNECT_PREF_BOX_LABEL=Faile peab jagama, et mitte olla Kaan:
 #### OPTIONS_CONNECT_PREF_SLIDER_LABEL=Allow Freeloaders:
-OPTIONS_CONNECT_PREF_SLIDER_LABEL=Luba Kaane:
+OPTIONS_CONNECT_PREF_SLIDER_LABEL=Luba kaane:
 #### OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Rarely
 OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Harva
 #### OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Always
@@ -2987,7 +2987,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Alati
 # in the advanced panel of the options window
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
-OPTIONS_CONNECT_LOCALE_PREF_TITLE=Kohalikud Eesõigused
+OPTIONS_CONNECT_LOCALE_PREF_TITLE=Kohalikud eesõigused
 #### OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference hosts using the same language as you.
 OPTIONS_CONNECT_LOCALE_PREF_LABEL=Sa võid määrata eesõigused võõrustajatele kes kasutavad sama keelt mis sina.
 #### OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
@@ -2998,7 +2998,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Lülita eesõigus sisse:
 # in the options window
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
-OPTIONS_PORT_TITLE=Pordi Loendamine
+OPTIONS_PORT_TITLE=Pordi loendamine
 #### OPTIONS_PORT_LABEL=You can set the local network port that listens for incoming connections. This port can be freely changed in case of conflict with another service on your system, or if a specific port number is required by the configuration of your firewall to direct incoming connections to your host.
 OPTIONS_PORT_LABEL=Sa võid seada kohaliku võrgu pordi mis loendab sissetulevatele ühendused. Seda porti võib vabalt muuta kui tekib konflikt teiste teenustega sinu süsteemil või kui täpsustatud pordi number on on vaja konfigureerida tulemüüri poolt otse sissetulevatele ühendustele sinu võõrustajalt.
 #### OPTIONS_PORT_BOX_LABEL=Listen on Port:
@@ -3013,11 +3013,11 @@ OPTIONS_ROUTER_TITLE=Ruuteri konfigureerimine
 #### OPTIONS_ROUTER_LABEL=LimeWire can configure itself to work from behind a firewall or router. Using Universal Plug 'n Play (UPnP), LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support UPnP, LimeWire can be set to advertise an external port manually. (You must also configure your router if you choose manual configuration.)
 OPTIONS_ROUTER_LABEL=LimeWire võib konfigureerida iseennast töötamaks tulemüüri või ruuteri taga. Kasutades Eniversaalselt Ühenda ja käivita tehnoloogiat (UPnP), võib LimeWire automaatselt konfigureeida sinu ruuteri või tulemüüri optimaalsele tasemele. Kui sinu ruuter ei toeta UPnP'd, võib LimeWire'le määrata pordi manuaalselt. (Sa pead samuti konfigureerima oma ruuterit kui sa valid manuaalse konfigureerimise.)
 #### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
-OPTIONS_ROUTER_UPNP=Kasuta UPnP (Soovitatav)
+OPTIONS_ROUTER_UPNP=Kasuta UPnP (soovitatav)
 #### OPTIONS_ROUTER_PORT=Manual Port Forward:
-OPTIONS_ROUTER_PORT=Manuaalne Port Edaspidi:
+OPTIONS_ROUTER_PORT=Manuaalne port edaspidi:
 #### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
-OPTIONS_ROUTER_NOTHING=Ära Tee Midagi (Mitte soovitatav)
+OPTIONS_ROUTER_NOTHING=Ära tee midagi (mitte soovitatav)
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection strings
@@ -3028,19 +3028,19 @@ OPTIONS_CONNECT_STRING_TITLE=Isiklik kohtvõrk
 #### OPTIONS_CONNECT_STRING_LABEL=You can set the connection handshake for a private Gnutella network. Other Gnutella hosts you connect to will need the same handshake.
 OPTIONS_CONNECT_STRING_LABEL=Sa võid seada ühenduse handshake'ima isikliku Gnutella võrguga. Teised Gnutella võõrustajad kellega sa ühendad vajavad sama handshake't.
 #### OPTIONS_CONNECT_STRING_STRING_LABEL=Connect String:
-OPTIONS_CONNECT_STRING_STRING_LABEL=Ühenda String:
+OPTIONS_CONNECT_STRING_STRING_LABEL=Ühenda string:
 #### OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect Ok String:
-OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Ühenda OK String:
+OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Ühenda OK string:
 
 ################################################################################
 # Key/Value pairs for browse for the Private Net options pane
 ################################################################################
 #### OPTIONS_PRIVATE_NET_TITLE=Private Network
-OPTIONS_PRIVATE_NET_TITLE=Isiklik Võrk
+OPTIONS_PRIVATE_NET_TITLE=Isiklik võrk
 #### OPTIONS_PRIVATE_NET_LABEL=Configure Private Network Options for LimeWire.
-OPTIONS_PRIVATE_NET_LABEL=Konfigureeri Isiklik Võrgu Valikud LimeWire'le.
+OPTIONS_PRIVATE_NET_LABEL=Konfigureeri isiklik võrgu valikud LimeWire'le.
 #### OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
-OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Ühenda Isiklikku Võrku?
+OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Ühenda isiklikku võrku?
 #### OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
 OPTIONS_PRIVATE_CACHE_IP_LABEL=Võõrustaja nimi
 #### OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
@@ -3053,7 +3053,7 @@ OPTIONS_PRIVATE_CACHE_NAME_LABEL=Nimi
 # in the options window
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
-OPTIONS_STARTUP_TITLE=Süsteemi Üleslaadimine
+OPTIONS_STARTUP_TITLE=Süsteemi üleslaadimine
 #### OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
 OPTIONS_STARTUP_LABEL=Sa võid valida kas automaatselt käivitada LimeWire kui arvuti käivitub, või mitte.
 #### OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on System Startup:
@@ -3065,9 +3065,9 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=Käivita koos süsteemi algkäivitusega:
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=Proksi
 #### OPTIONS_PROXY_LABEL=Configure Proxy Options for LimeWire.
-OPTIONS_PROXY_LABEL=Konfigureeri Proksi Valikud LimeWire'le.
+OPTIONS_PROXY_LABEL=Konfigureeri proksi valikud LimeWire'le.
 #### OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No Proxy
-OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=Mitte Proksi
+OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=Mitte proksi
 #### OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
 OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
 #### OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
@@ -3079,11 +3079,11 @@ OPTIONS_PROXY_HOST_LABEL=Proksi:
 #### OPTIONS_PROXY_PORT_LABEL=Port:
 OPTIONS_PROXY_PORT_LABEL=Port:
 #### OPTIONS_PROXY_LOGIN_TITLE=Login Details
-OPTIONS_PROXY_LOGIN_TITLE=Logimise Detailid
+OPTIONS_PROXY_LOGIN_TITLE=Logimise detailid
 #### OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
 OPTIONS_PROXY_LOGIN_LABEL=Konfigureeri kasutajanimi ja parool mida kasutab proksi.
 #### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication (Does Not Work for HTTP Proxies):
-OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Kasuta Tuvastust (Ei tööta HTTP Proksidega):
+OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Kasuta tuvastust (ei tööta HTTP proksidega):
 #### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username:
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Kasutajanimi:
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
@@ -3107,7 +3107,7 @@ STATS_ADVANCED_PANE_TITLE=Täpsemalt
 #### STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. Advanced statistics are not displayed by default and are not recommended for most users.
 STATS_ADVANCED_PANE_LABEL=Täpsem statistika sisaldab detailset informasitsiooni Gnutella teadete ja HTTP liikluse kohta. See informasitsioon võib olla kasulik oskajamatele kasutajatele õppimak kuidas Gnutella võrk toimib. Määratuna vaiksettetes ei edastata täpsemat statistikat ja ei ole suuremale osale inimestele vajalik.
 #### STATS_ADVANCED_CHECK_BOX_LABEL=Show Advanced Statistics:
-STATS_ADVANCED_CHECK_BOX_LABEL=Näita Täpsemat Statistikat:
+STATS_ADVANCED_CHECK_BOX_LABEL=Näita täpsemat statistikat:
 
 # Advanced Gnutella messages panes
 #### GNUTELLA_MESSAGES=Gnutella
@@ -3122,15 +3122,15 @@ STATS_NETWORK_INFO_TITLE=Võrgu informasitsioon
 #### STATS_CONNECTION_TITLE=Connections
 STATS_CONNECTION_TITLE=Ühendused
 #### STATS_UPLOADS=Current Uploads:
-STATS_UPLOADS=Tõõtavad Üleslaadimised:
+STATS_UPLOADS=Tõõtavad üleslaadimised:
 #### STATS_DOWNLOADS=Current Downloads:
-STATS_DOWNLOADS=Tõõtavad Allalaadimised:
+STATS_DOWNLOADS=Tõõtavad allalaadimised:
 #### STATS_NET=Current Hosts:
 STATS_NET=Hetkelised võõrustajad
 #### STATS_HOSTS=Total Hosts:
-STATS_HOSTS=Kõik Võõrustajad:
+STATS_HOSTS=Kõik võõrustajad:
 #### STATS_FILES=Total Files:
-STATS_FILES=Kõik Failid:
+STATS_FILES=Kõik failid:
 #### STATS_FILE_SIZE=Total File MBs:
 STATS_FILE_SIZE=Faili MB'e kokku:
 
