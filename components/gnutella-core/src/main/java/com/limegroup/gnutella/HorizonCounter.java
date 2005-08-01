@@ -39,7 +39,7 @@ public final class HorizonCounter {
     /** The max number of pongs to save. */
     private static final int MAX_PING_REPLIES=4000;
     /** The endpoints of pongs seen before.  Eliminates duplicates. */
-    private Set /* of Endpoint */ _pongs=new HashSet();
+    private Set /* of Endpoint */ _pongs=new HashSet(MAX_PING_REPLIES * 2);
     /** The size of _pingReplies before updateHorizonStats was called. */
     private long _totalHorizonFileSize=0;
     private long _numHorizonFiles=0;
@@ -54,9 +54,12 @@ public final class HorizonCounter {
     }
     
     public synchronized void addPong(PingReply pong) {
+        if (_pongs.size() >= MAX_PING_REPLIES)
+            return;
+        
         //Have we already seen a ping from this hosts?
         Endpoint host=new Endpoint(pong.getAddress(), pong.getPort());
-        if (_pongs.size()<MAX_PING_REPLIES && _pongs.add(host)) {
+        if (_pongs.add(host)) {
             //Nope.  Increment numbers. 
             _nextTotalHorizonFileSize += pong.getKbytes();
             _nextNumHorizonFiles += pong.getFiles();
