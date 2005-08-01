@@ -2283,6 +2283,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     
     synchronized void removeWorker(DownloadWorker worker) {
         removeActiveWorker(worker);
+        workerFailed(worker); // make sure its out of the chat list & browse list
         _workers.remove(worker);
     }
     
