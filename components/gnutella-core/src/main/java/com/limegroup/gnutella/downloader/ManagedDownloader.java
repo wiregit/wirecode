@@ -765,6 +765,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
+                ranker = null;
                 setState(status);
                 break;
 			case BUSY:
@@ -781,8 +782,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             }
             
             complete = isCompleted();
-            waitTime = ranker.calculateWaitTime();
-            ranker.stop();
+            if (ranker != null) {
+                waitTime = ranker.calculateWaitTime();
+                ranker.stop();
+            }
         }
         
         long now = System.currentTimeMillis();
@@ -1391,7 +1394,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
         // never add to a stopped download.
-        if(stopped)
+        if(stopped || isCompleted())
             return false;
         
         if (!allowAddition(rfd))
@@ -1406,7 +1409,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     public synchronized boolean addDownload(Collection c, boolean cache) {
-        if (stopped)
+        if (stopped || isCompleted())
             return false;
         
         List l = new ArrayList(c.size());
@@ -2516,11 +2519,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
-        return (ranker == null ? 0 : ranker.getNumKnownHosts());
+        return ranker == null ? 0 : ranker.getNumKnownHosts();
     }
     
     public synchronized int getBusyHostCount() {
-        return ranker.getNumBusyHosts();
+        return ranker == null ? 0 : ranker.getNumBusyHosts();
     }
 
     public synchronized int getQueuedHostCount() {
