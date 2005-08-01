@@ -2277,8 +2277,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     void workerFailed(DownloadWorker failed) {
-        chatList.removeHost(failed.getDownloader());
-        browseList.removeHost(failed.getDownloader());
+        HTTPDownloader downloader = failed.getDownloader();
+        if (downloader != null) {
+            chatList.removeHost(failed.getDownloader());
+            browseList.removeHost(failed.getDownloader());
+        }
     }
     
     synchronized void removeWorker(DownloadWorker worker) {
