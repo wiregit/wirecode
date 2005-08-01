@@ -1588,9 +1588,14 @@ public class UploadManager implements BandwidthTracker {
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {
+        List activeCopy;
+        synchronized(this) {
+            activeCopy = new ArrayList(_activeUploadList);
+        }
+        
         float currentTotal = 0f;
         boolean c = false;
-        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
 			HTTPUploader up = (HTTPUploader)iter.next();
             if (up.isForcedShare())
                 continue;
@@ -1598,15 +1603,23 @@ public class UploadManager implements BandwidthTracker {
 			up.measureBandwidth();
 			currentTotal += up.getAverageBandwidth();
 		}
-		if ( c )
-		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-		                    / ++numMeasures;
+		if ( c ) {
+            synchronized(this) {
+                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                    / ++numMeasures;
+            }
+        }
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
 	public synchronized float getMeasuredBandwidth() {
+        List activeCopy;
+        synchronized(this) {
+            activeCopy = new ArrayList(_activeUploadList);
+        }
+        
         float sum=0;
-        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
 			HTTPUploader up = (HTTPUploader)iter.next();
             if (up.isForcedShare())
                 continue;

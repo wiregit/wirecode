@@ -1464,9 +1464,14 @@ public class DownloadManager implements BandwidthTracker {
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {
+        List activeCopy;
+        synchronized(this) {
+            activeCopy = new ArrayList(active);
+        }
+        
         float currentTotal = 0f;
         boolean c = false;
-        for (Iterator iter = active.iterator(); iter.hasNext(); ) {
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
             BandwidthTracker bt = (BandwidthTracker)iter.next();
             if (bt instanceof InNetworkDownloader)
                 continue;
@@ -1475,15 +1480,23 @@ public class DownloadManager implements BandwidthTracker {
             bt.measureBandwidth();
             currentTotal += bt.getAverageBandwidth();
         }
-        if ( c )
-            averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                            / ++numMeasures;
+        if ( c ) {
+            synchronized(this) {
+                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+                    / ++numMeasures;
+            }
+        }
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
     public synchronized float getMeasuredBandwidth() {
+        List activeCopy;
+        synchronized(this) {
+            activeCopy = new ArrayList(active);
+        }
+        
         float sum=0;
-        for (Iterator iter = active.iterator(); iter.hasNext(); ) {
+        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
             BandwidthTracker bt = (BandwidthTracker)iter.next();
             if (bt instanceof InNetworkDownloader)
                 continue;
