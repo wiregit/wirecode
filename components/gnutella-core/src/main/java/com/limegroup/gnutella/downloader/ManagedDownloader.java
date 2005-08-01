@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
-import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -2279,8 +2278,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     void workerFailed(DownloadWorker failed) {
         HTTPDownloader downloader = failed.getDownloader();
         if (downloader != null) {
-            chatList.removeHost(failed.getDownloader());
-            browseList.removeHost(failed.getDownloader());
+            chatList.removeHost(downloader);
+            browseList.removeHost(downloader);
         }
     }
     
