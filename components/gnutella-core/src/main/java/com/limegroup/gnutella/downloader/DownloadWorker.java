@@ -622,37 +622,40 @@ public class DownloadWorker implements Runnable {
                      _rfd.getFileName(),_rfd.getIndex(),_rfd.getClientGUID());
        
         _manager.registerPushWaiter(this,mrfd);
-
+        
         Socket pushSocket = null;
-        synchronized(this) {
-            // only wait if we actually were able to send the push
-            RouterService.getDownloadManager().sendPush(_rfd, this);
-            
-            //No loop is actually needed here, assuming spurious
-            //notify()'s don't occur.  (They are not allowed by the Java
-            //Language Specifications.)  Look at acceptDownload for
-            //details.
-            try {
-                wait(_rfd.isFromAlternateLocation()? 
-                        UDP_PUSH_CONNECT_TIME: 
-                            PUSH_CONNECT_TIME);
-                pushSocket = _pushSocket;
-                _pushSocket = null;
-            } catch(InterruptedException e) {
-                DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
-                throw new IOException("push interupted.");
+        try {
+            synchronized(this) {
+                // only wait if we actually were able to send the push
+                RouterService.getDownloadManager().sendPush(_rfd, this);
+                
+                //No loop is actually needed here, assuming spurious
+                //notify()'s don't occur.  (They are not allowed by the Java
+                //Language Specifications.)  Look at acceptDownload for
+                //details.
+                try {
+                    wait(_rfd.isFromAlternateLocation()? 
+                            UDP_PUSH_CONNECT_TIME: 
+                                PUSH_CONNECT_TIME);
+                    pushSocket = _pushSocket;
+                    _pushSocket = null;
+                } catch(InterruptedException e) {
+                    DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
+                    throw new IOException("push interupted.");
+                }
+                
             }
             
+            //Done waiting or were notified.
+            if (pushSocket==null) {
+                DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+                
+                throw new IOException("push socket is null");
+            }
+        } finally {
+            _manager.unregisterPushWaiter(mrfd); //we are not going to use it after this
         }
         
-        //Done waiting or were notified.
-        if (pushSocket==null) {
-            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
-            
-            throw new IOException("push socket is null");
-        }
-        
-        _manager.unregisterPushWaiter(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, _rfd, _commonOutFile, 
                 _manager instanceof InNetworkDownloader);
         

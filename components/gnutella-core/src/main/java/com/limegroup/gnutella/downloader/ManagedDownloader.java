@@ -764,6 +764,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
+                ranker.stop();
                 ranker = null;
                 setState(status);
                 break;
