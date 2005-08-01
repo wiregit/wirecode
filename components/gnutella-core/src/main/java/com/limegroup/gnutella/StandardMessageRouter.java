@@ -189,18 +189,6 @@ public class StandardMessageRouter extends MessageRouter {
         //as ping will be broadcasted to them (since TTL=2)        
     }
     
-    protected void handlePingReply(PingReply pingReply,
-								   ReplyHandler receivingConnection) {
-        //We override the super's method so the receiving connection's
-        //statistics are updated whether or not this is for me.
-		if(receivingConnection instanceof ManagedConnection) {
-			ManagedConnection mc = (ManagedConnection)receivingConnection;
-			mc.updateHorizonStats(pingReply);
-		}
-        super.handlePingReply(pingReply, receivingConnection);
-    }
-
-
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID,
                                             ReplyHandler handler) {

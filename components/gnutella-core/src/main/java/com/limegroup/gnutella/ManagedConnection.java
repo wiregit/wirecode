@@ -229,11 +229,6 @@ public class ManagedConnection extends Connection
     private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
 
     /**
-     * Whether or not horizon counting is enabled from this connection.
-     */
-    private boolean _horizonEnabled = true;
-    
-    /**
      * Whether or not this was a supernode <-> client connection when message
      * looping started.
      */
@@ -1113,33 +1108,6 @@ public class ManagedConnection extends Connection
             return 0;
         }
         return retValue;
-    }
-
-    /** 
-     * @modifies this
-     * @effects enables or disables updateHorizon. Typically this method
-     *  is used to temporarily disable horizon statistics before sending a 
-     *  ping with a small TTL to make sure a connection is up.
-     */
-    public synchronized void setHorizonEnabled(boolean enable) {
-        _horizonEnabled=enable;
-    }
-
-    /**
-     * This method is called when a reply is received by this connection for a
-     * PingRequest that originated from LimeWire.
-     * 
-     * @modifies this 
-     * @effects adds the statistics from pingReply to this' horizon statistics,
-     *  unless horizon statistics have been disabled via setHorizonEnabled(false).
-     *  It's possible that the horizon statistics will not actually be updated
-     *  until refreshHorizonStats is called.
-     */
-    public synchronized void updateHorizonStats(PingReply pingReply) {
-        if (! _horizonEnabled)
-            return;
-        
-        HorizonCounter.instance().addPong(pingReply);
     }
 
     //

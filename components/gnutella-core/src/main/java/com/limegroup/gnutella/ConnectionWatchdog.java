@@ -133,7 +133,6 @@ public final class ConnectionWatchdog {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            c.setHorizonEnabled(false);
             RouterService.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
         }
         
@@ -182,7 +181,6 @@ public final class ConnectionWatchdog {
                 ManagedConnection c = (ManagedConnection)iter.next();
                 if (!c.isKillable())
     				continue;
-                c.setHorizonEnabled(true);
                 Object state = snapshots.get(c);
                 if (state == null)
                     continue;  //this is a new connection

@@ -63,18 +63,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 				//          else if (command.equals("push"))
 				//              RouterService.dumpPushRouteTable();
 				//Print push route
-				else if (command.equals("stat")) {
-					//              RouterService.dumpConnections();
-					System.out.println("Number of hosts: "+
-                        RouterService.getNumHosts());
-					System.out.println("Number of files: "+
-                        RouterService.getNumFiles());
-					System.out.println("Size of files: "+
-                        RouterService.getTotalFileSize());
-				}
-				//Send pings to everyone
-				else if (command.equals("update"))
-					RouterService.updateHorizon();
+			
 				String[] commands=split(command);
 				//Connect to remote host (establish outgoing connection)
 				if (commands.length>=2 && commands[0].equals("connect")) {

@@ -977,27 +977,6 @@ public class RouterService {
     }
 
     /**
-     *  Returns the number of good hosts in my horizon.
-     */
-    public static long getNumHosts() {
-        return HorizonCounter.instance().getNumHosts();
-    }
-
-    /**
-     * Returns the number of files in my horizon.
-     */
-    public static long getNumFiles() {
-        return HorizonCounter.instance().getNumFiles();
-    }
-
-    /**
-     * Returns the size of all files in my horizon, in kilobytes.
-     */
-    public static long getTotalFileSize() {
-        return HorizonCounter.instance().getTotalFileSize();
-    }
-
-    /**
      * Prints out the information about current initialied connections
      */
     public static void dumpConnections() {
@@ -1021,19 +1000,6 @@ public class RouterService {
         }
     }
     
-    /**
-     * Updates the horizon statistics.  This should called at least every five
-     * minutes or so to prevent the reported numbers from growing too large.
-     * You can safely call it more often.  Note that it does not modify the
-     * network; horizon stats are calculated by passively looking at messages.
-     *
-     * @modifies this (values returned by getNumFiles, getTotalFileSize, and
-     *  getNumHosts) 
-     */
-    public static void updateHorizon() {
-        HorizonCounter.instance().refresh();
-    }
-
     /** 
      * Returns a new GUID for passing to query.
      * This method is the central point of decision making for sending out OOB 

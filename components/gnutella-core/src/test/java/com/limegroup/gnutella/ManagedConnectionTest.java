@@ -145,69 +145,6 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         conn.close();
 	}
 
-    public void testHorizonStatistics() throws Exception {
-        HorizonCounter hc = HorizonCounter.instance();
-        ManagedConnection mc= new ManagedConnection("", 1);
-        //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
-        //non-final to compile.
-        HorizonCounter.HORIZON_UPDATE_TIME = 1*200;   
-
-        PingReply pr1 = PingReply.create(
-            GUID.makeGuid(), (byte)3, 6346,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            1, 10, false, 0, false);
-
-        PingReply pr2= PingReply.create(
-            GUID.makeGuid(), (byte)3, 6347,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            2, 20, false, 0, false);
-        PingReply pr3= PingReply.create(
-            GUID.makeGuid(), (byte)3, 6346,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-            3, 30, false, 0, false);
-
-        assertEquals("unexpected number of files", 0, hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
-        assertEquals("unexted total file size", 0, hc.getTotalFileSize());
-
-        mc.updateHorizonStats(pr1);
-        mc.updateHorizonStats(pr1);  //check duplicates
-        assertEquals("unexpected number of files", 1, hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
-
-        Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2);
-            
-        hc.refresh();
-        mc.updateHorizonStats(pr1);  //should be ignored for now
-        mc.updateHorizonStats(pr2);
-        mc.updateHorizonStats(pr3);
-        assertEquals("unexpected number of files", 1, hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
-        hc.refresh();    //should be ignored
-        assertEquals("unexpected number of files", 1, hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
-        assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
-
-        Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2);
-
-        hc.refresh();    //update stats
-        assertEquals("unexedted number of files", 1+2+3, hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 3, hc.getNumHosts());
-        assertEquals("unexpedted total filesize", 10+20+30, 
-            hc.getTotalFileSize());
-
-        Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2);
-
-        hc.refresh();
-        assertEquals("unexpected number of files", 0,hc.getNumFiles());
-        assertEquals("unexpected number of hosts", 0,hc.getNumHosts());
-        assertEquals("unexpected total file size", 0,hc.getTotalFileSize());
-        
-        mc.close();
-    }
-       
 	public void testStripsGGEP() throws Exception {
         ConnectionManager cm = RouterService.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
