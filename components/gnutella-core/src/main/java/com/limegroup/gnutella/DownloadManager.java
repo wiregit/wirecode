@@ -1463,7 +1463,7 @@ public class DownloadManager implements BandwidthTracker {
 
 
     /** Calls measureBandwidth on each uploader. */
-    public synchronized void measureBandwidth() {
+    public void measureBandwidth() {
         List activeCopy;
         synchronized(this) {
             activeCopy = new ArrayList(active);
@@ -1489,7 +1489,7 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
-    public synchronized float getMeasuredBandwidth() {
+    public float getMeasuredBandwidth() {
         List activeCopy;
         synchronized(this) {
             activeCopy = new ArrayList(active);
