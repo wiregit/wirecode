@@ -822,7 +822,12 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         }
         
         public final boolean equals(Object other) {
-            return guid.equals(other);
+            if (other == null)
+                return false;
+            if (!(other instanceof GUIDKey))
+                return false;
+            
+            return guid.equals(((GUIDKey)other).guid);
         }
         
         public final int hashCode() {
