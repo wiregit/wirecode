@@ -126,7 +126,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * there is at least one PE object for a remote host, the set of
 	 * proxies will not be gc-ed.
 	 */
-	private GUID _guid;
+	private GUIDKey _guid;
 	
 	/**
 	 * the various features this PE supports.
@@ -164,7 +164,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;
-		_guid = new GUID(_clientGUID);
+		_guid = new GUIDKey(_clientGUID);
 		if (proxies != null) {
             if (proxies instanceof IpPortSet)
                 _proxies = Collections.unmodifiableSet(proxies);
@@ -206,7 +206,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         } catch(IllegalArgumentException iae) {
             throw new IOException(iae.getMessage());
         }
-		_guid = new GUID(_clientGUID);
+		_guid = new GUIDKey(_clientGUID);
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
@@ -427,7 +427,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * given client guid.
 	 */
 	public static void setFWTVersionSupported(byte[] guid,int version){
-		GUID g = new GUID(guid);
+		GUIDKey g = new GUIDKey(guid);
 		GuidSetWrapper current = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(g);
 		if (current!=null)
@@ -466,7 +466,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	public String httpStringValue() {
-	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
+	    StringBuffer httpString =new StringBuffer(_guid.guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
 	    int fwtVersion=supportsFWTVersion();
@@ -527,7 +527,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * updates the features of all PushEndpoints for the given guid 
 	 */
 	public static void setFeatures(byte [] guid,int features) {
-		GUID g = new GUID(guid);
+		GUIDKey g = new GUIDKey(guid);
 		GuidSetWrapper current = (GuidSetWrapper)
 			GUID_PROXY_MAP.get(g);
 		if (current!=null)
@@ -538,7 +538,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
      * updates the external address of all PushEndpoints for the given guid
      */
     public static void setAddr(byte [] guid, IpPort addr) {
-        GUID g = new GUID(guid);
+        GUIDKey g = new GUIDKey(guid);
         GuidSetWrapper current = (GuidSetWrapper)
             GUID_PROXY_MAP.get(g);
         if (current!=null)
@@ -588,7 +588,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 */
 	public synchronized void updateProxies(boolean good) {
 	    GuidSetWrapper existing;
-	    GUID guidRef = null;
+	    GUIDKey guidRef = null;
 
 	    synchronized(GUID_PROXY_MAP) {
 	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
@@ -608,6 +608,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	            else
 	                existing.updateProxies(Collections.EMPTY_SET,true);
 	            
+                _guid.remove = true;
 	            GUID_PROXY_MAP.put(_guid,existing);
 	            
 	            // clear the reference to the set
@@ -626,7 +627,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
     
     public PushEndpoint createClone() {
-        return new PushEndpoint(_guid.bytes(), 
+        return new PushEndpoint(_guid.guid.bytes(), 
                 getProxies(),
                 getFeatures(),
                 supportsFWTVersion(), 
@@ -656,7 +657,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     }
     
     public static void overwriteProxies(byte[] guid, Set newSet) {
-	    GUID g = new GUID(guid);
+	    GUIDKey g = new GUIDKey(guid);
 	    GuidSetWrapper wrapper;
 	    synchronized(GUID_PROXY_MAP) {
 	        wrapper = (GuidSetWrapper)GUID_PROXY_MAP.get(g);
@@ -743,11 +744,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    private int _features,_fwtVersion;
         private IpPort _externalAddr;
 	    
-	    GuidSetWrapper(GUID guid) {
+	    GuidSetWrapper(GUIDKey guid) {
 	    	this(guid,0,0);
 	    }
 	    
-	    GuidSetWrapper(GUID guid,int features, int version) {
+	    GuidSetWrapper(GUIDKey guid,int features, int version) {
 	        _guidRef = new WeakReference(guid);
 	        _features=features;
 	        _fwtVersion=version;
@@ -802,9 +803,31 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             return _externalAddr;
         }
 	    
-	    GUID getGuid() {
-	        return (GUID) _guidRef.get();
+	    GUIDKey getGuid() {
+	        return (GUIDKey) _guidRef.get();
 	    }
 	}
+    
+    private static class GUIDKey {
+        final GUID guid;
+        volatile boolean remove = false;
+        
+        GUIDKey(byte [] g) {
+            guid = new GUID(g);
+        }
+        
+        protected void finalize() {
+            if (remove)
+                GUID_PROXY_MAP.remove(this);
+        }
+        
+        public final boolean equals(Object other) {
+            return guid.equals(other);
+        }
+        
+        public final int hashCode() {
+            return guid.hashCode();
+        }
+    }
 	
 }
