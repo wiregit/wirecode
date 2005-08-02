@@ -67,7 +67,7 @@ GENERAL_APPLY_BUTTON_TIP=應用新的設置
 #### GENERAL_CLOSE_BUTTON_LABEL=Close
 GENERAL_CLOSE_BUTTON_LABEL=關閉窗口
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window.
-#? GENERAL_CLOSE_BUTTON_TIP=關閉窗口
+GENERAL_CLOSE_BUTTON_TIP=關閉窗口
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
 GENERAL_BACK_BUTTON_LABEL=<< 後退
 #### GENERAL_NEXT_BUTTON_LABEL=Next >>
@@ -87,17 +87,17 @@ GENERAL_BROWSE_HOST_TIP=瀏覽選中計算機上的所有共用文件.
 # Keys/value pairs for right-click context menus.
 ################################################################################
 #### CONTEXT_MENU_UNDO=Undo
-#? CONTEXT_MENU_UNDO=取消上次操作
+CONTEXT_MENU_UNDO=取消上次操作
 #### CONTEXT_MENU_CUT=Cut
-#? CONTEXT_MENU_CUT=剪切
+CONTEXT_MENU_CUT=剪切
 #### CONTEXT_MENU_COPY=Copy
-#? CONTEXT_MENU_COPY=複製
+CONTEXT_MENU_COPY=複製
 #### CONTEXT_MENU_PASTE=Paste
-#? CONTEXT_MENU_PASTE=粘貼
+CONTEXT_MENU_PASTE=粘貼
 #### CONTEXT_MENU_DELETE=Delete
-#? CONTEXT_MENU_DELETE=刪除
+CONTEXT_MENU_DELETE=刪除
 #### CONTEXT_MENU_SELECT_ALL=Select All
-#? CONTEXT_MENU_SELECT_ALL=選擇全部
+CONTEXT_MENU_SELECT_ALL=選擇全部
 
 #Options
 #### OPTIONS_BUTTONS_OK_LABEL=OK
@@ -113,11 +113,11 @@ OPTIONS_BUTTONS_APPLY_LABEL=套用
 #### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
 OPTIONS_BUTTONS_APPLY_TIP=套用新的設置.
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
-#? OPTIONS_RESTART_REQUIRED=再次啟動 LimeWire 後一項或多項選擇將開始生效。
+OPTIONS_RESTART_REQUIRED=再次啟動 LimeWire 後一項或多項選擇將開始生效。
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT=還原預設值
+OPTIONS_BUTTON_REVERT_TO_DEFAULT=還原預設值
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=將所有設置還原至出廠預設狀態
+OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=將所有設置還原至出廠預設狀態
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -131,19 +131,19 @@ NO=否
 # Key/value pairs for general informative terms
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
-#? GENERAL_AVERAGE_BANDWIDTH=平均帶寬
+GENERAL_AVERAGE_BANDWIDTH=平均帶寬
 #### GENERAL_ALTERNATE_LOCATIONS=Valid Alternate Locations
-#? GENERAL_ALTERNATE_LOCATIONS=有效的替代位置
+GENERAL_ALTERNATE_LOCATIONS=有效的替代位置
 #### GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid Alternate Locations
-#? GENERAL_INVALID_ALTERNATE_LOCATIONS=無效的替代位置
+GENERAL_INVALID_ALTERNATE_LOCATIONS=無效的替代位置
 #### GENERAL_STARTED_ON=Started On
-#? GENERAL_STARTED_ON=啟動于
+GENERAL_STARTED_ON=啟動于
 #### GENERAL_FINISHED_ON=Finished On
-#? GENERAL_FINISHED_ON=結束于
+GENERAL_FINISHED_ON=結束于
 #### GENERAL_TIME_SPENT=Time Spent
-#? GENERAL_TIME_SPENT=耗時
+GENERAL_TIME_SPENT=耗時
 #### GENERAL_REVERT_TO_DEFAULT=Revert To Default
-#? GENERAL_REVERT_TO_DEFAULT=還原預設值
+GENERAL_REVERT_TO_DEFAULT=還原預設值
 #### GENERAL_MORE_OPTIONS=More Options
 GENERAL_MORE_OPTIONS=高級更多選項
 
@@ -177,17 +177,17 @@ ABOUT_LABEL_END=版權所有 (c)2000-2005 Lime Wire LLC.
 #### ABOUT_LABEL_TITLE=About LimeWire
 ABOUT_LABEL_TITLE=關於 LimeWire
 #### ABOUT_CREDITS_LABEL=Credits
-#? ABOUT_CREDITS_LABEL=感謝
+ABOUT_CREDITS_LABEL=感謝
 #### ABOUT_CREDITS_TIP=Display credits information about LimeWire.
-#? ABOUT_CREDITS_TIP=顯示與 LimeWire 相關的感謝資訊。
+ABOUT_CREDITS_TIP=顯示與 LimeWire 相關的感謝資訊。
 #### ABOUT_NOTICE_LABEL=Notice
-#? ABOUT_NOTICE_LABEL=通知
+ABOUT_NOTICE_LABEL=通知
 #### ABOUT_NOTICE_TIP=Display distribution and contact information.
-#? ABOUT_NOTICE_TIP=顯示分發及聯絡資訊。
+ABOUT_NOTICE_TIP=顯示分發及聯絡資訊。
 #### ABOUT_LICENSE_LABEL=License
-#? ABOUT_LICENSE_LABEL=許可證
+ABOUT_LICENSE_LABEL=許可證
 #### ABOUT_LICENSE_TIP=Display the license agreement about this software.
-#? ABOUT_LICENSE_TIP=顯示與本軟件相關的許可證協議。
+ABOUT_LICENSE_TIP=顯示與本軟件相關的許可證協議。
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
 ABOUT_SCROLL_CHECK_BOX_LABEL=自動滾動
 #### ABOUT_BUTTON_TIP=Close the About Window
@@ -197,15 +197,15 @@ ABOUT_BUTTON_TIP=關閉關於窗口.
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
-#? TOTD_TITLE=每日提示
+TOTD_TITLE=每日提示
 #### TOTD_INTRODUCTION=Did You Know...
-#? TOTD_INTRODUCTION=你是否知道...
+TOTD_INTRODUCTION=你是否知道...
 #### TOTD_SHOW_AT_STARTUP=Show Tips At Startup
-#? TOTD_SHOW_AT_STARTUP=啟動時顯示提示
+TOTD_SHOW_AT_STARTUP=啟動時顯示提示
 #### TOTD_NEXT=Next Tip
-#? TOTD_NEXT=下一提示
+TOTD_NEXT=下一提示
 #### TOTD_PREVIOUS=Previous Tip
-#? TOTD_PREVIOUS=上一提示
+TOTD_PREVIOUS=上一提示
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=關閉
 
@@ -213,17 +213,17 @@ TOTD_CLOSE=關閉
 # Key/value pairs for the Getting Started image
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
-#? GETTING_STARTED_TITLE=入門
+GETTING_STARTED_TITLE=入門
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
-#? GETTING_STARTED_CONTENTS=開始使用 LimeWire 時﹐請找到左側的文本字段﹐鍵入查找的內容並單擊“搜索” 按鈕。如果只尋找某種格式的內容(音樂/視頻等等...) ﹐可以使用文本字段上方的按鈕來限定搜索結果。
+GETTING_STARTED_CONTENTS=開始使用 LimeWire 時﹐請找到左側的文本字段﹐鍵入查找的內容並單擊“搜索” 按鈕。如果只尋找某種格式的內容(音樂/視頻等等...) ﹐可以使用文本字段上方的按鈕來限定搜索結果。
 
 ###################################################################
 # Key/value pairs for the Going Pro image.
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
-#? GOING_PRO_TITLE=全球最先進的文檔共享程式﹗
+GOING_PRO_TITLE=全球最先進的文檔共享程式﹗
 #### GOING_PRO_DESCRIPTION=Better search results\nTurbo-Charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
-#? GOING_PRO_DESCRIPTION=更完善的搜索結果\n更快的下載速度\n更多的可用資源\n個性化的技術支持\n六個月的免費升級
+GOING_PRO_DESCRIPTION=更完善的搜索結果\n更快的下載速度\n更多的可用資源\n個性化的技術支持\n六個月的免費升級
 
 
 ###################################################################
@@ -344,11 +344,11 @@ MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 #### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
 MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=重新整理我的最愛.
 #### MENU_FILE_LIBRARY_EXPLORE=Explore
-#? MENU_FILE_LIBRARY_EXPLORE=搜尋(X)
+MENU_FILE_LIBRARY_EXPLORE=搜尋(X)
 #### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
 MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
 #### MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open Library Folder
-#? MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=打開我的最愛資料夾
+MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=打開我的最愛資料夾
 
 #### MENU_NAV_TITLE=Navigation
 MENU_NAV_TITLE=導航(N)
@@ -384,23 +384,23 @@ MENU_VIEW_TITLE=檢視(V)
 #### MENU_VIEW_TITLE_MNEMONIC=V
 MENU_VIEW_TITLE_MNEMONIC=V
 #### MENU_VIEW_SMALL_ICONS=Use Small Icons
-#? MENU_VIEW_SMALL_ICONS=使用小圖標(S)
+MENU_VIEW_SMALL_ICONS=使用小圖標(S)
 #### MENU_VIEW_SMALL_ICONS_MNEMONIC=S
 MENU_VIEW_SMALL_ICONS_MNEMONIC=S
 #### MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use Small Icons
-#? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=使用小圖標
+MENU_VIEW_SMALL_ICONS_ACCESSIBLE=使用小圖標
 #### MENU_VIEW_TEXT_WITH_ICONS=Show Icon Text
-#? MENU_VIEW_TEXT_WITH_ICONS=顯示圖標文本(T)
+MENU_VIEW_TEXT_WITH_ICONS=顯示圖標文本(T)
 #### MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 #### MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show Text Below Icons
-#? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=在圖標下顯示文本
+MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=在圖標下顯示文本
 #### MENU_VIEW_SHOW_HIDE_TITLE=Show/Hide
-#? MENU_VIEW_SHOW_HIDE_TITLE=顯示/隱藏(W)
+MENU_VIEW_SHOW_HIDE_TITLE=顯示/隱藏(W)
 #### MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
 MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
 #### MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or Hide individual tabs
-#? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=顯示或隱藏單個標籤
+MENU_VIEW_SHOW_HIDE_ACCESSIBLE=顯示或隱藏單個標籤
 #### MENU_VIEW_MONITOR=Monitor
 MENU_VIEW_MONITOR=監視(M)
 #### MENU_VIEW_MONITOR_MNEMONIC=M
@@ -420,57 +420,57 @@ MENU_VIEW_LIBRARY_MNEMONIC=B
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
 MENU_VIEW_LIBRARY_ACCESSIBLE=顯示我的最愛窗口.
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
-#? MENU_VIEW_THEMES_TITLE=套用外殼(T)
+MENU_VIEW_THEMES_TITLE=套用外殼(T)
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
 MENU_VIEW_THEMES_TITLE_MNEMONIC=T
 #### MENU_VIEW_THEMES_GET_MORE=Get More Skins
-#? MENU_VIEW_THEMES_GET_MORE=獲取更多外殼(G)
+MENU_VIEW_THEMES_GET_MORE=獲取更多外殼(G)
 #### MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
 MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
 #### MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more skins from limewire.com
-#? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=從 limewire.com 搜尋更多外殼
+MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=從 limewire.com 搜尋更多外殼
 #### MENU_VIEW_THEMES_REFRESH=Refresh Skins
-#? MENU_VIEW_THEMES_REFRESH=更新外殼(R)
+MENU_VIEW_THEMES_REFRESH=更新外殼(R)
 #### MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
 MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
 #### MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk
-#? MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=從磁盤重新裝載可用外殼
+MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=從磁盤重新裝載可用外殼
 #### MENU_VIEW_THEMES_USE_DEFAULT=Use Default
-#? MENU_VIEW_THEMES_USE_DEFAULT=應用預設值(D)
+MENU_VIEW_THEMES_USE_DEFAULT=應用預設值(D)
 #### MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
 MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
 #### MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin
-#? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=套用預設外殼
+MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=套用預設外殼
 #### MENU_VIEW_LANGS_TITLE=Change Language
 MENU_VIEW_LANGS_TITLE=更改語言(H)
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
-#? MENU_VIEW_LANGS_RESTART_REQUIRED=新選擇語言生效須重新啟動 LimeWire。
+MENU_VIEW_LANGS_RESTART_REQUIRED=新選擇語言生效須重新啟動 LimeWire。
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
-#? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=協助翻譯 LimeWire(T)
+MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=協助翻譯 LimeWire(T)
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
 MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language
-#? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=將 LimeWire 譯成母語
+MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=將 LimeWire 譯成母語
 #### MENU_VIEW_SEARCH_TITLE=Search
-#? MENU_VIEW_SEARCH_TITLE=搜尋(S)
+MENU_VIEW_SEARCH_TITLE=搜尋(S)
 #### MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 #### MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
-#? MENU_VIEW_SEARCH_ACCESSIBLE=搜尋標籤選項
+MENU_VIEW_SEARCH_ACCESSIBLE=搜尋標籤選項
 #### MENU_VIEW_SEARCH_FILTERS=Result Filters
-#? MENU_VIEW_SEARCH_FILTERS=結果過濾(F)
+MENU_VIEW_SEARCH_FILTERS=結果過濾(F)
 #### MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
 MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
 #### MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
-#? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=顯示搜尋結果過濾
+MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=顯示搜尋結果過濾
 #### MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 #### MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 #### MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
-#? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=顯示 Magnetmix 按鈕
+MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=顯示 Magnetmix 按鈕
 
 #### MENU_RESOURCES_TITLE=Resources
 MENU_RESOURCES_TITLE=資源(R)
@@ -511,11 +511,11 @@ MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
 #### MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Help for Using LimeWire
 MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=使用 LimeWire 的說明.
 #### MENU_HELP_TOTD=Tip of the Day
-#? MENU_HELP_TOTD=每日提示(D)
+MENU_HELP_TOTD=每日提示(D)
 #### MENU_HELP_TOTD_MNEMONIC=D
 MENU_HELP_TOTD_MNEMONIC=D
 #### MENU_HELP_TOTD_ACCESSIBLE=Show the Tip of the Day Window
-#? MENU_HELP_TOTD_ACCESSIBLE=顯示每日提示窗口
+MENU_HELP_TOTD_ACCESSIBLE=顯示每日提示窗口
 #### MENU_HELP_FAQ=FAQ
 MENU_HELP_FAQ=常見疑難排解(F)
 #### MENU_HELP_FAQ_MNEMONIC=F
@@ -547,29 +547,29 @@ MENU_HELP_ABOUT_MNEMONIC=A
 #### MENU_HELP_ABOUT_ACCESSIBLE=Information about LimeWire
 MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息資訊.
 #### MENU_HELP_ERROR=Generate Error
-#? MENU_HELP_ERROR=出錯(E)
+MENU_HELP_ERROR=出錯(E)
 #### MENU_HELP_ERROR_MNEMONIC=E
-#? MENU_HELP_ERROR_MNEMONIC=E
+MENU_HELP_ERROR_MNEMONIC=E
 #### MENU_HELP_ERROR_ACCESSIBLE=Generate a Popup Error for Testing
-#? MENU_HELP_ERROR_ACCESSIBLE=彈出可用于測試的錯誤信息
+MENU_HELP_ERROR_ACCESSIBLE=彈出可用于測試的錯誤信息
 
 ################################################################################
 # Keys/value pairs for general tables info
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
-#? TABLES_USE_ROWSTRIPE=條紋行
+TABLES_USE_ROWSTRIPE=條紋行
 #### TABLES_REAL_TIME_SORTING=Sort Automatically
-#? TABLES_REAL_TIME_SORTING=自動分類
+TABLES_REAL_TIME_SORTING=自動分類
 #### TABLES_DISPLAY_TOOLTIPS=Extended Tooltips
-#? TABLES_DISPLAY_TOOLTIPS=更多工具提示
+TABLES_DISPLAY_TOOLTIPS=更多工具提示
 
 ################################################################################
 # Keys/value pairs for SearchView stuff...
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
-#? SEARCH_NOT_CONNECTED=尚未連線至網路。選擇“文件”菜單中的“連接”進行連線。連線之前﹐搜尋可能不會返回任何結果。
+SEARCH_NOT_CONNECTED=尚未連線至網路。選擇“文件”菜單中的“連接”進行連線。連線之前﹐搜尋可能不會返回任何結果。
 #### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
-#? SEARCH_STILL_CONNECTING=LimeWire 網路連接中。完全接通前﹐搜尋可能不會返回大量結果。
+SEARCH_STILL_CONNECTING=LimeWire 網路連接中。完全接通前﹐搜尋可能不會返回大量結果。
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=下載
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
@@ -611,17 +611,17 @@ SEARCH_PUBLIC_CHAT_STRING=和對方聊天
 #### SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi Web Lookup...
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=到 Bitzi 網搜尋...
 #### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet Details for File
-#? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=文件的磁信息
+SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=文件的磁信息
 #### SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
-#? SEARCH_PUBLIC_HTTP_PAGE_STRING=文件網頁
+SEARCH_PUBLIC_HTTP_PAGE_STRING=文件網頁
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=重新搜尋
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Host
-#? SEARCH_PUBLIC_BLOCK_STRING=屏蔽主機
+SEARCH_PUBLIC_BLOCK_STRING=屏蔽主機
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=搜尋結果
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
-#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=搜尋更多
+SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=搜尋更多
 #### SEARCH_SEARCHING_LABEL=Searching...
 SEARCH_SEARCHING_LABEL=正在搜尋...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
@@ -637,79 +637,79 @@ SEARCH_DOWNLOAD_DIALOG_CONFIRM=請求下載
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=文件名
 #### SEARCH_MULTIPLE_HOSTS=Multiple
-#? SEARCH_MULTIPLE_HOSTS=多重﹔多個
+SEARCH_MULTIPLE_HOSTS=多重﹔多個
 #### AUTO_DL_CHECKBOX_STRING=Automatically Download
 AUTO_DL_CHECKBOX_STRING=自動下載
 #### AUTO_DL_CHECKBOX_TOOLTIP=LimeWire will download your files for you
 AUTO_DL_CHECKBOX_TOOLTIP=LimeWire 將為您下載這些文件.
 #### SEARCH_TYPE_KEYWORD=Keyword
-#? SEARCH_TYPE_KEYWORD=關鍵詞
+SEARCH_TYPE_KEYWORD=關鍵詞
 #### SEARCH_TYPE_WHATSNEW=What's New
-#? SEARCH_TYPE_WHATSNEW=更新資訊
+SEARCH_TYPE_WHATSNEW=更新資訊
 #### SEARCH_TYPE_BROWSEHOST=Direct Connect
-#? SEARCH_TYPE_BROWSEHOST=直接連線
+SEARCH_TYPE_BROWSEHOST=直接連線
 #### SEARCH_BROWSEHOST_TITLE=Got Friends?
-#? SEARCH_BROWSEHOST_TITLE=聯繫朋友﹖
+SEARCH_BROWSEHOST_TITLE=聯繫朋友﹖
 #### SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
-#? SEARCH_BROWSEHOST_DESC=鍵入希望連線朋友的IP地址﹐點擊“直接連線” ﹐LimeWire會瀏覽該用戶的所有文件。
+SEARCH_BROWSEHOST_DESC=鍵入希望連線朋友的IP地址﹐點擊“直接連線” ﹐LimeWire會瀏覽該用戶的所有文件。
 #### SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
-#? SEARCH_BROWSEHOST_MYIP=如果朋友希望與你連線﹐則需鍵入
+SEARCH_BROWSEHOST_MYIP=如果朋友希望與你連線﹐則需鍵入
 #### SEARCH_BROWSEHOST_FIREWALLED=Your computer is behind a firewall or router and cannot receive direct connections.
-#? SEARCH_BROWSEHOST_FIREWALLED=你的電腦設置了防火牆或路由器﹐無法直接連線。
+SEARCH_BROWSEHOST_FIREWALLED=你的電腦設置了防火牆或路由器﹐無法直接連線。
 #### SEARCH_BROWSEHOST_BUTTON=Direct Connect
-#? SEARCH_BROWSEHOST_BUTTON=直接連線
+SEARCH_BROWSEHOST_BUTTON=直接連線
 #### SEARCH_WHATSNEW_HIDE_ADULT=Hide Adult Content
 SEARCH_WHATSNEW_HIDE_ADULT=忽略隱藏成人內容
 #### SEARCH_WHATSNEW_TITLE_ONE=Don't Know
-#? SEARCH_WHATSNEW_TITLE_ONE=不知道
+SEARCH_WHATSNEW_TITLE_ONE=不知道
 #### SEARCH_WHATSNEW_TITLE_TWO=What To Look For?
-#? SEARCH_WHATSNEW_TITLE_TWO=搜尋什麼﹖
+SEARCH_WHATSNEW_TITLE_TWO=搜尋什麼﹖
 #### SEARCH_WHATSNEW_DESC=A "What's New" search will search for files that have been recently added to the network.
-#? SEARCH_WHATSNEW_DESC=“更新資訊”搜索將搜尋新增至網路的文檔。
+SEARCH_WHATSNEW_DESC=“更新資訊”搜索將搜尋新增至網路的文檔。
 #### SEARCH_CURRENT_SEARCH=Current Search:
-#? SEARCH_CURRENT_SEARCH=當前搜尋﹕
+SEARCH_CURRENT_SEARCH=當前搜尋﹕
 #### SEARCH_WHATS_NEW_SMALL=New
-#? SEARCH_WHATS_NEW_SMALL=新
+SEARCH_WHATS_NEW_SMALL=新
 #### SEARCH_SELECT_TYPE=Select Type:
-#? SEARCH_SELECT_TYPE=選定類型﹕
+SEARCH_SELECT_TYPE=選定類型﹕
 #### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
-#? SEARCH_MEDIA_DOCUMENTS_TOOLTIP=搜尋文檔文件﹐包括 html,txt,pdf及更多
+SEARCH_MEDIA_DOCUMENTS_TOOLTIP=搜尋文檔文件﹐包括 html,txt,pdf及更多
 #### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
-#? SEARCH_MEDIA_PROGRAMS_TOOLTIP=搜尋程式文件﹐包括 exe,zip,gz 及更多
+SEARCH_MEDIA_PROGRAMS_TOOLTIP=搜尋程式文件﹐包括 exe,zip,gz 及更多
 #### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
-#? SEARCH_MEDIA_AUDIO_TOOLTIP=搜尋音頻文件﹐包括 mp3,wav,ogg及更多
+SEARCH_MEDIA_AUDIO_TOOLTIP=搜尋音頻文件﹐包括 mp3,wav,ogg及更多
 #### SEARCH_MEDIA_VIDEO_TOOLTIP=Search For Video Files, Including avi, mpg, wmv, and More
-#? SEARCH_MEDIA_VIDEO_TOOLTIP=搜尋視頻文件﹐包括 avi,mpg,wmv及更多
+SEARCH_MEDIA_VIDEO_TOOLTIP=搜尋視頻文件﹐包括 avi,mpg,wmv及更多
 #### SEARCH_MEDIA_IMAGES_TOOLTIP=Search For Image Files, Including jpg, gif, png and More
-#? SEARCH_MEDIA_IMAGES_TOOLTIP=搜尋圖片文件﹐包括 jpg,gif,png及更多
+SEARCH_MEDIA_IMAGES_TOOLTIP=搜尋圖片文件﹐包括 jpg,gif,png及更多
 #### SEARCH_FILTER_RESULTS=Filter Results:
-#? SEARCH_FILTER_RESULTS=過濾結果﹕
+SEARCH_FILTER_RESULTS=過濾結果﹕
 #### SEARCH_BACK_TO_SEARCH=Back To Search
-#? SEARCH_BACK_TO_SEARCH=返回搜尋結果
+SEARCH_BACK_TO_SEARCH=返回搜尋結果
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
-#? SEARCH_BLOCK_HOST=你是否希望屏蔽來自…主機的搜尋結果
+SEARCH_BLOCK_HOST=你是否希望屏蔽來自…主機的搜尋結果
 
 ################################################################################
 # Magnet stuff
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_LABEL=將磁性鏈接複製到剪貼板
+MAGNET_COPY_MAGNET_LINKS_LABEL=將磁性鏈接複製到剪貼板
 #### MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Copy the Magnet Links of the selected Files to the Clipboard
-#? MAGNET_COPY_MAGNET_LINKS_TOOLTIP=將選中文件的磁性鏈接複製到剪貼板
+MAGNET_COPY_MAGNET_LINKS_TOOLTIP=將選中文件的磁性鏈接複製到剪貼板
 
 ################################################################################
 # Search actions
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
-#? SEARCH_FOR_KEYWORDS_ACTION_NAME=搜尋關鍵詞﹕{0}
+SEARCH_FOR_KEYWORDS_ACTION_NAME=搜尋關鍵詞﹕{0}
 # {0} the already translated mediatype
 #### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
-#? SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=搜尋“更新資訊”: {0}
+SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=搜尋“更新資訊”: {0}
 # {0} the type of the search, e.g. Title, Album, Genre
 # {1} the keywords fo the search, e.g. name of the album
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
-#? SEARCH_XML_FIELD_ACTION_NAME=搜尋{0}: {1}
+SEARCH_XML_FIELD_ACTION_NAME=搜尋{0}: {1}
 
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
@@ -731,7 +731,7 @@ RESULT_PANEL_QUALITY=等級
 #### RESULT_PANEL_NAME=Name
 RESULT_PANEL_NAME=名稱
 #### RESULT_PANEL_ICON=Icon
-#? RESULT_PANEL_ICON=圖標
+RESULT_PANEL_ICON=圖標
 #### RESULT_PANEL_TYPE=Type
 RESULT_PANEL_TYPE=類型
 #### RESULT_PANEL_SIZE=Size
@@ -747,52 +747,52 @@ RESULT_PANEL_COUNT=#
 #### RESULT_PANEL_VENDOR=Vendor
 RESULT_PANEL_VENDOR= 軟體銷售商
 #### RESULT_PANEL_ADDED=Created
-#? RESULT_PANEL_ADDED=已建立
+RESULT_PANEL_ADDED=已建立
 #### RESULT_PANEL_LICENSE=License
-#? RESULT_PANEL_LICENSE=許可證
+RESULT_PANEL_LICENSE=許可證
 
 #Filter labels.
 #### SEARCH_FILTER_ALL=All
-#? SEARCH_FILTER_ALL=所有
+SEARCH_FILTER_ALL=所有
 #### SEARCH_FILTER_OPTION=Option
-#? SEARCH_FILTER_OPTION=選項
+SEARCH_FILTER_OPTION=選項
 #### SEARCH_FILTER_OPTIONS=Options
-#? SEARCH_FILTER_OPTIONS=選項
+SEARCH_FILTER_OPTIONS=選項
 #### SEARCH_FILTER_MEDIA=Media
-#? SEARCH_FILTER_MEDIA=介質
+SEARCH_FILTER_MEDIA=介質
 
 #### DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
-#? DOWNLOAD_LAUNCH_BUTTON_LABEL=預覽
+DOWNLOAD_LAUNCH_BUTTON_LABEL=預覽
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_TIP=預覽選中的下載
+DOWNLOAD_LAUNCH_BUTTON_TIP=預覽選中的下載
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=運行
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=運行
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=運行選中的下載
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=運行選中的下載
 #### DOWNLOAD_KILL_BUTTON_LABEL=Stop
 DOWNLOAD_KILL_BUTTON_LABEL=取消下載
 #### DOWNLOAD_KILL_BUTTON_TIP=Stop Selected Downloads
 DOWNLOAD_KILL_BUTTON_TIP=取消選中的下載.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=清除
+DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=清除
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=清除選中的下載
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=清除選中的下載
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=恢復下載
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
 DOWNLOAD_RESUME_BUTTON_TIP=重新嘗試下載.
 #### DOWNLOAD_SOURCES_BUTTON_LABEL=Find Sources
-#? DOWNLOAD_SOURCES_BUTTON_LABEL=查找來源
+DOWNLOAD_SOURCES_BUTTON_LABEL=查找來源
 #### DOWNLOAD_SOURCES_BUTTON_TIP=Try to Find Additional Sources for Downloads
-#? DOWNLOAD_SOURCES_BUTTON_TIP=查找其他的下載來源
+DOWNLOAD_SOURCES_BUTTON_TIP=查找其他的下載來源
 #### DOWNLOAD_CLEAR_BUTTON_LABEL=Clear Inactive
 DOWNLOAD_CLEAR_BUTTON_LABEL=清除停止的下載
 #### DOWNLOAD_CLEAR_BUTTON_TIP=Remove Inactive Downloads
 DOWNLOAD_CLEAR_BUTTON_TIP=移除不活動的下載.
 #### DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
-#? DOWNLOAD_PAUSE_BUTTON_LABEL=暫停
+DOWNLOAD_PAUSE_BUTTON_LABEL=暫停
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
-#? DOWNLOAD_PAUSE_BUTTON_TIP=暫停選中的下載
+DOWNLOAD_PAUSE_BUTTON_TIP=暫停選中的下載
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=運行
@@ -807,9 +807,9 @@ LIBRARY_REFRESH_BUTTON_LABEL=重新整理
 #### LIBRARY_REFRESH_BUTTON_TIP=Reload Shared Directories
 LIBRARY_REFRESH_BUTTON_TIP=重新整理共用資料夾.
 #### LIBRARY_EXPLORE_BUTTON_LABEL=Explore
-#? LIBRARY_EXPLORE_BUTTON_LABEL=搜尋(X)
+LIBRARY_EXPLORE_BUTTON_LABEL=搜尋(X)
 #### LIBRARY_EXPLORE_BUTTON_TIP=Open Library Directory
-#? LIBRARY_EXPLORE_BUTTON_TIP=打開我的最愛目錄
+LIBRARY_EXPLORE_BUTTON_TIP=打開我的最愛目錄
 #### LIBRARY_PLAYLIST_BUTTON_LABEL=Enqueue
 LIBRARY_PLAYLIST_BUTTON_LABEL=新增到播放列表
 #### LIBRARY_PLAYLIST_BUTTON_TIP=Add Selected Files to the Play List
@@ -823,7 +823,7 @@ LIBRARY_RESUME_BUTTON_LABEL=恢復下載
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
 LIBRARY_RESUME_BUTTON_TIP=重新嘗試下載選中的文件.
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
-#? LIBRARY_RENAME_BUTTON_LABEL=更名
+LIBRARY_RENAME_BUTTON_LABEL=更名
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=開啟...
@@ -846,9 +846,9 @@ PLAYLIST_FILE_DESCRIPTION=播放列表的文件 (*.m3u)
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire 多媒體播放機
 #### MEDIA_PLAY_BUTTON_TIP=Play
-#? MEDIA_PLAY_BUTTON_TIP=播放
+MEDIA_PLAY_BUTTON_TIP=播放
 #### MEDIA_PAUSE_BUTTON_TIP=Pause
-#? MEDIA_PAUSE_BUTTON_TIP=暫停
+MEDIA_PAUSE_BUTTON_TIP=暫停
 #### MEDIA_STOP_BUTTON_TIP=Stop
 MEDIA_STOP_BUTTON_TIP=停止
 #### MEDIA_FORWARD_BUTTON_TIP=Next
@@ -876,43 +876,43 @@ STATISTICS_SHARING=共用
 #### STATISTICS_SHARING_TOOLTIP=The number of files you are sharing.
 STATISTICS_SHARING_TOOLTIP=您正在共用文件的數目.
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
-#? STATISTICS_CONNECTION_DISCONNECTED=離線的
+STATISTICS_CONNECTION_DISCONNECTED=離線的
 #### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
-#? STATISTICS_CONNECTION_DISCONNECTED_TIP=沒有連接到網路。選擇“文件” 菜單中的“連接” 選項進行連接。
+STATISTICS_CONNECTION_DISCONNECTED_TIP=沒有連接到網路。選擇“文件” 菜單中的“連接” 選項進行連接。
 #### STATISTICS_CONNECTION_CONNECTING=Connecting
-#? STATISTICS_CONNECTION_CONNECTING=連線
+STATISTICS_CONNECTION_CONNECTING=連線
 #### STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
-#? STATISTICS_CONNECTION_CONNECTING_TIP=正在連線網路。
+STATISTICS_CONNECTION_CONNECTING_TIP=正在連線網路。
 #### STATISTICS_CONNECTION_POOR=Poor
-#? STATISTICS_CONNECTION_POOR=連線狀態差
+STATISTICS_CONNECTION_POOR=連線狀態差
 #### STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
-#? STATISTICS_CONNECTION_POOR_TIP=連線主機數量少﹐狀態不穩定。
+STATISTICS_CONNECTION_POOR_TIP=連線主機數量少﹐狀態不穩定。
 #### STATISTICS_CONNECTION_FAIR=Fair
-#? STATISTICS_CONNECTION_FAIR=連線狀態一般
+STATISTICS_CONNECTION_FAIR=連線狀態一般
 #### STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
-#? STATISTICS_CONNECTION_FAIR_TIP=網路連接增強。
+STATISTICS_CONNECTION_FAIR_TIP=網路連接增強。
 #### STATISTICS_CONNECTION_GOOD=Good
-#? STATISTICS_CONNECTION_GOOD=連線狀態好
+STATISTICS_CONNECTION_GOOD=連線狀態好
 #### STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
-#? STATISTICS_CONNECTION_GOOD_TIP=尚未完全連線至網路﹐但連接狀態好。
+STATISTICS_CONNECTION_GOOD_TIP=尚未完全連線至網路﹐但連接狀態好。
 #### STATISTICS_CONNECTION_EXCELLENT=Excellent
-#? STATISTICS_CONNECTION_EXCELLENT=極好
+STATISTICS_CONNECTION_EXCELLENT=極好
 #### STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
-#? STATISTICS_CONNECTION_EXCELLENT_TIP=網路連接強勁。
+STATISTICS_CONNECTION_EXCELLENT_TIP=網路連接強勁。
 #### STATISTICS_CONNECTION_TURBO_CHARGED=Turbo-Charged
-#? STATISTICS_CONNECTION_TURBO_CHARGED=快速的
+STATISTICS_CONNECTION_TURBO_CHARGED=快速的
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience Turbo-Charged connections all the time with LimeWire PRO.
-#? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=使用 LimeWire PRO﹐隨時體驗快速連接。
+STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=使用 LimeWire PRO﹐隨時體驗快速連接。
 #### STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
-#? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=網路連接極為強勁。
+STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=網路連接極為強勁。
 #### STATISTICS_CONNECTION_QUALITY=Quality:
-#? STATISTICS_CONNECTION_QUALITY=等級﹕
+STATISTICS_CONNECTION_QUALITY=等級﹕
 #### STATISTICS_CONNECTION_IDLE=Idle
-#? STATISTICS_CONNECTION_IDLE=閑置
+STATISTICS_CONNECTION_IDLE=閑置
 #### STATISTICS_CONNECTION_WAKING_UP=Waking Up
-#? STATISTICS_CONNECTION_WAKING_UP=喚醒
+STATISTICS_CONNECTION_WAKING_UP=喚醒
 #### STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire is waking up from sleep mode.
-#? STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire 從睡眠模式中喚醒。
+STATISTICS_CONNECTION_WAKING_UP_TIP=LimeWire 從睡眠模式中喚醒。
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -930,7 +930,7 @@ DOWNLOAD_POPUP_MENU_CHAT=和對方主機聊天
 #### DOWNLOAD_POPUP_MENU_BROWSE=Browse Host
 DOWNLOAD_POPUP_MENU_BROWSE=瀏覽對方主機
 #### DOWNLOAD_PRIORITY_COLUMN=Priority
-#? DOWNLOAD_PRIORITY_COLUMN=重點
+DOWNLOAD_PRIORITY_COLUMN=重點
 #### DOWNLOAD_NAME_COLUMN=Name
 DOWNLOAD_NAME_COLUMN=名稱
 #### DOWNLOAD_SIZE_COLUMN=Size
@@ -966,9 +966,9 @@ DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED= 移動到收藏時失敗磁盤故障
 #### DOWNLOAD_STATUS_CORRUPT_FILE=File Corrupted
 DOWNLOAD_STATUS_CORRUPT_FILE= 損毀的文件文件已損壞
 #### DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering Corrupted File
-#? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=恢復損壞的文件
+DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=恢復損壞的文件
 #### DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery Failed
-#? DOWNLOAD_STATUS_RECOVERY_FAILED=恢復失敗
+DOWNLOAD_STATUS_RECOVERY_FAILED=恢復失敗
 #### DOWNLOAD_STATUS_REQUERYING=Querying Network
 DOWNLOAD_STATUS_REQUERYING=正在請求連線
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Waiting
@@ -976,59 +976,59 @@ DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=請求已發出, 等待
 #### DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s for Sources
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=秒 返回結果
 #### DOWNLOAD_STATUS_WAITING_FOR_USER=Need More Sources
-#? DOWNLOAD_STATUS_WAITING_FOR_USER=需要更多結果
+DOWNLOAD_STATUS_WAITING_FOR_USER=需要更多結果
 #### DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for Stable Connections
-#? DOWNLOAD_STATUS_WAITING_FOR_CONN=等待穩定連線
+DOWNLOAD_STATUS_WAITING_FOR_CONN=等待穩定連線
 #### DOWNLOAD_HOSTS_LABEL=hosts
 DOWNLOAD_HOSTS_LABEL=主機
 #### DOWNLOAD_HOST_LABEL=host
-#? DOWNLOAD_HOST_LABEL=主機
+DOWNLOAD_HOST_LABEL=主機
 #### DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in Line, Position
-#? DOWNLOAD_STATUS_REMOTE_QUEUED=等待﹐位置
+DOWNLOAD_STATUS_REMOTE_QUEUED=等待﹐位置
 #### DOWNLOAD_STATUS_HASHING=Verifying File Contents...
-#? DOWNLOAD_STATUS_HASHING=檢驗文件內容...
+DOWNLOAD_STATUS_HASHING=檢驗文件內容...
 #### DOWNLOAD_STATUS_SAVING=Saving File...
-#? DOWNLOAD_STATUS_SAVING=保存文件...
+DOWNLOAD_STATUS_SAVING=保存文件...
 #### DOWNLOAD_STATUS_PAUSING=Pausing...
-#? DOWNLOAD_STATUS_PAUSING=暫停...
+DOWNLOAD_STATUS_PAUSING=暫停...
 #### DOWNLOAD_STATUS_PAUSED=Paused
-#? DOWNLOAD_STATUS_PAUSED=已暫停
+DOWNLOAD_STATUS_PAUSED=已暫停
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
-#? DOWNLOAD_AWAITING_SOURCES=可能需要更細緻的搜尋...
+DOWNLOAD_AWAITING_SOURCES=可能需要更細緻的搜尋...
 #### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
-#? DOWNLOAD_APPLY_NEW_THEME_START=已經下載名為...的新外殼
+DOWNLOAD_APPLY_NEW_THEME_START=已經下載名為...的新外殼
 #### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
-#? DOWNLOAD_APPLY_NEW_THEME_END=是否應用新外殼﹖
+DOWNLOAD_APPLY_NEW_THEME_END=是否應用新外殼﹖
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
-#? DOWNLOAD_POSSIBLE_HOSTS=可能的主機
+DOWNLOAD_POSSIBLE_HOSTS=可能的主機
 #### DOWNLOAD_BUSY_HOSTS=Busy Hosts
-#? DOWNLOAD_BUSY_HOSTS=主機忙
+DOWNLOAD_BUSY_HOSTS=主機忙
 #### DOWNLOAD_QUEUED_HOSTS=Remotely Queued
-#? DOWNLOAD_QUEUED_HOSTS=遠端等候
+DOWNLOAD_QUEUED_HOSTS=遠端等候
 #### DOWNLOAD_CHUNKS=Chunks
-#? DOWNLOAD_CHUNKS=程式
+DOWNLOAD_CHUNKS=程式
 #### DOWNLOAD_LOST=Lost To Corruption
-#? DOWNLOAD_LOST=程式已損壞
+DOWNLOAD_LOST=程式已損壞
 #### DOWNLOAD_SEARCHING=Locating Sources...
-#? DOWNLOAD_SEARCHING=查找源文件...
+DOWNLOAD_SEARCHING=查找源文件...
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
-#? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=抱歉﹐LimeWire 無法啟動原有下載。
+DOWNLOAD_COULD_NOT_READ_SNAPSHOT=抱歉﹐LimeWire 無法啟動原有下載。
 #### DOWNLOAD_MAGNET_DIALOG=Would you like to download
-#? DOWNLOAD_MAGNET_DIALOG=你是否希望下載
+DOWNLOAD_MAGNET_DIALOG=你是否希望下載
 #### DOWNLOAD_FROM=from
-#? DOWNLOAD_FROM=源文件位置
+DOWNLOAD_FROM=源文件位置
 #### DOWNLOAD_MAGNET_DIALOG_END=?
-#? DOWNLOAD_MAGNET_DIALOG_END=﹖
+DOWNLOAD_MAGNET_DIALOG_END=﹖
 #### DOWNLOAD_HASH_ONLY_MAGNET=LimeWire will not be able to start the download you have selected unless you start a search for it.
-#? DOWNLOAD_HASH_ONLY_MAGNET=除非啟動搜尋功能﹐LimeWire 無法開始選中的下載。
+DOWNLOAD_HASH_ONLY_MAGNET=除非啟動搜尋功能﹐LimeWire 無法開始選中的下載。
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
-#? DOWNLOAD_PRIORITY_ACTIVE=活動
+DOWNLOAD_PRIORITY_ACTIVE=活動
 #### DOWNLOAD_PRIORITY_UP_BUTTON_TIP=Move the selected download closer to becoming active
-#? DOWNLOAD_PRIORITY_UP_BUTTON_TIP=將選中下載移動至接近活動的位置
+DOWNLOAD_PRIORITY_UP_BUTTON_TIP=將選中下載移動至接近活動的位置
 #### DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=Move the selected download further from becoming active
-#? DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=將選中下載移動至遠離活動的位置
+DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=將選中下載移動至遠離活動的位置
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
-#? DOWNLOAD_PRIORITY_PRIORITIZE=等待
+DOWNLOAD_PRIORITY_PRIORITIZE=等待
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -1080,15 +1080,15 @@ UPLOAD_TABLE_STRING_PUSHFAILED=不能連線
 #### UPLOAD_TABLE_STRING_INTERRUPTED=Transfer Interrupted
 UPLOAD_TABLE_STRING_INTERRUPTED=傳輸中斷
 #### UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range Unavailable
-#? UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=範圍不可用
+UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=範圍不可用
 #### UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Malformed Request
-#? UPLOAD_TABLE_STRING_MALFORMED_REQUEST=非完整請求
+UPLOAD_TABLE_STRING_MALFORMED_REQUEST=非完整請求
 #### UPLOAD_TABLE_STRING_COMPLETE=Complete
 UPLOAD_TABLE_STRING_COMPLETE=完成
 #### UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned Greedy Servent
-#? UPLOAD_TABLE_STRING_BANNED_GREEDY=被禁止的貪婪用戶
+UPLOAD_TABLE_STRING_BANNED_GREEDY=被禁止的貪婪用戶
 #### UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash Tree
-#? UPLOAD_TABLE_STRING_HASH_TREE=上傳杂凑樹
+UPLOAD_TABLE_STRING_HASH_TREE=上傳杂凑樹
 #### UPLOAD_TABLE_STRING_FNF=File Not Found
 UPLOAD_TABLE_STRING_FNF=沒有找到文件
 #### UPLOAD_TABLE_STRING_QUEUED=Queued at
@@ -1096,9 +1096,9 @@ UPLOAD_TABLE_STRING_QUEUED=等候
 #### UPLOAD_STRING_KBPSEC=KB/s
 UPLOAD_STRING_KBPSEC=KB/s
 #### UPLOAD_ACTIVE=active
-#? UPLOAD_ACTIVE=活動的
+UPLOAD_ACTIVE=活動的
 #### UPLOAD_QUEUED=queued
-#? UPLOAD_QUEUED=等候
+UPLOAD_QUEUED=等候
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -1131,11 +1131,11 @@ MULTICAST_SPEED=Ethernet
 # HTML Page stuff
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
-#? HTML_PAGE_TITLE=下載頁
+HTML_PAGE_TITLE=下載頁
 #### HTML_PAGE_LISTING=File Listing for
-#? HTML_PAGE_LISTING=文件列表
+HTML_PAGE_LISTING=文件列表
 #### HTML_PAGE_MAGNET=Magnet Links for Fast Downloads (if you have LimeWire installed)
-#? HTML_PAGE_MAGNET=快速下載磁鏈接(如果裝有 LimeWire)
+HTML_PAGE_MAGNET=快速下載磁鏈接(如果裝有 LimeWire)
 
 ###################################################################
 # Key/value pairs for ConnectionView
@@ -1159,11 +1159,11 @@ CV_COLUMN_VENDOR=銷售商軟體/version版本
 #### CV_COLUMN_TIME=Time
 CV_COLUMN_TIME=時間
 #### CV_COLUMN_COMPRESSION=Compressed (I/O)
-#? CV_COLUMN_COMPRESSION=壓縮 (入/出)
+CV_COLUMN_COMPRESSION=壓縮 (入/出)
 #### CV_COLUMN_QRP_FULL=QRP (%)
-#? CV_COLUMN_QRP_FULL=QRP (%)
+CV_COLUMN_QRP_FULL=QRP (%)
 #### CV_COLUMN_QRP_USED=QRP Empty
-#? CV_COLUMN_QRP_USED=QRP 空
+CV_COLUMN_QRP_USED=QRP 空
 #### CV_BUTTON_REMOVE=Remove
 CV_BUTTON_REMOVE=删除
 #### CV_BUTTON_TOOLTIP_REMOVE=Remove the Selected Connections
@@ -1189,46 +1189,46 @@ CV_TABLE_STRING_ULTRAPEER=Ultrapeer
 #### CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
 CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
 #### CV_TABLE_STRING_PEER=Peer
-#? CV_TABLE_STRING_PEER=點
+CV_TABLE_STRING_PEER=點
 #### CV_TABLE_STRING_PEERS=Peers
-#? CV_TABLE_STRING_PEERS=點
+CV_TABLE_STRING_PEERS=點
 #### CV_TABLE_STRING_STANDARD=0.6
 CV_TABLE_STRING_STANDARD=0.6
 #### CV_TABLE_STRING_STANDARDS=Standard
-#? CV_TABLE_STRING_STANDARDS=標準
+CV_TABLE_STRING_STANDARDS=標準
 #### CV_TABLE_STRING_INCOMING=Incoming
 CV_TABLE_STRING_INCOMING=傳入
 #### CV_TABLE_STRING_OUTGOING=Outgoing
 CV_TABLE_STRING_OUTGOING=傳出
 #### CV_TABLE_STRING_CONNECTED_ON=Connected on
-#? CV_TABLE_STRING_CONNECTED_ON=連接
+CV_TABLE_STRING_CONNECTED_ON=連接
 #### CV_STRING_CLIENT=Leaf
 CV_STRING_CLIENT=[葉子節點]
 #### CV_STRING_ULTRAPEER=Ultrapeer
 CV_STRING_ULTRAPEER=[Ultrapeer]
 #### CV_STRING_STATUS=Connection Status:
-#? CV_STRING_STATUS=連線狀態﹕
+CV_STRING_STATUS=連線狀態﹕
 #### CV_TABLE_STRING_KBPSEC=KB/s
 CV_TABLE_STRING_KBPSEC=KB/s
 #### CV_ADD_HOST_LABEL=Host:
-#? CV_ADD_HOST_LABEL=主機﹕
+CV_ADD_HOST_LABEL=主機﹕
 #### CV_ADD_PORT_LABEL=Port:
-#? CV_ADD_PORT_LABEL=連接埠﹕
+CV_ADD_PORT_LABEL=連接埠﹕
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
-#? CV_ADD_DIALOG_TITLE=新增 Gnutella 連接
+CV_ADD_DIALOG_TITLE=新增 Gnutella 連接
 
 
 ################################################################################
 # Key/value pairs for strings in the library window
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
-#? LIBRARY_TABLE_ICON=圖標
+LIBRARY_TABLE_ICON=圖標
 #### LIBRARY_TABLE_NAME=Name
 LIBRARY_TABLE_NAME=名稱
 #### LIBRARY_TABLE_TITLE=Title
-#? LIBRARY_TABLE_TITLE=頭銜
+LIBRARY_TABLE_TITLE=頭銜
 #### LIBRARY_TABLE_ARTIST=Artist
-#? LIBRARY_TABLE_ARTIST=藝術家
+LIBRARY_TABLE_ARTIST=藝術家
 #### LIBRARY_TABLE_SIZE=Size
 LIBRARY_TABLE_SIZE=大小
 #### LIBRARY_TABLE_TYPE=Type
@@ -1240,13 +1240,13 @@ LIBRARY_TABLE_HITCOUNT=點擊命中
 #### LIBRARY_TABLE_NUMALTLOC=Locations
 LIBRARY_TABLE_NUMALTLOC=位置
 #### LIBRARY_TABLE_LICENSE=License
-#? LIBRARY_TABLE_LICENSE=許可證
+LIBRARY_TABLE_LICENSE=許可證
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=上傳
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
-#? LIBRARY_TABLE_SEARCH_POPUP_MENU=搜尋
+LIBRARY_TABLE_SEARCH_POPUP_MENU=搜尋
 #### LIBRARY_TABLE_ADVANCED_POPUP_MENU=Advanced
-#? LIBRARY_TABLE_ADVANCED_POPUP_MENU=高級
+LIBRARY_TABLE_ADVANCED_POPUP_MENU=高級
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
 LIBRARY_TREE_NEW_FOLDER_LABEL=新增資料夾
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing
@@ -1256,9 +1256,9 @@ LIBRARY_TREE_RENAME_FOLDER_LABEL=更名
 #### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=To Play List
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=新增到播放列表
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
-#? LIBRARY_TREE_SAVED_DIRECTORY=儲存的文件
+LIBRARY_TREE_SAVED_DIRECTORY=儲存的文件
 #### LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete Files
-#? LIBRARY_TREE_INCOMPLETE_DIRECTORY=不完整文件
+LIBRARY_TREE_INCOMPLETE_DIRECTORY=不完整文件
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -1290,34 +1290,34 @@ PLAYLIST_DIALOG_SAVE_TITLE=將儲存播放列表儲存為到...
 #### PLAYLIST_DIALOG_SAVE_SAVE=Save
 PLAYLIST_DIALOG_SAVE_SAVE=儲存
 #### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
-#? PLAYLIST_CANNOT_PLAY_FILE=LimeWire 無法播放文件
+PLAYLIST_CANNOT_PLAY_FILE=LimeWire 無法播放文件
 #### PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
-#? PLAYLIST_FILE_UNSUPPORTED=. 文件類型未經驗證。
+PLAYLIST_FILE_UNSUPPORTED=. 文件類型未經驗證。
 #### PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
-#? PLAYLIST_LINE_UNAVAILABLE=. 無輸出行。
+PLAYLIST_LINE_UNAVAILABLE=. 無輸出行。
 #### PLAYLIST_FILE_MISSING=. The file cannot be found.
-#? PLAYLIST_FILE_MISSING=. 文件找不到。
+PLAYLIST_FILE_MISSING=. 文件找不到。
 #### PLAYLIST_FILE_CORRUPT=. The file is corrupt.
-#? PLAYLIST_FILE_CORRUPT=. 文件已損壞。
+PLAYLIST_FILE_CORRUPT=. 文件已損壞。
 #### PLAYLIST_FILE_UNKNOWN=. There is an unknown error with the audio file.
-#? PLAYLIST_FILE_UNKNOWN=. 聲頻文件出現未知錯誤。
+PLAYLIST_FILE_UNKNOWN=. 聲頻文件出現未知錯誤。
 #### PLAYLIST_FILE_PARSE_PROBLEM=. The file cannot be parsed.
-#? PLAYLIST_FILE_PARSE_PROBLEM=. 無法解析文件。
+PLAYLIST_FILE_PARSE_PROBLEM=. 無法解析文件。
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
 #### SETUP_LANGUAGE_TITLE=Language Options
-#? SETUP_LANGUAGE_TITLE=語言選項
+SETUP_LANGUAGE_TITLE=語言選項
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
-#? SETUP_LANGUAGE_LABEL=請選擇希望 LimeWire 使用的語言。
+SETUP_LANGUAGE_LABEL=請選擇希望 LimeWire 使用的語言。
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=歡迎
 #### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
 SETUP_WELCOME_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire 將指導您透過一系列步骤設訂 LimeWire, 已達最佳效能.
 #### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
-#? SETUP_WELCOME_PARTIAL_LABEL=歡迎使用 LimeWire 安裝精靈。LimeWire 新增功能需要進行設定。LimeWire 將指導您透過一系列步骤設訂上述新增功能。
+SETUP_WELCOME_PARTIAL_LABEL=歡迎使用 LimeWire 安裝精靈。LimeWire 新增功能需要進行設定。LimeWire 將指導您透過一系列步骤設訂上述新增功能。
 
 #### SETUP_SAVE_TITLE=Save Directory
 SETUP_SAVE_TITLE=儲存目錄資料夾
@@ -1328,19 +1328,19 @@ SETUP_SPEED_TITLE=連線速度
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=請選擇您的因特網連線速度. 正確的设定此速度對於优化網路非常重要. 如果您不能確認您是何種網路連線類型或者網路類型沒有列出, 只需简单地選擇看上去最合适的.
 #### SETUP_STARTUP_TITLE=System Startup
-#? SETUP_STARTUP_TITLE=系統啟動
+SETUP_STARTUP_TITLE=系統啟動
 #### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
-#? SETUP_STARTUP_LABEL=您是否希望登錄計算機時啟動 LimeWire? 選擇此項會加快稍后使用 LimeWire 時的啟動速度。 
+SETUP_STARTUP_LABEL=您是否希望登錄計算機時啟動 LimeWire? 選擇此項會加快稍后使用 LimeWire 時的啟動速度。 
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
-#? SETUP_STARTUP_CHECKBOX=自動啟動
+SETUP_STARTUP_CHECKBOX=自動啟動
 #### SETUP_FIREWALL_TITLE_ONE=Firewall Preparation
-#? SETUP_FIREWALL_TITLE_ONE=準備防火牆
+SETUP_FIREWALL_TITLE_ONE=準備防火牆
 #### SETUP_FIREWALL_LABEL_ONE=LimeWire needs to receive information from the network in order to function properly. When you click next, some firewalls will ask your permission for LimeWire to use the network. You should allow LimeWire full access. Below is a picture of Windows Firewall asking to unblock LimeWire. Your firewall software may look different.
-#? SETUP_FIREWALL_LABEL_ONE=LimeWire 需要接收網路資訊﹐以便正常運行。您單擊前進後﹐防火牆會詢問您是否允許 LimeWire 使用網路。您應當賦予 LimeWire 所有權限。下面是 Windows 防火牆請求取消 LimeWire 鎖定的圖片﹐您防火牆軟體的顯示可能不同。
+SETUP_FIREWALL_LABEL_ONE=LimeWire 需要接收網路資訊﹐以便正常運行。您單擊前進後﹐防火牆會詢問您是否允許 LimeWire 使用網路。您應當賦予 LimeWire 所有權限。下面是 Windows 防火牆請求取消 LimeWire 鎖定的圖片﹐您防火牆軟體的顯示可能不同。
 #### SETUP_FIREWALL_TITLE_TWO=Firewall Warning
-#? SETUP_FIREWALL_TITLE_TWO=防火牆警告
+SETUP_FIREWALL_TITLE_TWO=防火牆警告
 #### SETUP_FIREWALL_LABEL_TWO=LimeWire is now requesting permission to use the network. If nothing appears, LimeWire has succesfully started listening to the network. If your software does pop up a warning, please allow LimeWire full access for best performance. Click 'Next' when finished.
-#? SETUP_FIREWALL_LABEL_TWO=LimeWire 正在請求使用網路。如果沒有訊息出現﹐表明 LimeWire 已開始成功地監視網路。如果軟體有警告彈出﹐請賦予 LimeWire 所有權限﹐以確保最佳效果。完成後請點擊“前進” 。
+SETUP_FIREWALL_LABEL_TWO=LimeWire 正在請求使用網路。如果沒有訊息出現﹐表明 LimeWire 已開始成功地監視網路。如果軟體有警告彈出﹐請賦予 LimeWire 所有權限﹐以確保最佳效果。完成後請點擊“前進” 。
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=掃描文件
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which directories you would like to share when the scan is complete.
@@ -1354,7 +1354,7 @@ SETUP_CONFIRM_TITLE=確認掃描
 #### SETUP_CONFIRM_LABEL=We identified the directories below as ones that you might like to share. If you would like to share one of these directories, simply check its associated checkbox. Subdirectories of shared directories will also be shared.
 SETUP_CONFIRM_LABEL=我們認為這些資料夾下面的文件有共用的可能. 如果您想共用這些資料夾, 請仅仅在檢查它相關的選擇框內畫勾. 共用的資料夾的的子資料夾也将被共用.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
-#? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire 找不到任何共享文件。要繼續設定 LimeWire﹐請單擊“前進” 。
+SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire 找不到任何共享文件。要繼續設定 LimeWire﹐請單擊“前進” 。
 #### SETUP_FINISH_TITLE=Finish Setup
 SETUP_FINISH_TITLE=安裝完成
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
@@ -1414,11 +1414,11 @@ GO_PRO_LATER_TIP=以後再要 LimeWire 增強版.
 # Key/Value pairs for the upgrade java window.
 ################################################################################
 #### JAVA_UPGRADE_TITLE=Upgrade Your Java
-#? JAVA_UPGRADE_TITLE=升級 Java
+JAVA_UPGRADE_TITLE=升級 Java
 #### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java. LimeWire looks and acts much better with newer versions of Java. Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
-#? JAVA_UPGRADE_MESSAGE=LimeWire 發現您使用的是老版 Java。新版 Java 會使 LimeWire 的外觀和性能都更趨完美。新功能包括支持滾輪滑鼠﹐Windows XP 外觀和其他多項改進。
+JAVA_UPGRADE_MESSAGE=LimeWire 發現您使用的是老版 Java。新版 Java 會使 LimeWire 的外觀和性能都更趨完美。新功能包括支持滾輪滑鼠﹐Windows XP 外觀和其他多項改進。
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
-#? JAVA_UPGRADE_QUESTION=您是否希望獲取免費 Java 升級﹖
+JAVA_UPGRADE_QUESTION=您是否希望獲取免費 Java 升級﹖
 
 ###################################################################
 # Key/value pairs for XML
@@ -1457,7 +1457,7 @@ VIEW_CHOOSER_CANCEL_BUTTON_LABEL=取消
 XML_SEARCH_MORE_OPTIONS_LABEL=更多搜尋選項
 
 #### META_EDITOR_INFO_TAB_LABEL=Info
-#? META_EDITOR_INFO_TAB_LABEL=資訊
+META_EDITOR_INFO_TAB_LABEL=資訊
 #### META_EDITOR_OK_BUTTON_LABEL=OK
 META_EDITOR_OK_BUTTON_LABEL=確定
 #### META_EDITOR_CANCEL_BUTTON_LABEL=Cancel
@@ -1465,51 +1465,51 @@ META_EDITOR_CANCEL_BUTTON_LABEL=取消
 #### META_EDITOR_ADVANCED_BUTTON_LABEL=Advanced
 META_EDITOR_ADVANCED_BUTTON_LABEL=高級
 #### META_EDITOR_RESET_LABEL=Reset
-#? META_EDITOR_RESET_LABEL=重置
+META_EDITOR_RESET_LABEL=重置
 
 #### META_EDITOR_AUDIO_LABEL=Audio
 META_EDITOR_AUDIO_LABEL=音頻
 #### META_EDITOR_TITLE_LABEL=Title:
-#? META_EDITOR_TITLE_LABEL=名稱﹕
+META_EDITOR_TITLE_LABEL=名稱﹕
 #### META_EDITOR_ARTIST_LABEL=Artist:
-#? META_EDITOR_ARTIST_LABEL=藝術家﹕
+META_EDITOR_ARTIST_LABEL=藝術家﹕
 #### META_EDITOR_ALBUM_LABEL=Album:
-#? META_EDITOR_ALBUM_LABEL=專輯﹕
+META_EDITOR_ALBUM_LABEL=專輯﹕
 #### META_EDITOR_GENRE_LABEL=Genre:
-#? META_EDITOR_GENRE_LABEL=流派﹕
+META_EDITOR_GENRE_LABEL=流派﹕
 #### META_EDITOR_YEAR_LABEL=Year:
-#? META_EDITOR_YEAR_LABEL=年份﹕
+META_EDITOR_YEAR_LABEL=年份﹕
 #### META_EDITOR_TYPE_LABEL=Type:
 META_EDITOR_TYPE_LABEL=類型:
 #### META_EDITOR_TRACK_LABEL=Track:
-#? META_EDITOR_TRACK_LABEL=聲道﹕
+META_EDITOR_TRACK_LABEL=聲道﹕
 #### META_EDITOR_LANGUAGE_LABEL=Language:
-#? META_EDITOR_LANGUAGE_LABEL=語言﹕
+META_EDITOR_LANGUAGE_LABEL=語言﹕
 #### META_EDITOR_SECONDS_LABEL=Length:
-#? META_EDITOR_SECONDS_LABEL=長度﹕
+META_EDITOR_SECONDS_LABEL=長度﹕
 #### META_EDITOR_BITRATE_LABEL=Bitrate:
-#? META_EDITOR_BITRATE_LABEL=比特率﹕
+META_EDITOR_BITRATE_LABEL=比特率﹕
 #### META_EDITOR_COMMENTS_LABEL=Comments:
-#? META_EDITOR_COMMENTS_LABEL=評論﹕
+META_EDITOR_COMMENTS_LABEL=評論﹕
 #### META_EDITOR_SHA1_LABEL=SHA1:
-#? META_EDITOR_SHA1_LABEL=SHA1:
+META_EDITOR_SHA1_LABEL=SHA1:
 #### META_EDITOR_PRICE_LABEL=Price:
-#? META_EDITOR_PRICE_LABEL=價格﹕
+META_EDITOR_PRICE_LABEL=價格﹕
 #### META_EDITOR_LINK_LABEL=Link:
-#? META_EDITOR_LINK_LABEL=鏈接﹕
+META_EDITOR_LINK_LABEL=鏈接﹕
 #### META_EDITOR_ACTION_LABEL=Action:
-#? META_EDITOR_ACTION_LABEL=表演﹕
+META_EDITOR_ACTION_LABEL=表演﹕
 #### META_EDITOR_STARS_LABEL=Stars:
-#? META_EDITOR_STARS_LABEL=明星﹕
+META_EDITOR_STARS_LABEL=明星﹕
 #### META_EDITOR_LICENSE_LABEL=License:
-#? META_EDITOR_LICENSE_LABEL=許可證﹕
+META_EDITOR_LICENSE_LABEL=許可證﹕
 
 #### META_EDITOR_SIZE_LABEL=Size:
 META_EDITOR_SIZE_LABEL=大小:
 #### META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
-#? META_EDITOR_DATE_MODIFIED_LABEL=修改日期﹕
+META_EDITOR_DATE_MODIFIED_LABEL=修改日期﹕
 #### META_EDITOR_KIND_LABEL=Kind:
-#? META_EDITOR_KIND_LABEL=類別﹕
+META_EDITOR_KIND_LABEL=類別﹕
 #### META_EDITOR_MP3_KIND_LABEL=MPEG-1 Audio Layer 3
 META_EDITOR_MP3_KIND_LABEL=MPEG-1 音頻 Layer 3
 #### META_EDITOR_MP4_KIND_LABEL=MPEG-4 Audio
@@ -1551,7 +1551,7 @@ GENERAL_LAUNCH_BUTTON_LABEL=運行
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
 GENERAL_LAUNCH_BUTTON_TIP=運行文件.
 #### GENERAL_CLEAR_HISTORY=Clear History
-#? GENERAL_CLEAR_HISTORY=清除歷史記錄
+GENERAL_CLEAR_HISTORY=清除歷史記錄
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips
@@ -1585,7 +1585,7 @@ CHAT_YOU=您
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading resources...
 SPLASH_STATUS_RESOURCE_MANAGER=加載資源...
 #### SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
-#? SPLASH_STATUS_HTML_ENGINE=加載 HTML 引擎...
+SPLASH_STATUS_HTML_ENGINE=加載 HTML 引擎...
 #### SPLASH_STATUS_SEARCH_WINDOW=Loading search window...
 SPLASH_STATUS_SEARCH_WINDOW=加載搜尋窗口...
 #### SPLASH_STATUS_OPTIONS_WINDOW=Loading options window...
@@ -1621,45 +1621,45 @@ SPLASH_STATUS_MENUS=加載菜单...
 #### SPLASH_STATUS_MESSAGE_SERVICE=Loading messages...
 SPLASH_STATUS_MESSAGE_SERVICE=加載信息...
 #### SPLASH_STATUS_ICONS=Loading icons...
-#? SPLASH_STATUS_ICONS=加載圖標...
+SPLASH_STATUS_ICONS=加載圖標...
 #### SPLASH_STATUS_I18N=Loading internationalization support...
-#? SPLASH_STATUS_I18N=加載國際化支持...
+SPLASH_STATUS_I18N=加載國際化支持...
 #### SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
-#? SPLASH_STATUS_DAAP=加載數位音頻進入協議...
+SPLASH_STATUS_DAAP=加載數位音頻進入協議...
 #### SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=加載連線播放器...
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=加載連線播放器...
 #### SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading message router...
-#? SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=加載信息路由器...
+SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=加載信息路由器...
 #### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading connection management...
-#? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=加載連線管理...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=加載連線管理...
 #### SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
-#? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=加載點...
+SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=加載點...
 #### SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading shared files...
-#? SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=加載共用的文件...
+SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=加載共用的文件...
 #### SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading old downloads...
-#? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=加載以前的下載...
+SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=加載以前的下載...
 #### SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
-#? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=檢查升級...
+SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=檢查升級...
 #### SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading directed querier...
-#? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=加載定向查詢...
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=加載定向查詢...
 #### SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading MAGNET listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=加載 MAGNET 接收器...
+SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=加載 MAGNET 接收器...
 #### SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading peer listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_PINGER=加載點接收器...
+SPLASH_STATUS_COMPONENT_LOADING_PINGER=加載點接收器...
 #### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading stale connection management...
-#? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=加載失效連線管理器...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=加載失效連線管理器...
 #### SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading saved files...
-#? SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=加載儲存的文件...
+SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=加載儲存的文件...
 #### SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading secure settings...
-#? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=加載安全設置...
+SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=加載安全設置...
 
 ##################################################################
 # Key/value pairs for the shutdown window
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
-#? SHUTDOWN_TITLE=關閉 LimeWire...
+SHUTDOWN_TITLE=關閉 LimeWire...
 #### SHUTDOWN_WAIT=Please wait while LimeWire shuts down...
-#? SHUTDOWN_WAIT=LimeWire正在關閉﹐請稍等...
+SHUTDOWN_WAIT=LimeWire正在關閉﹐請稍等...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to
@@ -1683,9 +1683,9 @@ SUPPORT_LIMEWIRE_07=支援 LimeWire 開放資源的, 基於點對點的架構. �
 #### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻. 保持因特網開放性﹐請使用 LimeWire 增強版。
 #### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
-#? SUPPORT_LIMEWIRE_09=研發 LimeWire 需要投入。獲取增強版。
+SUPPORT_LIMEWIRE_09=研發 LimeWire 需要投入。獲取增強版。
 #### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
-#? SUPPORT_LIMEWIRE_11=支援獨立媒體內容共享。
+SUPPORT_LIMEWIRE_11=支援獨立媒體內容共享。
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
@@ -1694,15 +1694,15 @@ SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻. 保持因特�
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=升級 LimeWire新版本下載﹗
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
-#? UPDATE_MESSAGE_SMALL=有新版本可供下載﹐升級嗎﹖
+UPDATE_MESSAGE_SMALL=有新版本可供下載﹐升級嗎﹖
 #### UPDATE_TITLE=A new version of LimeWire is available.
-#? UPDATE_TITLE=有新版本 LimeWire 可供下載。
+UPDATE_TITLE=有新版本 LimeWire 可供下載。
 #### UPDATE_LATER_LABEL=Update Later
-#? UPDATE_LATER_LABEL=稍後升級
+UPDATE_LATER_LABEL=稍後升級
 #### UPDATE_NOW_LABEL=Update Now
-#? UPDATE_NOW_LABEL=立即升級
+UPDATE_NOW_LABEL=立即升級
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
-#? UPDATE_TIP=訪問 http://www.limewire.com 升級﹗
+UPDATE_TIP=訪問 http://www.limewire.com 升級﹗
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
@@ -1748,11 +1748,11 @@ MESSAGE_FILE_CORRUPT=LimeWire 發現文件毁坏
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
 MESSAGE_CONTINUE_DOWNLOAD=您想繼續下載吗?
 #### MESSAGE_LANG_CHANGE=Please note that you must restart LimeWire for the language to change. Also, make sure that you have the required fonts for the selected language.
-#? MESSAGE_LANG_CHANGE=請注意﹕您必須重啟 LimeWire﹐語言修改才能生效。還須確保您擁有選中語言所必需的字體。
+MESSAGE_LANG_CHANGE=請注意﹕您必須重啟 LimeWire﹐語言修改才能生效。還須確保您擁有選中語言所必需的字體。
 #### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
-#? MESSAGE_SENSITIVE_SHARE_TOP=您嘗試共享的資料夾可能包含敏感資訊﹕
+MESSAGE_SENSITIVE_SHARE_TOP=您嘗試共享的資料夾可能包含敏感資訊﹕
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
-#? MESSAGE_SENSITIVE_SHARE_BOTTOM=共享資料夾﹖
+MESSAGE_SENSITIVE_SHARE_BOTTOM=共享資料夾﹖
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
@@ -1766,7 +1766,7 @@ INVALID_SAVE_DIR_LABEL=儲存文件的資料夾非法. 請選擇新的資料夾.
 # internet
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
-#? NO_INTERNET=您的電腦沒有活動的因特網連接﹐或者防火牆不允許 LimeWire 接入因特網。請檢視您的連接或防火牆設置﹐而後選擇“文件” 菜單中的“連接” 選項﹐使 LimeWire連接到網路。
+NO_INTERNET=您的電腦沒有活動的因特網連接﹐或者防火牆不允許 LimeWire 接入因特網。請檢視您的連接或防火牆設置﹐而後選擇“文件” 菜單中的“連接” 選項﹐使 LimeWire連接到網路。
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
@@ -1774,16 +1774,16 @@ INVALID_SAVE_DIR_LABEL=儲存文件的資料夾非法. 請選擇新的資料夾.
 # keep trying.
 ################################################################################
 #### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
-#? NO_INTERNET_RETRYING=您的電腦沒有活動的因特網連接﹐或者防火牆不允許 LimeWire 接入因特網。除非您選擇“文件” 菜單中的“不連接” 選項﹐否則 LimeWire會自動嘗試連接到網路。
+NO_INTERNET_RETRYING=您的電腦沒有活動的因特網連接﹐或者防火牆不允許 LimeWire 接入因特網。除非您選擇“文件” 菜單中的“不連接” 選項﹐否則 LimeWire會自動嘗試連接到網路。
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
 ################################################################################
 #### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
-#? GWEBCACHE_FETCHED_TOO_MANY=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆和內容過濾軟體屏蔽了對 Gnutella (連接埠6346) 的接入。請檢視您的防火牆選項﹐允許 LimeWire 接入 Gnutella 網路﹐或者聯絡系統管理員或 ISP﹐確定 Gnutella流量未被過濾。
+GWEBCACHE_FETCHED_TOO_MANY=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆和內容過濾軟體屏蔽了對 Gnutella (連接埠6346) 的接入。請檢視您的防火牆選項﹐允許 LimeWire 接入 Gnutella 網路﹐或者聯絡系統管理員或 ISP﹐確定 Gnutella流量未被過濾。
 #### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
-#? GWEBCACHE_NO_CACHES_LEFT=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆和內容過濾軟體屏蔽了對 Gnutella (連接埠6346) 的接入。請檢視您的防火牆選項﹐允許 LimeWire 接入 Gnutella 網路﹐或者聯絡系統管理員或 ISP﹐確定 Gnutella流量未被過濾。
+GWEBCACHE_NO_CACHES_LEFT=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆和內容過濾軟體屏蔽了對 Gnutella (連接埠6346) 的接入。請檢視您的防火牆選項﹐允許 LimeWire 接入 Gnutella 網路﹐或者聯絡系統管理員或 ISP﹐確定 Gnutella流量未被過濾。
 
 
 ################################################################################
@@ -1792,64 +1792,64 @@ INVALID_SAVE_DIR_LABEL=儲存文件的資料夾非法. 請選擇新的資料夾.
 # Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
 ################################################################################
 #### ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
-#? ERROR_DISK_FULL_DOWNLOAD=因為硬碟已滿﹐LimeWire 無法下載選中的文件。要想下載更多文件﹐必須釋放硬碟空間。
+ERROR_DISK_FULL_DOWNLOAD=因為硬碟已滿﹐LimeWire 無法下載選中的文件。要想下載更多文件﹐必須釋放硬碟空間。
 #### ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
-#? ERROR_DISK_FULL_GENERIC=因為硬碟已滿﹐LimeWire 無法寫入必需的文件。要想繼續使用 LimeWire﹐必須釋放硬碟空間。
+ERROR_DISK_FULL_GENERIC=因為硬碟已滿﹐LimeWire 無法寫入必需的文件。要想繼續使用 LimeWire﹐必須釋放硬碟空間。
 #### ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
-#? ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire 無法下載選中文件﹐因為該文件正在被其他程式使用。請關閉該程式﹐重新嘗試下載。
+ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire 無法下載選中文件﹐因為該文件正在被其他程式使用。請關閉該程式﹐重新嘗試下載。
 #### ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
-#? ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire 無法打開必要的文件﹐因為該文件正在被其他程式鎖定。直到該文件被釋放﹐LimeWire 可能出現意外操作。
+ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire 無法打開必要的文件﹐因為該文件正在被其他程式鎖定。直到該文件被釋放﹐LimeWire 可能出現意外操作。
 #### ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete directory. To continue using LimeWire, please choose a different Save Directory.
-#? ERROR_ACCESS_DENIED_DOWNLOAD=因為您未被許可向未完整下載的資料夾中寫入文件﹐LimeWire 不能創立或繼續寫入選定下載中未完全下載的文件。要想繼續使用 LimeWire﹐請選擇不同的儲存資料夾。
+ERROR_ACCESS_DENIED_DOWNLOAD=因為您未被許可向未完整下載的資料夾中寫入文件﹐LimeWire 不能創立或繼續寫入選定下載中未完全下載的文件。要想繼續使用 LimeWire﹐請選擇不同的儲存資料夾。
 #### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
-#? ERROR_ACCESS_DENIED_GENERIC=因為您沒有獲得相應的許可﹐LimeWire 無法寫入必要的文件。您下次啟動 LimeWire 時﹐偏好可能未被保存﹐或者 LimeWire 可能出現意外反應。
+ERROR_ACCESS_DENIED_GENERIC=因為您沒有獲得相應的許可﹐LimeWire 無法寫入必要的文件。您下次啟動 LimeWire 時﹐偏好可能未被保存﹐或者 LimeWire 可能出現意外反應。
 #### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
-#? ERROR_INVALID_NAME_DOWNLOAD=LimeWire 無法打開選定下載中的不完整文件﹐原因是該文件名包含您的操作系統不支援的字符。
+ERROR_INVALID_NAME_DOWNLOAD=LimeWire 無法打開選定下載中的不完整文件﹐原因是該文件名包含您的操作系統不支援的字符。
 #### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
-#? ERROR_INVALID_NAME_GENERIC=LimeWire 無法打開必要的文件﹐原因是該文件名包含您的操作系統不支援的字符。LimeWire 可能出現意外反應。
+ERROR_INVALID_NAME_GENERIC=LimeWire 無法打開必要的文件﹐原因是該文件名包含您的操作系統不支援的字符。LimeWire 可能出現意外反應。
 
 
 ################################################################################
 # Key/Value pairs for internal error messages
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
-#? ERROR_INTERNAL_TITLE=內部錯誤
+ERROR_INTERNAL_TITLE=內部錯誤
 #### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=LimeWire 存在碰到一個內部錯誤. 但是, LimeWire有可能 能從錯誤中恢復並繼續正常運行。請單擊“發送” 將問題告知 LimeWire﹐以便協助調試。如果您願意﹐可以單擊“檢視” 查看將要發送的資訊。謝謝您。且應該正常執行. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 #### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
-#? ERROR_INTERNAL_OLD=LimeWire 碰到一個內部錯誤. 但是, LimeWire有可能從錯誤中恢復並繼續正常運行。要想繼續使用 LimeWire﹐請單擊“忽略” 。如果您願意﹐可以單擊“檢視” 查看錯誤信息。
+ERROR_INTERNAL_OLD=LimeWire 碰到一個內部錯誤. 但是, LimeWire有可能從錯誤中恢復並繼續正常運行。要想繼續使用 LimeWire﹐請單擊“忽略” 。如果您願意﹐可以單擊“檢視” 查看錯誤信息。
 #### ERROR_INTERNAL_SEND=Send
-#? ERROR_INTERNAL_SEND=發送
+ERROR_INTERNAL_SEND=發送
 #### ERROR_INTERNAL_REVIEW=Review
-#? ERROR_INTERNAL_REVIEW=檢視
+ERROR_INTERNAL_REVIEW=檢視
 #### ERROR_INTERNAL_DISCARD=Discard
-#? ERROR_INTERNAL_DISCARD=忽略
+ERROR_INTERNAL_DISCARD=忽略
 #### ERROR_INTERNAL_COPY=Copy Report
-#? ERROR_INTERNAL_COPY=複製報告
+ERROR_INTERNAL_COPY=複製報告
 #### ERROR_INTERNAL_OK=OK
 ERROR_INTERNAL_OK=確定
 #### ERROR_INTERNAL_ALWAYS_SEND=Always Send Immediately
-#? ERROR_INTERNAL_ALWAYS_SEND=總是立即發送
+ERROR_INTERNAL_ALWAYS_SEND=總是立即發送
 #### ERROR_INTERNAL_ALWAYS_REVIEW=Always Ask For Review
-#? ERROR_INTERNAL_ALWAYS_REVIEW=總是要求檢視
+ERROR_INTERNAL_ALWAYS_REVIEW=總是要求檢視
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
-#? ERROR_INTERNAL_ALWAYS_DISCARD=總是忽略所有錯誤
+ERROR_INTERNAL_ALWAYS_DISCARD=總是忽略所有錯誤
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
-#? ERROR_INTERNAL_SERVLET_FAILED=LimeWire 無法連線故障服務器﹐發送故障報告。若想協助調試﹐請複製以下文本﹐發送至 bugs@limewire.com。謝謝您。
+ERROR_INTERNAL_SERVLET_FAILED=LimeWire 無法連線故障服務器﹐發送故障報告。若想協助調試﹐請複製以下文本﹐發送至 bugs@limewire.com。謝謝您。
 
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
 #### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
-#? ERROR_DAAP_LOOPBACK_FAILED=因為缺少微軟補丁或防火牆屏蔽接入﹐LimeWire 無法啟動數位音頻進入協議(共享 iTunes 文件)。如果您希望使用該功能﹐LimeWire 可以將您重新定向到微軟的網頁。點擊“是” 轉向補丁﹐“否” 禁用該功能﹐或者“取消” 稍後確定。
+ERROR_DAAP_LOOPBACK_FAILED=因為缺少微軟補丁或防火牆屏蔽接入﹐LimeWire 無法啟動數位音頻進入協議(共享 iTunes 文件)。如果您希望使用該功能﹐LimeWire 可以將您重新定向到微軟的網頁。點擊“是” 轉向補丁﹐“否” 禁用該功能﹐或者“取消” 稍後確定。
 #### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
-#? ERROR_DAAP_LOOPBACK_FAILED_NONXP=因為防火牆屏蔽接入﹐LimeWire 無法啟動數位音頻進入協議(共享 iTunes 文件)。要想繼續使用該功能﹐點擊“是” 更改防火牆設置﹐賦予“LimeWire.exe”全部出入連接權限。若想禁用該功能﹐請點擊“否” 。
+ERROR_DAAP_LOOPBACK_FAILED_NONXP=因為防火牆屏蔽接入﹐LimeWire 無法啟動數位音頻進入協議(共享 iTunes 文件)。要想繼續使用該功能﹐點擊“是” 更改防火牆設置﹐賦予“LimeWire.exe”全部出入連接權限。若想禁用該功能﹐請點擊“否” 。
 #### ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
-#? ERROR_DAAP_START_FAILED= LimeWire 無法啟動數位音頻進入協議服務(共享 iTunes 文件)。此功能將被關閉。您可以到選項中重新開啟﹐點擊 iTunes ->共享。
+ERROR_DAAP_START_FAILED= LimeWire 無法啟動數位音頻進入協議服務(共享 iTunes 文件)。此功能將被關閉。您可以到選項中重新開啟﹐點擊 iTunes ->共享。
 #### ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
-#? ERROR_DAAP_RUN_ERROR=LimeWire 啟動數位音頻進入協議(共享 iTunes 文件)時遇到錯誤。該功能將被關閉。您可以到選項中重新開啟﹐點擊 iTunes ->共享。
+ERROR_DAAP_RUN_ERROR=LimeWire 啟動數位音頻進入協議(共享 iTunes 文件)時遇到錯誤。該功能將被關閉。您可以到選項中重新開啟﹐點擊 iTunes ->共享。
 #### ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
-#? ERROR_NO_PORTS_AVAILABLE=LimeWire 無法設置連接埠監視進入的連線。LimeWire 的某些功能可能無法正常使用。
+ERROR_NO_PORTS_AVAILABLE=LimeWire 無法設置連接埠監視進入的連線。LimeWire 的某些功能可能無法正常使用。
 #### ERROR_PORT_UNAVAILABLE=Port not available. Please select a different port.
 ERROR_PORT_UNAVAILABLE=連接埠不可提供. 請選擇一個不同的連接埠.
 #### ERROR_KEEP_ALIVE=LimeWire does not allow you to maintain this many connections, as it creates excess traffic that clogs the network.
@@ -1873,7 +1873,7 @@ ERROR_INVALID_SAVE_DIRECTORY=錯誤的儲存文件的資料夾. 請用另一個�
 #### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save directory is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different directory.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=儲存資料夾不正確. 它可能已被删除了, 或可能沒有寫入的權限或者是其他問題. 請選擇另一個資料夾.
 #### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
-#? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=選定的儲存資料夾不正確。您可能沒有寫入權限。LimeWire 將恢復到您從前選定的資料夾。
+ERROR_INVALID_SAVE_DIRECTORY_SELECTION=選定的儲存資料夾不正確。您可能沒有寫入權限。LimeWire 將恢復到您從前選定的資料夾。
 #### ERROR_INVALID_SHARED_DIRECTORY=Invalid directory for sharing files. Please use another directory or revert to the default.
 ERROR_INVALID_SHARED_DIRECTORY=錯誤的共用資料夾. 請用另一個資料夾或者恢復到預設值.
 #### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
@@ -1889,15 +1889,15 @@ ERROR_ALREADY_DOWNLOADING=您已在下載中
 #### ERROR_ALREADY_EXISTS=You have already downloaded
 ERROR_ALREADY_EXISTS=You have already downloaded您已下載完畢
 #### NO_PREVIEW_BEGIN=There is nothing to preview for file
-#? NO_PREVIEW_BEGIN=沒有可以瀏覽的文件
+NO_PREVIEW_BEGIN=沒有可以瀏覽的文件
 #### NO_PREVIEW_END=.
-#? NO_PREVIEW_END=.
+NO_PREVIEW_END=.
 #### ERROR_CANT_RESUME_START=The file
-#? ERROR_CANT_RESUME_START=文件
+ERROR_CANT_RESUME_START=文件
 #### ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
-#? ERROR_CANT_RESUME_END=不是正確的未完全下載文件﹐無法繼續下載。
+ERROR_CANT_RESUME_END=不是正確的未完全下載文件﹐無法繼續下載。
 #### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
-#? ERROR_OPEN_URL=LimeWire 找不到您的網路瀏覽器﹐無法顯示以下網頁﹕
+ERROR_OPEN_URL=LimeWire 找不到您的網路瀏覽器﹐無法顯示以下網頁﹕
 #### ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save directory. Please select a new save directory in the Options menu and try again.
 ERROR_ACCESSING_SAVE_DIRECTORY=無法存取儲存資料夾. 請在“選項” 菜單中選擇一個新的資料夾, 然後再試.
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
@@ -1925,62 +1925,62 @@ ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=不能瀏覽主機
 #### ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 #### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
-#? ERROR_APPLYING_INVALID_THEME_FILE=您應用的主題不正確。LimeWire 將恢復到預設的主題。
+ERROR_APPLYING_INVALID_THEME_FILE=您應用的主題不正確。LimeWire 將恢復到預設的主題。
 #### ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid. Please choose another file, or use the default.
-#? ERROR_INVALID_THEME_FILE=您選中的外殼文件不存在或不正確。請選擇另外的文件﹐或使用預設外殼。
+ERROR_INVALID_THEME_FILE=您選中的外殼文件不存在或不正確。請選擇另外的文件﹐或使用預設外殼。
 #### ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
-#? ERROR_THEME_OUT_OF_DATE=您選中的外殼已過時。請下載最新版本。
+ERROR_THEME_OUT_OF_DATE=您選中的外殼已過時。請下載最新版本。
 #### ERROR_THEME_OUT_OF_DATE_TITLE=Invalid Skin
-#? ERROR_THEME_OUT_OF_DATE_TITLE=外殼不正確
+ERROR_THEME_OUT_OF_DATE_TITLE=外殼不正確
 #### ERROR_THEME_OUT_OF_DATE_GET_MORE=Get New Skins
-#? ERROR_THEME_OUT_OF_DATE_GET_MORE=獲取新的外殼
+ERROR_THEME_OUT_OF_DATE_GET_MORE=獲取新的外殼
 #### ERROR_THEME_OUT_OF_DATE_LATER=Later
-#? ERROR_THEME_OUT_OF_DATE_LATER=稍後
+ERROR_THEME_OUT_OF_DATE_LATER=稍後
 #### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
-#? ERROR_BAD_MAGNET_LINK=無法處理損壞的磁性鏈接
+ERROR_BAD_MAGNET_LINK=無法處理損壞的磁性鏈接
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
-#? ERROR_INVALID_URLS_IN_MAGNET=磁性鏈接中的一個或多個 URL 不正確。文件可能沒有正確下載。
+ERROR_INVALID_URLS_IN_MAGNET=磁性鏈接中的一個或多個 URL 不正確。文件可能沒有正確下載。
 #### ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-#? ERROR_ITUNES_SCRIPT=LimeWire 無法加載 iTunes 整合腳本﹐已關閉 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
+ERROR_ITUNES_SCRIPT=LimeWire 無法加載 iTunes 整合腳本﹐已關閉 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
 #### ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-#? ERROR_ITUNES_LINK=LimeWire 無法加載 iTunes 必需的組件﹐已關閉 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
+ERROR_ITUNES_LINK=LimeWire 無法加載 iTunes 必需的組件﹐已關閉 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
 
 #### ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-#? ERROR_ITUNES_INTEGRATION=LimeWire iTunes 整合出現錯誤。為了避免再次出錯﹐LimeWire 已經關閉了 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
+ERROR_ITUNES_INTEGRATION=LimeWire iTunes 整合出現錯誤。為了避免再次出錯﹐LimeWire 已經關閉了 iTunes 整合。要想重新啟用﹐請打開 LimeWire->偏好﹐點擊 iTunes 並在框中畫勾。
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
-#? ERROR_PROPS_CORRUPTED=儲存您偏好的文件已損壞。LimeWire 將使用預設值。
+ERROR_PROPS_CORRUPTED=儲存您偏好的文件已損壞。LimeWire 將使用預設值。
 #### ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
-#? ERROR_SEARCH_TOO_LARGE=搜尋太長。請減少搜尋項﹐而後重試。
+ERROR_SEARCH_TOO_LARGE=搜尋太長。請減少搜尋項﹐而後重試。
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
-#? ERROR_XML_SEARCH_TOO_LARGE=搜尋太具體。請減少搜尋項﹐而後重試。
+ERROR_XML_SEARCH_TOO_LARGE=搜尋太具體。請減少搜尋項﹐而後重試。
 
 ################################################################################
 # Messages for Creative Commons Licensing
 ################################################################################
 #### LICENSE_CC_VIEW_LICENSE=View License
-#? LICENSE_CC_VIEW_LICENSE=檢視許可證
+LICENSE_CC_VIEW_LICENSE=檢視許可證
 #### LICENSE_CC_TITLE=License Details
-#? LICENSE_CC_TITLE=許可證細則
+LICENSE_CC_TITLE=許可證細則
 #### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
-#? LICENSE_CC_LOCATING=LimeWire 正在搜尋許可證細則。
+LICENSE_CC_LOCATING=LimeWire 正在搜尋許可證細則。
 #### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license. Click 'verify' to locate the details of this Creative Commons license.
-#? LICENSE_CC_UNVERIFIED=LimeWire 尚未驗證此許可證。單擊“驗證” 檢視該創意共用許可證的詳細內容。
+LICENSE_CC_UNVERIFIED=LimeWire 尚未驗證此許可證。單擊“驗證” 檢視該創意共用許可證的詳細內容。
 #### LICENSE_CC_VERIFY=Verify
-#? LICENSE_CC_VERIFY=驗證
+LICENSE_CC_VERIFY=驗證
 #### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
-#? LICENSE_CC_INVALID=LimeWire 無法確定許可證細則。
+LICENSE_CC_INVALID=LimeWire 無法確定許可證細則。
 #### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
-#? LICENSE_CC_RETRY=您可以點擊“驗證”﹐重試驗證此許可證。
+LICENSE_CC_RETRY=您可以點擊“驗證”﹐重試驗證此許可證。
 #### LICENSE_CC_DETAILS=License Details:
-#? LICENSE_CC_DETAILS=許可證細則﹕
+LICENSE_CC_DETAILS=許可證細則﹕
 #### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
-#? LICENSE_CC_CLAIMED_DEED=檢視公開的授權約定
+LICENSE_CC_CLAIMED_DEED=檢視公開的授權約定
 #### LICENSE_CC_DEED=View License Deed
-#? LICENSE_CC_DEED=檢視授權約定
+LICENSE_CC_DEED=檢視授權約定
 #### LICENSE_CC_VERIFICATION=View Verification Page
-#? LICENSE_CC_VERIFICATION=檢視驗證頁
+LICENSE_CC_VERIFICATION=檢視驗證頁
 #### LICENSE_CC=Creative Commons
-#? LICENSE_CC=創意共用
+LICENSE_CC=創意共用
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -2008,27 +2008,27 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=連線
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
 OPTIONS_SHUTDOWN_MAIN_TITLE=關閉
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
-#? OPTIONS_UPDATE_MAIN_TITLE=更新
+OPTIONS_UPDATE_MAIN_TITLE=更新
 #### OPTIONS_CHAT_MAIN_TITLE=Chat
 OPTIONS_CHAT_MAIN_TITLE=聊天
 #### OPTIONS_PLAYER_MAIN_TITLE=Player
 OPTIONS_PLAYER_MAIN_TITLE=播放機
 #### OPTIONS_ITUNES_MAIN_TITLE=iTunes
-#? OPTIONS_ITUNES_MAIN_TITLE=iTunes
+OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #### OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
-#? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=輸入
+OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=輸入
 #### OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
-#? OPTIONS_ITUNES_DAAP_MAIN_TITLE=共用
+OPTIONS_ITUNES_DAAP_MAIN_TITLE=共用
 #### OPTIONS_APPS_MAIN_TITLE=Helper Apps
 OPTIONS_APPS_MAIN_TITLE=助手程式Helper apps
 #### OPTIONS_BUGS_MAIN_TITLE=Bug Reports
 OPTIONS_BUGS_MAIN_TITLE=Bug reports錯誤報告
 #### OPTIONS_GUI_MAIN_TITLE=View
-#? OPTIONS_GUI_MAIN_TITLE=檢視
+OPTIONS_GUI_MAIN_TITLE=檢視
 #### OPTIONS_POPUPS_MAIN_TITLE=Popups
-#? OPTIONS_POPUPS_MAIN_TITLE=彈出框
+OPTIONS_POPUPS_MAIN_TITLE=彈出框
 #### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete Text
-#? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=自動完成文本
+OPTIONS_AUTOCOMPLETE_MAIN_TITLE=自動完成文本
 #### OPTIONS_THEME_MAIN_TITLE=Skin
 OPTIONS_THEME_MAIN_TITLE=外殼
 #### OPTIONS_SKIN_MAIN_TITLE=Skin
@@ -2050,7 +2050,7 @@ OPTIONS_MESSAGES_MAIN_TITLE=主機
 #### OPTIONS_ADVANCED_MAIN_TITLE=Advanced
 OPTIONS_ADVANCED_MAIN_TITLE=高級
 #### OPTIONS_COMPRESSION_MAIN_TITLE=Compression
-#? OPTIONS_COMPRESSION_MAIN_TITLE=壓縮
+OPTIONS_COMPRESSION_MAIN_TITLE=壓縮
 #### OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
 OPTIONS_PREFERENCING_MAIN_TITLE=優先選擇
 #### OPTIONS_FIREWALL_MAIN_TITLE=Firewall Config
@@ -2058,11 +2058,11 @@ OPTIONS_FIREWALL_MAIN_TITLE=防火墙設置
 #### OPTIONS_PRIVATE_NET_MAIN_TITLE=Private Network
 OPTIONS_PRIVATE_NET_MAIN_TITLE=私有網路
 #### OPTIONS_STARTUP_MAIN_TITLE=System Startup
-#? OPTIONS_STARTUP_MAIN_TITLE=系統啟動
+OPTIONS_STARTUP_MAIN_TITLE=系統啟動
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
-#? OPTIONS_PROXY_MAIN_TITLE=代理服務器
+OPTIONS_PROXY_MAIN_TITLE=代理服務器
 #### OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale Preferencing
-#? OPTIONS_CONNECT_PREF_MAIN_TITLE=本地偏好
+OPTIONS_CONNECT_PREF_MAIN_TITLE=本地偏好
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -2082,7 +2082,7 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=國家
 # in the options window
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
-#? OPTIONS_SAVE_ON_CLOSE=您已經修改設置﹐是否需要保存﹖
+OPTIONS_SAVE_ON_CLOSE=您已經修改設置﹐是否需要保存﹖
 #### OPTIONS_SAVE_DIR_TITLE=Save Directory
 OPTIONS_SAVE_DIR_TITLE=儲存資料夾
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the directory for saving files.
@@ -2159,11 +2159,11 @@ OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=設置禁用超級節點功能連結點
 # Key/Value pairs for disabling OOB support
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
-#? OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB 搜尋
+OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB 搜尋
 #### OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Searching results in faster result delivery to your client, though some internet connections may not work well with this feature.
-#? OPTIONS_DISABLE_OOB_SEARCHING_LABEL=將帶外搜尋結果加速傳送給客戶端﹐但某些因特網連線可能與該功能不匹配。
+OPTIONS_DISABLE_OOB_SEARCHING_LABEL=將帶外搜尋結果加速傳送給客戶端﹐但某些因特網連線可能與該功能不匹配。
 #### OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Enable OOB Searching:
-#? OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=啟用 OOB 搜尋
+OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=啟用 OOB 搜尋
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
@@ -2229,11 +2229,11 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上傳頻寬:上傳速度﹕
 # files.
 ################################################################################
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Partial Files
-#? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=部份文件
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=部份文件
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
-#? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=您可以選擇是否自動共用部份下載的文件。
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=您可以選擇是否自動共用部份下載的文件。
 #### OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing
-#? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=允許部份共用
+OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=允許部份共用
 
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
@@ -2293,15 +2293,15 @@ OPTIONS_SHUTDOWN_TO_TRAY_LABEL=最小化到系統托盘
 # Key/Value pairs for update options
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
-#? OPTIONS_UPDATE_TITLE=更新選項
+OPTIONS_UPDATE_TITLE=更新選項
 #### OPTIONS_UPDATE_LABEL=You can choose when you want to be notified of new LimeWire releases.
-#? OPTIONS_UPDATE_LABEL=您可以選擇是否願意收到新 LimeWire 版本的通知
+OPTIONS_UPDATE_LABEL=您可以選擇是否願意收到新 LimeWire 版本的通知
 #### OPTIONS_UPDATE_BETA=Beta Releases
-#? OPTIONS_UPDATE_BETA=測試版
+OPTIONS_UPDATE_BETA=測試版
 #### OPTIONS_UPDATE_SERVICE=Service Releases
-#? OPTIONS_UPDATE_SERVICE=服務版
+OPTIONS_UPDATE_SERVICE=服務版
 #### OPTIONS_UPDATE_MAJOR=Major Releases
-#? OPTIONS_UPDATE_MAJOR=專業版
+OPTIONS_UPDATE_MAJOR=專業版
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window
@@ -2327,32 +2327,32 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=您可以選用內部播放機或者系統預設
 # Key/Value pairs for the iTunes options in the options window
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
-#? OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=啟用 iTunes 輸入﹕
+OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=啟用 iTunes 輸入﹕
 #### OPTIONS_ITUNES_PREFERENCE_TITLE=Importing
-#? OPTIONS_ITUNES_PREFERENCE_TITLE=輸入
+OPTIONS_ITUNES_PREFERENCE_TITLE=輸入
 #### OPTIONS_ITUNES_PREFERENCE_LABEL=You can have LimeWire import newly downloaded songs into iTunes.
-#? OPTIONS_ITUNES_PREFERENCE_LABEL=允許透過 LimeWire 將新下載的歌曲輸入 iTunes。
+OPTIONS_ITUNES_PREFERENCE_LABEL=允許透過 LimeWire 將新下載的歌曲輸入 iTunes。
 
 ################################################################################
 # Key/Value pairs for the iTunes/DAAP options in the options window
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
-#? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=共用
+OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=共用
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
-#? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=允許在本地網路上共用您的音樂﹐iTunes和其他使用數位音頻進入協議(DAAP) 的播放機都可進入。\n\n如果在共用時出現問題﹐請啟用兼容模式。此模式佔用更多資源﹐速度較慢﹐但有可能解決問題。
+OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=允許在本地網路上共用您的音樂﹐iTunes和其他使用數位音頻進入協議(DAAP) 的播放機都可進入。\n\n如果在共用時出現問題﹐請啟用兼容模式。此模式佔用更多資源﹐速度較慢﹐但有可能解決問題。
 #### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
-#? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=共享我的音樂﹕
+OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=共享我的音樂﹕
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
-#? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=共用名﹕
+OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=共用名﹕
 #### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility mode:
-#? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=兼容模式﹕
+OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=兼容模式﹕
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
-#? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=要求密碼
+OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=要求密碼
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
-#? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=允許設置密碼限制這項服務的使用。
+OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=允許設置密碼限制這項服務的使用。
 #### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
-#? OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=要求密碼﹕
+OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=要求密碼﹕
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=密碼:
 
@@ -2366,11 +2366,11 @@ OPTIONS_BROWSER_PREFERENCE_LABEL=您可以選擇使用選用何種瀏覽器.
 #### OPTIONS_BROWSER_BOX_LABEL=Browser
 OPTIONS_BROWSER_BOX_LABEL=瀏覽器
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image Options
-#? OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=圖片選項
+OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=圖片選項
 #### OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=You can choose which image viewer to use.
-#? OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=您可以選擇使用何種視圖片編輯器。
+OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=您可以選擇使用何種視圖片編輯器。
 #### OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image Viewer
-#? OPTIONS_IMAGE_VIEWER_BOX_LABEL=圖片編輯器
+OPTIONS_IMAGE_VIEWER_BOX_LABEL=圖片編輯器
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video Options
 OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=視頻 選項
 #### OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
@@ -2388,36 +2388,36 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=音頻 播放機
 # Key/value pairs for asking whether or not to display message bug reports
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
-#? OPTIONS_BUGS_TITLE=錯誤報告
+OPTIONS_BUGS_TITLE=錯誤報告
 #### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard Bugs' will cause LimeWire to ignore all bugs (this is not recommended).
-#? OPTIONS_BUGS_LABEL=您可以選擇如何發送錯誤報告。點擊“檢視樣例” 查看報告樣本。如果選擇“總是立即發送” ﹐則 LimeWire 遇到內部錯誤時將會立即聯絡錯誤服務器。選擇“總是詢問” ﹐LimeWire 則會在向錯誤服務器發送錯誤信息之前征得你的許可。選擇“總是忽略錯誤” 會使 LimeWire 忽略所有錯誤(不推薦該選項) 。
+OPTIONS_BUGS_LABEL=您可以選擇如何發送錯誤報告。點擊“檢視樣例” 查看報告樣本。如果選擇“總是立即發送” ﹐則 LimeWire 遇到內部錯誤時將會立即聯絡錯誤服務器。選擇“總是詢問” ﹐LimeWire 則會在向錯誤服務器發送錯誤信息之前征得你的許可。選擇“總是忽略錯誤” 會使 LimeWire 忽略所有錯誤(不推薦該選項) 。
 #### OPTIONS_BUGS_VIEW_EXAMPLE=View Example
-#? OPTIONS_BUGS_VIEW_EXAMPLE=檢視樣例
+OPTIONS_BUGS_VIEW_EXAMPLE=檢視樣例
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
-#? OPTIONS_DO_NOT_ASK_AGAIN=不要再顯示此信息
+OPTIONS_DO_NOT_ASK_AGAIN=不要再顯示此信息
 #### OPTIONS_ALWAYS_USE_ANSWER=Always use this answer
-#? OPTIONS_ALWAYS_USE_ANSWER=總是這樣回答
+OPTIONS_ALWAYS_USE_ANSWER=總是這樣回答
 #### OPTIONS_POPUPS_TITLE=Popups
-#? OPTIONS_POPUPS_TITLE=彈出窗口
+OPTIONS_POPUPS_TITLE=彈出窗口
 #### OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen 'Do not display this message again' or 'Always use this answer'.
-#? OPTIONS_POPUPS_LABEL=如果沒有聲明“不要再顯示此信息”或“總是這樣回答” ﹐則重新顯示此信息。
+OPTIONS_POPUPS_LABEL=如果沒有聲明“不要再顯示此信息”或“總是這樣回答” ﹐則重新顯示此信息。
 #### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert To Default
-#? OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=還原預設值
+OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=還原預設值
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
-#? OPTIONS_AUTOCOMPLETE_TITLE=自動填寫
+OPTIONS_AUTOCOMPLETE_TITLE=自動填寫
 #### OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields
-#? OPTIONS_AUTOCOMPLETE_LABEL=允許啟用或禁用自動填寫文本字段的功能
+OPTIONS_AUTOCOMPLETE_LABEL=允許啟用或禁用自動填寫文本字段的功能
 #### OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields
-#? OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=允許自動填寫文本字段
+OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=允許自動填寫文本字段
 
 ################################################################################
 # Key/Value pairs for theme options
@@ -2425,17 +2425,17 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=音頻 播放機
 #### OPTIONS_THEME_TITLE=Skin Options
 OPTIONS_THEME_TITLE=外殼選項
 #### OPTIONS_THEME_LABEL=You can select from alternate skins for LimeWire.
-#? OPTIONS_THEME_LABEL=您可以選擇 LimeWire 的備用外殼。
+OPTIONS_THEME_LABEL=您可以選擇 LimeWire 的備用外殼。
 #### OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate Skin File
-#? OPTIONS_THEME_BROWSE_BUTTON_TIP=找到外殼文件
+OPTIONS_THEME_BROWSE_BUTTON_TIP=找到外殼文件
 #### OPTIONS_THEME_DEFAULT_BUTTON_TIP=Use Default Skin File
-#? OPTIONS_THEME_DEFAULT_BUTTON_TIP=套用預設外殼文件
+OPTIONS_THEME_DEFAULT_BUTTON_TIP=套用預設外殼文件
 #### OPTIONS_THEME_BOX_LABEL=File:
 OPTIONS_THEME_BOX_LABEL=文件:
 #### OPTIONS_THEME_FILE_LABEL=You can choose your current skin.
-#? OPTIONS_THEME_FILE_LABEL=允許選擇當前外殼。
+OPTIONS_THEME_FILE_LABEL=允許選擇當前外殼。
 #### OPTIONS_THEME_FILE_CHOOSER_TITLE=Choose Your skin
-#? OPTIONS_THEME_FILE_CHOOSER_TITLE=選擇外殼
+OPTIONS_THEME_FILE_CHOOSER_TITLE=選擇外殼
 #### THEME_FILE_DESCRIPTION=LimeWire Skin Files (*.lwtp)
 THEME_FILE_DESCRIPTION=LimeWire 外殼 Theme 文件 (*.lwtp)
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
@@ -2469,7 +2469,7 @@ OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=從 www.javootoo.com 下載新的外殼..
 #### SKIN_APPLY_MESSAGE=Skin changes only take effect after restarting LimeWire...
 SKIN_APPLY_MESSAGE=下次啟動 LimeWire, 外殼將會改變...
 #### SKIN_RESTART_NEEDED=LimeWire must be restarted for this skin change to take effect.
-#? SKIN_RESTART_NEEDED=要使外殼改變生效﹐必需重啟 LimeWire。
+SKIN_RESTART_NEEDED=要使外殼改變生效﹐必需重啟 LimeWire。
 
 ################################################################################
 # Key/Value pairs for browse for new skins option pane
@@ -2578,13 +2578,13 @@ OPTIONS_ALLOW_MESSAGES_LABEL=透過新增 IP 地址到許可列表, 您可以允
 # Key/Value pairs for disabling compression support
 ################################################################################
 #### OPTIONS_COMPRESSION_TITLE=Compression Capabilities
-#? OPTIONS_COMPRESSION_TITLE=壓縮能力
+OPTIONS_COMPRESSION_TITLE=壓縮能力
 #### OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disabling these options.
-#? OPTIONS_COMPRESSION_LABEL=壓縮流量會減少佔用的頻寬﹐但也會增加CPU的負擔。如果您的計算機速度明顯變慢﹐請禁用上述選項。
+OPTIONS_COMPRESSION_LABEL=壓縮流量會減少佔用的頻寬﹐但也會增加CPU的負擔。如果您的計算機速度明顯變慢﹐請禁用上述選項。
 #### OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Disable Outgoing Compression
-#? OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=禁用傳出壓縮
+OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=禁用傳出壓縮
 #### OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Disable Incoming Compression
-#? OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=禁用傳入壓縮
+OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=禁用傳入壓縮
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
@@ -2608,11 +2608,11 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=始终
 # in the advanced panel of the options window
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
-#? OPTIONS_CONNECT_LOCALE_PREF_TITLE=本地偏好
+OPTIONS_CONNECT_LOCALE_PREF_TITLE=本地偏好
 #### OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference hosts using the same language as you.
-#? OPTIONS_CONNECT_LOCALE_PREF_LABEL=允許優先選擇與您使用同種語言的主機。
+OPTIONS_CONNECT_LOCALE_PREF_LABEL=允許優先選擇與您使用同種語言的主機。
 #### OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
-#? OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=開啟偏好功能﹕
+OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=開啟偏好功能﹕
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
@@ -2630,15 +2630,15 @@ OPTIONS_PORT_BOX_LABEL=監聽監試連接埠:
 # in the advanced panel in the options window
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
-#? OPTIONS_ROUTER_TITLE=路由器設置
+OPTIONS_ROUTER_TITLE=路由器設置
 #### OPTIONS_ROUTER_LABEL=LimeWire can configure itself to work from behind a firewall or router. Using Universal Plug 'n Play (UPnP), LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support UPnP, LimeWire can be set to advertise an external port manually. (You must also configure your router if you choose manual configuration.)
-#? OPTIONS_ROUTER_LABEL=LimeWire 可以設置為透過防火牆或路由器工作。使用萬用隨插即用協議(UpnP)﹐LimeWire 能夠自動配置您的路由器或防火牆﹐使其達到最佳效果。如果您的路由器不支援 UPnP﹐LimeWire 可以設置為手動指定外部連接埠。(如果選擇手動設定﹐必需同時設定您的路由器。)
+OPTIONS_ROUTER_LABEL=LimeWire 可以設置為透過防火牆或路由器工作。使用萬用隨插即用協議(UpnP)﹐LimeWire 能夠自動配置您的路由器或防火牆﹐使其達到最佳效果。如果您的路由器不支援 UPnP﹐LimeWire 可以設置為手動指定外部連接埠。(如果選擇手動設定﹐必需同時設定您的路由器。)
 #### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
-#? OPTIONS_ROUTER_UPNP=使用 UpnP(推薦)
+OPTIONS_ROUTER_UPNP=使用 UpnP(推薦)
 #### OPTIONS_ROUTER_PORT=Manual Port Forward
-#? OPTIONS_ROUTER_PORT=手動連接埠轉發
+OPTIONS_ROUTER_PORT=手動連接埠轉發
 #### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
-#? OPTIONS_ROUTER_NOTHING=保持原狀(不推薦)
+OPTIONS_ROUTER_NOTHING=保持原狀(不推薦)
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection strings
@@ -2659,9 +2659,9 @@ OPTIONS_CONNECT_STRING_OK_STRING_LABEL=連線成功字符串:
 #### OPTIONS_PRIVATE_NET_TITLE=Private Network
 OPTIONS_PRIVATE_NET_TITLE=私有網路
 #### OPTIONS_PRIVATE_NET_LABEL=Configure Private Network Options for LimeWire.
-#? OPTIONS_PRIVATE_NET_LABEL=設置 LimeWire 私有網路選項。
+OPTIONS_PRIVATE_NET_LABEL=設置 LimeWire 私有網路選項。
 #### OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
-#? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=連接到私有網路﹖
+OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=連接到私有網路﹖
 #### OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
 OPTIONS_PRIVATE_CACHE_IP_LABEL=名主機名
 #### OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
@@ -2674,37 +2674,37 @@ OPTIONS_PRIVATE_CACHE_NAME_LABEL=名稱
 # in the options window
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
-#? OPTIONS_STARTUP_TITLE=啟動系統
+OPTIONS_STARTUP_TITLE=啟動系統
 #### OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
-#? OPTIONS_STARTUP_LABEL=您可以選擇啟動計算機時是否自動運行 LimeWire。
+OPTIONS_STARTUP_LABEL=您可以選擇啟動計算機時是否自動運行 LimeWire。
 #### OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on System Startup:
-#? OPTIONS_STARTUP_CHECK_BOX_LABEL=系統啟動時運行﹕
+OPTIONS_STARTUP_CHECK_BOX_LABEL=系統啟動時運行﹕
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
-#? OPTIONS_PROXY_TITLE=代理服務器
+OPTIONS_PROXY_TITLE=代理服務器
 #### OPTIONS_PROXY_LABEL=Configure Proxy Options for LimeWire.
-#? OPTIONS_PROXY_LABEL=設定 LimeWire 代理服務器選項
+OPTIONS_PROXY_LABEL=設定 LimeWire 代理服務器選項
 #### OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No Proxy
-#? OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=沒有代理服務器
+OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=沒有代理服務器
 #### OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
-#? OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
+OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
 #### OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
-#? OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
+OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
 #### OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
-#? OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
+OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
 #### OPTIONS_PROXY_HOST_LABEL=Proxy
 OPTIONS_PROXY_HOST_LABEL=代理服務器Proxy 名主機名
 #### OPTIONS_PROXY_PORT_LABEL=Port
 OPTIONS_PROXY_PORT_LABEL=連接埠號
 #### OPTIONS_PROXY_LOGIN_TITLE=Login Details
-#? OPTIONS_PROXY_LOGIN_TITLE=登錄資料
+OPTIONS_PROXY_LOGIN_TITLE=登錄資料
 #### OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
-#? OPTIONS_PROXY_LOGIN_LABEL=設置代理服務器使用的用戶名和密碼。
+OPTIONS_PROXY_LOGIN_LABEL=設置代理服務器使用的用戶名和密碼。
 #### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication. (Does not work for HTTP Proxies)
-#? OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=啟用身份驗證。(不適用于 HTTP 代理服務器)
+OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=啟用身份驗證。(不適用于 HTTP 代理服務器)
 #### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=用戶名
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password
@@ -2716,19 +2716,19 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密碼
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=頻寬
 #### STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
-#? STATS_BANDWIDTH_PANE_LABEL=頻寬統計包括所有上行和下行頻寬的完整信息。請點擊種類查看理想數據。
+STATS_BANDWIDTH_PANE_LABEL=頻寬統計包括所有上行和下行頻寬的完整信息。請點擊種類查看理想數據。
 
 #### STATS_NET_PANE_TITLE=Network
 STATS_NET_PANE_TITLE=網路
 #### STATS_NET_PANE_LABEL=Statistics on the current state of the network. These statistics are quite inaccurate due to the dynamic, distributed nature of Gnutella and should not be taken too literally. They can, however, give you a general idea regarding the current state of your connection.
-#? STATS_NET_PANE_LABEL=當前網路狀態統計。因為 Gnutella 相對動態和分散﹐這些數據很不準確﹐不應太過堅持。但它們可以告訴您當前連線的大致狀況。
+STATS_NET_PANE_LABEL=當前網路狀態統計。因為 Gnutella 相對動態和分散﹐這些數據很不準確﹐不應太過堅持。但它們可以告訴您當前連線的大致狀況。
 
 #### STATS_ADVANCED_PANE_TITLE=Advanced
 STATS_ADVANCED_PANE_TITLE=高級
 #### STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. Advanced statistics are not displayed by default and are not recommended for most users.
-#? STATS_ADVANCED_PANE_LABEL=高級統計數據﹐包括 Gnutella 信息和 HTTP 流量的詳細資訊。此訊息會對高級用戶和 Gnutella 網路的研究工作有所助益。高級統計數據在预设状态下没有显示，也不推荐给大多数用户。
+STATS_ADVANCED_PANE_LABEL=高級統計數據﹐包括 Gnutella 信息和 HTTP 流量的詳細資訊。此訊息會對高級用戶和 Gnutella 網路的研究工作有所助益。高級統計數據在预设状态下没有显示，也不推荐给大多数用户。
 #### STATS_ADVANCED_CHECK_BOX_LABEL=Show Advanced Statistics:
-#? STATS_ADVANCED_CHECK_BOX_LABEL=显示高级统计数据：
+STATS_ADVANCED_CHECK_BOX_LABEL=显示高级统计数据：
 
 # Advanced Gnutella messages panes
 #### GNUTELLA_MESSAGES=Gnutella
@@ -2781,11 +2781,11 @@ BANDWIDTH_KEY=頻寬
 #### STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=Upstream
 STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=上游頻寬
 #### STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=Total bandwidth used to send outgoing data, either through uploads or Gnutella messages.
-#? STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=透過上傳或 Gnutella 信息發送輸出數據的總頻寬。
+STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=透過上傳或 Gnutella 信息發送輸出數據的總頻寬。
 #### STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=Downstream
 STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=下游上游頻寬
 #### STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Total bandwidth used to receive incoming data, either through downloads or Gnutella messages.
-#? STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=透過下載或 Gnutella 信息接受輸入數據的總頻寬。
+STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=透過下載或 Gnutella 信息接受輸入數據的總頻寬。
 
 
 ################################################################################
@@ -2798,21 +2798,21 @@ STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=下游上游頻寬
 # Key/value pairs for advanced Gnutella message statistics -- received messages
 ################################################################################
 #### RECEIVED_MESSAGES=Received
-#? RECEIVED_MESSAGES=收到的
+RECEIVED_MESSAGES=收到的
 
 #### RECEIVED_MESSAGE_NUMBER=Number
 RECEIVED_MESSAGE_NUMBER=數
 #### RECEIVED_QUERY_REQUESTS=Queries
-#? RECEIVED_QUERY_REQUESTS=詢問
+RECEIVED_QUERY_REQUESTS=詢問
 #### RECEIVED_QUERY_REPLIES=Query Hits
-#? RECEIVED_QUERY_REPLIES=詢問點擊
+RECEIVED_QUERY_REPLIES=詢問點擊
 
 #### RECEIVED_MESSAGE_BYTES=Kilobytes
 RECEIVED_MESSAGE_BYTES=KB
 #### RECEIVED_QUERY_REQUESTS_BYTES=Queries
-#? RECEIVED_QUERY_REQUESTS_BYTES=詢問
+RECEIVED_QUERY_REQUESTS_BYTES=詢問
 #### RECEIVED_QUERY_REPLIES_BYTES=Query Hits
-#? RECEIVED_QUERY_REPLIES_BYTES=詢問點擊
+RECEIVED_QUERY_REPLIES_BYTES=詢問點擊
 
 #### RECEIVED_LIMEWIRE=LimeWire Messages
 RECEIVED_LIMEWIRE=LimeWire 信息
@@ -2835,266 +2835,266 @@ STATS_RECEIVED_MULTICAST_BYTES=多點傳送Multicast
 
 # number of messages
 #### STATS_TOTAL_RECEIVED_MESSAGES_TITLE=Total
-#? STATS_TOTAL_RECEIVED_MESSAGES_TITLE=總數
+STATS_TOTAL_RECEIVED_MESSAGES_TITLE=總數
 #### STATS_TOTAL_RECEIVED_MESSAGES_LABEL=All Gnutella messages received by this client.
-#? STATS_TOTAL_RECEIVED_MESSAGES_LABEL=該客戶端收到的所有 Gnutella 信息。
+STATS_TOTAL_RECEIVED_MESSAGES_LABEL=該客戶端收到的所有 Gnutella 信息。
 #### STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP 
 #### STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over TCP, by message type.
-#? STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=透過 TCP 收到的所有 Gnutella 信息﹐按類型區分。
+STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=透過 TCP 收到的所有 Gnutella 信息﹐按類型區分。
 #### STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
 #### STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=All Gnutella messages received over UDP, by message type.
-#? STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=透過 UDP 收到的所有 Gnutella 信息﹐按類型區分。
+STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=透過 UDP 收到的所有 Gnutella 信息﹐按類型區分。
 #### STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=多點傳送Multicast
 #### STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=All Gnutella messages received over Multicast, by message type.
-#? STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=透過多點傳送收到的所有 Gnutella 信息﹐按類型區分。
+STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=透過多點傳送收到的所有 Gnutella 信息﹐按類型區分。
 #### STATS_RECEIVED_ALL_TITLE=TCP, UDP or Multicast
 STATS_RECEIVED_ALL_TITLE=TCP, UDP 或多點傳送 Multicast
 #### STATS_RECEIVED_ALL_LABEL=Total Gnutella messages received over TCP, UDP or Multicast.
-#? STATS_RECEIVED_ALL_LABEL=透過 TCP﹑UDP 或多點傳送接收的所有 Gnutella 信息。
+STATS_RECEIVED_ALL_LABEL=透過 TCP﹑UDP 或多點傳送接收的所有 Gnutella 信息。
 #### STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=Duplicate TCP
-#? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=TCP 重複詢問
+STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=TCP 重複詢問
 #### STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Number of duplicate queries received over TCP versus the total number of queries.
-#? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=透過 TCP 收到的重複詢問佔總詢問數的比例。
+STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=透過 TCP 收到的重複詢問佔總詢問數的比例。
 #### STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=Duplicate Multicast
-#? STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=多點傳送重複詢問
+STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=多點傳送重複詢問
 #### STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=Number of duplicate queries received over Multicast versus the total number of queries.
-#? STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=透過多點傳送收到的重複詢問佔總詢問數的比例。
+STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=透過多點傳送收到的重複詢問佔總詢問數的比例。
 # Advanced Gnutella Message hops/ttl for queries
 #### STATS_QUERY_REQUEST_HOPS_TITLE=Hops
 STATS_QUERY_REQUEST_HOPS_TITLE=躍點Hops
 #### STATS_QUERY_REQUEST_HOPS_LABEL=All received queries, by hops.
-#? STATS_QUERY_REQUEST_HOPS_LABEL=所有收到的詢問﹐按躍點劃分
+STATS_QUERY_REQUEST_HOPS_LABEL=所有收到的詢問﹐按躍點劃分
 #### STATS_QUERY_REQUEST_TTL_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_TITLE=TTL
 #### STATS_QUERY_REQUEST_TTL_LABEL=All received queries, by time to live (TTL).
-#? STATS_QUERY_REQUEST_TTL_LABEL=所有收到的詢問﹐按有效期限分類(TTL) 。
+STATS_QUERY_REQUEST_TTL_LABEL=所有收到的詢問﹐按有效期限分類(TTL) 。
 # Advanced Gnutella Message Special queries
 #### STATS_SPECIAL_QUERIES_TITLE=Special Queries
-#? STATS_SPECIAL_QUERIES_TITLE=特別詢問
+STATS_SPECIAL_QUERIES_TITLE=特別詢問
 #### STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
-#? STATS_SPECIAL_QUERIES_LABEL=所有特別標明的詢問。
+STATS_SPECIAL_QUERIES_LABEL=所有特別標明的詢問。
 # Advanced Gnutella Message hops/ttl for query hits
 #### STATS_QUERY_REPLY_HOPS_TITLE=Hops
 STATS_QUERY_REPLY_HOPS_TITLE=躍點Hops
 #### STATS_QUERY_REPLY_HOPS_LABEL=All received query hits, by hops.
-#? STATS_QUERY_REPLY_HOPS_LABEL=所有收到的查詢點擊﹐按躍點劃分。
+STATS_QUERY_REPLY_HOPS_LABEL=所有收到的查詢點擊﹐按躍點劃分。
 #### STATS_QUERY_REPLY_TTL_TITLE=TTL
 STATS_QUERY_REPLY_TTL_TITLE=TTL
 #### STATS_QUERY_REPLY_TTL_LABEL=All received query hits, by time to live (TTL).
-#? STATS_QUERY_REPLY_TTL_LABEL=收到的所有查詢點擊﹐按有效期限分類(TTL) 。
+STATS_QUERY_REPLY_TTL_LABEL=收到的所有查詢點擊﹐按有效期限分類(TTL) 。
 
 # number of kilobytes
 #### STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=Total
-#? STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=總數
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=總數
 #### STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=Total kilobytes for all Gnutella messages received by this client.
-#? STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=客戶端接收的所有 Gnutella 信息的總字節數
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=客戶端接收的所有 Gnutella 信息的總字節數
 #### STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
 #### STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over TCP, by message type.
-#? STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=透過 TCP 接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
+STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=透過 TCP 接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
 #### STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
 #### STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over UDP, by message type.
-#? STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=透過 UDP 接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
+STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=透過 UDP 接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
 #### STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=多點傳送Multicast
 #### STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over Multicast, by message type.
-#? STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=透過多點傳送接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
+STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=透過多點傳送接收的所有 Gnutella 信息的總字節數﹐按信息類型分類。
 #### STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
 STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP 或多點傳送 Multicast
 #### STATS_RECEIVED_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages received over TCP, UDP or Multicast.
-#? STATS_RECEIVED_BYTES_ALL_LABEL=透過 TCP﹑UDP 或多點傳送接收的所有 Gnutella 信息的總字節數。
+STATS_RECEIVED_BYTES_ALL_LABEL=透過 TCP﹑UDP 或多點傳送接收的所有 Gnutella 信息的總字節數。
 #### STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=Duplicate TCP
-#? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE= TCP 重複詢問
+STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE= TCP 重複詢問
 #### STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=Total kilobytes in duplicate queries received over TCP versus the total number of queries.
-#? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=TCP 收到的重複詢問的總字節數佔總詢問數的比例。
+STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=TCP 收到的重複詢問的總字節數佔總詢問數的比例。
 #### STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=Duplicate Multicast
-#? STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=多點傳送重複詢問
+STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=多點傳送重複詢問
 #### STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=Total kilobytes in duplicate queries received over Multicast versus the total number of queries.
-#? STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=多點傳送收到的重複詢問的總字節數佔總詢問數的比例。
+STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=多點傳送收到的重複詢問的總字節數佔總詢問數的比例。
 
 # Advanced Gnutella Message hops/ttl for queries in kilobytes
 #### STATS_QUERY_REQUEST_HOPS_BYTES_TITLE=Hops
 STATS_QUERY_REQUEST_HOPS_BYTES_TITLE=躍點Hops
 #### STATS_QUERY_REQUEST_HOPS_BYTES_LABEL=All received queries in kilobytes, by hops.
-#? STATS_QUERY_REQUEST_HOPS_BYTES_LABEL=收到查詢的總字節數﹐按躍點劃分
+STATS_QUERY_REQUEST_HOPS_BYTES_LABEL=收到查詢的總字節數﹐按躍點劃分
 #### STATS_QUERY_REQUEST_TTL_BYTES_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_BYTES_TITLE=TTL
 #### STATS_QUERY_REQUEST_TTL_BYTES_LABEL=All received queries in kilobytes, by time to live (TTL).
-#? STATS_QUERY_REQUEST_TTL_BYTES_LABEL=收到所有查詢的總字節數﹐按有效期限分類(TTL) 。
+STATS_QUERY_REQUEST_TTL_BYTES_LABEL=收到所有查詢的總字節數﹐按有效期限分類(TTL) 。
 # Advanced Gnutella Message hops/ttl for query hits in kilobytes
 #### STATS_QUERY_REPLY_HOPS_BYTES_TITLE=Hops
 STATS_QUERY_REPLY_HOPS_BYTES_TITLE=躍點Hops
 #### STATS_QUERY_REPLY_HOPS_BYTES_LABEL=All received query hits in kilobytes, by hops.
-#? STATS_QUERY_REPLY_HOPS_BYTES_LABEL=收到查詢點擊的總字節數﹐按躍點劃分
+STATS_QUERY_REPLY_HOPS_BYTES_LABEL=收到查詢點擊的總字節數﹐按躍點劃分
 #### STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
 STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
 #### STATS_QUERY_REPLY_TTL_BYTES_LABEL=All received query hits in kilobytes, by time to live (TTL).
-#? STATS_QUERY_REPLY_TTL_BYTES_LABEL=收到所有查詢點擊的總字節數﹐按有效期限分類(TTL) 。
+STATS_QUERY_REPLY_TTL_BYTES_LABEL=收到所有查詢點擊的總字節數﹐按有效期限分類(TTL) 。
 
 # number of messages received for LimeWire-specific stats -- TCP
 #### STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=接收自其他 LimeWires 的總信息數。
+STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=接收自其他 LimeWires 的總信息數。
 #### STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 TCP Pings 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 TCP Pings 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的 TCP Pongs 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的 TCP Pongs 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=接收自所有 Gnutella 客戶的 TCP 查詢數量與其他 LimeWires 用戶之比。
+STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=接收自所有 Gnutella 客戶的 TCP 查詢數量與其他 LimeWires 用戶之比。
 #### STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的 TCP 查詢點擊數量與其他 LimeWires 用戶之比。
+STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的 TCP 查詢點擊數量與其他 LimeWires 用戶之比。
 #### STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 TCP 推進與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 TCP 推進與其他 LimeWire 用戶之比。
 # number of messages received for LimeWire-specific stats -- UDP
 #### STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=接收自其他 LimeWire 用戶的總信息數。
+STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=接收自其他 LimeWire 用戶的總信息數。
 #### STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=UDP pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 UDP Pings 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 UDP Pings 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_UDP_PING_REPLIES_LABEL=UDP pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP Pongs 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_UDP_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP Pongs 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_UDP_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_UDP_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_UDP_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_UDP_QUERIES_LABEL=UDP queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_QUERIES_LABEL=接收自所有 Gnutella 客戶的 UDP 查詢數量與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_UDP_QUERIES_LABEL=接收自所有 Gnutella 客戶的 UDP 查詢數量與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_LABEL=UDP query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的 UDP 查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_UDP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的 UDP 查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=UDP pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 UDP 推進與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的 UDP 推進與其他 LimeWire 用戶之比。
 # number of messages received for LimeWire-specific stats -- Multicast
 #### STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=Total number of messages received from other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=接收自其他 LimeWire 用戶的信息總數。
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=接收自其他 LimeWire 用戶的信息總數。
 #### STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_LABEL=Multicast pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的多點傳輸 pings 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的多點傳輸 pings 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_LABEL=Multicast pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的多點傳輸 pongs 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的多點傳輸 pongs 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_MULTICAST_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_MULTICAST_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_MULTICAST_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_MULTICAST_QUERIES_LABEL=Multicast queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_QUERIES_LABEL=接收自所有 Gnutella 客戶的多點傳送查詢數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_MULTICAST_QUERIES_LABEL=接收自所有 Gnutella 客戶的多點傳送查詢數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=Multicast query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的多點傳送查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_MULTICAST_QUERY_REPLIES_LABEL=接收自所有 Gnutella 客戶的多點傳送查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=Multicast pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的多點傳送推進與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 客戶的多點傳送推進與其他 LimeWire 用戶之比。
 
 # number of kilobytes received for LimeWire-specific stats -- TCP
 #### STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=其他 LimeWire 用戶接收的總字節數。
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=其他 LimeWire 用戶接收的總字節數。
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的TCP pings 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=接收自所有 Gnutella 客戶的TCP pings 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的TCP pongs 與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_LABEL=接收自所有 Gnutella 客戶的TCP pongs 與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_LABEL=接收自所有 Gnutella 用戶的 TCP 查詢數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_TCP_QUERIES_LABEL=接收自所有 Gnutella 用戶的 TCP 查詢數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的 TCP 查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的 TCP 查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 TCP推進數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 TCP推進數與其他 LimeWire 用戶之比。
 # number of kilobytes received for LimeWire-specific stats -- UDP
 #### STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=其他 LimeWire 用戶收到的總字節數。
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=其他 LimeWire 用戶收到的總字節數。
 #### STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes for UDP pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 UDP pings總字節數與其他 LimeWire 之比。
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 UDP pings總字節數與其他 LimeWire 之比。
 #### STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP pongs 總字節數與其他 LimeWire 之比。
+STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP pongs 總字節數與其他 LimeWire 之比。
 #### STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_LABEL=接收自所有 Gnutella 用戶的 UDP 查詢字節數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_UDP_QUERIES_LABEL=接收自所有 Gnutella 用戶的 UDP 查詢字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP 查詢點擊字節數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_UDP_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的 UDP 查詢點擊字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 UDP推進總字節數與其他 LimeWire 之比。
+STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的 UDP推進總字節數與其他 LimeWire 之比。
 # number of kilobytes received for LimeWire-specific stats -- Multicast
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Total
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=總數
+STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=總數
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=其他 LimeWire 用戶收到的總字節數。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=其他 LimeWire 用戶收到的總字節數。
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_LABEL=Kilobytes for Multicast pings received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_LABEL=接收自所有 Gnutella用戶的多點傳輸 pings 總字節數與其他 LimeWire 之比。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_LABEL=接收自所有 Gnutella用戶的多點傳輸 pings 總字節數與其他 LimeWire 之比。
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_LABEL=Kilobytes for Multicast pongs received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的多點傳輸 pongs 總字節數與其他 LimeWire 之比。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_LABEL=接收自所有 Gnutella 用戶的多點傳輸 pongs 總字節數與其他 LimeWire 之比。
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=Queries
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=詢問
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=詢問
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=Kilobytes for Multicast queries received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=接收自所有 Gnutella 用戶的多點傳送查詢字節數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=接收自所有 Gnutella 用戶的多點傳送查詢字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Kilobytes for Multicast query hits received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的多點傳送查詢點擊字節數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_QUERY_REPLIES_LABEL=接收自所有 Gnutella 用戶的多點傳送查詢點擊字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes received from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的多點傳送推進字節數與其他 LimeWire 用戶之比。
+STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=接收自所有 Gnutella 用戶的多點傳送推進字節數與其他 LimeWire 用戶之比。
 
 #### STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=Average Size
-#? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=平均大小
+STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=平均大小
 #### STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=The average size in kilobytes of received Gnutella messages.
-#? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=所收到 Gnutella 信息的平均字節數。
+STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=所收到 Gnutella 信息的平均字節數。
 #### STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Average Size
-#? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=平均大小
+STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=平均大小
 #### STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=The average size in kilobytes of received messages from LimeWires.
-#? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=所收到 LimeWire 信息的平均字節數。
+STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=所收到 LimeWire 信息的平均字節數。
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- qrp messages
@@ -3102,73 +3102,73 @@ STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
 #### QRP_ULTRAPEER=Ultrapeer
-#? QRP_ULTRAPEER=超級節點
+QRP_ULTRAPEER=超級節點
 #### QRP_LEAF=Leaf
 QRP_LEAF=葉子節點
 
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=Sent
-#? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=已發送
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=已發送
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-#? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=最後一個躍點使用查詢發送表路由至其他超級節點的所有查詢。
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=最後一個躍點使用查詢發送表路由至其他超級節點的所有查詢。
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=Sent
-#? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=已發送
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT=已發送
 #### STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=Not Sent
-#? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=未發送
+STATS_QRP_ULTRAPEER_ROUTED_QUERIES_DROP=未發送
 
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=Sent
-#? STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=已發送
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=已發送
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to leaves, using query routing tables.
-#? STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=使用查詢發送表路由至葉節點的所有查詢。
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT_LABEL=使用查詢發送表路由至葉節點的所有查詢。
 #### STATS_QRP_LEAF_ROUTED_QUERIES_SENT=Sent
-#? STATS_QRP_LEAF_ROUTED_QUERIES_SENT=已發送
+STATS_QRP_LEAF_ROUTED_QUERIES_SENT=已發送
 #### STATS_QRP_LEAF_ROUTED_QUERIES_DROP=Not Sent
-#? STATS_QRP_LEAF_ROUTED_QUERIES_DROP=未發送
+STATS_QRP_LEAF_ROUTED_QUERIES_DROP=未發送
 
 #### STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=Received
-#? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=已收到
+STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=已收到
 #### STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=All queries that were received from routed connections.
-#? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=接收自路由連線的所有查詢。
+STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=接收自路由連線的所有查詢。
 #### STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Hit
-#? STATS_QRP_LEAF_ROUTED_QUERIES_HIT=點擊
+STATS_QRP_LEAF_ROUTED_QUERIES_HIT=點擊
 #### STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False Positive
-#? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=誤報
+STATS_QRP_LEAF_ROUTED_QUERIES_MISS=誤報
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- errors messages
 ################################################################################
 #### ERROR_MESSAGES=Errors
-#? ERROR_MESSAGES=出錯
+ERROR_MESSAGES=出錯
 
 #### STATS_ERROR_GENERIC_TITLE=Generic Errors
-#? STATS_ERROR_GENERIC_TITLE=一般錯誤
+STATS_ERROR_GENERIC_TITLE=一般錯誤
 #### STATS_ERROR_GENERIC_LABEL=Generic errors while reading messages.
-#? STATS_ERROR_GENERIC_LABEL=讀取信息時出錯
+STATS_ERROR_GENERIC_LABEL=讀取信息時出錯
 #### STATS_ERROR_QUERIES_TITLE=Queries
-#? STATS_ERROR_QUERIES_TITLE=查詢
+STATS_ERROR_QUERIES_TITLE=查詢
 #### STATS_ERROR_QUERIES_LABEL=Errors while reading query messages.
-#? STATS_ERROR_QUERIES_LABEL=讀取查詢信息時出錯。
+STATS_ERROR_QUERIES_LABEL=讀取查詢信息時出錯。
 #### STATS_ERROR_QUERY_REPLIES_TITLE=Query Replies
-#? STATS_ERROR_QUERY_REPLIES_TITLE=查詢答案
+STATS_ERROR_QUERY_REPLIES_TITLE=查詢答案
 #### STATS_ERROR_QUERY_REPLIES_LABEL=Errors while reading query reply messages.
-#? STATS_ERROR_QUERY_REPLIES_LABEL=讀取查詢答案信息時出錯。
+STATS_ERROR_QUERY_REPLIES_LABEL=讀取查詢答案信息時出錯。
 #### STATS_ERROR_PING_REPLY_TITLE=Ping Replies
-#? STATS_ERROR_PING_REPLY_TITLE=Ping 應答
+STATS_ERROR_PING_REPLY_TITLE=Ping 應答
 #### STATS_ERROR_PING_REPLY_LABEL=Errors while reading ping replies.
-#? STATS_ERROR_PING_REPLY_LABEL=讀取 Ping 應答時出錯。
+STATS_ERROR_PING_REPLY_LABEL=讀取 Ping 應答時出錯。
 #### STATS_ERROR_PUSHES_TITLE=Pushes
-#? STATS_ERROR_PUSHES_TITLE=推進
+STATS_ERROR_PUSHES_TITLE=推進
 #### STATS_ERROR_PUSHES_LABEL=Errors while reading pushes.
-#? STATS_ERROR_PUSHES_LABEL=讀取推進時出錯。
+STATS_ERROR_PUSHES_LABEL=讀取推進時出錯。
 #### STATS_ERROR_VENDOR_TITLE=Vendor Messages
-#? STATS_ERROR_VENDOR_TITLE=廠商信息
+STATS_ERROR_VENDOR_TITLE=廠商信息
 #### STATS_ERROR_VENDOR_LABEL=Errors while reading vendor messages.
-#? STATS_ERROR_VENDOR_LABEL=讀取廠商信息時出錯。
+STATS_ERROR_VENDOR_LABEL=讀取廠商信息時出錯。
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- sent messages
 ################################################################################
 #### SENT_MESSAGES=Sent
-#? SENT_MESSAGES=已發送
+SENT_MESSAGES=已發送
 #### SENT_MESSAGE_NUMBER=Number
 SENT_MESSAGE_NUMBER=數
 #### SENT_MESSAGE_BYTES=Kilobytes
@@ -3195,208 +3195,208 @@ STATS_SENT_MULTICAST_BYTES=多點傳送Multicast
 
 # number of messages
 #### STATS_TOTAL_SENT_MESSAGES_TITLE=Total
-#? STATS_TOTAL_SENT_MESSAGES_TITLE=總數
+STATS_TOTAL_SENT_MESSAGES_TITLE=總數
 #### STATS_TOTAL_SENT_MESSAGES_LABEL=All Gnutella messages sent out from this client.
-#? STATS_TOTAL_SENT_MESSAGES_LABEL=客戶端發送的所有 Gnutella 信息。
+STATS_TOTAL_SENT_MESSAGES_LABEL=客戶端發送的所有 Gnutella 信息。
 #### STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP 
 #### STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=All Gnutella messages sent over TCP, by message type.
-#? STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=透過 TCP 發送的所有 Gnutella 信息﹐按類型區分
+STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=透過 TCP 發送的所有 Gnutella 信息﹐按類型區分
 #### STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
 #### STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=All Gnutella messages sent over UDP, by message type.
-#? STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=透過 UDP 發送的所有 Gnutella 信息﹐按類型區分。
+STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=透過 UDP 發送的所有 Gnutella 信息﹐按類型區分。
 #### STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=多點傳輸Multicast
 #### STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=All Gnutella messages sent over Multicast, by message type.
-#? STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=透過多點傳輸發送的所有 Gnutella 信息﹐按類型區分。
+STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=透過多點傳輸發送的所有 Gnutella 信息﹐按類型區分。
 #### STATS_SENT_ALL_TITLE=TCP, UDP or Multicast
 STATS_SENT_ALL_TITLE=TCP, UDP 或多點傳輸 Multicast
 #### STATS_SENT_ALL_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
-#? STATS_SENT_ALL_LABEL=透過 TCP﹑UDP 或多點傳輸發送的所有 Gnutella 信息。
+STATS_SENT_ALL_LABEL=透過 TCP﹑UDP 或多點傳輸發送的所有 Gnutella 信息。
 
 # number of kilobytes
 #### STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=Total
-#? STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=總數
+STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=總數
 #### STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent out from this client.
-#? STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=客戶端發送 Gnutella 信息的總字節數。
+STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=客戶端發送 Gnutella 信息的總字節數。
 #### STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 #### STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over TCP, by message type.
-#? STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=透過 TCP 發出的 Gnutella 信息的總字節數﹐按消息類型區分。
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=透過 TCP 發出的 Gnutella 信息的總字節數﹐按消息類型區分。
 #### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 #### STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
-#? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=透過 UDP 發出的 Gnutella 信息的總字節數﹐按消息類型區分。
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=透過 UDP 發出的 Gnutella 信息的總字節數﹐按消息類型區分。
 #### STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=多點傳送Multicast
 #### STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over Multicast, by message type.
-#? STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=透過多點傳送發出的 Gnutella 信息的總字節數﹐按消息類型區分。
+STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=透過多點傳送發出的 Gnutella 信息的總字節數﹐按消息類型區分。
 #### STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 STATS_SENT_BYTES_ALL_TITLE=TCP, UDP 或多點傳送 Multicast
 #### STATS_SENT_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
-#? STATS_SENT_BYTES_ALL_LABEL=透過 TCP﹑UDP 或多點傳送發出的 Gnutella 信息的總字節數。
+STATS_SENT_BYTES_ALL_LABEL=透過 TCP﹑UDP 或多點傳送發出的 Gnutella 信息的總字節數。
 
 # number of messages sent for LimeWire-specific stats -- TCP
 #### STATS_LIME_SENT_TCP_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_TCP_MESSAGES_TITLE=總數
+STATS_LIME_SENT_TCP_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_TCP_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
-#? STATS_LIME_SENT_TCP_MESSAGES_LABEL=透過其他 LimeWire 發送的信息總數。
+STATS_LIME_SENT_TCP_MESSAGES_LABEL=透過其他 LimeWire 發送的信息總數。
 #### STATS_LIME_SENT_TCP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_TCP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=TCP pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP pings與其他 LimeWire 之比。
+STATS_LIME_SENT_TCP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP pings與其他 LimeWire 之比。
 #### STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP pongs與其他 LimeWire 之比。
+STATS_LIME_SENT_TCP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP pongs與其他 LimeWire 之比。
 #### STATS_LIME_SENT_TCP_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_TCP_QUERIES_TITLE=詢問
+STATS_LIME_SENT_TCP_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_TCP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 TCP 查詢與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_TCP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 TCP 查詢與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP 查詢點擊與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP 查詢點擊與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP 推進與其他 LimeWire 之比。
+STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP 推進與其他 LimeWire 之比。
 # number of messages sent for LimeWire-specific stats -- UDP
 #### STATS_LIME_SENT_UDP_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_UDP_MESSAGES_TITLE=總數
+STATS_LIME_SENT_UDP_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_UDP_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
-#? STATS_LIME_SENT_UDP_MESSAGES_LABEL=其他 LimeWire 發送的信息總數。
+STATS_LIME_SENT_UDP_MESSAGES_LABEL=其他 LimeWire 發送的信息總數。
 #### STATS_LIME_SENT_UDP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_UDP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_UDP_PING_REQUESTS_LABEL=UDP pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_UDP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的UDP pings與其他 LimeWire 之比。
+STATS_LIME_SENT_UDP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的UDP pings與其他 LimeWire 之比。
 #### STATS_LIME_SENT_UDP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_UDP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=UDP pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的UDP pongs與其他 LimeWire 之比。
+STATS_LIME_SENT_UDP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的UDP pongs與其他 LimeWire 之比。
 #### STATS_LIME_SENT_UDP_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_UDP_QUERIES_TITLE=詢問
+STATS_LIME_SENT_UDP_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_UDP_QUERIES_LABEL=UDP queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_UDP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_UDP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_UDP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=UDP query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_UDP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_UDP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=UDP pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的UDP 推進與其他 LimeWire 之比。
+STATS_LIME_SENT_UDP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的UDP 推進與其他 LimeWire 之比。
 # number of messages sent for LimeWire-specific stats -- Multicast
 #### STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=總數
+STATS_LIME_SENT_MULTICAST_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=其他 LimeWire 發送的信息總數。
+STATS_LIME_SENT_MULTICAST_MESSAGES_LABEL=其他 LimeWire 發送的信息總數。
 #### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_MULTICAST_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=Multicast pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送 pings 與其他 LimeWire 之比。
+STATS_LIME_SENT_MULTICAST_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送 pings 與其他 LimeWire 之比。
 #### STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_MULTICAST_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_MULTICAST_PING_REPLIES_LABEL=Multicast pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送 pongs 與其他 LimeWire 之比。
+STATS_LIME_SENT_MULTICAST_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送 pongs 與其他 LimeWire 之比。
 #### STATS_LIME_SENT_MULTICAST_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_MULTICAST_QUERIES_TITLE=詢問
+STATS_LIME_SENT_MULTICAST_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=Multicast queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=發送自所有 Gnutella 用戶的多點傳輸查詢與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=發送自所有 Gnutella 用戶的多點傳輸查詢與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=Multicast query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳輸查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳輸查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=Multicast pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳輸推進與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳輸推進與其他 LimeWire 用戶之比。
 
 # number of kilobytes sent for LimeWire-specific stats -- TCP
 #### STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=總數
+STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes sent by other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=其他 LimeWire 用戶發送的字節總數
+STATS_LIME_SENT_BYTES_TCP_MESSAGES_LABEL=其他 LimeWire 用戶發送的字節總數
 #### STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP pings與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_TCP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP pings與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=TCP pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP pongs與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_TCP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 TCP pongs與其他 LimeWire 用戶之比。
 
 #### STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=詢問
+STATS_LIME_SENT_BYTES_TCP_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=TCP queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=所有 Gnutella 客戶發送的 TCP 查詢與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_TCP_QUERIES_LABEL=所有 Gnutella 客戶發送的 TCP 查詢與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=所有 Gnutella 客戶發送的 TCP 查詢點擊數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_TCP_QUERY_REPLIES_LABEL=所有 Gnutella 客戶發送的 TCP 查詢點擊數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP推進與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 TCP推進與其他 LimeWire 用戶之比。
 # number of kilobytes sent for LimeWire-specific stats -- UDP
 #### STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=總數
+STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes sent on behalf of other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=代表其他 LimeWire 用戶發送的總字節數。
+STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=代表其他 LimeWire 用戶發送的總字節數。
 #### STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes for UDP pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 UDP pings 字節數與其他 LimeWire 之比。
+STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 UDP pings 字節數與其他 LimeWire 之比。
 #### STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP pongs 字節數與其他 LimeWire 之比。
+STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP pongs 字節數與其他 LimeWire 之比。
 #### STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=詢問
+STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢字節數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢點擊字節數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的 UDP 查詢點擊字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 UDP推進字節數與其他 LimeWire 之比。
+STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的 UDP推進字節數與其他 LimeWire 之比。
 # number of kilobytes sent for LimeWire-specific stats -- Multicast
 #### STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Total
-#? STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=總數
+STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_TITLE=總數
 #### STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes sent on behalf of other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_LABEL=代表其他 LimeWire 用戶發送的總字節數。
+STATS_LIME_SENT_BYTES_MULTICAST_MESSAGES_LABEL=代表其他 LimeWire 用戶發送的總字節數。
 #### STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
-#? STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
 #### STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_LABEL=Kilobytes for Multicast pings sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送 pings 字節數與其他 LimeWire 之比。
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送 pings 字節數與其他 LimeWire 之比。
 #### STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
-#? STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
 #### STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=Kilobytes for Multicast pongs sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送 pongs 字節數與其他 LimeWire 之比。
+STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送 pongs 字節數與其他 LimeWire 之比。
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=Queries
-#? STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=詢問
+STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=詢問
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=Kilobytes for Multicast queries sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=發送自所有 Gnutella 用戶的多點傳送查詢字節數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=發送自所有 Gnutella 用戶的多點傳送查詢字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
-#? STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
+STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=查詢點擊
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Kilobytes for Multicast query hits sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送查詢點擊字節數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=發送自所有 Gnutella 用戶的多點傳送查詢點擊字節數與其他 LimeWire 用戶之比。
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
-#? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=推進
+STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=推進
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
-#? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送推進字節數與其他 LimeWire 用戶之比。
+STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=發送自所有 Gnutella 用戶的多點傳送推進字節數與其他 LimeWire 用戶之比。
 
 # ultrapeer-specific sent stats
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent
 STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent已發送
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=最後一個躍點透過查詢發送表路由至其他超級節點的所有查詢。
+STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=最後一個躍點透過查詢發送表路由至其他超級節點的所有查詢。
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=未發送
+STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=未發送
 #### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
 STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
 
@@ -3404,9 +3404,9 @@ STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
 #### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Sent
 STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=已發送Sent
 #### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
-#? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=透過查詢發送表路由至葉節點的所有查詢。
+STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=透過查詢發送表路由至葉節點的所有查詢。
 #### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=未發送
+STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=未發送
 #### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 
@@ -3414,41 +3414,41 @@ STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
 ################################################################################
 #### HANDSHAKING=Handshaking
-#? HANDSHAKING=信號交換
+HANDSHAKING=信號交換
 #### STATS_HANDSHAKING_LEAF_TITLE=Leaf
 STATS_HANDSHAKING_LEAF_TITLE=葉子節點
 #### STATS_HANDSHAKING_LEAF_LABEL=Statistics for handshaking as a leaf.
-#? STATS_HANDSHAKING_LEAF_LABEL=葉節點信號交換統計
+STATS_HANDSHAKING_LEAF_LABEL=葉節點信號交換統計
 #### STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
-#? STATS_HANDSHAKING_ULTRAPEER_TITLE=超級節點
+STATS_HANDSHAKING_ULTRAPEER_TITLE=超級節點
 #### STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistics for handshaking as an ultrapeer.
-#? STATS_HANDSHAKING_ULTRAPEER_LABEL=超級節點信號交換統計
+STATS_HANDSHAKING_ULTRAPEER_LABEL=超級節點信號交換統計
 #### STATS_HANDSHAKING_OUTGOING_TITLE=Outgoing
 STATS_HANDSHAKING_OUTGOING_TITLE=傳出
 #### STATS_HANDSHAKING_OUTGOING_LABEL=Statistics for outgoing Gnutella connection handshaking.
-#? STATS_HANDSHAKING_OUTGOING_LABEL=Gnutella 輸出連線信號交換統計
+STATS_HANDSHAKING_OUTGOING_LABEL=Gnutella 輸出連線信號交換統計
 #### STATS_HANDSHAKING_INCOMING_TITLE=Incoming
 STATS_HANDSHAKING_INCOMING_TITLE=傳入
 #### STATS_HANDSHAKING_INCOMING_LABEL=Statistics for incoming Gnutella connection handshaking.
-#? STATS_HANDSHAKING_INCOMING_LABEL= Gnutella 輸入連線信號交換統計
+STATS_HANDSHAKING_INCOMING_LABEL= Gnutella 輸入連線信號交換統計
 #### STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Outgoing Server Reject
-#? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=輸出服務器拒絕
+STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=輸出服務器拒絕
 #### STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Statistics for outgoing Gnutella connection handshaking rejections from the server.
-#? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=服務器拒絕 Gnutella 輸出連線信號交換的統計數據
+STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=服務器拒絕 Gnutella 輸出連線信號交換的統計數據
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- compression
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
-#? COMPRESSABLE_MESSAGES=壓縮
+COMPRESSABLE_MESSAGES=壓縮
 #### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream
 STATS_COMPRESSABLE_UPSTREAM_TITLE=上游頻寬入
 #### STATS_COMPRESSABLE_UPSTREAM_LABEL=Statistics for compressed upstream traffic in kilobytes.
-#? STATS_COMPRESSABLE_UPSTREAM_LABEL=壓縮上游流量的字節數統計
+STATS_COMPRESSABLE_UPSTREAM_LABEL=壓縮上游流量的字節數統計
 #### STATS_COMPRESSABLE_DOWNSTREAM_TITLE=Downstream
 STATS_COMPRESSABLE_DOWNSTREAM_TITLE=下游頻寬出
 #### STATS_COMPRESSABLE_DOWNSTREAM_LABEL=Statistics for compressed downstream traffic in kilobytes.
-#? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=壓縮下游流量的字節數統計
+STATS_COMPRESSABLE_DOWNSTREAM_LABEL=壓縮下游流量的字節數統計
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- flow control
@@ -3471,7 +3471,7 @@ STATS_FLOW_CONTROL_BYTES_LABEL=Statistics for flow controlled messages in kiloby
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=路由排序錯誤
 #### STATS_ROUTE_ERRORS_LABEL=Total number of errors routing messages to other clients.
-#? STATS_ROUTE_ERRORS_LABEL=將信息路由至其他用戶的錯誤總數。
+STATS_ROUTE_ERRORS_LABEL=將信息路由至其他用戶的錯誤總數。
 
 #### STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=Hit Routing Errors
 STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE= Hit Routing Errors點擊路由錯誤
@@ -3482,22 +3482,22 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=查詢點擊路由錯誤。Errors routing q
 # Key/value pairs for advanced Gnutella message statistics -- other stats
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
-#? STATS_FILTERED_MESSAGES_TITLE=過濾的信息
+STATS_FILTERED_MESSAGES_TITLE=過濾的信息
 #### STATS_FILTERED_MESSAGES_LABEL=Total messages filtered.
-#? STATS_FILTERED_MESSAGES_LABEL=過濾信息總數
+STATS_FILTERED_MESSAGES_LABEL=過濾信息總數
 
 #### STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Connections
 STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=網路芳鄰
 #### STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Total number of Gnutella connection attempts, either initiated internally or externally.
-#? STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Gnutella 連線總次數﹐包括內部或外部啟動。
+STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Gnutella 連線總次數﹐包括內部或外部啟動。
 
 ################################################################################
 # Key/value pairs for advanced HTTP statistics
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
-#? STATS_TOTAL_HTTP_REQUESTS_TITLE=傳入的請求
+STATS_TOTAL_HTTP_REQUESTS_TITLE=傳入的請求
 #### STATS_TOTAL_HTTP_REQUESTS_LABEL=Total incoming requests received over time. This includes all connection attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...).
-#? STATS_TOTAL_HTTP_REQUESTS_LABEL=某一時段收到的傳入請求總數﹐包括所有的連線嘗試(GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET等...) 。
+STATS_TOTAL_HTTP_REQUESTS_LABEL=某一時段收到的傳入請求總數﹐包括所有的連線嘗試(GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET等...) 。
 
 ################################################################################
 # Key/value pairs for advanced Download statistics
@@ -3507,23 +3507,23 @@ DOWNLOAD_STATISTICS=下載
 #### STATS_DOWNLOAD_CONNECTIONS_TITLE=Connections
 STATS_DOWNLOAD_CONNECTIONS_TITLE=網路芳鄰
 #### STATS_DOWNLOAD_CONNECTIONS_LABEL=Total outgoing download connections attempts over time. This includes both direct connections and pushed requests.
-#? STATS_DOWNLOAD_CONNECTIONS_LABEL=某一時段傳出下載連線總數﹐包括直接連線和推進請求。
+STATS_DOWNLOAD_CONNECTIONS_LABEL=某一時段傳出下載連線總數﹐包括直接連線和推進請求。
 #### STATS_DOWNLOAD_RESPONSES_TITLE=Responses
-#? STATS_DOWNLOAD_RESPONSES_TITLE=響應
+STATS_DOWNLOAD_RESPONSES_TITLE=響應
 #### STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time. This includes Busy, File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses.
-#? STATS_DOWNLOAD_RESPONSES_LABEL=某一時段內接收自下載方的響應總數﹐包括線路忙﹑找不到文件﹑不許共用﹑等待等等。輸入輸出錯誤和確認響應。
+STATS_DOWNLOAD_RESPONSES_LABEL=某一時段內接收自下載方的響應總數﹐包括線路忙﹑找不到文件﹑不許共用﹑等待等等。輸入輸出錯誤和確認響應。
 #### STATS_DOWNLOAD_ALTERNATE_TITLE=Alt. Locations
-#? STATS_DOWNLOAD_ALTERNATE_TITLE=替代位置
+STATS_DOWNLOAD_ALTERNATE_TITLE=替代位置
 #### STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
-#? STATS_DOWNLOAD_ALTERNATE_LABEL=某一時段內收到和移除的替代位置總數﹐包括我們主動連線和忽略的位置﹐無法移除的位置和從連線嘗試中永久移除的位置。
+STATS_DOWNLOAD_ALTERNATE_LABEL=某一時段內收到和移除的替代位置總數﹐包括我們主動連線和忽略的位置﹐無法移除的位置和從連線嘗試中永久移除的位置。
 #### STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
 STATS_DOWNLOAD_TRANFERS_TITLE= 全部下載傳輸
 #### STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
-#? STATS_DOWNLOAD_TRANFERS_LABEL=某一時段內的傳輸總量﹐包括 HTTP1.1和 HTTP1.0傳輸。其中 HTTP1.1 的傳輸值以組塊為單位。
+STATS_DOWNLOAD_TRANFERS_LABEL=某一時段內的傳輸總量﹐包括 HTTP1.1和 HTTP1.0傳輸。其中 HTTP1.1 的傳輸值以組塊為單位。
 #### STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP Connect Time
-#? STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP連線時間
+STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP連線時間
 #### STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
-#? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=記錄完成 TCP 下載連線的耗時﹐以毫秒為單位。該值會不斷變化﹐比如當服務器承受高負載時。
+STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=記錄完成 TCP 下載連線的耗時﹐以毫秒為單位。該值會不斷變化﹐比如當服務器承受高負載時。
 
 ################################################################################
 # Key/value pairs for advanced Upload statistics
@@ -3531,13 +3531,13 @@ STATS_DOWNLOAD_TRANFERS_TITLE= 全部下載傳輸
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=上傳
 #### STATS_UPLOAD_REQUESTS_TITLE=Requests
-#? STATS_UPLOAD_REQUESTS_TITLE=請求
+STATS_UPLOAD_REQUESTS_TITLE=請求
 #### STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
-#? STATS_UPLOAD_REQUESTS_LABEL=傳入的上傳請求總數。每次解析請求時該值即增加﹐因此包括 HTTP/1.1 傳輸的所有組塊。
+STATS_UPLOAD_REQUESTS_LABEL=傳入的上傳請求總數。每次解析請求時該值即增加﹐因此包括 HTTP/1.1 傳輸的所有組塊。
 #### STATS_UPLOAD_RESPONSES_TITLE=Responses
-#? STATS_UPLOAD_RESPONSES_TITLE=響應
+STATS_UPLOAD_RESPONSES_TITLE=響應
 #### STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the number of requests for which we have attempted to transfer a portion of a file.
-#? STATS_UPLOAD_RESPONSES_LABEL=傳出的響應總數。每次發送響應前該值即增加﹐因此包括 HTTP/1.1 傳輸的所有組塊。“標準” 是指嘗試傳送部份文件的請求次數。
+STATS_UPLOAD_RESPONSES_LABEL=傳出的響應總數。每次發送響應前該值即增加﹐因此包括 HTTP/1.1 傳輸的所有組塊。“標準” 是指嘗試傳送部份文件的請求次數。
 
 #### STATS_UPLOAD_METHODS_TITLE=Request Methods
 #? STATS_UPLOAD_METHODS_TITLE=
@@ -3546,14 +3546,14 @@ UPLOAD_STATISTICS=上傳
 #### STATS_UPLOAD_GENERAL_TITLE=General
 STATS_UPLOAD_GENERAL_TITLE=全部上傳
 #### STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads. These numbers are incremented per connection, not per chunk. (Stalled uploads will also be counted as an interrupted upload.)
-#? STATS_UPLOAD_GENERAL_LABEL=开始、完成、中断或停止的上傳總數﹐每次連線該值都會增加﹐而與程式塊無關。(停止的上傳也將計為一次中斷的上傳。)
+STATS_UPLOAD_GENERAL_LABEL=开始、完成、中断或停止的上傳總數﹐每次連線該值都會增加﹐而與程式塊無關。(停止的上傳也將計為一次中斷的上傳。)
 
 ################################################################################
 # Key/Value pairs for statistics graph axis labels
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
-#? DEFAULT_X_AXIS_LABEL=秒
+DEFAULT_X_AXIS_LABEL=秒
 #### DEFAULT_Y_AXIS_LABEL=messages
 DEFAULT_Y_AXIS_LABEL=信息
 #### DEFAULT_Y_BYTE_AXIS_LABEL=kilobytes
@@ -3568,18 +3568,18 @@ Y_AXIS_BANDWIDTH_LABEL=KB
 #### STATS_LEGEND_NAME=Name
 STATS_LEGEND_NAME=名稱
 #### STATS_LEGEND_AVERAGE=Average
-#? STATS_LEGEND_AVERAGE=平均
+STATS_LEGEND_AVERAGE=平均
 #### STATS_LEGEND_MAX=Max
-#? STATS_LEGEND_MAX=最大
+STATS_LEGEND_MAX=最大
 #### STATS_LEGEND_TOTAL=Total
-#? STATS_LEGEND_TOTAL=總數
+STATS_LEGEND_TOTAL=總數
 #### STATS_LEGEND_COLOR=Color
-#? STATS_LEGEND_COLOR=顏色
+STATS_LEGEND_COLOR=顏色
 #### STATS_LEGEND_CURRENT=Current
-#? STATS_LEGEND_CURRENT=當前
+STATS_LEGEND_CURRENT=當前
 
 #### STATS_RECORD_STATS_LABEL=Write statistics for this graph to files.
-#? STATS_RECORD_STATS_LABEL=將此圖表的數據寫入文件。
+STATS_RECORD_STATS_LABEL=將此圖表的數據寫入文件。
 
 # Bandwidth
 #### UPSTREAM_BANDWIDTH=Total Upstream
@@ -3589,13 +3589,13 @@ DOWNSTREAM_BANDWIDTH=下游頻寬
 #### HTTP_BANDWIDTH=HTTP Total
 HTTP_BANDWIDTH=全部 HTTP
 #### HTTP_HEADER_BANDWIDTH=HTTP Headers
-#? HTTP_HEADER_BANDWIDTH=HTTP 標題
+HTTP_HEADER_BANDWIDTH=HTTP 標題
 #### HTTP_BODY_BANDWIDTH=HTTP Content
-#? HTTP_BODY_BANDWIDTH=HTTP 內容
+HTTP_BODY_BANDWIDTH=HTTP 內容
 #### GNUTELLA_BANDWIDTH=Gnutella Total
 GNUTELLA_BANDWIDTH=全部 Gnutella
 #### GNUTELLA_HEADER_BANDWIDTH=Gnutella Headers
-#? GNUTELLA_HEADER_BANDWIDTH=Gnutella 標題
+GNUTELLA_HEADER_BANDWIDTH=Gnutella 標題
 #### GNUTELLA_MESSAGE_BANDWIDTH=Gnutella Messages
 GNUTELLA_MESSAGE_BANDWIDTH=Gnutella 信息
 
@@ -3609,9 +3609,9 @@ UNCOMPRESSED_DOWNSTREAM=全部 下游頻寬 (potential) 可能的下游總頻寬
 #### COMPRESSED_DOWNSTREAM=Total Actual Downstream
 COMPRESSED_DOWNSTREAM=全部  上游頻寬 (actual) 實際的下游總頻寬
 #### HTTP_UNCOMPRESSED=HTTP (Potential)
-#? HTTP_UNCOMPRESSED=HTTP (可能值)
+HTTP_UNCOMPRESSED=HTTP (可能值)
 #### HTTP_COMPRESSED=HTTP (Actual)
-#? HTTP_COMPRESSED=HTTP (實際值)
+HTTP_COMPRESSED=HTTP (實際值)
 #### GNUTELLA_UNCOMPRESSED=Gnutella (Potential)
 GNUTELLA_UNCOMPRESSED=Gnutella 信息(可能值) (potential)
 #### GNUTELLA_COMPRESSED=Gnutella (Actual)
@@ -3619,15 +3619,15 @@ GNUTELLA_COMPRESSED=Gnutella 信息(實際值) (actual)
 
 # Advanced Gnutella All clients messages
 #### STATS_ALL_CLIENTS=All Clients
-#? STATS_ALL_CLIENTS=所有客戶
+STATS_ALL_CLIENTS=所有客戶
 #### STATS_LIMEWIRE=LimeWire
 STATS_LIMEWIRE=LimeWire
 
 # Advanced Gnutella Received Messages Total
 #### ALL_RECEIVED=Received
-#? ALL_RECEIVED=收到的
+ALL_RECEIVED=收到的
 #### ALL_LIME_RECEIVED=Received LimeWire
-#? ALL_LIME_RECEIVED=收到的 LimeWire
+ALL_LIME_RECEIVED=收到的 LimeWire
 # Advanced Gnutella Received Messages TCP/UDP/Multicast
 #### RECEIVED_ALL_TCP_MESSAGES=TCP Messages
 RECEIVED_ALL_TCP_MESSAGES=TCP 信息
@@ -3637,15 +3637,15 @@ RECEIVED_ALL_UDP_MESSAGES=UDP 信息
 RECEIVED_ALL_MULTICAST_MESSAGES=多點傳送Multicast 信息
 # Advanced Gnutella Received Messages Duplicate queries
 #### RECEIVED_TCP_DUPLICATE_QUERIES=Duplicates TCP
-#? RECEIVED_TCP_DUPLICATE_QUERIES=TCP 重複詢問
+RECEIVED_TCP_DUPLICATE_QUERIES=TCP 重複詢問
 #### RECEIVED_MULTICAST_DUPLICATE_QUERIES=Duplicates Multicast
-#? RECEIVED_MULTICAST_DUPLICATE_QUERIES=多點傳送重複詢問
+RECEIVED_MULTICAST_DUPLICATE_QUERIES=多點傳送重複詢問
 
 # Advanced Gnutella Received Kilobytes Total
 #### ALL_RECEIVED_BYTES=Received
-#? ALL_RECEIVED_BYTES=收到的
+ALL_RECEIVED_BYTES=收到的
 #### ALL_LIME_RECEIVED_BYTES=Received LimeWire
-#? ALL_LIME_RECEIVED_BYTES=收到的 LimeWire
+ALL_LIME_RECEIVED_BYTES=收到的 LimeWire
 # Advanced Gnutella Received Kilobytes TCP/UDP/Multicast
 #### RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP Messages
 RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP 信息
@@ -3655,15 +3655,15 @@ RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP 信息
 RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast多點傳送 信息
 # Advanced Gnutella Received Kilobytes Duplicate queries
 #### RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=Duplicates TCP
-#? RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=TCP 重複詢問
+RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=TCP 重複詢問
 #### RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=Duplicates Multicast
-#? RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=多點傳送重複詢問
+RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=多點傳送重複詢問
 
 # Advanced Gnutella Sent Messages Total
 #### ALL_SENT=Sent
-#? ALL_SENT=已發送
+ALL_SENT=已發送
 #### ALL_LIME_SENT=Sent LimeWire
-#? ALL_LIME_SENT=已發送 LimeWire
+ALL_LIME_SENT=已發送 LimeWire
 # Advanced Gnutella Sent Messages TCP/UDP/Multicast
 #### SENT_ALL_TCP_MESSAGES=TCP Messages
 SENT_ALL_TCP_MESSAGES=TCP 信息
@@ -3674,9 +3674,9 @@ SENT_ALL_MULTICAST_MESSAGES= Multicast 信息多點傳送信息
 
 # Advanced Gnutella Sent Kilobytes Total
 #### ALL_SENT_BYTES=Sent
-#? ALL_SENT_BYTES=已發送
+ALL_SENT_BYTES=已發送
 #### ALL_LIME_SENT_BYTES=Sent LimeWire
-#? ALL_LIME_SENT_BYTES=已發送 LimeWire
+ALL_LIME_SENT_BYTES=已發送 LimeWire
 # Advanced Gnutella Sent Kilobytes TCP/UDP/Multicast
 #### SENT_ALL_TCP_MESSAGES_BYTES=TCP Messages
 SENT_ALL_TCP_MESSAGES_BYTES=TCP 信息
@@ -3687,73 +3687,73 @@ SENT_ALL_MULTICAST_MESSAGES_BYTES=多點傳送信息Multicast 信息
 
 # Generic Errors
 #### ERROR_ALL_RECEIVED=All Errors
-#? ERROR_ALL_RECEIVED=所有錯誤
+ERROR_ALL_RECEIVED=所有錯誤
 #### ERROR_CONNECTION_CLOSED=Connection Closed
-#? ERROR_CONNECTION_CLOSED=關閉連線
+ERROR_CONNECTION_CLOSED=關閉連線
 #### ERROR_INVALID_LENGTH=Invalid Payload Length
-#? ERROR_INVALID_LENGTH=錯誤的有效載荷長度
+ERROR_INVALID_LENGTH=錯誤的有效載荷長度
 #### ERROR_INVALID_HOPS=Invalid Hops
-#? ERROR_INVALID_HOPS=錯誤的躍點
+ERROR_INVALID_HOPS=錯誤的躍點
 #### ERROR_INVALID_TTL=Invalid TTL
-#? ERROR_INVALID_TTL=錯誤的 TTL
+ERROR_INVALID_TTL=錯誤的 TTL
 #### ERROR_HOPS_EXCEED_SOFT_MAX=Hops > Soft Max
-#? ERROR_HOPS_EXCEED_SOFT_MAX=躍點>軟性最大值
+ERROR_HOPS_EXCEED_SOFT_MAX=躍點>軟性最大值
 #### ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(Hops + TTL) > Hard Max
-#? ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(躍點+TTL)> 硬性最大值
+ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(躍點+TTL)> 硬性最大值
 #### ERROR_INVALID_CODE=Invalid Message Code
-#? ERROR_INVALID_CODE=錯誤的信息代碼
+ERROR_INVALID_CODE=錯誤的信息代碼
 #### ERROR_ALL_QUERY_ERRORS=All Query Errors
-#? ERROR_ALL_QUERY_ERRORS=所有查詢錯誤
+ERROR_ALL_QUERY_ERRORS=所有查詢錯誤
 #### ERROR_QUERY_URN=URN Query
-#? ERROR_QUERY_URN=URN 查詢
+ERROR_QUERY_URN=URN 查詢
 #### ERROR_QUERY_TOO_LARGE=Query Too Large
-#? ERROR_QUERY_TOO_LARGE=查詢過大
+ERROR_QUERY_TOO_LARGE=查詢過大
 #### ERROR_QUERY_XML_TOO_LARGE=XML Query Too Large
-#? ERROR_QUERY_XML_TOO_LARGE=XML 查詢過大
+ERROR_QUERY_XML_TOO_LARGE=XML 查詢過大
 #### ERROR_QUERY_EMPTY=Empty Query
-#? ERROR_QUERY_EMPTY=空查詢
+ERROR_QUERY_EMPTY=空查詢
 #### ERROR_QUERY_ILLEGAL_CHARS=Illegal Characters in Query
-#? ERROR_QUERY_ILLEGAL_CHARS=查詢中含有非法字符
+ERROR_QUERY_ILLEGAL_CHARS=查詢中含有非法字符
 #### ERROR_ALL_QUERY_REPLY_ERRORS=All Query Reply Errors
-#? ERROR_ALL_QUERY_REPLY_ERRORS=所有查詢答案錯誤
+ERROR_ALL_QUERY_REPLY_ERRORS=所有查詢答案錯誤
 #### ERROR_REPLY_INVALID_PORT=Invalid Reply Port
-#? ERROR_REPLY_INVALID_PORT=錯誤的應答連接埠
+ERROR_REPLY_INVALID_PORT=錯誤的應答連接埠
 #### ERROR_REPLY_INVALID_ADDRESS=Invalid Reply Address
-#? ERROR_REPLY_INVALID_ADDRESS=錯誤的應答地址
+ERROR_REPLY_INVALID_ADDRESS=錯誤的應答地址
 #### ERROR_REPLY_INVALID_SPEED=Invalid Reply Speed
-#? ERROR_REPLY_INVALID_SPEED=錯誤的應答速度
+ERROR_REPLY_INVALID_SPEED=錯誤的應答速度
 #### ERROR_ALL_PING_REPLY_ERRORS=All Ping Reply Errors
-#? ERROR_ALL_PING_REPLY_ERRORS=所有 Ping 應答錯誤
+ERROR_ALL_PING_REPLY_ERRORS=所有 Ping 應答錯誤
 #### ERROR_PING_REPLY_INVALID_PAYLOAD=Invalid Ping Reply Payload
-#? ERROR_PING_REPLY_INVALID_PAYLOAD=Ping 應答有效載荷不正確
+ERROR_PING_REPLY_INVALID_PAYLOAD=Ping 應答有效載荷不正確
 #### ERROR_PING_REPLY_INVALID_PORT=Invalid Ping Reply Port
-#? ERROR_PING_REPLY_INVALID_PORT=Ping 應答連接埠不正確
+ERROR_PING_REPLY_INVALID_PORT=Ping 應答連接埠不正確
 #### ERROR_PING_REPLY_INVALID_ADDRESS=Invalid Ping Reply Address
-#? ERROR_PING_REPLY_INVALID_ADDRESS=Ping 應答地址不正確
+ERROR_PING_REPLY_INVALID_ADDRESS=Ping 應答地址不正確
 #### ERROR_PING_REPLY_INVALID_GGEP=Invalid GGEP Block
-#? ERROR_PING_REPLY_INVALID_GGEP=錯誤的 GGEP 屏蔽
+ERROR_PING_REPLY_INVALID_GGEP=錯誤的 GGEP 屏蔽
 #### ERROR_PING_REPLY_INVALID_VENDOR=Invalid Vendor Length
-#? ERROR_PING_REPLY_INVALID_VENDOR=錯誤的廠商長度
+ERROR_PING_REPLY_INVALID_VENDOR=錯誤的廠商長度
 #### ERROR_ALL_PUSH_ERRORS=All Push Errors
-#? ERROR_ALL_PUSH_ERRORS=所有推進錯誤
+ERROR_ALL_PUSH_ERRORS=所有推進錯誤
 #### ERROR_PUSH_INVALID_PORT=Invalid Push Port
-#? ERROR_PUSH_INVALID_PORT=推進連接埠不正確
+ERROR_PUSH_INVALID_PORT=推進連接埠不正確
 #### ERROR_PUSH_INVALID_ADDRESS=Invalid Push Address
-#? ERROR_PUSH_INVALID_ADDRESS=推進地址不正確
+ERROR_PUSH_INVALID_ADDRESS=推進地址不正確
 #### ERROR_PUSH_INVALID_PAYLOAD=Invalid Push Payload
-#? ERROR_PUSH_INVALID_PAYLOAD=推進有效載荷不正確
+ERROR_PUSH_INVALID_PAYLOAD=推進有效載荷不正確
 #### ERROR_ALL_VENDOR_ERRORS=All Vendor Message Errors
-#? ERROR_ALL_VENDOR_ERRORS=所有廠商信息錯誤
+ERROR_ALL_VENDOR_ERRORS=所有廠商信息錯誤
 #### ERROR_VENDOR_INVALID_ID=Invalid ID
-#? ERROR_VENDOR_INVALID_ID=錯誤的 ID
+ERROR_VENDOR_INVALID_ID=錯誤的 ID
 #### ERROR_VENDOR_INVALID_SELECTOR=Invalid Selector
-#? ERROR_VENDOR_INVALID_SELECTOR=錯誤的選擇器
+ERROR_VENDOR_INVALID_SELECTOR=錯誤的選擇器
 #### ERROR_VENDOR_INVALID_VERSION=Invalid Version
-#? ERROR_VENDOR_INVALID_VERSION=錯誤的版本
+ERROR_VENDOR_INVALID_VERSION=錯誤的版本
 #### ERROR_VENDOR_INVALID_PAYLOAD=Invalid Payload
-#? ERROR_VENDOR_INVALID_PAYLOAD=錯誤的有效載荷
+ERROR_VENDOR_INVALID_PAYLOAD=錯誤的有效載荷
 #### ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
-#? ERROR_VENDOR_UNRECOGNIZED=未經認可的廠商信息
+ERROR_VENDOR_UNRECOGNIZED=未經認可的廠商信息
 
 ###############################################################################
 # Key/value pairs for general message labels
@@ -3761,21 +3761,21 @@ SENT_ALL_MULTICAST_MESSAGES_BYTES=多點傳送信息Multicast 信息
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=全部信息
 #### GENERAL_PING_REQUEST_LABEL=Pings
-#? GENERAL_PING_REQUEST_LABEL=Pings
+GENERAL_PING_REQUEST_LABEL=Pings
 #### GENERAL_PING_REPLY_LABEL=Pongs
-#? GENERAL_PING_REPLY_LABEL=Pongs
+GENERAL_PING_REPLY_LABEL=Pongs
 #### GENERAL_QUERY_REQUEST_LABEL=Queries
-#? GENERAL_QUERY_REQUEST_LABEL=詢問
+GENERAL_QUERY_REQUEST_LABEL=詢問
 #### GENERAL_QUERY_REPLY_LABEL=Query Hits
-#? GENERAL_QUERY_REPLY_LABEL=查詢點擊
+GENERAL_QUERY_REPLY_LABEL=查詢點擊
 #### GENERAL_PUSH_REQUEST_LABEL=Pushes
-#? GENERAL_PUSH_REQUEST_LABEL=推進
+GENERAL_PUSH_REQUEST_LABEL=推進
 #### GENERAL_ROUTE_TABLE_LABEL=Route Table Reset
-#? GENERAL_ROUTE_TABLE_LABEL=路由列表重置
+GENERAL_ROUTE_TABLE_LABEL=路由列表重置
 #### GENERAL_RESET_ROUTE_TABLE_LABEL=Route Table Reset
-#? GENERAL_RESET_ROUTE_TABLE_LABEL=路由列表重置
+GENERAL_RESET_ROUTE_TABLE_LABEL=路由列表重置
 #### GENERAL_PATCH_ROUTE_TABLE_LABEL=Route Table Patch
-#? GENERAL_PATCH_ROUTE_TABLE_LABEL=路由列表補丁
+GENERAL_PATCH_ROUTE_TABLE_LABEL=路由列表補丁
 
 # Hops labels
 #### HOPS1=Hops 1
@@ -3799,7 +3799,7 @@ HOPS9=Hops 9
 
 # Special Query labels
 #### WHAT_IS_NEW_QUERIES=What's New?
-#? WHAT_IS_NEW_QUERIES=更新內容﹖
+WHAT_IS_NEW_QUERIES=更新內容﹖
 
 # TTL labels
 #### TTL0=TTL 0
@@ -3825,17 +3825,17 @@ TTL9=TTL 9
 
 # Advanced Gnutella Routing errors
 #### ALL_ROUTE_ERRORS=Routing Errors
-#? ALL_ROUTE_ERRORS=路由錯誤
+ALL_ROUTE_ERRORS=路由錯誤
 #### PING_REPLY_ROUTE_ERRORS=Pong Errors
-#? PING_REPLY_ROUTE_ERRORS=Pong 出錯
+PING_REPLY_ROUTE_ERRORS=Pong 出錯
 #### QUERY_REPLY_ROUTE_ERRORS=Reply Errors
-#? QUERY_REPLY_ROUTE_ERRORS=應答錯誤
+QUERY_REPLY_ROUTE_ERRORS=應答錯誤
 #### PUSH_REQUEST_ROUTE_ERRORS=Push Errors
-#? PUSH_REQUEST_ROUTE_ERRORS=推進出錯
+PUSH_REQUEST_ROUTE_ERRORS=推進出錯
 
 # Advanced Gnutella Routing errors Query replies
 #### HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Hard Limit
-#? HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=硬性限額
+HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=硬性限額
 #### HARD_LIMIT_QR_TTL_0=硬性限額Hard Limit (TTL 0)
 HARD_LIMIT_QR_TTL_0=硬性限額Hard limit (TTL 0)
 #### HARD_LIMIT_QR_TTL_1=硬性限額Hard Limit (TTL 1)
@@ -3849,246 +3849,246 @@ HARD_LIMIT_QR_TTL_4=硬性限額Hard limit (TTL 4)
 #### HARD_LIMIT_QR_TTL_5=硬性限額Hard Limit (TTL 5 or above)
 HARD_LIMIT_QR_TTL_5=硬性限額Hard limit (TTL 5 or above)
 #### NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=No Route
-#? NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=無路由
+NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=無路由
 
 # Advanced Gnutella Filtered messages
 #### ALL_FILTERED_MESSAGES=Filtered Messages
-#? ALL_FILTERED_MESSAGES=已過濾信息
+ALL_FILTERED_MESSAGES=已過濾信息
 
 # Advanced Gnutella Connections
 #### ALL_CONNECTION_ATTEMPTS=Connection Attempts
-#? ALL_CONNECTION_ATTEMPTS=連線嘗試
+ALL_CONNECTION_ATTEMPTS=連線嘗試
 #### OUTGOING_CONNECTION_ATTEMPTS=Outgoing Attempts
-#? OUTGOING_CONNECTION_ATTEMPTS=傳出嘗試
+OUTGOING_CONNECTION_ATTEMPTS=傳出嘗試
 #### INCOMING_CONNECTION_ATTEMPTS=Incoming Attempts
-#? INCOMING_CONNECTION_ATTEMPTS=傳入嘗試
+INCOMING_CONNECTION_ATTEMPTS=傳入嘗試
 
 # Advanced Requests
 #### ALL_HTTP_REQUESTS=All Requests
-#? ALL_HTTP_REQUESTS=所有請求
+ALL_HTTP_REQUESTS=所有請求
 #### ALL_HTTP_HEAD_REQUESTS=HEAD Requests
-#? ALL_HTTP_HEAD_REQUESTS=HEAD 請求
+ALL_HTTP_HEAD_REQUESTS=HEAD 請求
 #### ALL_HTTP_GET_REQUESTS=GET Requests
-#? ALL_HTTP_GET_REQUESTS=GET 請求
+ALL_HTTP_GET_REQUESTS=GET 請求
 #### ALL_HTTP_GIV_REQUESTS=Push Requests
-#? ALL_HTTP_GIV_REQUESTS=推進請求
+ALL_HTTP_GIV_REQUESTS=推進請求
 #### ALL_HTTP_GNUTELLA_REQUESTS=Gnutella Requests
-#? ALL_HTTP_GNUTELLA_REQUESTS=Gnutella 請求
+ALL_HTTP_GNUTELLA_REQUESTS=Gnutella 請求
 #### ALL_HTTP_GNUTELLA_LIMEWIRE_REQUESTS=Gnutella (LimeWire) Requests
-#? ALL_HTTP_GNUTELLA_LIMEWIRE_REQUESTS=Gnutella (LimeWire) 請求
+ALL_HTTP_GNUTELLA_LIMEWIRE_REQUESTS=Gnutella (LimeWire) 請求
 #### ALL_HTTP_CHAT_REQUESTS=Chat Requests
-#? ALL_HTTP_CHAT_REQUESTS=聊天請求
+ALL_HTTP_CHAT_REQUESTS=聊天請求
 #### ALL_HTTP_MAGNET_REQUESTS=Magnet Requests
-#? ALL_HTTP_MAGNET_REQUESTS=磁性請求
+ALL_HTTP_MAGNET_REQUESTS=磁性請求
 #### ALL_HTTP_UNKNOWN_REQUESTS=Unknown Requests
-#? ALL_HTTP_UNKNOWN_REQUESTS=未知請求
+ALL_HTTP_UNKNOWN_REQUESTS=未知請求
 #### ALL_HTTP_BANNED_REQUESTS=Banned Hosts
-#? ALL_HTTP_BANNED_REQUESTS=禁止的主機
+ALL_HTTP_BANNED_REQUESTS=禁止的主機
 #### ALL_HTTP_CLOSED_REQUESTS=Closed Immediately
-#? ALL_HTTP_CLOSED_REQUESTS=立即關閉
+ALL_HTTP_CLOSED_REQUESTS=立即關閉
 
 # Advanced Download statistics
 #### DOWNLOAD_RESPONSE_OK=Accepted
-#? DOWNLOAD_RESPONSE_OK=已接受
+DOWNLOAD_RESPONSE_OK=已接受
 #### DOWNLOAD_BUSY=Busy
-#? DOWNLOAD_BUSY=線路忙
+DOWNLOAD_BUSY=線路忙
 #### DOWNLOAD_FILE_NOT_FOUND=File Not Found
-#? DOWNLOAD_FILE_NOT_FOUND=找不到文件
+DOWNLOAD_FILE_NOT_FOUND=找不到文件
 #### DOWNLOAD_NOT_SHARING=Not Sharing Files
-#? DOWNLOAD_NOT_SHARING=文件不共享
+DOWNLOAD_NOT_SHARING=文件不共享
 #### DOWNLOAD_QUEUED=Queued
-#? DOWNLOAD_QUEUED=等候
+DOWNLOAD_QUEUED=等候
 #### DOWNLOAD_RANGE_UNAVAILABLE=Range Unavailable
-#? DOWNLOAD_RANGE_UNAVAILABLE=範圍不可用
+DOWNLOAD_RANGE_UNAVAILABLE=範圍不可用
 #### DOWNLOAD_PROBLEM_READING_HEADER=Problem Reading Header
-#? DOWNLOAD_PROBLEM_READING_HEADER=讀取標題時出錯
+DOWNLOAD_PROBLEM_READING_HEADER=讀取標題時出錯
 #### DOWNLOAD_UNKNOWN_CODE=Unknown Response Code
-#? DOWNLOAD_UNKNOWN_CODE=未知的應答代碼
+DOWNLOAD_UNKNOWN_CODE=未知的應答代碼
 #### DOWNLOAD_CONTENT_URN_MISMATCH=Content URN mismatch
-#? DOWNLOAD_CONTENT_URN_MISMATCH=內容 URN 不匹配
+DOWNLOAD_CONTENT_URN_MISMATCH=內容 URN 不匹配
 #### DOWNLOAD_NO_SUCH_RANGE=Incompatible Ranges
-#? DOWNLOAD_NO_SUCH_RANGE=範圍不兼容
+DOWNLOAD_NO_SUCH_RANGE=範圍不兼容
 #### DOWNLOAD_ERROR=IO Error
-#? DOWNLOAD_ERROR=IO 錯誤
+DOWNLOAD_ERROR=IO 錯誤
 #### DOWNLOAD_ALTERNATE_COLLECTED=Collected
-#? DOWNLOAD_ALTERNATE_COLLECTED=已收取
+DOWNLOAD_ALTERNATE_COLLECTED=已收取
 #### DOWNLOAD_ALTERNATE_NOT_ADDED=Failed
-#? DOWNLOAD_ALTERNATE_NOT_ADDED=失敗
+DOWNLOAD_ALTERNATE_NOT_ADDED=失敗
 #### DOWNLOAD_ALTERNATE_WORKED=Succeeded
-#? DOWNLOAD_ALTERNATE_WORKED=成功
+DOWNLOAD_ALTERNATE_WORKED=成功
 #### DOWNLOAD_SUCCESFULL_HTTP11=Successful HTTP 1.1
-#? DOWNLOAD_SUCCESFULL_HTTP11=成功的 HTTP 1.1
+DOWNLOAD_SUCCESFULL_HTTP11=成功的 HTTP 1.1
 #### DOWNLOAD_SUCCESFULL_HTTP10=Successful HTTP 1.0
-#? DOWNLOAD_SUCCESFULL_HTTP10=成功的 HTTP 1.0
+DOWNLOAD_SUCCESFULL_HTTP10=成功的 HTTP 1.0
 #### DOWNLOAD_FAILED_HTTP11=Failed HTTP 1.1
-#? DOWNLOAD_FAILED_HTTP11=失敗的 HTTP 1.1
+DOWNLOAD_FAILED_HTTP11=失敗的 HTTP 1.1
 #### DOWNLOAD_FAILED_HTTP10=Failed HTTP 1.0
-#? DOWNLOAD_FAILED_HTTP10=失敗的 HTTP 1.0
+DOWNLOAD_FAILED_HTTP10=失敗的 HTTP 1.0
 #### DOWNLOAD_RETRIED_SUCCESS=Retried Success
-#? DOWNLOAD_RETRIED_SUCCESS=重試成功
+DOWNLOAD_RETRIED_SUCCESS=重試成功
 #### DOWNLOAD_CONNECTION_ATTEMPTS=Attempted
-#? DOWNLOAD_CONNECTION_ATTEMPTS=已嘗試
+DOWNLOAD_CONNECTION_ATTEMPTS=已嘗試
 #### DOWNLOAD_CONNECT_DIRECT_SUCCESS=Successful Direct Connection
-#? DOWNLOAD_CONNECT_DIRECT_SUCCESS=直接連線成功
+DOWNLOAD_CONNECT_DIRECT_SUCCESS=直接連線成功
 #### DOWNLOAD_CONNECT_DIRECT_FAILURES=Failed Direct Connection
-#? DOWNLOAD_CONNECT_DIRECT_FAILURES=直接連線失敗
+DOWNLOAD_CONNECT_DIRECT_FAILURES=直接連線失敗
 #### DOWNLOAD_CONNECT_PUSH_SUCCESS=Successful Push Connection
-#? DOWNLOAD_CONNECT_PUSH_SUCCESS=推進連線成功
+DOWNLOAD_CONNECT_PUSH_SUCCESS=推進連線成功
 #### DOWNLOAD_PUSH_FAILURE_INTERRUPTED=Failed Push (Interrupted)
-#? DOWNLOAD_PUSH_FAILURE_INTERRUPTED=推進失敗 (中斷)
+DOWNLOAD_PUSH_FAILURE_INTERRUPTED=推進失敗 (中斷)
 #### DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=Failed Push (No GIV Received)
-#? DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=推進失敗 (未收到 GIV)
+DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=推進失敗 (未收到 GIV)
 #### DOWNLOAD_PUSH_FAILURE_LOST=Failed Push (Lost Connection)
-#? DOWNLOAD_PUSH_FAILURE_LOST=推進失敗 (連線中斷)
+DOWNLOAD_PUSH_FAILURE_LOST=推進失敗 (連線中斷)
 #### DOWNLOAD_TCP_CONNECT_TIME=TCP Connect Time
-#? DOWNLOAD_TCP_CONNECT_TIME=TCP 連線時間
+DOWNLOAD_TCP_CONNECT_TIME=TCP 連線時間
 #### DOWNLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
-#? DOWNLOAD_FW_FW_SUCCESS=FW-FW 連線成功
+DOWNLOAD_FW_FW_SUCCESS=FW-FW 連線成功
 #### DOWNLOAD_FW_FW_FAILURE=Failed FW-FW Connection
-#? DOWNLOAD_FW_FW_FAILURE=FW-FW 連線失敗
+DOWNLOAD_FW_FW_FAILURE=FW-FW 連線失敗
 
 # Advanced Upload statistics
 #### UPLOAD_STAT_THEX=THEX Request
-#? UPLOAD_STAT_THEX=THEX 請求
+UPLOAD_STAT_THEX=THEX 請求
 #### UPLOAD_STAT_PUSH_PROXY_SUCCESS=Successful Push Proxy
-#? UPLOAD_STAT_PUSH_PROXY_SUCCESS=推進服務器成功
+UPLOAD_STAT_PUSH_PROXY_SUCCESS=推進服務器成功
 #### UPLOAD_STAT_PUSH_PROXY_BAD=Malformed Push Proxy
-#? UPLOAD_STAT_PUSH_PROXY_BAD=推進服務器異常
+UPLOAD_STAT_PUSH_PROXY_BAD=推進服務器異常
 #### UPLOAD_STAT_PUSH_PROXY_FAILED=Failed Push Proxy
-#? UPLOAD_STAT_PUSH_PROXY_FAILED=推進服務器失敗
+UPLOAD_STAT_PUSH_PROXY_FAILED=推進服務器失敗
 #### UPLOAD_STAT_BROWSE_HOST=Browse Host
-#? UPLOAD_STAT_BROWSE_HOST=瀏覽主機
+UPLOAD_STAT_BROWSE_HOST=瀏覽主機
 #### UPLOAD_STAT_PUSH_PROXY=Push Proxy
-#? UPLOAD_STAT_PUSH_PROXY=推進服務器
+UPLOAD_STAT_PUSH_PROXY=推進服務器
 #### UPLOAD_STAT_UPDATE_FILE=Update File
-#? UPLOAD_STAT_UPDATE_FILE=更新文件
+UPLOAD_STAT_UPDATE_FILE=更新文件
 #### UPLOAD_STAT_TRADITIONAL_GET=Traditional Get
-#? UPLOAD_STAT_TRADITIONAL_GET=傳統的讀取
+UPLOAD_STAT_TRADITIONAL_GET=傳統的讀取
 #### UPLOAD_STAT_UNKNOWN_URN_GET=Unknown URN Get
-#? UPLOAD_STAT_UNKNOWN_URN_GET=未知的 URN 讀取
+UPLOAD_STAT_UNKNOWN_URN_GET=未知的 URN 讀取
 #### UPLOAD_STAT_URN_GET=URN Get
-#? UPLOAD_STAT_URN_GET=URN 讀取
+UPLOAD_STAT_URN_GET=URN 讀取
 #### UPLOAD_STAT_MALFORMED_REQUEST=Malformed Request
-#? UPLOAD_STAT_MALFORMED_REQUEST=異常請求
+UPLOAD_STAT_MALFORMED_REQUEST=異常請求
 #### UPLOAD_STAT_LIMIT_REACHED=Limit Reached
-#? UPLOAD_STAT_LIMIT_REACHED=達到上限
+UPLOAD_STAT_LIMIT_REACHED=達到上限
 #### UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy Request
-#? UPLOAD_STAT_LIMIT_REACHED_GREEDY=過度請求
+UPLOAD_STAT_LIMIT_REACHED_GREEDY=過度請求
 #### UPLOAD_STAT_BANNED=Banned Client
-#? UPLOAD_STAT_BANNED=禁止的用戶
+UPLOAD_STAT_BANNED=禁止的用戶
 #### UPLOAD_STAT_UNAVAILABLE_RANGE=Unavailable Range
-#? UPLOAD_STAT_UNAVAILABLE_RANGE=範圍不可用
+UPLOAD_STAT_UNAVAILABLE_RANGE=範圍不可用
 #### UPLOAD_STAT_FILE_NOT_FOUND=File Not Found
-#? UPLOAD_STAT_FILE_NOT_FOUND=找不到文件
+UPLOAD_STAT_FILE_NOT_FOUND=找不到文件
 #### UPLOAD_STAT_FREELOADER=Freeloader
-#? UPLOAD_STAT_FREELOADER=Freeloader
+UPLOAD_STAT_FREELOADER=Freeloader
 #### UPLOAD_STAT_QUEUED=Queued
-#? UPLOAD_STAT_QUEUED=等待
+UPLOAD_STAT_QUEUED=等待
 #### UPLOAD_STAT_NORMAL=Normal
-#? UPLOAD_STAT_NORMAL=正常
+UPLOAD_STAT_NORMAL=正常
 #### UPLOAD_STAT_GET=Get
-#? UPLOAD_STAT_GET=獲取
+UPLOAD_STAT_GET=獲取
 #### UPLOAD_STAT_HEAD=Head
-#? UPLOAD_STAT_HEAD=標題
+UPLOAD_STAT_HEAD=標題
 #### UPLOAD_STAT_UNKNOWN=Unknown
-#? UPLOAD_STAT_UNKNOWN=未知
+UPLOAD_STAT_UNKNOWN=未知
 #### UPLOAD_STAT_PUSHED_GET=Pushed Get
-#? UPLOAD_STAT_PUSHED_GET=讀取的推進
+UPLOAD_STAT_PUSHED_GET=讀取的推進
 #### UPLOAD_STAT_PUSHED_HEAD=Pushed Head
-#? UPLOAD_STAT_PUSHED_HEAD=標題的推進
+UPLOAD_STAT_PUSHED_HEAD=標題的推進
 #### UPLOAD_STAT_PUSHED_UNKNOWN=Pushed Unknown
-#? UPLOAD_STAT_PUSHED_UNKNOWN=未知的推進
+UPLOAD_STAT_PUSHED_UNKNOWN=未知的推進
 #### UPLOAD_STAT_PUSH_FAILED=Push Failed
-#? UPLOAD_STAT_PUSH_FAILED=推進失敗
+UPLOAD_STAT_PUSH_FAILED=推進失敗
 #### UPLOAD_STAT_ATTEMPTED=Attempted
-#? UPLOAD_STAT_ATTEMPTED=已嘗試
+UPLOAD_STAT_ATTEMPTED=已嘗試
 #### UPLOAD_STAT_COMPLETED=Completed Responses
-#? UPLOAD_STAT_COMPLETED=完成應答
+UPLOAD_STAT_COMPLETED=完成應答
 #### UPLOAD_STAT_INTERRUPTED=Interrupted
-#? UPLOAD_STAT_INTERRUPTED=中斷
+UPLOAD_STAT_INTERRUPTED=中斷
 #### UPLOAD_STAT_STALLED=Stalled
-#? UPLOAD_STAT_STALLED=停止
+UPLOAD_STAT_STALLED=停止
 #### UPLOAD_STAT_COMPLETED_FILE=Completed File Transfers
-#? UPLOAD_STAT_COMPLETED_FILE=完成文件傳輸
+UPLOAD_STAT_COMPLETED_FILE=完成文件傳輸
 #### UPLOAD_FW_FW_SUCCESS=Successful FW-FW Connection
-#? UPLOAD_FW_FW_SUCCESS=FW-FW 連線成功
+UPLOAD_FW_FW_SUCCESS=FW-FW 連線成功
 #### UPLOAD_FW_FW_FAILURE=Failed FW-FW Connection
-#? UPLOAD_FW_FW_FAILURE=FW-FW 連線失敗
+UPLOAD_FW_FW_FAILURE=FW-FW 連線失敗
 
 # Advanced Handshaking statistics
 #### LEAF_OUTGOING_REJECT_LEAF=Out Rej. (Leaf)
-#? LEAF_OUTGOING_REJECT_LEAF=拒絕輸出(葉節點)
+LEAF_OUTGOING_REJECT_LEAF=拒絕輸出(葉節點)
 #### LEAF_OUTGOING_REJECT_OLD_UP=Out Rej. (Old Ultrapeer)
-#? LEAF_OUTGOING_REJECT_OLD_UP=拒絕輸出(原有超級節點)
+LEAF_OUTGOING_REJECT_OLD_UP=拒絕輸出(原有超級節點)
 #### LEAF_OUTGOING_ACCEPT=Out Acc.
-#? LEAF_OUTGOING_ACCEPT=接受輸出
+LEAF_OUTGOING_ACCEPT=接受輸出
 #### LEAF_INCOMING_REJECT=In Rej.
-#? LEAF_INCOMING_REJECT=拒絕輸入
+LEAF_INCOMING_REJECT=拒絕輸入
 #### LEAF_INCOMING_ACCEPT=In Acc.
-#? LEAF_INCOMING_ACCEPT=接受輸入
+LEAF_INCOMING_ACCEPT=接受輸入
 #### UP_OUTGOING_REJECT_FULL=Out Rej. (Full)
-#? UP_OUTGOING_REJECT_FULL=拒絕輸出(完全)
+UP_OUTGOING_REJECT_FULL=拒絕輸出(完全)
 #### UP_OUTGOING_GUIDANCE_FOLLOWED=Out Acc. (Followed Guidance)
-#? UP_OUTGOING_GUIDANCE_FOLLOWED=接受輸出(遵循指導)
+UP_OUTGOING_GUIDANCE_FOLLOWED=接受輸出(遵循指導)
 #### UP_OUTGOING_GUIDANCE_IGNORED=Out Acc. (Ignored Guidance)
-#? UP_OUTGOING_GUIDANCE_IGNORED=接受輸出(忽略指導)
+UP_OUTGOING_GUIDANCE_IGNORED=接受輸出(忽略指導)
 #### UP_OUTGOING_ACCEPT=Out Acc. (No Guidance)
-#? UP_OUTGOING_ACCEPT=接受輸出(無指導)
+UP_OUTGOING_ACCEPT=接受輸出(無指導)
 #### UP_INCOMING_REJECT_LEAF=In Rej. (Leaf)
-#? UP_INCOMING_REJECT_LEAF=拒絕輸入(葉節點)
+UP_INCOMING_REJECT_LEAF=拒絕輸入(葉節點)
 #### UP_INCOMING_ACCEPT_LEAF=In Acc. (Leaf)
-#? UP_INCOMING_ACCEPT_LEAF=接受輸入(葉節點)
+UP_INCOMING_ACCEPT_LEAF=接受輸入(葉節點)
 #### UP_INCOMING_GUIDED=In Acc. (Guiding To Leaf)
-#? UP_INCOMING_GUIDED=接受輸入(引導至葉節點)
+UP_INCOMING_GUIDED=接受輸入(引導至葉節點)
 #### UP_INCOMING_ACCEPT_UP=In Acc. (Ultrapeer)
-#? UP_INCOMING_ACCEPT_UP=接受輸入(超級節點)
+UP_INCOMING_ACCEPT_UP=接受輸入(超級節點)
 #### UP_INCOMING_REJECT_NO_ROOM_LEAF=In Rej. (All Slots Taken)
-#? UP_INCOMING_REJECT_NO_ROOM_LEAF=拒絕輸入(已滿)
+UP_INCOMING_REJECT_NO_ROOM_LEAF=拒絕輸入(已滿)
 #### UP_INCOMING_REJECT_NO_ROOM_UP=In Rej. (Network Needs Ultrapeer)
-#? UP_INCOMING_REJECT_NO_ROOM_UP=拒絕輸入(網路需要超級節點)
+UP_INCOMING_REJECT_NO_ROOM_UP=拒絕輸入(網路需要超級節點)
 #### OUTGOING_BAD_CONNECT=Bad Connect
-#? OUTGOING_BAD_CONNECT=壞連接
+OUTGOING_BAD_CONNECT=壞連接
 #### OUTGOING_SERVER_REJECT=Server Reject
-#? OUTGOING_SERVER_REJECT=服務器不接受
+OUTGOING_SERVER_REJECT=服務器不接受
 #### OUTGOING_SERVER_UNKNOWN=Server Unknown
-#? OUTGOING_SERVER_UNKNOWN=服務器未知
+OUTGOING_SERVER_UNKNOWN=服務器未知
 #### OUTGOING_CLIENT_REJECT=Client Reject
-#? OUTGOING_CLIENT_REJECT=客戶端不接受
+OUTGOING_CLIENT_REJECT=客戶端不接受
 #### OUTGOING_CLIENT_UNKNOWN=Client Unknown
-#? OUTGOING_CLIENT_UNKNOWN=客戶端未知
+OUTGOING_CLIENT_UNKNOWN=客戶端未知
 #### SUCCESSFUL_OUTGOING=Successful
-#? SUCCESSFUL_OUTGOING=成功
+SUCCESSFUL_OUTGOING=成功
 #### INCOMING_BAD_CONNECT=Bad Connect
-#? INCOMING_BAD_CONNECT=壞連接
+INCOMING_BAD_CONNECT=壞連接
 #### INCOMING_SERVER_UNKNOWN=Server Unknown
-#? INCOMING_SERVER_UNKNOWN=服務器未知
+INCOMING_SERVER_UNKNOWN=服務器未知
 #### INCOMING_CLIENT_REJECT=Client Reject
-#? INCOMING_CLIENT_REJECT=客戶端不接受
+INCOMING_CLIENT_REJECT=客戶端不接受
 #### INCOMING_CLIENT_UNKNOWN=Client Unknown
-#? INCOMING_CLIENT_UNKNOWN=客戶端未知
+INCOMING_CLIENT_UNKNOWN=客戶端未知
 #### SUCCESSFUL_INCOMING=Successful
-#? SUCCESSFUL_INCOMING=成功
+SUCCESSFUL_INCOMING=成功
 #### INCOMING_NO_CONCLUSION=No Conclusion
-#? INCOMING_NO_CONCLUSION=無結果
+INCOMING_NO_CONCLUSION=無結果
 #### CRAWLER_CONNECTION=Crawler
-#? CRAWLER_CONNECTION=爬蟲
+CRAWLER_CONNECTION=爬蟲
 #### OUTGOING_LIMEWIRE_ULTRAPEER_REJECT=LimeWire Ultrapeers
-#? OUTGOING_LIMEWIRE_ULTRAPEER_REJECT=LimeWire 超級節點
+OUTGOING_LIMEWIRE_ULTRAPEER_REJECT=LimeWire 超級節點
 #### OUTGOING_LIMEWIRE_LEAF_REJECT=LimeWire Leaves
-#? OUTGOING_LIMEWIRE_LEAF_REJECT=LimeWire 葉節點
+OUTGOING_LIMEWIRE_LEAF_REJECT=LimeWire 葉節點
 #### OUTGOING_OTHER_ULTRAPEER_REJECT=Other Ultrapeers
-#? OUTGOING_OTHER_ULTRAPEER_REJECT=其他超級節點
+OUTGOING_OTHER_ULTRAPEER_REJECT=其他超級節點
 #### OUTGOING_OTHER_LEAF_REJECT=Other Leaves
-#? OUTGOING_OTHER_LEAF_REJECT=其他葉節點
+OUTGOING_OTHER_LEAF_REJECT=其他葉節點
 
 # Advanced OOB statistics
 #### ALL_OOB_REQUESTS=Responses Requested
-#? ALL_OOB_REQUESTS=請求應答
+ALL_OOB_REQUESTS=請求應答
 #### ALL_OOB_RESPONSES=Responses Received
-#? ALL_OOB_RESPONSES=收到應答
+ALL_OOB_RESPONSES=收到應答
 #### ALL_OOB_BYPASSED=Responses Bypassed
-#? ALL_OOB_BYPASSED=忽略應答
+ALL_OOB_BYPASSED=忽略應答
 #### STATS_OOB_THROUGHPUT_TITLE=OOB Success Rate
-#? STATS_OOB_THROUGHPUT_TITLE=OOB 成功率
+STATS_OOB_THROUGHPUT_TITLE=OOB 成功率
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
-#? STATS_OOB_THROUGHPUT_LABEL=透過 OOB 協議請求並收到的應答數
+STATS_OOB_THROUGHPUT_LABEL=透過 OOB 協議請求並收到的應答數
