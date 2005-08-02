@@ -11,10 +11,10 @@ LOCALE_LANGUAGE_NAME=日本語
 LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=日本
 LOCALE_VARIANT_CODE=
-LOCALE_VARIANT_NAME=インターナショナル
-LOCALE_SCRIPT_CODE=ヒラ
-LOCALE_SCRIPT_NAME=極東アジア
-LOCALE_ENGLISH_LANGUAGE_NAME=日本語
+LOCALE_VARIANT_NAME=International
+LOCALE_SCRIPT_CODE=Hira
+LOCALE_SCRIPT_NAME=Far-East Asian
+LOCALE_ENGLISH_LANGUAGE_NAME=Japanese
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 LOCALE_NSIS_NAME=Japanese
@@ -25,20 +25,20 @@ LOCALE_NSIS_NAME=Japanese
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).
 ################################################################################
-DISABLE_BOLD_CHARACTERS=正
+DISABLE_BOLD_CHARACTERS=true
 
 ################################################################################
 # Key/value pair for whether or not the layout should be adapted for right-to-
 # left scripts. Must be "true" or "false" (true only for semitic scripts).
 ################################################################################
-LAYOUT_RIGHT_TO_LEFT=誤
+LAYOUT_RIGHT_TO_LEFT=false
 
 ################################################################################
 # Key/value pair for whether or not the tips of the day should be displayed.
 # The default is false (set to true if TOTDs exist).
 ################################################################################
 # See: http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/totd/
-HAS_TIPS_OF_THE_DAY=正
+HAS_TIPS_OF_THE_DAY=true
 
 # See also other translatable resources for the application:
 # * translations of meta-data search items:
