@@ -380,10 +380,12 @@ public class NIODispatcher implements Runnable {
             // selection can handle more things in one round.
             // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
             // that cause this.
-            try {
-               Thread.sleep(50);
-            } catch(InterruptedException ix) {
-               LOG.warn("Selector interrupted", ix);
+            if (!checkTime) {
+                try {
+                    Thread.sleep(50);
+                } catch(InterruptedException ix) {
+                    LOG.warn("Selector interrupted", ix);
+                }
             }
             
             addPendingItems();
@@ -418,6 +420,7 @@ public class NIODispatcher implements Runnable {
                     checkTime = false;
                     startSelect = -1;
                     zeroes = 0;
+                    ignores = 0;
                 }
                 continue;
             } else if (checkTime) {             
