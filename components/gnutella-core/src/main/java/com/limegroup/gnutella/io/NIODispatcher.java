@@ -2,6 +2,7 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -9,6 +10,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
@@ -71,11 +73,29 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    /**
+     * Maximum number of times an attachment can be hit in a row without considering
+     * it suspect & closing it.
+     */
+    private static final long MAXIMUM_ATTACHMENT_HITS = 10000;
+    
+    /**
+     * Maximum number of times Selector can return quickly without having anything
+     * selected.
+     */
+    private static final long SPIN_AMOUNT = 5000;
+    
+    /** Ignore up to this many non-zero selects when suspecting selector is broken */
+    private static final int MAX_IGNORES = 5;
+    
     /** The thread this is being run on. */
     private final Thread dispatchThread;
     
     /** The selector this uses. */
     private Selector selector = null;
+    
+    /** The current iteration of selection. */
+    private long iteration = 0;
 	
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
@@ -148,11 +168,7 @@ public class NIODispatcher implements Runnable {
     /** Register interest */
     private void register(SelectableChannel channel, IOErrorObserver handler, int op) {
 		if(Thread.currentThread() == dispatchThread) {
-			try {
-				channel.register(selector, op, handler);
-			} catch(IOException iox) {
-                handler.handleIOException(iox);
-            }
+		    registerImpl(selector, channel, op, handler);
 		} else {
 	        synchronized(Q_LOCK) {
 				REGISTER.add(new RegisterOp(channel, handler, op));
@@ -222,6 +238,11 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    /** Gets the underlying attachment for the given SelectionKey's attachment. */
+    public IOErrorObserver attachment(Object proxyAttachment) {
+        return ((Attachment)proxyAttachment).attachment;
+    }
+    
     /**
      * Cancel SelectionKey & shuts down the handler.
      */
@@ -278,6 +299,17 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
+     * Does a real registration.
+     */
+    private void registerImpl(Selector selector, SelectableChannel channel, int op, IOErrorObserver attachment) {
+        try {
+            channel.register(selector, op, new Attachment(attachment));
+        } catch(IOException iox) {
+            attachment.handleIOException(iox);
+        }
+    }
+    
+    /**
      * Adds any pending actions.
      *
      * This works by adding any pending actions into a temporary list so that actions
@@ -309,11 +341,7 @@ public class NIODispatcher implements Runnable {
                 try {
                     if(item instanceof RegisterOp) {
                         RegisterOp next = (RegisterOp)item;
-                        try {
-                            next.channel.register(selector, next.op, next.handler);
-                        } catch(IOException iox) {
-                            next.handler.handleIOException(iox);
-                        }
+                        registerImpl(selector, next.channel, next.op, next.handler);
                     } else if(item instanceof Runnable) {
                         ((Runnable)item).run();
                     } 
@@ -338,7 +366,12 @@ public class NIODispatcher implements Runnable {
     /**
      * The actual NIO run loop
      */
-    private void process() {
+    private void process() throws ProcessingException, SpinningException {
+        boolean checkTime = false;
+        long startSelect = -1;
+        int zeroes = 0;
+        int ignores = 0;
+        
         while(true) {
             // This sleep is technically not necessary, however occasionally selector
             // begins to wakeup with nothing selected.  This happens very frequently on Linux,
@@ -356,6 +389,9 @@ public class NIODispatcher implements Runnable {
             addPendingItems();
 
             try {
+                if(checkTime)
+                    startSelect = System.currentTimeMillis();
+                    
                 // see register(...) for why this has a timeout
                 selector.select(100);
             } catch (NullPointerException err) {
@@ -365,12 +401,35 @@ public class NIODispatcher implements Runnable {
                 LOG.warn("cancelled", err);
                 continue;
             } catch (IOException iox) {
-                throw new RuntimeException(iox);
+                throw new ProcessingException(iox);
             }
             
             Collection keys = selector.selectedKeys();
-            if(keys.size() == 0)
+            if(keys.size() == 0) {
+                if(startSelect == -1) {
+                    LOG.warn("No keys selected, starting spin check.");
+                    checkTime = true;
+                } else if(startSelect + 30 >= System.currentTimeMillis()) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Spinning detected, current spins: " + zeroes);
+                    if(zeroes++ > SPIN_AMOUNT)
+                        throw new SpinningException();
+                } else { // waited the timeout just fine, reset everything.
+                    checkTime = false;
+                    startSelect = -1;
+                    zeroes = 0;
+                }
                 continue;
+            } else if (checkTime) {             
+                // skip up to certain number of good selects if we suspect the selector is broken
+                ignores++;
+                if (ignores > MAX_IGNORES) {
+                    checkTime = false;
+                    zeroes = 0;
+                    startSelect = -1;
+                    ignores = 0;
+                }
+            }
             
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + keys.size() + ") keys.");
@@ -384,6 +443,7 @@ public class NIODispatcher implements Runnable {
             }
             
             keys.clear();
+            iteration++;
         }
     }
     
@@ -391,34 +451,97 @@ public class NIODispatcher implements Runnable {
      * Processes a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
-    void process(SelectionKey sk, Object attachment, int allowedOps) {
-		try {
+    void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
+        Attachment proxy = (Attachment)proxyAttachment;
+        IOErrorObserver attachment = proxy.attachment;
+        
+        if(proxy.lastMod == iteration) {
+            proxy.hits++;
+        // do not count ones that we've already processed (such as throttled items)
+        } else if(proxy.lastMod < iteration)
+            proxy.hits = 0;
+            
+        proxy.lastMod = iteration + 1;
+            
+        if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
-                if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                    processAccept(sk, (AcceptObserver)attachment);
-                else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
-                    processConnect(sk, (ConnectObserver)attachment);
-                else {
-                    if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                        ((ReadObserver)attachment).handleRead();
-                    if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                        ((WriteObserver)attachment).handleWrite();
+                try {
+                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                        processAccept(sk, (AcceptObserver)attachment);
+                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                        processConnect(sk, (ConnectObserver)attachment);
+                    else {
+                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                            ((ReadObserver)attachment).handleRead();
+                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                            ((WriteObserver)attachment).handleWrite();
+                    }
+                } catch (CancelledKeyException err) {
+                    LOG.warn("Ignoring cancelled key", err);
+                } catch(IOException iox) {
+                    LOG.warn("IOX processing", iox);
+                    attachment.handleIOException(iox);
                 }
-            } catch (CancelledKeyException err) {
-                LOG.warn("Ignoring cancelled key", err);
-            } catch(IOException iox) {
-                LOG.warn("IOX processing", iox);
-                ((IOErrorObserver)attachment).handleIOException(iox);
+            } catch(Throwable t) {
+                ErrorService.error(t, "Unhandled exception while dispatching");
+                safeCancel(sk, attachment);
             }
-        } catch(Throwable t) {
-            ErrorService.error(t, "Unhandled exception while dispatching");
-
+        } else {
+            if(LOG.isErrorEnabled())
+                LOG.error("Too many hits in a row for: " + attachment);
+            // we've had too many hits in a row.  kill this attachment.
+            safeCancel(sk, attachment);
+        }
+    }
+    
+    /** A very safe cancel, ignoring errors & only shutting down if possible. */
+    private void safeCancel(SelectionKey sk, Shutdownable attachment) {
+        try {
+            cancel(sk, (Shutdownable)attachment);
+        } catch(Throwable ignored) {}
+    }
+    
+    /**
+     * Swaps all channels out of the old selector & puts them in the new one.
+     */
+    private void swapSelector() {
+        Selector oldSelector = selector;
+        Collection oldKeys = Collections.EMPTY_SET;
+        try {
+            if(oldSelector != null)
+                oldKeys = oldSelector.keys();
+        } catch(ClosedSelectorException ignored) {
+            LOG.warn("error getting keys", ignored);
+        }
+        
+        try {
+            selector = Selector.open();
+        } catch(IOException iox) {
+            LOG.error("Can't make a new selector!!!", iox);
+            throw new RuntimeException(iox);
+        }
+        
+        for(Iterator i = oldKeys.iterator(); i.hasNext(); ) {
             try {
-                if(attachment instanceof Shutdownable)
-                    cancel(sk, (Shutdownable)attachment);
-                else
-                    cancel(sk, null);
-            } catch(Throwable ignored) {}
+                SelectionKey key = (SelectionKey)i.next();
+                SelectableChannel channel = key.channel();
+                Object attachment = key.attachment();
+                int ops = key.interestOps();
+                try {
+                    channel.register(selector, ops, attachment);
+                } catch(IOException iox) {
+                    ((Attachment)attachment).attachment.handleIOException(iox);
+                }
+            } catch(CancelledKeyException ignored) {
+                LOG.warn("key cancelled while swapping", ignored);
+            }
+        }
+        
+        try {
+            if(oldSelector != null)
+                oldSelector.close();
+        } catch(IOException ignored) {
+            LOG.warn("error closing old selector", ignored);
         }
     }
     
@@ -431,11 +554,21 @@ public class NIODispatcher implements Runnable {
                 if(selector == null)
                     selector = Selector.open();
                 process();
+            } catch(SpinningException spin) {
+                LOG.warn("selector is spinning!", spin);
+                swapSelector();
+            } catch(ProcessingException uhoh) {
+                LOG.warn("unknown exception while selecting", uhoh);
+                swapSelector();
+            } catch(IOException iox) {
+                LOG.error("Unable to create a new Selector!!!", iox);
+                throw new RuntimeException(iox);
             } catch(Throwable err) {
-                selector = null;
                 LOG.error("Error in Selector!", err);
                 ErrorService.error(err);
-            } 
+                
+                swapSelector();
+            }
         }
     }
     
@@ -450,6 +583,26 @@ public class NIODispatcher implements Runnable {
             this.handler = handler;
             this.op = op;
         }
+    }
+    
+    /** Encapsulates an attachment. */
+    private static class Attachment {
+        private final IOErrorObserver attachment;
+        private long lastMod;
+        private long hits;
+        
+        Attachment(IOErrorObserver attachment) {
+            this.attachment = attachment;
+        }
+    }
+
+    private static class SpinningException extends Exception {
+        public SpinningException() { super(); }
+    }
+    
+    private static class ProcessingException extends Exception {
+        public ProcessingException() { super(); }
+        public ProcessingException(Throwable t) { super(t); }
     }
     
 }

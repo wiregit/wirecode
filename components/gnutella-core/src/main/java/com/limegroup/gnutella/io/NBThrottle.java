@@ -179,7 +179,7 @@ public class NBThrottle implements Throttle {
                 SelectionKey key = (SelectionKey)i.next();
                 try {
                     if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
-                        Object attachment = key.attachment();
+                        Object attachment = NIODispatcher.instance().attachment(key.attachment());
                         if(_interested.containsKey(attachment))
                             _ready.put(attachment, key);
                     }
@@ -200,7 +200,7 @@ public class NBThrottle implements Throttle {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
-                    NIODispatcher.instance().process(key, attachment, _processOp);
+                    NIODispatcher.instance().process(key, key.attachment(), _processOp);
                     i.remove();
                     if(_available < MINIMUM_TO_GIVE)
                         break;
