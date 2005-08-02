@@ -2502,7 +2502,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 	
 	synchronized void addRFD(RemoteFileDesc rfd) {
-        ranker.addToPool(rfd);
+        if (ranker != null)
+            ranker.addToPool(rfd);
 	}
     
     synchronized void forgetRFD(RemoteFileDesc rfd) {
