@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 
 import org.apache.commons.logging.LogFactory;
@@ -380,7 +381,7 @@ public class NIODispatcher implements Runnable {
             // selection can handle more things in one round.
             // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
             // that cause this.
-            if (!checkTime) {
+            if (!checkTime || !CommonUtils.isWindows()) {
                 try {
                     Thread.sleep(50);
                 } catch(InterruptedException ix) {
