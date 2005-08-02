@@ -789,20 +789,22 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 ranker = null;
         }
         
-        if (clearingNeeded) {
-            synchronized(altLock) {
-                recentInvalidAlts.clear();
-                invalidAlts.clear();
-                validAlts.clear();
-            }
-        }
-        
         long now = System.currentTimeMillis();
 
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
         manager.remove(this, complete);
+        
+        if (clearingNeeded) {
+            synchronized(altLock) {
+                recentInvalidAlts.clear();
+                invalidAlts.clear();
+                validAlts.clear();
+                if (complete)
+                    cachedRFDs.clear(); // the call right before this serializes. 
+            }
+        }
         
         if(LOG.isTraceEnabled())
             LOG.trace("MD completing <" + getSaveFile().getName() + 
