@@ -400,8 +400,9 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 
 	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 
-	    Assert.that(current != null);	    
-
+	    if (current == null)
+            return Collections.EMPTY_SET;
+        
 	    return current.getProxies();
 	}
 	
