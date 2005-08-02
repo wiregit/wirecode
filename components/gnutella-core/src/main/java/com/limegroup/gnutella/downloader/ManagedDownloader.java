@@ -754,6 +754,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private void completeDownload(int status) {
         
         boolean complete;
+        boolean clearingNeeded = false;
         int waitTime = 0;
         // If TAD2 gave a completed state, set the state correctly & exit.
         // Otherwise...
@@ -764,8 +765,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
-                ranker.stop();
-                ranker = null;
+                clearingNeeded = true;
                 setState(status);
                 break;
 			case BUSY:
@@ -782,9 +782,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             }
             
             complete = isCompleted();
-            if (ranker != null) {
-                waitTime = ranker.calculateWaitTime();
-                ranker.stop();
+            
+            waitTime = ranker.calculateWaitTime();
+            ranker.stop();
+            if (clearingNeeded)
+                ranker = null;
+        }
+        
+        if (clearingNeeded) {
+            synchronized(altLock) {
+                recentInvalidAlts.clear();
+                invalidAlts.clear();
+                validAlts.clear();
             }
         }
         
