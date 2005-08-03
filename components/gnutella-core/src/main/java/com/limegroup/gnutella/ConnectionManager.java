@@ -553,7 +553,9 @@ public class ConnectionManager {
     public int getNumFreeLimeWireNonLeafSlots() {
         return Math.max(0,
                         getNumFreeNonLeafSlots()
-                        - Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
+                        - Math.max(0, (int)
+                                (ConnectionSettings.NON_LIME_PEERS.getValue() * _preferredConnections) 
+                                - _nonLimeWirePeers)
                         - getNumLimeWireLocalePrefSlots()
                         );
     }
@@ -871,22 +873,11 @@ public class ConnectionManager {
             // for non-limewire peers to ensure that the network
             // is well connected.
             if(!hr.isLimeWire()) {
-                if( peers < _preferredConnections &&
-                    nonLimeWirePeers < RESERVED_NON_LIMEWIRE_PEERS ) {
-                    return true;
-                }
-                
-                double limeRatio = 1 - (double)nonLimeWirePeers / _preferredConnections;
-                if (limeRatio < ConnectionSettings.LIME_PEERS.getValue())
-                    return false;
-            }
-
-            // Otherwise, allow only if we've left enough room for the quota'd
-            // number of non-limewire peers.
-            return (peers + Math.max(0,
-                                RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers)
-                    + locale_num)
-                   < _preferredConnections;
+                double nonLimeRatio = ((double)nonLimeWirePeers) / _preferredConnections;
+                return (nonLimeRatio < ConnectionSettings.NON_LIME_PEERS.getValue()) && 
+                    hr.isGoodUltrapeer();
+            } else 
+                return (peers + locale_num) < _preferredConnections;
         }
 		return false;
     }
@@ -941,19 +932,6 @@ public class ConnectionManager {
             if(userAgent.indexOf(bad[i]) != -1)
                 return false;
         return true;
-    }
-
-	/** Returns the number of connections to other ultrapeers.  Caller MUST hold
-     *  this' monitor. */
-    private int ultrapeerConnections() {
-        //TODO3: augment state of this if needed to avoid loop
-        int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeConnection())
-                ret++;
-        }
-        return ret;
     }
 
     /**
