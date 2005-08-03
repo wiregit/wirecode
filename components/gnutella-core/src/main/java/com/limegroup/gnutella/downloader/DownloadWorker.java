@@ -204,19 +204,20 @@ public class DownloadWorker implements Runnable {
                 throw new InterruptedException();
             
             connectAndDownload();
-        } catch (Throwable e) {
+        }
+        // Ignore InterruptedException -- the JVM throws
+        // them for some reason at odd times, even though
+        // we've caught and handled all of them
+        // appropriately.
+        catch (InterruptedException ignored){}
+        catch (Throwable e) {
             LOG.debug("got an exception in run()",e);
-             // Ignore InterruptedException -- the JVM throws
-             // them for some reason at odd times, even though
-             // we've caught and handled all of them
-             // appropriately.
-            if(!(e instanceof InterruptedException)) {
-                //This is a "firewall" for reporting unhandled
-                //errors.  We don't really try to recover at
-                //this point, but we do attempt to display the
-                //error in the GUI for debugging purposes.
-                ErrorService.error(e);
-            }
+
+            //This is a "firewall" for reporting unhandled
+            //errors.  We don't really try to recover at
+            //this point, but we do attempt to display the
+            //error in the GUI for debugging purposes.
+            ErrorService.error(e);
         } finally {
             _manager.workerFinished(this);
         }
