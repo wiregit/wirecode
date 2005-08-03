@@ -129,12 +129,6 @@ public class ConnectionManager {
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
 
     /**
-     * The number of ultrapeer connections reserved for non LimeWire clients.
-     * This is done to ensure that the network is not solely LimeWire centric.
-     */
-    public static final int RESERVED_NON_LIMEWIRE_PEERS = 3;
-
-    /**
      * The current number of connections we want to maintain.
      */
     private volatile int _preferredConnections = -1;
@@ -554,7 +548,7 @@ public class ConnectionManager {
         return Math.max(0,
                         getNumFreeNonLeafSlots()
                         - Math.max(0, (int)
-                                (ConnectionSettings.NON_LIME_PEERS.getValue() * _preferredConnections) 
+                                (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections) 
                                 - _nonLimeWirePeers)
                         - getNumLimeWireLocalePrefSlots()
                         );
@@ -836,7 +830,7 @@ public class ConnectionManager {
                         nonLimeWireLeaves)) <
                           UltrapeerSettings.MAX_LEAVES.getValue();
 
-        } else if (hr.isUltrapeer()) {
+        } else if (hr.isGoodUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
@@ -874,10 +868,16 @@ public class ConnectionManager {
             // is well connected.
             if(!hr.isLimeWire()) {
                 double nonLimeRatio = ((double)nonLimeWirePeers) / _preferredConnections;
-                return (nonLimeRatio < ConnectionSettings.NON_LIME_PEERS.getValue()) && 
-                    hr.isGoodUltrapeer();
-            } else 
-                return (peers + locale_num) < _preferredConnections;
+                if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue())
+                    return true;
+                return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());  
+            } else {
+                int minNonLime = (int)
+                    (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+                return (peers + 
+                        Math.max(0,minNonLime - nonLimeWirePeers) + 
+                        locale_num) < _preferredConnections;
+            }
         }
 		return false;
     }
@@ -1538,7 +1538,8 @@ public class ConnectionManager {
         // 1 times the amount of connections.
         else {
             multiple = 1;
-            neededConnections -= 5 + RESERVED_NON_LIMEWIRE_PEERS;
+            neededConnections -= 5 + 
+                ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
         int need = Math.min(10, multiple*neededConnections)
