@@ -47,11 +47,11 @@ public final class ConnectionSettings extends LimeProps {
     
     /** The maximum ratio of non-limewire peers to allow */
     public static final FloatSetting MAX_NON_LIME_PEERS =
-        FACTORY.createSettableFloatSetting("NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.5f,0f);
+        FACTORY.createSettableFloatSetting("MAX_NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.5f,0f);
     
     /** The minimum ratio of non-limewire peers to allow */
     public static final FloatSetting MIN_NON_LIME_PEERS =
-        FACTORY.createSettableFloatSetting("NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.2f,0f);
+        FACTORY.createSettableFloatSetting("MIN_NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.2f,0f);
 
 	
     /**
