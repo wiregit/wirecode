@@ -2166,13 +2166,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         // First attempt to rename it.
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
-            
+
+        incompleteFileManager.removeEntry(incompleteFile);
+        
         // If that didn't work, we're out of luck.
         if (!success)
             return DISK_PROBLEM;
             
-        incompleteFileManager.removeEntry(incompleteFile);
-        
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
