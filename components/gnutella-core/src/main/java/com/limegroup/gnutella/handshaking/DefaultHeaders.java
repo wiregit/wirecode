@@ -55,7 +55,7 @@ public abstract class DefaultHeaders extends Properties {
         // include them with leaves to as an indication that they
         // understand these protocols
         props.put(HeaderNames.X_DEGREE, 
-                  Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
+                  Integer.toString(ConnectionSettings.NUM_CONNECTIONS.getValue()));
 		props.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 
                   QUERY_ROUTING_VERSION);
 
