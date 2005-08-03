@@ -259,13 +259,12 @@ public final class HandshakeResponse {
                 toLowerCase().startsWith("limewire");
 
         
-        GOOD_LEAF = isHighDegreeConnection() &&
+        GOOD_ULTRAPEER = isHighDegreeConnection() &&
             isUltrapeerQueryRoutingConnection() &&
             (getMaxTTL() < 5) &&
-            isDynamicQueryConnection() &&
-            (IS_LIMEWIRE || NO_REQUERYING);
-        
-        GOOD_ULTRAPEER = isGoodLeaf(); // && supportsProbeQueries();        
+            isDynamicQueryConnection();
+            
+        GOOD_LEAF = GOOD_ULTRAPEER && (IS_LIMEWIRE || NO_REQUERYING); 
         
         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
