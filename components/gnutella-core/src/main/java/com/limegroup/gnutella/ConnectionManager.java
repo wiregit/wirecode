@@ -875,6 +875,10 @@ public class ConnectionManager {
                     nonLimeWirePeers < RESERVED_NON_LIMEWIRE_PEERS ) {
                     return true;
                 }
+                
+                double limeRatio = 1 - (double)nonLimeWirePeers / _preferredConnections;
+                if (limeRatio < ConnectionSettings.LIME_PEERS.getValue())
+                    return false;
             }
 
             // Otherwise, allow only if we've left enough room for the quota'd

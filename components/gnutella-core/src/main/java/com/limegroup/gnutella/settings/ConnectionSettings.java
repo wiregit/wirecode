@@ -44,6 +44,10 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final IntSetting NUM_CONNECTIONS =
         FACTORY.createSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",96,16);
+    
+    
+    public static final FloatSetting LIME_PEERS =
+        FACTORY.createSettableFloatSetting("LIME_PEERS",0.8f,"ConnectionSettings.limePeers",1.0f,0.5f);
 
 	
     /**
