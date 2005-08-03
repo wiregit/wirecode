@@ -107,12 +107,6 @@ public class ConnectionManager {
 
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
-	/**
-	 * The number of Ultrapeer connections to ideally maintain as an Ultrapeer.
-	 */
-	public static final int ULTRAPEER_CONNECTIONS =
-        ConnectionSettings.NUM_CONNECTIONS.getValue();
-
     /**
      * The number of connections leaves should maintain to Ultrapeers.
      */
@@ -1884,7 +1878,7 @@ public class ConnectionManager {
         int oldPreferred = _preferredConnections;
 
         if(isSupernode())
-            _preferredConnections = ULTRAPEER_CONNECTIONS;
+            _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
         else if(isIdle())
             _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF_WHEN_IDLE;
         else

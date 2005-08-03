@@ -43,7 +43,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * Settings for the number of connections to maintain.
 	 */
 	public static final IntSetting NUM_CONNECTIONS =
-        FACTORY.createIntSetting("NUM_CONNECTIONS", 32);
+        FACTORY.createSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",96,16);
 
 	
     /**
