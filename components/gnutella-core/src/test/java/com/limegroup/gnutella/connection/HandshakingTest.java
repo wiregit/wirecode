@@ -81,7 +81,7 @@ public final class HandshakingTest extends BaseTestCase {
 	 * of connections are allowed.
 	 */
 	public void testConnectionLimit() throws Exception {
-		int limit = ConnectionManager.ULTRAPEER_CONNECTIONS+1;
+		int limit = ConnectionSettings.NUM_CONNECTIONS.getValue()+1;
 		for(int i=0; i<limit; i++) {
 			try {
 				Connection curConn = connect();
@@ -97,14 +97,14 @@ public final class HandshakingTest extends BaseTestCase {
 					curConn.receive(6000);
 				}
 
-				if(i == ConnectionManager.ULTRAPEER_CONNECTIONS) {
+				if(i == ConnectionSettings.NUM_CONNECTIONS.getValue()) {
 					// this should throw an IOException because the connection 
 					// should  really be closed
 					curConn.receive(6000);
 					fail("accepted beyond max connections");
 				}
 			} catch(IOException e) {
-				if(i < ConnectionManager.ULTRAPEER_CONNECTIONS)
+				if(i < ConnectionSettings.NUM_CONNECTIONS.getValue())
 					fail("allowed only: " + i, e);
 				// otherwise, we expected the exception
 			}
