@@ -79,13 +79,15 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
         
+        int nonLimeSlots = (int)
+        (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * ConnectionSettings.NUM_CONNECTIONS.getValue());
         // Should now have leaf slots
         assertEquals("unexpected number leaf slots", 
-                     10 - ConnectionManager.RESERVED_NON_LIMEWIRE_LEAVES, 
+                     10 - nonLimeSlots, 
                      pr.getNumLeafSlots());
         
         assertEquals("unexpected number ultrapeer slots", 
-            7 - ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS -
+            7 - nonLimeSlots -
             ConnectionSettings.NUM_LOCALE_PREF.getValue(), 
             pr.getNumUltrapeerSlots());
     }
