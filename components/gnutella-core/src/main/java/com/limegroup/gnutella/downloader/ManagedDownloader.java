@@ -2773,8 +2773,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return ourFile == null ? 0 : ourFile.getPendingSize();
     }
      
-    public synchronized Iterator /* of Endpoint */ getHosts() {
-        return getHosts(false);
+    public int getNumHosts() {
+        return _activeWorkers.size();
     }
    
 	public synchronized Endpoint getChatEnabledHost() {
@@ -2906,18 +2906,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         return true;
                 
-    }
-    
-    private final Iterator getHosts(boolean chattableOnly) {
-        List /* of Endpoint */ buf=new LinkedList();
-        for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {
-            HTTPDownloader dloader=((DownloadWorker)iter.next()).getDownloader();            
-            if (chattableOnly ? dloader.chatEnabled() : true) {                
-                buf.add(new Endpoint(dloader.getInetAddress().getHostAddress(),
-                                     dloader.getPort()));
-            }
-        }
-        return buf.iterator();
     }
     
     public synchronized String getVendor() {
