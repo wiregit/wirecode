@@ -106,6 +106,8 @@ public class Sockets {
 	 */
 	private static Socket connectPlain(String host, int port, int timeout)
 		throws IOException {
+        if (timeout == 0)
+            timeout = Integer.MAX_VALUE;
         
         long waitTime = System.currentTimeMillis();
         boolean waited = waitForSocket(timeout, waitTime);
@@ -394,6 +396,10 @@ public class Sockets {
 	    synchronized(Sockets.class) {
             int currentSocketsConnecting = _socketsConnecting;
 	        while(currentSocketsConnecting >= MAX_CONNECTING_SOCKETS) {
+                
+                if (timeout <= 0)
+                    throw new IOException("timed out :(");
+                
 	            try {
                     ret = true;
 	                Sockets.class.wait(timeout);
@@ -401,8 +407,6 @@ public class Sockets {
 	            } catch(InterruptedException ignored) {
 	                throw new IOException(ignored.getMessage());
 	            }
-                if (_socketsConnecting == currentSocketsConnecting || timeout <= 0)
-                    throw new IOException("timed out :(");
 	        }
 	        _socketsConnecting++;	        
 	    }
