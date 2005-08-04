@@ -79,17 +79,22 @@ public class UDPService implements ReadWriteObserver {
     /** True if the UDPService has ever received a solicited incoming UDP
      *  packet.
      */
-    private boolean _acceptedSolicitedIncoming = false;
+    private volatile boolean _acceptedSolicitedIncoming = false;
     
     /** True if the UDPService has ever received a unsolicited incoming UDP
      *  packet.
      */
-    private boolean _acceptedUnsolicitedIncoming = false;
+    private volatile boolean _acceptedUnsolicitedIncoming = false;
     
     /** The last time the _acceptedUnsolicitedIncoming was set.
      */
     private long _lastUnsolicitedIncomingTime = 0;
 
+    /**
+     * The last time we received any udp packet
+     */
+    private volatile long _lastReceivedAny = 0;
+    
     /** The last time we sent a UDP Connect Back.
      */
     private long _lastConnectBackTime = System.currentTimeMillis();
@@ -328,13 +333,14 @@ public class UDPService implements ReadWriteObserver {
 	
 	/** Updates internal state of the UDP Service. */
 	private void updateState(Message message, InetSocketAddress addr) {
+        _lastReceivedAny = System.currentTimeMillis();
 	    if (!isGUESSCapable()) {
             if (message instanceof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
                 if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr)) {
                     _acceptedUnsolicitedIncoming = true;
                 }
-                _lastUnsolicitedIncomingTime = System.currentTimeMillis();
+                _lastUnsolicitedIncomingTime = _lastReceivedAny;
             }
             else if (message instanceof PingReply) {
                 GUID guid = new GUID(message.getGUID());
@@ -363,7 +369,7 @@ public class UDPService implements ReadWriteObserver {
         // so we can use this fact to keep the last unsolicited up
         // to date
         if (message instanceof ReplyNumberVendorMessage)
-            _lastUnsolicitedIncomingTime = System.currentTimeMillis();
+            _lastUnsolicitedIncomingTime = _lastReceivedAny;
 	}
 	
 	/**
@@ -629,6 +635,10 @@ public class UDPService implements ReadWriteObserver {
 	public void setReceiveSolicited(boolean value) {
 		_acceptedSolicitedIncoming = value;
 	}
+    
+    public long getLastReceivedTime() {
+        return _lastReceivedAny;
+    }
 
 	/**
 	 * Returns whether or not the UDP socket is listening for incoming

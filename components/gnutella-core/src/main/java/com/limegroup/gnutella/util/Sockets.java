@@ -112,6 +112,8 @@ public class Sockets {
         if (waited) {
             waitTime = System.currentTimeMillis() - waitTime;
             timeout -= waitTime;
+            if (timeout <= 0)
+                throw new IOException("timed out");
         }
 		    
         try {
@@ -399,7 +401,7 @@ public class Sockets {
 	            } catch(InterruptedException ignored) {
 	                throw new IOException(ignored.getMessage());
 	            }
-                if (_socketsConnecting == currentSocketsConnecting)
+                if (_socketsConnecting == currentSocketsConnecting || timeout <= 0)
                     throw new IOException("timed out :(");
 	        }
 	        _socketsConnecting++;	        

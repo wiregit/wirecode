@@ -18,6 +18,7 @@ import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.Message;
@@ -226,11 +227,21 @@ public final class ConnectionChecker implements Runnable {
         UDPPinger myPinger = RouterService.getHostCatcher().getPinger();
         UDPChecker checker = new UDPChecker();
         
+        // send some hosts to be ranked
         myPinger.rank(hosts,checker,checker,ping);
-        
+        long now = System.currentTimeMillis();
         synchronized(checker) {
             try {
-                checker.wait(5000);
+                // since there may be other udp packets backed up to be sent,
+                // check every second if we have received something, and if so
+                // cancel the hosts we sent.
+                for (int i = 0; i < 5; i++) {
+                    checker.wait(1000);
+                    if (UDPService.instance().getLastReceivedTime() > now) {
+                        checker.received = true;
+                        return false;
+                    }
+                }
             } catch (InterruptedException ignored){}
         }
         return !checker.received;
