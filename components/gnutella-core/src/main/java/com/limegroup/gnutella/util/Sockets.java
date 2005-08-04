@@ -392,6 +392,7 @@ public class Sockets {
 	    if(!CommonUtils.isWindowsXP())
 	        return false;
         
+        long timeoutTime = now + timeout;
         boolean ret = false;
 	    synchronized(Sockets.class) {
             int currentSocketsConnecting = _socketsConnecting;
@@ -403,7 +404,7 @@ public class Sockets {
 	            try {
                     ret = true;
 	                Sockets.class.wait(timeout);
-                    timeout -= (System.currentTimeMillis() - now);
+                    timeout = (int)(timeoutTime - System.currentTimeMillis());
 	            } catch(InterruptedException ignored) {
 	                throw new IOException(ignored.getMessage());
 	            }
