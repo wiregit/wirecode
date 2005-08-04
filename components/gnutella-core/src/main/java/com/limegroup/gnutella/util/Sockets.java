@@ -108,12 +108,10 @@ public class Sockets {
 		throws IOException {
         
         long waitTime = System.currentTimeMillis();
-        boolean waited = waitForSocket();
+        boolean waited = waitForSocket(timeout);
         if (waited) {
             waitTime = System.currentTimeMillis() - waitTime;
             timeout -= waitTime;
-            if (timeout <= 0)
-                throw new IOException("timed out :(");
         }
 		    
         try {
@@ -386,19 +384,22 @@ public class Sockets {
 	 * connection.
      * @return true if we had to wait before we could get a connection
 	 */
-	private static boolean waitForSocket() throws IOException {
+	private static boolean waitForSocket(int timeout) throws IOException {
 	    if(!CommonUtils.isWindowsXP())
 	        return false;
         
         boolean ret = false;
 	    synchronized(Sockets.class) {
-	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
+            int currentSocketsConnecting = _socketsConnecting;
+	        while(currentSocketsConnecting >= MAX_CONNECTING_SOCKETS) {
 	            try {
                     ret = true;
-	                Sockets.class.wait();
+	                Sockets.class.wait(timeout);
 	            } catch(InterruptedException ignored) {
 	                throw new IOException(ignored.getMessage());
 	            }
+                if (_socketsConnecting == currentSocketsConnecting)
+                    throw new IOException("timed out :(");
 	        }
 	        _socketsConnecting++;	        
 	    }
