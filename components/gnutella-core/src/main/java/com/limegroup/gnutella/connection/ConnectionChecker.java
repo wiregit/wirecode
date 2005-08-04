@@ -127,6 +127,7 @@ public final class ConnectionChecker implements Runnable {
      */
     private ConnectionChecker() {}
 
+    private static ConnectionChecker current;
     /**
      * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
      * internet connection.  If the checker determines that there is no active 
@@ -138,7 +139,13 @@ public final class ConnectionChecker implements Runnable {
     public static ConnectionChecker checkForLiveConnection() {
         LOG.trace("checking for live connection");
 
-        ConnectionChecker checker = new ConnectionChecker();
+        ConnectionChecker checker;
+        synchronized(ConnectionChecker.class) {
+            if (current == null)
+                current = new ConnectionChecker();
+            checker = current;
+        }
+        
         Thread connectionThread = 
         new ManagedThread(checker, "check for live connection");
         connectionThread.setDaemon(true);
@@ -149,7 +156,7 @@ public final class ConnectionChecker implements Runnable {
     /**
      * Checks for a live internet connection.
      */
-    public void run() {
+    public synchronized void run() {
         try {
             List hostList = Arrays.asList(STANDARD_HOSTS);
             
@@ -192,6 +199,10 @@ public final class ConnectionChecker implements Runnable {
         } catch(Throwable t) {
             // Report any unhandled errors.
             ErrorService.error(t);
+        } finally {
+            synchronized(ConnectionChecker.class) {
+                current = null;
+            }
         }
     }
     
