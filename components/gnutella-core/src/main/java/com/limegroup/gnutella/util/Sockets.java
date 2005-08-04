@@ -107,7 +107,14 @@ public class Sockets {
 	private static Socket connectPlain(String host, int port, int timeout)
 		throws IOException {
         
-        waitForSocket();
+        long waitTime = System.currentTimeMillis();
+        boolean waited = waitForSocket();
+        if (waited) {
+            waitTime = System.currentTimeMillis() - waitTime;
+            timeout -= waitTime;
+            if (timeout <= 0)
+                throw new IOException("timed out :(");
+        }
 		    
         try {
             SocketAddress addr = new InetSocketAddress(host, port);
@@ -377,13 +384,17 @@ public class Sockets {
 	/**
 	 * Waits until we're allowed to do an active outgoing socket
 	 * connection.
+     * @return true if we had to wait before we could get a connection
 	 */
-	private static void waitForSocket() throws IOException {
+	private static boolean waitForSocket() throws IOException {
 	    if(!CommonUtils.isWindowsXP())
-	        return;
+	        return false;
+        
+        boolean ret = false;
 	    synchronized(Sockets.class) {
 	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
 	            try {
+                    ret = true;
 	                Sockets.class.wait();
 	            } catch(InterruptedException ignored) {
 	                throw new IOException(ignored.getMessage());
@@ -391,6 +402,8 @@ public class Sockets {
 	        }
 	        _socketsConnecting++;	        
 	    }
+        
+        return ret;
 	}
 	
 	/**
