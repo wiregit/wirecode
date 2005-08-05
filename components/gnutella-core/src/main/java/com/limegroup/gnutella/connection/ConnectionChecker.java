@@ -1,15 +1,13 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,13 +17,13 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -289,26 +287,16 @@ public final class ConnectionChecker implements Runnable {
         if(LOG.isTraceEnabled()) {
             LOG.trace("connecting to: "+host);
         }
-
-        HttpClient client = HttpClientManager.getNewClient(20000, 3000);
-        HttpMethod head = new HeadMethod(host);
-        head.addRequestHeader("Cache-Control", "no-cache");
-        head.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
-        head.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
-            "close");
-        head.setFollowRedirects(false);
-        try {
-            client.executeMethod(head);
-            _connected = true;     
-        } catch (IOException e) {
-            LOG.warn("Exception while handling server", e);
-            _unsuccessfulAttempts++;
+        
+        Socket s = null;
+        try  {
+        	s = Sockets.connectHardTimeout(host, 80, 20000);
+        	_connected = true;
+        } catch (IOException bad) {bad.printStackTrace();
+        	_unsuccessfulAttempts++;
         } finally {
-            //Reclaim this connection
-            head.releaseConnection();
-            //Close it -- just to make sure it's closed.
-            head.abort();
-        }        
+        	IOUtils.close(s);
+        }
     }
     
     private class UDPChecker implements MessageListener, Cancellable {
