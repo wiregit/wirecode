@@ -1546,6 +1546,9 @@ public class ConnectionManager {
                  - _fetchers.size()
                  - _initializingFetchedConnections.size();
 
+        // do not open more sockets than we can
+        need = Math.min(need, Sockets.getNumAllowedSockets());
+        
         // Start connection fetchers as necessary
         while(need > 0) {
             // This kicks off the thread for the fetcher

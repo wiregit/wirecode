@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -75,6 +73,45 @@ public class Sockets {
             throw new IllegalArgumentException("port out of range: "+port);
         }
 
+        Socket ret = connectThroughProxy(host, port, timeout);
+        if (ret != null)
+        	return ret;
+        
+		_attempts++;
+		return connectPlain(host, port, timeout);
+	}
+    
+    /**
+     * Connects and returns a socket to the given host, with a timeout.
+     * Any time spent waiting for available socket is counted towards the timeout.
+     *
+     * @param host the address of the host to connect to
+     * @param port the port to connect to
+     * @param timeout the desired timeout for connecting, in milliseconds,
+	 *  or 0 for no timeout. In case of a proxy connection, this timeout
+	 *  might be exceeded
+     * @return the connected Socket
+     * @throws IOException the connections couldn't be made in the 
+     *  requested time
+	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     */
+    public static Socket connectHardTimeout(String host, int port, int timeout) 
+    throws IOException {
+    	if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("port out of range: "+port);
+        }
+    	
+    	Socket ret = connectThroughProxy(host, port, timeout);
+    	
+    	if (ret != null)
+    		return ret;
+    	
+    	_attempts++;
+    	return connectHard(host, port, timeout);
+    }
+    
+    private static Socket connectThroughProxy(String host, int port, int timeout) 
+    throws IOException {
 		// if the user specified that he wanted to use a proxy to connect
 		// to the network, we will use that proxy unless the host we
 		// want to connect to is a private address
@@ -95,22 +132,23 @@ public class Sockets {
 				else if (connectionType == ConnectionSettings.C_SOCKS5_PROXY)
 					return connectSocksV5(host, port, timeout);
 			}
-		}
-		_attempts++;
-		return connectPlain(host, port, timeout);
-	}
+		} 
+			
+		return null;
+    }
 
 	/** 
-	 * connect to a host directly
+	 * connect to a host directly with a hard timeout - i.e. the time
+	 * necessary to acquire a socket is taken from the timeout.
 	 * @see connect(String, int, int)
 	 */
-	private static Socket connectPlain(String host, int port, int timeout)
+	private static Socket connectHard(String host, int port, int timeout)
 		throws IOException {
         if (timeout == 0)
             timeout = Integer.MAX_VALUE;
         
         long waitTime = System.currentTimeMillis();
-        boolean waited = waitForSocket(timeout, waitTime);
+        boolean waited = waitForSocketHard(timeout, waitTime);
         if (waited) {
             waitTime = System.currentTimeMillis() - waitTime;
             timeout -= waitTime;
@@ -118,6 +156,21 @@ public class Sockets {
                 throw new IOException("timed out");
         }
 		    
+        return connectAndRelease(host, port, timeout);
+    }
+	
+	/**
+	 * connects to a host directly. The timeout applies only to the 
+	 * actual network timeout.
+	 */
+	private static Socket connectPlain(String host, int port, int timeout) 
+	throws IOException {
+		waitForSocket();
+		return connectAndRelease(host, port, timeout);
+	}
+	
+	private static Socket connectAndRelease(String host, int port, int timeout) 
+	throws IOException {
         try {
             SocketAddress addr = new InetSocketAddress(host, port);
             Socket ret = new com.limegroup.gnutella.io.NIOSocket();
@@ -126,7 +179,7 @@ public class Sockets {
         } finally {
             releaseSocket();
         }
-    }
+	}
 
 	/** 
 	 * connect to a host using a socks v4 proxy
@@ -385,18 +438,17 @@ public class Sockets {
 	
 	/**
 	 * Waits until we're allowed to do an active outgoing socket
-	 * connection.
+	 * connection with a timeout
      * @return true if we had to wait before we could get a connection
 	 */
-	private static boolean waitForSocket(int timeout, long now) throws IOException {
+	private static boolean waitForSocketHard(int timeout, long now) throws IOException {
 	    if(!CommonUtils.isWindowsXP())
 	        return false;
         
         long timeoutTime = now + timeout;
         boolean ret = false;
 	    synchronized(Sockets.class) {
-            int currentSocketsConnecting = _socketsConnecting;
-	        while(currentSocketsConnecting >= MAX_CONNECTING_SOCKETS) {
+	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
                 
                 if (timeout <= 0)
                     throw new IOException("timed out :(");
@@ -416,6 +468,26 @@ public class Sockets {
 	}
 	
 	/**
+	 * Waits until we're allowed to do an active outgoing socket
+	 * connection.
+	 */
+	private static void waitForSocket() throws IOException {
+		if (!CommonUtils.isWindowsXP())
+			return;
+		
+		synchronized(Sockets.class) {
+			while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
+				try {
+					Sockets.class.wait();
+				} catch (InterruptedException ix) {
+					throw new IOException(ix.getMessage());
+				}
+			}
+			_socketsConnecting++;
+		}
+	}
+	
+	/**
 	 * Notification that a socket has been released.
 	 */
 	private static void releaseSocket() {
@@ -425,6 +497,13 @@ public class Sockets {
 	        _socketsConnecting--;
 	        Sockets.class.notifyAll();
 	    }
+	}
+	
+	public static int getNumAllowedSockets() {
+		if (CommonUtils.isWindowsXP())
+			return MAX_CONNECTING_SOCKETS;
+		else
+			return Integer.MAX_VALUE; // unlimited
 	}
 	
 }
