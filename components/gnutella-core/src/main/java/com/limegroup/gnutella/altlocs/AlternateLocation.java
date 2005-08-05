@@ -16,6 +16,7 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortForSelf;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -217,7 +218,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();
 		    
 		    
-			if (open && !NetworkUtils.isPrivate())
+			if (open && NetworkUtils.isValidExternalIpPort(IpPortForSelf.instance()))
 				return new DirectAltLoc(urn);
 			else 
 				return new PushAltLoc(urn);

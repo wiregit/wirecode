@@ -14,6 +14,18 @@ import com.limegroup.gnutella.RouterService;
 public class IpPortForSelf implements IpPort {
 	
 	private static final IpPort INSTANCE = new IpPortForSelf();
+	private static final InetAddress localhost;
+	static {
+		byte [] b = new byte[] {(byte)127,(byte)0,(byte)0,(byte)1};
+		InetAddress addr = null;
+		try {
+			addr = InetAddress.getByAddress(b);
+		} catch (UnknownHostException impossible) {
+			ErrorService.error(impossible);
+		}
+		localhost = addr;
+	}
+	
 	public static IpPort instance() { return INSTANCE;}
 	private IpPortForSelf() {}
 
@@ -25,12 +37,15 @@ public class IpPortForSelf implements IpPort {
 		try {
 			return InetAddress.getByAddress(RouterService.getAddress());
 		} catch (UnknownHostException bad) {
-			ErrorService.error(bad);
-			return null;
+			return localhost;
 		}
 	}
 
 	public int getPort() {
 		return RouterService.getPort();
+	}
+	
+	public String toString() {
+		return getAddress() +":"+getPort();
 	}
 }
