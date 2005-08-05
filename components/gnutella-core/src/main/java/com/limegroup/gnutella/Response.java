@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -430,11 +431,15 @@ public class Response {
             		continue;
                 DirectAltLoc al = (DirectAltLoc)o;
                 if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
-                    Endpoint host = al.getHost();
-                    if( !NetworkUtils.isMe(host.getAddress(), host.getPort()) ) {
+                    IpPort host = al.getHost();
+                    if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
                             endpoints = new HashSet();
-                        endpoints.add( al.getHost() );
+                        
+                        if (!(host instanceof Endpoint)) 
+                        	host = new Endpoint(host.getAddress(),host.getPort());
+                        
+                        endpoints.add( host );
                         i++;
                         al.send(now, AlternateLocation.MESH_RESPONSE);
                     }

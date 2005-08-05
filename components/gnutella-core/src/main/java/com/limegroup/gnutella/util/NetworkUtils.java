@@ -308,6 +308,12 @@ public final class NetworkUtils {
                    Arrays.equals(cIP, managerIP);
         }
     }
+    
+    public static boolean isMe(IpPort me) {
+    	if (me == IpPortForSelf.instance())
+    		return true;
+    	return isMe(me.getInetAddress().getAddress(),me.getPort());
+    }
 
     /**
      * Determines if the given socket is from a local host.
