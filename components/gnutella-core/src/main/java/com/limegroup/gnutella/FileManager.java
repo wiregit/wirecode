@@ -1288,8 +1288,8 @@ public abstract class FileManager {
             IntSet indices = (IntSet)_keywordTrie.get(keyword);
             if (indices != null) {
                 indices.remove(i);
-                //TODO2: prune tree if possible.  call
-                //_keywordTrie.remove(keyword) if indices.size()==0.
+                if (indices.size() == 0)
+                	_keywordTrie.remove(keyword);
             }
         }
 

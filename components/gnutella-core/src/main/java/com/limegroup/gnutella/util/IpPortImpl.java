@@ -38,6 +38,6 @@ public class IpPortImpl implements IpPort {
     }
     
     public String toString() {
-        return "host: " + addrString + ", port: " + port;
+        return "host: " + getAddress() + ", port: " + getPort();
     }
 }
