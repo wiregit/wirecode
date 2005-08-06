@@ -130,12 +130,6 @@ public class FileDesc implements FileDetails {
 		if(SHA1_URN == null)
 			throw new IllegalArgumentException("no SHA1 URN");
 
-        try {
-            addUrnsForSelf();
-        } catch(IllegalArgumentException e) {
-            // oh well, we'll add it later.
-        }
-        
         _hits = 0; // Starts off with 0 hits
     }
 
@@ -311,17 +305,6 @@ public class FileDesc implements FileDetails {
         return _license;
     }
 	
-	/**
-	 * Adds URNs for this' location to the alternate location collection.
-	 * This should be called whenever the address changes.
-	 */
-    public void addUrnsForSelf() {
-        if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue()) {
-        	AlternateLocation alt = AlternateLocation.create(SHA1_URN);
-        	RouterService.getAltlocManager().add(alt, null);
-        }
-    }
-    
     /**
      * Determine whether or not the given <tt>URN</tt> instance is 
 	 * contained in this <tt>FileDesc</tt>.

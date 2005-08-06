@@ -417,7 +417,7 @@ public class RouterService {
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
             
-            if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
+            //if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             
             LOG.trace("STOP RouterService.");
@@ -432,11 +432,11 @@ public class RouterService {
 	        public void run() {
 	            while(true) {
 	                try {
-	                    Thread.sleep(5 * 60 * 1000);
+	                    Thread.sleep(30 * 1000);
 	                } catch(InterruptedException ignored) {}
 	                LOG.trace("Running GC");
 	                System.gc();
-	                LOG.trace("GC finished, running finalizers");
+	                LOG.trace("GC finished, running finalizers");System.out.println("running finalizers");
 	                System.runFinalization();
 	                LOG.trace("Finalizers finished.");
                 }
@@ -1579,8 +1579,6 @@ public class RouterService {
         if(!NetworkUtils.isValidPort(port))
             return false;
 
-        updateAlterntateLocations();
-
         // reset the last connect back time so the next time the TCP/UDP
         // validators run they try to connect back.
         if (acceptor != null)
@@ -1625,17 +1623,7 @@ public class RouterService {
         if(!NetworkUtils.isValidPort(port))
             return false;
             
-        updateAlterntateLocations();
         return true;
-    }
-    
-    /**
-     * Updates all alternate locations.
-     */
-    private static void updateAlterntateLocations() {
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++)
-            fds[i].addUrnsForSelf();
     }
     
     /**
