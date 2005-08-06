@@ -695,14 +695,15 @@ public abstract class FileManager {
 
         // Add specially shared files
         Set specialFiles = _data.SPECIAL_FILES_TO_SHARE;
+        ArrayList list;
         synchronized(specialFiles) {
         	// iterate over a copied list, since addFileIfShared might call
         	// _data.SPECIAL_FILES_TO_SHARE.remove() which can cause a concurrent
         	// modification exception
-        	ArrayList list = new ArrayList(specialFiles);
-            for (Iterator i = list.iterator(); i.hasNext() && _revision == revision; )
-                addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
+        	list = new ArrayList(specialFiles);
         }
+        for (Iterator i = list.iterator(); i.hasNext() && _revision == revision; )
+            addFileIfShared((File)i.next(), Collections.EMPTY_LIST, true, revision, null);
         _isUpdating = false;
 
         trim();

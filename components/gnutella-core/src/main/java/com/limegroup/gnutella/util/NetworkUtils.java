@@ -389,9 +389,9 @@ public final class NetworkUtils {
     public static boolean isValidExternalIpPort(IpPort addr) {
         if (addr == null)
             return false;
-        
-        return isValidAddress(addr.getAddress()) &&
-        	!isPrivateAddress(addr.getAddress()) &&
+	byte [] b = addr.getInetAddress().getAddress();       
+        return isValidAddress(b) &&
+        	!isPrivateAddress(b) &&
         	isValidPort(addr.getPort());
     }
 }
