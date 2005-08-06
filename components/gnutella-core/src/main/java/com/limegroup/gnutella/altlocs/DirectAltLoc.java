@@ -126,7 +126,9 @@ public class DirectAltLoc extends AlternateLocation {
 		
 		DirectAltLoc other = (DirectAltLoc)o;
 		
-
+		if (_node == other._node)
+			return true;
+		
 		return (_node.getInetAddress().equals(other._node.getInetAddress()) &&
 		        _node.getPort() == other._node.getPort());
 		
