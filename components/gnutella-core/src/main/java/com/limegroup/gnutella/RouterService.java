@@ -436,7 +436,7 @@ public class RouterService {
 	                } catch(InterruptedException ignored) {}
 	                LOG.trace("Running GC");
 	                System.gc();
-	                LOG.trace("GC finished, running finalizers");System.out.println("running finalizers");
+	                LOG.trace("GC finished, running finalizers");
 	                System.runFinalization();
 	                LOG.trace("Finalizers finished.");
                 }
