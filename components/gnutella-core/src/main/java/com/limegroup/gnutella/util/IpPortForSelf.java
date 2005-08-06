@@ -9,7 +9,11 @@ import com.limegroup.gnutella.RouterService;
 /**
  * An IpPort for my local machine.  Always returns current port & address.
  * 
- * Do NOT put this in IpPortSets as it will probably break the invariants.  
+ * Its OK to put this in HashSets
+ * Its NOT ok to put it in IpPortSets
+ * Its NOT ok to put DirectLocs using this in AlternateLocationCollections
+ * Its NOT ok to use this in objects whose hashCode or equals will depend on 
+ * the values returned by any of the getters.  
  */
 public class IpPortForSelf implements IpPort {
 	
