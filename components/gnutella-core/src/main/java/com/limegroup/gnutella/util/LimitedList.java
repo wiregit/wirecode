@@ -23,32 +23,23 @@ public class LimitedList {
     	return _list.toArray();
     }
     
-    public void print() {               
-        for (int i=0; i < _size; i++) {
-            Pair p = (Pair)_list.get(i);
-			if (p != null)
-				p.print();
-        }               
-    }
-        
     public void add(Object elem, int key) {
                 
         if (key == 0)
             return;
         int index = _size - 1;
-		Pair p;
 		int pkey;
 
 
 		if (index > -1) {
-			while( (p = (Pair)_list.get(index)) == null ) {
+			while( _list.get(index) == null ) {
 				index--;
 				if( index==0 ) break;
 			}
 		}
 		
 		while (index > -1) {
-			p = (Pair)_list.get(index);
+			Pair p = (Pair)_list.get(index);
 			
 			pkey = p.getKey();
 
