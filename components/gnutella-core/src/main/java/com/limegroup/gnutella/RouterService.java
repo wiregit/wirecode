@@ -417,7 +417,7 @@ public class RouterService {
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
             
-            //if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
+            if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             
             LOG.trace("STOP RouterService.");
@@ -432,7 +432,7 @@ public class RouterService {
 	        public void run() {
 	            while(true) {
 	                try {
-	                    Thread.sleep(30 * 1000);
+	                    Thread.sleep(5 * 60 * 1000);
 	                } catch(InterruptedException ignored) {}
 	                LOG.trace("Running GC");
 	                System.gc();
