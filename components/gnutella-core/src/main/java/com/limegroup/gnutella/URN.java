@@ -20,6 +20,7 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.SystemUtils;
+import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as
@@ -585,7 +586,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
                 long start = System.currentTimeMillis();
                 md.update(buffer,0,read);
                 progress.addInt( read );
-                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME) {
+                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME &&
+		    SharingSettings.FRIENDLY_HASHING.getValue()) {
                     long end = System.currentTimeMillis();
                     long interval = end - start;
                     if(interval > 0)

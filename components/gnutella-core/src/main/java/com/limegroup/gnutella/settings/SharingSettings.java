@@ -233,7 +233,13 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final BooleanSetting ALLOW_BROWSER =
         FACTORY.createBooleanSetting("ALLOW_BROWSER", false);
-	
+
+    /**
+     * Whether to throttle hashing of shared files.
+     */
+    public static final BooleanSetting FRIENDLY_HASHING =
+        FACTORY.createBooleanSetting("FRIENDLY_HASHING", true);	
+
 	/**
 	 * Returns the download directory file setting for a mediatype. The
 	 * settings are created lazily when they are requested for the first time.
