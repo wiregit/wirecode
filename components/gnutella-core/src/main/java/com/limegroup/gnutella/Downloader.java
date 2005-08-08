@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.util.Iterator;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
