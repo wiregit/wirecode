@@ -55,7 +55,10 @@ public class DirectAltLoc extends AlternateLocation {
 	 * creates an altloc for myself.
 	 */
 	protected DirectAltLoc(final URN sha1) throws IOException{
-		this(IpPortForSelf.instance(),sha1);
+		this(new Endpoint(
+		        RouterService.getAddress(),
+		        RouterService.getPort())
+		    ,sha1);
 	}
 	
 	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
