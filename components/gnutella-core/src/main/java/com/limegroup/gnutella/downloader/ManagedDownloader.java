@@ -561,18 +561,28 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * This is for compatibility reasons, so the new version of the code 
      * will run with an older download.dat file.     
      */
-    private synchronized void writeObject(ObjectOutputStream stream)
+    private void writeObject(ObjectOutputStream stream)
             throws IOException {
         
-        stream.writeObject(cachedRFDs);
+        Set cached = new HashSet();
+        Map properties = new HashMap();
+        IncompleteFileManager ifm;
+        
+        synchronized(this) {
+            cached.addAll(cachedRFDs);
+            properties.putAll(propertiesMap);
+            ifm = incompleteFileManager;
+        }
+        
+        stream.writeObject(cached);
         
         //Blocks can be written to incompleteFileManager from other threads
         //while this downloader is being serialized, so lock is needed.
-        synchronized (incompleteFileManager) {
-            stream.writeObject(incompleteFileManager);
+        synchronized (ifm) {
+            stream.writeObject(ifm);
         }
 
-        stream.writeObject(propertiesMap);
+        stream.writeObject(properties);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
