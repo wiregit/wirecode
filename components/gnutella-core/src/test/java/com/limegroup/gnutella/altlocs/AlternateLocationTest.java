@@ -373,7 +373,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
 	        DirectAltLoc al = (DirectAltLoc) AlternateLocation.create(ip + ":50", urn);
-	        Endpoint ep = al.getHost();
+	        IpPort ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(50, ep.getPort());
 	        assertEquals(urn, al.getSHA1Urn());
@@ -383,7 +383,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		for(int i = 1; i < 254; i++) {
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
 	        DirectAltLoc al = (DirectAltLoc)AlternateLocation.create(ip, urn);
-	        Endpoint ep = al.getHost();
+	        IpPort ep = al.getHost();
 	        assertEquals(ip, ep.getAddress());
 	        assertEquals(6346, ep.getPort());
 	        assertEquals(urn, al.getSHA1Urn());
