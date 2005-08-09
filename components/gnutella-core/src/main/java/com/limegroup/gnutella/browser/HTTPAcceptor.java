@@ -141,11 +141,12 @@ public class HTTPAcceptor implements Runnable {
         } catch (IOException e) {
 			boolean error = true;
             socketError = e;
-            Random gen = new Random();
-            //2. Try 20 different random ports from 45100 to 50100
-            for (int i=0; i<20; i++) {
-                int rand = gen.nextInt(5000);
-    			_port = rand+45100;
+            //2. Try 20 different consecutive ports from 45100 to 45119 (inclusive)
+            //  no longer random, since this listening socket is used by the executable stub
+            //  to launch magnet downloads, so the stub needs to know what (small) range of 
+            //  ports to try...
+            for (int i=1; i<20; i++) {
+    			_port = i+45100;
                 try {
                     setListeningPort(_port);
 					error = false;
