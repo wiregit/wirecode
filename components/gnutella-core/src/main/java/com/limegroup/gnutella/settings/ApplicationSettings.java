@@ -95,7 +95,14 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting MINIMIZE_TO_TRAY =
         FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
-            CommonUtils.supportsTray());    
+            CommonUtils.supportsTray());   
+    
+    /**
+     * A flag for whether or not to display the system
+     * tray icon while the application is visible. 
+     */
+    public static final BooleanSetting DISPLAY_TRAY_ICON =
+        FACTORY.createBooleanSetting("DISPLAY_TRAY_ICON", true);
     
     /**
 	 * A flag for whether or not the application should shutdown
