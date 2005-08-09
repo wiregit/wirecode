@@ -2517,7 +2517,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	}
     
     synchronized void forgetRFD(RemoteFileDesc rfd) {
-        cachedRFDs.remove(rfd);
+        if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
+            // remember our last RFD
+            rfd.setSerializeProxies();
+            cachedRFDs.add(rfd);
+        }
     }
     
 	/**
