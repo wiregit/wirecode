@@ -18,6 +18,7 @@ public class ManagedThread extends Thread {
      */
     public ManagedThread() {
         super();
+        setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
@@ -25,6 +26,7 @@ public class ManagedThread extends Thread {
      */
     public ManagedThread(Runnable r) {
         super(r);
+        setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
@@ -32,6 +34,7 @@ public class ManagedThread extends Thread {
      */
     public ManagedThread(String name) {
         super(name);
+        setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
@@ -39,6 +42,7 @@ public class ManagedThread extends Thread {
      */
     public ManagedThread(Runnable r, String name) {
         super(r, name);
+        setPriority(Thread.NORM_PRIORITY);
     }
     
     /**
