@@ -250,7 +250,7 @@ TOTD_CLOSE=关闭
 ###################################################################
 # Key/value pairs for the Windows system tray
 ###################################################################
-#### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
+#### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire: 运行在 Gnutella 网络
 #### TRAY_RESTORE_LABEL=Restore
 TRAY_RESTORE_LABEL=恢复
@@ -2625,7 +2625,7 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=启动 时 连接:
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
-#### OPTIONS_SHUTDOWN_TITLE=Shutdown Options
+#### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=关闭 选项
 #### OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
 OPTIONS_SHUTDOWN_LABEL=你 可以 选择 缺省的 关闭 动作.
@@ -2635,6 +2635,12 @@ OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=立即 关闭
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=传输 完后 关闭
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=最小化 到系统托盘
+#### OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Show System Tray Icon:
+#? OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=
+#### OPTIONS_TRAY_ICON_DISPLAY_TITLE=System Tray Icon
+#? OPTIONS_TRAY_ICON_DISPLAY_TITLE=
+#### OPTIONS_TRAY_ICON_DISPLAY_LABEL=You can display the system tray icon while LimeWire is visible.
+#? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
 # Key/Value pairs for update options

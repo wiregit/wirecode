@@ -250,7 +250,7 @@ ABOUT_BUTTON_TIP=정보 창 닫기
 ###################################################################
 # Key/value pairs for the Windows system tray
 ###################################################################
-#### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
+#### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire: 그누텔라 네트워크
 #### TRAY_RESTORE_LABEL=Restore
 TRAY_RESTORE_LABEL=복구
@@ -2625,7 +2625,7 @@ OPTIONS_UPLOAD_MAIN_TITLE=올려놓기
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
-#### OPTIONS_SHUTDOWN_TITLE=Shutdown Options
+#### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 #? OPTIONS_SHUTDOWN_TITLE=
 #### OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
 #? OPTIONS_SHUTDOWN_LABEL=
@@ -2635,6 +2635,12 @@ OPTIONS_UPLOAD_MAIN_TITLE=올려놓기
 #? OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 #? OPTIONS_SHUTDOWN_TO_TRAY_LABEL=
+#### OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Show System Tray Icon:
+#? OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=
+#### OPTIONS_TRAY_ICON_DISPLAY_TITLE=System Tray Icon
+#? OPTIONS_TRAY_ICON_DISPLAY_TITLE=
+#### OPTIONS_TRAY_ICON_DISPLAY_LABEL=You can display the system tray icon while LimeWire is visible.
+#? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
 # Key/Value pairs for update options

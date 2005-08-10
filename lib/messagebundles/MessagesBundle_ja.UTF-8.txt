@@ -253,7 +253,7 @@ GOING_PRO_DESCRIPTION=より多くの検索結果\n最適化されたダウン�
 ###################################################################
 # Key/value pairs for the Windows system tray
 ###################################################################
-#### TRAY_TOOLTIP=LimeWire: Running the Gnutella Network
+#### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire：グヌーテラ ネットワークを実行中
 #### TRAY_RESTORE_LABEL=Restore
 TRAY_RESTORE_LABEL=復元
@@ -2628,7 +2628,7 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=起動時に接続：
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
-#### OPTIONS_SHUTDOWN_TITLE=Shutdown Options
+#### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=終了時のオプション
 #### OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
 OPTIONS_SHUTDOWN_LABEL=標準の終了動作を選択できる
@@ -2638,6 +2638,12 @@ OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=即時終了
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=ファイル転送後に終了
 #### OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to System Tray
 OPTIONS_SHUTDOWN_TO_TRAY_LABEL=システム・トレイに最小限化して収める
+#### OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=Show System Tray Icon:
+#? OPTIONS_TRAY_ICON_DISPLAY_CHECK_BOX_LABEL=
+#### OPTIONS_TRAY_ICON_DISPLAY_TITLE=System Tray Icon
+#? OPTIONS_TRAY_ICON_DISPLAY_TITLE=
+#### OPTIONS_TRAY_ICON_DISPLAY_LABEL=You can display the system tray icon while LimeWire is visible.
+#? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
 # Key/Value pairs for update options
