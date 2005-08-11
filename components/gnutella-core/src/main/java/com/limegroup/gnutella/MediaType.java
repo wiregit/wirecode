@@ -311,7 +311,6 @@ public class MediaType implements Serializable {
      * Determines whether or not the specified schema is a default.
      */
     public static boolean isDefaultType(String schema) {
-        final MediaType[] types = getDefaultMediaTypes();
         for (int i = ALL_MEDIA_TYPES.length; --i >= 0;)
             if (schema.equals(ALL_MEDIA_TYPES[i].schema))
                 return true;
