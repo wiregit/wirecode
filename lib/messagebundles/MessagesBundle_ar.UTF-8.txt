@@ -230,6 +230,8 @@ TOTD_NEXT=التلميح التالي >>
 TOTD_PREVIOUS=<< التلميح السابق
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=إغلاق
+#### TOTD_LOADING_TIPS="Loading tips..."
+#? TOTD_LOADING_TIPS=
 
 ###################################################################
 # Key/value pairs for the Getting Started image
@@ -2314,7 +2316,7 @@ OPTIONS_UPLOAD_BASIC_MAIN_TITLE=أساسي
 OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=الشرائح
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=اتصالات
-#### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
+#### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=إيقاف التشغيل
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
 #? OPTIONS_UPDATE_MAIN_TITLE=

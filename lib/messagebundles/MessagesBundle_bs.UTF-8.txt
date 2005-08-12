@@ -230,6 +230,8 @@ TOTD_NEXT=Sljedeći tip
 TOTD_PREVIOUS=Prošli tip
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Zatvori
+#### TOTD_LOADING_TIPS="Loading tips..."
+#? TOTD_LOADING_TIPS=
 
 ###################################################################
 # Key/value pairs for the Getting Started image
@@ -2314,7 +2316,7 @@ OPTIONS_UPLOAD_BASIC_MAIN_TITLE=Osnova
 OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Utori
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=Spajanje
-#### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
+#### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=Zatvaraj
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
 OPTIONS_UPDATE_MAIN_TITLE=Updates

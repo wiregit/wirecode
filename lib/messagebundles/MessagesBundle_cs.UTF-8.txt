@@ -230,6 +230,8 @@ TOTD_NEXT=Další tip
 TOTD_PREVIOUS=Předchozí tip
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Zavřít
+#### TOTD_LOADING_TIPS="Loading tips..."
+#? TOTD_LOADING_TIPS=
 
 ###################################################################
 # Key/value pairs for the Getting Started image
@@ -2314,7 +2316,7 @@ MENU_RESOURCES_PRO_MNEMONIC=P
 #? OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 #? OPTIONS_CONNECTIONS_MAIN_TITLE=
-#### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
+#### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 #? OPTIONS_SHUTDOWN_MAIN_TITLE=
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
 #? OPTIONS_UPDATE_MAIN_TITLE=

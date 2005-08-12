@@ -230,6 +230,8 @@ TOTD_NEXT=Επόμενη συμβουλή
 TOTD_PREVIOUS=Προηγούμενη συμβουλή
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Κλείσιμο
+#### TOTD_LOADING_TIPS="Loading tips..."
+#? TOTD_LOADING_TIPS=
 
 ###################################################################
 # Key/value pairs for the Getting Started image
@@ -2314,7 +2316,7 @@ OPTIONS_UPLOAD_BASIC_MAIN_TITLE=Βασικά
 OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Χαραμάδες
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=Συνδέσεις
-#### OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
+#### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=Παύση λειτουργίας
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
 #? OPTIONS_UPDATE_MAIN_TITLE=
