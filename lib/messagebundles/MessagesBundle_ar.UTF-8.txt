@@ -230,7 +230,7 @@ TOTD_NEXT=التلميح التالي >>
 TOTD_PREVIOUS=<< التلميح السابق
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=إغلاق
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

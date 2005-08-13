@@ -230,7 +230,7 @@ ABOUT_LABEL_START=LimeWire
 #? TOTD_PREVIOUS=
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Đóng
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

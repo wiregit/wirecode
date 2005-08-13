@@ -233,7 +233,7 @@ TOTD_NEXT=次のワンポイント
 TOTD_PREVIOUS=前のワンポイント
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=閉じる
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

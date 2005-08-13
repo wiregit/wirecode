@@ -230,7 +230,7 @@ HAS_TIPS_OF_THE_DAY=false
 #? TOTD_PREVIOUS=
 #### TOTD_CLOSE=Close
 #? TOTD_CLOSE=
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

@@ -230,7 +230,7 @@ TOTD_NEXT=Sljedeći tip
 TOTD_PREVIOUS=Prošli tip
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Zatvori
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

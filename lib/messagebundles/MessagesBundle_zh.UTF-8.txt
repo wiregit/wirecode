@@ -230,7 +230,7 @@ ABOUT_BUTTON_TIP=关闭 关于 窗口.
 #? TOTD_PREVIOUS=
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=关闭
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

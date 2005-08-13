@@ -230,7 +230,7 @@ TOTD_NEXT=Следующий совет
 TOTD_PREVIOUS=Предыдущий
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Закрыть
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

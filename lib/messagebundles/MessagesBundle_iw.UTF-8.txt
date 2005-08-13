@@ -230,7 +230,7 @@ TOTD_NEXT=עצה הבאה
 TOTD_PREVIOUS=עצה קודמת
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=סגור
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

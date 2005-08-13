@@ -230,7 +230,7 @@ ABOUT_SCROLL_CHECK_BOX_LABEL=Automatikus eltol
 #? TOTD_PREVIOUS=
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Bezár
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

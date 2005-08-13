@@ -230,7 +230,7 @@ TOTD_NEXT=Επόμενη συμβουλή
 TOTD_PREVIOUS=Προηγούμενη συμβουλή
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Κλείσιμο
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

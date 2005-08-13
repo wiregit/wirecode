@@ -230,7 +230,7 @@ TOTD_NEXT=अगला टिप सूची
 TOTD_PREVIOUS=पिछला टिप सूची
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=बन्द करो
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################

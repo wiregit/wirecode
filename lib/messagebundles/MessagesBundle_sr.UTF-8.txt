@@ -230,7 +230,7 @@ TOTD_NEXT=Сљедећи трик
 TOTD_PREVIOUS=Претходни трик
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=Затвори
-#### TOTD_LOADING_TIPS="Loading tips..."
+#### TOTD_LOADING_TIPS=Loading tips...
 #? TOTD_LOADING_TIPS=
 
 ###################################################################
