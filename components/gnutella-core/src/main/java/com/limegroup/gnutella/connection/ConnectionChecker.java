@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
@@ -290,9 +291,10 @@ public final class ConnectionChecker implements Runnable {
         
         Socket s = null;
         try  {
+        	InetAddress.getByName(host); // die fast if unresolvable
         	s = Sockets.connectHardTimeout(host, 80, 20000);
         	_connected = true;
-        } catch (IOException bad) {bad.printStackTrace();
+        } catch (IOException bad) {
         	_unsuccessfulAttempts++;
         } finally {
         	IOUtils.close(s);
