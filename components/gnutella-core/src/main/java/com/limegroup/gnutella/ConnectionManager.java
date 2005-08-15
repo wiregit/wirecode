@@ -2067,47 +2067,38 @@ public class ConnectionManager {
             return;
         }
 
-        // If the user has used the computer in the last 30 seconds, notify
-        // them to reconnect.  Otherwise, there may have been a temporary
-        // hiccup in the network connection, and we'll keep automatically
-        // trying to recover the connection.
-        if(ConnectionSettings.CONNECTION_SPEED.getValue() == SpeedConstants.MODEM_SPEED_INT &&
-                !QuestionsHandler.NO_INTERNET.getValue()) {
-            // Notify the user that they have no internet connection.
-            MessageService.showError("NO_INTERNET", QuestionsHandler.NO_INTERNET);
-            disconnect();
-        } else {
-            // Notify the user that they have no internet connection and that
-            // we will automatically retry
-            MessageService.showError("NO_INTERNET_RETRYING",
+        
+        // Notify the user that they have no internet connection and that
+        // we will automatically retry
+        MessageService.showError("NO_INTERNET_RETRYING",
                 QuestionsHandler.NO_INTERNET_RETRYING);
-
-            // Kill all of the ConnectionFetchers.
-            disconnect();
-
-            // Try to reconnect in 10 seconds, and then every minute after
-            // that.
-            RouterService.schedule(new Runnable() {
-                public void run() {
-                    // If the last time the user disconnected is more recent
-                    // than when we started automatically connecting, just
-                    // return without trying to connect.  Note that the
-                    // disconnect time is reset if the user selects to connect.
-                    if(_automaticConnectTime < _disconnectTime) {
-                        return;
-                    }
-
-                    if(!RouterService.isConnected()) {
-                        // Try to re-connect.  Note this call resets the time
-                        // for our last check for a live connection, so we may
-                        // hit web servers again to check for a live connection.
-                        connect();
-                    }
+        
+        // Kill all of the ConnectionFetchers.
+        disconnect();
+        
+        // Try to reconnect in 10 seconds, and then every minute after
+        // that.
+        RouterService.schedule(new Runnable() {
+            public void run() {
+                // If the last time the user disconnected is more recent
+                // than when we started automatically connecting, just
+                // return without trying to connect.  Note that the
+                // disconnect time is reset if the user selects to connect.
+                if(_automaticConnectTime < _disconnectTime) {
+                    return;
                 }
-            }, 10*1000, 2*60*1000);
-            _automaticConnectTime = System.currentTimeMillis();
-            _automaticallyConnecting = true;
-        }
+                
+                if(!RouterService.isConnected()) {
+                    // Try to re-connect.  Note this call resets the time
+                    // for our last check for a live connection, so we may
+                    // hit web servers again to check for a live connection.
+                    connect();
+                }
+            }
+        }, 10*1000, 2*60*1000);
+        _automaticConnectTime = System.currentTimeMillis();
+        _automaticallyConnecting = true;
+        
 
         recoverHosts();
     }
