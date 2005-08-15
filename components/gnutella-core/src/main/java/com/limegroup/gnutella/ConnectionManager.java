@@ -2071,9 +2071,8 @@ public class ConnectionManager {
         // them to reconnect.  Otherwise, there may have been a temporary
         // hiccup in the network connection, and we'll keep automatically
         // trying to recover the connection.
-        if(SystemUtils.supportsIdleTime() &&
-           SystemUtils.getIdleTime() < 30*1000 &&
-           !QuestionsHandler.NO_INTERNET.getValue()) {
+        if(ConnectionSettings.CONNECTION_SPEED.getValue() == SpeedConstants.MODEM_SPEED_INT &&
+                !QuestionsHandler.NO_INTERNET.getValue()) {
             // Notify the user that they have no internet connection.
             MessageService.showError("NO_INTERNET", QuestionsHandler.NO_INTERNET);
             disconnect();
