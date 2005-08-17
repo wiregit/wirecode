@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.io.StringReader;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Map;
-import java.util.HashMap;
 
 
 import org.apache.xerces.parsers.DOMParser;

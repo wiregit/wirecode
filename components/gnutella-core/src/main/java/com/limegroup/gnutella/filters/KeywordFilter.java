@@ -24,8 +24,8 @@ public class KeywordFilter extends SpamFilter {
      * @effects bans the given phrase.  Capitalization does not matter.
      */
     public void disallow(String phrase) { 
-        String canonical=phrase.toLowerCase();
-        if (! ban.contains(canonical))
+        String canonical = phrase.toLowerCase();
+        if (!ban.contains(canonical))
             ban.add(canonical);
     }
 
@@ -34,35 +34,38 @@ public class KeywordFilter extends SpamFilter {
      * @effects bans several well-known "adult" words.
      */
     public void disallowAdult() {
-        disallow("sex");
-        disallow("porn");
-        disallow("xxx");
-        disallow("fuck");
-        disallow("blowjob");
-        disallow("cunt");
-        disallow("titty");
-        disallow("tittie");
-        disallow("twat");
-        disallow("incest");
-        disallow("facial");
-        disallow("cock");
-        disallow("pussy");
-        disallow("jenna");
         disallow("anal");
         disallow("anul");
-        disallow("centerfold");
-        disallow("whore");
-        disallow("penis");
-        disallow("vagina");
-        disallow("suck");
-        disallow("porn");
-        disallow("blow");
         disallow("asshole");
+        disallow("blow");
+        disallow("blowjob");
         disallow("bondage");
+        disallow("centerfold");
+        disallow("cock");
         disallow("cum");
-        disallow("playboy");
-        disallow("nipple");
+        disallow("cunt");
+        disallow("facial");
+        disallow("fuck");
+        disallow("gangbang");
+        disallow("hentai");
+        disallow("incest");
+        disallow("jenna");
         disallow("masturbat");
+        disallow("nipple");
+        disallow("penis");
+        disallow("playboy");
+        disallow("porn");
+        disallow("pussy");
+        disallow("rape");
+        disallow("sex");
+        disallow("slut");
+        disallow("suck");
+        disallow("tittie");
+        disallow("titty");
+        disallow("twat");
+        disallow("vagina");
+        disallow("whore");
+        disallow("xxx");
     }
 
     /**
