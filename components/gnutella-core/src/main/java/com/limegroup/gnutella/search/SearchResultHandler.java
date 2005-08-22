@@ -218,6 +218,10 @@ public final class SearchResultHandler {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
                 continue;
+            
+            if (!RouterService.matchesQuery(data.getMessageGUID(),response))
+                continue;
+            
             //Throw away results from Mandragore Worm
             if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
                 continue;

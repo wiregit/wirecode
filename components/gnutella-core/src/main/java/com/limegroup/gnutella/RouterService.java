@@ -147,18 +147,18 @@ public class RouterService {
     private static PromotionManager promotionManager = new PromotionManager();
 
 	
-    private static final ResponseVerifier verifier = new ResponseVerifier();
+    private static final ResponseVerifier VERIFIER = new ResponseVerifier();
 
 	/**
 	 * <tt>Statistics</tt> class for managing statistics.
 	 */
-	private static final Statistics statistics = Statistics.instance();
+	private static final Statistics STATISTICS = Statistics.instance();
 
 	/**
 	 * Constant for the <tt>UDPService</tt> instance that handles UDP 
 	 * messages.
 	 */
-	private static final UDPService udpService = UDPService.instance();
+	private static final UDPService UDPSERVICE = UDPService.instance();
 
 	/**
 	 * Constant for the <tt>SearchResultHandler</tt> class that processes
@@ -522,7 +522,7 @@ public class RouterService {
 	 * @return the <tt>UDPService</tt> instance in use
 	 */
 	public static UDPService getUdpService() {
-		return udpService;
+		return UDPSERVICE;
 	}
 	
 	/**
@@ -772,7 +772,7 @@ public class RouterService {
      * Returns the current uptime.
      */
     public static long getCurrentUptime() {
-        return statistics.getUptime();
+        return STATISTICS.getUptime();
     }
     
     /**
@@ -1113,7 +1113,7 @@ public class RouterService {
     private static void recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
         _lastQueryTime = System.currentTimeMillis();
-        verifier.record(qr, type);
+        VERIFIER.record(qr, type);
         RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
         router.sendDynamicQuery(qr);
     }
@@ -1150,9 +1150,12 @@ public class RouterService {
      * @see ResponseVerifier#matchesType(byte[], Response) 
      */
     public static boolean matchesType(byte[] guid, Response response) {
-        return verifier.matchesType(guid, response);
+        return VERIFIER.matchesType(guid, response);
     }
 
+    public static boolean matchesQuery(byte [] guid, Response response) {
+        return VERIFIER.matchesQuery(guid, response);
+    }
     /** 
      * Returns true if the given response for the query with the given guid is a
      * result of the Madragore worm (8KB files of form "x.exe").  Returns false
@@ -1165,7 +1168,7 @@ public class RouterService {
      * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
      */
     public static boolean isMandragoreWorm(byte[] guid, Response response) {
-        return verifier.isMandragoreWorm(guid, response);
+        return VERIFIER.isMandragoreWorm(guid, response);
     }
     
     /**
@@ -1583,8 +1586,8 @@ public class RouterService {
         // validators run they try to connect back.
         if (acceptor != null)
         	acceptor.resetLastConnectBackTime();
-        if (udpService != null)
-        	udpService.resetLastConnectBackTime();
+        if (UDPSERVICE != null)
+        	UDPSERVICE.resetLastConnectBackTime();
         
         if (manager != null) {
         	Properties props = new Properties();
@@ -1679,7 +1682,7 @@ public class RouterService {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */
 	public static boolean isGUESSCapable() {
-		return udpService.isGUESSCapable();
+		return UDPSERVICE.isGUESSCapable();
 	}
 
 
@@ -1695,7 +1698,7 @@ public class RouterService {
 
 
     public static GUID getUDPConnectBackGUID() {
-        return udpService.getConnectBackGUID();
+        return UDPSERVICE.getConnectBackGUID();
     }
 
     
@@ -1707,14 +1710,14 @@ public class RouterService {
     }
     
     public static boolean canReceiveSolicited() {
-    	return udpService.canReceiveSolicited();
+    	return UDPSERVICE.canReceiveSolicited();
     }
     
     public static boolean canReceiveUnsolicited() {
-    	return udpService.canReceiveUnsolicited();
+    	return UDPSERVICE.canReceiveUnsolicited();
     }
     
     public static boolean canDoFWT() {
-        return udpService.canDoFWT();
+        return UDPSERVICE.canDoFWT();
     }
 }
