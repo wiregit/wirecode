@@ -21,23 +21,26 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class ResponseVerifier {
     private static class RequestData {
         /** The original query. */
-        String query;
+        final String query;
         /** The rich query. */
-        LimeXMLDocument richQuery;
+        final LimeXMLDocument richQuery;
         /** The keywords of the original query, lowercased. */
-        List queryWords;
+        final List queryWords;
         /** The type of the original query. */
-        MediaType type;
+        final MediaType type;
+        /** Whether this is a what is new query */
+        final boolean whatIsNew;
 
         RequestData(String query, MediaType type) {
-            this(query, null, type);
+            this(query, null, type, false);
         }
 
-        RequestData(String query, LimeXMLDocument richQuery, MediaType type) {
+        RequestData(String query, LimeXMLDocument richQuery, MediaType type, boolean whatIsNew) {
             this.query=query;
             this.richQuery=richQuery;
             this.queryWords=getSearchTerms(query, richQuery);
             this.type=type;
+            this.whatIsNew = whatIsNew;
         }
 
         public boolean xmlQuery() {
@@ -71,13 +74,17 @@ public class ResponseVerifier {
         byte[] guid = qr.getGUID();
         mapper.put(new GUID(guid),new RequestData(qr.getQuery(), 
                                                   qr.getRichQuery(),
-                                                  type));
+                                                  type,
+                                                  qr.isWhatIsNewRequest()));
     }
 
     public synchronized boolean matchesQuery(byte [] guid, Response response) {
         RequestData data = (RequestData) mapper.get(new GUID(guid));
         if (data == null || data.queryWords == null)
             return false;
+        
+        if (data.whatIsNew) 
+            return true;
         
         if (score(data.queryWords, response.getName()) > 0)
             return true;
