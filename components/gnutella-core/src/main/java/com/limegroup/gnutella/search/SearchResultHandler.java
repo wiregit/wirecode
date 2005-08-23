@@ -19,6 +19,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -216,15 +217,18 @@ public final class SearchResultHandler {
         int numSentToFrontEnd = 0;
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
-            if (!RouterService.matchesType(data.getMessageGUID(), response))
-                continue;
             
-            if (!RouterService.matchesQuery(data.getMessageGUID(),response))
-                continue;
+            if (!qr.isBrowseHostReply()) {
+            	if (!RouterService.matchesType(data.getMessageGUID(), response))
+            		continue;
+            	
+            	if (!RouterService.matchesQuery(data.getMessageGUID(),response)) 
+            		continue;
+            }
             
-            //Throw away results from Mandragore Worm
-            if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
-                continue;
+        	//Throw away results from Mandragore Worm
+        	if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
+        		continue;
 
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();

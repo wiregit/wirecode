@@ -80,4 +80,8 @@ public class FilterSettings extends LimeProps {
      */
     public static final BooleanSetting FILTER_HASH_QUERIES =
         FACTORY.createSettableBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
+    
+    public static final IntSetting MIN_MATCHING_WORDS =
+    	FACTORY.createSettableIntSetting("MIN_MATCHING_WORDS",0,
+    			"FilterSettings.minMatchingWords", 30, 0);
 }

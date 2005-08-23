@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -80,20 +81,21 @@ public class ResponseVerifier {
 
     public synchronized boolean matchesQuery(byte [] guid, Response response) {
         RequestData data = (RequestData) mapper.get(new GUID(guid));
-        if (data == null || data.queryWords == null)
+        if (data == null || data.queryWords == null) 
             return false;
         
         if (data.whatIsNew) 
             return true;
         
-        if (score(data.queryWords, response.getName()) > 0)
+        int minGood = FilterSettings.MIN_MATCHING_WORDS.getValue();
+        if (score(data.queryWords, response.getName()) > minGood)
             return true;
 
         LimeXMLDocument doc = response.getDocument();
         if (doc != null) {
             for (Iterator iter = doc.getKeyWords().iterator(); iter.hasNext();) {
                 String xmlWord = (String) iter.next();
-                if (score(data.queryWords,xmlWord) > 0 ) return true;
+                if (score(data.queryWords,xmlWord) > minGood ) return true;
             }
         }
         
