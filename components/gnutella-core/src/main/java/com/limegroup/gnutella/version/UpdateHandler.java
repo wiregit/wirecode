@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Collections;
+import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
@@ -394,13 +395,32 @@ public class UpdateHandler {
     
     /**
      * kills all in-network downloaders whose URNs are not listed in the list of updates.
+     * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List toDownload) {
+    	DownloadManager dm = RouterService.getDownloadManager();
+    	FileManager fm = RouterService.getFileManager();
+    	if (!dm.isGUIInitd() || !fm.isLoadFinished())
+    		return;
+    	
         if (_killingObsoleteNecessary) {
             _killingObsoleteNecessary = false;
-            DownloadManager dm = RouterService.getDownloadManager();
-            if (dm.isGUIInitd())
-                dm.killDownloadersNotListed(toDownload);
+            dm.killDownloadersNotListed(toDownload);
+            
+            Set urns = new HashSet(toDownload.size());
+            for (Iterator iter = toDownload.iterator(); iter.hasNext();) {
+				UpdateData data = (UpdateData) iter.next();
+				urns.add(data.getUpdateURN());
+			}
+            
+            FileDesc [] shared = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
+            for (int i = 0; i < shared.length; i++) {
+            	if (shared[i].getSHA1Urn() != null &&
+            			!urns.contains(shared[i].getSHA1Urn())) {
+            		fm.removeFileIfShared(shared[i].getFile());
+            		shared[i].getFile().delete();
+            	}
+			}
         }
     }
     
@@ -612,7 +632,6 @@ public class UpdateHandler {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            
             RouterService.schedule( new Runnable() {
                 public void run() {
                     QUEUE.add(new Poller());
