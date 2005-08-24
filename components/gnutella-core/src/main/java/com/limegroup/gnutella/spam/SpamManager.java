@@ -38,7 +38,7 @@ public class SpamManager {
 	private static final float NO_SHA1_URN_RATING = 0.5f;
 
 	/**
-	 * incomplete file... safe the user the trouble of downloading it, if he has
+	 * incomplete file... save the user the trouble of downloading it, if he has
 	 * his spam filter enabled
 	 */
 	private static final float INCOMPLETE_FILE_RATING = 0.2f;
