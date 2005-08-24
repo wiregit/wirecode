@@ -78,7 +78,6 @@ public final class ConnectionChecker implements Runnable {
         "http://www.monster.com",
         "http://www.uunet.com",
         "http://www.real.com",
-        "http://www.level3.com",
         "http://www.microsoft.com",
         "http://www.sco.com",
         "http://www.google.com",
@@ -117,7 +116,6 @@ public final class ConnectionChecker implements Runnable {
         "http://www.msnbc.com",
         "http://www.lycos.com",
         "http://www.comcast.com",
-        "http://www.overture.com",
     };
     
     /**
