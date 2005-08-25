@@ -42,6 +42,7 @@ public abstract class SpamFilter {
         boolean filterAdult = FilterSettings.FILTER_ADULT.getValue();
         boolean filterVbs = FilterSettings.FILTER_VBS.getValue();
         boolean filterHtml = FilterSettings.FILTER_HTML.getValue();
+        boolean filterWMVASF = FilterSettings.FILTER_WMV_ASF.getValue();
         
         if (badWords.length!=0 || filterAdult || filterVbs || filterHtml) {
             KeywordFilter kf=new KeywordFilter();
@@ -53,6 +54,8 @@ public abstract class SpamFilter {
                 kf.disallowVbs();
             if (filterHtml)
                 kf.disallowHtml();
+            if (filterWMVASF)
+            	kf.disallowWMVASF();
             buf.add(kf);
         }
 

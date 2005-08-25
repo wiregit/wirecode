@@ -83,6 +83,14 @@ public class KeywordFilter extends SpamFilter {
     public void disallowHtml() {
         disallow(".htm");
     }
+    
+    /**
+     * bans .wmv and .asf files
+     */
+    public void disallowWMVASF() {
+    	disallow(".asf");
+    	disallow(".wmv");
+    }
 
     public boolean allow(Message m) {
         boolean ok=true;

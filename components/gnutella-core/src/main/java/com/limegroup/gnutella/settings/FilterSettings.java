@@ -37,6 +37,12 @@ public class FilterSettings extends LimeProps {
         FACTORY.createBooleanSetting("FILTER_HTML", false);
     
     /**
+     * Sets whether or not search results of the wmv and asf types are banned.
+     */
+    public static final BooleanSetting FILTER_WMV_ASF =
+    	FACTORY.createBooleanSetting("FILTER_WMV_ASF",true);
+    
+    /**
 	 * Sets whether or not duplicate search results are
 	 * banned.
 	 */
