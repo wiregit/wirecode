@@ -144,7 +144,9 @@ public class UpdateHandler {
             public void run() {
                 UpdateInformation updateInfo = _updateInfo;
                 
-                if (updateInfo != null && isMyUpdateDownloaded(updateInfo))
+                if (updateInfo != null && 
+                		updateInfo.getUpdateURN() != null &&
+                		isMyUpdateDownloaded(updateInfo))
                     RouterService.getCallback().updateAvailable(updateInfo);
                 
                 downloadUpdates(_updatesToDownload, null);
