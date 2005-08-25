@@ -60,7 +60,7 @@ public class VerifyingFile {
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
      */
-    private static final float MAX_CORRUPTION = 0.1f;
+    private static final float MAX_CORRUPTION = 0.5f;
     
     /** The default chunk size - if we don't have a tree we request chunks this big.
      * 
