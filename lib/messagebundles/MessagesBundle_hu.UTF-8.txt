@@ -2557,7 +2557,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Letöltési sebesség:
 OPTIONS_UPLOAD_CLEAR_TITLE=Feltöltések takarítása
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
 OPTIONS_UPLOAD_CLEAR_LABEL=Választhat, hogy a befejezett feltöltések automatikusan törölve legyenek-e.
-#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
+#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automatically Clear Completed Uploads:
 OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Befejezett feltöltések automatikus takarítása:
 
 ################################################################################
@@ -2948,6 +2948,8 @@ OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Felnőtt tartalom kiszűrése
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=A .htm/.html fileok kiszűrése
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=A .vbs fileok kiszűrése
+#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
+#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window

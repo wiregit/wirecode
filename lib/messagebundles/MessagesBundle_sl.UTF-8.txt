@@ -2557,7 +2557,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Hitrost prenosov:
 OPTIONS_UPLOAD_CLEAR_TITLE=Čiščenje prenosov drugim
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
 OPTIONS_UPLOAD_CLEAR_LABEL=Izberete lahko, če želite, da LimeWire samodejno počisti končane prenose drugim.
-#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
+#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automatically Clear Completed Uploads:
 OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Samočiščenje končanih prenosov drugim:
 
 ################################################################################
@@ -2948,6 +2948,8 @@ OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignoriraj vsebino za odrasle
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignoriraj datoteke s pripono .htm/.html
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignoriraj datoteke s pripono .vbs
+#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
+#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window

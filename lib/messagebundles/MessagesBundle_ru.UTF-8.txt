@@ -2557,7 +2557,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Скорость загрузки:
 OPTIONS_UPLOAD_CLEAR_TITLE=Очистка списка выгрузок
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
 OPTIONS_UPLOAD_CLEAR_LABEL=Вы можете указать, будут ли выполненные выгрузки автоматически убираться из списка.
-#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
+#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automatically Clear Completed Uploads:
 OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Автоматически вычищать выполненные выгрузки:
 
 ################################################################################
@@ -2948,6 +2948,8 @@ OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Игнорировать конте�
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Игнорировать файлы .htm/.html
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Игнорировать файлы .vbs
+#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
+#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window

@@ -2557,7 +2557,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse kiirus
 OPTIONS_UPLOAD_CLEAR_TITLE=Puhasta üleslaetud
 #### OPTIONS_UPLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear uploads that have completed.
 OPTIONS_UPLOAD_CLEAR_LABEL=Sa võid valida kas automaatselt puhastada lõpetatud üleslaadimised.
-#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear Completed Uploads:
+#### OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automatically Clear Completed Uploads:
 OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhasta lõpetatud üleslaadimised:
 
 ################################################################################
@@ -2948,6 +2948,8 @@ OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Eemalda täiskasvanutele mõeldud ma
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Eemalda .htm/ .html failid
 #### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Eemalda .vbs failid
+#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
+#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window
