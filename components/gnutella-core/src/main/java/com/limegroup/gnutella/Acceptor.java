@@ -609,7 +609,6 @@ public class Acceptor implements Runnable {
     
         byte[] bytes = addr.getAddress();
         return !RouterService.isConnectedTo(addr) &&
-               !NetworkUtils.isCloseIP(bytes, getAddress(false)) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
 
