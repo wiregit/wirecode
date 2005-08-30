@@ -756,7 +756,7 @@ public class Acceptor implements Runnable {
      */
     void resetLastConnectBackTime() {
         _lastConnectBackTime = 
-             System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
+             System.currentTimeMillis() - INCOMING_EXPIRE_TIME - 1;
     }
 
     /**

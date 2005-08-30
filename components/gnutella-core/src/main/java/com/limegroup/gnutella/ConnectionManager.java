@@ -116,6 +116,11 @@ public class ConnectionManager {
      * To number of connections leaves should maintain when idle.
      */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF_WHEN_IDLE = 1;
+    
+    /**
+     * How many connect back requests to send if we have a single connection
+     */
+    public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
 
     /**
      * The minimum amount of idle time before we switch to using 1 connection.
@@ -1075,12 +1080,26 @@ public class ConnectionManager {
      */
     public boolean sendTCPConnectBackRequests() {
         int sent = 0;
-        final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+        
         List peers = new ArrayList(getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
-            if (currMC.remoteHostSupportsTCPRedirect() >= 0) {
+        for (Iterator iter = peers.iterator(); iter.hasNext();) {
+            ManagedConnection currMC = (ManagedConnection) iter.next();
+            if (currMC.remoteHostSupportsTCPRedirect() < 0)
+                iter.remove();
+        }
+        
+        if (peers.size() == 1) {
+            ManagedConnection myConn = (ManagedConnection) peers.get(0);
+            for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
+                Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+                myConn.send(cb);
+                sent++;
+            }
+        } else {
+            final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+            for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
+                ManagedConnection currMC = (ManagedConnection)i.next();
                 currMC.send(cb);
                 sent++;
             }

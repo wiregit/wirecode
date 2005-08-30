@@ -640,6 +640,32 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
  	public static void drainAll(Connection[] conns) throws Exception {
  	    drainAll(conns, TIMEOUT);
  	}
+    
+    /**
+     * drains all messages from the given connections simultaneously.
+     */
+    public static void drainAllParallel(final Connection [] conns) {
+        Thread []r = new Thread[conns.length];
+        for (int i = 0; i < conns.length; i++) {
+            final int index = i;
+            r[i] = new ManagedThread() {
+                public void managedRun() {
+                    try {
+                        drain(conns[index],TIMEOUT);
+                    } catch (Exception bad) {
+                        ErrorService.error(bad);
+                    }
+                }
+            };
+            r[i].start();
+        }
+        
+        for (int i = 0; i < r.length; i++) {
+            try {
+                r[i].join();
+            } catch (InterruptedException ignored) {}
+        }
+    }
  	
  	public static void drainAll(Connection[] cs, int tout) throws IOException {
         for (int i = 0; i < cs.length; i++) {

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -22,9 +23,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
- * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.  The test includes a leaf attached to 3 
- * Ultrapeers.
+ * Checks whether leaves request redirects properly.  
+ * The test includes a leaf attached to two ultrapeers.
  */
 public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     protected static final int PORT=6669;
@@ -54,6 +54,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         // send a MessagesSupportedMessage
         testUP[0].send(MessagesSupportedVendorMessage.instance());
         testUP[0].flush();
+        testUP[1].send(MessagesSupportedVendorMessage.instance());
+        testUP[1].flush();
 
         // we expect to get a TCPConnectBack request
         Message m = null;
@@ -154,6 +156,49 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 } while (!(m instanceof TCPConnectBackVendorMessage)) ;
             }
         }
+    }
+    
+    /**
+     * Tests that if the leaf is connected to only one ultrapeer it will 
+     * send a few redundant requests
+     */
+    public void testTCPRedundantRequestsSent() throws Exception {
+        drainAllParallel(testUP);
+        // wait some time - both UPs should get a single connect back
+        
+        //sleep
+        Thread.sleep(MY_VALIDATE_TIME+1000);
+        readNumConnectBacks(1,testUP[0], TIMEOUT);
+        readNumConnectBacks(1,testUP[1], TIMEOUT);
+        
+        // leave only one connection open
+        assertGreaterThan(1,rs.getConnectionManager().getNumInitializedConnections());
+        testUP[1].close();
+        Thread.sleep(500);
+        assertEquals(1,rs.getConnectionManager().getNumInitializedConnections());
+        
+        drainAll();
+        // sleep
+        Thread.sleep(MY_VALIDATE_TIME+1000);
+        
+        // we should receive more than one connect back redirects
+        readNumConnectBacks(ConnectionManager.CONNECT_BACK_REDUNDANT_REQUESTS,testUP[0],TIMEOUT);
+        
+    }
+    
+    private void readNumConnectBacks(int num,Connection conn, int timeout) throws Exception {
+        Message m;
+        for (int i = 0; i < num; i++) {
+            do {
+                m = conn.receive(timeout);
+            } while (!(m instanceof TCPConnectBackVendorMessage));
+        }
+        try {
+            do {
+                m = conn.receive(timeout);
+            } while (!(m instanceof TCPConnectBackVendorMessage));
+            fail ("got extra message on "+conn);
+        } catch (IOException expected) {}
     }
 
     // This test checks that if _acceptedUnsolicitedIncoming is false, connect
@@ -317,7 +362,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     }
 
     public static Integer numUPs() {
-        return new Integer(1);
+        return new Integer(2);
     }
 
     public static ActivityCallback getActivityCallback() {
