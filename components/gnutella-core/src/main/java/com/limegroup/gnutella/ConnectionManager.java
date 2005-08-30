@@ -113,11 +113,6 @@ public class ConnectionManager {
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
 
     /**
-     * To number of connections leaves should maintain when idle.
-     */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF_WHEN_IDLE = 1;
-    
-    /**
      * How many connect back requests to send if we have a single connection
      */
     public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
@@ -1868,7 +1863,7 @@ public class ConnectionManager {
      */
     public boolean isConnectionIdle() {
         return
-         _preferredConnections == PREFERRED_CONNECTIONS_FOR_LEAF_WHEN_IDLE;
+         _preferredConnections == ConnectionSettings.IDLE_CONNECTIONS.getValue();
     }
 
     /**
@@ -1885,7 +1880,7 @@ public class ConnectionManager {
         if(isSupernode())
             _preferredConnections = ConnectionSettings.NUM_CONNECTIONS.getValue();
         else if(isIdle())
-            _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF_WHEN_IDLE;
+            _preferredConnections = ConnectionSettings.IDLE_CONNECTIONS.getValue();
         else
             _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
 

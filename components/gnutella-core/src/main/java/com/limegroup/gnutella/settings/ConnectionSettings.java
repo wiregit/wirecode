@@ -332,6 +332,12 @@ public final class ConnectionSettings extends LimeProps {
     public static final StringArraySetting EVIL_HOSTS =
         FACTORY.createSettableStringArraySetting("EVIL_HOSTS", new String[0], "evil_hosts");
     
+    /**
+     * How many connections to maintain as a leaf when idle
+     */
+    public static final IntSetting IDLE_CONNECTIONS =
+        FACTORY.createSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",3,1);
+    
     
     /**
      * Helper method left from Settings Manager
