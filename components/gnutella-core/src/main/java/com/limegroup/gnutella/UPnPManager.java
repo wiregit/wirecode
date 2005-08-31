@@ -104,15 +104,15 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * the router we have and the sub-device necessary for port mapping 
 	 *  LOCKING: DEVICE_LOCK
 	 */
-	private Device _router;
+	private volatile Device _router;
 	
 	/**
 	 * The port-mapping service we'll use.  LOCKING: DEVICE_LOCK
 	 */
-	private Service _service;
+	private volatile Service _service;
 	
 	/** The tcp and udp mappings created this session */
-	private Mapping _tcp, _udp;
+	private volatile Mapping _tcp, _udp;
 	
 	/**
 	 * Lock that everything uses.
@@ -144,18 +144,14 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * @return whether we are behind an UPnP-enabled NAT/router
 	 */
 	public boolean isNATPresent() {
-	    synchronized(DEVICE_LOCK) {
-		    return _router != null && _service != null;
-        }
+	    return _router != null && _service != null;
 	}
 
 	/**
 	 * @return whether we have created mappings this session
 	 */
 	public boolean mappingsExist() {
-	    synchronized(DEVICE_LOCK) {
-		    return _tcp != null && _udp != null;
-        }
+	    return _tcp != null && _udp != null;
 	}
 	
 	/**
@@ -163,14 +159,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * null if we can't find it.
 	 */
 	public InetAddress getNATAddress() throws UnknownHostException {
-		Action getIP;
 		
-		synchronized(DEVICE_LOCK) {
-			if (!isNATPresent())
-				return null;
-			getIP = _service.getAction("GetExternalIPAddress");
-		}
-		
+        if (!isNATPresent())
+            return null;
+        
+        Action getIP = _service.getAction("GetExternalIPAddress");
 		if(getIP == null) {
 		    LOG.debug("Couldn't find GetExternalIPAddress action!");
 		    return null;
@@ -190,11 +183,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * Waits for a small amount of time before the device is discovered.
 	 */
 	public void waitForDevice() {
+        if(isNATPresent())
+            return;
 	    synchronized(DEVICE_LOCK) {
     	    // already have it.
-    	    if(isNATPresent())
-    	        return;
-    	        
             // otherwise, wait till we grab it.
             try {
                 DEVICE_LOCK.wait(WAIT_TIME);
@@ -207,16 +199,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * this method will be called when we discover a UPnP device.
 	 */
 	public void deviceAdded(Device dev) {
+        if (isNATPresent())
+            return;
 	    synchronized(DEVICE_LOCK) {
             if(LOG.isTraceEnabled())
                 LOG.trace("Device added: " + dev.getFriendlyName());
     		
-    		// we've found what we need
-    		if (_service != null && _router != null) {
-    			LOG.debug("we already have a router");
-    			return;
-    		}
-    
     		// did we find a router?
     		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
     			_router = dev;
@@ -360,10 +348,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding "+m);
 		
-		Action add;
-		synchronized(DEVICE_LOCK) {
-			add = _service.getAction("AddPortMapping");
-		}
+		Action add = _service.getAction("AddPortMapping");
 		
 		if(add == null) {
 		    LOG.debug("Couldn't find AddPortMapping action!");
@@ -395,10 +380,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("removing "+m);
 		
-		Action remove;
-		synchronized(DEVICE_LOCK) {
-			remove = _service.getAction("DeletePortMapping");
-		}
+		Action remove = _service.getAction("DeletePortMapping");
 		
 		if(remove == null) {
 		    LOG.debug("Couldn't find DeletePortMapping action!");
@@ -567,10 +549,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		    LOG.debug("Looking for stale mappings...");
 		    
 			Set mappings = new HashSet();
-			Action getGeneric;
-			synchronized(DEVICE_LOCK) {
-				getGeneric = _service.getAction("GetGenericPortMappingEntry");
-			}
+			Action getGeneric = _service.getAction("GetGenericPortMappingEntry");
 			
 			if(getGeneric == null) {
 			    LOG.debug("Couldn't find GetGenericPortMappingEntry action!");
