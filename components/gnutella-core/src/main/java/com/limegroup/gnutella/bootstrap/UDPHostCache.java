@@ -222,7 +222,7 @@ public class UDPHostCache {
      * Useful as a seperate method for tests to catch the Ping's GUID.
      */
     protected PingRequest getPing() {
-        return PingRequest.createUDPPing();
+        return PingRequest.createUHCPing();
     }
 
     /**

@@ -109,8 +109,27 @@ public class PingRequest extends Message {
      * for sending to UDP hosts.
      */
     public static PingRequest createUDPPing() {
-        GUID guid;
         List l = new LinkedList();
+        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
+    }
+    
+    /**
+     * Creates a TTL 1 Ping for faster bootstrapping, intended
+     * for sending to UHCs.
+     */    
+    public static PingRequest createUHCPing() {
+        List ggeps = new LinkedList();
+        GUID guid = populateUDPGGEPList(ggeps);
+        ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
+        return new PingRequest(guid.bytes(),(byte)1,ggeps);
+    }
+    
+    /**
+     * @param l list to put the standard extentions we add to UDP pings
+     * @return the guid to use for the ping
+     */
+    private static GUID populateUDPGGEPList(List l) {
+        GUID guid;
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
             guid = new GUID();
         } else {
@@ -123,7 +142,8 @@ public class PingRequest extends Message {
         else
             data[0] = SCP_LEAF;
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
-        return new PingRequest(guid.bytes(), (byte)1, l);
+        
+        return guid;
     }
     
     /**
