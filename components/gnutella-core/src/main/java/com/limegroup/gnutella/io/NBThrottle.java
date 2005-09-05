@@ -201,6 +201,7 @@ public class NBThrottle implements Throttle {
                     i.remove();
                 } else if(key != null) {
                     NIODispatcher.instance().process(key, key.attachment(), _processOp);
+		    keys.remove(key);
                     i.remove();
                     if(_available < MINIMUM_TO_GIVE)
                         break;
@@ -248,7 +249,9 @@ public class NBThrottle implements Throttle {
      */
     void tick(long currentTime) {
         if(currentTime >= _nextTickTime) {
-            _available = _bytesPerTick;
+	    float elapsedTicks = 1 + ((float)(currentTime - _nextTickTime)) / MILLIS_PER_TICK;
+	    elapsedTicks = Math.min(elapsedTicks, 2);
+            _available = (int)(_bytesPerTick * elapsedTicks);
             _nextTickTime = currentTime + MILLIS_PER_TICK;
             spreadBandwidth();
         } else if(_available > MINIMUM_TO_GIVE) {
