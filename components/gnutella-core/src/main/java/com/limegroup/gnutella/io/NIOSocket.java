@@ -50,6 +50,9 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      */
     private InetAddress connectedTo;
     
+    /** Whether the socket has started shutting down */
+    private boolean shuttingDown;
+    
     /** Lock used to signal/wait for connecting */
     private final Object LOCK = new Object();
     
@@ -240,6 +243,12 @@ public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor
      * Shuts down this socket & all its streams.
      */
     public void shutdown() {
+        synchronized(LOCK) {
+            if (shuttingDown)
+                return;
+            shuttingDown = true;
+        }
+        
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
         
