@@ -46,6 +46,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.MailSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -1029,7 +1030,10 @@ public class DownloadManager implements BandwidthTracker {
         //Save this' state to disk for crash recovery.
         if(ser)
             writeSnapshot();
-
+        
+        if(MailSettings.MAIL_ENABLED.getValue() && dl.getState()!=Downloader.ABORTED)
+        	new MailSender().sendDownloadStatusMail(dl);
+        
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback(dl).downloadsComplete();
