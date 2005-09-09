@@ -26,30 +26,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 public final class SupernodeAssigner {
 
 	/**
-	 * Constant for the minimum number of upstream kbytes per second that 
-	 * a node must be able to transfer in order to qualify as a ultrapeer.
-	 */
-	private static final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 10;
-
-	/**
-	 * Constant for the minimum number of downlstream kbytes per second that 
-	 * a node must be able to transfer in order to qualify as a ultrapeer.
-	 */
-	private static final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 20;
-
-	/**
-	 * Constant for the minimum average uptime in seconds that a node must 
-	 * have to qualify for ultrapeer status.
-	 */
-	private static final int MINIMUM_AVERAGE_UPTIME = 60 * 60; //1 hr
-
-	/**
-	 * Constant for the minimum current uptime in seconds that a node must 
-	 * have to qualify for Ultrapeer status.
-	 */
-	private static final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hrs
-
-	/**
 	 * Constant value for whether or not the operating system qualifies
 	 * this node for Ultrapeer status.
 	 */
@@ -120,12 +96,6 @@ public final class SupernodeAssigner {
 	 */
 	private static int _ultrapeerTries = 0;
 
-	/**
-	 * Constant for the amount of time to wait between attempts to become an 
-	 * Ultrapeer.
-	 */
-	private static final int RETRY_TIME = 180*60*1000; // 3 hours
-
     /** 
 	 * Creates a new <tt>UltrapeerAssigner</tt>. 
 	 *
@@ -184,14 +154,14 @@ public final class SupernodeAssigner {
         boolean isUltrapeerCapable = 
             //Is upstream OR downstream high enough?
             (_maxUpstreamBytesPerSec >= 
-                    MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND ||
+                    UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
              _maxDownstreamBytesPerSec >= 
-                    MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND) &&
+                    UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
             //AND I'm not a modem (in case estimate wrong)
             (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
             //AND is my average uptime OR current uptime high enough?
-            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= MINIMUM_AVERAGE_UPTIME ||
-             _currentUptime >= MINIMUM_CURRENT_UPTIME) &&
+            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
+             _currentUptime >= UltrapeerSettings.MIN_CUR_UPTIME.getValue()) &&
             //AND am I not firewalled?
 			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
             //AND I have accepted incoming messages over UDP
@@ -242,7 +212,7 @@ public final class SupernodeAssigner {
 	 *  otherwise <tt>false</tt>
 	 */
 	private static boolean shouldTryToBecomeAnUltrapeer(long curTime) {
-		if(curTime - _lastAttempt < RETRY_TIME) {
+		if(curTime - _lastAttempt < UltrapeerSettings.UP_RETRY_TIME.getValue()) {
 			return false;
 		}
 		_lastAttempt = curTime;
