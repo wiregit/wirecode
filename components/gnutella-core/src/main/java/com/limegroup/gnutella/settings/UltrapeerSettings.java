@@ -65,5 +65,11 @@ public final class UltrapeerSettings extends LimeProps {
     public static final IntSetting UP_RETRY_TIME =
         FACTORY.createSettableIntSetting("UP_RETRY_TIME",180*60*1000,
                 "UltrapeerSettings.UpRetryTime",24*3600*1000,180*60*1000);
+    
+    /**
+     * Whether to allow nodes to become ultrapeers immediately on startup
+     */
+    public static final BooleanSetting ALLOW_UP_STARTUP =
+        FACTORY.createSettableBooleanSetting("ALLOW_UP_STARTUP",true,"UltrapeerSettings.AllowUpStartup");
 }
 

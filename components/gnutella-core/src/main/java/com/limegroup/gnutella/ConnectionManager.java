@@ -365,7 +365,8 @@ public class ConnectionManager {
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
-               !isBehindProxy();
+               !isBehindProxy() &&
+               (UltrapeerSettings.ALLOW_UP_STARTUP.getValue() || SupernodeAssigner.isTooGoodToPassUp());
     }
     
     /**

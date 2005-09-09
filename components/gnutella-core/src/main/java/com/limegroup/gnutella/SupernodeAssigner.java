@@ -165,7 +165,7 @@ public final class SupernodeAssigner {
             //AND am I not firewalled?
 			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
             //AND I have accepted incoming messages over UDP
-            //RouterService.isGUESSCapable() &&
+            RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
 			ULTRAPEER_OS &&
 			//AND I do not have a private address
