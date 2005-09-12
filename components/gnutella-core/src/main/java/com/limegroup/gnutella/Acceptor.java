@@ -165,7 +165,21 @@ public class Acceptor implements Runnable {
 	 * call before running.
 	 */
 	public void init() {
-	    int tempPort = ConnectionSettings.PORT.getValue();
+        int tempPort;
+        // try a random port if we have not received an incoming connection  
+        // and have been running on the default port (6346) 
+        // and the user has not changed the settings
+        boolean tryingRandom = ConnectionSettings.PORT.isDefault() && 
+                !ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
+                !ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+        
+        Random gen = null;
+        if (tryingRandom) {
+            gen = new Random();
+            tempPort = gen.nextInt(50000)+2000;
+        }
+        else
+            tempPort = ConnectionSettings.PORT.getValue();
 
         //0. Get local address.  This must be done here because it can
         //   block under certain conditions.
@@ -189,20 +203,14 @@ public class Acceptor implements Runnable {
         } catch (IOException e) {
             LOG.warn("can't set initial port", e);
         
-            // 2. Try 20 different ports. The first 10 tries increment
-            // sequentially from 6346. The next 10 tries are random ports between
-            // 2000 and 52000
+            // 2. Try 20 different ports. 
             int numToTry = 20;
-            Random gen = null;
             for (int i=0; i<numToTry; i++) {
-                if(i < 10)
-                    tempPort = i+6346;
-                else {
-                    if(gen==null)
-                        gen = new Random();
-                    tempPort = gen.nextInt(50000);
-                    tempPort += 2000;//avoid the first 2000 ports
-                }
+                if(gen == null)
+                    gen = new Random();
+                tempPort = gen.nextInt(50000);
+                tempPort += 2000;//avoid the first 2000 ports
+                
 				// do not try to bind to the multicast port.
 				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
 				    numToTry++;
@@ -223,7 +231,7 @@ public class Acceptor implements Runnable {
             }
         }
         
-        if (_port != oldPort) {
+        if (_port != oldPort || tryingRandom) {
             ConnectionSettings.PORT.setValue(_port);
             SettingsHandler.save();
             RouterService.addressChanged();
