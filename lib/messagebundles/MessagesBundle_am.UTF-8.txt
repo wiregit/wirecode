@@ -1,18 +1,18 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Geez - Ethiopia
+# Specialization for: Amharic - Ethiopia
 # Dummy resources bundle for missing translation.
 # Supporting fonts: Ethiopia Jiret (http://www.senamirmir.com/projects/ethiopic/ethiopic.html), Code2000 (http://home.att.net/~jameskass/)
 ################################################################################
-LOCALE_LANGUAGE_CODE=gez
-LOCALE_LANGUAGE_NAME=ግዕዝኛ
+LOCALE_LANGUAGE_CODE=am
+LOCALE_LANGUAGE_NAME=አማርኛ
 LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=ኢትዮጵያ
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Ethi
 LOCALE_SCRIPT_NAME=Ethiopic
-LOCALE_ENGLISH_LANGUAGE_NAME=Geez
+LOCALE_ENGLISH_LANGUAGE_NAME=Amharic
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 #? LOCALE_NSIS_NAME=
