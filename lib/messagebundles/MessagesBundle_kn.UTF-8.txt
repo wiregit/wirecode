@@ -1,18 +1,18 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Malayalam - India
+# Specialization for: Kannada - India
 # Dummy resources bundle for missing translation.
-# Supporting fonts: Kartika, <a href="http://www.kamban.com.au/">Akshar Unicode</a>, <a href="http://home.att.net/~jameskass/">Code2000</a></i>
+# Supporting fonts: Tunga, <a href="http://www.kamban.com.au/">Akshar Unicode</a>, <a href="http://home.att.net/~jameskass/">Code2000</a>
 ################################################################################
-LOCALE_LANGUAGE_CODE=ml
-LOCALE_LANGUAGE_NAME=മലയാളം
+LOCALE_LANGUAGE_CODE=kn
+LOCALE_LANGUAGE_NAME=ಕನ್ನಡ
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=ഇന്ത്യ
+LOCALE_COUNTRY_NAME=ಭಾರತ
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
-LOCALE_SCRIPT_CODE=Mlym
+LOCALE_SCRIPT_CODE=Knda
 LOCALE_SCRIPT_NAME=Brahmic (Indian)
-LOCALE_ENGLISH_LANGUAGE_NAME=Malayalam
+LOCALE_ENGLISH_LANGUAGE_NAME=Kannada
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 #? LOCALE_NSIS_NAME=
@@ -23,7 +23,7 @@ LOCALE_ENGLISH_LANGUAGE_NAME=Malayalam
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).
 ################################################################################
-DISABLE_BOLD_CHARACTERS=false
+DISABLE_BOLD_CHARACTERS=true
 
 ################################################################################
 # Key/value pair for whether or not the layout should be adapted for right-to-
