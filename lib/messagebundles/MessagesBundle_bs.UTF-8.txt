@@ -1,6 +1,6 @@
 ﻿#########################################################################
 # Messages Bundle for LimeWire 4.9.8
-# Specialization for: Bosnian & Bosnia Herzegovina (Latin script)
+# Specialization for: Bosnian - Bosnia & Herzegovina
 # Thanks to: Ing. Salih Čavkić, Enver Julardžija and Bisera Uludag.
 #########################################################################
 LOCALE_LANGUAGE_CODE=bs

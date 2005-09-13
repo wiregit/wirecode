@@ -1,17 +1,17 @@
 ﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Serbian (Cyrillic) - Serbia-Montenegro
+# Specialization for: Serbian (Cyrillic) - Serbia & Montenegro
 # Thanks to Borislav Tadic, Nikola Milosavljevic
 ################################################################################
 LOCALE_LANGUAGE_CODE=sr
 LOCALE_LANGUAGE_NAME=Српски
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Србија-Црна Гора
+LOCALE_COUNTRY_NAME=Србија и Црна Гора
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Cyrl
 LOCALE_SCRIPT_NAME=Cyrillic
-LOCALE_ENGLISH_LANGUAGE_NAME=Serbian
+LOCALE_ENGLISH_LANGUAGE_NAME=Serbian (Cyrillic)
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 LOCALE_NSIS_NAME=Serbian
