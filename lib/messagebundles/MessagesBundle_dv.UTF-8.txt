@@ -2,11 +2,12 @@
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Divehi (Thaana) - Maldives
 # Dummy resources bundle for missing translation.
+# Supporting fonts: Mv Galan Normal (http://www.mcst.gov.mv/News_and_Events/xpfonts.htm), MV Boli, Code2000 (http://home.att.net/~jameskass/)
 ################################################################################
 LOCALE_LANGUAGE_CODE=dv
-LOCALE_LANGUAGE_NAME=Divehi
+LOCALE_LANGUAGE_NAME=ދިވެހިބަސް
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Maldives
+LOCALE_COUNTRY_NAME=ދިވެހި ރާއްޖެ
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Thaa
