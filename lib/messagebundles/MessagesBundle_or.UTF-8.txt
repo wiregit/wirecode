@@ -2,11 +2,13 @@
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Oriya - India
 # Dummy resources bundle for missing translation.
+# Supporting font: <a href="http://www.kamban.com.au/">Akshar Unicode</a>
+# Edited using WordPad in UTF-16 mode.
 ################################################################################
 LOCALE_LANGUAGE_CODE=or
-LOCALE_LANGUAGE_NAME=Oriyâ
+LOCALE_LANGUAGE_NAME=ଭାରତ
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=India
+LOCALE_COUNTRY_NAME=ଓଡ଼ିଆ
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Orya
