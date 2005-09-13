@@ -1218,7 +1218,7 @@ public class ConnectionManager {
             // this connection.  It is possible that, because of race-conditions,
             // we may have allowed both a 'Peer' and an 'Ultrapeer', or an 'Ultrapeer'
             // and a leaf.  That'd 'cause undefined results if we allowed it.
-            if(!allowConnection(c.headers())) {
+            if(!allowInitializedConnection(c)) {
                 removeInternal(c);
                 return false;
             }
@@ -1232,9 +1232,11 @@ public class ConnectionManager {
                 newConnections.add(c);
                 _initializedConnections =
                     Collections.unmodifiableList(newConnections);
-                //maintain invariant
-                if(c.isClientSupernodeConnection())
+                
+                if(c.isClientSupernodeConnection()) {
+                	killPeerConnections(); // clean up any extraneus peer conns.
                     _shieldedConnections++;
+                }
                 if(!c.isLimeWire())
                     _nonLimeWirePeers++;
                 if(checkLocale(c.getLocalePref()))
@@ -1260,6 +1262,31 @@ public class ConnectionManager {
 
     }
 
+    /**
+     * like allowConnection, except more strict - if this is a leaf,
+     * only allow connections whom we have told we're leafs.
+     * @return whether the connection should be allowed 
+     */
+    private boolean allowInitializedConnection(Connection c) {
+    	if ((isShieldedLeaf() || !isSupernode()) &&
+    			!c.isClientSupernodeConnection())
+    		return false;
+    	
+    	return allowConnection(c.headers());
+    }
+    
+    /**
+     * removes any supernode->supernode connections
+     */
+    private void killPeerConnections() {
+    	List conns = _initializedConnections;
+    	for (Iterator iter = conns.iterator(); iter.hasNext();) {
+			ManagedConnection con = (ManagedConnection) iter.next();
+			if (con.isSupernodeSupernodeConnection()) 
+				removeInternal(con);
+		}
+    }
+    
     /**
      * Iterates over all the connections and sends the updated CapabilitiesVM
      * down every one of them.
