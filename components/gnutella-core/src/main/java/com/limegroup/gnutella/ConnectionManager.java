@@ -75,6 +75,11 @@ public class ConnectionManager {
      * Timestamp for the last time the user selected to disconnect.
      */
     private volatile long _disconnectTime = -1;
+    
+    /**
+     * Timestamp for the last time we started trying to connect
+     */
+    private volatile long _connectTime = Long.MAX_VALUE;
 
     /**
      * Timestamp for the time we began automatically connecting.  We stop
@@ -366,9 +371,16 @@ public class ConnectionManager {
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
                !isBehindProxy() &&
-               (UltrapeerSettings.ALLOW_UP_STARTUP.getValue() || SupernodeAssigner.isTooGoodToPassUp());
+               minConnectTimePassed();
     }
     
+    /**
+     * @return whether the minimum time since we started trying to connect has passed
+     */
+    private boolean minConnectTimePassed() {
+        return Math.max(0,(System.currentTimeMillis() - _connectTime)) / 1000 
+            >= UltrapeerSettings.MIN_CONNECT_TIME.getValue();
+    }
     /**
      * @return if we are currently using a http or socks4/5 proxy to connect.
      */
@@ -1308,6 +1320,7 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         _disconnectTime = System.currentTimeMillis();
+        _connectTime = Long.MAX_VALUE;
         _preferredConnections = 0;
         adjustConnectionFetchers(); // kill them all
         //2. Remove all connections.
@@ -1334,6 +1347,7 @@ public class ConnectionManager {
 
         // Reset the disconnect time to be a long time ago.
         _disconnectTime = 0;
+        _connectTime = System.currentTimeMillis();
 
         // Ignore this call if we're already connected
         // or not initialized yet.

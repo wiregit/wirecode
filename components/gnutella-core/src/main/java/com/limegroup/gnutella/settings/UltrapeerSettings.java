@@ -54,10 +54,17 @@ public final class UltrapeerSettings extends LimeProps {
         FACTORY.createSettableIntSetting("MIN_AVG_UPTIME",3600,"UltrapeerSettings.MinAvgUptime",48*3600,3600);
     
     /**
+     * The minimum time in seconds that a node must have tried to connect before it can 
+     * qualify for Ultrapeer status.
+     */
+    public static final IntSetting MIN_CONNECT_TIME =
+        FACTORY.createSettableIntSetting("MIN_CONNECT_TIME",10,"UltrapeerSettings.MinConnectTime",30,0);
+    
+    /**
      * The minimum current uptime in seconds that a node must have to qualify for Ultrapeer status.
      */
-    public static final IntSetting MIN_CUR_UPTIME =
-        FACTORY.createSettableIntSetting("MIN_CUR_UPTIME",120*60,"UltrapeerSettings.MinCurUptime",48*3600,120*60);
+    public static final IntSetting MIN_INITIAL_UPTIME =
+        FACTORY.createSettableIntSetting("MIN_INITIAL_UPTIME",120*60,"UltrapeerSettings.MinInitialUptime",48*3600,120*60);
     
     /**
      * The amount of time to wait between attempts to become an Ultrapeer.
@@ -65,11 +72,5 @@ public final class UltrapeerSettings extends LimeProps {
     public static final IntSetting UP_RETRY_TIME =
         FACTORY.createSettableIntSetting("UP_RETRY_TIME",180*60*1000,
                 "UltrapeerSettings.UpRetryTime",24*3600*1000,180*60*1000);
-    
-    /**
-     * Whether to allow nodes to become ultrapeers immediately on startup
-     */
-    public static final BooleanSetting ALLOW_UP_STARTUP =
-        FACTORY.createSettableBooleanSetting("ALLOW_UP_STARTUP",true,"UltrapeerSettings.AllowUpStartup");
 }
 
