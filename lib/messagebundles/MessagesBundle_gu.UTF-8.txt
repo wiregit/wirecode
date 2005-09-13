@@ -4,9 +4,9 @@
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=gu
-LOCALE_LANGUAGE_NAME=Gujrâtî
+LOCALE_LANGUAGE_NAME=ગુજરાતી
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=India
+LOCALE_COUNTRY_NAME=ભારત
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Gujr

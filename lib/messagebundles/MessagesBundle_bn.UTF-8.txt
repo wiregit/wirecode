@@ -4,9 +4,9 @@
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=bn
-LOCALE_LANGUAGE_NAME=Bengla
+LOCALE_LANGUAGE_NAME=বাংলা
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Bengla Desh, India
+LOCALE_COUNTRY_NAME=বাংলাদেশ, ভারত
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Beng

@@ -4,9 +4,9 @@
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=mn
-LOCALE_LANGUAGE_NAME=Монгол
+LOCALE_LANGUAGE_NAME=Монгол хэл
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Монгол
+LOCALE_COUNTRY_NAME=Монгол улс
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Cyrl

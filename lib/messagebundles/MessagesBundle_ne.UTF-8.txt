@@ -1,17 +1,17 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Kashmiri (Gurmukhi) - India
+# Specialization for: Nepali (Devanagari) - Nepal
 # Dummy resources bundle for missing translation.
 ################################################################################
-LOCALE_LANGUAGE_CODE=ks
-LOCALE_LANGUAGE_NAME=Kashmiri
+LOCALE_LANGUAGE_CODE=ne
+LOCALE_LANGUAGE_NAME=नेपाली
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=\u0a2d\u0a3e\u0a30\u0a24
+LOCALE_COUNTRY_NAME=नेपाल
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
-LOCALE_SCRIPT_CODE=Guru
+LOCALE_SCRIPT_CODE=Deva
 LOCALE_SCRIPT_NAME=Brahmic (Indian)
-LOCALE_ENGLISH_LANGUAGE_NAME=Kashmiri (Gurmukhi)
+LOCALE_ENGLISH_LANGUAGE_NAME=Nepali (Devanagari)
 # Before adding a value below, verify the existence of the translation on the NSIS repository:
 # http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 #? LOCALE_NSIS_NAME=

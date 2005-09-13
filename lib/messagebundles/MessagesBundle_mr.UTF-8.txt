@@ -4,9 +4,9 @@
 # Maintained by the LimeWire project team.
 ################################################################################
 LOCALE_LANGUAGE_CODE=mr
-LOCALE_LANGUAGE_NAME=Marathi
+LOCALE_LANGUAGE_NAME=मराठी
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=India
+LOCALE_COUNTRY_NAME=भारत
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Deva
