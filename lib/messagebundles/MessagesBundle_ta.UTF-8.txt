@@ -2,11 +2,12 @@
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Tamil - India (& Sri Lanka, Malaysia)
 # Dummy resources bundle for missing translation.
+# Supporting fonts: Latha, <a href="http://www.kamban.com.au/">Akshar Unicode</a>
 ################################################################################
 LOCALE_LANGUAGE_CODE=ta
 LOCALE_LANGUAGE_NAME=தமிழ
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=India
+LOCALE_COUNTRY_NAME=இந்தியா, இலங்கை
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Taml

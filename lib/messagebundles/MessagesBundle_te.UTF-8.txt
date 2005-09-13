@@ -4,9 +4,9 @@
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=te
-LOCALE_LANGUAGE_NAME=Telugu
+LOCALE_LANGUAGE_NAME=తెలుగు
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=India
+LOCALE_COUNTRY_NAME=భారత దేళ౦
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Telu
