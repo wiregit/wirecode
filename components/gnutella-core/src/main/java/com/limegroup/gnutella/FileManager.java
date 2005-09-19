@@ -1634,6 +1634,10 @@ public abstract class FileManager {
 	 * or if it is specially shared.
 	 */
 	private boolean isFileShareable(File file) {
+        // Don't share mp3, ogg, and wma files that don't explicitly
+        // contain information indicating they may be shared.
+        if (isFileUnliscenced(file))
+            return false;
 		if (!isFilePhysicallyShareable(file))
 			return false;
 		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
@@ -1651,6 +1655,16 @@ public abstract class FileManager {
 		return false;
 	}
 	
+    /*
+     * Returns true if a file's extension indicates that we could
+     * determine there is a license, and yet we could not determine
+     * a license.
+     */
+    private boolean isFileUnliscenced(File file) {
+        // TODO flesh this method out
+        return true;
+    }
+    
     /**
      * Returns true if this file is not too large, not too small,
      * not null, is a directory, can be read, is not hidden.  Returns
