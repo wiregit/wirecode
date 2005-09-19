@@ -419,6 +419,18 @@ public class LimeXMLUtils {
     }
     
     /**
+     * Determines if we are capable of reading license information from a given
+     * file type.
+     */
+    public static boolean canEmbedLicense(File file) {
+        return canEmbedLicense(file.getName());
+    }
+    
+    public static boolean canEmbedLicense(String file) {
+        return isMP3File(file) || isWMAFile(file) || isOGGFile(file);
+    }
+    
+    /**
      * Parses the passed string, and encodes the special characters (used in
      * xml for special purposes) with the appropriate codes.
      * e.g. '<' is changed to '&lt;'

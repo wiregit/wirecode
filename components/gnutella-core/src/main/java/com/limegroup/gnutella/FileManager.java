@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -1660,8 +1661,11 @@ public abstract class FileManager {
      * determine there is a license, and yet we could not determine
      * a license.
      */
-    private boolean isFileUnliscenced(File file) {
-        // TODO flesh this method out
+    public boolean isFileUnliscenced(File file) {
+        if (! LimeXMLUtils.canEmbedLicense(file))
+            return false;
+        // TODO add checks for license here
+        
         return true;
     }
     
