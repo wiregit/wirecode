@@ -1640,15 +1640,14 @@ public abstract class FileManager {
 	private boolean isFileShareable(File file) {
 		if (!isFilePhysicallyShareable(file))
 			return false;
+        if (_data.FILES_NOT_TO_SHARE.contains(file))
+            return false;
         // Don't share mp3, ogg, and wma files that don't explicitly
         // contain information indicating they may be shared.
-        if (isFileUnliscenced(file)) {
+        if (isFileUnlicensed(file))
             return false;
-        }
 		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
-		if (_data.FILES_NOT_TO_SHARE.contains(file))
-			return false;
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
 				return true;
@@ -1664,20 +1663,32 @@ public abstract class FileManager {
      * determine there is a license, and yet we could not determine
      * a license.
      */
-    public boolean isFileUnliscenced(File file) {
-        if (! LimeXMLUtils.canEmbedLicense(file)) {
-            return false;
-        }
-        // If we've reached here, the file could contain a license.
-        // If the license is null, then the file is unlicensed
-        FileDesc fileDesc = getFileDescForFile(file);
-        if (fileDesc != null) {
-            return (fileDesc.getLicense() == null);
-        }
+    public boolean isFileUnlicensed(File file) {
         try {
-            AudioMetaData metaData = (AudioMetaData) MetaData.parse(file);
-            return ((metaData.getLicense() == null) && 
-                    (metaData.getLicenseType() == null));
+            if (! LimeXMLUtils.canEmbedLicense(file)) {
+                return false;
+            }
+            // Assume that all content pushed by the version key holder
+            // is properly licensed
+            if (FileUtils.isReallyParent(PROGRAM_SHARE,file)) {
+                return false;
+            }
+            if (FileUtils.isReallyParent(PREFERENCE_SHARE,file)) {
+                return false;
+            }
+            // If we've reached here, the file could contain a license.
+            // If the license is null, then the file is unlicensed
+            FileDesc fileDesc = getFileDescForFile(file);
+            if (fileDesc != null) {
+                return (fileDesc.getLicense() == null);
+            }
+        
+            MetaData metaData = MetaData.parse(file);
+            if (metaData instanceof AudioMetaData) {
+                AudioMetaData amd = (AudioMetaData) metaData;
+                return ((amd.getLicense() == null) && 
+                        (amd.getLicenseType() == null));
+            }
         } catch (Throwable t) {
             t.printStackTrace(System.err);
         }
