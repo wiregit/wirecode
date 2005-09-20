@@ -35,6 +35,9 @@ import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
+import com.limegroup.gnutella.metadata.MetaData;
+import com.limegroup.gnutella.metadata.AudioMetaData;
+
 /**
  * The list of all shared files.  Provides operations to add and remove
  * individual files, directory, or sets of directories.  Provides a method to
@@ -1635,12 +1638,13 @@ public abstract class FileManager {
 	 * or if it is specially shared.
 	 */
 	private boolean isFileShareable(File file) {
-        // Don't share mp3, ogg, and wma files that don't explicitly
-        // contain information indicating they may be shared.
-        if (isFileUnliscenced(file))
-            return false;
 		if (!isFilePhysicallyShareable(file))
 			return false;
+        // Don't share mp3, ogg, and wma files that don't explicitly
+        // contain information indicating they may be shared.
+        if (isFileUnliscenced(file)) {
+            return false;
+        }
 		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
@@ -1651,8 +1655,7 @@ public abstract class FileManager {
 			if (!hasShareableExtension(file))
 	        	return false;
 			return true;
-		}
-			
+        }		
 		return false;
 	}
 	
@@ -1662,11 +1665,25 @@ public abstract class FileManager {
      * a license.
      */
     public boolean isFileUnliscenced(File file) {
-        if (! LimeXMLUtils.canEmbedLicense(file))
+        if (! LimeXMLUtils.canEmbedLicense(file)) {
             return false;
-        // TODO add checks for license here
-        
-        return true;
+        }
+        // If we've reached here, the file could contain a license.
+        // If the license is null, then the file is unlicensed
+        FileDesc fileDesc = getFileDescForFile(file);
+        if (fileDesc != null) {
+            return (fileDesc.getLicense() == null);
+        }
+        try {
+            AudioMetaData metaData = (AudioMetaData) MetaData.parse(file);
+            return ((metaData.getLicense() == null) && 
+                    (metaData.getLicenseType() == null));
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
+        }
+        // If we fell through to here, the file is of a type that we
+        // can't determine its license.
+        return false;
     }
     
     /**
