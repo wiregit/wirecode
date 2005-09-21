@@ -502,7 +502,7 @@ public class MetaFileManager extends FileManager {
             }
         
             MetaData metaData = MetaData.parse(file);
-            return metaData.isShareable();
+            return !metaData.isShareable();
         } catch (Throwable t) {
             t.printStackTrace(System.err);
         }
