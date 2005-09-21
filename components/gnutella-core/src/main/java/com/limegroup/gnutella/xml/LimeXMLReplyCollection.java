@@ -25,6 +25,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -187,7 +188,6 @@ public class LimeXMLReplyCollection {
             }
             oldMap.clear();
         }
-    
     }
     
     /**
@@ -222,6 +222,10 @@ public class LimeXMLReplyCollection {
             doc = AudioMetaData.fixCorruption(doc);
             mediaFileToDisk(fd, file.getPath(), doc, false);
         }
+        
+        // if this document should not be shared, do not add it to the reply collection
+        if (!doc.isShareable())
+            return null;
         
         return doc;
     }
@@ -677,6 +681,7 @@ public class LimeXMLReplyCollection {
         try {
             in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
             read = (Map)in.readObject();
+            revalidate(read);
         } catch(Throwable t) {
             LOG.error("Unable to read LimeXMLCollection", t);
         } finally {
@@ -684,5 +689,17 @@ public class LimeXMLReplyCollection {
         }
         
         return read == null ? new HashMap() : read;
+    }
+    
+    /**
+     * Removes any documents that should not be included in the reply collection
+     */
+    private void revalidate(Map m) {
+        for (Iterator iter = m.entrySet().iterator(); iter.hasNext();) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            LimeXMLDocument doc = (LimeXMLDocument) entry.getValue();
+            if (!doc.isShareable()) 
+                iter.remove();
+        }
     }
 }

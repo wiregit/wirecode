@@ -33,10 +33,6 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-
-import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.metadata.AudioMetaData;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -1185,6 +1181,10 @@ public abstract class FileManager {
         return fileDesc;
     }
 
+    public boolean isFileUnlicensed(File f) {
+        return false;
+    }
+    
 	/**
 	 * Removes the file if it is being shared, and then removes the file from
 	 * the special lists as necessary.
@@ -1637,14 +1637,10 @@ public abstract class FileManager {
 	 * Returns true if the given file is in a completely shared directory
 	 * or if it is specially shared.
 	 */
-	private boolean isFileShareable(File file) {
+	protected boolean isFileShareable(File file) {
 		if (!isFilePhysicallyShareable(file))
 			return false;
         if (_data.FILES_NOT_TO_SHARE.contains(file))
-            return false;
-        // Don't share mp3, ogg, and wma files that don't explicitly
-        // contain information indicating they may be shared.
-        if (isFileUnlicensed(file))
             return false;
 		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
 			return true;
@@ -1658,45 +1654,6 @@ public abstract class FileManager {
 		return false;
 	}
 	
-    /*
-     * Returns true if a file's extension indicates that we could
-     * determine there is a license, and yet we could not determine
-     * a license.
-     */
-    public boolean isFileUnlicensed(File file) {
-        try {
-            if (! LimeXMLUtils.canEmbedLicense(file)) {
-                return false;
-            }
-            // Assume that all content pushed by the version key holder
-            // is properly licensed
-            if (FileUtils.isReallyParent(PROGRAM_SHARE,file)) {
-                return false;
-            }
-            if (FileUtils.isReallyParent(PREFERENCE_SHARE,file)) {
-                return false;
-            }
-            // If we've reached here, the file could contain a license.
-            // If the license is null, then the file is unlicensed
-            FileDesc fileDesc = getFileDescForFile(file);
-            if (fileDesc != null) {
-                return (fileDesc.getLicense() == null);
-            }
-        
-            MetaData metaData = MetaData.parse(file);
-            if (metaData instanceof AudioMetaData) {
-                AudioMetaData amd = (AudioMetaData) metaData;
-                return ((amd.getLicense() == null) && 
-                        (amd.getLicenseType() == null));
-            }
-        } catch (Throwable t) {
-            t.printStackTrace(System.err);
-        }
-        // If we fell through to here, the file is of a type that we
-        // can't determine its license.
-        return false;
-    }
-    
     /**
      * Returns true if this file is not too large, not too small,
      * not null, is a directory, can be read, is not hidden.  Returns

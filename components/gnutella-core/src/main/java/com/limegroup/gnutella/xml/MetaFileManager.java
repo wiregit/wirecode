@@ -21,7 +21,9 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.NameValue;
 
 import org.apache.commons.logging.Log;
@@ -465,6 +467,48 @@ public class MetaFileManager extends FileManager {
         }
 
         return retResponses;
+    }
+    
+    protected boolean isFileShareable(File f) {
+        boolean ret = super.isFileShareable(f);
+        if (!ret)
+            return false;
+        return ret && !isFileUnlicensed(f);
+    }
+    
+    /*
+     * Returns true if a file's extension indicates that we could
+     * determine there is a license, and yet we could not determine
+     * a license.
+     */
+    public boolean isFileUnlicensed(File file) {
+        try {
+            if (! LimeXMLUtils.canEmbedLicense(file)) {
+                return false;
+            }
+            // Assume that all content pushed by the version key holder
+            // is properly licensed
+            if (FileUtils.isReallyParent(PROGRAM_SHARE,file)) {
+                return false;
+            }
+            if (FileUtils.isReallyParent(PREFERENCE_SHARE,file)) {
+                return false;
+            }
+            // If we've reached here, the file could contain a license.
+            // If the license is null, then the file is unlicensed
+            FileDesc fileDesc = getFileDescForFile(file);
+            if (fileDesc != null) {
+                return (fileDesc.getLicense() == null);
+            }
+        
+            MetaData metaData = MetaData.parse(file);
+            return metaData.isShareable();
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
+        }
+        // If we fell through to here, the file is of a type that we
+        // can't determine its license.
+        return false;
     }
     
     private class Saver implements Runnable {

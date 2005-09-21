@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
@@ -275,6 +276,10 @@ public abstract class AudioMetaData extends MetaData {
                !fieldName.equals(PRICE_KEY) &&
                !fieldName.equals(LICENSE_TYPE_KEY)
                ;
+    }
+    
+    public boolean isShareable() {
+        return LicenseFactory.isShareable(getLicense());
     }
     
 }

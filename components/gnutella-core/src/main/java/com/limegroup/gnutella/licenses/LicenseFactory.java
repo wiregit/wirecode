@@ -212,5 +212,14 @@ public final class LicenseFactory {
         
         return WeedLicense.buildURI(cid, vid);
     }
+    
+    /**
+     * @return whether the license contained in the string is shareable.
+     * null licenses are not shareable.
+     */
+    public static boolean isShareable(String licenseString) {
+        return licenseString != null && 
+        (isCCLicense(licenseString) || isWeedLicense(licenseString));
+    }
 }
        

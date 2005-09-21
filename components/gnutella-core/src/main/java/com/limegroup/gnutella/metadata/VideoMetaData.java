@@ -137,4 +137,8 @@ public abstract class VideoMetaData extends MetaData {
     private boolean isValid(int i) {
         return i >= 0;
     }
+    
+    public boolean isShareable() {
+        return true;
+    }
 }

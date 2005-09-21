@@ -209,8 +209,16 @@ public class LimeXMLDocument implements Serializable {
         // no valid attributes.
         if(getAttributeString().length() == 0)
             return false;
-            
+        
         return true;
+    }
+    
+    /**
+     * @return whether or this LimeXMLDocument can be added to the reply collection.
+     */
+    boolean isShareable() {
+        return (!getSchemaURI().equals("http://www.limewire.com/schemas/audio.xsd") ||
+                isLicenseAvailable());
     }
 
     /**

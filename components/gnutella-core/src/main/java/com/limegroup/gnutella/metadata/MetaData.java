@@ -71,4 +71,9 @@ public abstract class MetaData {
 	 * @throws IOException parsing failed
 	 */
     protected abstract void parseFile(File f) throws IOException;
+    
+    /**
+     * @return whether the given file can be shared (i.e. whether it has license, etc.)
+     */
+    public abstract boolean isShareable();
 }
