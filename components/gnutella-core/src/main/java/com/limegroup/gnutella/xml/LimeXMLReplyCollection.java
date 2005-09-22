@@ -134,7 +134,7 @@ public class LimeXMLReplyCollection {
         }
         
         // Then try to get it from the old map.
-        if(doc == null)
+        if(doc == null || !doc.isShareable())
             doc = (LimeXMLDocument)oldMap.get(urn);
         
         
@@ -167,7 +167,7 @@ public class LimeXMLReplyCollection {
             // be multiple kinds of files every time.   
             if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
                 doc = constructDocument(file);
-                if(doc != null) {
+                if(doc != null && doc.isShareable()) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
                     addReply(fd, doc);
@@ -411,6 +411,20 @@ public class LimeXMLReplyCollection {
     public LimeXMLDocument getDocForHash(URN hash){
         synchronized(mainMap){
             return (LimeXMLDocument)mainMap.get(hash);
+        }
+    }
+    
+    /**
+     * @return any LimeXMLDocument associated with this hash
+     */
+    public LimeXMLDocument getAnyDocForHash(URN hash) {
+        synchronized(mainMap) {
+            LimeXMLDocument ret = getDocForHash(hash);
+            
+            if (ret == null)
+                ret = (LimeXMLDocument)oldMap.get(hash);
+            
+            return ret;
         }
     }
         

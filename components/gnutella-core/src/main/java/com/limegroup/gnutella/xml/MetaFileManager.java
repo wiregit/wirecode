@@ -19,6 +19,7 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
@@ -292,16 +293,15 @@ public class MetaFileManager extends FileManager {
      * Notification that a single FileDesc has its URNs.
      */
     protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
-        super.loadFile(fd, file, metadata, urns);
+
         boolean added = false;
-        
         Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
         for(Iterator i = replies.iterator(); i.hasNext(); )
             added |= (((LimeXMLReplyCollection)i.next()).initialize(fd, metadata) != null);
         for(Iterator i = replies.iterator(); i.hasNext(); )
             added |= (((LimeXMLReplyCollection)i.next()).createIfNecessary(fd) != null);
             
-        if(added) {
+        if (added) {
             synchronized(this) {
                 _needRebuild = true;
             }
@@ -469,11 +469,44 @@ public class MetaFileManager extends FileManager {
         return retResponses;
     }
     
-    protected boolean isFileShareable(File f) {
-        boolean ret = super.isFileShareable(f);
-        if (!ret)
-            return false;
-        return ret && !isFileUnlicensed(f);
+    /**
+     * Tries to find a license for this file in the following locations
+     * 1. the newly passed list of metadata, if any
+     * 2. the pre-existing reply collections from previous sessions
+     * 3. the file itself
+     * @modifies metadata if it finds a license in the file
+     * @return if a license was found either in the pre-existing metadata or in the file
+     */
+    protected boolean findLicense(File f, List metadata, Set urns) {
+        if(!LimeXMLUtils.canEmbedLicense(f))
+            return true;
+        
+        // see if there is any license in the most recent metadata
+        for (Iterator iter = metadata.iterator(); iter.hasNext();) {
+            LimeXMLDocument doc = (LimeXMLDocument) iter.next();
+            if (doc.hasShareableLicense()) 
+                return true;
+        }
+        
+        // if not, see if there is a license in cached metadata from previous sessions
+        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(Iterator i = replies.iterator(); i.hasNext(); ) {
+            LimeXMLReplyCollection col = (LimeXMLReplyCollection)i.next();
+            for (Iterator iter = urns.iterator(); iter.hasNext();) {
+                LimeXMLDocument doc = (LimeXMLDocument) col.getAnyDocForHash((URN)iter.next());
+                if (doc != null && doc.hasShareableLicense()) 
+                    return true;
+            }
+        }
+        
+        // if not, parse the document here and remember the metadata for later.
+        try {
+            LimeXMLDocument doc = MetaDataReader.readDocument(f);
+            metadata.add(doc);
+            return doc.hasShareableLicense();
+        } catch (IOException parsingFailed) {
+            return false; // no license
+        }
     }
     
     /*

@@ -218,7 +218,14 @@ public class LimeXMLDocument implements Serializable {
      */
     boolean isShareable() {
         return (!getSchemaURI().equals("http://www.limewire.com/schemas/audio.xsd") ||
-                isLicenseAvailable());
+                hasShareableLicense());
+    }
+    
+    /**
+     * @return whether this LimeXMLDocument has a license that is shareable
+     */
+    boolean hasShareableLicense() {
+        return licenseType == CC_LICENSE || licenseType == WEED_LICENSE;
     }
 
     /**

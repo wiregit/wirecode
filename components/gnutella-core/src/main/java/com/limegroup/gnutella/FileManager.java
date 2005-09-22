@@ -795,7 +795,7 @@ public abstract class FileManager {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFileIfShared(file_list[i], Collections.EMPTY_LIST, true, revision, null);
+            addFileIfShared(file_list[i], new ArrayList(1), true, revision, null);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -922,14 +922,14 @@ public abstract class FileManager {
 	 * Always shares the given file.
 	 */
 	public void addFileAlways(File file) {
-		addFileAlways(file, Collections.EMPTY_LIST, null);
+		addFileAlways(file, new ArrayList(1), null);
 	}
 	
 	/**
 	 * Always shares a file, notifying the given callback when shared.
 	 */
 	public void addFileAlways(File file, FileEventListener callback) {
-	    addFileAlways(file, Collections.EMPTY_LIST, callback);
+	    addFileAlways(file, new ArrayList(1), callback);
 	}
 	
 	/**
@@ -959,14 +959,14 @@ public abstract class FileManager {
      * Adds the given file if it's shared.
      */
    public void addFileIfShared(File file) {
-       addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, null);
+       addFileIfShared(file, new ArrayList(1), true, _revision, null);
    }
    
     /**
      * Adds the given file if it's shared, notifying the given callback.
      */
     public void addFileIfShared(File file, FileEventListener callback) {
-        addFileIfShared(file, Collections.EMPTY_LIST, true, _revision, callback);
+        addFileIfShared(file, new ArrayList(1), true, _revision, callback);
     }
     
     /**
@@ -1060,6 +1060,9 @@ public abstract class FileManager {
                     // Only load the file if we were able to calculate URNs and
                     // the file is still shareable.
                     if(!urns.isEmpty() && isFileShareable(file)) {
+                        if (!findLicense(file,metadata, urns))
+                            return;
+                        
                         fd = addFile(file, urns);
                         _needRebuild = true;
                     }
@@ -1087,6 +1090,10 @@ public abstract class FileManager {
                 return o == FileManager.this;
             }
         };
+    }
+    
+    protected boolean findLicense(File file, List metadata, Set urns) {
+        return true;
     }
     
     /**
