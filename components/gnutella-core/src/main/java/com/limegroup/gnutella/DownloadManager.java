@@ -38,6 +38,7 @@ import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.mail.MailDownloadNotificator;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -46,7 +47,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.MailSettings;
+import com.limegroup.gnutella.settings.MailSenderSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -1031,8 +1032,8 @@ public class DownloadManager implements BandwidthTracker {
         if(ser)
             writeSnapshot();
         
-        if(MailSettings.MAIL_ENABLED.getValue() && dl.getState()!=Downloader.ABORTED)
-        	new MailSender().sendDownloadStatusMail(dl);
+        if(MailSenderSettings.MAIL_ENABLED.getValue() && dl.getState()!=Downloader.ABORTED)
+        	new MailDownloadNotificator().sendDownloadStatusMail(dl);
         
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())

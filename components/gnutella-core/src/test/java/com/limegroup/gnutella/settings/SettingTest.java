@@ -69,7 +69,7 @@ public class SettingTest extends BaseTestCase {
             
             FILE_ARRAY_SETTING =
                 FACTORY.createFileArraySetting("FILE_ARRAY_SETTING", files);
-                
+            
             EXPIRABLE_INT_SETTING =
                 FACTORY.createExpirableIntSetting("EXPIRABLE_INT_SETTING", 12061980);
                 
@@ -339,5 +339,27 @@ public class SettingTest extends BaseTestCase {
         assertEquals("removing null should be ok", setting.length(), 1);
         assertFalse("containing null should be ok", setting.contains(null));
         assertEquals("Expected index of -1", setting.indexOf(null), -1);
+    }
+    
+    public void testNotificationFilterSetting() throws Exception{
+        String[][] filters = new String[][]{
+        		{"filter1","name","contains","test"},{"filter2","type","equals","jpg"}};
+    	SettingsFactory factory = new SettingsFactory(new File(getSaveDirectory(), "testSettings.props"));
+        NotificationFilterSetting setting = 
+        	factory.createNotificationFilterSetting("NOTIFICATIONFILTER_SETTING",filters);
+        //  Confirm the default value
+        // (Which requires one full conversion to and from their string values 
+        assertTrue("notification filters should have same size",setting.getValue().length
+        															== filters.length);
+        for (int i = 0; i < setting.getValue().length; i++) {
+			assertTrue("notification filter should be equal",
+					Arrays.equals(setting.getValue()[i],filters[i]));
+		}
+        //  Confirm that we can set everything 
+        
+        //  Write property to file and confirm that everything reloads properly 
+        factory.save();
+        factory = new SettingsFactory(new File(getSaveDirectory(), "testSettings.props"));
+        
     }
 }

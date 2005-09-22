@@ -524,6 +524,15 @@ public final class SettingsFactory {
         return result;
     }
     
+    public synchronized NotificationFilterSetting
+    createNotificationFilterSetting(String key, String[][] defaultValue) {
+    NotificationFilterSetting result = 
+                   new NotificationFilterSetting(DEFAULT_PROPS, PROPS, key, 
+                                                             defaultValue);
+    handleSettingInternal(result, null);
+    return result;
+    }
+    
     public synchronized StringArraySetting createSettableStringArraySetting(
               String key, String[] defaultValue, String simppKey) {
         StringArraySetting result = 
