@@ -27,7 +27,7 @@ import com.limegroup.gnutella.URN;
 /**
  * A concrete implementation of a License, for Creative Commons licenses.
  */
-class CCLicense extends AbstractLicense {
+class CCLicense extends AbstractLicense implements EmbeddableLicense, RDFLicense {
     
     private static final Log LOG = LogFactory.getLog(CCLicense.class);
     
@@ -484,5 +484,13 @@ class CCLicense extends AbstractLicense {
                     parseXML(body, false);
              }
         }
+    }
+    
+    public String getEmbeddableString() {
+        return license;
+    }
+    
+    public String getRDFRepresentation() {
+        return null;
     }
 }
