@@ -427,7 +427,7 @@ public class LimeXMLUtils {
     }
     
     public static boolean canEmbedLicense(String file) {
-        return isMP3File(file) || isWMAFile(file) || isOGGFile(file);
+        return isSupportedAudioFormat(file);
     }
     
     /**
