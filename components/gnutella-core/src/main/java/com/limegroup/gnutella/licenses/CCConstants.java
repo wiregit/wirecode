@@ -38,6 +38,9 @@ public final class CCConstants {
             "xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
             "xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">";
     
+    /** The footer of the RDF block */
+    public static final String CC_RDF_FOOTER = "</rdf:RDF>";
+    
     /** various types of licenses and combinations of permited/prohibited uses */
     public static final int ATTRIBUTION = 0;
     public static final int ATTRIBUTION_NO_DERIVS = 0x1;
