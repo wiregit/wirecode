@@ -68,6 +68,10 @@ public final class CCConstants {
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION_SHARE_NON_COMMERCIAL),ATTRIBUTION_SHARE_NON_COMMERCIAL_URI);
     }
     
+    public static String getLicenseURI(int licenseType) {
+        return (String) LICENSE_URI_MAP.get(new Integer(licenseType));
+    }
+    
     public static String getLicenseElement(int licenseType) {
         Integer licenseTypeI = new Integer(licenseType);
         Assert.that(LICENSE_URI_MAP.containsKey(licenseTypeI));
