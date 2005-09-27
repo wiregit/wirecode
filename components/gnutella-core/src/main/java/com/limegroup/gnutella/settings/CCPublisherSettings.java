@@ -4,6 +4,6 @@ public class CCPublisherSettings extends LimeProps {
 
 	private CCPublisherSettings(){}
 	
-	public static final BooleanSetting SHOW_CCPUBLISHER_WARNING= 
-		FACTORY.createBooleanSetting("SHOW_CCPUBLISHER_WARNING", true);
+	public static final BooleanSetting CCPUBLISHER_WARN= 
+		FACTORY.createBooleanSetting("CCPUBLISHER_WARN", false);
 }
