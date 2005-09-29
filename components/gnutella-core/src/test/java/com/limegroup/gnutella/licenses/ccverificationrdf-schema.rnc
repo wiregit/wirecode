@@ -1,14 +1,13 @@
-default namespace = "http://web.resource.org/cc"
+default namespace = "http://web.resource.org/cc/"
 namespace dc = "http://purl.org/dc/elements/1.1/"
 namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 
 grammar {
    start =
       element rdf:RDF {
-         attribute xmlns { xsd:anyURI },
-         attribute xmlns* { xsd:anyURI }*,
+
          element Work {
-            attribute rdf:about { xsd:anyURI },
+            attribute rdf:about { xsd:anyURI } &
             element dc:title { text }? &
             element dc:description { text }? &
             element dc:subject { text }? &
@@ -34,10 +33,10 @@ grammar {
             element license {
                attribute rdf:resource { xsd:anyURI }
             }+
-         }+
+         }+ &
          
          element License {
-            attribute rdf:about { xsd:anyURI },
+            attribute rdf:about { xsd:anyURI } &
 
             element permits {
                attribute rdf:resource { xsd:anyURI }
@@ -53,9 +52,11 @@ grammar {
          }*
       }
 
-   Agent =
-      element dc:title { text } &
-      element dc:description { text }?
+   agent = 
+      element Agent {
+         element dc:title { text } &
+         element dc:description { text }?
+      }
 
 
 }
