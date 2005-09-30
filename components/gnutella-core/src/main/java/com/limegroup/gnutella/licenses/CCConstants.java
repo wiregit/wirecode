@@ -35,8 +35,8 @@ public final class CCConstants {
     
     /** The header to include in RDF documents */
     public static final String CC_RDF_HEADER = "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
-            "xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
-            "xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">";
+            " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
+            " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">";
     
     /** The footer of the RDF block */
     public static final String CC_RDF_FOOTER = "</rdf:RDF>";
