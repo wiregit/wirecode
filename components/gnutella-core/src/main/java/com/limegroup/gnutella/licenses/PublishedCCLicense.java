@@ -2,11 +2,8 @@ package com.limegroup.gnutella.licenses;
 
 import com.limegroup.gnutella.Assert;
 
-public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
+public class PublishedCCLicense{
 
-    private final String holder, year, title, url, description, uri;
-    private final int type;
-    
     private static final String DATE_TAG = "dc:date";
     private static final String IDENTIFIER_TAG = "dc:identifier"; //magnet link
     private static final String RIGHTS_TAG = "dc:rights";
@@ -17,18 +14,8 @@ public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
     
     private static final String LICENSE_TAG = "license rdf:resource=\"";
     
-    public PublishedCCLicense(String holder, String title, 
-            String year, String url, String description, String uri, int type) {
-        this.holder = holder;
-        this.year = year;
-        this.title = title;
-        this.url = url;
-        this.description = description;
-        this.type = type;
-        this.uri = uri;
-    }
-    
-    public String getRDFRepresentation() {
+    public static String getRDFRepresentation(String holder, String title, 
+            String year, String description, String uri, int type) {
     	
         Assert.that(holder!=null && year!=null && title!=null && uri!=null);
     	
@@ -64,7 +51,8 @@ public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
         return ret.toString();
     }
     
-    public String getEmbeddableString() {
+    public static String getEmbeddableString(String holder, String title, 
+            String year, String url,String description, int type) {
     	 Assert.that(holder!=null && year!=null && title!=null && url!=null);
         StringBuffer ret = new StringBuffer();
         ret.append(year+" ");
