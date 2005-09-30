@@ -30,8 +30,7 @@ public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
     
     public String getRDFRepresentation() {
     	
-        Assert.that(holder!=null && year!=null && title!=null && url!=null 
-        		&& uri!=null);
+        Assert.that(holder!=null && year!=null && title!=null && uri!=null);
     	
     	StringBuffer ret = new StringBuffer();
         ret.append(CCConstants.CC_RDF_HEADER).append("\n");
@@ -48,8 +47,8 @@ public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
         // description
         if (description != null)
         ret.append("<"+DESCRIPTION_TAG+">"+description+"</"+DESCRIPTION_TAG+">");
-        // identifier (url)
-        ret.append("<"+IDENTIFIER_TAG+">"+url+"</"+IDENTIFIER_TAG+">");
+        // identifier (url) -- not implemented yet -- weed?
+        //	ret.append("<"+IDENTIFIER_TAG+">"+url+"</"+IDENTIFIER_TAG+">");
         // copyright holder is an Agent
         ret.append("<"+RIGHTS_TAG+"><"+AGENT+"><"+TITLE_TAG+">"+
                 holder+"</"+TITLE_TAG+"></"+AGENT+"></"+RIGHTS_TAG+">");
@@ -66,8 +65,7 @@ public class PublishedCCLicense implements RDFLicense, EmbeddableLicense {
     }
     
     public String getEmbeddableString() {
-    	 Assert.that(holder!=null && year!=null && title!=null && url!=null 
-         		&& uri!=null);
+    	 Assert.that(holder!=null && year!=null && title!=null && url!=null);
         StringBuffer ret = new StringBuffer();
         ret.append(year+" ");
         ret.append(holder+". ");
