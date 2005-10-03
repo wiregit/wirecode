@@ -765,6 +765,18 @@ public final class CommonUtils {
                                             "Library/Preferences");
             settingsDir = new File(tempSettingsDir, "LimeWire");
 		} 
+        if(isWindows()) {
+            if ((new File(getUserHomeDir(), "Application Data")).exists()) {
+                File tempSettingsDir = new File(getUserHomeDir(),
+                                                "Application Data\\LimeWire");
+                // Check for the legacy location of the LW preferences directory
+                // on Windows.  Use legacy data if available and the new
+                // preferences directory doesn't exist.
+                if (tempSettingsDir.exists() || !settingsDir.exists()) {
+                    settingsDir = tempSettingsDir;
+                }
+            }
+        }
 
         if(!settingsDir.isDirectory()) {
             settingsDir.delete(); // delete whatever it may have been
