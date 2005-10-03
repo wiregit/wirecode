@@ -418,6 +418,10 @@ public class LimeXMLUtils {
             return false;
     }
     
+    public static boolean isFilePublishable(File file) {
+    	 return isMP3File(file.getName()) || isOGGFile(file.getName());
+    }
+    
     /**
      * Parses the passed string, and encodes the special characters (used in
      * xml for special purposes) with the appropriate codes.

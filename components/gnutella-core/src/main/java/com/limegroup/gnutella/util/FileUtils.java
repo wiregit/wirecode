@@ -412,12 +412,4 @@ public class FileUtils {
 
         return retArray;
     }
-    
-    public static boolean isFilePublishable(File file) {
-    	String ext = getFileExtension(file);
-		if(ext == null)
-            return false;
-        ext = ext.toLowerCase();
-        return ext.equals("mp3") || ext.equals("ogg");
-    }
 }

@@ -2144,7 +2144,7 @@ public abstract class FileManager {
     /**
      * unregisters a listener for FileManagerEvents
      */
-    public void unregisterFileManagerEventListener(FileEventListener listener) {
+    public void unregisterFileManagerEventListener(FileEventListener listener){System.out.println("UN-Registering "+listener);
         eventListeners.remove(listener);
     }
 
