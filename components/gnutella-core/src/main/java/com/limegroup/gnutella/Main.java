@@ -218,7 +218,7 @@ public class Main implements ActivityCallback, ErrorCallback {
     
 	public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
 	
-	public void handleFileManagerEvent(FileManagerEvent evt) {}
+	public void handleFileEvent(FileManagerEvent evt) {}
 	
 	public void handleSharedFileUpdate(File file) {}
 

@@ -6,6 +6,8 @@ import java.util.*;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.licenses.cc.BadCCLicense;
+import com.limegroup.gnutella.licenses.cc.CCLicense;
 import com.limegroup.gnutella.util.*;
 
 public final class LicenseFactoryTest extends BaseTestCase {

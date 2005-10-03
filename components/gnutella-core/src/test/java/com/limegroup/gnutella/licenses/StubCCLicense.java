@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.licenses;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.licenses.cc.CCLicense;
+
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
