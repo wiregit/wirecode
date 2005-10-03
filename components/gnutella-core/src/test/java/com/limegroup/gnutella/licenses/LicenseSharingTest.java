@@ -8,7 +8,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.licenses.cc.CCLicense;
 import com.limegroup.gnutella.metadata.*;
 import com.limegroup.gnutella.xml.*;    
 import com.limegroup.gnutella.settings.*;
