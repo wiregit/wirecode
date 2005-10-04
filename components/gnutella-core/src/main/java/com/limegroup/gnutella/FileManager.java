@@ -73,10 +73,18 @@ public abstract class FileManager {
     
     private static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
 
+     
+    /**
+     * List of event listeners for FileManagerEvents.
+     * LOCKING: listenerLock
+     */
+    private volatile List eventListeners = Collections.EMPTY_LIST;
+    private final Object listenerLock = new Object();
+    
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
      **********************************************************************/
-     
+
     /**
      * All of the data for FileManager.
      */
@@ -784,7 +792,7 @@ public abstract class FileManager {
 
 			_completelySharedDirectories.add(directory);
             if (!isForcedShare) {
-                RouterService.getCallback().handleFileManagerEvent(
+                dispatchFileEvent(
                     new FileManagerEvent(this, FileManagerEvent.ADD_FOLDER, directory, parent));
             }
         }
@@ -894,7 +902,7 @@ public abstract class FileManager {
             // send the event last.  this is a hack so that the GUI can properly
             // receive events with the children first, moving any leftover children up to
             // potential parent directories.
-            RouterService.getCallback().handleFileManagerEvent(
+            dispatchFileEvent(
                 new FileManagerEvent(this, FileManagerEvent.REMOVE_FOLDER, folder));
         }
     }
@@ -1070,7 +1078,7 @@ public abstract class FileManager {
                     
                     FileManagerEvent evt = new FileManagerEvent(FileManager.this, FileManagerEvent.ADD, fd);
                     if(notify) // sometimes notify the GUI
-                        RouterService.getCallback().handleFileManagerEvent(evt);
+                        dispatchFileEvent(evt);
                     callback.handleFileEvent(evt); // always notify the individual callback.
                 } else {
                     // If URNs was empty, or loading failed, notify...
@@ -1260,7 +1268,7 @@ public abstract class FileManager {
 	                                            FileManagerEvent.REMOVE, 
 	                                            fd );
 	                                            
-	            RouterService.getCallback().handleFileManagerEvent(evt);
+	            dispatchFileEvent(evt);
 	        }
             return fd;
         }
@@ -1306,7 +1314,7 @@ public abstract class FileManager {
                                             FileManagerEvent.REMOVE, 
                                             fd);
                                             
-            RouterService.getCallback().handleFileManagerEvent(evt);
+            dispatchFileEvent(evt);
         }
         
         return fd;
@@ -1374,8 +1382,7 @@ public abstract class FileManager {
         _numIncompleteFiles++;
         _needRebuild = true;
         File parent = FileUtils.getParentFile(incompleteFile);
-        RouterService.getCallback().handleFileManagerEvent(
-            new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
+        dispatchFileEvent(new FileManagerEvent(this, FileManagerEvent.ADD, ifd));
     }
 
     /**
@@ -1458,7 +1465,7 @@ public abstract class FileManager {
         FileDesc toRemove = getFileDescForFile(oldName);
         if (toRemove == null) {
             FileManagerEvent evt = new FileManagerEvent(this, FileManagerEvent.FAILED, oldName);
-            RouterService.getCallback().handleFileManagerEvent(evt);
+            dispatchFileEvent(evt);
             if(callback != null)
                 callback.handleFileEvent(evt);
             return;
@@ -1493,7 +1500,7 @@ public abstract class FileManager {
                                        FileManagerEvent.REMOVE,
                                        removed);
                 }
-                RouterService.getCallback().handleFileManagerEvent(newEvt);
+                dispatchFileEvent(evt);
                 if(callback != null)
                     callback.handleFileEvent(newEvt);
             }
@@ -2127,6 +2134,40 @@ public abstract class FileManager {
      */
     public static boolean isForcedShareDirectory(File f) {
         return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
+    }
+    
+    /**
+     * registers a listener for FileManagerEvents
+     */
+    public void registerFileManagerEventListener(FileEventListener listener) {
+        if (eventListeners.contains(listener))
+	    return;    
+	synchronized(listenerLock) {
+	    List copy = new ArrayList(eventListeners);
+	    copy.add(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+	}
+    }
+
+    /**
+     * unregisters a listener for FileManagerEvents
+     */
+    public void unregisterFileManagerEventListener(FileEventListener listener){
+	synchronized(listenerLock) {
+	    List copy = new ArrayList(eventListeners);
+	    copy.remove(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+	}
+    }
+
+    /**
+     * dispatches a FileManagerEvent to any registered listeners 
+     */
+    public void dispatchFileEvent(FileManagerEvent evt) {
+        for (Iterator iter = eventListeners.iterator(); iter.hasNext();) {
+            FileEventListener listener = (FileEventListener) iter.next();
+            listener.handleFileEvent(evt);
+        }
     }
 }
 

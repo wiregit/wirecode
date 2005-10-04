@@ -22,7 +22,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback 
+public interface ActivityCallback extends DownloadCallback, FileEventListener 
 {
     
     /**
@@ -104,7 +104,7 @@ public interface ActivityCallback extends DownloadCallback
      * changed or renamed. This event is triggered by FileManager
      * or MetaFileManager.
      */
-    public void handleFileManagerEvent(FileManagerEvent evt);
+    public void handleFileEvent(FileManagerEvent evt);
     
     /**
      * Notifies the GUI that the given shared file has new information.

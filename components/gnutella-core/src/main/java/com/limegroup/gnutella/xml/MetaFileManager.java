@@ -170,7 +170,7 @@ public class MetaFileManager extends FileManager {
                                        FileManagerEvent.REMOVE,
                                        removed);
                 }
-                RouterService.getCallback().handleFileManagerEvent(newEvt);
+                dispatchFileEvent(newEvt);
             }
         });
     }        
