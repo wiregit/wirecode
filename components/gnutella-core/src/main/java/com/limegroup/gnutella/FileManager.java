@@ -73,15 +73,18 @@ public abstract class FileManager {
     
     private static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
 
-    /**********************************************************************
-     * LOCKING: obtain this's monitor before modifying this.
-     **********************************************************************/
      
     /**
      * List of event listeners for FileManagerEvents.
+     * LOCKING: listenerLock
      */
-    private final List eventListeners = new ArrayList();
+    private volatile List eventListeners = Collections.EMPTY_LIST;
+    private final Object listenerLock = new Object();
     
+    /**********************************************************************
+     * LOCKING: obtain this's monitor before modifying this.
+     **********************************************************************/
+
     /**
      * All of the data for FileManager.
      */
@@ -2136,16 +2139,25 @@ public abstract class FileManager {
     /**
      * registers a listener for FileManagerEvents
      */
-    public void registerFileManagerEventListener(FileEventListener listener) {System.out.println("Registering "+listener);
-        if (!eventListeners.contains(listener))
-            eventListeners.add(listener);
+    public void registerFileManagerEventListener(FileEventListener listener) {
+        if (eventListeners.contains(listener))
+	    return;    
+	synchronized(listenerLock) {
+	    List copy = new ArrayList(eventListeners);
+	    copy.add(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+	}
     }
 
     /**
      * unregisters a listener for FileManagerEvents
      */
-    public void unregisterFileManagerEventListener(FileEventListener listener){System.out.println("UN-Registering "+listener);
-        eventListeners.remove(listener);
+    public void unregisterFileManagerEventListener(FileEventListener listener){
+	synchronized(listenerLock) {
+	    List copy = new ArrayList(eventListeners);
+	    copy.remove(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+	}
     }
 
     /**
