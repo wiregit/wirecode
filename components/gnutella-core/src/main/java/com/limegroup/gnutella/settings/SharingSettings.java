@@ -260,4 +260,11 @@ public class SharingSettings extends LimeProps {
 		}
 		return setting;
 	}
+	
+	/**
+	 * The Creative Commons URL
+	 */
+	public static final StringSetting CREATIVE_COMMONS_URL = 
+		FACTORY.createSettableStringSetting
+		("CREATIVE_COMMONS_URL","http://creativecommons.org/about/licenses/how1","creativeCommonsURL");
 }
