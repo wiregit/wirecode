@@ -495,7 +495,7 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 
     public void componentLoading(String component) {}
     
-    public void handleFileManagerEvent(FileManagerEvent fme) {}
+    public void handleFileEvent(FileManagerEvent fme) {}
     
     public void fileManagerLoading() {}
 
