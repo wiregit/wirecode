@@ -83,6 +83,8 @@ public class FileDesc implements FileDetails {
 	 * Never add or remove from this list.  Always create a new list.
 	 * This has extra overhead when adding/removing, but makes synchronization
 	 * much much easier.
+     * 
+     * LOCKING: CoW on this
 	 */
 	private volatile List /* of LimeXMLDocument */ _limeXMLDocs = 
 	    Collections.EMPTY_LIST;
@@ -233,13 +235,17 @@ public class FileDesc implements FileDetails {
 	 * Adds a LimeXMLDocument to this FileDesc.
 	 */
 	public void addLimeXMLDocument(LimeXMLDocument doc) {
-	    List newDocs = new ArrayList(_limeXMLDocs.size() + 1);
-	    newDocs.addAll(_limeXMLDocs);
-	    newDocs.add(doc);
+        
+        synchronized(this) {
+            List newDocs = new ArrayList(_limeXMLDocs.size() + 1);
+            newDocs.addAll(_limeXMLDocs);
+            newDocs.add(doc);
+            _limeXMLDocs = newDocs;
+        }
+        
 	    doc.setIdentifier(FILE);
 	    if(doc.isLicenseAvailable())
 	        _license = doc.getLicense();
-	    _limeXMLDocs = newDocs;
     }
     
     /**
@@ -247,20 +253,23 @@ public class FileDesc implements FileDetails {
      */
     public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
                                           LimeXMLDocument newDoc) {
-        int index = _limeXMLDocs.indexOf(oldDoc);
-        if( index == -1 )
-            return false;
+        synchronized(this) {
+            int index = _limeXMLDocs.indexOf(oldDoc);
+            if( index == -1 )
+                return false;
             
-        List newDocs = new ArrayList(_limeXMLDocs);
-        Object removed = newDocs.remove(index);
-        Assert.that(removed == oldDoc, "wrong doc removed!");
-        newDocs.add(newDoc);
+            List newDocs = new ArrayList(_limeXMLDocs);
+            Object removed = newDocs.remove(index);
+            Assert.that(removed == oldDoc, "wrong doc removed!");
+            newDocs.add(newDoc);
+            _limeXMLDocs = newDocs;
+        }
+        
         newDoc.setIdentifier(FILE);
         if(newDoc.isLicenseAvailable())
             _license = newDoc.getLicense();
         else if(_license != null && oldDoc.isLicenseAvailable())
             _license = null;        
-        _limeXMLDocs = newDocs;
         return true;
     }
     
@@ -268,12 +277,17 @@ public class FileDesc implements FileDetails {
      * Removes a LimeXMLDocument from the FileDesc.
      */
     public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
-        if( _limeXMLDocs.size() == 0 ) 
-            return false;
+        boolean removed = false;
         
-        List newDocs = new ArrayList(_limeXMLDocs);
-        boolean removed = newDocs.remove(toRemove);
-        _limeXMLDocs = newDocs;
+        synchronized(this) {
+            if( _limeXMLDocs.size() == 0 ) 
+                return false;
+            
+            List newDocs = new ArrayList(_limeXMLDocs);
+            removed = newDocs.remove(toRemove);
+            _limeXMLDocs = newDocs;
+        }
+        
         if(_license != null && toRemove.isLicenseAvailable())
             _license = null;
         return removed;
@@ -287,8 +301,9 @@ public class FileDesc implements FileDetails {
     }
 	
 	public LimeXMLDocument getXMLDocument() {
-		return _limeXMLDocs.isEmpty() ? null 
-			: (LimeXMLDocument)_limeXMLDocs.get(0);
+        List docs = getLimeXMLDocuments();
+		return docs.isEmpty() ? null 
+			: (LimeXMLDocument)docs.get(0);
 	}
     
     /**
