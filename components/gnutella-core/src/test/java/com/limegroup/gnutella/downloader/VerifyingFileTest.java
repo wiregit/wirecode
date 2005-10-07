@@ -313,26 +313,22 @@ public class VerifyingFileTest extends BaseTestCase {
     }
     
     /**
-     *  tests that if more than ten percent of the file needed redownloading we give up.  
+     *  tests that if more than n % of the file needed redownloading we give up.  
      */
     public void testGiveUp() throws Exception {
         vf.leaseWhite((int)completeFile.length());
         byte [] chunk = new byte[hashTree.getNodeSize()];
         
-        // write a chunk of corrupt data
-        raf.read(chunk);
-        for (int i = 0;i< 100;i++)
-            chunk[i]=(byte)i;
-        writeImpl((int)raf.getFilePointer()-chunk.length,chunk);
-        Thread.sleep(1000);
-        assertFalse(raf.getFilePointer()+"",vf.isHopeless());
-        
-        // do it once again and we give up since 2 chunks > 10% of the file
-        raf.read(chunk);
-        for (int i = 0;i< 100;i++)
-            chunk[i]=(byte)i;
-        writeImpl((int)(raf.getFilePointer()-chunk.length),chunk);
-        Thread.sleep(1000);
+        int j = 0;
+        while (j * chunk.length < completeFile.length() * VerifyingFile.MAX_CORRUPTION) {
+            assertFalse(vf.isHopeless());
+            raf.read(chunk);
+            for (int i = 0;i< 100;i++)
+                chunk[i]=(byte)i;
+            writeImpl((int)(raf.getFilePointer() - chunk.length),chunk);
+            Thread.sleep(1000);
+            j++;
+        }
         assertTrue(vf.isHopeless());
     }
     
