@@ -19,6 +19,7 @@ import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -79,15 +80,8 @@ public class FileDesc implements FileDetails {
 	
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
-	 *
-	 * Never add or remove from this list.  Always create a new list.
-	 * This has extra overhead when adding/removing, but makes synchronization
-	 * much much easier.
-     * 
-     * LOCKING: CoW on this
 	 */
-	private volatile List /* of LimeXMLDocument */ _limeXMLDocs = 
-	    Collections.EMPTY_LIST;
+	private final List /* of LimeXMLDocument */ _limeXMLDocs = new CoWList(CoWList.ARRAY_LIST);
 
 	/**
 	 * The number of hits this file has recieved.
@@ -236,12 +230,7 @@ public class FileDesc implements FileDetails {
 	 */
 	public void addLimeXMLDocument(LimeXMLDocument doc) {
         
-        synchronized(this) {
-            List newDocs = new ArrayList(_limeXMLDocs.size() + 1);
-            newDocs.addAll(_limeXMLDocs);
-            newDocs.add(doc);
-            _limeXMLDocs = newDocs;
-        }
+        _limeXMLDocs.add(doc);
         
 	    doc.setIdentifier(FILE);
 	    if(doc.isLicenseAvailable())
@@ -253,16 +242,12 @@ public class FileDesc implements FileDetails {
      */
     public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
                                           LimeXMLDocument newDoc) {
-        synchronized(this) {
+        synchronized(_limeXMLDocs) {
             int index = _limeXMLDocs.indexOf(oldDoc);
             if( index == -1 )
                 return false;
             
-            List newDocs = new ArrayList(_limeXMLDocs);
-            Object removed = newDocs.remove(index);
-            Assert.that(removed == oldDoc, "wrong doc removed!");
-            newDocs.add(newDoc);
-            _limeXMLDocs = newDocs;
+            _limeXMLDocs.set(index, newDoc);
         }
         
         newDoc.setIdentifier(FILE);
@@ -277,20 +262,14 @@ public class FileDesc implements FileDetails {
      * Removes a LimeXMLDocument from the FileDesc.
      */
     public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
-        boolean removed = false;
         
-        synchronized(this) {
-            if( _limeXMLDocs.size() == 0 ) 
-                return false;
-            
-            List newDocs = new ArrayList(_limeXMLDocs);
-            removed = newDocs.remove(toRemove);
-            _limeXMLDocs = newDocs;
-        }
+        if (!_limeXMLDocs.remove(toRemove))
+            return false;
         
         if(_license != null && toRemove.isLicenseAvailable())
             _license = null;
-        return removed;
+        
+        return true;
     }   
     
     /**
