@@ -9,70 +9,72 @@ import java.util.ListIterator;
 
 import com.limegroup.gnutella.ErrorService;
 
+interface ListCreator {
+    public List getList();
+}
+
 public class CoWList implements List {
     
-    public static final Class ARRAY_LIST = ArrayList.class;
-    public static final Class LINKED_LIST = LinkedList.class;
+    public static final ListCreator ARRAY_LIST = new ArrayCreator(); 
+    
+    public static final ListCreator LINKED_LIST = new LinkedCreator();
     
     private volatile List l;
     
-    private final Class listType;
+    private final ListCreator creator;
     
     public CoWList(List l) {
         this.l = l;
-        this.listType = l.getClass();
+        this.creator = new ReflectiveCreator(l.getClass());
     }
     
     public CoWList(Class listType) {
-        this.listType = listType;
-        l = newInstance();
+        this(new ReflectiveCreator(listType));
     }
     
-    private List newInstance() {
-        List ret = null;
-        try {
-            ret = (List) listType.newInstance();
-        } catch (IllegalAccessException bad) {
-            ErrorService.error(bad);
-        } catch (InstantiationException bad) {
-            ErrorService.error(bad);
-        }
+    public CoWList(ListCreator creator) {
+        this.creator = creator;
+        l = creator.getList();
+    }
+    
+    private List getListCopy() {
+        List ret = creator.getList();
         
         if (l != null)
             ret.addAll(l);
         
         return ret;
     }
-
+    
     public synchronized void add(int arg0, Object arg1) {
-        List newList = newInstance();
+        List newList = getListCopy();
         newList.add(arg0, arg1);
         l = newList;
     }
 
     public synchronized boolean add(Object arg0) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.add(arg0);
         l = newList;
         return ret;
     }
 
     public synchronized boolean addAll(Collection arg0) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.addAll(arg0);
         l = newList;
         return ret;
     }
 
     public synchronized boolean addAll(int arg0, Collection arg1) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.addAll(arg0,arg1);
         l = newList;
         return ret;
     }
 
     public synchronized void clear() {
-        List newList = newInstance();
+        List newList = getListCopy();
         newList.clear();
         l = newList;
     }
@@ -115,35 +117,35 @@ public class CoWList implements List {
 
     public synchronized Object remove(int index) {
         Object ret = null;
-        List newList = newInstance();
+        List newList = getListCopy();
         ret = newList.remove(index);
         l = newList;
         return ret;
     }
 
     public synchronized boolean remove(Object o) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.remove(o);
         l = newList;
         return ret;    
     }
 
     public synchronized boolean removeAll(Collection arg0) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.removeAll(arg0);
         l = newList;
         return ret;    
     }
 
     public synchronized boolean retainAll(Collection arg0) {
-        List newList = newInstance();
+        List newList = getListCopy();
         boolean ret = newList.retainAll(arg0);
         l = newList;
         return ret;
     }
 
     public synchronized Object set(int arg0, Object arg1) {
-        List newList = newInstance();
+        List newList = getListCopy();
         Object ret = newList.set(arg0,arg1);
         l = newList;
         return ret;
@@ -164,5 +166,35 @@ public class CoWList implements List {
     public Object[] toArray(Object[] arg0) {
         return l.toArray(arg0);
     }
+    
+    private static class ReflectiveCreator implements ListCreator {
+        private final Class listType;
+        public ReflectiveCreator(Class c) {
+            this.listType = c;
+        }
+        
+        public List getList() {            
+            List ret = null;
+            try {
+                ret = (List) listType.newInstance();
+            } catch (IllegalAccessException bad) {
+                ErrorService.error(bad);
+            } catch (InstantiationException bad) {
+                ErrorService.error(bad);
+            }
+            return ret;
+        }
+    }
+    
+    private static class ArrayCreator implements ListCreator {
+        public List getList() {
+            return new ArrayList();
+        }
+    }
 
+    private static class LinkedCreator implements ListCreator {
+        public List getList() {
+            return new LinkedList();
+        }
+    }
 }
