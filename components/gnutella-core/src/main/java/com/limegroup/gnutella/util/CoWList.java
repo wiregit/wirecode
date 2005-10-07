@@ -23,18 +23,27 @@ public class CoWList implements List {
     
     private final ListCreator creator;
     
-    public CoWList(List l) {
+    /** Object to synchronize the atomic operations on */
+    private final Object lock;
+    
+    public CoWList(List l, Object lock) {
         this.l = l;
         this.creator = new ReflectiveCreator(l.getClass());
+        this.lock = lock == null ? this : lock;
     }
     
-    public CoWList(Class listType) {
-        this(new ReflectiveCreator(listType));
+    public CoWList(Class listType, Object lock) {
+        this(new ReflectiveCreator(listType),lock);
     }
     
     public CoWList(ListCreator creator) {
+        this(creator, null);
+    }
+    
+    public CoWList(ListCreator creator, Object lock) {
         this.creator = creator;
         l = creator.getList();
+        this.lock = lock == null ? this : lock;
     }
     
     private List getListCopy() {
@@ -46,37 +55,47 @@ public class CoWList implements List {
         return ret;
     }
     
-    public synchronized void add(int arg0, Object arg1) {
-        List newList = getListCopy();
-        newList.add(arg0, arg1);
-        l = newList;
+    public void add(int arg0, Object arg1) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            newList.add(arg0, arg1);
+            l = newList;
+        }
     }
 
-    public synchronized boolean add(Object arg0) {
-        List newList = getListCopy();
-        boolean ret = newList.add(arg0);
-        l = newList;
-        return ret;
+    public boolean add(Object arg0) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.add(arg0);
+            l = newList;
+            return ret;
+        }
     }
 
-    public synchronized boolean addAll(Collection arg0) {
-        List newList = getListCopy();
-        boolean ret = newList.addAll(arg0);
-        l = newList;
-        return ret;
+    public boolean addAll(Collection arg0) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.addAll(arg0);
+            l = newList;
+            return ret;
+        }
     }
 
-    public synchronized boolean addAll(int arg0, Collection arg1) {
-        List newList = getListCopy();
-        boolean ret = newList.addAll(arg0,arg1);
-        l = newList;
-        return ret;
+    public boolean addAll(int arg0, Collection arg1) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.addAll(arg0,arg1);
+            l = newList;
+            return ret;
+        }
     }
 
-    public synchronized void clear() {
-        List newList = getListCopy();
-        newList.clear();
-        l = newList;
+    public void clear() {
+        synchronized(lock) {
+            List newList = getListCopy();
+            newList.clear();
+            l = newList;
+        }
     }
 
     public boolean contains(Object o) {
@@ -115,40 +134,50 @@ public class CoWList implements List {
         return l.listIterator(index);
     }
 
-    public synchronized Object remove(int index) {
-        Object ret = null;
-        List newList = getListCopy();
-        ret = newList.remove(index);
-        l = newList;
-        return ret;
+    public Object remove(int index) {
+        synchronized(lock) {
+            Object ret = null;
+            List newList = getListCopy();
+            ret = newList.remove(index);
+            l = newList;
+            return ret;
+        }
     }
 
-    public synchronized boolean remove(Object o) {
-        List newList = getListCopy();
-        boolean ret = newList.remove(o);
-        l = newList;
-        return ret;    
+    public boolean remove(Object o) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.remove(o);
+            l = newList;
+            return ret;    
+        }
     }
 
-    public synchronized boolean removeAll(Collection arg0) {
-        List newList = getListCopy();
-        boolean ret = newList.removeAll(arg0);
-        l = newList;
-        return ret;    
+    public boolean removeAll(Collection arg0) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.removeAll(arg0);
+            l = newList;
+            return ret;    
+        }
     }
 
-    public synchronized boolean retainAll(Collection arg0) {
-        List newList = getListCopy();
-        boolean ret = newList.retainAll(arg0);
-        l = newList;
-        return ret;
+    public boolean retainAll(Collection arg0) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            boolean ret = newList.retainAll(arg0);
+            l = newList;
+            return ret;
+        }
     }
 
-    public synchronized Object set(int arg0, Object arg1) {
-        List newList = getListCopy();
-        Object ret = newList.set(arg0,arg1);
-        l = newList;
-        return ret;
+    public Object set(int arg0, Object arg1) {
+        synchronized(lock) {
+            List newList = getListCopy();
+            Object ret = newList.set(arg0,arg1);
+            l = newList;
+            return ret;
+        }
     }
 
     public int size() {
