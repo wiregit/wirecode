@@ -30,7 +30,7 @@ public class MediaType implements Serializable {
     // These values should match standard MIME content-type
     // categories and/or XSD schema names.
     public static final String SCHEMA_ANY_TYPE = "*";
-    public static final String SCHEMA_DOCUMENTS = "text";
+    public static final String SCHEMA_DOCUMENTS = "document";
     public static final String SCHEMA_PROGRAMS = "application";
     public static final String SCHEMA_AUDIO = "audio";
     public static final String SCHEMA_VIDEO = "video";
