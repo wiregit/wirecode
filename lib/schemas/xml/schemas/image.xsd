@@ -5,7 +5,7 @@
  i18n:locales="http://www.limewire.com/schemas/i18n/image.locales.xml"
  targetNamespace="http://www.limewire.com/schemas/image.xsd">
 
-  <element name="imagess" maxOccurs="1">
+  <element name="images" maxOccurs="1">
     <complexType>
       <element name="image" minOccurs="1" maxOccurs="unbounded" type="imageType"/>
     </complexType>
@@ -13,9 +13,9 @@
 
 <complexType name="imageType">
   <all>
-      <attribute name="Title" editable="true"/>
-      <attribute name="Description" editable="true"/>
-      <attribute name="Artist" editable="true"/>
+      <attribute name="title" editable="true"/>
+      <attribute name="description" editable="true"/>
+      <attribute name="artist" editable="true"/>
       <attribute name="licensetype" editable="true">
         <simpleType base="string">
           <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>

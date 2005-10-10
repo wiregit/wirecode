@@ -13,9 +13,9 @@
 
 <complexType name="documentType">
   <all>
-      <attribute name="Title" editable="true"/>
-      <attribute name="Topic" editable="true"/>
-      <attribute name="Author" editable="true"/>
+      <attribute name="title" editable="true"/>
+      <attribute name="topic" editable="true"/>
+      <attribute name="author" editable="true"/>
       <attribute name="licensetype" editable="true">
         <simpleType base="string">
           <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>

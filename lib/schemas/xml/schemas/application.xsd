@@ -13,9 +13,9 @@
 
 <complexType name="applicationType">
   <all>
-      <attribute name="Name" editable="true"/>
-      <attribute name="Publisher" editable="true"/>
-      <attribute name="Platform" editable="true">
+      <attribute name="name" editable="true"/>
+      <attribute name="publisher" editable="true"/>
+      <attribute name="platform" editable="true">
         <simpleType base="string">
 	  <enumeration value="Windows"/>
 	  <enumeration value="OSX"/>
