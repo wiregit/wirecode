@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseConstants;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.metadata.WeedInfo;
 import com.limegroup.gnutella.metadata.WRMXML;
@@ -99,28 +100,8 @@ public class LimeXMLDocument implements Serializable {
      */
     private transient List CACHED_KEYWORDS = null;
     
-    /** The indivisible keywords for a CC license. */
-    private static final List CC_INDIVISIBLE;
-    static {
-        List l = new ArrayList(1);
-        l.add(CCConstants.CC_URI_PREFIX);
-        CC_INDIVISIBLE = Collections.unmodifiableList(l);
-    }
-    
-    /** The indivisible keywords for a Weed license. */
-    private static final List WEED_INDIVISIBLE;
-    static {
-        List l = new ArrayList(1);
-        l.add(WeedInfo.LAINFO);
-        WEED_INDIVISIBLE = Collections.unmodifiableList(l);
-    }
-    
     /** The kind of license this has. */
-    private transient int licenseType = NO_LICENSE;
-    private static final int NO_LICENSE = 0;
-    private static final int CC_LICENSE = 1;
-    private static final int WEED_LICENSE = 2;
-    private static final int UNKNOWN_LICENSE = 3;
+    private transient int licenseType = LicenseConstants.NO_LICENSE;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -265,13 +246,7 @@ public class LimeXMLDocument implements Serializable {
      * Returns all the indivisible keywords for entry into QRP tables.
      */
     public List getKeyWordsIndivisible() {
-        switch(licenseType) {
-        case NO_LICENSE: return Collections.EMPTY_LIST;
-        case WEED_LICENSE: return WEED_INDIVISIBLE;
-        case CC_LICENSE: return CC_INDIVISIBLE;
-        case UNKNOWN_LICENSE: return Collections.EMPTY_LIST; // not searchable.
-        default: return Collections.EMPTY_LIST;
-        }
+        return LicenseConstants.getIndivisible(licenseType);
     }
 
     /**
@@ -385,24 +360,32 @@ public class LimeXMLDocument implements Serializable {
      * Determines if a license exists that this LimeXMLDocument knows about.
      */
     public boolean isLicenseAvailable() {
-        return licenseType != NO_LICENSE;
+        return licenseType != LicenseConstants.NO_LICENSE;
     }
     
     /**
      * Returns a string that can be used to verify if this license is valid.
      */
     public String getLicenseString() {
-        if(licenseType != NO_LICENSE) {
+        if(isLicenseAvailable()) {
+            String licenseStringSuffix = getVerifyableLicenseElement(licenseType);
+            if (licenseStringSuffix == null)
+                return null;
             for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry next = (Map.Entry)i.next();
                 String key = (String)next.getKey();
-                if(licenseType == CC_LICENSE && key.endsWith(XML_LICENSE_ATTRIBUTE))
-                    return (String)next.getValue();
-                else if((licenseType == WEED_LICENSE || licenseType == UNKNOWN_LICENSE) && 
-                        key.endsWith(XML_LICENSE_TYPE_ATTRIBUTE))
+                if (key.endsWith(licenseStringSuffix))
                     return (String)next.getValue();
             }
         }
+        return null;
+    }
+    
+    private static String getVerifyableLicenseElement(int type) {
+        if (type == LicenseConstants.CC_LICENSE)
+            return LimeXMLDocument.XML_LICENSE_ATTRIBUTE;
+        if (type == LicenseConstants.WEED_LICENSE)
+            return LimeXMLDocument.XML_LICENSE_TYPE_ATTRIBUTE;
         return null;
     }
     
@@ -593,42 +576,12 @@ public class LimeXMLDocument implements Serializable {
         // CC licenses require that the 'license' field has the CC_URI_PREFIX & CC_URL_INDICATOR
         // somewhere.  Weed licenses require that the 'license type' field has WeedInfo.LINFO,
         // a content id & a version id.
-        if(hasCCLicense(license, type)) {
+        licenseType = LicenseConstants.determineLicenseType(license, type);
+        if (licenseType == LicenseConstants.CC_LICENSE)
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
-            licenseType = CC_LICENSE;
-        } else if(hasWeedLicense(type)) {
-            licenseType = WEED_LICENSE;
-        } else if(hasUnknownLicense(type)) {
-            licenseType = UNKNOWN_LICENSE;
-        } else {
-            //fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
-            licenseType = NO_LICENSE;
-        }
 
         if(LOG.isDebugEnabled())
             LOG.debug("Fields after setting: " + fieldToValue);
-    }
-    
-    /** Determines if this document has a CC license. */
-    private boolean hasCCLicense(String license, String type) {
-        return (type != null && type.equals(CCConstants.CC_URI_PREFIX)) ||
-               (license != null && license.indexOf(CCConstants.CC_URI_PREFIX) != -1
-                                && license.indexOf(CCConstants.URL_INDICATOR) != -1)
-               ;
-    }
-    
-    /** Determines if this document has a Weed license. */
-    private boolean hasWeedLicense(String type) {
-        return type != null &&
-               type.startsWith(WeedInfo.LAINFO) &&
-               type.indexOf(WeedInfo.VID) != -1 &&
-               type.indexOf(WeedInfo.CID) != -1;
-    }
-    
-    /** Determiens if this has some kind of license. */
-    private boolean hasUnknownLicense(String type) {
-        return type != null &&
-               type.startsWith(WRMXML.PROTECTED);
     }
     
     /**
