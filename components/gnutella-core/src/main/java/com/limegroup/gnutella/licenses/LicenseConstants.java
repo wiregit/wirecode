@@ -61,7 +61,7 @@ public class LicenseConstants {
         
         Integer i = new Integer(type);
         List ret = (List) LICENSE_DESC_CACHE.get(i);
-        if (ret != null)
+        if (ret != null) 
             return ret;
         
         ret = new ArrayList(1);
@@ -81,6 +81,14 @@ public class LicenseConstants {
             return WEED_LICENSE;
         if (hasDRMLicense(type))
             return DRM_LICENSE;
+        
+        // the other licenses do not have any special requirements 
+        // for the license or type field (yet)
+        for (int i = 0;i < LICENSE_DESCS.length; i++) {
+            if (LICENSE_DESCS[i].equals(type)) 
+                return i;
+        }
+        
         return NO_LICENSE;
     }
     
