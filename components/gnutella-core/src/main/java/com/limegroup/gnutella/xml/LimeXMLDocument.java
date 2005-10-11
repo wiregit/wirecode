@@ -230,7 +230,7 @@ public class LimeXMLDocument implements Serializable {
         while(iter.hasNext()){
             String currKey = (String) iter.next();
             String val = (String) fieldToValue.get(currKey);
-            if(val != null && !val.equals("") && !isIndivisible(currKey, val)) {
+            if(val != null && !val.equals("") && !isIndivisible(currKey)) {
                 try {
                     Double.parseDouble(val); // will trigger NFE.
                 } catch(NumberFormatException ignored) {
@@ -253,7 +253,7 @@ public class LimeXMLDocument implements Serializable {
      * Determines if this keyword & value is indivisible
      * (thus making QRP not split it).
      */
-    private boolean isIndivisible(String currKey, String val) {
+    private boolean isIndivisible(String currKey) {
         //the license-type is always indivisible.
         //note that for weed licenses, this works because getKeyWordsIndivisible
         //is returning a list of only 'WeedInfo.LAINFO'.  the content-id & version-id
@@ -384,7 +384,7 @@ public class LimeXMLDocument implements Serializable {
     private static String getVerifyableLicenseElement(int type) {
         if (type == LicenseConstants.CC_LICENSE)
             return LimeXMLDocument.XML_LICENSE_ATTRIBUTE;
-        if (type == LicenseConstants.WEED_LICENSE)
+        if (LicenseConstants.isDRMLicense(type))
             return LimeXMLDocument.XML_LICENSE_TYPE_ATTRIBUTE;
         return null;
     }

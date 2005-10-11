@@ -2,7 +2,9 @@ package com.limegroup.gnutella.licenses;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.limegroup.gnutella.metadata.WRMXML;
 import com.limegroup.gnutella.metadata.WeedInfo;
@@ -15,33 +17,58 @@ public class LicenseConstants {
     public static final int NO_LICENSE = 0;
     public static final int CC_LICENSE = 1;
     public static final int WEED_LICENSE = 2;
-    public static final int UNKNOWN_LICENSE = 3;
+    public static final int DRM_LICENSE = 3;
     
-    /** The indivisible keywords for a CC license. */
-    private static final List CC_INDIVISIBLE;
+    public static final int GPL = 4;
+    public static final int LGPL = 5;
+    public static final int APACHE_BSD = 6;
+    public static final int MIT_X = 7;
+    public static final int FDL = 8;
+    public static final int ARTISTIC = 9;
+    public static final int PUBLIC_DOMAIN = 10;
+    public static final int SHAREWARE = 11;
+    
+    private static final String []LICENSE_DESCS;
+    
     static {
-        List l = new ArrayList(1);
-        l.add(CCConstants.CC_URI_PREFIX);
-        CC_INDIVISIBLE = Collections.unmodifiableList(l);
+        List descList = new ArrayList();
+        descList.add(""); // no license
+        descList.add(CCConstants.CC_URI_PREFIX); // cc
+        descList.add(WeedInfo.LAINFO); // weed ...
+        descList.add(""); // general drm 
+        descList.add("http://www.gnu.org/copyleft/gpl.html");
+        descList.add("http://www.gnu.org/copyleft/lgpl.html");
+        descList.add("http://www.google.com/search?q=apache+or+bsd+license");
+        descList.add("http://www.google.com/search?q=X+or+MIT+license");
+        descList.add("http://www.gnu.org/copyleft/fdl.html");
+        descList.add("http://www.opensource.org/licenses/artistic-license.php");
+        descList.add("http://www.public-domain.org");
+        descList.add("http://en.wikipedia.org/wiki/Shareware");
+        // .. others in same order as above
+        
+        LICENSE_DESCS = (String [])descList.toArray(new String[0]);
     }
     
-    /** The indivisible keywords for a Weed license. */
-    private static final List WEED_INDIVISIBLE;
-    static {
-        List l = new ArrayList(1);
-        l.add(WeedInfo.LAINFO);
-        WEED_INDIVISIBLE = Collections.unmodifiableList(l);
-    }
+    private static final Map LICENSE_DESC_CACHE = new HashMap();
     
     public static List getIndivisible(int type) {
         
-        switch(type) {
-        case NO_LICENSE: return Collections.EMPTY_LIST;
-        case WEED_LICENSE: return WEED_INDIVISIBLE;
-        case CC_LICENSE: return CC_INDIVISIBLE;
-        case UNKNOWN_LICENSE: return Collections.EMPTY_LIST; // not searchable.
-        default: return Collections.EMPTY_LIST;
-        }
+        if (type >= LICENSE_DESCS.length) // unknown type
+            return Collections.EMPTY_LIST;
+        
+        if (type == NO_LICENSE || type == DRM_LICENSE)
+            return Collections.EMPTY_LIST;
+        
+        Integer i = new Integer(type);
+        List ret = (List) LICENSE_DESC_CACHE.get(i);
+        if (ret != null)
+            return ret;
+        
+        ret = new ArrayList(1);
+        ret.add(LICENSE_DESCS[type]);
+        ret = Collections.unmodifiableList(ret);
+        LICENSE_DESC_CACHE.put(i,ret);
+        return ret;
     }
     
     /**
@@ -52,8 +79,8 @@ public class LicenseConstants {
             return CC_LICENSE;
         if (hasWeedLicense(type))
             return WEED_LICENSE;
-        if (hasUnknownLicense(type))
-            return UNKNOWN_LICENSE;
+        if (hasDRMLicense(type))
+            return DRM_LICENSE;
         return NO_LICENSE;
     }
     
@@ -71,8 +98,12 @@ public class LicenseConstants {
                type.indexOf(WeedInfo.CID) != -1;
     }
     
-    private static boolean hasUnknownLicense(String type) {
+    private static boolean hasDRMLicense(String type) {
         return type != null &&
                type.startsWith(WRMXML.PROTECTED);
+    }
+    
+    public static boolean isDRMLicense(int type) {
+        return type == WEED_LICENSE || type == DRM_LICENSE;
     }
 }
