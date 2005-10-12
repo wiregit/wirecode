@@ -28,8 +28,8 @@
 	  <enumeration name="GPL" value="http://www.gnu.org/copyleft/gpl.html"/>
 	  <enumeration name="LGPL" value="http://www.gnu.org/copyleft/lgpl.html"/>
 	<!-- no formal urls for these -->
-	  <enumeration name="Apache/BSD" value="http://www.google.com/search?q=apache+or+bsd+license"/>
-	  <enumeration name="X/MIT" value="http://www.google.com/search?q=X+or+MIT+license"/>
+	  <enumeration name="Apache/BSD" value="http://opensource.org/licenses/apache2.0.php"/>
+	  <enumeration name="X/MIT" value="http://opensource.org/licenses/mit-license.php"/>
 	  <enumeration name="Shareware" value="http://en.wikipedia.org/wiki/Shareware"/> 
           <enumeration name="Creative Commons" value="creativecommons.org/licenses/"/>
 	  <enumeration name="Public Domain" value="http://www.public-domain.org"/>

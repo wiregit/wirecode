@@ -38,8 +38,8 @@ public class LicenseConstants {
         descList.add(""); // general drm 
         descList.add("http://www.gnu.org/copyleft/gpl.html");
         descList.add("http://www.gnu.org/copyleft/lgpl.html");
-        descList.add("http://www.google.com/search?q=apache+or+bsd+license");
-        descList.add("http://www.google.com/search?q=X+or+MIT+license");
+        descList.add("http://opensource.org/licenses/apache2.0.php");
+        descList.add("http://opensource.org/licenses/mit-license.php");
         descList.add("http://www.gnu.org/copyleft/fdl.html");
         descList.add("http://www.opensource.org/licenses/artistic-license.php");
         descList.add("http://www.public-domain.org");
