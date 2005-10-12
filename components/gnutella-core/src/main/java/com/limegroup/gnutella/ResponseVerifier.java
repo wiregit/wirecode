@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -93,7 +94,9 @@ public class ResponseVerifier {
 
         LimeXMLDocument doc = response.getDocument();
         if (doc != null) {
-            for (Iterator iter = doc.getKeyWords().iterator(); iter.hasNext();) {
+            for (Iterator iter = new DualIterator(
+                    doc.getKeyWords().iterator(),doc.getKeyWordsIndivisible().iterator()); 
+                    iter.hasNext();) {
                 String xmlWord = (String) iter.next();
                 if (score(data.queryWords,xmlWord) > minGood ) return true;
             }
