@@ -19,6 +19,7 @@ public class SizeToken extends AbstractToken {
 
 	private final long _size;
 
+    /* How suspect this file is, on a scale of [0, MAX] */
 	private byte _bad;
 
 	public SizeToken(long size) {
@@ -30,7 +31,7 @@ public class SizeToken extends AbstractToken {
 	 * implements interface <tt>Token</tt>
 	 */
 	public float getRating() {
-		return 1f / MAX * _bad;
+		return ((float) _bad) / MAX;
 	}
 
 	/**
@@ -52,7 +53,10 @@ public class SizeToken extends AbstractToken {
 			_bad = 0;
 			break;
 		case RATING_USER_MARKED_SPAM:
-			_bad = (byte) Math.min(_bad + 3, MAX);
+			_bad += 3;
+            if (_bad > MAX) {
+                _bad = MAX;
+            }
 			break;
 		default:
 			throw new IllegalArgumentException("unknown type of rating");
@@ -67,7 +71,11 @@ public class SizeToken extends AbstractToken {
 	}
 
     public final int hashCode() {
-        return (int)(_size ^ (_size >>> 32));
+        // Even when we support files larger than
+        // 2 GB, the upper 32 bits of the file size
+        // hold much much less entropy than the lower
+        // 32 bits.
+        return (int)(_size);
     }
     
     public final boolean equals(Object o) {

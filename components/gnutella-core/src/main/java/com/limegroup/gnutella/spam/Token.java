@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * From every RFD we can extract a set of tokens,
  */
-public interface Token extends Serializable {
+public interface Token extends Serializable, Comparable {
 	/**
 	 * A Token representing a keyword
 	 */
@@ -92,15 +92,16 @@ public interface Token extends Serializable {
 	public int getType();
 
 	/**
-	 * Returns the age of this token used to measure when this Token should be
-	 * invalidated
+	 * Used to determine which tokens should be kept when there are too
+     * many tokens in RatingTable.  The items with the lowest "importance"
+     * values are discarded.
 	 * 
-	 * @return int the age of this token.
+	 * @return the importance metric value for this token  
 	 */
-	public int getAge();
+	public double getImportance();
 	
 	/**
 	 * increase the age of the token (measured in limewire sessions)
 	 */
-	public void age();
+	public void incrimentAge();
 }

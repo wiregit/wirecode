@@ -860,7 +860,7 @@ public class RouterService {
             // save limewire.props & other settings
             SettingsHandler.save();
 			
-			RatingTable.instance().saveAndAge();
+			RatingTable.instance().ageAndSave();
             
             cleanupPreviewFiles();
             

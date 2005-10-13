@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.SortedSet;
+import java.util.Set;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +45,9 @@ public class RatingTable {
 	}
 
 	/**
-	 * a map containing all tokens
+	 * a map&lt;Token, Token&gt; containing all tokens.  
+     * We happen to use a HashMap, but there is no need to 
+     * be so restrictive in the declaration.
 	 */
 	private final Map _tokenMap;
 
@@ -58,12 +63,12 @@ public class RatingTable {
 		} catch (IOException ioe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(ioe);
-			map = new HashMap(1000);
+			map = new HashMap();
 		}
 		_tokenMap = map;
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenMap " + _tokenMap.size());
+			LOG.debug("size of tokenSet " + _tokenMap.size());
 
 	}
 
@@ -198,7 +203,7 @@ public class RatingTable {
 	/**
 	 * read data from disk
 	 * 
-	 * @return Map of <tt>Token</tt> as read from disk
+	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 * @throws IOException
 	 */
 	private Map readData() throws IOException {
@@ -209,7 +214,7 @@ public class RatingTable {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-			tokens = (HashMap) is.readObject();
+			tokens = (Map) is.readObject();
 		} catch (ClassNotFoundException cnfe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(cnfe);
@@ -224,11 +229,11 @@ public class RatingTable {
      * Save data from this table to disk.
      */
     public void save() {
-        Map copy;
+        HashMap copy;
         
         synchronized(this) {
             if (_tokenMap.size() > MAX_SIZE)
-                clearOldEntries();
+                pruneEntries();
             copy = new HashMap(_tokenMap);
         }
         
@@ -257,9 +262,9 @@ public class RatingTable {
      * Marks that the table will be serialized to disc and not accessed for
      * a long time (i.e. LimeWire is about to get shut down)
      */
-    public synchronized void saveAndAge() {
+    public synchronized void ageAndSave() {
         for (Iterator iter = _tokenMap.keySet().iterator(); iter.hasNext();)
-            ((Token) iter.next()).age();
+            ((Token) iter.next()).incrimentAge();
         save();
     }
     
@@ -269,32 +274,34 @@ public class RatingTable {
 	private synchronized void checkSize() {
 		if (_tokenMap.size() < MAX_SIZE * 2)
 			return;
-		clearOldEntries();
+		pruneEntries();
 	}
 
 	/**
-	 * removes old entries from the _tokenMap
+	 * removes lowest importance elements from _tokenSet until there
+     * are at most MAX_SIZE entries.
 	 */
-	private void clearOldEntries() {
+	private void pruneEntries() {
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("clearing ratingtable from old entries");
+			LOG.debug("pruning unimportant entries from RatingTable");
 
-		ArrayList list = new ArrayList();
-		list.addAll(_tokenMap.keySet());
-		Collections.sort(list, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((Token) o1).getAge() - ((Token) o2).getAge();
-			}
-		});
-
-		_tokenMap.clear();
-
-		int i = 0;
-		for (Iterator iter = list.iterator(); iter.hasNext() && i < MAX_SIZE; i++) {
-			Object o = iter.next();
-			_tokenMap.put(o, o);
-		}
+        if (_tokenMap.size() <= MAX_SIZE) {
+            return;
+        }
+        
+        synchronized (_tokenMap) {
+            // Make a set of sorted tokens
+            TreeSet tokenSet = new TreeSet(_tokenMap.values());
+            HashMap temporaryMap = new HashMap();
+            Iterator it = tokenSet.iterator();
+            int neededTokens = MAX_SIZE;
+            while (neededTokens > 0 && it.hasNext()) {
+                Token token = (Token) it.next();
+                _tokenMap.put(token,token);
+                --neededTokens;
+            }
+        }
 	}
     
 	private static File getSpamDat() {

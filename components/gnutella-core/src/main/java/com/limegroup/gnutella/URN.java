@@ -329,9 +329,16 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public boolean equals(Object o) {
 		if(o == this) return true;
+        // Since hashCode is cached, and most commonly o
+        // will be a HashCode, this speeds comparison without
+        // affecting accuracy.
+        if (this.hashCode() != o.hashCode()) {
+            return false;
+        }
 		if(!(o instanceof URN)) {
 			return false;
 		}
+        
 		URN urn = (URN)o;
 		
 		return (_urnString.equals(urn._urnString) &&
