@@ -5,7 +5,7 @@ package com.limegroup.gnutella.spam;
  */
 public abstract class AbstractToken implements Token {
     /* Number of LW sessions since this token has been created */
-	byte _age;
+	protected byte _age;
     
     /* Used to cache getImportance() */
     protected transient double _importance = Double.NaN;

@@ -51,7 +51,7 @@ public class IPList {
      * Calculates the first set bit in the distance between an IPv4 address and
      * the ranges represented by this list.
      * 
-     * This is equivalent to floor(log2(distance)) - 1.
+     * This is equivalent to floor(log2(distance)) + 1.
      *  
      * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
      * @return an int on the interval [0,31].
