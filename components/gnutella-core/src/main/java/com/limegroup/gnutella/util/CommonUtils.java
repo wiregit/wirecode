@@ -745,6 +745,34 @@ public final class CommonUtils {
         return PROPS.getProperty("user.name");
     }
     
+    
+    private static synchronized void setUserSettingsDir(File settingsDir) throws IOException, SecurityException {
+        settingsDir = settingsDir.getAbsoluteFile();
+        
+        if(!settingsDir.isDirectory()) {
+            settingsDir.delete(); // delete whatever it may have been
+            if(!settingsDir.mkdirs()) {
+                String msg = "could not create preferences directory: "+
+                    settingsDir;
+                throw new IOException(msg);
+            }
+        }
+
+        if(!settingsDir.canWrite()) {
+            throw new IOException("settings dir not writable");
+        }
+
+        if(!settingsDir.canRead()) {
+            throw new IOException("settings dir not readable");
+        }
+
+        // make sure Windows files are moved
+        moveWindowsFiles(settingsDir);
+        // make sure old metadata files are moved
+        moveXMLFiles(settingsDir);
+        // cache the directory.
+        SETTINGS_DIRECTORY = settingsDir;
+    }
     /**
      * Returns the directory where all user settings should be stored.  This
      * is where all application data should be stored.  If the directory does
@@ -760,58 +788,29 @@ public final class CommonUtils {
         
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
-        if(CommonUtils.isMacOSX()) {            
-            File tempSettingsDir = new File(getUserHomeDir(), 
-                                            "Library/Preferences");
-            settingsDir = new File(tempSettingsDir, "LimeWire");
-		} 
-        if(isWindows()) {
-            // System.getenv(String) is un-depricated in Java 1.5
-            // and works in Java 1.4
-            String appdata = System.getenv("APPDATA");
-            if (appdata != null && appdata.length() > 0 && 
-                    (new File(appdata)).isDirectory()) {
-                File tempSettingsDir = new File(appdata, "LimeWire");
-                // Check for the legacy location of the LW preferences directory
-                // on Windows.  Use legacy data if available and the new
-                // preferences directory doesn't exist.
-                if (tempSettingsDir.exists() || !settingsDir.exists()) {
-                    settingsDir = tempSettingsDir;
+        if (isWindows()) {
+            try {
+                String appdata = System.getenv("APPDATA");
+                if (appdata != null && appdata.length() > 0) {
+                    File tempSettingsDir = new File(appdata, "LimeWire");
+                    if (tempSettingsDir.isDirectory() || ! settingsDir.exists()) {
+                        setUserSettingsDir(tempSettingsDir);
+                        return tempSettingsDir;
+                    }
                 }
-            }
-        }
-
-        // Best effort to make settingsDir is absolute
+            } catch (IOException e) {} // Ignore errors and fall back on default
+            catch (SecurityException e) {} // Ignore errors and fall back on default
+        } else if(isMacOSX()) {
+            settingsDir = new File(getUserHomeDir(), 
+                                     "Library/Preferences/LimeWire");
+        } 
+      
+        // Default behavior
         try {
-            settingsDir = settingsDir.getAbsoluteFile();
-        } catch (SecurityException e) {
-            System.err.println("Error making settingsDir absolute: "+e);
-            e.printStackTrace(System.err);
+            setUserSettingsDir(settingsDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        
-        if(!settingsDir.isDirectory()) {
-            settingsDir.delete(); // delete whatever it may have been
-            if(!settingsDir.mkdirs()) {
-                String msg = "could not create preferences directory: "+
-                    settingsDir;
-                throw new RuntimeException(msg);
-            }
-        }
-
-        if(!settingsDir.canWrite()) {
-            throw new RuntimeException("settings dir not writable");
-        }
-
-        if(!settingsDir.canRead()) {
-            throw new RuntimeException("settings dir not readable");
-        }
-
-        // make sure Windows files are moved
-        moveWindowsFiles(settingsDir);
-        // make sure old metadata files are moved
-        moveXMLFiles(settingsDir);
-        // cache the directory.
-        SETTINGS_DIRECTORY = settingsDir;
         return settingsDir;
     }
 
