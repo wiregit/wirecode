@@ -769,7 +769,8 @@ public final class CommonUtils {
             // System.getenv(String) is un-depricated in Java 1.5
             // and works in Java 1.4
             String appdata = System.getenv("APPDATA");
-            if (appdata != null && (new File(appdata)).isDirectory()) {
+            if (appdata != null && appdata.length() > 0 && 
+                    (new File(appdata)).isDirectory()) {
                 File tempSettingsDir = new File(appdata, "LimeWire");
                 // Check for the legacy location of the LW preferences directory
                 // on Windows.  Use legacy data if available and the new
