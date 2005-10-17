@@ -781,6 +781,14 @@ public final class CommonUtils {
             }
         }
 
+        // Best effort to make settingsDir is absolute
+        try {
+            settingsDir = settingsDir.getAbsoluteFile();
+        } catch (SecurityException e) {
+            System.err.println("Error making settingsDir absolute: "+e);
+            e.printStackTrace(System.err);
+        }
+        
         if(!settingsDir.isDirectory()) {
             settingsDir.delete(); // delete whatever it may have been
             if(!settingsDir.mkdirs()) {
