@@ -24,35 +24,39 @@ import com.limegroup.gnutella.util.StringUtils;
  * This class notifies the user by email when a download completes.
  *
  */
-public class MailDownloadNotificator extends AbstractMailSender{
+public class MailDownloadNotificator{
     
     
-    /**
+	private String _from,_host,_username,_password = null;
+
+	private static final String EMAIL_SUBJECT = "Your LimeWire download";
+	
+	/**
      * The first part of the email's body.
      */
-    private final String EMAIL_BODY1 = 
+    private static final String EMAIL_BODY1 = 
         "-----This is a message from your LimeWire software----\n\nThe download: \"";
     
     /**
      * The second part of the email's body
      */
-    private final String EMAIL_BODY2 = "\" has ";
+    private static final String EMAIL_BODY2 = "\" has ";
     
     /**
      * The keyword for a successfull download in the email's body
      */
-    private final String EMAIL_COMPLETE = "completed successfully.";
+    private static final String EMAIL_COMPLETE = "completed successfully.";
     
     /**
      * The keyword for a failed download in the email's body
      */
-    private final String EMAIL_FAILED = "failed.";
+    private static final String EMAIL_FAILED = "failed.";
     
     public MailDownloadNotificator() {
-    	USER_EMAIL = MailSenderSetting.USER_EMAIL.getValueAsString(); //TODO use limewire address?		
-		SMTP_HOST = MailSenderSetting.SMTP_SERVER.getValueAsString();
-		SMTP_USERNAME =  MailSenderSetting.SMTP_USERNAME.getValueAsString();
-		SMTP_PASSWORD =  MailSenderSetting.SMTP_PASSWORD.getValueAsString();
+    	_from = MailSenderSetting.USER_EMAIL.getValueAsString();		
+		_host = MailSenderSetting.SMTP_SERVER.getValueAsString();
+		_username =  MailSenderSetting.SMTP_USERNAME.getValueAsString();
+		_password =  MailSenderSetting.SMTP_PASSWORD.getValueAsString();
     }
     
     /**
@@ -63,16 +67,15 @@ public class MailDownloadNotificator extends AbstractMailSender{
      * @param dl The completed Downloader
      */
     public void sendDownloadStatusMail(Downloader dl){
-        
-		if(!MailSenderSetting.MAIL_FILTER_ENABLED.getValue() ||
-				(MailSenderSetting.MAIL_FILTER_ENABLED.getValue() &&
-					filterFile(MailSenderSetting.MAIL_FILTER.getValue(),dl.getFile()))){
+        boolean fileFiltered = filterFile(MailSenderSetting.MAIL_FILTER.getValue(),dl.getFile());
+        boolean filterEnabled = MailSenderSetting.MAIL_FILTER_ENABLED.getValue();
+		if(!filterEnabled ||(filterEnabled && fileFiltered)){
 		    String downloadState = (dl.getState()== Downloader.COMPLETE)? EMAIL_COMPLETE : EMAIL_FAILED;
 		    String text = EMAIL_BODY1+dl.getFile().getName()+EMAIL_BODY2+downloadState;
-		    EMAIL_BODY = text;
-			EMAIL_SUBJECT = "Your LimeWire download";
+		    String body = text;
+		    SMTPMailSender mailSender = new SMTPMailSender(EMAIL_SUBJECT,body,_from,_from,_host,_username,_password);
 			try {
-				sendMail();
+				mailSender.sendMail();
 			}
 			catch(MessagingException doNothingException) {};
 		}
@@ -104,11 +107,13 @@ public class MailDownloadNotificator extends AbstractMailSender{
             String ext = filename.substring(begin, end);
 
             int length = extensions.length;
+            boolean isValid = false;
             for (int i = 0; i < length; i++) {
                 if (ext.equalsIgnoreCase(extensions[i])) {
-                    isAllowed=true;
+                    isValid |= true;
                 }
             }
+            isAllowed &= isValid;
     	}
     	else if(filterString[1].equals("size")){
     		//size in store in KB and we need it in Bytes.
