@@ -788,18 +788,30 @@ public final class CommonUtils {
         
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
-        if (isWindows() && isJava15OrLater()) {
-            try {
-                String appdata = System.getenv("APPDATA");
-                if (appdata != null && appdata.length() > 0) {
-                    File tempSettingsDir = new File(appdata, "LimeWire");
-                    if (tempSettingsDir.isDirectory() || ! settingsDir.exists()) {
+        if (isWindows()) {
+            String appdata = null;
+            // In some Java 1.4 implementations, System.getenv() is 
+            // depricated with prejudice (throws java.lang.Error).
+            if (isJava15OrLater()) {
+                appdata = System.getProperty("LIMEWIRE_PREFS_DIR",
+                        System.getenv("APPDATA"));
+            } else {
+                // null string will fall back on default
+                appdata = System.getProperty("LIMEWIRE_PREFS_DIR",null);
+            }
+            if ("%APPDATA%".equals(appdata)) {
+                appdata = null; // fall back on default
+            }
+            if (appdata != null && appdata.length() > 0) {
+                File tempSettingsDir = new File(appdata, "LimeWire");
+                if (tempSettingsDir.isDirectory() || ! settingsDir.exists()) {
+                    try {
                         setUserSettingsDir(tempSettingsDir);
                         return tempSettingsDir;
-                    }
+                    } catch (IOException e) {} // Ignore errors and fall back on default
+                    catch (SecurityException e) {} // Ignore errors and fall back on default
                 }
-            } catch (IOException e) {} // Ignore errors and fall back on default
-            catch (SecurityException e) {} // Ignore errors and fall back on default
+            }
         } else if(isMacOSX()) {
             settingsDir = new File(getUserHomeDir(), 
                                      "Library/Preferences/LimeWire");
