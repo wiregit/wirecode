@@ -788,7 +788,7 @@ public final class CommonUtils {
         
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
-        if (isWindows()) {
+        if (isWindows() && isJava15OrLater()) {
             try {
                 String appdata = System.getenv("APPDATA");
                 if (appdata != null && appdata.length() > 0) {
