@@ -134,7 +134,7 @@ public class LimeXMLReplyCollection {
         }
         
         // Then try to get it from the old map.
-        if(doc == null || !doc.isShareable())
+        if(doc == null || !doc.isShareable()) // the old doc may have had license.
             doc = (LimeXMLDocument)oldMap.get(urn);
         
         

@@ -1903,7 +1903,7 @@ public abstract class FileManager {
         if (matches==null)
             return EMPTY_RESPONSES;
 
-        List responses = new LinkedList();
+        List responses = new ArrayList(matches.size());
         final MediaType.Aggregator filter = MediaType.getAggregator(request);
         LimeXMLDocument doc = request.getRichQuery();
 
@@ -1915,7 +1915,20 @@ public abstract class FileManager {
                 Assert.that(false, 
                             "unexpected null in FileManager for query:\n"+
                             request);
-
+            
+            boolean hasLicense = false;
+            for (Iterator iterator = desc.getLimeXMLDocuments().iterator(); iterator.hasNext();) {
+                LimeXMLDocument ourDoc = (LimeXMLDocument) iterator.next();
+                String license = ourDoc.getLicenseString(); 
+                if (license != null && license.length() > 0) {
+                    hasLicense = true;
+                    break;
+                }
+            }
+            
+            if (!hasLicense) // don't return results w/o a license
+                continue;
+            
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
