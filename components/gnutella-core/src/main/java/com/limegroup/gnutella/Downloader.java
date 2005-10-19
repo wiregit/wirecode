@@ -244,5 +244,34 @@ public interface Downloader extends BandwidthTracker {
 	 * @return
 	 */
 	public URN getSHA1Urn();
+    
+    /**
+     * Sets a new attribute associated with the download.
+     * The attributes are used eg. by GUI to store some extra
+     * information about the download.
+     * @param key A key used to identify the attribute.
+     * @patam value The value of the key.
+     * @return A prvious value of the attribute, or <code>null</code>
+     *         if the attribute wasn't set.
+     */
+    public Object setAttribute( String key, Object value );
+
+    /**
+     * Gets a value of attribute associated with the download.
+     * The attributes are used eg. by GUI to store some extra
+     * information about the download.
+     * @param key A key which identifies the attribue.
+     * @return The value of the specified attribute,
+     *         or <code>null</code> if value was not specified.
+     */
+    public Object getAttribute( String key );
+
+    /**
+     * Removes an attribute associated with this download.
+     * @param key A key which identifies the attribute do remove.
+     * @return A value of the attribute or <code>null</code> if
+     *         attribute was not set.
+     */
+    public Object removeAttribute( String key );
 }
 

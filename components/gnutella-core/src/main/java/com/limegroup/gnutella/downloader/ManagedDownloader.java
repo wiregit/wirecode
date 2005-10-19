@@ -490,10 +490,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private volatile int inactivePriority;
     
+    /**
+     * A map of attributes associated with the download. The attributes
+     * may be used by GUI, to keep some additional information about
+     * the download.
+     */
+    protected Map attributes = new HashMap();
+
     protected Map propertiesMap;
     
     protected static final String DEFAULT_FILENAME = "defaultFileName";
     protected static final String FILE_SIZE = "fileSize";
+    protected static final String ATTRIBUTES = "attributes";
     /**
 	 * The key under which the saveFile File is stored in the attribute map
      * used in serializing and deserializing ManagedDownloaders. 
@@ -582,6 +590,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             stream.writeObject(ifm);
         }
 
+        if ( !propertiesMap.containsKey(ATTRIBUTES) )
+	    propertiesMap.put(ATTRIBUTES, attributes);
+
         stream.writeObject(properties);
     }
 
@@ -627,6 +638,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (propertiesMap.get(DEFAULT_FILENAME) == null) {
             propertiesMap.put(DEFAULT_FILENAME,"Unknown "+(++unknownIndex));
         }
+        if (propertiesMap.containsKey(ATTRIBUTES)) 
+            attributes = (Map) propertiesMap.get(ATTRIBUTES);
+
+	if (attributes == null)
+	    attributes = new HashMap();
     }
 
     /** 
@@ -3017,6 +3033,41 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return true;
         return false;
     }
+    
+    /**
+     * Sets a new attribute associated with the download.
+     * The attributes are used eg. by GUI to store some extra
+     * information about the download.
+     * @param key A key used to identify the attribute.
+     * @patam value The value of the key.
+     * @return A prvious value of the attribute, or <code>null</code>
+     *         if the attribute wasn't set.
+     */
+    public Object setAttribute( String key, Object value ) {
+        return attributes.put( key, value );
+    }
+
+    /**
+     * Gets a value of attribute associated with the download.
+     * The attributes are used eg. by GUI to store some extra
+     * information about the download.
+     * @param key A key which identifies the attribue.
+     * @return The value of the specified attribute,
+     *         or <code>null</code> if value was not specified.
+     */
+    public Object getAttribute( String key ) {
+        return attributes.get( key );
+    }
+
+    /**
+     * Removes an attribute associated with this download.
+     * @param key A key which identifies the attribute do remove.
+     * @return A value of the attribute or <code>null</code> if
+     *         attribute was not set.
+     */
+    public Object removeAttribute( String key ) {
+        return attributes.remove( key );
+    }    
 }
 
 interface MeshHandler {
