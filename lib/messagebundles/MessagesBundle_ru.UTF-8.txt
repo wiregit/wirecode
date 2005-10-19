@@ -845,6 +845,8 @@ DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Изменить расположени�
 DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Корректировка имени файла для сохранения загрузки
 #### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
 DOWNLOAD_POPUP_MENU_CLEAR=Убрать все неактивные загрузки
+#### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
+#? DOWNLOAD_EXPLORE_BUTTON_TIP=
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Запустить

@@ -845,6 +845,8 @@ DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Vaheta faili asukohta...
 DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Muuda tiritud faili nime.
 #### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
 DOWNLOAD_POPUP_MENU_CLEAR=Puhasta kõigist mitteaktiivsetest tirimistest
+#### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
+#? DOWNLOAD_EXPLORE_BUTTON_TIP=
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=Käivita
