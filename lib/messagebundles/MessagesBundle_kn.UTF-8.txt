@@ -1229,6 +1229,17 @@ HAS_TIPS_OF_THE_DAY=false
 #? DOWNLOAD_PRIORITY_PRIORITIZE=
 #### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
 #? DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=
+#### DOWNLOAD_SEARCH_MENU=Search...
+#? DOWNLOAD_SEARCH_MENU=
+#### DOWNLOAD_SEARCH_FILENAME_LABEL=Files with this name
+#? DOWNLOAD_SEARCH_FILENAME_LABEL=
+#### DOWNLOAD_SEARCH_FILENAME_TIP=Searches for files with the same file name.
+#? DOWNLOAD_SEARCH_FILENAME_TIP=
+#### DOWNLOAD_SERACH_ORGINAL_LABEL=Orginal query
+#? DOWNLOAD_SERACH_ORGINAL_LABEL=
+#### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
+#? DOWNLOAD_SERACH_ORGINAL_TIP=
+
 
 ###################################################################
 # Key/value pairs for UploadView

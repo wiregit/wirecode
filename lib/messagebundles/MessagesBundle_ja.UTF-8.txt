@@ -1231,6 +1231,17 @@ DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=選択ダウンロード促進を有効にす�
 DOWNLOAD_PRIORITY_PRIORITIZE=待ち行列
 #### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
 DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWireはこのファイルのライセンスを確認できない。それでもダウンロードするか?\n\n注意：LimeWireはグヌーテラ･ネットワークの内容を監視または管理できない。ユーザーは地元の版権に関する法律を守ること。
+#### DOWNLOAD_SEARCH_MENU=Search...
+#? DOWNLOAD_SEARCH_MENU=
+#### DOWNLOAD_SEARCH_FILENAME_LABEL=Files with this name
+#? DOWNLOAD_SEARCH_FILENAME_LABEL=
+#### DOWNLOAD_SEARCH_FILENAME_TIP=Searches for files with the same file name.
+#? DOWNLOAD_SEARCH_FILENAME_TIP=
+#### DOWNLOAD_SERACH_ORGINAL_LABEL=Orginal query
+#? DOWNLOAD_SERACH_ORGINAL_LABEL=
+#### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
+#? DOWNLOAD_SERACH_ORGINAL_TIP=
+
 
 ###################################################################
 # Key/value pairs for UploadView
