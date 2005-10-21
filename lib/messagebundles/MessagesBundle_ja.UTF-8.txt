@@ -1242,7 +1242,6 @@ DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWireはこのファイルのライセ�
 #### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
 #? DOWNLOAD_SERACH_ORGINAL_TIP=
 
-
 ###################################################################
 # Key/value pairs for UploadView
 ###################################################################
@@ -1867,8 +1866,6 @@ META_EDITOR_LICENSE_LABEL=ライセンス
 #? META_EDITOR_DESCRIPTION_LABEL=
 #### META_EDITOR_PLATFORM_LABEL=Platform:
 #? META_EDITOR_PLATFORM_LABEL=
-
-
 #### META_EDITOR_SIZE_LABEL=Size:
 META_EDITOR_SIZE_LABEL=容量：
 #### META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
@@ -1884,7 +1881,7 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 
 #### CC_PUBLISHER_TITLE=Publish License
 #? CC_PUBLISHER_TITLE=
-#### CC_PUBLISHER_INTRO=This tool helps you publish audio under a Creative Commons license. 
+#### CC_PUBLISHER_INTRO=This tool helps you publish audio under a Creative Commons license.
 #? CC_PUBLISHER_INTRO=
 #### CC_PUBLISHER_CC_INTRO_URL_LABEL=How does it work?
 #? CC_PUBLISHER_CC_INTRO_URL_LABEL=
@@ -1920,8 +1917,8 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=
 #### CC_PUBLISHER_RDF_OUTPUT=In order to publish your file, please insert the following code in your verification page at:
 #? CC_PUBLISHER_RDF_OUTPUT=
-#### CC_PUBLISHER_COPY_BUTTON =Copy to Clipboard
-#? CC_PUBLISHER_COPY_BUTTON =
+#### CC_PUBLISHER_COPY_BUTTON=Copy to Clipboard
+#? CC_PUBLISHER_COPY_BUTTON=
 #### CC_PUBLISHER_RDFNOTGENERATED_WARNING=You have to generate an up-to-date license RDF to create the verification link for you Creative Commons license.\n\nAre you sure you want to continue without generating the license?
 #? CC_PUBLISHER_RDFNOTGENERATED_WARNING=
 #### CC_PUBLISHER_REMOVELICENSE_LABEL=Are you sure you want to permanently remove the license from your local copy of this file?
