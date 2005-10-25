@@ -30,6 +30,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
@@ -1379,20 +1380,9 @@ public class QueryRequest extends Message implements Serializable{
             throw new BadPacketException("illegal chars: " + QUERY);
         }
     }
-
-    /**
-     * Utility method for checking whether or not the query string contains
-     * illegal characters.
-     *
-     * @param query the query string to check
-     */
+    
     private static boolean hasIllegalChars(String query) {
-        char[] chars = query.toCharArray();
-        Arrays.sort(chars);
-        for(int i=0; i<ILLEGAL_CHARS.length; i++) {
-            if(Arrays.binarySearch(chars, ILLEGAL_CHARS[i]) >= 0) return true;
-        }
-        return false;
+        return StringUtils.containsCharacters(query,ILLEGAL_CHARS);
     }
 
     /**

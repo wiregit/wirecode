@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -109,6 +110,15 @@ public class StringUtils {
             i=j+1;
         }
         return true;            
+    }
+    
+    public static boolean containsCharacters(String input, char [] chars) {
+        char [] inputChars = input.toCharArray();
+        Arrays.sort(inputChars);
+        for(int i=0; i<chars.length; i++) {
+            if(Arrays.binarySearch(inputChars, chars[i]) >= 0) return true;
+        }
+        return false;
     }
 
     /** 
