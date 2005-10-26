@@ -3,11 +3,10 @@ package com.limegroup.gnutella.archive;
 import java.io.IOException;
 
 public class BadResponseException extends IOException {
-	private String __id__ = "$Id: BadResponseException.java,v 1.1.2.1 2005-10-14 23:27:03 tolsen Exp $";
-	
-	/**
-	 * 
-	 */
+
+	public static final String repositoryVersion = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/BadResponseException.java,v 1.1.2.2 2005-10-26 20:02:48 tolsen Exp $";
+
 	private static final long serialVersionUID = 4844119150283787850L;
 
 	public BadResponseException( Throwable cause ) {

@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArchiveConstants {
-	private String __id__ = "$Id: ArchiveConstants.java,v 1.1.2.1 2005-10-14 23:27:03 tolsen Exp $";
 	
+	public static final String repositoryVersion = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveConstants.java,v 1.1.2.2 2005-10-26 20:02:48 tolsen Exp $";
+
 	/** Internet Archive Media Types */
 	
-	/** Contributions of type movies will default to 
+	/** Contributions of media type movies will default to 
 	 *  the open-source movies collection
 	 */
 	public static final int MEDIA_MOVIES = 1;
@@ -23,7 +25,7 @@ public class ArchiveConstants {
 	 */
 	//public static final int MEDIA_TEXTS = 2;
 	
-	/** Contributions of type audio will default to
+	/** Contributions of media type audio will default to
 	 * the open-source audio collection
 	 */
 	public static final int MEDIA_AUDIO = 3;
@@ -68,20 +70,20 @@ public class ArchiveConstants {
 		new Integer( COLLECTION_OPENSOURCE_AUDIO );
 	
 	private static final Map _collectionStrings;
-	private static final Map _defaultCollectionsForType;
+	private static final Map _defaultCollectionsForMedia;
 	
 	static {
 		Map mCS = new HashMap();
-		Map mDCFT = new HashMap();
+		Map mDCFM = new HashMap();
 		
 		mCS.put( _collectionOpensourceMovies, "opensource_movies" );		
 		mCS.put( _collectionOpensourceAudio, "opensource_audio" );
 		_collectionStrings = Collections.unmodifiableMap( mCS );
 		
-		mDCFT.put( _mediaMovies, _collectionOpensourceMovies );
+		mDCFM.put( _mediaMovies, _collectionOpensourceMovies );
 				
-		mDCFT.put( _mediaAudio, _collectionOpensourceMovies );
-		_defaultCollectionsForType = Collections.unmodifiableMap( mDCFT );
+		mDCFM.put( _mediaAudio, _collectionOpensourceMovies );
+		_defaultCollectionsForMedia = Collections.unmodifiableMap( mDCFM );
 	}
 
 	static String getMediaString( int media ) {
@@ -93,12 +95,18 @@ public class ArchiveConstants {
 			.get( new Integer( collection ) );
 	}
 	
-	static int defaultCollectionForType( int type ) 
-	throws IllegalArgumentException {
-		Integer c = (Integer) _defaultCollectionsForType.get( new Integer( type ) );
+	/**
+	 * 
+	 * @param media
+	 * @return
+	 * @throws IllegalArgumentException
+	 *         If media is not valid
+	 */
+	static int defaultCollectionForMedia( int media ) {
+		Integer c = (Integer) _defaultCollectionsForMedia.get( new Integer( media ) );
 		
 		if ( c == null ) {
-			throw new IllegalArgumentException( "Invalid media type: " + type );
+			throw new IllegalArgumentException( "Invalid media type: " + media );
 		}
 		return c.intValue();
 	}
