@@ -1500,7 +1500,7 @@ public abstract class FileManager {
                                        FileManagerEvent.REMOVE,
                                        removed);
                 }
-                dispatchFileEvent(evt);
+                dispatchFileEvent(newEvt);
                 if(callback != null)
                     callback.handleFileEvent(newEvt);
             }
