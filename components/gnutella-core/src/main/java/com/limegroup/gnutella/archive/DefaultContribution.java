@@ -22,10 +22,11 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.1 2005-10-26 20:02:48 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.2 2005-10-27 18:30:43 tolsen Exp $";
 
 	private String _identifier;
 	private URL _ftpUrl;
+	private String _verificationUrl;
 	
 	// no default constructor
 	private DefaultContribution() {
@@ -66,7 +67,9 @@ public class DefaultContribution extends AbstractContribution {
 		setCollection( collection );	
 	}
 	
-	
+	public String getVerificationUrl() {
+		return _verificationUrl;
+	}
 
 	
 	// only allow alphanumerics and . - _
@@ -86,7 +89,7 @@ public class DefaultContribution extends AbstractContribution {
 	 * 
 	 */
 	
-	public String getVerificationUrl( String identifier ) 
+	public String reserveIdentifier( String identifier ) 
 	throws IdentifierUnavailableException, BadResponseException,
 	HttpException, IOException {
 		_identifier = null;
@@ -183,15 +186,17 @@ public class DefaultContribution extends AbstractContribution {
 			// we're all good now
 			_ftpUrl = url;
 			_identifier = nId;
-			//return _identifier;
 			
-			// construct verification URL
 			
-			return "http://www.archive.org/" +
+			// set verification URL
+			
+			_verificationUrl =  "http://www.archive.org/" +
 				ArchiveConstants.getMediaString( getMedia() ) +
 				"_details_db.php?collection=" +
 				ArchiveConstants.getCollectionString( getCollection() ) +
 				"&collectionid=" + _identifier;
+			
+			return _identifier;
 			
 		} else if ( type.equals( "error" ) ) {
 			// let's fetch the message

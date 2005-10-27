@@ -15,10 +15,11 @@ import com.limegroup.gnutella.FileDesc;
  * 
  * 	1.	create a Contribution object using your preferred concrete subclass
  * 		of AbstractContribution
- * 	2.	call getVerificationUrl() with your requested identifier
- * 	3.	call addFile() for each file you want to add to the contribution
- * 	4.	call addListener() with your UploadListener
- * 	5.  call upload() to upload the contribution
+ * 	2.	call requestIdentifier() with your requested identifier
+ * 	3.	if step 2 successful, call getVerificationUrl() to get the verification URL
+ * 	4.	call addFile() for each file you want to add to the contribution
+ * 	5.	call addListener() with your UploadListener
+ * 	6.  call upload() to upload the contribution
  * 
  * @author tim
  *
@@ -26,7 +27,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.1 2005-10-26 20:02:48 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.2 2005-10-27 18:30:43 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -46,7 +47,11 @@ public abstract class AbstractContribution {
 	private HashMap _fields = new HashMap();
 
 	
-	abstract public String getVerificationUrl( String identifier )
+	abstract public String getVerificationUrl();
+	
+	
+	// returns normalized (no funny characters) identifier
+	abstract public String reserveIdentifier( String identifier )
 	throws IdentifierUnavailableException, IOException;
 	
 	abstract public void upload();
