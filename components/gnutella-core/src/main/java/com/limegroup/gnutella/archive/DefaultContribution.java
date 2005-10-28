@@ -22,10 +22,11 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.2 2005-10-27 18:30:43 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.3 2005-10-28 19:43:16 tolsen Exp $";
 
 	private String _identifier;
-	private URL _ftpUrl;
+	private String _ftpServer;
+	private String _ftpPath;
 	private String _verificationUrl;
 	
 	// no default constructor
@@ -175,16 +176,22 @@ public class DefaultContribution extends AbstractContribution {
 			} 
 			
 			final String urlString = _findText( urlNode );
-			final URL url = new URL( urlString );
 			
-			// check that it's FTP
-			if ( !url.getProtocol().equalsIgnoreCase("ftp") ) {
-				throw new BadResponseException( "Not an ftp url: "
-						+ urlString + "\n" + responseString  );
+			// the url returned does not have ftp:// in front of it
+			// i.e. :  server/path
+			
+			final String[] urlSplit = urlString.split( "/", 2 );
+			
+			if ( urlSplit.length < 2 ) {
+				throw new BadResponseException( "No slash (/) present to separate server from path: "
+				+ urlString + "\n" + responseString );
 			}
-			
+
 			// we're all good now
-			_ftpUrl = url;
+			
+			_ftpServer = urlSplit[0];
+			_ftpPath = urlSplit[1];
+			
 			_identifier = nId;
 			
 			
