@@ -3,6 +3,8 @@ package com.limegroup.gnutella.archive;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import org.w3c.dom.Document;
+
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
@@ -11,7 +13,7 @@ import com.limegroup.gnutella.FileDesc;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.2 2005-10-28 19:43:16 tolsen Exp $";
+	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.3 2005-10-28 19:44:24 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
