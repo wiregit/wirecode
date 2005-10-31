@@ -1,19 +1,25 @@
 package com.limegroup.gnutella.archive;
 
-import java.io.OutputStream;
 import java.util.HashMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.httpclient.URIException;
 import org.w3c.dom.Document;
-
+import org.w3c.dom.Element;
+import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.3 2005-10-28 19:44:24 tolsen Exp $";
+	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.4 2005-10-31 20:51:17 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -57,18 +63,23 @@ class File {
 
 	private static final String OGG_VORBIS = "Ogg Vorbis";
 
-	private FileDesc _fd;
+	
+	private FileDetails _fd;
 
 	private String _format;
 	private String _runtime;
+	private String _licenseUrl;
+	private String _licenseDeclaration;
 	
-	private Document _xmlDoc;
+	private Element _element;
 
 	/*
 	 * @throws UnsupportedFormatException
 	 */
-	File(FileDesc fd) {
+	File(FileDetails fd) {
 		_fd = fd;
+		
+		final LimeXMLDocument xmlDoc = _fd.getXMLDocument();
 
 		final String fileName = _fd.getFileName();
 
@@ -77,7 +88,7 @@ class File {
 			// check the bitrate
 			
 			try {
-				final String bitRateStr = _fd.getXMLDocument().getValue(LimeXMLNames.AUDIO_BITRATE);
+				final String bitRateStr = xmlDoc.getValue(LimeXMLNames.AUDIO_BITRATE);
 				
 				if ( bitRateStr != null ) {
 					final Integer bitRate = Integer.valueOf( bitRateStr );
@@ -106,22 +117,122 @@ class File {
 		// set the runtime 
 		
 		try {
-		final String secondsStr = _fd.getXMLDocument().getValue(LimeXMLNames.AUDIO_SECONDS);
-		
-		if ( secondsStr != null ) {
-			final int seconds = Integer.parseInt(secondsStr);
-			_runtime = CommonUtils.seconds2time( seconds );
-		}
-		
+			final String secondsStr = xmlDoc.getValue(LimeXMLNames.AUDIO_SECONDS);
+			
+			if ( secondsStr != null ) {
+				final int seconds = Integer.parseInt(secondsStr);
+				_runtime = CommonUtils.seconds2time( seconds );
+			}
+			
 		} catch (NumberFormatException e) {
 		}
 		
+		// set the licenseUrl and licenseDeclaration
+		
+		try {
+			if ( xmlDoc.isLicenseAvailable() ) {
+				final License license = xmlDoc.getLicense();
+				
+				if ( license.getLicenseName() == LicenseFactory.CC_NAME ) {
+					_licenseUrl = license.getLicenseURI().getURI(); 
+					_licenseDeclaration = xmlDoc.getLicenseString();
+				}
+			}
+		} catch ( final URIException e ) {
+		}
 	}
 	
-	public void serialize( OutputStream o ) {
-		
-		
+	String getLicenseUrl() {
+		return _licenseUrl;
 	}
 	
+	String getLicenseDeclaration() {
+		return _licenseDeclaration;
+	}
+	
+	String getFileName() {
+		return _fd.getFileName();
+	}
+	
+	FileDetails getFileDetails() {
+		return _fd;
+	}
+	
+	/*
+	 * Sample XML representation:
+	 * 
+	 *   <file name="MyHomeMovie.mpeg" source="original">
+	 *     <runtime>2:30</runtime>
+	 *     <format>MPEG2</format>
+	 *   </file>
+	 */
+	
+	private static final String _fileElement = "file";
+	private static final String _nameAttr = "name";
+	private static final String _sourceAttr = "source";
+	private static final String _sourceAttrDefaultValue = "original";
+	private static final String _runtimeElement = "runtime";
+	private static final String _formatElement = "format";
+	private static final String _licenseElement = "license";
+	
+	/**
+	 * @throws 	IllegalStateException
+	 * 			If there is problem with java's XML parser configuration
+	 * @return
+	 */
+	Element getElement() {
+		if ( _element == null ) {
+			try {
+				final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				final DocumentBuilder db = dbf.newDocumentBuilder();
+				final Document document = db.newDocument();
+				
+				final Element fileElement = document.createElement(_fileElement);
+				
+				// hmm.. I wonder if this works if I don't append _fileElement
+				// as a child to the document
+				
+				fileElement.setAttribute( _nameAttr, getFileName());
+				fileElement.setAttribute( _sourceAttr, _sourceAttrDefaultValue );
+				
+				if ( _runtime != null ) {
+					final Element runtimeElement = document.createElement(_runtimeElement);
+					runtimeElement.appendChild( document.createTextNode( _runtime ));
+					fileElement.appendChild( runtimeElement );
+				}
+				
+				// _format should not be null (otherwise we would have thrown
+				// an UnsupportedFormatException upon construction)
+				final Element formatElement = document.createElement(_formatElement);
+				formatElement.appendChild( document.createTextNode( _format ));
+				fileElement.appendChild( formatElement );
+				
+				// defacto standard due to ccPublisher.  each <file> has
+				// a child <license> element with its text set to be
+				// the license declaration
+				
+				final String licenseDeclaration = getLicenseDeclaration(); 
+				
+				if ( licenseDeclaration != null ) {
+					final Element licenseElement = document.createElement( _licenseElement );
+					licenseElement.appendChild( document.createTextNode( licenseDeclaration ));
+					fileElement.appendChild( licenseElement );					
+				}
+				
+				// we all good now
+				_element = fileElement;
+				
+			} catch (final ParserConfigurationException e) {
+				e.printStackTrace();
+				
+				final IllegalStateException ise = new IllegalStateException();
+				ise.initCause( e );
+				throw ise;
+			}	
+		}
+		
+		return _element;
+		
+	}
 
 }

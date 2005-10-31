@@ -2,47 +2,87 @@ package com.limegroup.gnutella.archive;
 
 import java.util.EventObject;
 
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
 
 public class UploadEvent extends EventObject {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.1 2005-10-26 20:02:48 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.2 2005-10-31 20:51:17 tolsen Exp $";
 
 	private static final long serialVersionUID = 7412297699826457995L;
+	
+	public static final int FILE_STARTED = 1;
+	public static final int FILE_PROGRESSED = 2;
+	public static final int FILE_COMPLETED = 3;
+	public static final int CONNECTED = 4;
+	public static final int LOGGED_IN = 5;
+	public static final int DIR_CHANGED = 6;
 
-	private FileDesc _fd;
-	private long _bytesRead;
+	private FileDetails _fd;
+	private int _filesSent;
+	private int _totalFiles;
+	private long _fileBytesSent;
 	private long _fileSize;
+	private long _totalBytesSent;
+	private long _totalSize;
+
 	
-	public UploadEvent(Object source) {
+	private final int _id;
+	
+	public UploadEvent(Object source, int id) {
 		super(source);
-		// TODO Auto-generated constructor stub
+		_id = id;
 	}
 	
-	public UploadEvent() {
-		this( null );
-	}
-	
-	public UploadEvent( FileDesc fd, long bytesRead, long fileSize ) {
-		this();
+	public UploadEvent( Object source, int id, FileDetails fd, 
+			int filesSent, int totalFiles, 
+			long fileBytesSent, long fileSize,
+			long totalBytesSent, long totalSize ) {
+		this( source, id );
 		_fd = fd;
-		_bytesRead = bytesRead;
+		_filesSent = filesSent;
+		_totalFiles = totalFiles;
+		_fileBytesSent = fileBytesSent;
 		_fileSize = fileSize;
+		_totalBytesSent = totalBytesSent;
+		_totalSize = totalSize;
 	}
 	
-	public long getBytesRead() {
-		return _bytesRead;
+	public int getFilesSent() {
+		return _filesSent;
+	}
+
+	public int getTotalFiles() {
+		return _totalFiles;
+	}
+
+	
+	public long getFileBytesSent() {
+		return _fileBytesSent;
 	}
 	
 	public long getFileSize() {
 		return _fileSize;
 	}
 	
-	public FileDesc getFD() {
-		return _fd;
+	
+	public long getTotalBytesSent() {
+		return _totalBytesSent;
 	}
 	
+	public long getTotalSize() {
+		return _totalSize;
+	}
+
+	
+	public String getFileName() {
+		return _fd.getFileName();
+	}
+
+	
+	public int getID() {
+		return _id;
+	}
 
 
 

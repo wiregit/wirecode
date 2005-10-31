@@ -2,12 +2,15 @@ package com.limegroup.gnutella.archive;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
 
 /**
  * Follow these steps to do upload a contribution to the 
@@ -27,7 +30,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.2 2005-10-27 18:30:43 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.3 2005-10-31 20:51:17 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -35,7 +38,7 @@ public abstract class AbstractContribution {
 
 	private String _username;
 	
-	private final LinkedHashSet _fds = new LinkedHashSet();
+	private final LinkedHashMap _files = new LinkedHashMap();
 	private final ArrayList _uploadListeners = new ArrayList();
 	
 	// if by chance this class becomes serializable, and
@@ -46,6 +49,7 @@ public abstract class AbstractContribution {
 	/** String -> String */
 	private HashMap _fields = new HashMap();
 
+	private volatile boolean _cancelled = false; 
 	
 	abstract public String getVerificationUrl();
 	
@@ -56,25 +60,81 @@ public abstract class AbstractContribution {
 	
 	abstract public void upload();
 	
-	// a collection consists of one or more files
+	// a contribution consists of one or more files
+	// note that we currently set the licenseurl for the
+	// contribution to th
 	
-	public void addFile( FileDesc fd ) { _fds.add( fd ); }	
-	public void removeFile( FileDesc fd ) { _fds.remove( fd ); }
-	public boolean containsFile( FileDesc fd ) { return _fds.contains( fd ); }
+	public void addFileDetails( FileDetails fd ) { 
+		_files.put( fd, new File(fd));
+	}
+	
+	public void removeFileDetails( FileDetails fd ) { 
+		_files.remove( fd );
+	}
+	
+	public boolean containsFileDetails( FileDetails fd ) { 
+		return _files.containsKey( fd ); 
+	}	
+	
+	public void cancel() {
+		_cancelled = true;
+	}
+	
+	protected boolean isCancelled() {
+		return _cancelled;
+	}
 	
 	/**
-	 * @return a set of the files in the collection (implemented as a LinkedHashSet to
-	 * keep the elements in the order they were added)
+	 * @return a set of the files in the collection
+	 * 
+	 * I'm guessing that LinkedHashMap returns a LinkedHashSet for keySet() 
+	 * so the order should be in the order they were added
 	 *         
 	 */
-	public Set getFiles() { return Collections.unmodifiableSet( _fds ); }
+	public Set getFileDetails() { 
+		return Collections.unmodifiableSet( _files.keySet() ); 
+	}
 	
-	public void addListener( FTPUploadListener l ) {
+	protected Collection getFiles() {
+		return Collections.unmodifiableCollection(_files.values());
+	}
+	
+	public void addListener( UploadListener l ) {
 		_uploadListeners.add( l );
 	}
 	
-	public void removeListener( FTPUploadListener l ) {
+	public void removeListener( UploadListener l ) {
 		_uploadListeners.remove( l );
+	}
+	
+	protected void processUploadEvent( UploadEvent e ) {
+		for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
+			UploadListener l = (UploadListener) i.next();
+			
+			switch ( e.getID() ) {
+			case UploadEvent.FILE_STARTED:
+				l.fileStarted( e );
+				break;
+			case UploadEvent.FILE_PROGRESSED:
+				l.fileProgressed( e );
+				break;
+			case UploadEvent.FILE_COMPLETED:
+				l.fileCompleted( e );
+				break;
+			case UploadEvent.CONNECTED:
+				l.connected( e );
+				break;
+			case UploadEvent.LOGGED_IN:
+				l.loggedIn( e );
+				break;
+			case UploadEvent.DIR_CHANGED:
+				l.dirChanged( e );
+				break;
+			default:	
+				break;
+			}
+			
+		}
 	}
 	
 	public void setTitle( String title ) {
@@ -164,6 +224,10 @@ public abstract class AbstractContribution {
 	
 	public void removeField( String field ) {
 		_fields.remove( field );
+	}
+	
+	protected Map getFields() {
+		return Collections.unmodifiableMap( _fields );
 	}
 
 	
