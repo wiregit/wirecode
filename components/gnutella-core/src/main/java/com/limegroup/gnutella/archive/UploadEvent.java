@@ -7,7 +7,7 @@ import com.limegroup.gnutella.FileDetails;
 public class UploadEvent extends EventObject {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.2 2005-10-31 20:51:17 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.3 2005-10-31 20:59:55 tolsen Exp $";
 
 	private static final long serialVersionUID = 7412297699826457995L;
 	
@@ -15,8 +15,7 @@ public class UploadEvent extends EventObject {
 	public static final int FILE_PROGRESSED = 2;
 	public static final int FILE_COMPLETED = 3;
 	public static final int CONNECTED = 4;
-	public static final int LOGGED_IN = 5;
-	public static final int DIR_CHANGED = 6;
+	public static final int COMPLETED = 5;
 
 	private FileDetails _fd;
 	private int _filesSent;

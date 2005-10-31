@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.4 2005-10-31 20:51:17 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.5 2005-10-31 20:59:55 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -323,19 +323,15 @@ public class DefaultContribution extends AbstractContribution {
 				ftp.disconnect();
 				throw new RefusedConnection( _ftpServer + "refused FTP connection" );
 			}
-			
-			
-			
-			processUploadEvent( new UploadEvent( this, UploadEvent.CONNECTED ));
-			
 			// now login
 			ftp.login( username, password );
-			processUploadEvent( new UploadEvent( this, UploadEvent.LOGGED_IN));
 
+			processUploadEvent( new UploadEvent( this, UploadEvent.CONNECTED ));
+			
 			// now change directory
 			ftp.changeWorkingDirectory( _ftpPath );
 			ftp.setFileType( FTP.BINARY_FILE_TYPE );
-			processUploadEvent( new UploadEvent( this, UploadEvent.DIR_CHANGED ));
+
 			
 			
 		} catch (SocketException e) {
