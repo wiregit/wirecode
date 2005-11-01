@@ -1,10 +1,6 @@
 package com.limegroup.gnutella.archive;
 
 import java.util.HashMap;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.httpclient.URIException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,7 +15,7 @@ import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.5 2005-11-01 21:52:34 mkornfilt Exp $";
+	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.6 2005-11-01 21:59:38 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -175,21 +171,20 @@ class File {
 	private static final String _formatElement = "format";
 	private static final String _licenseElement = "license";
 	
+
 	/**
-	 * @throws 	IllegalStateException
-	 * 			If there is problem with java's XML parser configuration
+	 * 
+	 * @param document
+	 * 	      root document for generating the element
 	 * @return
 	 */
-	Element getElement() {
+	
+	Element getElement( Document document ) {
 		if ( _element == null ) {
-			try {
-				final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-				final DocumentBuilder db = dbf.newDocumentBuilder();
-				final Document document = db.newDocument();
+		
 				
 				final Element fileElement = document.createElement(_fileElement);
 				
-				document.appendChild(fileElement);
 				
 				fileElement.setAttribute( _nameAttr, getFileName());
 				fileElement.setAttribute( _sourceAttr, _sourceAttrDefaultValue );
@@ -220,14 +215,6 @@ class File {
 				
 				// we all good now
 				_element = fileElement;
-				
-			} catch (final ParserConfigurationException e) {
-				e.printStackTrace();
-				
-				final IllegalStateException ise = new IllegalStateException();
-				ise.initCause( e );
-				throw ise;
-			}	
 		}
 		
 		return _element;

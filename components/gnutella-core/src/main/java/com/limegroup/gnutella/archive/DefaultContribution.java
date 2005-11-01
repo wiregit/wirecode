@@ -41,7 +41,7 @@ import com.limegroup.gnutella.FileDesc;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.7 2005-11-01 20:30:41 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.8 2005-11-01 21:59:38 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -576,7 +576,7 @@ public class DefaultContribution extends AbstractContribution {
 			for (final Iterator i = files.iterator(); i.hasNext();) {
 				final File file = (File) i.next();
 				
-				final Element fileElement = file.getElement();
+				final Element fileElement = file.getElement( document );
 				filesElement.appendChild( fileElement );
 			}
 			
