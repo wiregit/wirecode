@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.FileDesc;
 
 /**
  * Follow these steps to do upload a contribution to the 
@@ -30,7 +30,7 @@ import com.limegroup.gnutella.FileDetails;
 public abstract class AbstractContribution {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.5 2005-10-31 22:06:09 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.6 2005-11-01 20:01:05 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -58,21 +58,21 @@ public abstract class AbstractContribution {
 	abstract public String reserveIdentifier( String identifier )
 	throws IdentifierUnavailableException, IOException;
 	
-	abstract public void upload();
+	abstract public void upload() throws IOException;
 	
 	// a contribution consists of one or more files
 	// note that we currently set the licenseurl for the
 	// contribution to th
 	
-	public void addFileDetails( FileDetails fd ) { 
+	public void addFileDesc( FileDesc fd ) { 
 		_files.put( fd, new File(fd));
 	}
 	
-	public void removeFileDetails( FileDetails fd ) { 
+	public void removeFileDesc( FileDesc fd ) { 
 		_files.remove( fd );
 	}
 	
-	public boolean containsFileDetails( FileDetails fd ) { 
+	public boolean containsFileDesc( FileDesc fd ) { 
 		return _files.containsKey( fd ); 
 	}	
 	
@@ -91,7 +91,7 @@ public abstract class AbstractContribution {
 	 * so the order should be in the order they were added
 	 *         
 	 */
-	public Set getFileDetails() { 
+	public Set getFileDescs() { 
 		return Collections.unmodifiableSet( _files.keySet() ); 
 	}
 	
@@ -107,7 +107,7 @@ public abstract class AbstractContribution {
 		_uploadListeners.remove( l );
 	}
 	
-	protected void processUploadEvent( UploadEvent e ) {
+	void processUploadEvent( UploadEvent e ) {
 		for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
 			UploadListener l = (UploadListener) i.next();
 			

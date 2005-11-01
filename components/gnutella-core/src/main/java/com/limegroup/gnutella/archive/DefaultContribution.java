@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.archive;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
@@ -25,17 +28,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.FileDesc;
 
 
 
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.5 2005-10-31 20:59:55 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.6 2005-11-01 20:01:05 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -166,7 +169,9 @@ public class DefaultContribution extends AbstractContribution {
 		} catch (final IOException e) {
 			e.printStackTrace();
 			throw (e);
-		}	
+		} finally {
+			responseStream.close();
+		}
 		
 		/*
 		 * On success, XML will be returned like:
@@ -283,7 +288,12 @@ public class DefaultContribution extends AbstractContribution {
 	 * 			(no username, password, server, etc. set)
 	 * 			or if java's xml parser is configured badly
 	 */
-	public void upload() {
+	
+	private static final int  NUM_XML_FILES = 2;
+	private static final String META_XML_SUFFIX = "_meta.xml";
+	private static final String FILES_XML_SUFFIX = "_files.xml";
+	
+	public void upload() throws SocketException, RefusedConnectionException, IOException {
 		
 		String username = getUsername();
 		String password = getPassword();
@@ -303,50 +313,112 @@ public class DefaultContribution extends AbstractContribution {
 		
 		// calculate total number of files and bytes
 		
-		Set fileDetails = getFileDetails();
+
 		
-		int totalFiles = 0;
-		long totalBytes = 0;
+		final String metaXmlString = serializeDocument( getMetaDocument() );
+		final String filesXmlString = serializeDocument( getFilesDocument() );
 		
+		final byte[] metaXmlBytes = metaXmlString.getBytes();
+		final byte[] filesXmlBytes = filesXmlString.getBytes();
 		
+		final int metaXmlLength = metaXmlBytes.length;
+		final int filesXmlLength = filesXmlBytes.length;
 		
-		try {
+		final Set fileDescs = getFileDescs();
+		
+		final int totalFiles = NUM_XML_FILES + fileDescs.size();
+		
+		final String[] fileNames = new String[totalFiles];
+		final long[] fileSizes = new long[totalFiles];
+		
+		final String metaXmlName = _identifier + META_XML_SUFFIX; 
+		fileNames[0] = metaXmlName;
+		fileSizes[0] = metaXmlLength;
+		
+		final String filesXmlName = _identifier + FILES_XML_SUFFIX;
+		fileNames[1] = filesXmlName;
+		fileSizes[1] = filesXmlLength;
+		
+		int j = 2;
+		for (Iterator i = fileDescs.iterator(); i.hasNext();) {
+			final FileDesc fd = (FileDesc) i.next();
+			fileNames[j] = fd.getFileName();
+			fileSizes[j] = fd.getFileSize();
+			j++;
+		}
+		
+		final UploadEvent uploadEvent = new UploadEvent( this, fileNames, fileSizes );
+		
+	
 			// first connect
 			FTPClient ftp = new FTPClient();
 			ftp.enterLocalPassiveMode();
-			
-			
 			ftp.connect( _ftpServer );
 			
 			final int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
 				ftp.disconnect();
-				throw new RefusedConnection( _ftpServer + "refused FTP connection" );
+				throw new RefusedConnectionException( _ftpServer + "refused FTP connection" );
 			}
 			// now login
 			ftp.login( username, password );
-
-			processUploadEvent( new UploadEvent( this, UploadEvent.CONNECTED ));
-			
 			// now change directory
 			ftp.changeWorkingDirectory( _ftpPath );
+
+			uploadEvent.connected();
+			processUploadEvent( uploadEvent );
+
+			
+			// upload xml files
+			uploadFile( metaXmlName,
+					new ByteArrayInputStream( metaXmlBytes ),
+					ftp, uploadEvent );
+			
+			
+			uploadFile( filesXmlName,
+						new ByteArrayInputStream( filesXmlBytes ),
+						ftp, uploadEvent );
+			
+			// now switch to binary mode
 			ftp.setFileType( FTP.BINARY_FILE_TYPE );
-
 			
+			// upload contributed files
+			for (final Iterator i = fileDescs.iterator(); i.hasNext();) {
+				final FileDesc fd = (FileDesc) i.next();
+				
+				uploadFile( fd.getFileName(), 
+						new FileInputStream( fd.getFile() ),
+						ftp,uploadEvent );
+			}
 			
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
+			ftp.logout();
+			ftp.disconnect();	
 		
 	}
 	
-	
+	/**
+	 * 
+	 * @param fileName
+	 * @param input
+	 * 		  The input stream (not necessarily buffered).
+	 *        This stream will be closed by this method
+	 */
+	private void uploadFile( String fileName, InputStream input,
+			FTPClient ftp, UploadEvent uploadEvent )
+	throws IOException {
+		uploadEvent.fileStarted( fileName );
+		processUploadEvent( uploadEvent );
+		final InputStream fileStream = new BufferedInputStream(
+				new UploadMonitorInputStream( input, this, uploadEvent ));
+		
+		try {
+			ftp.storeFile( fileName, fileStream );
+		} finally {
+			fileStream.close();
+		}
+		uploadEvent.fileCompleted();
+		processUploadEvent( uploadEvent );
+	}
 	
 
 	/*
@@ -474,7 +546,6 @@ public class DefaultContribution extends AbstractContribution {
 			
 		} catch (final ParserConfigurationException e) {
 			e.printStackTrace();
-			
 			final IllegalStateException ise = new IllegalStateException();
 			ise.initCause( e );
 			throw ise;
