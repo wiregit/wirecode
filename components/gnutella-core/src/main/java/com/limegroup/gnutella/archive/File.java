@@ -19,7 +19,7 @@ import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.4 2005-10-31 20:51:17 tolsen Exp $";
+	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.5 2005-11-01 21:52:34 mkornfilt Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -189,8 +189,7 @@ class File {
 				
 				final Element fileElement = document.createElement(_fileElement);
 				
-				// hmm.. I wonder if this works if I don't append _fileElement
-				// as a child to the document
+				document.appendChild(fileElement);
 				
 				fileElement.setAttribute( _nameAttr, getFileName());
 				fileElement.setAttribute( _sourceAttr, _sourceAttrDefaultValue );
