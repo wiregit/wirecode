@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,7 +23,9 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.io.CopyStreamException;
 import org.apache.xerces.dom3.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,7 +41,7 @@ import com.limegroup.gnutella.FileDesc;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.6 2005-11-01 20:01:05 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.7 2005-11-01 20:30:41 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -282,18 +285,48 @@ public class DefaultContribution extends AbstractContribution {
 		return "";
 	}
 
-	/**
-	 * @throws	IllegalStateException
-	 * 			If the contribution object is not ready to upload
-	 * 			(no username, password, server, etc. set)
-	 * 			or if java's xml parser is configured badly
-	 */
 	
 	private static final int  NUM_XML_FILES = 2;
 	private static final String META_XML_SUFFIX = "_meta.xml";
 	private static final String FILES_XML_SUFFIX = "_files.xml";
 	
-	public void upload() throws SocketException, RefusedConnectionException, IOException {
+
+	/**
+	 * 
+	 * @throws UnknownHostException
+	 *         If the hostname cannot be resolved.
+	 *         
+	 * @throws SocketException
+	 *         If the socket timeout could not be set.
+	 *         
+	 * @throws FTPConnectionClosedException
+	 *         If the connection is closed by the server.
+	 *         
+	 * @throws LoginFailedException
+	 *         If the login fails.
+	 *         
+	 * @throws DirectoryChangeFailedException
+	 *         If changing to the directory provided by the internet
+	 *         archive fails.
+	 *         
+	 * @throws CopyStreamException
+	 *         If an I/O error occurs while in the middle of
+	 *         transferring a file.
+	 *         
+	 * @throws IOException
+	 *         If an I/O error occurs while sending a command or
+	 *         receiving a reply from the server
+	 *         
+	 * @throws IllegalStateException
+	 * 		   If the contribution object is not ready to upload
+	 * 		   (no username, password, server, etc. set)
+	 * 		   or if java's xml parser is configured badly
+	 */
+	
+	public void upload() throws UnknownHostException, SocketException, 
+	FTPConnectionClosedException, LoginFailedException,
+	DirectoryChangeFailedException, CopyStreamException, 
+	RefusedConnectionException, IOException {
 		
 		String username = getUsername();
 		String password = getPassword();
@@ -361,9 +394,14 @@ public class DefaultContribution extends AbstractContribution {
 				throw new RefusedConnectionException( _ftpServer + "refused FTP connection" );
 			}
 			// now login
-			ftp.login( username, password );
+			if (!ftp.login( username, password )) {
+				throw new LoginFailedException();
+			}
+			
 			// now change directory
-			ftp.changeWorkingDirectory( _ftpPath );
+			if (!ftp.changeWorkingDirectory( _ftpPath )) {
+				throw new DirectoryChangeFailedException();
+			}
 
 			uploadEvent.connected();
 			processUploadEvent( uploadEvent );
@@ -391,7 +429,7 @@ public class DefaultContribution extends AbstractContribution {
 						ftp,uploadEvent );
 			}
 			
-			ftp.logout();
+			ftp.logout();  // we don't care if logging out fails
 			ftp.disconnect();	
 		
 	}
