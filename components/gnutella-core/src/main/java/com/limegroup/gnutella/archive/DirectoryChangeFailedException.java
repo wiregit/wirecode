@@ -5,7 +5,7 @@ import java.io.IOException;
 public class DirectoryChangeFailedException extends IOException {
 
 	public static final String repositoryVersion =
-		"$Header";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectoryChangeFailedException.java,v 1.1.2.2 2005-11-01 20:41:53 tolsen Exp $";
 	
 	private static final long serialVersionUID = 2754710183495849898L;
 
