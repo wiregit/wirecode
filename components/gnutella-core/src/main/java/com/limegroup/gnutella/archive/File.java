@@ -11,11 +11,12 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.6 2005-11-01 21:59:38 tolsen Exp $";
+	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.7 2005-11-02 16:37:25 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -60,7 +61,7 @@ class File {
 	private static final String OGG_VORBIS = "Ogg Vorbis";
 
 	
-	private FileDetails _fd;
+	private final FileDesc _fd;
 
 	private String _format;
 	private String _runtime;
@@ -68,16 +69,20 @@ class File {
 	private String _licenseDeclaration;
 	
 	private Element _element;
+	
+	private final String _remoteFileName;  // normalized
 
 	/*
 	 * @throws UnsupportedFormatException
 	 */
-	File(FileDetails fd) {
+	File(FileDesc fd) {
 		_fd = fd;
 		
 		final LimeXMLDocument xmlDoc = _fd.getXMLDocument();
 
 		final String fileName = _fd.getFileName();
+		
+		_remoteFileName = Archives.normalizeName( fileName );
 
 		// set the format
 		if (LimeXMLUtils.isMP3File(fileName)) {
@@ -146,12 +151,24 @@ class File {
 		return _licenseDeclaration;
 	}
 	
-	String getFileName() {
+	String getLocalFileName() {
 		return _fd.getFileName();
+	}
+	
+	String getRemoteFileName() {
+		return _remoteFileName;
 	}
 	
 	FileDetails getFileDetails() {
 		return _fd;
+	}
+	
+	long getFileSize() {
+		return _fd.getFileSize();
+	}
+	
+	java.io.File getIOFile() {
+		return _fd.getFile();
 	}
 	
 	/*
@@ -186,7 +203,7 @@ class File {
 				final Element fileElement = document.createElement(_fileElement);
 				
 				
-				fileElement.setAttribute( _nameAttr, getFileName());
+				fileElement.setAttribute( _nameAttr, getRemoteFileName());
 				fileElement.setAttribute( _sourceAttr, _sourceAttrDefaultValue );
 				
 				if ( _runtime != null ) {

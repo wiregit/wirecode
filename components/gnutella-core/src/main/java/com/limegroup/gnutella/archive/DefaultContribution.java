@@ -10,9 +10,6 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,14 +31,12 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.FileDesc;
-
 
 
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.9 2005-11-02 16:04:09 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.10 2005-11-02 16:37:25 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -258,7 +253,7 @@ public class DefaultContribution extends AbstractContribution {
 		
 	}
 	
-	/** helper function for setIdentifier() */
+	/** helper function for reserveIdentifier() */
 	private static Node _findChildElement( Node parent, String name ) {
 		Node n = parent.getFirstChild();
 		for ( ; n != null; n = n.getNextSibling() ) {
@@ -270,7 +265,7 @@ public class DefaultContribution extends AbstractContribution {
 		return n;
 	}
 	
-	/** helper function for setIdentifier() */
+	/** helper function for reserveIdentifier() */
 	private static String _findText( Node parent ) {
 
 		for ( Node n = parent.getFirstChild(); 
@@ -326,8 +321,8 @@ public class DefaultContribution extends AbstractContribution {
 	DirectoryChangeFailedException, CopyStreamException, 
 	RefusedConnectionException, IOException {
 		
-		String username = getUsername();
-		String password = getPassword();
+		final String username = getUsername();
+		final String password = getPassword();
 		
 		if ( _ftpServer == null ) {
 			throw new IllegalStateException( "ftp server not set" );
@@ -344,7 +339,7 @@ public class DefaultContribution extends AbstractContribution {
 		
 		// calculate total number of files and bytes
 		
-
+		
 		
 		final String metaXmlString = serializeDocument( getMetaDocument() );
 		final String filesXmlString = serializeDocument( getFilesDocument() );
@@ -355,9 +350,9 @@ public class DefaultContribution extends AbstractContribution {
 		final int metaXmlLength = metaXmlBytes.length;
 		final int filesXmlLength = filesXmlBytes.length;
 		
-		final Set fileDescs = getFileDescs();
+		final Collection files = getFiles();
 		
-		final int totalFiles = NUM_XML_FILES + fileDescs.size();
+		final int totalFiles = NUM_XML_FILES + files.size();
 		
 		final String[] fileNames = new String[totalFiles];
 		final long[] fileSizes = new long[totalFiles];
@@ -371,24 +366,25 @@ public class DefaultContribution extends AbstractContribution {
 		fileSizes[1] = filesXmlLength;
 		
 		int j = 2;
-		for (Iterator i = fileDescs.iterator(); i.hasNext();) {
-			final FileDesc fd = (FileDesc) i.next();
-			fileNames[j] = fd.getFileName();
-			fileSizes[j] = fd.getFileSize();
+		for (Iterator i = files.iterator(); i.hasNext();) {
+			final File f = (File) i.next();
+			fileNames[j] = f.getLocalFileName();
+			fileSizes[j] = f.getFileSize();
 			j++;
 		}
 		
 		final UploadEvent uploadEvent = new UploadEvent( this, fileNames, fileSizes );
 		
-	
+		FTPClient ftp = new FTPClient();
+		
+		try {
 			// first connect
-			FTPClient ftp = new FTPClient();
+			
 			ftp.enterLocalPassiveMode();
 			ftp.connect( _ftpServer );
 			
 			final int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
-				ftp.disconnect();
 				throw new RefusedConnectionException( _ftpServer + "refused FTP connection" );
 			}
 			// now login
@@ -396,40 +392,44 @@ public class DefaultContribution extends AbstractContribution {
 				throw new LoginFailedException();
 			}
 			
-			// now change directory
-			if (!ftp.changeWorkingDirectory( _ftpPath )) {
-				throw new DirectoryChangeFailedException();
-			}
-
-			uploadEvent.connected();
-			processUploadEvent( uploadEvent );
-
-			
-			// upload xml files
-			uploadFile( metaXmlName,
-					new ByteArrayInputStream( metaXmlBytes ),
-					ftp, uploadEvent );
-			
-			
-			uploadFile( filesXmlName,
+			try {
+				
+				// now change directory
+				if (!ftp.changeWorkingDirectory( _ftpPath )) {
+					throw new DirectoryChangeFailedException();
+				}
+				
+				uploadEvent.connected();
+				processUploadEvent( uploadEvent );
+				
+				
+				// upload xml files
+				uploadFile( metaXmlName, metaXmlName,
+						new ByteArrayInputStream( metaXmlBytes ),
+						ftp, uploadEvent );
+				
+				
+				uploadFile( filesXmlName, filesXmlName,
 						new ByteArrayInputStream( filesXmlBytes ),
 						ftp, uploadEvent );
-			
-			// now switch to binary mode
-			ftp.setFileType( FTP.BINARY_FILE_TYPE );
-			
-			// upload contributed files
-			for (final Iterator i = fileDescs.iterator(); i.hasNext();) {
-				final FileDesc fd = (FileDesc) i.next();
 				
-				uploadFile( fd.getFileName(), 
-						new FileInputStream( fd.getFile() ),
-						ftp,uploadEvent );
+				// now switch to binary mode
+				ftp.setFileType( FTP.BINARY_FILE_TYPE );
+				
+				// upload contributed files
+				for (final Iterator i = files.iterator(); i.hasNext();) {
+					final File f = (File) i.next();
+					
+					uploadFile( f.getLocalFileName(), f.getRemoteFileName(), 
+							new FileInputStream( f.getIOFile() ),
+							ftp,uploadEvent );
+				}
+			} finally {
+				ftp.logout(); // we don't care if logging out fails
 			}
-			
-			ftp.logout();  // we don't care if logging out fails
+		} finally {
 			ftp.disconnect();	
-		
+		}
 	}
 	
 	/**
@@ -439,16 +439,16 @@ public class DefaultContribution extends AbstractContribution {
 	 * 		  The input stream (not necessarily buffered).
 	 *        This stream will be closed by this method
 	 */
-	private void uploadFile( String fileName, InputStream input,
-			FTPClient ftp, UploadEvent uploadEvent )
+	private void uploadFile( String localFileName, String remoteFileName, 
+			InputStream input, FTPClient ftp, UploadEvent uploadEvent )
 	throws IOException {
-		uploadEvent.fileStarted( fileName );
+		uploadEvent.fileStarted( localFileName );
 		processUploadEvent( uploadEvent );
 		final InputStream fileStream = new BufferedInputStream(
 				new UploadMonitorInputStream( input, this, uploadEvent ));
 		
 		try {
-			ftp.storeFile( fileName, fileStream );
+			ftp.storeFile( remoteFileName, fileStream );
 		} finally {
 			fileStream.close();
 		}
