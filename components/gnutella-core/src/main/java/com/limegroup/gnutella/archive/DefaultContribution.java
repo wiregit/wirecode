@@ -41,7 +41,7 @@ import com.limegroup.gnutella.FileDesc;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.8 2005-11-01 21:59:38 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.9 2005-11-02 16:04:09 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -63,7 +63,7 @@ public class DefaultContribution extends AbstractContribution {
 	public DefaultContribution( String username, String password, 
 			String title, int media ) {
 		this( username, password, title, media, 
-				ArchiveConstants.defaultCollectionForMedia( media ));
+				Archives.defaultCollectionForMedia( media ));
 	}
 	
 	/**
@@ -92,10 +92,7 @@ public class DefaultContribution extends AbstractContribution {
 	}
 
 	
-	// only allow alphanumerics and . - _
-	private static final Pattern _badChars = 
-		Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
-	private static final String _replaceStr = "_";
+
 	
 	private static final String _createIdUrl =
 		"http://www.archive.org:80/create.php";
@@ -129,7 +126,8 @@ public class DefaultContribution extends AbstractContribution {
 	HttpException, IOException {
 		_identifier = null;
 		// normalize the identifier
-		final String nId = _badChars.matcher( identifier ).replaceAll(_replaceStr);
+		
+		String nId = Archives.normalizeName( identifier );
 		
         final HttpClient client = new HttpClient();
 
@@ -233,9 +231,9 @@ public class DefaultContribution extends AbstractContribution {
 			// set verification URL
 			
 			_verificationUrl =  "http://www.archive.org/" +
-				ArchiveConstants.getMediaString( getMedia() ) +
+				Archives.getMediaString( getMedia() ) +
 				"_details_db.php?collection=" +
-				ArchiveConstants.getCollectionString( getCollection() ) +
+				Archives.getCollectionString( getCollection() ) +
 				"&collectionid=" + _identifier;
 			
 			return _identifier;
@@ -494,11 +492,11 @@ public class DefaultContribution extends AbstractContribution {
 			
 			final Element collectionElement = document.createElement( _collectionElement );
 			metadataElement.appendChild( collectionElement );
-			collectionElement.appendChild( document.createTextNode( ArchiveConstants.getMediaString( getMedia())));
+			collectionElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia())));
 			
 			final Element titleElement = document.createElement( _titleElement );
 			metadataElement.appendChild( titleElement );
-			titleElement.appendChild( document.createTextNode( ArchiveConstants.getCollectionString( getCollection())));
+			titleElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
 			
 			//take licenseurl from the first File
 			

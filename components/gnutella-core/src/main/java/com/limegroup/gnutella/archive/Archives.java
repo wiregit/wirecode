@@ -3,11 +3,12 @@ package com.limegroup.gnutella.archive;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-public class ArchiveConstants {
+public class Archives {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveConstants.java,v 1.1.2.2 2005-10-26 20:02:48 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.1 2005-11-02 16:04:09 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	
@@ -110,5 +111,15 @@ public class ArchiveConstants {
 		}
 		return c.intValue();
 	}
+	
+	public static String normalizeName( String name ) {
+		// only allow alphanumerics and . - _
+		final Pattern _badChars = 
+			Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
+		final String _replaceStr = "_";
+		
+		return _badChars.matcher( name ).replaceAll(_replaceStr);
+	}
+	
 	
 }

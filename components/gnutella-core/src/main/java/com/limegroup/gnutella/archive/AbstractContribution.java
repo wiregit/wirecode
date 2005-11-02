@@ -30,7 +30,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.6 2005-11-01 20:01:05 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.7 2005-11-02 16:04:08 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -148,7 +148,7 @@ public abstract class AbstractContribution {
 	 * 
 	 */
 	public void setMedia( int media ) {
-		if ( ArchiveConstants.getMediaString( media ) == null ) {
+		if ( Archives.getMediaString( media ) == null ) {
 			throw new IllegalArgumentException( "Invalid media type: " 
 					+ media );
 		}
@@ -167,7 +167,7 @@ public abstract class AbstractContribution {
 	 *         
 	 */
 	public void setCollection( int collection ) {
-		if ( ArchiveConstants.getCollectionString( collection ) == null ) {
+		if ( Archives.getCollectionString( collection ) == null ) {
 			throw new IllegalArgumentException( "Invalid collection type: " 
 					+ collection );
 		}
