@@ -16,7 +16,8 @@ import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = "$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.7 2005-11-02 16:37:25 tolsen Exp $";
+	public static final String repositoryVersion = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.8 2005-11-02 19:09:12 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:

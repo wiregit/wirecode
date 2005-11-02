@@ -36,7 +36,7 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.10 2005-11-02 16:37:25 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.11 2005-11-02 19:09:12 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -87,11 +87,6 @@ public class DefaultContribution extends AbstractContribution {
 	}
 
 	
-
-	
-	private static final String _createIdUrl =
-		"http://www.archive.org:80/create.php";
-	
 	/** 
 	 * 	normalizes identifier and checks with Internet Archive
 	 *  if identifier is available.
@@ -119,6 +114,9 @@ public class DefaultContribution extends AbstractContribution {
 	public String reserveIdentifier( String identifier ) 
 	throws IdentifierUnavailableException, BadResponseException,
 	HttpException, IOException {
+		
+		final String _createIdUrl = "http://www.archive.org:80/create.php";
+		
 		_identifier = null;
 		// normalize the identifier
 		
@@ -126,49 +124,22 @@ public class DefaultContribution extends AbstractContribution {
 		
         final HttpClient client = new HttpClient();
 
-        final PostMethod post = new PostMethod( _createIdUrl );
-        post.addRequestHeader("Content-type","application/x-www-form-urlencoded");
-        post.addRequestHeader("Accept","text/plain");
+        final PostMethod post = postMethod( _createIdUrl, getUsername(), nId );
 
-        final NameValuePair[] nameVal = new NameValuePair[] {
-                        new NameValuePair("xml","1"),
-                        new NameValuePair("user", getUsername() ),
-                        new NameValuePair("identifier", nId )};
-
-        post.addParameters(nameVal);
-        client.executeMethod(post);
+        client.executeMethod( post );
         
         final String responseString = post.getResponseBodyAsString();
         final InputStream responseStream = post.getResponseBodyAsStream();
-
         post.releaseConnection();
         
-		final DocumentBuilderFactory factory = 
-			DocumentBuilderFactory.newInstance();
-		factory.setIgnoringComments( true );
-		factory.setCoalescing( true );
-		
-		final DocumentBuilder parser;
-		final Document document;
-		
-		try {
-			parser = factory.newDocumentBuilder();
-			document = parser.parse( responseStream );
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			IllegalStateException ise = new IllegalStateException();
-			ise.initCause(e);
-			throw ise;
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			throw new BadResponseException(e);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			throw (e);
-		} finally {
-			responseStream.close();
-		}
-		
+        final Element resultElement;
+        
+        try {
+        	resultElement = getResultElement( responseStream );
+        } finally {
+        	responseStream.close();
+        }
+
 		/*
 		 * On success, XML will be returned like:
 		 * 
@@ -179,15 +150,12 @@ public class DefaultContribution extends AbstractContribution {
 		 * <result type="error"><message>[human readable error]</message></result>
 		 */
 
-		
-		final Node resultNode = _findChildElement( document, "result" );
-		
-		if ( resultNode == null ) {
+		if ( resultElement == null ) {
 			throw new BadResponseException( "No top level element <result>\n"
 					+ responseString );
 		}
 		
-		final Node typeNode = resultNode.getAttributes().getNamedItem( "type" );
+		final Node typeNode = resultElement.getAttributes().getNamedItem( "type" );
 		
 		if ( typeNode == null ) {
 			throw new BadResponseException( "<result> node does not have a \"type\" attribute\n"
@@ -197,7 +165,8 @@ public class DefaultContribution extends AbstractContribution {
 		final String type = typeNode.getNodeValue();
 		
 		if ( type.equals( "success" ) ) {
-			final Node urlNode = _findChildElement( resultNode, "url" ); 
+			
+			final Node urlNode = _findChildElement( resultElement, "url" ); 
 			if ( urlNode == null ) {
 				throw new BadResponseException( "<result type=\"success\"> does not have <url> child\n"
 						+ responseString );
@@ -233,10 +202,11 @@ public class DefaultContribution extends AbstractContribution {
 			
 			return _identifier;
 			
+			
 		} else if ( type.equals( "error" ) ) {
 			// let's fetch the message
 			
-			final Node msgNode = _findChildElement( resultNode, "message" );
+			final Node msgNode = _findChildElement( resultElement, "message" );
 			String msg = "[NO MESSAGE GIVEN]";
 			
 			if ( msgNode != null ) {
@@ -249,20 +219,23 @@ public class DefaultContribution extends AbstractContribution {
 			throw new BadResponseException ( "unidentified value for attribute \"type\" in <result> element \n"
 					+ "(should be either \"success\" or \"error\"): " + type + "\n" + responseString ); 
 		}
+			
+
+
 		
 		
 	}
 	
 	/** helper function for reserveIdentifier() */
-	private static Node _findChildElement( Node parent, String name ) {
+	private static Element _findChildElement( Node parent, String name ) {
 		Node n = parent.getFirstChild();
 		for ( ; n != null; n = n.getNextSibling() ) {
 			if ( n.getNodeType() == Node.ELEMENT_NODE
 					&& n.getNodeName().equals( name )) {
-				break;
+				return (Element) n;
 			}
 		}		
-		return n;
+		return null;
 	}
 	
 	/** helper function for reserveIdentifier() */
@@ -430,6 +403,26 @@ public class DefaultContribution extends AbstractContribution {
 		} finally {
 			ftp.disconnect();	
 		}
+		
+		// now tell the Internet Archive that we're done
+		checkin();
+		
+	}
+	
+	private PostMethod postMethod( String url, String username, String identifier  ) {
+        
+		final PostMethod post = new PostMethod( url );
+        post.addRequestHeader("Content-type","application/x-www-form-urlencoded");
+        post.addRequestHeader("Accept","text/plain");
+
+        final NameValuePair[] nameVal = new NameValuePair[] {
+                        new NameValuePair("xml","1"),
+                        new NameValuePair("user", username ),
+                        new NameValuePair("identifier", identifier )};
+
+        post.addParameters(nameVal);
+        
+        return post;
 	}
 	
 	/**
@@ -456,24 +449,142 @@ public class DefaultContribution extends AbstractContribution {
 		processUploadEvent( uploadEvent );
 	}
 	
-
-	/*
-	 * Sample _meta.xml file:
+	/**
 	 * 
-	 * <metadata>
-	 *   <collection>opensource_movies</collection>
-	 *   <mediatype>movies</mediatype>
-	 *   <title>My Home Movie</title>
-	 *   <runtime>2:30</runtime>
-	 *   <director>Joe Producer</director>
-	 * </metadata>    
+	 * @throws	HttpException
+	 * 			If something bad happens in the http layer
 	 * 
+	 * @throws  IOException
+	 * 			If something bad happens during I/O
+	 * 
+	 * @throws IllegalStateException
+	 *         If username or identifier is not set.
+	 *         
+	 * @throws BadResponseException
+	 *         If the checkin fails
+	 *
 	 */
-	
-	private static final String _metadataElement = "metadata";
-	private static final String _collectionElement = "collection";
-	private static final String _titleElement = "title";
-	private static final String _licenseUrlElement = "licenseurl";
+	private void checkin() throws HttpException, 
+	BadResponseException, IOException {
+		
+		final String checkinUrl = "http://www.archive.org/checkin.php";
+		final String username = getUsername();
+		
+		if ( username == null ) {
+			throw new IllegalStateException( "username not set" );			
+		}
+		if ( _identifier == null ) {
+			throw new IllegalStateException( "identifier not set" );
+		}
+		
+		final PostMethod post = postMethod( checkinUrl, username, _identifier );
+		
+		final HttpClient client = new HttpClient();
+		client.executeMethod( post );
+		
+		final String responseString = post.getResponseBodyAsString();
+		final InputStream responseStream = post.getResponseBodyAsStream();
+		post.releaseConnection();
+		
+		final Element resultElement;
+		
+		try {
+			resultElement = getResultElement( responseStream );
+		} finally {
+			responseStream.close();
+		}
+		
+		/*
+		 * On success, XML will be returned like:
+		 *
+		 * <result type="success"><message>item has been checked in</message></result>
+		 *
+		 * On failure, XML will be returned like:
+		 *
+		 * <result type="error"><message>[human readable error]</message></result>
+		 *
+		 */
+		
+		if ( resultElement == null ) {
+			throw new BadResponseException( "No top level element <result>\n"
+					+ responseString );
+		}
+		
+		final Node typeNode = resultElement.getAttributes().getNamedItem( "type" );
+		
+		if ( typeNode == null ) {
+			throw new BadResponseException( "<result> node does not have a \"type\" attribute\n"
+					+ responseString );
+		}
+		
+		final String type = typeNode.getNodeValue();
+		
+		if ( type.equals( "success" ) ) {
+			return;
+		} else if ( type.equals( "error" ) ) {
+			// let's fetch the message
+			
+			final Node msgNode = _findChildElement( resultElement, "message" );
+			String msg = "[NO MESSAGE GIVEN]";
+			
+			if ( msgNode != null ) {
+				msg = _findText( msgNode );
+			}
+			
+			throw new BadResponseException( "checkin failed: " + msg );
+		} else {
+			// unidentified type
+			throw new BadResponseException( "unidentified value for attribute \"type\" in <result> element \n"
+					+ "(should be either \"success\" or \"error\"): " + type + "\n" + responseString ); 
+		}
+	}
+
+	/**
+	 * 
+	 * @param responseStream
+	 * @param responseString
+	 * @return
+	 * 
+	 * @throws BadResponseException
+	 *         If we get a bad response from Internet Archive
+	 *         
+	 * @throws IOException
+	 *         If something bad happens during I/O
+	 *         
+	 * @throws IllegalStateException
+	 *         If java's xml parser configuration is bad
+	 */
+
+	private Element getResultElement( InputStream responseStream )
+	throws BadResponseException, IOException {
+		
+		final DocumentBuilderFactory factory = 
+			DocumentBuilderFactory.newInstance();
+		factory.setIgnoringComments( true );
+		factory.setCoalescing( true );
+		
+		final DocumentBuilder parser;
+		final Document document;
+		
+		try {
+			parser = factory.newDocumentBuilder();
+			document = parser.parse( responseStream );
+		} catch (final ParserConfigurationException e) {
+			e.printStackTrace();
+			final IllegalStateException ise = new IllegalStateException();
+			ise.initCause(e);
+			throw ise;
+		} catch (final SAXException e) {
+			e.printStackTrace();
+			throw new BadResponseException(e);
+		} catch (final IOException e) {
+			e.printStackTrace();
+			throw (e);
+		} 
+			
+		return _findChildElement( document, "result" );
+
+	}
 	
 	/**
 	 * @throws 	IllegalStateException
@@ -482,6 +593,25 @@ public class DefaultContribution extends AbstractContribution {
 	
 	
 	private Document getMetaDocument() {
+		
+		/*
+		 * Sample _meta.xml file:
+		 * 
+		 * <metadata>
+		 *   <collection>opensource_movies</collection>
+		 *   <mediatype>movies</mediatype>
+		 *   <title>My Home Movie</title>
+		 *   <runtime>2:30</runtime>
+		 *   <director>Joe Producer</director>
+		 * </metadata>    
+		 * 
+		 */
+		
+		final String _metadataElement = "metadata";
+		final String _collectionElement = "collection";
+		final String _titleElement = "title";
+		final String _licenseUrlElement = "licenseurl";
+		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			final DocumentBuilder db = dbf.newDocumentBuilder();
@@ -539,19 +669,7 @@ public class DefaultContribution extends AbstractContribution {
 		}	
 	}
 	
-	/*
-	 * Sample _files.xml file:
-	 * 
-	 * <files>
-	 *   <file name="MyHomeMovie.mpeg" source="original">
-     *     <runtime>2:30</runtime>
-     *     <format>MPEG2</format>
-     *   </file>
-     * </files>    
-	 * 
-	 */
-	
-	private static final String _filesElement = "files";
+
 
 	
 	/**
@@ -561,6 +679,20 @@ public class DefaultContribution extends AbstractContribution {
 	 */
 	
 	private Document getFilesDocument() {
+		/*
+		 * Sample _files.xml file:
+		 * 
+		 * <files>
+		 *   <file name="MyHomeMovie.mpeg" source="original">
+	     *     <runtime>2:30</runtime>
+	     *     <format>MPEG2</format>
+	     *   </file>
+	     * </files>    
+		 * 
+		 */
+		
+		final String _filesElement = "files";
+		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			final DocumentBuilder db = dbf.newDocumentBuilder();
