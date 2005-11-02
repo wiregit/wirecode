@@ -35,8 +35,8 @@ import org.xml.sax.SAXException;
 
 public class DefaultContribution extends AbstractContribution {
 	
-	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.11 2005-11-02 19:09:12 tolsen Exp $";
+	public static final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.12 2005-11-02 20:59:38 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -115,7 +115,7 @@ public class DefaultContribution extends AbstractContribution {
 	throws IdentifierUnavailableException, BadResponseException,
 	HttpException, IOException {
 		
-		final String _createIdUrl = "http://www.archive.org:80/create.php";
+		final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
 		
 		_identifier = null;
 		// normalize the identifier
@@ -124,7 +124,7 @@ public class DefaultContribution extends AbstractContribution {
 		
         final HttpClient client = new HttpClient();
 
-        final PostMethod post = postMethod( _createIdUrl, getUsername(), nId );
+        final PostMethod post = postMethod( CREATE_ID_URL, getUsername(), nId );
 
         client.executeMethod( post );
         
@@ -467,7 +467,7 @@ public class DefaultContribution extends AbstractContribution {
 	private void checkin() throws HttpException, 
 	BadResponseException, IOException {
 		
-		final String checkinUrl = "http://www.archive.org/checkin.php";
+		final String CHECKIN_URL = "http://www.archive.org/checkin.php";
 		final String username = getUsername();
 		
 		if ( username == null ) {
@@ -477,7 +477,7 @@ public class DefaultContribution extends AbstractContribution {
 			throw new IllegalStateException( "identifier not set" );
 		}
 		
-		final PostMethod post = postMethod( checkinUrl, username, _identifier );
+		final PostMethod post = postMethod( CHECKIN_URL, username, _identifier );
 		
 		final HttpClient client = new HttpClient();
 		client.executeMethod( post );
@@ -607,24 +607,24 @@ public class DefaultContribution extends AbstractContribution {
 		 * 
 		 */
 		
-		final String _metadataElement = "metadata";
-		final String _collectionElement = "collection";
-		final String _titleElement = "title";
-		final String _licenseUrlElement = "licenseurl";
+		final String METADATA_ELEMENT = "metadata";
+		final String COLLECTION_ELEMENT = "collection";
+		final String TITLE_ELEMENT = "title";
+		final String LICENSE_URL_ELEMENT = "licenseurl";
 		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			final DocumentBuilder db = dbf.newDocumentBuilder();
 			final Document document = db.newDocument();
 			
-			final Element metadataElement = document.createElement(_metadataElement);
+			final Element metadataElement = document.createElement(METADATA_ELEMENT);
 			document.appendChild( metadataElement );
 			
-			final Element collectionElement = document.createElement( _collectionElement );
+			final Element collectionElement = document.createElement( COLLECTION_ELEMENT );
 			metadataElement.appendChild( collectionElement );
 			collectionElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia())));
 			
-			final Element titleElement = document.createElement( _titleElement );
+			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
 			titleElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
 			
@@ -636,7 +636,7 @@ public class DefaultContribution extends AbstractContribution {
 				final File firstFile = (File) filesIterator.next();
 				final String licenseUrl = firstFile.getLicenseUrl();
 				if ( licenseUrl != null ) {
-					final Element licenseUrlElement = document.createElement( _licenseUrlElement );
+					final Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
 					metadataElement.appendChild( licenseUrlElement );
 					licenseUrlElement.appendChild( document.createTextNode( licenseUrl ));
 				}
@@ -691,14 +691,14 @@ public class DefaultContribution extends AbstractContribution {
 		 * 
 		 */
 		
-		final String _filesElement = "files";
+		final String FILES_ELEMENT = "files";
 		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			final DocumentBuilder db = dbf.newDocumentBuilder();
 			final Document document = db.newDocument();
 			
-			final Element filesElement = document.createElement( _filesElement );
+			final Element filesElement = document.createElement( FILES_ELEMENT );
 			document.appendChild( filesElement );
 			
 			Collection files = getFiles();

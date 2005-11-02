@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 
 public class Archives {
 	
-	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.2 2005-11-02 20:07:17 tolsen Exp $";
+	public static final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.3 2005-11-02 20:59:38 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	

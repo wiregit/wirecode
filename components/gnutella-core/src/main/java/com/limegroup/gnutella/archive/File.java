@@ -16,8 +16,8 @@ import com.limegroup.gnutella.FileDetails;
 
 class File {
 
-	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.8 2005-11-02 19:09:12 tolsen Exp $";
+	public static final String REPOSITORY_VERSION = 
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.9 2005-11-02 20:59:38 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -172,22 +172,7 @@ class File {
 		return _fd.getFile();
 	}
 	
-	/*
-	 * Sample XML representation:
-	 * 
-	 *   <file name="MyHomeMovie.mpeg" source="original">
-	 *     <runtime>2:30</runtime>
-	 *     <format>MPEG2</format>
-	 *   </file>
-	 */
-	
-	private static final String _fileElement = "file";
-	private static final String _nameAttr = "name";
-	private static final String _sourceAttr = "source";
-	private static final String _sourceAttrDefaultValue = "original";
-	private static final String _runtimeElement = "runtime";
-	private static final String _formatElement = "format";
-	private static final String _licenseElement = "license";
+
 	
 
 	/**
@@ -198,24 +183,42 @@ class File {
 	 */
 	
 	Element getElement( Document document ) {
+		/*
+		 * Sample XML representation:
+		 * 
+		 *   <file name="MyHomeMovie.mpeg" source="original">
+		 *     <runtime>2:30</runtime>
+		 *     <format>MPEG2</format>
+		 *   </file>
+		 */
+		
+		final String FILE_ELEMENT = "file";
+		final String NAME_ATTR = "name";
+		final String SOURCE_ATTR = "source";
+		final String SOURCE_ATTR_DEFAULT_VALUE = "original";
+		final String RUNTIME_ELEMENT = "runtime";
+		final String FORMAT_ELEMENT = "format";
+		final String LICENSE_ELEMENT = "license";
+
+		
 		if ( _element == null ) {
 		
 				
-				final Element fileElement = document.createElement(_fileElement);
+				final Element fileElement = document.createElement(FILE_ELEMENT);
 				
 				
-				fileElement.setAttribute( _nameAttr, getRemoteFileName());
-				fileElement.setAttribute( _sourceAttr, _sourceAttrDefaultValue );
+				fileElement.setAttribute( NAME_ATTR, getRemoteFileName());
+				fileElement.setAttribute( SOURCE_ATTR, SOURCE_ATTR_DEFAULT_VALUE );
 				
 				if ( _runtime != null ) {
-					final Element runtimeElement = document.createElement(_runtimeElement);
+					final Element runtimeElement = document.createElement(RUNTIME_ELEMENT);
 					runtimeElement.appendChild( document.createTextNode( _runtime ));
 					fileElement.appendChild( runtimeElement );
 				}
 				
 				// _format should not be null (otherwise we would have thrown
 				// an UnsupportedFormatException upon construction)
-				final Element formatElement = document.createElement(_formatElement);
+				final Element formatElement = document.createElement(FORMAT_ELEMENT);
 				formatElement.appendChild( document.createTextNode( _format ));
 				fileElement.appendChild( formatElement );
 				
@@ -226,7 +229,7 @@ class File {
 				final String licenseDeclaration = getLicenseDeclaration(); 
 				
 				if ( licenseDeclaration != null ) {
-					final Element licenseElement = document.createElement( _licenseElement );
+					final Element licenseElement = document.createElement( LICENSE_ELEMENT );
 					licenseElement.appendChild( document.createTextNode( licenseDeclaration ));
 					fileElement.appendChild( licenseElement );					
 				}
