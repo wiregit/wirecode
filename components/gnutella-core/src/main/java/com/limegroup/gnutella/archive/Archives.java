@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Archives {
 	
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.1 2005-11-02 16:04:09 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.2 2005-11-02 20:07:17 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	
@@ -113,12 +113,38 @@ public class Archives {
 	}
 	
 	public static String normalizeName( String name ) {
-		// only allow alphanumerics and . - _
-		final Pattern _badChars = 
-			Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
-		final String _replaceStr = "_";
+		final int MIN_LENGTH = 5;
+		final int MAX_LENGTH = 100;
 		
-		return _badChars.matcher( name ).replaceAll(_replaceStr);
+		// first character can only be alphanumberic
+		final Pattern BAD_BEGINNING_CHARS =
+			Pattern.compile( "^[^\\p{Alnum}]+" );
+		
+		// only allow alphanumerics and . - _
+		final Pattern BAD_CHARS = 
+			Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
+		final String REPLACE_STR = "_";
+		
+		if ( name == null )
+			return null;
+		
+		// chop off all bad beginning characters
+		name = BAD_BEGINNING_CHARS.matcher( name ).replaceFirst("");
+		
+		name = BAD_CHARS.matcher( name ).replaceAll(REPLACE_STR);
+		
+		final StringBuffer nameBuf = new StringBuffer( name );
+		
+		while ( nameBuf.length() < MIN_LENGTH ) {
+			nameBuf.append( REPLACE_STR );
+		}
+		 
+		
+		if ( nameBuf.length() > MAX_LENGTH ) {
+			nameBuf.setLength( MAX_LENGTH );
+		}
+
+		return nameBuf.toString(); 
 	}
 	
 	

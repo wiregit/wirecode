@@ -30,7 +30,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String repositoryVersion = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.7 2005-11-02 16:04:08 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.8 2005-11-02 20:07:17 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -205,6 +205,9 @@ public abstract class AbstractContribution {
 	 *  
 	 * Movies: color, contact, country, credits, director, producer,
 	 *		production_company, segments, segments, sound, sponsor, shotlist 
+	 *
+	 * Also see the Dublin Core: http://dublincore.org/documents/dces/
+	 * 
 	 */
 	
 
