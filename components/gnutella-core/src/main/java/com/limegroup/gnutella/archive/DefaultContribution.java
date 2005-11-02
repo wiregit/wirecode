@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -36,7 +37,7 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.12 2005-11-02 20:59:38 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.13 2005-11-02 23:29:06 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -354,7 +355,10 @@ public class DefaultContribution extends AbstractContribution {
 			// first connect
 			
 			ftp.enterLocalPassiveMode();
+			if ( isCancelled() ) { return; }
+			
 			ftp.connect( _ftpServer );
+			if ( isCancelled() ) { return; }
 			
 			final int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
@@ -364,6 +368,7 @@ public class DefaultContribution extends AbstractContribution {
 			if (!ftp.login( username, password )) {
 				throw new LoginFailedException();
 			}
+			if ( isCancelled() ) { return; }
 			
 			try {
 				
@@ -371,6 +376,7 @@ public class DefaultContribution extends AbstractContribution {
 				if (!ftp.changeWorkingDirectory( _ftpPath )) {
 					throw new DirectoryChangeFailedException();
 				}
+				if ( isCancelled() ) { return; }
 				
 				uploadEvent.connected();
 				processUploadEvent( uploadEvent );
@@ -380,14 +386,16 @@ public class DefaultContribution extends AbstractContribution {
 				uploadFile( metaXmlName, metaXmlName,
 						new ByteArrayInputStream( metaXmlBytes ),
 						ftp, uploadEvent );
-				
+				if ( isCancelled() ) { return; }
 				
 				uploadFile( filesXmlName, filesXmlName,
 						new ByteArrayInputStream( filesXmlBytes ),
 						ftp, uploadEvent );
+				if ( isCancelled() ) { return; }
 				
 				// now switch to binary mode
 				ftp.setFileType( FTP.BINARY_FILE_TYPE );
+				if ( isCancelled() ) { return; }
 				
 				// upload contributed files
 				for (final Iterator i = files.iterator(); i.hasNext();) {
@@ -396,13 +404,18 @@ public class DefaultContribution extends AbstractContribution {
 					uploadFile( f.getLocalFileName(), f.getRemoteFileName(), 
 							new FileInputStream( f.getIOFile() ),
 							ftp,uploadEvent );
+					if ( isCancelled() ) { return; }
 				}
+			} catch( InterruptedIOException ioe ) {
+				// we've been requested to cancel
+				return;
 			} finally {
 				ftp.logout(); // we don't care if logging out fails
 			}
 		} finally {
 			ftp.disconnect();	
-		}
+		}		
+		if ( isCancelled() ) { return; }
 		
 		// now tell the Internet Archive that we're done
 		checkin();
