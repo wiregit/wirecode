@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.18 2005-11-03 21:14:31 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.19 2005-11-03 22:06:18 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -245,12 +245,7 @@ public class DefaultContribution extends AbstractContribution {
 			// unidentified type
 			throw new BadResponseException ( "unidentified value for attribute \"type\" in <result> element \n"
 					+ "(should be either \"success\" or \"error\"): " + type + "\n" + responseString ); 
-		}
-			
-
-
-		
-		
+		}	
 	}
 	
 	/** helper function for reserveIdentifier() */
@@ -410,11 +405,11 @@ public class DefaultContribution extends AbstractContribution {
 				
 				
 				// upload xml files
-				uploadFile( metaXmlName, metaXmlName,
+				uploadFile( metaXmlName,
 						new ByteArrayInputStream( metaXmlBytes ),
 						ftp, uploadEvent );
 				
-				uploadFile( filesXmlName, filesXmlName,
+				uploadFile( filesXmlName,
 						new ByteArrayInputStream( filesXmlBytes ),
 						ftp, uploadEvent );
 				
@@ -426,7 +421,7 @@ public class DefaultContribution extends AbstractContribution {
 				for (final Iterator i = files.iterator(); i.hasNext();) {
 					final File f = (File) i.next();
 					
-					uploadFile( f.getLocalFileName(), f.getRemoteFileName(), 
+					uploadFile( f.getRemoteFileName(), 
 							new FileInputStream( f.getIOFile() ),
 							ftp,uploadEvent );
 				}
@@ -469,10 +464,10 @@ public class DefaultContribution extends AbstractContribution {
 	 * 		  The input stream (not necessarily buffered).
 	 *        This stream will be closed by this method
 	 */
-	private void uploadFile( String localFileName, String remoteFileName, 
+	private void uploadFile( String remoteFileName, 
 			InputStream input, FTPClient ftp, UploadEvent uploadEvent )
 	throws InterruptedIOException, IOException {
-		uploadEvent.fileStarted( localFileName );
+		uploadEvent.fileStarted( remoteFileName );
 		processUploadEvent( uploadEvent );
 		final InputStream fileStream = new BufferedInputStream(
 				new UploadMonitorInputStream( input, this, uploadEvent ));
