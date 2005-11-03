@@ -30,7 +30,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.11 2005-11-03 17:06:08 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.12 2005-11-03 22:35:28 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -123,6 +123,12 @@ public abstract class AbstractContribution {
 				break;
 			case UploadEvent.CONNECTED:
 				l.connected( e );
+				break;
+			case UploadEvent.CHECKIN_STARTED:
+				l.checkinStarted( e );
+				break;
+			case UploadEvent.CHECKIN_COMPLETED:
+				l.checkinCompleted( e );
 				break;
 			default:	
 				break;
