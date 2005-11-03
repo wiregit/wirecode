@@ -32,12 +32,14 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.util.CommonUtils;
+
 
 
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.16 2005-11-03 18:01:54 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.17 2005-11-03 18:29:32 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -664,6 +666,11 @@ public class DefaultContribution extends AbstractContribution {
 		final String MEDIATYPE_ELEMENT = "mediatype";
 		final String TITLE_ELEMENT = "title";
 		final String LICENSE_URL_ELEMENT = "licenseurl";
+		final String UPLOAD_APPLICATION_ELEMENT = "upload_application";
+		final String APPID_ATTR = "appid";
+		final String APPID_ATTR_VALUE = "LimeWire";
+		final String VERSION_ATTR = "version";
+		final String UPLOADER_ELEMENT = "uploader";
 		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -684,6 +691,15 @@ public class DefaultContribution extends AbstractContribution {
 			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
 			titleElement.appendChild( document.createTextNode( getTitle()));
+			
+			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
+			metadataElement.appendChild( uploadApplicationElement );
+			uploadApplicationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
+			uploadApplicationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
+			
+			final Element uploaderElement = document.createElement( UPLOADER_ELEMENT );
+			metadataElement.appendChild( uploaderElement );
+			uploaderElement.appendChild( document.createTextNode( getUsername() ));
 			
 			//take licenseurl from the first File
 			
