@@ -37,12 +37,15 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.13 2005-11-02 23:29:06 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.14 2005-11-03 17:06:08 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
 	private String _ftpPath;
 	private String _verificationUrl;
+	
+	private Object _postLock = new Object();
+	private PostMethod _post = null;
 	
 	// no default constructor
 	private DefaultContribution() {
@@ -88,6 +91,16 @@ public class DefaultContribution extends AbstractContribution {
 	}
 
 	
+	public void cancel() {
+		super.cancel();
+	
+		synchronized( _postLock ) {
+			if ( _post != null ) {
+				_post.abort();
+			}
+		}
+	}
+	
 	/** 
 	 * 	normalizes identifier and checks with Internet Archive
 	 *  if identifier is available.
@@ -126,12 +139,23 @@ public class DefaultContribution extends AbstractContribution {
         final HttpClient client = new HttpClient();
 
         final PostMethod post = postMethod( CREATE_ID_URL, getUsername(), nId );
+        
+        synchronized( _postLock ) {
+        	_post = post;
+        }
 
         client.executeMethod( post );
+       
         
         final String responseString = post.getResponseBodyAsString();
         final InputStream responseStream = post.getResponseBodyAsStream();
+
+        synchronized( _postLock ) {
+        	_post = null;	
+        }
+        
         post.releaseConnection();
+        
         
         final Element resultElement;
         
@@ -492,11 +516,20 @@ public class DefaultContribution extends AbstractContribution {
 		
 		final PostMethod post = postMethod( CHECKIN_URL, username, _identifier );
 		
+		synchronized( _postLock ) {
+			_post = post;
+		}
+		
 		final HttpClient client = new HttpClient();
 		client.executeMethod( post );
 		
 		final String responseString = post.getResponseBodyAsString();
 		final InputStream responseStream = post.getResponseBodyAsStream();
+		
+		synchronized( _postLock ) {
+			_post = null;
+		}
+		
 		post.releaseConnection();
 		
 		final Element resultElement;

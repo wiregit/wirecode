@@ -30,7 +30,7 @@ import com.limegroup.gnutella.FileDesc;
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.10 2005-11-02 23:29:06 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.11 2005-11-03 17:06:08 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
@@ -49,7 +49,7 @@ public abstract class AbstractContribution {
 	/** String -> String */
 	private HashMap _fields = new HashMap();
 
-	private volatile boolean _cancelled = false; 
+	private volatile boolean _cancelled = false;
 	
 	abstract public String getVerificationUrl();
 	
