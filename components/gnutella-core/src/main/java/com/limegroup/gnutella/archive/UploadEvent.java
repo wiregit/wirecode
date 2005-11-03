@@ -7,7 +7,7 @@ import java.util.Map;
 public class UploadEvent extends EventObject {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.6 2005-11-02 20:59:38 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/UploadEvent.java,v 1.1.2.7 2005-11-03 22:21:37 mkornfilt Exp $";
 
 	private static final long serialVersionUID = 7412297699826457995L;
 	
@@ -19,7 +19,7 @@ public class UploadEvent extends EventObject {
 
 
 	private String _curFileName;
-	private int _filesSent = -1;
+	private int _filesSent = 0;
 	private int _totalFiles;
 	private final Map _fileNames2Progress = new HashMap();
 	private long _totalBytesSent;

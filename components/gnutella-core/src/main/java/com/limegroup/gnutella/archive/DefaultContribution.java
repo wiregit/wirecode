@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.19 2005-11-03 22:06:18 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.20 2005-11-03 22:21:37 mkornfilt Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -215,6 +215,7 @@ public class DefaultContribution extends AbstractContribution {
 			
 			_ftpServer = urlSplit[0];
 			_ftpPath = "/" + urlSplit[1];
+			
 			
 			_identifier = nId;
 			
@@ -432,12 +433,14 @@ public class DefaultContribution extends AbstractContribution {
 				ftp.logout(); // we don't care if logging out fails
 			}
 		} finally {
-			ftp.disconnect();	
+			try{
+				ftp.disconnect();	
+			} catch(Exception e) {}
 		}		
 
 		// now tell the Internet Archive that we're done
 		if ( isCancelled() ) { return; }
-		checkin();
+//		checkin();
 		
 	}
 	
