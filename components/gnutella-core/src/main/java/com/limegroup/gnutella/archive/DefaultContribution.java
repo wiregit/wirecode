@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.15 2005-11-03 17:14:12 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.16 2005-11-03 18:01:54 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -661,6 +661,7 @@ public class DefaultContribution extends AbstractContribution {
 		
 		final String METADATA_ELEMENT = "metadata";
 		final String COLLECTION_ELEMENT = "collection";
+		final String MEDIATYPE_ELEMENT = "mediatype";
 		final String TITLE_ELEMENT = "title";
 		final String LICENSE_URL_ELEMENT = "licenseurl";
 		
@@ -674,11 +675,15 @@ public class DefaultContribution extends AbstractContribution {
 			
 			final Element collectionElement = document.createElement( COLLECTION_ELEMENT );
 			metadataElement.appendChild( collectionElement );
-			collectionElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia())));
+			collectionElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
+			
+			final Element mediatypeElement = document.createElement(MEDIATYPE_ELEMENT);
+			metadataElement.appendChild( mediatypeElement );
+			mediatypeElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia() )));
 			
 			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
-			titleElement.appendChild( document.createTextNode( Archives.getCollectionString( getCollection())));
+			titleElement.appendChild( document.createTextNode( getTitle()));
 			
 			//take licenseurl from the first File
 			
