@@ -33,7 +33,7 @@ import com.limegroup.gnutella.util.CoWList;
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.13 2005-11-07 17:00:18 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.14 2005-11-07 17:43:26 zlatinb Exp $";
 	
 	private String _title;
 	private int _media;
@@ -254,22 +254,22 @@ public abstract class AbstractContribution {
             
             switch ( _id ) {
             case FILE_STARTED:
-                l.fileStarted( this );
+                l.fileStarted();
                 break;
             case FILE_PROGRESSED:
-                l.fileProgressed( this );
+                l.fileProgressed();
                 break;
             case FILE_COMPLETED:
-                l.fileCompleted( this );
+                l.fileCompleted();
                 break;
             case CONNECTED:
-                l.connected( this );
+                l.connected();
                 break;
             case CHECKIN_STARTED:
-                l.checkinStarted( this );
+                l.checkinStarted();
                 break;
             case CHECKIN_COMPLETED:
-                l.checkinCompleted( this );
+                l.checkinCompleted();
                 break;
             default:    
                 break;
