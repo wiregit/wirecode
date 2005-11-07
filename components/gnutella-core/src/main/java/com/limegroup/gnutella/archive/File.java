@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.archive;
 
 import java.util.HashMap;
-import org.apache.commons.httpclient.URIException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import com.limegroup.gnutella.licenses.License;
@@ -17,7 +16,7 @@ import com.limegroup.gnutella.FileDetails;
 class File {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.9 2005-11-02 20:59:38 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/File.java,v 1.1.2.10 2005-11-07 19:41:37 tolsen Exp $";
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -131,16 +130,13 @@ class File {
 		
 		// set the licenseUrl and licenseDeclaration
 		
-		try {
-			if ( xmlDoc.isLicenseAvailable() ) {
-				final License license = xmlDoc.getLicense();
-				
-				if ( license.getLicenseName() == LicenseFactory.CC_NAME ) {
-					_licenseUrl = license.getLicenseURI().getURI(); 
-					_licenseDeclaration = xmlDoc.getLicenseString();
-				}
+		if ( xmlDoc.isLicenseAvailable() ) {
+			final License license = xmlDoc.getLicense();
+			
+			if ( license.getLicenseName() == LicenseFactory.CC_NAME ) {
+				_licenseUrl = license.getLicenseDeed(null).toString(); 
+				_licenseDeclaration = xmlDoc.getLicenseString();
 			}
-		} catch ( final URIException e ) {
 		}
 	}
 	

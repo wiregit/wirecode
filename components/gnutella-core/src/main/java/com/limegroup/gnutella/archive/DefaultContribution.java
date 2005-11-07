@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.22 2005-11-07 17:00:18 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.23 2005-11-07 19:41:37 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -223,8 +223,9 @@ public class DefaultContribution extends AbstractContribution {
 			// set verification URL
 			
 			_verificationUrl =  "http://www.archive.org/" +
+				Archives.getMediaString( getMedia() ) + "/" +
 				Archives.getMediaString( getMedia() ) +
-				"_details_db.php?collection=" +
+				"-details-db.php?collection=" +
 				Archives.getCollectionString( getCollection() ) +
 				"&collectionid=" + _identifier;
 			
@@ -273,11 +274,6 @@ public class DefaultContribution extends AbstractContribution {
 		}
 		return "";
 	}
-
-	
-	private static final int  NUM_XML_FILES = 2;
-	private static final String META_XML_SUFFIX = "_meta.xml";
-	private static final String FILES_XML_SUFFIX = "_files.xml";
 	
 
 	/**
@@ -316,6 +312,11 @@ public class DefaultContribution extends AbstractContribution {
 	FTPConnectionClosedException, LoginFailedException,
 	DirectoryChangeFailedException, CopyStreamException, 
 	RefusedConnectionException, IOException {
+		
+		final int  NUM_XML_FILES = 2;
+		final String META_XML_SUFFIX = "_meta.xml";
+		final String FILES_XML_SUFFIX = "_files.xml";
+		
 		
 		final String username = getUsername();
 		final String password = getPassword();
@@ -676,6 +677,7 @@ public class DefaultContribution extends AbstractContribution {
 		final String APPID_ATTR_VALUE = "LimeWire";
 		final String VERSION_ATTR = "version";
 		final String UPLOADER_ELEMENT = "uploader";
+		final String IDENTIFIER_ELEMENT = "identifier";
 		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -696,6 +698,10 @@ public class DefaultContribution extends AbstractContribution {
 			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
 			titleElement.appendChild( document.createTextNode( getTitle()));
+			
+			final Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
+			metadataElement.appendChild( identifierElement );
+			identifierElement.appendChild( document.createTextNode( _identifier ));
 			
 			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
 			metadataElement.appendChild( uploadApplicationElement );
