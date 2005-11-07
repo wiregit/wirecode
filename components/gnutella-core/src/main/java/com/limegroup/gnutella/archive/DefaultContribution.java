@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.23 2005-11-07 19:41:37 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.24 2005-11-07 21:17:28 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -59,12 +59,13 @@ public class DefaultContribution extends AbstractContribution {
 	 *        One of ArchiveConstants.MEDIA_*
 	 *        
 	 * @throws IllegalArgumentException
-	 *         If type is not valid
+	 *         If media is not valid
 	 */
 	public DefaultContribution( String username, String password, 
 			String title, int media ) {
 		this( username, password, title, media, 
-				Archives.defaultCollectionForMedia( media ));
+				Archives.defaultCollectionForMedia( media ),
+				Archives.defaultTypesForMedia( media ));
 	}
 	
 	/**
@@ -80,12 +81,13 @@ public class DefaultContribution extends AbstractContribution {
 	 *         
 	 */
 	public DefaultContribution( String username, String password, 
-			String title, int media, int collection ) {
+			String title, int media, int collection, int type ) {
 		setUsername( username );
 		setPassword( password );
 		setTitle( title );
 		setMedia( media );
 		setCollection( collection );	
+		setType( type );
 	}
 	
 	public String getVerificationUrl() {
@@ -678,6 +680,7 @@ public class DefaultContribution extends AbstractContribution {
 		final String VERSION_ATTR = "version";
 		final String UPLOADER_ELEMENT = "uploader";
 		final String IDENTIFIER_ELEMENT = "identifier";
+		final String TYPE_ELEMENT = "type";
 		
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -694,6 +697,10 @@ public class DefaultContribution extends AbstractContribution {
 			final Element mediatypeElement = document.createElement(MEDIATYPE_ELEMENT);
 			metadataElement.appendChild( mediatypeElement );
 			mediatypeElement.appendChild( document.createTextNode( Archives.getMediaString( getMedia() )));
+			
+			final Element typeElement = document.createElement(TYPE_ELEMENT);
+			metadataElement.appendChild( typeElement );
+			typeElement.appendChild( document.createTextNode( Archives.getTypeString( getType() )));
 			
 			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );

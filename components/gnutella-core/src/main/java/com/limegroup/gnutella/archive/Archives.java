@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Archives {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.3 2005-11-02 20:59:38 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.4 2005-11-07 21:17:28 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	
@@ -50,6 +50,25 @@ public class Archives {
 	}
 	
 
+	/* Dublin-core types.  See http://dublincore.org/documents/dcmi-type-vocabulary/ */
+	
+	public static final int TYPE_MOVING_IMAGE = 1;
+	private static final Integer _typeMovingImage = new Integer( TYPE_MOVING_IMAGE );
+	
+	public static final int TYPE_SOUND = 2;
+	private static final Integer _typeSound = new Integer( TYPE_SOUND );
+	
+	private static final Map _typeStrings;
+	
+	static {
+		Map m = new HashMap();
+		
+		m.put( _typeMovingImage, "MovingImage" );
+		m.put( _typeSound, "Sound" );
+		
+		_typeStrings = Collections.unmodifiableMap( m );
+	}
+	
 	/* Just use open-source collections for now */
 	
 	/**** Movie Collections ****/
@@ -72,19 +91,25 @@ public class Archives {
 	
 	private static final Map _collectionStrings;
 	private static final Map _defaultCollectionsForMedia;
+	private static final Map _defaultTypesForMedia;
 	
 	static {
 		Map mCS = new HashMap();
 		Map mDCFM = new HashMap();
+		Map mDTFM = new HashMap();
 		
 		mCS.put( _collectionOpensourceMovies, "opensource_movies" );		
 		mCS.put( _collectionOpensourceAudio, "opensource_audio" );
 		_collectionStrings = Collections.unmodifiableMap( mCS );
 		
 		mDCFM.put( _mediaMovies, _collectionOpensourceMovies );
+		mDTFM.put( _mediaMovies, _typeMovingImage );
 				
 		mDCFM.put( _mediaAudio, _collectionOpensourceMovies );
+		mDTFM.put( _mediaAudio, _typeSound );
+		
 		_defaultCollectionsForMedia = Collections.unmodifiableMap( mDCFM );
+		_defaultTypesForMedia = Collections.unmodifiableMap( mDTFM );
 	}
 
 	static String getMediaString( int media ) {
@@ -94,6 +119,10 @@ public class Archives {
 	static String getCollectionString( int collection ) {
 		return (String) _collectionStrings
 			.get( new Integer( collection ) );
+	}
+	
+	static String getTypeString( int type ) {
+		return (String) _typeStrings.get( new Integer( type ));
 	}
 	
 	/**
@@ -107,6 +136,22 @@ public class Archives {
 		Integer c = (Integer) _defaultCollectionsForMedia.get( new Integer( media ) );
 		
 		if ( c == null ) {
+			throw new IllegalArgumentException( "Invalid media type: " + media );
+		}
+		return c.intValue();
+	}
+	
+	/**
+	 * 
+	 * @param media
+	 * @return
+	 * @ throws IllegalArgumentException
+	 *          If media is not valid
+	 */
+	static int defaultTypesForMedia( int media ) {
+		Integer c = (Integer) _defaultTypesForMedia.get( new Integer( media ));
+		
+		if (c == null ) {
 			throw new IllegalArgumentException( "Invalid media type: " + media );
 		}
 		return c.intValue();

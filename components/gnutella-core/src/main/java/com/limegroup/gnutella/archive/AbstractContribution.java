@@ -32,11 +32,12 @@ import com.limegroup.gnutella.util.CoWList;
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.15 2005-11-07 19:41:37 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.16 2005-11-07 21:17:28 tolsen Exp $";
 	
 	private String _title;
 	private int _media;
 	private int _collection;
+	private int _type;
 
 	private String _username, _password;
 	
@@ -164,6 +165,24 @@ public abstract class AbstractContribution {
 	
 	public int getCollection() {
 		return _collection;
+	}
+	
+	/**
+	 * 
+	 * @param type
+	 * @throws IllegalArgumentException
+	 *         If type is not valid
+	 */
+	public void setType( int type ) {
+		if (Archives.getTypeString( type ) == null ) {
+			throw new IllegalArgumentException( "Invalid dublin-core type: "
+					+ type );
+		}
+		_type = type;
+	}
+	
+	public int getType() {
+		return _type;
 	}
 	
 	public String getPassword() {
