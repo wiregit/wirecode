@@ -7,12 +7,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.util.CoWList;
 
 /**
+ * 
+ * A contribution consists of one or more files that we upload to a location
+ * such as the Internet Archive.
+ * 
  * Follow these steps to do upload a contribution to the 
  * Internet Archive:
  * 
@@ -23,46 +29,61 @@ import com.limegroup.gnutella.FileDesc;
  * 	4.	call addFile() for each file you want to add to the contribution
  * 	5.	call addListener() with your UploadListener
  * 	6.  call upload() to upload the contribution
- * 
- * @author tim
- *
  */
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.12 2005-11-03 22:35:28 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.13 2005-11-07 17:00:18 zlatinb Exp $";
 	
 	private String _title;
 	private int _media;
 	private int _collection;
 
-	private String _username;
+	private String _username, _password;
 	
 	private final LinkedHashMap _files = new LinkedHashMap();
-	private final ArrayList _uploadListeners = new ArrayList();
-	
-	// if by chance this class becomes serializable, and
-	// you wish to write the password to disk, then feel free
-	// to take out the transient keyword
-	private transient String _password;
+    
 	
 	/** String -> String */
 	private HashMap _fields = new HashMap();
 
-	private volatile boolean _cancelled = false;
+	private volatile boolean _cancelled;
+    
+    
+    public static final int NOT_CONNECTED = 0;
+    public static final int CONNECTED = 1;  
+    public static final int FILE_STARTED = 2;
+    public static final int FILE_PROGRESSED = 3;
+    public static final int FILE_COMPLETED = 4;
+    public static final int CHECKIN_STARTED = 5;
+    public static final int CHECKIN_COMPLETED = 6;
+
+
+    /** LOCKING: this */
+    private String _curFileName;
+    private int _filesSent = 0;
+    private long _totalBytesSent;
+    
+    protected long _totalUploadSize;
+    protected final Map _fileNames2Progress = new HashMap();
+
+    
+    private int _id = NOT_CONNECTED;
+    
+    private final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
 	
+    /**
+     * @return the verification URL that should be used for the contribution
+     */
 	abstract public String getVerificationUrl();
 	
-	
-	// returns normalized (no funny characters) identifier
-	abstract public String reserveIdentifier( String identifier )
-	throws IdentifierUnavailableException, IOException;
-	
+	/**
+     * @return normalized identifier
+	 */
+	abstract public String reserveIdentifier( String identifier ) throws 
+        IdentifierUnavailableException, IOException;
+
 	abstract public void upload() throws IOException;
-	
-	// a contribution consists of one or more files
-	// note that we currently set the licenseurl for the
-	// contribution to th
 	
 	public void addFileDesc( FileDesc fd ) { 
 		_files.put( fd, new File(fd));
@@ -97,44 +118,6 @@ public abstract class AbstractContribution {
 	
 	protected Collection getFiles() {
 		return Collections.unmodifiableCollection(_files.values());
-	}
-	
-	public void addListener( UploadListener l ) {
-		_uploadListeners.add( l );
-	}
-	
-	public void removeListener( UploadListener l ) {
-		_uploadListeners.remove( l );
-	}
-	
-	void processUploadEvent( UploadEvent e ) {
-		for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
-			UploadListener l = (UploadListener) i.next();
-			
-			switch ( e.getID() ) {
-			case UploadEvent.FILE_STARTED:
-				l.fileStarted( e );
-				break;
-			case UploadEvent.FILE_PROGRESSED:
-				l.fileProgressed( e );
-				break;
-			case UploadEvent.FILE_COMPLETED:
-				l.fileCompleted( e );
-				break;
-			case UploadEvent.CONNECTED:
-				l.connected( e );
-				break;
-			case UploadEvent.CHECKIN_STARTED:
-				l.checkinStarted( e );
-				break;
-			case UploadEvent.CHECKIN_COMPLETED:
-				l.checkinCompleted( e );
-				break;
-			default:	
-				break;
-			}
-			
-		}
 	}
 	
 	public void setTitle( String title ) {
@@ -200,7 +183,6 @@ public abstract class AbstractContribution {
 		_username = username;
 	}
 		
-	
 	/**
 	 * Fields You can include whatever fields you like, but the following are
 	 * known (possibly semantically)  by the Internet Archive
@@ -232,6 +214,190 @@ public abstract class AbstractContribution {
 	protected Map getFields() {
 		return Collections.unmodifiableMap( _fields );
 	}
+    
+    protected class UploadFileProgress {
+        
+        private long _fileSize;
+        private long _bytesSent = 0;
+        
+        public UploadFileProgress( long fileSize ) {
+            _fileSize = fileSize;
+        }
+        
+        public long getFileSize() {
+            return _fileSize;
+        }
+        
+        public long getBytesSent() {
+            return _bytesSent;
+        }
+        
+        public void setBytesSent( long bytesSent ) {
+            _bytesSent = bytesSent;
+        }
+        public void incrBytesSent( long bytesSentDelta ) {
+            _bytesSent += bytesSentDelta;
+        }
+    }
 
+    public void addListener( UploadListener l ) {
+        _uploadListeners.add( l );
+    }
+    
+    public void removeListener( UploadListener l ) {
+        _uploadListeners.remove( l );
+    }
+    
+    private void notifyStateChange() {
+        for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
+            UploadListener l = (UploadListener) i.next();
+            
+            switch ( _id ) {
+            case FILE_STARTED:
+                l.fileStarted( this );
+                break;
+            case FILE_PROGRESSED:
+                l.fileProgressed( this );
+                break;
+            case FILE_COMPLETED:
+                l.fileCompleted( this );
+                break;
+            case CONNECTED:
+                l.connected( this );
+                break;
+            case CHECKIN_STARTED:
+                l.checkinStarted( this );
+                break;
+            case CHECKIN_COMPLETED:
+                l.checkinCompleted( this );
+                break;
+            default:    
+                break;
+            }
+            
+        }
+    }
+    
+    public synchronized int getFilesSent() {
+        return _filesSent;
+    }
+
+    public synchronized int getTotalFiles() {
+        return getFileDescs().size();
+    }
+
+    
+    public synchronized long getFileBytesSent() {
+        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getBytesSent();       
+
+    }
+    
+    public synchronized long getFileSize() {
+        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getFileSize();
+    }
+    
+    
+    public synchronized long getTotalBytesSent() {
+        return _totalBytesSent;
+    }
+    
+    public synchronized long getTotalSize() {
+        return _totalUploadSize;
+    }
+
+    
+    public synchronized String getFileName() {
+        return _curFileName;
+    }
+
+    
+    public int getID() {
+        return _id;
+    }
+    
+    
+    void connected() {
+        _id = CONNECTED;
+    }
+    
+    
+    void fileStarted( String fileName, long bytesSent ) {
+        _id = FILE_STARTED;
+        synchronized(this) {
+            _curFileName = fileName;
+            ((UploadFileProgress) _fileNames2Progress.get( fileName )).setBytesSent( bytesSent );
+        }
+        notifyStateChange();
+    }
+    
+    void fileStarted( String fileName ) {
+        fileStarted( fileName, 0 );
+    }
+    
+    /**
+     * 
+     * @param fileName
+     * @param bytesSent
+     * 
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
+     */
+    void fileProgressed( long bytesSent ) {
+        _id = FILE_PROGRESSED;
+        
+        synchronized(this) {
+            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            // find delta       
+            long delta = bytesSent - progress.getBytesSent();
+            _totalBytesSent += delta;
+            progress.setBytesSent( bytesSent );
+        }
+        notifyStateChange();
+    }
+    
+    /**
+     * 
+     * @param fileName
+     * @param bytesSentDelta
+     * 
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
+     */
+    void fileProgressedDelta( long bytesSentDelta ) {
+        _id = FILE_PROGRESSED;
+        synchronized(this) {
+            _totalBytesSent += bytesSentDelta;
+            ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).incrBytesSent( bytesSentDelta );
+        }
+        notifyStateChange();
+    }
+    
+    /**
+     * 
+     * @param fileName
+     * 
+     * @throws IllegalStateException
+     *         If fileName does not match the current fileName
+     */
+    void fileCompleted() {
+        _id = FILE_COMPLETED;
+        
+        synchronized(this) {
+            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            progress.setBytesSent( progress.getFileSize() );
+            _filesSent++;
+        }
+        notifyStateChange();
+    }
+    
+    void checkinStarted() {
+        _id = CHECKIN_STARTED;
+        notifyStateChange();
+    }
+    
+    void checkinCompleted() {
+        _id = CHECKIN_COMPLETED;
+        notifyStateChange();
+    }
 	
 }

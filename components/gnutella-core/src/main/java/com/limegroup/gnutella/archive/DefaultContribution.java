@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class DefaultContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.21 2005-11-03 22:35:28 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.22 2005-11-07 17:00:18 zlatinb Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -368,8 +368,13 @@ public class DefaultContribution extends AbstractContribution {
 			fileSizes[j] = f.getFileSize();
 			j++;
 		}
+
+        // init the progress mapping
+        for (int i = 0; i < fileSizes.length; i++) { 
+            _fileNames2Progress.put(fileNames[i],new UploadFileProgress(fileSizes[i]));
+            _totalUploadSize+=fileSizes[i];
+        }
 		
-		final UploadEvent uploadEvent = new UploadEvent( this, fileNames, fileSizes );
 		
 		FTPClient ftp = new FTPClient();
 		
@@ -401,18 +406,17 @@ public class DefaultContribution extends AbstractContribution {
 				}
 				
 				if ( isCancelled() ) { return; }
-				uploadEvent.connected();
-				processUploadEvent( uploadEvent );
+				connected();
 				
 				
 				// upload xml files
 				uploadFile( metaXmlName,
 						new ByteArrayInputStream( metaXmlBytes ),
-						ftp, uploadEvent );
+						ftp);
 				
 				uploadFile( filesXmlName,
 						new ByteArrayInputStream( filesXmlBytes ),
-						ftp, uploadEvent );
+						ftp);
 				
 				// now switch to binary mode
 				if ( isCancelled() ) { return; }
@@ -424,7 +428,7 @@ public class DefaultContribution extends AbstractContribution {
 					
 					uploadFile( f.getRemoteFileName(), 
 							new FileInputStream( f.getIOFile() ),
-							ftp,uploadEvent );
+							ftp);
 				}
 			} catch( InterruptedIOException ioe ) {
 				// we've been requested to cancel
@@ -440,15 +444,13 @@ public class DefaultContribution extends AbstractContribution {
 
 		// now tell the Internet Archive that we're done
 		if ( isCancelled() ) { return; }
-		uploadEvent.checkinStarted();
-		processUploadEvent( uploadEvent );
+		checkinStarted();
 
 		if ( isCancelled() ) { return; }		
 		checkin();
 		
 		if ( isCancelled() ) { return; }		
-		uploadEvent.checkinCompleted();
-		processUploadEvent( uploadEvent );		
+		checkinCompleted();
 	}
 	
 	private PostMethod postMethod( String url, String username, String identifier  ) {
@@ -475,12 +477,11 @@ public class DefaultContribution extends AbstractContribution {
 	 *        This stream will be closed by this method
 	 */
 	private void uploadFile( String remoteFileName, 
-			InputStream input, FTPClient ftp, UploadEvent uploadEvent )
+			InputStream input, FTPClient ftp)
 	throws InterruptedIOException, IOException {
-		uploadEvent.fileStarted( remoteFileName );
-		processUploadEvent( uploadEvent );
+		fileStarted( remoteFileName );
 		final InputStream fileStream = new BufferedInputStream(
-				new UploadMonitorInputStream( input, this, uploadEvent ));
+				new UploadMonitorInputStream( input, this));
 		
 		try {
 			if ( isCancelled() ) {
@@ -495,8 +496,7 @@ public class DefaultContribution extends AbstractContribution {
 		if ( isCancelled() ) {
 			throw new InterruptedIOException();
 		}
-		uploadEvent.fileCompleted();
-		processUploadEvent( uploadEvent );
+		fileCompleted();
 	}
 	
 	/**
