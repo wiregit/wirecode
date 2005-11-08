@@ -32,7 +32,7 @@ import com.limegroup.gnutella.util.CoWList;
 public abstract class AbstractContribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.16 2005-11-07 21:17:28 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.17 2005-11-08 19:10:55 zlatinb Exp $";
 	
 	private String _title;
 	private int _media;
@@ -301,7 +301,7 @@ public abstract class AbstractContribution {
     }
 
     public synchronized int getTotalFiles() {
-        return getFileDescs().size();
+        return _fileNames2Progress.size();
     }
 
     
