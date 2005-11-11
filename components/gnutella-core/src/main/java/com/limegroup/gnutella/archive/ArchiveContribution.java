@@ -36,10 +36,10 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 
-public class DefaultContribution extends AbstractContribution {
+public class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DefaultContribution.java,v 1.1.2.24 2005-11-07 21:17:28 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.1 2005-11-11 19:48:35 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
@@ -50,7 +50,7 @@ public class DefaultContribution extends AbstractContribution {
 	private PostMethod _post = null;
 	
 	// no default constructor
-	private DefaultContribution() {
+	private ArchiveContribution() {
 	}
 	
 	
@@ -61,7 +61,7 @@ public class DefaultContribution extends AbstractContribution {
 	 * @throws IllegalArgumentException
 	 *         If media is not valid
 	 */
-	public DefaultContribution( String username, String password, 
+	public ArchiveContribution( String username, String password, 
 			String title, int media ) {
 		this( username, password, title, media, 
 				Archives.defaultCollectionForMedia( media ),
@@ -80,7 +80,7 @@ public class DefaultContribution extends AbstractContribution {
 	 *         If type or collection is not valid
 	 *         
 	 */
-	public DefaultContribution( String username, String password, 
+	public ArchiveContribution( String username, String password, 
 			String title, int media, int collection, int type ) {
 		setUsername( username );
 		setPassword( password );
