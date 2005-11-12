@@ -11,14 +11,13 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
@@ -27,10 +26,8 @@ import org.apache.commons.net.io.CopyStreamException;
 import org.apache.xerces.dom3.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
-import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -39,15 +36,16 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.1 2005-11-11 19:48:35 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.2 2005-11-12 00:30:19 tolsen Exp $";
 
 	private String _identifier;
 	private String _ftpServer;
 	private String _ftpPath;
 	private String _verificationUrl;
 	
-	private Object _postLock = new Object();
-	private PostMethod _post = null;
+	
+	private Object _requestLock = new Object();
+	private ArchiveRequest _request = null;
 	
 	// no default constructor
 	private ArchiveContribution() {
@@ -98,9 +96,9 @@ public class ArchiveContribution extends AbstractContribution {
 	public void cancel() {
 		super.cancel();
 	
-		synchronized( _postLock ) {
-			if ( _post != null ) {
-				_post.abort();
+		synchronized( _requestLock ) {
+			if ( _request != null ) {
+				_request.cancel();
 			}
 		}
 	}
@@ -129,7 +127,7 @@ public class ArchiveContribution extends AbstractContribution {
 	 * 
 	 */
 	
-	public String reserveIdentifier( String identifier ) 
+	public String requestIdentifier( String identifier ) 
 	throws IdentifierUnavailableException, BadResponseException,
 	HttpException, IOException {
 		
@@ -140,79 +138,37 @@ public class ArchiveContribution extends AbstractContribution {
 		
 		String nId = Archives.normalizeName( identifier );
 		
-        final HttpClient client = new HttpClient();
-
-        final PostMethod post = postMethod( CREATE_ID_URL, getUsername(), nId );
-        
-        synchronized( _postLock ) {
-        	_post = post;
-        }
-
-        client.executeMethod( post );
-       
-        
-        final String responseString = post.getResponseBodyAsString();
-        final InputStream responseStream = post.getResponseBodyAsStream();
-
-        synchronized( _postLock ) {
-        	_post = null;	
-        }
-        
-        post.releaseConnection();
-        
-        
-        final Element resultElement;
-        
-        try {
-        	resultElement = getResultElement( responseStream );
-        } finally {
-        	responseStream.close();
-        }
-
-		/*
-		 * On success, XML will be returned like:
-		 * 
-		 * <result type="success"><url>[FTP url]</url></result>
-		 * 
-		 * On failure, XML will be returned like:
-		 * 
-		 * <result type="error"><message>[human readable error]</message></result>
-		 */
-
-		if ( resultElement == null ) {
-			throw new BadResponseException( "No top level element <result>\n"
-					+ responseString );
+		synchronized( _requestLock ) {
+			_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+					new NameValuePair( "xml", "1" ),
+					new NameValuePair( "user", getUsername() ),
+					new NameValuePair( "identifier", nId )
+			});
 		}
 		
-		final Node typeNode = resultElement.getAttributes().getNamedItem( "type" );
+		_request.execute();
+		final ArchiveResponse response = _request.getResponse();
 		
-		if ( typeNode == null ) {
-			throw new BadResponseException( "<result> node does not have a \"type\" attribute\n"
-					+ responseString );
+		synchronized( _requestLock ){
+			_request = null;
 		}
 		
-		final String type = typeNode.getNodeValue();
+		final String resultType = response.getResultType();
 		
-		if ( type.equals( "success" ) ) {
+		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 			
-			final Node urlNode = _findChildElement( resultElement, "url" ); 
-			if ( urlNode == null ) {
-				throw new BadResponseException( "<result type=\"success\"> does not have <url> child\n"
-						+ responseString );
-			} 
+			final String url = response.getUrl();
 			
-			final String urlString = _findText( urlNode );
+			if ( url.equals( "" ) ) {
+				throw new BadResponseException( "successful result, but no url given" );
+			}
 			
-			// the url returned does not have ftp:// in front of it
-			// i.e. :  server/path
-			
-			final String[] urlSplit = urlString.split( "/", 2 );
+			final String[] urlSplit = url.split( "/", 2 );
 			
 			if ( urlSplit.length < 2 ) {
-				throw new BadResponseException( "No slash (/) present to separate server from path: "
-				+ urlString + "\n" + responseString );
+				throw new BadResponseException( "No slash (/) present to separate server from path: " + url );
 			}
-
+			
 			// we're all good now
 			
 			_ftpServer = urlSplit[0];
@@ -223,60 +179,25 @@ public class ArchiveContribution extends AbstractContribution {
 			
 			
 			// set verification URL
+//			
+//			_verificationUrl =  "http://www.archive.org/" +
+//			Archives.getMediaString( getMedia() ) + "/" +
+//			Archives.getMediaString( getMedia() ) +
+//			"-details-db.php?collection=" +
+//			Archives.getCollectionString( getCollection() ) +
+//			"&collectionid=" + _identifier;
 			
-			_verificationUrl =  "http://www.archive.org/" +
-				Archives.getMediaString( getMedia() ) + "/" +
-				Archives.getMediaString( getMedia() ) +
-				"-details-db.php?collection=" +
-				Archives.getCollectionString( getCollection() ) +
-				"&collectionid=" + _identifier;
+			_verificationUrl = "http://www.archive.org/details/" + _identifier;
 			
 			return _identifier;
 			
-			
-		} else if ( type.equals( "error" ) ) {
-			// let's fetch the message
-			
-			final Node msgNode = _findChildElement( resultElement, "message" );
-			String msg = "[NO MESSAGE GIVEN]";
-			
-			if ( msgNode != null ) {
-				msg = _findText( msgNode );
-			}
-			
-			throw new IdentifierUnavailableException( msg, nId );
+		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
+			throw new IdentifierUnavailableException( response.getMessage(), nId );
 		} else {
 			// unidentified type
-			throw new BadResponseException ( "unidentified value for attribute \"type\" in <result> element \n"
-					+ "(should be either \"success\" or \"error\"): " + type + "\n" + responseString ); 
-		}	
-	}
-	
-	/** helper function for reserveIdentifier() */
-	private static Element _findChildElement( Node parent, String name ) {
-		Node n = parent.getFirstChild();
-		for ( ; n != null; n = n.getNextSibling() ) {
-			if ( n.getNodeType() == Node.ELEMENT_NODE
-					&& n.getNodeName().equals( name )) {
-				return (Element) n;
-			}
-		}		
-		return null;
-	}
-	
-	/** helper function for reserveIdentifier() */
-	private static String _findText( Node parent ) {
-
-		for ( Node n = parent.getFirstChild(); 
-			n != null; n = n.getNextSibling()) {
-			
-			if (n.getNodeType() == Node.TEXT_NODE ) {
-				return n.getNodeValue();
-			}
+			throw new BadResponseException ( "unidentified result type:" + resultType );
 		}
-		return "";
-	}
-	
+	}	
 
 	/**
 	 * 
@@ -456,21 +377,7 @@ public class ArchiveContribution extends AbstractContribution {
 		checkinCompleted();
 	}
 	
-	private PostMethod postMethod( String url, String username, String identifier  ) {
-        
-		final PostMethod post = new PostMethod( url );
-        post.addRequestHeader("Content-type","application/x-www-form-urlencoded");
-        post.addRequestHeader("Accept","text/plain");
 
-        final NameValuePair[] nameVal = new NameValuePair[] {
-                        new NameValuePair("xml","1"),
-                        new NameValuePair("user", username ),
-                        new NameValuePair("identifier", identifier )};
-
-        post.addParameters(nameVal);
-        
-        return post;
-	}
 	
 	/**
 	 * 
@@ -530,124 +437,33 @@ public class ArchiveContribution extends AbstractContribution {
 			throw new IllegalStateException( "identifier not set" );
 		}
 		
-		final PostMethod post = postMethod( CHECKIN_URL, username, _identifier );
-		
-		synchronized( _postLock ) {
-			_post = post;
+		synchronized( _requestLock ) {
+			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+					new NameValuePair( "xml", "1" ),
+					new NameValuePair( "user", username ),
+					new NameValuePair( "identifier", _identifier )
+			});
 		}
 		
-		final HttpClient client = new HttpClient();
-		client.executeMethod( post );
+		_request.execute();
+		final ArchiveResponse response = _request.getResponse();
 		
-		final String responseString = post.getResponseBodyAsString();
-		final InputStream responseStream = post.getResponseBodyAsStream();
-		
-		synchronized( _postLock ) {
-			_post = null;
+		synchronized( _requestLock ) {
+			_request = null;
 		}
 		
-		post.releaseConnection();
+		final String resultType = response.getResultType();
 		
-		final Element resultElement;
-		
-		try {
-			resultElement = getResultElement( responseStream );
-		} finally {
-			responseStream.close();
-		}
-		
-		/*
-		 * On success, XML will be returned like:
-		 *
-		 * <result type="success"><message>item has been checked in</message></result>
-		 *
-		 * On failure, XML will be returned like:
-		 *
-		 * <result type="error"><message>[human readable error]</message></result>
-		 *
-		 */
-		
-		if ( resultElement == null ) {
-			throw new BadResponseException( "No top level element <result>\n"
-					+ responseString );
-		}
-		
-		final Node typeNode = resultElement.getAttributes().getNamedItem( "type" );
-		
-		if ( typeNode == null ) {
-			throw new BadResponseException( "<result> node does not have a \"type\" attribute\n"
-					+ responseString );
-		}
-		
-		final String type = typeNode.getNodeValue();
-		
-		if ( type.equals( "success" ) ) {
+		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
 			return;
-		} else if ( type.equals( "error" ) ) {
-			// let's fetch the message
-			
-			final Node msgNode = _findChildElement( resultElement, "message" );
-			String msg = "[NO MESSAGE GIVEN]";
-			
-			if ( msgNode != null ) {
-				msg = _findText( msgNode );
-			}
-			
-			throw new BadResponseException( "checkin failed: " + msg );
+		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
+			throw new BadResponseException( "checkin failed: " + response.getMessage() );
 		} else {
-			// unidentified type
-			throw new BadResponseException( "unidentified value for attribute \"type\" in <result> element \n"
-					+ "(should be either \"success\" or \"error\"): " + type + "\n" + responseString ); 
+			throw new BadResponseException( "unidentified result type:" + resultType );
 		}
 	}
 
-	/**
-	 * 
-	 * @param responseStream
-	 * @param responseString
-	 * @return
-	 * 
-	 * @throws BadResponseException
-	 *         If we get a bad response from Internet Archive
-	 *         
-	 * @throws IOException
-	 *         If something bad happens during I/O
-	 *         
-	 * @throws IllegalStateException
-	 *         If java's xml parser configuration is bad
-	 */
 
-	private Element getResultElement( InputStream responseStream )
-	throws BadResponseException, IOException {
-		
-		final DocumentBuilderFactory factory = 
-			DocumentBuilderFactory.newInstance();
-		factory.setIgnoringComments( true );
-		factory.setCoalescing( true );
-		
-		final DocumentBuilder parser;
-		final Document document;
-		
-		try {
-			parser = factory.newDocumentBuilder();
-			document = parser.parse( responseStream );
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-			final IllegalStateException ise = new IllegalStateException();
-			ise.initCause(e);
-			throw ise;
-		} catch (final SAXException e) {
-			e.printStackTrace();
-			throw new BadResponseException(e);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			throw (e);
-		} 
-			
-		return _findChildElement( document, "result" );
-
-	}
-	
 	/**
 	 * @throws 	IllegalStateException
 	 * 			If java's xml parser configuration is bad
