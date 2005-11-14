@@ -13,27 +13,9 @@ import java.util.Set;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.util.CoWList;
 
-/**
- * 
- * A contribution consists of one or more files that we upload to a location
- * such as the Internet Archive.
- * 
- * Follow these steps to do upload a contribution to the 
- * Internet Archive:
- * 
- * 	1.	create a Contribution object using your preferred concrete subclass
- * 		of AbstractContribution
- * 	2.	call reservetIdentifier() with your requested identifier
- * 	3.	if step 2 successful, call getVerificationUrl() to get the verification URL
- * 	4.	call addFile() for each file you want to add to the contribution
- * 	5.	call addListener() with your UploadListener
- * 	6.  call upload() to upload the contribution
- */
-public abstract class AbstractContribution {
 
-	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AbstractContribution.java,v 1.1.2.18 2005-11-12 00:30:19 tolsen Exp $";
-	
+abstract class AbstractContribution implements Contribution {
+
 	private String _title;
 	private int _media;
 	private int _collection;
@@ -50,15 +32,6 @@ public abstract class AbstractContribution {
 	private volatile boolean _cancelled;
     
     
-    public static final int NOT_CONNECTED = 0;
-    public static final int CONNECTED = 1;  
-    public static final int FILE_STARTED = 2;
-    public static final int FILE_PROGRESSED = 3;
-    public static final int FILE_COMPLETED = 4;
-    public static final int CHECKIN_STARTED = 5;
-    public static final int CHECKIN_COMPLETED = 6;
-
-
     /** LOCKING: this */
     private String _curFileName;
     private int _filesSent = 0;
@@ -72,31 +45,51 @@ public abstract class AbstractContribution {
     
     private final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
 	
-    /**
-     * @return the verification URL that should be used for the contribution
-     */
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getVerificationUrl()
+	 */
 	abstract public String getVerificationUrl();
 	
-	/**
-     * @return normalized identifier
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#requestIdentifier(java.lang.String)
 	 */
 	abstract public String requestIdentifier( String identifier ) throws 
         IdentifierUnavailableException, IOException;
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getIdentifier()
+	 */
+	abstract public String getIdentifier();
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#upload()
+	 */
 	abstract public void upload() throws IOException;
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#addFileDesc(com.limegroup.gnutella.FileDesc)
+	 */
 	public void addFileDesc( FileDesc fd ) { 
 		_files.put( fd, new File(fd));
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeFileDesc(com.limegroup.gnutella.FileDesc)
+	 */
 	public void removeFileDesc( FileDesc fd ) { 
 		_files.remove( fd );
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#containsFileDesc(com.limegroup.gnutella.FileDesc)
+	 */
 	public boolean containsFileDesc( FileDesc fd ) { 
 		return _files.containsKey( fd ); 
 	}	
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#cancel()
+	 */
 	public void cancel() {
 		_cancelled = true;
 	}
@@ -105,12 +98,8 @@ public abstract class AbstractContribution {
 		return _cancelled;
 	}
 	
-	/**
-	 * @return a set of the files in the collection
-	 * 
-	 * I'm guessing that LinkedHashMap returns a LinkedHashSet for keySet() 
-	 * so the order should be in the order they were added
-	 *         
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileDescs()
 	 */
 	public Set getFileDescs() { 
 		return Collections.unmodifiableSet( _files.keySet() ); 
@@ -120,21 +109,22 @@ public abstract class AbstractContribution {
 		return Collections.unmodifiableCollection(_files.values());
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setTitle(java.lang.String)
+	 */
 	public void setTitle( String title ) {
 		_title = title;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTitle()
+	 */
 	public String getTitle() {
 		return _title;
 	}
 	
-	/**
-	 * 
-	 * @param media
-	 * 
-	 * @throws IllegalArgumentException
-	 *         If media is not valid
-	 * 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setMedia(int)
 	 */
 	public void setMedia( int media ) {
 		if ( Archives.getMediaString( media ) == null ) {
@@ -144,16 +134,15 @@ public abstract class AbstractContribution {
 		_media = media;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getMedia()
+	 */
 	public int getMedia() {
 		return _media;
 	}
 	
-	/**
-	 * 
-	 * @param collection
-	 * @throws IllegalArgumentException
-	 *         If collection is not valid
-	 *         
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setCollection(int)
 	 */
 	public void setCollection( int collection ) {
 		if ( Archives.getCollectionString( collection ) == null ) {
@@ -163,15 +152,15 @@ public abstract class AbstractContribution {
 		_collection = collection;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getCollection()
+	 */
 	public int getCollection() {
 		return _collection;
 	}
 	
-	/**
-	 * 
-	 * @param type
-	 * @throws IllegalArgumentException
-	 *         If type is not valid
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setType(int)
 	 */
 	public void setType( int type ) {
 		if (Archives.getTypeString( type ) == null ) {
@@ -181,39 +170,43 @@ public abstract class AbstractContribution {
 		_type = type;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getType()
+	 */
 	public int getType() {
 		return _type;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getPassword()
+	 */
 	public String getPassword() {
 		return _password;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setPassword(java.lang.String)
+	 */
 	public void setPassword(String password) {
 		_password = password;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getUsername()
+	 */
 	public String getUsername() {
 		return _username;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setUsername(java.lang.String)
+	 */
 	public void setUsername(String username) {
 		_username = username;
 	}
 		
-	/**
-	 * Fields You can include whatever fields you like, but the following are
-	 * known (possibly semantically)  by the Internet Archive
-	 * 
-	 * Movies and Audio: date, description, runtime
-	 * 
-	 * Audio: creator, notes, source, taper 	 
-	 *  
-	 * Movies: color, contact, country, credits, director, producer,
-	 *		production_company, segments, segments, sound, sponsor, shotlist 
-	 *
-	 * Also see the Dublin Core: http://dublincore.org/documents/dces/
-	 * 
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#setField(java.lang.String, java.lang.String)
 	 */
 	
 
@@ -221,10 +214,16 @@ public abstract class AbstractContribution {
 		_fields.put( field, value );
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getField(java.lang.String)
+	 */
 	public String getField( String field ) {
 		return (String) _fields.get( field );
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeField(java.lang.String)
+	 */
 	public void removeField( String field ) {
 		_fields.remove( field );
 	}
@@ -258,10 +257,16 @@ public abstract class AbstractContribution {
         }
     }
 
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#addListener(com.limegroup.gnutella.archive.UploadListener)
+	 */
     public void addListener( UploadListener l ) {
         _uploadListeners.add( l );
     }
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#removeListener(com.limegroup.gnutella.archive.UploadListener)
+	 */
     public void removeListener( UploadListener l ) {
         _uploadListeners.remove( l );
     }
@@ -296,39 +301,63 @@ public abstract class AbstractContribution {
         }
     }
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFilesSent()
+	 */
     public synchronized int getFilesSent() {
         return _filesSent;
     }
 
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalFiles()
+	 */
     public synchronized int getTotalFiles() {
         return _fileNames2Progress.size();
     }
 
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileBytesSent()
+	 */
     public synchronized long getFileBytesSent() {
         return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getBytesSent();       
 
     }
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileSize()
+	 */
     public synchronized long getFileSize() {
         return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getFileSize();
     }
     
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalBytesSent()
+	 */
     public synchronized long getTotalBytesSent() {
         return _totalBytesSent;
     }
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getTotalSize()
+	 */
     public synchronized long getTotalSize() {
         return _totalUploadSize;
     }
 
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getFileName()
+	 */
     public synchronized String getFileName() {
         return _curFileName;
     }
 
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.archive.Contribution#getID()
+	 */
     public int getID() {
         return _id;
     }

@@ -16,8 +16,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
@@ -33,25 +31,13 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 
-public class ArchiveContribution extends AbstractContribution {
+abstract class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.2 2005-11-12 00:30:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.3 2005-11-14 17:30:18 tolsen Exp $";
 
-	private String _identifier;
-	private String _ftpServer;
-	private String _ftpPath;
-	private String _verificationUrl;
-	
-	
-	private Object _requestLock = new Object();
-	private ArchiveRequest _request = null;
-	
-	// no default constructor
-	private ArchiveContribution() {
-	}
-	
-	
+
+
 	/**
 	 * @param media
 	 *        One of ArchiveConstants.MEDIA_*
@@ -87,118 +73,15 @@ public class ArchiveContribution extends AbstractContribution {
 		setCollection( collection );	
 		setType( type );
 	}
-	
-	public String getVerificationUrl() {
-		return _verificationUrl;
-	}
 
 	
-	public void cancel() {
-		super.cancel();
+	abstract protected String getFtpServer();
+	abstract protected String getFtpPath();
+	abstract protected boolean isFtpDirPreMade();
 	
-		synchronized( _requestLock ) {
-			if ( _request != null ) {
-				_request.cancel();
-			}
-		}
-	}
-	
-	/** 
-	 * 	normalizes identifier and checks with Internet Archive
-	 *  if identifier is available.
-	 *  throws a IdentifierUnavailableException if the identifier
-	 *  is not available
-	 *  otherwise, returns normalized identifier 
-	 * 
-	 * @throws 	IdentifierUnavailableException
-	 * 			If the identifier is not available
-	 * 
-	 * @throws	BadResponseException
-	 * 			If we get a bad response from Internet Archive
-	 * 
-	 * @throws	HttpException
-	 * 			If something bad happens in the http layer
-	 * 
-	 * @throws  IOException
-	 * 			If something bad happens during I/O
-	 * 
-	 * @throws	IllegalStateException
-	 * 			If java's xml parser configuration is bad
-	 * 
-	 */
-	
-	public String requestIdentifier( String identifier ) 
-	throws IdentifierUnavailableException, BadResponseException,
-	HttpException, IOException {
-		
-		final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
-		
-		_identifier = null;
-		// normalize the identifier
-		
-		String nId = Archives.normalizeName( identifier );
-		
-		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
-					new NameValuePair( "xml", "1" ),
-					new NameValuePair( "user", getUsername() ),
-					new NameValuePair( "identifier", nId )
-			});
-		}
-		
-		_request.execute();
-		final ArchiveResponse response = _request.getResponse();
-		
-		synchronized( _requestLock ){
-			_request = null;
-		}
-		
-		final String resultType = response.getResultType();
-		
-		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
-			
-			final String url = response.getUrl();
-			
-			if ( url.equals( "" ) ) {
-				throw new BadResponseException( "successful result, but no url given" );
-			}
-			
-			final String[] urlSplit = url.split( "/", 2 );
-			
-			if ( urlSplit.length < 2 ) {
-				throw new BadResponseException( "No slash (/) present to separate server from path: " + url );
-			}
-			
-			// we're all good now
-			
-			_ftpServer = urlSplit[0];
-			_ftpPath = "/" + urlSplit[1];
-			
-			
-			_identifier = nId;
-			
-			
-			// set verification URL
-//			
-//			_verificationUrl =  "http://www.archive.org/" +
-//			Archives.getMediaString( getMedia() ) + "/" +
-//			Archives.getMediaString( getMedia() ) +
-//			"-details-db.php?collection=" +
-//			Archives.getCollectionString( getCollection() ) +
-//			"&collectionid=" + _identifier;
-			
-			_verificationUrl = "http://www.archive.org/details/" + _identifier;
-			
-			return _identifier;
-			
-		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new IdentifierUnavailableException( response.getMessage(), nId );
-		} else {
-			// unidentified type
-			throw new BadResponseException ( "unidentified result type:" + resultType );
-		}
-	}	
+	abstract protected void checkin() throws IOException;
 
+	
 	/**
 	 * 
 	 * @throws UnknownHostException
@@ -244,10 +127,10 @@ public class ArchiveContribution extends AbstractContribution {
 		final String username = getUsername();
 		final String password = getPassword();
 		
-		if ( _ftpServer == null ) {
+		if ( getFtpServer() == null ) {
 			throw new IllegalStateException( "ftp server not set" );
 		}
-		if ( _ftpPath == null ) {
+		if ( getFtpPath() == null ) {
 			throw new IllegalStateException( "ftp path not set" );
 		}
 		if ( username == null ) {
@@ -277,11 +160,11 @@ public class ArchiveContribution extends AbstractContribution {
 		final String[] fileNames = new String[totalFiles];
 		final long[] fileSizes = new long[totalFiles];
 		
-		final String metaXmlName = _identifier + META_XML_SUFFIX; 
+		final String metaXmlName = getIdentifier() + META_XML_SUFFIX; 
 		fileNames[0] = metaXmlName;
 		fileSizes[0] = metaXmlLength;
 		
-		final String filesXmlName = _identifier + FILES_XML_SUFFIX;
+		final String filesXmlName = getIdentifier() + FILES_XML_SUFFIX;
 		fileNames[1] = filesXmlName;
 		fileSizes[1] = filesXmlLength;
 		
@@ -309,11 +192,11 @@ public class ArchiveContribution extends AbstractContribution {
 			ftp.enterLocalPassiveMode();
 			
 			if ( isCancelled() ) { return; }
-			ftp.connect( _ftpServer );
+			ftp.connect( getFtpServer() );
 			
 			final int reply = ftp.getReplyCode();
 			if ( !FTPReply.isPositiveCompletion(reply) ) {
-				throw new RefusedConnectionException( _ftpServer + "refused FTP connection" );
+				throw new RefusedConnectionException( getFtpServer() + "refused FTP connection" );
 			}
 			// now login
 			if ( isCancelled() ) { return; }
@@ -323,9 +206,15 @@ public class ArchiveContribution extends AbstractContribution {
 			
 			try {
 				
+				// make directory if necessary
+				if ( !isFtpDirPreMade() &&
+						!ftp.makeDirectory( getFtpPath() )) {
+					throw new DirectoryChangeFailedException();
+				}
+				
 				// now change directory
 				if ( isCancelled() ) { return; }
-				if (!ftp.changeWorkingDirectory( _ftpPath )) {
+				if (!ftp.changeWorkingDirectory( getFtpPath() )) {
 					throw new DirectoryChangeFailedException();
 				}
 				
@@ -408,68 +297,13 @@ public class ArchiveContribution extends AbstractContribution {
 		}
 		fileCompleted();
 	}
+
 	
-	/**
-	 * 
-	 * @throws	HttpException
-	 * 			If something bad happens in the http layer
-	 * 
-	 * @throws  IOException
-	 * 			If something bad happens during I/O
-	 * 
-	 * @throws IllegalStateException
-	 *         If username or identifier is not set.
-	 *         
-	 * @throws BadResponseException
-	 *         If the checkin fails
-	 *
-	 */
-	private void checkin() throws HttpException, 
-	BadResponseException, IOException {
-		
-		final String CHECKIN_URL = "http://www.archive.org/checkin.php";
-		final String username = getUsername();
-		
-		if ( username == null ) {
-			throw new IllegalStateException( "username not set" );			
-		}
-		if ( _identifier == null ) {
-			throw new IllegalStateException( "identifier not set" );
-		}
-		
-		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
-					new NameValuePair( "xml", "1" ),
-					new NameValuePair( "user", username ),
-					new NameValuePair( "identifier", _identifier )
-			});
-		}
-		
-		_request.execute();
-		final ArchiveResponse response = _request.getResponse();
-		
-		synchronized( _requestLock ) {
-			_request = null;
-		}
-		
-		final String resultType = response.getResultType();
-		
-		if ( resultType == ArchiveResponse.RESULT_TYPE_SUCCESS ) {
-			return;
-		} else if ( resultType == ArchiveResponse.RESULT_TYPE_ERROR ) {
-			throw new BadResponseException( "checkin failed: " + response.getMessage() );
-		} else {
-			throw new BadResponseException( "unidentified result type:" + resultType );
-		}
-	}
-
-
+	
 	/**
 	 * @throws 	IllegalStateException
 	 * 			If java's xml parser configuration is bad
 	 */
-	
-	
 	private Document getMetaDocument() {
 		
 		/*
@@ -524,7 +358,7 @@ public class ArchiveContribution extends AbstractContribution {
 			
 			final Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
 			metadataElement.appendChild( identifierElement );
-			identifierElement.appendChild( document.createTextNode( _identifier ));
+			identifierElement.appendChild( document.createTextNode( getIdentifier() ));
 			
 			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
 			metadataElement.appendChild( uploadApplicationElement );
