@@ -1734,7 +1734,7 @@ public class Connection implements IpPort {
      *  and therefore has headers, otherwise <tt>false</tt>
      */
     public boolean receivedHeaders() {
-        return _headers != null;
+        return _headers != HandshakeResponse.createEmptyResponse();
     }
 
 	/**

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -240,7 +241,7 @@ public final class HandshakeResponse {
     HandshakeResponse(int code, String message, Properties headers) { 
         STATUS_CODE = code;
         STATUS_MESSAGE = message;
-        HEADERS = headers;
+        HEADERS = new UnmodifyableProperties(headers);
         DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
         HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
         ULTRAPEER_QRP = 
@@ -311,6 +312,7 @@ public final class HandshakeResponse {
             return ret;
     }
 
+    private static final HandshakeResponse EMPTY_RESPONSE = new HandshakeResponse(new Properties());
     /**
      * Creates an empty response with no headers.  This is useful, for 
      * example, during connection handshaking when we haven't yet read
@@ -319,7 +321,7 @@ public final class HandshakeResponse {
      * @return a new, empty <tt>HandshakeResponse</tt> instance
      */
     public static HandshakeResponse createEmptyResponse() {
-        return new HandshakeResponse(new Properties());
+        return EMPTY_RESPONSE;
     }
     
     /**
@@ -1110,6 +1112,18 @@ public final class HandshakeResponse {
 
     public String toString() {
         return "<"+STATUS_CODE+", "+STATUS_MESSAGE+">"+HEADERS;
+    }
+    
+    private class UnmodifyableProperties extends Properties {
+        
+        public UnmodifyableProperties(Properties other) {
+            super(other);
+        }
+
+        public synchronized Object setProperty(String key, String value) {
+            throw new UnsupportedOperationException();
+        }
+        
     }
 }
 
