@@ -42,6 +42,7 @@ import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
@@ -356,7 +357,7 @@ public class RouterService {
     													 manager);
     		sa.start();
     		LOG.trace("STOP SupernodeAssigner");
-    
+			
             // THIS MUST BE BEFORE THE CONNECT (below)
             // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
             LOG.trace("START HostCatcher.initialize");
@@ -417,6 +418,10 @@ public class RouterService {
             callback.componentLoading("SAVED_FILE_MANAGER");
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
+			
+			LOG.trace("START loading spam data");
+			RatingTable.instance();
+			LOG.trace("START loading spam data");			
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
@@ -853,14 +858,20 @@ public class RouterService {
             } catch (IOException e) {}
             
             // save limewire.props & other settings
-            SettingsHandler.save();            
+            SettingsHandler.save();
+			
+			RatingTable.instance().ageAndSave();
             
             cleanupPreviewFiles();
             
             downloader.writeSnapshot();
             
             fileManager.stop();
-            
+			
+            UrnCache.instance().persistCache();
+
+            CreationTimeCache.instance().persistCache();
+
             TigerTreeCache.instance().persistCache();
 
             LicenseFactory.persistCache();
