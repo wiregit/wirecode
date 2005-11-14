@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Archives {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.4 2005-11-07 21:17:28 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.5 2005-11-14 20:21:19 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	
@@ -156,19 +156,21 @@ public class Archives {
 		}
 		return c.intValue();
 	}
+
+	
+	// first character can only be alphanumberic
+	private static final Pattern BAD_BEGINNING_CHARS =
+		Pattern.compile( "^[^\\p{Alnum}]+" );
+	
+	// only allow alphanumerics and . - _
+	private static final Pattern BAD_CHARS = 
+		Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
+	private static final String REPLACE_STR = "_";
 	
 	public static String normalizeName( String name ) {
 		final int MIN_LENGTH = 5;
 		final int MAX_LENGTH = 100;
-		
-		// first character can only be alphanumberic
-		final Pattern BAD_BEGINNING_CHARS =
-			Pattern.compile( "^[^\\p{Alnum}]+" );
-		
-		// only allow alphanumerics and . - _
-		final Pattern BAD_CHARS = 
-			Pattern.compile( "[^\\p{Alnum}\\.\\-_]" );
-		final String REPLACE_STR = "_";
+
 		
 		if ( name == null )
 			return null;

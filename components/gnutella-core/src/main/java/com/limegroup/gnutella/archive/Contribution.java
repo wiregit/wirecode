@@ -8,7 +8,7 @@ import com.limegroup.gnutella.FileDesc;
 public interface Contribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.3 2005-11-14 17:30:18 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.4 2005-11-14 20:21:19 tolsen Exp $";
 
 	/**
 	 * 
@@ -80,6 +80,10 @@ public interface Contribution {
 	public void setTitle(String title);
 
 	public String getTitle();
+	
+	public void setDescription( String description ) throws DescriptionTooShortException;
+	
+	public String getDescription();
 
 	/**
 	 * 

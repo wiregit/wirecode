@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 abstract class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.3 2005-11-14 17:30:18 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.4 2005-11-14 20:21:19 tolsen Exp $";
 
 
 
@@ -46,8 +46,9 @@ abstract class ArchiveContribution extends AbstractContribution {
 	 *         If media is not valid
 	 */
 	public ArchiveContribution( String username, String password, 
-			String title, int media ) {
-		this( username, password, title, media, 
+			String title, String description, int media )
+	throws DescriptionTooShortException {
+		this( username, password, title, description, media, 
 				Archives.defaultCollectionForMedia( media ),
 				Archives.defaultTypesForMedia( media ));
 	}
@@ -65,10 +66,13 @@ abstract class ArchiveContribution extends AbstractContribution {
 	 *         
 	 */
 	public ArchiveContribution( String username, String password, 
-			String title, int media, int collection, int type ) {
+			String title, String description, int media, 
+			int collection, int type ) 
+	throws DescriptionTooShortException {
 		setUsername( username );
 		setPassword( password );
 		setTitle( title );
+		setDescription( description );
 		setMedia( media );
 		setCollection( collection );	
 		setType( type );
@@ -323,6 +327,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final String COLLECTION_ELEMENT = "collection";
 		final String MEDIATYPE_ELEMENT = "mediatype";
 		final String TITLE_ELEMENT = "title";
+		final String DESCRIPTION_ELEMENT = "description";
 		final String LICENSE_URL_ELEMENT = "licenseurl";
 		final String UPLOAD_APPLICATION_ELEMENT = "upload_application";
 		final String APPID_ATTR = "appid";
@@ -355,6 +360,10 @@ abstract class ArchiveContribution extends AbstractContribution {
 			final Element titleElement = document.createElement( TITLE_ELEMENT );
 			metadataElement.appendChild( titleElement );
 			titleElement.appendChild( document.createTextNode( getTitle()));
+			
+			final Element descriptionElement = document.createElement( DESCRIPTION_ELEMENT );
+			metadataElement.appendChild( descriptionElement );
+			descriptionElement.appendChild( document.createTextNode( getDescription() ));
 			
 			final Element identifierElement = document.createElement( IDENTIFIER_ELEMENT );
 			metadataElement.appendChild( identifierElement );

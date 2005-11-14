@@ -5,13 +5,15 @@ public class ContributionFactory {
 	private ContributionFactory() {}
 
 	public static Contribution createContribution( String username, String password, 
-			String title, int media) {
-		return new DirectContribution( username, password, title, media );
+			String title, String description, int media)
+	throws DescriptionTooShortException {
+		return new AdvancedContribution( username, password, title, description, media );
 	}
 	
 	public static Contribution createContribution( String username, String password, 
-			String title, int media, int collection, int type ) {
-		return new DirectContribution( username, password, title, media, collection, type );
+			String title, String description, int media, int collection, int type )
+	throws DescriptionTooShortException {
+		return new AdvancedContribution( username, password, title, description, media, collection, type );
 	}
 
 }

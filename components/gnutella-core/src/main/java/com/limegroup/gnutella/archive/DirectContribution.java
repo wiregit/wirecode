@@ -8,7 +8,7 @@ import org.apache.commons.httpclient.NameValuePair;
 class DirectContribution extends ArchiveContribution {
 
 	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.1 2005-11-14 17:30:18 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.2 2005-11-14 20:21:19 tolsen Exp $";
 	
 	private String _identifier;
 	private String _ftpServer;
@@ -22,18 +22,18 @@ class DirectContribution extends ArchiveContribution {
 	
 	
 	public DirectContribution(String username, String password, String title,
-			int media) {
-		super(username, password, title, media);
-		// TODO Auto-generated constructor stub
+			String description, int media) 
+	throws DescriptionTooShortException {
+		super(username, password, title, description, media);
 	}
 
 	public DirectContribution(String username, String password, String title,
-			int media, int collection, int type) {
-		super(username, password, title, media, collection, type);
-		// TODO Auto-generated constructor stub
+			String description, int media, int collection, int type) 
+	throws DescriptionTooShortException {
+		super(username, password, title, description, media, collection, type);
 	}
 
-
+	
 	public String getIdentifier() {
 		return _identifier;
 	}
@@ -87,7 +87,9 @@ class DirectContribution extends ArchiveContribution {
 	 * 			If java's xml parser configuration is bad
 	 * 
 	 */
-	public String requestIdentifier(String identifier) throws IdentifierUnavailableException, BadResponseException, HttpException, IOException {
+	public String requestIdentifier(String identifier) 
+	throws IdentifierUnavailableException, BadResponseException, 
+	HttpException, IOException {
 			
 			final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
 			
@@ -138,13 +140,6 @@ class DirectContribution extends ArchiveContribution {
 				
 				
 				// set verification URL
-	//			
-	//			_verificationUrl =  "http://www.archive.org/" +
-	//			Archives.getMediaString( getMedia() ) + "/" +
-	//			Archives.getMediaString( getMedia() ) +
-	//			"-details-db.php?collection=" +
-	//			Archives.getCollectionString( getCollection() ) +
-	//			"&collectionid=" + _identifier;
 				
 				_verificationUrl = "http://www.archive.org/details/" + _identifier;
 				

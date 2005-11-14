@@ -17,6 +17,7 @@ import com.limegroup.gnutella.util.CoWList;
 abstract class AbstractContribution implements Contribution {
 
 	private String _title;
+	private String _description;
 	private int _media;
 	private int _collection;
 	private int _type;
@@ -121,6 +122,15 @@ abstract class AbstractContribution implements Contribution {
 	 */
 	public String getTitle() {
 		return _title;
+	}
+	
+	public void setDescription( String description ) 
+	throws DescriptionTooShortException {
+		_description = description;
+	}
+	
+	public String getDescription() {
+		return _description;
 	}
 	
 	/* (non-Javadoc)
