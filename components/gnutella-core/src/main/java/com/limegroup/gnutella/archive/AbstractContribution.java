@@ -244,7 +244,7 @@ abstract class AbstractContribution implements Contribution {
     
     protected class UploadFileProgress {
         
-        private long _fileSize;
+        private final long _fileSize;
         private long _bytesSent = 0;
         
         public UploadFileProgress( long fileSize ) {

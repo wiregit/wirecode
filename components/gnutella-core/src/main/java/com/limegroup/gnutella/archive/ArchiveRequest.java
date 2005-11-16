@@ -19,11 +19,10 @@ import org.xml.sax.SAXException;
 class ArchiveRequest {
 
 	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.1.2.1 2005-11-12 00:30:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveRequest.java,v 1.1.2.2 2005-11-16 17:07:08 zlatinb Exp $";
 	
 	private final String _url;
 	private final NameValuePair[] _parameters;
-	private final Object _postLock = new Object();
 	private PostMethod _post; 
 	
 	private ArchiveResponse _response;
@@ -59,7 +58,7 @@ class ArchiveRequest {
 	
 		final HttpClient client = new HttpClient();
 				
-		synchronized( _postLock ) {
+		synchronized(this) {
 			_post = post;
 		}
 		
@@ -68,7 +67,7 @@ class ArchiveRequest {
 		final String responseString = post.getResponseBodyAsString();
 		final InputStream responseStream = post.getResponseBodyAsStream();
 		
-		synchronized( _postLock ) {
+		synchronized(this) {
 			_post = null;
 		}
 		
@@ -148,12 +147,11 @@ class ArchiveRequest {
 		_response = new ArchiveResponse( type, code, message, url );
 	}
 
-	void cancel() {
-		synchronized( _postLock ) {
-			if ( _post != null ) {
-				_post.abort();
-			}
-		}
+	synchronized void cancel() {
+	    if ( _post != null ) {
+	        _post.abort();
+            _post = null;
+	    }
 	}
 
 	/**

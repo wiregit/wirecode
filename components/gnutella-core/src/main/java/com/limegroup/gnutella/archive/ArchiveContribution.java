@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 abstract class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.4 2005-11-14 20:21:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.5 2005-11-16 17:07:08 zlatinb Exp $";
 
 
 
@@ -53,18 +53,6 @@ abstract class ArchiveContribution extends AbstractContribution {
 				Archives.defaultTypesForMedia( media ));
 	}
 	
-	/**
-	 * 
-	 * @param username
-	 * @param password
-	 * @param title
-	 * @param media
-	 * @param collection
-	 * 
-	 * @throws IllegalArgumentException
-	 *         If type or collection is not valid
-	 *         
-	 */
 	public ArchiveContribution( String username, String password, 
 			String title, String description, int media, 
 			int collection, int type ) 

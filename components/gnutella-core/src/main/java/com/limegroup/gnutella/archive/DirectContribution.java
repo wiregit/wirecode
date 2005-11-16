@@ -8,7 +8,7 @@ import org.apache.commons.httpclient.NameValuePair;
 class DirectContribution extends ArchiveContribution {
 
 	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.2 2005-11-14 20:21:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/DirectContribution.java,v 1.1.2.3 2005-11-16 17:07:08 zlatinb Exp $";
 	
 	private String _identifier;
 	private String _ftpServer;
@@ -60,6 +60,7 @@ class DirectContribution extends ArchiveContribution {
 		synchronized( _requestLock ) {
 			if ( _request != null ) {
 				_request.cancel();
+                _request = null;
 			}
 		}
 	}
@@ -99,19 +100,22 @@ class DirectContribution extends ArchiveContribution {
 			
 			String nId = Archives.normalizeName( identifier );
 			
+            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
+                    new NameValuePair( "xml", "1" ),
+                    new NameValuePair( "user", getUsername() ),
+                    new NameValuePair( "identifier", nId )});
 			synchronized( _requestLock ) {
-				_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
-						new NameValuePair( "xml", "1" ),
-						new NameValuePair( "user", getUsername() ),
-						new NameValuePair( "identifier", nId )
-				});
+				_request = request;
 			}
 			
-			_request.execute();
-			final ArchiveResponse response = _request.getResponse();
-			
-			synchronized( _requestLock ){
-				_request = null;
+			ArchiveResponse response;
+			try {
+			    request.execute();
+			    response = request.getResponse();
+			} finally {
+			    synchronized( _requestLock ){
+			        _request = null;
+			    }
 			}
 			
 			final String resultType = response.getResultType();
@@ -180,19 +184,23 @@ class DirectContribution extends ArchiveContribution {
 			throw new IllegalStateException( "identifier not set" );
 		}
 		
+        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
+                new NameValuePair( "xml", "1" ),
+                new NameValuePair( "user", username ),
+                new NameValuePair( "identifier", _identifier )
+        }); 
 		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
-					new NameValuePair( "xml", "1" ),
-					new NameValuePair( "user", username ),
-					new NameValuePair( "identifier", _identifier )
-			});
+			_request = request; 
 		}
 		
-		_request.execute();
-		final ArchiveResponse response = _request.getResponse();
-		
-		synchronized( _requestLock ) {
-			_request = null;
+		ArchiveResponse response;
+		try {
+		    request.execute();
+		    response = request.getResponse();
+		} finally {
+		    synchronized( _requestLock ) {
+		        _request = null;
+		    }
 		}
 		
 		final String resultType = response.getResultType();

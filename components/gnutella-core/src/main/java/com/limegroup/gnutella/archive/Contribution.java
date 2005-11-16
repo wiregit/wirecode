@@ -8,7 +8,7 @@ import com.limegroup.gnutella.FileDesc;
 public interface Contribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.4 2005-11-14 20:21:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.5 2005-11-16 17:07:08 zlatinb Exp $";
 
 	/**
 	 * 
@@ -85,35 +85,14 @@ public interface Contribution {
 	
 	public String getDescription();
 
-	/**
-	 * 
-	 * @param media
-	 * 
-	 * @throws IllegalArgumentException
-	 *         If media is not valid
-	 * 
-	 */
 	public void setMedia(int media);
 
 	public int getMedia();
 
-	/**
-	 * 
-	 * @param collection
-	 * @throws IllegalArgumentException
-	 *         If collection is not valid
-	 *         
-	 */
 	public void setCollection(int collection);
 
 	public int getCollection();
 
-	/**
-	 * 
-	 * @param type
-	 * @throws IllegalArgumentException
-	 *         If type is not valid
-	 */
 	public void setType(int type);
 
 	public int getType();
