@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 abstract class ArchiveContribution extends AbstractContribution {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.5 2005-11-16 17:07:08 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/ArchiveContribution.java,v 1.1.2.6 2005-11-16 18:02:13 zlatinb Exp $";
 
 
 
@@ -198,17 +198,20 @@ abstract class ArchiveContribution extends AbstractContribution {
 			
 			try {
 				
-				// make directory if necessary
-				if ( !isFtpDirPreMade() &&
-						!ftp.makeDirectory( getFtpPath() )) {
-					throw new DirectoryChangeFailedException();
-				}
-				
-				// now change directory
-				if ( isCancelled() ) { return; }
-				if (!ftp.changeWorkingDirectory( getFtpPath() )) {
-					throw new DirectoryChangeFailedException();
-				}
+                // try to change the directory
+                if (!ftp.changeWorkingDirectory(getFtpPath())) {
+                    // if changing fails, make the directory
+                    if ( !isFtpDirPreMade() &&
+                            !ftp.makeDirectory( getFtpPath() )) {
+                        throw new DirectoryChangeFailedException();
+                    }
+                    
+                    // now change directory, if it fails again bail
+                    if ( isCancelled() ) { return; }
+                    if (!ftp.changeWorkingDirectory( getFtpPath() )) {
+                        throw new DirectoryChangeFailedException();
+                    }
+                }
 				
 				if ( isCancelled() ) { return; }
 				connected();
