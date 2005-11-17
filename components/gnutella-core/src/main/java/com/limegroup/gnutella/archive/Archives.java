@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Archives {
 	
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.5 2005-11-14 20:21:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Archives.java,v 1.1.2.6 2005-11-17 15:46:40 tolsen Exp $";
 
 	/** Internet Archive Media Types */
 	
@@ -193,6 +193,28 @@ public class Archives {
 
 		return nameBuf.toString(); 
 	}
+
+	/* factory methods */
 	
+	public static Contribution createContribution( String username, String password, 
+			String title, String description, int media)
+	throws DescriptionTooShortException {
+		return new AdvancedContribution( username, password, title, description, media );
+	}
+
+	public static Contribution createContribution( String username, String password, 
+			String title, String description, int media, int collection, int type )
+	throws DescriptionTooShortException {
+		return new AdvancedContribution( username, password, title, description, media, collection, type );
+	}
+	
+	/**
+	 * checks if the given description would be valid 
+	 * @param description
+	 * @return
+	 */
+	public static boolean isValidDescription( String description ) {
+		return AdvancedContribution.isValidDescription( description );
+	}
 	
 }

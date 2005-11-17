@@ -10,7 +10,7 @@ import org.apache.commons.httpclient.NameValuePair;
 class AdvancedContribution extends ArchiveContribution {
 
 	public static final String REPOSITORY_VERSION =
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.1 2005-11-14 20:21:19 tolsen Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/AdvancedContribution.java,v 1.1.2.2 2005-11-17 15:46:40 tolsen Exp $";
 	
 	private String _identifier;
 	private String _ftpServer;
@@ -66,9 +66,12 @@ class AdvancedContribution extends ArchiveContribution {
 	private static final Pattern MIN_WORDS_PATTERN =
 		Pattern.compile( MIN_WORDS_REGEX );
 	
+	static boolean isValidDescription( String description ) {
+		return MIN_WORDS_PATTERN.matcher( description ).matches(); 
+	}
 	
 	public void setDescription( String description ) throws DescriptionTooShortException {
-		if ( MIN_WORDS_PATTERN.matcher( description ).matches() ) {
+		if ( isValidDescription( description ) ) {
 			super.setDescription( description );	
 		} else {
 			throw new DescriptionTooShortException( DESCRIPTION_MIN_WORDS );

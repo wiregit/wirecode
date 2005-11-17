@@ -8,7 +8,7 @@ import com.limegroup.gnutella.FileDesc;
 public interface Contribution {
 
 	public static final String REPOSITORY_VERSION = 
-		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.5 2005-11-16 17:07:08 zlatinb Exp $";
+		"$Header: /gittmp/cvs_drop/repository/limewire/components/gnutella-core/src/main/java/com/limegroup/gnutella/archive/Attic/Contribution.java,v 1.1.2.6 2005-11-17 15:46:40 tolsen Exp $";
 
 	/**
 	 * 
@@ -28,17 +28,11 @@ public interface Contribution {
 	
 	
 	public static final int NOT_CONNECTED = 0;
-
 	public static final int CONNECTED = 1;
-
 	public static final int FILE_STARTED = 2;
-
 	public static final int FILE_PROGRESSED = 3;
-
 	public static final int FILE_COMPLETED = 4;
-
 	public static final int CHECKIN_STARTED = 5;
-
 	public static final int CHECKIN_COMPLETED = 6;
 
 	/**
@@ -145,5 +139,5 @@ public interface Contribution {
 	public String getFileName();
 
 	public int getID();
-
+	
 }
