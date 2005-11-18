@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 // Commented for the Learning branch
 
+// Another small CVS test
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
