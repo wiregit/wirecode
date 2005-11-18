@@ -36,6 +36,13 @@ import com.limegroup.gnutella.util.NetworkUtils;
  */
 public class Acceptor implements Runnable {
 
+	/*
+	 * This is the first change in the new Learning branch of the LimeWire source code.
+	 * Welcome to the Learning branch.
+	 * This branch will feature unlimited amounts of comments and documentation to help new developers learn Java and LimeWire all at once.
+	 * Thanks! -Zootella
+	 */
+
 	/** A log that we can write lines of text into as the code here runs */
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
