@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+// Edited for the Learning branch
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
@@ -40,8 +42,8 @@ import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
- * A Connection managed by a ConnectionManager.  Includes a loopForMessages
- * method that runs forever (or until an IOException occurs), receiving and
+ * A Connection managed by a ConnectionManager.
+ * Includes a loopForMessages method that runs forever (or until an IOException occurs), receiving and
  * replying to Gnutella messages.  ManagedConnection is only instantiated
  * through a ConnectionManager.<p>
  *
@@ -75,60 +77,54 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
  */
-public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+public class ManagedConnection extends Connection implements ReplyHandler, MessageReceiver, SentMessageHandler {
 
-    /** 
-     * The time to wait between route table updates for leaves, 
-	 * in milliseconds. 
+    /** 5 minutes in milliseconds, the time to wait between route table updates for leaves. */
+    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 5 * 60 * 1000;
+
+    /** 1 minute in milliseconds, the time to wait between route table updates for ultrapeers. */
+    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 60 * 1000;
+
+    /**
+     * 6 seconds in milliseconds, the timeout to use when connecting.
+     * This is not used for bootstrap servers. (do)
      */
-    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
-    
-    /** 
-     * The time to wait between route table updates for Ultrapeers, 
-	 * in milliseconds. 
+    private static final int CONNECT_TIMEOUT = 6000;
+
+    /**
+     * 8000 bytes per second, the limit on the total upstream messaging bandwidth for all connections.
+     * This is in bytes per second, not bits per second.
      */
-    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH = 8000;
 
-
-    /** The timeout to use when connecting, in milliseconds.  This is NOT used
-     *  for bootstrap servers.  */
-    private static final int CONNECT_TIMEOUT = 6000;  //6 seconds
-
-    /** The total amount of upstream messaging bandwidth for ALL connections
-     *  in BYTES (not bits) per second. */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
-
-    /** The maximum number of times ManagedConnection instances should send UDP
-     *  ConnectBack requests.
-     */
+    /** 15, the maximum number of times we should send UDP connect back requests. */
     private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
 
-    /** The maximum number of times ManagedConnection instances should send TCP
-     *  ConnectBack requests.
-     */
+    /** 10, the maximum number of times we shuld send TCP connect back requests. */
     private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
-	/** Handle to the <tt>ConnectionManager</tt>.
-	 */
+	/** A reference to the connection manager object. */
     private ConnectionManager _manager;
 
-	/** Filter for filtering out messages that are considered spam.
-	 */
-    private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
-    private volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    /*
+     * Filter for filtering out messages that are considered spam.
+     * (do)
+     * by messages, we mean Gnutella packets, right?
+     * by spam, we mean packets from poorly designed remote programs, right?
+     */
+
+    private volatile SpamFilter _routeFilter    = SpamFilter.newRouteFilter();
+    private volatile SpamFilter _personalFilter = SpamFilter.newPersonalFilter();
 
     /*
-     * IMPLEMENTATION NOTE: this class uses the SACHRIFC algorithm described at
-     * http://www.limewire.com/developer/sachrifc.txt.  The basic idea is to use
-     * one queue for each message type.  Messages are removed from the queue in
-     * a biased round-robin fashion.  This prioritizes some messages types while
-     * preventing any one message type from dominating traffic.  Query replies
-     * are further prioritized by "GUID volume", i.e., the number of bytes
-     * already routed for that GUID.  Other messages are sorted by time and
-     * removed in a LIFO [sic] policy.  This, coupled with timeouts, reduces
-     * latency.  
+     * Implementation Note:
+     * This class uses the SACHRIFC algorithm described at http://www.limewire.com/developer/sachrifc.txt.
+     * The basic idea is to use one queue for each message type.
+     * Messages are removed from the queue in a biased round-robin fashion.
+     * This prioritizes some message types while preventing any one message type from dominating traffic.
+     * Query replies are further prioritized by "GUID volume", i.e., the number of bytes already routed for that GUID.
+     * Other messages are sorted by time and removed in a LIFO [sic] policy.
+     * This, coupled with timeouts, reduces latency.
      */
 
     /** A lock for QRP activity on this connection */
@@ -240,55 +236,80 @@ public class ManagedConnection extends Connection
     private byte[] clientGUID = DataUtils.EMPTY_GUID;
 
     /**
-     * Creates a new outgoing connection to the specified host on the
-	 * specified port.  
-	 *
-	 * @param host the address of the host we're connecting to
-	 * @param port the port the host is listening on
+     * Make a new ManagedConnection object that we'll use to try to connect to a new remote computer.
+     * This is for an outgoing connection that we initiated.
+     * This constructor takes the IP address and port number of the remote computer.
+     * When it runs, we haven't tried connecting to the remote computer yet.
+     * ManagedConnection objects should only be made by the connection manager.
+	 * 
+     * @param host The IP address of the remote computer we're going to try to connect to, in a string like "24.183.177.68"
+     * @param port The port number of the remote computer we're going to try to connect to, like 6346
      */
     public ManagedConnection(String host, int port) {
-        this(host, port, 
-			 (RouterService.isSupernode() ? 
-			  (Properties)(new UltrapeerHeaders(host)) : 
-			  (Properties)(new LeafHeaders(host))),
-			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
-			  (HandshakeResponder)new LeafHandshakeResponder(host)));
+
+    	// Call the next ManagedConnection constructor with the given IP address and port number, and new blank objects
+        this(host, port,
+
+            // Make a new empty UltrapeerHeaders or LeafHeaders object, depending on if we're an ultrapeer or not
+            // Cast it as a Properties object and pass it to the other constructor
+            (RouterService.isSupernode() ? (Properties)(new UltrapeerHeaders(host)) : (Properties)(new LeafHeaders(host))),
+
+            // Make a new empty UltrapeerHandshakeResponder or LeafHandshakeResponder object, depending on if we're an ultrapeer or not
+            // Cast it as a HandshakeResponder object and pass it to the other constructor
+            (RouterService.isSupernode() ? (HandshakeResponder)new UltrapeerHandshakeResponder(host) : (HandshakeResponder)new LeafHandshakeResponder(host)));
     }
 
 	/**
-	 * Creates a new <tt>ManagedConnection</tt> with the specified 
-	 * handshake classes and the specified host and port.
+     * Make a new ManagedConnection object that we'll use to try to connect to a new remote computer.
+     * This is for an outgoing connection that we initiated.
+     * This constructor takes the IP address and port number of the remote computer.
+     * When it runs, we haven't tried connecting to the remote computer yet.
+     * ManagedConnection objects should only be made by the connection manager.
+	 * 
+     * @param host            The IP address of the remote computer we're going to try to connect to, in a string like "24.183.177.68"
+     * @param port            The port number of the remote computer we're going to try to connect to, like 6346
+     * @param requestHeaders  A new empty UltrapeerHeaders or LeafHeaders object cast to a Properties, depending on which role we're in.
+     *                        This will be saved as REQUEST_HEADERS, our stage 1 headers we'll send with "GNUTELLA CONNECT/0.6".
+     * @param responseHeaders A new empty UltrapeerHandshakeResponder or LeafHandshakeResponder object cast to a HandshakeResponder, depending on which role we're in.
+     *                        This is the HandshakeResponder object that will read stage 2 and compose stage 3.
 	 */
-	private ManagedConnection(String host, int port, 
-							  Properties props, 
-							  HandshakeResponder responder) {	
-        super(host, port, props, responder);        
-        _manager = RouterService.getConnectionManager();		
+	private ManagedConnection(String host, int port, Properties props, HandshakeResponder responder) {
+
+		// Call the Connection constructor with the same parameters
+        super(host, port, props, responder);
+
+        // Save a reference to the connection manager in this ManagedConnection object
+        _manager = RouterService.getConnectionManager();
 	}
 
     /**
-     * Creates an incoming connection.
-     * ManagedConnections should only be constructed within ConnectionManager.
-     * @requires the word "GNUTELLA " and nothing else has just been read
-     *  from socket
-     * @effects wraps a connection around socket and does the rest of the
-     *  Gnutella handshake.
+     * Make a new ManagedConnection object for a new remote computer that just connected to us.
+     * This is for an incoming connection the remote computer initiated.
+     * ManagedConnection objects should only be made by the connection manager.
+     * 
+     * @param socket The connection socket that accept() returned.
+     *               The Acceptor already read "GNUTELLA " from the socket, so the next thing in it will probably be "CONNECT/0.6".
      */
     ManagedConnection(Socket socket) {
-        super(socket, 
-			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
-			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new LeafHandshakeResponder(
-				  socket.getInetAddress().getHostAddress())));
+
+    	// Call the Connection constructor with the connection socket and a new empty HandshakeResponder object we'll make here
+    	super(socket,
+
+    		// If we're an ultrapeer
+            RouterService.isSupernode() ?
+
+            // Make this new ManagedConnection object with an UltrapeerHandshakeResponder
+            (HandshakeResponder)(new UltrapeerHandshakeResponder(socket.getInetAddress().getHostAddress())) :
+
+            // Otherwise, make it with a LeafHandshakeResponder
+            (HandshakeResponder)(new LeafHandshakeResponder(socket.getInetAddress().getHostAddress())));
+
+        // Save a reference to the connection manager in this ManagedConnection object
         _manager = RouterService.getConnectionManager();
     }
 
+    public void initialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
 
-
-    public void initialize()
-            throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
 		super.initialize(CONNECT_TIMEOUT);
 
@@ -660,9 +681,11 @@ public class ManagedConnection extends Connection
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
+    	
         supernodeClientAtLooping = isSupernodeClientConnection();
         
         if(!isAsynchronous()) {
+        	
             while (true) {
                 Message m=null;
                 try {
@@ -673,14 +696,27 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
-            MessageReader reader = new MessageReader(ManagedConnection.this);
-            if(isReadDeflated())
+        	
+        	// Make a new message reader for this connection
+            MessageReader reader = new MessageReader(ManagedConnection.this); // Give it access to this ManagedConnection object
+
+            // If the remote computer said "Content-Encoding: deflate"
+            if(isReadDeflated()) {
+
+            	// Make a new InflaterReader, and give it the _inflater object to use to actually decompress data
+            	// We still need to tell it what channel to read from, it's not ready for anyone to call read on it yet
+            	// Don't save a reference to it here, but make it the read channel of the MessageReader
                 reader.setReadChannel(new InflaterReader(_inflater));
-                
+
+                // We're not ready to read yet
+                // We told the InflaterReader what zip object to use, but didn't tell it where to read from
+                // Find where the code does this, where it hooks up the InflaterReader to the channel of the socket (do)
+            }
+
             ((NIOMultiplexor)_socket).setReadObserver(reader);
         }
     }
-    
+
     /**
      * Notification that messaging has closed.
      */

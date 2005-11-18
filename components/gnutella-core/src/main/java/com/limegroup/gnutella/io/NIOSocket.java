@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.io;
 
+// Edited for the Learning branch
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -24,6 +26,17 @@ import org.apache.commons.logging.Log;
  * can be used, and read-events will be passed to the ReadObserver.
  * A ChannelReadObserver must be used so that the Socket can set the appropriate
  * underlying channel.
+ * 
+ * 
+ * 
+ * NIOSocket extends Socket, meaning that it is a socket.
+ * However, we never use that socket.
+ * Instead, we create or get passed one and save it in the member variable named socket.
+ * NIOSocket extends Socket just to use its interface.
+ * 
+ * 
+ * 
+ * 
  */
 public class NIOSocket extends Socket implements ConnectObserver, NIOMultiplexor {
     

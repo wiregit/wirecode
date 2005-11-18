@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+// Edited for the Learning branch
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,39 +26,42 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 /**
  * This class handles common utility functions for networking tasks.
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class NetworkUtils {
-    
+
+    /** An array that contains 0 and 255, use it to notice an IP address that starts 0 or 255, which is invalid. */
+    private static final byte[] INVALID_ADDRESSES_BYTE = new byte[] { (byte)0, (byte)255 };
+
     /**
-     * The list of invalid addresses.
+     * A list of 7 mask and address pairs you can use to determine if an IP address is just an internal LAN address.
+     * 
+     * This is a two dimensional array, int[][].
+     * It's a grid with 7 rows and 2 columns.
+     * 
+     * The first column contains masks, and the second column contains IP addresses.
+     * They go together, for instance, PRIVATE_ADDRESS_BYTE[1][1] masks out the first byte, and PRIVATE_ADDRESS_BYTE[1][2] is the address 127.0.0.0.
+     * 
+     * This is used in just one place, the isPrivateAddress() method.
+     * If an IP address doesn't match any of the 7 tests here, it's a real external Internet IP address.
      */
-    private static final byte [] INVALID_ADDRESSES_BYTE = 
-        new byte[]{(byte)0,(byte)255};
-    
-    /**
-     * The list of private addresses.
-     */
-    private static final int [][] PRIVATE_ADDRESSES_BYTE =
-        new int[][]{
-            {0xFF000000,0},
-            {0xFF000000,127 << 24},
-            {0xFF000000,255 << 24},
-            {0xFF000000,10 << 24},
-            {0xFFF00000,(172 << 24) | (16 << 16)},
-            {0xFFFF0000,(169 << 24) | (254 << 16)},
-            {0xFFFF0000,(192 << 24) | (168 << 16)}};
-    
-    
-    /**
-     * The list of local addresses.
-     */
+    private static final int[][] PRIVATE_ADDRESSES_BYTE = new int[][] {
+
+    	// Put 7 pairs of masks and addresses in the array
+    	{0xFF000000,    0},                       // Index 0: First byte,   0.0.0.0
+        {0xFF000000,  127 << 24},                 // Index 1: First byte, 127.0.0.0
+        {0xFF000000,  255 << 24},                 // Index 2: First byte, 255.0.0.0
+        {0xFF000000,   10 << 24},                 // Index 3: First byte,  10.0.0.0
+        {0xFFF00000, (172 << 24) |  (16 << 16)},  // Index 4: First byte and a half, 0xAC100000
+        {0xFFFF0000, (169 << 24) | (254 << 16)},  // Index 5: First two bytes, 169.254.0.0
+        {0xFFFF0000, (192 << 24) | (168 << 16)}}; // Index 6: First two bytes, 192.168.0.0
+
+    /** If an IP address starts 127, it's a LAN address. */
     private static final byte LOCAL_ADDRESS_BYTE = (byte)127;
-    
+
     /**
      * Ensure that this class cannot be constructed.
      */
     private NetworkUtils() {}
-    
+
     /**
      * Determines if the given addr or port is valid.
      * Both must be valid for this to return true.
@@ -76,6 +81,9 @@ public final class NetworkUtils {
 	/**
 	 * Returns whether or not the specified port is within the valid range of
 	 * ports.
+	 * 
+	 * Returns true if port is 1 through 65535
+	 * Returns false if port is 0, 65536, or higher
 	 *
 	 * @param port the port number to check
 	 */
@@ -84,44 +92,69 @@ public final class NetworkUtils {
         if(port == 0) return false;
 		return true;
 	}
-	
+
 	/**
-	 * Returns whether or not the specified address is valid.
+	 * Returns false if the IP address starts 0 or 255.
+	 * This is the isValidAddress method which the others call, and which actually looks at the IP address.
+	 * 
+	 * @param addr An array of 4 bytes that is an IP address
+	 * @return     True if it looks OK, false if it starts with a 0 or 255
 	 */
 	public static boolean isValidAddress(byte[] addr) {
-	    return addr[0]!=INVALID_ADDRESSES_BYTE[0] &&
-	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
+
+		// Only return true if the first number in the IP address isn't 0 or 255
+	    return addr[0] != INVALID_ADDRESSES_BYTE[0] && addr[0] != INVALID_ADDRESSES_BYTE[1];
     }
-    
+
     /**
-     * Returns whether or not the specified InetAddress is valid.
+	 * Returns false if the IP address starts 0 or 255.
+	 * 
+	 * @param addr An InetAddress object
+	 * @return     True if it looks OK, false if it starts with a 0 or 255
      */
     public static boolean isValidAddress(InetAddress addr) {
+
+    	// Get the 4 bytes inside the InetAddress object, and pass them to the other isValidAddress method
         return isValidAddress(addr.getAddress());
     }
-    
+
     /**
-     * Returns whether or not the specified host is a valid address.
+	 * Returns false if the IP address starts 0 or 255.
+	 * 
+	 * @param addr A string like "216.27.178.74"
+	 * @return     True if it looks OK, false if it starts with a 0 or 255
      */
     public static boolean isValidAddress(String host) {
+
         try {
+
+        	// Convert the given text into an InetAddress object, and pass it to the other isValidAddress method
             return isValidAddress(InetAddress.getByName(host));
-        } catch(UnknownHostException uhe) {
-            return false;
-        }
+
+        // getByName threw an exception, say the IP address isn't valid
+        } catch (UnknownHostException uhe) { return false; }
     }
-	
+
 	/**
-	 * Returns whether or not the supplied address is a local address.
+	 * True if the given address starts 127 or is our own address on the LAN.
+	 * 
+	 * @param addr Address to look at and determine if it's local
+	 * @return     True if it's a LAN IP address, false if it's an Internet IP address
 	 */
 	public static boolean isLocalAddress(InetAddress addr) {
-	    try {
-	        if( addr.getAddress()[0]==LOCAL_ADDRESS_BYTE )
-	            return true;
 
-            InetAddress address = InetAddress.getLocalHost();
+		try {
+
+			// If the given address starts 127, it's local
+	        if (addr.getAddress()[0] == LOCAL_ADDRESS_BYTE) return true;
+
+            // If the given address is our address, it's local
+	        InetAddress address = InetAddress.getLocalHost(); // Ask Java for our IP address on the LAN, like 192.168.0.102
             return Arrays.equals(address.getAddress(), addr.getAddress());
-        } catch(UnknownHostException e) {
+
+        } catch (UnknownHostException e) {
+
+        	// Some error happened, say the address is external
             return false;
         }
     }
@@ -166,72 +199,103 @@ public final class NetworkUtils {
      * @param addr the address to compare
      */
     public static boolean isVeryCloseIP(byte[] addr) {
+    	
         return isVeryCloseIP(RouterService.getAddress(), addr);
     }
     
+    
+    
+    
+    
     /**
-     * Returns whether or not this node has a private address.
-     *
-     * @return <tt>true</tt> if this node has a private address,
-     *  otherwise <tt>false</tt>
+     * True if the IP address we're telling remote computers is just a LAN address.
+     *  
+     * @return True if our IP address is a LAN address, false if it's an Internet IP address.
      */
     public static boolean isPrivate() {
+
+    	// Get the address we're telling remote computers is ours, and see if it matches any of the 7 ranges of LAN IP addresses
         return isPrivateAddress(RouterService.getAddress());
     }
 
     /**
-     * Checks to see if the given address is a firewalled address.
+     * Sees if a given IP address is in one of the ranges of addresses that DHCP servers assign to computers on their LAN.
+     * For instance, 192.168.1.102 is a LAN address, while 216.27.158.74 is not.
+     * This is the method that can identify a LAN IP address just by looking at it.
      * 
-     * @param address the address to check
+     * If a remote computer tells us its IP address and it's just a LAN address, this means that computer is behind a NAT.
+     * 
+     * @param address An IP address as an array of 4 bytes
+     * @return        True if it's a LAN IP address, false if it's an Internet IP address
      */
     public static boolean isPrivateAddress(byte[] address) {
-        if( !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
-            return false;
-        
-        
-        int addr = ((address[0] & 0xFF) << 24) | 
-        			((address[1] & 0xFF)<< 16);
-        
-        for (int i =0;i< 7;i++){
-            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) ==
-                	PRIVATE_ADDRESSES_BYTE[i][1])
-                return true;
+
+    	// If settings allow us to make Gnutella connections to other computers on our LAN, then there's no such thing as a private address
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) return false; // Connect to this IP as though it were public and distant on the Internet
+
+        /*
+         * Both the byte[] address and an int are 4 bytes big.
+         * Copy just the first two bytes from the IP address into an int, and then read the int as a number.
+         * For instance, the IP address "1.2.3.4" is a byte array like 0x01 0x02 0x03 0x04.
+         * The next line of code clips out the first half, like        0x01 0x02 0x00 0x00.
+         * Then, it reads it as a number, like 0x01020000, which is the number 16908288.
+         */
+
+        // Clip out the first half of the IP address like x.x.0.0
+        int addr = ((address[0] & 0xFF) << 24)  // Take the first byte of the IP address, and shift it to the left 3 bytes
+                 | ((address[1] & 0xFF) << 16); // Take the second byte of the IP address, and shift it to the left 2 bytes
+
+        // Loops 7 times, once for each of the 7 mask and IP address pairs in the list
+        for (int i = 0; i < 7; i++) {
+
+        	// If the parts of the given address shown with the mask equal the correpsonding address, it's a LAN address
+            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) == PRIVATE_ADDRESSES_BYTE[i][1]) return true;
         }
-        
+
+        // It passed all 7 tests, it's a Internet IP address
         return false;
     }
 
     /**
-     * Utility method for determing whether or not the given 
-     * address is private taking an InetAddress object as argument
-     * like the isLocalAddress(InetAddress) method. Delegates to 
-     * <tt>isPrivateAddress(byte[] address)</tt>.
-     *
-     * @return <tt>true</tt> if the specified address is private,
-     *  otherwise <tt>false</tt>
+     * Sees if a given IP address is in one of the ranges of addresses that DHCP servers assign to computers on their LAN.
+     * For instance, 192.168.1.102 is a LAN address, while 216.27.158.74 is not.
+     * This is the method that can identify a LAN IP address just by looking at it.
+     * 
+     * If a remote computer tells us its IP address and it's just a LAN address, this means that computer is behind a NAT.
+     * 
+     * @param address An IP address as an InetAddress object
+     * @return        True if it's a LAN IP address, false if it's an Internet IP address
      */
     public static boolean isPrivateAddress(InetAddress address) {
+
+    	// Get the array of 4 bytes from the InetAddress object, and pass them to the other method
         return isPrivateAddress(address.getAddress());
     }
 
     /**
-     * Utility method for determing whether or not the given 
-     * address is private.  Delegates to 
-     * <tt>isPrivateAddress(byte[] address)</tt>.
-     *
-     * Returns true if the host is unknown.
-     *
-     * @return <tt>true</tt> if the specified address is private,
-     *  otherwise <tt>false</tt>
+     * Sees if a given IP address is in one of the ranges of addresses that DHCP servers assign to computers on their LAN.
+     * For instance, 192.168.1.102 is a LAN address, while 216.27.158.74 is not.
+     * This is the method that can identify a LAN IP address just by looking at it.
+     * 
+     * If a remote computer tells us its IP address and it's just a LAN address, this means that computer is behind a NAT.
+     * 
+     * @param address An IP address as a string like "192.168.1.102"
+     * @return        True if it's a LAN IP address or there was an error reading it, false if it's an Internet IP address
      */
     public static boolean isPrivateAddress(String address) {
-        try {
-            return isPrivateAddress(InetAddress.getByName(address));
-        } catch(UnknownHostException uhe) {
-            return true;
-        }
+
+    	try {
+    		
+    		// Convert the string into an InetAddress object, and call the other method
+    		return isPrivateAddress(InetAddress.getByName(address));
+
+    	// Reading the text caused an exception, report that this is a LAN address
+    	} catch (UnknownHostException uhe) { return true; }
     }
 
+    
+    
+    
     /** 
      * Returns the ip (given in BIG-endian) format as standard
      * dotted-decimal, e.g., 192.168.0.1<p> 

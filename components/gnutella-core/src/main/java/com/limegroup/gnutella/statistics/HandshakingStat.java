@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.statistics;
 
+// Edited for the Learning branch
+
 /**
  * This class contains a type-safe enumeration of statistics for handshaking
  */
-public class HandshakingStat extends AdvancedStatistic {
+public class HandshakingStat extends AdvancedStatistic 
+{
 
 	/**
 	 * Make the constructor private so that only this class can construct
@@ -133,11 +136,9 @@ public class HandshakingStat extends AdvancedStatistic {
         new HandshakingStat();
 
     /**
-     * Statistic for a bad connect string returned from the remote host for an
-     * outgoing connection.
+     * We connected to a computer, sent our stage 1 headers, and it said something that doesn't start "GNUTELLA/0.6".
      */
-    public static final Statistic OUTGOING_BAD_CONNECT =
-        new HandshakingStat();
+    public static final Statistic OUTGOING_BAD_CONNECT = new HandshakingStat();
     
     /**
      * Statistic for when the remote host rejected our outgoing connection
@@ -173,29 +174,17 @@ public class HandshakingStat extends AdvancedStatistic {
     public static final Statistic SUCCESSFUL_OUTGOING =
         new HandshakingStat();
 
-    /**
-     * Statistic for when we reject an incoming connection.
-     */
-    public static final Statistic INCOMING_CLIENT_REJECT =
-        new HandshakingStat();
+    /** A remote computer connected to us, and we rejected it with stage 2 headers that said 503. */
+    public static final Statistic INCOMING_CLIENT_REJECT = new HandshakingStat();
 
-    /**
-     * Statistic for when we send an unknown response to an incoming connection.
-     */    
-    public static final Statistic INCOMING_CLIENT_UNKNOWN =
-        new HandshakingStat();
+    /** A remote computer connected to us, and we rejected it with stage 2 headers that had an unusual status code. */
+    public static final Statistic INCOMING_CLIENT_UNKNOWN = new HandshakingStat();
 
-    /**
-     * Statistic for an unknown incoming connection string from a remote host.
-     */
-    public static final Statistic INCOMING_BAD_CONNECT =
-        new HandshakingStat();
+    /** The remote computer connected to us, we sent stage 2, then they sent stage 3 that didn't start "GNUTELLA/0.6". */
+    public static final Statistic INCOMING_BAD_CONNECT = new HandshakingStat();
 
-    /**
-     * Statistic for successful incoming connections.
-     */
-    public static final Statistic SUCCESSFUL_INCOMING =
-        new HandshakingStat();
+    /** We've successfully finished shaking hands with a remote computer that contacted us. */
+    public static final Statistic SUCCESSFUL_INCOMING = new HandshakingStat();
 
     /**
      * Statistic for unknown responses from the server on incoming connections.
@@ -203,21 +192,26 @@ public class HandshakingStat extends AdvancedStatistic {
     public static final Statistic INCOMING_SERVER_UNKNOWN =
         new HandshakingStat();
 
+    /** This statistic was written for the unfinished challenge response handshaking feature, and is not used. */
+    public static final Statistic INCOMING_NO_CONCLUSION = new HandshakingStat();
+
     /**
-     * Statistic for when the handshake does not conclude in any standard state.
+     * We connected to a LimeWire ultrapeer, and it rejected our connection in stage 2.
      */
-    public static final Statistic INCOMING_NO_CONCLUSION =
-       new HandshakingStat();
+    public static final Statistic OUTGOING_LIMEWIRE_ULTRAPEER_REJECT = new OutgoingServerReject();
 
-    public static final Statistic OUTGOING_LIMEWIRE_ULTRAPEER_REJECT =
-        new OutgoingServerReject();
-
-    public static final Statistic OUTGOING_LIMEWIRE_LEAF_REJECT =
-        new OutgoingServerReject();
-
-    public static final Statistic OUTGOING_OTHER_ULTRAPEER_REJECT =
-        new OutgoingServerReject();
-
-    public static final Statistic OUTGOING_OTHER_LEAF_REJECT =
-        new OutgoingServerReject();
+    /**
+     * We connected to a LimeWire leaf, and it rejected our connection in stage 2.
+     */
+    public static final Statistic OUTGOING_LIMEWIRE_LEAF_REJECT = new OutgoingServerReject();
+    
+    /**
+     * We connected to an ultrapeer running something other than LimeWire, and it rejected our connection in stage 2.
+     */
+    public static final Statistic OUTGOING_OTHER_ULTRAPEER_REJECT = new OutgoingServerReject();
+    
+    /**
+     * We connected to a remote leaf running something other than LimeWire, and it rejected our connection in stage 2.
+     */
+    public static final Statistic OUTGOING_OTHER_LEAF_REJECT = new OutgoingServerReject();
 }

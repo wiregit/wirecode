@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+// Edited for the Learning branch
+
 import com.limegroup.gnutella.SpeedConstants;
 
 /**
@@ -55,7 +57,7 @@ public final class ConnectionSettings extends LimeProps {
 
 	
     /**
-     * Setting for the "soft max" ttl.  This is the limit for hops+ttl
+     * 3, Setting for the "soft max" ttl.  This is the limit for hops+ttl
      * on incoming messages.  The soft max is invoked if the following is
      * true:<p>
      * 
@@ -170,41 +172,41 @@ public final class ConnectionSettings extends LimeProps {
 	 */
     public static final IntSetting PORT =
         FACTORY.createIntSetting("PORT", 6346);
-    
+
     /**
-	 * Sets whether or not the users ip address should be forced to
-	 * the value they have entered.
+     * The user has specified manual port forwarding numbers in settings the program should assume are setup instead of doing UPnP
 	 */
-    public static final BooleanSetting FORCE_IP_ADDRESS =
-        FACTORY.createBooleanSetting("FORCE_IP_ADDRESS", false);
+    public static final BooleanSetting FORCE_IP_ADDRESS = FACTORY.createBooleanSetting("FORCE_IP_ADDRESS", false);
     
     /**
-     * Forces IP address to the given address.
+     * When a remote computer tells us what our IP address is, we store it here in settings.
      */
-    public static final StringSetting FORCED_IP_ADDRESS_STRING =
-        (StringSetting)FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0").
-        setPrivate(true);
+    public static final StringSetting FORCED_IP_ADDRESS_STRING = (StringSetting)FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0").setPrivate(true);
     
     /**
-     * The port to use when forcing the ip address.
+     * The port number of our NAT mapping and listening sockets.
+     * 
+     * This is our port number.
+     * Our TCP and UDP sockets listen on this port number.
+     * Also, we use UPnP to try to forward this port number from the NAT to the PC we are running on.
+     * Acceptor.init may have chosen this port number randomly, or the user may have set it manually in settings.
+     * 
+     * Initialized to 6346, the port number for Gnutella.
+     * 6346 means we haven't chosen a random port in place of this default.
      */
-    public static final IntSetting FORCED_PORT =
-        FACTORY.createIntSetting("FORCED_PORT", 6346);
+    public static final IntSetting FORCED_PORT = FACTORY.createIntSetting("FORCED_PORT", 6346);
     
     /**
-     * Whether we should not try to use UPnP to open ports.
+     * The user doesn't want the program to use UPnP.
      */
-    public static final BooleanSetting DISABLE_UPNP =
-    	FACTORY.createBooleanSetting("DISABLE_UPNP", false);
+    public static final BooleanSetting DISABLE_UPNP = FACTORY.createBooleanSetting("DISABLE_UPNP", false);
     
     /**
-     * Whether we are currently using UPNP - used to detect whether clearing
-     * of the mappings on shutdown was definitely not successful.  Since the
-     * shutdown hooks may fail, this cannot guarantee if it was successful. 
+     * We've created a port mapping with UPnP, and we need to remove it.
+     * If the program starts and finds this setting true, then it wasn't shut down properly and should remove the mapping now.
      */
-    public static final BooleanSetting UPNP_IN_USE =
-    	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
-    
+    public static final BooleanSetting UPNP_IN_USE = FACTORY.createBooleanSetting("UPNP_IN_USE", false);
+
     public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     
     public static final StringSetting CONNECT_STRING =

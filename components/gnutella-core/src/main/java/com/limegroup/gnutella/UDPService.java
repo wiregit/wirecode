@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+// Edited for the Learning branch
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -715,9 +717,9 @@ public class UDPService implements ReadWriteObserver {
                                 mr.unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
-                    RouterService.schedule(checkThread, 
-                                           Acceptor.WAIT_TIME_AFTER_REQUESTS,
-                                           0);
+                        
+                    // Call this again in 30 seconds
+                    RouterService.schedule(checkThread, Acceptor.WAIT_TIME_AFTER_REQUESTS, 0);
                 }
                 else
                     mr.unregisterMessageListener(cbGuid.bytes(), ml);

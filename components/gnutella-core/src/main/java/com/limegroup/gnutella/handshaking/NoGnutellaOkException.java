@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
+// Commented for the Learning branch
+
 import java.io.IOException;
 
 /**
@@ -58,8 +60,8 @@ public final class NoGnutellaOkException extends IOException {
      * Throw NoGnutellaOkException.CLIENT_REJECT when we send the remote computer 503.
      * 
      * In the Connection class, both concludeIncomingHandshake and conclucdeOutgoingHandshake throw this exception.
-     * In concludeIncomingHandshake, we send 503 in our stage 2 headers and throw this exception.
-     * In concluceOutgoingHandshake, we throw it when the remote computer sent 503 in its stage 3.
+     * In concluceOutgoingHandshake, we connected to the remote computer, it sent stage 2, and then we rejected it in stage 3.
+     * In concludeIncomingHandshake, the remote computer connected to us, and we rejected it in stage 2.
      */
     public static final NoGnutellaOkException CLIENT_REJECT = new NoGnutellaOkException(
 
@@ -78,6 +80,10 @@ public final class NoGnutellaOkException extends IOException {
      * This exception is only thrown in one place, Connection.concludeOutgoingHandshake().
      * We connected to the remote computer and sent our stage 1 headers.
      * The remote computer replied with stage 2 headers that start with "200 OK", but include a "X-Locale-Pref" header that doesn't match ours.
+     * We rejected the connection in stage 3.
+     * 
+     * This feature, locale preferencing, is turned off by default.
+     * So, this exception is never really used.
      */
     public static final NoGnutellaOkException CLIENT_REJECT_LOCALE = new NoGnutellaOkException(
         false,                                                 // The remote computer refused the connection
@@ -85,18 +91,14 @@ public final class NoGnutellaOkException extends IOException {
         FATAL_CLIENT_MSG + HandshakeResponse.LOCALE_NO_MATCH); // Compose text for the exception like "We sent fatal response: 577"
 
     /**
-     * Throw NoGnutellaOkException.UNRESOLVED_CLIENT when we refuse the connection because the handshake is going on too long.
-     * 
-     * This exception is only thrown in one place, Connection.concludeIncomingHandshake().
+     * This exception was written for the unfinished challenge response handshaking feature, and is never used.
      */
     public static final NoGnutellaOkException UNRESOLVED_CLIENT = new NoGnutellaOkException(
         true,                                   // We refused the connection
         "Too much handshaking, no conclusion"); // Custom text for the exception
 
     /**
-     * Throw NoGnutellaOkException.UNRESOLVED_SERVER when the remote computer refused the connection because the handshake is going on too long.
-     * 
-     * This exception is only thrown in one place, Connection.concludeOutgoingHandshake().
+     * This exception was written for the unfinished challenge response handshaking feature, and is never used.
      */
     public static final NoGnutellaOkException UNRESOLVED_SERVER = new NoGnutellaOkException(
         false,                                  // The remote computer refused the connection

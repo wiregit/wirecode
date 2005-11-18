@@ -1,15 +1,21 @@
 package com.limegroup.gnutella.io;
 
+// Edited for the Learning branch
+
 import java.nio.channels.ReadableByteChannel;
+
 /**
- * Allows arbitrary ReadableByteChannels to be set as the source
- * for reading from this object.
+ * Have your object implement this interface so code can give it a channel to read from.
+ * 
+ * Objects that implement ChannelReader will also probably implement ReadableByteChannel.
+ * ChannelReader lets you call setReadChannel(ReadableByteChannel c) to give the object c, the channel it will read from.
+ * ReadableByteChannel lets you call read(ByteBuffer b) to have the object move data from the channel to b.
  */
 public interface ChannelReader {
     
-    /** Set the new source channel */
-    void setReadChannel(ReadableByteChannel newChannel);
+    /** Give the object the channel it will read from */
+    void setReadChannel(ReadableByteChannel newChannel); // Pass an object we can call read(ByteBuffer b) on
     
-    /** Gets the existing source channel. */
-    ReadableByteChannel getReadChannel();
+    /** Have the object tell us what channel it reads from */
+    ReadableByteChannel getReadChannel(); // Returns the channel we passed in to setReadChannel
 }

@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.connection;
 
+// Commented for the Learning branch
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -9,161 +11,234 @@ import java.util.zip.DataFormatException;
 import com.limegroup.gnutella.io.ChannelReader;
 
 /**
- * Reads data from a source channel and offers the inflated version for reading.
- *
- * Each invocation of read(ByteBuffer) will attempt to return any inflated data.
- * If no data is available for inflation, data will be read from the source channel
- * and inflation will be attempted.  The ByteBuffer will be filled as much as possible
- * without blocking.
- *
- * The source channel may not be entirely emptied out in a single call to read(ByteBuffer),
- * because the supplied ByteBuffer may not be large enough to accept all inflated data.
- * If this is the case, the data will remain in the source channel until further calls to
- * read(ByteBuffer).
- *
- * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
- * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
+ * An InflaterReader object can read compressed data from a channel and decompress it all at the same time.
+ * 
+ * Make an InflateReader and give it a source channel of compressed data.
+ * Then, call read(ByteBuffer b) on it to have it read data from the channel and decompress it into the given buffer.
  */
 public class InflaterReader implements ChannelReader, ReadableByteChannel {
-    
-    /** the inflater that will do the decompressing for us */
-    private Inflater inflater;
-    
-    /** the channel this reads from */
-    private ReadableByteChannel channel;
-    
-    /** the temporary buffer that data from the channel goes to prior to inflating */
-    private ByteBuffer data;
-    
+
+    /** The Java Inflater object that actually decompresses the data */
+    private Inflater inflater; // A java.util.zip.Inflater is an object that can do decompression with the deflate algorithm
+
+    /** The channel we read the compressed data from */
+    private ReadableByteChannel channel; // Any object that implements ReadableByteChannel can go here
+
+    /** A 512 byte buffer where compressed data from the channel waits to be decompressed */
+    private ByteBuffer data; // A java.nio.ByteBuffer is a buffer that can hold bytes
+
     /**
-     * Constructs a new InflaterReader without an underlying source.
-     * Prior to read(ByteBuffer) being called, setReadChannel(ReadableByteChannel)
-     * MUST be called.
+     * Make a new InflateReader object without a source of compressed data.
+     * Call setReadChannel(ReadableByteChannel) to give it a source of compressed data later.
+     * Then, you can call read(ByteBuffer) to have the object decompress the data.
+     * 
+     * @param inflater The java.util.zip.Inflater object to keep in this one that will actually decompress the data
      */
     public InflaterReader(Inflater inflater) {
-        this(null, inflater);
-    }
-    
-    /**
-     * Constructs a new InflaterReader with the given source channel & inflater.
-     */
-    public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {        
-        if(inflater == null)
-            throw new NullPointerException("null inflater!");
 
-        this.channel = channel;
-        this.inflater = inflater;
-        this.data = ByteBuffer.allocate(512);
+    	// Call the main constructor without giving it a readable byte channel
+    	this(null, inflater);
     }
-    
+
     /**
-     * Sets the new channel.
+     * Make a new InflateReader object from the given source channel and inflater object.
+     * 
+     * @param channel  An object we can call read(ByteBuffer) on to read compressed data from
+     * @param inflater The Java Inflater object that can actually decompress data
+     */
+    public InflaterReader(ReadableByteChannel channel, Inflater inflater) {
+
+    	// Make sure we got a Java Inflater object
+        if (inflater == null) throw new NullPointerException("null inflater!");
+
+        // Save the given readable byte channel and Java zip inflater in this object
+        this.channel  = channel;  // This is where we'll get the compressed data
+        this.inflater = inflater; // This is how we'll decompress it
+
+        // Setup this object's temporary buffer
+        this.data = ByteBuffer.allocate(512); // Make it able to hold 512 bytes
+    }
+
+    /**
+     * You may have made a new InflateReader object without giving the constructor a channel to read from.
+     * If you did, call this method to tell this InflaterReader where to get the compressed data.
+     * 
+     * @param channel An object we can call read(ByteBuffer) on to read compressed data from
      */
     public void setReadChannel(ReadableByteChannel channel) {
-        if(channel == null)
-            throw new NullPointerException("cannot set null channel!");
 
+    	// Make sure the caller is actually giving us an object
+        if (channel == null) throw new NullPointerException("cannot set null channel!");
+
+        // Save the channel in this object
         this.channel = channel;
     }
     
-    /** Gets the read channel */
+    /**
+     * Gets the channel this object has been reading compressed data from.
+     * This is an object that implements Java's ReadableByteChannel interface.
+     * This means you can call read(ByteBuffer) on it to read compressed data from it.
+     * We saved it in the member variable named channel.
+     * 
+     * @return The object that you can call read(ByteBuffer) on to read compressed data from
+     */
     public ReadableByteChannel getReadChannel() {
+
+    	// We saved it in channel
         return channel;
     }
     
     /**
-     * Reads from this' inflater into the given ByteBuffer.
+     * Reads compressed data from the channel, decompresses it, and writes it to the given buffer decompressed.
+     * 
+     * Each time you call read, the method will try to get data from the channel and decompress it.
+     * If there's no data waiting on our end of the channel, it won't decompress anything, and will return 0.
+     * If the channel has a lot of data, it will fill the buffer you give it.
+     * If the buffer isn't big enough, call it multiple times to pull everything through.
+     * 
+     * If the inflater object or channel breaks, read returns -1.
+     * 
+     * This method doesn't block because it never waits for data to arrive on the channel, it just decompresses what's already there.
+     * 
+     * This object implements ReadableByteChannel just like channel does.
+     * This means we have to implement a read(ByteBuffer) method here too.
+     * 
+     * @param buffer A ByteBuffer to write the decompressed data into
+     * @return       The number of bytes we wrote there, 0 if none, -1 if we hit the end and should stop
      */
     public int read(ByteBuffer buffer) throws IOException {
-        int written = 0;
-        int read = 0;
-        
-        // inflate loop... inflate -> read -> lather -> rinse -> repeat as necessary.
-        // only break out of this loop if 
-        // a) output buffer gets full
-        // b) inflater finishes or needs a dictionary
-        // c) no data can be inflated & no data can be read off the channel
-        while(buffer.hasRemaining()) { // (case a above)
-            // first try to inflate any prior input from the inflater.
-            int inflated = inflate(buffer);
-            written += inflated;
-            
-            // if we couldn't inflate anything...
-            if(inflated == 0) {
-                // if this inflater is done or needs a dictionary, we're screwed. (case b above)
+
+        int written = 0; // The number of bytes of decompressed data we'll write to the given output buffer
+        int read    = 0;
+
+        // This loop moves data from the channel to the temporary buffer, and inflates it to the given output buffer
+        // Loop until
+        // (a) Our output buffer fills up
+        // (b) The inflater finishes or needs a dictionary
+        // (c) There's no more compressed data in the channel or temporary buffer
+        while (buffer.hasRemaining()) { // Break for (a) the output buffer fills up
+
+        	// Have the inflate object inflate any compressed data sitting in the data buffer
+            int inflated = inflate(buffer); // setInput below told it where to get the data, buffer is where inflate will write
+            written += inflated;            // Add the number of decompressed bytes it wrote to written
+
+            // The inflater couldn't inflate anything
+            if (inflated == 0) {
+
+            	// The inflater is done, or it needs a dictionary
         		if (inflater.finished() || inflater.needsDictionary()) {
+
+        			// We have to stop now and return -1
                     read = -1;
-                    break;
+                    break; // Break for (b) the inflater finished or needs a dictionary
         		}
-            
-                // if the buffer needs input, add it.
-                if(inflater.needsInput()) {
-                    // First gobble up any data from the channel we're dependent on.
-                    while(data.hasRemaining() && (read = channel.read(data)) > 0);
-                    // if we couldn't read any data, we suck. (case c above)
-                    if(data.position() == 0)
-                        break;
-                    
-                    // Then put that data into the inflater.
-                    inflater.setInput(data.array(), 0, data.position());
-                    data.clear();
+
+        		// The buffer needs some compressed data to decompress
+                if (inflater.needsInput()) {
+
+                    // Move as much compressed data from the channel to the buffer as we can
+                    while (true) {
+
+                    	// Stop because the temporary buffer is out of room
+                    	if (!data.hasRemaining()) break;
+
+                    	// Move compressed data from the channel into the temporary buffer
+                    	read = channel.read(data); // Sets read to the number of bytes moved
+
+                    	// The read method returns 0 for nothing read, or -1 if it reached the end of the channel
+                    	if (read <= 0) break; // Break for (c) there's no more compressed data in the channel or temporary buffer
+                    }
+
+                    // If the temporary buffer has no data to decompress, leave the loop
+                    if (data.position() == 0) break;
+
+                    // Tell the inflater where it can find the compressed data
+                    inflater.setInput(
+                        data.array(),     // The compressed data is in the temporary buffer
+                        0,                // At the start of the buffer
+                        data.position()); // The length of the input data is the position where we could write more into the buffer
+
+                    // Clear the buffer
+                    data.clear(); // Sets the position back to 0, letting us treat it as an empty buffer again
                 }
             }
-            
-            // if we're here, we either:
-            // a) inflated some data
-            // b) didn't inflate, but read some data that we input'd to the inflater
-            
-            // if a), we'll continue trying to inflate so long as the output buffer
-            // has space left.
-            // if b), we try to inflate and ultimately end up at a).
         }
         
-        
-        if(written > 0)
-            return written;
-        else if(read == -1)
-            return -1;
+        // We decompressed all the data we could
+        if (written > 0)
+            return written; // Say how many bytes of decompressed data we wrote to the given buffer
+        else if (read == -1)
+            return -1;      // The inflater finished, needs a dictionary, or we hit the very end of the channel
         else
-            return 0;
+            return 0;       // The channel just doesn't have any compressed bytes for us right now
     }
-    
-    /** Inflates data to this buffer. */
+
+    /**
+     * This method only gets called by read, the one above.
+     * Runs the inflater, which read set on the decompressed data in the temporary buffer.
+     * 
+     * @param buffer The same buffer passed to read, where we write the decompressed data
+     * @return       The number of bytes we wrote there
+     */
     private int inflate(ByteBuffer buffer) throws IOException {
+
+    	// Record how many bytes we wrote
         int written = 0;
-        
-        int position = buffer.position();
+
+        // A buffer keeps a position, get it
+        int position = buffer.position(); // This is where we can write next
+
         try {
-            written = inflater.inflate(buffer.array(), position, buffer.remaining());
-        } catch(DataFormatException dfe) {
+        	
+        	// The inflater already knows where to read the compressed data
+        	// We gave it the temporary buffer in the read method, with the call inflater.setInput above
+
+        	// This is the line of code that actually decompresses the data
+            written = inflater.inflate(  // Returns the number of decompressed bytes written to the buffer
+            		buffer.array(),      // The buffer to write the decompressed bytes into
+            		position,            // Don't start writing at the start of that buffer, write this far into it
+            		buffer.remaining()); // The buffer has this much space left at that point
+
+        // The inflater threw a data format exception
+        } catch (DataFormatException dfe) {
+
+        	// Wrap it with a new io exception, and throw that instead
             IOException x = new IOException();
             x.initCause(dfe);
             throw x;
-        } catch(NullPointerException npe) {
-            // possible if the inflater was closed on a separate thread.
+
+        // If a separate thread closed the inflater, it might throw a null pointer exception
+        } catch (NullPointerException npe) {
+
+        	// Wrap it with a new io exception, and throw that instead
             IOException x = new IOException();
             x.initCause(npe);
             throw x;
         }
-            
+
+        // Move the position forward in the buffer over the bytes we wrote, and return the number we wrote
         buffer.position(position + written);
-        
         return written;
     }
-    
+
     /**
      * Determines if this reader is open.
+     * Checks if the channel we've been reading compressed data from is open.
+     * 
+     * @return True if the channel we've been getting compressed data from is open, false if it's closed
      */
     public boolean isOpen() {
+    	
+    	// Return true or false if the compressed channel is open or closed
         return channel.isOpen();
     }
     
     /**
-     * Closes this channel.
+     * Close the channel we've been reading compressed data from.
      */
     public void close() throws IOException {
+
+    	// Close the channel we've been reading compressed data from
         channel.close();
     }
 }
-    
-    

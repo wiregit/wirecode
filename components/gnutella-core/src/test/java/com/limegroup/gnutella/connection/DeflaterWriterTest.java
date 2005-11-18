@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.connection;
 
+// Edited for the Learning branch
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -16,13 +18,30 @@ import com.limegroup.gnutella.util.*;
  * passing it on to the source channel.
  */
 public final class DeflaterWriterTest extends BaseTestCase {
+
+	// Make the objects we need to test the DeflaterWriter
+    private Deflater DEFLATER = new Deflater();                              // The Java Deflater object which can actually compresses data
+    private Inflater INFLATER = new Inflater();                              // The Java Inflater object which can actually decompress data
+
+    private static Random RND = new Random();                                // A random number generator
+
+    private WriteBufferChannel SINK   = new WriteBufferChannel(1024 * 1024); // A WriteBufferChannel with a 1 MB buffer we can write to
+    private DeflaterWriter     WRITER = new DeflaterWriter(DEFLATER, SINK);  // The DeflaterWriter we're going to test, have it write to SINK
     
-    private Deflater DEFLATER = new Deflater();
-    private WriteBufferChannel SINK = new WriteBufferChannel(1024 * 1024);
-    private DeflaterWriter WRITER = new DeflaterWriter(DEFLATER, SINK);
-    private static Random RND = new Random();
-    private WriteBufferChannel SOURCE = new WriteBufferChannel(WRITER);
-    private Inflater INFLATER = new Inflater();
+    // There's no way WRITER.observer is set to SOURCE yet
+
+    // Here is where all the backlinking happens
+    // Calling this links WRITER.observer to SOURCE, and then links SINK.observer to WRITER
+    private WriteBufferChannel SOURCE = new WriteBufferChannel(WRITER);      // A WriteBufferChannel that will write to our DeflaterWriter
+    
+    // when you make a new object, you pass it the channel to write to
+    // the constructor calls interest(this, true) on it, linking it back up to you
+    // this is how the list becomes doubly linked
+    
+    // all this time, this has just been a doubly linked list, it's actually not that confusing
+    // now, you need to see how the pull works, how if you write to source, it's actually sink that pulls from writer and writer that pulls from source
+    
+    // Now is WRITER.observer set to SOURCE? what sets it?
 
 	public DeflaterWriterTest(String name) {
 		super(name);
@@ -35,15 +54,24 @@ public final class DeflaterWriterTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-	
+
 	public void tearDown() {
 	    DEFLATER.end();
 	    INFLATER.end();
 	}
 	
 	public void testSimpleDeflation() throws Exception {
+		
+		// Make a byte array that holds 10 KB of data, and have our source use it
 	    byte[] data = data(10 * 1024);
 	    SOURCE.setBuffer(buffer(data));
+
+	    // Have the DeflaterWriter compress and send everything it has into SINK
+	    // Since it doesn't have any data yet, it should be able to write everything
+	    // Since it doesn't have any data, it will ask for some
+	    
+	    // How does it get a reference to call SOURCE to get SOURCE to write to it?
+	    
 	    assertFalse(WRITER.handleWrite()); // should have been able to write everything.
 	    
 	    ByteBuffer deflated = SINK.getBuffer();

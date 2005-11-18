@@ -1,10 +1,13 @@
 package com.limegroup.gnutella;
 
+// Edited for the Learning branch
+
 /**
 * A class to keep together the constants that may be used by multiple classes
 * @author  Anurag Singla
 */
-public final class Constants {
+public final class Constants 
+{
     
     private Constants() {}
 
@@ -18,7 +21,7 @@ public final class Constants {
         "application/x-gnutella-packets";
     
     /**
-     * Constant for the timeout to use on sockets.
+     * 8 seconds, the timeout to use on sockets
      */
     public static final int TIMEOUT = 8000;  
 

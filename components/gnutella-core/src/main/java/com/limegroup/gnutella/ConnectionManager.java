@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+// Edited for the Learning branch
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -668,33 +670,34 @@ public class ConnectionManager {
      * false otherwise
      */
     private boolean allowConnection(ManagedConnection c) {
+
+    	// TODO:kfaaborg receivedHeaders always returns true
         if(!c.receivedHeaders()) return false;
 		return allowConnection(c.headers(), false);
     }
 
     /**
-     * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
-     * false otherwise
+     * Determines if we have room to accept a new connection
+     * Includes the possiblity of telling the remote ultrapeer to become a leaf
+     * 
+     * @param hr The headers from the remote computer
+     * @return   true if we have an incoming slot for this, false if we don't
      */
     public boolean allowConnectionAsLeaf(HandshakeResponse hr) {
+    	
+    	// Call allow connection telling it the remote computer is a leaf
 		return allowConnection(hr, true);
     }
 
     /**
-     * Checks if the connection received can be accepted,
-     * based upon the type of connection (e.g. client, ultrapeer,
-     * temporary etc).
-     * @param c The connection we received, for which to
-     * test if we have incoming slot.
-     * @return true, if we have incoming slot for the connection received,
-     * false otherwise
+     * Determines if we have room to accept a new connection
+     * 
+     * @param hr The headers from the remote computer
+     * @return   true if we have an incoming slot for this, false if we don't
      */
      public boolean allowConnection(HandshakeResponse hr) {
+    	 
+    	 // Call allowConnection telling it if the remote computer is a leaf or ultrapeer
          return allowConnection(hr, !hr.isUltrapeer());
      }
 
@@ -1699,7 +1702,9 @@ public class ConnectionManager {
      * @param headers The headers to be processed
      * @param connection The connection on which we received the headers
      */
-    private void processConnectionHeaders(Connection connection){
+    private void processConnectionHeaders(Connection connection) {
+
+    	// TODO:kfaaborg receivedHeaders always returns true
         if(!connection.receivedHeaders()) {
             return;
         }

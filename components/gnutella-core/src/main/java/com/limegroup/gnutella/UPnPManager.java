@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+// Edited for the Learning branch
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
@@ -157,6 +158,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/**
 	 * @return the external address the NAT thinks we have.  Blocking.
 	 * null if we can't find it.
+	 * 
+	 * Call getNATAddress, and it will talk UPnP to the NAT on our LAN to get it to tell us its external Internet address.
+	 * This call blocks, and takes a second or so.
+	 * The program does not use it.
 	 */
 	public InetAddress getNATAddress() throws UnknownHostException {
 		
@@ -409,6 +414,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		}
 		
 		Thread waiter = new Thread("UPnP Waiter") {
+			
 		    public void run() {
                 Thread cleaner = new Thread("UPnP Cleaner") {
         			public void run() {

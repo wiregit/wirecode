@@ -1,8 +1,14 @@
 package com.limegroup.gnutella.handshaking;
 
+// Commented for the Learning branch
+
 import java.io.IOException;
 
 /**
+ * This interface defines a method, called respond, which another class can implement to become a handshake responder.
+ * The respond method takes a group of Gnutella handshake headers and composes the next group.
+ * Both groups are stored in HandshakeResponse objects.
+ * 
  * Provides a servent ways to set connection handshake responses in response to 
  * a connection handshake response just received.  Note, however, incoming 
  * connections and outgoing connections will differ in the use 
@@ -34,7 +40,8 @@ import java.io.IOException;
  * host.  Hence, they don't care about the status code and status response, only
  * the headers they received.  Here is a typical anonymous implementation of 
  * HandshakeResponder for incoming connections:
- *<pre>
+ * 
+ * <pre>
  * new HandshakeResponder() {
  *     public HandshakeResponse respond(HandshakeResponse response, 
  *                                      boolean outgoing) {
@@ -54,25 +61,24 @@ import java.io.IOException;
  *     }
  * }
  * </pre>
- * 
  */
 public interface HandshakeResponder {
+	
     /** 
-     * Returns the corresponding handshake to be written to the remote host when
-     * responding to the connection handshake response just received.  
-     * Implementations should respond differently to incoming vs. outgoing 
-     * connections.   
-     * @param response The response received from the host on the
-     * other side of teh connection.
-     * @param outgoing whether the connection to the remote host is an outgoing
-     * connection.
+     * Use when we receive a group of handshake headers from a remote computer.
+     * Returns the group of handshake headers we should send in response.
+     * Implementations need to respond differently depending on which computer initiated the connection.
+     * 
+     * @param response The group of handshake headers the remote computer sent us
+     * @param outgoing True if we connected to the remote computer, false if it connected to us
      */
-    public HandshakeResponse respond(HandshakeResponse response, 
-         boolean outgoing) throws IOException;
+    public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException;
 
     /**
-     * optional method.
-     * note: should this throw an UnsupportedOperationException
+     * A Gnutella program can send a header like "X-Locale-Pref: en" to say it is configured for the English language
+     * Call setLocalePreferencing(true) to make this handshake responder refuse connections from foreign language remote computers
+     * This method is optional, when implementing this interface, you don't have to write code for it.
+     * This method should throw an UnsupportedOperationException.
      */
     public void setLocalePreferencing(boolean b);
 }

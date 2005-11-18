@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+// Commented for the Learning branch
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
@@ -35,13 +37,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * This class has a special relationship with UDPService and should be the only class that intializes it.
  */
 public class Acceptor implements Runnable {
-
-	/*
-	 * This is the first change in the new Learning branch of the LimeWire source code.
-	 * Welcome to the Learning branch.
-	 * This branch will feature unlimited amounts of comments and documentation to help new developers learn Java and LimeWire all at once.
-	 * Thanks! -Zootella
-	 */
 
 	/** A log that we can write lines of text into as the code here runs */
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
@@ -231,7 +226,7 @@ public class Acceptor implements Runnable {
         boolean tryingRandom =
         	ConnectionSettings.PORT.isDefault() &&                   // We haven't randomly selected a port number yet, it's still 6346
             !ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() && // A remote computer has never connected to us
-            !ConnectionSettings.FORCE_IP_ADDRESS.getValue();         // We didn't do this the last time
+            !ConnectionSettings.FORCE_IP_ADDRESS.getValue();         // We don't have our real Internet IP address saved in settings
 
         // Generate a random port number for tempPort
         Random gen = null; // Java's random number generator
@@ -344,13 +339,21 @@ public class Acceptor implements Runnable {
         	// True if our sockets are listening
         	boolean validPort = NetworkUtils.isValidPort(_port); // True if _port is between 1 and 65535
 
-        	// True if we have an IP address to use and we haven't setup a port mapping in UPnP yet
+        	// True if our real Internet IP address is in settings and we don't have a UPnP mapping on the NAT right now
         	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() && !ConnectionSettings.UPNP_IN_USE.getValue();
 
         	if (LOG.isDebugEnabled()) LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
         	// There is a NAT we can talk to, our sockets are listening, and we don't have an IP address we have to use
         	if (natted && validPort && !forcedIP) {
+
+        		/*
+        		 * The UPnP mapping is only there while the program is running.
+        		 * If the program creates a port mapping when it starts up, it deletes it when it shuts down.
+        		 * 
+        		 * UPNP_MANAGER.mapPort(_port) creates the port mapping now.
+        		 * UPNP_MANAGER.clearMappingsOnShutdown() has the router service use the UPnP manager to remove the port mappings when the program shuts down.
+        		 */
 
         		// Have the UPnP manager send commands to the NAT to forward the port number in _port back to us
         		int mappedPort = UPNP_MANAGER.mapPort(_port);
@@ -359,18 +362,17 @@ public class Acceptor implements Runnable {
         		// Setting up port forwarding with UPnP worked
 			    if (mappedPort != 0) {
 
-			    	// Have our UPnP manager remember to clear the port mapping when the program shuts down
+			    	// Create a thread that waits until the program shuts down, when the router service tells it to delete the port mapping
 			        UPNP_MANAGER.clearMappingsOnShutdown();
 
 			        /*
-			         * Mark UPnP as being on.
-			         * If LimeWire shuts down prematurely, we know the FORCE_IP was from UPnP and we can continue trying to use UPnP.
+			         * If LimeWire stops running without being able to shut down properly, these settings will let it clean up the UPnP mapping when it runs the next time.
 			         */
-			        
-			        // Save information for the next time the program runs
-        		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);  // The program should use the same IP address and port number the next time it runs
-        	        ConnectionSettings.FORCED_PORT.setValue(mappedPort); // The program should always use the port number we randomly selected
-        	        ConnectionSettings.UPNP_IN_USE.setValue(true);       // Record that we created a mapping so we can remove it when the program shuts down
+
+			        // Save information the program will read the next time it starts if it isn't shut down properly
+        		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);  // Record that we're saving our IP address and port number in settings
+        	        ConnectionSettings.FORCED_PORT.setValue(mappedPort); // Keep the port number we forwarded with UPnP in settings
+        	        ConnectionSettings.UPNP_IN_USE.setValue(true);       // Make a note that there is a UPnP mapping on the NAT right now
 
         	        // If the port the UPnP manager mapped is different from the port our sockets are listening on, tell the router service our address changed
         	        if (mappedPort != _port) RouterService.addressChanged();
@@ -462,15 +464,15 @@ public class Acceptor implements Runnable {
      */
     public byte[] getAddress(boolean checkForce) {
 
-    	// The caller wants our forced address if we have one, and we do have one
-		if (checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+    	// The caller wants us to look in settings for our real Internet IP address, and we've stored it there
+	    if (checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
 
-			// Get our preset address from where it is saved in settings
+	        // Get it
             String address = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
 
             try {
 
-            	// Convert it into an InetAddress object, and return it
+                // Convert it into an InetAddress object, and return it
                 InetAddress ia = InetAddress.getByName(address);
                 return ia.getAddress();
 
@@ -491,7 +493,7 @@ public class Acceptor implements Runnable {
      */
     public int getPort(boolean checkForce) {
 
-    	// If the caller wants us to look in settings, and a port number is specified there, return it
+    	// If the caller wants us to look in settings, and we've saved our real Internet IP address there, return the port number stored next to it
     	if (checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) return ConnectionSettings.FORCED_PORT.getValue();
 
     	// Otherwise, return the port number our TCP and UDP sockets are listening on
@@ -760,9 +762,9 @@ public class Acceptor implements Runnable {
                             
                             /*
                              * The types here are not exactly as they seem.
-                             * _socket looks like a java.net.ServerSocket, but it's actually an NIOServerSocket
-                             * accept() doesn't call into Java, but into NIOServerSocket.accept() instead
-                             * client looks like a java.net.Socket, but it's actually a NIOSocket
+                             * _socket looks like a java.net.ServerSocket, but it's actually an NIOServerSocket.
+                             * accept() doesn't call into Java, but into NIOServerSocket.accept() instead.
+                             * client looks like a java.net.Socket, but it's actually a NIOSocket.
                              */
 
                         } catch (IOException e) {
@@ -1108,15 +1110,7 @@ public class Acceptor implements Runnable {
     }
 
     /**
-     * If init() forwarded a port with UPnP, puts it away (do)ask this looks like it deletes settings, not the mapping
-     * 
-     * RouterService.shutdown() calls this method when the program is shutting down.
-     * If the init() method used UPnP to setup port forwarding, this method puts connection settings back to their defaults.
-     * 
-     * (do)
-     * This makes no sense, why are we doing this?
-     * How does it remember what random port we chose, then?
-     * Does the program delete a port mapping it makes before shutting down?
+     * Writes settings to clean up a UPnP mapping next time if the program terminates this time without shutting down.
      */
     public void shutdown() {
 
@@ -1127,14 +1121,17 @@ public class Acceptor implements Runnable {
             ConnectionSettings.UPNP_IN_USE.getValue()) { // We saved a note that confirms all this in settings
 
         	/*
-        	 * Reset the forced port values.
-        	 * Must happen before we save them to disk.
+        	 * When the program shuts down, the router service will use the UPnP manager to remove the port mapping we set up.
+        	 * But, the program might terminate unexpectedly, leaving the mapping in place.
+        	 * So, we set these settings this way now.
+        	 * If the program starts and they are set this way, we'll know there's a mapping we still need to remove.
         	 */
 
-        	// Clear the information about this from program settings (do)
-        	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault(); // false
-        	ConnectionSettings.FORCED_PORT.revertToDefault();      // 6346
-        	ConnectionSettings.UPNP_IN_USE.revertToDefault();      // false
+        	// Save settings that indicate we made a port mapping we still need to clean up
+        	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault(); // Set back to false, meaning don't look in settings for our Internet IP address and port number
+        	ConnectionSettings.FORCED_PORT.revertToDefault();      // Set back to 6346, meaning choose a new random port number to listen on
+        	ConnectionSettings.UPNP_IN_USE.revertToDefault();      // Set back to false, meaning there is nothing in the NAT UPnP needs to clean up
+        	// TODO:kfaaborg How is the program supposed to clean up the mapping when we've erased information about it from settings?
         }
     }
 

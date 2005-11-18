@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.io;
 
+// Edited for the Learning branch
+
 /**
  * Allows arbitrary InterestWriteChannels to be set as the source writing
  * channel for this object.
@@ -22,8 +24,15 @@ package com.limegroup.gnutella.io;
  * It would opt to write to the source in the case where data was already deflated,
  * and could opt to propogate the event if there was still room to write & someone
  * was interested in getting the event.
+ * 
+ * (added)
+ * An object that implements ChannelWriter has a channel it can write to.
+ * You can call write(ByteBuffer b) on the object to give it data.
+ * You can call setWriteChannel to give it a channel, and getWriteChannel to find what you set.
+ * The channel you give it must support the InterestWriteChannel interface.
  */
-public interface ChannelWriter extends WriteObserver {
+public interface ChannelWriter extends WriteObserver 
+{
     
     /**
      * Set the new source channel.  This object should immediately

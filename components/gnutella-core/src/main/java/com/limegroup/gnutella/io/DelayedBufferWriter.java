@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.io;
 
+// Edited for the Learning branch
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
@@ -54,9 +56,9 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     public synchronized void interest(WriteObserver observer, boolean status) {
         this.observer = status ? observer : null;
         
-        InterestWriteChannel source = sink;
-        if(source != null)
-            source.interest(this, true); 
+        InterestWriteChannel s = sink;
+        if(s != null)
+            s.interest(this, true); 
     }
 
     /** Closes the underlying channel. */

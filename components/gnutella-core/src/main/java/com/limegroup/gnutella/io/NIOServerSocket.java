@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.io;
 
+// Edited for the Learning branch
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
@@ -85,6 +86,15 @@ public class NIOServerSocket extends ServerSocket implements AcceptObserver {
 
     /**
      * Accepts an incoming connection.
+     * 
+     * 
+     * This is the call that is part of the line:
+     * 
+     *  client = _socket.accept();
+     * 
+     * It pretends to be the accept() method on Java's ServerSocket
+     * Uses NIO which doesn't block, but pretends to block for the benefit of the Acceptor class, which expects blocking
+     * 
      */
     public Socket accept() throws IOException {
         synchronized(LOCK){

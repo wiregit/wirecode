@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.messages;
 
+// Edited for the Learning branch
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -215,7 +217,9 @@ public abstract class Message implements Serializable, Comparable {
      * @effects exactly like Message.read(in), but buf is used as scratch for
      *  reading the header.  This is an optimization that lets you avoid
      *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
-     *  but the contents are not guaranteed to contain any useful data.  
+     *  but the contents are not guaranteed to contain any useful data.
+     * 
+     * @param network The network this Gnutella packet came in from, 1 for TCP, 2 for UDP
      */
     public static Message read(InputStream in, byte[] buf, int network, byte softMax)
 		throws BadPacketException, IOException {
