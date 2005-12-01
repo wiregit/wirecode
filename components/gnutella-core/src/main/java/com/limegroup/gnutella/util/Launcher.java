@@ -225,12 +225,8 @@ public final class Launcher {
 	 */
 	private static void loadMacClasses() throws IOException {
 		try {
-			Class mrjFileUtilsClass = Class.forName("com.apple.mrj.MRJFileUtils");
-
-			String openURLName = "openURL";
-			Class[] openURLParams = {String.class};
-			_openURL = mrjFileUtilsClass.getDeclaredMethod(openURLName, 
-														   openURLParams);
+			Class mrjAdapter = Class.forName("net.roydesign.mac.MRJAdapter");
+			_openURL = mrjAdapter.getDeclaredMethod("openURL", new Class[]{String.class});
 		} catch (ClassNotFoundException cnfe) {
 			throw new IOException();
 		} catch (NoSuchMethodException nsme) {
