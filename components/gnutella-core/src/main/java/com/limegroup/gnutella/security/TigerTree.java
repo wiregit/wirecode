@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.7 2005-07-11 00:05:13 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.7.24.1 2005-12-02 21:18:29 rkapsi Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -34,7 +34,6 @@ public class TigerTree extends MessageDigest {
     private static final int HASHSIZE = 24;
     
     private static final boolean USE_CRYPTIX =
-        CommonUtils.isJava14OrLater() &&
         CommonUtils.isMacOSX() && 
         CommonUtils.isJaguarOrAbove() &&
         !CommonUtils.isPantherOrAbove();

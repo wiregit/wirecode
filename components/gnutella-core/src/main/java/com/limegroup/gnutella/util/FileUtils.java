@@ -257,8 +257,7 @@ public class FileUtils {
             try {
                 fos = new FileOutputStream(f);
             } catch(IOException ioe) {
-                if(CommonUtils.isJava14OrLater())
-                    ioe.initCause(failed);
+                ioe.initCause(failed);
                 throw ioe;
             } finally {
                 if(fos != null) {

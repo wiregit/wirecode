@@ -45,9 +45,8 @@ public class Acceptor implements Runnable {
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
     
     /** the UPnPManager to use */
-    private static final UPnPManager UPNP_MANAGER = 
-    	(CommonUtils.isJava14OrLater() && !ConnectionSettings.DISABLE_UPNP.getValue()) 
-			? UPnPManager.instance() : null;
+    private static final UPnPManager UPNP_MANAGER 
+        = (!ConnectionSettings.DISABLE_UPNP.getValue()) ? UPnPManager.instance() : null;
 
     /**
      * The socket that listens for incoming connections. Can be changed to
